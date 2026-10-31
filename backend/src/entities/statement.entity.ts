@@ -17,6 +17,7 @@ type JsonObject = Record<string, unknown>;
 
 import { normalizeFilename } from '../common/utils/filename.util';
 import { nulFreeTransformer } from '../common/utils/nul-chars.util';
+import { BankName } from './bank-name';
 import { Category } from './category.entity';
 import { Folder } from './folder.entity';
 import { Tag } from './tag.entity';
@@ -24,6 +25,8 @@ import { Transaction } from './transaction.entity';
 import { User } from './user.entity';
 import { Wallet } from './wallet.entity';
 import { Workspace } from './workspace.entity';
+
+export { BankName };
 
 export enum StatementStatus {
   UPLOADED = 'uploaded',
@@ -48,25 +51,6 @@ export enum StatementStage {
   SUBMIT = 'submit',
   APPROVE = 'approve',
   PAY = 'pay',
-}
-
-export enum BankName {
-  BEREKE_NEW = 'bereke_new',
-  BEREKE_OLD = 'bereke_old',
-  KASPI = 'kaspi',
-  HAPOALIM = 'hapoalim',
-  ABSA = 'absa',
-  ALLY = 'ally',
-  ANZ = 'anz',
-  ASSOCIATED = 'associated',
-  ATB = 'atb',
-  AXIS = 'axis',
-  BANCO_DO_BRASIL = 'banco_do_brasil',
-  BANK_OF_CHINA = 'bank_of_china',
-  BANK_OF_SCOTLAND = 'bank_of_scotland',
-  BARCLAYS = 'barclays',
-  BECU = 'becu',
-  OTHER = 'other',
 }
 
 export enum FileType {

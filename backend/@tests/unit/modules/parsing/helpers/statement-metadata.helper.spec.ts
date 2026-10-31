@@ -61,6 +61,8 @@ describe('statement-metadata.helper', () => {
   it('reads which dollar from the prefix or the country', () => {
     expect(detectStatementCurrency('Total S$ 12.00')).toBe('SGD');
     expect(detectStatementCurrency('Example Bank Canada Inc.\nSolde 10,00 $')).toBe('CAD');
+    expect(detectStatementCurrency('www.example-bank.com.au\nBalance $97.39')).toBe('AUD');
+    expect(detectStatementCurrency('Charged in Australian dollars $5.00')).toBe('AUD');
     expect(detectStatementCurrency('Balance $10.00')).toBe('USD');
     expect(detectStatementCurrency('Saldo 10,00 €')).toBe('EUR');
   });
