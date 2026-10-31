@@ -1,5 +1,6 @@
 import type { PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import type { LaidOutRow } from './pdf-layout-columns.helper';
+import { findStatementAmounts } from './statement-amount.helper';
 
 /**
  * Lines this close, in line heights, belong to one table row: a cell's text
@@ -72,4 +73,37 @@ export function splitOverlappingLines(row: PdfTextRow): PdfTextRow[] {
     }
   }
   return lines;
+}
+
+/** A line further than this many line heights below the previous one is not a continuation. */
+const CONTINUATION_LINE_HEIGHTS = 2.6;
+
+/**
+ * Whether a line without its own date adds to the transaction above it: it
+ * sits right under the previous line, carries no money (money anywhere makes
+ * it a totals line or a note such as "Frais sur compte: 23,00 $"; the row's
+ * own balance repeated does not count) and keeps out of the date column,
+ * which a footer does not.
+ */
+export function isNextLine(row: PdfTextRow, lastRow: PdfTextRow | null): boolean {
+  return (
+    lastRow !== null &&
+    lastRow.page === row.page &&
+    row.y - lastRow.y <= CONTINUATION_LINE_HEIGHTS * rowHeight(lastRow)
+  );
+}
+
+export function continuesTransaction(
+  row: PdfTextRow,
+  laidOut: LaidOutRow,
+  lastRow: PdfTextRow | null,
+  balance?: number,
+) {
+  // The row's balance printed again on its wrapped line is not new money.
+  const isMoney = (value: number) => value !== 0 && Math.abs(value) !== Math.abs(balance ?? NaN);
+  const hasMoney =
+    laidOut.amounts.some(amount => isMoney(amount.value)) ||
+    findStatementAmounts(row.items.map(item => item.text).join(' ')).some(isMoney);
+  const reachesDateColumn = (laidOut.text.date ?? []).length > 0;
+  return isNextLine(row, lastRow) && !hasMoney && !reachesDateColumn;
 }

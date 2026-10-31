@@ -83,21 +83,24 @@ export function parseDateParts(text: string, order: NumericDateOrder): DateParts
     return valid({ year: Number(year), month: Number(month), day: Number(day) });
   }
 
-  const numeric = value.match(/^(\d{1,2})[./-](\d{1,2})(?:[./-](\d{4}|\d{2}))?$/);
+  const numeric = value.match(/^(\d{1,2})[./-](\d{1,2})(?:[./-]((?:19|20)\d{2}|\d{2}))?$/);
   if (numeric) {
     const [first, second] = [Number(numeric[1]), Number(numeric[2])];
     const [day, month] = order === 'mdy' ? [second, first] : [first, second];
     return valid({ day, month, year: fullYear(numeric[3]) });
   }
 
-  const dayFirst = value.match(/^(\d{1,2})(?:er)?\s+([a-z]+)\.?,?(?:\s+(\d{4}|\d{2}))?$/);
+  const dayFirst = value.match(/^(\d{1,2})(?:er)?\s+([a-z]+)\.?,?(?:\s+((?:19|20)\d{2}|\d{2}))?$/);
   if (dayFirst) {
     const month = monthFromName(dayFirst[2]);
     return month ? valid({ day: Number(dayFirst[1]), month, year: fullYear(dayFirst[3]) }) : null;
   }
 
-  // "Sep 3", "Sep 3, 2025", and "September 7,2017" as OCR reads it.
-  const monthFirst = value.match(/^([a-z]+)\.?\s+(\d{1,2})(?:,?\s+(\d{4})|,(\d{4}))?,?$/);
+  // "Sep 3", "Sep 3, 2025", and "September 7,2017" as OCR reads it. A year is
+  // 19xx or 20xx: "Jun 18 4239" is a date and a check number.
+  const monthFirst = value.match(
+    /^([a-z]+)\.?\s+(\d{1,2})(?:,?\s+((?:19|20)\d{2})|,((?:19|20)\d{2}))?,?$/,
+  );
   if (monthFirst) {
     const month = monthFromName(monthFirst[1]);
     const year = fullYear(monthFirst[3] ?? monthFirst[4]);

@@ -159,6 +159,13 @@ def extract_tables(page: "pdfplumber.page.Page", page_number: int) -> List[Dict[
     return tables_out
 
 
+def on_page(page: "pdfplumber.page.Page"):
+    """Keeps the characters that sit on the page: a statement may print its own
+    reference numbers past the right edge, where no reader sees them."""
+    left, _, right, _ = page.bbox
+    return lambda obj: obj.get("object_type") != "char" or (obj["x0"] < right and obj["x1"] > left)
+
+
 def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:
     full_text: List[str] = []
     rows: List[Dict[str, Any]] = []
@@ -168,6 +175,7 @@ def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:
         for page_number, raw_page in enumerate(pdf.pages, start=1):
             # Bold drawn twice at the same spot reads "PPaaggee" otherwise.
             page = raw_page.dedupe_chars()
+            page = page.filter(on_page(page))
             page_text = page.extract_text() or ""
             full_text.append(page_text)
 

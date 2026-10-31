@@ -14,6 +14,7 @@ import { BecuParser } from '../parsers/becu.parser';
 import { BendigoParser } from '../parsers/bendigo.parser';
 import { BerekeNewParser } from '../parsers/bereke-new.parser';
 import { BerekeOldParser } from '../parsers/bereke-old.parser';
+import { BmoParser } from '../parsers/bmo.parser';
 import { Camt053Parser } from '../parsers/camt053.parser';
 import { CsvParser } from '../parsers/csv.parser';
 import { DocxParser } from '../parsers/docx.parser';
@@ -47,6 +48,7 @@ export const FALLBACK_CLAIMS: [
   [BarclaysParser, { bankName: BankName.BARCLAYS }],
   [BecuParser, { bankName: BankName.BECU }],
   [BendigoParser, { bankName: BankName.BENDIGO }],
+  [BmoParser, { bankName: BankName.BMO }],
   [BerekeNewParser, { bankName: BankName.BEREKE_NEW, formatVersion: 'new' }],
   [BerekeOldParser, { bankName: BankName.BEREKE_OLD, formatVersion: 'old' }],
 ];
@@ -73,6 +75,7 @@ export function createParsers(): IParser[] {
     new BarclaysParser(),
     new BecuParser(),
     new BendigoParser(),
+    new BmoParser(),
     new GenericPdfParser(),
     new ExcelParser(),
     new CsvParser(),
