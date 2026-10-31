@@ -102,18 +102,25 @@ export function wordsInRegion(words: readonly LayoutWord[], region: TeachRegion)
   });
 }
 
-/** The areas with one more drawn: a tag drawn again moves to the new area (Skip adds up). */
+/** Tags of one thing printed once; every other tag may be marked in as many areas as it takes. */
+const SINGLE_TAGS = new Set<TeachTag>(['openingBalance', 'closingBalance', 'bankName']);
+
+/**
+ * The areas with one more drawn. A column, the header or a skip adds up (the
+ * table on every page); a single tag drawn again moves to the new area.
+ */
 export function withRegion(regions: readonly TeachRegion[], region: TeachRegion): TeachRegion[] {
-  return [...regions.filter(other => region.tag === 'skip' || other.tag !== region.tag), region];
+  const moves = SINGLE_TAGS.has(region.tag);
+  return [...regions.filter(other => !moves || other.tag !== region.tag), region];
 }
 
-const DATE_WORD = /^\d{1,4}[./-]\d{1,2}[./-]\d{1,4}$/;
 const lineKey = (word: LayoutWord) => `${word.page}:${Math.round(word.y)}`;
 
 /**
  * The first look of an area against its tag, as the parser will judge it:
- * a column crosses at least one transaction row (its line starts with a
- * date); one figure is one line with a figure, not a whole column.
+ * a column crosses at least one transaction row (a line the parser reads as
+ * starting with a date, `dated`); one figure is one line with a figure, not
+ * a whole column.
  */
 export function regionWarning(
   region: TeachRegion,
@@ -121,11 +128,7 @@ export function regionWarning(
 ): RegionWarning | null {
   const lines = new Set(wordsInRegion(words, region).map(lineKey));
   if (COLUMN_TAGS.has(region.tag)) {
-    const startsWithDate = [...lines].some(key => {
-      const [first] = words.filter(word => lineKey(word) === key).sort((a, b) => a.x - b.x);
-      return first !== undefined && DATE_WORD.test(first.text);
-    });
-    return startsWithDate ? null : 'notColumn';
+    return wordsInRegion(words, region).some(word => word.dated) ? null : 'notColumn';
   }
   if (ONE_FIGURE_TAGS.has(region.tag)) {
     const withFigures = [...lines].filter(key =>
