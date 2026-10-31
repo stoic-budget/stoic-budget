@@ -32,7 +32,7 @@ const LETTER_SIGNS: [RegExp, string][] = [
 /** Where a bare "$" is printed, the bank's country says which dollar. */
 const DOLLAR_COUNTRIES: [RegExp, string][] = [
   [/\bcanada\b|\bqu[eé]bec\b/i, 'CAD'],
-  [/\baustralia\b/i, 'AUD'],
+  [/\baustralian?\b|\.com\.au\b/i, 'AUD'],
   [/\bnew zealand\b/i, 'NZD'],
   [/\bsingapore\b/i, 'SGD'],
   [/\bhong kong\b/i, 'HKD'],

@@ -1,0 +1,20 @@
+/** The banks a statement can be read as; `other` for any a parser of its own does not claim. */
+export enum BankName {
+  BEREKE_NEW = 'bereke_new',
+  BEREKE_OLD = 'bereke_old',
+  KASPI = 'kaspi',
+  HAPOALIM = 'hapoalim',
+  ABSA = 'absa',
+  ALLY = 'ally',
+  ANZ = 'anz',
+  ASSOCIATED = 'associated',
+  ATB = 'atb',
+  AXIS = 'axis',
+  BANCO_DO_BRASIL = 'banco_do_brasil',
+  BANK_OF_CHINA = 'bank_of_china',
+  BANK_OF_SCOTLAND = 'bank_of_scotland',
+  BARCLAYS = 'barclays',
+  BECU = 'becu',
+  BENDIGO = 'bendigo',
+  OTHER = 'other',
+}

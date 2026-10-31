@@ -87,6 +87,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('BankofScotlandplc.Registeredoffice')).toBe(BankName.BANK_OF_SCOTLAND);
     expect(mentionedBank('barclays bank uk plc. registered in england')).toBe(BankName.BARCLAYS);
     expect(mentionedBank("direct inquiries to: boeing employees' credit union")).toBe(BankName.BECU);
+    expect(mentionedBank('bendigo and adelaide bank limited abn 11')).toBe(BankName.BENDIGO);
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
     expect(statement(usual, 'ACME', '12.50')?.mentionedBank).toBeUndefined();
     expect(
