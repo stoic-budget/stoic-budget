@@ -89,6 +89,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank("direct inquiries to: boeing employees' credit union")).toBe(BankName.BECU);
     expect(mentionedBank('bendigo and adelaide bank limited abn 11')).toBe(BankName.BENDIGO);
     expect(mentionedBank('bmo bank n.a. p.o. box 94033')).toBe(BankName.BMO);
+    expect(mentionedBank('bnp paribas bank polska s.a. ul. 2')).toBe(BankName.BNP_PARIBAS);
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
     expect(statement(usual, 'ACME', '12.50')?.mentionedBank).toBeUndefined();
     expect(

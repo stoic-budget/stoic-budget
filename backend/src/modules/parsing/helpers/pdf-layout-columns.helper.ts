@@ -1,4 +1,5 @@
 import type { PdfTextItem, PdfTextRow } from '../../../common/utils/pdf-parser.util';
+import { HEADINGS } from './pdf-layout-headings.helper';
 import { isAmountPart, parseStatementAmount } from './statement-amount.helper';
 import { foldText } from './statement-date.helper';
 
@@ -26,100 +27,6 @@ export interface LayoutColumn {
 
 const TEXT_ROLES: ColumnRole[] = ['date', 'otherDate', 'description', 'counterparty', 'other'];
 const MONEY_ROLES: ColumnRole[] = ['debit', 'credit', 'amount', 'balance'];
-
-/**
- * Column headings by role, folded (lower case, no accents). Matched longest
- * phrase first, so "interest date" is not read as "date" and "chèques et
- * débits" stays one heading even when the next one starts 6pt later.
- */
-const HEADINGS: Record<ColumnRole, string[]> = {
-  date: [
-    'date',
-    'post date',
-    'posting date',
-    'booking date',
-    'transaction date',
-    'datum',
-    'dia',
-    'data',
-    'boekdatum',
-    'fecha',
-  ],
-  otherDate: [
-    'trans date',
-    'interest date',
-    'value date',
-    'rentedatum',
-    'valutadatum',
-    'date valeur',
-    'valuta',
-  ],
-  description: [
-    'description',
-    'details',
-    'transaction',
-    'transaction details',
-    'transaction description',
-    'merchant name or transaction description',
-    'omschrijving',
-    'particulars',
-    'narrative',
-    'libelle',
-    'concepto',
-    'descripcion',
-    'historico',
-    'descricao',
-    'buchungstext',
-    'verwendungszweck',
-  ],
-  counterparty: ['counterparty', 'tegenpartij', 'tegenrekening', 'payee', 'beneficiary'],
-  debit: [
-    'withdrawal',
-    'withdrawals',
-    'money out of your account',
-    'debits to your account',
-    'debit',
-    'debits',
-    'cheques et debits',
-    'paid out',
-    'money out',
-    'cargos',
-    'retiros',
-    'debito',
-    'debitos',
-    'saidas',
-    'af',
-  ],
-  credit: [
-    'deposit',
-    'deposits',
-    'money into your account',
-    'credits to your account',
-    'credit',
-    'credits',
-    'depots et credits',
-    'paid in',
-    'money in',
-    'abonos',
-    'depositos',
-    'credito',
-    'creditos',
-    'entradas',
-    'bij',
-  ],
-  amount: [
-    'amount',
-    '$ amount',
-    'bedrag',
-    'montant',
-    'importe',
-    'betrag',
-    'transaction amount',
-    'valor',
-  ],
-  balance: ['balance', 'running balance', 'solde', 'saldo', 'kontostand'],
-  other: [],
-};
 
 const PHRASES = new Map<string, ColumnRole>(
   (Object.entries(HEADINGS) as [ColumnRole, string[]][]).flatMap(([role, phrases]) =>

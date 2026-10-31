@@ -40,6 +40,9 @@ function stackLines(top: PdfTextRow, bottom: PdfTextRow): PdfTextRow {
   return { ...top, text: items.map(item => item.text).join(' '), items };
 }
 
+const hasAmount = (columns: LayoutColumn[] | null) =>
+  Boolean(columns?.some(c => c.role === 'amount'));
+
 /** Rows in page order, with every two-line header made one row. */
 export function joinStackedHeaders(
   rows: PdfTextRow[],
@@ -50,9 +53,18 @@ export function joinStackedHeaders(
     const [top, bottom] = [rows[index], rows[index + 1]];
     const close =
       bottom?.page === top.page && bottom.y - top.y <= STACKED_LINE_GAP * rowHeight(top);
-    const stacked = close && !readHeader(top) ? stackLines(top, bottom) : null;
+    const topColumns = readHeader(top);
+    const stacked = close ? stackLines(top, bottom) : null;
     const columns = stacked ? readHeader(stacked) : null;
-    if (stacked && columns && columns.length > (readHeader(bottom)?.length ?? 0)) {
+    // A header that reads on its top line alone still takes the lower line when
+    // that makes one signed column of "Deposits" over "Withdrawals".
+    const joinsSigned = hasAmount(columns) && !hasAmount(topColumns);
+    if (
+      stacked &&
+      columns &&
+      (!topColumns || joinsSigned) &&
+      columns.length > (readHeader(bottom)?.length ?? 0)
+    ) {
       joined.push(stacked);
       index += 1;
     } else {

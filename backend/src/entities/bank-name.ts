@@ -17,5 +17,6 @@ export enum BankName {
   BECU = 'becu',
   BENDIGO = 'bendigo',
   BMO = 'bmo',
+  BNP_PARIBAS = 'bnp_paribas',
   OTHER = 'other',
 }

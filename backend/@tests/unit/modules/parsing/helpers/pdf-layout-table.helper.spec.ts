@@ -254,6 +254,20 @@ describe('pdf-layout-table.helper', () => {
     expect(isBalanceTableHeader(row(50, [['Date', 40], ['Details', 100], ['Balance', 400]]))).toBe(false);
   });
 
+  it('reads a numbered table with one signed column under Deposits over Withdrawals', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['No.', 20], ['Date', 50], ['Operation', 200], ['type', 250], ['Deposits', 400], ['(CR)', 450]]),
+      row(109, [['Operation', 200], ['details', 250], ['Withdrawals', 400]]),
+      row(130, [['1', 20], ['.', 26], ['26.10.2021', 50], ['MAINTENANCE', 200], ['FEE', 270], ['-25.00', 420], ['PLN', 455]]),
+      row(139, [['ref-1', 200]]),
+      row(160, [['2', 20], ['.', 26], ['22.10.2021', 50], ['SALARY', 200], ['100.00', 420], ['PLN', 455]]),
+    ]);
+    expect(transactions.map(({ dateText, amount, description }) => [dateText, amount, description])).toEqual([
+      ['26.10.2021', -25, 'MAINTENANCE FEE ref-1'],
+      ['22.10.2021', 100, 'SALARY'],
+    ]);
+  });
+
   describe('tables printed tight', () => {
     // Lines a line height apart sit within a wrapped cell's gap, header or not.
     const amountHeader = row(100, [['Date', 40], ['Amount', 175], ['Description', 215]]);
