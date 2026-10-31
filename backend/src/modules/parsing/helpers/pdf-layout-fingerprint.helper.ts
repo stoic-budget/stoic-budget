@@ -41,6 +41,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.BANK_OF_CHINA, /\bbochk\b|\bbank of china\b/],
   [BankName.BANK_OF_SCOTLAND, /\bbank\s*of\s*scotland/],
   [BankName.BARCLAYS, /\bbarclays bank\b/],
+  [BankName.BECU, /\bbecu\b|\bboeing employees' credit union\b/],
   [BankName.KASPI, /\bkaspi\b|\bкаспи\b/],
   [BankName.BEREKE_NEW, /\bbereke\b|\bбереке\b/],
   [BankName.HAPOALIM, /\bhapoalim\b|הפועלים/],

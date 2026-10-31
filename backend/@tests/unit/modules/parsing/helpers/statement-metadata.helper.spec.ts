@@ -185,6 +185,11 @@ describe('statement-metadata.helper', () => {
     });
     expect(readAccountHeading('EXAMPLE CITY 19850-1423 Account number: XXXX XXXX 0001')).toBeNull();
     expect(readAccountHeading('Account Summary')).toBeNull();
+    expect(readAccountHeading('Example Savings - 1234567890')).toEqual({
+      accountNumber: '1234567890',
+    });
+    expect(readAccountHeading('Statement Period: 11/19/2016 - 12/16/2016')).toBeNull();
+    expect(readAccountHeading('Order - 12345')).toBeNull();
   });
 
   it('tells a card statement by its wording', () => {

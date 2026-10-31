@@ -65,6 +65,7 @@ export enum BankName {
   BANK_OF_CHINA = 'bank_of_china',
   BANK_OF_SCOTLAND = 'bank_of_scotland',
   BARCLAYS = 'barclays',
+  BECU = 'becu',
   OTHER = 'other',
 }
 
