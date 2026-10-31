@@ -16,5 +16,6 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.BANK_OF_CHINA]: 'Bank of China (Hong Kong)',
   [BankName.BANK_OF_SCOTLAND]: 'Bank of Scotland',
   [BankName.BARCLAYS]: 'Barclays',
+  [BankName.BECU]: 'BECU',
   [BankName.OTHER]: 'Bank',
 };

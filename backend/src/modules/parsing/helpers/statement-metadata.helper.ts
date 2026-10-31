@@ -377,16 +377,20 @@ export function isCreditCardStatement(text: string): boolean {
 const ACCOUNT_HEADING =
   /\b(?:account|compte|rekening|konto|cuenta)\b(?:\s+(?:number|no\.?|nr\.?|#))?\s*[:—–-]?\s*([A-Z]{2}\d{2}[A-Z0-9]{10,30}|\d[\d -]{6,}\d)/i;
 
+/** A line of only a product name and a long number: "Member Savings - 3589405262". */
+const PRODUCT_HEADING = /^[A-Za-z][A-Za-z&' ]{2,40}?\s+[-–—]\s+(\d{8,17})$/;
+
 /**
  * The heading a statement prints above one account's table ("HKD Current
  * Account — 817-890692-838", "Numéro de compte: 67324-673-9893968"): the
  * number right after the word for account, and the currency code if the line
- * names one. Null for any other line.
+ * names one. A line holding only a product name and a long number ("Checking
+ * - 3600212596") is one too. Null for any other line.
  */
 export function readAccountHeading(
   line: string,
 ): { accountNumber: string; currency?: string } | null {
-  const match = line.match(ACCOUNT_HEADING);
+  const match = line.match(ACCOUNT_HEADING) ?? line.trim().match(PRODUCT_HEADING);
   if (!match) {
     return null;
   }
