@@ -98,6 +98,8 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('card purchase cash app*example person')).toBeUndefined();
     expect(mentionedBank('send inquiries to charles schwab bank p.o. box')).toBe(BankName.SCHWAB);
     expect(mentionedBank('jpmorgan chase bank, n.a. p o box 182051')).toBe(BankName.CHASE);
+    expect(mentionedBank('write to chime member services, p.o. box 417')).toBe(BankName.CHIME);
+    expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
     expect(statement(usual, 'ACME', '12.50')?.mentionedBank).toBeUndefined();
     expect(

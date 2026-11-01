@@ -201,6 +201,7 @@ describe('ParserFactoryService', () => {
       'CashAppParser',
       'SchwabParser',
       'ChaseParser',
+      'ChimeParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

@@ -1,0 +1,1128 @@
+{
+  "metadata": {
+    "accountNumber": "840952148730",
+    "currency": "USD",
+    "dateFrom": "2024-12-01T00:00:00",
+    "dateTo": "2024-12-31T00:00:00",
+    "balanceStart": 406.21,
+    "balanceEnd": 124.29,
+    "rawHeader": "Member Services (844) 244-6363 Dana Mcdowells",
+    "normalizedHeader": "Member Services (844) 244-6363 Dana Mcdowells",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-12-31T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-31T00:00:00",
+      "counterpartyName": "Amazon",
+      "paymentPurpose": "Amazon Refund AMAZON MKTPLACE PMTS AMZN.COM/BILLWAUS",
+      "credit": 23.33,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-29T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 49,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-29T00:00:00",
+      "counterpartyName": "Bonnie P.",
+      "paymentPurpose": "Transfer from Bonnie P. Transfer",
+      "credit": 43,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-28T00:00:00",
+      "counterpartyName": "Sindl ay T.",
+      "paymentPurpose": "Transfer from Sindl ay T. Transfer",
+      "credit": 6,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-27T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 15,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-27T00:00:00",
+      "counterpartyName": "Ck*mcdowells dana visa direct txus",
+      "paymentPurpose": "Ck*mcdowells dana visa direct txus Deposit CK*MCDOWELLS DANA VISA DIRECT TXUS",
+      "credit": 15.72,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-27T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.27,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-27T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 24,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-27T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 24,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-27T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 27,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-27T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 24.5,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-26T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.33,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-26T00:00:00",
+      "counterpartyName": "Just Energy",
+      "paymentPurpose": "Just Energy Purchase JUST ENERGY 866-587-8674 TXUS",
+      "debit": 207.73,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-26T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - OTHER DEBIT",
+      "credit": 7.75,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-26T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - OTHER DEBIT",
+      "credit": 44.21,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-26T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.29,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-26T00:00:00",
+      "counterpartyName": "Chime Savings Account",
+      "paymentPurpose": "Transfer from Chime Savings Account Transfer",
+      "credit": 4.5,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-26T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 200,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-25T00:00:00",
+      "counterpartyName": "Qt 985 Outside",
+      "paymentPurpose": "Qt 985 Outside Purchase QT 985 OUTSIDE MESQUITE TXUS",
+      "debit": 7.67,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-25T00:00:00",
+      "counterpartyName": "Qt",
+      "paymentPurpose": "Qt Purchase QT 985 MESQUITE TXUS",
+      "debit": 6.45,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-24T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.67,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-24T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.31,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-24T00:00:00",
+      "counterpartyName": "Cash Deposit",
+      "paymentPurpose": "Cash Deposit Deposit",
+      "credit": 350,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-12-24T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 80,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-24T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-24T00:00:00",
+      "counterpartyName": "7 Eleven",
+      "paymentPurpose": "7 Eleven Purchase 7-ELEVEN 35400 DALLAS TXUS",
+      "debit": 1.71,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-24T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase",
+      "debit": 80,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-24T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 80,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-23T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.2,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-23T00:00:00",
+      "counterpartyName": "Amazon",
+      "paymentPurpose": "Amazon Purchase AMAZON MKTPL*ZE6AX14R0 AMZN.COM/BILLWAUS",
+      "debit": 23.33,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-23T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 80,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-23T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-23T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.97,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-23T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.1,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-22T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 60,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-22T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 100,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-22T00:00:00",
+      "counterpartyName": "Klarna",
+      "paymentPurpose": "Klarna Purchase KLARNA KLARNA.COM OHUS",
+      "debit": 33.69,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-22T00:00:00",
+      "counterpartyName": "Cash Deposit",
+      "paymentPurpose": "Cash Deposit Deposit",
+      "credit": 200,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-12-21T00:00:00",
+      "counterpartyName": "MurphyUSA",
+      "paymentPurpose": "MurphyUSA Purchase MURPHY USA 7832 SEAGOVILLE TXUS",
+      "debit": 32.9,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-21T00:00:00",
+      "counterpartyName": "Murphy",
+      "paymentPurpose": "Murphy Purchase MURPHY7350ATWALMART BALCH SPRINGSTXUS",
+      "debit": 26.03,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-21T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.99,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-21T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-21T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 10,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-21T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.08,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-21T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 40,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-21T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 60,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-21T00:00:00",
+      "counterpartyName": "Qt",
+      "paymentPurpose": "Qt Purchase QT 1942 INSIDE DALLAS TXUS",
+      "debit": 0.8,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-20T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 20,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-20T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 20,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-20T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.39,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-20T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 3.1,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-20T00:00:00",
+      "counterpartyName": "Murphy",
+      "paymentPurpose": "Murphy Purchase MURPHY7680ATWALMART MESQUITE TXUS",
+      "debit": 17,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-20T00:00:00",
+      "counterpartyName": "Tom Thumb Fs",
+      "paymentPurpose": "Tom Thumb Fs Purchase TOM THUMB FS4606 MESQUITE TXUS",
+      "debit": 34.01,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-20T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.69,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-19T00:00:00",
+      "counterpartyName": "Taco Bell",
+      "paymentPurpose": "Taco Bell Purchase TACO BELL 27489 MESQUITE TXUS",
+      "debit": 14.01,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-19T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 70,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-19T00:00:00",
+      "counterpartyName": "Murphy",
+      "paymentPurpose": "Murphy Purchase MURPHY7350ATWALMART BALCH SPRINGSTXUS",
+      "debit": 0.92,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-19T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 47,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-19T00:00:00",
+      "counterpartyName": "Chime Savings Account",
+      "paymentPurpose": "Transfer from Chime Savings Account Transfer",
+      "credit": 5.75,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-19T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 19,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-19T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.1,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-18T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.27,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-18T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.62,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-18T00:00:00",
+      "counterpartyName": "7 Eleven",
+      "paymentPurpose": "7 Eleven Purchase 7-ELEVEN MESQUITE TXUS",
+      "debit": 28.31,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-18T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.5,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-18T00:00:00",
+      "counterpartyName": "Qt",
+      "paymentPurpose": "Qt Purchase QT 1942 INSIDE DALLAS TXUS",
+      "debit": 1.61,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-17T00:00:00",
+      "counterpartyName": "Kroger",
+      "paymentPurpose": "Kroger Purchase KROGER #0893 1919 FAITHMESQUITE TXUS",
+      "debit": 64.38,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-17T00:00:00",
+      "counterpartyName": "Murphy",
+      "paymentPurpose": "Murphy Purchase MURPHY7350ATWALMART BALCH SPRINGSTXUS",
+      "debit": 43.9,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-17T00:00:00",
+      "counterpartyName": "Pizza Patron",
+      "paymentPurpose": "Pizza Patron Purchase PIZZA PATRON 0077 BALCH SPRINGSTXUS",
+      "debit": 17.73,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-17T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-17T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.36,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-17T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.06,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-17T00:00:00",
+      "counterpartyName": "Merrick Bank, Mobile Pa...",
+      "paymentPurpose": "Direct Debit: Merrick Bank, Mobile Pa... Direct Debit MERRICK BANK, MOBILE PAY, 243500430235765",
+      "debit": 40,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-12-17T00:00:00",
+      "counterpartyName": "Credit Karma, Transfer ...",
+      "paymentPurpose": "Direct Debit: Credit Karma, Transfer ... Direct Debit CREDIT KARMA, TRANSFER , 14009656020",
+      "debit": 20,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-12-16T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 65,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-16T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 105,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-16T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.26,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-16T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.39,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-16T00:00:00",
+      "counterpartyName": "Walmart",
+      "paymentPurpose": "Walmart Purchase WAL-MART #5288 SEAGOVILLE TXUS",
+      "debit": 13.5,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-15T00:00:00",
+      "counterpartyName": "Murphy",
+      "paymentPurpose": "Murphy Purchase MURPHY7350ATWALMART BALCH SPRINGSTXUS",
+      "debit": 0.64,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-15T00:00:00",
+      "counterpartyName": "Murphy",
+      "paymentPurpose": "Murphy Purchase MURPHY7350ATWALMART BALCH SPRINGSTXUS",
+      "debit": 23.94,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-15T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 189,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-15T00:00:00",
+      "counterpartyName": "Klarna* Temu",
+      "paymentPurpose": "Klarna* Temu Purchase KLARNA* TEMU KLARNA.COM OHUS",
+      "debit": 12.74,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-15T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.13,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-14T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.69,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-14T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 160,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-14T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 160,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-14T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.48,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-14T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.9,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-14T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.96,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-14T00:00:00",
+      "counterpartyName": "Klarna* Amazon",
+      "paymentPurpose": "Klarna* Amazon Refund KLARNA* AMAZON KLARNA.COM OHUS",
+      "credit": 13.15,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-14T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 330,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-14T00:00:00",
+      "counterpartyName": "Qt",
+      "paymentPurpose": "Qt Purchase QT 982 BALCH SPRINGSTXUS",
+      "debit": 1.61,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Murphy",
+      "paymentPurpose": "Murphy Purchase MURPHY7350ATWALMART BALCH SPRINGSTXUS",
+      "debit": 20,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Murphy",
+      "paymentPurpose": "Murphy Purchase MURPHY7350ATWALMART BALCH SPRINGSTXUS",
+      "debit": 31.87,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Cigarettes N More",
+      "paymentPurpose": "Cigarettes N More Purchase CIGARETTES N MORE BALCH SPRINGSTXUS",
+      "debit": 5.5,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Cash Deposit",
+      "paymentPurpose": "Cash Deposit Deposit",
+      "credit": 350,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 30,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Sindl ay T.",
+      "paymentPurpose": "Transfer to Sindl ay T. Transfer",
+      "debit": 10,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 50,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 70,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.01,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 40,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Klarna* Amazon",
+      "paymentPurpose": "Klarna* Amazon Purchase KLARNA* AMAZON KLARNA.COM OHUS",
+      "debit": 13.15,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Klarna*Temu",
+      "paymentPurpose": "Klarna*Temu Purchase KLARNA*TEMU COLUMBUS OHUS",
+      "debit": 20.04,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Klarna*Temu",
+      "paymentPurpose": "Klarna*Temu Purchase KLARNA*TEMU COLUMBUS OHUS",
+      "debit": 6.39,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Klarna",
+      "paymentPurpose": "Klarna Purchase KLARNA KLARNA.COM OHUS",
+      "debit": 13.15,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Autozone",
+      "paymentPurpose": "Autozone Purchase AUTOZONE 5789 DALLAS TXUS",
+      "debit": 13.52,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "Qt",
+      "paymentPurpose": "Qt Purchase QT 982 BALCH SPRINGSTXUS",
+      "debit": 8.31,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-13T00:00:00",
+      "counterpartyName": "7 Eleven",
+      "paymentPurpose": "7 Eleven Purchase 7-ELEVEN 35400 DALLAS TXUS",
+      "debit": 25.1,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-12T00:00:00",
+      "counterpartyName": "Walmart",
+      "paymentPurpose": "Walmart Purchase WAL-MART #5191 FORNEY TXUS",
+      "debit": 4.04,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-12T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 25,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-12T00:00:00",
+      "counterpartyName": "Cash Deposit",
+      "paymentPurpose": "Cash Deposit Deposit",
+      "credit": 120,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-12-12T00:00:00",
+      "counterpartyName": "Murphy",
+      "paymentPurpose": "Murphy Purchase MURPHY7350ATWALMART BALCH SPRINGSTXUS",
+      "debit": 37.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-12T00:00:00",
+      "counterpartyName": "Transform Credit, 33 Z6...",
+      "paymentPurpose": "Direct Debit: Transform Credit, 33 Z6... Direct Debit TRANSFORM CREDIT, 33Z6P5X , 6JK7",
+      "debit": 167.73,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-12-11T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 90,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-11T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 65,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-10T00:00:00",
+      "counterpartyName": "Credit One Bank, Paymen...",
+      "paymentPurpose": "Direct Debit: Credit One Bank, Paymen... Direct Debit CREDIT ONE BANK, PAYMENT , 63325379",
+      "debit": 50,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-12-09T00:00:00",
+      "counterpartyName": "Sindl ay T.",
+      "paymentPurpose": "Transfer to Sindl ay T. Transfer",
+      "debit": 20,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-09T00:00:00",
+      "counterpartyName": "Sindl ay T.",
+      "paymentPurpose": "Transfer to Sindl ay T. Transfer",
+      "debit": 10,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-09T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 60,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-09T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 145,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-08T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 20,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-07T00:00:00",
+      "counterpartyName": "Klarna* 25 Klarna4",
+      "paymentPurpose": "Klarna* 25 Klarna4 Refund KLARNA* 25KLARNA4 KLARNA.COM OHUS",
+      "credit": 13.37,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-06T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSCASH.APP CAUS",
+      "debit": 78.26,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-06T00:00:00",
+      "counterpartyName": "Round Up to Savings Account",
+      "paymentPurpose": "Round Up to Savings Account Round Up Transfer",
+      "debit": 0.14,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-05T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 50,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-04T00:00:00",
+      "counterpartyName": "Walmart",
+      "paymentPurpose": "Walmart Purchase WAL-MART #1118 BALCH SPRINGSTXUS",
+      "debit": 12.86,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-04T00:00:00",
+      "counterpartyName": "Visa Money Transfer - Dana Mcdowells",
+      "paymentPurpose": "Visa Money Transfer - Dana Mcdowells Deposit VISA MONEY TRANSFER - DANA MCDOWELLS - VISA DEBIT",
+      "credit": 260,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-04T00:00:00",
+      "counterpartyName": "Chime Savings Account",
+      "paymentPurpose": "Transfer from Chime Savings Account Transfer",
+      "credit": 1.58,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-12-03T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 90,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-03T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 80,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-12-02T00:00:00",
+      "counterpartyName": "Merrick Bank, Mobile Pa...",
+      "paymentPurpose": "Direct Debit: Merrick Bank, Mobile Pa... Direct Debit MERRICK BANK, MOBILE PAY, 243330427404072",
+      "debit": 95,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-12-01T00:00:00",
+      "counterpartyName": "Sindl ay T.",
+      "paymentPurpose": "Transfer to Sindl ay T. Transfer",
+      "debit": 3,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-12-01T00:00:00",
+      "counterpartyName": "Sindl ay T.",
+      "paymentPurpose": "Transfer to Sindl ay T. Transfer",
+      "debit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-11-30T00:00:00",
+      "counterpartyName": "Cash App*Dana Mcdowells",
+      "paymentPurpose": "Cash App*Dana Mcdowells Purchase CASH APP*DANA MCDOWELLSOAKLAND CAUS",
+      "debit": 45,
+      "currency": "USD",
+      "paymentType": "card"
+    }
+  ],
+  "checks": [
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "71866447158f",
+    "headings": [
+      "date:transaction date | description:description type | amount:amount | other:net settlement amount date"
+    ],
+    "unknownWords": [
+      "type",
+      "net settlement amount date"
+    ],
+    "mentionedBank": "chime"
+  }
+}
