@@ -1,0 +1,340 @@
+{
+  "metadata": {
+    "accountNumber": "7311-482-956",
+    "currency": "PHP",
+    "dateFrom": "2021-12-10T00:00:00",
+    "dateTo": "2022-06-30T00:00:00",
+    "rawHeader": "San Fernando Sta. Ana Pampanga Philippines",
+    "normalizedHeader": "San Fernando Sta. Ana Pampanga Philippines",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2021-12-10T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 20035.51,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-15T00:00:00",
+      "counterpartyName": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "paymentPurpose": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "debit": 10000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "GCASH CASH IN",
+      "paymentPurpose": "3448 EDL/MB PAY 0189 TO: GCASH CASH IN …..XXXXX92798",
+      "debit": 3500,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-22T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 21003.87,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-29T00:00:00",
+      "counterpartyName": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "paymentPurpose": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "debit": 15000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-01-04T00:00:00",
+      "counterpartyName": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "paymentPurpose": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "debit": 2500,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-01-07T00:00:00",
+      "counterpartyName": "GCASH CASH IN",
+      "paymentPurpose": "3448 EDL/MB PAY 0189 TO: GCASH CASH IN …..XXXXX92798",
+      "debit": 1500,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-01-10T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 20387.93,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-01-16T00:00:00",
+      "counterpartyName": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "paymentPurpose": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "debit": 10000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-01-22T00:00:00",
+      "counterpartyName": "1411 ATM WDL 0438",
+      "paymentPurpose": "1411 ATM WDL 0438",
+      "debit": 3000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-01-23T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 20281,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-02-03T00:00:00",
+      "counterpartyName": "GCASH CASH IN",
+      "paymentPurpose": "3448 EDL/MB PAY 0189 TO: GCASH CASH IN …..XXXXX92798",
+      "debit": 3500,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-02-10T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 20000,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-02-15T00:00:00",
+      "counterpartyName": "1411 ATM WDL 0438",
+      "paymentPurpose": "1411 ATM WDL 0438",
+      "debit": 3000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-17T00:00:00",
+      "counterpartyName": "1411 ATM WDL 0438",
+      "paymentPurpose": "1411 ATM WDL 0438",
+      "debit": 15000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-22T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 21231.3,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-02T00:00:00",
+      "counterpartyName": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "paymentPurpose": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "debit": 25000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-10T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 20032.1,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-16T00:00:00",
+      "counterpartyName": "1411 ATM WDL 0438",
+      "paymentPurpose": "1411 ATM WDL 0438",
+      "debit": 20000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-22T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 20100.56,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-22T00:00:00",
+      "counterpartyName": "1411 ATM WDL 0438",
+      "paymentPurpose": "1411 ATM WDL 0438",
+      "debit": 20000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-04-10T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 20333.46,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-04-11T00:00:00",
+      "counterpartyName": "GCASH CASH IN",
+      "paymentPurpose": "3488 EDL/MB PAY 0189 TO: GCASH CASH IN …..XXXXX25605",
+      "debit": 10000,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-04-12T00:00:00",
+      "counterpartyName": "1411 ATM WDL 0438",
+      "paymentPurpose": "1411 ATM WDL 0438",
+      "debit": 15000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-04-22T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 20112.8,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-04-22T00:00:00",
+      "counterpartyName": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "paymentPurpose": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "debit": 25000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-04-30T00:00:00",
+      "counterpartyName": "GCASH CASH IN",
+      "paymentPurpose": "3488 EDL/MB PAY 0189 TO: GCASH CASH IN …..XXXXX25605",
+      "debit": 5000,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-05-10T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 20200.1,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-05-11T00:00:00",
+      "counterpartyName": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "paymentPurpose": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "debit": 5000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-22T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 21000.33,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-05-23T00:00:00",
+      "counterpartyName": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "paymentPurpose": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "debit": 15000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-01T00:00:00",
+      "counterpartyName": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "paymentPurpose": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "debit": 1980.5,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-10T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 20138.6,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-11T00:00:00",
+      "counterpartyName": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "paymentPurpose": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "debit": 11000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-22T00:00:00",
+      "counterpartyName": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "paymentPurpose": "4348 EL/ES PAY 1011 INTER-BANK FUND TRANSFER",
+      "credit": 21388,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-30T00:00:00",
+      "counterpartyName": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "paymentPurpose": "1414 EPS AT EN 0000 FROM:NON-BPI TERMINAL",
+      "debit": 17000,
+      "currency": "PHP",
+      "paymentType": "cash"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": false,
+      "detail": {
+        "row": 29,
+        "date": "MAY 11",
+        "expected": 182207.26,
+        "actual": 182207.16
+      }
+    },
+    {
+      "code": "printed_balances",
+      "passed": false,
+      "detail": {
+        "side": "end",
+        "expected": 206548.06,
+        "actual": 199751.59
+      }
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "161ebcbcb85c",
+    "headings": [
+      "date:date | description:description ref | description:details | debit:deb amt | credit:credit amt | balance:balance"
+    ],
+    "unknownWords": [
+      "ref"
+    ],
+    "mentionedBank": "bpi"
+  },
+  "failedChecks": [
+    "balance_chain",
+    "printed_balances"
+  ]
+}

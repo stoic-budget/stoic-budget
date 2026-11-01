@@ -37,6 +37,7 @@ const BANK_LABELS: Record<string, string> = {
   bmo: 'BMO',
   bnp_paribas: 'BNP Paribas',
   boq: 'BOQ',
+  bpi: 'BPI',
   other: 'Other',
 };
 

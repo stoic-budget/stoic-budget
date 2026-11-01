@@ -195,6 +195,7 @@ describe('ParserFactoryService', () => {
       'BmoParser',
       'BnpParibasParser',
       'BoqParser',
+      'BpiParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
