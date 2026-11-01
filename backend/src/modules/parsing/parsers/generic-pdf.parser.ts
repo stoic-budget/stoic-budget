@@ -34,6 +34,7 @@ import {
   checkSectionTotals,
 } from '../helpers/statement-checks.helper';
 import { detectNumericDateOrder, type NumericDateOrder } from '../helpers/statement-date.helper';
+import { findSharedYearPeriod } from '../helpers/statement-header-period.helper';
 import {
   detectStatementCurrency,
   findAccountNumber,
@@ -153,7 +154,9 @@ export class GenericPdfParser extends BaseParser {
 
     const legacyRange = this.extractDateRange(text);
     const dateRange = plausiblePeriod(
-      legacyRange.from ? legacyRange : findStatementPeriod(text, dateOrder),
+      legacyRange.from
+        ? legacyRange
+        : (findStatementPeriod(text, dateOrder) ?? findSharedYearPeriod(text)),
       transactions,
     );
     const transactionDates = transactions.map(t => t.transactionDate).filter(Boolean);
@@ -278,7 +281,10 @@ export class GenericPdfParser extends BaseParser {
     const currency = rows[0].account?.currency ?? fallbackCurrency;
     const transactions = toParsedTransactions(rows, dateOrder, latestPrinted, currency, isCard);
     const times = transactions.map(t => t.transactionDate.getTime());
-    const period = plausiblePeriod(findStatementPeriod(text, dateOrder), transactions);
+    const period = plausiblePeriod(
+      findStatementPeriod(text, dateOrder) ?? findSharedYearPeriod(text),
+      transactions,
+    );
     return {
       metadata: {
         accountNumber: rows[0].account?.accountNumber ?? '',

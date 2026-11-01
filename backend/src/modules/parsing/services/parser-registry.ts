@@ -19,6 +19,7 @@ import { BnpParibasParser } from '../parsers/bnp-paribas.parser';
 import { BoqParser } from '../parsers/boq.parser';
 import { BpiParser } from '../parsers/bpi.parser';
 import { Camt053Parser } from '../parsers/camt053.parser';
+import { CapitalOneParser } from '../parsers/capital-one.parser';
 import { CsvParser } from '../parsers/csv.parser';
 import { DocxParser } from '../parsers/docx.parser';
 import { ExcelParser } from '../parsers/excel.parser';
@@ -55,6 +56,7 @@ export const FALLBACK_CLAIMS: [
   [BnpParibasParser, { bankName: BankName.BNP_PARIBAS }],
   [BoqParser, { bankName: BankName.BOQ }],
   [BpiParser, { bankName: BankName.BPI }],
+  [CapitalOneParser, { bankName: BankName.CAPITAL_ONE }],
   [BerekeNewParser, { bankName: BankName.BEREKE_NEW, formatVersion: 'new' }],
   [BerekeOldParser, { bankName: BankName.BEREKE_OLD, formatVersion: 'old' }],
 ];
@@ -85,6 +87,7 @@ export function createParsers(): IParser[] {
     new BnpParibasParser(),
     new BoqParser(),
     new BpiParser(),
+    new CapitalOneParser(),
     new GenericPdfParser(),
     new ExcelParser(),
     new CsvParser(),

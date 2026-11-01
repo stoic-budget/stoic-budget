@@ -40,7 +40,9 @@ export function parseStatementAmount(text: string): number | null {
     .replace(CURRENCY_MARK, '')
     .replace(/\s+/g, ' ')
     .replace(/−/g, '-')
-    .trim();
+    .trim()
+    // The sign spaced from the figure: "+ $0.05", "- $12.89".
+    .replace(/^([-+])\s+(?=[\d.])/, '$1');
   if (!AMOUNT_SHAPE.test(bare)) {
     return null;
   }
