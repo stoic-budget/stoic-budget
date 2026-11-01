@@ -4,7 +4,7 @@ export class AddBmoBankName1787700000000 implements MigrationInterface {
   name = 'AddBmoBankName1787700000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('ALTER TYPE "bank_name_enum" ADD VALUE IF NOT EXISTS \'bendigo\'');
+    await queryRunner.query('ALTER TYPE "bank_name_enum" ADD VALUE IF NOT EXISTS \'bmo\'');
   }
 
   public async down(_queryRunner: QueryRunner): Promise<void> {
