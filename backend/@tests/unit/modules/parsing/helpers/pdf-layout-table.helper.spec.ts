@@ -225,6 +225,17 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('files the rows before the only account heading under that account', () => {
+    const transactions = readLayoutTransactions([
+      header,
+      row(120, [['01/02/2025', 40], ['ACME', 110], ['12.50', 315]]),
+      row(300, [['Account', 40], ['number:', 90], ['12-34567', 140]]),
+      header,
+      row(320, [['02/02/2025', 40], ['ACME', 110], ['5.00', 315]]),
+    ]);
+    expect(splitByAccount(transactions).map(group => group.length)).toEqual([2]);
+  });
+
   it('reads "transfer to account <number>" under a row as its text, not a new account', () => {
     const transactions = readLayoutTransactions([
       header,
@@ -356,6 +367,21 @@ describe('pdf-layout-table.helper', () => {
     ]);
     expect(transactions.map(({ amount, description }) => [amount, description])).toEqual([
       [-4.95, 'Monthly Service Fee'],
+    ]);
+  });
+
+  it('keeps "(continued on next page)" out of the last row, and gives an undated row the date above it', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 90], ['Withdrawals', 300], ['Deposits', 380], ['Balance', 470]]),
+      row(120, [['Dec', 40], ['1', 62], ['RETAIL', 90], ['PURCHASE', 130], ['8.77', 330], ['3,093.51', 480]]),
+      row(133, [['EXAMPLE', 90], ['CAFE', 130]]),
+      row(153, [['RETAIL', 90], ['PURCHASE', 130], ['2.30', 330], ['3,091.21', 480]]),
+      row(166, [['EXAMPLE', 90], ['BAKERY', 130]]),
+      row(186, [['(continued', 400], ['on', 440], ['next', 455], ['page)', 475]]),
+    ]);
+    expect(transactions.map(({ dateText, debit, description }) => [dateText, debit, description])).toEqual([
+      ['Dec 1', 8.77, 'RETAIL PURCHASE EXAMPLE CAFE'],
+      ['Dec 1', 2.3, 'RETAIL PURCHASE EXAMPLE BAKERY'],
     ]);
   });
 

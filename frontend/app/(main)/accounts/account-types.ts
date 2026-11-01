@@ -73,6 +73,7 @@ const BANK_LABELS: Record<string, string> = {
   schwab: 'Charles Schwab',
   chase: 'Chase',
   chime: 'Chime',
+  cibc: 'CIBC',
 };
 
 export const statementBankLabel = (bankName: string): string | null =>

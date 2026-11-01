@@ -76,6 +76,9 @@ export function splitOverlappingLines(row: PdfTextRow): PdfTextRow[] {
   return lines;
 }
 
+/** "(continued on next page)" under the last row of a page is a note to the reader, no text of the row. */
+const PAGE_NOTE = /^\(?continued(?: on (?:the )?next page)?\)?$/i;
+
 /** A line further than this many line heights below the previous one is not a continuation. */
 const CONTINUATION_LINE_HEIGHTS = 2.6;
 
@@ -107,5 +110,11 @@ export function continuesTransaction(
     findStatementAmounts(row.items.map(item => item.text).join(' ')).some(isMoney);
   const reachesDateColumn = (laidOut.text.date ?? []).length > 0;
   // "Ending Balance $12,274.35" under the last row states the balance, it is no text of the row.
-  return isNextLine(row, lastRow) && !hasMoney && !reachesDateColumn && !isBalanceLabel(row.text);
+  return (
+    isNextLine(row, lastRow) &&
+    !hasMoney &&
+    !reachesDateColumn &&
+    !isBalanceLabel(row.text) &&
+    !PAGE_NOTE.test(row.text.trim())
+  );
 }
