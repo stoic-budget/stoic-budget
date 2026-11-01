@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "accountNumber": "Unknown",
+    "currency": "USD",
+    "dateFrom": "2026-09-03T00:00:00",
+    "dateTo": "2026-09-27T00:00:00"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-09-03T00:00:00",
+      "counterpartyName": "Coffee & Co",
+      "paymentPurpose": "Latte",
+      "debit": 42.5,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2026-09-25T00:00:00",
+      "counterpartyName": "ACME Payroll",
+      "paymentPurpose": "ACME Payroll",
+      "credit": 3000,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2026-09-27T00:00:00",
+      "counterpartyName": "ACME Store",
+      "paymentPurpose": "Wireless Buds",
+      "debit": 15,
+      "currency": "USD"
+    }
+  ]
+}
