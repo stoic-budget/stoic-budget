@@ -22,6 +22,18 @@ function guessFileType(filePath: string): FileType {
   if (ext === '.csv') {
     return FileType.CSV;
   }
+  if (ext === '.ofx') {
+    return FileType.OFX;
+  }
+  if (ext === '.qif') {
+    return FileType.QIF;
+  }
+  if (ext === '.sta' || ext === '.mt940') {
+    return FileType.MT940;
+  }
+  if (ext === '.xml') {
+    return FileType.CAMT;
+  }
   return FileType.PDF;
 }
 
