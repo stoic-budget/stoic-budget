@@ -199,6 +199,7 @@ describe('ParserFactoryService', () => {
       'CapitalOneParser',
       'CapitecParser',
       'CashAppParser',
+      'SchwabParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

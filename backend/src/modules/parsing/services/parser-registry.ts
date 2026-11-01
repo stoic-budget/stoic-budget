@@ -31,6 +31,7 @@ import { KaspiParser } from '../parsers/kaspi.parser';
 import { Mt940Parser } from '../parsers/mt940.parser';
 import { OfxParser } from '../parsers/ofx.parser';
 import { QifParser } from '../parsers/qif.parser';
+import { SchwabParser } from '../parsers/schwab.parser';
 
 /**
  * Bank-specific parsers that may claim a file when its text names no bank,
@@ -61,6 +62,7 @@ export const FALLBACK_CLAIMS: [
   [CapitalOneParser, { bankName: BankName.CAPITAL_ONE }],
   [CapitecParser, { bankName: BankName.CAPITEC }],
   [CashAppParser, { bankName: BankName.CASH_APP }],
+  [SchwabParser, { bankName: BankName.SCHWAB }],
   [BerekeNewParser, { bankName: BankName.BEREKE_NEW, formatVersion: 'new' }],
   [BerekeOldParser, { bankName: BankName.BEREKE_OLD, formatVersion: 'old' }],
 ];
@@ -94,6 +96,7 @@ export function createParsers(): IParser[] {
     new CapitalOneParser(),
     new CapitecParser(),
     new CashAppParser(),
+    new SchwabParser(),
     new GenericPdfParser(),
     new ExcelParser(),
     new CsvParser(),

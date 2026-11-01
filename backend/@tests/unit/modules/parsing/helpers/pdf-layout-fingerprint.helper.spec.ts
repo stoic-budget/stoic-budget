@@ -94,7 +94,9 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('bpi express phone 89-100')).toBe(BankName.BPI);
     expect(mentionedBank('www.capitalone.com 1-888')).toBe(BankName.CAPITAL_ONE);
     expect(mentionedBank('capitec bank limited 1 quantum street')).toBe(BankName.CAPITEC);
-    expect(mentionedBank('cash app 1955 broadway')).toBe(BankName.CASH_APP);
+    expect(mentionedBank('write us at cash disputes, 1955 broadway')).toBe(BankName.CASH_APP);
+    expect(mentionedBank('card purchase cash app*example person')).toBeUndefined();
+    expect(mentionedBank('send inquiries to charles schwab bank p.o. box')).toBe(BankName.SCHWAB);
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
     expect(statement(usual, 'ACME', '12.50')?.mentionedBank).toBeUndefined();
     expect(
