@@ -24,15 +24,15 @@ const AMOUNT_SHAPE = /^[-+(]?(?:(?:\d{1,3}(?:[ .,  ]\d{3})+|\d+)[.,]\d{2}|\.\
 /** Parses a printed amount, currency marks included; null when it is not one. */
 /**
  * The side written after the figure: "1.500,00 (-)", "120.000,00(+)",
- * "1,000.00 Cr", "250.00 DR".
+ * "1,000.00 Cr", "250.00 DR", "1.95 cr".
  */
-const SIGN_SUFFIX = /\s*(?:\(([+-])\)|\b([CD])[Rr]\.?)$/;
+const SIGN_SUFFIX = /\s*(?:\(([+-])\)|\b([CcDd])[Rr]\.?)$/;
 
 export function parseStatementAmount(text: string): number | null {
   const suffix = text.trim().match(SIGN_SUFFIX);
   if (suffix) {
     const value = parseStatementAmount(text.trim().slice(0, suffix.index));
-    const negative = suffix[1] === '-' || suffix[2] === 'D';
+    const negative = suffix[1] === '-' || suffix[2] === 'D' || suffix[2] === 'd';
     return value === null ? null : negative ? -Math.abs(value) : Math.abs(value);
   }
   const bare = text
@@ -61,9 +61,9 @@ export function isAmountPart(word: string): boolean {
     .replace(/\([+-]\)$/, '');
   return (
     /^[-+(−]?[\d.,]*\d[\d.,]*\)?-?$/.test(figure) ||
-    new RegExp(`^(?:[A-Z]{0,3}[${CURRENCY_SYMBOLS}]|[A-Z]{3}|[-+=]|\\([+-]\\)|[CD][Rr]\\.?)$`).test(
-      word,
-    )
+    new RegExp(
+      `^(?:[A-Z]{0,3}[${CURRENCY_SYMBOLS}]|[A-Z]{3}|[-+=]|\\([+-]\\)|[CcDd][Rr]\\.?)$`,
+    ).test(word)
   );
 }
 

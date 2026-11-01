@@ -65,6 +65,7 @@ const BANK_LABELS: Record<string, string> = {
   bendigo: 'Bendigo Bank',
   bmo: 'BMO',
   bnp_paribas: 'BNP Paribas',
+  boq: 'BOQ',
 };
 
 export const statementBankLabel = (bankName: string): string | null =>
