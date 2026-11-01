@@ -1,5 +1,6 @@
 import type { PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import {
+  isBalanceTableHeader,
   type LaidOutRow,
   type LayoutColumn,
   layOutRow,
@@ -23,10 +24,12 @@ import {
   signBySection,
 } from './pdf-layout-sections.helper';
 import { joinStackedHeaders } from './pdf-layout-stacked-header.helper';
+import { splitTwoUp } from './pdf-layout-two-up.helper';
 import {
+  continuesTransaction,
   groupWrappedLines,
+  isNextLine,
   mergeLaidOut,
-  rowHeight,
   splitOverlappingLines,
 } from './pdf-layout-wrapped.helper';
 import { findStatementAmounts } from './statement-amount.helper';
@@ -75,9 +78,6 @@ export interface LayoutReading {
   rows?: RowRule;
 }
 
-/** A line further than this many line heights below the previous one is not a continuation. */
-const CONTINUATION_LINE_HEIGHTS = 2.6;
-
 const IBAN = /^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/;
 
 function appendText(transaction: LayoutTransaction, laidOut: LaidOutRow) {
@@ -118,36 +118,6 @@ function openTransaction(
   appendText(transaction, laidOut);
   transaction.firstLine = transaction.description;
   return transaction;
-}
-
-/**
- * Whether a line without its own date adds to the transaction above it: it
- * sits right under the previous line, carries no money (money anywhere makes
- * it a totals line or a note such as "Frais sur compte: 23,00 $"; the row's
- * own balance repeated does not count) and keeps out of the date column,
- * which a footer does not.
- */
-function isNextLine(row: PdfTextRow, lastRow: PdfTextRow | null): boolean {
-  return (
-    lastRow !== null &&
-    lastRow.page === row.page &&
-    row.y - lastRow.y <= CONTINUATION_LINE_HEIGHTS * rowHeight(lastRow)
-  );
-}
-
-function continuesTransaction(
-  row: PdfTextRow,
-  laidOut: LaidOutRow,
-  lastRow: PdfTextRow | null,
-  balance?: number,
-) {
-  // The row's balance printed again on its wrapped line is not new money.
-  const isMoney = (value: number) => value !== 0 && Math.abs(value) !== Math.abs(balance ?? NaN);
-  const hasMoney =
-    laidOut.amounts.some(amount => isMoney(amount.value)) ||
-    findStatementAmounts(row.items.map(item => item.text).join(' ')).some(isMoney);
-  const reachesDateColumn = (laidOut.text.date ?? []).length > 0;
-  return isNextLine(row, lastRow) && !hasMoney && !reachesDateColumn;
 }
 
 /**
@@ -205,11 +175,14 @@ export function readLayoutTable(
   layout: { headers: LayoutColumn[][]; sections: SectionSign[] };
 } {
   const readHeader = (row: PdfTextRow) => readHeaderRow(row, reading.headings);
-  const ordered = joinStackedHeaders(
-    rows
-      .flatMap(splitOverlappingLines)
-      .filter(row => !reading.skip?.(row))
-      .sort((a, b) => a.page - b.page || a.y - b.y),
+  const ordered = splitTwoUp(
+    joinStackedHeaders(
+      rows
+        .flatMap(splitOverlappingLines)
+        .filter(row => !reading.skip?.(row))
+        .sort((a, b) => a.page - b.page || a.y - b.y),
+      readHeader,
+    ),
     readHeader,
   );
   const state: ReadingState = {
@@ -262,7 +235,9 @@ function readRow(state: ReadingState, lines: PdfTextRow[]) {
   const [row] = lines;
   if (
     lines.length > 1 &&
-    lines.some(line => state.readHeader(line) || accountHeadingAt(line, null))
+    lines.some(
+      line => state.readHeader(line) || isBalanceTableHeader(line) || accountHeadingAt(line, null),
+    )
   ) {
     // A heading is never part of a wrapped cell: read each line on its own.
     for (const line of lines) {
@@ -284,6 +259,13 @@ function readRow(state: ReadingState, lines: PdfTextRow[]) {
     state.current = null;
     return;
   }
+  if (isBalanceTableHeader(row)) {
+    // A daily balance summary: its lines are balances, and the table above is over.
+    state.columns = state.fallback;
+    state.section = undefined;
+    state.current = null;
+    return;
+  }
   if (heading || header) {
     state.account = heading ?? state.account;
     state.columns = header ?? state.columns;
@@ -299,6 +281,14 @@ function readRow(state: ReadingState, lines: PdfTextRow[]) {
   }
 
   const read = lines.map(line => readTableRow(line, columns));
+  if (read.filter(line => line.date && line.laidOut.amounts.length > 0).length > 1) {
+    // Lines set closer than a wrapped cell's gap, each with its own date and
+    // amount, are rows of their own: a cell has one of each.
+    for (const line of lines) {
+      readRow(state, [line]);
+    }
+    return;
+  }
   const date = read.find(line => line.date)?.date ?? null;
   const laidOut = mergeLaidOut(read.map(line => line.laidOut));
   const pending = state.pending;

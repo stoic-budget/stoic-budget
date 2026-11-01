@@ -167,6 +167,31 @@ function matchHeading(items: PdfTextItem[], index: number, taught?: TaughtHeadin
  * are read before the built-in ones.
  */
 export function readHeaderRow(row: PdfTextRow, taught?: TaughtHeadings): LayoutColumn[] | null {
+  const columns = readHeadingColumns(row, taught);
+  const roles = new Set(columns.map(column => column.role));
+  const hasMoney = roles.has('debit') || roles.has('credit') || roles.has('amount');
+  const hasText = roles.has('date') || roles.has('description');
+  return columns.length >= 3 && hasMoney && hasText ? columns : null;
+}
+
+/**
+ * A header of dates and balances alone ("Date  Balance"): a daily balance
+ * summary, whose lines are no transactions and end the table above it.
+ */
+export function isBalanceTableHeader(row: PdfTextRow, taught?: TaughtHeadings): boolean {
+  const columns = readHeadingColumns(row, taught);
+  const roles = columns.map(column => column.role);
+  // Every word is a heading: a header with a column of its own kind is no summary.
+  const words = columns.reduce((sum, column) => sum + wordCount(column.heading ?? ''), 0);
+  return (
+    words === row.items.length &&
+    roles.includes('balance') &&
+    roles.includes('date') &&
+    roles.every(role => role === 'balance' || role === 'date' || role === 'otherDate')
+  );
+}
+
+function readHeadingColumns(row: PdfTextRow, taught?: TaughtHeadings): LayoutColumn[] {
   const items = [...row.items].sort((a, b) => a.x - b.x);
   const columns: LayoutColumn[] = [];
   let pendingX0: number | null = null;
@@ -218,10 +243,7 @@ export function readHeaderRow(row: PdfTextRow, taught?: TaughtHeadings): LayoutC
     index += 1;
   }
 
-  const roles = new Set(columns.map(column => column.role));
-  const hasMoney = roles.has('debit') || roles.has('credit') || roles.has('amount');
-  const hasText = roles.has('date') || roles.has('description');
-  return columns.length >= 3 && hasMoney && hasText ? columns : null;
+  return columns;
 }
 
 /** A header word no heading knows stays with the column before it, or waits for the first one. */
@@ -290,11 +312,12 @@ function textColumnFor(x: number, columns: LayoutColumn[]): ColumnRole {
   const text = columns.filter(column => TEXT_ROLES.includes(column.role));
   const owner = [...text].reverse().find(column => column.x0 <= x + 4) ?? text[0];
   const isDate = owner?.role === 'date' || owner?.role === 'otherDate';
-  const next = text.find(column => column.x0 > (owner?.x1 ?? 0));
+  const next = text.find(column => column.x0 > (owner?.x1 ?? 0) && column.role !== owner?.role);
   if (isDate && next && x > owner.x1 + DATE_CELL_GAP) {
     return next.role;
   }
-  return owner?.role ?? 'description';
+  // A table of dates and amounts alone ("Date  Serial #  Amount") keeps its words in the row's text.
+  return isDate && !next ? 'description' : (owner?.role ?? 'description');
 }
 
 /**
@@ -335,10 +358,11 @@ function moneyCellAt(sorted: PdfTextItem[], start: number, columns: LayoutColumn
   ) {
     end += 1;
   }
-  if (end === start) {
+  const run = sorted.slice(start, end);
+  // A bare "ACH" or "USD" with no figure beside it is a word, not an amount.
+  if (!run.some(item => /\d/.test(item.text))) {
     return null;
   }
-  const run = sorted.slice(start, end);
   const value = parseStatementAmount(run.map(item => item.text).join(' '));
   const last = run[run.length - 1];
   const column = moneyColumnFor(last.x + last.width, columns);

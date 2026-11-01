@@ -1,5 +1,8 @@
 import type { PdfTextRow } from '@/common/utils/pdf-parser.util';
-import { readHeaderRow } from '@/modules/parsing/helpers/pdf-layout-columns.helper';
+import {
+  isBalanceTableHeader,
+  readHeaderRow,
+} from '@/modules/parsing/helpers/pdf-layout-columns.helper';
 import { readLayoutTransactions } from '@/modules/parsing/helpers/pdf-layout-table.helper';
 import {
   openingBalanceFromRows,
@@ -244,5 +247,51 @@ describe('pdf-layout-table.helper', () => {
       { debit: undefined, credit: 5 },
     ]);
     expect(parsed[0].transactionDate.getMonth()).toBe(8);
+  });
+  it('takes a header of dates and balances for a summary, and a lone BALANCE for none', () => {
+    expect(isBalanceTableHeader(row(50, [['Date', 40], ['Balance', 150], ['Date', 300], ['Balance', 400]]))).toBe(true);
+    expect(isBalanceTableHeader(row(50, [['BALANCE', 400]]))).toBe(false);
+    expect(isBalanceTableHeader(row(50, [['Date', 40], ['Details', 100], ['Balance', 400]]))).toBe(false);
+  });
+
+  describe('tables printed tight', () => {
+    // Lines a line height apart sit within a wrapped cell's gap, header or not.
+    const amountHeader = row(100, [['Date', 40], ['Amount', 175], ['Description', 215]]);
+
+    it('reads lines each with its own date as rows of their own, and keeps a short word', () => {
+      const transactions = readLayoutTransactions([
+        amountHeader,
+        row(107, [['Jun', 40], ['03', 60], ['20.00', 170], ['ACH', 215], ['DEBIT', 235]]),
+        row(107, [['Jun', 40], ['14', 60], ['84.99', 170], ['ACH', 215], ['DEBIT', 235]], 2),
+        row(114, [['WEB', 215], ['ACME', 240], ['Cafe', 265]], 2),
+        row(121, [['Jun', 40], ['17', 60], ['9.00', 175], ['Transfer', 215]], 2),
+      ]);
+      expect(transactions.map(({ dateText, amount, description }) => [dateText, amount, description])).toEqual([
+        ['Jun 03', 20, 'ACH DEBIT'],
+        ['Jun 14', 84.99, 'ACH DEBIT WEB ACME Cafe'],
+        ['Jun 17', 9, 'Transfer'],
+      ]);
+    });
+
+    it('reads a table printed in two blocks side by side, and stops at a balance summary', () => {
+      const transactions = readLayoutTransactions([
+        row(100, [
+          ['Date', 40], ['Serial', 90], ['#', 130], ['Amount', 200],
+          ['Date', 300], ['Serial', 350], ['#', 390], ['Amount', 460],
+        ]),
+        row(107, [
+          ['Jun', 40], ['18', 60], ['4239', 90], ['2,000.00', 190],
+          ['Jun', 300], ['26', 320], ['4244', 350], ['*', 385], ['2,274.00', 445],
+        ]),
+        row(114, [['Jun', 40], ['25', 60], ['4241', 90], ['10.00', 200]]),
+        row(160, [['Date', 40], ['Balance', 150], ['Date', 300], ['Balance', 400]]),
+        row(167, [['May', 40], ['31', 60], ['446.97', 150], ['Jun', 300], ['18', 320], ['24.00', 400]]),
+      ]);
+      expect(transactions.map(({ dateText, amount, description }) => [dateText, amount, description])).toEqual([
+        ['Jun 18', 2000, '4239'],
+        ['Jun 26', 2274, '4244 *'],
+        ['Jun 25', 10, '4241'],
+      ]);
+    });
   });
 });

@@ -28,7 +28,7 @@ describe('statement-date.helper', () => {
     expect(parseDateParts(text, order)).toEqual(expected);
   });
 
-  it.each(['8373579', '13/13', '1 Sep Faster', 'Paynow', '38.2gal', '1.450,77'])(
+  it.each(['8373579', '13/13', '1 Sep Faster', 'Paynow', '38.2gal', '1.450,77', 'Jun 18 4239'])(
     'does not read %s as a date',
     text => {
       expect(parseDateParts(text, 'dmy')).toBeNull();

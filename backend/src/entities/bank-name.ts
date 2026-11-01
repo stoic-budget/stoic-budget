@@ -16,5 +16,6 @@ export enum BankName {
   BARCLAYS = 'barclays',
   BECU = 'becu',
   BENDIGO = 'bendigo',
+  BMO = 'bmo',
   OTHER = 'other',
 }
