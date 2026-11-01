@@ -27,5 +27,6 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.CASH_APP]: 'Cash App',
   [BankName.SCHWAB]: 'Charles Schwab',
   [BankName.CHASE]: 'Chase',
+  [BankName.CHIME]: 'Chime',
   [BankName.OTHER]: 'Bank',
 };
