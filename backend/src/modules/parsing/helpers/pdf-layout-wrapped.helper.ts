@@ -1,6 +1,7 @@
 import type { PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import type { LaidOutRow } from './pdf-layout-columns.helper';
 import { findStatementAmounts } from './statement-amount.helper';
+import { isBalanceLabel } from './statement-metadata.helper';
 
 /**
  * Lines this close, in line heights, belong to one table row: a cell's text
@@ -105,5 +106,6 @@ export function continuesTransaction(
     laidOut.amounts.some(amount => isMoney(amount.value)) ||
     findStatementAmounts(row.items.map(item => item.text).join(' ')).some(isMoney);
   const reachesDateColumn = (laidOut.text.date ?? []).length > 0;
-  return isNextLine(row, lastRow) && !hasMoney && !reachesDateColumn;
+  // "Ending Balance $12,274.35" under the last row states the balance, it is no text of the row.
+  return isNextLine(row, lastRow) && !hasMoney && !reachesDateColumn && !isBalanceLabel(row.text);
 }

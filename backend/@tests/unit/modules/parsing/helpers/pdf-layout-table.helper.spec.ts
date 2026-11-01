@@ -348,6 +348,17 @@ describe('pdf-layout-table.helper', () => {
     expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
   });
 
+  it('does not add an "Ending Balance" line under the last row to that row', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 90], ['Amount', 400], ['Balance', 490]]),
+      row(120, [['03/31', 40], ['Monthly', 90], ['Service', 130], ['Fee', 170], ['-4.95', 420], ['12,274.35', 490]]),
+      row(133, [['Ending', 90], ['Balance', 130], ['$12,274.35', 490]]),
+    ]);
+    expect(transactions.map(({ amount, description }) => [amount, description])).toEqual([
+      [-4.95, 'Monthly Service Fee'],
+    ]);
+  });
+
   describe('tables printed tight', () => {
     // Lines a line height apart sit within a wrapped cell's gap, header or not.
     const amountHeader = row(100, [['Date', 40], ['Amount', 175], ['Description', 215]]);

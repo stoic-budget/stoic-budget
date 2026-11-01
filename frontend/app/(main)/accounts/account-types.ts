@@ -71,6 +71,7 @@ const BANK_LABELS: Record<string, string> = {
   capitec: 'Capitec',
   cash_app: 'Cash App',
   schwab: 'Charles Schwab',
+  chase: 'Chase',
 };
 
 export const statementBankLabel = (bankName: string): string | null =>
