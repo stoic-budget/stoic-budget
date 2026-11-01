@@ -303,6 +303,18 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('reads a sign spaced from the figure, and drops a category column from the text', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 90], ['Category', 300], ['Amount', 400], ['Balance', 490]]),
+      row(120, [['Jul', 40], ['3', 62], ['Deposit', 90], ['from', 130], ['ACME', 160], ['Credit', 300], ['+', 395], ['$0.05', 405], ['$1,500.05', 490]]),
+      row(140, [['Jul', 40], ['10', 62], ['Withdrawal', 90], ['from', 150], ['ACME', 180], ['Debit', 300], ['-', 385], ['$200.26', 395], ['$1,299.79', 490]]),
+    ]);
+    expect(transactions.map(({ amount, balance, description }) => [amount, balance, description])).toEqual([
+      [0.05, 1500.05, 'Deposit from ACME'],
+      [-200.26, 1299.79, 'Withdrawal from ACME'],
+    ]);
+  });
+
   describe('tables printed tight', () => {
     // Lines a line height apart sit within a wrapped cell's gap, header or not.
     const amountHeader = row(100, [['Date', 40], ['Amount', 175], ['Description', 215]]);

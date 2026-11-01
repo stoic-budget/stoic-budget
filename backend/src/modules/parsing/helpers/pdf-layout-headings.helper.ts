@@ -107,6 +107,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'deposits withdrawals',
   ],
   balance: ['balance', 'running balance', 'solde', 'saldo', 'kontostand'],
-  // A row-number column, left of the date: its words are no text of the row.
-  other: ['no.'],
+  // Columns whose words are no text of the row: the row number left of the date, a
+  // category label ("Credit", "Debit") beside the amount.
+  other: ['no.', 'category'],
 };

@@ -1,6 +1,7 @@
 import {
   findDayRangePeriod,
   findMonthPeriod,
+  findSharedYearPeriod,
 } from '@/modules/parsing/helpers/statement-header-period.helper';
 
 const day = (m: number, d: number) => new Date(Date.UTC(2022, m, d));
@@ -37,4 +38,28 @@ describe('findMonthPeriod', () => {
   it.each(['Statement of account', 'For month Foo 2021'])('is null for %s', text => {
     expect(findMonthPeriod(text)).toBeNull();
   });
+});
+
+describe('findSharedYearPeriod', () => {
+  it('reads two ends that share the year printed at the end', () => {
+    expect(findSharedYearPeriod('Jul 1 - Jul 31, 2023')).toEqual({
+      from: new Date(Date.UTC(2023, 6, 1)),
+      to: new Date(Date.UTC(2023, 6, 31)),
+    });
+    expect(findSharedYearPeriod('Jul 1 - 31, 2023')?.to).toEqual(new Date(Date.UTC(2023, 6, 31)));
+  });
+
+  it('starts a range across New Year in the year before', () => {
+    expect(findSharedYearPeriod('Dec 15 - Jan 14, 2024')).toEqual({
+      from: new Date(Date.UTC(2023, 11, 15)),
+      to: new Date(Date.UTC(2024, 0, 14)),
+    });
+  });
+
+  it.each(['Statement of account', 'Foo 1 - Foo 31, 2023', 'Feb 1 - Feb 30, 2023', 'Jul 20 - Jul 5, 2023'])(
+    'is null for %s',
+    text => {
+      expect(findSharedYearPeriod(text)).toBeNull();
+    },
+  );
 });
