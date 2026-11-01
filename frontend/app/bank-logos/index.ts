@@ -20,6 +20,7 @@ export type BankLogoKey =
   | 'bpi'
   | 'capital_one'
   | 'capitec'
+  | 'cash_app'
   | 'other';
 
 export type ResolvedBankLogo = {
@@ -51,6 +52,7 @@ const LOGO_SRC_BY_KEY: Record<BankLogoKey, string> = {
   bpi: '/images/bank-logo/bank.png',
   capital_one: '/images/bank-logo/bank.png',
   capitec: '/images/bank-logo/bank.png',
+  cash_app: '/images/bank-logo/bank.png',
   other: '/images/bank-logo/bank.png',
 };
 
@@ -76,6 +78,7 @@ const DISPLAY_NAME_BY_KEY: Record<BankLogoKey, string> = {
   bpi: 'BPI',
   capital_one: 'Capital One',
   capitec: 'Capitec',
+  cash_app: 'Cash App',
   other: 'Bank',
 };
 
@@ -155,6 +158,9 @@ const resolveKeyFromName = (bankName: string): BankLogoKey => {
   }
   if (n === 'capitec' || n.startsWith('capitec ') || n === 'capitec bank') {
     return 'capitec';
+  }
+  if (n === 'cash app' || n.startsWith('cash app ') || n === 'cash_app') {
+    return 'cash_app';
   }
   if (n === 'other') {
     return 'other';

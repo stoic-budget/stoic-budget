@@ -423,7 +423,7 @@ export class BackupRestoreService {
       const backedUp =
         metadata &&
         (isWorkspaceScoped(metadata) || RELATED_COLLECTIONS.some(item => item.table === tableName));
-      if (!metadata || !backedUp)
+      if (!(metadata && backedUp))
         throw new BadRequestException(appError('BACKUP_UNKNOWN_COLLECTION', { table: tableName }));
       if (EXCLUDED_TABLES.has(tableName)) continue;
       tables.push({

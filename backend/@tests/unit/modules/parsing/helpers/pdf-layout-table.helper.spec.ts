@@ -329,6 +329,18 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('reads bare amounts as money out where money in carries a plus, and a Fee column as no text', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 90], ['Details', 200], ['Fee', 330], ['Amount', 400]]),
+      row(120, [['Apr', 40], ['3', 62], ['From', 90], ['Example', 120], ['Bank', 160], ['Transfer', 200], ['$0.00', 322], ['+', 405], ['$400.00', 415]]),
+      row(140, [['Apr', 40], ['3', 62], ['To', 90], ['Example', 105], ['Person', 145], ['Payment', 200], ['$0.00', 322], ['$375.00', 418]]),
+    ]);
+    expect(transactions.map(({ amount, description }) => [amount, description])).toEqual([
+      [400, 'From Example Bank Transfer'],
+      [-375, 'To Example Person Payment'],
+    ]);
+  });
+
   describe('tables printed tight', () => {
     // Lines a line height apart sit within a wrapped cell's gap, header or not.
     const amountHeader = row(100, [['Date', 40], ['Amount', 175], ['Description', 215]]);

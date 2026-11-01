@@ -43,6 +43,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.BARCLAYS, /\bbarclays bank\b/],
   [BankName.BENDIGO, /\bbendigo (?:and adelaide )?bank\b/],
   [BankName.BNP_PARIBAS, /\bbnp paribas\b/],
+  [BankName.CASH_APP, /\bcash app\b/],
   [BankName.CAPITEC, /\bcapitec bank\b|\bcapitecbank\.co\.za\b/],
   [BankName.CAPITAL_ONE, /\bcapital one\b|\bcapitalone\.com\b/],
   [BankName.BPI, /\bbpi express\b|\bbank of the philippine islands\b/],
