@@ -20,3 +20,19 @@ export function findDayRangePeriod(text: string): { from: Date; to: Date } | nul
   const to = new Date(Date.UTC(year, month, toDay));
   return from.getUTCMonth() === month && to.getUTCMonth() === month ? { from, to } : null;
 }
+
+const MONTH_PERIOD = /\bFor month:?\s+([A-Za-z]{3,9})\s+(\d{4})\b/i;
+
+/**
+ * A period printed as a whole month ("For month October 2021"). Only the first
+ * such line counts. Null when there is none or the month is not an English one.
+ */
+export function findMonthPeriod(text: string): { from: Date; to: Date } | null {
+  const match = MONTH_PERIOD.exec(text);
+  const month = match ? MONTHS.indexOf(match[1].slice(0, 3).toLowerCase()) : -1;
+  if (!match || month < 0) {
+    return null;
+  }
+  const year = Number(match[2]);
+  return { from: new Date(Date.UTC(year, month, 1)), to: new Date(Date.UTC(year, month + 1, 0)) };
+}

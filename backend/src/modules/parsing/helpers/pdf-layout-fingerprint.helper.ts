@@ -42,6 +42,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.BANK_OF_SCOTLAND, /\bbank\s*of\s*scotland/],
   [BankName.BARCLAYS, /\bbarclays bank\b/],
   [BankName.BENDIGO, /\bbendigo (?:and adelaide )?bank\b/],
+  [BankName.BNP_PARIBAS, /\bbnp paribas\b/],
   [BankName.BMO, /\bbmo bank\b|\bbmo harris\b/],
   [BankName.BECU, /\bbecu\b|\bboeing employees' credit union\b/],
   [BankName.KASPI, /\bkaspi\b|\bкаспи\b/],

@@ -3,18 +3,11 @@ import {
   isBalanceTableHeader,
   type LaidOutRow,
   type LayoutColumn,
-  layOutRow,
   readHeaderRow,
   type TaughtHeadings,
 } from './pdf-layout-columns.helper';
 import { attachLeadInLines } from './pdf-layout-lead-in.helper';
-import {
-  leadingDate,
-  type RowDate,
-  type RowRule,
-  sameDayDate,
-  startsLeftOfText,
-} from './pdf-layout-row-date.helper';
+import { leadingDate, type RowDate, type RowRule, sameDayDate } from './pdf-layout-row-date.helper';
 import {
   alignsWithSectionText,
   type LayoutSection,
@@ -24,6 +17,7 @@ import {
   signBySection,
 } from './pdf-layout-sections.helper';
 import { joinStackedHeaders } from './pdf-layout-stacked-header.helper';
+import { readTableRow } from './pdf-layout-table-row.helper';
 import { splitTwoUp } from './pdf-layout-two-up.helper';
 import {
   continuesTransaction,
@@ -131,16 +125,6 @@ function accountHeadingAt(row: PdfTextRow, rowAbove: PdfTextRow | null) {
     return null;
   }
   return readAccountHeading(text);
-}
-
-/** A row's leading date, if any, and the rest of its words by column. */
-function readTableRow(row: PdfTextRow, columns: LayoutColumn[]) {
-  const items = [...row.items].sort((a, b) => a.x - b.x);
-  const found = leadingDate(items);
-  // A date in the description column ("03/07 07:50 …", "On" wrapped onto
-  // "07 Sep") opens no row; it is left out of the text all the same.
-  const date = found && startsLeftOfText(items[0], columns) ? found : null;
-  return { date, laidOut: layOutRow(found ? items.slice(found.used) : items, columns) };
 }
 
 /**
