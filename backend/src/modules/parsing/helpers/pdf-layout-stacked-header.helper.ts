@@ -42,6 +42,8 @@ function stackLines(top: PdfTextRow, bottom: PdfTextRow): PdfTextRow {
 
 const hasAmount = (columns: LayoutColumn[] | null) =>
   Boolean(columns?.some(c => c.role === 'amount'));
+const dateCount = (columns: LayoutColumn[] | null) =>
+  columns?.filter(c => c.role === 'date').length ?? 0;
 
 /** Rows in page order, with every two-line header made one row. */
 export function joinStackedHeaders(
@@ -58,11 +60,13 @@ export function joinStackedHeaders(
     const columns = stacked ? readHeader(stacked) : null;
     // A header that reads on its top line alone still takes the lower line when
     // that makes one signed column of "Deposits" over "Withdrawals".
-    const joinsSigned = hasAmount(columns) && !hasAmount(topColumns);
+    // Or that gives a date its own heading: "Transaction" over "Date" beside "Posting Date".
+    const joinsMore =
+      (hasAmount(columns) && !hasAmount(topColumns)) || dateCount(columns) > dateCount(topColumns);
     if (
       stacked &&
       columns &&
-      (!topColumns || joinsSigned) &&
+      (!topColumns || joinsMore) &&
       columns.length > (readHeader(bottom)?.length ?? 0)
     ) {
       joined.push(stacked);

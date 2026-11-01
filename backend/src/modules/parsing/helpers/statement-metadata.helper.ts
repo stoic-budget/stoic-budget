@@ -44,6 +44,7 @@ const UNMARKED_COUNTRIES: [RegExp, string][] = [
   [/\bIFSC\b/, 'INR'],
   [/\b(?:PIX|CNPJ|CPF)\b/, 'BRL'],
   [/\bPhilippines\b/i, 'PHP'],
+  [/\bSouth Africa\b|\.co\.za\b/i, 'ZAR'],
 ];
 
 const SYMBOLS: [string, string][] = [

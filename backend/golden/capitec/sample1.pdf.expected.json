@@ -1,0 +1,394 @@
+{
+  "metadata": {
+    "accountNumber": "9215436472",
+    "currency": "ZAR",
+    "dateFrom": "2020-01-10T00:00:00",
+    "dateTo": "2020-02-09T00:00:00",
+    "balanceStart": 9894.22,
+    "balanceEnd": 9215.21,
+    "rawHeader": "24hr Client Care Centre 0860 10 20 43 E ClientCare@capitecbank.co.za capitecbank.co.za One of the Global One money management products or services",
+    "normalizedHeader": "24hr Client Care Centre 0860 10 20 43 E ClientCare@capitecbank.co.za capitecbank.co.za One of the Global One money management products or services",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2020-01-11T00:00:00",
+      "counterpartyName": "ATM Cash Withdrawal Hammanskraal Renbro (Card 7055)",
+      "paymentPurpose": "ATM Cash Withdrawal Hammanskraal Renbro (Card 7055)",
+      "debit": 500,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-01-11T00:00:00",
+      "counterpartyName": "*ATM Cash Withdrawal Fee",
+      "paymentPurpose": "*ATM Cash Withdrawal Fee",
+      "debit": 6,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-11T00:00:00",
+      "counterpartyName": "*SMS Notification Fee",
+      "paymentPurpose": "*SMS Notification Fee",
+      "debit": 1.2,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-14T00:00:00",
+      "counterpartyName": "*USSD Prepaid Purchase MTN",
+      "paymentPurpose": "*USSD Prepaid Purchase MTN",
+      "debit": 12,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2020-01-15T00:00:00",
+      "counterpartyName": "*USSD Prepaid Purchase MTN",
+      "paymentPurpose": "*USSD Prepaid Purchase MTN",
+      "debit": 12,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2020-01-17T00:00:00",
+      "counterpartyName": "J Nkosi",
+      "paymentPurpose": "Banking App Payment Received J Nkosi",
+      "credit": 1000,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-17T00:00:00",
+      "counterpartyName": "*USSD Prepaid Purchase MTN",
+      "paymentPurpose": "*USSD Prepaid Purchase MTN",
+      "debit": 12,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2020-01-17T00:00:00",
+      "counterpartyName": "*SMS Notification Fee",
+      "paymentPurpose": "*SMS Notification Fee",
+      "debit": 0.4,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-21T00:00:00",
+      "counterpartyName": "ATM Cash Withdrawal 2 Hammanskraal Renb (Card 7055)",
+      "paymentPurpose": "ATM Cash Withdrawal 2 Hammanskraal Renb (Card 7055)",
+      "debit": 500,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-01-21T00:00:00",
+      "counterpartyName": "*ATM Cash Withdrawal Fee",
+      "paymentPurpose": "*ATM Cash Withdrawal Fee",
+      "debit": 6,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-21T00:00:00",
+      "counterpartyName": "Anna Payment",
+      "paymentPurpose": "Payment Received: Anna Payment 4848587755",
+      "credit": 3500,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-21T00:00:00",
+      "counterpartyName": "*SMS Notification Fee",
+      "paymentPurpose": "*SMS Notification Fee",
+      "debit": 2.4,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-22T00:00:00",
+      "counterpartyName": "Superspar Trust Farm",
+      "paymentPurpose": "Superspar Trust Farm (Card 7055)",
+      "debit": 262.27,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-01-22T00:00:00",
+      "counterpartyName": "Mrp Bloed Street Mall Pretoria",
+      "paymentPurpose": "Mrp Bloed Street Mall Pretoria (Card 7055)",
+      "debit": 435.96,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-01-22T00:00:00",
+      "counterpartyName": "Mrp Kopanong Hammanskr Hammanskraal",
+      "paymentPurpose": "Mrp Kopanong Hammanskr Hammanskraal (Card 7055)",
+      "debit": 279.98,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-01-23T00:00:00",
+      "counterpartyName": "L168 - Lgt Bloed Str Pretoria",
+      "paymentPurpose": "L168 - Lgt Bloed Str Pretoria (Card 7055)",
+      "debit": 149.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-01-23T00:00:00",
+      "counterpartyName": "ATM Cash Withdrawal Hammanskraal (Card 7055)",
+      "paymentPurpose": "ATM Cash Withdrawal Hammanskraal (Card 7055)",
+      "debit": 500,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-01-23T00:00:00",
+      "counterpartyName": "*ATM Cash Withdrawal Fee",
+      "paymentPurpose": "*ATM Cash Withdrawal Fee",
+      "debit": 6,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-23T00:00:00",
+      "counterpartyName": "*SMS Notification Fee",
+      "paymentPurpose": "*SMS Notification Fee",
+      "debit": 0.4,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-24T00:00:00",
+      "counterpartyName": "Superspar Trust Farm",
+      "paymentPurpose": "Superspar Trust Farm (Card 7055)",
+      "debit": 84.31,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-01-25T00:00:00",
+      "counterpartyName": "Express Store Hammansk Pretoria",
+      "paymentPurpose": "Express Store Hammansk Pretoria (Card 7055)",
+      "debit": 99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-01-25T00:00:00",
+      "counterpartyName": "T Molefe",
+      "paymentPurpose": "Banking App Payment Received T Molefe",
+      "credit": 100,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-25T00:00:00",
+      "counterpartyName": "*SMS Notification Fee",
+      "paymentPurpose": "*SMS Notification Fee",
+      "debit": 0.4,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-26T00:00:00",
+      "counterpartyName": "*USSD Prepaid Purchase MTN",
+      "paymentPurpose": "*USSD Prepaid Purchase MTN",
+      "debit": 12,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2020-01-28T00:00:00",
+      "counterpartyName": "ATM Cash Withdrawal Hammanskraal (Card 7055)",
+      "paymentPurpose": "ATM Cash Withdrawal Hammanskraal (Card 7055)",
+      "debit": 1000,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-01-28T00:00:00",
+      "counterpartyName": "*ATM Cash Withdrawal Fee",
+      "paymentPurpose": "*ATM Cash Withdrawal Fee",
+      "debit": 6,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-28T00:00:00",
+      "counterpartyName": "*SMS Notification Fee",
+      "paymentPurpose": "*SMS Notification Fee",
+      "debit": 0.4,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-29T00:00:00",
+      "counterpartyName": "*USSD Prepaid Purchase MTN",
+      "paymentPurpose": "*USSD Prepaid Purchase MTN",
+      "debit": 12,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "Dod 40620503 Salary",
+      "paymentPurpose": "Payment Received: Dod 40620503 Salary 7118540068",
+      "credit": 2750.79,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "Pm8@lyceum 026074b9200131naedo Dr 1713758505",
+      "paymentPurpose": "Pm8@lyceum 026074b9200131naedo Dr 1713758505",
+      "debit": 1294.17,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "*Debit Order Fee",
+      "paymentPurpose": "*Debit Order Fee",
+      "debit": 3.5,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "Cash Withdrawal Dnr Hammanskraal Jub3rd (Card 7055)",
+      "paymentPurpose": "Cash Withdrawal Dnr Hammanskraal Jub3rd (Card 7055)",
+      "debit": 2000,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "*ATM Cash Withdrawal Fee",
+      "paymentPurpose": "*ATM Cash Withdrawal Fee",
+      "debit": 12,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "Dispute Pm8@lyceum 026074b9200131",
+      "paymentPurpose": "Branch Payment Received Dispute Pm8@lyceum 026074b9200131 1800589930",
+      "credit": 1294.17,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "*Debit Order Dispute Fee (40 Days)",
+      "paymentPurpose": "*Debit Order Dispute Fee (40 Days)",
+      "debit": 40,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "*USSD Prepaid Purchase MTN",
+      "paymentPurpose": "*USSD Prepaid Purchase MTN",
+      "debit": 30,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "Interest Received",
+      "paymentPurpose": "Interest Received",
+      "credit": 81.41,
+      "currency": "ZAR",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "*SMS Notification Fee",
+      "paymentPurpose": "*SMS Notification Fee",
+      "debit": 2,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "*Monthly Account Admin Fee",
+      "paymentPurpose": "*Monthly Account Admin Fee",
+      "debit": 5,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-02-01T00:00:00",
+      "counterpartyName": "Lindiwe",
+      "paymentPurpose": "Banking App Transfer to Lindiwe (7172867781)",
+      "debit": 1200,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-01T00:00:00",
+      "counterpartyName": "*SMS Notification Fee",
+      "paymentPurpose": "*SMS Notification Fee",
+      "debit": 1.2,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-02-02T00:00:00",
+      "counterpartyName": "Dis-Chem Hammanskraal",
+      "paymentPurpose": "Dis-Chem Hammanskraal (Card 7055)",
+      "debit": 654.4,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "Online Purchase: Rain Bryanston",
+      "paymentPurpose": "Online Purchase: Rain Bryanston (Card 7055)",
+      "debit": 250,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-02-07T00:00:00",
+      "counterpartyName": "*USSD Prepaid Purchase MTN",
+      "paymentPurpose": "*USSD Prepaid Purchase MTN",
+      "debit": 12,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2020-02-08T00:00:00",
+      "counterpartyName": "*SMS Notification Fee",
+      "paymentPurpose": "*SMS Notification Fee",
+      "debit": 0.4,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": false,
+      "detail": {
+        "row": 11,
+        "date": "21/01/2020",
+        "expected": 13344.62,
+        "actual": 14344.62
+      }
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "651942890e83",
+    "headings": [
+      "date:posting date | date:transaction date | description:description | credit:money in | debit:money out | balance:balance"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "capitec"
+  },
+  "failedChecks": [
+    "balance_chain"
+  ]
+}

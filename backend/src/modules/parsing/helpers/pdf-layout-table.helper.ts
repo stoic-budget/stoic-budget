@@ -6,6 +6,7 @@ import {
   readHeaderRow,
   type TaughtHeadings,
 } from './pdf-layout-columns.helper';
+import { withoutRowsAfterEnd } from './pdf-layout-end-marker.helper';
 import { attachLeadInLines } from './pdf-layout-lead-in.helper';
 import { leadingDate, type RowDate, type RowRule, sameDayDate } from './pdf-layout-row-date.helper';
 import {
@@ -161,10 +162,12 @@ export function readLayoutTable(
   const readHeader = (row: PdfTextRow) => readHeaderRow(row, reading.headings);
   const ordered = splitTwoUp(
     joinStackedHeaders(
-      rows
-        .flatMap(splitOverlappingLines)
-        .filter(row => !reading.skip?.(row))
-        .sort((a, b) => a.page - b.page || a.y - b.y),
+      withoutRowsAfterEnd(
+        rows
+          .flatMap(splitOverlappingLines)
+          .filter(row => !reading.skip?.(row))
+          .sort((a, b) => a.page - b.page || a.y - b.y),
+      ),
       readHeader,
     ),
     readHeader,
