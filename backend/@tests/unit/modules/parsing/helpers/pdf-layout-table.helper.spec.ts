@@ -48,6 +48,25 @@ describe('pdf-layout-table.helper', () => {
     expect(columns?.[2].x1).toBe(456);
   });
 
+  it('reads Withdrawals, Deposits and Balance alone as a header: the date and text sit left of them', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['WITHDRAWALS', 290], ['DEPOSITS', 390], ['BALANCE', 485]]),
+      row(120, [['01', 40], ['AUG', 52], ['23', 70], ['Balance', 110], ['Forward', 150], ['116.61', 490]]),
+      row(140, [['01', 40], ['AUG', 52], ['23', 70], ['Cheque', 110], ['310.00', 310], ['-193.39', 485]]),
+      row(149, [['4309', 125]]),
+      row(170, [['02', 40], ['AUG', 52], ['23', 70], ['Deposit', 110], ['500.00', 400], ['306.61', 490]]),
+    ]);
+    expect(transactions.map(t => [t.dateText, t.description, t.debit, t.credit])).toEqual([
+      ['01 AUG 23', 'Cheque 4309', 310, undefined],
+      ['02 AUG 23', 'Deposit', undefined, 500],
+    ]);
+  });
+
+  it('needs all three money headings to read a header without date or text', () => {
+    expect(readHeaderRow(row(50, [['Withdrawals', 290], ['Deposits', 390]]))).toBeNull();
+    expect(readHeaderRow(row(50, [['Deposits', 290], ['Balance', 390], ['Total', 450]]))).toBeNull();
+  });
+
   it('does not take a summary line for a header', () => {
     expect(readHeaderRow(row(50, [['Previous', 40], ['Balance', 90], ['1,000.00', 300]]))).toBeNull();
   });

@@ -7,6 +7,8 @@ describe('isPageFooterLine', () => {
   it('matches the word alone, whatever its case or spacing', () => {
     expect(isPageFooterLine(row('Continued'))).toBe(true);
     expect(isPageFooterLine(row('  continued '))).toBe(true);
+    expect(isPageFooterLine(row('CONTINUED...'))).toBe(true);
+    expect(isPageFooterLine(row('Continued…'))).toBe(true);
   });
 
   it('keeps a row that only contains the word', () => {

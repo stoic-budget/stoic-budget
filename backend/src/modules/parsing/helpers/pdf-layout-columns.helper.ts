@@ -80,7 +80,16 @@ export function readHeaderRow(row: PdfTextRow, taught?: TaughtHeadings): LayoutC
   const roles = new Set(columns.map(column => column.role));
   const hasMoney = roles.has('debit') || roles.has('credit') || roles.has('amount');
   const hasText = roles.has('date') || roles.has('description');
-  return columns.length >= 3 && hasMoney && hasText ? columns : null;
+  return columns.length >= 3 && hasMoney && (hasText || isMoneyOnlyHeader(roles)) ? columns : null;
+}
+
+/**
+ * "WITHDRAWALS  DEPOSITS  BALANCE" with nothing over the date and text: the
+ * rows still open with their date, and their words left of the money are the
+ * text. All three money headings make it a header, not a summary line.
+ */
+function isMoneyOnlyHeader(roles: Set<ColumnRole>): boolean {
+  return roles.has('debit') && roles.has('credit') && roles.has('balance');
 }
 
 /**
