@@ -71,6 +71,10 @@ describe('statement-metadata.helper', () => {
     expect(detectStatementCurrency('San Fernando\nSta. Ana Pampanga\nPhilippines\nBalance 10.00')).toBe('PHP');
   });
 
+  it('reads rand from the country or its domain when no currency is printed', () => {
+    expect(detectStatementCurrency('Client Care ClientCare@example.co.za\nBalance 10.00')).toBe('ZAR');
+  });
+
   it('reads rupees from an Indian bank code when no currency is printed', () => {
     expect(detectStatementCurrency('IFSC Code :EXMP0000001\nBalance 1490.11')).toBe('INR');
     expect(detectStatementCurrency('Balance 1490.11')).toBeNull();

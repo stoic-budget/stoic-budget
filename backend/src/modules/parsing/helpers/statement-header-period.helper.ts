@@ -1,3 +1,6 @@
+import { findFullDates, type NumericDateOrder } from './statement-date.helper';
+import { findStatementPeriod } from './statement-metadata.helper';
+
 const DAY_RANGE = /\b(\d{1,2})\s*-\s*(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})\b/;
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
@@ -62,4 +65,39 @@ export function findSharedYearPeriod(text: string): { from: Date; to: Date } | n
   const to = new Date(Date.UTC(year, toMonth, toDay));
   const real = from.getUTCMonth() === fromMonth && to.getUTCMonth() === toMonth;
   return real && from <= to ? { from, to } : null;
+}
+
+const FROM_LABEL = /\bf\s?rom\s+date\s*:?/i;
+const TO_LABEL = /\bto\s+date\s*:?/i;
+
+/**
+ * A period printed as two labelled dates that other text may sit between:
+ * "From Date: 10/01/2020" and, a line further, "To Date: 09/02/2020". Each
+ * takes the first date after its label. Null when a label or its date is
+ * missing or the dates run backwards.
+ */
+export function findLabelledPeriod(
+  text: string,
+  order: NumericDateOrder,
+): { from: Date; to: Date } | null {
+  const dates = findFullDates(text, order);
+  const after = (label: RegExp) => {
+    const match = label.exec(text);
+    const end = match ? match.index + match[0].length : -1;
+    return end < 0 ? undefined : dates.find(found => found.index >= end)?.date;
+  };
+  const [from, to] = [after(FROM_LABEL), after(TO_LABEL)];
+  return from && to && from <= to ? { from, to } : null;
+}
+
+/** The statement's period as its header prints it, in whichever way. */
+export function findHeaderPeriod(
+  text: string,
+  order: NumericDateOrder,
+): { from: Date; to: Date } | null {
+  return (
+    findStatementPeriod(text, order) ??
+    findSharedYearPeriod(text) ??
+    findLabelledPeriod(text, order)
+  );
 }

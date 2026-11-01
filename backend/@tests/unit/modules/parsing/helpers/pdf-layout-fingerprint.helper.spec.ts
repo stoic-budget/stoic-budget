@@ -93,6 +93,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('bank of queensland limited abn 32')).toBe(BankName.BOQ);
     expect(mentionedBank('bpi express phone 89-100')).toBe(BankName.BPI);
     expect(mentionedBank('www.capitalone.com 1-888')).toBe(BankName.CAPITAL_ONE);
+    expect(mentionedBank('capitec bank limited 1 quantum street')).toBe(BankName.CAPITEC);
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
     expect(statement(usual, 'ACME', '12.50')?.mentionedBank).toBeUndefined();
     expect(

@@ -315,6 +315,20 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('gives a second date its own heading when its name wraps, and stops at a line of End', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Posting', 40], ['Date', 70], ['Transaction', 100], ['Description', 175], ['Money', 330], ['In', 360], ['Money', 400], ['Out', 430], ['Balance', 490]]),
+      row(109, [['Date', 100]]),
+      row(130, [['11/01/2020', 40], ['10/01/2020', 100], ['ACME', 175], ['Store', 205], ['500.00', 425], ['9', 490], ['394.22', 500]]),
+      row(150, [['End', 40]]),
+      row(170, [['Date', 40], ['Description', 100], ['Amount', 400]]),
+      row(190, [['08/02/2020', 40], ['Pending', 100], ['Item', 140], ['226.49', 420]]),
+    ]);
+    expect(transactions.map(({ dateText, debit, description }) => [dateText, debit, description])).toEqual([
+      ['11/01/2020', 500, 'ACME Store'],
+    ]);
+  });
+
   describe('tables printed tight', () => {
     // Lines a line height apart sit within a wrapped cell's gap, header or not.
     const amountHeader = row(100, [['Date', 40], ['Amount', 175], ['Description', 215]]);

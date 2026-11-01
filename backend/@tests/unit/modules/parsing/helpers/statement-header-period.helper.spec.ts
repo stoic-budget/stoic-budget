@@ -1,5 +1,7 @@
 import {
   findDayRangePeriod,
+  findHeaderPeriod,
+  findLabelledPeriod,
   findMonthPeriod,
   findSharedYearPeriod,
 } from '@/modules/parsing/helpers/statement-header-period.helper';
@@ -62,4 +64,32 @@ describe('findSharedYearPeriod', () => {
       expect(findSharedYearPeriod(text)).toBeNull();
     },
   );
+});
+
+describe('findLabelledPeriod', () => {
+  const header = [
+    'Example Bank Limited 09/02/2020',
+    '1 Example Street Branch: 1234 F rom Date: 10/01/2020',
+    'Example Park To Date: 09/02/2020',
+    'Print Date: 09/02/2020',
+  ].join('\n');
+
+  it('takes the date after each label, other text between them', () => {
+    expect(findLabelledPeriod(header, 'dmy')).toEqual({
+      from: new Date(2020, 0, 10),
+      to: new Date(2020, 1, 9),
+    });
+  });
+
+  it.each(['Print Date: 09/02/2020', 'From Date: 10/01/2020', 'From Date: 10/02/2020 To Date: 10/01/2020'])(
+    'is null for %s',
+    text => {
+      expect(findLabelledPeriod(text, 'dmy')).toBeNull();
+    },
+  );
+
+  it('is tried after the unlabelled forms', () => {
+    expect(findHeaderPeriod('01/01/2020 - 31/01/2020', 'dmy')?.to).toEqual(new Date(2020, 0, 31));
+    expect(findHeaderPeriod(header, 'dmy')?.from).toEqual(new Date(2020, 0, 10));
+  });
 });
