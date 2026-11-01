@@ -100,6 +100,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('jpmorgan chase bank, n.a. p o box 182051')).toBe(BankName.CHASE);
     expect(mentionedBank('write to chime member services, p.o. box 417')).toBe(BankName.CHIME);
     expect(mentionedBank('cibc account statement for dec 1 to dec 31')).toBe(BankName.CIBC);
+    expect(mentionedBank('your citibank account statement as on aug 1, 2024 ... mobikwik axis bank')).toBe(BankName.CITI);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

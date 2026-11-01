@@ -25,6 +25,7 @@ export type BankLogoKey =
   | 'chase'
   | 'chime'
   | 'cibc'
+  | 'citi'
   | 'other';
 
 export type ResolvedBankLogo = {
@@ -61,6 +62,7 @@ const LOGO_SRC_BY_KEY: Record<BankLogoKey, string> = {
   chase: '/images/bank-logo/bank.png',
   chime: '/images/bank-logo/bank.png',
   cibc: '/images/bank-logo/bank.png',
+  citi: '/images/bank-logo/bank.png',
   other: '/images/bank-logo/bank.png',
 };
 
@@ -91,6 +93,7 @@ const DISPLAY_NAME_BY_KEY: Record<BankLogoKey, string> = {
   chase: 'Chase',
   chime: 'Chime',
   cibc: 'CIBC',
+  citi: 'Citi',
   other: 'Bank',
 };
 
@@ -185,6 +188,9 @@ const resolveKeyFromName = (bankName: string): BankLogoKey => {
   }
   if (n === 'cibc' || n.startsWith('cibc ')) {
     return 'cibc';
+  }
+  if (n === 'citi' || n.startsWith('citi ') || n.startsWith('citibank')) {
+    return 'citi';
   }
   if (n === 'other') {
     return 'other';

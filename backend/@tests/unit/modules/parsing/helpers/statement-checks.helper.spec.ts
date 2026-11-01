@@ -52,6 +52,20 @@ describe('statement-checks.helper', () => {
       expect(checkBalanceChain(card, true)?.passed).toBe(true);
     });
 
+    it('holds a balance that is printed only where it changes, and stays 0.00 across rows that net to nothing', () => {
+      const rows = [
+        tx('02/01', { debit: 85 }),
+        tx('02/01', { credit: 500 }),
+        tx('02/01', { debit: 500, balance: 0 }),
+        tx('04/01', { credit: 2136 }),
+        tx('04/01', { debit: 1184 }),
+        tx('04/01', { debit: 500 }),
+        tx('04/01', { debit: 452, balance: 0 }),
+      ];
+      expect(checkBalanceChain(rows)).toEqual({ code: 'balance_chain', passed: true });
+      expect(checkBalanceChain([...rows.slice(0, 6), tx('04/01', { debit: 400, balance: 0 })])?.passed).toBe(false);
+    });
+
     it('names the first row the balance does not follow', () => {
       const rows = [
         tx('02/01', { credit: 100, balance: 1100 }),

@@ -203,6 +203,7 @@ describe('ParserFactoryService', () => {
       'ChaseParser',
       'ChimeParser',
       'CibcParser',
+      'CitiParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

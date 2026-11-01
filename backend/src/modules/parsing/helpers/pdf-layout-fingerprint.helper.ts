@@ -31,6 +31,8 @@ const FINGERPRINT_LENGTH = 12;
  * the generic parser is one its parser declined, maybe a new layout.
  */
 const BANK_MENTIONS: [BankName, RegExp][] = [
+  // First: a Citibank statement names other banks in its IMPS and NEFT lines ("MOBIKWIK AXIS BANK").
+  [BankName.CITI, /\bcitibank n\.?a\b|\bcitibank account statement\b/],
   [BankName.ABSA, /\babsa\b/],
   [BankName.ALLY, /\bally bank\b/],
   [BankName.ANZ, /\banz\b|australia and new zealand banking/],

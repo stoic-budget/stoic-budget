@@ -1,0 +1,173 @@
+{
+  "metadata": {
+    "accountNumber": "50XX8XXX27",
+    "currency": "INR",
+    "dateFrom": "2024-07-01T00:00:00",
+    "dateTo": "2024-07-31T00:00:00",
+    "balanceEnd": 0.12,
+    "rawHeader": "PRABHAT DONELLO Statement Period: July 1, 2024 to July 31, 2024 Your Citibank Account Statement as on Aug 1, 2024 Page 1 of 7",
+    "normalizedHeader": "PRABHAT DONELLO Statement Period: July 1, 2024 to July 31, 2024 Your Citibank Account Statement as on Aug 1, 2024 Page 1 of 7",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-07-02T00:00:00",
+      "counterpartyName": "add-money@paytm",
+      "paymentPurpose": "IMPS OUTWARD ORG UPI To add-money@paytm,REF NO - 155832323261, Oid10448171713@Paytm Add Money",
+      "debit": 85,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-07-02T00:00:00",
+      "counterpartyName": "hanumatharaj@okhdfcbank",
+      "paymentPurpose": "IMPS INWARD ORG UPI From hanumatharaj@okhdfcbank,REF NO - 735354017150, UPI",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-07-02T00:00:00",
+      "counterpartyName": "add-money@paytm",
+      "paymentPurpose": "IMPS OUTWARD ORG UPI To add-money@paytm,REF NO - 091554382087, Oid33436312127@Paytm Add Money",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-07-04T00:00:00",
+      "counterpartyName": "Razorpay Composite 2 ICICI BANK LIMITED",
+      "paymentPurpose": "IMPS INWARD ORG IMPSTO from Razorpay Composite 2 ICICI BANK LIMITED REF NO: - 258773584637 Effective Date : 02Apr22",
+      "credit": 2136,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-07-04T00:00:00",
+      "counterpartyName": "BHARATPE.91678076637@fbpe",
+      "paymentPurpose": "IMPS OUTWARD ORG UPI To BHARATPE.91678076637@fbpe,REF NO - 038320700972, Pay to BharatPe Merchant",
+      "debit": 1184,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-07-04T00:00:00",
+      "counterpartyName": "PAYTM PAYMENTS BANK LTD",
+      "paymentPurpose": "IMPS OUTWARD ORG IMPS TO 080810648906 - PAYTM PAYMENTS BANK LTD REF NO:-263244555617-PRABHAT .",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-07-04T00:00:00",
+      "counterpartyName": "PAYTM PAYMENTS BANK LTD",
+      "paymentPurpose": "IMPS OUTWARD ORG IMPS TO 080810648906 - PAYTM PAYMENTS BANK LTD REF NO:-372191355055-PRABHAT .",
+      "debit": 452,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-07-05T00:00:00",
+      "counterpartyName": "S2M TRAINING TECHNOL",
+      "paymentPurpose": "NEFT INWARD NEFT IN UTR CITIN52703183089 FROM S2M TRAINING TECHNOL 87359162519DCTXN REF N S2M Salary Mar76103952875066GURURAYA MANSION,3RD FLOOR FLR,759 TO 764 8TH MAIN,ROAD J P NAGAR,",
+      "credit": 49244,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-07-10T00:00:00",
+      "counterpartyName": "PAYTM PAYMENTS BANK LTD",
+      "paymentPurpose": "IMPS OUTWARD ORG IMPS TO 080810648906 - PAYTM PAYMENTS BANK LTD REF NO:-032292438852-PRABHAT .",
+      "debit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-07-12T00:00:00",
+      "counterpartyName": "PAYTM PAYMENTS BANK LTD",
+      "paymentPurpose": "IMPS OUTWARD ORG IMPS TO 080810648906 - PAYTM PAYMENTS BANK LTD REF NO:-096297587187-PRABHAT .",
+      "debit": 335,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-07-17T00:00:00",
+      "counterpartyName": "Prabhat UNION BANK OF INDIA",
+      "paymentPurpose": "IMPS INWARD ORG IMPSTO from Prabhat UNION BANK OF INDIA REF NO: - 136365353946",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-07-20T00:00:00",
+      "counterpartyName": "PAYTM PAYMENTS BANK LTD",
+      "paymentPurpose": "IMPS OUTWARD ORG IMPS TO 080810648906 - PAYTM PAYMENTS BANK LTD REF NO:-448455776576-PRABHAT .",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-07-20T00:00:00",
+      "counterpartyName": "MOBIKWIK AXIS BANK",
+      "paymentPurpose": "IMPS INWARD ORG IMPSTO from MOBIKWIK AXIS BANK REF NO: - 138499684680",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-07-25T00:00:00",
+      "counterpartyName": "PAYTM PAYMENTS BANK LTD",
+      "paymentPurpose": "IMPS OUTWARD ORG IMPS TO 080810648906 - PAYTM PAYMENTS BANK LTD REF NO:-427668313386-PRABHAT .",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-07-30T00:00:00",
+      "counterpartyName": "yasat.nes61@okicici",
+      "paymentPurpose": "IMPS INWARD ORG UPI From yasat.nes61@okicici,REF NO - 264963199412, UPI",
+      "credit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-07-31T00:00:00",
+      "counterpartyName": "PAYTM PAYMENTS BANK LTD",
+      "paymentPurpose": "IMPS OUTWARD ORG IMPS TO 080810648906 - PAYTM PAYMENTS BANK LTD REF NO:-895779154543-PRABHAT .",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": false,
+      "detail": {
+        "row": 16,
+        "date": "31Jul24",
+        "expected": 41909,
+        "actual": 0.12
+      }
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "e79f4e726e9b",
+    "headings": [
+      "date:date | description:transaction details | debit:withdrawals | credit:deposits | balance:balance"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "citi"
+  },
+  "failedChecks": [
+    "balance_chain"
+  ]
+}
