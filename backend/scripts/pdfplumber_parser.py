@@ -161,9 +161,13 @@ def extract_tables(page: "pdfplumber.page.Page", page_number: int) -> List[Dict[
 
 def on_page(page: "pdfplumber.page.Page"):
     """Keeps the characters that sit on the page: a statement may print its own
-    reference numbers past the right edge, where no reader sees them."""
+    reference numbers past the right edge, where no reader sees them. A glyph
+    the font has no character for ("(cid:856)", an ellipsis) is no text, and its
+    width and height would throw the line it sits in off its neighbours."""
     left, _, right, _ = page.bbox
-    return lambda obj: obj.get("object_type") != "char" or (obj["x0"] < right and obj["x1"] > left)
+    return lambda obj: obj.get("object_type") != "char" or (
+        obj["x0"] < right and obj["x1"] > left and not str(obj.get("text", "")).startswith("(cid:")
+    )
 
 
 def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:

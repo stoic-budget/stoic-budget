@@ -24,5 +24,6 @@ export enum BankName {
   CAPITEC = 'capitec',
   CASH_APP = 'cash_app',
   SCHWAB = 'schwab',
+  CHASE = 'chase',
   OTHER = 'other',
 }

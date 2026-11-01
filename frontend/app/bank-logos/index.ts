@@ -22,6 +22,7 @@ export type BankLogoKey =
   | 'capitec'
   | 'cash_app'
   | 'schwab'
+  | 'chase'
   | 'other';
 
 export type ResolvedBankLogo = {
@@ -55,6 +56,7 @@ const LOGO_SRC_BY_KEY: Record<BankLogoKey, string> = {
   capitec: '/images/bank-logo/bank.png',
   cash_app: '/images/bank-logo/bank.png',
   schwab: '/images/bank-logo/bank.png',
+  chase: '/images/bank-logo/bank.png',
   other: '/images/bank-logo/bank.png',
 };
 
@@ -82,6 +84,7 @@ const DISPLAY_NAME_BY_KEY: Record<BankLogoKey, string> = {
   capitec: 'Capitec',
   cash_app: 'Cash App',
   schwab: 'Charles Schwab',
+  chase: 'Chase',
   other: 'Bank',
 };
 
@@ -167,6 +170,9 @@ const resolveKeyFromName = (bankName: string): BankLogoKey => {
   }
   if (n === 'schwab' || n.startsWith('charles schwab') || n.startsWith('schwab ')) {
     return 'schwab';
+  }
+  if (n === 'chase' || n.startsWith('chase ') || n.startsWith('jpmorgan chase')) {
+    return 'chase';
   }
   if (n === 'other') {
     return 'other';

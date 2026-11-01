@@ -97,6 +97,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('write us at cash disputes, 1955 broadway')).toBe(BankName.CASH_APP);
     expect(mentionedBank('card purchase cash app*example person')).toBeUndefined();
     expect(mentionedBank('send inquiries to charles schwab bank p.o. box')).toBe(BankName.SCHWAB);
+    expect(mentionedBank('jpmorgan chase bank, n.a. p o box 182051')).toBe(BankName.CHASE);
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
     expect(statement(usual, 'ACME', '12.50')?.mentionedBank).toBeUndefined();
     expect(
