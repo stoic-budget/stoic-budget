@@ -200,6 +200,9 @@ describe('statement-metadata.helper', () => {
     });
     expect(readAccountHeading('Statement Period: 11/19/2016 - 12/16/2016')).toBeNull();
     expect(readAccountHeading('Order - 12345')).toBeNull();
+    expect(readAccountHeading('100000000001 (100)')).toEqual({ accountNumber: '100000000001' });
+    expect(readAccountHeading('Cheque 4309 (100)')).toBeNull();
+    expect(readAccountHeading('100000000001 (100) 116.61')).toBeNull();
   });
 
   it('tells a card statement by its wording', () => {
