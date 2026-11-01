@@ -1,6 +1,6 @@
 /**
  * Dates the way statements print them: "02/06/2025", "09/13" (no year),
- * "1 mei", "02-Mar-2025", "02 janv. 25", "Sep 3, 2025", "31 janvier 2025", "2025-05-31".
+ * "1 mei", "02-Mar-2025", "02Jul24", "02 janv. 25", "Sep 3, 2025", "31 janvier 2025", "2025-05-31".
  *
  * Whether "09/01" is the 9th of January or September 1st is a property of the
  * document, not of one date, so callers settle the order once per statement
@@ -91,7 +91,7 @@ export function parseDateParts(text: string, order: NumericDateOrder): DateParts
   }
 
   const dayFirst = value.match(
-    /^(\d{1,2})(?:er)?[\s-]+([a-z]+)\.?,?(?:[\s-]+((?:19|20)\d{2}|\d{2}))?$/,
+    /^(\d{1,2})(?:er)?[\s-]*([a-z]+)\.?,?(?:[\s-]*((?:19|20)\d{2}|\d{2}))?$/,
   );
   if (dayFirst) {
     const month = monthFromName(dayFirst[2]);

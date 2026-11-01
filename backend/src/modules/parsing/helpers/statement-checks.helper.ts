@@ -77,6 +77,10 @@ function brokenPair(pairs: BalancePair[], signs: (1 | -1)[]) {
       }
       continue;
     }
+    // A balance that did not move holds in whichever direction the rows between net to nothing.
+    if (!mode && (pair.down === 0 || pair.up === 0) && same(pair.previous, pair.balance)) {
+      continue;
+    }
     mode ??=
       modes.find(
         candidate =>

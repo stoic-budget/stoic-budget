@@ -20,6 +20,7 @@ describe('statement-date.helper', () => {
     ['02 janv. 25', 'dmy', { day: 2, month: 1, year: 2025 }],
     ['31 janvier 2025', 'dmy', { day: 31, month: 1, year: 2025 }],
     ['02-Mar-2025', 'dmy', { day: 2, month: 3, year: 2025 }],
+    ['02Jul24', 'dmy', { day: 2, month: 7, year: 2024 }],
     ['1er février 2025', 'dmy', { day: 1, month: 2, year: 2025 }],
     ['3 März', 'dmy', { day: 3, month: 3, year: undefined }],
     ['Sep 3, 2025', 'dmy', { day: 3, month: 9, year: 2025 }],

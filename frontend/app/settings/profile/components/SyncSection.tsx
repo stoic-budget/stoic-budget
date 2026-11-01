@@ -45,6 +45,7 @@ const BANK_LABELS: Record<string, string> = {
   chase: 'Chase',
   chime: 'Chime',
   cibc: 'CIBC',
+  citi: 'Citi',
   other: 'Other',
 };
 
