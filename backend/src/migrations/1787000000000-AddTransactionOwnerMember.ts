@@ -51,10 +51,10 @@ export class AddTransactionOwnerMember1787000000000 implements MigrationInterfac
     await queryRunner.query(
       `ALTER TABLE transactions DROP CONSTRAINT IF EXISTS "FK_transactions_owner_member"`,
     );
-    await queryRunner.query(`ALTER TABLE transactions DROP COLUMN IF EXISTS owner_member_id`);
+    await queryRunner.query('ALTER TABLE transactions DROP COLUMN IF EXISTS owner_member_id');
     await queryRunner.query(
       `ALTER TABLE wallets DROP CONSTRAINT IF EXISTS "FK_wallets_owner_member"`,
     );
-    await queryRunner.query(`ALTER TABLE wallets DROP COLUMN IF EXISTS owner_member_id`);
+    await queryRunner.query('ALTER TABLE wallets DROP COLUMN IF EXISTS owner_member_id');
   }
 }

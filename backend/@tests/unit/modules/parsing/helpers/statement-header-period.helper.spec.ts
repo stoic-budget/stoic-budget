@@ -4,6 +4,7 @@ import {
   findLabelledPeriod,
   findMonthPeriod,
   findSharedYearPeriod,
+  wholeMonth,
 } from '@/modules/parsing/helpers/statement-header-period.helper';
 
 const day = (m: number, d: number) => new Date(Date.UTC(2022, m, d));
@@ -91,5 +92,19 @@ describe('findLabelledPeriod', () => {
   it('is tried after the unlabelled forms', () => {
     expect(findHeaderPeriod('01/01/2020 - 31/01/2020', 'dmy')?.to).toEqual(new Date(2020, 0, 31));
     expect(findHeaderPeriod(header, 'dmy')?.from).toEqual(new Date(2020, 0, 10));
+  });
+});
+
+describe('wholeMonth', () => {
+  it('runs from the first to the last day of the month', () => {
+    expect(wholeMonth('April', 2025)).toEqual({
+      from: new Date(Date.UTC(2025, 3, 1)),
+      to: new Date(Date.UTC(2025, 3, 30)),
+    });
+    expect(wholeMonth('Feb', 2024)?.to).toEqual(new Date(Date.UTC(2024, 1, 29)));
+  });
+
+  it('is null for a word that is no English month', () => {
+    expect(wholeMonth('Foo', 2025)).toBeNull();
   });
 });

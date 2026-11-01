@@ -40,6 +40,7 @@ const BANK_LABELS: Record<string, string> = {
   bpi: 'BPI',
   capital_one: 'Capital One',
   capitec: 'Capitec',
+  cash_app: 'Cash App',
   other: 'Other',
 };
 

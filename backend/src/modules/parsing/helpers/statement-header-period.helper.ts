@@ -32,12 +32,15 @@ const MONTH_PERIOD = /\bFor month:?\s+([A-Za-z]{3,9})\s+(\d{4})\b/i;
  */
 export function findMonthPeriod(text: string): { from: Date; to: Date } | null {
   const match = MONTH_PERIOD.exec(text);
-  const month = match ? MONTHS.indexOf(match[1].slice(0, 3).toLowerCase()) : -1;
-  if (!match || month < 0) {
-    return null;
-  }
-  const year = Number(match[2]);
-  return { from: new Date(Date.UTC(year, month, 1)), to: new Date(Date.UTC(year, month + 1, 0)) };
+  return match ? wholeMonth(match[1], Number(match[2])) : null;
+}
+
+/** The first to the last day of an English month ("October", "Oct"), null for any other word. */
+export function wholeMonth(name: string, year: number): { from: Date; to: Date } | null {
+  const month = MONTHS.indexOf(name.slice(0, 3).toLowerCase());
+  return month < 0
+    ? null
+    : { from: new Date(Date.UTC(year, month, 1)), to: new Date(Date.UTC(year, month + 1, 0)) };
 }
 
 const SHARED_YEAR_RANGE =

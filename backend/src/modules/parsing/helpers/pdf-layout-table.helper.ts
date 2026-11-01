@@ -8,6 +8,7 @@ import {
 } from './pdf-layout-columns.helper';
 import { withoutRowsAfterEnd } from './pdf-layout-end-marker.helper';
 import { attachLeadInLines } from './pdf-layout-lead-in.helper';
+import { readBareAmountsAsDebits } from './pdf-layout-plus-sign.helper';
 import { leadingDate, type RowDate, type RowRule, sameDayDate } from './pdf-layout-row-date.helper';
 import {
   alignsWithSectionText,
@@ -53,6 +54,8 @@ export interface LayoutTransaction {
   credit?: number;
   /** Signed, from a single amount column. */
   amount?: number;
+  /** The amount was printed with a leading plus. */
+  plusMarked?: boolean;
   /** Running balance after this row, when the table prints one. */
   balance?: number;
   /** The account heading printed above this row's table, if any. */
@@ -99,13 +102,14 @@ function openTransaction(
     firstLine: '',
     counterparty: '',
   };
-  for (const { role, value } of laidOut.amounts) {
+  for (const { role, value, plus } of laidOut.amounts) {
     if (role === 'debit') {
       transaction.debit = Math.abs(value);
     } else if (role === 'credit') {
       transaction.credit = Math.abs(value);
     } else if (role === 'amount') {
       transaction.amount = value;
+      transaction.plusMarked = plus;
     } else if (role === 'balance') {
       transaction.balance = value;
     }
@@ -191,7 +195,11 @@ export function readLayoutTable(
   for (const lines of attachLeadInLines(groupWrappedLines(ordered), dateWords, isHeading)) {
     readRow(state, lines);
   }
-  return { transactions: state.transactions, sections: state.sections, layout: state.layout };
+  return {
+    transactions: readBareAmountsAsDebits(state.transactions),
+    sections: state.sections,
+    layout: state.layout,
+  };
 }
 
 interface ReadingState {

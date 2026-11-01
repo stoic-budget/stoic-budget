@@ -12,6 +12,8 @@ export type ColumnRole =
   | 'credit'
   | 'amount'
   | 'balance'
+  /** A fee beside the amount (already part of it): read as money so its figures are no text of the row. */
+  | 'fee'
   /** A column of none of ours after the money ('Init. Br', a branch code): its words are no text of the row. */
   | 'other';
 
@@ -26,7 +28,7 @@ export interface LayoutColumn {
 }
 
 const TEXT_ROLES: ColumnRole[] = ['date', 'otherDate', 'description', 'counterparty', 'other'];
-const MONEY_ROLES: ColumnRole[] = ['debit', 'credit', 'amount', 'balance'];
+const MONEY_ROLES: ColumnRole[] = ['debit', 'credit', 'amount', 'balance', 'fee'];
 
 const PHRASES = new Map<string, ColumnRole>(
   (Object.entries(HEADINGS) as [ColumnRole, string[]][]).flatMap(([role, phrases]) =>
@@ -184,6 +186,8 @@ function attachStrayWord(
 export interface AmountCell {
   role: ColumnRole;
   value: number;
+  /** Printed with a leading plus ("+ $400.00"). */
+  plus?: boolean;
 }
 
 export interface LaidOutRow {
@@ -276,5 +280,11 @@ function moneyCellAt(sorted: PdfTextItem[], start: number, columns: LayoutColumn
   if (!column) {
     return null;
   }
-  return { amount: value === null ? null : { role: column.role, value }, end };
+  return {
+    amount:
+      value === null
+        ? null
+        : { role: column.role, value, ...(run[0].text.startsWith('+') && { plus: true }) },
+    end,
+  };
 }
