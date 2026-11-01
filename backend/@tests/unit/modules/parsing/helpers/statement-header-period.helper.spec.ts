@@ -50,6 +50,10 @@ describe('findSharedYearPeriod', () => {
       to: new Date(Date.UTC(2023, 6, 31)),
     });
     expect(findSharedYearPeriod('Jul 1 - 31, 2023')?.to).toEqual(new Date(Date.UTC(2023, 6, 31)));
+    expect(findSharedYearPeriod('For Dec 1 to Dec 31, 2017')).toEqual({
+      from: new Date(Date.UTC(2017, 11, 1)),
+      to: new Date(Date.UTC(2017, 11, 31)),
+    });
   });
 
   it('starts a range across New Year in the year before', () => {

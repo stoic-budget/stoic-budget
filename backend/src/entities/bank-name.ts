@@ -26,5 +26,6 @@ export enum BankName {
   SCHWAB = 'schwab',
   CHASE = 'chase',
   CHIME = 'chime',
+  CIBC = 'cibc',
   OTHER = 'other',
 }

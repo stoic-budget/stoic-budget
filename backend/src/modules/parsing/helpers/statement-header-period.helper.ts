@@ -44,11 +44,11 @@ export function wholeMonth(name: string, year: number): { from: Date; to: Date }
 }
 
 const SHARED_YEAR_RANGE =
-  /\b([A-Za-z]{3,9})\.?\s+(\d{1,2})\s*[-–—]\s*(?:([A-Za-z]{3,9})\.?\s+)?(\d{1,2}),?\s+(\d{4})\b/;
+  /\b([A-Za-z]{3,9})\.?\s+(\d{1,2})\s*(?:[-–—]|to)\s*(?:([A-Za-z]{3,9})\.?\s+)?(\d{1,2}),?\s+(\d{4})\b/;
 
 /**
  * A period whose two ends share the year printed once at the end: "Jul 1 -
- * Jul 31, 2023", "Jul 1 - 31, 2023". A range that crosses New Year ("Dec 15 -
+ * Jul 31, 2023", "Jul 1 - 31, 2023", "Dec 1 to Dec 31, 2017". A range that crosses New Year ("Dec 15 -
  * Jan 14, 2024") starts the year before. Null when there is none, a month is
  * not an English one, or a day is not in its month.
  */

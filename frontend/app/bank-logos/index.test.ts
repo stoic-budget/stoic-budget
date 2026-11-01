@@ -28,6 +28,7 @@ describe('resolveBankLogo', () => {
     ['schwab', 'Charles Schwab'],
     ['chase', 'Chase'],
     ['chime', 'Chime'],
+    ['cibc', 'CIBC'],
   ])('names the bank stored as %s by its real name', (bankName, displayName) => {
     expect(resolveBankLogo(bankName).displayName).toBe(displayName);
   });

@@ -47,12 +47,17 @@ TOKEN_RE = re.compile(
 DIGIT_RUN_RE = re.compile(r"\d+")
 
 
+# qpdf exits 3 when it succeeded with warnings (a damaged image stream it kept as it was).
+QPDF_OK = (0, 3)
+
+
 def run_qpdf_json(pdf: Path) -> dict:
     out = subprocess.run(
         ["qpdf", "--json=2", "--json-stream-data=inline", "--decode-level=generalized", str(pdf), "-"],
-        check=True,
         capture_output=True,
     )
+    if out.returncode not in QPDF_OK:
+        raise subprocess.CalledProcessError(out.returncode, out.args, out.stdout, out.stderr)
     return json.loads(out.stdout)
 
 
@@ -313,7 +318,9 @@ def main() -> int:
 
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tmp:
         json.dump(doc, tmp)
-    subprocess.run(["qpdf", "--json-input", tmp.name, str(args.output)], check=True)
+    written = subprocess.run(["qpdf", "--json-input", tmp.name, str(args.output)])
+    if written.returncode not in QPDF_OK:
+        raise subprocess.CalledProcessError(written.returncode, written.args)
     Path(tmp.name).unlink()
     print(f"rewrote {changed} text runs → {args.output}")
     return 0
