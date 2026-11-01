@@ -268,6 +268,29 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('reads balances suffixed cr or dr in lower case, after a year printed on a line of its own', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Posting', 40], ['Transaction', 110], ['Details', 170], ['Debit', 300], ['Credit', 370], ['Balance', 450]]),
+      row(109, [['Date', 40]]),
+      row(130, [['2025', 40]]),
+      row(150, [['02-Mar', 40], ['Opening', 110], ['Balance', 150], ['1.95', 455], ['cr', 485]]),
+      row(170, [['05-Mar', 40], ['ACME', 110], ['Store', 135], ['12.50', 305], ['10.55', 455], ['dr', 485]]),
+      row(190, [['09-Mar', 40], ['ACME', 110], ['Payroll', 135], ['100.00', 375], ['89.45', 460], ['cr', 485]]),
+    ]);
+    expect(
+      transactions.map(({ dateText, debit, credit, balance, description }) => [
+        dateText,
+        debit,
+        credit,
+        balance,
+        description,
+      ]),
+    ).toEqual([
+      ['05-Mar', 12.5, undefined, -10.55, 'ACME Store'],
+      ['09-Mar', undefined, 100, 89.45, 'ACME Payroll'],
+    ]);
+  });
+
   describe('tables printed tight', () => {
     // Lines a line height apart sit within a wrapped cell's gap, header or not.
     const amountHeader = row(100, [['Date', 40], ['Amount', 175], ['Description', 215]]);

@@ -19,6 +19,7 @@ describe('statement-date.helper', () => {
     ['1 mei', 'dmy', { day: 1, month: 5, year: undefined }],
     ['02 janv. 25', 'dmy', { day: 2, month: 1, year: 2025 }],
     ['31 janvier 2025', 'dmy', { day: 31, month: 1, year: 2025 }],
+    ['02-Mar-2025', 'dmy', { day: 2, month: 3, year: 2025 }],
     ['1er février 2025', 'dmy', { day: 1, month: 2, year: 2025 }],
     ['3 März', 'dmy', { day: 3, month: 3, year: undefined }],
     ['Sep 3, 2025', 'dmy', { day: 3, month: 9, year: 2025 }],
@@ -60,5 +61,11 @@ describe('statement-date.helper', () => {
     expect(findFullDates('Statement Date 2020/10/31', 'mdy').map(found => iso(found.date))).toEqual([
       '2020-10-31',
     ]);
+  });
+
+  it('finds a day-month-year date joined by hyphens', () => {
+    expect(
+      findFullDates('From 02-Mar-2025 to 01-Apr-2025', 'dmy').map(found => iso(found.date)),
+    ).toEqual(['2025-03-02', '2025-04-01']);
   });
 });
