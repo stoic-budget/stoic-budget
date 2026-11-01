@@ -385,6 +385,35 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('reads a section heading that shares its line with a block on the right, and stops at a daily balance list', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Withdrawals', 40], ['&', 100], ['Debits', 110], ['**', 145], ['Total', 400], ['Withdrawals', 430], ['&', 490], ['Debits', 500]]),
+      row(112, [['Date', 40], ['Amount', 90], ['Description', 170]]),
+      row(130, [['11/01', 40], ['147.00', 95], ['EXAMPLE', 170], ['BAR', 215]]),
+      row(145, [['Other', 40], ['Withdrawals', 70], ['&', 130], ['Debits', 140]]),
+      row(160, [['11/02', 40], ['289.44', 95], ['EXAMPLE', 170], ['UTILITY', 215]]),
+      row(190, [['Deposits', 40], ['&', 90], ['Credits', 100]]),
+      row(205, [['11/03', 40], ['500.00', 95], ['EXAMPLE', 170], ['PAYER', 215]]),
+      row(235, [['Daily', 40], ['Balance', 75], ['Current', 400], ['Balance', 440]]),
+      row(250, [['Date', 40], ['Balance', 90], ['Date', 200], ['Balance', 250]]),
+      row(265, [['11/01', 40], ['14,349.13', 90], ['11/10', 200], ['17,251.95', 250]]),
+    ]);
+    expect(transactions.map(({ dateText, debit, credit }) => [dateText, debit, credit])).toEqual([
+      ['11/01', 147, undefined],
+      ['11/02', 289.44, undefined],
+      ['11/03', undefined, 500],
+    ]);
+  });
+
+  it('does not take a summary line "Deposits  $2,869.18" for a section heading', () => {
+    const transactions = readLayoutTransactions([
+      row(80, [['Deposits', 40], ['$2,869.18', 400]]),
+      row(100, [['Date', 40], ['Description', 90], ['Amount', 400]]),
+      row(120, [['12/31', 40], ['EXAMPLE', 90], ['SHOP', 140], ['-$49.00', 405]]),
+    ]);
+    expect(transactions.map(({ amount }) => amount)).toEqual([-49]);
+  });
+
   describe('tables printed tight', () => {
     // Lines a line height apart sit within a wrapped cell's gap, header or not.
     const amountHeader = row(100, [['Date', 40], ['Amount', 175], ['Description', 215]]);

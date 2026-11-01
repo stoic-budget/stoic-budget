@@ -12,6 +12,7 @@ import { readBareAmountsAsDebits } from './pdf-layout-plus-sign.helper';
 import { leadingDate, type RowDate, type RowRule, sameDayDate } from './pdf-layout-row-date.helper';
 import {
   alignsWithSectionText,
+  isDailyBalanceHeading,
   type LayoutSection,
   readSectionHeading,
   type SectionSign,
@@ -250,11 +251,15 @@ function readRow(state: ReadingState, lines: PdfTextRow[]) {
     state.sectionRead = state.section?.sign === section ? state.sectionRead : 0;
     state.section = { sign: section };
     state.layout.sections.push(section);
-    state.columns = state.fallback;
+    // A section under the transactions table's own header ("Other Withdrawals & Debits" after
+    // "Date Amount Description") reads against it; any other table's header is left behind.
+    state.columns = state.columns?.some(column => column.role === 'description')
+      ? state.columns
+      : state.fallback;
     state.current = null;
     return;
   }
-  if (isBalanceTableHeader(row)) {
+  if (isBalanceTableHeader(row) || isDailyBalanceHeading(row)) {
     // A daily balance summary: its lines are balances, and the table above is over.
     state.columns = state.fallback;
     state.section = undefined;
