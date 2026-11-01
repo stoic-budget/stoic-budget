@@ -39,10 +39,11 @@ const DOLLAR_COUNTRIES: [RegExp, string][] = [
   [/\bm[eé]xico\b/i, 'MXN'],
 ];
 
-/** Statements that print no currency at all, known by a code only one country uses. */
+/** Statements that print no currency at all, known by a code or a country name only one currency goes with. */
 const UNMARKED_COUNTRIES: [RegExp, string][] = [
   [/\bIFSC\b/, 'INR'],
   [/\b(?:PIX|CNPJ|CPF)\b/, 'BRL'],
+  [/\bPhilippines\b/i, 'PHP'],
 ];
 
 const SYMBOLS: [string, string][] = [

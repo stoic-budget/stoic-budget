@@ -17,6 +17,7 @@ export type BankLogoKey =
   | 'bmo'
   | 'bnp_paribas'
   | 'boq'
+  | 'bpi'
   | 'other';
 
 export type ResolvedBankLogo = {
@@ -45,6 +46,7 @@ const LOGO_SRC_BY_KEY: Record<BankLogoKey, string> = {
   bmo: '/images/bank-logo/bank.png',
   bnp_paribas: '/images/bank-logo/bank.png',
   boq: '/images/bank-logo/bank.png',
+  bpi: '/images/bank-logo/bank.png',
   other: '/images/bank-logo/bank.png',
 };
 
@@ -67,6 +69,7 @@ const DISPLAY_NAME_BY_KEY: Record<BankLogoKey, string> = {
   bmo: 'BMO',
   bnp_paribas: 'BNP Paribas',
   boq: 'BOQ',
+  bpi: 'BPI',
   other: 'Bank',
 };
 
@@ -137,6 +140,9 @@ const resolveKeyFromName = (bankName: string): BankLogoKey => {
   }
   if (n === 'boq' || n.startsWith('boq ') || n === 'bank of queensland') {
     return 'boq';
+  }
+  if (n === 'bpi' || n.startsWith('bpi ') || n === 'bank of the philippine islands') {
+    return 'bpi';
   }
   if (n === 'other') {
     return 'other';

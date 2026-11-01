@@ -21,5 +21,6 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.BMO]: 'BMO',
   [BankName.BNP_PARIBAS]: 'BNP Paribas',
   [BankName.BOQ]: 'BOQ',
+  [BankName.BPI]: 'BPI',
   [BankName.OTHER]: 'Bank',
 };

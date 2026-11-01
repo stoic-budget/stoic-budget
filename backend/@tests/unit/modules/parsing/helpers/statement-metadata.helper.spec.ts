@@ -67,6 +67,10 @@ describe('statement-metadata.helper', () => {
     expect(detectStatementCurrency('Saldo 10,00 €')).toBe('EUR');
   });
 
+  it('reads pesos from the country name when no currency is printed', () => {
+    expect(detectStatementCurrency('San Fernando\nSta. Ana Pampanga\nPhilippines\nBalance 10.00')).toBe('PHP');
+  });
+
   it('reads rupees from an Indian bank code when no currency is printed', () => {
     expect(detectStatementCurrency('IFSC Code :EXMP0000001\nBalance 1490.11')).toBe('INR');
     expect(detectStatementCurrency('Balance 1490.11')).toBeNull();

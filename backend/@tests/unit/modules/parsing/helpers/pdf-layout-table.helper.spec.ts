@@ -291,6 +291,18 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('reads "Deb Amt" and "Credit Amt" as the debit and credit columns', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 90], ['Ref', 230], ['Details', 270], ['Deb', 350], ['Amt', 375], ['Credit', 410], ['Amt', 445], ['Balance', 490]]),
+      row(120, [['DEC', 40], ['10', 62], ['PAY', 90], ['1011', 230], ['TRANSFER', 270], ['20,035.51', 420], ['170,524.14', 500]]),
+      row(140, [['DEC', 40], ['15', 62], ['CASH', 90], ['0000', 230], ['TERMINAL', 270], ['10,000.00', 350], ['160,524.14', 500]]),
+    ]);
+    expect(transactions.map(({ debit, credit, balance }) => [debit, credit, balance])).toEqual([
+      [undefined, 20035.51, 170524.14],
+      [10000, undefined, 160524.14],
+    ]);
+  });
+
   describe('tables printed tight', () => {
     // Lines a line height apart sit within a wrapped cell's gap, header or not.
     const amountHeader = row(100, [['Date', 40], ['Amount', 175], ['Description', 215]]);
