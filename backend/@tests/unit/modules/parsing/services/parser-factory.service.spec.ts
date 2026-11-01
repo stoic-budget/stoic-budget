@@ -206,6 +206,7 @@ describe('ParserFactoryService', () => {
       'CitiParser',
       'CitizensParser',
       'CoastCapitalParser',
+      'ComericaParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

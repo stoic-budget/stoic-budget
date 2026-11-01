@@ -103,6 +103,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('your citibank account statement as on aug 1, 2024 ... mobikwik axis bank')).toBe(BankName.CITI);
     expect(mentionedBank('access your account online: citizensbank.com')).toBe(BankName.CITIZENS);
     expect(mentionedBank('your agreement with coast capital savings federal credit union (ccs)')).toBe(BankName.COAST_CAPITAL);
+    expect(mentionedBank('visit our web site www.comerica.com')).toBe(BankName.COMERICA);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

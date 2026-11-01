@@ -1,0 +1,348 @@
+{
+  "metadata": {
+    "accountNumber": "0253877710",
+    "currency": "USD",
+    "dateFrom": "2024-08-23T00:00:00",
+    "dateTo": "2024-09-24T00:00:00",
+    "balanceStart": 51.99,
+    "balanceEnd": 122.45,
+    "rawHeader": "10001 MEMBER ONE 1200 SW 10TH CT",
+    "normalizedHeader": "10001 MEMBER ONE 1200 SW 10TH CT",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-08-30T00:00:00",
+      "counterpartyName": "Fedex Corporatio Pn Pmts/cp Aug 24",
+      "paymentPurpose": "Fedex Corporatio Pn Pmts/cp Aug 24",
+      "credit": 432.11,
+      "documentNumber": "6322346321",
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "SSA Treas 310 Xxsoc Sec 090324",
+      "paymentPurpose": "SSA Treas 310 Xxsoc Sec 090324",
+      "credit": 1586,
+      "documentNumber": "2888351671",
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-13T00:00:00",
+      "counterpartyName": "Amazon Prime Amzn.com/bill WA",
+      "paymentPurpose": "Amazon Prime Amzn.com/bill WA 4321",
+      "credit": 16.32,
+      "documentNumber": "MS0120 0",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-08-23T00:00:00",
+      "counterpartyName": "Xtra Foods - AR Aranguez Tto",
+      "paymentPurpose": "Xtra Foods - AR Aranguez Tto 4321",
+      "debit": 27.18,
+      "documentNumber": "MS10804907",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-08-23T00:00:00",
+      "counterpartyName": "Foreign Fee Aranguez Aranguez Tto",
+      "paymentPurpose": "Foreign Fee Aranguez Aranguez Tto 4321",
+      "debit": 0.75,
+      "documentNumber": "MS01204907",
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-08-26T00:00:00",
+      "counterpartyName": "Amazon Mktpl*r4 Amzn.com/bill WA",
+      "paymentPurpose": "Amazon Mktpl*r4 Amzn.com/bill WA 4321",
+      "debit": 19.99,
+      "documentNumber": "MS10800867",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "Dons Restaurant Morne Coco Ro Tto",
+      "paymentPurpose": "Dons Restaurant Morne Coco Ro Tto 4321",
+      "debit": 25.52,
+      "documentNumber": "MS10809704",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "W/D At Rbl Ind Square #1 -o-s T Tt",
+      "paymentPurpose": "W/D At Rbl Ind Square #1 -o-s T Tt 4321",
+      "debit": 148.38,
+      "documentNumber": "MA10804764",
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "Foreign Fee Rbl Ind Squar -o-s T Tt",
+      "paymentPurpose": "Foreign Fee Rbl Ind Squar -o-s T Tt 4321",
+      "debit": 3,
+      "documentNumber": "MA01204764",
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "Amazon.com*rk7g Amzn.com/bill WA",
+      "paymentPurpose": "Amazon.com*rk7g Amzn.com/bill WA 4321",
+      "debit": 26.27,
+      "documentNumber": "MS10807507",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "Foreign Fee Cor Crystal Morne Coco Ro Tto",
+      "paymentPurpose": "Foreign Fee Cor Crystal Morne Coco Ro Tto 4321",
+      "debit": 0.71,
+      "documentNumber": "MS01209704",
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-04T00:00:00",
+      "counterpartyName": "Amazon Mktpl*zt Amzn.com/bill WA",
+      "paymentPurpose": "Amazon Mktpl*zt Amzn.com/bill WA 4321",
+      "debit": 78.41,
+      "documentNumber": "MS10905932",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-06T00:00:00",
+      "counterpartyName": "Dsw. Columbus OH",
+      "paymentPurpose": "Dsw. Columbus OH 4321",
+      "debit": 21.98,
+      "documentNumber": "MS10909244",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-06T00:00:00",
+      "counterpartyName": "Google *google One Mountain View CA",
+      "paymentPurpose": "Google *google One Mountain View CA 4321",
+      "debit": 2.12,
+      "documentNumber": "MS10907949",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "Burger Boys Ltd Edward Street Tto",
+      "paymentPurpose": "Burger Boys Ltd Edward Street Tto 4321",
+      "debit": 7.43,
+      "documentNumber": "MS10906992",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "Foreign Fee Edward Stree Edward Street Tto",
+      "paymentPurpose": "Foreign Fee Edward Stree Edward Street Tto 4321",
+      "debit": 0.2,
+      "documentNumber": "MS01206992",
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "Actblue* Harris Boston MA",
+      "paymentPurpose": "Actblue* Harris Boston MA 4321",
+      "debit": 7,
+      "documentNumber": "MS10905462",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "Actblue* Democr Boston MA",
+      "paymentPurpose": "Actblue* Democr Boston MA 4321",
+      "debit": 3,
+      "documentNumber": "MS10909055",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "Amazon Prime*zt Amzn.com/bill WA",
+      "paymentPurpose": "Amazon Prime*zt Amzn.com/bill WA 4321",
+      "debit": 16.32,
+      "documentNumber": "MS10902763",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "Netflix.com Los Gatos CA",
+      "paymentPurpose": "Netflix.com Los Gatos CA 4321",
+      "debit": 15.99,
+      "documentNumber": "MS10908968",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-10T00:00:00",
+      "counterpartyName": "Flirt By Vs Ltd Port Of Spain Tto",
+      "paymentPurpose": "Flirt By Vs Ltd Port Of Spain Tto 4321",
+      "debit": 26.75,
+      "documentNumber": "MS10905181",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-10T00:00:00",
+      "counterpartyName": "Foreign Fee Shop #4 Abou Port Of Spain Tto",
+      "paymentPurpose": "Foreign Fee Shop #4 Abou Port Of Spain Tto 4321",
+      "debit": 0.74,
+      "documentNumber": "MS01205181",
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-11T00:00:00",
+      "counterpartyName": "Pricesmart-movi Movie Towne Tto",
+      "paymentPurpose": "Pricesmart-movi Movie Towne Tto 4321",
+      "debit": 86.46,
+      "documentNumber": "MS10905204",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-11T00:00:00",
+      "counterpartyName": "Foreign Fee Invaders Bay Movie Towne Tto",
+      "paymentPurpose": "Foreign Fee Invaders Bay Movie Towne Tto 4321",
+      "debit": 2.41,
+      "documentNumber": "MS01205204",
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-16T00:00:00",
+      "counterpartyName": "Google *amazon Mountain View CA",
+      "paymentPurpose": "Google *amazon Mountain View CA 4321",
+      "debit": 14.99,
+      "documentNumber": "MS10908820",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-16T00:00:00",
+      "counterpartyName": "Amazon Mktpl*vu Amzn.com/bill WA",
+      "paymentPurpose": "Amazon Mktpl*vu Amzn.com/bill WA 4321",
+      "debit": 59,
+      "documentNumber": "MS10900019",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-17T00:00:00",
+      "counterpartyName": "Amazon Mktpl*7k Amzn.com/bill WA",
+      "paymentPurpose": "Amazon Mktpl*7k Amzn.com/bill WA 4321",
+      "debit": 30.33,
+      "documentNumber": "MS10907893",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-17T00:00:00",
+      "counterpartyName": "Amazon Mktpl*lj Amzn.com/bill WA",
+      "paymentPurpose": "Amazon Mktpl*lj Amzn.com/bill WA 4321",
+      "debit": 50.56,
+      "documentNumber": "MS10901383",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-20T00:00:00",
+      "counterpartyName": "Royal Castle Li #1-5 Race Cou Tto",
+      "paymentPurpose": "Royal Castle Li #1-5 Race Cou Tto 4321",
+      "debit": 22.9,
+      "documentNumber": "MS10903464",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-20T00:00:00",
+      "counterpartyName": "Foreign Fee #2 Saddle Ro #1-5 Race Cou Tto",
+      "paymentPurpose": "Foreign Fee #2 Saddle Ro #1-5 Race Cou Tto 4321",
+      "debit": 0.63,
+      "documentNumber": "MS01203464",
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-23T00:00:00",
+      "counterpartyName": "Digicel(trinida Port Of Spain Tto",
+      "paymentPurpose": "Digicel(trinida Port Of Spain Tto 4321",
+      "debit": 73.98,
+      "documentNumber": "MS10905482",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-23T00:00:00",
+      "counterpartyName": "Foreign Fee Unknown Port Of Spain Tto",
+      "paymentPurpose": "Foreign Fee Unknown Port Of Spain Tto 4321",
+      "debit": 2.06,
+      "documentNumber": "MS01205482",
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-23T00:00:00",
+      "counterpartyName": "Great Foods Lim #95-96 Freder Tto",
+      "paymentPurpose": "Great Foods Lim #95-96 Freder Tto 4321",
+      "debit": 17.72,
+      "documentNumber": "MS10903472",
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-23T00:00:00",
+      "counterpartyName": "Foreign Fee 95-96 Freder #95-96 Freder Tto",
+      "paymentPurpose": "Foreign Fee 95-96 Freder #95-96 Freder Tto 4321",
+      "debit": 0.49,
+      "documentNumber": "MS01203472",
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "Payee One",
+      "paymentPurpose": "Zelle Payee One",
+      "debit": 1000,
+      "documentNumber": "ZPD000GIO9",
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-05T00:00:00",
+      "counterpartyName": "United Of Omaha Ins Prem 240905",
+      "paymentPurpose": "United Of Omaha Ins Prem 240905",
+      "debit": 99.77,
+      "documentNumber": "6428572502",
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-05T00:00:00",
+      "counterpartyName": "T-mobile Pcs Svc 240904",
+      "paymentPurpose": "T-mobile Pcs Svc 240904",
+      "debit": 70.93,
+      "documentNumber": "5628100369",
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    }
+  ]
+}

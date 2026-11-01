@@ -180,7 +180,9 @@ def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:
             # Bold drawn twice at the same spot reads "PPaaggee" otherwise.
             page = raw_page.dedupe_chars()
             page = page.filter(on_page(page))
-            page_text = page.extract_text() or ""
+            # The same gap splits words as in the rows below: at the default 3pt
+            # a statement that sets words 2pt apart reads "Beginningbalance".
+            page_text = page.extract_text(x_tolerance=1.5) or ""
             full_text.append(page_text)
 
             words = page.filter(is_horizontal).extract_words(

@@ -1,4 +1,5 @@
 import { findStatementAmounts } from './statement-amount.helper';
+import { balanceLineEnd } from './statement-balance-line.helper';
 import { findFullDates, foldText, type NumericDateOrder } from './statement-date.helper';
 
 /**
@@ -219,7 +220,8 @@ export function isBalanceLabel(description: string): boolean {
 const DATED_BALANCE = /\b(?:balance|solde|saldo)\s+(?:as\s+(?:of|at)|on|au|per|op|al)\b/g;
 
 /**
- * The last amount after a label, up to the end of its line: "Balance Carried
+ * The last amount after a label, up to the end of its line (or of the dated
+ * line under a label that stands alone, see `balanceLineEnd`): "Balance Carried
  * Forward: 2,181.67 2,002.15 15,271.23" ends with the balance. Dates on the
  * line are skipped. A dated balance takes the first: the figure right after
  * its date, whatever a box beside it prints on the same line ("Balance on 20
@@ -232,8 +234,7 @@ function amountAfter(
   order: NumericDateOrder,
   pick: 'first' | 'last' = 'last',
 ) {
-  const lineEnd = folded.indexOf('\n', index);
-  const line = text.slice(index, lineEnd === -1 ? undefined : lineEnd);
+  const line = text.slice(index, balanceLineEnd(folded, index));
   let withoutDates = line;
   for (const found of findFullDates(line, order).reverse()) {
     withoutDates = `${withoutDates.slice(0, found.index)} ${withoutDates.slice(found.index + found.length)}`;

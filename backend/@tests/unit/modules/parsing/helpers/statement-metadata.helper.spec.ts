@@ -169,6 +169,16 @@ describe('statement-metadata.helper', () => {
     expect(findStatementBalances(text, 'mdy')).toEqual({ start: 1000, end: 1250.5 });
   });
 
+  it('reads the amount under a label that stands alone, on its dated line', () => {
+    const text = [
+      'Beginning balance $1,000.00',
+      'on August 1, 2024 Visit our web site',
+      'Ending balance',
+      'on August 31, 2024 $1,250.50 Please refer to the notice.',
+    ].join('\n');
+    expect(findStatementBalances(text, 'mdy')).toEqual({ start: 1000, end: 1250.5 });
+  });
+
   it('reads two dated balances, the earlier one opening', () => {
     const text = 'Balance as of 31.05.2025: 900,00 €\nBalance as of 01.05.2025: 1.000,00 €';
     expect(findStatementBalances(text, 'dmy')).toEqual({ start: 1000, end: 900 });

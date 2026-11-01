@@ -45,6 +45,8 @@ TOKEN_RE = re.compile(
     re.S,
 )
 DIGIT_RUN_RE = re.compile(r"\d+")
+# An image drawn inside the content stream itself: "BI <dict> ID <data> EI".
+INLINE_IMAGE_RE = re.compile(rb"(?<!\S)BI\s.*?\sID\s.*?EI(?!\S)", re.S)
 
 
 # qpdf exits 3 when it succeeded with warnings (a damaged image stream it kept as it was).
@@ -141,7 +143,7 @@ def main() -> int:
     parser.add_argument(
         "--drop-images",
         action="store_true",
-        help="replace every image with a blank pixel: a scan shows what the text layer was anonymized from",
+        help="replace every image with a blank pixel and drop inline ones: a scan shows what the text layer was anonymized from, a postal barcode the address",
     )
     args = parser.parse_args()
 
@@ -310,6 +312,10 @@ def main() -> int:
                     "/BitsPerComponent": 8,
                 }
                 obj["stream"]["data"] = base64.b64encode(b"\xff").decode("ascii")
+        # Inline images sit in the page's own content stream: a postal barcode
+        # printed beside the address is one, and it encodes the address.
+        for stream_obj, _ in jobs:
+            set_stream_bytes(stream_obj, INLINE_IMAGE_RE.sub(b"", stream_bytes(stream_obj)))
 
     info = resolve(doc["qpdf"][1].get("trailer", {}).get("value", {}).get("/Info"))
     if info:

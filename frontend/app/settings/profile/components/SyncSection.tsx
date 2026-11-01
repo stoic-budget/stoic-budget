@@ -48,6 +48,7 @@ const BANK_LABELS: Record<string, string> = {
   citi: 'Citi',
   citizens: 'Citizens',
   coast_capital: 'Coast Capital',
+  comerica: 'Comerica',
   other: 'Other',
 };
 

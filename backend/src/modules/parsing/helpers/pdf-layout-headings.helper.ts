@@ -32,6 +32,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
   description: [
     'description',
     'details',
+    'activity',
     'transaction',
     'transaction details',
     'transaction description',

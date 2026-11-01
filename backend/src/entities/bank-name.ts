@@ -30,5 +30,6 @@ export enum BankName {
   CITI = 'citi',
   CITIZENS = 'citizens',
   COAST_CAPITAL = 'coast_capital',
+  COMERICA = 'comerica',
   OTHER = 'other',
 }

@@ -71,6 +71,27 @@ describe('pdf-layout-table.helper', () => {
     expect(readHeaderRow(row(50, [['Previous', 40], ['Balance', 90], ['1,000.00', 300]]))).toBeNull();
   });
 
+  it('reads "Activity" as the description, right of the amount', () => {
+    const rows = [
+      row(100, [
+        ['Date', 40],
+        ['Amount', 100],
+        ['Activity', 160],
+      ]),
+      row(120, [
+        ['Aug', 40],
+        ['30', 60],
+        ['-12.50', 110],
+        ['ACME', 160],
+        ['Store', 190],
+      ]),
+    ];
+    const transactions = readLayoutTransactions(rows);
+    expect(transactions.map(t => [t.dateText, t.description, t.amount])).toEqual([
+      ['Aug 30', 'ACME Store', -12.5],
+    ]);
+  });
+
   it('reads multi-line descriptions and the side of each amount', () => {
     const transactions = readLayoutTransactions([
       header,
