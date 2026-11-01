@@ -10,6 +10,8 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'date',
     'post date',
     'posting date',
+    'posted',
+    'date posted',
     'booking date',
     'transaction date',
     'datum',

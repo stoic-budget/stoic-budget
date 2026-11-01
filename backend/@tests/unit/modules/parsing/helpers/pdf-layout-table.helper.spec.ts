@@ -341,6 +341,13 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('reads "Posted" as the date heading, with "Date" printed over it', () => {
+    const columns = readHeaderRow(
+      row(100, [['Posted', 40], ['Description', 110], ['Debits', 300], ['Credits', 380], ['Balance', 470]]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
+  });
+
   describe('tables printed tight', () => {
     // Lines a line height apart sit within a wrapped cell's gap, header or not.
     const amountHeader = row(100, [['Date', 40], ['Amount', 175], ['Description', 215]]);

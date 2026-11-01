@@ -1,0 +1,1055 @@
+{
+  "metadata": {
+    "accountNumber": "051734338215",
+    "currency": "USD",
+    "dateFrom": "2023-07-01T00:00:00",
+    "dateTo": "2023-07-31T00:00:00",
+    "balanceStart": 28.15,
+    "balanceEnd": 99.65,
+    "rawHeader": "Account Number Statement Period EDGARDO ALEJANDRA BARRERA ALMEIDA 051734338215 July 1-31, 2023 Customer Service Information",
+    "normalizedHeader": "Account Number Statement Period EDGARDO ALEJANDRA BARRERA ALMEIDA 051734338215 July 1-31, 2023 Customer Service Information",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-07-01T00:00:00",
+      "counterpartyName": "Wells Fargo Ban 3150 Ce Santa Fe",
+      "paymentPurpose": "ATM Withdrawal Wells Fargo Ban 3150 Ce Santa Fe, NM, US",
+      "debit": 23,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-02T00:00:00",
+      "counterpartyName": "McDonalds 2279 150-5471041",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase McDonalds 2279 150-5471041, NM, US",
+      "debit": 3.24,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-04T00:00:00",
+      "counterpartyName": "PAYPAL*Barrera Edgardo San Jose",
+      "paymentPurpose": "Money Transfer Visa Direct PAYPAL*Barrera Edgardo San Jose, CA, US",
+      "credit": 12.29,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-04T00:00:00",
+      "counterpartyName": "EFT 1624 St Michaels Dr Sant fe",
+      "paymentPurpose": "ATM Withdrawal EFT 1624 St Michaels Dr Sant fe, NM, US",
+      "debit": 12,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-05T00:00:00",
+      "counterpartyName": "AVIAGAMES INC 8066296568",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase AVIAGAMES INC 8066296568, CA, US",
+      "debit": 1,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-05T00:00:00",
+      "counterpartyName": "SXM*SIRIUSXM.COM/ACCT 888-635-5144",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SXM*SIRIUSXM.COM/ACCT 888-635-5144, NY, US",
+      "debit": 1.18,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-05T00:00:00",
+      "counterpartyName": "KLOVER PLUS Chicago",
+      "paymentPurpose": "Money Transfer Visa Direct KLOVER PLUS Chicago, IL, US",
+      "credit": 0.03,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-05T00:00:00",
+      "counterpartyName": "KLOVER PLUS 57 W. Grand Chicago",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase KLOVER PLUS 57 W. Grand Chicago, IL, US",
+      "debit": 0.03,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-05T00:00:00",
+      "counterpartyName": "KLOVER APP BOOST Chicago",
+      "paymentPurpose": "Money Transfer Visa Direct KLOVER APP BOOST Chicago, IL, US",
+      "credit": 10,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-06T00:00:00",
+      "counterpartyName": "McDonalds 2279 150-5471041",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase McDonalds 2279 150-5471041, NM, US",
+      "debit": 7.18,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "PANDA RESTAURANT DIRECT DEP 230707",
+      "paymentPurpose": "Electronic Deposit PANDA RESTAURANT DIRECT DEP 230707~ Tran: ACHDD",
+      "credit": 963.13,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "EARNIN PAYMENTRET",
+      "paymentPurpose": "Electronic Withdrawal EARNIN PAYMENTRET ~ Tran: ACHDW",
+      "debit": 78.99,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "EFT 1624 St Michaels Dr Sant fe",
+      "paymentPurpose": "ATM Withdrawal EFT 1624 St Michaels Dr Sant fe, NM, US",
+      "debit": 112,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "KLOVER APP BOOST 57 W. Chicago",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase KLOVER APP BOOST 57 W. Chicago, IL, US",
+      "debit": 12.54,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 8.08,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "AMERICAN CONSUME ACCCPMNT 230706",
+      "paymentPurpose": "Electronic Withdrawal AMERICAN CONSUME ACCCPMNT 230706",
+      "debit": 97,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "Albert Instant 440 N Ba Covina",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Albert Instant 440 N Ba Covina, CA, US",
+      "debit": 41.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "CLEO AI CASH ADVANCE EX Wilmington",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase CLEO AI CASH ADVANCE EX Wilmington, DE, US",
+      "debit": 3.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "Cleo Salary Advance Wilmington",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Cleo Salary Advance Wilmington, DE, US",
+      "debit": 30,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "Dave Inc Los Angeles",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Dave Inc Los Angeles, CA, US",
+      "debit": 30,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "CLEO AI HTTPSWWW.MEET",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase CLEO AI HTTPSWWW.MEET, DE, US",
+      "debit": 5.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "Albert Instant Covina",
+      "paymentPurpose": "Money Transfer Visa Direct Albert Instant Covina, CA, US",
+      "credit": 75,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "Wells Fargo Ban 3150 Ce Santa Fe",
+      "paymentPurpose": "ATM Withdrawal Wells Fargo Ban 3150 Ce Santa Fe, NM, US",
+      "debit": 23,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "DAVE.COM P2P SD1300",
+      "paymentPurpose": "Electronic Withdrawal DAVE.COM P2P SD1300",
+      "debit": 30,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "Earnin Transfer Palo Alto",
+      "paymentPurpose": "Money Transfer Visa Direct Earnin Transfer Palo Alto, CA, US",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 10.81,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 23.85,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "Dave Inc 1265 South Coc Los Angeles",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Dave Inc 1265 South Coc Los Angeles, CA, US",
+      "debit": 1,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "USCIS ELIS I-90 800-375-5283",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase USCIS ELIS I-90 800-375-5283, DC, US",
+      "debit": 540,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "DOORDASH DASHPASS WWW.DOORDASH.",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase DOORDASH DASHPASS WWW.DOORDASH., CA, US",
+      "debit": 9.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "Cleo Salary Advance Wilmington",
+      "paymentPurpose": "Money Transfer Visa Direct Cleo Salary Advance Wilmington, DE, US",
+      "credit": 35,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "Dave Inc Los Angeles",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Dave Inc Los Angeles, CA, US",
+      "debit": 44.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "McDonalds 2279 150-5471041",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase McDonalds 2279 150-5471041, NM, US",
+      "debit": 9.74,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-09T00:00:00",
+      "counterpartyName": "SPEEDWAY 08698 3730 CER SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SPEEDWAY 08698 3730 CER SANTA FE, NM, US",
+      "debit": 6.78,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-09T00:00:00",
+      "counterpartyName": "SQ *EL MARIA BONITA Santa Fe",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SQ *EL MARIA BONITA Santa Fe, NM, US",
+      "debit": 5.42,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-09T00:00:00",
+      "counterpartyName": "SQ *EL MARIA BONITA Santa Fe",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SQ *EL MARIA BONITA Santa Fe, NM, US",
+      "debit": 5.43,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-09T00:00:00",
+      "counterpartyName": "SQ *EL MARIA BONITA Santa Fe",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SQ *EL MARIA BONITA Santa Fe, NM, US",
+      "debit": 5.42,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-09T00:00:00",
+      "counterpartyName": "SQ *EL MARIA BONITA Santa Fe",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SQ *EL MARIA BONITA Santa Fe, NM, US",
+      "debit": 5.42,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-09T00:00:00",
+      "counterpartyName": "KLOVER APP BOOST Chicago",
+      "paymentPurpose": "Money Transfer Visa Direct KLOVER APP BOOST Chicago, IL, US",
+      "credit": 10,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-10T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 22.25,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-10T00:00:00",
+      "counterpartyName": "LULU CHINESE CUISINE LL SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase LULU CHINESE CUISINE LL SANTA FE, NM, US",
+      "debit": 13.85,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-11T00:00:00",
+      "counterpartyName": "McDonalds 2279 150-5471041",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase McDonalds 2279 150-5471041, NM, US",
+      "debit": 6.05,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-15T00:00:00",
+      "counterpartyName": "PAYPAL*Barrera Edgardo San Jose",
+      "paymentPurpose": "Money Transfer Visa Direct PAYPAL*Barrera Edgardo San Jose, CA, US",
+      "credit": 88.69,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-15T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 19.55,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-15T00:00:00",
+      "counterpartyName": "EFT 1624 St Michaels Dr Sant fe",
+      "paymentPurpose": "ATM Withdrawal EFT 1624 St Michaels Dr Sant fe, NM, US",
+      "debit": 32,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-15T00:00:00",
+      "counterpartyName": "Albert* Covina",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Albert* Covina, CA, US",
+      "debit": 6,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-16T00:00:00",
+      "counterpartyName": "Transfer from Schwab Bank Investor Checking -2848",
+      "paymentPurpose": "Money Transfer Transfer from Schwab Bank Investor Checking -2848",
+      "credit": 25,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-16T00:00:00",
+      "counterpartyName": "Solo Funds Inc West Memphis",
+      "paymentPurpose": "Money Transfer Visa Direct Solo Funds Inc West Memphis, TN, US",
+      "credit": 0.03,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "PAI ISO 3000 CERRILLOS SANTA FE",
+      "paymentPurpose": "ATM Withdrawal PAI ISO 3000 CERRILLOS SANTA FE, NM, US",
+      "debit": 22.99,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "PAYPAL*Barrera Edgardo San Jose",
+      "paymentPurpose": "Money Transfer Visa Direct PAYPAL*Barrera Edgardo San Jose, CA, US",
+      "credit": 5.68,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "FloatMe Fund I DB San Antonio",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase FloatMe Fund I DB San Antonio, TX, US",
+      "debit": 24,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "FloatMe Fund I CR San Antonio",
+      "paymentPurpose": "Money Transfer Visa Direct FloatMe Fund I CR San Antonio, TX, US",
+      "credit": 20,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "EFT 1624 St Michaels Dr Sant fe",
+      "paymentPurpose": "ATM Withdrawal EFT 1624 St Michaels Dr Sant fe, NM, US",
+      "debit": 27,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "LITTLE CAESARS 514 3261 SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase LITTLE CAESARS 514 3261 SANTA FE, NM, US",
+      "debit": 8.64,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "EDGARDO BARRERA P2P",
+      "paymentPurpose": "Electronic Deposit EDGARDO BARRERA P2P",
+      "credit": 5.84,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-18T00:00:00",
+      "counterpartyName": "SOLO FUNDS INC. CREDIT NODE_64B44EEFE9A38F6F244FE272/NONE",
+      "paymentPurpose": "Electronic Deposit SOLO FUNDS INC. CREDIT NODE_64B44EEFE9A38F6F244FE272/NONE",
+      "credit": 0.03,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-18T00:00:00",
+      "counterpartyName": "SOLO FUNDS INC. CREDIT NODE_64B44EEFE9A38F6F244FE272/NONE",
+      "paymentPurpose": "Electronic Deposit SOLO FUNDS INC. CREDIT NODE_64B44EEFE9A38F6F244FE272/NONE",
+      "credit": 0.03,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-19T00:00:00",
+      "counterpartyName": "210091795600608 CASH",
+      "paymentPurpose": "Electronic Deposit 210091795600608 CASH",
+      "credit": 6,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-19T00:00:00",
+      "counterpartyName": "PAYPAL*Barrera Edgardo San Jose",
+      "paymentPurpose": "Money Transfer Visa Direct PAYPAL*Barrera Edgardo San Jose, CA, US",
+      "credit": 4.85,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-19T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 4.48,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-19T00:00:00",
+      "counterpartyName": "SoLo Funds 888-295-1622 West Memphis",
+      "paymentPurpose": "Money Transfer Visa Direct SoLo Funds 888-295-1622 West Memphis, CA, US",
+      "credit": 98.25,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-19T00:00:00",
+      "counterpartyName": "EFT 1624 St Michaels Dr Sant fe",
+      "paymentPurpose": "ATM Withdrawal EFT 1624 St Michaels Dr Sant fe, NM, US",
+      "debit": 27,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-19T00:00:00",
+      "counterpartyName": "WALGREENS 3298 CERRILLO SANTA FE",
+      "paymentPurpose": "ATM Withdrawal WALGREENS 3298 CERRILLO SANTA FE, NM, US",
+      "debit": 23.5,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-20T00:00:00",
+      "counterpartyName": "McDonalds 2279 SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase McDonalds 2279 SANTA FE, NM, US",
+      "debit": 5.7,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-20T00:00:00",
+      "counterpartyName": "SCHLOTZSKYS #1255 SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SCHLOTZSKYS #1255 SANTA FE, NM, US",
+      "debit": 9.93,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "PAYPAL *PAPAYAGAMIN 402-935-7733",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase PAYPAL *PAPAYAGAMIN 402-935-7733, MO, US",
+      "debit": 5,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 3.27,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "PANDA RESTAURANT DIRECT DEP 230721",
+      "paymentPurpose": "Electronic Deposit PANDA RESTAURANT DIRECT DEP 230721~ Tran: ACHDD",
+      "credit": 953.28,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "EARNIN PAYMENTRET",
+      "paymentPurpose": "Electronic Withdrawal EARNIN PAYMENTRET ~ Tran: ACHDW",
+      "debit": 103.99,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "SoLo Funds 888-295-1622 San Francisco",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SoLo Funds 888-295-1622 San Francisco, CA, US",
+      "debit": 122,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "KLOVER APP BOOST 57 W. Chicago",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase KLOVER APP BOOST 57 W. Chicago, IL, US",
+      "debit": 12.9,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "Dave Inc Los Angeles",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Dave Inc Los Angeles, CA, US",
+      "debit": 79.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "Albert Instant 440 N Ba Covina",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Albert Instant 440 N Ba Covina, CA, US",
+      "debit": 81.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "Rocket Self Storage 619-3355135",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Rocket Self Storage 619-3355135, CA, US",
+      "debit": 329.7,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "CLEO AI CASH ADVANCE AN Wilmington",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase CLEO AI CASH ADVANCE AN Wilmington, DE, US",
+      "debit": 38.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "FloatMe San Antonio",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase FloatMe San Antonio, TX, US",
+      "debit": 1.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "Transfer to Schwab Bank Investor Checking -2848",
+      "paymentPurpose": "Money Transfer Transfer to Schwab Bank Investor Checking -2848",
+      "debit": 27,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "EFT 1624 St Michaels Dr Sant fe",
+      "paymentPurpose": "ATM Withdrawal EFT 1624 St Michaels Dr Sant fe, NM, US",
+      "debit": 32,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-22T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 12.56,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-22T00:00:00",
+      "counterpartyName": "LULU CHINESE CUISINE LL SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase LULU CHINESE CUISINE LL SANTA FE, NM, US",
+      "debit": 22.35,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-22T00:00:00",
+      "counterpartyName": "FEDEX395357450621 MEMPHIS",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase FEDEX395357450621 MEMPHIS, TN, US",
+      "debit": 13.95,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-22T00:00:00",
+      "counterpartyName": "AVIAGAMES INC 8066296568",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase AVIAGAMES INC 8066296568, CA, US",
+      "debit": 2,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-22T00:00:00",
+      "counterpartyName": "McDonalds 2279 SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase McDonalds 2279 SANTA FE, NM, US",
+      "debit": 7.57,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-22T00:00:00",
+      "counterpartyName": "EFT 1624 St Michaels Dr Sant fe",
+      "paymentPurpose": "ATM Withdrawal EFT 1624 St Michaels Dr Sant fe, NM, US",
+      "debit": 22,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-22T00:00:00",
+      "counterpartyName": "SAVERS - 1229 SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SAVERS - 1229 SANTA FE, NM, US",
+      "debit": 32.19,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-23T00:00:00",
+      "counterpartyName": "Earnin Transfer Palo Alto",
+      "paymentPurpose": "Money Transfer Visa Direct Earnin Transfer Palo Alto, CA, US",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-23T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 23.33,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-23T00:00:00",
+      "counterpartyName": "SQ *EL MARIA BONITA Santa Fe",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SQ *EL MARIA BONITA Santa Fe, NM, US",
+      "debit": 5.43,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-23T00:00:00",
+      "counterpartyName": "OLIVE GARDEN 00016097 SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase OLIVE GARDEN 00016097 SANTA FE, NM, US",
+      "debit": 31.68,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-23T00:00:00",
+      "counterpartyName": "Albert Instant Covina",
+      "paymentPurpose": "Money Transfer Visa Direct Albert Instant Covina, CA, US",
+      "credit": 75,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-23T00:00:00",
+      "counterpartyName": "EFT 1624 St Michaels Dr Sant fe",
+      "paymentPurpose": "ATM Withdrawal EFT 1624 St Michaels Dr Sant fe, NM, US",
+      "debit": 42,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-23T00:00:00",
+      "counterpartyName": "Subway 35291 Santa Fe",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Subway 35291 Santa Fe, NM, US",
+      "debit": 9.62,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-24T00:00:00",
+      "counterpartyName": "KLOVER APP BOOST Chicago",
+      "paymentPurpose": "Money Transfer Visa Direct KLOVER APP BOOST Chicago, IL, US",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-24T00:00:00",
+      "counterpartyName": "Cleo Salary Advance Wilmington",
+      "paymentPurpose": "Money Transfer Visa Direct Cleo Salary Advance Wilmington, DE, US",
+      "credit": 80,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "DREAMZ DISPENSARY - SAN SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase DREAMZ DISPENSARY - SAN SANTA FE, NM, US",
+      "debit": 46.62,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 11.48,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "Uber Technologies, Inc San Francisco",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Uber Technologies, Inc San Francisco, CA, US",
+      "debit": 12.85,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "RIO METRO REGIONAL TRAN ALBUQUERQUE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase RIO METRO REGIONAL TRAN ALBUQUERQUE, NM, US",
+      "debit": 9,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "Uber Technologies, Inc San Francisco",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Uber Technologies, Inc San Francisco, CA, US",
+      "debit": 7.97,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "Uber Technologies, Inc San Francisco",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Uber Technologies, Inc San Francisco, CA, US",
+      "debit": 5.21,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "Uber Technologies, Inc San Francisco",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase Uber Technologies, Inc San Francisco, CA, US",
+      "debit": 8.92,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "WALGREENS 3298 CERRILLO SANTA FE",
+      "paymentPurpose": "ATM Withdrawal WALGREENS 3298 CERRILLO SANTA FE, NM, US",
+      "debit": 23.5,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 0.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "TST* TUCANOS BRAZILIAN ALBUQUERQUE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase TST* TUCANOS BRAZILIAN ALBUQUERQUE, NM, US",
+      "debit": 8,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "TST* TUCANOS BRAZILIAN ALBUQUERQUE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase TST* TUCANOS BRAZILIAN ALBUQUERQUE, NM, US",
+      "debit": 8,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "CARLS JR 1101594 ALBUQUERQUE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase CARLS JR 1101594 ALBUQUERQUE, NM, US",
+      "debit": 13.33,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "SQ *EL MARIA BONITA Santa Fe",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SQ *EL MARIA BONITA Santa Fe, NM, US",
+      "debit": 5.42,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "SoLo Funds 888-295-1622 West Memphis",
+      "paymentPurpose": "Money Transfer Visa Direct SoLo Funds 888-295-1622 West Memphis, CA, US",
+      "credit": 147.38,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "FEDEX OFFIC13417281608 SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase FEDEX OFFIC13417281608 SANTA FE, NM, US",
+      "debit": 6.75,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "SOUP STAR LLC SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase SOUP STAR LLC SANTA FE, NM, US",
+      "debit": 16.23,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "DOORDASH*WILD BURGER WWW.DOORDASH.",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase DOORDASH*WILD BURGER WWW.DOORDASH., CA, US",
+      "debit": 19.2,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "VZWRLSS*BILL PAY VW 800-9220204",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase VZWRLSS*BILL PAY VW 800-9220204, CA, US",
+      "debit": 107.72,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "Transfer from Schwab Bank Investor Checking -2848",
+      "paymentPurpose": "Money Transfer Transfer from Schwab Bank Investor Checking -2848",
+      "credit": 19.01,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-27T00:00:00",
+      "counterpartyName": "CASH APP*MARCO MEDE 5999091541",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase CASH APP*MARCO MEDE 5999091541, CA, US",
+      "debit": 35,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-27T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 12.96,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-27T00:00:00",
+      "counterpartyName": "LYFT *RIDE TUE 11AM lyft.com",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase LYFT *RIDE TUE 11AM lyft.com, CA, US",
+      "debit": 8.95,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-27T00:00:00",
+      "counterpartyName": "FEDEX505288975061 MEMPHIS",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase FEDEX505288975061 MEMPHIS, TN, US",
+      "debit": 13.95,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-27T00:00:00",
+      "counterpartyName": "5GUYS 0677 QSR SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase 5GUYS 0677 QSR SANTA FE, NM, US",
+      "debit": 15.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-27T00:00:00",
+      "counterpartyName": "PAYPAL*Barrera Edgardo San Jose",
+      "paymentPurpose": "Money Transfer Visa Direct PAYPAL*Barrera Edgardo San Jose, CA, US",
+      "credit": 78.6,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-29T00:00:00",
+      "counterpartyName": "WALGREENS STORE 3298 CE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase WALGREENS STORE 3298 CE SANTA FE, NM, US",
+      "debit": 6.07,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-29T00:00:00",
+      "counterpartyName": "MVD EXPRESS SANTA FE SV FORT WORTH",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase MVD EXPRESS SANTA FE SV FORT WORTH, TX, US",
+      "debit": 2.35,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-29T00:00:00",
+      "counterpartyName": "MVD EXPRESS SANTA FE SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase MVD EXPRESS SANTA FE SANTA FE, NM, US",
+      "debit": 77.35,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "PAYPAL*Barrera Edgardo San Jose",
+      "paymentPurpose": "Money Transfer Visa Direct PAYPAL*Barrera Edgardo San Jose, CA, US",
+      "credit": 54.04,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "ZSK*IT ELPAISANOMKT ST SANTA FE",
+      "paymentPurpose": "Visa Debit Card Point of Sale Purchase ZSK*IT ELPAISANOMKT ST SANTA FE, NM, US",
+      "debit": 11.92,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "PAYPAL*Barrera Edgardo San Jose",
+      "paymentPurpose": "Money Transfer Visa Direct PAYPAL*Barrera Edgardo San Jose, CA, US",
+      "credit": 24.56,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "ATM Fee Rebate",
+      "paymentPurpose": "ATM Fee Rebate",
+      "credit": 31.99,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "Interest Paid",
+      "paymentPurpose": "Interest Paid",
+      "credit": 0.02,
+      "currency": "USD",
+      "paymentType": "interest"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "db8993126a4d",
+    "headings": [
+      "description:description posted | debit:debits | credit:credits | balance:balance"
+    ],
+    "unknownWords": [
+      "posted"
+    ],
+    "mentionedBank": "schwab"
+  }
+}
