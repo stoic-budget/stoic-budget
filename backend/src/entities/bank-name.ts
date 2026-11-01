@@ -28,5 +28,6 @@ export enum BankName {
   CHIME = 'chime',
   CIBC = 'cibc',
   CITI = 'citi',
+  CITIZENS = 'citizens',
   OTHER = 'other',
 }

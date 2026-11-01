@@ -26,6 +26,7 @@ import { ChaseParser } from '../parsers/chase.parser';
 import { ChimeParser } from '../parsers/chime.parser';
 import { CibcParser } from '../parsers/cibc.parser';
 import { CitiParser } from '../parsers/citi.parser';
+import { CitizensParser } from '../parsers/citizens.parser';
 import { CsvParser } from '../parsers/csv.parser';
 import { DocxParser } from '../parsers/docx.parser';
 import { ExcelParser } from '../parsers/excel.parser';
@@ -71,6 +72,7 @@ export const FALLBACK_CLAIMS: [
   [ChimeParser, { bankName: BankName.CHIME }],
   [CibcParser, { bankName: BankName.CIBC }],
   [CitiParser, { bankName: BankName.CITI }],
+  [CitizensParser, { bankName: BankName.CITIZENS }],
   [BerekeNewParser, { bankName: BankName.BEREKE_NEW, formatVersion: 'new' }],
   [BerekeOldParser, { bankName: BankName.BEREKE_OLD, formatVersion: 'old' }],
 ];
@@ -109,6 +111,7 @@ export function createParsers(): IParser[] {
     new ChimeParser(),
     new CibcParser(),
     new CitiParser(),
+    new CitizensParser(),
     new GenericPdfParser(),
     new ExcelParser(),
     new CsvParser(),
