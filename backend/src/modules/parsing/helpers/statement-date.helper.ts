@@ -140,6 +140,8 @@ const FULL_DATE_PATTERNS = [
   /\b\d{1,2}[./-]\d{1,2}[./-](?:\d{4}|\d{2})\b/g,
   /\b\d{1,2}(?:er)?[\s-]+[a-z]+\.?[\s-]+\d{4}\b/g,
   /\b[a-z]+\.?\s+\d{1,2}(?:,?\s+|,)\d{4}\b/g,
+  // Glued, as some banks print them: "31AUG23", "02Jul2024".
+  /\b\d{1,2}[a-z]{3}(?:\d{4}|\d{2})\b/g,
 ];
 
 export interface FoundDate {

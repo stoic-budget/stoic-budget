@@ -56,6 +56,7 @@ describe('statement-metadata.helper', () => {
   it('takes the ISO code printed most often, upper case only', () => {
     expect(detectStatementCurrency('Try our app. EUR 1.00 and EUR 2.00, once USD')).toBe('EUR');
     expect(detectStatementCurrency('Try our new app today')).toBeNull();
+    expect(detectStatementCurrency('ACCOUNT NO 100000001 CURRENCY LKR')).toBe('LKR');
   });
 
   it('reads which dollar from the prefix or the country', () => {

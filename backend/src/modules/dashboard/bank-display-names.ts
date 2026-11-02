@@ -35,5 +35,6 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.COMERICA]: 'Comerica',
   [BankName.COMMBANK]: 'CommBank',
   [BankName.COMMERCE_BANK]: 'Commerce Bank',
+  [BankName.COMMERCIAL_BANK]: 'Commercial Bank',
   [BankName.OTHER]: 'Bank',
 };

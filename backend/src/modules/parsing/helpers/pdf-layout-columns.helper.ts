@@ -210,13 +210,19 @@ const MONEY_EDGE_TOLERANCE = 30;
 /** Words of one printed amount ("1", "200,45", "$") sit closer than this. */
 const AMOUNT_WORD_GAP = 7;
 
-function moneyColumnFor(x1: number, columns: LayoutColumn[]): LayoutColumn | null {
-  const candidates = columns
-    .filter(column => MONEY_ROLES.includes(column.role))
+function moneyColumnFor(x0: number, x1: number, columns: LayoutColumn[]): LayoutColumn | null {
+  const money = columns.filter(column => MONEY_ROLES.includes(column.role));
+  const candidates = money
     .map(column => ({ column, distance: Math.abs(column.x1 - x1) }))
     .sort((a, b) => a.distance - b.distance);
   const best = candidates[0];
-  return best && best.distance <= MONEY_EDGE_TOLERANCE ? best.column : null;
+  if (best && best.distance <= MONEY_EDGE_TOLERANCE) {
+    return best.column;
+  }
+  // A figure set well past its heading's right edge ("BALANCE" over figures
+  // ending 44pt further right) still starts under that heading, and no other.
+  const under = money.filter(column => x0 < column.x1 && x1 > column.x0);
+  return under.length === 1 ? under[0] : null;
 }
 
 /** Text this far right of a date heading is no part of the date. */
@@ -285,7 +291,7 @@ function moneyCellAt(sorted: PdfTextItem[], start: number, columns: LayoutColumn
   }
   const value = parseStatementAmount(run.map(item => item.text).join(' '));
   const last = run[run.length - 1];
-  const column = moneyColumnFor(last.x + last.width, columns);
+  const column = moneyColumnFor(run[0].x, last.x + last.width, columns);
   if (!column) {
     return null;
   }

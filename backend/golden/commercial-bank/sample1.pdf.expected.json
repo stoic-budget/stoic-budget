@@ -1,0 +1,93 @@
+{
+  "failedChecks": [
+    "balance_chain"
+  ],
+  "metadata": {
+    "accountNumber": "8700001000",
+    "currency": "LKR",
+    "dateFrom": "2023-08-31T00:00:00",
+    "dateTo": "2023-09-30T00:00:00",
+    "balanceStart": 1471796.37,
+    "rawHeader": "STATEMENT OF ACCOUNT IN ACCOUTN WITH COMMERCIAL BANK OF CYELON Reg No:PQ116",
+    "normalizedHeader": "STATEMENT OF ACCOUNT IN ACCOUTN WITH COMMERCIAL BANK OF CYELON Reg No:PQ116",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-09-04T00:00:00",
+      "counterpartyName": "C00000000000001 PETRO",
+      "paymentPurpose": "C00000000000001 PETRO",
+      "credit": 83187.5,
+      "currency": "LKR"
+    },
+    {
+      "transactionDate": "2023-09-09T00:00:00",
+      "counterpartyName": "C00000000000002 PETRO",
+      "paymentPurpose": "C00000000000002 PETRO",
+      "credit": 95289.22,
+      "currency": "LKR"
+    },
+    {
+      "transactionDate": "2023-09-11T00:00:00",
+      "counterpartyName": "March Ho",
+      "paymentPurpose": "March Ho",
+      "credit": 144000,
+      "currency": "LKR"
+    },
+    {
+      "transactionDate": "2023-09-11T00:00:00",
+      "counterpartyName": "March Kandy",
+      "paymentPurpose": "March Kandy",
+      "credit": 183000,
+      "currency": "LKR"
+    },
+    {
+      "transactionDate": "2023-09-12T00:00:00",
+      "counterpartyName": "cash",
+      "paymentPurpose": "cash",
+      "debit": 5000,
+      "currency": "LKR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-09-12T00:00:00",
+      "counterpartyName": "RENT – Sep;place office",
+      "paymentPurpose": "RENT – Sep;place office",
+      "credit": 49500,
+      "currency": "LKR"
+    },
+    {
+      "transactionDate": "2023-09-17T00:00:00",
+      "counterpartyName": "WITHDRAWL KEELS-KOHU",
+      "paymentPurpose": "WITHDRAWL KEELS-KOHU",
+      "debit": 50005,
+      "currency": "LKR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-09-23T00:00:00",
+      "counterpartyName": "PURCHASE SOFTLOGIC",
+      "paymentPurpose": "PURCHASE SOFTLOGIC",
+      "debit": 5539.84,
+      "currency": "LKR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-09-25T00:00:00",
+      "counterpartyName": "TO 8000001111",
+      "paymentPurpose": "TO 8000001111",
+      "debit": 1500,
+      "currency": "LKR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-30T00:00:00",
+      "counterpartyName": "INTREST",
+      "paymentPurpose": "INTREST",
+      "debit": 5714.47,
+      "credit": 4136.04,
+      "currency": "LKR",
+      "paymentType": "interest"
+    }
+  ]
+}

@@ -106,6 +106,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('visit our web site www.comerica.com')).toBe(BankName.COMERICA);
     expect(mentionedBank('commonwealth bank of australia abn 48 123 123 124')).toBe(BankName.COMMBANK);
     expect(mentionedBank('go to commercebank.com to learn more')).toBe(BankName.COMMERCE_BANK);
+    expect(mentionedBank('in account with commercial bank of ceylon')).toBe(BankName.COMMERCIAL_BANK);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

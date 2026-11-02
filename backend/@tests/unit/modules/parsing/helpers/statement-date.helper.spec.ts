@@ -65,6 +65,10 @@ describe('statement-date.helper', () => {
     expect(findFullDates('Statement Date 2020/10/31', 'mdy').map(found => iso(found.date))).toEqual([
       '2020-10-31',
     ]);
+    // Glued: "31AUG23 OPENING BALANCE", but no reference such as "12ABC34".
+    expect(
+      findFullDates('31AUG23 OPENING BALANCE 02Jul2024 ref 12ABC34', 'dmy').map(found => iso(found.date)),
+    ).toEqual(['2023-08-31', '2024-07-02']);
   });
 
   it('finds a day-month-year date joined by hyphens', () => {

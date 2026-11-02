@@ -92,6 +92,25 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('reads Payments and Receipts, and a balance set past the right edge of its heading', () => {
+    const rows = [
+      row(100, [
+        ['DATE', 40],
+        ['PARTICULARS', 110],
+        ['PAYMENTS', 250],
+        ['RECEIPTS', 340],
+        ['BALANCE', 440],
+      ]),
+      // Balance figures end 44pt right of "BALANCE" (440-475), starting under it.
+      row(120, [['04SEP23', 40], ['ACME', 110], ['PAYROLL', 140], ['83,187.50', 335], ['1,554,983.87', 459]]),
+      row(132, [['17SEP23', 40], ['ACME', 110], ['STORE', 140], ['50,005.00', 245], ['1,504,978.87', 459]]),
+    ];
+    expect(readLayoutTransactions(rows).map(({ description, debit, credit, balance }) => ({ description, debit, credit, balance }))).toEqual([
+      { description: 'ACME PAYROLL', debit: undefined, credit: 83187.5, balance: 1554983.87 },
+      { description: 'ACME STORE', debit: 50005, credit: undefined, balance: 1504978.87 },
+    ]);
+  });
+
   it('reads multi-line descriptions and the side of each amount', () => {
     const transactions = readLayoutTransactions([
       header,
