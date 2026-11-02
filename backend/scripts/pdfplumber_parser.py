@@ -23,6 +23,7 @@ from typing import List, Dict, Any
 
 try:
     import pdfplumber  # type: ignore
+    from pdfminer.layout import LTChar, LTContainer, LTCurve  # type: ignore
 except Exception as exc:  # pragma: no cover - surfaced to caller
     sys.stderr.write(f"pdfplumber is required: {exc}\n")
     sys.exit(1)
@@ -170,6 +171,79 @@ def on_page(page: "pdfplumber.page.Page"):
     )
 
 
+def is_white(color: Any) -> bool:
+    values = color if isinstance(color, (list, tuple)) else (color,)
+    try:
+        return tuple(float(v) for v in values) in ((1.0,), (1.0, 1.0, 1.0), (0.0, 0.0, 0.0, 0.0))
+    except (TypeError, ValueError):
+        return False
+
+
+def hidden_chars(page: "pdfplumber.page.Page") -> set:
+    """Characters a white fill drawn after them covers: an editor that paints
+    over text to write new text on top leaves the old text underneath, where no
+    reader sees it. Returned as the ids of the page's char objects, which come
+    in the order the page draws them."""
+    covered: set = set()
+    drawn: List[Any] = []
+
+    def walk(objects) -> None:
+        for obj in objects:
+            if isinstance(obj, LTChar):
+                drawn.append(obj)
+            elif isinstance(obj, LTCurve) and obj.fill and is_white(obj.non_stroking_color):
+                for index, char in enumerate(drawn):
+                    x, y = (char.x0 + char.x1) / 2, (char.y0 + char.y1) / 2
+                    if obj.x0 <= x <= obj.x1 and obj.y0 <= y <= obj.y1:
+                        covered.add(index)
+            elif isinstance(obj, LTContainer):
+                walk(obj)
+
+    walk(page.layout)
+    chars = page.chars
+    if not covered or len(chars) != len(drawn):
+        return set()
+    return {id(chars[index]) for index in covered}
+
+
+# Text below this size set over other text is no print a reader can make out.
+SMUDGE_SIZE = 4.0
+
+
+def upright(char: Dict[str, Any]) -> bool:
+    matrix = char.get("matrix") or (1, 0, 0, 1)
+    return abs(matrix[1]) < 1e-6 and abs(matrix[2]) < 1e-6
+
+
+def smudges(chars: List[Dict[str, Any]]) -> set:
+    """Characters under 4pt set over an upright character at least twice their
+    size, most of their box inside its box: no reader can make them out, as an
+    editor's leftovers drawn over the text it wrote ("01 Jul" at 3.75pt over
+    "01 Feb" at 9pt). A watermark is turned, and the text under it is read."""
+    found: set = set()
+    by_line: Dict[int, List[Dict[str, Any]]] = {}
+    for char in chars:
+        by_line.setdefault(int(char["top"] // 10), []).append(char)
+    for char in chars:
+        area = (char["x1"] - char["x0"]) * (char["bottom"] - char["top"])
+        if area <= 0 or char["size"] >= SMUDGE_SIZE or not char["text"].strip():
+            continue
+        line = int(char["top"] // 10)
+        for other in by_line.get(line - 1, []) + by_line.get(line, []) + by_line.get(line + 1, []):
+            if other["size"] < 2 * char["size"] or not upright(other) or not other["text"].strip():
+                continue
+            width = min(char["x1"], other["x1"]) - max(char["x0"], other["x0"])
+            height = min(char["bottom"], other["bottom"]) - max(char["top"], other["top"])
+            if width > 0 and height > 0 and width * height > area / 2:
+                found.add(id(char))
+                break
+    return found
+
+
+def visible(hidden: set):
+    return lambda obj: obj.get("object_type") != "char" or id(obj) not in hidden
+
+
 def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:
     full_text: List[str] = []
     rows: List[Dict[str, Any]] = []
@@ -177,9 +251,16 @@ def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:
 
     with pdfplumber.open(str(file_path)) as pdf:
         for page_number, raw_page in enumerate(pdf.pages, start=1):
+            # Text painted over goes first: the text written on top at the same
+            # spot would otherwise be dropped as its duplicate.
+            hidden = hidden_chars(raw_page)
+            page = raw_page.filter(visible(hidden)) if hidden else raw_page
             # Bold drawn twice at the same spot reads "PPaaggee" otherwise.
-            page = raw_page.dedupe_chars()
+            page = page.dedupe_chars()
             page = page.filter(on_page(page))
+            smudged = smudges(page.chars)
+            if smudged:
+                page = page.filter(visible(smudged))
             # The same gap splits words as in the rows below: at the default 3pt
             # a statement that sets words 2pt apart reads "Beginningbalance".
             page_text = page.extract_text(x_tolerance=1.5) or ""

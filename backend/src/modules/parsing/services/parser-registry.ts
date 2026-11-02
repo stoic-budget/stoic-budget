@@ -29,6 +29,7 @@ import { CitiParser } from '../parsers/citi.parser';
 import { CitizensParser } from '../parsers/citizens.parser';
 import { CoastCapitalParser } from '../parsers/coast-capital.parser';
 import { ComericaParser } from '../parsers/comerica.parser';
+import { CommBankParser } from '../parsers/commbank.parser';
 import { CsvParser } from '../parsers/csv.parser';
 import { DocxParser } from '../parsers/docx.parser';
 import { ExcelParser } from '../parsers/excel.parser';
@@ -77,6 +78,7 @@ export const FALLBACK_CLAIMS: [
   [CitizensParser, { bankName: BankName.CITIZENS }],
   [CoastCapitalParser, { bankName: BankName.COAST_CAPITAL }],
   [ComericaParser, { bankName: BankName.COMERICA }],
+  [CommBankParser, { bankName: BankName.COMMBANK }],
   [BerekeNewParser, { bankName: BankName.BEREKE_NEW, formatVersion: 'new' }],
   [BerekeOldParser, { bankName: BankName.BEREKE_OLD, formatVersion: 'old' }],
 ];
@@ -118,6 +120,7 @@ export function createParsers(): IParser[] {
     new CitizensParser(),
     new CoastCapitalParser(),
     new ComericaParser(),
+    new CommBankParser(),
     new GenericPdfParser(),
     new ExcelParser(),
     new CsvParser(),
