@@ -19,9 +19,13 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'data',
     'boekdatum',
     'fecha',
+    // Over the date a payment was posted, right of its text: "Date" over "Paid", "Credited".
+    'date paid',
+    'date credited',
   ],
   otherDate: [
     'trans date',
+    'tran date',
     'interest date',
     'value date',
     'rentedatum',

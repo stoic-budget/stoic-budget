@@ -60,7 +60,7 @@ describe('pdf-layout-fingerprint.helper', () => {
   it('keeps the header words no heading knows, but no figure or date read with them', () => {
     const layout = layoutOf([
       row(100, [
-        ['Tran', 20],
+        ['Seq', 20],
         ['Date', 40],
         ['Description', 110],
         ['Withdrawal', 290],
@@ -70,9 +70,9 @@ describe('pdf-layout-fingerprint.helper', () => {
         ['31/01/2025', 580],
       ]),
     ]);
-    expect(layout?.unknownWords).toEqual(['tran', 'branch']);
+    expect(layout?.unknownWords).toEqual(['seq', 'branch']);
     expect(layout?.headings).toEqual([
-      'date:date tran | description:description | debit:withdrawal | credit:deposit | balance:balance | other:branch',
+      'date:date seq | description:description | debit:withdrawal | credit:deposit | balance:balance | other:branch',
     ]);
   });
 
@@ -105,6 +105,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('your agreement with coast capital savings federal credit union (ccs)')).toBe(BankName.COAST_CAPITAL);
     expect(mentionedBank('visit our web site www.comerica.com')).toBe(BankName.COMERICA);
     expect(mentionedBank('commonwealth bank of australia abn 48 123 123 124')).toBe(BankName.COMMBANK);
+    expect(mentionedBank('go to commercebank.com to learn more')).toBe(BankName.COMMERCE_BANK);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

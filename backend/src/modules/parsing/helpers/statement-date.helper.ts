@@ -114,14 +114,16 @@ export function parseDateParts(text: string, order: NumericDateOrder): DateParts
 
 /**
  * "dmy" or "mdy" for numeric dates, decided by a component that can only be a
- * day ("17/01" is day-first, "09/13" month-first). Null when nothing decides.
+ * day ("17/01" is day-first, "09/13" and "12-31" month-first). Null when nothing decides.
  */
 export function detectNumericDateOrder(samples: string[]): NumericDateOrder | null {
   let dayFirst = false;
   let monthFirst = false;
   for (const sample of samples) {
-    // Not the month and day of a year-first date ("2020/09/30").
-    for (const match of sample.matchAll(/(?<![\d./])(\d{1,2})[./](\d{1,2})(?:[./]\d{2,4})?\b/g)) {
+    // Not the month and day of a year-first date ("2020/09/30", "2020-09-30").
+    for (const match of sample.matchAll(
+      /(?<![\d./-])(\d{1,2})[./-](\d{1,2})(?:[./-]\d{2,4})?\b/g,
+    )) {
       dayFirst ||= Number(match[1]) > 12 && Number(match[2]) <= 12;
       monthFirst ||= Number(match[2]) > 12 && Number(match[1]) <= 12;
     }

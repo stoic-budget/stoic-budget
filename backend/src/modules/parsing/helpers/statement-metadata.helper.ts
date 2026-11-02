@@ -333,7 +333,8 @@ export function findStatementTotals(
   const folded = foldText(text);
   const total = (labels: string[]) => {
     for (const label of labels) {
-      const pattern = new RegExp(`(?:^|[^a-z])${label}(?![a-z])`, 'g');
+      // "Total Withdrawals & Other Debits" totals one section, not the statement.
+      const pattern = new RegExp(`(?:^|[^a-z])${label}(?![a-z]|\\s*(?:&|and)\\s+[a-z])`, 'g');
       for (const match of folded.matchAll(pattern)) {
         const value = amountAfter(
           text,

@@ -36,6 +36,32 @@ describe('pdf-layout-sections.helper', () => {
     expect(readSectionHeading(row(10, phrase('Plus: Deposits and Other Additions 3,909.54', 50)))).toBeNull();
   });
 
+  it('reads a heading that names its account after it, continued or not', () => {
+    expect(readSectionHeading(row(10, phrase('Deposits & Other Credits Account # 100000001', 50)))).toBe(
+      'credit',
+    );
+    expect(
+      readSectionHeading(row(10, phrase('ATM Withdrawals & Debits Account # 100000001 (Cont.)', 50))),
+    ).toBe('debit');
+    expect(readSectionHeading(row(10, phrase('Debit Card Purchases & Debits', 50)))).toBe('debit');
+  });
+
+  it('reads a section of an account whose dates stand right of the text, under a two-line header', () => {
+    const rows = readLayoutTransactions([
+      row(100, phrase('ATM Withdrawals & Debits Account # 100000001', 50)),
+      row(112, [['Tran', 400], ['Date', 455]]),
+      row(122, [['Description', 50], ['Date', 400], ['Paid', 455], ['Amount', 530]]),
+      row(140, [...phrase('ACME Store', 50), ['12-20', 400], ['12-21', 455], ['15.00', 535]]),
+      row(152, phrase('Sampletown IL', 50)),
+      row(164, [...phrase('ACME Cafe', 50), ['01-02', 400], ['01-04', 455], ['3.10', 540]]),
+    ]);
+    expect(rows.map(({ dateText, description, debit, credit }) => ({ dateText, description, debit, credit }))).toEqual([
+      { dateText: '12-21', description: 'ACME Store Sampletown IL', debit: 15, credit: undefined },
+      { dateText: '01-04', description: 'ACME Cafe', debit: 3.1, credit: undefined },
+    ]);
+    expect(rows[0].account).toEqual({ accountNumber: '100000001' });
+  });
+
   it('signs each row by its section, without a column header, up to the totals line', () => {
     const rows = readLayoutTransactions([
       row(100, phrase('Deposits and Other Additions', 50)),

@@ -43,6 +43,9 @@ describe('statement-date.helper', () => {
     expect(detectNumericDateOrder(['01/02', '03/04'])).toBeNull();
     // Month and day of a year-first date do not decide.
     expect(detectNumericDateOrder(['2020/09/30', '2020/10/31'])).toBeNull();
+    // Dashes too: "12-31" is month-first, and an ISO date decides nothing.
+    expect(detectNumericDateOrder(['12-20', '12-31'])).toBe('mdy');
+    expect(detectNumericDateOrder(['2020-09-30', '2020-10-31'])).toBeNull();
   });
 
   it('gives a yearless date the statement year, or the year before across a new year', () => {

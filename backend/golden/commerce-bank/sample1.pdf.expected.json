@@ -1,0 +1,443 @@
+{
+  "metadata": {
+    "accountNumber": "250023203",
+    "currency": "USD",
+    "dateFrom": "2020-12-16T00:00:00",
+    "dateTo": "2021-01-15T00:00:00",
+    "balanceStart": 202.02,
+    "balanceEnd": 175.47,
+    "rawHeader": "Member A One Member B Two 100 N Sample St Apt 1",
+    "normalizedHeader": "Member A One Member B Two 100 N Sample St Apt 1",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2020-12-31T00:00:00",
+      "counterpartyName": "Xxsoc Sec Ssa Treas 310",
+      "paymentPurpose": "Xxsoc Sec Ssa Treas 310 Ref Nbr: 670337684154 Trace No: 563599927076832",
+      "credit": 1149,
+      "documentNumber": "670337684154",
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Xxtaxeip2 Irs Treas 310",
+      "paymentPurpose": "Xxtaxeip2 Irs Treas 310 Ref Nbr: 475879336080 Trace No: 237269059135669",
+      "credit": 600,
+      "documentNumber": "475879336080",
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-12-21T00:00:00",
+      "counterpartyName": "ATM Foreign Fee 550 S Madison St P304720 Lebanon IL 21488706",
+      "paymentPurpose": "ATM Foreign Fee 550 S Madison St P304720 Lebanon IL 21488706",
+      "debit": 2.95,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-12-21T00:00:00",
+      "counterpartyName": "ATM DDA Inquiry Foreign Fee 550 S Madison St P304720 Lebanon IL 21436806",
+      "paymentPurpose": "ATM DDA Inquiry Foreign Fee 550 S Madison St P304720 Lebanon IL 21436806",
+      "debit": 2.95,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-12-21T00:00:00",
+      "counterpartyName": "ATM Withdrawal 550 S Madison St P304720 Lebanon IL 21488706",
+      "paymentPurpose": "ATM Withdrawal 550 S Madison St P304720 Lebanon IL 21488706",
+      "debit": 62,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-12-21T00:00:00",
+      "counterpartyName": "Shell Service Station",
+      "paymentPurpose": "Debit Card Purchase-Pin Shell Service Station 40037001 Lebanon IL 12069509",
+      "debit": 15,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-12-22T00:00:00",
+      "counterpartyName": "ATM DDA Inquiry Foreign Fee 550 S Madison St P304720 Lebanon IL 19005023",
+      "paymentPurpose": "ATM DDA Inquiry Foreign Fee 550 S Madison St P304720 Lebanon IL 19005023",
+      "debit": 2.95,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-12-22T00:00:00",
+      "counterpartyName": "Dollar-General # 707",
+      "paymentPurpose": "Debit Card Purchase-Pin Dollar-General # 707 99999999 Lebanon IL 19435482",
+      "debit": 4.1,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-12-22T00:00:00",
+      "counterpartyName": "Don S Iga",
+      "paymentPurpose": "Debit Card Purchase-Pin Don S Iga 59622601 Lebanon IL 15954955",
+      "debit": 3.45,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "ATM Foreign Fee 550 S Madison St P304720 Lebanon IL 16882222",
+      "paymentPurpose": "ATM Foreign Fee 550 S Madison St P304720 Lebanon IL 16882222",
+      "debit": 2.95,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Usps PO",
+      "paymentPurpose": "Debit Card Purchase-Pin Usps PO 16438605 201 99999999 Lebanon IL 16302241",
+      "debit": 288.25,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Bp#6623599Ksfa",
+      "paymentPurpose": "Debit Card Purchase-Pin Bp#6623599Ksfa 39395401 Lebanon IL 39541748",
+      "debit": 3.1,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Shell Service Station",
+      "paymentPurpose": "Debit Card Purchase-Pin Shell Service Station 40037001 Lebanon IL 15019522",
+      "debit": 30.26,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Famous Footwear #2856",
+      "paymentPurpose": "Debit Card Purchase-Pin Famous Footwear #2856 08409241 Shiloh IL 48002573",
+      "debit": 133.23,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Don S Iga",
+      "paymentPurpose": "Debit Card Purchase-Pin Don S Iga 59622601 Lebanon IL 17887584",
+      "debit": 80.07,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "ATM Withdrawal 550 S Madison St P304720 Lebanon IL 16882222",
+      "paymentPurpose": "ATM Withdrawal 550 S Madison St P304720 Lebanon IL 16882222",
+      "debit": 42,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Dollar-General # 707",
+      "paymentPurpose": "Debit Card Purchase-Pin Dollar-General # 707 99999999 Lebanon IL 22301125",
+      "debit": 56.49,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-05T00:00:00",
+      "counterpartyName": "Dollar General # 415",
+      "paymentPurpose": "Debit Card Purchase-Pin Dollar General # 415 99999999 Aviston IL 18303347",
+      "debit": 8.23,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-08T00:00:00",
+      "counterpartyName": "Target T- 3400 Green",
+      "paymentPurpose": "Debit Card Purchase-Pin Target T- 3400 Green 31539080 Shiloh IL 16412145",
+      "debit": 172.75,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-08T00:00:00",
+      "counterpartyName": "Don S Iga",
+      "paymentPurpose": "Debit Card Purchase-Pin Don S Iga 59622601 Lebanon IL 18578803",
+      "debit": 14.78,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-11T00:00:00",
+      "counterpartyName": "Dollar-General # 707",
+      "paymentPurpose": "Debit Card Purchase-Pin Dollar-General # 707 99999999 Lebanon IL 17750683",
+      "debit": 19.66,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-11T00:00:00",
+      "counterpartyName": "Don S Iga",
+      "paymentPurpose": "Debit Card Purchase-Pin Don S Iga 59622601 Lebanon IL 14763589",
+      "debit": 5.87,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "Schnucks Schnuck Sev",
+      "paymentPurpose": "Debit Card Purchase-Pin Schnucks Schnuck Sev 49017710 OFallon IL 15462895",
+      "debit": 65.41,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-14T00:00:00",
+      "counterpartyName": "Dollar-General # 707",
+      "paymentPurpose": "Debit Card Purchase-Pin Dollar-General # 707 99999999 Lebanon IL 23224551",
+      "debit": 10.64,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-12-21T00:00:00",
+      "counterpartyName": "McDonald's F19630",
+      "paymentPurpose": "McDonald's F19630 Lebanon IL",
+      "debit": 8.18,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-12-24T00:00:00",
+      "counterpartyName": "State Farm Insurance",
+      "paymentPurpose": "State Farm Insurance 800-956-6310 IL",
+      "debit": 91.38,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Usa*Vagabond Vending",
+      "paymentPurpose": "Usa*Vagabond Vending Washington DC",
+      "debit": 1.25,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Usa*Vagabond Vending",
+      "paymentPurpose": "Usa*Vagabond Vending Washington DC",
+      "debit": 1.25,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Usa*Vagabond Vending",
+      "paymentPurpose": "Usa*Vagabond Vending Washington DC",
+      "debit": 1.25,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Paypal *Icanvas.Com",
+      "paymentPurpose": "Paypal *Icanvas.Com 402-935-7733 IL",
+      "debit": 105.82,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Cultured Quotes",
+      "paymentPurpose": "Cultured Quotes 855-825-9898 PA",
+      "debit": 2,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Real Life Catholic",
+      "paymentPurpose": "Real Life Catholic Httpsreallife or",
+      "debit": 37,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Ebay O*11-06341-37011",
+      "paymentPurpose": "Ebay O*11-06341-37011 San Jose CA",
+      "debit": 16.14,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Ebay O*11-06341-37010",
+      "paymentPurpose": "Ebay O*11-06341-37010 San Jose CA",
+      "debit": 4.37,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-05T00:00:00",
+      "counterpartyName": "Spectrum",
+      "paymentPurpose": "Spectrum 855-707-7328 MO",
+      "debit": 33,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-05T00:00:00",
+      "counterpartyName": "Amazon Prime*wk0rj7x73",
+      "paymentPurpose": "Amazon Prime*wk0rj7x73 Amzn.Com/Bill WA",
+      "debit": 12.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-06T00:00:00",
+      "counterpartyName": "Humana Compbenefits",
+      "paymentPurpose": "Humana Compbenefits 855-216-6888 KY",
+      "debit": 14.18,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-06T00:00:00",
+      "counterpartyName": "Amazon.Com*Nf9if1be3 Amzn",
+      "paymentPurpose": "Amazon.Com*Nf9if1be3 Amzn Amzn.Com/Bill WA",
+      "debit": 14.23,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-07T00:00:00",
+      "counterpartyName": "Pgi*Potpourri",
+      "paymentPurpose": "Pgi*Potpourri 800-375-1303 MA",
+      "debit": 96.58,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-07T00:00:00",
+      "counterpartyName": "Ewtn Religious Catalog",
+      "paymentPurpose": "Ewtn Religious Catalog 800-4473986 AL",
+      "debit": 32.62,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-08T00:00:00",
+      "counterpartyName": "Thecobblestoneeatery",
+      "paymentPurpose": "Thecobblestoneeatery Lebanon IL",
+      "debit": 32.5,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-11T00:00:00",
+      "counterpartyName": "Prescriptions Plus",
+      "paymentPurpose": "Prescriptions Plus Lebanon IL",
+      "debit": 14.23,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-11T00:00:00",
+      "counterpartyName": "Cultured Quotes",
+      "paymentPurpose": "Cultured Quotes 855-825-9898 PA",
+      "debit": 25,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-11T00:00:00",
+      "counterpartyName": "Cultured Quotes",
+      "paymentPurpose": "Cultured Quotes 855-825-9898 PA",
+      "debit": 4.95,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-11T00:00:00",
+      "counterpartyName": "Pgi*Potpourri Vip",
+      "paymentPurpose": "Pgi*Potpourri Vip 888-732-0666 MA",
+      "debit": 12.95,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-11T00:00:00",
+      "counterpartyName": "Paypal *Dailyom.Com",
+      "paymentPurpose": "Paypal *Dailyom.Com 541-488-0508 CA",
+      "debit": 15,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-11T00:00:00",
+      "counterpartyName": "Assn Mira Medal",
+      "paymentPurpose": "Assn Mira Medal 573-547-8343 MO",
+      "debit": 24,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-12T00:00:00",
+      "counterpartyName": "Wf* Wayfair 6241139669",
+      "paymentPurpose": "Wf* Wayfair 6241139669 Httpswww.Wayf MA",
+      "debit": 61.61,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-14T00:00:00",
+      "counterpartyName": "Paypal *Washpost",
+      "paymentPurpose": "Paypal *Washpost 402-935-7733 DC",
+      "debit": 4,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-12-31T00:00:00",
+      "counterpartyName": "ID Recover Service Fee",
+      "paymentPurpose": "ID Recover Service Fee",
+      "debit": 4.49,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-01-04T00:00:00",
+      "counterpartyName": "Payment Midland Credit M",
+      "paymentPurpose": "Payment Midland Credit M Ref Nbr: 6795145393484 Trace No: 410304162776893",
+      "debit": 53.5,
+      "documentNumber": "6795145393484",
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-01-05T00:00:00",
+      "counterpartyName": "0921833797 Life Protect 24/",
+      "paymentPurpose": "0921833797 Life Protect 24/ Ref Nbr: 0783128239354 Trace No: 860979375571830",
+      "debit": 19.99,
+      "documentNumber": "0783128239354",
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-01-15T00:00:00",
+      "counterpartyName": "Statement Fee",
+      "paymentPurpose": "Statement Fee",
+      "debit": 4,
+      "currency": "USD",
+      "paymentType": "fee"
+    }
+  ]
+}

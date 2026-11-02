@@ -1,4 +1,7 @@
 import type { PdfTextRow } from '../../../common/utils/pdf-parser.util';
+import { isNextLine } from './pdf-layout-wrapped.helper';
+import { findStatementAmounts } from './statement-amount.helper';
+import { readAccountHeading } from './statement-metadata.helper';
 
 /** "Account Number" / "Account No." heading a column of an account summary. */
 const HEADING_FIRST = /^account$/i;
@@ -41,4 +44,17 @@ export function findAccountNumberInColumn(rows: PdfTextRow[]): string | null {
     }
   }
   return null;
+}
+
+/**
+ * An account heading sits between tables, without money on its line. Right
+ * under a transaction row it is that row's text ("Transfer to account
+ * 1234-5678"), not a new account.
+ */
+export function accountHeadingAt(row: PdfTextRow, rowAbove: PdfTextRow | null) {
+  const text = row.items.map(item => item.text).join(' ');
+  if (isNextLine(row, rowAbove) || findStatementAmounts(text).length > 0) {
+    return null;
+  }
+  return readAccountHeading(text);
 }

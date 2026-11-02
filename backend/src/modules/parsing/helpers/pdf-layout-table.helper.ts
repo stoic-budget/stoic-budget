@@ -1,4 +1,5 @@
 import type { PdfTextRow } from '../../../common/utils/pdf-parser.util';
+import { accountHeadingAt } from './pdf-layout-account-number.helper';
 import {
   isBalanceTableHeader,
   type LaidOutRow,
@@ -29,7 +30,6 @@ import {
   mergeLaidOut,
   splitOverlappingLines,
 } from './pdf-layout-wrapped.helper';
-import { findStatementAmounts } from './statement-amount.helper';
 import type { DateParts } from './statement-date.helper';
 import { isBalanceLabel, readAccountHeading } from './statement-metadata.helper';
 
@@ -118,19 +118,6 @@ function openTransaction(
   appendText(transaction, laidOut);
   transaction.firstLine = transaction.description;
   return transaction;
-}
-
-/**
- * An account heading sits between tables, without money on its line. Right
- * under a transaction row it is that row's text ("Transfer to account
- * 1234-5678"), not a new account.
- */
-function accountHeadingAt(row: PdfTextRow, rowAbove: PdfTextRow | null) {
-  const text = row.items.map(item => item.text).join(' ');
-  if (isNextLine(row, rowAbove) || findStatementAmounts(text).length > 0) {
-    return null;
-  }
-  return readAccountHeading(text);
 }
 
 /**
@@ -244,8 +231,10 @@ function readRow(state: ReadingState, lines: PdfTextRow[]) {
   // An account heading or a table header starts a new table.
   const heading = accountHeadingAt(row, state.current ? state.lastRow : null);
   const header = heading ? null : state.readHeader(row);
-  const section = heading || header ? null : readSectionHeading(row);
+  // "Deposits & Other Credits  Account # 123456789" heads a section of that account.
+  const section = header ? null : readSectionHeading(row);
   if (section) {
+    state.account = heading ?? state.account;
     // A section's own header row, if it prints one, follows its heading.
     // "Withdrawals (continued)" on the next page goes on adding to the same total.
     state.sectionRead = state.section?.sign === section ? state.sectionRead : 0;

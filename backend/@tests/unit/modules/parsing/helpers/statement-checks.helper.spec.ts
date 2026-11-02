@@ -114,6 +114,11 @@ describe('statement-checks.helper', () => {
       });
       // "money input" is no label.
       expect(findStatementTotals('Money input 12.00', 'dmy')).toEqual({ credits: null, debits: null });
+      // A section's own total is no total of the statement.
+      expect(findStatementTotals('Total Withdrawals & Other Debits $81.98', 'mdy')).toEqual({
+        credits: null,
+        debits: null,
+      });
     });
 
     it('holds the rows to them, and says which side is off', () => {

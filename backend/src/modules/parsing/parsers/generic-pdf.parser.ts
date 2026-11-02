@@ -152,8 +152,11 @@ export class GenericPdfParser extends BaseParser {
     );
 
     const legacyRange = this.extractDateRange(text);
+    // Else the dated balance rows: "Beginning Balance on December 16, 2020" opens it.
     const dateRange = plausiblePeriod(
-      legacyRange.from ? legacyRange : findHeaderPeriod(text, dateOrder),
+      legacyRange.from
+        ? legacyRange
+        : (findHeaderPeriod(text, dateOrder) ?? findBalanceRowPeriod(text, dateOrder)),
       transactions,
     );
     const transactionDates = transactions.map(t => t.transactionDate).filter(Boolean);
@@ -165,10 +168,8 @@ export class GenericPdfParser extends BaseParser {
       transactionDates.length > 0
         ? new Date(Math.max(...transactionDates.map(d => d.getTime())))
         : null;
-    // A month without movements still dates its balance rows.
-    const balanceRows = minDate ? null : findBalanceRowPeriod(text, dateOrder);
-    const dateFrom = dateRange?.from || minDate || balanceRows?.from || new Date();
-    const dateTo = dateRange?.to || maxDate || balanceRows?.to || dateFrom;
+    const dateFrom = dateRange?.from || minDate || new Date();
+    const dateTo = dateRange?.to || maxDate || dateFrom;
 
     return {
       metadata: {

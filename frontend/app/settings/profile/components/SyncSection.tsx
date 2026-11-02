@@ -50,6 +50,7 @@ const BANK_LABELS: Record<string, string> = {
   coast_capital: 'Coast Capital',
   comerica: 'Comerica',
   commbank: 'CommBank',
+  commerce_bank: 'Commerce Bank',
   other: 'Other',
 };
 

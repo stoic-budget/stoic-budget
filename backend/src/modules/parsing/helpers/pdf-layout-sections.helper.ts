@@ -46,8 +46,10 @@ const SECTIONS: Record<SectionSign, string[]> = {
     'card withdrawals',
     'atm and debit card withdrawals',
     'atm & debit card withdrawals',
+    'atm withdrawals and debits',
     'card purchases',
     'debit card purchases',
+    'debit card purchases and debits',
     'debits',
     'other debits',
     'deductions',
@@ -69,7 +71,8 @@ const HEADING_GAP = 40;
 
 /**
  * A heading as the section tables print it, folded: "&" is "and", a footnote
- * star and "(continued)" are no part of it. A line that also holds a block
+ * star, "(continued)", "(Cont.)" and the account it names after it ("Account #
+ * 123456789") are no part of it. A line that also holds a block
  * further right ("Withdrawals & Debits **" over the page's left half and
  * "Total Withdrawals & Debits" over its right) is read by its left block,
  * unless that block holds a figure: "Deposits  $2,869.18" is a summary line.
@@ -84,7 +87,8 @@ function headingText(row: PdfTextRow): string {
   const left =
     end < 0 || items.slice(end).some(item => /\d/.test(item.text)) ? items : items.slice(0, end);
   return foldText(left.map(item => item.text).join(' '))
-    .replace(/\(?\bcontinued\b\)?/g, '')
+    .replace(/\(?\bcontinued\b\)?|\(cont\.?\)/g, '')
+    .replace(/\s+account\s*(?:#|no\.?|number)\s*[\dx*-]+\s*$/, '')
     .replace(/&/g, ' and ')
     .replace(/\*+/g, '')
     .replace(/[\s:.]+$/, '')

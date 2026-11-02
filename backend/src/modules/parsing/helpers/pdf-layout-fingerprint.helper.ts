@@ -49,6 +49,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.COAST_CAPITAL, /\bcoast capital savings\b/],
   [BankName.COMERICA, /\bcomerica\.com\b/],
   [BankName.COMMBANK, /\bcommonwealth bank of australia\b/],
+  [BankName.COMMERCE_BANK, /\bcommercebank\.com\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

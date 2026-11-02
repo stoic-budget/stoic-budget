@@ -34,6 +34,7 @@ describe('resolveBankLogo', () => {
     ['coast_capital', 'Coast Capital'],
     ['comerica', 'Comerica'],
     ['commbank', 'CommBank'],
+    ['commerce_bank', 'Commerce Bank'],
   ])('names the bank stored as %s by its real name', (bankName, displayName) => {
     expect(resolveBankLogo(bankName).displayName).toBe(displayName);
   });
