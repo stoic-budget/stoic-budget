@@ -75,7 +75,7 @@ export function parseOfx(text: string): ParsedStatement {
     transactions.push({
       transactionDate: date,
       documentNumber: ofxTag(block, 'FITID') ?? ofxTag(block, 'CHECKNUM'),
-      counterpartyName: name || memo || 'Unknown',
+      counterpartyName: name || memo || '',
       paymentPurpose: memo || name,
       ...(amount < 0 ? { debit: Math.abs(amount) } : { credit: amount }),
       currency,
@@ -172,7 +172,7 @@ export function parseQif(text: string, currency = 'USD'): ParsedStatement {
     transactions.push({
       transactionDate: date,
       documentNumber: record.N,
-      counterpartyName: record.P || record.M || 'Unknown',
+      counterpartyName: record.P || record.M || '',
       paymentPurpose: record.M || record.P || '',
       ...(amount < 0 ? { debit: Math.abs(amount) } : { credit: amount }),
       currency,
@@ -251,7 +251,7 @@ export function parseCamt053(text: string): ParsedStatement {
     transactions.push({
       transactionDate: date,
       documentNumber: reference,
-      counterpartyName: counterparty || purpose || 'Unknown',
+      counterpartyName: counterparty || purpose || '',
       paymentPurpose: purpose || counterparty || '',
       ...(indicator === 'DBIT' ? { debit: amount } : { credit: amount }),
       currency: xmlAttr(entry, 'Amt', 'Ccy') ?? currency,
@@ -349,7 +349,7 @@ export function parseMt940(text: string): ParsedStatement {
     transactions.push({
       transactionDate: date,
       documentNumber: (match[7] ?? '').trim() || undefined,
-      counterpartyName: counterparty || purpose || match[6] || 'Unknown',
+      counterpartyName: counterparty || purpose || match[6] || '',
       paymentPurpose: purpose || info,
       ...(isDebit ? { debit: amount } : { credit: amount }),
       currency,

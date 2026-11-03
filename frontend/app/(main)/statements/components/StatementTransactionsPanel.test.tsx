@@ -25,6 +25,8 @@ vi.mock('@/app/lib/query-fn-schema', () => ({
               category: categoryRef({ id: 'cat-ads', name: 'Advertising' }),
             }),
             transactionItem({ id: 'tx-2', counterpartyName: confirmedPayee, isVerified: true }),
+            // The file named no counterparty: stored empty.
+            transactionItem({ id: 'tx-3', counterpartyName: '' }),
           ],
         },
 }));
@@ -63,6 +65,12 @@ describe('StatementTransactionsPanel', () => {
 
     expect(await screen.findByText('Advertising', { selector: 'span' })).toBeInTheDocument();
     expect(screen.queryByText(confirmedPayee)).toBeNull();
+  });
+
+  it("names a row without a counterparty in the reader's language", async () => {
+    renderWithQuery(<StatementTransactionsPanel statementId="st-1" />);
+
+    expect(await screen.findByText('Unknown payee')).toBeInTheDocument();
   });
 
   it('shows every row in Documents', async () => {

@@ -18,6 +18,7 @@ import { Select } from '@/app/components/ui/select';
 import { useIntlayer } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import type { PayablePayment, PaymentCandidate } from '@/app/lib/payables-api';
+import { usePayeeName } from '@/app/lib/use-payee-name';
 
 export type WalletOption = { id: string; name: string; currency: string; isActive?: boolean };
 
@@ -65,6 +66,7 @@ export function CandidateList(props: {
 
 function CandidateLabel(props: { candidate: PaymentCandidate; locale: string }): React.JSX.Element {
   const t = useIntlayer('payableMarkPaid');
+  const payeeName = usePayeeName();
   const { candidate } = props;
   return (
     <Box sx={{ minWidth: 0 }}>
@@ -84,7 +86,7 @@ function CandidateLabel(props: { candidate: PaymentCandidate; locale: string }):
         {candidate.vendorMatch && <Chip size="small" label={t.vendorMatch.value} sx={{ ml: 1 }} />}
       </Typography>
       <Typography variant="caption" sx={{ color: 'text.secondary', overflowWrap: 'anywhere' }}>
-        {candidate.counterpartyName} — {candidate.paymentPurpose}
+        {payeeName(candidate.counterpartyName)} — {candidate.paymentPurpose}
       </Typography>
     </Box>
   );

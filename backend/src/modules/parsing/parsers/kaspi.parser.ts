@@ -157,8 +157,8 @@ export class KaspiParser extends BaseParser {
         flushCurrent();
         currentTransaction = {
           documentNumber: docMatch[1],
-          counterpartyName: 'Не указано',
-          paymentPurpose: 'Не указано',
+          counterpartyName: '',
+          paymentPurpose: '',
         };
         blockLines.push(line);
         continue;
@@ -210,7 +210,7 @@ export class KaspiParser extends BaseParser {
         line.length < 50 &&
         !line.match(/^(Дебет|Кредит|Номер|Дата|Назначение)/)
       ) {
-        if (currentTransaction.counterpartyName === 'Не указано') {
+        if (!currentTransaction.counterpartyName) {
           currentTransaction.counterpartyName = line;
         }
         continue;
@@ -302,8 +302,7 @@ export class KaspiParser extends BaseParser {
       }
 
       const nameCell =
-        (idxName >= 0 ? row[idxName] : '') ||
-        (idxPurpose >= 0 ? row[idxPurpose] : 'Неизвестный контрагент');
+        (idxName >= 0 ? row[idxName] : '') || (idxPurpose >= 0 ? row[idxPurpose] : '');
       // Kaspi prints the BIN inside the name cell: `ТОО "X" БИН/ИИН 123456789012`.
       const nameWithBin = nameCell.match(/^(.+?)\s*БИН\/ИИН\s*(\d+)/);
       const counterpartyName = nameWithBin ? nameWithBin[1].trim() : nameCell;
@@ -311,13 +310,13 @@ export class KaspiParser extends BaseParser {
       const transaction: ParsedTransaction = {
         transactionDate,
         documentNumber: idxDocument >= 0 ? row[idxDocument] : undefined,
-        counterpartyName: counterpartyName || 'Неизвестный контрагент',
+        counterpartyName,
         counterpartyAccount: idxAccount >= 0 ? row[idxAccount] : undefined,
         counterpartyBank: idxBank >= 0 ? row[idxBank] : undefined,
         counterpartyBin: nameWithBin?.[2] ?? (idxBin >= 0 ? row[idxBin] : undefined),
         debit,
         credit,
-        paymentPurpose: idxPurpose >= 0 ? row[idxPurpose] : 'Не указано',
+        paymentPurpose: idxPurpose >= 0 ? row[idxPurpose] : '',
         currency: defaultCurrency,
       };
 
@@ -347,11 +346,11 @@ export class KaspiParser extends BaseParser {
     const combinedBlock = normalizedLines.join(' ');
 
     let paymentPurpose = currentTransaction.paymentPurpose;
-    if ((!paymentPurpose || paymentPurpose === 'Не указано') && purposeLines.length) {
+    if (!paymentPurpose && purposeLines.length) {
       paymentPurpose = purposeLines.join(' ').trim();
     }
 
-    if (!paymentPurpose || paymentPurpose === 'Не указано') {
+    if (!paymentPurpose) {
       const purposeIdx = normalizedLines.findIndex(l => l.toLowerCase().includes('назначение'));
       if (purposeIdx >= 0 && purposeIdx < normalizedLines.length - 1) {
         paymentPurpose = normalizedLines
@@ -361,7 +360,7 @@ export class KaspiParser extends BaseParser {
       }
     }
 
-    if (!paymentPurpose || paymentPurpose === 'Не указано') {
+    if (!paymentPurpose) {
       const freeText = normalizedLines
         .filter(l => !this.looksLikeKaspiMetaLine(l))
         .join(' ')
@@ -381,7 +380,7 @@ export class KaspiParser extends BaseParser {
       }
     }
 
-    if (!counterpartyName || counterpartyName === 'Не указано') {
+    if (!counterpartyName) {
       const cpLine =
         normalizedLines.find(l => l.includes('БИН/ИИН') || l.match(/^(АО|ТОО|ИП)\s/i)) ||
         normalizedLines.find(
@@ -400,7 +399,7 @@ export class KaspiParser extends BaseParser {
       }
     }
 
-    if ((!counterpartyName || counterpartyName === 'Не указано') && paymentPurpose) {
+    if (!counterpartyName && paymentPurpose) {
       const purposeNameMatch = paymentPurpose.match(
         /(?:от|поступление от|перевод от)\s+([A-Za-zА-Яа-яёЁ0-9"«»().\s-]{3,})/i,
       );
@@ -433,13 +432,13 @@ export class KaspiParser extends BaseParser {
     return {
       transactionDate: currentTransaction.transactionDate ?? new Date(),
       documentNumber: currentTransaction.documentNumber,
-      counterpartyName: counterpartyName?.trim() || 'Неизвестный контрагент',
+      counterpartyName: counterpartyName?.trim() ?? '',
       counterpartyBin,
       counterpartyAccount: currentTransaction.counterpartyAccount,
       counterpartyBank: currentTransaction.counterpartyBank,
       debit,
       credit,
-      paymentPurpose: paymentPurpose?.trim() || 'Не указано',
+      paymentPurpose: paymentPurpose?.trim() ?? '',
       currency: currency || 'KZT',
       exchangeRate: currentTransaction.exchangeRate,
       amountForeign: currentTransaction.amountForeign,

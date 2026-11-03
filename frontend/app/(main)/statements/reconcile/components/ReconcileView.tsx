@@ -9,6 +9,7 @@ import { LoadError } from '@/app/components/ui/load-error';
 import { fillTemplateNodes, PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
+import { usePayeeName } from '@/app/lib/use-payee-name';
 import { formatStoredDateWithOptions } from '@/app/lib/user-format-store';
 import { tokens } from '@/lib/theme-tokens';
 import { type AgeingBucket, useReconciliation } from '../useReconciliation';
@@ -41,6 +42,7 @@ const formatDate = (date: string): string =>
 
 export function ReconcileView(): React.JSX.Element {
   const t = useIntlayer('reconcilePage');
+  const payeeName = usePayeeName();
   const { locale } = useLocale();
   const { data, isPending, isFetching, error, confirm, confirming } = useReconciliation();
   const money = (value: number, currency?: string) =>
@@ -150,7 +152,10 @@ export function ReconcileView(): React.JSX.Element {
                     </Box>
                     <Box>
                       <Typography variant="body2">
-                        {match.transaction.counterpartyName ?? match.transaction.paymentPurpose}
+                        {payeeName(
+                          match.transaction.counterpartyName?.trim() ||
+                            match.transaction.paymentPurpose,
+                        )}
                       </Typography>
                       <Typography
                         variant="caption"

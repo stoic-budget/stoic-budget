@@ -13,6 +13,7 @@ import { useIntlayer, useLocale } from '@/app/i18n';
 import { FALLBACK_CURRENCY } from '@/app/lib/currency';
 import { isPrivateCategory, pickableCategories } from '@/app/lib/private-category';
 import { getCategoryDisplayName } from '@/app/lib/statement-categories';
+import { usePayeeName } from '@/app/lib/use-payee-name';
 import { formatAmount, formatDate } from './helpers/transactionFormatters';
 import { useBulkUpdateOwner } from './hooks/useBulkUpdateOwner';
 import { useContributionLink } from './hooks/useContributionLink';
@@ -49,6 +50,7 @@ export function TransactionDetailsTab({
   const { locale } = useLocale();
   const t = useIntlayer('transactionsDrawer');
   const tOwner = useIntlayer('transactionOwner');
+  const payeeName = usePayeeName();
   const [ownerSaving, setOwnerSaving] = useState(false);
   const [privateSaving, setPrivateSaving] = useState(false);
   const members = useWorkspaceMembers();
@@ -121,37 +123,29 @@ export function TransactionDetailsTab({
       });
   };
 
-  const handleUpdateOwner = async (value: string) => {
+  // The owner and the private flag save alike: one call, a toast either way.
+  const saveOwnership = async (
+    patch: Omit<Parameters<typeof updateOwner.mutateAsync>[0], 'txIds'>,
+    setSaving: (saving: boolean) => void,
+  ) => {
     const successMessage = tOwner.ownerUpdated.value;
     const failureMessage = tOwner.ownerUpdateFailed.value;
-    setOwnerSaving(true);
+    setSaving(true);
     await updateOwner
-      .mutateAsync({ txIds: [transaction.id], ownerMemberId: ownerValueToMemberId(value) })
+      .mutateAsync({ txIds: [transaction.id], ...patch })
       .then(
         () => toast.success(successMessage),
         (error: unknown) => {
-          console.error('Failed to update owner:', error);
+          console.error('Failed to update owner or privacy:', error);
           toast.error(failureMessage);
         },
       )
-      .finally(() => setOwnerSaving(false));
+      .finally(() => setSaving(false));
   };
-
-  const handleTogglePrivate = async (next: boolean) => {
-    const successMessage = tOwner.ownerUpdated.value;
-    const failureMessage = tOwner.ownerUpdateFailed.value;
-    setPrivateSaving(true);
-    await updateOwner
-      .mutateAsync({ txIds: [transaction.id], isPrivate: next })
-      .then(
-        () => toast.success(successMessage),
-        (error: unknown) => {
-          console.error('Failed to update privacy:', error);
-          toast.error(failureMessage);
-        },
-      )
-      .finally(() => setPrivateSaving(false));
-  };
+  const handleUpdateOwner = (value: string) =>
+    saveOwnership({ ownerMemberId: ownerValueToMemberId(value) }, setOwnerSaving);
+  const handleTogglePrivate = (next: boolean) =>
+    saveOwnership({ isPrivate: next }, setPrivateSaving);
 
   const handleMarkIgnored = async () => {
     if (!onMarkIgnored) return;
@@ -190,7 +184,7 @@ export function TransactionDetailsTab({
         >
           {t.reimbursement.reimburses.value}:{' '}
           {formatDate(transaction.reimbursementOf.transactionDate, locale)} ·{' '}
-          {transaction.reimbursementOf.counterpartyName}
+          {payeeName(transaction.reimbursementOf.counterpartyName)}
           {transaction.transferPairId ? '' : ` · ${t.reimbursement.partial.value}`}
         </div>
       )}
@@ -378,7 +372,8 @@ export function TransactionDetailsTab({
                 className="seneca-tx-detail__ignore-btn"
                 style={{ display: 'block', width: '100%', textAlign: 'left', marginTop: 6 }}
               >
-                {formatDate(candidate.transactionDate, locale)} · {candidate.counterpartyName} ·{' '}
+                {formatDate(candidate.transactionDate, locale)} ·{' '}
+                {payeeName(candidate.counterpartyName)} ·{' '}
                 <PrivateAmount>
                   {formatAmount(
                     Math.abs(candidate.amount),

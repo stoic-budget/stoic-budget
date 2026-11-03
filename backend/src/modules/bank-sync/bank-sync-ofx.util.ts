@@ -44,7 +44,7 @@ export function buildOfxStatement(
     `<BANKTRANLIST><DTSTART>${ofxDate(start)}<DTEND>${ofxDate(end)}`,
   ];
   for (const item of transactions) {
-    const name = item.payee || item.description || item.memo || 'Unknown';
+    const name = item.payee || item.description || item.memo || '';
     const memo = item.memo || (item.payee ? item.description : '');
     lines.push(
       '<STMTTRN>',

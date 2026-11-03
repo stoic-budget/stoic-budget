@@ -21,6 +21,7 @@ import { isSuggestion } from '@/app/lib/category-suggestion';
 import type { CategoryList } from '@/app/lib/contracts';
 import { formatMoney } from '@/app/lib/format-money';
 import { useCategoryName } from '@/app/lib/use-category-name';
+import { usePayeeName } from '@/app/lib/use-payee-name';
 import { formatStoredDateWithOptions } from '@/app/lib/user-format-store';
 import {
   type Direction,
@@ -78,6 +79,7 @@ export function AllTransactionsTable({
 }): React.JSX.Element {
   const t = useIntlayer('allTransactionsPage');
   const tTable = useIntlayer('transactionsTable');
+  const payeeName = usePayeeName();
   const { locale } = useLocale();
   const router = useRouter();
   const categoryName = useCategoryName();
@@ -149,7 +151,7 @@ export function AllTransactionsTable({
               const Icon = DIRECTION_ICONS[direction];
               const amount = signedAmount(row);
               const { source, destination } = rowSides(row);
-              const description = row.paymentPurpose?.trim() || row.counterpartyName;
+              const description = row.paymentPurpose?.trim() || payeeName(row.counterpartyName);
               const budget = row.categoryId ? budgetByCategory.get(row.categoryId) : undefined;
               return (
                 <tr key={row.id} className={clsx(selected.has(row.id) && 'is-selected')}>

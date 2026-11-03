@@ -19,6 +19,7 @@ import { useIntlayer, useLocale } from '@/app/i18n';
 import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { useCategoryName } from '@/app/lib/use-category-name';
+import { usePayeeName } from '@/app/lib/use-payee-name';
 
 const EMPTY_CELL = '—';
 
@@ -41,6 +42,7 @@ export function StatementTransactionsPanel({
   const { locale } = useLocale();
   const categoryName = useCategoryName();
   const tTable = useIntlayer('transactionsTable');
+  const payeeName = usePayeeName();
   const tPage = useIntlayer('transactionsPageView');
   const bulkUpdateCategory = useBulkUpdateCategory();
   const [open, setOpen] = useState<Transaction | null>(null);
@@ -139,7 +141,7 @@ export function StatementTransactionsPanel({
                   {dateFormat.format(new Date(`${tx.transactionDate.slice(0, 10)}T00:00:00`))}
                 </span>
                 <span className="seneca-stmt-tx-panel__name">
-                  {tx.isPrivate ? EMPTY_CELL : tx.counterpartyName || EMPTY_CELL}
+                  {tx.isPrivate ? EMPTY_CELL : payeeName(tx.counterpartyName)}
                 </span>
                 <span className="seneca-stmt-tx-panel__category">
                   {tx.category && hasChosenCategory(tx.category.name) ? (

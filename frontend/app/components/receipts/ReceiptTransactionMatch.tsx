@@ -17,6 +17,7 @@ import apiClient, {
 } from '@/app/lib/api';
 import { invalidateFinancialData } from '@/app/lib/invalidate-document-lists';
 import { getCategoryDisplayName } from '@/app/lib/statement-categories';
+import { usePayeeName } from '@/app/lib/use-payee-name';
 import { tokens } from '@/lib/theme-tokens';
 import { groupSplitItems } from './helpers/receipt-split-groups';
 import type { ReceiptCategoryOption } from './receipt-types';
@@ -48,6 +49,7 @@ export function ReceiptTransactionMatch({
   onChanged,
 }: Props) {
   const t = useIntlayer('receiptDocumentPage');
+  const payeeName = usePayeeName();
   const { locale: appLocale } = useLocale();
   const [candidates, setCandidates] = useState<ReceiptMatchCandidate[]>([]);
   const [suggestion, setSuggestion] = useState<ReceiptSplitSuggestion | null>(null);
@@ -172,7 +174,7 @@ export function ReceiptTransactionMatch({
           </Typography>
           {candidates.map(row => (
             <Typography key={row.id} variant="body2">
-              {row.transactionDate.slice(0, 10)} · {row.counterpartyName} ·{' '}
+              {row.transactionDate.slice(0, 10)} · {payeeName(row.counterpartyName)} ·{' '}
               <PrivateAmount>{formatMoney(row.amount, row.currency, locale)}</PrivateAmount>
             </Typography>
           ))}

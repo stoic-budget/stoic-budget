@@ -51,11 +51,13 @@ import {
   getCategoryDisplayName,
   localizeStatementCategoryName,
 } from '@/app/lib/statement-categories';
+import { usePayeeName } from '@/app/lib/use-payee-name';
 import type { UseReviewInboxResult } from '../hooks/useReviewInbox';
 import {
   dateFilterToRange,
   documentHref,
   documentOf,
+  fill,
   groupByDocument,
   groupByPayee,
   isFolded,
@@ -64,6 +66,7 @@ import {
   type ReviewInboxDocument,
   type ReviewInboxItem,
   type ReviewInboxKind,
+  sameText,
   targetIds,
   toggleSelection,
 } from '../lib/review-inbox-model';
@@ -121,20 +124,11 @@ const headerStyle = (column: ReviewColumn): React.CSSProperties => ({
   ...reviewColumnWidthStyle(column),
 });
 
-/** Same words, ignoring case and spacing: "Invoice number 29…" vs "Invoice number29…". */
-function sameText(a: string, b: string): boolean {
-  const normalize = (text: string) => text.replace(/\s+/g, '').toLowerCase();
-  return normalize(a) === normalize(b);
-}
-
-function fill(template: string, params: Record<string, string | number>): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => String(params[key] ?? ''));
-}
-
 type Props = { state: UseReviewInboxResult };
 
 export function ReviewInboxView({ state }: Props) {
   const t = useIntlayer('reviewInbox');
+  const payeeName = usePayeeName();
   const tOwner = useIntlayer('transactionOwner');
   const drawer = useIntlayer('transactionsDrawer');
   const { locale } = useLocale();
@@ -363,13 +357,13 @@ export function ReviewInboxView({ state }: Props) {
     if (item.kind === 'transaction') {
       // The payee by the name the user knows; the bank's own wording underneath,
       // unless it only repeats the name (a scan's purpose is often its vendor).
-      title = item.payee?.name ?? item.counterpartyName;
+      title = item.payee?.name ?? payeeName(item.counterpartyName);
       const detail = [item.counterpartyName, item.paymentPurpose].find(
         text => text && !sameText(text, title),
       );
       meta = [formatDate(item.date, locale), detail].filter(Boolean).join(' · ');
     } else if (item.kind === 'duplicate') {
-      title = item.counterpartyName;
+      title = payeeName(item.counterpartyName);
       meta = [
         formatDate(item.date, locale),
         `${t.duplicateOf.value} ${item.duplicateOfId ? item.duplicateOfId.slice(0, 8) : '—'}`,

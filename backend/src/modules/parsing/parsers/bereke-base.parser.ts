@@ -385,9 +385,6 @@ export abstract class BerekeBaseParser<ColumnKey extends string> extends BasePar
     }
 
     purpose = this.sanitizePurpose(purpose);
-    if (!purpose) {
-      purpose = 'Не указано';
-    }
 
     const counterpartyName = this.resolveCounterpartyNameForGroup({
       cells,
@@ -540,7 +537,7 @@ export abstract class BerekeBaseParser<ColumnKey extends string> extends BasePar
     name = name.replace(/\s+/g, ' ').trim();
 
     return {
-      name: name || 'Неизвестный контрагент',
+      name,
       bin: binMatch ? binMatch[0] : undefined,
       account: accountMatch ? accountMatch[0] : undefined,
     };
@@ -602,7 +599,7 @@ export abstract class BerekeBaseParser<ColumnKey extends string> extends BasePar
       return fromCombined;
     }
 
-    return 'Неизвестный контрагент';
+    return '';
   }
 
   protected extractNameFromText(text: string): string | null {

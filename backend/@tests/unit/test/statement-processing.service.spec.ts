@@ -642,6 +642,23 @@ describe('StatementProcessingService', () => {
     expect(importSessionService.processImport).not.toHaveBeenCalled();
   });
 
+  it('stores a row the file named no one for as empty, not as a word in one language', async () => {
+    const [named] = parsedStatement.transactions;
+    parserFactory.getParser.mockResolvedValueOnce({
+      parse: vi.fn().mockResolvedValue({
+        metadata: parsedStatement.metadata,
+        transactions: [{ ...named, counterpartyName: '  ', paymentPurpose: undefined }],
+      }),
+      constructor: { name: 'FakeParser' },
+    });
+
+    await service.processStatement(statement.id);
+
+    expect(savedTransactions).toHaveLength(1);
+    // The app names it "Unknown payee" in the reader's language.
+    expect(savedTransactions[0]).toMatchObject({ counterpartyName: '', paymentPurpose: '' });
+  });
+
   it('keeps all dropped samples so every warning row remains repairable', async () => {
     const manyInvalidTransactions = Array.from({ length: 12 }, (_, index) => ({
       transactionDate: new Date('2024-01-05'),

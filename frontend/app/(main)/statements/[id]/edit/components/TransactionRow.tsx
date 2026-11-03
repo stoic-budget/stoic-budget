@@ -14,6 +14,7 @@ import { Checkbox } from '@/app/components/ui/checkbox';
 import { ModalFooter, ModalShell } from '@/app/components/ui/modal-shell';
 import { PRIVATE_CLASS } from '@/app/components/ui/private-amount';
 import { isSuggestion } from '@/app/lib/category-suggestion';
+import { usePayeeName } from '@/app/lib/use-payee-name';
 import type { Transaction } from '../editHelpers';
 import {
   computeMissingCategory,
@@ -129,6 +130,7 @@ export function TransactionRow({
   onCategoryClick,
   onDelete,
 }: TransactionRowProps): React.ReactElement {
+  const payeeName = usePayeeName();
   const missingCategory = computeMissingCategory(transaction);
   const rowSx = getRowSx(missingCategory);
   const display = (field: keyof Transaction): string =>
@@ -142,7 +144,7 @@ export function TransactionRow({
         />
       </TableCell>
       <TableCell sx={{ minWidth: 100 }}>{display('transactionDate')}</TableCell>
-      <TableCell sx={{ minWidth: 150 }}>{transaction.counterpartyName}</TableCell>
+      <TableCell sx={{ minWidth: 150 }}>{payeeName(transaction.counterpartyName)}</TableCell>
       <TableCell sx={{ minWidth: 200, maxWidth: 300 }}>
         <Tooltip title={transaction.paymentPurpose}>
           <Typography

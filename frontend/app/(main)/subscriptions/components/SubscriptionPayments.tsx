@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { resolveLocale } from '@/app/(main)/dashboard/helpers/dashboard-helpers';
 import {
   extractUploadErrorMessage,
@@ -18,7 +18,9 @@ import type { SubscriptionChargeCandidates, SubscriptionDetail } from '@/app/lib
 import { formatMoney } from '@/app/lib/format-money';
 import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
+import { usePayeeName } from '@/app/lib/use-payee-name';
 import { formatStoredDateWithOptions } from '@/app/lib/user-format-store';
+import { useAliveRef } from '../hooks/useAliveRef';
 
 export type CandidateRow = SubscriptionChargeCandidates[number];
 
@@ -65,6 +67,7 @@ export function SubscriptionPayments({
   onRemove,
 }: SubscriptionPaymentsProps) {
   const t = useIntlayer('subscriptionPayments');
+  const payeeName = usePayeeName();
   const { locale } = useLocale();
   const workspaceId = useWorkspaceId();
   const [mode, setMode] = useState<'idle' | 'manual' | 'pick'>('idle');
@@ -76,15 +79,7 @@ export function SubscriptionPayments({
   const [uploading, setUploading] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
-  // Set on every mount: React mounts twice in development, and a flag cleared by
-  // the first unmount alone dropped every payment an upload came back with.
-  const alive = useRef(false);
-  useEffect(() => {
-    alive.current = true;
-    return () => {
-      alive.current = false;
-    };
-  }, []);
+  const alive = useAliveRef();
 
   const candidates = useQuery({
     queryKey: queryKeys.subscriptionChargeCandidates({ workspaceId, vendorName, statementId }),
@@ -296,7 +291,7 @@ export function SubscriptionPayments({
                   onClick={() => void pick(row)}
                 >
                   <span className="seneca-sub-payments__candidate-name">
-                    {row.counterpartyName}
+                    {payeeName(row.counterpartyName)}
                   </span>
                   <span>{formatDate(row.transactionDate)}</span>
                   <PrivateAmount>{money(row.amount, row.currency)}</PrivateAmount>
