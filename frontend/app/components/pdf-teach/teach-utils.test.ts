@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   canTeach,
+  hasTextUnderText,
   isAreaBigEnough,
   missingGroups,
   nextTag,
@@ -105,5 +106,47 @@ describe('teach-utils', () => {
     expect(regionWarning(on('description', 110, 95, 150, 108), words)).toBeNull();
     expect(regionWarning(on('closingBalance', 290, 95, 330, 130), words)).toBe('notOneFigure');
     expect(regionWarning(on('closingBalance', 290, 115, 330, 130), words)).toBeNull();
+  });
+
+  it('finds old text under the visible one, not a word printed twice for bold', () => {
+    const word = (text: string, x: number, y: number) => ({
+      text,
+      page: 1,
+      x,
+      y,
+      width: 20,
+      height: 8,
+      dated: false,
+    });
+    // An edited row: "05 Mar … 300.00" printed over "05 Aug … 125.40".
+    const edited = [
+      word('05', 40, 100),
+      word('05', 40, 100),
+      word('Mar', 53, 100),
+      word('Aug', 55, 100.4),
+      word('ACME', 100, 100),
+      word('ACME', 100, 100),
+      word('300.00', 300, 100),
+      word('125.40', 300, 100),
+    ];
+    const rows = (count: number) =>
+      Array.from({ length: count }, (_, row) => edited.map(cell => ({ ...cell, y: cell.y + row * 15 })));
+    // Two words under others per row: a few stacked words are not an edited file.
+    expect(hasTextUnderText(rows(4).flat())).toBe(false);
+    expect(hasTextUnderText(rows(5).flat())).toBe(true);
+    // Bold drawn twice, a little apart; and words of one line side by side.
+    const bold = [word('Northwind', 40, 20), word('Northwind', 40.4, 20.2)];
+    const line = [word('05', 40, 120), word('Mar', 53, 120), word('ACME', 100, 120)];
+    expect(hasTextUnderText([...bold, ...bold, ...bold, ...line])).toBe(false);
+    // The next line down is not under this one.
+    const lines = [0, 10, 20].map(y => word(`Row ${y}`, 40, y));
+    expect(hasTextUnderText(lines)).toBe(false);
+  });
+
+  it('judges no column once the file has text under its text', () => {
+    const words = [{ text: 'ACME', page: 1, x: 40, y: 20, width: 20, height: 6, dated: false }];
+    const off = { tag: 'date' as const, page: 1, x0: 30, y0: 10, x1: 80, y1: 30 };
+    expect(regionWarning(off, words)).toBe('notColumn');
+    expect(regionWarning(off, words, true)).toBeNull();
   });
 });

@@ -66,9 +66,12 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
   const failed = preview?.checks.some(check => !check.passed && FORMAT_CHECKS.includes(check.code));
   // Areas that do not look like what their tag stands for, said as the parser will judge them.
   const warnings = session.regions.flatMap(region => {
-    const warning = regionWarning(region, session.words ?? []);
+    const warning = regionWarning(region, session.words ?? [], session.textUnderText);
     return warning ? [t.warnings[warning].value.replace('{tag}', label(region.tag))] : [];
   });
+  if (session.textUnderText) {
+    warnings.unshift(t.warnings.textUnderText.value);
+  }
 
   const status = (() => {
     if (!session.words) {

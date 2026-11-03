@@ -116,19 +116,56 @@ export function withRegion(regions: readonly TeachRegion[], region: TeachRegion)
 
 const lineKey = (word: LayoutWord) => `${word.page}:${Math.round(word.y)}`;
 
+/** Two words start this close, in points, when one is printed over the other. */
+const OVERPRINT_GAP = 3;
+/**
+ * Overprinted words it takes to call the file edited: text turned sideways in
+ * a margin stacks a few words at one spot too (four in some bank statements).
+ */
+const MIN_OVERPRINTED = 10;
+
+/**
+ * Whether the file holds text under its text: an edited PDF keeps the old
+ * words under the ones drawn over them ("Jun" under "Jan", "1,546.61" under
+ * "2,448.00"), and the parser reads both. Only different words count: the
+ * same word printed twice is how some PDFs draw bold.
+ */
+export function hasTextUnderText(words: readonly LayoutWord[]): boolean {
+  const sorted = [...words].sort((a, b) => a.page - b.page || a.y - b.y || a.x - b.x);
+  let overprinted = 0;
+  sorted.forEach((word, index) => {
+    for (let next = index + 1; next < sorted.length; next += 1) {
+      const other = sorted[next];
+      const near = Math.min(word.height, other.height) / 2;
+      if (other.page !== word.page || other.y - word.y >= near) {
+        break;
+      }
+      if (Math.abs(other.x - word.x) < OVERPRINT_GAP && other.text !== word.text) {
+        overprinted += 1;
+        break;
+      }
+    }
+  });
+  return overprinted >= MIN_OVERPRINTED;
+}
+
 /**
  * The first look of an area against its tag, as the parser will judge it:
  * a column crosses at least one transaction row (a line the parser reads as
  * starting with a date, `dated`); one figure is one line with a figure, not
- * a whole column.
+ * a whole column. With text under the text (`hasTextUnderText`) no line
+ * reads as dated, so a column is not judged.
  */
 export function regionWarning(
   region: TeachRegion,
   words: readonly LayoutWord[],
+  textUnderText = false,
 ): RegionWarning | null {
   const lines = new Set(wordsInRegion(words, region).map(lineKey));
   if (COLUMN_TAGS.has(region.tag)) {
-    return wordsInRegion(words, region).some(word => word.dated) ? null : 'notColumn';
+    return textUnderText || wordsInRegion(words, region).some(word => word.dated)
+      ? null
+      : 'notColumn';
   }
   if (ONE_FIGURE_TAGS.has(region.tag)) {
     const withFigures = [...lines].filter(key =>
