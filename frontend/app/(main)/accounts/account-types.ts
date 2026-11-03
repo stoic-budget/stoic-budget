@@ -81,6 +81,7 @@ const BANK_LABELS: Record<string, string> = {
   commbank: 'CommBank',
   commerce_bank: 'Commerce Bank',
   commercial_bank: 'Commercial Bank',
+  credit_agricole: 'Crédit Agricole',
 };
 
 export const statementBankLabel = (bankName: string): string | null =>

@@ -37,6 +37,24 @@ function dateRightOfText(items: PdfTextItem[], columns: LayoutColumn[]) {
   return found ? { ...found, items: items.filter(item => !under.includes(item)) } : null;
 }
 
+/**
+ * The value date printed beside the row's date, left of the text under no
+ * heading of its own ("16.12  16.12  Card ACME"): one word printed the way
+ * the row's date is, so an amount set left of the text ("11/14  21.12") is
+ * none.
+ */
+function valueDateAfter(
+  items: PdfTextItem[],
+  date: { text: string; used: number },
+  columns: LayoutColumn[],
+): number {
+  const text = columns.find(column => column.role === 'description');
+  const next = items[date.used];
+  const shape = (word: string) => word.replace(/\d/g, '9');
+  const alike = next && date.used === 1 && shape(next.text) === shape(date.text);
+  return alike && text && leadingDate([next]) && next.x + next.width <= text.x0 ? 1 : 0;
+}
+
 /** A row's date, if any, and the rest of its words by column. */
 export function readTableRow(row: PdfTextRow, columns: LayoutColumn[]) {
   const items = withoutRowNumber(
@@ -54,5 +72,6 @@ export function readTableRow(row: PdfTextRow, columns: LayoutColumn[]) {
   // A date in the description column ("03/07 07:50 …", "On" wrapped onto
   // "07 Sep") opens no row; it is left out of the text all the same.
   const date = found && startsLeftOfText(items[0], columns) ? found : null;
-  return { date, laidOut: layOutRow(found ? items.slice(found.used) : items, columns) };
+  const used = found ? found.used + valueDateAfter(items, found, columns) : 0;
+  return { date, laidOut: layOutRow(items.slice(used), columns) };
 }

@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "accountNumber": "FR7618706000001001230078957",
+    "currency": "EUR",
+    "dateFrom": "2021-12-15T00:00:00",
+    "dateTo": "2022-01-17T00:00:00",
+    "balanceStart": 701.88,
+    "balanceEnd": 626.41,
+    "rawHeader": "000100 220100 220100 000200",
+    "normalizedHeader": "000100 220100 220100 000200",
+    "locale": "fr"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2021-12-16T00:00:00",
+      "counterpartyName": "Leboncoin",
+      "paymentPurpose": "Avoir Carte Leboncoin 15/12",
+      "credit": 7.44,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "Paypal Luxembourg",
+      "paymentPurpose": "Carte Paypal Luxembourg 19/12",
+      "debit": 12.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-21T00:00:00",
+      "counterpartyName": "Www.orange.ro Bucuresti",
+      "paymentPurpose": "Carte Www.orange.ro Bucuresti 19/12",
+      "debit": 6.09,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "Paypal Luxembourg",
+      "paymentPurpose": "Carte Paypal Luxembourg 02/01",
+      "debit": 3.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-05T00:00:00",
+      "counterpartyName": "Cotis Eko",
+      "paymentPurpose": "Cotis Eko",
+      "debit": 2,
+      "currency": "EUR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-01-10T00:00:00",
+      "counterpartyName": "Amazon Payments PAYLI24415",
+      "paymentPurpose": "Carte Amazon Payments PAYLI24415 05/01",
+      "debit": 55.85,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-11T00:00:00",
+      "counterpartyName": "Lebara Mobile London",
+      "paymentPurpose": "Carte Lebara Mobile London 10/01",
+      "debit": 1.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    }
+  ]
+}

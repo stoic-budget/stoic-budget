@@ -39,4 +39,27 @@ describe('pdf-layout-stacked-header.helper', () => {
       ['Aug 9', 'Withdrawal', 200, undefined, undefined],
     ]);
   });
+
+  it('keeps the lower line alone when joining would lose one of its columns, and skips the value date', () => {
+    const rows = readLayoutTransactions([
+      // A tick-box mark over the right edge of "Crédit" would glue onto it.
+      row(100, [['Date', 20], ['Date', 50], ['þ', 551]]),
+      row(104, [['Libellé', 80], ['des', 115], ['opérations', 135], ['Débit', 435], ['Crédit', 519]]),
+      row(108, [['opé.', 20], ['valeur', 48]]),
+      row(130, [['16.12', 18], ['16.12', 50], ['Avoir', 80], ['ACME', 110], ['7,44', 529]]),
+      row(145, [['20.12', 18], ['20.12', 50], ['Carte', 80], ['ACME', 110], ['12,99', 435]]),
+    ]);
+    expect(rows.map(t => [t.dateText, t.description, t.debit, t.credit])).toEqual([
+      ['16.12', 'Avoir ACME', undefined, 7.44],
+      ['20.12', 'Carte ACME', 12.99, undefined],
+    ]);
+  });
+
+  it('reads an amount set left of the text as money, even when it reads as a date too', () => {
+    const rows = readLayoutTransactions([
+      row(100, [['Date', 40], ['Amount', 110], ['Description', 165]]),
+      row(120, [['11/14', 40], ['21.12', 120], ['ACME', 165], ['Store', 190]]),
+    ]);
+    expect(rows.map(t => [t.dateText, t.description, t.amount])).toEqual([['11/14', 'ACME Store', 21.12]]);
+  });
 });

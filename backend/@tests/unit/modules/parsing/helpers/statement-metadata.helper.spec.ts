@@ -57,6 +57,10 @@ describe('statement-metadata.helper', () => {
     expect(detectStatementCurrency('Try our app. EUR 1.00 and EUR 2.00, once USD')).toBe('EUR');
     expect(detectStatementCurrency('Try our new app today')).toBeNull();
     expect(detectStatementCurrency('ACCOUNT NO 100000001 CURRENCY LKR')).toBe('LKR');
+    // The currency named in capitals in the title outweighs a foreign amount quoted once.
+    expect(
+      detectStatementCurrency('RELEVE DE COMPTES EN EUROS\nMt initial : 29,89 RON\nRELEVE DE COMPTES EN EUROS'),
+    ).toBe('EUR');
   });
 
   it('reads which dollar from the prefix or the country', () => {

@@ -63,11 +63,18 @@ export function joinStackedHeaders(
     // Or that gives a date its own heading: "Transaction" over "Date" beside "Posting Date".
     const joinsMore =
       (hasAmount(columns) && !hasAmount(topColumns)) || dateCount(columns) > dateCount(topColumns);
+    const bottomColumns = close ? readHeader(bottom) : null;
+    // Never at the cost of a column the lower line reads alone: "þ" glued onto
+    // "Crédit" above it would lose the credit column.
+    const keepsBottom = (bottomColumns ?? []).every(column =>
+      columns?.some(joinedColumn => joinedColumn.role === column.role),
+    );
     if (
       stacked &&
       columns &&
+      keepsBottom &&
       (!topColumns || joinsMore) &&
-      columns.length > (readHeader(bottom)?.length ?? 0)
+      columns.length > (bottomColumns?.length ?? 0)
     ) {
       joined.push(stacked);
       index += 1;

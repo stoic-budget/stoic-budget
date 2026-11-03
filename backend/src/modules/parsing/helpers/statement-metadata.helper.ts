@@ -8,7 +8,7 @@ import { findFullDates, foldText, type NumericDateOrder } from './statement-date
  */
 
 const ISO_CODES =
-  /\b(KZT|UZS|GEL|UAH|BYN|AMD|AZN|KGS|TJS|TMT|USD|EUR|RUB|GBP|CNY|TRY|AED|JPY|CHF|CAD|AUD|SEK|NOK|DKK|PLN|CZK|HUF|RON|INR|BRL|MXN|SGD|HKD|NZD|ZAR|THB|MYR|IDR|ILS|SAR|QAR|KWD|LKR)\b/g;
+  /\b(KZT|UZS|GEL|UAH|BYN|AMD|AZN|KGS|TJS|TMT|USD|EUR|RUB|GBP|CNY|TRY|AED|JPY|CHF|CAD|AUD|SEK|NOK|DKK|PLN|CZK|HUF|RON|INR|BRL|MXN|SGD|HKD|NZD|ZAR|THB|MYR|IDR|ILS|SAR|QAR|KWD|LKR|EUROS?)\b/g;
 
 const PREFIXED_DOLLARS: [RegExp, string][] = [
   [/\bS\$/, 'SGD'],
@@ -61,12 +61,13 @@ const SYMBOLS: [string, string][] = [
 
 /**
  * The statement currency: the ISO code printed most often (upper case only:
- * "try" and "eur" are words too), else a currency symbol.
+ * "try" and "eur" are words too; "EUROS" is EUR), else a currency symbol.
  */
 export function detectStatementCurrency(text: string): string | null {
   const counts = new Map<string, number>();
   for (const match of text.matchAll(ISO_CODES)) {
-    counts.set(match[1], (counts.get(match[1]) ?? 0) + 1);
+    // "RELEVE DE COMPTES EN EUROS": the currency named in capitals counts as its code.
+    counts.set(match[1].slice(0, 3), (counts.get(match[1].slice(0, 3)) ?? 0) + 1);
   }
   const [mostPrinted] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
   if (mostPrinted) {

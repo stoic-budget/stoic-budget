@@ -32,6 +32,7 @@ export type BankLogoKey =
   | 'commbank'
   | 'commerce_bank'
   | 'commercial_bank'
+  | 'credit_agricole'
   | 'other';
 
 export type ResolvedBankLogo = {
@@ -75,6 +76,7 @@ const LOGO_SRC_BY_KEY: Record<BankLogoKey, string> = {
   commbank: '/images/bank-logo/bank.png',
   commerce_bank: '/images/bank-logo/bank.png',
   commercial_bank: '/images/bank-logo/bank.png',
+  credit_agricole: '/images/bank-logo/bank.png',
   other: '/images/bank-logo/bank.png',
 };
 
@@ -112,6 +114,7 @@ const DISPLAY_NAME_BY_KEY: Record<BankLogoKey, string> = {
   commbank: 'CommBank',
   commerce_bank: 'Commerce Bank',
   commercial_bank: 'Commercial Bank',
+  credit_agricole: 'Crédit Agricole',
   other: 'Bank',
 };
 
@@ -224,6 +227,13 @@ const resolveKeyFromName = (bankName: string): BankLogoKey => {
   }
   if (n === 'commercial_bank' || n.startsWith('commercial bank')) {
     return 'commercial_bank';
+  }
+  if (
+    n === 'credit_agricole' ||
+    n.startsWith('credit agricole') ||
+    n.startsWith('crédit agricole')
+  ) {
+    return 'credit_agricole';
   }
   if (n === 'citi' || n.startsWith('citi ') || n.startsWith('citibank')) {
     return 'citi';
