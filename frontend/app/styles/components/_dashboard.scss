@@ -1183,8 +1183,10 @@
       flex: 1 1 auto;
     }
 
-    /* A card with nothing to show takes no room. */
-    &:has(> .seneca-overview__handle:only-child) {
+    /* A card with nothing to show takes no room. Set from the same state the
+       spans come from: Firefox could keep a `:has(:only-child)` match after
+       the card arrived, hiding it while its neighbour still took half a row. */
+    &--empty {
       display: none;
     }
 

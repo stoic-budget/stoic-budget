@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQuery } from '@/app/test/query-wrapper';
 import {
@@ -117,6 +118,36 @@ describe('OverviewLayout', () => {
 
     await waitFor(() => expect(spanOf('top-categories card')).toBe('12'));
     expect(spanOf('cash-runway card')).toBe('6');
+  });
+
+  it('hides an empty section by the same state its partner is sized by, and shows it once it draws', async () => {
+    api.get.mockResolvedValue({ data: { state: null } });
+    let load = () => {};
+    function LateCard(): React.JSX.Element | null {
+      const [loaded, setLoaded] = useState(false);
+      load = () => setLoaded(true);
+      return loaded ? <div>runway card</div> : null;
+    }
+    const isEmpty = (id: string) =>
+      document
+        .querySelector(`[data-overview-section="${id}"]`)
+        ?.classList.contains('seneca-overview__section--empty');
+
+    renderWithQuery(
+      <OverviewLayout
+        sections={sections({ 'recent-transactions': null, 'cash-runway': <LateCard /> })}
+      />,
+    );
+
+    await waitFor(() => expect(isEmpty('cash-runway')).toBe(true));
+    expect(isEmpty('recent-transactions')).toBe(true);
+    expect(spanOf('top-categories card')).toBe('12');
+    expect(spanOf('safe-to-spend card')).toBe('12');
+
+    act(() => load());
+    await waitFor(() => expect(isEmpty('cash-runway')).toBe(false));
+    expect(spanOf('runway card')).toBe('6');
+    expect(spanOf('safe-to-spend card')).toBe('6');
   });
 
   it('mutes the cards about today while another month is picked, and only them', async () => {
