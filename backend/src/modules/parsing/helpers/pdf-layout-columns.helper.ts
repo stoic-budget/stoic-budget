@@ -118,6 +118,12 @@ function readHeadingColumns(row: PdfTextRow, taught?: TaughtHeadings): LayoutCol
 
   for (let index = 0; index < items.length; ) {
     const heading = matchHeading(items, index, taught);
+    const opensWithDate = heading?.role === 'date' || heading?.role === 'otherDate';
+    if (opensWithDate && columns.length === 0 && pendingX0 === null && standsApart(items, index)) {
+      // "Reference Number" left of "Trans Date", well apart: a column of its own, left of the date.
+      columns.push(leadingColumn(items.slice(0, index)));
+      strays = [];
+    }
     if (heading) {
       const last = items[index + heading.length - 1];
       columns.push({
@@ -162,6 +168,22 @@ function readHeadingColumns(row: PdfTextRow, taught?: TaughtHeadings): LayoutCol
   }
 
   return columns;
+}
+
+/** Words no heading knows open the header, set apart from the date heading after them. */
+function standsApart(items: PdfTextItem[], first: number): boolean {
+  const before = items[first - 1];
+  return Boolean(before) && items[first].x - (before.x + before.width) > ATTACH_GAP;
+}
+
+function leadingColumn(words: PdfTextItem[]): LayoutColumn {
+  const last = words[words.length - 1];
+  return {
+    role: 'other',
+    x0: words[0].x,
+    x1: last.x + last.width,
+    heading: words.map(headingWord).filter(Boolean).join(' '),
+  };
 }
 
 /** A header word no heading knows stays with the column before it, or waits for the first one. */

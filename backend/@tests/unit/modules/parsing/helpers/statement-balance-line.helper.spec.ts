@@ -22,4 +22,10 @@ describe('balanceLineEnd', () => {
   it('keeps to the label line when the next one is not its date', () => {
     expect(read('new balance\nprevious balance 10.00', 'new balance')).toBe('');
   });
+
+  it('ends at the next balance label on the same line', () => {
+    const text = 'previous balance $900.00 new balance $200.00';
+    const index = 'previous balance'.length;
+    expect(text.slice(index, balanceLineEnd(text, index, ['previous balance', 'new balance']))).toBe(' $900.00');
+  });
 });

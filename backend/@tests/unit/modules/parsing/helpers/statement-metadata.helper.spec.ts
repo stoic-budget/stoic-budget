@@ -184,6 +184,11 @@ describe('statement-metadata.helper', () => {
     expect(findStatementBalances(text, 'mdy')).toEqual({ start: 1000, end: 1250.5 });
   });
 
+  it('reads two balances a summary prints side by side on one line', () => {
+    const text = 'Previous Balance $900.00 New Balance $200.00\nPayments - $1,000.00';
+    expect(findStatementBalances(text, 'mdy')).toEqual({ start: 900, end: 200 });
+  });
+
   it('reads two dated balances, the earlier one opening', () => {
     const text = 'Balance as of 31.05.2025: 900,00 €\nBalance as of 01.05.2025: 1.000,00 €';
     expect(findStatementBalances(text, 'dmy')).toEqual({ start: 1000, end: 900 });

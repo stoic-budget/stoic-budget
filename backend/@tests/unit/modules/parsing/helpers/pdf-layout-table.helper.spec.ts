@@ -111,6 +111,25 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('leaves out a reference column set apart left of the date, and reads the rows after it', () => {
+    const rows = [
+      row(100, [
+        ['Reference', 40],
+        ['Number', 90],
+        ['Trans', 140],
+        ['Date', 170],
+        ['Post', 200],
+        ['Date', 225],
+        ['Description', 260],
+        ['Amount', 430],
+      ]),
+      row(120, [['P0000000AB0000001', 40], ['07/09', 145], ['07/10', 200], ['ACME', 260], ['Store', 285], ['8.17', 440]]),
+    ];
+    expect(readLayoutTransactions(rows).map(t => [t.dateText, t.description, t.amount])).toEqual([
+      ['07/10', 'ACME Store', 8.17],
+    ]);
+  });
+
   it('reads multi-line descriptions and the side of each amount', () => {
     const transactions = readLayoutTransactions([
       header,

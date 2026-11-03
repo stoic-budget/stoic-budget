@@ -1,0 +1,76 @@
+{
+  "metadata": {
+    "accountNumber": "3793 000000 10001",
+    "currency": "USD",
+    "dateFrom": "2022-07-09T00:00:00",
+    "dateTo": "2022-08-08T00:00:00",
+    "balanceStart": -916.96,
+    "balanceEnd": -203.39,
+    "rawHeader": "645742602854800 CREDIT ONE BANK CREDIT CARD STATEMENT Account Number 3793 000000 10001",
+    "normalizedHeader": "645742602854800 CREDIT ONE BANK CREDIT CARD STATEMENT Account Number 3793 000000 10001",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-07-09T00:00:00",
+      "counterpartyName": "PAYMENT THANK YOU (ARC) LAS VEGAS NV",
+      "paymentPurpose": "PAYMENT THANK YOU (ARC) LAS VEGAS NV",
+      "credit": 1500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-08-04T00:00:00",
+      "counterpartyName": "PROTONMAIL GENEVA",
+      "paymentPurpose": "PROTONMAIL GENEVA",
+      "debit": 8.17,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-08-05T00:00:00",
+      "counterpartyName": "AMZN MKTP US*7T4TU7Z13 AMZN.COM/BILL WA",
+      "paymentPurpose": "AMZN MKTP US*7T4TU7Z13 AMZN.COM/BILL WA",
+      "debit": 192.28,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-08-05T00:00:00",
+      "counterpartyName": "AN ADJ TO YOUR ACCOUNT LAS VEGAS NV",
+      "paymentPurpose": "AN ADJ TO YOUR ACCOUNT LAS VEGAS NV",
+      "debit": 583.04,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2022-08-07T00:00:00",
+      "counterpartyName": "AMZNPRIME DE*UZ3S27VA5 AMZN.DE/INFO",
+      "paymentPurpose": "AMZNPRIME DE*UZ3S27VA5 AMZN.DE/INFO",
+      "debit": 1.01,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-08-07T00:00:00",
+      "counterpartyName": "CREDIT REFUND LAS VEGAS NV",
+      "paymentPurpose": "CREDIT REFUND LAS VEGAS NV",
+      "debit": 583.04,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2022-08-08T00:00:00",
+      "counterpartyName": "CREDIT PROTECT 1-877-825-3242",
+      "paymentPurpose": "CREDIT PROTECT 1-877-825-3242",
+      "debit": 1.93,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-08-08T00:00:00",
+      "counterpartyName": "REVERSE CREDIT REFUND LAS VEGAS CREDIT",
+      "paymentPurpose": "REVERSE CREDIT REFUND LAS VEGAS CREDIT",
+      "credit": 583.04,
+      "currency": "USD"
+    }
+  ]
+}

@@ -33,6 +33,7 @@ import { CommBankParser } from '../parsers/commbank.parser';
 import { CommerceBankParser } from '../parsers/commerce-bank.parser';
 import { CommercialBankParser } from '../parsers/commercial-bank.parser';
 import { CreditAgricoleParser } from '../parsers/credit-agricole.parser';
+import { CreditOneParser } from '../parsers/credit-one.parser';
 import { CsvParser } from '../parsers/csv.parser';
 import { DocxParser } from '../parsers/docx.parser';
 import { ExcelParser } from '../parsers/excel.parser';
@@ -85,6 +86,7 @@ export const FALLBACK_CLAIMS: [
   [CommerceBankParser, { bankName: BankName.COMMERCE_BANK }],
   [CommercialBankParser, { bankName: BankName.COMMERCIAL_BANK }],
   [CreditAgricoleParser, { bankName: BankName.CREDIT_AGRICOLE }],
+  [CreditOneParser, { bankName: BankName.CREDIT_ONE }],
   [BerekeNewParser, { bankName: BankName.BEREKE_NEW, formatVersion: 'new' }],
   [BerekeOldParser, { bankName: BankName.BEREKE_OLD, formatVersion: 'old' }],
 ];
@@ -130,6 +132,7 @@ export function createParsers(): IParser[] {
     new CommerceBankParser(),
     new CommercialBankParser(),
     new CreditAgricoleParser(),
+    new CreditOneParser(),
     new GenericPdfParser(),
     new ExcelParser(),
     new CsvParser(),

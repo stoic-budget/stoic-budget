@@ -1,6 +1,7 @@
 import {
   detectNumericDateOrder,
   findFullDates,
+  orderWithinPeriod,
   parseDateParts,
   resolveDate,
 } from '@/modules/parsing/helpers/statement-date.helper';
@@ -46,6 +47,14 @@ describe('statement-date.helper', () => {
     // Dashes too: "12-31" is month-first, and an ISO date decides nothing.
     expect(detectNumericDateOrder(['12-20', '12-31'])).toBe('mdy');
     expect(detectNumericDateOrder(['2020-09-30', '2020-10-31'])).toBeNull();
+  });
+
+  it('settles an open day/month order by the period printed in words', () => {
+    const period = { from: new Date(2022, 6, 9), to: new Date(2022, 7, 8) };
+    expect(orderWithinPeriod(['07/09', '08/04', '08/05'], period)).toBe('mdy');
+    expect(orderWithinPeriod(['09/07', '04/08'], period)).toBe('dmy');
+    expect(orderWithinPeriod(['01/02'], period)).toBeNull();
+    expect(orderWithinPeriod(['07/09'], null)).toBeNull();
   });
 
   it('gives a yearless date the statement year, or the year before across a new year', () => {

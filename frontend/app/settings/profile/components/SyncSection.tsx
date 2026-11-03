@@ -53,6 +53,7 @@ const BANK_LABELS: Record<string, string> = {
   commerce_bank: 'Commerce Bank',
   commercial_bank: 'Commercial Bank',
   credit_agricole: 'Crédit Agricole',
+  credit_one: 'Credit One',
   other: 'Other',
 };
 

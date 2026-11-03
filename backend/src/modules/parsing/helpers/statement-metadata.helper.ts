@@ -235,7 +235,7 @@ function amountAfter(
   order: NumericDateOrder,
   pick: 'first' | 'last' = 'last',
 ) {
-  const line = text.slice(index, balanceLineEnd(folded, index));
+  const line = text.slice(index, balanceLineEnd(folded, index, [...OPENING, ...CLOSING]));
   let withoutDates = line;
   for (const found of findFullDates(line, order).reverse()) {
     withoutDates = `${withoutDates.slice(0, found.index)} ${withoutDates.slice(found.index + found.length)}`;

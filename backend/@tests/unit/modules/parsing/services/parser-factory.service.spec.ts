@@ -211,6 +211,7 @@ describe('ParserFactoryService', () => {
       'CommerceBankParser',
       'CommercialBankParser',
       'CreditAgricoleParser',
+      'CreditOneParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

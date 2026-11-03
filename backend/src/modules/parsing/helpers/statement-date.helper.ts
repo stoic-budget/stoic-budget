@@ -134,6 +134,35 @@ export function detectNumericDateOrder(samples: string[]): NumericDateOrder | nu
   return dayFirst ? 'dmy' : 'mdy';
 }
 
+/** Days a row's date may sit outside the printed period and still count as inside it. */
+const PERIOD_SLACK_DAYS = 3;
+
+/**
+ * "dmy" or "mdy" for rows whose dates leave the order open ("07/09", "08/04"):
+ * the order that puts more of them inside the statement's period, printed in
+ * words ("July 09, 2022 to August 08, 2022"). Null when the orders tie.
+ */
+export function orderWithinPeriod(
+  dateTexts: string[],
+  period: { from: Date; to: Date } | null,
+): NumericDateOrder | null {
+  if (!period || dateTexts.length === 0) {
+    return null;
+  }
+  const slack = PERIOD_SLACK_DAYS * 24 * 60 * 60 * 1000;
+  const inside = (order: NumericDateOrder) =>
+    dateTexts.filter(text => {
+      const parts = parseDateParts(text, order);
+      const time = parts ? resolveDate(parts, period.to).getTime() : Number.NaN;
+      return time >= period.from.getTime() - slack && time <= period.to.getTime() + slack;
+    }).length;
+  const [dayFirst, monthFirst] = [inside('dmy'), inside('mdy')];
+  if (dayFirst === monthFirst) {
+    return null;
+  }
+  return dayFirst > monthFirst ? 'dmy' : 'mdy';
+}
+
 const FULL_DATE_PATTERNS = [
   /\b\d{4}-\d{2}-\d{2}\b/g,
   /\b(?:19|20)\d{2}([/.])\d{1,2}\1\d{1,2}\b/g,

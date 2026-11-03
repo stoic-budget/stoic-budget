@@ -33,7 +33,11 @@ import {
   checkPrintedTotals,
   checkSectionTotals,
 } from '../helpers/statement-checks.helper';
-import { detectNumericDateOrder, type NumericDateOrder } from '../helpers/statement-date.helper';
+import {
+  detectNumericDateOrder,
+  type NumericDateOrder,
+  orderWithinPeriod,
+} from '../helpers/statement-date.helper';
 import { findHeaderPeriod } from '../helpers/statement-header-period.helper';
 import {
   detectStatementCurrency,
@@ -108,6 +112,10 @@ export class GenericPdfParser extends BaseParser {
     const dateOrder =
       detectNumericDateOrder(layoutTransactions.map(t => t.dateText)) ??
       detectNumericDateOrder(text.match(/\b\d{1,2}[./]\d{1,2}[./]\d{2,4}\b/g) ?? []) ??
+      orderWithinPeriod(
+        layoutTransactions.map(t => t.dateText),
+        findHeaderPeriod(text, 'dmy'),
+      ) ??
       'dmy';
     const latestPrinted = findStatementAnchor(text, dateOrder);
     const isCard = isCreditCardStatement(text);
