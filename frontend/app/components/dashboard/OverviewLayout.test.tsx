@@ -162,7 +162,7 @@ describe('OverviewLayout', () => {
     await waitFor(() =>
       expect(sectionOf('advice card')).toHaveClass('seneca-overview__section--muted'),
     );
-    expect(sectionOf('upcoming-charges card')).toHaveClass('seneca-overview__section--muted');
+    expect(sectionOf('safe-to-spend card')).toHaveClass('seneca-overview__section--muted');
     expect(sectionOf('cash-runway card')).not.toHaveClass('seneca-overview__section--muted');
 
     unmount();

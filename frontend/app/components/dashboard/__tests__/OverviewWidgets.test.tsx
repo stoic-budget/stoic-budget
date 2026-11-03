@@ -11,7 +11,6 @@ import { OverviewMonthProvider } from '../overview-month';
 import { SafeToSpendTile } from '../SafeToSpendTile';
 import { SectionSpanProvider } from '../section-span';
 import { TaxesCard } from '../TaxesCard';
-import { UpcomingChargesCard } from '../UpcomingChargesCard';
 
 const apiGet = vi.hoisted(() => vi.fn());
 
@@ -192,68 +191,6 @@ describe('SafeToSpendTile', () => {
 
     await waitFor(() => expect(apiGet).toHaveBeenCalled());
     expect(container).toBeEmptyDOMElement();
-  });
-});
-
-describe('UpcomingChargesCard', () => {
-  it('lists the charges due this week with the flags from the summary', async () => {
-    serve({
-      '/subscriptions/upcoming': [
-        {
-          id: 's-1',
-          vendorName: 'Netflix',
-          amount: '12.99',
-          currency: 'EUR',
-          nextChargeDate: '2026-10-15',
-        },
-      ],
-      '/subscriptions/summary': {
-        totalMonthlyCost: 80,
-        activeCount: 6,
-        upcomingCount: 1,
-        upcoming30DaysCount: 4,
-        upcoming30DaysAmount: 0,
-        priceChangeCount: 2,
-        priceChangeYearlyEffect: 24,
-        duplicateCount: 0,
-        overdueReviewCount: 0,
-        realizedAnnualSavings: 0,
-      },
-    });
-    renderWithQuery(<UpcomingChargesCard formatAmount={money} />);
-
-    expect(await screen.findByText('Netflix')).toBeInTheDocument();
-    // A row leads to its own subscription, ringed.
-    expect(screen.getByText('Netflix').closest('a')).toHaveAttribute(
-      'href',
-      '/subscriptions?focus=subscription:s-1',
-    );
-    // The chip leads to the subscriptions it is about, ringed.
-    expect((await screen.findByText('priceChanges')).closest('a')).toHaveAttribute(
-      'href',
-      '/subscriptions?focus=price-changed',
-    );
-    expect(screen.queryByText('duplicates')).toBeNull();
-    expect(apiGet).toHaveBeenCalledWith(
-      '/subscriptions/upcoming',
-      expect.objectContaining({ params: { days: 7 } }),
-    );
-  });
-
-  it('says so when nothing charges this week', async () => {
-    serve({ '/subscriptions/upcoming': [] });
-    renderWithQuery(<UpcomingChargesCard formatAmount={money} />);
-
-    expect(await screen.findByText('upcomingEmpty')).toBeInTheDocument();
-  });
-
-  it('draws nothing when the subscriptions cannot be read', async () => {
-    serve({});
-    const { container } = renderWithQuery(<UpcomingChargesCard formatAmount={money} />);
-
-    await waitFor(() => expect(apiGet).toHaveBeenCalled());
-    // The card holds its place while the request is out, then leaves.
-    await waitFor(() => expect(container).toBeEmptyDOMElement());
   });
 });
 
