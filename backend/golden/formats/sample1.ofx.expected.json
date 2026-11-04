@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "accountNumber": "987654321",
+    "currency": "USD",
+    "dateFrom": "2026-09-01T00:00:00",
+    "dateTo": "2026-09-30T00:00:00",
+    "balanceEnd": 3042.5
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-09-03T00:00:00",
+      "documentNumber": "T1",
+      "counterpartyName": "COFFEE & CO",
+      "paymentPurpose": "Latte",
+      "debit": 42.5,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2026-09-25T00:00:00",
+      "documentNumber": "T2",
+      "counterpartyName": "ACME PAYROLL",
+      "paymentPurpose": "ACME PAYROLL",
+      "credit": 3000,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2026-09-27T00:00:00",
+      "documentNumber": "T3",
+      "counterpartyName": "ACME STORE",
+      "paymentPurpose": "Wireless Buds",
+      "debit": 15,
+      "currency": "USD"
+    }
+  ]
+}
