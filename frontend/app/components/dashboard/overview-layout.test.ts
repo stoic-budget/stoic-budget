@@ -226,8 +226,22 @@ describe('hidden and optional sections', () => {
 });
 
 describe('the shipped layout', () => {
-  // Saved in the Administrator workspace on 2026-10-21, nothing hidden.
-  const administrator = {
+  // Saved in the Administrator workspace on 2026-11-02, nothing hidden.
+  const administrator = [
+    ['getting-started'],
+    ['kpi-income', 'kpi-spent', 'kpi-net', 'kpi-savings'],
+    ['cash-flow'],
+    ['top-categories', 'recent-transactions'],
+    ['balances', 'safe-to-spend'],
+    ['goals', 'cash-runway'],
+    ['budgets', 'month-close'],
+    ['net-worth'],
+    ['activity'],
+    ['advice'],
+  ];
+
+  // The Administrator layout of 2026-10-21, from before two sections were folded into others.
+  const older = {
     rows: [
       ['getting-started', 'budgets'],
       ['kpi-income', 'kpi-spent', 'kpi-net', 'kpi-savings'],
@@ -242,20 +256,11 @@ describe('the shipped layout', () => {
     hidden: [],
   };
 
-  it('is the Administrator layout, with the balances card under net worth', () => {
-    // The spending calendar became a view of the cash flow card, so its row is gone;
-    // upcoming charges went into the subscriptions card, leaving net worth alone.
-    // The KPI row leads with what is left to spend, the savings rate now in the net tile.
-    const rows = administrator.rows
-      .filter(row => !row.includes('spend-calendar'))
-      .map(row => row.filter(id => id !== 'upcoming-charges'))
-      .map(row => (row.includes('kpi-spent') ? [...KPI_SECTION_IDS] : row));
-    const netWorthRow = rows.findIndex(row => row.includes('net-worth'));
-    expect(DEFAULT_OVERVIEW_ROWS).toEqual([
-      ...rows.slice(0, netWorthRow + 1),
-      ['balances'],
-      ...rows.slice(netWorthRow + 1),
-    ]);
+  it('is the Administrator layout, its KPI row led by what is left to spend', () => {
+    // The savings rate went into the net tile.
+    expect(DEFAULT_OVERVIEW_ROWS).toEqual(
+      administrator.map(row => (row.includes('kpi-spent') ? [...KPI_SECTION_IDS] : row)),
+    );
     expect(DEFAULT_OVERVIEW_ROWS.flat()).not.toContain('money-owed');
     expect(DEFAULT_OVERVIEW_ROWS.flat()).not.toContain('taxes');
   });
@@ -264,8 +269,8 @@ describe('the shipped layout', () => {
     // Less the spending calendar, which is now a view of the cash flow card,
     // upcoming charges, which went into the subscriptions card, and the savings
     // rate, which went into the net tile.
-    expect(normalizeRows(administrator)).toEqual([
-      ...administrator.rows
+    expect(normalizeRows(older)).toEqual([
+      ...older.rows
         .filter(row => !row.includes('spend-calendar'))
         .map(row => row.filter(id => id !== 'upcoming-charges' && id !== 'kpi-savings')),
       ['balances'],

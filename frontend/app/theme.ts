@@ -8,12 +8,14 @@ import { selectMenuComponents } from './components/ui/select-menu-theme';
 export type ThemeMode = 'dark' | 'light';
 
 type AppSurfaceTokens = {
-  primary: string;
+  /** What a hover or a selection washes a row with: neutral in light, not the accent. */
+  hover: string;
 };
 
 const SURFACE_TOKENS: Record<ThemeMode, AppSurfaceTokens> = {
-  light: { primary: '#5b7b6a' },
-  dark: { primary: '#8fb39f' },
+  // Light: the warm graphite of figures ($seneca-color-figure); sage read as a cold blue tint.
+  light: { hover: '#24211e' },
+  dark: { hover: '#8fb39f' },
 };
 
 /**
@@ -511,8 +513,8 @@ export const createAppTheme = (mode: ThemeMode, preferences: AppThemeOptions = {
     palette: {
       ...paletteByMode[mode],
       action: {
-        hover: alpha(surfaces.primary, mode === 'dark' ? 0.12 : 0.06),
-        selected: alpha(surfaces.primary, mode === 'dark' ? 0.16 : 0.08),
+        hover: alpha(surfaces.hover, mode === 'dark' ? 0.12 : 0.06),
+        selected: alpha(surfaces.hover, mode === 'dark' ? 0.16 : 0.08),
       },
     },
   });

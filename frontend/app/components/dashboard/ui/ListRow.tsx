@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import Link from 'next/link';
 import type React from 'react';
+import { useOverviewHrefMarker } from '@/app/components/dashboard/overview-month';
 
 export interface ListRowProps {
   /** Icon badge or avatar. */
@@ -33,9 +34,10 @@ export function ListRow({
     </>
   );
   const rowClass = clsx('seneca-dashboard__row', href && 'seneca-dashboard__row--link', className);
-  if (href) {
+  const marked = useOverviewHrefMarker()(href);
+  if (marked) {
     return (
-      <Link href={href} className={rowClass}>
+      <Link href={marked} className={rowClass}>
         {content}
       </Link>
     );

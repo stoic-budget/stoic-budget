@@ -54,6 +54,7 @@ import type {
 import { attentionGroups, RISK_LABELS, STATUS_LABELS, SubscriptionCard } from './SubscriptionCard';
 import { SubscriptionDetailsDrawer } from './SubscriptionDetailsDrawer';
 import { SubscriptionFormDrawer } from './SubscriptionFormDrawer';
+import { SubscriptionsPastMonth } from './SubscriptionsPastMonth';
 import { SubscriptionsListSkeleton } from './SubscriptionsSkeleton';
 import { filterSubscriptions } from './subscription-filter.utils';
 
@@ -101,58 +102,6 @@ interface SubscriptionsContentProps {
   recordUsage?: (id: string) => Promise<void>;
   createSinkingFund?: (id: string) => Promise<void>;
   duplicateIds?: Set<string>;
-}
-
-function SubscriptionRowSkeleton(): React.JSX.Element {
-  return (
-    <tr>
-      <td>
-        <Skeleton variant="text" width={140} height={20} />
-        <Skeleton variant="text" width={70} height={16} />
-      </td>
-      <td>
-        <Skeleton variant="text" width={80} height={20} />
-      </td>
-      <td>
-        <Skeleton variant="text" width={70} height={20} />
-      </td>
-      <td>
-        <Skeleton variant="text" width={100} height={20} />
-      </td>
-      <td>
-        <Skeleton variant="text" width={60} height={20} />
-      </td>
-      <td>
-        <Skeleton variant="text" width={70} height={20} />
-      </td>
-    </tr>
-  );
-}
-
-function SubscriptionCardSkeleton(): React.JSX.Element {
-  return (
-    <Card variant="outlined">
-      <CardContent sx={{ pb: 1.5, '&:last-child': { pb: 1.5 } }}>
-        <Box
-          sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}
-        >
-          <Box>
-            <Skeleton variant="text" width={120} height={22} />
-            <Skeleton variant="text" width={90} height={26} />
-          </Box>
-          <Skeleton variant="rounded" width={60} height={22} />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2, mb: 1.5 }}>
-          <Skeleton variant="text" width={80} height={18} />
-          <Skeleton variant="text" width={70} height={18} />
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-          <Skeleton variant="circular" width={28} height={28} />
-          <Skeleton variant="circular" width={28} height={28} />
-        </Box>
-      </CardContent>
-    </Card>
-  );
 }
 
 const formatAmount = (amount: number, currency: string) =>
@@ -276,6 +225,7 @@ export function SubscriptionsContent(props: SubscriptionsContentProps) {
       <Box sx={{ mb: 2 }}>
         <PageTitle path="/subscriptions" summary={titleSummary} />
       </Box>
+      <SubscriptionsPastMonth currency={props.workspaceCurrency} />
       <Box
         sx={{
           display: 'flex',

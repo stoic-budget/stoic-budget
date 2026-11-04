@@ -13,13 +13,9 @@ import StatementCategoryDrawer from '@/app/(main)/statements/[id]/edit/Statement
 import { statementColumnWidthStyle } from '@/app/(main)/statements/components/columns/statement-columns';
 import { DateFilterDropdown } from '@/app/(main)/statements/components/filters/DateFilterDropdown';
 import { statementFilterSpan } from '@/app/(main)/statements/components/filters/filter-summary';
-import type { StatementFilterDate } from '@/app/(main)/statements/components/filters/statement-filters';
 import { useFilterSummary } from '@/app/(main)/statements/components/filters/useFilterSummary';
 import { useStatementPreview } from '@/app/(main)/statements/components/hooks/useStatementPreview';
 import {
-  buildDateModes,
-  buildDatePresets,
-  buildFilterLabels,
   buildFilterOptionLabels,
   buildListHeaderLabels,
 } from '@/app/(main)/statements/components/StatementsListView.utils';
@@ -52,9 +48,9 @@ import {
   localizeStatementCategoryName,
 } from '@/app/lib/statement-categories';
 import { usePayeeName } from '@/app/lib/use-payee-name';
+import { useReviewDateFilter } from '../hooks/useReviewDateFilter';
 import type { UseReviewInboxResult } from '../hooks/useReviewInbox';
 import {
-  dateFilterToRange,
   documentHref,
   documentOf,
   fill,
@@ -150,13 +146,9 @@ export function ReviewInboxView({ state }: Props) {
     resolveLabel(getNestedValue(statementsText, path)),
   );
   const listHeaderLabels = buildListHeaderLabels(statementsText);
-  const datePresets = buildDatePresets(filterOptionLabels);
-  const dateModes = buildDateModes(filterOptionLabels);
-  const [dateOpen, setDateOpen] = useState(false);
-  const [dateDraft, setDateDraft] = useState<StatementFilterDate | null>(state.initialDateFilter);
-  const [dateApplied, setDateApplied] = useState<StatementFilterDate | null>(
-    state.initialDateFilter,
-  );
+  const dateFilter = useReviewDateFilter(state, filterOptionLabels, statementsText);
+  const { datePresets, dateModes, dateOpen, setDateOpen, dateDraft, setDateDraft } = dateFilter;
+  const { dateApplied, applyDate, dateLabel } = dateFilter;
 
   const {
     kind,
@@ -177,19 +169,6 @@ export function ReviewInboxView({ state }: Props) {
     busy,
     approve,
   } = state;
-
-  const applyDate = (next: StatementFilterDate | null): void => {
-    const range = dateFilterToRange(next, new Date());
-    setDateDraft(next);
-    setDateApplied(next);
-    state.setFrom(range.from);
-    state.setTo(range.to);
-    setDateOpen(false);
-  };
-  const dateLabel =
-    (dateApplied?.preset && datePresets.find(o => o.value === dateApplied.preset)?.label) ||
-    (dateApplied?.mode && dateModes.find(o => o.value === dateApplied.mode)?.label) ||
-    buildFilterLabels(statementsText).date;
 
   const sourceLabels: Record<string, string> = Object.fromEntries(
     Object.entries(drawer.categorySource).map(([source, label]) => [source, label.value]),

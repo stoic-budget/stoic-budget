@@ -17,7 +17,6 @@ import { PRIVATE_CLASS } from '@/app/components/ui/private-amount';
 import { TextTabs } from '@/app/components/ui/text-tabs';
 import { useCategoryName } from '@/app/lib/use-category-name';
 import { formatStoredDate } from '@/app/lib/user-format-store';
-import { tokens } from '@/lib/theme-tokens';
 
 type SourceLabels = {
   sourceBank: string;
@@ -149,14 +148,7 @@ export function TopCategoriesLeaderboard({
     operations: sortLabels.sortByOperations,
   };
   return (
-    <div
-      style={{
-        border: '1px solid var(--border-color)',
-        background: 'var(--card-bg)',
-        padding: 20,
-        borderRadius: tokens.radius.lg,
-      }}
-    >
+    <div>
       <div
         style={{
           marginBottom: 8,

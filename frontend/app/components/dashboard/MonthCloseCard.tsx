@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import type React from 'react';
 import { fillTemplate } from '@/app/(main)/dashboard/helpers/dashboard-helpers';
+import { useOverviewHrefMarker } from '@/app/components/dashboard/overview-month';
 import { Check, ChevronRight } from '@/app/components/icons';
 import { fillTemplateNodes } from '@/app/components/ui/private-amount';
 import type { DashboardData } from '@/app/hooks/useDashboard';
@@ -50,7 +51,7 @@ const signed = (amount: number, formatAmount: (value: number) => string): string
 
 function ActionLink({ href, children }: { href: string; children: string }): React.JSX.Element {
   return (
-    <Link href={href} className="seneca-close-step__action">
+    <Link href={useOverviewHrefMarker()(href)} className="seneca-close-step__action">
       {children}
       <ChevronRight size={14} aria-hidden="true" />
     </Link>

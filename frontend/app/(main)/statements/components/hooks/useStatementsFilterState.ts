@@ -16,6 +16,7 @@ import {
   type StatementFilters,
   saveStatementFilters,
 } from '@/app/(main)/statements/components/filters/statement-filters';
+import { useClearAsOf } from '@/app/hooks/useClearAsOf';
 import { monthDeepLinkFilters } from '../filters/month-deep-link';
 import { reconcileFiltersWithColumns } from '../StatementsListView.utils';
 
@@ -72,6 +73,8 @@ export function useStatementsFilterState({
   const [columnsDrawerOpen, setColumnsDrawerOpen] = useState(false);
   const [columns, setColumns] = useState<StatementColumn[]>(DEFAULT_STATEMENT_COLUMNS);
   const [draftColumns, setDraftColumns] = useState<StatementColumn[]>(DEFAULT_STATEMENT_COLUMNS);
+  // Filters picked here replace the dashboard month a link opened the list on.
+  const clearAsOf = useClearAsOf();
 
   const initFromStorage = (deepLinkMonth?: string | null, ignoreStored = false): void => {
     const storedFilters =
@@ -92,6 +95,7 @@ export function useStatementsFilterState({
     setAppliedFilters(draftFilters);
     saveStatementFilters(draftFilters);
     setPage(1);
+    clearAsOf();
   };
 
   const applyAndClose = (close: () => void): void => {
@@ -105,6 +109,7 @@ export function useStatementsFilterState({
     setAppliedFilters(next);
     saveStatementFilters(next);
     close();
+    clearAsOf();
   };
 
   const resetAllFilters = (): void => {
@@ -112,6 +117,7 @@ export function useStatementsFilterState({
     setAppliedFilters(DEFAULT_STATEMENT_FILTERS);
     saveStatementFilters(DEFAULT_STATEMENT_FILTERS);
     setPage(1);
+    clearAsOf();
   };
 
   const updateColumnsToggle = (id: StatementColumnId, visible: boolean): void => {

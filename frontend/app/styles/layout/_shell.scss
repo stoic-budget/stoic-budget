@@ -430,9 +430,10 @@ $seneca-sidebar-fixed: 2 * $seneca-focus-ring-reach + 17px + 14px;
     }
   }
 
+  // Light: a calm warm tile and the figures' graphite, a step past the hover; not sage.
   &--active {
-    background: var(--primary-50);
-    color: var(--primary);
+    background: $seneca-color-ink-100;
+    color: $seneca-color-figure;
     font-weight: 600;
 
     @include dark {
@@ -441,7 +442,7 @@ $seneca-sidebar-fixed: 2 * $seneca-focus-ring-reach + 17px + 14px;
     }
 
     &:hover {
-      background: var(--primary-100);
+      background: $seneca-color-ink-150;
 
       @include dark {
         background: $seneca-color-primary-200-dk;
@@ -689,7 +690,9 @@ $seneca-sidebar-fixed: 2 * $seneca-focus-ring-reach + 17px + 14px;
     display: none;
   }
 
-  .seneca-shell__content > main {
+  // Room for the bottom bar only where it is drawn: login, onboarding and the
+  // shared pages have none, and the empty 56px made them scroll.
+  .seneca-shell__content:has(> .seneca-bottom-bar) > main {
     padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
   }
 }

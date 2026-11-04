@@ -13,6 +13,7 @@ const apiGet = vi.hoisted(() => vi.fn());
 
 // The card has its own test; here only what the Overview hands it matters.
 vi.mock('../CashFlowCard', () => ({
+  reportsHref: (month: string) => `/reports?tab=cash-flow&month=${month}`,
   CashFlowCard: ({ activeMonth, days }: { activeMonth: string; days: unknown[] }) => (
     <div data-testid="cash-flow" data-days={days.length}>
       {activeMonth}
@@ -219,7 +220,10 @@ describe('OverviewTab', () => {
     const recentTransactionsLink = links.find(link =>
       link.getAttribute('href')?.startsWith('/statements/submit'),
     );
-    expect(recentTransactionsLink?.getAttribute('href')).toBe('/statements/submit?month=2026-02');
+    // A past month is marked, so the list it opens warns it is not the present.
+    expect(recentTransactionsLink?.getAttribute('href')).toBe(
+      '/statements/submit?month=2026-02&asOf=2026-02',
+    );
   });
 
   it('renders budget and subscriptions cards below the main row once their fetches resolve', async () => {
