@@ -74,7 +74,7 @@ function storeView(view: CashFlowView): void {
 }
 
 /** Reports → Cash flow opened on the same month. */
-function reportsHref(month: string): string {
+export function reportsHref(month: string): string {
   const { from, to } = monthRange(month);
   return `/reports?tab=cash-flow&from=${from}&to=${to}`;
 }

@@ -282,14 +282,15 @@ export function ProfileStep({
                     alignSelf: 'flex-start',
                     flexWrap: 'wrap',
                     // A soft neutral track; the picked option is a white chip with a
-                    // hairline, no shadow and no icons.
+                    // hairline, no shadow and no icons. Rounded corners, not a pill:
+                    // on a phone the options wrap and a pill track turns into an oval.
                     bgcolor: 'var(--surface-soft)',
-                    borderRadius: 999,
+                    borderRadius: 'var(--radius-md)',
                     p: 0.5,
                     gap: 0.5,
                     '& .MuiToggleButtonGroup-grouped': {
                       border: '1px solid transparent',
-                      borderRadius: 999,
+                      borderRadius: 'var(--radius-sm)',
                     },
                   }}
                 >
@@ -307,7 +308,7 @@ export function ProfileStep({
                         textTransform: 'none',
                         px: 2,
                         fontWeight: 500,
-                        borderRadius: '999px !important',
+                        borderRadius: 'var(--radius-sm) !important',
                         color: 'var(--text-muted)',
                         '&.Mui-selected, &.Mui-selected:hover': {
                           color: 'text.primary',

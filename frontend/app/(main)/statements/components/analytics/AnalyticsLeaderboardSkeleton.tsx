@@ -1,7 +1,6 @@
 'use client';
 
 import Skeleton from '@mui/material/Skeleton';
-import { tokens } from '@/lib/theme-tokens';
 
 const STAT_CARD_KEYS = ['stat-0', 'stat-1', 'stat-2', 'stat-3'];
 const ROW_KEYS = ['row-0', 'row-1', 'row-2', 'row-3', 'row-4', 'row-5', 'row-6', 'row-7'];
@@ -48,20 +47,13 @@ function LeaderboardRowSkeleton(): React.JSX.Element {
 
 export function AnalyticsLeaderboardSkeleton(): React.JSX.Element {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div className="seneca-stat-tiles">
         {STAT_CARD_KEYS.map(key => (
           <StatCardSkeleton key={key} />
         ))}
       </div>
-      <div
-        style={{
-          border: '1px solid var(--border-color)',
-          background: 'var(--card-bg)',
-          padding: 20,
-          borderRadius: tokens.radius.lg,
-        }}
-      >
+      <div>
         <div
           style={{
             marginBottom: 8,

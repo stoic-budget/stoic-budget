@@ -43,6 +43,12 @@ const TONE_FILL: Record<ReturnType<typeof budgetTone>, string> = {
   over: 'var(--money-down)',
 };
 
+/** The budgets page measured on the card's month; the current one needs no month. */
+function budgetsHref(month: string, toList: boolean): string {
+  const query = monthEndOrToday(month) ? `?month=${month}` : '';
+  return `/budgets${query}${toList ? '#budget-list' : ''}`;
+}
+
 function mostUsed(budgets: BudgetSummary[]): BudgetSummary[] {
   return [...budgets].sort((a, b) => b.percentUsed - a.percentUsed);
 }
@@ -91,7 +97,7 @@ export function BudgetSummaryWidget({
       <DashboardCard
         title={t.title}
         subtitle={monthLabel}
-        action={<CardLink href="/budgets#budget-list">{t.viewAll}</CardLink>}
+        action={<CardLink href={budgetsHref(month, true)}>{t.viewAll}</CardLink>}
       >
         <BudgetRowsSkeleton rows={LOADING_BUDGETS} wide={wide} />
       </DashboardCard>
@@ -127,7 +133,7 @@ export function BudgetSummaryWidget({
       title={t.title}
       subtitle={monthLabel}
       action={
-        <CardLink href={hasBudgets ? '/budgets#budget-list' : '/budgets'}>
+        <CardLink href={budgetsHref(month, hasBudgets)}>
           {hasBudgets ? t.viewAll : t.setUpBudgets}
         </CardLink>
       }

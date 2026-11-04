@@ -156,30 +156,15 @@ export function InvoicesListView(): React.JSX.Element {
           gap: 16,
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 16,
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-          }}
-        >
+        {/* The statements header's row: on a phone the title takes its own line. */}
+        <div className="seneca-stmt-toolbar">
           <PageTitle
             path="/invoices"
             summary={
               status === 'all' ? undefined : `${t.columns.status.value}: ${statusLabels[status]}`
             }
           />
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'flex-end',
-              gap: 8,
-              alignItems: 'center',
-            }}
-          >
+          <div className="seneca-stmt-toolbar__group">
             <Button variant="outline" onClick={() => router.push('/invoices/clients')}>
               {t.clientsNav}
             </Button>

@@ -2,6 +2,7 @@
 
 import clsx from 'clsx';
 import React from 'react';
+import { DocumentTypeIcon } from '@/app/components/DocumentTypeIcon';
 import { AlertCircle } from '@/app/components/icons';
 import { canTeach } from '@/app/components/pdf-teach/teach-utils';
 import { Checkbox } from '@/app/components/ui/checkbox';
@@ -18,6 +19,8 @@ import type { StatementListItem } from './statements-list-item.types';
  */
 export function StatementsListItemMobile(props: {
   statement: StatementListItem;
+  isReceipt: boolean;
+  previewSource: 'statement' | 'receipt';
   c: typeof tokens.color | typeof tokens.dark.color;
   merchantLabel: string;
   amountLabel: string;
@@ -37,6 +40,7 @@ export function StatementsListItemMobile(props: {
   const { statement, c, merchantLabel, amountLabel, dateLabel, isProcessing, hasError } = props;
   const { danger, showAmountLoader, caption, selected, selectionDisabled } = props;
   const { onToggleSelect, onIconClick, rowsToggle } = props;
+  const { isReceipt, previewSource } = props;
   return (
     <>
       {/* Mobile layout (<768px): who and how much on the first line, when and what
@@ -64,7 +68,16 @@ export function StatementsListItemMobile(props: {
             onIconClick();
           }}
           aria-label={statement.fileName}
-        ></button>
+        >
+          <DocumentTypeIcon
+            fileType={isReceipt ? 'pdf' : statement.fileType}
+            fileName={statement.fileName}
+            fileId={statement.id}
+            source={previewSource}
+            size={28}
+            muted
+          />
+        </button>
         <div className="seneca-stmt-list-item__mobile-body">
           <div className="seneca-stmt-list-item__mobile-line">
             <span className="seneca-stmt-list-item__mobile-merchant">

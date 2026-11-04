@@ -262,7 +262,7 @@ export function CreateTableDialog(props: CreateTableDialogProps) {
   const filtered = Object.keys(normalizeSourceFilters(form.sourceFilters)).some(
     key => key !== 'ids',
   );
-  // The whole source, unfiltered: the "of N" of the count and the currency options.
+  // The whole source, unfiltered: the "of N" of the count.
   const whole = useSourcePreview({
     kind: form.sourceKind,
     filters: EMPTY_SOURCE_FILTERS,
@@ -350,7 +350,6 @@ export function CreateTableDialog(props: CreateTableDialogProps) {
                   setForm(prev => ({ ...prev, sourceFilters: { ...prev.sourceFilters, ...patch } }))
                 }
                 categories={categories}
-                currencies={whole.preview?.currencies ?? []}
                 labels={labels.sourcePanel}
               />
             </div>

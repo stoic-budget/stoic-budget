@@ -142,12 +142,12 @@ describe('OverviewLayout', () => {
     await waitFor(() => expect(isEmpty('cash-runway')).toBe(true));
     expect(isEmpty('recent-transactions')).toBe(true);
     expect(spanOf('top-categories card')).toBe('12');
-    expect(spanOf('safe-to-spend card')).toBe('12');
+    expect(spanOf('goals card')).toBe('12');
 
     act(() => load());
     await waitFor(() => expect(isEmpty('cash-runway')).toBe(false));
     expect(spanOf('runway card')).toBe('6');
-    expect(spanOf('safe-to-spend card')).toBe('6');
+    expect(spanOf('goals card')).toBe('6');
   });
 
   it('mutes the cards about today while another month is picked, and only them', async () => {
@@ -201,7 +201,7 @@ describe('OverviewLayout', () => {
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: 'Reset layout' })).not.toBeInTheDocument(),
     );
-    expect(order().slice(0, 3)).toEqual(['getting-started', 'budgets', 'kpi-income']);
+    expect(order().slice(0, 3)).toEqual(['getting-started', 'kpi-income', 'kpi-spent']);
   });
 
   it('switches on a widget that is off by default from the picker', async () => {

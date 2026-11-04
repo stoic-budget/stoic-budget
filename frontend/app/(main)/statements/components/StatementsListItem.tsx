@@ -210,6 +210,8 @@ export function StatementsListItem(props: StatementsListItemProps) {
 
       <StatementsListItemMobile
         statement={statement}
+        isReceipt={isReceipt}
+        previewSource={previewSource}
         c={c}
         merchantLabel={merchantLabel}
         amountLabel={amountLabel}

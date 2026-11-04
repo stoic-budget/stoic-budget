@@ -74,6 +74,14 @@ describe('PDFPreviewModal manual attach flow', () => {
     originalRevokeObjectUrl = URL.revokeObjectURL;
 
     vi.stubGlobal('alert', vi.fn());
+    // jsdom has no ResizeObserver; the page is measured once on its own.
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        observe(): void {}
+        disconnect(): void {}
+      },
+    );
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 404 }));
     Object.defineProperty(URL, 'createObjectURL', {
       configurable: true,

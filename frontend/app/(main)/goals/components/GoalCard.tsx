@@ -6,6 +6,7 @@ import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import NextLink from 'next/link';
 import type React from 'react';
+import { useOverviewHrefMarker, useOverviewMonth } from '@/app/components/dashboard/overview-month';
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { formatMoney } from '@/app/lib/format-money';
 import { tokens } from '@/lib/theme-tokens';
@@ -27,6 +28,11 @@ interface GoalCardProps {
 
 export function GoalCard({ goal, locale, labels, note, actions }: GoalCardProps) {
   const money = (value: number) => formatMoney(value, goal.currency, locale);
+  // On the dashboard the goal opens on the month in view, as the card shows it.
+  const shown = useOverviewMonth();
+  const href = useOverviewHrefMarker()(
+    shown ? `/goals/${goal.id}?month=${shown.month}` : `/goals/${goal.id}`,
+  );
 
   return (
     <Box
@@ -44,7 +50,7 @@ export function GoalCard({ goal, locale, labels, note, actions }: GoalCardProps)
           <Box sx={{ minWidth: 0 }}>
             <Link
               component={NextLink}
-              href={`/goals/${goal.id}`}
+              href={href}
               underline="hover"
               color="inherit"
               variant="body1"

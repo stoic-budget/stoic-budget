@@ -10,7 +10,11 @@ const apiPut = vi.hoisted(() => vi.fn());
 vi.mock('@/app/lib/api', () => ({ default: { get: apiGet, put: apiPut } }));
 vi.mock('@/app/hooks/useWorkspaceId', () => ({ useWorkspaceId: () => 'ws-1' }));
 const search = vi.hoisted(() => ({ params: new URLSearchParams() }));
-vi.mock('next/navigation', () => ({ useSearchParams: () => search.params }));
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => search.params,
+  useRouter: () => ({ replace: vi.fn() }),
+  usePathname: () => '/reports',
+}));
 
 let hook: ReturnType<typeof useCashFlowMap> | null = null;
 
@@ -125,6 +129,14 @@ describe('useCashFlowMap: the period a link names', () => {
     renderWithQuery(<Probe />);
     expect(hook?.filters.from).toBe('2026-09-01');
     expect(hook?.filters.to).toBe('2026-09-30');
+  });
+
+  it('opens on a whole `?month=` when no days are named, as a dashboard category link does', () => {
+    search.params = new URLSearchParams('tab=cash-flow&month=2026-02&focus=category:rent');
+    renderWithQuery(<Probe />);
+    expect(hook?.filters.from).toBe('2026-02-01');
+    expect(hook?.filters.to).toBe('2026-02-28');
+    search.params = new URLSearchParams();
   });
 
   it('falls back to the first preset on a malformed or reversed period', () => {

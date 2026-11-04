@@ -144,9 +144,10 @@
       }
     }
 
+    // As in the sidebar: a calm warm tile in light, not sage.
     &--active {
-      background: var(--primary-50);
-      color: var(--primary);
+      background: $seneca-color-ink-100;
+      color: $seneca-color-figure;
       font-weight: 600;
 
       @include dark {

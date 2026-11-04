@@ -62,7 +62,9 @@ type StatementCategoryDrawerProps = {
   open: boolean;
   onClose: () => void;
   categories: StatementCategoryNode[];
-  selectedCategoryId: string;
+  selectedCategoryId?: string;
+  /** Several picks, a tick on each (a filter); the caller toggles and keeps the drawer open. */
+  selectedCategoryIds?: string[];
   onSelect: (categoryId: string) => void;
   selecting?: boolean;
   /** A first row that picks "no category" (''), named by the caller: "Clear", "Any category"… */
@@ -80,7 +82,8 @@ export default function StatementCategoryDrawer({
   open,
   onClose,
   categories,
-  selectedCategoryId,
+  selectedCategoryId = '',
+  selectedCategoryIds,
   onSelect,
   selecting = false,
   clearLabel,
@@ -93,6 +96,7 @@ export default function StatementCategoryDrawer({
   const [recent, setRecent] = useState<string[]>([]);
   const t = useIntlayer('categoriesPage');
   const { locale } = useLocale();
+  const picked = selectedCategoryIds ?? (selectedCategoryId ? [selectedCategoryId] : []);
 
   useEffect(() => {
     if (open) {
@@ -172,10 +176,10 @@ export default function StatementCategoryDrawer({
                   type="button"
                   disabled={selecting}
                   onClick={() => select('')}
-                  className={`seneca-cat-drawer__option${selectedCategoryId === '' ? ' seneca-cat-drawer__option--selected' : ''}`}
+                  className={`seneca-cat-drawer__option${picked.length === 0 ? ' seneca-cat-drawer__option--selected' : ''}`}
                 >
                   <span className="seneca-cat-drawer__option-name">{clearLabel}</span>
-                  {selectedCategoryId === '' ? <Check size={18} color="var(--primary)" /> : null}
+                  {picked.length === 0 ? <Check size={18} color="var(--primary)" /> : null}
                 </button>
               ) : null}
 
@@ -183,7 +187,7 @@ export default function StatementCategoryDrawer({
                 <div className="seneca-cat-drawer__no-results">{t.noData.value}</div>
               ) : (
                 filteredCategories.map(category => {
-                  const isSelected = selectedCategoryId === category.id;
+                  const isSelected = picked.includes(category.id);
                   return (
                     <button
                       key={category.id}

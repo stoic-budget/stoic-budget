@@ -4,7 +4,6 @@ import type React from 'react';
 import { AnalyticsLeaderboardSkeleton } from '@/app/(main)/statements/components/analytics/AnalyticsLeaderboardSkeleton';
 import { AnalyticsMonthEmpty } from '@/app/(main)/statements/components/analytics/flow/AnalyticsMonthEmpty';
 import type { AnalyticsViewMode } from '@/app/(main)/statements/components/analytics/flow/analytics-flow.types';
-import { tokens } from '@/lib/theme-tokens';
 
 type Props = {
   title: string;
@@ -28,8 +27,9 @@ type Props = {
 };
 
 /**
- * One leaderboard on the Cash flow tab: its name, its own header and the body,
- * which is the content, its skeleton or the empty month.
+ * One leaderboard on the Cash flow tab, a card like the ones above it: its name
+ * and its own header inside, then the body, which is the content, its skeleton
+ * or the empty month.
  */
 export function AnalyticsSection({
   title,
@@ -47,7 +47,7 @@ export function AnalyticsSection({
   const showEmpty = viewMode !== 'chart' && !loading && isEmpty;
   return (
     <section
-      className="seneca-cash-flow__section"
+      className="seneca-dashboard__card seneca-cash-flow__section"
       data-attention={viewMode === 'chart' ? (attentionId ?? undefined) : undefined}
     >
       <div className="seneca-cash-flow__section-head">
@@ -56,15 +56,7 @@ export function AnalyticsSection({
       </div>
       {showSkeleton ? <AnalyticsLeaderboardSkeleton /> : null}
       {showEmpty ? (
-        <div
-          style={{
-            border: '1px dashed var(--border-color)',
-            background: 'var(--card-bg)',
-            borderRadius: tokens.radius.lg,
-          }}
-        >
-          <AnalyticsMonthEmpty month={month} isIncome={isIncome} labels={emptyLabels} />
-        </div>
+        <AnalyticsMonthEmpty month={month} isIncome={isIncome} labels={emptyLabels} />
       ) : null}
       {showSkeleton || showEmpty ? null : children}
     </section>

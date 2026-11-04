@@ -60,19 +60,20 @@ const CARD_UNITS = 2;
 const LEGACY_KPI_ROW = 'kpis';
 
 /**
- * The arrangement set up in the Administrator workspace (2026-10-21), made
+ * The arrangement set up in the Administrator workspace (2026-11-02), made
  * everyone's starting point.
  */
 export const DEFAULT_OVERVIEW_ROWS: OverviewRows = [
-  ['getting-started', 'budgets'],
+  ['getting-started'],
   [...KPI_SECTION_IDS],
-  ['cash-flow', 'goals'],
+  ['cash-flow'],
   ['top-categories', 'recent-transactions'],
-  ['safe-to-spend', 'cash-runway'],
+  ['balances', 'safe-to-spend'],
+  ['goals', 'cash-runway'],
+  ['budgets', 'month-close'],
   ['net-worth'],
-  ['balances'],
   ['activity'],
-  ['advice', 'month-close'],
+  ['advice'],
 ];
 
 /**
