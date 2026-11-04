@@ -27,6 +27,7 @@ describe('statement-date.helper', () => {
     ['Sep 3, 2025', 'dmy', { day: 3, month: 9, year: 2025 }],
     ['September 7,2017', 'dmy', { day: 7, month: 9, year: 2017 }],
     ['14 dic', 'dmy', { day: 14, month: 12, year: undefined }],
+    ['JAN01', 'dmy', { day: 1, month: 1, year: undefined }],
   ] as const)('reads %s', (text, order, expected) => {
     expect(parseDateParts(text, order)).toEqual(expected);
   });

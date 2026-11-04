@@ -221,6 +221,8 @@ describe('statement-metadata.helper', () => {
     expect(readAccountHeading('Statement Period: 11/19/2016 - 12/16/2016')).toBeNull();
     expect(readAccountHeading('Order - 12345')).toBeNull();
     expect(readAccountHeading('100000000001 (100)')).toEqual({ accountNumber: '100000000001' });
+    expect(readAccountHeading('PRIMARY SAVINGS  ACCT# 1')).toEqual({ accountNumber: '1' });
+    expect(readAccountHeading('SEE ACCT# 1 FOR DETAILS 100.00')).toBeNull();
     expect(readAccountHeading('Cheque 4309 (100)')).toBeNull();
     expect(readAccountHeading('100000000001 (100) 116.61')).toBeNull();
   });
@@ -228,6 +230,10 @@ describe('statement-metadata.helper', () => {
   it('tells a card statement by its wording', () => {
     expect(isCreditCardStatement('Minimum Payment Due 35.00\nPayment Due Date 10/24/2025')).toBe(true);
     expect(isCreditCardStatement('Payment received, thank you')).toBe(false);
+    // A bank account's notes on a credit line ask for no payment.
+    expect(
+      isCreditCardStatement('HOME EQUITY LINE OF CREDIT\nCREDIT LINE FINANCE CHARGE\nagainst your credit limit'),
+    ).toBe(false);
   });
 
   it('tells a totals line from a row, wherever the label stands', () => {

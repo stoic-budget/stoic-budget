@@ -80,7 +80,17 @@ export function readHeaderRow(row: PdfTextRow, taught?: TaughtHeadings): LayoutC
   const roles = new Set(columns.map(column => column.role));
   const hasMoney = roles.has('debit') || roles.has('credit') || roles.has('amount');
   const hasText = roles.has('date') || roles.has('description');
-  return columns.length >= 3 && hasMoney && (hasText || isMoneyOnlyHeader(roles)) ? columns : null;
+  const valid = columns.length >= 3 && hasMoney && (hasText || isMoneyOnlyHeader(roles));
+  return valid && !isSummaryGrid(columns) ? columns : null;
+}
+
+/**
+ * "DATE  AMOUNT  DATE  AMOUNT  DATE  AMOUNT": a grid summing one kind of entry,
+ * three or more to a line. Its figures repeat rows already read.
+ */
+function isSummaryGrid(columns: LayoutColumn[]): boolean {
+  const dates = columns.filter(column => column.role === 'date').length;
+  return dates >= 3 && columns.every(column => column.role === 'date' || column.role === 'amount');
 }
 
 /**
@@ -93,20 +103,20 @@ function isMoneyOnlyHeader(roles: Set<ColumnRole>): boolean {
 }
 
 /**
- * A header of dates and balances alone ("Date  Balance"): a daily balance
- * summary, whose lines are no transactions and end the table above it.
+ * A header of dates and balances alone ("Date  Balance"), or a summary grid of
+ * dates and amounts: a summary whose lines are no transactions and end the
+ * table above it.
  */
 export function isBalanceTableHeader(row: PdfTextRow, taught?: TaughtHeadings): boolean {
   const columns = readHeadingColumns(row, taught);
   const roles = columns.map(column => column.role);
   // Every word is a heading: a header with a column of its own kind is no summary.
   const words = columns.reduce((sum, column) => sum + wordCount(column.heading ?? ''), 0);
-  return (
-    words === row.items.length &&
+  const balances =
     roles.includes('balance') &&
     roles.includes('date') &&
-    roles.every(role => role === 'balance' || role === 'date' || role === 'otherDate')
-  );
+    roles.every(role => role === 'balance' || role === 'date' || role === 'otherDate');
+  return words === row.items.length && (balances || isSummaryGrid(columns));
 }
 
 function readHeadingColumns(row: PdfTextRow, taught?: TaughtHeadings): LayoutColumn[] {
