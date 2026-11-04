@@ -492,9 +492,9 @@ function buildTransactionFromRow(
     detectCurrency(row, columnMap) || options?.defaultCurrency || appDefaultCurrency();
 
   const counterpartyName =
-    valueAt(row, columnMap.counterparty) || collectName(row, columnMap) || 'Неизвестный контрагент';
+    valueAt(row, columnMap.counterparty) || collectName(row, columnMap) || '';
 
-  const purpose = valueAt(row, columnMap.purpose) || collectPurpose(row, columnMap) || 'Не указано';
+  const purpose = valueAt(row, columnMap.purpose) || collectPurpose(row, columnMap) || '';
 
   return {
     transactionDate,

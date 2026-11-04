@@ -1,6 +1,7 @@
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
+import { usePayeeName } from '@/app/lib/use-payee-name';
 import type { useAccount } from '../hooks/useAccounts';
 import {
   cardStyle,
@@ -21,6 +22,7 @@ export function AccountTransactionsCard({
   money: (value: number) => string;
 }): React.JSX.Element {
   const t = useIntlayer('accountsPage');
+  const payeeName = usePayeeName();
   const { locale } = useLocale();
   return (
     <section style={cardStyle}>
@@ -46,7 +48,7 @@ export function AccountTransactionsCard({
                   >
                     {other
                       ? t.transferWith.value.replace('{{account}}', other)
-                      : row.counterpartyName}
+                      : payeeName(row.counterpartyName)}
                   </span>
                   <span style={mutedStyle}>{formatDay(row.transactionDate, locale)}</span>
                 </span>

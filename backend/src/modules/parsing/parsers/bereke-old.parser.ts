@@ -173,7 +173,7 @@ export class BerekeOldParser extends BerekeBaseParser<ColumnKey> {
       counterpartyDetails.name ||
         counterpartyBlock ||
         this.extractCounterpartyNameFromText(combinedText) ||
-        'Неизвестный контрагент',
+        '',
       purpose,
       combinedText,
     );

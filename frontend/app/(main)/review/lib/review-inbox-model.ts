@@ -198,3 +198,14 @@ export function dateFilterToRange(
   const [first, last] = day <= end ? [day, end] : [end, day];
   return { from: isoDay(first), to: isoDay(last) };
 }
+
+/** Same words, ignoring case and spacing: "Invoice number 29…" vs "Invoice number29…". */
+export function sameText(a: string, b: string): boolean {
+  const normalize = (text: string) => text.replace(/\s+/g, '').toLowerCase();
+  return normalize(a) === normalize(b);
+}
+
+/** A text with its {{key}} placeholders filled in. */
+export function fill(template: string, params: Record<string, string | number>): string {
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => String(params[key] ?? ''));
+}

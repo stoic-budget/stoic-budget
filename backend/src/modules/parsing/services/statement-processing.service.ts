@@ -322,10 +322,8 @@ export class StatementProcessingService {
         debit: debit > 0 ? debit : undefined,
         credit: credit > 0 ? credit : undefined,
         currency,
-        counterpartyName:
-          (tx.counterpartyName || 'Неизвестный контрагент').toString().trim() ||
-          'Неизвестный контрагент',
-        paymentPurpose: (tx.paymentPurpose || 'Не указано').toString().trim() || 'Не указано',
+        counterpartyName: (tx.counterpartyName || '').toString().trim(),
+        paymentPurpose: (tx.paymentPurpose || '').toString().trim(),
       };
 
       valid.push(sanitized);
@@ -914,8 +912,8 @@ export class StatementProcessingService {
     for (let i = 0; i < deduped.length; i++) {
       const parsed = deduped[i];
 
-      const counterpartyName = (parsed.counterpartyName || '').trim() || 'Неизвестный контрагент';
-      const paymentPurpose = (parsed.paymentPurpose || '').trim() || 'Не указано';
+      const counterpartyName = (parsed.counterpartyName || '').trim();
+      const paymentPurpose = (parsed.paymentPurpose || '').trim();
 
       // Determine transaction type
       const transactionType =
@@ -1029,7 +1027,7 @@ export class StatementProcessingService {
       if (!counterpartyName || /неизвест/i.test(counterpartyName)) {
         missing.push('counterparty');
       }
-      if (!paymentPurpose || paymentPurpose === 'Не указано') {
+      if (!paymentPurpose) {
         missing.push('purpose');
       }
       if (!classification.categoryId) {

@@ -276,8 +276,7 @@ export abstract class BaseTabularParser extends BaseParser {
         counterpartyBank: bankIndex !== undefined ? String(getValue(bankIndex) || '') : undefined,
         debit,
         credit,
-        paymentPurpose:
-          purposeIndex !== undefined ? String(getValue(purposeIndex) || '') : 'Не указано',
+        paymentPurpose: purposeIndex !== undefined ? String(getValue(purposeIndex) || '') : '',
         currency,
       };
     } catch (error) {

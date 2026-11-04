@@ -114,8 +114,7 @@ export class DroppedSampleService {
         null,
       counterpartyName:
         payload.transaction.counterpartyName?.trim() ||
-        String(originalTransaction?.counterpartyName || '').trim() ||
-        'Неизвестный контрагент',
+        String(originalTransaction?.counterpartyName || '').trim(),
       counterpartyBin:
         payload.transaction.counterpartyBin ||
         (originalTransaction?.counterpartyBin as string) ||
@@ -137,8 +136,7 @@ export class DroppedSampleService {
       ),
       paymentPurpose:
         payload.transaction.paymentPurpose?.trim() ||
-        String(originalTransaction?.paymentPurpose || '').trim() ||
-        'Не указано',
+        String(originalTransaction?.paymentPurpose || '').trim(),
       categoryId,
       categorySource: payload.transaction.categoryId ? TransactionCategorySource.MANUAL : null,
       branchId,

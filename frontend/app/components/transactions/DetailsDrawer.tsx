@@ -8,6 +8,7 @@ import { NotesPanel } from '@/app/components/notes/NotesPanel';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { FALLBACK_CURRENCY } from '@/app/lib/currency';
 import { formatMoney } from '@/app/lib/format-money';
+import { usePayeeName } from '@/app/lib/use-payee-name';
 import { ItemImageBadge } from '../item-images/ItemImageBadge';
 import { DrawerShell } from '../ui/drawer-shell';
 import { PRIVATE_CLASS } from '../ui/private-amount';
@@ -51,6 +52,7 @@ function TransactionSummary({
   source?: TransactionSource;
 }): React.JSX.Element {
   const t = useIntlayer('transactionsDrawer');
+  const payeeName = usePayeeName();
   const { locale } = useLocale();
   const isIncome = transaction.credit > 0 && !(transaction.debit > 0);
   const amount = transaction.debit || transaction.credit;
@@ -89,7 +91,7 @@ function TransactionSummary({
         </ItemImageBadge>
       </div>
       <div className="seneca-tx-summary__merchant">
-        {transaction.isPrivate ? EMPTY : transaction.counterpartyName || EMPTY}
+        {transaction.isPrivate ? EMPTY : payeeName(transaction.counterpartyName)}
       </div>
       {/* Ink, like every figure: spending is not an alarm. The sign says which way it went. */}
       <div className={`seneca-tx-summary__amount ${PRIVATE_CLASS}`}>

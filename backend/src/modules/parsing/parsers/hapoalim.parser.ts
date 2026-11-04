@@ -278,7 +278,7 @@ export class HapoalimParser extends BaseParser {
     // If no merchant found, try extracting any English text block
     if (!counterpartyName) {
       const englishBlock = line.match(/([A-Z][A-Z\s.*/'",()-]{3,})/);
-      counterpartyName = englishBlock ? englishBlock[1].trim() : 'Unknown';
+      counterpartyName = englishBlock ? englishBlock[1].trim() : '';
     }
 
     // Extract original foreign amount (with $ or € sign)
@@ -322,7 +322,7 @@ export class HapoalimParser extends BaseParser {
 
     return {
       transactionDate,
-      counterpartyName: counterpartyName || 'Unknown',
+      counterpartyName: counterpartyName || '',
       debit,
       credit,
       paymentPurpose: counterpartyName || 'Foreign purchase',
@@ -390,7 +390,7 @@ export class HapoalimParser extends BaseParser {
 
     return {
       transactionDate,
-      counterpartyName: counterpartyName || 'Unknown',
+      counterpartyName: counterpartyName || '',
       debit,
       credit,
       paymentPurpose: paymentPurpose || 'Domestic purchase',
