@@ -3,20 +3,20 @@
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import CustomDatePicker from '@/app/components/CustomDatePicker';
-import { MultiSelect } from '@/app/components/ui/multi-select';
 import { PRIVATE_CLASS } from '@/app/components/ui/private-amount';
-import { Select } from '@/app/components/ui/select';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useLocale } from '@/app/i18n';
 import { usePrivacyMode } from '@/app/lib/privacy-mode';
 import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
-import { useCategoryName } from '@/app/lib/use-category-name';
 import { resolveLocaleTag } from '@/app/lib/user-format';
 import { formatStoredDateWithOptions } from '@/app/lib/user-format-store';
 import type { SourcePreview } from '../hooks/useSourcePreview';
 import type { TableCategory } from '../hooks/useTablesList';
 import { DIRECTION_OPTIONS, type SourceDef, type SourceFilters, TYPE_OPTIONS } from '../sources';
+import { FilterDrawerField, type FilterDrawerLabels } from './FilterDrawerField';
+import { CategoriesFilterField, CurrencyFilterField } from './filter-picker-fields';
+import { statementFilterOptions } from './statement-filter-options';
 
 export interface SourceFilterPanelLabels {
   filters: Record<
@@ -35,7 +35,9 @@ export interface SourceFilterPanelLabels {
     | 'dueFrom'
     | 'dueTo'
     | 'any'
-    | 'selected',
+    | 'selected'
+    | 'search'
+    | 'noMatches',
     string
   >;
   /** Translated enum values: income, expense, payable, to_pay, draft… */
@@ -58,24 +60,10 @@ export interface SourceFilterPanelLabels {
   >;
 }
 
-interface StatementOption {
-  id: string;
-  fileName: string;
-  statementDateFrom?: string | null;
-  statementDateTo?: string | null;
-}
-
 const SAMPLE_ROWS = 5;
 const STATEMENTS_LIMIT = 50;
 /** Values shown through the translated option labels rather than as stored. */
 const ENUM_FIELDS = new Set(['status', 'frequency', 'direction', 'periodType']);
-
-const statementLabel = (statement: StatementOption): string => {
-  const period = [statement.statementDateFrom, statement.statementDateTo]
-    .filter(Boolean)
-    .join(' – ');
-  return period ? `${statement.fileName} · ${period}` : statement.fileName;
-};
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -90,28 +78,25 @@ function OptionSelect({
   label,
   value,
   values,
-  anyLabel,
+  drawerLabels,
   optionLabels,
   onChange,
 }: {
   label: string;
   value: string;
   values: readonly string[];
-  anyLabel: string;
+  drawerLabels: FilterDrawerLabels;
   optionLabels: Record<string, string>;
   onChange: (value: string) => void;
 }) {
   return (
     <Field label={label}>
-      <Select
-        size="small"
-        value={value}
-        inputProps={{ 'aria-label': label }}
-        onChange={onChange}
-        options={[
-          { value: '', label: anyLabel },
-          ...values.map(item => ({ value: item, label: optionLabels[item] ?? item })),
-        ]}
+      <FilterDrawerField
+        label={label}
+        options={values.map(item => ({ value: item, label: optionLabels[item] ?? item }))}
+        value={value ? [value] : []}
+        onChange={next => onChange(next[0] ?? '')}
+        labels={drawerLabels}
       />
     </Field>
   );
@@ -158,16 +143,16 @@ interface SourceFilterFieldsProps {
   filters: SourceFilters;
   onChange: (patch: Partial<SourceFilters>) => void;
   categories: TableCategory[];
-  /** Currency codes across the whole source, for the currency select. */
-  currencies: readonly string[];
   labels: SourceFilterPanelLabels;
 }
 
 /** The chosen source's filters, as plain fields of one look. */
 export function SourceFilterFields(props: SourceFilterFieldsProps) {
-  const { source, filters, onChange, categories, currencies, labels } = props;
+  const { source, filters, onChange, categories, labels } = props;
   const workspaceId = useWorkspaceId();
-  const categoryName = useCategoryName();
+  const { locale } = useLocale();
+  const { any, selected, search, noMatches } = labels.filters;
+  const drawerLabels: FilterDrawerLabels = { any, selected, search, noMatches };
   const wantsStatements = source.filterFields.includes('statements');
   const statementsQuery = useQuery({
     queryKey: [...queryKeys.customTables(workspaceId), 'source-statements'],
@@ -184,9 +169,6 @@ export function SourceFilterFields(props: SourceFilterFieldsProps) {
   if (!source.filterFields.length) {
     return null;
   }
-  const currencyValues = [
-    ...new Set([...currencies, ...(filters.currency ? [filters.currency] : [])]),
-  ];
 
   return (
     <section className="seneca-ct__source-section">
@@ -248,7 +230,7 @@ export function SourceFilterFields(props: SourceFilterFieldsProps) {
             label={labels.filters.type}
             value={filters.type}
             values={TYPE_OPTIONS}
-            anyLabel={labels.filters.any}
+            drawerLabels={drawerLabels}
             optionLabels={labels.options}
             onChange={type => onChange({ type })}
           />
@@ -258,7 +240,7 @@ export function SourceFilterFields(props: SourceFilterFieldsProps) {
             label={labels.filters.direction}
             value={filters.direction}
             values={DIRECTION_OPTIONS}
-            anyLabel={labels.filters.any}
+            drawerLabels={drawerLabels}
             optionLabels={labels.options}
             onChange={direction => onChange({ direction })}
           />
@@ -268,53 +250,43 @@ export function SourceFilterFields(props: SourceFilterFieldsProps) {
             label={labels.filters.status}
             value={filters.status}
             values={source.statusOptions}
-            anyLabel={labels.filters.any}
+            drawerLabels={drawerLabels}
             optionLabels={labels.options}
             onChange={status => onChange({ status })}
           />
         ) : null}
         {has('currency') ? (
-          <OptionSelect
-            label={labels.filters.currency}
-            value={filters.currency}
-            values={currencyValues}
-            anyLabel={labels.filters.any}
-            optionLabels={{}}
-            onChange={currency => onChange({ currency })}
-          />
+          <Field label={labels.filters.currency}>
+            <CurrencyFilterField
+              label={labels.filters.currency}
+              value={filters.currency}
+              anyLabel={labels.filters.any}
+              onChange={currency => onChange({ currency })}
+            />
+          </Field>
         ) : null}
         {has('categories') ? (
           <Field label={labels.filters.categories}>
-            <MultiSelect
-              aria-label={labels.filters.categories}
+            <CategoriesFilterField
+              label={labels.filters.categories}
               value={filters.categoryIds}
-              options={categories.map(category => ({
-                value: category.id,
-                label: categoryName(category.name),
-              }))}
-              placeholder={categories.length ? labels.filters.any : labels.filters.categoriesEmpty}
+              categories={categories}
+              anyLabel={labels.filters.any}
+              emptyLabel={labels.filters.categoriesEmpty}
               selectedLabel={labels.filters.selected}
-              disabled={!categories.length}
               onChange={categoryIds => onChange({ categoryIds })}
             />
           </Field>
         ) : null}
         {wantsStatements ? (
           <Field label={labels.filters.statements}>
-            <MultiSelect
-              aria-label={labels.filters.statements}
+            <FilterDrawerField
+              label={labels.filters.statements}
+              multiple
               value={filters.statementIds}
-              options={(statementsQuery.data ?? []).map(statement => ({
-                value: statement.id,
-                label: statementLabel(statement),
-              }))}
-              placeholder={
-                statementsQuery.data?.length === 0
-                  ? labels.filters.statementsEmpty
-                  : labels.filters.any
-              }
-              selectedLabel={labels.filters.selected}
-              disabled={!statementsQuery.data?.length}
+              options={statementFilterOptions(statementsQuery.data ?? [], resolveLocaleTag(locale))}
+              emptyLabel={statementsQuery.data ? labels.filters.statementsEmpty : undefined}
+              labels={drawerLabels}
               onChange={statementIds => onChange({ statementIds })}
             />
           </Field>

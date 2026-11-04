@@ -186,8 +186,22 @@ describe('hidden and optional sections', () => {
 });
 
 describe('the shipped layout', () => {
-  // Saved in the Administrator workspace on 2026-10-21, nothing hidden.
-  const administrator = {
+  // Saved in the Administrator workspace on 2026-11-02, nothing hidden.
+  const administrator = [
+    ['getting-started'],
+    ['kpi-income', 'kpi-spent', 'kpi-net', 'kpi-savings'],
+    ['cash-flow'],
+    ['top-categories', 'recent-transactions'],
+    ['balances', 'safe-to-spend'],
+    ['goals', 'cash-runway'],
+    ['budgets', 'month-close'],
+    ['net-worth'],
+    ['activity'],
+    ['advice'],
+  ];
+
+  // The Administrator layout of 2026-10-21, from before two sections were folded into others.
+  const older = {
     rows: [
       ['getting-started', 'budgets'],
       ['kpi-income', 'kpi-spent', 'kpi-net', 'kpi-savings'],
@@ -202,18 +216,8 @@ describe('the shipped layout', () => {
     hidden: [],
   };
 
-  it('is the Administrator layout, with the balances card under net worth', () => {
-    // The spending calendar became a view of the cash flow card, so its row is gone;
-    // upcoming charges went into the subscriptions card, leaving net worth alone.
-    const rows = administrator.rows
-      .filter(row => !row.includes('spend-calendar'))
-      .map(row => row.filter(id => id !== 'upcoming-charges'));
-    const netWorthRow = rows.findIndex(row => row.includes('net-worth'));
-    expect(DEFAULT_OVERVIEW_ROWS).toEqual([
-      ...rows.slice(0, netWorthRow + 1),
-      ['balances'],
-      ...rows.slice(netWorthRow + 1),
-    ]);
+  it('is the Administrator layout', () => {
+    expect(DEFAULT_OVERVIEW_ROWS).toEqual(administrator);
     expect(DEFAULT_OVERVIEW_ROWS.flat()).not.toContain('money-owed');
     expect(DEFAULT_OVERVIEW_ROWS.flat()).not.toContain('taxes');
   });
@@ -221,8 +225,8 @@ describe('the shipped layout', () => {
   it('keeps the saved layout as it was, adding a section shipped after it at the end', () => {
     // Less the spending calendar, which is now a view of the cash flow card, and
     // upcoming charges, which went into the subscriptions card.
-    expect(normalizeRows(administrator)).toEqual([
-      ...administrator.rows
+    expect(normalizeRows(older)).toEqual([
+      ...older.rows
         .filter(row => !row.includes('spend-calendar'))
         .map(row => row.filter(id => id !== 'upcoming-charges')),
       ['balances'],

@@ -78,7 +78,7 @@ export function TopSpendersContent({
   month,
 }: Props & { viewMode: AnalyticsViewMode; month: Date }): React.JSX.Element {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {viewMode === 'chart' ? (
         <AnalyticsFlowSection
           groupBy="category-merchant"

@@ -23,7 +23,6 @@ import { useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import { usePrivacyMode } from '@/app/lib/privacy-mode';
 import { useCategoryName } from '@/app/lib/use-category-name';
-import { tokens } from '@/lib/theme-tokens';
 
 /** Below this width the third column has no room for its labels. */
 const COMPACT_WIDTH = 640;
@@ -268,17 +267,7 @@ export function SpendFlowChart({
   };
 
   return (
-    <section
-      ref={containerRef}
-      aria-label={title}
-      style={{
-        border: '1px solid var(--border-color)',
-        background: 'var(--card-bg)',
-        padding: 20,
-        borderRadius: tokens.radius.lg,
-        minWidth: 0,
-      }}
-    >
+    <section ref={containerRef} aria-label={title} style={{ minWidth: 0 }}>
       {heading ? (
         <div style={{ marginBottom: 12 }}>
           <h3 style={{ fontSize: 15, fontWeight: 500, color: 'var(--foreground)' }}>{title}</h3>

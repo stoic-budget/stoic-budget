@@ -91,6 +91,7 @@ function PayablesList({
 }: PayablesListProps): React.JSX.Element {
   const isMobile = useIsMobile();
   const unbookedText = useIntlayer('payablesUnbooked');
+  const tagsText = useIntlayer('tagsPage');
 
   if (items.length === 0) {
     return (
@@ -108,6 +109,8 @@ function PayablesList({
   const safeRangeStart = pagination.totalItems === 0 ? 0 : Math.min(rangeStart, rangeEnd);
   // A column that says the same thing on every row says nothing.
   const showSource = new Set(items.map(item => item.source)).size > 1;
+  // A column of its own on the table, shown only when some bill has a tag.
+  const showTags = items.some(item => item.tags && item.tags.length > 0);
   const relative = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
 
   /** A quiet status: a dot and a word; an overdue one says for how long, in terracotta. */
@@ -230,6 +233,7 @@ function PayablesList({
                 <th className="seneca-payable-list__th">{labels.vendor}</th>
                 <th className="seneca-payable-list__th">{labels.dueDate}</th>
                 {showSource && <th className="seneca-payable-list__th">{labels.source}</th>}
+                {showTags && <th className="seneca-payable-list__th">{tagsText.title.value}</th>}
                 <th className="seneca-payable-list__th">{labels.status}</th>
                 <th className="seneca-payable-list__th seneca-payable-list__th--right">
                   {labels.amount}
@@ -267,7 +271,6 @@ function PayablesList({
                         >
                           {payable.vendor}
                         </button>
-                        {renderTags(payable)}
                       </div>
                     </div>
                   </td>
@@ -279,6 +282,7 @@ function PayablesList({
                       {labels.sourceLabels[payable.source] || payable.source}
                     </td>
                   )}
+                  {showTags && <td className="seneca-payable-list__td">{renderTags(payable)}</td>}
                   <td className="seneca-payable-list__td">{renderStatus(payable)}</td>
                   <td className="seneca-payable-list__td seneca-payable-list__amount">
                     {renderAmount(payable)}

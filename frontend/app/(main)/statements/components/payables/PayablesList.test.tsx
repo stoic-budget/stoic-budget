@@ -8,7 +8,10 @@ vi.mock('@/app/hooks/useIsMobile', () => ({ useIsMobile: () => false }));
 // The picture tile fetches on its own and has its own tests.
 vi.mock('@/app/components/item-images/ItemThumb', () => ({ ItemThumb: () => null }));
 vi.mock('@/app/i18n', () => ({
-  useIntlayer: () => ({ notInAccount: { value: 'not in an account yet' } }),
+  useIntlayer: () => ({
+    notInAccount: { value: 'not in an account yet' },
+    title: { value: 'Tags' },
+  }),
 }));
 
 const LABELS = {
@@ -80,6 +83,23 @@ describe('PayablesList', () => {
       payable({ id: 'p-2', vendor: 'B', source: 'invoice' }),
     ]);
     expect(screen.getByText('Source')).toBeInTheDocument();
+  });
+
+  it('puts the tags in a column of their own, not under the vendor', () => {
+    const tag = { id: 't-1', name: 'Office rent', color: null };
+    renderList([
+      payable({ id: 'p-1', vendor: 'ACME Lettings', tags: [tag] }),
+      payable({ id: 'p-2', vendor: 'B' }),
+    ]);
+
+    expect(screen.getByRole('columnheader', { name: 'Tags' })).toBeInTheDocument();
+    const tagCell = screen.getByText(tag.name).closest('td');
+    expect(tagCell).not.toBe(screen.getByText('ACME Lettings').closest('td'));
+  });
+
+  it('leaves the tags column out while no bill has a tag', () => {
+    renderList([payable({ id: 'p-1', vendor: 'A' })]);
+    expect(screen.queryByRole('columnheader', { name: 'Tags' })).toBeNull();
   });
 
   it('writes a received one once, without repeating its amount as received', () => {

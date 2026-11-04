@@ -100,6 +100,8 @@ const sourcePanelLabels = (t: Dictionary): SourceFilterPanelLabels => ({
     'dueTo',
     'any',
     'selected',
+    'search',
+    'noMatches',
   ]),
   options: plain(t.createFromSource.options as Record<string, { value: string }>),
   preview: record(t.createFromSource.preview, [

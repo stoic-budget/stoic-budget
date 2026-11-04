@@ -200,8 +200,10 @@ export function PDFPreviewModal({
     const node = viewportRef.current;
 
     const updatePageWidth = () => {
-      const width = Math.floor(node.clientWidth - 120);
-      setPageWidth(Math.max(520, Math.min(1080, width)));
+      // A phone fits the whole page inside the viewport's own 20px gutters: the
+      // 520px floor of wider screens made it wider than the screen, cut off.
+      const width = Math.floor(node.clientWidth - (node.clientWidth < 640 ? 40 : 120));
+      setPageWidth(node.clientWidth < 640 ? width : Math.max(520, Math.min(1080, width)));
     };
 
     updatePageWidth();
@@ -212,7 +214,9 @@ export function PDFPreviewModal({
     return () => {
       observer.disconnect();
     };
-  }, [isOpen]);
+    // The viewport is drawn only once the file and react-pdf are in: on open alone
+    // there was nothing to measure, and the page kept its 920px on any screen.
+  }, [isOpen, pdfObjectUrl, pdfModule, error]);
 
   useEffect(() => {
     if (!menuOpen) {

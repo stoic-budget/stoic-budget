@@ -1154,6 +1154,21 @@
     white-space: nowrap;
   }
 
+  // A second, quieter line under the name: a statement's period.
+  &__option-desc {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  // Two lines and a thumbnail need room above and below.
+  &__option:has(&__option-desc) {
+    padding-block: 8px;
+  }
+
   // Doubled class to outrank MUI's own button colour without !important.
   &__footer &__create {
     color: var(--primary);

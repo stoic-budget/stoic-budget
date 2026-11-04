@@ -1,16 +1,13 @@
 'use client';
 
-import { Box, type SxProps, type Theme } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material';
 import { useState } from 'react';
 import StatementCategoryDrawer from '@/app/(main)/statements/[id]/edit/StatementCategoryDrawer';
-import { ChevronDown } from '@/app/components/icons';
+import { PickerFieldButton, type PickerFieldSize } from '@/app/components/ui/picker-field-button';
 import { useLocale } from '@/app/i18n';
 import { getCategoryDisplayName, type StatementCategoryNode } from '@/app/lib/statement-categories';
-import { tokens } from '@/app/lib/theme-tokens';
 
 type PickerCategory = StatementCategoryNode & { isEnabled?: boolean };
-
-const HEIGHT = { small: 40, medium: 48, compact: 36 } as const;
 
 export interface CategoryPickerFieldProps {
   value: string;
@@ -23,7 +20,7 @@ export interface CategoryPickerFieldProps {
   disabled?: boolean;
   id?: string;
   ariaLabel?: string;
-  size?: keyof typeof HEIGHT;
+  size?: PickerFieldSize;
   sx?: SxProps<Theme>;
 }
 
@@ -56,52 +53,16 @@ export function CategoryPickerField({
 
   return (
     <>
-      <Box
-        component="button"
-        type="button"
+      <PickerFieldButton
         id={id}
-        aria-label={ariaLabel}
-        aria-haspopup="dialog"
-        title={selected ? label : undefined}
+        ariaLabel={ariaLabel}
+        label={label}
+        empty={!selected}
         disabled={disabled}
         onClick={() => setOpen(true)}
-        sx={[
-          {
-            display: 'flex',
-            height: HEIGHT[size],
-            width: '100%',
-            minWidth: 0,
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 1,
-            border: '1px solid var(--input)',
-            borderRadius: tokens.radius.md,
-            bgcolor: 'transparent',
-            color: selected ? 'text.primary' : 'var(--text-muted)',
-            px: 1.75,
-            font: 'inherit',
-            fontSize: size === 'medium' ? 16 : 14,
-            textAlign: 'left',
-            cursor: 'pointer',
-            '&:hover:not(:disabled)': { borderColor: 'text.primary' },
-            '&:focus-visible': {
-              borderColor: 'primary.main',
-              boxShadow: '0 0 0 3px var(--primary-50)',
-              outline: 'none',
-            },
-            '&:disabled': { cursor: 'default', opacity: 0.6 },
-          },
-          ...(Array.isArray(sx) ? sx : [sx]),
-        ]}
-      >
-        <Box
-          component="span"
-          sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-        >
-          {label}
-        </Box>
-        <ChevronDown aria-hidden style={{ width: 18, height: 18, flexShrink: 0 }} />
-      </Box>
+        size={size}
+        sx={sx}
+      />
       {/* Mounted while open only: a page may hold many of these fields. */}
       {open ? (
         <StatementCategoryDrawer
