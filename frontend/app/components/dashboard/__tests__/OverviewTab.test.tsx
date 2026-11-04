@@ -131,11 +131,11 @@ describe('OverviewTab', () => {
     expect(screen.queryByText('Income')).not.toBeInTheDocument();
   });
 
-  it('renders the four KPI cards with formatted amounts for a month without transactions', () => {
+  it('renders the KPI cards with formatted amounts for a month without transactions', () => {
     renderTab(baseData, () => 'KZT 1,025,215');
 
-    for (const label of ['Income', 'Spent', 'Net', 'Savings rate']) {
-      expect(screen.getByText(label)).toBeInTheDocument();
+    for (const label of ['Income', 'Spent', 'Net']) {
+      expect(screen.getByText(label, { selector: '.seneca-dashboard__stat-label' })).toBeInTheDocument();
     }
     expect(document.body.textContent).toContain('KZT 1,025,215');
     expect(document.body.textContent).not.toContain('KZT KZT 1,025,215');
@@ -144,22 +144,17 @@ describe('OverviewTab', () => {
     expect(screen.getByText('No transactions this period')).toBeInTheDocument();
   });
 
-  it('marks net and savings rate by sign with a dot, keeping the figure ink', () => {
+  it('marks the net by sign with a dot, keeping the figure ink, and gives its savings rate', () => {
     renderTab({
       ...baseData,
       snapshot: { ...baseData.snapshot, income30d: 1000, expense30d: 1500 },
     });
 
-    expect(
-      screen.getByText('−500').closest('.seneca-dashboard__stat')?.querySelector(
-        '.seneca-dashboard__stat-dot--negative',
-      ),
-    ).not.toBeNull();
-    expect(
-      screen.getByText('-50%').closest('.seneca-dashboard__stat')?.querySelector(
-        '.seneca-dashboard__stat-dot--negative',
-      ),
-    ).not.toBeNull();
+    const figure = screen.getByText('−500');
+    const tile = figure.closest('.seneca-dashboard__stat');
+    expect(tile?.querySelector('.seneca-dashboard__stat-dot--negative')).not.toBeNull();
+    expect(figure).not.toHaveClass('seneca-dashboard__stat-value--negative');
+    expect(tile).toHaveTextContent('Savings rate: -50%');
   });
 
   it('leaves zero figures neutral', () => {
@@ -171,15 +166,13 @@ describe('OverviewTab', () => {
     expect(document.querySelector('.seneca-dashboard__stat-dot')).toBeNull();
   });
 
-  it('shows a 0% savings rate when there is no income', () => {
+  it('gives no savings rate when there is no income to keep a share of', () => {
     renderTab({
       ...baseData,
       snapshot: { ...baseData.snapshot, income30d: 0, expense30d: 0 },
     });
 
-    expect(screen.getByText('0%').className).toBe(
-      'seneca-figure__value seneca-dashboard__stat-value seneca-private',
-    );
+    expect(document.body).not.toHaveTextContent('Savings rate');
   });
 
   it('says under the savings rate that the current month is not over yet', () => {
@@ -312,7 +305,10 @@ describe('OverviewTab spent tile', () => {
   /** The tile once the budgets are in: its figure replaces the spinner. */
   async function spentTile(): Promise<HTMLElement> {
     await waitFor(() => expect(apiGet).toHaveBeenCalledWith('/budgets', expect.anything()));
-    const label = await screen.findByText(/^(Spent|Left to spend)$/);
+    // A wide tile also names what was spent among its details; this is its label.
+    const label = await screen.findByText(/^(Spent|Left to spend)$/, {
+      selector: '.seneca-dashboard__stat-label',
+    });
     const tile = label.closest('.seneca-dashboard__stat') as HTMLElement;
     await waitFor(() => expect(tile.querySelector('.seneca-dashboard__stat-value')?.textContent).not.toBe(''));
     return tile;
@@ -380,6 +376,35 @@ describe('OverviewTab spent tile', () => {
     const tile = await spentTile();
     expect(figure(tile)).toBe(formatMoney(-30, 'USD', 'en'));
     expect(tile.querySelector('.seneca-dashboard__stat-dot--negative')).not.toBeNull();
+    expect(tile.querySelector('.seneca-dashboard__stat-value--negative')).not.toBeNull();
+    expect(tile.querySelector('.seneca-dashboard__budget-bar[data-tone="over"]')).not.toBeNull();
+  });
+
+  it('shows how much of the budget is used, and turns ochre in its last tenth', async () => {
+    const limit = 100;
+    const spentInBudget = 95;
+    answerBudgets([
+      budgetItem({ id: 'b-1', name: 'Groceries', availableAmount: limit, spentAmount: spentInBudget }),
+    ]);
+    renderTab(dataWithSpending);
+
+    await screen.findByText('Left to spend');
+    const tile = await spentTile();
+    const bar = tile.querySelector('.seneca-dashboard__stat-meter [role="progressbar"]');
+    expect(bar?.getAttribute('aria-valuenow')).toBe(String(spentInBudget));
+    expect(tile.querySelector('.seneca-dashboard__stat-value--warning')).not.toBeNull();
+  });
+
+  it('keeps the figure ink while the budget is far from its limit', async () => {
+    answerBudgets([
+      budgetItem({ id: 'b-1', name: 'Groceries', availableAmount: 100, spentAmount: 40 }),
+    ]);
+    renderTab(dataWithSpending);
+
+    await screen.findByText('Left to spend');
+    const tile = await spentTile();
+    expect(tile.querySelector('.seneca-dashboard__stat-meter')).not.toBeNull();
+    expect(tile.querySelector('[class*="seneca-dashboard__stat-value--"]')).toBeNull();
   });
 });
 

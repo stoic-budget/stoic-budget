@@ -91,7 +91,7 @@ describe('OverviewLayout', () => {
     expect(spanOf('goals card')).toBe('12');
   });
 
-  it('opens a layout saved before the tiles moved apart with the four tiles in its place', async () => {
+  it('opens a layout saved before the tiles moved apart with the tiles in its place', async () => {
     api.get.mockResolvedValue({
       data: { state: { overviewRows: [['getting-started'], ['goals'], ['kpis']] } },
     });
@@ -99,16 +99,16 @@ describe('OverviewLayout', () => {
     renderWithQuery(<OverviewLayout sections={sections()} />);
 
     await waitFor(() =>
-      expect(order().slice(0, 6)).toEqual([
+      expect(order().slice(0, 5)).toEqual([
         'getting-started',
         'goals',
-        'kpi-income',
         'kpi-spent',
+        'kpi-income',
         'kpi-net',
-        'kpi-savings',
       ]),
     );
-    expect(spanOf('kpi-savings card')).toBe('3');
+    expect(spanOf('kpi-spent card')).toBe('6');
+    expect(spanOf('kpi-net card')).toBe('3');
   });
 
   it('lets a half take the whole row when its partner has nothing to show', async () => {
@@ -201,7 +201,7 @@ describe('OverviewLayout', () => {
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: 'Reset layout' })).not.toBeInTheDocument(),
     );
-    expect(order().slice(0, 3)).toEqual(['getting-started', 'kpi-income', 'kpi-spent']);
+    expect(order().slice(0, 3)).toEqual(['getting-started', 'kpi-spent', 'kpi-income']);
   });
 
   it('switches on a widget that is off by default from the picker', async () => {

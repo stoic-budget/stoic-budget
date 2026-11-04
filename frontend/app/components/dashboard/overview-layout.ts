@@ -1,16 +1,20 @@
 /**
  * The Overview as rows of sections. A row has room for four units: a card
- * takes two, a KPI tile one. So a row holds one card (full width), two cards
- * (halves), a card and up to two tiles, or up to four tiles — and whatever a
- * row holds fills it, which is what makes a moved section narrower or wider.
+ * takes two, a KPI tile one and the lead tile two. So a row holds one card
+ * (full width), two cards (halves), a card and up to two tiles, or up to four
+ * tiles — and whatever a row holds fills it, which is what makes a moved
+ * section narrower or wider.
  */
 
-export const KPI_SECTION_IDS = ['kpi-income', 'kpi-spent', 'kpi-net', 'kpi-savings'] as const;
+export const KPI_SECTION_IDS = ['kpi-spent', 'kpi-income', 'kpi-net'] as const;
 
 export type KpiSectionId = (typeof KPI_SECTION_IDS)[number];
 
-/** Sections drawn as tiles: a quarter of a row each. */
+/** Sections drawn as tiles: a quarter of a row each, the lead tile a half. */
 const TILE_SECTION_IDS = [...KPI_SECTION_IDS, 'safe-to-spend'] as const;
+
+/** What is left to spend is what the Overview is opened for: its tile is twice as wide. */
+const LEAD_TILE_ID = 'kpi-spent';
 
 /**
  * Widgets someone switches on from the picker; until then they stay off the
@@ -91,24 +95,26 @@ const OFF_BY_DEFAULT = new Set<string>(OFF_BY_DEFAULT_SECTION_IDS);
 
 export const isTile = (id: string): boolean => TILES.has(id);
 
-const unitsOf = (id: string): number => (isTile(id) ? TILE_UNITS : CARD_UNITS);
+export const isLeadTile = (id: string): boolean => id === LEAD_TILE_ID;
+
+const unitsOf = (id: string): number => (isTile(id) && !isLeadTile(id) ? TILE_UNITS : CARD_UNITS);
 
 const unitsIn = (ids: string[]): number => ids.reduce((sum, id) => sum + unitsOf(id), 0);
 
 /**
  * How many of the grid's columns each section of a row spans, counting only
  * the sections that show something: a card alone takes the row, two cards
- * split it, and tiles share what the cards leave.
+ * split it, and tiles share what the cards leave, the lead tile twice a tile's share.
  */
 export function rowSpans(shown: string[]): Map<string, number> {
   const cards = shown.filter(id => !isTile(id));
   const tiles = shown.filter(isTile);
   const cardSpan = cards.length === 1 && tiles.length === 0 ? GRID_COLUMNS : GRID_COLUMNS / 2;
   const left = GRID_COLUMNS - cards.length * cardSpan;
-  const tileSpan = tiles.length > 0 ? left / tiles.length : 0;
+  const unitSpan = tiles.length > 0 ? left / unitsIn(tiles) : 0;
   return new Map<string, number>([
     ...cards.map(id => [id, cardSpan] as const),
-    ...tiles.map(id => [id, tileSpan] as const),
+    ...tiles.map(id => [id, unitSpan * unitsOf(id)] as const),
   ]);
 }
 
@@ -149,7 +155,7 @@ export function normalizeRows(
       continue;
     }
     const entries = row.filter((id): id is string => typeof id === 'string');
-    // The old KPI row had all four tiles; they keep its place as a row of their own.
+    // The old KPI row had all the tiles; they keep its place as a row of their own.
     if (entries.includes(LEGACY_KPI_ROW)) {
       const tiles = KPI_SECTION_IDS.filter(id => !seen.has(id));
       for (const id of tiles) {

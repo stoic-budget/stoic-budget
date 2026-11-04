@@ -9,14 +9,15 @@ interface BudgetFigures {
 }
 
 /**
- * What the budgets governing a `YYYY-MM` month still allow, per currency, or
+ * What the budgets governing a `YYYY-MM` month still allow (`amount`) out of
+ * what they allowed in all (`allowed`), per currency, or
  * null when none does: no budget yet, or only ones whose window starts after
  * the month or ended before it. Then the tile shows what was spent instead.
  */
 export function leftToSpend(
   budgets: readonly BudgetFigures[],
   month: string,
-): Array<{ currency: string; amount: number }> | null {
+): Array<{ currency: string; amount: number; allowed: number }> | null {
   const [year, index] = month.split('-').map(Number);
   const first = `${month}-01`;
   const last = `${month}-${String(new Date(year, index, 0).getDate()).padStart(2, '0')}`;
@@ -26,10 +27,14 @@ export function leftToSpend(
   if (inMonth.length === 0) {
     return null;
   }
-  const totals = new Map<string, number>();
+  const totals = new Map<string, { amount: number; allowed: number }>();
   for (const b of inMonth) {
     const allowed = Number(b.availableAmount ?? b.limitAmount);
-    totals.set(b.currency, (totals.get(b.currency) ?? 0) + allowed - b.spentAmount);
+    const total = totals.get(b.currency) ?? { amount: 0, allowed: 0 };
+    totals.set(b.currency, {
+      amount: total.amount + allowed - b.spentAmount,
+      allowed: total.allowed + allowed,
+    });
   }
-  return [...totals].map(([currency, amount]) => ({ currency, amount }));
+  return [...totals].map(([currency, total]) => ({ currency, ...total }));
 }

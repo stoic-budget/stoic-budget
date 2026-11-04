@@ -4,6 +4,7 @@ import {
   DEFAULT_OVERVIEW_ROWS,
   hideSection,
   isDefaultLayout,
+  KPI_SECTION_IDS,
   moveSection,
   normalizeRows,
   type OverviewRows,
@@ -40,18 +41,27 @@ describe('moveSection', () => {
   });
 
   it('puts a tile right next to the one it was dropped beside', () => {
-    const tiles: OverviewRows = [['kpi-income', 'kpi-spent', 'kpi-net'], ['kpi-savings']];
-    expect(moveSection(tiles, 'kpi-savings', 'kpi-income', 'right')).toEqual([
-      ['kpi-income', 'kpi-savings', 'kpi-spent', 'kpi-net'],
+    const tiles: OverviewRows = [['kpi-income', 'kpi-net'], ['safe-to-spend']];
+    expect(moveSection(tiles, 'safe-to-spend', 'kpi-income', 'right')).toEqual([
+      ['kpi-income', 'safe-to-spend', 'kpi-net'],
     ]);
   });
 
   it('lets a tile join a card, and two tiles, but not a third', () => {
-    const rows: OverviewRows = [['goals'], ['kpi-income'], ['kpi-spent'], ['kpi-net']];
+    const rows: OverviewRows = [['goals'], ['kpi-income'], ['safe-to-spend'], ['kpi-net']];
     const one = moveSection(rows, 'kpi-income', 'goals', 'right');
-    const two = moveSection(one, 'kpi-spent', 'kpi-income', 'right');
-    expect(two).toEqual([['goals', 'kpi-income', 'kpi-spent'], ['kpi-net']]);
-    expect(moveSection(two, 'kpi-net', 'kpi-spent', 'right')).toBe(two);
+    const two = moveSection(one, 'safe-to-spend', 'kpi-income', 'right');
+    expect(two).toEqual([['goals', 'kpi-income', 'safe-to-spend'], ['kpi-net']]);
+    expect(moveSection(two, 'kpi-net', 'safe-to-spend', 'right')).toBe(two);
+  });
+
+  it('lets the lead tile join a card as another card would, but not a card and a tile', () => {
+    const rows: OverviewRows = [['goals'], ['kpi-spent'], ['kpi-net']];
+    const paired = moveSection(rows, 'kpi-spent', 'goals', 'right');
+    expect(paired).toEqual([['goals', 'kpi-spent'], ['kpi-net']]);
+
+    const withTile: OverviewRows = [['goals', 'kpi-net'], ['kpi-spent']];
+    expect(moveSection(withTile, 'kpi-spent', 'goals', 'right')).toBe(withTile);
   });
 
   it('gives a tile a row of its own when dropped above or below', () => {
@@ -71,20 +81,34 @@ describe('rowSpans', () => {
   });
 
   it('shares the row among tiles, and what a card leaves among tiles beside it', () => {
-    expect(
-      Object.fromEntries(rowSpans(['kpi-income', 'kpi-spent', 'kpi-net', 'kpi-savings'])),
-    ).toEqual({ 'kpi-income': 3, 'kpi-spent': 3, 'kpi-net': 3, 'kpi-savings': 3 });
-    expect(Object.fromEntries(rowSpans(['kpi-income', 'kpi-spent', 'kpi-net']))).toEqual({
+    expect(Object.fromEntries(rowSpans(['kpi-income', 'safe-to-spend', 'kpi-net']))).toEqual({
       'kpi-income': 4,
-      'kpi-spent': 4,
+      'safe-to-spend': 4,
       'kpi-net': 4,
     });
-    expect(Object.fromEntries(rowSpans(['goals', 'kpi-income', 'kpi-spent']))).toEqual({
+    expect(Object.fromEntries(rowSpans(['goals', 'kpi-income', 'safe-to-spend']))).toEqual({
       goals: 6,
       'kpi-income': 3,
-      'kpi-spent': 3,
+      'safe-to-spend': 3,
     });
     expect(Object.fromEntries(rowSpans(['kpi-net']))).toEqual({ 'kpi-net': 12 });
+  });
+
+  it('gives the lead tile twice the share of a tile beside it', () => {
+    expect(Object.fromEntries(rowSpans(['kpi-spent', 'kpi-income', 'kpi-net']))).toEqual({
+      'kpi-spent': 6,
+      'kpi-income': 3,
+      'kpi-net': 3,
+    });
+    expect(Object.fromEntries(rowSpans(['kpi-spent', 'kpi-income']))).toEqual({
+      'kpi-spent': 8,
+      'kpi-income': 4,
+    });
+    expect(Object.fromEntries(rowSpans(['goals', 'kpi-spent']))).toEqual({
+      goals: 6,
+      'kpi-spent': 6,
+    });
+    expect(Object.fromEntries(rowSpans(['kpi-spent']))).toEqual({ 'kpi-spent': 12 });
   });
 });
 
@@ -95,10 +119,14 @@ describe('canSitBeside', () => {
     expect(canSitBeside(ROWS, 'a', 'b')).toBe(false);
   });
 
-  it('counts tiles as a quarter of the row and cards as half', () => {
-    const rows: OverviewRows = [['kpi-income', 'kpi-spent', 'kpi-net'], ['goals'], ['kpi-savings']];
-    expect(canSitBeside(rows, 'kpi-savings', 'kpi-income')).toBe(true);
-    expect(canSitBeside(rows, 'goals', 'kpi-income')).toBe(false);
+  it('counts tiles as a quarter of the row, cards and the lead tile as half', () => {
+    const pair: OverviewRows = [['kpi-income', 'kpi-net'], ['safe-to-spend'], ['kpi-spent']];
+    expect(canSitBeside(pair, 'safe-to-spend', 'kpi-income')).toBe(true);
+    expect(canSitBeside(pair, 'kpi-spent', 'kpi-income')).toBe(true);
+
+    const three: OverviewRows = [['kpi-income', 'kpi-net', 'safe-to-spend'], ['goals'], ['kpi-spent']];
+    expect(canSitBeside(three, 'kpi-spent', 'kpi-income')).toBe(false);
+    expect(canSitBeside(three, 'goals', 'kpi-income')).toBe(false);
   });
 });
 
@@ -133,16 +161,28 @@ describe('normalizeRows', () => {
     expect(rows.flat()).toContain('net-worth');
   });
 
-  it('turns the old single KPI row into the four tiles in its place', () => {
+  it('turns the old single KPI row into the tiles in its place', () => {
     const rows = normalizeRows({ rows: [['getting-started'], ['goals'], ['kpis', 'crypto']] });
 
     expect(rows.slice(0, 4)).toEqual([
       ['getting-started'],
       ['goals'],
-      ['kpi-income', 'kpi-spent', 'kpi-net', 'kpi-savings'],
+      ['kpi-spent', 'kpi-income', 'kpi-net'],
       ['crypto'],
     ]);
     expect(rows.flat().sort()).toEqual([...DEFAULT_OVERVIEW_ROWS.flat(), 'crypto'].sort());
+  });
+
+  it('keeps a saved row of four KPI tiles whole once the savings rate joined the net tile', () => {
+    const rows = normalizeRows({
+      rows: [['kpi-income', 'kpi-spent', 'kpi-net', 'kpi-savings'], ['goals']],
+    });
+
+    expect(rows.slice(0, 3)).toEqual([
+      ['getting-started'],
+      ['kpi-income', 'kpi-spent', 'kpi-net'],
+      ['goals'],
+    ]);
   });
 });
 
@@ -216,19 +256,23 @@ describe('the shipped layout', () => {
     hidden: [],
   };
 
-  it('is the Administrator layout', () => {
-    expect(DEFAULT_OVERVIEW_ROWS).toEqual(administrator);
+  it('is the Administrator layout, its KPI row led by what is left to spend', () => {
+    // The savings rate went into the net tile.
+    expect(DEFAULT_OVERVIEW_ROWS).toEqual(
+      administrator.map(row => (row.includes('kpi-spent') ? [...KPI_SECTION_IDS] : row)),
+    );
     expect(DEFAULT_OVERVIEW_ROWS.flat()).not.toContain('money-owed');
     expect(DEFAULT_OVERVIEW_ROWS.flat()).not.toContain('taxes');
   });
 
   it('keeps the saved layout as it was, adding a section shipped after it at the end', () => {
-    // Less the spending calendar, which is now a view of the cash flow card, and
-    // upcoming charges, which went into the subscriptions card.
+    // Less the spending calendar, which is now a view of the cash flow card,
+    // upcoming charges, which went into the subscriptions card, and the savings
+    // rate, which went into the net tile.
     expect(normalizeRows(older)).toEqual([
       ...older.rows
         .filter(row => !row.includes('spend-calendar'))
-        .map(row => row.filter(id => id !== 'upcoming-charges')),
+        .map(row => row.filter(id => id !== 'upcoming-charges' && id !== 'kpi-savings')),
       ['balances'],
     ]);
   });

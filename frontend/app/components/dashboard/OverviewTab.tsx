@@ -5,25 +5,20 @@ import Skeleton from '@mui/material/Skeleton';
 import Link from 'next/link';
 import type React from 'react';
 import { useMemo } from 'react';
-import {
-  BudgetSummaryWidget,
-  useBudgets,
-} from '@/app/(main)/dashboard/components/BudgetSummaryWidget';
+import { BudgetSummaryWidget } from '@/app/(main)/dashboard/components/BudgetSummaryWidget';
 import { SubscriptionsMonthWidget } from '@/app/(main)/dashboard/components/SubscriptionsMonthWidget';
 import { parseDateOnly, resolveLocale } from '@/app/(main)/dashboard/helpers/dashboard-helpers';
 import { FileUp } from '@/app/components/icons';
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import type { DashboardData } from '@/app/hooks/useDashboard';
 import { useIntlayer, useLocale } from '@/app/i18n';
-import { PiggyBank, Scale, TrayArrowDown, WalletArrowUp } from '@/app/lib/category-line-icons';
-import { formatMoney } from '@/app/lib/format-money';
+import { Scale, TrayArrowDown, WalletArrowUp } from '@/app/lib/category-line-icons';
 import { AdviceCard } from './AdviceCard';
 import { CashFlowCard, reportsHref } from './CashFlowCard';
 import { CryptoPortfolioCard } from './CryptoPortfolioCard';
 import { computeNet, computeSavingsRate, signTone } from './dashboard-stats.util';
 import { GettingStartedCard } from './GettingStartedCard';
 import { GoalsProgressCard } from './GoalsProgressCard';
-import { leftToSpend } from './left-to-spend';
 import { MoneyOwedCard } from './MoneyOwedCard';
 import { MonthCloseCard } from './MonthCloseCard';
 import { OverviewLayout } from './OverviewLayout';
@@ -31,9 +26,10 @@ import type { KpiSectionId } from './overview-layout';
 import { OverviewMonthProvider } from './overview-month';
 import { RecentTransactionsCard } from './RecentTransactionsCard';
 import { SafeToSpendTile } from './SafeToSpendTile';
+import { SpentTile } from './SpentTile';
 import { TaxesCard } from './TaxesCard';
 import { TopCategoriesCard } from './TopCategoriesCard';
-import { CardLink, DashboardCard, KpiCard, type KpiCardProps } from './ui';
+import { CardLink, DashboardCard, KpiCard } from './ui';
 import { useMonthLabel } from './use-month-label';
 import { WorkspaceActivityCard } from './WorkspaceActivityCard';
 import { wealthSections } from './wealth-sections';
@@ -136,50 +132,13 @@ interface KpiTilesProps {
     net: string;
     netCaption: string;
     savingsRate: string;
-    savingsRateCaption: string;
     monthInProgress: string;
     avgPerDay: string;
     biggestDay: string;
   };
 }
 
-interface SpentTileProps extends KpiCardProps {
-  /** The month shown, `YYYY-MM`. */
-  month: string;
-  leftLabel: string;
-  /** What was spent, kept as a detail once the tile shows what is left. */
-  spentValue: string;
-}
-
-/**
- * What was spent, until a budget covers the month: from then on what the
- * budgets still allow. A budget that starts after the month or ended before
- * it does not count.
- */
-function SpentTile({ month, leftLabel, spentValue, ...spent }: SpentTileProps): React.JSX.Element {
-  const { locale } = useLocale();
-  const { budgets, loaded } = useBudgets(month);
-  // Until the budgets are in it is not known which of the two the tile is.
-  if (!loaded) {
-    return <KpiCard {...spent} value={<Skeleton variant="text" width={120} />} />;
-  }
-  const left = leftToSpend(budgets, month);
-  if (!left) {
-    return <KpiCard {...spent} />;
-  }
-  return (
-    <KpiCard
-      {...spent}
-      label={leftLabel}
-      value={left.map(total => formatMoney(total.amount, total.currency, locale)).join(' · ')}
-      // Only an overrun is a signal; what is left stays neutral.
-      tone={left.some(total => total.amount < 0) ? 'negative' : 'neutral'}
-      details={[{ label: spent.label, value: spentValue }, ...(spent.details ?? [])]}
-    />
-  );
-}
-
-/** The four KPI tiles, each a section of its own that moves on its own. */
+/** The KPI tiles, each a section of its own that moves on its own. */
 function kpiTiles({
   data,
   formatAmount,
@@ -240,6 +199,7 @@ function kpiTiles({
         spentValue={formatAmount(expense)}
         label={labels.spent}
         icon={WalletArrowUp}
+        lead
         value={spinner || formatAmount(expense)}
         // Spending is not an alarm: the card stays neutral whatever the amount.
         tone="neutral"
@@ -262,23 +222,17 @@ function kpiTiles({
         icon={Scale}
         value={spinner || signed(net, formatAmount)}
         tone={signTone(net)}
-        caption={labels.netCaption}
+        // What share of income is kept says the same as the net, so it is the net's caption.
+        caption={
+          savingsRate === null
+            ? labels.netCaption
+            : `${labels.savingsRate}: ${Math.round(savingsRate)}%`
+        }
+        // Early in the month most spending is still ahead and the share reads near 100%.
+        note={monthInProgress && savingsRate !== null ? labels.monthInProgress : undefined}
+        attentionId="kpi:savings-rate"
         spark={spark.net && { points: spark.net }}
         wideSpark={month ? { points: month.map(p => p.income - p.expense) } : undefined}
-        details={split}
-      />
-    ),
-    'kpi-savings': (
-      <KpiCard
-        label={labels.savingsRate}
-        icon={PiggyBank}
-        value={spinner || `${Math.round(savingsRate ?? 0)}%`}
-        tone={signTone(savingsRate)}
-        caption={labels.savingsRateCaption}
-        // A share of a month that is not over reads as final; with most of the
-        // spending still ahead it is near 100% early in every month.
-        note={monthInProgress ? labels.monthInProgress : undefined}
-        attentionId="kpi:savings-rate"
         details={split}
       />
     ),
@@ -340,7 +294,6 @@ export function OverviewTab({
               net: t.netLabel.value,
               netCaption: t.netCaption.value,
               savingsRate: t.savingsRateLabel.value,
-              savingsRateCaption: t.savingsRateCaption.value,
               monthInProgress: t.monthInProgress.value,
               avgPerDay: wideText.avgPerDay.value,
               biggestDay: wideText.biggestDay.value,
