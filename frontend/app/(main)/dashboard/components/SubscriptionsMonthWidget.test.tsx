@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DonutSlice } from '@/app/components/charts/CategoryDonut';
 import { OverviewMonthProvider } from '@/app/components/dashboard/overview-month';
 import { renderWithQuery } from '@/app/test/query-wrapper';
@@ -67,10 +67,33 @@ const status = (overrides = {}) => ({
 
 const money = (value: number) => `${value} €`;
 const MONTH = '2026-10';
+const MONTHLY = 80;
+const summary = (overrides = {}) => ({
+  totalMonthlyCost: MONTHLY,
+  activeCount: 6,
+  upcomingCount: 1,
+  upcoming30DaysCount: 4,
+  upcoming30DaysAmount: 0,
+  priceChangeCount: 2,
+  priceChangeYearlyEffect: 24,
+  duplicateCount: 0,
+  overdueReviewCount: 0,
+  realizedAnnualSavings: 0,
+  ...overrides,
+});
+/** Answers each endpoint with its own payload, as the widget asks two. */
+const serve = (month: object, totals: object) =>
+  apiGet.mockImplementation(async (url: string) => ({
+    data: url === '/subscriptions/summary' ? totals : month,
+  }));
 
 describe('SubscriptionsMonthWidget', () => {
   beforeEach(() => {
     apiGet.mockReset();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('asks for the Overview’s month and names it under the title', async () => {
@@ -159,5 +182,57 @@ describe('SubscriptionsMonthWidget', () => {
 
     expect(await screen.findByText('emptyDescription')).toBeInTheDocument();
     expect(screen.queryByTestId('donut')).toBeNull();
+  });
+
+  it('says how soon this week’s charges are, in the month under way only', async () => {
+    // Three days before Example Cloud charges on Oct 28.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 9, 25, 12));
+    serve(status(), summary());
+    const { unmount } = renderWithQuery(
+      <OverviewMonthProvider value={MONTH}>
+        <SubscriptionsMonthWidget formatAmount={money} />
+      </OverviewMonthProvider>,
+    );
+
+    const row = await screen.findByRole('link', { name: /Example Cloud/ });
+    expect(row).toHaveTextContent('Oct 28 · in 3 days');
+    expect(screen.getByRole('link', { name: /ACME Music/ })).not.toHaveTextContent('in ');
+
+    unmount();
+    vi.setSystemTime(new Date(2026, 10, 25, 12));
+    renderWithQuery(
+      <OverviewMonthProvider value={MONTH}>
+        <SubscriptionsMonthWidget formatAmount={money} />
+      </OverviewMonthProvider>,
+    );
+    const past = await screen.findByRole('link', { name: /Example Cloud/ });
+    expect(past).toHaveTextContent('Oct 28');
+    expect(past).not.toHaveTextContent('·');
+  });
+
+  it('adds what subscriptions cost a month and the flags from the summary', async () => {
+    serve(status(), summary());
+    renderWithQuery(<SubscriptionsMonthWidget formatAmount={money} />);
+
+    expect(await screen.findByText('subscriptionsMonthly')).toBeInTheDocument();
+    // The chip leads to the subscriptions it is about, ringed.
+    expect(screen.getByText('priceChanges').closest('a')).toHaveAttribute(
+      'href',
+      '/subscriptions?focus=price-changed',
+    );
+    expect(screen.queryByText('duplicates')).toBeNull();
+  });
+
+  it('leaves the cost and the flags out when there is nothing to say', async () => {
+    serve(status(), summary({ totalMonthlyCost: 0, priceChangeCount: 0 }));
+    renderWithQuery(<SubscriptionsMonthWidget formatAmount={money} />);
+
+    expect(await screen.findByText('Example Cloud')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(apiGet).toHaveBeenCalledWith('/subscriptions/summary', expect.anything()),
+    );
+    expect(screen.queryByText('subscriptionsMonthly')).toBeNull();
+    expect(screen.queryByText('priceChanges')).toBeNull();
   });
 });

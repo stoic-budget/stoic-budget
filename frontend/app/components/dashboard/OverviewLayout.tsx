@@ -39,6 +39,7 @@ import {
   tellsThePresent,
 } from './overview-layout';
 import { useShowsOtherMonth } from './overview-month';
+import { SectionGhost } from './section-ghost';
 import { SectionSpanProvider } from './section-span';
 import { useOverviewLayoutState } from './use-overview-layout-state';
 
@@ -55,9 +56,6 @@ interface Point {
 /** How far into a card, from either side, a drop counts as "next to it". */
 const SIDE_BAND_SHARE = 0.3;
 const SIDE_BAND_MAX_PX = 200;
-
-/** The preview under the pointer is shrunk to at most this width. */
-const GHOST_MAX_WIDTH_PX = 420;
 
 /** Page scroll follows the pointer near the top or bottom edge only, never sideways. */
 const AUTO_SCROLL = { threshold: { x: 0, y: 0.15 } };
@@ -87,6 +85,8 @@ interface OverviewSectionProps {
   span: number;
   /** The odd tile left over when a narrow screen pairs the row's tiles two by two. */
   unpaired: boolean;
+  /** Its card draws nothing, so the section takes no room. */
+  empty: boolean;
   drop: DropZone | null;
   handleLabel: string;
   onEmptyChange: (id: string, empty: boolean) => void;
@@ -97,6 +97,7 @@ function OverviewSection({
   id,
   span,
   unpaired,
+  empty,
   drop,
   handleLabel,
   onEmptyChange,
@@ -141,6 +142,7 @@ function OverviewSection({
         isTile(id) && 'seneca-overview__section--tile',
         muted && 'seneca-overview__section--muted',
         unpaired && 'seneca-overview__section--unpaired',
+        empty && 'seneca-overview__section--empty',
         drag.isDragging && 'seneca-overview__section--dragging',
         drop && `seneca-overview__section--drop-${drop}`,
       )}
@@ -159,44 +161,6 @@ function OverviewSection({
       </button>
       <SectionSpanProvider value={span}>{children}</SectionSpanProvider>
     </div>
-  );
-}
-
-/**
- * What follows the pointer: a shrunken snapshot of the section being moved.
- * Dragging the card itself would carry a full-width card past the screen edge
- * and cover the very places it could be dropped; the snapshot is fixed-position
- * and small, and the card stays put, dimmed, until it is dropped.
- */
-function SectionGhost({ id }: { id: string }): React.JSX.Element {
-  const hostRef = useRef<HTMLDivElement | null>(null);
-  const [scale, setScale] = useState(1);
-
-  useLayoutEffect(() => {
-    const source = document.querySelector<HTMLElement>(`[data-overview-section="${id}"]`);
-    const host = hostRef.current;
-    if (!(source && host)) {
-      return;
-    }
-    const width = source.getBoundingClientRect().width;
-    const clone = source.cloneNode(true) as HTMLElement;
-    // Only the real section may answer to its id while the drop target is looked up.
-    clone.removeAttribute('data-overview-section');
-    // A picture, not a second set of controls.
-    clone.setAttribute('inert', '');
-    clone.className = 'seneca-overview__section';
-    clone.style.width = `${width}px`;
-    host.replaceChildren(clone);
-    setScale(Math.min(1, GHOST_MAX_WIDTH_PX / width));
-  }, [id]);
-
-  return (
-    <div
-      ref={hostRef}
-      className="seneca-overview__ghost"
-      style={{ transform: `scale(${scale})` }}
-      aria-hidden
-    />
   );
 }
 
@@ -339,6 +303,7 @@ export function OverviewLayout({ sections }: OverviewLayoutProps): React.JSX.Ele
                   id={id}
                   span={spans.get(id) ?? 0}
                   unpaired={id === unpaired}
+                  empty={empty.has(id)}
                   drop={
                     drop?.target === id || (vertical && row === targetRow)
                       ? (drop?.zone ?? null)

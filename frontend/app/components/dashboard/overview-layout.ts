@@ -33,7 +33,6 @@ export const OVERVIEW_SECTION_IDS = [
   'cash-runway',
   'activity',
   'month-close',
-  'upcoming-charges',
   'advice',
   ...OFF_BY_DEFAULT_SECTION_IDS,
 ] as const;
@@ -70,7 +69,7 @@ export const DEFAULT_OVERVIEW_ROWS: OverviewRows = [
   ['cash-flow', 'goals'],
   ['top-categories', 'recent-transactions'],
   ['safe-to-spend', 'cash-runway'],
-  ['net-worth', 'upcoming-charges'],
+  ['net-worth'],
   ['balances'],
   ['activity'],
   ['advice', 'month-close'],
@@ -78,16 +77,10 @@ export const DEFAULT_OVERVIEW_ROWS: OverviewRows = [
 
 /**
  * Sections that tell the present or the future (what is safe to spend, what
- * charges next, what is owed, taxes, advice), whatever month is picked: in
+ * is owed, taxes, advice), whatever month is picked: in
  * another month they stay in place, muted, under their "Today" note.
  */
-const PRESENT_SECTION_IDS = new Set<string>([
-  'safe-to-spend',
-  'upcoming-charges',
-  'money-owed',
-  'taxes',
-  'advice',
-]);
+const PRESENT_SECTION_IDS = new Set<string>(['safe-to-spend', 'money-owed', 'taxes', 'advice']);
 
 export const tellsThePresent = (id: string): boolean => PRESENT_SECTION_IDS.has(id);
 

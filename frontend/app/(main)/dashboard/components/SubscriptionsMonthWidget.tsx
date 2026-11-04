@@ -8,9 +8,16 @@ import type { DonutSlice } from '@/app/components/charts/CategoryDonut';
 import { LazyCategoryDonut } from '@/app/components/charts/lazy-charts';
 import { currentMonthKey } from '@/app/components/dashboard/month-end';
 import { useOverviewMonth } from '@/app/components/dashboard/overview-month';
-import { CardEmpty, CardLink, DashboardCard, ListRow } from '@/app/components/dashboard/ui';
+import {
+  CardEmpty,
+  CardLink,
+  Chip,
+  ChipGroup,
+  DashboardCard,
+  ListRow,
+} from '@/app/components/dashboard/ui';
 import { ListRowsSkeleton } from '@/app/components/dashboard/ui/card-skeletons';
-import { PrivateAmount } from '@/app/components/ui/private-amount';
+import { fillTemplateNodes, PrivateAmount } from '@/app/components/ui/private-amount';
 import { VendorIcon } from '@/app/components/VendorIcon';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer, useLocale } from '@/app/i18n';
@@ -27,6 +34,23 @@ const MAX_ROWS = 5;
 // The donut's ring (outer 90%, inner 56% of its 220px box), cut out of a disc.
 const DONUT_RING_SX = { mask: 'radial-gradient(circle, transparent 61px, black 62px)' };
 
+// A charge this close is worth a nudge: "in 3 days" beside its date.
+const SOON_DAYS = 7;
+
+const fill = (template: string, values: Record<string, string>): string =>
+  Object.entries(values).reduce(
+    (text, [key, value]) => text.replaceAll(`{{${key}}}`, value),
+    template,
+  );
+
+/** Whole days from today to a `YYYY-MM-DD` day, by the calendar rather than the clock. */
+function daysFromToday(day: string): number {
+  const [year, month, date] = day.split('-').map(Number);
+  const today = new Date();
+  const start = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.round((Date.UTC(year, month - 1, date) - start) / 86_400_000);
+}
+
 type SubscriptionsMonthWidgetProps = {
   /** Formats an amount in the workspace currency, which the answer is in. */
   formatAmount: (value: number) => string;
@@ -36,7 +60,8 @@ type SubscriptionsMonthWidgetProps = {
  * The subscription charges of the Overview's month (this month's elsewhere) as
  * a ring, paid so far against still to come, beside the subscriptions
  * themselves: icon, name, a dot in the ring's colour with "Paid" or the charge
- * date, and the amount.
+ * date (and how soon, for this week's), and the amount. Below, what all the
+ * subscriptions cost a month and what the subscriptions page flags.
  */
 export function SubscriptionsMonthWidget({
   formatAmount,
@@ -61,6 +86,13 @@ export function SubscriptionsMonthWidget({
     // Another month keeps the ring in place until its figures arrive.
     placeholderData: (previous, previousQuery) =>
       previousQuery?.queryKey[1] === workspaceId ? previous : undefined,
+  });
+  // Same request and key as the subscriptions page, so either fills the other's cache.
+  const summary = useQuery({
+    queryKey: queryKeys.subscriptionsSummary(workspaceId),
+    queryFn: ({ signal }) =>
+      apiQueryDecoded({ url: '/subscriptions/summary', signal, contract: 'SubscriptionSummary' }),
+    enabled: Boolean(workspaceId),
   });
 
   if (isPending) {
@@ -119,6 +151,33 @@ export function SubscriptionsMonthWidget({
           resolveLocale(locale),
         )
       : '';
+  const relative = new Intl.RelativeTimeFormat(resolveLocale(locale), { numeric: 'auto' });
+  // Only the month under way has charges "in 3 days".
+  const soon = (value: string | null): string | null => {
+    if (!value || month !== currentMonthKey()) {
+      return null;
+    }
+    const days = daysFromToday(value.slice(0, 10));
+    return days >= 0 && days <= SOON_DAYS ? relative.format(days, 'day') : null;
+  };
+  // "Nov 21 · in 3 days"
+  const chargeLine = (value: string | null): string =>
+    [chargeDay(value) || text(t.unpaid), soon(value)].filter(Boolean).join(' · ');
+  const flags = summary.data
+    ? [
+        summary.data.priceChangeCount > 0 && {
+          label: fill(links.priceChanges.value, {
+            count: String(summary.data.priceChangeCount),
+          }),
+          // Rings every subscription whose price changed (data-attention-group).
+          href: '/subscriptions?focus=price-changed',
+        },
+        summary.data.duplicateCount > 0 && {
+          label: fill(links.duplicates.value, { count: String(summary.data.duplicateCount) }),
+          href: undefined,
+        },
+      ].filter((flag): flag is { label: string; href: string | undefined } => Boolean(flag))
+    : [];
 
   return (
     <DashboardCard
@@ -154,7 +213,7 @@ export function SubscriptionsMonthWidget({
                       style={{ background: item.paid ? PAID_TONE : UNPAID_TONE }}
                       aria-hidden="true"
                     />
-                    {item.paid ? text(t.paid) : chargeDay(item.nextChargeDate) || text(t.unpaid)}
+                    {item.paid ? text(t.paid) : chargeLine(item.nextChargeDate)}
                   </>
                 }
                 trailing={<PrivateAmount>{formatAmount(item.amount)}</PrivateAmount>}
@@ -162,6 +221,22 @@ export function SubscriptionsMonthWidget({
             ))}
           </div>
         </div>
+      )}
+      {summary.data && summary.data.totalMonthlyCost > 0 && (
+        <p className="seneca-dashboard__card-note seneca-dashboard__card-note--footer">
+          {fillTemplateNodes(links.subscriptionsMonthly.value, {
+            amount: formatAmount(summary.data.totalMonthlyCost),
+          })}
+        </p>
+      )}
+      {flags.length > 0 && (
+        <ChipGroup>
+          {flags.map(flag => (
+            <Chip key={flag.label} tone="warning" href={flag.href}>
+              {flag.label}
+            </Chip>
+          ))}
+        </ChipGroup>
       )}
     </DashboardCard>
   );

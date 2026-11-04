@@ -27,7 +27,6 @@ type SectionNameKey =
   | 'subscriptionsMonth'
   | 'activity'
   | 'monthClose'
-  | 'upcomingCharges'
   | 'moneyOwed'
   | 'taxes'
   | 'advice';
@@ -49,7 +48,6 @@ const NAME_KEYS: Record<Exclude<OverviewSectionId, 'getting-started'>, SectionNa
   'cash-runway': 'subscriptionsMonth',
   activity: 'activity',
   'month-close': 'monthClose',
-  'upcoming-charges': 'upcomingCharges',
   'money-owed': 'moneyOwed',
   taxes: 'taxes',
   advice: 'advice',

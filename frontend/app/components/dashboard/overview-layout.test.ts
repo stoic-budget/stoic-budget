@@ -203,8 +203,11 @@ describe('the shipped layout', () => {
   };
 
   it('is the Administrator layout, with the balances card under net worth', () => {
-    // The spending calendar became a view of the cash flow card, so its row is gone.
-    const rows = administrator.rows.filter(row => !row.includes('spend-calendar'));
+    // The spending calendar became a view of the cash flow card, so its row is gone;
+    // upcoming charges went into the subscriptions card, leaving net worth alone.
+    const rows = administrator.rows
+      .filter(row => !row.includes('spend-calendar'))
+      .map(row => row.filter(id => id !== 'upcoming-charges'));
     const netWorthRow = rows.findIndex(row => row.includes('net-worth'));
     expect(DEFAULT_OVERVIEW_ROWS).toEqual([
       ...rows.slice(0, netWorthRow + 1),
@@ -216,9 +219,12 @@ describe('the shipped layout', () => {
   });
 
   it('keeps the saved layout as it was, adding a section shipped after it at the end', () => {
-    // Less the spending calendar, which is now a view of the cash flow card.
+    // Less the spending calendar, which is now a view of the cash flow card, and
+    // upcoming charges, which went into the subscriptions card.
     expect(normalizeRows(administrator)).toEqual([
-      ...administrator.rows.filter(row => !row.includes('spend-calendar')),
+      ...administrator.rows
+        .filter(row => !row.includes('spend-calendar'))
+        .map(row => row.filter(id => id !== 'upcoming-charges')),
       ['balances'],
     ]);
   });

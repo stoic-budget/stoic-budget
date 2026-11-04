@@ -33,7 +33,6 @@ import { RecentTransactionsCard } from './RecentTransactionsCard';
 import { SafeToSpendTile } from './SafeToSpendTile';
 import { TaxesCard } from './TaxesCard';
 import { TopCategoriesCard } from './TopCategoriesCard';
-import { UpcomingChargesCard } from './UpcomingChargesCard';
 import { CardLink, DashboardCard, KpiCard, type KpiCardProps } from './ui';
 import { useMonthLabel } from './use-month-label';
 import { WorkspaceActivityCard } from './WorkspaceActivityCard';
@@ -391,7 +390,6 @@ export function OverviewTab({
           budgets: <BudgetSummaryWidget month={monthKey(displayMonth)} monthLabel={monthLabel} />,
           'cash-runway': <SubscriptionsMonthWidget formatAmount={formatAmount} />,
           activity: <WorkspaceActivityCard />,
-          'upcoming-charges': <UpcomingChargesCard formatAmount={formatAmount} />,
           'money-owed': (
             <MoneyOwedCard
               payable={data.snapshot.totalPayable}
