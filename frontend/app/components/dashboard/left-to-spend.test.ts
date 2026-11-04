@@ -31,13 +31,13 @@ describe('leftToSpend', () => {
       spentAmount: 0,
     });
 
-    expect(leftToSpend([counted, later], MONTH)).toEqual([{ currency: 'USD', amount: 60 }]);
+    expect(leftToSpend([counted, later], MONTH)).toEqual([{ currency: 'USD', amount: 60, allowed: 100 }]);
   });
 
   it('counts a budget without a window as what it still allows', () => {
     const budget = budgetItem({ id: 'b-1', name: 'Groceries', availableAmount: 300, spentAmount: 120 });
 
-    expect(leftToSpend([budget], MONTH)).toEqual([{ currency: 'USD', amount: 180 }]);
+    expect(leftToSpend([budget], MONTH)).toEqual([{ currency: 'USD', amount: 180, allowed: 300 }]);
   });
 
   it('counts a budget that starts during the month', () => {
@@ -49,7 +49,7 @@ describe('leftToSpend', () => {
       spentAmount: 50,
     });
 
-    expect(leftToSpend([budget], MONTH)).toEqual([{ currency: 'USD', amount: 150 }]);
+    expect(leftToSpend([budget], MONTH)).toEqual([{ currency: 'USD', amount: 150, allowed: 200 }]);
   });
 
   it('counts a budget that ends during the month', () => {
@@ -61,7 +61,7 @@ describe('leftToSpend', () => {
       spentAmount: 50,
     });
 
-    expect(leftToSpend([budget], MONTH)).toEqual([{ currency: 'USD', amount: 150 }]);
+    expect(leftToSpend([budget], MONTH)).toEqual([{ currency: 'USD', amount: 150, allowed: 200 }]);
   });
 
   it('adds budgets up per currency', () => {
@@ -78,14 +78,14 @@ describe('leftToSpend', () => {
     ];
 
     expect(leftToSpend(budgets, MONTH)).toEqual([
-      { currency: 'USD', amount: 230 },
-      { currency: 'EUR', amount: 900 },
+      { currency: 'USD', amount: 230, allowed: 350 },
+      { currency: 'EUR', amount: 900, allowed: 900 },
     ]);
   });
 
   it('goes below zero once the month is over budget', () => {
     const budget = budgetItem({ id: 'b-1', name: 'Groceries', availableAmount: 100, spentAmount: 130 });
 
-    expect(leftToSpend([budget], MONTH)).toEqual([{ currency: 'USD', amount: -30 }]);
+    expect(leftToSpend([budget], MONTH)).toEqual([{ currency: 'USD', amount: -30, allowed: 100 }]);
   });
 });

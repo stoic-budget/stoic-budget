@@ -29,6 +29,7 @@ import {
   type DropZone,
   hideSection,
   isDefaultLayout,
+  isLeadTile,
   isTile,
   moveSection,
   normalizeRows,
@@ -83,8 +84,16 @@ interface OverviewSectionProps {
   id: string;
   /** Columns of the twelve it spans, given what else in its row has something to show. */
   span: number;
-  /** The odd tile left over when a narrow screen pairs the row's tiles two by two. */
+  /**
+   * On a narrow screen, a row of its own: the lead tile, or the odd tile left
+   * over when the row's tiles pair up two by two.
+   */
   unpaired: boolean;
+  /**
+   * Where a narrow screen draws it: in its row's place, the lead tile ahead of
+   * the rest, so the tiles beside it still pair up underneath.
+   */
+  phoneOrder: number;
   /** Its card draws nothing, so the section takes no room. */
   empty: boolean;
   drop: DropZone | null;
@@ -97,6 +106,7 @@ function OverviewSection({
   id,
   span,
   unpaired,
+  phoneOrder,
   empty,
   drop,
   handleLabel,
@@ -108,6 +118,7 @@ function OverviewSection({
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
   const muted = useShowsOtherMonth() && tellsThePresent(id);
+  const style = { '--overview-span': span, '--overview-phone-order': phoneOrder };
   const setRef = useCallback(
     (node: HTMLDivElement | null) => {
       nodeRef.current = node;
@@ -136,7 +147,7 @@ function OverviewSection({
     <div
       ref={setRef}
       data-overview-section={id}
-      style={{ '--overview-span': span } as React.CSSProperties}
+      style={style as React.CSSProperties}
       className={clsx(
         'seneca-overview__section',
         isTile(id) && 'seneca-overview__section--tile',
@@ -291,10 +302,11 @@ export function OverviewLayout({ sections }: OverviewLayoutProps): React.JSX.Ele
           <div className="seneca-overview__grid">
             {/* One flat list, not a wrapper per row: a moved card keeps its place
               in the tree, so it is not remounted and keeps its own state. */}
-            {rows.flatMap(row => {
+            {rows.flatMap((row, rowIndex) => {
               const shown = row.filter(id => !empty.has(id));
               const spans = rowSpans(shown);
-              const tiles = shown.filter(isTile);
+              // The lead tile takes a phone's whole row, so it pairs with nothing.
+              const tiles = shown.filter(id => isTile(id) && !isLeadTile(id));
               const unpaired = tiles.length % 2 === 1 ? tiles[tiles.length - 1] : undefined;
               const vertical = drop && (drop.zone === 'above' || drop.zone === 'below');
               return row.map(id => (
@@ -302,7 +314,8 @@ export function OverviewLayout({ sections }: OverviewLayoutProps): React.JSX.Ele
                   key={id}
                   id={id}
                   span={spans.get(id) ?? 0}
-                  unpaired={id === unpaired}
+                  unpaired={id === unpaired || isLeadTile(id)}
+                  phoneOrder={rowIndex * 2 + (isLeadTile(id) ? 0 : 1)}
                   empty={empty.has(id)}
                   drop={
                     drop?.target === id || (vertical && row === targetRow)

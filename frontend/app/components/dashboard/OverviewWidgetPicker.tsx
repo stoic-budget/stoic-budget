@@ -14,7 +14,6 @@ type SectionNameKey =
   | 'kpiIncome'
   | 'kpiSpent'
   | 'kpiNet'
-  | 'kpiSavings'
   | 'safeToSpend'
   | 'cashFlow'
   | 'crypto'
@@ -35,7 +34,6 @@ const NAME_KEYS: Record<Exclude<OverviewSectionId, 'getting-started'>, SectionNa
   'kpi-income': 'kpiIncome',
   'kpi-spent': 'kpiSpent',
   'kpi-net': 'kpiNet',
-  'kpi-savings': 'kpiSavings',
   'safe-to-spend': 'safeToSpend',
   'cash-flow': 'cashFlow',
   crypto: 'crypto',

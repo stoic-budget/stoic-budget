@@ -209,6 +209,12 @@
     margin-top: 12px;
   }
 
+  /* How much of the budget is used, at the foot of the tile in place of a sparkline. */
+  &__stat-meter {
+    margin-top: auto;
+    padding-top: 14px;
+  }
+
   // Label and value side by side in two columns sized to their content, so a
   // wide tile does not push each value to the far edge, away from its label.
   &__stat-details {
@@ -1361,6 +1367,7 @@
 @mixin overview-single-column {
   .seneca-overview__section {
     grid-column: 1 / -1;
+    order: var(--overview-phone-order, 0);
 
     &--tile {
       grid-column: span 6;

@@ -1,3 +1,4 @@
+import LinearProgress from '@mui/material/LinearProgress';
 import clsx from 'clsx';
 import Link from 'next/link';
 import type React from 'react';
@@ -39,6 +40,38 @@ export interface KpiCardProps {
    * behind the content and cut by the card's edge. Decorative: the label says it.
    */
   icon?: LucideIcon;
+  /** The figure the Overview leads with: it takes its tone's colour, not only the dot. */
+  lead?: boolean;
+  /** A share used, in percent: a bar at the foot of the tile in place of the sparkline. */
+  meter?: { percent: number };
+}
+
+const METER_FILL: Record<KpiTone, string> = {
+  neutral: 'var(--primary)',
+  positive: 'var(--primary)',
+  info: 'var(--primary)',
+  warning: 'var(--attention)',
+  negative: 'var(--money-down)',
+};
+
+/** How much is used, at the foot of the tile; over the limit the bar stays full and a tick says so. */
+function KpiMeter({ percent, tone }: { percent: number; tone: KpiTone }): React.JSX.Element {
+  return (
+    <div className="seneca-dashboard__stat-meter" aria-hidden="true">
+      <div className="seneca-dashboard__budget-bar" data-tone={percent > 100 ? 'over' : undefined}>
+        <LinearProgress
+          variant="determinate"
+          value={Math.min(Math.max(percent, 0), 100)}
+          sx={{
+            height: 5,
+            borderRadius: 3,
+            bgcolor: 'var(--icon-badge-bg)',
+            '& .MuiLinearProgress-bar': { bgcolor: METER_FILL[tone], borderRadius: 3 },
+          }}
+        />
+      </div>
+    </div>
+  );
 }
 
 export function KpiCard({
@@ -55,11 +88,13 @@ export function KpiCard({
   details,
   wideChart,
   icon: Icon,
+  lead = false,
+  meter,
 }: KpiCardProps): React.JSX.Element {
   // A tile given half a row or more has room to say more than its figure.
   const roomy = useSectionSpan() >= GRID_COLUMNS / 2;
   const chart = roomy ? wideChart : undefined;
-  const line = chart ? undefined : roomy && wideSpark ? wideSpark : spark;
+  const line = chart || meter ? undefined : roomy && wideSpark ? wideSpark : spark;
   const body = (
     <>
       {Icon && (
@@ -69,7 +104,7 @@ export function KpiCard({
         </span>
       )}
       <div className="seneca-dashboard__stat-label">
-        {/* The figure stays ink; the tone shows only as this dot and the sparkline. */}
+        {/* Unless it leads, the figure stays ink; the tone shows as this dot and the sparkline. */}
         {tone !== 'neutral' && (
           <span
             className={`seneca-dashboard__stat-dot seneca-dashboard__stat-dot--${tone}`}
@@ -78,7 +113,13 @@ export function KpiCard({
         )}
         {label}
       </div>
-      <Figure className={clsx('seneca-dashboard__stat-value', !plainValue && PRIVATE_CLASS)}>
+      <Figure
+        className={clsx(
+          'seneca-dashboard__stat-value',
+          lead && tone !== 'neutral' && `seneca-dashboard__stat-value--${tone}`,
+          !plainValue && PRIVATE_CLASS,
+        )}
+      >
         {value}
       </Figure>
       {caption && (
@@ -98,6 +139,7 @@ export function KpiCard({
         </dl>
       )}
       {chart && <div className="seneca-dashboard__stat-chart">{chart}</div>}
+      {meter && <KpiMeter percent={meter.percent} tone={tone} />}
       {line && line.points.length >= 2 && (
         <div
           className={clsx(
