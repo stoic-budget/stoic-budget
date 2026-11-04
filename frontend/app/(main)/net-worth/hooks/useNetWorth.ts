@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import apiClient from '@/app/lib/api';
+import { AS_OF_PARAM } from '@/app/lib/as-of-month';
 import type {
   CapitalRole,
   NetWorthResponse as NetWorthData,
@@ -106,6 +107,8 @@ export function useNetWorth(initialRange: NetWorthRange = '90d'): NetWorthState 
   const from = searchParams.get('from');
   const to = searchParams.get('to');
   const custom: NetWorthCustomRange | null = from && to ? { from, to } : null;
+  // `?to=` alone: the preset window ending on that day, as a past dashboard month shows it.
+  const endsOn = !from && to ? to : null;
   const range = (searchParams.get('range') as NetWorthRange | null) ?? initialRange;
   const view = searchParams.get('view') === 'breakdown' ? 'breakdown' : 'performance';
   const excluded = (searchParams.get('exclude') ?? '').split(',').filter(Boolean);
@@ -128,12 +131,13 @@ export function useNetWorth(initialRange: NetWorthRange = '90d'): NetWorthState 
   );
 
   const setRange = useCallback(
-    (next: NetWorthRange): void => writeParams({ range: next, from: null, to: null }),
+    (next: NetWorthRange): void =>
+      writeParams({ range: next, from: null, to: null, [AS_OF_PARAM]: null }),
     [writeParams],
   );
   const setCustom = useCallback(
     (next: NetWorthCustomRange | null): void =>
-      writeParams(next ? { from: next.from, to: next.to } : { from: null, to: null }),
+      writeParams({ from: next?.from ?? null, to: next?.to ?? null, [AS_OF_PARAM]: null }),
     [writeParams],
   );
   const setView = useCallback(
@@ -146,7 +150,9 @@ export function useNetWorth(initialRange: NetWorthRange = '90d'): NetWorthState 
     [writeParams],
   );
 
-  const window = custom ? { from: custom.from, to: custom.to } : { range };
+  const window = custom
+    ? { from: custom.from, to: custom.to }
+    : { range, ...(endsOn ? { to: endsOn } : {}) };
   const params = {
     ...window,
     ...(excluded.length > 0 ? { exclude: excluded.join(',') } : {}),
@@ -156,6 +162,7 @@ export function useNetWorth(initialRange: NetWorthRange = '90d'): NetWorthState 
     workspaceId,
     range: [custom ? `${custom.from}:${custom.to}` : range, ...excluded].join('|'),
     denominate,
+    to: endsOn,
   });
 
   const query = useQuery({

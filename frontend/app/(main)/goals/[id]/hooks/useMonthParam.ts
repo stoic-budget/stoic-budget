@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
+import { AS_OF_PARAM } from '@/app/lib/as-of-month';
 import { formatMonthParam, parseMonthParam } from '../../../dashboard/helpers/dashboard-url-state';
 
 export interface MonthParamState {
@@ -28,6 +29,8 @@ export function useMonthParam(): MonthParamState {
     (year: number, monthIndex: number): void => {
       const next = new URLSearchParams(query);
       next.set('month', formatMonthParam(new Date(year, monthIndex, 1)));
+      // Another month than the dashboard's that opened the goal: its strip goes.
+      next.delete(AS_OF_PARAM);
       router.replace(`${pathname}?${next.toString()}`, { scroll: false });
     },
     [router, pathname, query],

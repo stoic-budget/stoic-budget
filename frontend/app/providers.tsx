@@ -29,6 +29,7 @@ import {
 import { KeyboardShortcutsProvider } from './components/keyboard-shortcuts-provider';
 import { OfflineBanner } from './components/pwa/OfflineBanner';
 import { ServiceWorkerRegistrar } from './components/pwa/ServiceWorkerRegistrar';
+import { PastMonthBanner } from './components/versions/PastMonthBanner';
 import { VersionBanner } from './components/versions/VersionBanner';
 import { AuthProvider } from './contexts/AuthContext';
 import { CurrencyDisplayProvider } from './contexts/CurrencyDisplayContext';
@@ -113,6 +114,10 @@ function WorkspaceScopedProviders({
               <ServiceWorkerRegistrar />
               <OfflineBanner />
               <VersionBanner />
+              {/* Reads the address; under Suspense so it never holds the page's render. */}
+              <React.Suspense fallback={null}>
+                <PastMonthBanner />
+              </React.Suspense>
             </>
           ) : null}
           <React.Fragment key={scopeKey}>{children}</React.Fragment>

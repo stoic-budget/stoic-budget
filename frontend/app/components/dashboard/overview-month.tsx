@@ -1,8 +1,9 @@
 'use client';
 
-import { createContext, useContext } from 'react';
+import { createContext, useCallback, useContext } from 'react';
 import { resolveLocale } from '@/app/(main)/dashboard/helpers/dashboard-helpers';
 import { useLocale } from '@/app/i18n';
+import { withAsOf } from '@/app/lib/as-of-month';
 import { currentMonthKey } from './month-end';
 
 /**
@@ -29,6 +30,29 @@ export function useOverviewMonth(): { month: string; label: string } | null {
     year: 'numeric',
   }).format(new Date(year, monthNumber - 1, 1));
   return { month, label };
+}
+
+/** The link opens its page on `month`: `?month=` names it, or `?from=`/`?to=` fall in it. */
+function namesMonth(href: string, month: string): boolean {
+  const params = new URL(href, 'http://overview.local').searchParams;
+  return (
+    params.get('month') === month ||
+    [params.get('from'), params.get('to')].some(day => day?.startsWith(`${month}-`))
+  );
+}
+
+/**
+ * Marks the Overview's links that open a page on another month than this one
+ * (`?asOf=`), so that page warns its figures are not the present. Links to
+ * pages that show no month stay as they are: the warning would not be true there.
+ */
+export function useOverviewHrefMarker(): <T extends string | undefined>(href: T) => T {
+  const month = useContext(OverviewMonthContext);
+  return useCallback(
+    href =>
+      (href && month && namesMonth(href, month) ? withAsOf(href, month) : href) as typeof href,
+    [month],
+  );
 }
 
 /** The Overview shows a month other than the one we are in. */

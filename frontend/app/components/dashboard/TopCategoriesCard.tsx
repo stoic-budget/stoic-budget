@@ -12,6 +12,7 @@ import { useIntlayer } from '@/app/i18n';
 import { categoryReportHref } from '@/app/lib/category-report-href';
 import { useCategoryName } from '@/app/lib/use-category-name';
 import { CategoryIconBadge } from './CategoryIconBadge';
+import { useOverviewHrefMarker } from './overview-month';
 import { useIsWideSection } from './section-span';
 import { CardEmpty, ListRow } from './ui';
 
@@ -56,6 +57,8 @@ export function TopCategoriesCard({ categories, formatAmount, month }: TopCatego
   // With the row to itself the list can say how each total came about.
   const wide = useIsWideSection();
   const categoryName = useCategoryName();
+  // The donut navigates on its own; the rows are marked by ListRow.
+  const mark = useOverviewHrefMarker();
   const labels = useMemo(
     () => ({ uncategorized: t.uncategorized.value, other: t.other.value }),
     [t.uncategorized, t.other],
@@ -72,9 +75,9 @@ export function TopCategoriesCard({ categories, formatAmount, month }: TopCatego
       name: categoryDisplayName(cat, labels, categoryName),
       value: cat.amount,
       color: tones[index],
-      href: categoryHref(cat, month),
+      href: mark(categoryHref(cat, month)),
     }));
-  }, [categories, labels, categoryName, month]);
+  }, [categories, labels, categoryName, month, mark]);
 
   if (!categories.length) {
     return <CardEmpty icon={DonutLargeOutlined}>{t.noCategoryData}</CardEmpty>;

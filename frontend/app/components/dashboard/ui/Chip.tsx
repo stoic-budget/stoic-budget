@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import type React from 'react';
 import { forwardRef } from 'react';
+import { useOverviewHrefMarker } from '@/app/components/dashboard/overview-month';
 
 export type ChipTone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 
@@ -51,9 +52,10 @@ export function Chip(props: ChipProps): React.JSX.Element {
   const { href, onClick, disabled, active, children, count, title } = props;
   const className = chipClassName(props);
   const ariaLabel = props['aria-label'];
-  if (href && !disabled) {
+  const marked = useOverviewHrefMarker()(href);
+  if (marked && !disabled) {
     return (
-      <Link href={href} className={className} aria-label={ariaLabel} title={title}>
+      <Link href={marked} className={className} aria-label={ariaLabel} title={title}>
         <ChipContent count={count}>{children}</ChipContent>
       </Link>
     );

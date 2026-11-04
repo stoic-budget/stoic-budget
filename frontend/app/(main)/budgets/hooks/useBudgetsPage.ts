@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { parseMonthParam } from '@/app/(main)/dashboard/helpers/dashboard-url-state';
+import { monthEndOrToday } from '@/app/components/dashboard/month-end';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer } from '@/app/i18n';
@@ -180,9 +182,12 @@ export function useBudgetsPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // `?month=` (from a past month of the dashboard): spending measured on its last day.
+  const monthParam = searchParams.get('month');
+  const date = monthParam && parseMonthParam(monthParam) ? monthEndOrToday(monthParam) : null;
   const query = useQuery({
-    queryKey: queryKeys.budgets(workspaceId),
-    queryFn: ({ signal }) => fetchBudgets(signal),
+    queryKey: date ? queryKeys.budgetsAt(workspaceId, date) : queryKeys.budgets(workspaceId),
+    queryFn: ({ signal }) => fetchBudgets(signal, date ?? undefined),
     enabled: Boolean(workspaceId),
   });
 

@@ -18,7 +18,7 @@ import { useIntlayer, useLocale } from '@/app/i18n';
 import { PiggyBank, Scale, TrayArrowDown, WalletArrowUp } from '@/app/lib/category-line-icons';
 import { formatMoney } from '@/app/lib/format-money';
 import { AdviceCard } from './AdviceCard';
-import { CashFlowCard } from './CashFlowCard';
+import { CashFlowCard, reportsHref } from './CashFlowCard';
 import { CryptoPortfolioCard } from './CryptoPortfolioCard';
 import { computeNet, computeSavingsRate, signTone } from './dashboard-stats.util';
 import { GettingStartedCard } from './GettingStartedCard';
@@ -369,7 +369,7 @@ export function OverviewTab({
             <DashboardCard
               title={t.topCategoriesTitle}
               subtitle={monthLabel}
-              action={<CardLink href="/reports?tab=cash-flow">{t.viewAll}</CardLink>}
+              action={<CardLink href={reportsHref(monthKey(displayMonth))}>{t.viewAll}</CardLink>}
             >
               <TopCategoriesCard
                 categories={data.topCategories ?? []}

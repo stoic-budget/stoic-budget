@@ -39,6 +39,11 @@ interface NetWorthCardProps {
  * Net worth over a period the user picks, as the net worth page draws it,
  * ending today, or on the last day of the month the overview shows.
  */
+/** The net worth page on the card's window: the same preset, ending where the card's does. */
+export function netWorthHref(range: NetWorthRange, asOf: string | null): string {
+  return asOf ? `/net-worth?range=${range}&to=${asOf}` : '/net-worth';
+}
+
 export function NetWorthCard({ month, monthLabel }: NetWorthCardProps): React.JSX.Element | null {
   const t = useIntlayer('overviewTab');
   const netWorthText = useIntlayer('netWorthPage');
@@ -67,7 +72,7 @@ export function NetWorthCard({ month, monthLabel }: NetWorthCardProps): React.JS
         onChange={setRange}
         ariaLabel={t.netWorthPeriod.value}
       />
-      <CardLink href="/net-worth">{t.viewAll}</CardLink>
+      <CardLink href={netWorthHref(range, asOf)}>{t.viewAll}</CardLink>
     </>
   );
 

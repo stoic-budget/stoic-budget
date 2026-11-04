@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import Link from 'next/link';
 import type React from 'react';
+import { useOverviewHrefMarker } from '@/app/components/dashboard/overview-month';
 import { ArrowRight } from '@/app/components/icons';
 
 export interface DashboardCardProps {
@@ -52,7 +53,7 @@ export interface CardLinkProps {
 
 export function CardLink({ href, children }: CardLinkProps): React.JSX.Element {
   return (
-    <Link href={href} className="seneca-dashboard__card-link-btn">
+    <Link href={useOverviewHrefMarker()(href)} className="seneca-dashboard__card-link-btn">
       {children} <ArrowRight size={13} />
     </Link>
   );

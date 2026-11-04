@@ -9,6 +9,7 @@ import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import { BalanceGroupRow } from './BalanceGroupRow';
 import { monthEndOrToday } from './month-end';
+import { netWorthHref } from './NetWorthCard';
 import { CardEmpty, CardLink, DashboardCard } from './ui';
 
 /** The trend windows, shortest first; a fixed span is labelled by Intl. */
@@ -85,7 +86,7 @@ export function BalancesCard({ month, monthLabel }: BalancesCardProps): React.JS
             onChange={setRange}
             ariaLabel={overview.netWorthPeriod.value}
           />
-          <CardLink href="/net-worth">{overview.viewAll}</CardLink>
+          <CardLink href={netWorthHref(range, asOf)}>{overview.viewAll}</CardLink>
         </>
       }
     >

@@ -17,7 +17,8 @@ import { getApiErrorMessage } from '@/app/lib/api-error';
 import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { formatStoredDate, formatStoredDateTime } from '@/app/lib/user-format-store';
 
-const BAR_STYLE: React.CSSProperties = {
+/** The strip's look, shared with PastMonthBanner. */
+export const BAR_STYLE: React.CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',

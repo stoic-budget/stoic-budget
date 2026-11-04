@@ -3,7 +3,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
+import { parseMonthParam } from '@/app/(main)/dashboard/helpers/dashboard-url-state';
+import { monthRange } from '@/app/components/dashboard/cash-flow-flow';
 import { useViewPreference } from '@/app/components/transactions/hooks/useViewPreference';
+import { useClearAsOf } from '@/app/hooks/useClearAsOf';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
@@ -85,13 +88,17 @@ export function useCashFlowMap() {
   const includeTransfers = view.state?.includeTransfers ?? true;
   const netRefunds = view.state?.netRefunds ?? false;
   const [local, setLocal] = useState<Omit<CashFlowFilters, keyof SavedSwitches>>(() => {
-    // A link may name the period (`?from=&to=`, the dashboard's month); else the first preset.
+    // A link may name the period (`?from=&to=`, or a whole `?month=` as a category
+    // link from the dashboard does); else the first preset.
     const linkedFrom = searchParams?.get('from') ?? '';
     const linkedTo = searchParams?.get('to') ?? '';
-    const [from, to] =
-      DAY.test(linkedFrom) && DAY.test(linkedTo) && linkedFrom <= linkedTo
-        ? [linkedFrom, linkedTo]
-        : presetRangeValues(QUICK_PERIOD_PRESETS[0]);
+    const linkedMonth = searchParams?.get('month') ?? '';
+    let [from, to] = presetRangeValues(QUICK_PERIOD_PRESETS[0]);
+    if (DAY.test(linkedFrom) && DAY.test(linkedTo) && linkedFrom <= linkedTo) {
+      [from, to] = [linkedFrom, linkedTo];
+    } else if (parseMonthParam(linkedMonth)) {
+      ({ from, to } = monthRange(linkedMonth));
+    }
     return { from, to, compare: true, compareTo: 'previous', categories: [], owner: null };
   });
   const filters = useMemo<CashFlowFilters>(
@@ -121,8 +128,11 @@ export function useCashFlowMap() {
   });
 
   const { save } = view;
+  const clearAsOf = useClearAsOf();
   const update = useCallback(
     (patch: Partial<CashFlowFilters>) => {
+      // Another period than the dashboard month a link opened the report on.
+      if (patch.from !== undefined || patch.to !== undefined) clearAsOf();
       const { includeTransfers: nextIncludeTransfers, netRefunds: nextNetRefunds, ...rest } = patch;
       // Saved per person and workspace, so leaving the page does not reset them.
       if (nextIncludeTransfers !== undefined || nextNetRefunds !== undefined) {
@@ -133,7 +143,7 @@ export function useCashFlowMap() {
       }
       setLocal(current => ({ ...current, ...rest }));
     },
-    [save, includeTransfers, netRefunds],
+    [save, includeTransfers, netRefunds, clearAsOf],
   );
 
   const exportUrl = useMemo(() => {

@@ -56,6 +56,15 @@ type SubscriptionsMonthWidgetProps = {
   formatAmount: (value: number) => string;
 };
 
+/** The subscriptions page; a past month shows what was charged in it above the list. */
+function subscriptionsHref(month: string, focus?: string): string {
+  const params = new URLSearchParams();
+  if (month !== currentMonthKey()) params.set('month', month);
+  if (focus) params.set('focus', focus);
+  const query = params.toString();
+  return query ? `/subscriptions?${query}` : '/subscriptions';
+}
+
 /**
  * The subscription charges of the Overview's month (this month's elsewhere) as
  * a ring, paid so far against still to come, beside the subscriptions
@@ -100,7 +109,7 @@ export function SubscriptionsMonthWidget({
       <DashboardCard
         title={t.title}
         subtitle={shown?.label}
-        action={<CardLink href="/subscriptions">{links.allSubscriptions}</CardLink>}
+        action={<CardLink href={subscriptionsHref(month)}>{links.allSubscriptions}</CardLink>}
       >
         <div className="seneca-dashboard__categories" aria-hidden="true">
           <div
@@ -170,7 +179,7 @@ export function SubscriptionsMonthWidget({
             count: String(summary.data.priceChangeCount),
           }),
           // Rings every subscription whose price changed (data-attention-group).
-          href: '/subscriptions?focus=price-changed',
+          href: subscriptionsHref(month, 'price-changed'),
         },
         summary.data.duplicateCount > 0 && {
           label: fill(links.duplicates.value, { count: String(summary.data.duplicateCount) }),
@@ -183,7 +192,7 @@ export function SubscriptionsMonthWidget({
     <DashboardCard
       title={t.title}
       subtitle={shown?.label}
-      action={<CardLink href="/subscriptions">{links.allSubscriptions}</CardLink>}
+      action={<CardLink href={subscriptionsHref(month)}>{links.allSubscriptions}</CardLink>}
     >
       {total === 0 ? (
         <CardEmpty icon={EventRepeatOutlined}>{t.emptyDescription}</CardEmpty>
@@ -197,7 +206,7 @@ export function SubscriptionsMonthWidget({
               <ListRow
                 key={item.subscriptionId}
                 // Rings this subscription's row there (see useAttentionFocus).
-                href={`/subscriptions?focus=${encodeURIComponent(`subscription:${item.subscriptionId}`)}`}
+                href={subscriptionsHref(month, `subscription:${item.subscriptionId}`)}
                 leading={
                   <VendorIcon
                     vendorName={item.vendorName}
