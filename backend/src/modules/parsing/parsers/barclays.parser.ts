@@ -3,7 +3,8 @@ import { BankName, FileType } from '../../../entities/statement.entity';
 import { isPageFooterLine } from '../helpers/pdf-layout-page-footer.helper';
 import type { LayoutReading, LayoutTransaction } from '../helpers/pdf-layout-table.helper';
 import { findDayRangePeriod } from '../helpers/statement-header-period.helper';
-import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
+import { withPaymentTypes } from '../helpers/statement-payment-type.helper';
+import type { ParsedStatement } from '../interfaces/parsed-statement.interface';
 import { BARCLAYS_PREFIXES, barclaysPaymentType } from './barclays-payment-type';
 import { GenericPdfParser } from './generic-pdf.parser';
 
@@ -78,22 +79,7 @@ export class BarclaysParser extends GenericPdfParser {
   }
 
   async parse(filePath: string, cachedText?: string): Promise<ParsedStatement> {
-    const statement = await super.parse(filePath, cachedText);
-    const typed = (rows: ParsedTransaction[]): ParsedTransaction[] =>
-      rows.map(row => {
-        const paymentType = barclaysPaymentType(row.paymentPurpose);
-        return paymentType ? { ...row, paymentType } : row;
-      });
-    return {
-      ...statement,
-      transactions: typed(statement.transactions),
-      ...(statement.otherAccounts && {
-        otherAccounts: statement.otherAccounts.map(account => ({
-          ...account,
-          transactions: typed(account.transactions),
-        })),
-      }),
-    };
+    return withPaymentTypes(await super.parse(filePath, cachedText), barclaysPaymentType);
   }
 
   protected readTransactions(

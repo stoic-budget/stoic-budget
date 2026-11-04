@@ -12,6 +12,29 @@ export type BankLogoKey =
   | 'bank_of_china'
   | 'bank_of_scotland'
   | 'barclays'
+  | 'becu'
+  | 'bendigo'
+  | 'bmo'
+  | 'bnp_paribas'
+  | 'boq'
+  | 'bpi'
+  | 'capital_one'
+  | 'capitec'
+  | 'cash_app'
+  | 'schwab'
+  | 'chase'
+  | 'chime'
+  | 'cibc'
+  | 'citi'
+  | 'citizens'
+  | 'coast_capital'
+  | 'comerica'
+  | 'commbank'
+  | 'commerce_bank'
+  | 'commercial_bank'
+  | 'credit_agricole'
+  | 'credit_one'
+  | 'dcu'
   | 'other';
 
 export type ResolvedBankLogo = {
@@ -35,6 +58,29 @@ const LOGO_SRC_BY_KEY: Record<BankLogoKey, string> = {
   bank_of_china: '/images/bank-logo/bank.png',
   bank_of_scotland: '/images/bank-logo/bank.png',
   barclays: '/images/bank-logo/bank.png',
+  becu: '/images/bank-logo/bank.png',
+  bendigo: '/images/bank-logo/bank.png',
+  bmo: '/images/bank-logo/bank.png',
+  bnp_paribas: '/images/bank-logo/bank.png',
+  boq: '/images/bank-logo/bank.png',
+  bpi: '/images/bank-logo/bank.png',
+  capital_one: '/images/bank-logo/bank.png',
+  capitec: '/images/bank-logo/bank.png',
+  cash_app: '/images/bank-logo/bank.png',
+  schwab: '/images/bank-logo/bank.png',
+  chase: '/images/bank-logo/bank.png',
+  chime: '/images/bank-logo/bank.png',
+  cibc: '/images/bank-logo/bank.png',
+  citi: '/images/bank-logo/bank.png',
+  citizens: '/images/bank-logo/bank.png',
+  coast_capital: '/images/bank-logo/bank.png',
+  comerica: '/images/bank-logo/bank.png',
+  commbank: '/images/bank-logo/bank.png',
+  commerce_bank: '/images/bank-logo/bank.png',
+  commercial_bank: '/images/bank-logo/bank.png',
+  credit_agricole: '/images/bank-logo/bank.png',
+  credit_one: '/images/bank-logo/bank.png',
+  dcu: '/images/bank-logo/bank.png',
   other: '/images/bank-logo/bank.png',
 };
 
@@ -52,6 +98,29 @@ const DISPLAY_NAME_BY_KEY: Record<BankLogoKey, string> = {
   bank_of_china: 'Bank of China (Hong Kong)',
   bank_of_scotland: 'Bank of Scotland',
   barclays: 'Barclays',
+  becu: 'BECU',
+  bendigo: 'Bendigo Bank',
+  bmo: 'BMO',
+  bnp_paribas: 'BNP Paribas',
+  boq: 'BOQ',
+  bpi: 'BPI',
+  capital_one: 'Capital One',
+  capitec: 'Capitec',
+  cash_app: 'Cash App',
+  schwab: 'Charles Schwab',
+  chase: 'Chase',
+  chime: 'Chime',
+  cibc: 'CIBC',
+  citi: 'Citi',
+  citizens: 'Citizens',
+  coast_capital: 'Coast Capital',
+  comerica: 'Comerica',
+  commbank: 'CommBank',
+  commerce_bank: 'Commerce Bank',
+  commercial_bank: 'Commercial Bank',
+  credit_agricole: 'Crédit Agricole',
+  credit_one: 'Credit One',
+  dcu: 'DCU',
   other: 'Bank',
 };
 
@@ -107,6 +176,79 @@ const resolveKeyFromName = (bankName: string): BankLogoKey => {
   }
   if (n.startsWith('barclays')) {
     return 'barclays';
+  }
+  if (n === 'becu' || n.startsWith('becu ')) {
+    return 'becu';
+  }
+  if (n === 'bendigo' || n.startsWith('bendigo ')) {
+    return 'bendigo';
+  }
+  if (n === 'bmo' || n.startsWith('bmo ')) {
+    return 'bmo';
+  }
+  if (n === 'bnp paribas' || n.startsWith('bnp paribas ') || n === 'bnp_paribas') {
+    return 'bnp_paribas';
+  }
+  if (n === 'boq' || n.startsWith('boq ') || n === 'bank of queensland') {
+    return 'boq';
+  }
+  if (n === 'bpi' || n.startsWith('bpi ') || n === 'bank of the philippine islands') {
+    return 'bpi';
+  }
+  if (n === 'capital one' || n.startsWith('capital one ') || n === 'capital_one') {
+    return 'capital_one';
+  }
+  if (n === 'capitec' || n.startsWith('capitec ') || n === 'capitec bank') {
+    return 'capitec';
+  }
+  if (n === 'cash app' || n.startsWith('cash app ') || n === 'cash_app') {
+    return 'cash_app';
+  }
+  if (n === 'schwab' || n.startsWith('charles schwab') || n.startsWith('schwab ')) {
+    return 'schwab';
+  }
+  if (n === 'chase' || n.startsWith('chase ') || n.startsWith('jpmorgan chase')) {
+    return 'chase';
+  }
+  if (n === 'chime' || n.startsWith('chime ')) {
+    return 'chime';
+  }
+  if (n === 'cibc' || n.startsWith('cibc ')) {
+    return 'cibc';
+  }
+  if (n === 'citizens' || n.startsWith('citizens ')) {
+    return 'citizens';
+  }
+  if (n === 'coast_capital' || n.startsWith('coast capital')) {
+    return 'coast_capital';
+  }
+  if (n === 'comerica' || n.startsWith('comerica ')) {
+    return 'comerica';
+  }
+  if (n === 'commbank' || n.startsWith('commonwealth bank')) {
+    return 'commbank';
+  }
+  if (n === 'commerce_bank' || n.startsWith('commerce bank')) {
+    return 'commerce_bank';
+  }
+  if (n === 'commercial_bank' || n.startsWith('commercial bank')) {
+    return 'commercial_bank';
+  }
+  if (
+    n === 'credit_agricole' ||
+    n.startsWith('credit agricole') ||
+    n.startsWith('crédit agricole')
+  ) {
+    return 'credit_agricole';
+  }
+  if (n === 'credit_one' || n.startsWith('credit one')) {
+    return 'credit_one';
+  }
+  if (n === 'dcu' || n.startsWith('digital federal credit union')) {
+    return 'dcu';
+  }
+  if (n === 'citi' || n.startsWith('citi ') || n.startsWith('citibank')) {
+    return 'citi';
   }
   if (n === 'other') {
     return 'other';

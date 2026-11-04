@@ -1,5 +1,8 @@
 import { findStatementAmounts } from './statement-amount.helper';
+import { balanceLineEnd } from './statement-balance-line.helper';
 import { findFullDates, foldText, type NumericDateOrder } from './statement-date.helper';
+
+export { isCreditCardStatement } from './statement-card.helper';
 
 /**
  * Statement header facts read from free text, for statements in English,
@@ -7,7 +10,7 @@ import { findFullDates, foldText, type NumericDateOrder } from './statement-date
  */
 
 const ISO_CODES =
-  /\b(KZT|UZS|GEL|UAH|BYN|AMD|AZN|KGS|TJS|TMT|USD|EUR|RUB|GBP|CNY|TRY|AED|JPY|CHF|CAD|AUD|SEK|NOK|DKK|PLN|CZK|HUF|RON|INR|BRL|MXN|SGD|HKD|NZD|ZAR|THB|MYR|IDR|ILS|SAR|QAR|KWD)\b/g;
+  /\b(KZT|UZS|GEL|UAH|BYN|AMD|AZN|KGS|TJS|TMT|USD|EUR|RUB|GBP|CNY|TRY|AED|JPY|CHF|CAD|AUD|SEK|NOK|DKK|PLN|CZK|HUF|RON|INR|BRL|MXN|SGD|HKD|NZD|ZAR|THB|MYR|IDR|ILS|SAR|QAR|KWD|LKR|EUROS?)\b/g;
 
 const PREFIXED_DOLLARS: [RegExp, string][] = [
   [/\bS\$/, 'SGD'],
@@ -32,17 +35,19 @@ const LETTER_SIGNS: [RegExp, string][] = [
 /** Where a bare "$" is printed, the bank's country says which dollar. */
 const DOLLAR_COUNTRIES: [RegExp, string][] = [
   [/\bcanada\b|\bqu[eé]bec\b/i, 'CAD'],
-  [/\baustralia\b/i, 'AUD'],
+  [/\baustralian?\b|\.com\.au\b/i, 'AUD'],
   [/\bnew zealand\b/i, 'NZD'],
   [/\bsingapore\b/i, 'SGD'],
   [/\bhong kong\b/i, 'HKD'],
   [/\bm[eé]xico\b/i, 'MXN'],
 ];
 
-/** Statements that print no currency at all, known by a code only one country uses. */
+/** Statements that print no currency at all, known by a code or a country name only one currency goes with. */
 const UNMARKED_COUNTRIES: [RegExp, string][] = [
   [/\bIFSC\b/, 'INR'],
   [/\b(?:PIX|CNPJ|CPF)\b/, 'BRL'],
+  [/\bPhilippines\b/i, 'PHP'],
+  [/\bSouth Africa\b|\.co\.za\b/i, 'ZAR'],
 ];
 
 const SYMBOLS: [string, string][] = [
@@ -58,12 +63,13 @@ const SYMBOLS: [string, string][] = [
 
 /**
  * The statement currency: the ISO code printed most often (upper case only:
- * "try" and "eur" are words too), else a currency symbol.
+ * "try" and "eur" are words too; "EUROS" is EUR), else a currency symbol.
  */
 export function detectStatementCurrency(text: string): string | null {
   const counts = new Map<string, number>();
   for (const match of text.matchAll(ISO_CODES)) {
-    counts.set(match[1], (counts.get(match[1]) ?? 0) + 1);
+    // "RELEVE DE COMPTES EN EUROS": the currency named in capitals counts as its code.
+    counts.set(match[1].slice(0, 3), (counts.get(match[1].slice(0, 3)) ?? 0) + 1);
   }
   const [mostPrinted] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
   if (mostPrinted) {
@@ -217,7 +223,8 @@ export function isBalanceLabel(description: string): boolean {
 const DATED_BALANCE = /\b(?:balance|solde|saldo)\s+(?:as\s+(?:of|at)|on|au|per|op|al)\b/g;
 
 /**
- * The last amount after a label, up to the end of its line: "Balance Carried
+ * The last amount after a label, up to the end of its line (or of the dated
+ * line under a label that stands alone, see `balanceLineEnd`): "Balance Carried
  * Forward: 2,181.67 2,002.15 15,271.23" ends with the balance. Dates on the
  * line are skipped. A dated balance takes the first: the figure right after
  * its date, whatever a box beside it prints on the same line ("Balance on 20
@@ -230,8 +237,7 @@ function amountAfter(
   order: NumericDateOrder,
   pick: 'first' | 'last' = 'last',
 ) {
-  const lineEnd = folded.indexOf('\n', index);
-  const line = text.slice(index, lineEnd === -1 ? undefined : lineEnd);
+  const line = text.slice(index, balanceLineEnd(folded, index, [...OPENING, ...CLOSING]));
   let withoutDates = line;
   for (const found of findFullDates(line, order).reverse()) {
     withoutDates = `${withoutDates.slice(0, found.index)} ${withoutDates.slice(found.index + found.length)}`;
@@ -330,7 +336,8 @@ export function findStatementTotals(
   const folded = foldText(text);
   const total = (labels: string[]) => {
     for (const label of labels) {
-      const pattern = new RegExp(`(?:^|[^a-z])${label}(?![a-z])`, 'g');
+      // "Total Withdrawals & Other Debits" totals one section, not the statement.
+      const pattern = new RegExp(`(?:^|[^a-z])${label}(?![a-z]|\\s*(?:&|and)\\s+[a-z])`, 'g');
       for (const match of folded.matchAll(pattern)) {
         const value = amountAfter(
           text,
@@ -349,47 +356,36 @@ export function findStatementTotals(
   return { credits: total(TOTAL_CREDITS), debits: total(TOTAL_DEBITS) };
 }
 
-const CARD_MARKERS = [
-  'minimum payment',
-  'payment due date',
-  'available credit',
-  'credit limit',
-  'credit line',
-  'cardmember',
-  'cardholder',
-  'paiement minimum',
-  'limite de credit',
-  'minimumbetaling',
-  'mindestzahlung',
-  'pago minimo',
-];
-
-/**
- * A credit card statement prints charges as positive amounts and its balance
- * as what is owed. Bank arithmetic reconciles it just as well with every sign
- * flipped, so only the wording tells the two apart.
- */
-export function isCreditCardStatement(text: string): boolean {
-  const folded = foldText(text);
-  return CARD_MARKERS.filter(marker => folded.includes(marker)).length >= 2;
-}
-
 const ACCOUNT_HEADING =
   /\b(?:account|compte|rekening|konto|cuenta)\b(?:\s+(?:number|no\.?|nr\.?|#))?\s*[:—–-]?\s*([A-Z]{2}\d{2}[A-Z0-9]{10,30}|\d[\d -]{6,}\d)/i;
+
+/**
+ * A line of only a product name and a long number ("Member Savings -
+ * 3589405262"), or of a long number and its suffix in brackets, printed under
+ * the product name ("100123456789 (100)").
+ */
+const PRODUCT_HEADING =
+  /^(?:[A-Za-z][A-Za-z&' ]{2,40}?\s+[-–—]\s+(\d{8,17})|(\d{8,17}) \(\d+\)|[A-Za-z][A-Za-z&' ]{2,40}?\s+ACCT#\s*(\d{1,17}))$/;
 
 /**
  * The heading a statement prints above one account's table ("HKD Current
  * Account — 817-890692-838", "Numéro de compte: 67324-673-9893968"): the
  * number right after the word for account, and the currency code if the line
- * names one. Null for any other line.
+ * names one. A line holding only a product name and a long number ("Checking
+ * - 3600212596") is one too, and so is a number alone with its suffix in
+ * brackets ("100123456789 (100)"), and a product name with its share number
+ * ("PRIMARY SAVINGS  ACCT# 1"). Null for any other line.
  */
 export function readAccountHeading(
   line: string,
 ): { accountNumber: string; currency?: string } | null {
-  const match = line.match(ACCOUNT_HEADING);
+  const match = line.match(ACCOUNT_HEADING) ?? line.trim().match(PRODUCT_HEADING);
   if (!match) {
     return null;
   }
   const currency = Array.from(line.matchAll(ISO_CODES), code => code[1])[0];
-  return { accountNumber: match[1].trim(), ...(currency ? { currency } : {}) };
+  return {
+    accountNumber: (match[1] ?? match[2] ?? match[3]).trim(),
+    ...(currency ? { currency } : {}),
+  };
 }

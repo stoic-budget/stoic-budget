@@ -39,13 +39,17 @@ const SECTIONS: Record<SectionSign, string[]> = {
     'withdrawals and other subtractions',
     'withdrawals and deductions',
     'withdrawals and other debits',
+    'withdrawals and debits',
+    'other withdrawals and debits',
     'other withdrawals',
     'electronic withdrawals',
     'card withdrawals',
     'atm and debit card withdrawals',
     'atm & debit card withdrawals',
+    'atm withdrawals and debits',
     'card purchases',
     'debit card purchases',
+    'debit card purchases and debits',
     'debits',
     'other debits',
     'deductions',
@@ -62,16 +66,44 @@ const SECTION_BY_HEADING = new Map<string, SectionSign>(
   ),
 );
 
-const rowText = (row: PdfTextRow) => row.items.map(item => item.text).join(' ');
+/** Words of one heading sit closer than this, in points; a second block on the line sits further. */
+const HEADING_GAP = 40;
 
-/** The sign a section heading gives the rows under it; null for any other line. */
-export function readSectionHeading(row: PdfTextRow): SectionSign | null {
-  const heading = foldText(rowText(row))
-    .replace(/\(?\bcontinued\b\)?/g, '')
+/**
+ * A heading as the section tables print it, folded: "&" is "and", a footnote
+ * star, "(continued)", "(Cont.)" and the account it names after it ("Account #
+ * 123456789") are no part of it. A line that also holds a block
+ * further right ("Withdrawals & Debits **" over the page's left half and
+ * "Total Withdrawals & Debits" over its right) is read by its left block,
+ * unless that block holds a figure: "Deposits  $2,869.18" is a summary line.
+ */
+function headingText(row: PdfTextRow): string {
+  const items = [...row.items].sort((a, b) => a.x - b.x);
+  const end = items.findIndex(
+    (item, index) =>
+      index > 0 && item.x - (items[index - 1].x + items[index - 1].width) > HEADING_GAP,
+  );
+  // A block on the right with a figure in it is a summary line ("Deposits   $2,869.18"), no heading.
+  const left =
+    end < 0 || items.slice(end).some(item => /\d/.test(item.text)) ? items : items.slice(0, end);
+  return foldText(left.map(item => item.text).join(' '))
+    .replace(/\(?\bcontinued\b\)?|\(cont\.?\)/g, '')
+    .replace(/\s+account\s*(?:#|no\.?|number)\s*[\dx*-]+\s*$/, '')
+    .replace(/&/g, ' and ')
+    .replace(/\*+/g, '')
     .replace(/[\s:.]+$/, '')
     .replace(/\s+/g, ' ')
     .trim();
-  return SECTION_BY_HEADING.get(heading) ?? null;
+}
+
+/** The sign a section heading gives the rows under it; null for any other line. */
+export function readSectionHeading(row: PdfTextRow): SectionSign | null {
+  return SECTION_BY_HEADING.get(headingText(row)) ?? null;
+}
+
+/** "Daily Balance": a list of end-of-day balances follows, and the section above is over. */
+export function isDailyBalanceHeading(row: PdfTextRow): boolean {
+  return ['daily balance', 'daily balances', 'daily ending balance'].includes(headingText(row));
 }
 
 const startsWithDate = (items: PdfTextItem[]) =>

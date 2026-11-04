@@ -1,0 +1,85 @@
+{
+  "metadata": {
+    "accountNumber": "904149661",
+    "currency": "AUD",
+    "dateFrom": "2023-02-09T00:00:00",
+    "dateTo": "2023-03-09T00:00:00",
+    "balanceStart": 97.39,
+    "balanceEnd": 55,
+    "rawHeader": "www.bendigobank.com.au Your details at a glance BSB number 633-000",
+    "normalizedHeader": "www.bendigobank.com.au Your details at a glance BSB number 633-000",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-02-09T00:00:00",
+      "counterpartyName": "Tifflers Cafe Deli ACMEYS",
+      "paymentPurpose": "WITHDRAWAL - EFTPOS 8883 Tifflers Cafe Deli ACMEYS CARD NUMBER 500000XXXXXXX001 1",
+      "debit": 6,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-02-13T00:00:00",
+      "counterpartyName": "MACDONALD WST LONGLEE LONGLEE",
+      "paymentPurpose": "WITHDRAWAL - EFTPOS 6066 MACDONALD WST LONGLEE LONGLEE CARD NUMBER 500000XXXXXXX001 1",
+      "debit": 4.75,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-02-18T00:00:00",
+      "counterpartyName": "MACDONALD WST LONGLEE LONGLEE",
+      "paymentPurpose": "WITHDRAWAL - EFTPOS 6326 MACDONALD WST LONGLEE LONGLEE CARD NUMBER 500000XXXXXXX001 1",
+      "debit": 21.15,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-03T00:00:00",
+      "counterpartyName": "MACDONALD WST LONGLEE LONGLEE",
+      "paymentPurpose": "WITHDRAWAL - EFTPOS 5833 MACDONALD WST LONGLEE LONGLEE CARD NUMBER 500000XXXXXXX001 1",
+      "debit": 8.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-09T00:00:00",
+      "counterpartyName": "7-ELEVEN 1246 BELM",
+      "paymentPurpose": "WITHDRAWAL - EFTPOS 6411 7-ELEVEN 1246 BELM CARD NUMBER 500000XXXXXXX001 1",
+      "debit": 2,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-09T00:00:00",
+      "counterpartyName": "INTEREST",
+      "paymentPurpose": "INTEREST",
+      "credit": 0.01,
+      "currency": "AUD",
+      "paymentType": "interest"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "4d3900205945",
+    "headings": [
+      "date:date | description:transaction | debit:withdrawals | credit:deposits | balance:balance"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "bendigo"
+  }
+}

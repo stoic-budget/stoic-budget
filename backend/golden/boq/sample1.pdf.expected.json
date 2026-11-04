@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "accountNumber": "96013212",
+    "currency": "AUD",
+    "dateFrom": "2025-03-02T00:00:00",
+    "dateTo": "2025-04-01T00:00:00",
+    "balanceStart": 1.95,
+    "balanceEnd": 1.95,
+    "rawHeader": "Bank of Queensland Limited ABN 32 009 656 740 AFSL No. 244616",
+    "normalizedHeader": "Bank of Queensland Limited ABN 32 009 656 740 AFSL No. 244616",
+    "locale": "en"
+  },
+  "transactions": [],
+  "checks": [
+    {
+      "code": "printed_totals",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "23aae6d99987",
+    "headings": [
+      "description:details as at total | debit:debits | other:$ dr",
+      "description:transaction details posting | debit:debit | credit:credit | balance:balance"
+    ],
+    "unknownWords": [
+      "as",
+      "at",
+      "total",
+      "$",
+      "dr",
+      "posting"
+    ],
+    "mentionedBank": "boq"
+  }
+}

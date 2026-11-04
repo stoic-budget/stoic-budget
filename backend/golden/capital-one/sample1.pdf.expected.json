@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "accountNumber": "52631340358",
+    "currency": "USD",
+    "dateFrom": "2023-07-01T00:00:00",
+    "dateTo": "2023-07-31T00:00:00",
+    "balanceStart": 1500,
+    "balanceEnd": 686.95,
+    "rawHeader": "Daniel Wu 1188 Wintfghavmm Dr Unit 999",
+    "normalizedHeader": "Daniel Wu 1188 Wintfghavmm Dr Unit 999",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-07-03T00:00:00",
+      "counterpartyName": "CHARLES SCHWAB ACCTVERIFY",
+      "paymentPurpose": "Deposit from CHARLES SCHWAB ACCTVERIFY",
+      "credit": 0.05,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-03T00:00:00",
+      "counterpartyName": "CHARLES SCHWAB ACCTVERIFY",
+      "paymentPurpose": "Deposit from CHARLES SCHWAB ACCTVERIFY",
+      "credit": 0.09,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-03T00:00:00",
+      "counterpartyName": "CHARLES SCHWAB ACCTVERIFY",
+      "paymentPurpose": "Withdrawal from CHARLES SCHWAB ACCTVERIFY",
+      "debit": 0.14,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-10T00:00:00",
+      "counterpartyName": "Wise Inc WISE",
+      "paymentPurpose": "Withdrawal from Wise Inc WISE",
+      "debit": 200.26,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-24T00:00:00",
+      "counterpartyName": "INTERACTIVE BROK ACH TRANSF",
+      "paymentPurpose": "Withdrawal from INTERACTIVE BROK ACH TRANSF",
+      "debit": 500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "4953584986 Wise Ltd TrnWise",
+      "paymentPurpose": "Withdrawal from 4953584986 Wise Ltd TrnWise",
+      "debit": 12.89,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "VARO BANK NA VARO*TRSFR",
+      "paymentPurpose": "Withdrawal from VARO BANK NA VARO*TRSFR",
+      "debit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "Monthly Interest Paid",
+      "paymentPurpose": "Monthly Interest Paid",
+      "credit": 0.1,
+      "currency": "USD",
+      "paymentType": "interest"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "62f96e19abd4",
+    "headings": [
+      "date:date | description:description | other:category | amount:amount | balance:balance"
+    ],
+    "unknownWords": [
+      "category"
+    ],
+    "mentionedBank": "capital_one"
+  }
+}

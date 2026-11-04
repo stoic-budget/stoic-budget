@@ -1,4 +1,5 @@
 import type { PdfTextItem, PdfTextRow } from '../../../common/utils/pdf-parser.util';
+import { HEADINGS } from './pdf-layout-headings.helper';
 import { isAmountPart, parseStatementAmount } from './statement-amount.helper';
 import { foldText } from './statement-date.helper';
 
@@ -11,6 +12,8 @@ export type ColumnRole =
   | 'credit'
   | 'amount'
   | 'balance'
+  /** A fee beside the amount (already part of it): read as money so its figures are no text of the row. */
+  | 'fee'
   /** A column of none of ours after the money ('Init. Br', a branch code): its words are no text of the row. */
   | 'other';
 
@@ -25,100 +28,7 @@ export interface LayoutColumn {
 }
 
 const TEXT_ROLES: ColumnRole[] = ['date', 'otherDate', 'description', 'counterparty', 'other'];
-const MONEY_ROLES: ColumnRole[] = ['debit', 'credit', 'amount', 'balance'];
-
-/**
- * Column headings by role, folded (lower case, no accents). Matched longest
- * phrase first, so "interest date" is not read as "date" and "chèques et
- * débits" stays one heading even when the next one starts 6pt later.
- */
-const HEADINGS: Record<ColumnRole, string[]> = {
-  date: [
-    'date',
-    'post date',
-    'posting date',
-    'booking date',
-    'transaction date',
-    'datum',
-    'dia',
-    'data',
-    'boekdatum',
-    'fecha',
-  ],
-  otherDate: [
-    'trans date',
-    'interest date',
-    'value date',
-    'rentedatum',
-    'valutadatum',
-    'date valeur',
-    'valuta',
-  ],
-  description: [
-    'description',
-    'details',
-    'transaction details',
-    'transaction description',
-    'merchant name or transaction description',
-    'omschrijving',
-    'particulars',
-    'narrative',
-    'libelle',
-    'concepto',
-    'descripcion',
-    'historico',
-    'descricao',
-    'buchungstext',
-    'verwendungszweck',
-  ],
-  counterparty: ['counterparty', 'tegenpartij', 'tegenrekening', 'payee', 'beneficiary'],
-  debit: [
-    'withdrawal',
-    'withdrawals',
-    'money out of your account',
-    'debits to your account',
-    'debit',
-    'debits',
-    'cheques et debits',
-    'paid out',
-    'money out',
-    'cargos',
-    'retiros',
-    'debito',
-    'debitos',
-    'saidas',
-    'af',
-  ],
-  credit: [
-    'deposit',
-    'deposits',
-    'money into your account',
-    'credits to your account',
-    'credit',
-    'credits',
-    'depots et credits',
-    'paid in',
-    'money in',
-    'abonos',
-    'depositos',
-    'credito',
-    'creditos',
-    'entradas',
-    'bij',
-  ],
-  amount: [
-    'amount',
-    '$ amount',
-    'bedrag',
-    'montant',
-    'importe',
-    'betrag',
-    'transaction amount',
-    'valor',
-  ],
-  balance: ['balance', 'running balance', 'solde', 'saldo', 'kontostand'],
-  other: [],
-};
+const MONEY_ROLES: ColumnRole[] = ['debit', 'credit', 'amount', 'balance', 'fee'];
 
 const PHRASES = new Map<string, ColumnRole>(
   (Object.entries(HEADINGS) as [ColumnRole, string[]][]).flatMap(([role, phrases]) =>
@@ -166,6 +76,50 @@ function matchHeading(items: PdfTextItem[], index: number, taught?: TaughtHeadin
  * are read before the built-in ones.
  */
 export function readHeaderRow(row: PdfTextRow, taught?: TaughtHeadings): LayoutColumn[] | null {
+  const columns = readHeadingColumns(row, taught);
+  const roles = new Set(columns.map(column => column.role));
+  const hasMoney = roles.has('debit') || roles.has('credit') || roles.has('amount');
+  const hasText = roles.has('date') || roles.has('description');
+  const valid = columns.length >= 3 && hasMoney && (hasText || isMoneyOnlyHeader(roles));
+  return valid && !isSummaryGrid(columns) ? columns : null;
+}
+
+/**
+ * "DATE  AMOUNT  DATE  AMOUNT  DATE  AMOUNT": a grid summing one kind of entry,
+ * three or more to a line. Its figures repeat rows already read.
+ */
+function isSummaryGrid(columns: LayoutColumn[]): boolean {
+  const dates = columns.filter(column => column.role === 'date').length;
+  return dates >= 3 && columns.every(column => column.role === 'date' || column.role === 'amount');
+}
+
+/**
+ * "WITHDRAWALS  DEPOSITS  BALANCE" with nothing over the date and text: the
+ * rows still open with their date, and their words left of the money are the
+ * text. All three money headings make it a header, not a summary line.
+ */
+function isMoneyOnlyHeader(roles: Set<ColumnRole>): boolean {
+  return roles.has('debit') && roles.has('credit') && roles.has('balance');
+}
+
+/**
+ * A header of dates and balances alone ("Date  Balance"), or a summary grid of
+ * dates and amounts: a summary whose lines are no transactions and end the
+ * table above it.
+ */
+export function isBalanceTableHeader(row: PdfTextRow, taught?: TaughtHeadings): boolean {
+  const columns = readHeadingColumns(row, taught);
+  const roles = columns.map(column => column.role);
+  // Every word is a heading: a header with a column of its own kind is no summary.
+  const words = columns.reduce((sum, column) => sum + wordCount(column.heading ?? ''), 0);
+  const balances =
+    roles.includes('balance') &&
+    roles.includes('date') &&
+    roles.every(role => role === 'balance' || role === 'date' || role === 'otherDate');
+  return words === row.items.length && (balances || isSummaryGrid(columns));
+}
+
+function readHeadingColumns(row: PdfTextRow, taught?: TaughtHeadings): LayoutColumn[] {
   const items = [...row.items].sort((a, b) => a.x - b.x);
   const columns: LayoutColumn[] = [];
   let pendingX0: number | null = null;
@@ -174,6 +128,12 @@ export function readHeaderRow(row: PdfTextRow, taught?: TaughtHeadings): LayoutC
 
   for (let index = 0; index < items.length; ) {
     const heading = matchHeading(items, index, taught);
+    const opensWithDate = heading?.role === 'date' || heading?.role === 'otherDate';
+    if (opensWithDate && columns.length === 0 && pendingX0 === null && standsApart(items, index)) {
+      // "Reference Number" left of "Trans Date", well apart: a column of its own, left of the date.
+      columns.push(leadingColumn(items.slice(0, index)));
+      strays = [];
+    }
     if (heading) {
       const last = items[index + heading.length - 1];
       columns.push({
@@ -217,10 +177,23 @@ export function readHeaderRow(row: PdfTextRow, taught?: TaughtHeadings): LayoutC
     index += 1;
   }
 
-  const roles = new Set(columns.map(column => column.role));
-  const hasMoney = roles.has('debit') || roles.has('credit') || roles.has('amount');
-  const hasText = roles.has('date') || roles.has('description');
-  return columns.length >= 3 && hasMoney && hasText ? columns : null;
+  return columns;
+}
+
+/** Words no heading knows open the header, set apart from the date heading after them. */
+function standsApart(items: PdfTextItem[], first: number): boolean {
+  const before = items[first - 1];
+  return Boolean(before) && items[first].x - (before.x + before.width) > ATTACH_GAP;
+}
+
+function leadingColumn(words: PdfTextItem[]): LayoutColumn {
+  const last = words[words.length - 1];
+  return {
+    role: 'other',
+    x0: words[0].x,
+    x1: last.x + last.width,
+    heading: words.map(headingWord).filter(Boolean).join(' '),
+  };
 }
 
 /** A header word no heading knows stays with the column before it, or waits for the first one. */
@@ -254,6 +227,8 @@ function attachStrayWord(
 export interface AmountCell {
   role: ColumnRole;
   value: number;
+  /** Printed with a leading plus ("+ $400.00"). */
+  plus?: boolean;
 }
 
 export interface LaidOutRow {
@@ -267,13 +242,19 @@ const MONEY_EDGE_TOLERANCE = 30;
 /** Words of one printed amount ("1", "200,45", "$") sit closer than this. */
 const AMOUNT_WORD_GAP = 7;
 
-function moneyColumnFor(x1: number, columns: LayoutColumn[]): LayoutColumn | null {
-  const candidates = columns
-    .filter(column => MONEY_ROLES.includes(column.role))
+function moneyColumnFor(x0: number, x1: number, columns: LayoutColumn[]): LayoutColumn | null {
+  const money = columns.filter(column => MONEY_ROLES.includes(column.role));
+  const candidates = money
     .map(column => ({ column, distance: Math.abs(column.x1 - x1) }))
     .sort((a, b) => a.distance - b.distance);
   const best = candidates[0];
-  return best && best.distance <= MONEY_EDGE_TOLERANCE ? best.column : null;
+  if (best && best.distance <= MONEY_EDGE_TOLERANCE) {
+    return best.column;
+  }
+  // A figure set well past its heading's right edge ("BALANCE" over figures
+  // ending 44pt further right) still starts under that heading, and no other.
+  const under = money.filter(column => x0 < column.x1 && x1 > column.x0);
+  return under.length === 1 ? under[0] : null;
 }
 
 /** Text this far right of a date heading is no part of the date. */
@@ -289,11 +270,12 @@ function textColumnFor(x: number, columns: LayoutColumn[]): ColumnRole {
   const text = columns.filter(column => TEXT_ROLES.includes(column.role));
   const owner = [...text].reverse().find(column => column.x0 <= x + 4) ?? text[0];
   const isDate = owner?.role === 'date' || owner?.role === 'otherDate';
-  const next = text.find(column => column.x0 > (owner?.x1 ?? 0));
+  const next = text.find(column => column.x0 > (owner?.x1 ?? 0) && column.role !== owner?.role);
   if (isDate && next && x > owner.x1 + DATE_CELL_GAP) {
     return next.role;
   }
-  return owner?.role ?? 'description';
+  // A table of dates and amounts alone ("Date  Serial #  Amount") keeps its words in the row's text.
+  return isDate && !next ? 'description' : (owner?.role ?? 'description');
 }
 
 /**
@@ -334,15 +316,22 @@ function moneyCellAt(sorted: PdfTextItem[], start: number, columns: LayoutColumn
   ) {
     end += 1;
   }
-  if (end === start) {
+  const run = sorted.slice(start, end);
+  // A bare "ACH" or "USD" with no figure beside it is a word, not an amount.
+  if (!run.some(item => /\d/.test(item.text))) {
     return null;
   }
-  const run = sorted.slice(start, end);
   const value = parseStatementAmount(run.map(item => item.text).join(' '));
   const last = run[run.length - 1];
-  const column = moneyColumnFor(last.x + last.width, columns);
+  const column = moneyColumnFor(run[0].x, last.x + last.width, columns);
   if (!column) {
     return null;
   }
-  return { amount: value === null ? null : { role: column.role, value }, end };
+  return {
+    amount:
+      value === null
+        ? null
+        : { role: column.role, value, ...(run[0].text.startsWith('+') && { plus: true }) },
+    end,
+  };
 }

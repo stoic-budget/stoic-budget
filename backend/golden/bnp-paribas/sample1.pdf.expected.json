@@ -1,0 +1,66 @@
+{
+  "metadata": {
+    "accountNumber": "PL10160011112222333344440001",
+    "currency": "PLN",
+    "dateFrom": "2021-10-01T00:00:00",
+    "dateTo": "2021-10-31T00:00:00",
+    "balanceStart": 3193.99,
+    "balanceEnd": 2797.99,
+    "rawHeader": "BNP Paribas Bank Polska S.A. ul. Kasprzaka 2 01-211 Warszawa",
+    "normalizedHeader": "BNP Paribas Bank Polska S.A. ul. Kasprzaka 2 01-211 Warszawa",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2021-10-26T00:00:00",
+      "counterpartyName": "ACCOUNT/PACKAGE MAINTENANCE FEE 6275-1234A5-001",
+      "paymentPurpose": "ACCOUNT/PACKAGE MAINTENANCE FEE 6275-1234A5-001",
+      "debit": 25,
+      "currency": "PLN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-10-22T00:00:00",
+      "counterpartyName": "COMM-SEPA TRANSFER Prowizja BNP Paribas Bank Polska SA Charges of BNP Paribas Bank Polska CEN1172235826038",
+      "paymentPurpose": "COMM-SEPA TRANSFER Prowizja BNP Paribas Bank Polska SA Charges of BNP Paribas Bank Polska CEN1172235826038",
+      "debit": 1,
+      "currency": "PLN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-10-01T00:00:00",
+      "counterpartyName": "COMM-DOMESTIC TRANSFER CEN2815954739147",
+      "paymentPurpose": "COMM-DOMESTIC TRANSFER CEN2815954739147",
+      "debit": 1,
+      "currency": "PLN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-10-01T00:00:00",
+      "counterpartyName": "ACME SERVICES Sp. z o o",
+      "paymentPurpose": "TRANSFER VIA INTERNET 06963308379543919244460499 A0001/09/2021/C/FPF CEN2815954739147",
+      "debit": 369,
+      "currency": "PLN"
+    }
+  ],
+  "checks": [
+    {
+      "code": "printed_totals",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "2ec1c75a3da0",
+    "headings": [
+      "other:no. | date:date | counterparty:beneficiary name | description:operation type operation details | amount:deposits withdrawals"
+    ],
+    "unknownWords": [
+      "no."
+    ],
+    "mentionedBank": "bnp_paribas"
+  }
+}

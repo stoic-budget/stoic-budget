@@ -62,8 +62,12 @@ export function toParsedTransactions(
  */
 export function splitByAccount(transactions: LayoutTransaction[]): LayoutTransaction[][] {
   const groups = new Map<string, LayoutTransaction[]>();
+  // One account named in all the headings: rows before the first heading are its too
+  // ("Account number: 12-34567" printed over the table from the second page on).
+  const named = new Set(transactions.map(row => row.account?.accountNumber).filter(Boolean));
+  const only = named.size === 1 ? [...named][0] : undefined;
   for (const transaction of transactions) {
-    const key = transaction.account?.accountNumber ?? '';
+    const key = transaction.account?.accountNumber ?? only ?? '';
     groups.set(key, [...(groups.get(key) ?? []), transaction]);
   }
   return [...groups.values()];

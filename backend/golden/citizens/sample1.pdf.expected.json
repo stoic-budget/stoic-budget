@@ -1,0 +1,453 @@
+{
+  "metadata": {
+    "accountNumber": "XXXX-079-2",
+    "currency": "USD",
+    "dateFrom": "2023-11-01T00:00:00",
+    "dateTo": "2023-11-30T00:00:00",
+    "balanceStart": 10549.13,
+    "rawHeader": "Checking Account US759 | BR059 | 1 Statement",
+    "normalizedHeader": "Checking Account US759 | BR059 | 1 Statement",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-11-12T00:00:00",
+      "counterpartyName": "Check 193",
+      "paymentPurpose": "Check 193",
+      "debit": 1490,
+      "documentNumber": "193",
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "SCORPION BAR GRAND RAPIDS MI",
+      "paymentPurpose": "3016 DBT PURCHASE - 035524 SCORPION BAR GRAND RAPIDS MI",
+      "debit": 147,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "CITIZENS TAUNTON AVENUE 3, ST PAUL",
+      "paymentPurpose": "3016 ATM CASH - RI1248 CITIZENS TAUNTON AVENUE 3, ST PAUL",
+      "debit": 100,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-11-02T00:00:00",
+      "counterpartyName": "VERIZON*RECURRIN 800-VERIZO N MI",
+      "paymentPurpose": "3016 POS DEBIT - 291003 VERIZON*RECURRIN 800-VERIZO N MI",
+      "debit": 39.98,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-02T00:00:00",
+      "counterpartyName": "GRAND NAILS AND HAS GRAND RAPIDS MI",
+      "paymentPurpose": "3016 DBT PURCHASE - 058883 GRAND NAILS AND HAS GRAND RAPIDS MI",
+      "debit": 198,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-02T00:00:00",
+      "counterpartyName": "MARKET BASKET7 S ATTLEBOR O MI",
+      "paymentPurpose": "3016 POS DEBIT - 094526 MARKET BASKET7 S ATTLEBOR O MI",
+      "debit": 71.91,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-02T00:00:00",
+      "counterpartyName": "SHELL SERVICE STATE GRAND RAPIDS MI",
+      "paymentPurpose": "3016 POS DEBIT - 633763 SHELL SERVICE STATE GRAND RAPIDS MI",
+      "debit": 13.81,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-03T00:00:00",
+      "counterpartyName": "GRAND RAPIDS MI",
+      "paymentPurpose": "3016 DBT PURCHASE – 756574 GRAND RAPIDS MI",
+      "debit": 53.48,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-03T00:00:00",
+      "counterpartyName": "CVS/PHARMACY #",
+      "paymentPurpose": "3016 POS DEBIT - 300212 CVS/PHARMACY #",
+      "debit": 10.26,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-03T00:00:00",
+      "counterpartyName": "STOP & SHOP",
+      "paymentPurpose": "3016 POS DEBIT - 001 STOP & SHOP",
+      "debit": 72.82,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-03T00:00:00",
+      "counterpartyName": "WAL-MART #2184 GRAND RAPIDS MI",
+      "paymentPurpose": "3016 POS DEBIT - 218400 WAL-MART #2184 GRAND RAPIDS MI",
+      "debit": 67.87,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-04T00:00:00",
+      "counterpartyName": "CHRIS GASBARROS GRAND RAPIDS MI",
+      "paymentPurpose": "3016 DBT PURCHASE - 035444 CHRIS GASBARROS GRAND RAPIDS MI",
+      "debit": 28.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-04T00:00:00",
+      "counterpartyName": "Subway 26596 Seekonk MA",
+      "paymentPurpose": "3016 DBT PURCHASE - 752967 Subway 26596 Seekonk MA",
+      "debit": 19.44,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-05T00:00:00",
+      "counterpartyName": "THE G SALON & SPA GRAND RAPIDS MI",
+      "paymentPurpose": "3016 DBT PURCHASE - 000112 THE G SALON & SPA GRAND RAPIDS MI",
+      "debit": 25,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-07T00:00:00",
+      "counterpartyName": "STOP & SHOP 2701 GRAND RAPIDS MI",
+      "paymentPurpose": "3016 POS DEBIT - 001 STOP & SHOP 2701 GRAND RAPIDS MI",
+      "debit": 219.3,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-09T00:00:00",
+      "counterpartyName": "STOP & SHOP 2701 GRAND RAPIDS MI",
+      "paymentPurpose": "3016 POS DEBIT - 001 STOP & SHOP 2701 GRAND RAPIDS MI",
+      "debit": 215.74,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-09T00:00:00",
+      "counterpartyName": "SHELL SERVICE STATE GRAND RAPIDS MI",
+      "paymentPurpose": "3016 POS DEBIT - 633763 SHELL SERVICE STATE GRAND RAPIDS MI",
+      "debit": 13.81,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-09T00:00:00",
+      "counterpartyName": "3016 POS DEBIT - 001",
+      "paymentPurpose": "3016 POS DEBIT - 001",
+      "debit": 5.71,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-10T00:00:00",
+      "counterpartyName": "REHOBOTH HOUSE OF REHOBOTH MN",
+      "paymentPurpose": "3016 DBT PURCHASE - 756574 REHOBOTH HOUSE OF REHOBOTH MN",
+      "debit": 47.06,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-10T00:00:00",
+      "counterpartyName": "STOP & SHOP 0712 NILES MI",
+      "paymentPurpose": "3016 POS DEBIT - 001 STOP & SHOP 0712 NILES MI",
+      "debit": 48,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-11T00:00:00",
+      "counterpartyName": "MARKET BASKET GRAND RAPIDS MI",
+      "paymentPurpose": "3016 POS DEBIT - 656298 MARKET BASKET GRAND RAPIDS MI",
+      "debit": 7.57,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-14T00:00:00",
+      "counterpartyName": "CITY OF ST PAUL 401-435-75 MN",
+      "paymentPurpose": "3016 POS DEBIT - 281007 CITY OF ST PAUL 401-435-75 MN",
+      "debit": 170.09,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-14T00:00:00",
+      "counterpartyName": "SHELL SERVICE STATE GRAND RAPIDS MI",
+      "paymentPurpose": "3016 POS DEBIT - 633763 SHELL SERVICE STATE GRAND RAPIDS MI",
+      "debit": 21.12,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Subway 26596 Seekonk MN",
+      "paymentPurpose": "3016 DBT PURCHASE - 752967 Subway 26596 Seekonk MN",
+      "debit": 27.14,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "Boston House of Pi GRAND RAPIDS MI",
+      "paymentPurpose": "3016 DBT PURCHASE - 230160 Boston House of Pi GRAND RAPIDS MI",
+      "debit": 48.63,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "BRAINLY* RENEWAL 0HTTPSBRAIN LY.N",
+      "paymentPurpose": "3016 DBT PURCHASE - UMSRXA BRAINLY* RENEWAL 0HTTPSBRAIN LY.N",
+      "debit": 324,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "DOORDASH DASHPASS WWW.DOORDASH.COM",
+      "paymentPurpose": "3016 DBT PURCHASE - APGEHD DOORDASH DASHPASS WWW.DOORDASH.COM",
+      "debit": 59.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "KFC E685067 GRAND RAPIDS MI",
+      "paymentPurpose": "3016 DBT PURCHASE - 000023 KFC E685067 GRAND RAPIDS MI",
+      "debit": 35.39,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "CHELOS GRAND RAPIDS MI",
+      "paymentPurpose": "3016 DBT PURCHASE - 214749 CHELOS GRAND RAPIDS MI",
+      "debit": 47.69,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-21T00:00:00",
+      "counterpartyName": "COMENITY PAY BH WEB PYMT 042022 P22110889694356 Please See Additional Information on Next Page",
+      "paymentPurpose": "COMENITY PAY BH WEB PYMT 042022 P22110889694356 Please See Additional Information on Next Page",
+      "debit": 371.69,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-02T00:00:00",
+      "counterpartyName": "NGRID49 NGRID49WEB 042122 4763389934",
+      "paymentPurpose": "NGRID49 NGRID49WEB 042122 4763389934",
+      "debit": 289.44,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-11-02T00:00:00",
+      "counterpartyName": "ONLINE TRANSFER TO CHECKING 7612071119",
+      "paymentPurpose": "ONLINE TRANSFER TO CHECKING 7612071119",
+      "debit": 500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-05T00:00:00",
+      "counterpartyName": "CHASE CREDIT CRD EPAY 220423 5778173724",
+      "paymentPurpose": "CHASE CREDIT CRD EPAY 220423 5778173724",
+      "debit": 300,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-06T00:00:00",
+      "counterpartyName": "SCHEDULED TRANSFER 6344024706",
+      "paymentPurpose": "SCHEDULED TRANSFER 6344024706",
+      "debit": 1030,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-08T00:00:00",
+      "counterpartyName": "OPTI CREDIT FEE ( AT $37 )",
+      "paymentPurpose": "OPTI CREDIT FEE ( AT $37 )",
+      "debit": 37,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-11-10T00:00:00",
+      "counterpartyName": "GrtrPrvdncYMCA PURCHASE 220503 3538457",
+      "paymentPurpose": "GrtrPrvdncYMCA PURCHASE 220503 3538457",
+      "debit": 47.4,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-11-12T00:00:00",
+      "counterpartyName": "THE G. SALON G. SALON 220501 G5718",
+      "paymentPurpose": "THE G. SALON G. SALON 220501 G5718",
+      "debit": 100,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-11-14T00:00:00",
+      "counterpartyName": "CHASE CREDIT CRD EPAY 220503 7119510329",
+      "paymentPurpose": "CHASE CREDIT CRD EPAY 220503 7119510329",
+      "debit": 323.17,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-15T00:00:00",
+      "counterpartyName": "Edgewood Edge 050622",
+      "paymentPurpose": "Edgewood Edge 050622",
+      "debit": 42.49,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-11-19T00:00:00",
+      "counterpartyName": "SCHEDULED TRANSFER 6344024706",
+      "paymentPurpose": "SCHEDULED TRANSFER 6344024706",
+      "debit": 1030,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-23T00:00:00",
+      "counterpartyName": "NGRID49 NGRID49TEL 051222 1374115124",
+      "paymentPurpose": "NGRID49 NGRID49TEL 051222 1374115124",
+      "debit": 278.89,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-11-27T00:00:00",
+      "counterpartyName": "Nissan Auto Loan 220512 0010240612892",
+      "paymentPurpose": "Nissan Auto Loan 220512 0010240612892",
+      "debit": 78.09,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-11-27T00:00:00",
+      "counterpartyName": "PROG DIRECT INS INS PREM 220513 168981794",
+      "paymentPurpose": "PROG DIRECT INS INS PREM 220513 168981794",
+      "debit": 155.12,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "POS APPLE CASH ST PAUL, MN 87150550707291X",
+      "paymentPurpose": "POS APPLE CASH ST PAUL, MN 87150550707291X",
+      "credit": 3800,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-11-03T00:00:00",
+      "counterpartyName": "PAYPAL DEPOSIT REF 042522",
+      "paymentPurpose": "PAYPAL DEPOSIT REF 042522",
+      "credit": 5043,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-06T00:00:00",
+      "counterpartyName": "PAYMENTECH BANK DEPOSIT CCID: 2108I7312128721 ****000190551",
+      "paymentPurpose": "PAYMENTECH BANK DEPOSIT CCID: 2108I7312128721 ****000190551",
+      "credit": 2816.08,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-08T00:00:00",
+      "counterpartyName": "MN TAX DIVISION RIREFUND 220426",
+      "paymentPurpose": "MN TAX DIVISION RIREFUND 220426",
+      "credit": 1167.21,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-11-15T00:00:00",
+      "counterpartyName": "DEPOSIT",
+      "paymentPurpose": "DEPOSIT",
+      "credit": 1500,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-11-19T00:00:00",
+      "counterpartyName": "OPTI CREDIT FOR FEE ON 11/28/22 FOR CREDIT MONITORING",
+      "paymentPurpose": "OPTI CREDIT FOR FEE ON 11/28/22 FOR CREDIT MONITORING",
+      "credit": 37,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-11-21T00:00:00",
+      "counterpartyName": "CITIZENS ATM DEPOSIT, CCID: 00076012342345 St Paul, MN 21012**** 000190650",
+      "paymentPurpose": "CITIZENS ATM DEPOSIT, CCID: 00076012342345 St Paul, MN 21012**** 000190650",
+      "credit": 2816,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-11-30T00:00:00",
+      "counterpartyName": "CITIZENS ATM DEPOSIT, CCID: 00076012342345 St Paul, MN 21012**** 000208900008267",
+      "paymentPurpose": "CITIZENS ATM DEPOSIT, CCID: 00076012342345 St Paul, MN 21012**** 000208900008267",
+      "credit": 3816,
+      "currency": "USD",
+      "paymentType": "cash"
+    }
+  ],
+  "checks": [
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "642ff0041e47",
+    "headings": [
+      "fee:fee the monthly maintenance is waived when you make at least | credit:deposit that is | date:posted before the end of your statement",
+      "amount:amount check # | date:date check # | amount:amount | date:date",
+      "date:date | amount:amount | description:description",
+      "date:date | amount:amount | description:description +",
+      "date:date | amount:amount | date:date | amount:amount | other:it will be helpful to us if you also give us a telephone number at which",
+      "section:debit",
+      "section:credit"
+    ],
+    "unknownWords": [
+      "the",
+      "monthly",
+      "maintenance",
+      "is",
+      "waived",
+      "when",
+      "you",
+      "make",
+      "at",
+      "least",
+      "that",
+      "before",
+      "end",
+      "of",
+      "your",
+      "statement",
+      "check",
+      "#",
+      "+",
+      "it will be helpful to us if you also give us a telephone number at which"
+    ],
+    "mentionedBank": "citizens"
+  }
+}

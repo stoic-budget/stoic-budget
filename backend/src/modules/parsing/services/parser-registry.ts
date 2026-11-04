@@ -10,10 +10,32 @@ import { BancoDoBrasilParser } from '../parsers/banco-do-brasil.parser';
 import { BankOfChinaParser } from '../parsers/bank-of-china.parser';
 import { BankOfScotlandParser } from '../parsers/bank-of-scotland.parser';
 import { BarclaysParser } from '../parsers/barclays.parser';
+import { BecuParser } from '../parsers/becu.parser';
+import { BendigoParser } from '../parsers/bendigo.parser';
 import { BerekeNewParser } from '../parsers/bereke-new.parser';
 import { BerekeOldParser } from '../parsers/bereke-old.parser';
+import { BmoParser } from '../parsers/bmo.parser';
+import { BnpParibasParser } from '../parsers/bnp-paribas.parser';
+import { BoqParser } from '../parsers/boq.parser';
+import { BpiParser } from '../parsers/bpi.parser';
 import { Camt053Parser } from '../parsers/camt053.parser';
+import { CapitalOneParser } from '../parsers/capital-one.parser';
+import { CapitecParser } from '../parsers/capitec.parser';
+import { CashAppParser } from '../parsers/cash-app.parser';
+import { ChaseParser } from '../parsers/chase.parser';
+import { ChimeParser } from '../parsers/chime.parser';
+import { CibcParser } from '../parsers/cibc.parser';
+import { CitiParser } from '../parsers/citi.parser';
+import { CitizensParser } from '../parsers/citizens.parser';
+import { CoastCapitalParser } from '../parsers/coast-capital.parser';
+import { ComericaParser } from '../parsers/comerica.parser';
+import { CommBankParser } from '../parsers/commbank.parser';
+import { CommerceBankParser } from '../parsers/commerce-bank.parser';
+import { CommercialBankParser } from '../parsers/commercial-bank.parser';
+import { CreditAgricoleParser } from '../parsers/credit-agricole.parser';
+import { CreditOneParser } from '../parsers/credit-one.parser';
 import { CsvParser } from '../parsers/csv.parser';
+import { DcuParser } from '../parsers/dcu.parser';
 import { DocxParser } from '../parsers/docx.parser';
 import { ExcelParser } from '../parsers/excel.parser';
 import { GenericPdfParser } from '../parsers/generic-pdf.parser';
@@ -22,6 +44,7 @@ import { KaspiParser } from '../parsers/kaspi.parser';
 import { Mt940Parser } from '../parsers/mt940.parser';
 import { OfxParser } from '../parsers/ofx.parser';
 import { QifParser } from '../parsers/qif.parser';
+import { SchwabParser } from '../parsers/schwab.parser';
 
 /**
  * Bank-specific parsers that may claim a file when its text names no bank,
@@ -43,6 +66,29 @@ export const FALLBACK_CLAIMS: [
   [BankOfChinaParser, { bankName: BankName.BANK_OF_CHINA }],
   [BankOfScotlandParser, { bankName: BankName.BANK_OF_SCOTLAND }],
   [BarclaysParser, { bankName: BankName.BARCLAYS }],
+  [BecuParser, { bankName: BankName.BECU }],
+  [BendigoParser, { bankName: BankName.BENDIGO }],
+  [BmoParser, { bankName: BankName.BMO }],
+  [BnpParibasParser, { bankName: BankName.BNP_PARIBAS }],
+  [BoqParser, { bankName: BankName.BOQ }],
+  [BpiParser, { bankName: BankName.BPI }],
+  [CapitalOneParser, { bankName: BankName.CAPITAL_ONE }],
+  [CapitecParser, { bankName: BankName.CAPITEC }],
+  [CashAppParser, { bankName: BankName.CASH_APP }],
+  [SchwabParser, { bankName: BankName.SCHWAB }],
+  [ChaseParser, { bankName: BankName.CHASE }],
+  [ChimeParser, { bankName: BankName.CHIME }],
+  [CibcParser, { bankName: BankName.CIBC }],
+  [CitiParser, { bankName: BankName.CITI }],
+  [CitizensParser, { bankName: BankName.CITIZENS }],
+  [CoastCapitalParser, { bankName: BankName.COAST_CAPITAL }],
+  [ComericaParser, { bankName: BankName.COMERICA }],
+  [CommBankParser, { bankName: BankName.COMMBANK }],
+  [CommerceBankParser, { bankName: BankName.COMMERCE_BANK }],
+  [CommercialBankParser, { bankName: BankName.COMMERCIAL_BANK }],
+  [CreditAgricoleParser, { bankName: BankName.CREDIT_AGRICOLE }],
+  [CreditOneParser, { bankName: BankName.CREDIT_ONE }],
+  [DcuParser, { bankName: BankName.DCU }],
   [BerekeNewParser, { bankName: BankName.BEREKE_NEW, formatVersion: 'new' }],
   [BerekeOldParser, { bankName: BankName.BEREKE_OLD, formatVersion: 'old' }],
 ];
@@ -67,6 +113,29 @@ export function createParsers(): IParser[] {
     new BankOfChinaParser(),
     new BankOfScotlandParser(),
     new BarclaysParser(),
+    new BecuParser(),
+    new BendigoParser(),
+    new BmoParser(),
+    new BnpParibasParser(),
+    new BoqParser(),
+    new BpiParser(),
+    new CapitalOneParser(),
+    new CapitecParser(),
+    new CashAppParser(),
+    new SchwabParser(),
+    new ChaseParser(),
+    new ChimeParser(),
+    new CibcParser(),
+    new CitiParser(),
+    new CitizensParser(),
+    new CoastCapitalParser(),
+    new ComericaParser(),
+    new CommBankParser(),
+    new CommerceBankParser(),
+    new CommercialBankParser(),
+    new CreditAgricoleParser(),
+    new CreditOneParser(),
+    new DcuParser(),
     new GenericPdfParser(),
     new ExcelParser(),
     new CsvParser(),

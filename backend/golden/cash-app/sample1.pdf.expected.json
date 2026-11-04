@@ -1,0 +1,814 @@
+{
+  "metadata": {
+    "accountNumber": "3187061371076",
+    "currency": "USD",
+    "dateFrom": "2025-04-01T00:00:00",
+    "dateTo": "2025-04-30T00:00:00",
+    "balanceStart": 6.31,
+    "balanceEnd": 255.74,
+    "rawHeader": "PLEASE SEE THE LAST PAGE FOR NOTICE OF UPDATE TO PAPER MONEY DEPOSIT LIMITS FOR RETAILERS LOCATED IN CERTAIN ZIP CODES. April 2025 Account Statement",
+    "normalizedHeader": "PLEASE SEE THE LAST PAGE FOR NOTICE OF UPDATE TO PAPER MONEY DEPOSIT LIMITS FOR RETAILERS LOCATED IN CERTAIN ZIP CODES. April 2025 Account Statement",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2025-04-03T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 400,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-03T00:00:00",
+      "counterpartyName": "Hazel Gardiner",
+      "paymentPurpose": "To Hazel Gardiner Cash App payment",
+      "debit": 375,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-04-03T00:00:00",
+      "counterpartyName": "Cash Invest CRWV BUY trade",
+      "paymentPurpose": "Cash Invest CRWV BUY trade Stock buy",
+      "debit": 25,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-03T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-03T00:00:00",
+      "counterpartyName": "Cash App",
+      "paymentPurpose": "Cash App Loan repayment (#MBAQV4X64)",
+      "debit": 47.25,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-03T00:00:00",
+      "counterpartyName": "Cash Invest CRWV BUY trade",
+      "paymentPurpose": "Cash Invest CRWV BUY trade Stock buy",
+      "debit": 9,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-03T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-03T00:00:00",
+      "counterpartyName": "Cash Invest MSTR BUY trade",
+      "paymentPurpose": "Cash Invest MSTR BUY trade Stock buy",
+      "debit": 50,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-04T00:00:00",
+      "counterpartyName": "sale of BTC 0.00093196",
+      "paymentPurpose": "sale of BTC 0.00093196 Bitcoin sale",
+      "credit": 75.91,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-04T00:00:00",
+      "counterpartyName": "Cash Invest TSLA BUY trade",
+      "paymentPurpose": "Cash Invest TSLA BUY trade Stock buy",
+      "debit": 25,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-05T00:00:00",
+      "counterpartyName": "Cash App",
+      "paymentPurpose": "Cash App Loan drawdown (#HWVW2XZDH)",
+      "credit": 250,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-05T00:00:00",
+      "counterpartyName": "Klarna temu",
+      "paymentPurpose": "Klarna temu Cash App Card",
+      "debit": 14.15,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-04-05T00:00:00",
+      "counterpartyName": "Klarna Temu Wilmington DE",
+      "paymentPurpose": "Klarna Temu Wilmington DE Cash App Card",
+      "debit": 33.35,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-04-05T00:00:00",
+      "counterpartyName": "Klarna Temu Wilmington DE",
+      "paymentPurpose": "Klarna Temu Wilmington DE Cash App Card",
+      "debit": 23.43,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-04-05T00:00:00",
+      "counterpartyName": "Klarna Temu",
+      "paymentPurpose": "Klarna Temu Cash App Card",
+      "debit": 24.58,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-04-05T00:00:00",
+      "counterpartyName": "Kelsey Thomson",
+      "paymentPurpose": "From Kelsey Thomson Cash App payment",
+      "credit": 25,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-05T00:00:00",
+      "counterpartyName": "To Savings Transfer",
+      "paymentPurpose": "To Savings Transfer",
+      "debit": 0.42,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-05T00:00:00",
+      "counterpartyName": "To Savings Transfer",
+      "paymentPurpose": "To Savings Transfer",
+      "debit": 0.85,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-06T00:00:00",
+      "counterpartyName": "To Savings Transfer",
+      "paymentPurpose": "To Savings Transfer",
+      "debit": 0.65,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-06T00:00:00",
+      "counterpartyName": "To Savings Transfer",
+      "paymentPurpose": "To Savings Transfer",
+      "debit": 0.57,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-06T00:00:00",
+      "counterpartyName": "Temu.com",
+      "paymentPurpose": "Temu.com Cash App Card",
+      "debit": 59.36,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-04-06T00:00:00",
+      "counterpartyName": "purchase of BTC 0.00121873",
+      "paymentPurpose": "purchase of BTC 0.00121873 Bitcoin buy",
+      "debit": 100,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-06T00:00:00",
+      "counterpartyName": "Visa Debit 0429 x0429",
+      "paymentPurpose": "To Visa Debit 0429 x0429 Instant transfer",
+      "debit": 20,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-04-06T00:00:00",
+      "counterpartyName": "Temu.com",
+      "paymentPurpose": "Temu.com Cash App Card",
+      "debit": 5.41,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-04-07T00:00:00",
+      "counterpartyName": "Temu.com",
+      "paymentPurpose": "Temu.com Cash App Card",
+      "credit": 3.82,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-04-07T00:00:00",
+      "counterpartyName": "Temu.com",
+      "paymentPurpose": "Temu.com Cash App Card",
+      "credit": 10.01,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-04-07T00:00:00",
+      "counterpartyName": "Temu.com",
+      "paymentPurpose": "Temu.com Cash App Card",
+      "credit": 33.75,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-04-07T00:00:00",
+      "counterpartyName": "To Savings Transfer",
+      "paymentPurpose": "To Savings Transfer",
+      "debit": 0.64,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-07T00:00:00",
+      "counterpartyName": "To Savings Transfer",
+      "paymentPurpose": "To Savings Transfer",
+      "debit": 0.59,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-07T00:00:00",
+      "counterpartyName": "Cash Invest GETY BUY trade",
+      "paymentPurpose": "Cash Invest GETY BUY trade Stock buy",
+      "debit": 50,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-09T00:00:00",
+      "counterpartyName": "purchase of BTC 0.00045732",
+      "paymentPurpose": "purchase of BTC 0.00045732 Bitcoin buy",
+      "debit": 39,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-09T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-09T00:00:00",
+      "counterpartyName": "Cash Invest CRWV SELL trade",
+      "paymentPurpose": "Cash Invest CRWV SELL trade Stock sale",
+      "credit": 28.93,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-10T00:00:00",
+      "counterpartyName": "Cash Invest MUR BUY trade",
+      "paymentPurpose": "Cash Invest MUR BUY trade Stock buy",
+      "debit": 50,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-11T00:00:00",
+      "counterpartyName": "Cash Invest ZBIO BUY trade",
+      "paymentPurpose": "Cash Invest ZBIO BUY trade Stock buy",
+      "debit": 10,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-11T00:00:00",
+      "counterpartyName": "Cash App",
+      "paymentPurpose": "Cash App Loan repayment (#HWVW2XZDH)",
+      "debit": 65.63,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-13T00:00:00",
+      "counterpartyName": "sale of BTC 0.00167605",
+      "paymentPurpose": "sale of BTC 0.00167605 Bitcoin sale",
+      "credit": 135.38,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-13T00:00:00",
+      "counterpartyName": "purchase of BTC 0.00157989",
+      "paymentPurpose": "purchase of BTC 0.00157989 Bitcoin buy",
+      "debit": 137,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-14T00:00:00",
+      "counterpartyName": "Cash Invest MLYS BUY trade",
+      "paymentPurpose": "Cash Invest MLYS BUY trade Stock buy",
+      "debit": 2,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-14T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-14T00:00:00",
+      "counterpartyName": "Cash Invest MTSR BUY trade",
+      "paymentPurpose": "Cash Invest MTSR BUY trade Stock buy",
+      "debit": 10,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-14T00:00:00",
+      "counterpartyName": "Cash Invest KC BUY trade",
+      "paymentPurpose": "Cash Invest KC BUY trade Stock buy",
+      "debit": 10,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-15T00:00:00",
+      "counterpartyName": "Cash Invest UPB SELL trade",
+      "paymentPurpose": "Cash Invest UPB SELL trade Stock sale",
+      "credit": 7.38,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-15T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-15T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 250,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-15T00:00:00",
+      "counterpartyName": "Hazel Gardiner",
+      "paymentPurpose": "To Hazel Gardiner Cash App payment",
+      "debit": 375,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-04-17T00:00:00",
+      "counterpartyName": "Cash Invest HTZ BUY trade",
+      "paymentPurpose": "Cash Invest HTZ BUY trade Stock buy",
+      "debit": 12,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-17T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-17T00:00:00",
+      "counterpartyName": "Cash Invest HTZ BUY trade",
+      "paymentPurpose": "Cash Invest HTZ BUY trade Stock buy",
+      "debit": 50,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-17T00:00:00",
+      "counterpartyName": "Cash Invest HTZ SELL trade",
+      "paymentPurpose": "Cash Invest HTZ SELL trade Stock sale",
+      "credit": 63.83,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-17T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-17T00:00:00",
+      "counterpartyName": "Cash Invest HTZ BUY trade",
+      "paymentPurpose": "Cash Invest HTZ BUY trade Stock buy",
+      "debit": 100,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-17T00:00:00",
+      "counterpartyName": "Cash Invest UNH BUY trade",
+      "paymentPurpose": "Cash Invest UNH BUY trade Stock buy",
+      "debit": 30,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-18T00:00:00",
+      "counterpartyName": "Cash App",
+      "paymentPurpose": "Cash App Loan repayment (#HWVW2XZDH)",
+      "debit": 65.62,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-18T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 31.18,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 1,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest SEDG BUY trade",
+      "paymentPurpose": "Cash Invest SEDG BUY trade Stock buy",
+      "debit": 1,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 25,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest SEDG BUY trade",
+      "paymentPurpose": "Cash Invest SEDG BUY trade Stock buy",
+      "debit": 25,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest UNH SELL trade",
+      "paymentPurpose": "Cash Invest UNH SELL trade Stock sale",
+      "credit": 26.77,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest HTZ SELL trade",
+      "paymentPurpose": "Cash Invest HTZ SELL trade Stock sale",
+      "credit": 108.54,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest GETY SELL trade",
+      "paymentPurpose": "Cash Invest GETY SELL trade Stock sale",
+      "credit": 61.77,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest MSTR SELL trade",
+      "paymentPurpose": "Cash Invest MSTR SELL trade Stock sale",
+      "credit": 59.41,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest MUR SELL trade",
+      "paymentPurpose": "Cash Invest MUR SELL trade Stock sale",
+      "credit": 54.07,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest ZBIO SELL trade",
+      "paymentPurpose": "Cash Invest ZBIO SELL trade Stock sale",
+      "credit": 12.91,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest MTSR SELL trade",
+      "paymentPurpose": "Cash Invest MTSR SELL trade Stock sale",
+      "credit": 11.27,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest SEDG SELL trade",
+      "paymentPurpose": "Cash Invest SEDG SELL trade Stock sale",
+      "credit": 25.97,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest KC SELL trade",
+      "paymentPurpose": "Cash Invest KC SELL trade Stock sale",
+      "credit": 8.06,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest BRDG SELL trade",
+      "paymentPurpose": "Cash Invest BRDG SELL trade Stock sale",
+      "credit": 8.2,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Hazel Gardiner",
+      "paymentPurpose": "To Hazel Gardiner Cash App payment",
+      "debit": 375,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "Cash Invest HTZ BUY trade",
+      "paymentPurpose": "Cash Invest HTZ BUY trade Stock buy",
+      "debit": 1,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "purchase of BTC 0.00105634",
+      "paymentPurpose": "purchase of BTC 0.00105634 Bitcoin buy",
+      "debit": 100,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-22T00:00:00",
+      "counterpartyName": "purchase of BTC 0.00051961",
+      "paymentPurpose": "purchase of BTC 0.00051961 Bitcoin buy",
+      "debit": 50,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-23T00:00:00",
+      "counterpartyName": "sale of BTC 0.00237381",
+      "paymentPurpose": "sale of BTC 0.00237381 Bitcoin sale",
+      "credit": 216.13,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-23T00:00:00",
+      "counterpartyName": "Cash Invest SMCI BUY trade",
+      "paymentPurpose": "Cash Invest SMCI BUY trade Stock buy",
+      "debit": 20,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-23T00:00:00",
+      "counterpartyName": "Cash Invest KC BUY trade",
+      "paymentPurpose": "Cash Invest KC BUY trade Stock buy",
+      "debit": 50,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-23T00:00:00",
+      "counterpartyName": "Cash Invest CRWV BUY trade",
+      "paymentPurpose": "Cash Invest CRWV BUY trade Stock buy",
+      "debit": 50,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-23T00:00:00",
+      "counterpartyName": "Cash Invest CRDO BUY trade",
+      "paymentPurpose": "Cash Invest CRDO BUY trade Stock buy",
+      "debit": 10,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-23T00:00:00",
+      "counterpartyName": "Cash Invest ALAB BUY trade",
+      "paymentPurpose": "Cash Invest ALAB BUY trade Stock buy",
+      "debit": 50,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-23T00:00:00",
+      "counterpartyName": "Cash Invest CRWV SELL trade",
+      "paymentPurpose": "Cash Invest CRWV SELL trade Stock sale",
+      "credit": 48.98,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-23T00:00:00",
+      "counterpartyName": "Cash Invest TSLA BUY trade",
+      "paymentPurpose": "Cash Invest TSLA BUY trade Stock buy",
+      "debit": 50,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-23T00:00:00",
+      "counterpartyName": "Cash Invest ULCC BUY trade",
+      "paymentPurpose": "Cash Invest ULCC BUY trade Stock buy",
+      "debit": 25,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-23T00:00:00",
+      "counterpartyName": "Cash Invest MLYS SELL trade",
+      "paymentPurpose": "Cash Invest MLYS SELL trade Stock sale",
+      "credit": 1.88,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-23T00:00:00",
+      "counterpartyName": "Cash App",
+      "paymentPurpose": "Cash App Loan repayment (#HWVW2XZDH)",
+      "debit": 12,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-24T00:00:00",
+      "counterpartyName": "Cash Invest ULCC SELL trade",
+      "paymentPurpose": "Cash Invest ULCC SELL trade Stock sale",
+      "credit": 22.39,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-24T00:00:00",
+      "counterpartyName": "Cash Invest ALAB SELL trade",
+      "paymentPurpose": "Cash Invest ALAB SELL trade Stock sale",
+      "credit": 49.85,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-25T00:00:00",
+      "counterpartyName": "Cash App",
+      "paymentPurpose": "Cash App Loan repayment (#HWVW2XZDH)",
+      "debit": 53.63,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-25T00:00:00",
+      "counterpartyName": "Cash Invest TSLA BUY trade",
+      "paymentPurpose": "Cash Invest TSLA BUY trade Stock buy",
+      "debit": 10,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-25T00:00:00",
+      "counterpartyName": "Cash Invest KC SELL trade",
+      "paymentPurpose": "Cash Invest KC SELL trade Stock sale",
+      "credit": 45.02,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-25T00:00:00",
+      "counterpartyName": "Cash Invest TSLA SELL trade",
+      "paymentPurpose": "Cash Invest TSLA SELL trade Stock sale",
+      "credit": 155.65,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-25T00:00:00",
+      "counterpartyName": "Cash Invest SEDG BUY trade",
+      "paymentPurpose": "Cash Invest SEDG BUY trade Stock buy",
+      "debit": 10,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-25T00:00:00",
+      "counterpartyName": "Cash Invest SMCI SELL trade",
+      "paymentPurpose": "Cash Invest SMCI SELL trade Stock sale",
+      "credit": 21.12,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-26T00:00:00",
+      "counterpartyName": "Cash App",
+      "paymentPurpose": "Cash App Loan repayment (#HWVW2XZDH)",
+      "debit": 65.62,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-26T00:00:00",
+      "counterpartyName": "The Bancorp Bank x0429",
+      "paymentPurpose": "From The Bancorp Bank x0429 Standard transfer",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-26T00:00:00",
+      "counterpartyName": "City Of Mesquite Util Mesquite TX",
+      "paymentPurpose": "City Of Mesquite Util Mesquite TX Cash App Card",
+      "debit": 203.36,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-04-28T00:00:00",
+      "counterpartyName": "To Savings Transfer",
+      "paymentPurpose": "To Savings Transfer",
+      "debit": 0.64,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-28T00:00:00",
+      "counterpartyName": "Cash Invest TSLA BUY trade",
+      "paymentPurpose": "Cash Invest TSLA BUY trade Stock buy",
+      "debit": 1,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-28T00:00:00",
+      "counterpartyName": "Cash App",
+      "paymentPurpose": "Cash App Loan drawdown (#H6AECAZCK)",
+      "credit": 300,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-28T00:00:00",
+      "counterpartyName": "Cash Invest TSLA BUY trade",
+      "paymentPurpose": "Cash Invest TSLA BUY trade Stock buy",
+      "debit": 50,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-28T00:00:00",
+      "counterpartyName": "Cash Invest BHVN BUY trade",
+      "paymentPurpose": "Cash Invest BHVN BUY trade Stock buy",
+      "debit": 50,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-28T00:00:00",
+      "counterpartyName": "Mitchel Whitmanes",
+      "paymentPurpose": "From Mitchel Whitmanes Cash App payment",
+      "credit": 75,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-04-30T00:00:00",
+      "counterpartyName": "Cash Invest KC BUY trade",
+      "paymentPurpose": "Cash Invest KC BUY trade Stock buy",
+      "debit": 10,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-04-30T00:00:00",
+      "counterpartyName": "Cash Invest MLYS BUY trade",
+      "paymentPurpose": "Cash Invest MLYS BUY trade Stock buy",
+      "debit": 10,
+      "currency": "USD"
+    }
+  ],
+  "checks": [
+    {
+      "code": "printed_totals",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "4c9ca84376ea",
+    "headings": [
+      "date:date | description:description | description:details | fee:fee | amount:amount",
+      "credit:deposit effective april customers are not able to more than per paper money | credit:deposit | description:transaction at eligible retailers located in"
+    ],
+    "unknownWords": [
+      "effective",
+      "april",
+      "customers",
+      "are",
+      "not",
+      "able",
+      "to",
+      "more",
+      "than",
+      "per",
+      "paper",
+      "money",
+      "at",
+      "eligible",
+      "retailers",
+      "located",
+      "in"
+    ],
+    "mentionedBank": "cash_app"
+  }
+}

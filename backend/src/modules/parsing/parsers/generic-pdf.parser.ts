@@ -33,14 +33,18 @@ import {
   checkPrintedTotals,
   checkSectionTotals,
 } from '../helpers/statement-checks.helper';
-import { detectNumericDateOrder, type NumericDateOrder } from '../helpers/statement-date.helper';
+import {
+  detectNumericDateOrder,
+  type NumericDateOrder,
+  orderWithinPeriod,
+} from '../helpers/statement-date.helper';
+import { findHeaderPeriod } from '../helpers/statement-header-period.helper';
 import {
   detectStatementCurrency,
   findAccountNumber,
   findBalanceRowPeriod,
   findStatementAnchor,
   findStatementBalances,
-  findStatementPeriod,
   findStatementTotals,
   isCreditCardStatement,
 } from '../helpers/statement-metadata.helper';
@@ -107,7 +111,11 @@ export class GenericPdfParser extends BaseParser {
     // "38.2gal" or "19.5%" look like day-first dates too.
     const dateOrder =
       detectNumericDateOrder(layoutTransactions.map(t => t.dateText)) ??
-      detectNumericDateOrder(text.match(/\b\d{1,2}[./]\d{1,2}[./]\d{2,4}\b/g) ?? []) ??
+      detectNumericDateOrder(text.match(/\b\d{1,2}([./-])\d{1,2}\1\d{2,4}\b/g) ?? []) ??
+      orderWithinPeriod(
+        layoutTransactions.map(t => t.dateText),
+        findHeaderPeriod(text, 'dmy'),
+      ) ??
       'dmy';
     const latestPrinted = findStatementAnchor(text, dateOrder);
     const isCard = isCreditCardStatement(text);
@@ -152,8 +160,11 @@ export class GenericPdfParser extends BaseParser {
     );
 
     const legacyRange = this.extractDateRange(text);
+    // Else the dated balance rows: "Beginning Balance on December 16, 2020" opens it.
     const dateRange = plausiblePeriod(
-      legacyRange.from ? legacyRange : findStatementPeriod(text, dateOrder),
+      legacyRange.from
+        ? legacyRange
+        : (findHeaderPeriod(text, dateOrder) ?? findBalanceRowPeriod(text, dateOrder)),
       transactions,
     );
     const transactionDates = transactions.map(t => t.transactionDate).filter(Boolean);
@@ -165,10 +176,8 @@ export class GenericPdfParser extends BaseParser {
       transactionDates.length > 0
         ? new Date(Math.max(...transactionDates.map(d => d.getTime())))
         : null;
-    // A month without movements still dates its balance rows.
-    const balanceRows = minDate ? null : findBalanceRowPeriod(text, dateOrder);
-    const dateFrom = dateRange?.from || minDate || balanceRows?.from || new Date();
-    const dateTo = dateRange?.to || maxDate || balanceRows?.to || dateFrom;
+    const dateFrom = dateRange?.from || minDate || new Date();
+    const dateTo = dateRange?.to || maxDate || dateFrom;
 
     return {
       metadata: {
@@ -278,7 +287,7 @@ export class GenericPdfParser extends BaseParser {
     const currency = rows[0].account?.currency ?? fallbackCurrency;
     const transactions = toParsedTransactions(rows, dateOrder, latestPrinted, currency, isCard);
     const times = transactions.map(t => t.transactionDate.getTime());
-    const period = plausiblePeriod(findStatementPeriod(text, dateOrder), transactions);
+    const period = plausiblePeriod(findHeaderPeriod(text, dateOrder), transactions);
     return {
       metadata: {
         accountNumber: rows[0].account?.accountNumber ?? '',

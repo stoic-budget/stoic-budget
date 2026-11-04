@@ -1,0 +1,187 @@
+{
+  "metadata": {
+    "accountNumber": "6795539096",
+    "currency": "USD",
+    "dateFrom": "2024-06-01T00:00:00",
+    "dateTo": "2024-06-30T00:00:00",
+    "balanceStart": 446.97,
+    "balanceEnd": 9018.38,
+    "rawHeader": "ABCDEFGHIJKLMNOPQRST BMOBANK N.A. 534432 P.O. BOX 94033",
+    "normalizedHeader": "ABCDEFGHIJKLMNOPQRST BMOBANK N.A. 534432 P.O. BOX 94033",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-06-11T00:00:00",
+      "counterpartyName": "PC TRANSFER CREDIT",
+      "paymentPurpose": "PC TRANSFER CREDIT",
+      "credit": 200,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-06-14T00:00:00",
+      "counterpartyName": "TELLER DEPOSIT",
+      "paymentPurpose": "TELLER DEPOSIT",
+      "credit": 8246,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2024-06-17T00:00:00",
+      "counterpartyName": "TELLER DEPOSIT",
+      "paymentPurpose": "TELLER DEPOSIT",
+      "credit": 9096,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2024-06-17T00:00:00",
+      "counterpartyName": "TELLER DEPOSIT",
+      "paymentPurpose": "TELLER DEPOSIT",
+      "credit": 11040,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2024-06-03T00:00:00",
+      "counterpartyName": "ACME 84139405 ACCT FEE",
+      "paymentPurpose": "ACH DEBIT CCD ACME 84139405 ACCT FEE",
+      "debit": 20,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-06-04T00:00:00",
+      "counterpartyName": "ACME INS GROUP ACMEPAYMNT",
+      "paymentPurpose": "ACH DEBIT PPD ACME INS GROUP ACMEPAYMNT",
+      "debit": 125.25,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-06-13T00:00:00",
+      "counterpartyName": "ACCT ANALYSIS SERV CHG",
+      "paymentPurpose": "ACCT ANALYSIS SERV CHG",
+      "debit": 28,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-06-14T00:00:00",
+      "counterpartyName": "ACMECABLE ACMECABLE",
+      "paymentPurpose": "ACH DEBIT TEL ACMECABLE ACMECABLE",
+      "debit": 84.99,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-06-17T00:00:00",
+      "counterpartyName": "PC TRANSFER DEBIT",
+      "paymentPurpose": "PC TRANSFER DEBIT",
+      "debit": 1000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-06-17T00:00:00",
+      "counterpartyName": "ACME CITY BANK WEB PAY",
+      "paymentPurpose": "ACH DEBIT WEB ACME CITY BANK WEB PAY",
+      "debit": 229.09,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-06-18T00:00:00",
+      "counterpartyName": "PC TRANSFER DEBIT",
+      "paymentPurpose": "PC TRANSFER DEBIT",
+      "debit": 500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-06-20T00:00:00",
+      "counterpartyName": "PC TRANSFER DEBIT",
+      "paymentPurpose": "PC TRANSFER DEBIT",
+      "debit": 500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-06-24T00:00:00",
+      "counterpartyName": "PC TRANSFER DEBIT",
+      "paymentPurpose": "PC TRANSFER DEBIT",
+      "debit": 1000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-06-26T00:00:00",
+      "counterpartyName": "PC TRANSFER DEBIT",
+      "paymentPurpose": "PC TRANSFER DEBIT",
+      "debit": 500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-06-28T00:00:00",
+      "counterpartyName": "DIGITAL BANKING CARD PAYMENT *0001",
+      "paymentPurpose": "PC TRANSFER DEBIT DIGITAL BANKING CARD PAYMENT *0001",
+      "debit": 16.26,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-06-18T00:00:00",
+      "counterpartyName": "Check 4239",
+      "paymentPurpose": "Check 4239",
+      "debit": 2000,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2024-06-26T00:00:00",
+      "counterpartyName": "Check 4244",
+      "paymentPurpose": "Check 4244",
+      "debit": 2274,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2024-06-25T00:00:00",
+      "counterpartyName": "Check 4241",
+      "paymentPurpose": "Check 4241",
+      "debit": 10603.04,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2024-06-26T00:00:00",
+      "counterpartyName": "Check 4245",
+      "paymentPurpose": "Check 4245",
+      "debit": 1000,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2024-06-17T00:00:00",
+      "counterpartyName": "Check 4242",
+      "paymentPurpose": "Check 4242",
+      "debit": 129.96,
+      "currency": "USD"
+    }
+  ],
+  "checks": [
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "790d8e5e4c7a",
+    "headings": [
+      "date:date | amount:amount | description:description",
+      "date:date serial # | amount:amount | date:date serial # | amount:amount",
+      "section:credit",
+      "section:debit"
+    ],
+    "unknownWords": [
+      "serial",
+      "#"
+    ],
+    "mentionedBank": "bmo"
+  }
+}

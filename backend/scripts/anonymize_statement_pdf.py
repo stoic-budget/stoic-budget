@@ -18,6 +18,9 @@ replacement that needs a missing letter fails loudly instead of rendering as
 garbage. Amounts, dates and balances are left alone: they are what the golden
 test checks.
 
+Text drawn inside form XObjects is read too. A file that is a scan with a text
+layer over it shows the real page in its image: --drop-images blanks them.
+
 Requires the `qpdf` CLI (12+). Usage:
 
   python3 scripts/anonymize_statement_pdf.py in.pdf out.pdf \
@@ -42,14 +45,21 @@ TOKEN_RE = re.compile(
     re.S,
 )
 DIGIT_RUN_RE = re.compile(r"\d+")
+# An image drawn inside the content stream itself: "BI <dict> ID <data> EI".
+INLINE_IMAGE_RE = re.compile(rb"(?<!\S)BI\s.*?\sID\s.*?EI(?!\S)", re.S)
+
+
+# qpdf exits 3 when it succeeded with warnings (a damaged image stream it kept as it was).
+QPDF_OK = (0, 3)
 
 
 def run_qpdf_json(pdf: Path) -> dict:
     out = subprocess.run(
         ["qpdf", "--json=2", "--json-stream-data=inline", "--decode-level=generalized", str(pdf), "-"],
-        check=True,
         capture_output=True,
     )
+    if out.returncode not in QPDF_OK:
+        raise subprocess.CalledProcessError(out.returncode, out.args, out.stdout, out.stderr)
     return json.loads(out.stdout)
 
 
@@ -130,6 +140,11 @@ def main() -> int:
     parser.add_argument("--min-digits", type=int, default=9)
     parser.add_argument("--salt", default="seneca-golden")
     parser.add_argument("--dump", action="store_true", help="print decoded text runs and exit")
+    parser.add_argument(
+        "--drop-images",
+        action="store_true",
+        help="replace every image with a blank pixel and drop inline ones: a scan shows what the text layer was anonymized from, a postal barcode the address",
+    )
     args = parser.parse_args()
 
     replacements = []
@@ -166,12 +181,33 @@ def main() -> int:
 
     pages = [obj["value"] for obj in objects.values() if isinstance(obj.get("value"), dict) and obj["value"].get("/Type") == "/Page"]
     jobs = []  # (content stream object, {font name: Font})
+    seen_forms: set = set()
+
+    def add_forms(resources, fonts: dict) -> None:
+        """Form XObjects draw text of their own, with the fonts of their own resources or the page's."""
+        for ref in as_dict(as_dict(resources).get("/XObject")).values():
+            form = resolve(ref)
+            if not form or "stream" not in form or ref in seen_forms:
+                continue
+            form_dict = form["stream"]["dict"]
+            if form_dict.get("/Subtype") != "/Form":
+                continue
+            seen_forms.add(ref)
+            form_resources = form_dict.get("/Resources")
+            form_fonts = {
+                **fonts,
+                **{name.encode(): font_for(font_ref) for name, font_ref in as_dict(as_dict(form_resources).get("/Font")).items()},
+            }
+            jobs.append((form, form_fonts))
+            add_forms(form_resources or resources, form_fonts)
+
     for page in pages:
         font_refs = as_dict(as_dict(page.get("/Resources")).get("/Font"))
         fonts = {name.encode(): font_for(ref) for name, ref in font_refs.items()}
         contents = page.get("/Contents")
         for ref in contents if isinstance(contents, list) else [contents]:
             jobs.append((resolve(ref), fonts))
+        add_forms(page.get("/Resources"), fonts)
 
     def text_runs(data: bytes, fonts: dict):
         """Yields (match, font, decoded text) for every string drawn in a content stream."""
@@ -263,6 +299,24 @@ def main() -> int:
     if not args.output:
         parser.error("output path is required unless --dump is given")
 
+    if args.drop_images:
+        for obj in objects.values():
+            image = obj.get("stream", {}).get("dict", {}) if isinstance(obj, dict) else {}
+            if image.get("/Subtype") == "/Image":
+                obj["stream"]["dict"] = {
+                    "/Type": "/XObject",
+                    "/Subtype": "/Image",
+                    "/Width": 1,
+                    "/Height": 1,
+                    "/ColorSpace": "/DeviceGray",
+                    "/BitsPerComponent": 8,
+                }
+                obj["stream"]["data"] = base64.b64encode(b"\xff").decode("ascii")
+        # Inline images sit in the page's own content stream: a postal barcode
+        # printed beside the address is one, and it encodes the address.
+        for stream_obj, _ in jobs:
+            set_stream_bytes(stream_obj, INLINE_IMAGE_RE.sub(b"", stream_bytes(stream_obj)))
+
     info = resolve(doc["qpdf"][1].get("trailer", {}).get("value", {}).get("/Info"))
     if info:
         for key in ("/Author", "/Title", "/Subject", "/Keywords"):
@@ -270,7 +324,9 @@ def main() -> int:
 
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tmp:
         json.dump(doc, tmp)
-    subprocess.run(["qpdf", "--json-input", tmp.name, str(args.output)], check=True)
+    written = subprocess.run(["qpdf", "--json-input", tmp.name, str(args.output)])
+    if written.returncode not in QPDF_OK:
+        raise subprocess.CalledProcessError(written.returncode, written.args)
     Path(tmp.name).unlink()
     print(f"rewrote {changed} text runs → {args.output}")
     return 0

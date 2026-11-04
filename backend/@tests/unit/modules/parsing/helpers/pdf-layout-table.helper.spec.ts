@@ -1,5 +1,8 @@
 import type { PdfTextRow } from '@/common/utils/pdf-parser.util';
-import { readHeaderRow } from '@/modules/parsing/helpers/pdf-layout-columns.helper';
+import {
+  isBalanceTableHeader,
+  readHeaderRow,
+} from '@/modules/parsing/helpers/pdf-layout-columns.helper';
 import { readLayoutTransactions } from '@/modules/parsing/helpers/pdf-layout-table.helper';
 import {
   openingBalanceFromRows,
@@ -45,8 +48,86 @@ describe('pdf-layout-table.helper', () => {
     expect(columns?.[2].x1).toBe(456);
   });
 
+  it('reads Withdrawals, Deposits and Balance alone as a header: the date and text sit left of them', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['WITHDRAWALS', 290], ['DEPOSITS', 390], ['BALANCE', 485]]),
+      row(120, [['01', 40], ['AUG', 52], ['23', 70], ['Balance', 110], ['Forward', 150], ['116.61', 490]]),
+      row(140, [['01', 40], ['AUG', 52], ['23', 70], ['Cheque', 110], ['310.00', 310], ['-193.39', 485]]),
+      row(149, [['4309', 125]]),
+      row(170, [['02', 40], ['AUG', 52], ['23', 70], ['Deposit', 110], ['500.00', 400], ['306.61', 490]]),
+    ]);
+    expect(transactions.map(t => [t.dateText, t.description, t.debit, t.credit])).toEqual([
+      ['01 AUG 23', 'Cheque 4309', 310, undefined],
+      ['02 AUG 23', 'Deposit', undefined, 500],
+    ]);
+  });
+
+  it('needs all three money headings to read a header without date or text', () => {
+    expect(readHeaderRow(row(50, [['Withdrawals', 290], ['Deposits', 390]]))).toBeNull();
+    expect(readHeaderRow(row(50, [['Deposits', 290], ['Balance', 390], ['Total', 450]]))).toBeNull();
+  });
+
   it('does not take a summary line for a header', () => {
     expect(readHeaderRow(row(50, [['Previous', 40], ['Balance', 90], ['1,000.00', 300]]))).toBeNull();
+  });
+
+  it('reads "Activity" as the description, right of the amount', () => {
+    const rows = [
+      row(100, [
+        ['Date', 40],
+        ['Amount', 100],
+        ['Activity', 160],
+      ]),
+      row(120, [
+        ['Aug', 40],
+        ['30', 60],
+        ['-12.50', 110],
+        ['ACME', 160],
+        ['Store', 190],
+      ]),
+    ];
+    const transactions = readLayoutTransactions(rows);
+    expect(transactions.map(t => [t.dateText, t.description, t.amount])).toEqual([
+      ['Aug 30', 'ACME Store', -12.5],
+    ]);
+  });
+
+  it('reads Payments and Receipts, and a balance set past the right edge of its heading', () => {
+    const rows = [
+      row(100, [
+        ['DATE', 40],
+        ['PARTICULARS', 110],
+        ['PAYMENTS', 250],
+        ['RECEIPTS', 340],
+        ['BALANCE', 440],
+      ]),
+      // Balance figures end 44pt right of "BALANCE" (440-475), starting under it.
+      row(120, [['04SEP23', 40], ['ACME', 110], ['PAYROLL', 140], ['83,187.50', 335], ['1,554,983.87', 459]]),
+      row(132, [['17SEP23', 40], ['ACME', 110], ['STORE', 140], ['50,005.00', 245], ['1,504,978.87', 459]]),
+    ];
+    expect(readLayoutTransactions(rows).map(({ description, debit, credit, balance }) => ({ description, debit, credit, balance }))).toEqual([
+      { description: 'ACME PAYROLL', debit: undefined, credit: 83187.5, balance: 1554983.87 },
+      { description: 'ACME STORE', debit: 50005, credit: undefined, balance: 1504978.87 },
+    ]);
+  });
+
+  it('leaves out a reference column set apart left of the date, and reads the rows after it', () => {
+    const rows = [
+      row(100, [
+        ['Reference', 40],
+        ['Number', 90],
+        ['Trans', 140],
+        ['Date', 170],
+        ['Post', 200],
+        ['Date', 225],
+        ['Description', 260],
+        ['Amount', 430],
+      ]),
+      row(120, [['P0000000AB0000001', 40], ['07/09', 145], ['07/10', 200], ['ACME', 260], ['Store', 285], ['8.17', 440]]),
+    ];
+    expect(readLayoutTransactions(rows).map(t => [t.dateText, t.description, t.amount])).toEqual([
+      ['07/10', 'ACME Store', 8.17],
+    ]);
   });
 
   it('reads multi-line descriptions and the side of each amount', () => {
@@ -222,6 +303,17 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('files the rows before the only account heading under that account', () => {
+    const transactions = readLayoutTransactions([
+      header,
+      row(120, [['01/02/2025', 40], ['ACME', 110], ['12.50', 315]]),
+      row(300, [['Account', 40], ['number:', 90], ['12-34567', 140]]),
+      header,
+      row(320, [['02/02/2025', 40], ['ACME', 110], ['5.00', 315]]),
+    ]);
+    expect(splitByAccount(transactions).map(group => group.length)).toEqual([2]);
+  });
+
   it('reads "transfer to account <number>" under a row as its text, not a new account', () => {
     const transactions = readLayoutTransactions([
       header,
@@ -244,5 +336,200 @@ describe('pdf-layout-table.helper', () => {
       { debit: undefined, credit: 5 },
     ]);
     expect(parsed[0].transactionDate.getMonth()).toBe(8);
+  });
+  it('takes a header of dates and balances for a summary, and a lone BALANCE for none', () => {
+    expect(isBalanceTableHeader(row(50, [['Date', 40], ['Balance', 150], ['Date', 300], ['Balance', 400]]))).toBe(true);
+    expect(isBalanceTableHeader(row(50, [['BALANCE', 400]]))).toBe(false);
+    expect(isBalanceTableHeader(row(50, [['Date', 40], ['Details', 100], ['Balance', 400]]))).toBe(false);
+  });
+
+  it('reads a numbered table with one signed column under Deposits over Withdrawals', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['No.', 20], ['Date', 50], ['Operation', 200], ['type', 250], ['Deposits', 400], ['(CR)', 450]]),
+      row(109, [['Operation', 200], ['details', 250], ['Withdrawals', 400]]),
+      row(130, [['1', 20], ['.', 26], ['26.10.2021', 50], ['MAINTENANCE', 200], ['FEE', 270], ['-25.00', 420], ['PLN', 455]]),
+      row(139, [['ref-1', 200]]),
+      row(160, [['2', 20], ['.', 26], ['22.10.2021', 50], ['SALARY', 200], ['100.00', 420], ['PLN', 455]]),
+    ]);
+    expect(transactions.map(({ dateText, amount, description }) => [dateText, amount, description])).toEqual([
+      ['26.10.2021', -25, 'MAINTENANCE FEE ref-1'],
+      ['22.10.2021', 100, 'SALARY'],
+    ]);
+  });
+
+  it('reads balances suffixed cr or dr in lower case, after a year printed on a line of its own', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Posting', 40], ['Transaction', 110], ['Details', 170], ['Debit', 300], ['Credit', 370], ['Balance', 450]]),
+      row(109, [['Date', 40]]),
+      row(130, [['2025', 40]]),
+      row(150, [['02-Mar', 40], ['Opening', 110], ['Balance', 150], ['1.95', 455], ['cr', 485]]),
+      row(170, [['05-Mar', 40], ['ACME', 110], ['Store', 135], ['12.50', 305], ['10.55', 455], ['dr', 485]]),
+      row(190, [['09-Mar', 40], ['ACME', 110], ['Payroll', 135], ['100.00', 375], ['89.45', 460], ['cr', 485]]),
+    ]);
+    expect(
+      transactions.map(({ dateText, debit, credit, balance, description }) => [
+        dateText,
+        debit,
+        credit,
+        balance,
+        description,
+      ]),
+    ).toEqual([
+      ['05-Mar', 12.5, undefined, -10.55, 'ACME Store'],
+      ['09-Mar', undefined, 100, 89.45, 'ACME Payroll'],
+    ]);
+  });
+
+  it('reads "Deb Amt" and "Credit Amt" as the debit and credit columns', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 90], ['Ref', 230], ['Details', 270], ['Deb', 350], ['Amt', 375], ['Credit', 410], ['Amt', 445], ['Balance', 490]]),
+      row(120, [['DEC', 40], ['10', 62], ['PAY', 90], ['1011', 230], ['TRANSFER', 270], ['20,035.51', 420], ['170,524.14', 500]]),
+      row(140, [['DEC', 40], ['15', 62], ['CASH', 90], ['0000', 230], ['TERMINAL', 270], ['10,000.00', 350], ['160,524.14', 500]]),
+    ]);
+    expect(transactions.map(({ debit, credit, balance }) => [debit, credit, balance])).toEqual([
+      [undefined, 20035.51, 170524.14],
+      [10000, undefined, 160524.14],
+    ]);
+  });
+
+  it('reads a sign spaced from the figure, and drops a category column from the text', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 90], ['Category', 300], ['Amount', 400], ['Balance', 490]]),
+      row(120, [['Jul', 40], ['3', 62], ['Deposit', 90], ['from', 130], ['ACME', 160], ['Credit', 300], ['+', 395], ['$0.05', 405], ['$1,500.05', 490]]),
+      row(140, [['Jul', 40], ['10', 62], ['Withdrawal', 90], ['from', 150], ['ACME', 180], ['Debit', 300], ['-', 385], ['$200.26', 395], ['$1,299.79', 490]]),
+    ]);
+    expect(transactions.map(({ amount, balance, description }) => [amount, balance, description])).toEqual([
+      [0.05, 1500.05, 'Deposit from ACME'],
+      [-200.26, 1299.79, 'Withdrawal from ACME'],
+    ]);
+  });
+
+  it('gives a second date its own heading when its name wraps, and stops at a line of End', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Posting', 40], ['Date', 70], ['Transaction', 100], ['Description', 175], ['Money', 330], ['In', 360], ['Money', 400], ['Out', 430], ['Balance', 490]]),
+      row(109, [['Date', 100]]),
+      row(130, [['11/01/2020', 40], ['10/01/2020', 100], ['ACME', 175], ['Store', 205], ['500.00', 425], ['9', 490], ['394.22', 500]]),
+      row(150, [['End', 40]]),
+      row(170, [['Date', 40], ['Description', 100], ['Amount', 400]]),
+      row(190, [['08/02/2020', 40], ['Pending', 100], ['Item', 140], ['226.49', 420]]),
+    ]);
+    expect(transactions.map(({ dateText, debit, description }) => [dateText, debit, description])).toEqual([
+      ['11/01/2020', 500, 'ACME Store'],
+    ]);
+  });
+
+  it('reads bare amounts as money out where money in carries a plus, and a Fee column as no text', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 90], ['Details', 200], ['Fee', 330], ['Amount', 400]]),
+      row(120, [['Apr', 40], ['3', 62], ['From', 90], ['Example', 120], ['Bank', 160], ['Transfer', 200], ['$0.00', 322], ['+', 405], ['$400.00', 415]]),
+      row(140, [['Apr', 40], ['3', 62], ['To', 90], ['Example', 105], ['Person', 145], ['Payment', 200], ['$0.00', 322], ['$375.00', 418]]),
+    ]);
+    expect(transactions.map(({ amount, description }) => [amount, description])).toEqual([
+      [400, 'From Example Bank Transfer'],
+      [-375, 'To Example Person Payment'],
+    ]);
+  });
+
+  it('reads "Posted" as the date heading, with "Date" printed over it', () => {
+    const columns = readHeaderRow(
+      row(100, [['Posted', 40], ['Description', 110], ['Debits', 300], ['Credits', 380], ['Balance', 470]]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
+  });
+
+  it('does not add an "Ending Balance" line under the last row to that row', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 90], ['Amount', 400], ['Balance', 490]]),
+      row(120, [['03/31', 40], ['Monthly', 90], ['Service', 130], ['Fee', 170], ['-4.95', 420], ['12,274.35', 490]]),
+      row(133, [['Ending', 90], ['Balance', 130], ['$12,274.35', 490]]),
+    ]);
+    expect(transactions.map(({ amount, description }) => [amount, description])).toEqual([
+      [-4.95, 'Monthly Service Fee'],
+    ]);
+  });
+
+  it('keeps "(continued on next page)" out of the last row, and gives an undated row the date above it', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 90], ['Withdrawals', 300], ['Deposits', 380], ['Balance', 470]]),
+      row(120, [['Dec', 40], ['1', 62], ['RETAIL', 90], ['PURCHASE', 130], ['8.77', 330], ['3,093.51', 480]]),
+      row(133, [['EXAMPLE', 90], ['CAFE', 130]]),
+      row(153, [['RETAIL', 90], ['PURCHASE', 130], ['2.30', 330], ['3,091.21', 480]]),
+      row(166, [['EXAMPLE', 90], ['BAKERY', 130]]),
+      row(186, [['(continued', 400], ['on', 440], ['next', 455], ['page)', 475]]),
+    ]);
+    expect(transactions.map(({ dateText, debit, description }) => [dateText, debit, description])).toEqual([
+      ['Dec 1', 8.77, 'RETAIL PURCHASE EXAMPLE CAFE'],
+      ['Dec 1', 2.3, 'RETAIL PURCHASE EXAMPLE BAKERY'],
+    ]);
+  });
+
+  it('reads a section heading that shares its line with a block on the right, and stops at a daily balance list', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Withdrawals', 40], ['&', 100], ['Debits', 110], ['**', 145], ['Total', 400], ['Withdrawals', 430], ['&', 490], ['Debits', 500]]),
+      row(112, [['Date', 40], ['Amount', 90], ['Description', 170]]),
+      row(130, [['11/01', 40], ['147.00', 95], ['EXAMPLE', 170], ['BAR', 215]]),
+      row(145, [['Other', 40], ['Withdrawals', 70], ['&', 130], ['Debits', 140]]),
+      row(160, [['11/02', 40], ['289.44', 95], ['EXAMPLE', 170], ['UTILITY', 215]]),
+      row(190, [['Deposits', 40], ['&', 90], ['Credits', 100]]),
+      row(205, [['11/03', 40], ['500.00', 95], ['EXAMPLE', 170], ['PAYER', 215]]),
+      row(235, [['Daily', 40], ['Balance', 75], ['Current', 400], ['Balance', 440]]),
+      row(250, [['Date', 40], ['Balance', 90], ['Date', 200], ['Balance', 250]]),
+      row(265, [['11/01', 40], ['14,349.13', 90], ['11/10', 200], ['17,251.95', 250]]),
+    ]);
+    expect(transactions.map(({ dateText, debit, credit }) => [dateText, debit, credit])).toEqual([
+      ['11/01', 147, undefined],
+      ['11/02', 289.44, undefined],
+      ['11/03', undefined, 500],
+    ]);
+  });
+
+  it('does not take a summary line "Deposits  $2,869.18" for a section heading', () => {
+    const transactions = readLayoutTransactions([
+      row(80, [['Deposits', 40], ['$2,869.18', 400]]),
+      row(100, [['Date', 40], ['Description', 90], ['Amount', 400]]),
+      row(120, [['12/31', 40], ['EXAMPLE', 90], ['SHOP', 140], ['-$49.00', 405]]),
+    ]);
+    expect(transactions.map(({ amount }) => amount)).toEqual([-49]);
+  });
+
+  describe('tables printed tight', () => {
+    // Lines a line height apart sit within a wrapped cell's gap, header or not.
+    const amountHeader = row(100, [['Date', 40], ['Amount', 175], ['Description', 215]]);
+
+    it('reads lines each with its own date as rows of their own, and keeps a short word', () => {
+      const transactions = readLayoutTransactions([
+        amountHeader,
+        row(107, [['Jun', 40], ['03', 60], ['20.00', 170], ['ACH', 215], ['DEBIT', 235]]),
+        row(107, [['Jun', 40], ['14', 60], ['84.99', 170], ['ACH', 215], ['DEBIT', 235]], 2),
+        row(114, [['WEB', 215], ['ACME', 240], ['Cafe', 265]], 2),
+        row(121, [['Jun', 40], ['17', 60], ['9.00', 175], ['Transfer', 215]], 2),
+      ]);
+      expect(transactions.map(({ dateText, amount, description }) => [dateText, amount, description])).toEqual([
+        ['Jun 03', 20, 'ACH DEBIT'],
+        ['Jun 14', 84.99, 'ACH DEBIT WEB ACME Cafe'],
+        ['Jun 17', 9, 'Transfer'],
+      ]);
+    });
+
+    it('reads a table printed in two blocks side by side, and stops at a balance summary', () => {
+      const transactions = readLayoutTransactions([
+        row(100, [
+          ['Date', 40], ['Serial', 90], ['#', 130], ['Amount', 200],
+          ['Date', 300], ['Serial', 350], ['#', 390], ['Amount', 460],
+        ]),
+        row(107, [
+          ['Jun', 40], ['18', 60], ['4239', 90], ['2,000.00', 190],
+          ['Jun', 300], ['26', 320], ['4244', 350], ['*', 385], ['2,274.00', 445],
+        ]),
+        row(114, [['Jun', 40], ['25', 60], ['4241', 90], ['10.00', 200]]),
+        row(160, [['Date', 40], ['Balance', 150], ['Date', 300], ['Balance', 400]]),
+        row(167, [['May', 40], ['31', 60], ['446.97', 150], ['Jun', 300], ['18', 320], ['24.00', 400]]),
+      ]);
+      expect(transactions.map(({ dateText, amount, description }) => [dateText, amount, description])).toEqual([
+        ['Jun 18', 2000, '4239'],
+        ['Jun 26', 2274, '4244 *'],
+        ['Jun 25', 10, '4241'],
+      ]);
+    });
   });
 });

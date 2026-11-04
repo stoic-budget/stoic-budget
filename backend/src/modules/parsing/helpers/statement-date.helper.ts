@@ -1,6 +1,6 @@
 /**
  * Dates the way statements print them: "02/06/2025", "09/13" (no year),
- * "1 mei", "02 janv. 25", "Sep 3, 2025", "31 janvier 2025", "2025-05-31".
+ * "1 mei", "02-Mar-2025", "02Jul24", "02 janv. 25", "Sep 3, 2025", "31 janvier 2025", "2025-05-31".
  *
  * Whether "09/01" is the 9th of January or September 1st is a property of the
  * document, not of one date, so callers settle the order once per statement
@@ -83,21 +83,26 @@ export function parseDateParts(text: string, order: NumericDateOrder): DateParts
     return valid({ year: Number(year), month: Number(month), day: Number(day) });
   }
 
-  const numeric = value.match(/^(\d{1,2})[./-](\d{1,2})(?:[./-](\d{4}|\d{2}))?$/);
+  const numeric = value.match(/^(\d{1,2})[./-](\d{1,2})(?:[./-]((?:19|20)\d{2}|\d{2}))?$/);
   if (numeric) {
     const [first, second] = [Number(numeric[1]), Number(numeric[2])];
     const [day, month] = order === 'mdy' ? [second, first] : [first, second];
     return valid({ day, month, year: fullYear(numeric[3]) });
   }
 
-  const dayFirst = value.match(/^(\d{1,2})(?:er)?\s+([a-z]+)\.?,?(?:\s+(\d{4}|\d{2}))?$/);
+  const dayFirst = value.match(
+    /^(\d{1,2})(?:er)?[\s-]*([a-z]+)\.?,?(?:[\s-]*((?:19|20)\d{2}|\d{2}))?$/,
+  );
   if (dayFirst) {
     const month = monthFromName(dayFirst[2]);
     return month ? valid({ day: Number(dayFirst[1]), month, year: fullYear(dayFirst[3]) }) : null;
   }
 
-  // "Sep 3", "Sep 3, 2025", and "September 7,2017" as OCR reads it.
-  const monthFirst = value.match(/^([a-z]+)\.?\s+(\d{1,2})(?:,?\s+(\d{4})|,(\d{4}))?,?$/);
+  // "Sep 3", "Sep 3, 2025", "JAN01", and "September 7,2017" as OCR reads it. A
+  // year is 19xx or 20xx: "Jun 18 4239" is a date and a check number.
+  const monthFirst = value.match(
+    /^([a-z]+)\.?\s*(\d{1,2})(?:,?\s+((?:19|20)\d{2})|,((?:19|20)\d{2}))?,?$/,
+  );
   if (monthFirst) {
     const month = monthFromName(monthFirst[1]);
     const year = fullYear(monthFirst[3] ?? monthFirst[4]);
@@ -109,14 +114,16 @@ export function parseDateParts(text: string, order: NumericDateOrder): DateParts
 
 /**
  * "dmy" or "mdy" for numeric dates, decided by a component that can only be a
- * day ("17/01" is day-first, "09/13" month-first). Null when nothing decides.
+ * day ("17/01" is day-first, "09/13" and "12-31" month-first). Null when nothing decides.
  */
 export function detectNumericDateOrder(samples: string[]): NumericDateOrder | null {
   let dayFirst = false;
   let monthFirst = false;
   for (const sample of samples) {
-    // Not the month and day of a year-first date ("2020/09/30").
-    for (const match of sample.matchAll(/(?<![\d./])(\d{1,2})[./](\d{1,2})(?:[./]\d{2,4})?\b/g)) {
+    // Not the month and day of a year-first date ("2020/09/30", "2020-09-30").
+    for (const match of sample.matchAll(
+      /(?<![\d./-])(\d{1,2})[./-](\d{1,2})(?:[./-]\d{2,4})?\b/g,
+    )) {
       dayFirst ||= Number(match[1]) > 12 && Number(match[2]) <= 12;
       monthFirst ||= Number(match[2]) > 12 && Number(match[1]) <= 12;
     }
@@ -127,12 +134,43 @@ export function detectNumericDateOrder(samples: string[]): NumericDateOrder | nu
   return dayFirst ? 'dmy' : 'mdy';
 }
 
+/** Days a row's date may sit outside the printed period and still count as inside it. */
+const PERIOD_SLACK_DAYS = 3;
+
+/**
+ * "dmy" or "mdy" for rows whose dates leave the order open ("07/09", "08/04"):
+ * the order that puts more of them inside the statement's period, printed in
+ * words ("July 09, 2022 to August 08, 2022"). Null when the orders tie.
+ */
+export function orderWithinPeriod(
+  dateTexts: string[],
+  period: { from: Date; to: Date } | null,
+): NumericDateOrder | null {
+  if (!period || dateTexts.length === 0) {
+    return null;
+  }
+  const slack = PERIOD_SLACK_DAYS * 24 * 60 * 60 * 1000;
+  const inside = (order: NumericDateOrder) =>
+    dateTexts.filter(text => {
+      const parts = parseDateParts(text, order);
+      const time = parts ? resolveDate(parts, period.to).getTime() : Number.NaN;
+      return time >= period.from.getTime() - slack && time <= period.to.getTime() + slack;
+    }).length;
+  const [dayFirst, monthFirst] = [inside('dmy'), inside('mdy')];
+  if (dayFirst === monthFirst) {
+    return null;
+  }
+  return dayFirst > monthFirst ? 'dmy' : 'mdy';
+}
+
 const FULL_DATE_PATTERNS = [
   /\b\d{4}-\d{2}-\d{2}\b/g,
   /\b(?:19|20)\d{2}([/.])\d{1,2}\1\d{1,2}\b/g,
   /\b\d{1,2}[./-]\d{1,2}[./-](?:\d{4}|\d{2})\b/g,
-  /\b\d{1,2}(?:er)?\s+[a-z]+\.?\s+\d{4}\b/g,
+  /\b\d{1,2}(?:er)?[\s-]+[a-z]+\.?[\s-]+\d{4}\b/g,
   /\b[a-z]+\.?\s+\d{1,2}(?:,?\s+|,)\d{4}\b/g,
+  // Glued, as some banks print them: "31AUG23", "02Jul2024".
+  /\b\d{1,2}[a-z]{3}(?:\d{4}|\d{2})\b/g,
 ];
 
 export interface FoundDate {

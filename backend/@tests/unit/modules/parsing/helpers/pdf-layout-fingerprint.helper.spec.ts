@@ -60,7 +60,7 @@ describe('pdf-layout-fingerprint.helper', () => {
   it('keeps the header words no heading knows, but no figure or date read with them', () => {
     const layout = layoutOf([
       row(100, [
-        ['Tran', 20],
+        ['Seq', 20],
         ['Date', 40],
         ['Description', 110],
         ['Withdrawal', 290],
@@ -70,9 +70,9 @@ describe('pdf-layout-fingerprint.helper', () => {
         ['31/01/2025', 580],
       ]),
     ]);
-    expect(layout?.unknownWords).toEqual(['tran', 'branch']);
+    expect(layout?.unknownWords).toEqual(['seq', 'branch']);
     expect(layout?.headings).toEqual([
-      'date:date tran | description:description | debit:withdrawal | credit:deposit | balance:balance | other:branch',
+      'date:date seq | description:description | debit:withdrawal | credit:deposit | balance:balance | other:branch',
     ]);
   });
 
@@ -86,6 +86,32 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Website: www.bochk.com')).toBe(BankName.BANK_OF_CHINA);
     expect(mentionedBank('BankofScotlandplc.Registeredoffice')).toBe(BankName.BANK_OF_SCOTLAND);
     expect(mentionedBank('barclays bank uk plc. registered in england')).toBe(BankName.BARCLAYS);
+    expect(mentionedBank("direct inquiries to: boeing employees' credit union")).toBe(BankName.BECU);
+    expect(mentionedBank('bendigo and adelaide bank limited abn 11')).toBe(BankName.BENDIGO);
+    expect(mentionedBank('bmo bank n.a. p.o. box 94033')).toBe(BankName.BMO);
+    expect(mentionedBank('bnp paribas bank polska s.a. ul. 2')).toBe(BankName.BNP_PARIBAS);
+    expect(mentionedBank('bank of queensland limited abn 32')).toBe(BankName.BOQ);
+    expect(mentionedBank('bpi express phone 89-100')).toBe(BankName.BPI);
+    expect(mentionedBank('www.capitalone.com 1-888')).toBe(BankName.CAPITAL_ONE);
+    expect(mentionedBank('capitec bank limited 1 quantum street')).toBe(BankName.CAPITEC);
+    expect(mentionedBank('write us at cash disputes, 1955 broadway')).toBe(BankName.CASH_APP);
+    expect(mentionedBank('card purchase cash app*example person')).toBeUndefined();
+    expect(mentionedBank('send inquiries to charles schwab bank p.o. box')).toBe(BankName.SCHWAB);
+    expect(mentionedBank('jpmorgan chase bank, n.a. p o box 182051')).toBe(BankName.CHASE);
+    expect(mentionedBank('write to chime member services, p.o. box 417')).toBe(BankName.CHIME);
+    expect(mentionedBank('cibc account statement for dec 1 to dec 31')).toBe(BankName.CIBC);
+    expect(mentionedBank('your citibank account statement as on aug 1, 2024 ... mobikwik axis bank')).toBe(BankName.CITI);
+    expect(mentionedBank('access your account online: citizensbank.com')).toBe(BankName.CITIZENS);
+    expect(mentionedBank('your agreement with coast capital savings federal credit union (ccs)')).toBe(BankName.COAST_CAPITAL);
+    expect(mentionedBank('visit our web site www.comerica.com')).toBe(BankName.COMERICA);
+    expect(mentionedBank('commonwealth bank of australia abn 48 123 123 124')).toBe(BankName.COMMBANK);
+    expect(mentionedBank('go to commercebank.com to learn more')).toBe(BankName.COMMERCE_BANK);
+    expect(mentionedBank('in account with commercial bank of ceylon')).toBe(BankName.COMMERCIAL_BANK);
+    expect(mentionedBank('Crédit Agricole Brie Picardie 500 Rue Saint Fuscien')).toBe(BankName.CREDIT_AGRICOLE);
+    expect(mentionedBank('made payable to CREDIT ONE BANK.')).toBe(BankName.CREDIT_ONE);
+    expect(mentionedBank('Digital Federal Credit Union 220 Sample Boulevard')).toBe(BankName.DCU);
+    expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
+    expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
     expect(statement(usual, 'ACME', '12.50')?.mentionedBank).toBeUndefined();
     expect(

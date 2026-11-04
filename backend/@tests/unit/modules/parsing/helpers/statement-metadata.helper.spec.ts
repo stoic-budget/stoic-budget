@@ -56,13 +56,28 @@ describe('statement-metadata.helper', () => {
   it('takes the ISO code printed most often, upper case only', () => {
     expect(detectStatementCurrency('Try our app. EUR 1.00 and EUR 2.00, once USD')).toBe('EUR');
     expect(detectStatementCurrency('Try our new app today')).toBeNull();
+    expect(detectStatementCurrency('ACCOUNT NO 100000001 CURRENCY LKR')).toBe('LKR');
+    // The currency named in capitals in the title outweighs a foreign amount quoted once.
+    expect(
+      detectStatementCurrency('RELEVE DE COMPTES EN EUROS\nMt initial : 29,89 RON\nRELEVE DE COMPTES EN EUROS'),
+    ).toBe('EUR');
   });
 
   it('reads which dollar from the prefix or the country', () => {
     expect(detectStatementCurrency('Total S$ 12.00')).toBe('SGD');
     expect(detectStatementCurrency('Example Bank Canada Inc.\nSolde 10,00 $')).toBe('CAD');
+    expect(detectStatementCurrency('www.example-bank.com.au\nBalance $97.39')).toBe('AUD');
+    expect(detectStatementCurrency('Charged in Australian dollars $5.00')).toBe('AUD');
     expect(detectStatementCurrency('Balance $10.00')).toBe('USD');
     expect(detectStatementCurrency('Saldo 10,00 €')).toBe('EUR');
+  });
+
+  it('reads pesos from the country name when no currency is printed', () => {
+    expect(detectStatementCurrency('San Fernando\nSta. Ana Pampanga\nPhilippines\nBalance 10.00')).toBe('PHP');
+  });
+
+  it('reads rand from the country or its domain when no currency is printed', () => {
+    expect(detectStatementCurrency('Client Care ClientCare@example.co.za\nBalance 10.00')).toBe('ZAR');
   });
 
   it('reads rupees from an Indian bank code when no currency is printed', () => {
@@ -159,6 +174,21 @@ describe('statement-metadata.helper', () => {
     expect(findStatementBalances(text, 'mdy')).toEqual({ start: 1000, end: 1250.5 });
   });
 
+  it('reads the amount under a label that stands alone, on its dated line', () => {
+    const text = [
+      'Beginning balance $1,000.00',
+      'on August 1, 2024 Visit our web site',
+      'Ending balance',
+      'on August 31, 2024 $1,250.50 Please refer to the notice.',
+    ].join('\n');
+    expect(findStatementBalances(text, 'mdy')).toEqual({ start: 1000, end: 1250.5 });
+  });
+
+  it('reads two balances a summary prints side by side on one line', () => {
+    const text = 'Previous Balance $900.00 New Balance $200.00\nPayments - $1,000.00';
+    expect(findStatementBalances(text, 'mdy')).toEqual({ start: 900, end: 200 });
+  });
+
   it('reads two dated balances, the earlier one opening', () => {
     const text = 'Balance as of 31.05.2025: 900,00 €\nBalance as of 01.05.2025: 1.000,00 €';
     expect(findStatementBalances(text, 'dmy')).toEqual({ start: 1000, end: 900 });
@@ -185,11 +215,25 @@ describe('statement-metadata.helper', () => {
     });
     expect(readAccountHeading('EXAMPLE CITY 19850-1423 Account number: XXXX XXXX 0001')).toBeNull();
     expect(readAccountHeading('Account Summary')).toBeNull();
+    expect(readAccountHeading('Example Savings - 1234567890')).toEqual({
+      accountNumber: '1234567890',
+    });
+    expect(readAccountHeading('Statement Period: 11/19/2016 - 12/16/2016')).toBeNull();
+    expect(readAccountHeading('Order - 12345')).toBeNull();
+    expect(readAccountHeading('100000000001 (100)')).toEqual({ accountNumber: '100000000001' });
+    expect(readAccountHeading('PRIMARY SAVINGS  ACCT# 1')).toEqual({ accountNumber: '1' });
+    expect(readAccountHeading('SEE ACCT# 1 FOR DETAILS 100.00')).toBeNull();
+    expect(readAccountHeading('Cheque 4309 (100)')).toBeNull();
+    expect(readAccountHeading('100000000001 (100) 116.61')).toBeNull();
   });
 
   it('tells a card statement by its wording', () => {
     expect(isCreditCardStatement('Minimum Payment Due 35.00\nPayment Due Date 10/24/2025')).toBe(true);
     expect(isCreditCardStatement('Payment received, thank you')).toBe(false);
+    // A bank account's notes on a credit line ask for no payment.
+    expect(
+      isCreditCardStatement('HOME EQUITY LINE OF CREDIT\nCREDIT LINE FINANCE CHARGE\nagainst your credit limit'),
+    ).toBe(false);
   });
 
   it('tells a totals line from a row, wherever the label stands', () => {

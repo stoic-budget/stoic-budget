@@ -1,0 +1,530 @@
+{
+  "metadata": {
+    "accountNumber": "409098017833917",
+    "currency": "USD",
+    "dateFrom": "2025-01-01T00:00:00",
+    "dateTo": "2025-03-31T00:00:00",
+    "balanceStart": 310.45,
+    "balanceEnd": 12274.35,
+    "rawHeader": "January 01, 2025 through March 31, 2025 Account Number: 409098017833917 JPMorgan Chase Bank, N.A.",
+    "normalizedHeader": "January 01, 2025 through March 31, 2025 Account Number: 409098017833917 JPMorgan Chase Bank, N.A.",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2025-01-01T00:00:00",
+      "counterpartyName": "Online Transfer To Chk ...5159",
+      "paymentPurpose": "01/01 Online Transfer To Chk ...5159 Transaction#: 36549088118",
+      "debit": 300,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-01-03T00:00:00",
+      "counterpartyName": "Kenyoo Type Kitchen Inc",
+      "paymentPurpose": "Zelle Payment From Kenyoo Type Kitchen Inc Bachkt1Gwsj6",
+      "credit": 500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-04T00:00:00",
+      "counterpartyName": "Monica Polke ach7834657",
+      "paymentPurpose": "Monica Polke ach7834657",
+      "credit": 1700,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-01-05T00:00:00",
+      "counterpartyName": "New Images Marketing Solutions .",
+      "paymentPurpose": "Zelle Payment From New Images Marketing Solutions . Hna0Hu3O11Ad",
+      "credit": 950,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-05T00:00:00",
+      "counterpartyName": "Online Transfer From Chk ...5959",
+      "paymentPurpose": "Online Transfer From Chk ...5959 Transaction#: 17177977041",
+      "credit": 300,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-08T00:00:00",
+      "counterpartyName": "Pressure Pathways Inc. Payroll",
+      "paymentPurpose": "Pressure Pathways Inc. Payroll PPD ID: 9009870680",
+      "credit": 2000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-09T00:00:00",
+      "counterpartyName": "Py *Forever Yogurt -Ho Homewood IL",
+      "paymentPurpose": "Card Purchase 01/09 Py *Forever Yogurt -Ho Homewood IL Card 9294",
+      "debit": 26.51,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-12T00:00:00",
+      "counterpartyName": "Ebel's Ace -Homewood Homewood IL",
+      "paymentPurpose": "Card Purchase 01/12 Ebel's Ace -Homewood Homewood IL Card 9294",
+      "debit": 19.36,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-13T00:00:00",
+      "counterpartyName": "Ebel's Ace -Homewood Homewood IL",
+      "paymentPurpose": "Card Purchase 01/13 Ebel's Ace -Homewood Homewood IL Card 9294",
+      "debit": 103.26,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-15T00:00:00",
+      "counterpartyName": "Online Transfer To Chk ...5373",
+      "paymentPurpose": "01/15 Online Transfer To Chk ...5373 Transaction#: 01339511780",
+      "debit": 700,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-01-16T00:00:00",
+      "counterpartyName": "Pay*Paychex Inc 866-603-5802 NY",
+      "paymentPurpose": "Card Purchase 01/16 Pay*Paychex Inc 866-603-5802 NY Card 1425",
+      "debit": 34.57,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-17T00:00:00",
+      "counterpartyName": "Fleetcor Funding Bt0425",
+      "paymentPurpose": "Fleetcor Funding Bt0425 PPD ID: 2201913142",
+      "debit": 228.93,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-01-19T00:00:00",
+      "counterpartyName": "Wife",
+      "paymentPurpose": "Zelle Payment To Wife Jpm999Vvcjwg",
+      "debit": 1200,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-01-19T00:00:00",
+      "counterpartyName": "Online Transfer From Chk ...5959",
+      "paymentPurpose": "Online Transfer From Chk ...5959 Transaction#: 17193635850",
+      "credit": 60,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-23T00:00:00",
+      "counterpartyName": "Fundbox Fundbox.Com TX",
+      "paymentPurpose": "Card Purchase 03/07 Fundbox Fundbox.Com TX Card 1425",
+      "debit": 1180.04,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-25T00:00:00",
+      "counterpartyName": "Online Transfer To Chk ...5959",
+      "paymentPurpose": "01/25 Online Transfer To Chk ...5959 Transaction#: 65094296815",
+      "debit": 310,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-01-26T00:00:00",
+      "counterpartyName": "Apetropics 877-247-89414 NV",
+      "paymentPurpose": "Card Purchase 01/26 Apetropics 877-247-89414 NV Card 1425",
+      "credit": 900,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-28T00:00:00",
+      "counterpartyName": "Wife",
+      "paymentPurpose": "Zelle Payment To Wife Jpm999Vvcjwg",
+      "debit": 300,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-01-30T00:00:00",
+      "counterpartyName": "Online Transfer From Chk ...5959",
+      "paymentPurpose": "Online Transfer From Chk ...5959 Transaction#: 17193635935",
+      "credit": 300,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-31T00:00:00",
+      "counterpartyName": "Apetropics 877-227-8944 NV",
+      "paymentPurpose": "Card Purchase 01/31 Apetropics 877-227-8944 NV Card 1425",
+      "debit": 49.95,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-02-01T00:00:00",
+      "counterpartyName": "Cvs/Pharmacy #00080 Flossmoor IL",
+      "paymentPurpose": "Card Purchase 02/01 Cvs/Pharmacy #00080 Flossmoor IL Card 1425",
+      "debit": 170.54,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-02-02T00:00:00",
+      "counterpartyName": "Pressure Pathways Inc. Payroll",
+      "paymentPurpose": "Pressure Pathways Inc. Payroll PPD ID: 9009870680",
+      "credit": 2000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-02-04T00:00:00",
+      "counterpartyName": "Fbt Credit Card Pymt 866-686-2258 TX",
+      "paymentPurpose": "Card Purchase 02/04 Fbt Credit Card Pymt 866-686-2258 TX Card 1425",
+      "debit": 110.32,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-02-05T00:00:00",
+      "counterpartyName": "Opensky Mobile Pym 231190332453475",
+      "paymentPurpose": "Opensky Mobile Pym 231190332453475 Web ID: 9000002843",
+      "debit": 130,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-02-07T00:00:00",
+      "counterpartyName": "New Life Covenant Chu 773-275-1731 IL",
+      "paymentPurpose": "Card Purchase 02/07New Life Covenant Chu 773-275-1731 IL Card 1425",
+      "debit": 180,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-02-08T00:00:00",
+      "counterpartyName": "New Life Covenant Chu 773-285-1731 IL",
+      "paymentPurpose": "Card Purchase 02/08 New Life Covenant Chu 773-285-1731 IL Card 1425",
+      "debit": 230,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-02-09T00:00:00",
+      "counterpartyName": "Opensky Mobile Pym 231190332453475",
+      "paymentPurpose": "Opensky Mobile Pym 231190332453475 Web ID: 9000002843",
+      "debit": 350,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-02-12T00:00:00",
+      "counterpartyName": "Online Transfer from Chk … 5959",
+      "paymentPurpose": "Online Transfer from Chk … 5959 Transaction#: 17332771762",
+      "credit": 2497.25,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-02-13T00:00:00",
+      "counterpartyName": "New Images Marketing Solutions .",
+      "paymentPurpose": "Zelle Payment From New Images Marketing Solutions . Hna0Hubs9Rws",
+      "credit": 70,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-02-15T00:00:00",
+      "counterpartyName": "New Images Marketing",
+      "paymentPurpose": "Zelle Payment To New Images Marketing Jpm999W33Ftf",
+      "debit": 10,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-02-16T00:00:00",
+      "counterpartyName": "Kenyoo Type Kitchen Inc",
+      "paymentPurpose": "Zelle Payment From Kenyoo Type Kitchen Inc Bace6Ghnpamk",
+      "credit": 110,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-02-17T00:00:00",
+      "counterpartyName": "Pressure Pathways Inc. Payroll",
+      "paymentPurpose": "Pressure Pathways Inc. Payroll PPD ID: 9009870680",
+      "credit": 2000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-02-19T00:00:00",
+      "counterpartyName": "Online Transfer To Chk ...5959",
+      "paymentPurpose": "02/19 Online Transfer To Chk ...5959 Transaction#: 01009704706",
+      "credit": 400,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-02-23T00:00:00",
+      "counterpartyName": "Sams Club Cc Sams Epay 2401749052",
+      "paymentPurpose": "Sams Club Cc Sams Epay 2401749052 Web ID: 9069876103",
+      "debit": 75,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-02-24T00:00:00",
+      "counterpartyName": "Ape tropics877-228-8944 NV",
+      "paymentPurpose": "Card Purchase Return 02/24Ape tropics877-228-8944 NV Card 1425",
+      "credit": 24.97,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-02-26T00:00:00",
+      "counterpartyName": "Sams Club Cc Sams Epay 2402720774",
+      "paymentPurpose": "Sams Club Cc Sams Epay 2402720774 Web ID: 9069872103",
+      "debit": 64,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-02-26T00:00:00",
+      "counterpartyName": "Online Transfer from Chk ...5959",
+      "paymentPurpose": "Online Transfer from Chk ...5959 Transaction#: 17284056489",
+      "credit": 1100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-02-27T00:00:00",
+      "counterpartyName": "Online Transfer From Chk ...5959",
+      "paymentPurpose": "Online Transfer From Chk ...5959 Transaction#: 17292025622 02/28Online",
+      "credit": 80,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-02-28T00:00:00",
+      "counterpartyName": "Transfer To Chk… 6567 Transaction#: 17309381345",
+      "paymentPurpose": "Transfer To Chk… 6567 Transaction#: 17309381345",
+      "debit": 1429.19,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-02-28T00:00:00",
+      "counterpartyName": "Kenyoo Type Kitchen Inc",
+      "paymentPurpose": "Zelle Payment From Kenyoo Type Kitchen Inc Bace6Ghnpamk",
+      "credit": 400,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-01T00:00:00",
+      "counterpartyName": "Online Transfer From Chk ...5959",
+      "paymentPurpose": "Online Transfer From Chk ...5959 Transaction#: 17305143972",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-02T00:00:00",
+      "counterpartyName": "New Life Covenant Chu 773-285-1731 IL",
+      "paymentPurpose": "Card Purchase 03/02 New Life Covenant Chu 773-285-1731 IL Card 1425",
+      "debit": 70,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-04T00:00:00",
+      "counterpartyName": "Google *Fitbit LLC Mountain View CA",
+      "paymentPurpose": "Card Purchase With Pin 03/04 Google *Fitbit LLC Mountain View CA Card 1425",
+      "debit": 85.59,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-05T00:00:00",
+      "counterpartyName": "Online Transfer To Chk ...5959",
+      "paymentPurpose": "03/05 Online Transfer To Chk ...5959 Transaction#: 61801668808",
+      "debit": 4200,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-03-05T00:00:00",
+      "counterpartyName": "Online Transfer from Chk ...5959",
+      "paymentPurpose": "Online Transfer from Chk ...5959 Transaction#: 17332772682",
+      "credit": 3000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-08T00:00:00",
+      "counterpartyName": "Fund box Fundbox.Com TX",
+      "paymentPurpose": "Card Purchase 03/08 Fund box Fundbox.Com TX Card 1425",
+      "debit": 5000,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-09T00:00:00",
+      "counterpartyName": "Pressure Pathways Inc. Payroll",
+      "paymentPurpose": "Pressure Pathways Inc. Payroll PPD ID: 9009870680",
+      "credit": 2000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-10T00:00:00",
+      "counterpartyName": "Online Transfer From Chk ...5959",
+      "paymentPurpose": "Online Transfer From Chk ...5959 Transaction#: 17366520075",
+      "credit": 3200,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-12T00:00:00",
+      "counterpartyName": "Kenyoo Type Kitchen Inc",
+      "paymentPurpose": "Zelle Payment From Kenyoo Type Kitchen Inc Bachkt1Geas6",
+      "credit": 60,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-15T00:00:00",
+      "counterpartyName": "Online Transfer From Chk ...5959",
+      "paymentPurpose": "Online Transfer From Chk ...5959 Transaction#: 17369613706",
+      "credit": 27,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-16T00:00:00",
+      "counterpartyName": "Rentalkharma.Com Httpswww.Rent CO",
+      "paymentPurpose": "Recurring Card Purchase 03/16 Rentalkharma.Com Httpswww.Rent CO Card 1425",
+      "debit": 4.95,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-17T00:00:00",
+      "counterpartyName": "Fpb CR Card VRU",
+      "paymentPurpose": "Fpb CR Card VRU PPD ID: 3411894456",
+      "debit": 19.16,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-03-17T00:00:00",
+      "counterpartyName": "Sigma Financial Pnc Bank 016Fswemx2Ndal4",
+      "paymentPurpose": "Sigma Financial Pnc Bank 016Fswemx2Ndal4 CCD ID: 1204895317",
+      "debit": 1406.25,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-03-19T00:00:00",
+      "counterpartyName": "Wife",
+      "paymentPurpose": "Zelle Payment To Wife Jpm999Wneagl",
+      "debit": 150,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-03-21T00:00:00",
+      "counterpartyName": "Wife",
+      "paymentPurpose": "Zelle Payment To Wife Jpm999Wnsxc9",
+      "debit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-03-23T00:00:00",
+      "counterpartyName": "Online Transfer From Chk ...6159",
+      "paymentPurpose": "Online Transfer From Chk ...6159 Transaction#: 17369613890",
+      "credit": 300,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-23T00:00:00",
+      "counterpartyName": "Wife",
+      "paymentPurpose": "Zelle Payment To Wife Jpm999Woscty",
+      "debit": 160,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-03-25T00:00:00",
+      "counterpartyName": "0 /28Online Transfer To Chk 5961 Transaction#: 17383214432",
+      "paymentPurpose": "0 /28Online Transfer To Chk 5961 Transaction#: 17383214432",
+      "credit": 4497.25,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-03-26T00:00:00",
+      "counterpartyName": "Kenyoo Type Kitchen Inc",
+      "paymentPurpose": "Zelle Payment From Kenyoo Type Kitchen Inc Bachkt1Gwvx5",
+      "credit": 320,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-28T00:00:00",
+      "counterpartyName": "Online Transfer To Chk ...5959",
+      "paymentPurpose": "03/28 Online Transfer To Chk ...5959 Transaction#: 99683351770",
+      "debit": 580,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-03-30T00:00:00",
+      "counterpartyName": "Mgc Marketing.",
+      "paymentPurpose": "Zelle Payment From Mgc Marketing. Hna0Hur0Izsw",
+      "credit": 2000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-31T00:00:00",
+      "counterpartyName": "Monthly Service Fee",
+      "paymentPurpose": "Monthly Service Fee",
+      "debit": 4.95,
+      "currency": "USD",
+      "paymentType": "fee"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "35b994ad847f",
+    "headings": [
+      "date:date | description:description | amount:amount | balance:balance"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "chase"
+  }
+}

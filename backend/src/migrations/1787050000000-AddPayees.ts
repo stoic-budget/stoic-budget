@@ -159,7 +159,7 @@ export class AddPayees1787050000000 implements MigrationInterface {
       const unkeyed = described.filter(row => row.key === null).map(row => row.id);
       if (unkeyed.length) {
         await queryRunner.query(
-          `UPDATE transactions SET payee_key = NULL WHERE id = ANY($1::uuid[]) AND payee_key IS NOT NULL`,
+          'UPDATE transactions SET payee_key = NULL WHERE id = ANY($1::uuid[]) AND payee_key IS NOT NULL',
           [unkeyed],
         );
       }

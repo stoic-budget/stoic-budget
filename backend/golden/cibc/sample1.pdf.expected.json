@@ -1,0 +1,666 @@
+{
+  "metadata": {
+    "accountNumber": "12-34567",
+    "currency": "CAD",
+    "dateFrom": "2017-12-01T00:00:00",
+    "dateTo": "2017-12-31T00:00:00",
+    "balanceStart": 3102.28,
+    "balanceEnd": 3047.04,
+    "rawHeader": "CIBC Account Statement MR GLEN BURNS For Dec 1 to Dec 31, 2017 Account number",
+    "normalizedHeader": "CIBC Account Statement MR GLEN BURNS For Dec 1 to Dec 31, 2017 Account number",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2017-12-01T00:00:00",
+      "counterpartyName": "TIM HORTONS #21",
+      "paymentPurpose": "RETAIL PURCHASE TIM HORTONS #21",
+      "debit": 8.77,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-01T00:00:00",
+      "counterpartyName": "TIM HORTONS #21",
+      "paymentPurpose": "RETAIL PURCHASE TIM HORTONS #21",
+      "debit": 2.3,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-01T00:00:00",
+      "counterpartyName": "COFFEE TIME #20",
+      "paymentPurpose": "RETAIL PURCHASE COFFEE TIME #20",
+      "debit": 10,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-01T00:00:00",
+      "counterpartyName": "D.O.T. FURNITUR",
+      "paymentPurpose": "RETAIL PURCHASE D.O.T. FURNITUR",
+      "debit": 33.87,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-01T00:00:00",
+      "counterpartyName": "CLASSIC FADE BA",
+      "paymentPurpose": "RETAIL PURCHASE CLASSIC FADE BA",
+      "debit": 21.4,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-04T00:00:00",
+      "counterpartyName": "NOFRILLS TOM&MI",
+      "paymentPurpose": "RETAIL PURCHASE NOFRILLS TOM&MI",
+      "debit": 27.83,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-04T00:00:00",
+      "counterpartyName": "SEAFOOD CITY SU",
+      "paymentPurpose": "RETAIL PURCHASE SEAFOOD CITY SU",
+      "debit": 15.27,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-04T00:00:00",
+      "counterpartyName": "FAT BASTARD BUR",
+      "paymentPurpose": "RETAIL PURCHASE FAT BASTARD BUR",
+      "debit": 9.82,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-05T00:00:00",
+      "counterpartyName": "TIM HORTONS",
+      "paymentPurpose": "RETAIL PURCHASE TIM HORTONS",
+      "debit": 1.77,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-05T00:00:00",
+      "counterpartyName": "LENA'S ROTI & D",
+      "paymentPurpose": "RETAIL PURCHASE LENA'S ROTI & D",
+      "debit": 15.38,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-06T00:00:00",
+      "counterpartyName": "COFFEE TIME",
+      "paymentPurpose": "RETAIL PURCHASE COFFEE TIME",
+      "debit": 6.64,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-06T00:00:00",
+      "counterpartyName": "SEAFOOD CITY SU",
+      "paymentPurpose": "RETAIL PURCHASE SEAFOOD CITY SU",
+      "debit": 13.73,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-07T00:00:00",
+      "counterpartyName": "CANADIAN TIRE",
+      "paymentPurpose": "RETAIL PURCHASE CANADIAN TIRE",
+      "debit": 22.59,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-07T00:00:00",
+      "counterpartyName": "GRANT'S SUPERMA",
+      "paymentPurpose": "RETAIL PURCHASE GRANT'S SUPERMA",
+      "debit": 33.45,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-07T00:00:00",
+      "counterpartyName": "INSTANT TELLER WITHDRAWAL RD",
+      "paymentPurpose": "INSTANT TELLER WITHDRAWAL RD",
+      "debit": 40,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2017-12-07T00:00:00",
+      "counterpartyName": "FAT BASTARD BUR",
+      "paymentPurpose": "RETAIL PURCHASE FAT BASTARD BUR",
+      "debit": 19.64,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-07T00:00:00",
+      "counterpartyName": "LENA'S ROTI & D",
+      "paymentPurpose": "RETAIL PURCHASE LENA'S ROTI & D",
+      "debit": 12.73,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-08T00:00:00",
+      "counterpartyName": "TALIZE",
+      "paymentPurpose": "RETAIL PURCHASE TALIZE",
+      "debit": 4.19,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-08T00:00:00",
+      "counterpartyName": "FRESHCO",
+      "paymentPurpose": "RETAIL PURCHASE FRESHCO",
+      "debit": 9.96,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-08T00:00:00",
+      "counterpartyName": "DEPOSIT",
+      "paymentPurpose": "DEPOSIT",
+      "credit": 766.49,
+      "currency": "CAD"
+    },
+    {
+      "transactionDate": "2017-12-08T00:00:00",
+      "counterpartyName": "D.O.T. FURNITUR",
+      "paymentPurpose": "RETAIL PURCHASE D.O.T. FURNITUR",
+      "debit": 45.2,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-08T00:00:00",
+      "counterpartyName": "TODAY'S SPORTSW",
+      "paymentPurpose": "RETAIL PURCHASE TODAY'S SPORTSW",
+      "debit": 79.09,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-08T00:00:00",
+      "counterpartyName": "CONSOLIDATED SA",
+      "paymentPurpose": "RETAIL PURCHASE CONSOLIDATED SA",
+      "debit": 9,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-08T00:00:00",
+      "counterpartyName": "INVESTMENT PAC",
+      "paymentPurpose": "PREAUTHORIZED DEBIT INVESTMENT PAC",
+      "debit": 50,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2017-12-08T00:00:00",
+      "counterpartyName": "ARCHIVE INSURANCE",
+      "paymentPurpose": "PREAUTHORIZED DEBIT ARCHIVE INSURANCE",
+      "debit": 185.38,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2017-12-11T00:00:00",
+      "counterpartyName": "DOLLARAMA",
+      "paymentPurpose": "RETAIL PURCHASE DOLLARAMA",
+      "debit": 38.99,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-11T00:00:00",
+      "counterpartyName": "PETRO-CANADA",
+      "paymentPurpose": "RETAIL PURCHASE PETRO-CANADA",
+      "debit": 54.51,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-11T00:00:00",
+      "counterpartyName": "RANSACK THE UNI",
+      "paymentPurpose": "RETAIL PURCHASE RANSACK THE UNI",
+      "debit": 11.3,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-11T00:00:00",
+      "counterpartyName": "FAT BASTARD BUR",
+      "paymentPurpose": "RETAIL PURCHASE FAT BASTARD BUR",
+      "debit": 11.06,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-11T00:00:00",
+      "counterpartyName": "E-TRANSFER INTERNET TRANSFER",
+      "paymentPurpose": "E-TRANSFER INTERNET TRANSFER",
+      "credit": 380,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2017-12-11T00:00:00",
+      "counterpartyName": "Amazon *Marketp",
+      "paymentPurpose": "VISA DEBIT RETAIL PURCHASE Amazon *Marketp",
+      "debit": 38.29,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-11T00:00:00",
+      "counterpartyName": "MASTERCARD",
+      "paymentPurpose": "INTERNET BILL PAY MASTERCARD",
+      "debit": 240,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2017-12-11T00:00:00",
+      "counterpartyName": "INTERNET TRANSFER",
+      "paymentPurpose": "INTERNET TRANSFER",
+      "debit": 120,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2017-12-12T00:00:00",
+      "counterpartyName": "COFFEE TIME",
+      "paymentPurpose": "RETAIL PURCHASE COFFEE TIME",
+      "debit": 11.14,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-12T00:00:00",
+      "counterpartyName": "SEAFOOD CITY SU",
+      "paymentPurpose": "RETAIL PURCHASE SEAFOOD CITY SU",
+      "debit": 52.89,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-13T00:00:00",
+      "counterpartyName": "LITTLE CAESARS",
+      "paymentPurpose": "RETAIL PURCHASE LITTLE CAESARS",
+      "debit": 15.29,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-14T00:00:00",
+      "counterpartyName": "INSTANT TELLER WITHDRAWAL ABC",
+      "paymentPurpose": "INSTANT TELLER WITHDRAWAL ABC",
+      "debit": 40,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2017-12-15T00:00:00",
+      "counterpartyName": "FAT BASTARD BUR",
+      "paymentPurpose": "RETAIL PURCHASE FAT BASTARD BUR",
+      "debit": 11.06,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-15T00:00:00",
+      "counterpartyName": "INDIA SAJAWAT P",
+      "paymentPurpose": "RETAIL PURCHASE INDIA SAJAWAT P",
+      "debit": 45.77,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-15T00:00:00",
+      "counterpartyName": "TECH SOURCE",
+      "paymentPurpose": "RETAIL PURCHASE TECH SOURCE",
+      "debit": 22.6,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-15T00:00:00",
+      "counterpartyName": "HEENA`S DAIRY",
+      "paymentPurpose": "RETAIL PURCHASE HEENA`S DAIRY",
+      "debit": 1.6,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-15T00:00:00",
+      "counterpartyName": "TECH SOURCE",
+      "paymentPurpose": "RETAIL PURCHASE TECH SOURCE",
+      "debit": 11.28,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-15T00:00:00",
+      "counterpartyName": "TECH SOURCE",
+      "paymentPurpose": "RETAIL PURCHASE TECH SOURCE",
+      "debit": 16.93,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-18T00:00:00",
+      "counterpartyName": "NOFRILLS TOM&MI",
+      "paymentPurpose": "RETAIL PURCHASE NOFRILLS TOM&MI",
+      "debit": 6.44,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-18T00:00:00",
+      "counterpartyName": "US $ WITHDRAWL IN CANADIAN $ BRITANNIA + LATIMER",
+      "paymentPurpose": "US $ WITHDRAWL IN CANADIAN $ BRITANNIA + LATIMER",
+      "debit": 267.14,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2017-12-18T00:00:00",
+      "counterpartyName": "WAL-MART",
+      "paymentPurpose": "RETAIL PURCHASE WAL-MART",
+      "debit": 67.73,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-18T00:00:00",
+      "counterpartyName": "FAT BASTARD BUR",
+      "paymentPurpose": "RETAIL PURCHASE FAT BASTARD BUR",
+      "debit": 11.06,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-19T00:00:00",
+      "counterpartyName": "E-TRANSFER INTERNET TRANSFER",
+      "paymentPurpose": "E-TRANSFER INTERNET TRANSFER",
+      "debit": 200,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2017-12-19T00:00:00",
+      "counterpartyName": "DEPOSIT MISC ABC",
+      "paymentPurpose": "DEPOSIT MISC ABC",
+      "credit": 400,
+      "currency": "CAD"
+    },
+    {
+      "transactionDate": "2017-12-21T00:00:00",
+      "counterpartyName": "FAT BASTARD BUR",
+      "paymentPurpose": "RETAIL PURCHASE FAT BASTARD BUR",
+      "debit": 12.06,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-22T00:00:00",
+      "counterpartyName": "ZEN GARDENS",
+      "paymentPurpose": "RETAIL PURCHASE ZEN GARDENS",
+      "debit": 16,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-22T00:00:00",
+      "counterpartyName": "SEAFOOD CITY SU",
+      "paymentPurpose": "RETAIL PURCHASE SEAFOOD CITY SU",
+      "debit": 50.23,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-22T00:00:00",
+      "counterpartyName": "TIM HORTONS",
+      "paymentPurpose": "RETAIL PURCHASE TIM HORTONS",
+      "debit": 7.77,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-22T00:00:00",
+      "counterpartyName": "INVESTMENT CIBCSI EFT-PAC",
+      "paymentPurpose": "PREAUTHORIZED DEBIT INVESTMENT CIBCSI EFT-PAC",
+      "debit": 50,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "SHOPPERS DOLLAR",
+      "paymentPurpose": "RETAIL PURCHASE SHOPPERS DOLLAR",
+      "debit": 39,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "INSTANT TELLER WITHDRAWAL ABC",
+      "paymentPurpose": "INSTANT TELLER WITHDRAWAL ABC",
+      "debit": 80,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "DEPOSIT",
+      "paymentPurpose": "DEPOSIT",
+      "credit": 930.86,
+      "currency": "CAD"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "GRANT'S SUPERMA",
+      "paymentPurpose": "RETAIL PURCHASE GRANT'S SUPERMA",
+      "debit": 33.78,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "LUCA PIZZA INC",
+      "paymentPurpose": "RETAIL PURCHASE LUCA PIZZA INC",
+      "debit": 10,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "PETRO-CANADA",
+      "paymentPurpose": "RETAIL PURCHASE PETRO-CANADA",
+      "debit": 76.53,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "INDIA SAJAWAT A",
+      "paymentPurpose": "RETAIL PURCHASE INDIA SAJAWAT A",
+      "debit": 86.99,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "INDIA SAJAWAT P",
+      "paymentPurpose": "RETAIL PURCHASE INDIA SAJAWAT P",
+      "debit": 19.32,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "INDIA SAJAWAT P",
+      "paymentPurpose": "RETAIL PURCHASE INDIA SAJAWAT P",
+      "debit": 11.3,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "ESSO",
+      "paymentPurpose": "RETAIL PURCHASE ESSO",
+      "debit": 10.49,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "LCBO/RAO",
+      "paymentPurpose": "RETAIL PURCHASE LCBO/RAO",
+      "debit": 36.9,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "INSTANT TELLER WITHDRAWAL ABC",
+      "paymentPurpose": "INSTANT TELLER WITHDRAWAL ABC",
+      "debit": 60,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "NOFRILLS TOM&MI",
+      "paymentPurpose": "RETAIL PURCHASE NOFRILLS TOM&MI",
+      "debit": 81.57,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "NOFRILLS TOM&MI",
+      "paymentPurpose": "RETAIL PURCHASE NOFRILLS TOM&MI",
+      "debit": 0.28,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "TELECOM",
+      "paymentPurpose": "VISA DEBIT RETAIL PURCHASE TELECOM",
+      "debit": 126.17,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-27T00:00:00",
+      "counterpartyName": "E-TRANSFER INTERNET TRANSFER",
+      "paymentPurpose": "E-TRANSFER INTERNET TRANSFER",
+      "credit": 360,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2017-12-29T00:00:00",
+      "counterpartyName": "CANADIAN TIRE",
+      "paymentPurpose": "RETAIL PURCHASE CANADIAN TIRE",
+      "debit": 90.35,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-29T00:00:00",
+      "counterpartyName": "ISLAND PALACE",
+      "paymentPurpose": "RETAIL PURCHASE ISLAND PALACE",
+      "debit": 9.89,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-29T00:00:00",
+      "counterpartyName": "CANADIAN TIRE",
+      "paymentPurpose": "RETAIL PURCHASE CANADIAN TIRE",
+      "debit": 5.07,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-29T00:00:00",
+      "counterpartyName": "CANADIAN TIRE",
+      "paymentPurpose": "RETAIL PURCHASE CANADIAN TIRE",
+      "debit": 1.8,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-12-29T00:00:00",
+      "counterpartyName": "SERVICE CHARGE",
+      "paymentPurpose": "SERVICE CHARGE",
+      "debit": 72.65,
+      "currency": "CAD"
+    },
+    {
+      "transactionDate": "2017-12-29T00:00:00",
+      "counterpartyName": "SERVICE CHARGE DISCOUNT",
+      "paymentPurpose": "SERVICE CHARGE DISCOUNT",
+      "credit": 72.65,
+      "currency": "CAD"
+    },
+    {
+      "transactionDate": "2017-12-29T00:00:00",
+      "counterpartyName": "MONTHLY FIXED OVERDRAFT FEE",
+      "paymentPurpose": "MONTHLY FIXED OVERDRAFT FEE",
+      "debit": 4,
+      "currency": "CAD",
+      "paymentType": "fee"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "d8af9e21032a",
+    "headings": [
+      "date:date | description:description | debit:withdrawals | credit:deposits | balance:balance",
+      "description:transaction copy of which is available at any cibc branch in canada (this is in addition to any | fee:fee applicable to the | debit:withdrawal"
+    ],
+    "unknownWords": [
+      "copy",
+      "of",
+      "which",
+      "is",
+      "available",
+      "at",
+      "any",
+      "cibc",
+      "branch",
+      "in",
+      "canada",
+      "(this",
+      "addition",
+      "to",
+      "applicable",
+      "the"
+    ],
+    "mentionedBank": "cibc"
+  }
+}

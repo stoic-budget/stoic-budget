@@ -1,0 +1,1057 @@
+{
+  "failedChecks": [
+    "balance_chain"
+  ],
+  "metadata": {
+    "accountNumber": "062-000 10000001",
+    "currency": "AUD",
+    "dateFrom": "2022-01-19T00:00:00",
+    "dateTo": "2022-04-19T00:00:00",
+    "balanceStart": 1524.65,
+    "rawHeader": "Commonwealth Bank of Australia ABN 48 123 123 124 AFSL and Transaction Summary",
+    "normalizedHeader": "Commonwealth Bank of Australia ABN 48 123 123 124 AFSL and Transaction Summary",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-01-19T00:00:00",
+      "counterpartyName": "WOOLWORTHS W3174 ST_KILDA AUS",
+      "paymentPurpose": "WOOLWORTHS W3174 ST_KILDA AUS Card xx1234",
+      "debit": 50.95,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-19T00:00:00",
+      "counterpartyName": "SUBWAY CAULFIELD",
+      "paymentPurpose": "SUBWAY CAULFIELD",
+      "debit": 10.25,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-19T00:00:00",
+      "counterpartyName": "NOODLE & SUSHI COMBO CAULFIELD VIC",
+      "paymentPurpose": "NOODLE & SUSHI COMBO CAULFIELD VIC",
+      "debit": 10,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-20T00:00:00",
+      "counterpartyName": "VIC ROADS PAYT PROCESS KEW EAST AUS",
+      "paymentPurpose": "VIC ROADS PAYT PROCESS KEW EAST AUS Card xx1234",
+      "debit": 57.7,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-22T00:00:00",
+      "counterpartyName": "Non CBA ATM Withdrawal Fee",
+      "paymentPurpose": "Non CBA ATM Withdrawal Fee",
+      "debit": 2.8,
+      "currency": "AUD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-01-21T00:00:00",
+      "counterpartyName": "Wdl ATM CBA ATM ST_KILDA VIC 3174",
+      "paymentPurpose": "Wdl ATM CBA ATM ST_KILDA VIC 3174",
+      "debit": 60,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-01-21T00:00:00",
+      "counterpartyName": "CITYLINK MELBOURNE MELBOURNE AUS",
+      "paymentPurpose": "CITYLINK MELBOURNE MELBOURNE AUS Card xx1234",
+      "debit": 120.08,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-22T00:00:00",
+      "counterpartyName": "JOHNNY BOYS PIZZA CAULFIELD AU",
+      "paymentPurpose": "JOHNNY BOYS PIZZA CAULFIELD AU",
+      "debit": 14.4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-22T00:00:00",
+      "counterpartyName": "COLES CAULFIELD SOUTH VIC AU",
+      "paymentPurpose": "COLES CAULFIELD SOUTH VIC AU Cash Out $100.00 Purchase $20.00",
+      "debit": 120,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-23T00:00:00",
+      "counterpartyName": "WAGES Acme Care Services Ltd",
+      "paymentPurpose": "Direct Credit 141000 WAGES Acme Care Services Ltd",
+      "credit": 2448,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-01-25T00:00:00",
+      "counterpartyName": "PAYPAL AUSTRALIA",
+      "paymentPurpose": "Direct Debit 278568 PAYPAL AUSTRALIA",
+      "debit": 38.9,
+      "currency": "AUD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-26T00:00:00",
+      "counterpartyName": "Wdl ATM BBL BP CAULFIELD",
+      "paymentPurpose": "Wdl ATM BBL BP CAULFIELD",
+      "debit": 200,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-01-27T00:00:00",
+      "counterpartyName": "Non CBA ATM Withdrawal Fee",
+      "paymentPurpose": "Non CBA ATM Withdrawal Fee",
+      "debit": 2.8,
+      "currency": "AUD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-01-28T00:00:00",
+      "counterpartyName": "RED ROOSTER CAULFIELD VIC",
+      "paymentPurpose": "RED ROOSTER CAULFIELD VIC",
+      "debit": 10.59,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-28T00:00:00",
+      "counterpartyName": "PAYPAL AUSTRALIA",
+      "paymentPurpose": "Direct Debit 278568 PAYPAL AUSTRALIA J222226G324TA",
+      "debit": 37,
+      "currency": "AUD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-29T00:00:00",
+      "counterpartyName": "SUBWAY CAULFIELD",
+      "paymentPurpose": "SUBWAY CAULFIELD",
+      "debit": 10.25,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-01T00:00:00",
+      "counterpartyName": "Transfer to other Bank CommBank app",
+      "paymentPurpose": "Transfer to other Bank CommBank app",
+      "debit": 80,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-02-02T00:00:00",
+      "counterpartyName": "Wdl ATM CASHCARD 7-11 BALACLAVABALACLAV",
+      "paymentPurpose": "Wdl ATM CASHCARD 7-11 BALACLAVABALACLAV",
+      "debit": 40,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-03T00:00:00",
+      "counterpartyName": "VIC ROADS DAND SOUTH 0018 DANDENONG SOUTH",
+      "paymentPurpose": "VIC ROADS DAND SOUTH 0018 DANDENONG SOUTH",
+      "debit": 145.6,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-03T00:00:00",
+      "counterpartyName": "Wdl ATM CASHCARD 7-11 PRAHRAN EVIC",
+      "paymentPurpose": "Wdl ATM CASHCARD 7-11 PRAHRAN EVIC",
+      "debit": 100,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-03T00:00:00",
+      "counterpartyName": "PAYPAL AUSTRALIA",
+      "paymentPurpose": "Direct Debit 278568 PAYPAL AUSTRALIA J222226G324TA",
+      "debit": 37,
+      "currency": "AUD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-02-03T00:00:00",
+      "counterpartyName": "Wdl ATM CASHCARD 7-11 PRAHRAN EVIC",
+      "paymentPurpose": "Wdl ATM CASHCARD 7-11 PRAHRAN EVIC",
+      "debit": 100,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-04T00:00:00",
+      "counterpartyName": "Transfer to CBA A/c CommBank app Savings",
+      "paymentPurpose": "Transfer to CBA A/c CommBank app Savings",
+      "debit": 200,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-02-05T00:00:00",
+      "counterpartyName": "PAYPAL AUSTRALIA",
+      "paymentPurpose": "Direct Debit 278568 PAYPAL AUSTRALIA J222226GFAH9Y",
+      "debit": 14.99,
+      "currency": "AUD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-02-05T00:00:00",
+      "counterpartyName": "NOODLE & SUSHI COMBO CAULFIELD AUS",
+      "paymentPurpose": "NOODLE & SUSHI COMBO CAULFIELD AUS",
+      "debit": 14.2,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-05T00:00:00",
+      "counterpartyName": "PAYPAL AUSTRALIA",
+      "paymentPurpose": "Direct Debit 278570 PAYPAL AUSTRALIA J222226GKJ7SA",
+      "debit": 37,
+      "currency": "AUD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-02-07T00:00:00",
+      "counterpartyName": "WAGES Acme Care Services Ltd",
+      "paymentPurpose": "Direct Credit 141000 WAGES Acme Care Services Ltd",
+      "credit": 2448,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-02-08T00:00:00",
+      "counterpartyName": "7-ELEVEN 1288 HALLAM VIC",
+      "paymentPurpose": "7-ELEVEN 1288 HALLAM VIC",
+      "debit": 8.2,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-09T00:00:00",
+      "counterpartyName": "Wdl ATM CASHCARD 7-11 HAMPTONPARK VIC",
+      "paymentPurpose": "Wdl ATM CASHCARD 7-11 HAMPTONPARK VIC",
+      "debit": 150,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-10T00:00:00",
+      "counterpartyName": "COLES ELSTERNWICK VIC AU",
+      "paymentPurpose": "COLES ELSTERNWICK VIC AU Cash Out $70.00 Purchase $10.47",
+      "debit": 80.47,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-10T00:00:00",
+      "counterpartyName": "Wdl ATM CBA ATM NORTHCOTE STH VIC 3157",
+      "paymentPurpose": "Wdl ATM CBA ATM NORTHCOTE STH VIC 3157",
+      "debit": 80,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-10T00:00:00",
+      "counterpartyName": "PAYPAL *HOTENERGYLI 4029357733 AU AUS",
+      "paymentPurpose": "PAYPAL *HOTENERGYLI 4029357733 AU AUS Card xx1234",
+      "debit": 30.98,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-11T00:00:00",
+      "counterpartyName": "Transfer to CBA A/c CommBank app Savings",
+      "paymentPurpose": "Transfer to CBA A/c CommBank app Savings",
+      "debit": 1000,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-02-12T00:00:00",
+      "counterpartyName": "PAYPAL *ShopOne12 402874733 AU AUS",
+      "paymentPurpose": "PAYPAL *ShopOne12 402874733 AU AUS Card xx1234",
+      "debit": 31.45,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-12T00:00:00",
+      "counterpartyName": "Wdl ATM CASHCARD 7-11 HAMPTONPARK VIC",
+      "paymentPurpose": "Wdl ATM CASHCARD 7-11 HAMPTONPARK VIC",
+      "debit": 20,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-13T00:00:00",
+      "counterpartyName": "Transfer to other Bank CommBank app THANKS",
+      "paymentPurpose": "Transfer to other Bank CommBank app THANKS",
+      "debit": 5,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-02-13T00:00:00",
+      "counterpartyName": "ANNA EXAMPLE",
+      "paymentPurpose": "Transfer from ANNA EXAMPLE CommBank a Anna",
+      "credit": 125,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-02-13T00:00:00",
+      "counterpartyName": "Wdl ATM CASHCARD 7-11 BALACLAVA",
+      "paymentPurpose": "Wdl ATM CASHCARD 7-11 BALACLAVA",
+      "debit": 20,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-14T00:00:00",
+      "counterpartyName": "CASH DEPOSIT CBA ATM HAMPTONPARK A VIC 310401 AUS",
+      "paymentPurpose": "CASH DEPOSIT CBA ATM HAMPTONPARK A VIC 310401 AUS",
+      "credit": 20,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-15T00:00:00",
+      "counterpartyName": "BP CAULFIELD 5846 CAULFIELD VI AUS",
+      "paymentPurpose": "BP CAULFIELD 5846 CAULFIELD VI AUS Card xx1234",
+      "debit": 5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-15T00:00:00",
+      "counterpartyName": "Wdl ATM CASHCARD 7-11 BALACLAVA",
+      "paymentPurpose": "Wdl ATM CASHCARD 7-11 BALACLAVA",
+      "debit": 50,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-16T00:00:00",
+      "counterpartyName": "BELMONT WINES NORTHCOTE VIC",
+      "paymentPurpose": "BELMONT WINES NORTHCOTE VIC",
+      "debit": 28,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-16T00:00:00",
+      "counterpartyName": "COLES 699 ELSTERNWICK VI AUS",
+      "paymentPurpose": "COLES 699 ELSTERNWICK VI AUS Card xx1234",
+      "debit": 12.1,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-18T00:00:00",
+      "counterpartyName": "PAYPAL *SOUNDCLOUD 4029357733 AU AUS",
+      "paymentPurpose": "PAYPAL *SOUNDCLOUD 4029357733 AU AUS Card xx1234",
+      "debit": 25.79,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-19T00:00:00",
+      "counterpartyName": "Transfer to CBA A/c CommBank app Savings",
+      "paymentPurpose": "Transfer to CBA A/c CommBank app Savings",
+      "debit": 300,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-02-19T00:00:00",
+      "counterpartyName": "Beatie Service Centr ST_KILDA",
+      "paymentPurpose": "Beatie Service Centr ST_KILDA",
+      "debit": 175,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-21T00:00:00",
+      "counterpartyName": "WAGES Acme Care Services Ltd",
+      "paymentPurpose": "Direct Credit 141000 WAGES Acme Care Services Ltd",
+      "credit": 2448,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-02-22T00:00:00",
+      "counterpartyName": "COLES 699 ELSTERNWICK VI AUS",
+      "paymentPurpose": "COLES 699 ELSTERNWICK VI AUS Card xx1234",
+      "debit": 80,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-22T00:00:00",
+      "counterpartyName": "PAYPAL AUSTRALIA",
+      "paymentPurpose": "Direct Debit 278568 PAYPAL AUSTRALIA J222226KMKRJY",
+      "debit": 31.97,
+      "currency": "AUD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-02-23T00:00:00",
+      "counterpartyName": "KFC CAULFIELD AUS",
+      "paymentPurpose": "KFC CAULFIELD AUS Card xx1234",
+      "debit": 13.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-23T00:00:00",
+      "counterpartyName": "ALEX EXAMPLE",
+      "paymentPurpose": "Transfer from ALEX EXAMPLE CommBank rentassist",
+      "credit": 200,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-02-23T00:00:00",
+      "counterpartyName": "PAYPAL AUSTRALIA",
+      "paymentPurpose": "Direct Debit 278568 PAYPAL AUSTRALIA J222226LXUHCS",
+      "debit": 9.99,
+      "currency": "AUD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-02-24T00:00:00",
+      "counterpartyName": "Wdl ATM CASHCARD 7-11 HAMPTONPARK VIC",
+      "paymentPurpose": "Wdl ATM CASHCARD 7-11 HAMPTONPARK VIC",
+      "debit": 150,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-02-26T00:00:00",
+      "counterpartyName": "TELSTRA CORP LTD",
+      "paymentPurpose": "TELSTRA CORP LTD NetBank BPAY 24796 200000000001 Telstra Mobile Bil",
+      "debit": 80,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-02-26T00:00:00",
+      "counterpartyName": "PAYPAL *TEL 4029357733 AU AUS",
+      "paymentPurpose": "PAYPAL *TEL 4029357733 AU AUS Card xx1234",
+      "debit": 150,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-02-26T00:00:00",
+      "counterpartyName": "Debit Excess Interest",
+      "paymentPurpose": "Debit Excess Interest",
+      "debit": 0.25,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2022-02-26T00:00:00",
+      "counterpartyName": "Transfer to CBA A/c CommBank app Savings",
+      "paymentPurpose": "Transfer to CBA A/c CommBank app Savings",
+      "debit": 600,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-02-28T00:00:00",
+      "counterpartyName": "PAYPAL AUSTRALIA",
+      "paymentPurpose": "Direct Debit 278568 PAYPAL AUSTRALIA J222226NKEAAC",
+      "debit": 49.95,
+      "currency": "AUD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-03-02T00:00:00",
+      "counterpartyName": "Wdl ATM BBL Abbotsford Convent Abbotsfor",
+      "paymentPurpose": "Wdl ATM BBL Abbotsford Convent Abbotsfor",
+      "debit": 16.24,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-02T00:00:00",
+      "counterpartyName": "Non CBA ATM Withdrawal Fee",
+      "paymentPurpose": "Non CBA ATM Withdrawal Fee",
+      "debit": 2,
+      "currency": "AUD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-03-02T00:00:00",
+      "counterpartyName": "ANNA EXAMPLE",
+      "paymentPurpose": "Transfer from ANNA EXAMPLE CommBank a Anna",
+      "credit": 30,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-01T00:00:00",
+      "counterpartyName": "SAFEWAY W3162 CAULFIELD AUS",
+      "paymentPurpose": "SAFEWAY W3162 CAULFIELD AUS Card xx1234",
+      "debit": 140.65,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-02T00:00:00",
+      "counterpartyName": "Transfer to CBA A/c CommBank app Savings",
+      "paymentPurpose": "Transfer to CBA A/c CommBank app Savings",
+      "debit": 50,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-03-02T00:00:00",
+      "counterpartyName": "TELSTRA",
+      "paymentPurpose": "TELSTRA NetBank BPAY 983079 100000009 telstra",
+      "debit": 90,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-03-02T00:00:00",
+      "counterpartyName": "CASH DEPOSIT CBA ATM CAULFIELD A VIC 323801 AUS",
+      "paymentPurpose": "CASH DEPOSIT CBA ATM CAULFIELD A VIC 323801 AUS",
+      "credit": 200,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-02T00:00:00",
+      "counterpartyName": "7-ELEVEN 1210 PRAHRAN VI",
+      "paymentPurpose": "7-ELEVEN 1210 PRAHRAN VI",
+      "debit": 7,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-03T00:00:00",
+      "counterpartyName": "WAGES Acme Care Services Ltd",
+      "paymentPurpose": "Direct Credit 141000 WAGES Acme Care Services Ltd",
+      "credit": 2448,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-05T00:00:00",
+      "counterpartyName": "SAFEWAY W3162 CAULFIELD AUS",
+      "paymentPurpose": "SAFEWAY W3162 CAULFIELD AUS Card xx1234",
+      "debit": 40,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-05T00:00:00",
+      "counterpartyName": "Cardless Cash for collection SAMPLE",
+      "paymentPurpose": "Cardless Cash for collection SAMPLE",
+      "debit": 170,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-05T00:00:00",
+      "counterpartyName": "COLES CAULFIELD SOUTH 05 VI AUS",
+      "paymentPurpose": "COLES CAULFIELD SOUTH 05 VI AUS Card xx1234",
+      "debit": 35.56,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-07T00:00:00",
+      "counterpartyName": "SAFEWAY W3807 ST_KILDA AUS",
+      "paymentPurpose": "SAFEWAY W3807 ST_KILDA AUS Card xx1234",
+      "debit": 28.56,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-07T00:00:00",
+      "counterpartyName": "Wdl ATM CASHCARD 7-11 BALACLAVA",
+      "paymentPurpose": "Wdl ATM CASHCARD 7-11 BALACLAVA",
+      "debit": 100,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-08T00:00:00",
+      "counterpartyName": "CHRIS SAMPLE",
+      "paymentPurpose": "Transfer from CHRIS SAMPLE CommBank Rent Payment",
+      "credit": 50,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-08T00:00:00",
+      "counterpartyName": "7-ELEVEN 1316 PASCOE VALE VI",
+      "paymentPurpose": "7-ELEVEN 1316 PASCOE VALE VI Cash Out $50.00 Purchase $5.00",
+      "debit": 55,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-08T00:00:00",
+      "counterpartyName": "THE PICTURE BOX PTY COLLINGWOOD VIC",
+      "paymentPurpose": "THE PICTURE BOX PTY COLLINGWOOD VIC",
+      "debit": 135,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-08T00:00:00",
+      "counterpartyName": "SAFEWAY W3807 ST_KILDA AUS",
+      "paymentPurpose": "SAFEWAY W3807 ST_KILDA AUS Card xx1234",
+      "debit": 154.39,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-09T00:00:00",
+      "counterpartyName": "WOOLWORTHS 3167 CAULFIELD VIC AU",
+      "paymentPurpose": "WOOLWORTHS 3167 CAULFIELD VIC AU",
+      "debit": 20.01,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-10T00:00:00",
+      "counterpartyName": "CITYLINK MELBOURNE MELBOURNE AUS",
+      "paymentPurpose": "CITYLINK MELBOURNE MELBOURNE AUS Card xx1234",
+      "debit": 49.95,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-10T00:00:00",
+      "counterpartyName": "Wdl ATM CBA ATM NORTHCOTE STH VIC 3157",
+      "paymentPurpose": "Wdl ATM CBA ATM NORTHCOTE STH VIC 3157",
+      "debit": 100,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-11T00:00:00",
+      "counterpartyName": "BP HAMPTON PRK 3379 LYNDHURST AU",
+      "paymentPurpose": "BP HAMPTON PRK 3379 LYNDHURST AU Cash Out $50.00 Purchase $8.00",
+      "debit": 58,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-11T00:00:00",
+      "counterpartyName": "WAGES Acme Care Services Ltd",
+      "paymentPurpose": "Direct Credit 141000 WAGES Acme Care Services Ltd",
+      "credit": 2448,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-11T00:00:00",
+      "counterpartyName": "S/ARMY SALVOS STORES0400 HAWTHORN",
+      "paymentPurpose": "S/ARMY SALVOS STORES0400 HAWTHORN",
+      "debit": 5.25,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-12T00:00:00",
+      "counterpartyName": "xx5678",
+      "paymentPurpose": "Transfer from xx5678 CommBank app Savings",
+      "credit": 200,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-13T00:00:00",
+      "counterpartyName": "Transfer to CBA A/c CommBank app Savings",
+      "paymentPurpose": "Transfer to CBA A/c CommBank app Savings",
+      "debit": 1000,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-03-14T00:00:00",
+      "counterpartyName": "WOOLWORTHS 3112 CANTERBURY G VIC AU",
+      "paymentPurpose": "WOOLWORTHS 3112 CANTERBURY G VIC AU",
+      "debit": 73.34,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-16T00:00:00",
+      "counterpartyName": "MCDONALDS CAULFIELD AUS",
+      "paymentPurpose": "MCDONALDS CAULFIELD AUS Card xx1234",
+      "debit": 22.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-17T00:00:00",
+      "counterpartyName": "PAYPAL *MERCHANTONE 4029357733 AU AUS",
+      "paymentPurpose": "PAYPAL *MERCHANTONE 4029357733 AU AUS Card xx1234",
+      "debit": 66.99,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-17T00:00:00",
+      "counterpartyName": "COLES CAULFIELD SOUTH 05 VI AUS",
+      "paymentPurpose": "COLES CAULFIELD SOUTH 05 VI AUS Card xx1234",
+      "debit": 96.29,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-18T00:00:00",
+      "counterpartyName": "COLES EXPRESS 6774 CAULFIELD VI AUS",
+      "paymentPurpose": "COLES EXPRESS 6774 CAULFIELD VI AUS Card xx1234",
+      "debit": 57.78,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-18T00:00:00",
+      "counterpartyName": "7 ELEVEN 1090 BALACLAVA VI AUS",
+      "paymentPurpose": "7 ELEVEN 1090 BALACLAVA VI AUS Card xx1234",
+      "debit": 8,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-18T00:00:00",
+      "counterpartyName": "COLES CAULFIELD SOUTH 05 VI AUS",
+      "paymentPurpose": "COLES CAULFIELD SOUTH 05 VI AUS Card xx1234",
+      "debit": 9.49,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-18T00:00:00",
+      "counterpartyName": "WAGES Acme Care Services Ltd",
+      "paymentPurpose": "Direct Credit 141000 WAGES Acme Care Services Ltd",
+      "credit": 2448,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-19T00:00:00",
+      "counterpartyName": "COLES CAULFIELD SOUTH 05 VI AUS",
+      "paymentPurpose": "COLES CAULFIELD SOUTH 05 VI AUS Card xx1234",
+      "debit": 14.21,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-19T00:00:00",
+      "counterpartyName": "CIGNALL BULLEEN & GA VIC",
+      "paymentPurpose": "CIGNALL BULLEEN & GA VIC",
+      "debit": 29.1,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-19T00:00:00",
+      "counterpartyName": "PAYPAL *EAUDEVIE102 4029357733 AU AUS",
+      "paymentPurpose": "PAYPAL *EAUDEVIE102 4029357733 AU AUS Card xx1234",
+      "debit": 61.86,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-19T00:00:00",
+      "counterpartyName": "KMART FOUNTATIN GATE VIC AU",
+      "paymentPurpose": "KMART FOUNTATIN GATE VIC AU",
+      "debit": 96.35,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-20T00:00:00",
+      "counterpartyName": "PAYPAL AUSTRALIA",
+      "paymentPurpose": "Direct Debit 278568 PAYPAL AUSTRALIA J222226UNXV3C",
+      "debit": 4.95,
+      "currency": "AUD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-03-22T00:00:00",
+      "counterpartyName": "CASH DEPOSIT CBA ATM HAMPTON D VIC 361604 AUS",
+      "paymentPurpose": "CASH DEPOSIT CBA ATM HAMPTON D VIC 361604 AUS",
+      "credit": 110,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-22T00:00:00",
+      "counterpartyName": "Transfer to CBA A/c CommBank app Transfer",
+      "paymentPurpose": "Transfer to CBA A/c CommBank app Transfer",
+      "debit": 340,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-03-24T00:00:00",
+      "counterpartyName": "COLES CAULFIELD SOUTH 05 VI AUS",
+      "paymentPurpose": "COLES CAULFIELD SOUTH 05 VI AUS Card xx1234",
+      "debit": 45,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-03-25T00:00:00",
+      "counterpartyName": "TELSTRA CORP LTD",
+      "paymentPurpose": "TELSTRA CORP LTD NetBank BPAY 24796 200000000001 Telstra Mobile Bil",
+      "debit": 80,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-03-25T00:00:00",
+      "counterpartyName": "Child Support",
+      "paymentPurpose": "Direct Credit Child Support",
+      "credit": 2550,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-27T00:00:00",
+      "counterpartyName": "Wdl ATM CASHCARD 7-ELEVEN EAST EA",
+      "paymentPurpose": "Wdl ATM CASHCARD 7-ELEVEN EAST EA",
+      "debit": 800,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-27T00:00:00",
+      "counterpartyName": "CASH DEPOSIT CBA ATM KNOX CITY SC A VIC 324501 AUS",
+      "paymentPurpose": "CASH DEPOSIT CBA ATM KNOX CITY SC A VIC 324501 AUS",
+      "credit": 50,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-29T00:00:00",
+      "counterpartyName": "Cardless Cash for collection cash transfer",
+      "paymentPurpose": "Cardless Cash for collection cash transfer",
+      "debit": 50,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-30T00:00:00",
+      "counterpartyName": "Transfer to CBA A/c CommBank app Savings",
+      "paymentPurpose": "Transfer to CBA A/c CommBank app Savings",
+      "debit": 300,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-03-30T00:00:00",
+      "counterpartyName": "xx5678",
+      "paymentPurpose": "Transfer from xx5678 CommBank app",
+      "credit": 100,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-31T00:00:00",
+      "counterpartyName": "Wdl ATM CBA ATM ELSTERNWICK VLLGE VIC 3616",
+      "paymentPurpose": "Wdl ATM CBA ATM ELSTERNWICK VLLGE VIC 3616",
+      "debit": 100,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-03-31T00:00:00",
+      "counterpartyName": "xx5678",
+      "paymentPurpose": "Transfer from xx5678 CommBank app",
+      "credit": 150,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-31T00:00:00",
+      "counterpartyName": "WAGES Acme Care Services Ltd",
+      "paymentPurpose": "Direct Credit 141000 WAGES Acme Care Services Ltd",
+      "credit": 2448,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-31T00:00:00",
+      "counterpartyName": "xx5678",
+      "paymentPurpose": "Transfer from xx5678 CommBank app",
+      "debit": 20,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-03-01T00:00:00",
+      "counterpartyName": "TELSTRA",
+      "paymentPurpose": "TELSTRA NetBank BPAY 983079 100000009 telstra",
+      "debit": 90,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-04-01T00:00:00",
+      "counterpartyName": "xx5678",
+      "paymentPurpose": "Transfer from xx5678 CommBank app",
+      "debit": 40,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-04-01T00:00:00",
+      "counterpartyName": "Transfer to CBA A/c CommBank app Transfer",
+      "paymentPurpose": "Transfer to CBA A/c CommBank app Transfer",
+      "debit": 75,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-04-03T00:00:00",
+      "counterpartyName": "Cardless Cash for collection atm",
+      "paymentPurpose": "Cardless Cash for collection atm",
+      "debit": 50,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-04-04T00:00:00",
+      "counterpartyName": "PAYPAL AUSTRALIA",
+      "paymentPurpose": "Direct Debit 278568 PAYPAL AUSTRALIA J222226XMN5X4",
+      "debit": 14.95,
+      "currency": "AUD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-04-04T00:00:00",
+      "counterpartyName": "SW PETROL 3020 CAULFIELD VIC AU",
+      "paymentPurpose": "SW PETROL 3020 CAULFIELD VIC AU Cash Out $35.00 Purchase $51.14",
+      "debit": 86.14,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-05T00:00:00",
+      "counterpartyName": "7 ELEVEN 1090 BALACLAVA VI AUS",
+      "paymentPurpose": "7 ELEVEN 1090 BALACLAVA VI AUS Card xx1234",
+      "debit": 4.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-05T00:00:00",
+      "counterpartyName": "PAYPAL AUSTRALIA",
+      "paymentPurpose": "Direct Debit 278568 PAYPAL AUSTRALIA J222226X8KWBC",
+      "debit": 25,
+      "currency": "AUD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-04-05T00:00:00",
+      "counterpartyName": "BUNNINGS 321000 COLLINGWOOD AUS",
+      "paymentPurpose": "BUNNINGS 321000 COLLINGWOOD AUS Card xx1234",
+      "debit": 74.16,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-05T00:00:00",
+      "counterpartyName": "PAYPAL *FIRENLIGHT 4029357733 AU AUS",
+      "paymentPurpose": "PAYPAL *FIRENLIGHT 4029357733 AU AUS Card xx1234",
+      "debit": 49.8,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-08T00:00:00",
+      "counterpartyName": "Wdl ATM CBA ATM HEATHMONT VIC 3191",
+      "paymentPurpose": "Wdl ATM CBA ATM HEATHMONT VIC 3191",
+      "debit": 20,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-04-10T00:00:00",
+      "counterpartyName": "PAYPAL *GOOGLE 4029357733 AU AUS",
+      "paymentPurpose": "PAYPAL *GOOGLE 4029357733 AU AUS Card xx1234",
+      "debit": 1.58,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-12T00:00:00",
+      "counterpartyName": "Wdl ATM CBA ATM HEATHMONT VIC 3191",
+      "paymentPurpose": "Wdl ATM CBA ATM HEATHMONT VIC 3191",
+      "debit": 150,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-04-12T00:00:00",
+      "counterpartyName": "Transfer to CBA A/c CommBank app Savings",
+      "paymentPurpose": "Transfer to CBA A/c CommBank app Savings",
+      "debit": 1000,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-04-12T00:00:00",
+      "counterpartyName": "7-ELEVEN 1259 CHADSTONE VI",
+      "paymentPurpose": "7-ELEVEN 1259 CHADSTONE VI",
+      "debit": 30.53,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-14T00:00:00",
+      "counterpartyName": "WAGES Acme Care Services Ltd",
+      "paymentPurpose": "Direct Credit 141000 WAGES Acme Care Services Ltd",
+      "debit": 2448,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-04-14T00:00:00",
+      "counterpartyName": "7-ELEVEN 1259 CHADSTONE VI",
+      "paymentPurpose": "7-ELEVEN 1259 CHADSTONE VI",
+      "debit": 22.78,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-16T00:00:00",
+      "counterpartyName": "CITYLINK MELBOURNE MELBOURNE AUS",
+      "paymentPurpose": "CITYLINK MELBOURNE MELBOURNE AUS Card xx1234",
+      "debit": 112.42,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-18T00:00:00",
+      "counterpartyName": "Wdl ATM CBA ATM ST_KILDA VIC 3807",
+      "paymentPurpose": "Wdl ATM CBA ATM ST_KILDA VIC 3807",
+      "debit": 120,
+      "currency": "AUD",
+      "paymentType": "cash"
+    }
+  ]
+}

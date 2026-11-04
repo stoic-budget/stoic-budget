@@ -1,6 +1,7 @@
 import {
   detectNumericDateOrder,
   findFullDates,
+  orderWithinPeriod,
   parseDateParts,
   resolveDate,
 } from '@/modules/parsing/helpers/statement-date.helper';
@@ -19,16 +20,19 @@ describe('statement-date.helper', () => {
     ['1 mei', 'dmy', { day: 1, month: 5, year: undefined }],
     ['02 janv. 25', 'dmy', { day: 2, month: 1, year: 2025 }],
     ['31 janvier 2025', 'dmy', { day: 31, month: 1, year: 2025 }],
+    ['02-Mar-2025', 'dmy', { day: 2, month: 3, year: 2025 }],
+    ['02Jul24', 'dmy', { day: 2, month: 7, year: 2024 }],
     ['1er février 2025', 'dmy', { day: 1, month: 2, year: 2025 }],
     ['3 März', 'dmy', { day: 3, month: 3, year: undefined }],
     ['Sep 3, 2025', 'dmy', { day: 3, month: 9, year: 2025 }],
     ['September 7,2017', 'dmy', { day: 7, month: 9, year: 2017 }],
     ['14 dic', 'dmy', { day: 14, month: 12, year: undefined }],
+    ['JAN01', 'dmy', { day: 1, month: 1, year: undefined }],
   ] as const)('reads %s', (text, order, expected) => {
     expect(parseDateParts(text, order)).toEqual(expected);
   });
 
-  it.each(['8373579', '13/13', '1 Sep Faster', 'Paynow', '38.2gal', '1.450,77'])(
+  it.each(['8373579', '13/13', '1 Sep Faster', 'Paynow', '38.2gal', '1.450,77', 'Jun 18 4239'])(
     'does not read %s as a date',
     text => {
       expect(parseDateParts(text, 'dmy')).toBeNull();
@@ -41,6 +45,17 @@ describe('statement-date.helper', () => {
     expect(detectNumericDateOrder(['01/02', '03/04'])).toBeNull();
     // Month and day of a year-first date do not decide.
     expect(detectNumericDateOrder(['2020/09/30', '2020/10/31'])).toBeNull();
+    // Dashes too: "12-31" is month-first, and an ISO date decides nothing.
+    expect(detectNumericDateOrder(['12-20', '12-31'])).toBe('mdy');
+    expect(detectNumericDateOrder(['2020-09-30', '2020-10-31'])).toBeNull();
+  });
+
+  it('settles an open day/month order by the period printed in words', () => {
+    const period = { from: new Date(2022, 6, 9), to: new Date(2022, 7, 8) };
+    expect(orderWithinPeriod(['07/09', '08/04', '08/05'], period)).toBe('mdy');
+    expect(orderWithinPeriod(['09/07', '04/08'], period)).toBe('dmy');
+    expect(orderWithinPeriod(['01/02'], period)).toBeNull();
+    expect(orderWithinPeriod(['07/09'], null)).toBeNull();
   });
 
   it('gives a yearless date the statement year, or the year before across a new year', () => {
@@ -60,5 +75,15 @@ describe('statement-date.helper', () => {
     expect(findFullDates('Statement Date 2020/10/31', 'mdy').map(found => iso(found.date))).toEqual([
       '2020-10-31',
     ]);
+    // Glued: "31AUG23 OPENING BALANCE", but no reference such as "12ABC34".
+    expect(
+      findFullDates('31AUG23 OPENING BALANCE 02Jul2024 ref 12ABC34', 'dmy').map(found => iso(found.date)),
+    ).toEqual(['2023-08-31', '2024-07-02']);
+  });
+
+  it('finds a day-month-year date joined by hyphens', () => {
+    expect(
+      findFullDates('From 02-Mar-2025 to 01-Apr-2025', 'dmy').map(found => iso(found.date)),
+    ).toEqual(['2025-03-02', '2025-04-01']);
   });
 });

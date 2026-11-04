@@ -92,6 +92,7 @@ export default defineConfig({
           include: [
             'src/modules/parsing/__tests__/parsing.golden.spec.ts',
             'src/modules/parsing/__tests__/scan-routing.golden.spec.ts',
+            'src/modules/parsing/__tests__/pdf-text-layer.golden.spec.ts',
           ],
         },
       },

@@ -1,5 +1,9 @@
 import type { PdfTextItem, PdfTextRow } from '../../../common/utils/pdf-parser.util';
-import { type LayoutColumn, readHeaderRow } from './pdf-layout-columns.helper';
+import {
+  isBalanceTableHeader,
+  type LayoutColumn,
+  readHeaderRow,
+} from './pdf-layout-columns.helper';
 import { rowHeight } from './pdf-layout-wrapped.helper';
 
 /**
@@ -40,6 +44,11 @@ function stackLines(top: PdfTextRow, bottom: PdfTextRow): PdfTextRow {
   return { ...top, text: items.map(item => item.text).join(' '), items };
 }
 
+const hasAmount = (columns: LayoutColumn[] | null) =>
+  Boolean(columns?.some(c => c.role === 'amount'));
+const dateCount = (columns: LayoutColumn[] | null) =>
+  columns?.filter(c => c.role === 'date').length ?? 0;
+
 /** Rows in page order, with every two-line header made one row. */
 export function joinStackedHeaders(
   rows: PdfTextRow[],
@@ -50,9 +59,29 @@ export function joinStackedHeaders(
     const [top, bottom] = [rows[index], rows[index + 1]];
     const close =
       bottom?.page === top.page && bottom.y - top.y <= STACKED_LINE_GAP * rowHeight(top);
-    const stacked = close && !readHeader(top) ? stackLines(top, bottom) : null;
+    const topColumns = readHeader(top);
+    const stacked = close ? stackLines(top, bottom) : null;
     const columns = stacked ? readHeader(stacked) : null;
-    if (stacked && columns && columns.length > (readHeader(bottom)?.length ?? 0)) {
+    // A header that reads on its top line alone still takes the lower line when
+    // that makes one signed column of "Deposits" over "Withdrawals".
+    // Or that gives a date its own heading: "Transaction" over "Date" beside "Posting Date".
+    const joinsMore =
+      (hasAmount(columns) && !hasAmount(topColumns)) || dateCount(columns) > dateCount(topColumns);
+    const bottomColumns = close ? readHeader(bottom) : null;
+    // Never at the cost of a column the lower line reads alone: "þ" glued onto
+    // "Crédit" above it would lose the credit column.
+    const keepsBottom = (bottomColumns ?? []).every(column =>
+      columns?.some(joinedColumn => joinedColumn.role === column.role),
+    );
+    // Nor over a summary's header ("DATE AMOUNT DATE AMOUNT…" under its heading).
+    if (
+      stacked &&
+      columns &&
+      keepsBottom &&
+      !isBalanceTableHeader(bottom) &&
+      (!topColumns || joinsMore) &&
+      columns.length > (bottomColumns?.length ?? 0)
+    ) {
       joined.push(stacked);
       index += 1;
     } else {

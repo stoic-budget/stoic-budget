@@ -1,0 +1,761 @@
+{
+  "failedChecks": [
+    "balance_chain"
+  ],
+  "accounts": [
+    {
+      "metadata": {
+        "accountNumber": "100512345678",
+        "currency": "CAD",
+        "dateFrom": "2023-08-01T00:00:00",
+        "dateTo": "2023-08-31T00:00:00",
+        "balanceStart": 116.61
+      },
+      "transactions": [
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "GBL MERCH FEES0000031415926535",
+          "paymentPurpose": "Pre-Auth Debit TIDE TILES LTD GBL MERCH FEES0000031415926535",
+          "debit": 2.95,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "Cheque 4309",
+          "paymentPurpose": "Cheque 4309",
+          "debit": 450,
+          "documentNumber": "4309",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "Cheque 4296",
+          "paymentPurpose": "Cheque 4296",
+          "debit": 172.76,
+          "documentNumber": "4296",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "Cheque 4289",
+          "paymentPurpose": "Cheque 4289",
+          "debit": 563.72,
+          "documentNumber": "4289",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "Cheque 4286",
+          "paymentPurpose": "Cheque 4286",
+          "debit": 563.72,
+          "documentNumber": "4286",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "Cheque 4288",
+          "paymentPurpose": "Cheque 4288",
+          "debit": 563.72,
+          "documentNumber": "4288",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "Cheque 4287",
+          "paymentPurpose": "Cheque 4287",
+          "debit": 563.72,
+          "documentNumber": "4287",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "Cheque 4300",
+          "paymentPurpose": "Cheque 4300",
+          "debit": 89.29,
+          "documentNumber": "4300",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "Cheque 4276",
+          "paymentPurpose": "Cheque 4276",
+          "debit": 622.65,
+          "documentNumber": "4276",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "Cheque 4275",
+          "paymentPurpose": "Cheque 4275",
+          "debit": 544.65,
+          "documentNumber": "4275",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 5350,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Pre-Auth Debit FE43239208371 TIDE TILE LTD FIRST DATA CANADAJ",
+          "debit": 5,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "506563876787848 MRCHNT SVCS",
+          "paymentPurpose": "Pre-Auth Debit TIDE TILES LTD VT 506563876787848 MRCHNT SVCS",
+          "debit": 64.99,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-01T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Pre-Auth Debit MRCH69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "debit": 343.25,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-02T00:00:00",
+          "counterpartyName": "ICBC",
+          "paymentPurpose": "Pre-Auth Debit TIDE TILES LTD ICBC",
+          "debit": 152.44,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-02T00:00:00",
+          "counterpartyName": "Cheque 4292",
+          "paymentPurpose": "Cheque 4292",
+          "debit": 500,
+          "documentNumber": "4292",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-02T00:00:00",
+          "counterpartyName": "Cheque 4298",
+          "paymentPurpose": "Cheque 4298",
+          "debit": 176.95,
+          "documentNumber": "4298",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-02T00:00:00",
+          "counterpartyName": "Cheque 4283",
+          "paymentPurpose": "Cheque 4283",
+          "debit": 525.53,
+          "documentNumber": "4283",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-02T00:00:00",
+          "counterpartyName": "Cheque 4317",
+          "paymentPurpose": "Cheque 4317",
+          "debit": 1175.53,
+          "documentNumber": "4317",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-02T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 2000.5,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-03T00:00:00",
+          "counterpartyName": "Cheque 4318",
+          "paymentPurpose": "Cheque 4318",
+          "debit": 150,
+          "documentNumber": "4318",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-03T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 3080,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-04T00:00:00",
+          "counterpartyName": "Cheque 4319",
+          "paymentPurpose": "Cheque 4319",
+          "debit": 500,
+          "documentNumber": "4319",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-04T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 4091.55,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-04T00:00:00",
+          "counterpartyName": "FIRST DATA CORP",
+          "paymentPurpose": "Pre-Auth Debit TIDE TILES LTD FIRST DATA CORP",
+          "debit": 50.1,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-05T00:00:00",
+          "counterpartyName": "Cheque 4305",
+          "paymentPurpose": "Cheque 4305",
+          "debit": 145.22,
+          "documentNumber": "4305",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-05T00:00:00",
+          "counterpartyName": "Cheque 4310",
+          "paymentPurpose": "Cheque 4310",
+          "debit": 86.53,
+          "documentNumber": "4310",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-05T00:00:00",
+          "counterpartyName": "Cheque 4307",
+          "paymentPurpose": "Cheque 4307",
+          "debit": 105.54,
+          "documentNumber": "4307",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-05T00:00:00",
+          "counterpartyName": "Cheque 4314",
+          "paymentPurpose": "Cheque 4314",
+          "debit": 200,
+          "documentNumber": "4314",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-05T00:00:00",
+          "counterpartyName": "Cheque 4322",
+          "paymentPurpose": "Cheque 4322",
+          "debit": 2500,
+          "documentNumber": "4322",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-05T00:00:00",
+          "counterpartyName": "Cheque 4311",
+          "paymentPurpose": "Cheque 4311",
+          "debit": 450,
+          "documentNumber": "4311",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-05T00:00:00",
+          "counterpartyName": "Cheque 4320",
+          "paymentPurpose": "Cheque 4320",
+          "debit": 3000,
+          "documentNumber": "4320",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-05T00:00:00",
+          "counterpartyName": "Cheque 4321",
+          "paymentPurpose": "Cheque 4321",
+          "debit": 3000,
+          "documentNumber": "4321",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-08T00:00:00",
+          "counterpartyName": "INTACT INS CO",
+          "paymentPurpose": "Pre-Auth Debit TIDE TILES LTD INTACT INS CO",
+          "debit": 300.56,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-08T00:00:00",
+          "counterpartyName": "Deposit",
+          "paymentPurpose": "Deposit",
+          "credit": 6743.98,
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-08T00:00:00",
+          "counterpartyName": "Deposit",
+          "paymentPurpose": "Deposit",
+          "credit": 5400.42,
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-08T00:00:00",
+          "counterpartyName": "Official Draft Fee AC-10100512345678",
+          "paymentPurpose": "Official Draft Fee AC-10100512345678",
+          "debit": 10,
+          "currency": "CAD",
+          "paymentType": "fee"
+        },
+        {
+          "transactionDate": "2023-08-08T00:00:00",
+          "counterpartyName": "Official Draft 50071234",
+          "paymentPurpose": "Official Draft 50071234",
+          "debit": 382.66,
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-08T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 1363.6,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-09T00:00:00",
+          "counterpartyName": "MBBP",
+          "paymentPurpose": "Pre-Auth Debit MBBP2856 MBBP",
+          "debit": 13.54,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-09T00:00:00",
+          "counterpartyName": "Cheque 4312",
+          "paymentPurpose": "Cheque 4312",
+          "debit": 450,
+          "documentNumber": "4312",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-09T00:00:00",
+          "counterpartyName": "Cheque 4294",
+          "paymentPurpose": "Cheque 4294",
+          "debit": 299.21,
+          "documentNumber": "4294",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-09T00:00:00",
+          "counterpartyName": "Cheque 4327",
+          "paymentPurpose": "Cheque 4327",
+          "debit": 1077.02,
+          "documentNumber": "4327",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-09T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 4183.75,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-10T00:00:00",
+          "counterpartyName": "CLOVER APP MRKT",
+          "paymentPurpose": "Pre-Auth Debit TIDE TILES LTD CLOVER APP MRKT",
+          "debit": 16.8,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-10T00:00:00",
+          "counterpartyName": "CLOVER APP MRKT",
+          "paymentPurpose": "Pre-Auth Debit TIDE TILES LTD CLOVER APP MRKT",
+          "debit": 16.8,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-10T00:00:00",
+          "counterpartyName": "Cheque 4297",
+          "paymentPurpose": "Cheque 4297",
+          "debit": 172.76,
+          "documentNumber": "4297",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-10T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 4000.4,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-11T00:00:00",
+          "counterpartyName": "Cheque 4303",
+          "paymentPurpose": "Cheque 4303",
+          "debit": 176.95,
+          "documentNumber": "4303",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-12T00:00:00",
+          "counterpartyName": "Cheque 4323",
+          "paymentPurpose": "Cheque 4323",
+          "debit": 375,
+          "documentNumber": "4323",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-12T00:00:00",
+          "counterpartyName": "Cheque 4315",
+          "paymentPurpose": "Cheque 4315",
+          "debit": 200,
+          "documentNumber": "4315",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-14T00:00:00",
+          "counterpartyName": "GREAT POS",
+          "paymentPurpose": "Pre-Auth Debit FD01843 GREAT POS",
+          "debit": 6.77,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-14T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 4203.09,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-15T00:00:00",
+          "counterpartyName": "BANQUE DEVELOPPEMENT DU CANADA",
+          "paymentPurpose": "Pre-Auth Debit BDC TIDE TILES LTD BANQUE DEVELOPPEMENT DU CANADA",
+          "debit": 2278.76,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-15T00:00:00",
+          "counterpartyName": "Cheque 4313",
+          "paymentPurpose": "Cheque 4313",
+          "debit": 450,
+          "documentNumber": "4313",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-15T00:00:00",
+          "counterpartyName": "Cheque 4339",
+          "paymentPurpose": "Cheque 4339",
+          "debit": 1175.53,
+          "documentNumber": "4339",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-15T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 3970,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-16T00:00:00",
+          "counterpartyName": "Cheque 4330",
+          "paymentPurpose": "Cheque 4330",
+          "debit": 248.96,
+          "documentNumber": "4330",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-16T00:00:00",
+          "counterpartyName": "Cheque 4324",
+          "paymentPurpose": "Cheque 4324",
+          "debit": 375,
+          "documentNumber": "4324",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-16T00:00:00",
+          "counterpartyName": "Cheque 4293",
+          "paymentPurpose": "Cheque 4293",
+          "debit": 500,
+          "documentNumber": "4293",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-16T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 4500.2,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-17T00:00:00",
+          "counterpartyName": "Cheque 4316",
+          "paymentPurpose": "Cheque 4316",
+          "debit": 200,
+          "documentNumber": "4316",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-17T00:00:00",
+          "counterpartyName": "Cheque 4302",
+          "paymentPurpose": "Cheque 4302",
+          "debit": 90.29,
+          "documentNumber": "4302",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-17T00:00:00",
+          "counterpartyName": "Cheque 4326",
+          "paymentPurpose": "Cheque 4326",
+          "debit": 90.29,
+          "documentNumber": "4326",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-17T00:00:00",
+          "counterpartyName": "Cheque 4329",
+          "paymentPurpose": "Cheque 4329",
+          "debit": 90.29,
+          "documentNumber": "4329",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-17T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 3112,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-17T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Pre-Auth Debit FE43239208371 TIDE TILE LTD FIRST DATA CANADAJ",
+          "debit": 33.6,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-18T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 5144,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-19T00:00:00",
+          "counterpartyName": "Cheque 4341",
+          "paymentPurpose": "Cheque 4341",
+          "debit": 1667.03,
+          "documentNumber": "4341",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-21T00:00:00",
+          "counterpartyName": "Deposit",
+          "paymentPurpose": "Deposit",
+          "credit": 7890.97,
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-22T00:00:00",
+          "counterpartyName": "Cheque 4343",
+          "paymentPurpose": "Cheque 4343",
+          "debit": 64.13,
+          "documentNumber": "4343",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-22T00:00:00",
+          "counterpartyName": "Cheque 4342",
+          "paymentPurpose": "Cheque 4342",
+          "debit": 1181.31,
+          "documentNumber": "4342",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-22T00:00:00",
+          "counterpartyName": "Cheque 4345",
+          "paymentPurpose": "Cheque 4345",
+          "debit": 283.5,
+          "documentNumber": "4345",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-22T00:00:00",
+          "counterpartyName": "Cheque 4359",
+          "paymentPurpose": "Cheque 4359",
+          "debit": 1175.53,
+          "documentNumber": "4359",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-23T00:00:00",
+          "counterpartyName": "Deposit",
+          "paymentPurpose": "Deposit",
+          "credit": 2577.5,
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-23T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 487.1,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-24T00:00:00",
+          "counterpartyName": "ICBC",
+          "paymentPurpose": "Pre-Auth Debit TIDE TILES LTD ICBC",
+          "debit": 179.13,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-25T00:00:00",
+          "counterpartyName": "Cheque 4332",
+          "paymentPurpose": "Cheque 4332",
+          "debit": 2954.64,
+          "documentNumber": "4332",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-25T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Direct Deposit DP69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "credit": 90,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2023-08-26T00:00:00",
+          "counterpartyName": "Cheque 4360",
+          "paymentPurpose": "Cheque 4360",
+          "debit": 1175.53,
+          "documentNumber": "4360",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-28T00:00:00",
+          "counterpartyName": "ICBC",
+          "paymentPurpose": "Pre-Auth Debit TIDE TILES LTD ICBC",
+          "debit": 187.79,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-29T00:00:00",
+          "counterpartyName": "Cheque 4347",
+          "paymentPurpose": "Cheque 4347",
+          "debit": 301,
+          "documentNumber": "4347",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-29T00:00:00",
+          "counterpartyName": "Cheque 4344",
+          "paymentPurpose": "Cheque 4344",
+          "debit": 1667.03,
+          "documentNumber": "4344",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-29T00:00:00",
+          "counterpartyName": "Cheque 4346",
+          "paymentPurpose": "Cheque 4346",
+          "debit": 294,
+          "documentNumber": "4346",
+          "currency": "CAD"
+        },
+        {
+          "transactionDate": "2023-08-30T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Pre-Auth Debit MRCH69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "debit": 0.04,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-30T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Pre-Auth Debit FE43239208371 TIDE TILE LTD FIRST DATA CANADAJ",
+          "debit": 6,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-31T00:00:00",
+          "counterpartyName": "PROVINCE OF BC",
+          "paymentPurpose": "Pre-Auth Debit TIDE TILES LTD PROVINCE OF BC",
+          "debit": 371.36,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-31T00:00:00",
+          "counterpartyName": "FIRST DATA CANADAJ",
+          "paymentPurpose": "Pre-Auth Debit MRCH69452761313 TIDE TILES LTD FIRST DATA CANADAJ",
+          "debit": 0.37,
+          "currency": "CAD",
+          "paymentType": "direct_debit"
+        },
+        {
+          "transactionDate": "2023-08-31T00:00:00",
+          "counterpartyName": "Service Charge",
+          "paymentPurpose": "Service Charge",
+          "debit": 68.75,
+          "currency": "CAD",
+          "paymentType": "fee"
+        },
+        {
+          "transactionDate": "2023-08-31T00:00:00",
+          "counterpartyName": "Service Charge",
+          "paymentPurpose": "Service Charge",
+          "debit": 6,
+          "currency": "CAD",
+          "paymentType": "fee"
+        },
+        {
+          "transactionDate": "2023-08-31T00:00:00",
+          "counterpartyName": "Interest - Capitalise",
+          "paymentPurpose": "Interest - Capitalise",
+          "debit": 117.97,
+          "currency": "CAD",
+          "paymentType": "interest"
+        }
+      ]
+    },
+    {
+      "metadata": {
+        "accountNumber": "110098765432",
+        "currency": "CAD",
+        "dateFrom": "2023-08-01T00:00:00",
+        "dateTo": "2023-08-31T00:00:00",
+        "balanceStart": 921.76,
+        "balanceEnd": 921.8
+      },
+      "transactions": [
+        {
+          "transactionDate": "2023-09-01T00:00:00",
+          "counterpartyName": "Interest Paid",
+          "paymentPurpose": "Interest Paid",
+          "credit": 0.04,
+          "currency": "CAD",
+          "paymentType": "interest"
+        }
+      ]
+    }
+  ]
+}
