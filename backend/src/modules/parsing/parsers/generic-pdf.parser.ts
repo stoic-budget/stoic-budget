@@ -111,7 +111,7 @@ export class GenericPdfParser extends BaseParser {
     // "38.2gal" or "19.5%" look like day-first dates too.
     const dateOrder =
       detectNumericDateOrder(layoutTransactions.map(t => t.dateText)) ??
-      detectNumericDateOrder(text.match(/\b\d{1,2}[./]\d{1,2}[./]\d{2,4}\b/g) ?? []) ??
+      detectNumericDateOrder(text.match(/\b\d{1,2}([./-])\d{1,2}\1\d{2,4}\b/g) ?? []) ??
       orderWithinPeriod(
         layoutTransactions.map(t => t.dateText),
         findHeaderPeriod(text, 'dmy'),

@@ -1,5 +1,9 @@
 import type { PdfTextItem, PdfTextRow } from '../../../common/utils/pdf-parser.util';
-import { type LayoutColumn, readHeaderRow } from './pdf-layout-columns.helper';
+import {
+  isBalanceTableHeader,
+  type LayoutColumn,
+  readHeaderRow,
+} from './pdf-layout-columns.helper';
 import { rowHeight } from './pdf-layout-wrapped.helper';
 
 /**
@@ -69,10 +73,12 @@ export function joinStackedHeaders(
     const keepsBottom = (bottomColumns ?? []).every(column =>
       columns?.some(joinedColumn => joinedColumn.role === column.role),
     );
+    // Nor over a summary's header ("DATE AMOUNT DATE AMOUNT…" under its heading).
     if (
       stacked &&
       columns &&
       keepsBottom &&
+      !isBalanceTableHeader(bottom) &&
       (!topColumns || joinsMore) &&
       columns.length > (bottomColumns?.length ?? 0)
     ) {

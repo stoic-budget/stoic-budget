@@ -1,0 +1,84 @@
+{
+  "accounts": [
+    {
+      "metadata": {
+        "accountNumber": "1000001-1",
+        "currency": "USD",
+        "dateFrom": "2021-01-01T00:00:00",
+        "dateTo": "2021-01-31T00:00:00",
+        "balanceStart": 10024.38,
+        "balanceEnd": 14893.93
+      },
+      "transactions": [
+        {
+          "transactionDate": "2021-01-01T00:00:00",
+          "counterpartyName": "TRANSFER 1000002 FROM/TO 1 MOBILE BANKING TRANSFER:139915566657088598",
+          "paymentPurpose": "TRANSFER 1000002 FROM/TO 1 MOBILE BANKING TRANSFER:139915566657088598",
+          "credit": 6400,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-01-07T00:00:00",
+          "counterpartyName": "DEPOSIT Visa Cash Back Deposit",
+          "paymentPurpose": "DEPOSIT Visa Cash Back Deposit",
+          "credit": 16.53,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-01-25T00:00:00",
+          "counterpartyName": "PAYMENT SHR TRANSFER FROM/TO 141 MOBILE BANKING TRANSFER:781417803986425177",
+          "paymentPurpose": "PAYMENT SHR TRANSFER FROM/TO 141 MOBILE BANKING TRANSFER:781417803986425177",
+          "debit": 1555.28,
+          "currency": "USD",
+          "paymentType": "bank_transfer_out"
+        },
+        {
+          "transactionDate": "2021-01-31T00:00:00",
+          "counterpartyName": "DIVIDEND",
+          "paymentPurpose": "DIVIDEND",
+          "credit": 8.3,
+          "currency": "USD",
+          "paymentType": "interest"
+        }
+      ]
+    },
+    {
+      "metadata": {
+        "accountNumber": "1000001-2",
+        "currency": "USD",
+        "dateFrom": "2021-01-01T00:00:00",
+        "dateTo": "2021-01-31T00:00:00",
+        "balanceStart": 605.8,
+        "balanceEnd": 1785.8
+      },
+      "transactions": [
+        {
+          "transactionDate": "2021-01-01T00:00:00",
+          "counterpartyName": "TRANSFER 1000002 FROM/TO 1 MOBILE BANKING TRANSFER:226931472879154897",
+          "paymentPurpose": "TRANSFER 1000002 FROM/TO 1 MOBILE BANKING TRANSFER:226931472879154897",
+          "credit": 600,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-01-05T00:00:00",
+          "counterpartyName": "TRANSFER 1000002 FROM/TO 1 MOBILE BANKING TRANSFER:535699680709504509",
+          "paymentPurpose": "TRANSFER 1000002 FROM/TO 1 MOBILE BANKING TRANSFER:535699680709504509",
+          "credit": 230,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-01-31T00:00:00",
+          "counterpartyName": "TRANSFER 1000002 FROM/TO 1 MOBILE BANKING TRANSFER:028205099730924671",
+          "paymentPurpose": "TRANSFER 1000002 FROM/TO 1 MOBILE BANKING TRANSFER:028205099730924671",
+          "credit": 350,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        }
+      ]
+    }
+  ]
+}

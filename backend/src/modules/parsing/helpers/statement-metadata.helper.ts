@@ -2,6 +2,8 @@ import { findStatementAmounts } from './statement-amount.helper';
 import { balanceLineEnd } from './statement-balance-line.helper';
 import { findFullDates, foldText, type NumericDateOrder } from './statement-date.helper';
 
+export { isCreditCardStatement } from './statement-card.helper';
+
 /**
  * Statement header facts read from free text, for statements in English,
  * French, Dutch, German and Spanish.
@@ -354,31 +356,6 @@ export function findStatementTotals(
   return { credits: total(TOTAL_CREDITS), debits: total(TOTAL_DEBITS) };
 }
 
-const CARD_MARKERS = [
-  'minimum payment',
-  'payment due date',
-  'available credit',
-  'credit limit',
-  'credit line',
-  'cardmember',
-  'cardholder',
-  'paiement minimum',
-  'limite de credit',
-  'minimumbetaling',
-  'mindestzahlung',
-  'pago minimo',
-];
-
-/**
- * A credit card statement prints charges as positive amounts and its balance
- * as what is owed. Bank arithmetic reconciles it just as well with every sign
- * flipped, so only the wording tells the two apart.
- */
-export function isCreditCardStatement(text: string): boolean {
-  const folded = foldText(text);
-  return CARD_MARKERS.filter(marker => folded.includes(marker)).length >= 2;
-}
-
 const ACCOUNT_HEADING =
   /\b(?:account|compte|rekening|konto|cuenta)\b(?:\s+(?:number|no\.?|nr\.?|#))?\s*[:—–-]?\s*([A-Z]{2}\d{2}[A-Z0-9]{10,30}|\d[\d -]{6,}\d)/i;
 
@@ -387,7 +364,8 @@ const ACCOUNT_HEADING =
  * 3589405262"), or of a long number and its suffix in brackets, printed under
  * the product name ("100123456789 (100)").
  */
-const PRODUCT_HEADING = /^(?:[A-Za-z][A-Za-z&' ]{2,40}?\s+[-–—]\s+(\d{8,17})|(\d{8,17}) \(\d+\))$/;
+const PRODUCT_HEADING =
+  /^(?:[A-Za-z][A-Za-z&' ]{2,40}?\s+[-–—]\s+(\d{8,17})|(\d{8,17}) \(\d+\)|[A-Za-z][A-Za-z&' ]{2,40}?\s+ACCT#\s*(\d{1,17}))$/;
 
 /**
  * The heading a statement prints above one account's table ("HKD Current
@@ -395,7 +373,8 @@ const PRODUCT_HEADING = /^(?:[A-Za-z][A-Za-z&' ]{2,40}?\s+[-–—]\s+(\d{8,17})
  * number right after the word for account, and the currency code if the line
  * names one. A line holding only a product name and a long number ("Checking
  * - 3600212596") is one too, and so is a number alone with its suffix in
- * brackets ("100123456789 (100)"). Null for any other line.
+ * brackets ("100123456789 (100)"), and a product name with its share number
+ * ("PRIMARY SAVINGS  ACCT# 1"). Null for any other line.
  */
 export function readAccountHeading(
   line: string,
@@ -405,5 +384,8 @@ export function readAccountHeading(
     return null;
   }
   const currency = Array.from(line.matchAll(ISO_CODES), code => code[1])[0];
-  return { accountNumber: (match[1] ?? match[2]).trim(), ...(currency ? { currency } : {}) };
+  return {
+    accountNumber: (match[1] ?? match[2] ?? match[3]).trim(),
+    ...(currency ? { currency } : {}),
+  };
 }

@@ -98,10 +98,10 @@ export function parseDateParts(text: string, order: NumericDateOrder): DateParts
     return month ? valid({ day: Number(dayFirst[1]), month, year: fullYear(dayFirst[3]) }) : null;
   }
 
-  // "Sep 3", "Sep 3, 2025", and "September 7,2017" as OCR reads it. A year is
-  // 19xx or 20xx: "Jun 18 4239" is a date and a check number.
+  // "Sep 3", "Sep 3, 2025", "JAN01", and "September 7,2017" as OCR reads it. A
+  // year is 19xx or 20xx: "Jun 18 4239" is a date and a check number.
   const monthFirst = value.match(
-    /^([a-z]+)\.?\s+(\d{1,2})(?:,?\s+((?:19|20)\d{2})|,((?:19|20)\d{2}))?,?$/,
+    /^([a-z]+)\.?\s*(\d{1,2})(?:,?\s+((?:19|20)\d{2})|,((?:19|20)\d{2}))?,?$/,
   );
   if (monthFirst) {
     const month = monthFromName(monthFirst[1]);
