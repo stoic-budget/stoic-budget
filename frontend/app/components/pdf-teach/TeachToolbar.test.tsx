@@ -14,6 +14,7 @@ import type { TeachSession } from './useTeachSession';
 const session = (over: Partial<TeachSession> = {}): TeachSession => ({
   statementId: 'statement-1',
   words: [],
+  textUnderText: false,
   regions: [],
   activeTag: 'date',
   setActiveTag: vi.fn(),
@@ -65,6 +66,20 @@ describe('TeachToolbar', () => {
     fireEvent.click(screen.getByRole('button', { name: /save/i }));
     await vi.waitFor(() => expect(onDone).toHaveBeenCalled());
     expect(marks.save).toHaveBeenCalled();
+  });
+
+  it('says the file has text under its text instead of judging the columns', () => {
+    const date = { tag: 'date' as const, page: 1, x0: 0, y0: 0, x1: 50, y1: 50 };
+    render(
+      <TeachToolbar
+        session={session({ textUnderText: true, regions: [date] })}
+        onDone={vi.fn()}
+      />,
+    );
+    const warnings = [...document.querySelectorAll('.seneca-pdf-teach__warning')];
+    expect(warnings.map(warning => warning.textContent)).toEqual([
+      expect.stringContaining('old text under the visible text'),
+    ]);
   });
 
   it('warns when a check fails, and takes a tag by its number key', () => {

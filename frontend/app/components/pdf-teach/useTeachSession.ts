@@ -6,6 +6,7 @@ import apiClient from '@/app/lib/api';
 import { invalidateFinancialData } from '@/app/lib/invalidate-document-lists';
 import { checkContract } from '@/app/lib/query-fn-schema';
 import {
+  hasTextUnderText,
   isAreaBigEnough,
   missingGroups,
   nextTag,
@@ -22,6 +23,8 @@ export interface TeachSession {
   /** The statement being marked; null while the marking mode is off. */
   statementId: string | null;
   words: ReturnType<typeof useLayoutWords>['data'];
+  /** The file holds old text under the visible one, and the parser reads both. */
+  textUnderText: boolean;
   regions: TeachRegion[];
   activeTag: TeachTag;
   setActiveTag: (tag: TeachTag) => void;
@@ -130,6 +133,7 @@ export function useTeachSession(statementId: string | null): TeachSession {
   return {
     statementId,
     words: words.data,
+    textUnderText: hasTextUnderText(words.data ?? []),
     regions,
     activeTag,
     setActiveTag,
