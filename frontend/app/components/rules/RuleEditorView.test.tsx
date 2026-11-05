@@ -222,13 +222,32 @@ describe('RuleEditorView', () => {
     await waitFor(() => expect(post).toHaveBeenCalledWith('/categorization-rules/rule-1/apply'));
   });
 
-  it('warns when a rule above takes every row this one matches', async () => {
+  it('warns when a rule above sets the category of every row this one matches', async () => {
     const above = { id: 'rule-top', name: 'Any store' };
     preview = { ...preview, shadowed: 2, matches: [match('tx-1', above), match('tx-2', above)] };
     renderWithQuery(<RuleEditorView id="rule-1" />);
 
-    expect(await screen.findByText(/this rule never files them/)).toBeTruthy();
-    expect(screen.getAllByText('goes to “Any store” first')).toHaveLength(2);
+    expect(await screen.findByText(/this rule's category never applies/)).toBeTruthy();
+    expect(screen.getAllByText('category set by “Any store”, a rule above')).toHaveLength(2);
+  });
+
+  it('says nothing of the rules above for a rule that sets no category: rules add up', async () => {
+    const above = { id: 'rule-top', name: 'Any store' };
+    preview = { ...preview, shadowed: 2, matches: [match('tx-1', above), match('tx-2', above)] };
+    get.mockImplementation(async (url: string) => {
+      if (url === '/categorization-rules/rule-1')
+        return apiResponse({ ...saved, result: { walletId: CARD.id } });
+      if (url === '/categories') return apiResponse([ELECTRONICS]);
+      if (url === '/wallets') return apiResponse([CARD]);
+      if (url === '/tags') return apiResponse([]);
+      if (url.startsWith('/workspaces/')) return apiResponse({ members: [] });
+      throw new Error(`unexpected GET ${url}`);
+    });
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+
+    await screen.findByRole('table');
+    expect(screen.queryByText(/never applies/)).toBeNull();
+    expect(screen.queryByText(/a rule above/)).toBeNull();
   });
 
   it('asks for a condition before it looks anything up', async () => {

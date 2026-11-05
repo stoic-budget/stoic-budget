@@ -82,6 +82,14 @@ export function matchesConditions(
   return conditions.every(condition => conditionHolds(transaction, condition));
 }
 
+/** Whether the rule matches the row: the one place that knows how its conditions combine. */
+export function matchesRule(
+  transaction: Transaction,
+  rule: { conditions: ClassificationCondition[] },
+): boolean {
+  return matchesConditions(transaction, rule.conditions);
+}
+
 /** The conditions a matching row satisfied, worded for the rule preview. */
 export function explainMatch(
   transaction: Transaction,

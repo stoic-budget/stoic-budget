@@ -11,7 +11,7 @@ import { AuditService } from '../../audit/audit.service';
 import { TaxAssignmentService } from '../../tax/tax-assignment.service';
 import { hasDecidedCategory } from '../engine/category-decision';
 import { movesToWallet, planRuleApply } from '../engine/rule-apply-plan';
-import { explainMatch, matchesConditions } from '../engine/rule-conditions';
+import { explainMatch, matchesConditions, matchesRule } from '../engine/rule-conditions';
 import { addTransactionTags, ownedTagIds } from '../engine/rule-tags';
 import { ruleApplyEvents } from '../helpers/rule-audit';
 import type { ClassificationCondition } from '../interfaces/classification-rule.interface';
@@ -108,7 +108,8 @@ export class RuleApplicationService {
   /**
    * What a rule would match, as the caller sees the rows: another member's
    * private row is left out entirely, since even its amount would answer a
-   * question about it. A match a rule ranked above takes is marked with it.
+   * question about it. A match whose category a rule ranked above sets is
+   * marked with that rule.
    */
   async previewRule(input: {
     workspaceId: string;
@@ -125,7 +126,8 @@ export class RuleApplicationService {
     const matches = readable
       .filter(row => matchesConditions(row, input.conditions))
       .map(row => {
-        const winner = above.find(rule => matchesConditions(row, rule.conditions));
+        // Rules add up, so only a rule that sets a category takes that from this one.
+        const winner = above.find(rule => rule.result.categoryId && matchesRule(row, rule));
         return { row, wonBy: winner ? { id: winner.id, name: winner.name } : null };
       });
     return {
@@ -154,7 +156,8 @@ export class RuleApplicationService {
   /**
    * Files the workspace's existing matches under the rule's category, adds its
    * tags and moves them to its account, a page of rows at a time until every
-   * row was looked at. Which rows change is `planRuleApply`'s call. The owner
+   * row was looked at. Which rows change is `planRuleApply`'s call: a category
+   * or an account a rule ranked above sets on a row is left to that rule. The owner
    * is not touched on old rows: nothing tells an owner somebody assigned from
    * one the row inherited. A rule naming what is not this workspace's applies
    * nothing, as on import.
@@ -174,9 +177,11 @@ export class RuleApplicationService {
     if (!(owned && (categoryId || walletId || tagIds.length > 0))) {
       return totals;
     }
+    const above = await this.rulesAbove(workspaceId, rule.id);
     let touchedRows = 0;
     for await (const rows of this.pagesForRule(workspaceId)) {
       const plan = planRuleApply(rows, rule, {
+        above,
         viewerMemberId,
         setsCategory: Boolean(categoryId),
         setsTags: tagIds.length > 0,

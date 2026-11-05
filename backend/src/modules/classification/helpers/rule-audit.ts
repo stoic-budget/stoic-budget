@@ -1,8 +1,9 @@
 import { ActorType, AuditAction, EntityType } from '../../../entities/audit-event.entity';
 import type { CategorizationRule } from '../../../entities/categorization-rule.entity';
-import { TransactionCategorySource } from '../../../entities/transaction.entity';
+import { type Transaction, TransactionCategorySource } from '../../../entities/transaction.entity';
 import type { CreateAuditEventDto } from '../../audit/interfaces/audit-event.interface';
 import type { RuleApplyPlan } from '../engine/rule-apply-plan';
+import type { RuleLayers } from '../engine/rule-layers';
 import type { ClassificationCondition } from '../interfaces/classification-rule.interface';
 
 export type CategorizationRuleAuditSnapshot = {
@@ -78,4 +79,31 @@ export function ruleApplyEvents(
         meta: { ruleId: rule.id, ruleName: rule.name, confidence: 1, tagIds: [...tagIds] },
       };
     });
+}
+
+/**
+ * One event per rule that added something to a row being classified, so the
+ * row's history names each of them. A row not booked yet has no id to hang an
+ * event on and gets none.
+ */
+export function ruleApplicationEvents(input: {
+  transaction: Pick<Transaction, 'id' | 'workspaceId'>;
+  layers: RuleLayers;
+  userId: string;
+  batchId?: string | null;
+}): CreateAuditEventDto[] {
+  const { transaction, layers, userId, batchId } = input;
+  if (!transaction.id) {
+    return [];
+  }
+  return layers.contributors.map(rule => ({
+    workspaceId: transaction.workspaceId ?? null,
+    actorType: ActorType.USER,
+    actorId: userId,
+    entityType: EntityType.TRANSACTION,
+    entityId: transaction.id,
+    action: AuditAction.APPLY_RULE,
+    meta: { ruleId: rule.id, ruleName: rule.name, confidence: 1 },
+    batchId: batchId ?? null,
+  }));
 }
