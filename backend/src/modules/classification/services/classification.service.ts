@@ -162,8 +162,9 @@ export class ClassificationService {
       await this.cacheManager.set(cacheKey, classification, 300000); // 5 minutes in ms
     }
 
-    if (matchedRule) {
-      // Audit: record rule application for categorization transparency.
+    // A row not booked yet has no id to hang the event on; its category source
+    // and reason carry the rule's name instead.
+    if (matchedRule && transaction.id) {
       await this.auditService.createEvent({
         workspaceId: transaction.workspaceId ?? null,
         actorType: ActorType.USER,

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { type Repository } from 'typeorm';
 import { Statement } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
+import { writeClassification } from '../classification/engine/rule-row-write';
 import { ClassificationService } from '../classification/services/classification.service';
 import { throwHelpfulSchemaError } from './helpers/schema-error';
 
@@ -39,17 +40,7 @@ export class CustomTableConvertedStatementsService {
           transaction,
           userId,
         );
-        const { categoryId, categorySource, categoryReason } = classification;
-        if (categoryId) {
-          await this.transactionRepository.update(
-            { id: transaction.id },
-            {
-              categoryId,
-              categorySource: categorySource ?? null,
-              categoryReason: categoryReason ?? null,
-            },
-          );
-        }
+        await writeClassification(this.transactionRepository.manager, transaction, classification);
       }
     } catch (error) {
       this.logger.warn(

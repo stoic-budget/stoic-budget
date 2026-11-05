@@ -16,11 +16,8 @@ export interface ClassificationCondition {
     | 'counterparty_bin'
     | 'document_number'
     /**
-     * Who the row belongs to, as a membership id or the literal `shared`.
-     *
-     * A freshly imported row has no owner until its wallet is known, which
-     * happens after the rules run — so an owner condition matches when a rule
-     * is re-applied to an existing row, not on the first pass of an import.
+     * Who the row belongs to, as a membership id or the literal `shared`. A row
+     * being imported belongs to the owner of its statement's account.
      */
     | 'owner'
     /** `income` or `expense`: amounts are stored unsigned, the direction says which. */

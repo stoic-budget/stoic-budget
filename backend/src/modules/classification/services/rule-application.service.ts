@@ -8,14 +8,18 @@ import { ActorType, AuditAction, EntityType } from '../../../entities/audit-even
 import { CategorizationRule } from '../../../entities/categorization-rule.entity';
 import { Transaction, TransactionCategorySource } from '../../../entities/transaction.entity';
 import { AuditService } from '../../audit/audit.service';
+import { TaxAssignmentService } from '../../tax/tax-assignment.service';
 import { hasDecidedCategory } from '../engine/category-decision';
+import { planRuleApply } from '../engine/rule-apply-plan';
 import { explainMatch, matchesConditions } from '../engine/rule-conditions';
 import { addTransactionTags, ownedTagIds } from '../engine/rule-tags';
 import type { ClassificationCondition } from '../interfaces/classification-rule.interface';
 import { ClassificationService } from './classification.service';
 
-/** How many of a workspace's most recent rows a rule preview or apply looks at. */
+/** How many of a workspace's most recent rows a rule preview looks at. */
 const RULE_SCAN_LIMIT = 5000;
+/** How many rows an apply reads and writes at a time. */
+const RULE_APPLY_PAGE = 1000;
 /** How many matching rows the preview hands back as examples. */
 const RULE_PREVIEW_MATCHES = 50;
 
@@ -27,35 +31,61 @@ export class RuleApplicationService {
     private transactionRepository: Repository<Transaction>,
     private readonly classificationService: ClassificationService,
     private readonly auditService: AuditService,
+    private readonly taxAssignmentService: TaxAssignmentService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   /**
-   * The workspace's rows a rule would be tried on, newest first: not duplicates,
-   * not split parts, not in a trashed statement. `transactionIds` narrows it to
-   * those rows. One row more than the limit is read to tell a full page from
-   * a truncated one.
+   * The workspace's rows a rule is tried on: not duplicates, not split parts,
+   * not in a trashed statement.
    */
-  private async rowsForRule(
-    workspaceId: string,
-    transactionIds?: readonly string[],
-  ): Promise<{ rows: Transaction[]; truncated: boolean }> {
-    const query = this.transactionRepository
+  private rowsQuery(workspaceId: string) {
+    return this.transactionRepository
       .createQueryBuilder('transaction')
       .where('transaction.workspaceId = :workspaceId', { workspaceId })
       .andWhere('transaction.isDuplicate = false')
       .andWhere('transaction.splitGroupId IS NULL')
       .andWhere(
         'NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = transaction.statementId AND trashed.deleted_at IS NOT NULL)',
-      )
+      );
+  }
+
+  /** The newest of those rows for the preview, up to the scan limit. */
+  private async rowsForRule(
+    workspaceId: string,
+    transactionIds?: readonly string[],
+  ): Promise<{ rows: Transaction[]; truncated: boolean }> {
+    const query = this.rowsQuery(workspaceId)
       .orderBy('transaction.transactionDate', 'DESC')
       .addOrderBy('transaction.id', 'DESC')
       .take(RULE_SCAN_LIMIT + 1);
     if (transactionIds) {
       query.andWhere('transaction.id IN (:...transactionIds)', { transactionIds });
     }
+    // One row more than the limit tells a full page from a truncated one.
     const rows = await query.getMany();
     return { rows: rows.slice(0, RULE_SCAN_LIMIT), truncated: rows.length > RULE_SCAN_LIMIT };
+  }
+
+  /** Every one of those rows for an apply, a page at a time in id order. */
+  private async *pagesForRule(workspaceId: string): AsyncGenerator<Transaction[]> {
+    let after: string | null = null;
+    for (;;) {
+      const query = this.rowsQuery(workspaceId)
+        .orderBy('transaction.id', 'ASC')
+        .take(RULE_APPLY_PAGE);
+      if (after) {
+        query.andWhere('transaction.id > :after', { after });
+      }
+      const rows = await query.getMany();
+      if (rows.length > 0) {
+        yield rows;
+      }
+      if (rows.length < RULE_APPLY_PAGE) {
+        return;
+      }
+      after = rows[rows.length - 1].id;
+    }
   }
 
   /**
@@ -119,10 +149,9 @@ export class RuleApplicationService {
 
   /**
    * Files the workspace's existing matches under the rule's category and adds
-   * its tags. The category goes only on rows nobody decided: a category picked
-   * by hand, or put there by a rule, stays. Tags go on every match, since
-   * adding one takes nothing away. Wallet and owner are not touched on old
-   * rows: moving a row between accounts changes balances, and that is not
+   * its tags, a page of rows at a time until every row was looked at. Which
+   * rows change is `planRuleApply`'s call. Wallet and owner are not touched on
+   * old rows: moving a row between accounts changes balances, and that is not
    * what "apply" promises.
    */
   async applyRuleToExisting(input: {
@@ -135,56 +164,61 @@ export class RuleApplicationService {
     const categoryId = rule.result.categoryId;
     const manager = this.transactionRepository.manager;
     const tagIds = await ownedTagIds(manager, workspaceId, rule.result.tagIds);
+    const totals = { applied: 0, skippedManual: 0, tagged: 0 };
     if (!categoryId && tagIds.length === 0) {
-      return { applied: 0, skippedManual: 0, tagged: 0 };
+      return totals;
     }
-    const { rows } = await this.rowsForRule(workspaceId);
-    const matches = rows.filter(
-      row => canReadPrivate(row, viewerMemberId) && matchesConditions(row, rule.conditions),
-    );
-    const open = categoryId ? matches.filter(row => !hasDecidedCategory(row)) : [];
-    const tagged = tagIds.length > 0 ? matches : [];
-    if (open.length > 0) {
-      await this.transactionRepository.update(
-        { id: In(open.map(row => row.id)), workspaceId },
-        { categoryId, categorySource: TransactionCategorySource.RULE, categoryReason: rule.name },
+    let touchedRows = 0;
+    for await (const rows of this.pagesForRule(workspaceId)) {
+      const plan = planRuleApply(rows, rule, {
+        viewerMemberId,
+        setsCategory: Boolean(categoryId),
+        setsTags: tagIds.length > 0,
+      });
+      const refiledIds = plan.refiled.map(row => row.id);
+      if (refiledIds.length > 0) {
+        await this.transactionRepository.update(
+          { id: In(refiledIds), workspaceId },
+          { categoryId, categorySource: TransactionCategorySource.RULE, categoryReason: rule.name },
+        );
+        // A raw update: the tax subscriber did not see the new category.
+        await this.taxAssignmentService.reassess(workspaceId, { ids: refiledIds });
+      }
+      await addTransactionTags(
+        manager,
+        workspaceId,
+        plan.tagged.map(row => row.id),
+        tagIds,
       );
-    }
-    await addTransactionTags(
-      manager,
-      workspaceId,
-      tagged.map(row => row.id),
-      tagIds,
-    );
-    const touched = new Set([...open, ...tagged].map(row => row.id));
-    if (touched.size > 0) {
-      const opened = new Set(open.map(row => row.id));
+      const refiled = new Set(refiledIds);
+      // Tags go on every match, so with tags every match was touched.
+      const touched = plan.tagged.length > 0 ? plan.matches : plan.refiled;
       await this.auditService.createBatchEvents(
-        matches
-          .filter(row => touched.has(row.id))
-          .map(row => ({
-            workspaceId,
-            actorType: ActorType.USER,
-            actorId: userId,
-            entityType: EntityType.TRANSACTION,
-            entityId: row.id,
-            action: AuditAction.APPLY_RULE,
-            diff: opened.has(row.id)
-              ? {
-                  before: { categoryId: row.categoryId, categorySource: row.categorySource },
-                  after: { categoryId, categorySource: TransactionCategorySource.RULE },
-                }
-              : null,
-            meta: { ruleId: rule.id, ruleName: rule.name, confidence: 1, tagIds },
-          })),
+        touched.map(row => ({
+          workspaceId,
+          actorType: ActorType.USER,
+          actorId: userId,
+          entityType: EntityType.TRANSACTION,
+          entityId: row.id,
+          action: AuditAction.APPLY_RULE,
+          diff: refiled.has(row.id)
+            ? {
+                before: { categoryId: row.categoryId, categorySource: row.categorySource },
+                after: { categoryId, categorySource: TransactionCategorySource.RULE },
+              }
+            : null,
+          meta: { ruleId: rule.id, ruleName: rule.name, confidence: 1, tagIds },
+        })),
       );
-      await this.classificationService.recordRuleMatch(rule.id, workspaceId, touched.size);
+      touchedRows += touched.length;
+      totals.applied += refiledIds.length;
+      totals.skippedManual += categoryId ? plan.matches.length - refiledIds.length : 0;
+      totals.tagged += plan.tagged.length;
+    }
+    if (touchedRows > 0) {
+      await this.classificationService.recordRuleMatch(rule.id, workspaceId, touchedRows);
       await this.cacheManager.set(`reports:version:${workspaceId}`, Date.now().toString(), 0);
     }
-    return {
-      applied: open.length,
-      skippedManual: categoryId ? matches.length - open.length : 0,
-      tagged: tagged.length,
-    };
+    return totals;
   }
 }

@@ -6,7 +6,7 @@ import {
 } from "../../../src/entities/audit-event.entity";
 import { CustomTableSource } from "../../../src/entities/custom-table.entity";
 import { CustomTableColumnType } from "../../../src/entities/custom-table-column.entity";
-import { TransactionType } from "../../../src/entities/transaction.entity";
+import { Transaction, TransactionType } from "../../../src/entities/transaction.entity";
 import type { CustomTablesService } from "../../../src/modules/custom-tables/custom-tables.service";
 import { buildCustomTablesService as buildFacade } from "./helpers/build-custom-tables-service";
 import { workspaceCurrencyStub } from '../../helpers/workspace-currency-stub';
@@ -267,6 +267,9 @@ describe("CustomTablesService.convertToStatement", () => {
 				...value,
 			})),
 		);
+		// What the saved rows are written through, after the classifier answered.
+		const manager = { update: vi.fn(), query: vi.fn() };
+		Object.assign(transactionRepository, { manager });
 
 		await service.convertToStatement("user-1", "workspace-1", TABLE_ID);
 
@@ -274,8 +277,9 @@ describe("CustomTablesService.convertToStatement", () => {
 			expect.objectContaining({ counterpartyName: "Magnum" }),
 			"user-1",
 		);
-		expect(transactionRepository.update).toHaveBeenCalledWith(
-			{ id: "tx-0" },
+		expect(manager.update).toHaveBeenCalledWith(
+			Transaction,
+			{ id: "tx-0", workspaceId: "workspace-1" },
 			{
 				categoryId: "cat-food",
 				categorySource: "history",

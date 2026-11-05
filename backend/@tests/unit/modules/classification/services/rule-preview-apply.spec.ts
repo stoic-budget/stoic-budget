@@ -53,6 +53,7 @@ function build(
     take: vi.fn().mockReturnThis(),
     getMany: vi.fn(async () => rows),
   };
+  const tax = { reassess: vi.fn(async () => 0) };
   // Every rule of the workspace, best first, as the preview reads them to rank.
   const allRules = { find: vi.fn(async () => options.allRules ?? []) };
   // The tags of the workspace that still exist.
@@ -100,9 +101,10 @@ function build(
     transactions as never,
     service,
     audit as unknown as AuditService,
+    tax as never,
     cache as never,
   );
-  return { service, rulesService, query, transactions, rules, cache, audit, manager };
+  return { service, rulesService, query, transactions, rules, cache, audit, manager, tax };
 }
 
 describe('rule preview', () => {
@@ -322,6 +324,42 @@ describe('applying a rule to existing rows', () => {
       { id: storeRule.id, workspaceId: WORKSPACE },
       expect.objectContaining({ lastMatchedAt: expect.any(Date) }),
     );
+  });
+
+  it('goes through every row of the workspace, a page at a time', async () => {
+    const first = Array.from({ length: 1000 }, (_, index) => row(`a-${index}`));
+    const { rulesService, query, transactions } = build([]);
+    query.getMany.mockResolvedValueOnce(first).mockResolvedValueOnce([row('b-last')]);
+
+    const result = await rulesService.applyRuleToExisting({
+      rule: storeRule,
+      userId: 'user-1',
+      viewerMemberId: ME,
+    });
+
+    expect(result.applied).toBe(1001);
+    expect(transactions.update).toHaveBeenCalledTimes(2);
+    // The second page starts after the last row of the first.
+    expect(query.andWhere).toHaveBeenCalledWith('transaction.id > :after', { after: 'a-999' });
+  });
+
+  it('leaves a row on a filed tax return as it is, and has the tax of the others looked at again', async () => {
+    const { rulesService, transactions, tax } = build([
+      row('open'),
+      row('filed', { taxLocked: true }),
+    ]);
+
+    const result = await rulesService.applyRuleToExisting({
+      rule: storeRule,
+      userId: 'user-1',
+      viewerMemberId: ME,
+    });
+
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 0 });
+    expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
+      'open',
+    ]);
+    expect(tax.reassess).toHaveBeenCalledWith(WORKSPACE, { ids: ['open'] });
   });
 
   it("never touches another member's private row", async () => {

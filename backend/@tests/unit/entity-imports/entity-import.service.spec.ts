@@ -1,4 +1,5 @@
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Transaction } from '../../../src/entities/transaction.entity';
 import { EntityImportService } from '../../../src/modules/entity-imports/entity-import.service';
 
 const WORKSPACE_ID = '11111111-1111-4111-8111-111111111111';
@@ -155,33 +156,46 @@ describe('EntityImportService categorising imported transactions', () => {
     );
     const transactions = dataSource.getRepository({ name: 'Transaction' }) as ReturnType<typeof repoMock>;
     transactions.find.mockResolvedValue([
-      { id: 't-1', counterpartyName: 'REWE', paymentPurpose: '', transactionType: 'expense' },
-      { id: 't-2', counterpartyName: 'New Shop', paymentPurpose: '', transactionType: 'expense' },
+      { id: 't-1', workspaceId: WORKSPACE_ID, counterpartyName: 'ACME Store', paymentPurpose: '', transactionType: 'expense' },
+      { id: 't-2', workspaceId: WORKSPACE_ID, counterpartyName: 'New Shop', paymentPurpose: '', transactionType: 'expense' },
     ]);
+    // What the saved rows are written through, after the classifier answered.
+    const manager = Object.assign(dataSource.manager, {
+      update: vi.fn(async () => undefined),
+      query: vi.fn(async () => undefined),
+    });
     const run = () =>
       (service as unknown as { categorize: (...args: unknown[]) => Promise<void> }).categorize(
         USER_ID,
         WORKSPACE_ID,
         [{ kind: 'statement', id: STATEMENT_ID }],
       );
-    return { run, classification, transactions };
+    return { run, classification, transactions, manager };
   };
 
-  it('stores what the rules and payee history decided for each row', async () => {
-    const { run, transactions } = setup([
-      { categoryId: 'groceries', categorySource: 'history', categoryReason: 'REWE' },
+  it('stores what the rules and payee history decided for each row, with the tags of a rule', async () => {
+    const { run, manager } = setup([
+      { categoryId: 'groceries', categorySource: 'rule', categoryReason: 'ACME is groceries', tags: [{ id: 'tag-food' }] },
       { categoryId: 'uncategorized', categorySource: 'default', categoryReason: null },
     ]);
 
     await run();
 
-    expect(transactions.update).toHaveBeenCalledWith(
+    expect(manager.update).toHaveBeenCalledWith(
+      Transaction,
       { id: 't-1', workspaceId: WORKSPACE_ID },
-      { categoryId: 'groceries', categorySource: 'history', categoryReason: 'REWE' },
+      { categoryId: 'groceries', categorySource: 'rule', categoryReason: 'ACME is groceries' },
     );
-    expect(transactions.update).toHaveBeenCalledWith(
+    expect(manager.update).toHaveBeenCalledWith(
+      Transaction,
       { id: 't-2', workspaceId: WORKSPACE_ID },
       { categoryId: 'uncategorized', categorySource: 'default', categoryReason: null },
     );
+    expect(manager.query).toHaveBeenCalledTimes(1);
+    expect((manager.query.mock.calls[0] as unknown as [string, unknown[]])[1]).toEqual([
+      WORKSPACE_ID,
+      ['t-1'],
+      ['tag-food'],
+    ]);
   });
 });

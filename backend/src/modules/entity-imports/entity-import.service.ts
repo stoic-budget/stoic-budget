@@ -30,6 +30,7 @@ import { Subscription } from '../../entities/subscription.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
+import { writeClassification } from '../classification/engine/rule-row-write';
 import { ClassificationService } from '../classification/services/classification.service';
 import { MetalsService } from '../investments/metals.service';
 import type { TransactionsImportedEvent } from '../notifications/events/notification-events';
@@ -329,16 +330,7 @@ export class EntityImportService {
       }
       for (const tx of uncategorized) {
         const result = await this.classificationService.classifyTransaction(tx, userId);
-        if (result.categoryId) {
-          await repo.update(
-            { id: tx.id, workspaceId },
-            {
-              categoryId: result.categoryId,
-              categorySource: result.categorySource ?? null,
-              categoryReason: result.categoryReason ?? null,
-            },
-          );
-        }
+        await writeClassification(this.dataSource.manager, tx, result);
       }
     } catch (error) {
       this.logger.warn(

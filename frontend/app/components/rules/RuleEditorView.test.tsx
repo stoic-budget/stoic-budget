@@ -135,6 +135,25 @@ describe('RuleEditorView', () => {
     );
   });
 
+  it('offers every way a bank says money moved as a payment type', async () => {
+    renderWithQuery(<RuleEditorView id="new" />);
+    await screen.findByRole('heading', { name: 'New rule' });
+
+    selectOption(screen.getAllByLabelText('Field')[0], 'Payment type');
+    fireEvent.mouseDown(screen.getAllByLabelText('Value')[0]);
+
+    expect(screen.getAllByRole('option').map(option => option.textContent)).toEqual([
+      'Card',
+      'Bank transfer in',
+      'Bank transfer out',
+      'Direct debit',
+      'Standing order',
+      'Cash',
+      'Fee',
+      'Interest',
+    ]);
+  });
+
   it('saves without a priority, so the server puts the new rule on top, then offers to refile', async () => {
     search.params = new URLSearchParams({ payee: STORE });
     renderWithQuery(<RuleEditorView id="new" />);

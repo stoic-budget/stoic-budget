@@ -39,6 +39,10 @@ export function evaluateCondition(
   }
 
   const conditionValue = condition.value;
+  // A stored amount reads back as "25.00": compared as text it never equals 25.
+  if (condition.field === 'amount' && condition.operator === 'equals') {
+    return Number(fieldValue) === Number(conditionValue);
+  }
   const fieldStr = String(fieldValue).toLowerCase();
   const conditionStr = String(conditionValue).toLowerCase();
 

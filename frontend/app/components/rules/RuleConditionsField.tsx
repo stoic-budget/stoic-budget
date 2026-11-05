@@ -49,11 +49,7 @@ export function RuleConditionsField({
   const choices: Partial<Record<RuleField, Option[]>> = {
     owner: ownerOptions,
     wallet: walletOptions,
-    // Only the two kinds the sample statement shows; the backend accepts all eight.
-    payment_type: [
-      { value: 'card', label: words.paymentType.card },
-      { value: 'bank_transfer_in', label: words.paymentType.bank_transfer_in },
-    ],
+    payment_type: Object.entries(words.paymentType).map(([value, label]) => ({ value, label })),
     direction: [
       { value: 'expense', label: words.direction.expense },
       { value: 'income', label: words.direction.income },
