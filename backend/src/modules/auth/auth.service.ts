@@ -553,10 +553,8 @@ export class AuthService {
     });
   }
 
-  private async generateTokens(
-    user: User,
-    sessionContext?: SessionContext,
-  ): Promise<AuthResponseDto> {
+  /** Also issues the session of a guest demo account (`demo-guests/`). */
+  async generateTokens(user: User, sessionContext?: SessionContext): Promise<AuthResponseDto> {
     const sessionId = randomUUID();
 
     const payload: JwtPayload = {

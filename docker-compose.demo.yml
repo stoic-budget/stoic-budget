@@ -1,0 +1,41 @@
+# Public demo instance: the regular stack plus a Cloudflare Tunnel, with guest
+# demo sessions turned on. Layered over the main file:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.demo.yml up -d
+#
+# Step by step (free Oracle VM, free tunnel): website/docs/deployment/public-demo.md.
+# The tunnel dials out to Cloudflare, so the VM needs no open inbound port
+# besides SSH. Keep the app's own ports on loopback through .env:
+# BACKEND_PORT=127.0.0.1:3001 and FRONTEND_PORT=127.0.0.1:3000.
+services:
+  backend:
+    environment:
+      - FRONTEND_URL=${DEMO_URL:?DEMO_URL is required, e.g. https://demo.example.com}
+      - APP_URL=${DEMO_URL}
+      - DEMO_GUESTS_ENABLED=true
+      - DEMO_GUEST_TTL_HOURS=${DEMO_GUEST_TTL_HOURS:-24}
+      - DEMO_GUESTS_MAX=${DEMO_GUESTS_MAX:-200}
+      # Requests arrive through Cloudflare, cloudflared and the frontend's proxy,
+      # all but the first on Docker's private network. Trusting private hops
+      # makes req.ip the visitor Cloudflare saw, so rate limits stay per visitor.
+      - TRUST_PROXY=loopback, uniquelocal
+
+  frontend:
+    environment:
+      - NEXT_PUBLIC_APP_URL=${DEMO_URL}
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.7
+    container_name: seneca-cloudflared
+    # A named tunnel (a stable address on your own Cloudflare domain) by default.
+    # Without a domain, CLOUDFLARED_COMMAND="tunnel --no-autoupdate --url http://frontend:3000"
+    # opens a quick tunnel instead: a random *.trycloudflare.com address, new on every restart.
+    command: ${CLOUDFLARED_COMMAND:-tunnel --no-autoupdate run}
+    environment:
+      # Zero Trust → Networks → Tunnels → your tunnel → the token in its install command.
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      - frontend
+    networks:
+      - finflow-network
+    restart: unless-stopped

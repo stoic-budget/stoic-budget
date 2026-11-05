@@ -13,6 +13,7 @@ export const PUBLIC_PREFIXES = [
   '/forgot-password',
   '/reset-password',
   '/verify-email',
+  '/try',
   '/invite',
 ] as const;
 

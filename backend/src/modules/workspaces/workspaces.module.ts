@@ -24,6 +24,6 @@ import { WorkspacesService } from './workspaces.service';
   providers: [WorkspacesService, WorkspaceBackgroundsService, DemoWorkspaceService],
   // Backgrounds first: its literal `backgrounds/...` paths must not be read as a workspace id.
   controllers: [WorkspaceBackgroundsController, WorkspacesController],
-  exports: [WorkspacesService],
+  exports: [WorkspacesService, DemoWorkspaceService],
 })
 export class WorkspacesModule {}

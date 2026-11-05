@@ -38,7 +38,7 @@ jobs:
             -w /project \
             openpolicyagent/conftest:v0.56.0 \
             test -p infra/policy/docker-compose \
-            docker-compose.yml docker-compose.dev.yml
+            docker-compose.yml docker-compose.dev.yml docker-compose.demo.yml
 
       - name: Conftest (GitHub workflows)
         run: |

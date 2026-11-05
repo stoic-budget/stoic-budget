@@ -16,9 +16,13 @@ import {
 import { AuditModule } from '../audit/audit.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { MailerModule } from '../mailer/mailer.module';
+import { WorkspacesModule } from '../workspaces/workspaces.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthDevBootstrapService } from './auth-dev-bootstrap.service';
+import { DemoGuestsController } from './demo-guests/demo-guests.controller';
+import { DemoGuestsScheduler } from './demo-guests/demo-guests.scheduler';
+import { DemoGuestsService } from './demo-guests/demo-guests.service';
 import { PasswordResetService } from './password-reset.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
@@ -37,6 +41,7 @@ import { TwoFactorService } from './two-factor.service';
     AuditModule,
     CategoriesModule,
     MailerModule,
+    WorkspacesModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -52,12 +57,14 @@ import { TwoFactorService } from './two-factor.service';
       inject: [ConfigService],
     }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, DemoGuestsController],
   providers: [
     AuthService,
     TwoFactorService,
     PasswordResetService,
     AuthDevBootstrapService,
+    DemoGuestsService,
+    DemoGuestsScheduler,
     JwtStrategy,
     JwtRefreshStrategy,
   ],
