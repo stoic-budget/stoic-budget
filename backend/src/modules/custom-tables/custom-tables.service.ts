@@ -15,7 +15,6 @@ import {
   IsNull,
   Not,
   type QueryDeepPartialEntity,
-  QueryFailedError,
   type Repository,
   type SelectQueryBuilder,
 } from 'typeorm';
@@ -32,7 +31,6 @@ import { resolveUploadsDir } from '../../common/utils/uploads.util';
 import type {
   BatchCreateCustomTableRowsBody,
   ClassifyPaidStatusBody,
-  ColumnStylePartInput,
   CreateCustomTableBody,
   CreateCustomTableColumnBody,
   CreateCustomTableFromDataEntryBody,
@@ -43,7 +41,6 @@ import type {
   PreviewFormulaBody,
   ReorderCustomTableColumnsBody,
   RestoredTableDefault,
-  SourceFiltersInput,
   UpdateCustomTableBody,
   UpdateCustomTableColumnBody,
   UpdateCustomTableColumnStyleBody,
@@ -85,13 +82,23 @@ import { DataEntryToCustomTableScope } from './dto/create-custom-table-from-data
 import {
   CUSTOM_TABLE_AGGREGATE_FNS,
   type CustomTableAggregateDto,
-  type CustomTableAggregateFn,
   type CustomTableAggregateResult,
   type CustomTableRowFilterDto,
   type CustomTableRowSortDto,
 } from './dto/list-custom-table-rows.dto';
-import { FormulaRecalcService, formulaColumnsOf } from './formula-recalc.service';
+import { FormulaRecalcService } from './formula-recalc.service';
+import {
+  describeValidationError,
+  formulaHasCycle,
+  formulaTypeOfColumn,
+  mergeColumnStyle,
+  resolveFormulaTitles,
+  storageTypeOf,
+  validateNumberConfig,
+  validateSelectConfig,
+} from './helpers/column-config';
 import { convertedRowFingerprint, flagRepeatedRows } from './helpers/converted-repeats';
+import { type DataEntryFieldKey, getDataEntryColumnMapping } from './helpers/data-entry-columns';
 import {
   assertValidFormula,
   collectFieldRefs,
@@ -104,6 +111,33 @@ import {
 } from './helpers/formula-evaluator';
 import { detectPaidStatus, type PaidStatusInput } from './helpers/paid-status.helper';
 import {
+  applyFormulaColumns,
+  attachColumnStyles,
+  collectRowText,
+  getPaidStatusFieldKeys,
+  getRowDataValue,
+  getViewSettingsColumns,
+  getViewSettingsObject,
+  isBlankCellValue,
+  isUuid,
+  type JsonObject,
+  mergeRowStyles,
+  readSummaries,
+  sameCellValue,
+  sanitizeRowData,
+  toRowDataRecord,
+} from './helpers/row-data';
+import { applyRowFilters } from './helpers/row-filters';
+import {
+  applyRowSort,
+  buildAggregateSelections,
+  buildTypedValueExprs,
+  exportCellValue,
+  exportHeader,
+  normalizeAggregateValue,
+} from './helpers/row-query';
+import { throwHelpfulSchemaError } from './helpers/schema-error';
+import {
   columnSourceConfig,
   generateColumnKey,
   newSourceColumns,
@@ -111,44 +145,23 @@ import {
   sourceColumnConfig,
   sourceFields,
 } from './helpers/source-columns';
-import { orderFormulaColumns } from './helpers/table-evaluator';
+import { fetchSourceRows, normalizeSourceFilters } from './helpers/source-rows';
+import {
+  buildConversionMapping,
+  buildConvertedCsv,
+  type ConvertedTransactionInput,
+  parseConversionDate,
+  parsePositiveAmount,
+  readScalarString,
+  toDateOnly,
+} from './helpers/statement-conversion';
 import type { SourceAdapter, SourceFilters, SourceRow, SourceValue } from './sources/source.types';
-import { MAX_SOURCE_ROWS } from './sources/source.utils';
 import { SourceWriteBackService } from './write-back/source-write-back.service';
 
-type DataEntryFieldKey = 'date' | 'type' | 'amount' | 'currency' | 'note';
-type JsonObject = Record<string, unknown>;
-type RowDataValue = string | number | boolean | null | undefined | JsonObject | RowDataValue[];
-type RowDataRecord = Record<string, RowDataValue>;
-type DriverErrorLike = { driverError?: { code?: string } };
-type RowStylesRecord = Record<string, JsonObject>;
 type CustomTableWithViewSettings = CustomTable & { viewSettings?: JsonObject };
-type ColumnWithStyle = CustomTableColumn & { style?: CustomTableColumnStyle['style'] | null };
+
 type ColumnDefinitionConfig = JsonObject | null;
 type RowInsertData = Record<string, string | number | null>;
-/**
- * Деньги — это число с оформлением: сравнения, сортировка, итоги и выгрузка
- * обязаны обращаться с ними так же, как с NUMBER.
- */
-function isNumericColumnType(columnType: CustomTableColumnType): boolean {
-  return (
-    columnType === CustomTableColumnType.NUMBER || columnType === CustomTableColumnType.CURRENCY
-  );
-}
-
-type ViewSettingsColumns = Record<string, { width?: number; aggregate?: CustomTableAggregateFn }>;
-type QueryParams = Record<string, string | number | boolean | string[] | number[] | null>;
-type ConversionField = 'date' | 'amount' | 'merchant' | 'purpose' | 'article' | 'currency';
-type ConversionMapping = Partial<Record<ConversionField, string>>;
-type ConvertedTransactionInput = {
-  rowNumber: number;
-  transactionDate: Date;
-  merchant: string;
-  purpose: string;
-  amount: number;
-  currency: string;
-  article: string | null;
-};
 
 @Injectable()
 export class CustomTablesService {
@@ -199,82 +212,6 @@ export class CustomTablesService {
     @Optional() private readonly eventEmitter?: EventEmitter2,
   ) {}
 
-  private getDriverErrorCode(error: unknown): string | undefined {
-    return typeof error === 'object' && error !== null
-      ? (error as DriverErrorLike).driverError?.code
-      : undefined;
-  }
-
-  private toRowDataRecord(data: unknown): RowDataRecord {
-    return typeof data === 'object' && data !== null && !Array.isArray(data)
-      ? (data as RowDataRecord)
-      : {};
-  }
-
-  private getRowDataValue(data: Record<string, unknown>, key: string): unknown {
-    return data[key];
-  }
-
-  private getViewSettingsObject(table: CustomTable): JsonObject {
-    return table.viewSettings && typeof table.viewSettings === 'object'
-      ? (table.viewSettings as JsonObject)
-      : {};
-  }
-
-  private getViewSettingsColumns(viewSettings: JsonObject): ViewSettingsColumns {
-    const columns = viewSettings.columns;
-    return typeof columns === 'object' && columns !== null ? (columns as ViewSettingsColumns) : {};
-  }
-
-  private attachColumnStyles(
-    columns: CustomTableColumn[],
-    stylesByKey: Map<string, CustomTableColumnStyle['style']>,
-  ): ColumnWithStyle[] {
-    return columns.map(column => {
-      const columnWithStyle = column as ColumnWithStyle;
-      columnWithStyle.style = stylesByKey.get(column.key) || null;
-      return columnWithStyle;
-    });
-  }
-
-  private mergeRowStyles(
-    rows: CustomTableRow[],
-    cellStyles: CustomTableCellStyle[],
-  ): CustomTableRow[] {
-    const stylesByRowId = new Map<string, JsonObject>();
-    rows.forEach(row => {
-      if (row.styles && typeof row.styles === 'object') {
-        stylesByRowId.set(row.id, row.styles as JsonObject);
-      }
-    });
-
-    const byRow: RowStylesRecord = {};
-    for (const style of cellStyles) {
-      const current = byRow[style.rowId] || {};
-      current[style.columnKey] = style.style as JsonObject;
-      byRow[style.rowId] = current;
-    }
-
-    rows.forEach(row => {
-      row.styles = {
-        ...(byRow[row.id] || {}),
-        ...(stylesByRowId.get(row.id) || {}),
-      };
-    });
-
-    return rows;
-  }
-
-  private throwHelpfulSchemaError(error: unknown): never {
-    if (error instanceof QueryFailedError) {
-      const code = this.getDriverErrorCode(error);
-      if (code === '42P01' || code === '42703') {
-        throw new BadRequestException(appError('TABLE_SCHEMA_OUTDATED'));
-      }
-    }
-    throw error;
-  }
-
   private async ensureCanEditCustomTables(userId: string, workspaceId: string): Promise<void> {
     await ensureCanEdit(
       this.workspaceMemberRepository,
@@ -293,37 +230,6 @@ export class CustomTablesService {
       'canEditStatements',
       'STATEMENTS_EDIT_FORBIDDEN',
     );
-  }
-
-  private normalizeColumnText(value: string | null | undefined): string {
-    return (value || '').trim().toLowerCase();
-  }
-
-  private getColumnSearchText(column: CustomTableColumn): string {
-    const source = columnSourceConfig(column.config);
-    return [column.title, column.key, source?.field, source?.name, source?.kind]
-      .map(value => this.normalizeColumnText(value))
-      .filter(Boolean)
-      .join(' ');
-  }
-
-  private findConversionColumnKey(
-    columns: CustomTableColumn[],
-    tokens: string[],
-  ): string | undefined {
-    const normalizedTokens = tokens.map(token => token.toLowerCase());
-    const exact = columns.find(column => {
-      const source = columnSourceConfig(column.config);
-      const sourceField = this.normalizeColumnText(source?.field);
-      return sourceField && normalizedTokens.includes(sourceField);
-    });
-    if (exact) {
-      return exact.key;
-    }
-    return columns.find(column => {
-      const haystack = this.getColumnSearchText(column);
-      return normalizedTokens.some(token => haystack.includes(token));
-    })?.key;
   }
 
   /**
@@ -365,116 +271,6 @@ export class CustomTablesService {
     }
   }
 
-  private buildConversionMapping(columns: CustomTableColumn[]): ConversionMapping {
-    return {
-      date: this.findConversionColumnKey(columns, ['date', 'дата']),
-      amount: this.findConversionColumnKey(columns, ['amount', 'сумма', 'debit', 'расход']),
-      merchant: this.findConversionColumnKey(columns, [
-        'merchant',
-        'counterparty',
-        'payee',
-        'vendor',
-        'client',
-        'контрагент',
-        'поставщик',
-        'клиент',
-        'магазин',
-      ]),
-      purpose: this.findConversionColumnKey(columns, [
-        'purpose',
-        'description',
-        'назначение',
-        'описание',
-      ]),
-      article: this.findConversionColumnKey(columns, ['article', 'статья']),
-      currency: this.findConversionColumnKey(columns, ['currency', 'валюта']),
-    };
-  }
-
-  private readScalarString(data: RowDataRecord, key?: string): string {
-    if (!key) {
-      return '';
-    }
-    const value = this.getRowDataValue(data, key);
-    if (
-      value === null ||
-      value === undefined ||
-      Array.isArray(value) ||
-      typeof value === 'object'
-    ) {
-      return '';
-    }
-    return String(value).trim();
-  }
-
-  private parseConversionDate(value: unknown): Date | null {
-    if (value instanceof Date) {
-      return Number.isNaN(value.getTime()) ? null : value;
-    }
-    if (value === null || value === undefined) {
-      return null;
-    }
-    const raw = String(value).trim();
-    if (!raw) {
-      return null;
-    }
-    const dateOnly = raw.match(/^\d{4}-\d{2}-\d{2}/)?.[0];
-    const parsed = new Date(dateOnly ? `${dateOnly}T00:00:00.000Z` : raw);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  }
-
-  private parsePositiveAmount(value: unknown): number | null {
-    if (value === null || value === undefined || value === '') {
-      return null;
-    }
-    const normalized =
-      typeof value === 'number'
-        ? value
-        : Number(
-            String(value)
-              .trim()
-              .replace(/\s+/g, '')
-              .replace(',', '.')
-              .replace(/[^\d.-]/g, ''),
-          );
-    if (!Number.isFinite(normalized) || normalized <= 0) {
-      return null;
-    }
-    return Number(normalized.toFixed(2));
-  }
-
-  private toDateOnly(value: Date): string {
-    return value.toISOString().slice(0, 10);
-  }
-
-  private escapeCsvValue(value: string): string {
-    // Neutralize before quoting: quoting keeps the CSV well-formed but does not
-    // stop Excel or Sheets from evaluating a cell that begins with = + - @, and
-    // this content originates from imported statements and receipts.
-    const safe = neutralizeSpreadsheetFormulaCell(value) as string;
-    if (safe.includes(',') || safe.includes('"') || safe.includes('\n')) {
-      return `"${safe.replaceAll('"', '""')}"`;
-    }
-    return safe;
-  }
-
-  private buildConvertedCsv(rows: ConvertedTransactionInput[]): Buffer {
-    const lines = [
-      'date,merchant,purpose,article,amount,currency',
-      ...rows.map(row =>
-        [
-          this.toDateOnly(row.transactionDate),
-          this.escapeCsvValue(row.merchant),
-          this.escapeCsvValue(row.purpose),
-          this.escapeCsvValue(row.article || ''),
-          row.amount.toFixed(2),
-          row.currency,
-        ].join(','),
-      ),
-    ];
-    return Buffer.from(lines.join('\n'), 'utf8');
-  }
-
   private async findConvertedStatement(
     workspaceId: string,
     tableId: string,
@@ -492,7 +288,7 @@ export class CustomTablesService {
         })
         .getOne();
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
   }
 
@@ -506,7 +302,7 @@ export class CustomTablesService {
 
       category = await qb.getOne();
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     if (!category) {
       throw new BadRequestException(appError('CATEGORY_NOT_FOUND'));
@@ -515,7 +311,7 @@ export class CustomTablesService {
   }
 
   private async requireTable(workspaceId: string, tableId: string): Promise<CustomTable> {
-    if (!this.isUuid(tableId)) {
+    if (!isUuid(tableId)) {
       throw new BadRequestException(appError('TABLE_ID_INVALID'));
     }
     try {
@@ -531,30 +327,9 @@ export class CustomTablesService {
       }
       return table;
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     throw new NotFoundException(appError('TABLE_NOT_FOUND'));
-  }
-
-  private isUuid(value: string): boolean {
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
-  }
-
-  private sanitizeRowData(
-    data: Record<string, unknown>,
-    allowedKeys: Set<string>,
-  ): Record<string, unknown> {
-    if (!data || typeof data !== 'object' || Array.isArray(data)) {
-      return {};
-    }
-
-    const sanitized: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(data)) {
-      if (allowedKeys.has(key)) {
-        sanitized[key] = value;
-      }
-    }
-    return sanitized;
   }
 
   private async getAllowedColumnKeys(tableId: string): Promise<Set<string>> {
@@ -565,136 +340,6 @@ export class CustomTablesService {
       },
     });
     return new Set(columns.map(c => c.key));
-  }
-
-  private getPaidStatusFieldKeys(columns: CustomTableColumn[]): {
-    commentKeys: string[];
-    counterpartyKeys: string[];
-  } {
-    const commentPatterns = [
-      /comment/i,
-      /purpose/i,
-      /description/i,
-      /note/i,
-      /memo/i,
-      /details/i,
-      /назнач/i,
-      /комментар/i,
-      /описан/i,
-      /примеч/i,
-      /платеж/i,
-    ];
-    const counterpartyPatterns = [
-      /counterparty/i,
-      /merchant/i,
-      /supplier/i,
-      /partner/i,
-      /vendor/i,
-      /payer/i,
-      /receiver/i,
-      /beneficiar/i,
-      /контраг/i,
-      /получател/i,
-      /плательщик/i,
-      /бенефиц/i,
-    ];
-
-    const commentKeys: string[] = [];
-    const counterpartyKeys: string[] = [];
-    for (const column of columns) {
-      const hay = `${column.title || ''} ${column.key || ''}`.toLowerCase();
-      if (commentPatterns.some(re => re.test(hay))) {
-        commentKeys.push(column.key);
-      }
-      if (counterpartyPatterns.some(re => re.test(hay))) {
-        counterpartyKeys.push(column.key);
-      }
-    }
-    return { commentKeys, counterpartyKeys };
-  }
-
-  private collectRowText(data: Record<string, unknown>, keys: string[]): string {
-    if (!data || typeof data !== 'object') {
-      return '';
-    }
-    const parts: string[] = [];
-    for (const key of keys) {
-      const value = this.getRowDataValue(data, key);
-      if (value === null || value === undefined) {
-        continue;
-      }
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          if (item === null || item === undefined) {
-            continue;
-          }
-          if (typeof item === 'object') {
-            continue;
-          }
-          const str = String(item).trim();
-          if (str) {
-            parts.push(str);
-          }
-        }
-        continue;
-      }
-      if (typeof value === 'object') {
-        continue;
-      }
-      const str = String(value).trim();
-      if (str) {
-        parts.push(str);
-      }
-    }
-    return parts.join(' ').trim();
-  }
-
-  private getDataEntryColumnMapping(columns: CustomTableColumn[]): {
-    fieldKeyByName: Partial<Record<DataEntryFieldKey, string>>;
-    customFieldKeyByName: Map<string, string>;
-  } {
-    const fieldKeyByName: Partial<Record<DataEntryFieldKey, string>> = {};
-    const customFieldKeyByName = new Map<string, string>();
-    const titleToField: Record<string, DataEntryFieldKey> = {
-      дата: 'date',
-      тип: 'type',
-      сумма: 'amount',
-      валюта: 'currency',
-      комментарий: 'note',
-    };
-
-    for (const column of columns) {
-      const source = columnSourceConfig(column.config);
-      if (
-        source?.kind === 'data_entry_field' &&
-        source.field &&
-        !fieldKeyByName[source.field as DataEntryFieldKey]
-      ) {
-        fieldKeyByName[source.field as DataEntryFieldKey] = column.key;
-      }
-      if (
-        source?.kind === 'data_entry_custom_tab' &&
-        source.field &&
-        !fieldKeyByName[source.field as DataEntryFieldKey]
-      ) {
-        fieldKeyByName[source.field as DataEntryFieldKey] = column.key;
-      }
-      if (
-        source?.kind === 'data_entry_custom_field' &&
-        source.name &&
-        !customFieldKeyByName.has(source.name)
-      ) {
-        customFieldKeyByName.set(source.name, column.key);
-      }
-
-      const normalizedTitle = column.title?.trim().toLowerCase();
-      const fallbackField = normalizedTitle ? titleToField[normalizedTitle] : undefined;
-      if (fallbackField && !fieldKeyByName[fallbackField]) {
-        fieldKeyByName[fallbackField] = column.key;
-      }
-    }
-
-    return { fieldKeyByName, customFieldKeyByName };
   }
 
   private async getNextColumnPosition(tableId: string): Promise<number> {
@@ -807,7 +452,7 @@ export class CustomTablesService {
     try {
       saved = await this.customTableRepository.save(table);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
@@ -831,7 +476,7 @@ export class CustomTablesService {
 
       return await qb.getMany();
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
   }
 
@@ -844,7 +489,7 @@ export class CustomTablesService {
         relations: { columns: true, category: true },
       });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     if (!table) {
       throw new NotFoundException(appError('TABLE_NOT_FOUND'));
@@ -861,7 +506,7 @@ export class CustomTablesService {
         },
       });
       const byKey = new Map(styles.map(s => [s.columnKey, s.style]));
-      table.columns = this.attachColumnStyles(table.columns, byKey);
+      table.columns = attachColumnStyles(table.columns, byKey);
     } catch (_error) {
       this.logger.warn(`Failed to load column styles for tableId=${tableId}`);
     }
@@ -892,7 +537,7 @@ export class CustomTablesService {
     try {
       saved = await this.customTableRepository.save(table);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
@@ -928,7 +573,7 @@ export class CustomTablesService {
 
       entries = await qb.getMany();
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     if (!entries.length) {
@@ -1048,7 +693,7 @@ export class CustomTablesService {
         }),
       );
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     await this.logEvent({
@@ -1084,7 +729,7 @@ export class CustomTablesService {
         ),
       );
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     const keyByDefId = new Map<string, string>();
@@ -1147,7 +792,7 @@ export class CustomTablesService {
       try {
         await this.customTableRowRepository.save(chunk);
       } catch (error) {
-        this.throwHelpfulSchemaError(error);
+        throwHelpfulSchemaError(error);
       }
     }
 
@@ -1185,7 +830,7 @@ export class CustomTablesService {
 
       customTab = await qb.getOne();
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     if (!customTab) {
       throw new BadRequestException(appError('VIEW_NOT_FOUND'));
@@ -1202,7 +847,7 @@ export class CustomTablesService {
 
       entries = await qb.getMany();
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     if (!entries.length) {
@@ -1229,7 +874,7 @@ export class CustomTablesService {
         }),
       );
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     await this.logEvent({
@@ -1319,7 +964,7 @@ export class CustomTablesService {
         ),
       );
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     const keyByDefId = new Map<string, string>();
@@ -1359,7 +1004,7 @@ export class CustomTablesService {
       try {
         await this.customTableRowRepository.save(chunk);
       } catch (error) {
-        this.throwHelpfulSchemaError(error);
+        throwHelpfulSchemaError(error);
       }
     }
 
@@ -1398,7 +1043,7 @@ export class CustomTablesService {
 
       table = await qb.getOne();
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     if (!table) {
       throw new NotFoundException(appError('TABLE_NOT_FOUND'));
@@ -1430,11 +1075,11 @@ export class CustomTablesService {
 
       entries = await qb.getMany();
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     const columns = (table.columns || []).sort((a, b) => a.position - b.position);
-    const { fieldKeyByName, customFieldKeyByName } = this.getDataEntryColumnMapping(columns);
+    const { fieldKeyByName, customFieldKeyByName } = getDataEntryColumnMapping(columns);
 
     const requiredFields: DataEntryFieldKey[] = ['date', 'amount', 'currency', 'note'];
     if (!isCustomTab && table.dataEntryScope === DataEntryToCustomTableScope.ALL) {
@@ -1564,7 +1209,7 @@ export class CustomTablesService {
     const adapter = this.requireSources().get(binding.kind);
 
     const report = await this.sourceWriteBack.revertTable({ userId, workspaceId, table });
-    const sourceRows = await this.fetchSourceRows(
+    const sourceRows = await fetchSourceRows(
       adapter,
       workspaceId,
       binding.filters as SourceFilters,
@@ -1669,37 +1314,6 @@ export class CustomTablesService {
     return { tableId, ...report, rows: applied.total };
   }
 
-  private async fetchSourceRows(
-    adapter: SourceAdapter,
-    workspaceId: string,
-    filters: SourceFilters,
-  ): Promise<SourceRow[]> {
-    const rows = await adapter.fetchRows(workspaceId, filters);
-    if (rows.length > MAX_SOURCE_ROWS) {
-      throw new BadRequestException(appError('SOURCE_TOO_MANY_ROWS', { limit: MAX_SOURCE_ROWS }));
-    }
-    return rows;
-  }
-
-  /** Empty filter values are dropped so the stored binding equals what the preview used. */
-  private normalizeSourceFilters(filters: SourceFiltersInput | undefined): JsonObject {
-    const normalized: JsonObject = {};
-    for (const [key, value] of Object.entries(filters ?? {})) {
-      if (value === undefined || value === null || value === '') {
-        continue;
-      }
-      if (Array.isArray(value) && !value.length) {
-        continue;
-      }
-      normalized[key] = value;
-    }
-    return normalized;
-  }
-
-  private sameCellValue(current: unknown, next: SourceValue): boolean {
-    return JSON.stringify(current ?? null) === JSON.stringify(next ?? null);
-  }
-
   async previewSource(
     userId: string,
     workspaceId: string,
@@ -1712,12 +1326,10 @@ export class CustomTablesService {
   }> {
     await this.ensureCanEditCustomTables(userId, workspaceId);
     const adapter = this.requireSources().get(dto.kind);
-    const rows = await this.fetchSourceRows(
+    const rows = await fetchSourceRows(
       adapter,
       workspaceId,
-      this.normalizeSourceFilters(
-        dto.filters ? withoutNulls(dto.filters) : undefined,
-      ) as SourceFilters,
+      normalizeSourceFilters(dto.filters ? withoutNulls(dto.filters) : undefined) as SourceFilters,
     );
     return {
       count: rows.length,
@@ -1744,10 +1356,8 @@ export class CustomTablesService {
   ): Promise<{ tableId: string; columnsCreated: number; rowsCreated: number }> {
     await this.ensureCanEditCustomTables(userId, workspaceId);
     const adapter = this.requireSources().get(dto.kind);
-    const filters = this.normalizeSourceFilters(
-      dto.filters ? withoutNulls(dto.filters) : undefined,
-    );
-    const sourceRows = await this.fetchSourceRows(adapter, workspaceId, filters as SourceFilters);
+    const filters = normalizeSourceFilters(dto.filters ? withoutNulls(dto.filters) : undefined);
+    const sourceRows = await fetchSourceRows(adapter, workspaceId, filters as SourceFilters);
     if (!sourceRows.length) {
       throw new BadRequestException(appError('SOURCE_EMPTY'));
     }
@@ -1775,7 +1385,7 @@ export class CustomTablesService {
         }),
       );
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     let columns: CustomTableColumn[];
@@ -1795,7 +1405,7 @@ export class CustomTablesService {
         ),
       );
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     await this.logEvent({
@@ -1834,7 +1444,7 @@ export class CustomTablesService {
         .andWhere('table.workspaceId = :workspaceId', { workspaceId })
         .getOne();
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     if (!table) {
       throw new NotFoundException(appError('TABLE_NOT_FOUND'));
@@ -1844,7 +1454,7 @@ export class CustomTablesService {
       throw new BadRequestException(appError('TABLE_NOT_LINKED_TO_SOURCE'));
     }
     const adapter = this.requireSources().get(binding.kind);
-    const sourceRows = await this.fetchSourceRows(
+    const sourceRows = await fetchSourceRows(
       adapter,
       workspaceId,
       (binding.filters ?? {}) as SourceFilters,
@@ -1927,7 +1537,7 @@ export class CustomTablesService {
       );
       return [...existing, ...created];
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
   }
 
@@ -1972,7 +1582,7 @@ export class CustomTablesService {
         },
       });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     const existingByKey = new Map<string, CustomTableRow>();
     for (const row of existing) {
@@ -2005,9 +1615,9 @@ export class CustomTablesService {
         nextRowNumber += 1;
         continue;
       }
-      const data = this.toRowDataRecord(current.data);
+      const data = toRowDataRecord(current.data);
       const changed = Object.entries(patch).some(
-        ([key, value]) => !this.sameCellValue(data[key], value),
+        ([key, value]) => !sameCellValue(data[key], value),
       );
       if (changed) {
         toUpdate.push({ id: current.id, patch });
@@ -2046,7 +1656,7 @@ export class CustomTablesService {
         );
       });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     await this.logRowBatchCreate({
@@ -2100,7 +1710,7 @@ export class CustomTablesService {
         }),
       ]);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     if (!columns.length) {
@@ -2110,7 +1720,7 @@ export class CustomTablesService {
       throw new BadRequestException(appError('TABLE_NO_ROWS_TO_CONVERT'));
     }
 
-    const mapping = this.buildConversionMapping(columns);
+    const mapping = buildConversionMapping(columns);
     const missingRequired = [
       !mapping.date ? 'date' : null,
       !mapping.amount ? 'amount' : null,
@@ -2134,12 +1744,12 @@ export class CustomTablesService {
     const warnings: string[] = [];
 
     for (const row of rows) {
-      const data = this.toRowDataRecord(row.data);
-      const transactionDate = this.parseConversionDate(
-        mapping.date ? this.getRowDataValue(data, mapping.date) : null,
+      const data = toRowDataRecord(row.data);
+      const transactionDate = parseConversionDate(
+        mapping.date ? getRowDataValue(data, mapping.date) : null,
       );
-      const amount = this.parsePositiveAmount(
-        mapping.amount ? this.getRowDataValue(data, mapping.amount) : null,
+      const amount = parsePositiveAmount(
+        mapping.amount ? getRowDataValue(data, mapping.amount) : null,
       );
 
       if (!transactionDate) {
@@ -2151,12 +1761,12 @@ export class CustomTablesService {
         continue;
       }
 
-      const merchant = this.readScalarString(data, mapping.merchant) || table.name;
-      const purpose = this.readScalarString(data, mapping.purpose) || merchant;
-      const currency = (this.readScalarString(data, mapping.currency) || defaultCurrency)
+      const merchant = readScalarString(data, mapping.merchant) || table.name;
+      const purpose = readScalarString(data, mapping.purpose) || merchant;
+      const currency = (readScalarString(data, mapping.currency) || defaultCurrency)
         .trim()
         .toUpperCase();
-      const article = this.readScalarString(data, mapping.article) || null;
+      const article = readScalarString(data, mapping.article) || null;
 
       converted.push({
         rowNumber: row.rowNumber,
@@ -2174,7 +1784,7 @@ export class CustomTablesService {
     }
 
     const existingStatement = await this.findConvertedStatement(workspaceId, tableId);
-    const csv = this.buildConvertedCsv(converted);
+    const csv = buildConvertedCsv(converted);
     const fileName = normalizeFilename(`${table.name}-expenses.csv`);
     const filePath =
       existingStatement?.filePath || path.join(resolveUploadsDir(), `${randomUUID()}.csv`);
@@ -2217,8 +1827,8 @@ export class CustomTablesService {
         transactionsCreated: converted.length,
         warnings,
         metadataExtracted: {
-          dateFrom: this.toDateOnly(statementDateFrom),
-          dateTo: this.toDateOnly(statementDateTo),
+          dateFrom: toDateOnly(statementDateFrom),
+          dateTo: toDateOnly(statementDateTo),
           currency,
         },
         importPreview: {
@@ -2261,7 +1871,7 @@ export class CustomTablesService {
       this.transactionRepository.create({
         workspaceId,
         statementId: savedStatement.id,
-        transactionDate: new Date(this.toDateOnly(row.transactionDate)),
+        transactionDate: new Date(toDateOnly(row.transactionDate)),
         counterpartyName: row.merchant,
         paymentPurpose: row.purpose,
         debit: row.amount,
@@ -2327,7 +1937,7 @@ export class CustomTablesService {
     try {
       await this.customTableRepository.delete({ id: table.id });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
@@ -2338,155 +1948,6 @@ export class CustomTablesService {
       diff: { before: table, after: null },
       isUndoable: true,
     });
-  }
-
-  /**
-   * Опции select: строки или объекты { value, label?, color? }; значения
-   * уникальны, цвет — #rrggbb. В ячейке хранится только value.
-   */
-  private validateSelectConfig(
-    type: CustomTableColumnType | undefined,
-    config: Record<string, unknown> | null | undefined,
-  ): void {
-    if (
-      !config ||
-      config.options === undefined ||
-      (type !== CustomTableColumnType.SELECT && type !== CustomTableColumnType.MULTI_SELECT)
-    ) {
-      return;
-    }
-    const raw = config.options;
-    if (!Array.isArray(raw)) {
-      throw new BadRequestException(appError('COLUMN_OPTIONS_INVALID'));
-    }
-    const seen = new Set<string>();
-    for (const item of raw) {
-      const value =
-        typeof item === 'string'
-          ? item.trim()
-          : item &&
-              typeof item === 'object' &&
-              typeof (item as { value?: unknown }).value === 'string'
-            ? ((item as { value: string }).value ?? '').trim()
-            : '';
-      const color =
-        item && typeof item === 'object' ? (item as { color?: unknown }).color : undefined;
-      const label =
-        item && typeof item === 'object' ? (item as { label?: unknown }).label : undefined;
-      const colorOk =
-        color === undefined || (typeof color === 'string' && /^#[0-9a-f]{6}$/i.test(color));
-      const labelOk = label === undefined || typeof label === 'string';
-      if (!value || seen.has(value) || !colorOk || !labelOk) {
-        throw new BadRequestException(appError('COLUMN_OPTIONS_INVALID'));
-      }
-      seen.add(value);
-    }
-  }
-
-  /**
-   * Валюта, точность и формат числовых колонок: невалидный код валюты ронял
-   * бы Intl в браузере, а точность вне 0..6 бессмысленна для денег.
-   * Код валюты нормализуется к верхнему регистру прямо в конфиге.
-   */
-  private validateNumberConfig(
-    type: CustomTableColumnType | undefined,
-    config: Record<string, unknown> | null | undefined,
-  ): void {
-    if (!config) {
-      return;
-    }
-    const numeric =
-      type === CustomTableColumnType.NUMBER ||
-      type === CustomTableColumnType.CURRENCY ||
-      type === CustomTableColumnType.FORMULA;
-    if (!numeric) {
-      return;
-    }
-    if (config.currency !== undefined) {
-      const code = String(config.currency).trim().toUpperCase();
-      if (!/^[A-Z]{3}$/.test(code)) {
-        throw new BadRequestException(appError('COLUMN_CURRENCY_INVALID'));
-      }
-      config.currency = code;
-    }
-    if (config.precision !== undefined) {
-      const precision = config.precision;
-      if (
-        typeof precision !== 'number' ||
-        !Number.isInteger(precision) ||
-        precision < 0 ||
-        precision > 6
-      ) {
-        throw new BadRequestException(appError('COLUMN_PRECISION_INVALID'));
-      }
-    }
-    if (config.format !== undefined && config.format !== 'plain' && config.format !== 'percent') {
-      throw new BadRequestException(appError('COLUMN_FORMAT_INVALID'));
-    }
-  }
-
-  /**
-   * Формула проверяется при сохранении колонки: здесь ошибку надо показать,
-   * в отличие от вычисления строк, где сбой даёт пустую ячейку.
-   */
-  /**
-   * Названия колонок в [квадратных скобках] переводятся в ключи: человек пишет
-   * [Сумма], а хранится [col_…], поэтому переименование колонки формулу не ломает.
-   */
-  private resolveFormulaTitles(
-    expression: string,
-    columns: Array<{ key: string; title: string }>,
-  ): string {
-    const keys = new Set(columns.map(col => col.key));
-    const byTitle = new Map(columns.map(col => [col.title.trim().toLowerCase(), col.key]));
-    return expression.replace(/\[([^\]]{1,120})\]/g, (match, ref: string) => {
-      const trimmed = ref.trim();
-      if (keys.has(trimmed)) {
-        return `[${trimmed}]`;
-      }
-      const key = byTitle.get(trimmed.toLowerCase());
-      return key ? `[${key}]` : match;
-    });
-  }
-
-  private formulaTypeOfColumn(column: {
-    type: CustomTableColumnType;
-    config: CustomTableColumn['config'];
-  }): FormulaResultType {
-    switch (column.type) {
-      case CustomTableColumnType.NUMBER:
-      case CustomTableColumnType.CURRENCY:
-        return 'number';
-      case CustomTableColumnType.DATE:
-        return 'date';
-      case CustomTableColumnType.BOOLEAN:
-        return 'boolean';
-      case CustomTableColumnType.FORMULA: {
-        const declared = column.config?.resultType;
-        return declared === 'text' || declared === 'boolean' || declared === 'date'
-          ? declared
-          : 'number';
-      }
-      default:
-        return 'text';
-    }
-  }
-
-  private formulaHasCycle(start: string, refsByKey: Map<string, string[]>): boolean {
-    const visited = new Set<string>();
-    const stack = [...(refsByKey.get(start) ?? [])];
-    while (stack.length) {
-      const key = stack.pop() as string;
-      if (key === start) {
-        return true;
-      }
-      if (visited.has(key)) {
-        continue;
-      }
-      visited.add(key);
-      stack.push(...(refsByKey.get(key) ?? []));
-    }
-    return false;
   }
 
   /**
@@ -2519,7 +1980,7 @@ export class CustomTablesService {
     });
     const others = columns.filter(col => col.key !== selfColumnKey);
     // Все колонки, включая свою: «остаток = PREV([Остаток]) + …» должен резолвиться в ключ.
-    const expression = this.resolveFormulaTitles(raw, columns);
+    const expression = resolveFormulaTitles(raw, columns);
     // У новой колонки ключа ещё нет — до сохранения она известна только по названию.
     const selfKey = selfColumnKey ?? selfTitle?.trim() ?? null;
     try {
@@ -2547,12 +2008,12 @@ export class CustomTablesService {
     }
     const graphKey = selfKey ?? '__self__';
     refsByKey.set(graphKey, collectFieldRefs(expression, { excludePrev: true }));
-    if (this.formulaHasCycle(graphKey, refsByKey)) {
+    if (formulaHasCycle(graphKey, refsByKey)) {
       throw new BadRequestException(appError('COLUMN_FORMULA_CYCLE'));
     }
 
     const fieldTypes = Object.fromEntries(
-      others.map(col => [col.key, this.formulaTypeOfColumn(col)]),
+      others.map(col => [col.key, formulaTypeOfColumn(col)]),
     ) as Record<string, FormulaResultType>;
     if (selfKey) {
       // PREV([своя колонка]) — почти всегда остаток или счётчик, то есть число.
@@ -2562,18 +2023,6 @@ export class CustomTablesService {
       config.expression = expression;
       config.resultType = inferFormulaResultType(expression, fieldTypes);
     }
-  }
-
-  private describeValidationError(error: unknown): string {
-    if (error instanceof BadRequestException) {
-      const response = error.getResponse();
-      if (typeof response === 'string') {
-        return response;
-      }
-      const message = (response as { message?: unknown }).message;
-      return Array.isArray(message) ? message.join('; ') : String(message ?? 'Invalid formula');
-    }
-    return error instanceof Error ? error.message : 'Invalid formula';
   }
 
   /** Живой пример для редактора: ошибка, тип результата и значение на первой строке. */
@@ -2602,7 +2051,7 @@ export class CustomTablesService {
     } catch (error) {
       return {
         valid: false,
-        error: this.describeValidationError(error),
+        error: describeValidationError(error),
         expression: dto.expression,
         resultType: null,
         sample: null,
@@ -2629,11 +2078,11 @@ export class CustomTablesService {
       });
       if (row) {
         const columns = await this.customTableColumnRepository.find({ where: { tableId } });
-        this.applyFormulaColumns(
+        applyFormulaColumns(
           [row],
           columns.filter(col => col.key !== dto.columnKey),
         );
-        sample = evaluateFormula(expression, this.toRowDataRecord(row.data));
+        sample = evaluateFormula(expression, toRowDataRecord(row.data));
       }
     }
     return {
@@ -2655,8 +2104,8 @@ export class CustomTablesService {
     await this.requireTable(workspaceId, tableId);
 
     const type = toEnum(CustomTableColumnType, dto.type);
-    this.validateNumberConfig(type ?? undefined, dto.config);
-    this.validateSelectConfig(type ?? undefined, dto.config);
+    validateNumberConfig(type ?? undefined, dto.config);
+    validateSelectConfig(type ?? undefined, dto.config);
     await this.validateFormulaConfig(tableId, type ?? undefined, dto.config, null, dto.title);
     await this.validateRelationConfig(workspaceId, type ?? undefined, dto.config);
 
@@ -2676,7 +2125,7 @@ export class CustomTablesService {
     try {
       saved = await this.customTableColumnRepository.save(column);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
@@ -2704,7 +2153,7 @@ export class CustomTablesService {
       try {
         saved = await this.customTableColumnRepository.save(saved);
       } catch (error) {
-        this.throwHelpfulSchemaError(error);
+        throwHelpfulSchemaError(error);
       }
     }
     if (saved.type === CustomTableColumnType.FORMULA) {
@@ -2722,7 +2171,7 @@ export class CustomTablesService {
   ): Promise<CustomTableColumn> {
     await this.ensureCanEditCustomTables(userId, workspaceId);
     await this.requireTable(workspaceId, tableId);
-    if (!this.isUuid(columnId)) {
+    if (!isUuid(columnId)) {
       throw new BadRequestException(appError('COLUMN_ID_INVALID'));
     }
     let column: CustomTableColumn | null = null;
@@ -2731,7 +2180,7 @@ export class CustomTablesService {
         where: { id: columnId, tableId },
       });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     if (!column) {
       throw new NotFoundException(appError('COLUMN_NOT_FOUND'));
@@ -2763,8 +2212,8 @@ export class CustomTablesService {
       }
     }
 
-    this.validateNumberConfig(column.type, column.config);
-    this.validateSelectConfig(column.type, column.config);
+    validateNumberConfig(column.type, column.config);
+    validateSelectConfig(column.type, column.config);
     await this.validateFormulaConfig(tableId, column.type, column.config, column.key);
     await this.validateRelationConfig(workspaceId, column.type, column.config);
 
@@ -2772,7 +2221,7 @@ export class CustomTablesService {
     try {
       saved = await this.customTableColumnRepository.save(column);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
@@ -2801,7 +2250,7 @@ export class CustomTablesService {
   ): Promise<{ columnKey: string; style: JsonObject }> {
     await this.ensureCanEditCustomTables(userId, workspaceId);
     await this.requireTable(workspaceId, tableId);
-    if (!this.isUuid(columnId)) {
+    if (!isUuid(columnId)) {
       throw new BadRequestException(appError('COLUMN_ID_INVALID'));
     }
     let column: CustomTableColumn | null = null;
@@ -2814,7 +2263,7 @@ export class CustomTablesService {
         },
       });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     if (!column) {
       throw new NotFoundException(appError('COLUMN_NOT_FOUND'));
@@ -2827,11 +2276,11 @@ export class CustomTablesService {
         where: { tableId, columnKey },
       });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     const before = existing?.style ?? null;
-    const next = this.mergeColumnStyle(before, dto);
+    const next = mergeColumnStyle(before, dto);
     const hasStyle = Object.keys(next).length > 0;
 
     try {
@@ -2848,7 +2297,7 @@ export class CustomTablesService {
         );
       }
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
     await this.logEvent({
@@ -2863,45 +2312,6 @@ export class CustomTablesService {
     return { columnKey, style: hasStyle ? next : {} };
   }
 
-  private mergeColumnStyle(
-    before: JsonObject | null,
-    dto: UpdateCustomTableColumnStyleBody,
-  ): JsonObject {
-    const next: JsonObject = { ...(before ?? {}) };
-    for (const part of ['header', 'cell'] as const) {
-      const value = dto[part];
-      if (value === undefined) {
-        continue;
-      }
-      const normalized = value === null ? null : this.normalizeColumnStylePart(value);
-      if (normalized) {
-        next[part] = normalized;
-      } else {
-        delete next[part];
-      }
-    }
-    return next;
-  }
-
-  /** Оставляем только заполненные поля; пустая часть превращается в null. */
-  private normalizeColumnStylePart(part: ColumnStylePartInput): JsonObject | null {
-    const result: JsonObject = {};
-    if (part.backgroundColor) {
-      result.backgroundColor = part.backgroundColor;
-    }
-    const textFormat: JsonObject = {};
-    if (part.textFormat?.foregroundColor) {
-      textFormat.foregroundColor = part.textFormat.foregroundColor;
-    }
-    if (typeof part.textFormat?.bold === 'boolean') {
-      textFormat.bold = part.textFormat.bold;
-    }
-    if (Object.keys(textFormat).length) {
-      result.textFormat = textFormat;
-    }
-    return Object.keys(result).length ? result : null;
-  }
-
   async reorderColumns(
     userId: string,
     workspaceId: string,
@@ -2910,7 +2320,7 @@ export class CustomTablesService {
   ): Promise<void> {
     await this.ensureCanEditCustomTables(userId, workspaceId);
     await this.requireTable(workspaceId, tableId);
-    const invalidId = dto.columnIds.find(id => !this.isUuid(id));
+    const invalidId = dto.columnIds.find(id => !isUuid(id));
     if (invalidId) {
       throw new BadRequestException(appError('COLUMN_ID_INVALID'));
     }
@@ -2920,7 +2330,7 @@ export class CustomTablesService {
         where: { tableId },
       });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     const beforePositions = new Map(columns.map(col => [col.id, col.position ?? 0]));
     const existingIds = new Set(columns.map(c => c.id));
@@ -2938,7 +2348,7 @@ export class CustomTablesService {
     try {
       await this.customTableColumnRepository.save(updates);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     try {
       await this.auditService.createBatchEvents(
@@ -2971,7 +2381,7 @@ export class CustomTablesService {
   ): Promise<void> {
     await this.ensureCanEditCustomTables(userId, workspaceId);
     await this.requireTable(workspaceId, tableId);
-    if (!this.isUuid(columnId)) {
+    if (!isUuid(columnId)) {
       throw new BadRequestException(appError('COLUMN_ID_INVALID'));
     }
     let column: CustomTableColumn | null = null;
@@ -2980,7 +2390,7 @@ export class CustomTablesService {
         where: { id: columnId, tableId },
       });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     if (!column) {
       throw new NotFoundException(appError('COLUMN_NOT_FOUND'));
@@ -2988,7 +2398,7 @@ export class CustomTablesService {
     try {
       await this.customTableColumnRepository.delete({ id: columnId, tableId });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
@@ -3001,73 +2411,6 @@ export class CustomTablesService {
       isUndoable: true,
     });
     await this.recalcAfterWrite(tableId, workspaceId);
-  }
-
-  /**
-   * Значения строк лежат в jsonb как текст, поэтому сравнение по типу колонки
-   * требует приведения. Выражения общие для фильтрации и сортировки — иначе
-   * фильтр и сортировка по одной колонке трактуют её по-разному.
-   */
-  private buildTypedValueExprs(colParam: string): {
-    textExpr: string;
-    textCoalescedExpr: string;
-    numericExpr: string;
-    dateExpr: string;
-    boolExpr: string;
-  } {
-    // Формульные колонки лежат в computed: фильтры, сортировка и итоги видят их так же.
-    const textExpr = `COALESCE(r.data ->> :${colParam}, r.computed ->> :${colParam})`;
-    return {
-      textExpr,
-      textCoalescedExpr: `COALESCE(${textExpr}, '')`,
-      numericExpr: `(CASE WHEN ${textExpr} ~ '^\\s*-?\\d+(?:\\.\\d+)?\\s*$' THEN (${textExpr})::numeric ELSE NULL END)`,
-      dateExpr: `(CASE
-          WHEN ${textExpr} ~ '^\\d{4}-\\d{2}-\\d{2}$' THEN (${textExpr})::date
-          WHEN ${textExpr} ~ '^\\d{2}\\.\\d{2}\\.\\d{4}$' THEN to_date(${textExpr}, 'DD.MM.YYYY')
-          ELSE NULL
-        END)`,
-      boolExpr: `(CASE
-          WHEN lower(${textExpr}) IN ('true','t','1','yes','y') THEN true
-          WHEN lower(${textExpr}) IN ('false','f','0','no','n') THEN false
-          ELSE NULL
-        END)`,
-    };
-  }
-
-  private sortExprForColumnType(colParam: string, columnType: CustomTableColumnType): string {
-    const exprs = this.buildTypedValueExprs(colParam);
-    switch (columnType) {
-      case CustomTableColumnType.NUMBER:
-      case CustomTableColumnType.CURRENCY:
-        return exprs.numericExpr;
-      case CustomTableColumnType.DATE:
-        return exprs.dateExpr;
-      case CustomTableColumnType.BOOLEAN:
-        return exprs.boolExpr;
-      default:
-        return exprs.textExpr;
-    }
-  }
-
-  private readSummaries(
-    table: CustomTable,
-  ): Array<{ id: string; title: string; expression: string }> {
-    const raw = this.getViewSettingsObject(table).summaries;
-    if (!Array.isArray(raw)) {
-      return [];
-    }
-    return raw
-      .filter(
-        (item): item is { id: string; title: string; expression: string } =>
-          typeof item === 'object' &&
-          item !== null &&
-          typeof (item as { expression?: unknown }).expression === 'string',
-      )
-      .map(item => ({
-        id: String(item.id ?? randomUUID()),
-        title: String(item.title ?? ''),
-        expression: item.expression,
-      }));
   }
 
   /**
@@ -3093,7 +2436,7 @@ export class CustomTablesService {
     });
     const keys = columns.map(col => col.key);
     const summaries = dto.summaries.map(item => {
-      const expression = this.resolveFormulaTitles(item.expression.trim(), columns);
+      const expression = resolveFormulaTitles(item.expression.trim(), columns);
       try {
         assertValidFormula(expression, keys);
       } catch (error) {
@@ -3102,12 +2445,12 @@ export class CustomTablesService {
       return { id: item.id?.trim() || randomUUID(), title: item.title.trim(), expression };
     });
     const before = { ...table };
-    table.viewSettings = { ...this.getViewSettingsObject(table), summaries };
+    table.viewSettings = { ...getViewSettingsObject(table), summaries };
     let saved: CustomTable;
     try {
       saved = await this.customTableRepository.save(table);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
@@ -3135,13 +2478,13 @@ export class CustomTablesService {
     }>;
   }> {
     const table = await this.requireTable(workspaceId, tableId);
-    const summaries = this.readSummaries(table);
+    const summaries = readSummaries(table);
     if (!summaries.length) {
       return { items: [] };
     }
     const columns = await this.customTableColumnRepository.find({ where: { tableId } });
     const fieldTypes = Object.fromEntries(
-      columns.map(col => [col.key, this.formulaTypeOfColumn(col)]),
+      columns.map(col => [col.key, formulaTypeOfColumn(col)]),
     ) as Record<string, FormulaResultType>;
     const context = this.formulaRecalc
       ? (await this.formulaRecalc.buildEvaluator(tableId, columns)).evaluator.summaryContext()
@@ -3189,28 +2532,6 @@ export class CustomTablesService {
   }
 
   /**
-   * Значения формул живут в `computed` и пишутся пересчётом после каждой
-   * записи; здесь они подмешиваются в data для выдачи. Строка, которую
-   * пересчёт ещё не видел, получает значение на лету — без табличного
-   * контекста, но без пустых ячеек.
-   */
-  private applyFormulaColumns(rows: CustomTableRow[], columns: CustomTableColumn[]): void {
-    const formulaColumns = orderFormulaColumns(formulaColumnsOf(columns));
-    if (!formulaColumns.length) {
-      return;
-    }
-    for (const row of rows) {
-      const data = (row.data ?? {}) as Record<string, unknown>;
-      const computed = this.toRowDataRecord(row.computed);
-      for (const col of formulaColumns) {
-        data[col.key] =
-          col.key in computed ? computed[col.key] : evaluateFormula(col.expression, data);
-      }
-      row.data = data;
-    }
-  }
-
-  /**
    * Подписи связанных строк. Как и формулы, считаются при выдаче и не
    * хранятся: иначе переименование строки-цели оставило бы всюду устаревший
    * текст. В data[key] лежит идентификатор строки, подпись едет отдельно.
@@ -3236,7 +2557,7 @@ export class CustomTablesService {
         new Set(
           rows
             .map(row => (row.data as Record<string, unknown>)?.[col.key])
-            .filter((v): v is string => typeof v === 'string' && this.isUuid(v)),
+            .filter((v): v is string => typeof v === 'string' && isUuid(v)),
         ),
       );
       if (!ids.length) {
@@ -3290,7 +2611,7 @@ export class CustomTablesService {
       return;
     }
     const targetTableId = config?.targetTableId;
-    if (typeof targetTableId !== 'string' || !this.isUuid(targetTableId)) {
+    if (typeof targetTableId !== 'string' || !isUuid(targetTableId)) {
       throw new BadRequestException(appError('COLUMN_RELATION_TARGET_REQUIRED'));
     }
     // requireTable проверяет принадлежность воркспейсу — это и есть защита
@@ -3361,26 +2682,6 @@ export class CustomTablesService {
     });
   }
 
-  /** Формульная колонка для SQL — это её тип результата: число, дата, флаг или текст. */
-  private storageTypeOf(column: {
-    type: CustomTableColumnType;
-    config: CustomTableColumn['config'];
-  }): CustomTableColumnType {
-    if (column.type !== CustomTableColumnType.FORMULA) {
-      return column.type;
-    }
-    switch (this.formulaTypeOfColumn(column)) {
-      case 'date':
-        return CustomTableColumnType.DATE;
-      case 'boolean':
-        return CustomTableColumnType.BOOLEAN;
-      case 'text':
-        return CustomTableColumnType.TEXT;
-      default:
-        return CustomTableColumnType.NUMBER;
-    }
-  }
-
   private async loadColumnTypeMap(tableId: string): Promise<Map<string, CustomTableColumnType>> {
     const columns = await this.customTableColumnRepository.find({
       where: { tableId },
@@ -3390,331 +2691,7 @@ export class CustomTablesService {
         config: true,
       },
     });
-    return new Map<string, CustomTableColumnType>(columns.map(c => [c.key, this.storageTypeOf(c)]));
-  }
-
-  private applyRowFilters(
-    query: SelectQueryBuilder<CustomTableRow>,
-    rawFilters: CustomTableRowFilterDto[],
-    typeByKey: Map<string, CustomTableColumnType>,
-  ): void {
-    if (rawFilters.length) {
-      if (rawFilters.length > 50) {
-        throw new BadRequestException(appError('FILTER_TOO_MANY'));
-      }
-
-      rawFilters.forEach((filter, index) => {
-        const op = filter?.op;
-        if (!op) {
-          throw new BadRequestException(appError('FILTER_INVALID'));
-        }
-
-        if (op === 'search') {
-          const rawValue =
-            typeof filter.value === 'string'
-              ? filter.value.trim()
-              : String(filter.value ?? '').trim();
-          if (!rawValue) {
-            return;
-          }
-          const valueParam = `f_val_${index}`;
-          query.andWhere(`r.data::text ILIKE :${valueParam}`, {
-            [valueParam]: `%${rawValue}%`,
-          });
-          return;
-        }
-
-        const col = filter?.col?.trim();
-        if (!col) {
-          throw new BadRequestException(appError('FILTER_INVALID'));
-        }
-        const columnType = typeByKey.get(col);
-        if (!columnType) {
-          throw new BadRequestException(
-            appError('FILTER_COLUMN_NOT_FOUND', { column: String(col) }),
-          );
-        }
-
-        const colParam = `f_col_${index}`;
-        const valueParam = `f_val_${index}`;
-        const valueParam2 = `f_val2_${index}`;
-        const valuesParam = `f_vals_${index}`;
-
-        const { textExpr, textCoalescedExpr, numericExpr, dateExpr, boolExpr } =
-          this.buildTypedValueExprs(colParam);
-
-        const apply = (sql: string, paramsObj: QueryParams) => {
-          query.andWhere(sql, paramsObj);
-        };
-
-        const withCol = (paramsObj: QueryParams): QueryParams => ({
-          ...paramsObj,
-          [colParam]: col,
-        });
-
-        switch (op) {
-          case 'isEmpty': {
-            if (columnType === CustomTableColumnType.MULTI_SELECT) {
-              apply(
-                `(r.data -> :${colParam} IS NULL OR r.data -> :${colParam} = '[]'::jsonb)`,
-                withCol({}),
-              );
-              break;
-            }
-            apply(`(${textExpr} IS NULL OR ${textExpr} = '')`, withCol({}));
-            break;
-          }
-          case 'isNotEmpty': {
-            if (columnType === CustomTableColumnType.MULTI_SELECT) {
-              apply(
-                `(r.data -> :${colParam} IS NOT NULL AND r.data -> :${colParam} <> '[]'::jsonb)`,
-                withCol({}),
-              );
-              break;
-            }
-            apply(`(${textExpr} IS NOT NULL AND ${textExpr} <> '')`, withCol({}));
-            break;
-          }
-          case 'contains': {
-            const value =
-              typeof filter.value === 'string'
-                ? filter.value.trim()
-                : String(filter.value ?? '').trim();
-            if (!value) {
-              return;
-            }
-            apply(
-              `${textCoalescedExpr} ILIKE :${valueParam}`,
-              withCol({ [valueParam]: `%${value}%` }),
-            );
-            break;
-          }
-          case 'startsWith': {
-            const value =
-              typeof filter.value === 'string'
-                ? filter.value.trim()
-                : String(filter.value ?? '').trim();
-            if (!value) {
-              return;
-            }
-            apply(
-              `${textCoalescedExpr} ILIKE :${valueParam}`,
-              withCol({ [valueParam]: `${value}%` }),
-            );
-            break;
-          }
-          case 'eq':
-          case 'neq': {
-            const isNeq = op === 'neq';
-            if (isNumericColumnType(columnType)) {
-              const value = Number(filter.value);
-              if (!Number.isFinite(value)) {
-                return;
-              }
-              apply(
-                `${numericExpr} ${isNeq ? 'IS DISTINCT FROM' : '='} :${valueParam}`,
-                withCol({ [valueParam]: value }),
-              );
-              break;
-            }
-            if (columnType === CustomTableColumnType.DATE) {
-              const value =
-                typeof filter.value === 'string'
-                  ? filter.value.trim()
-                  : String(filter.value ?? '').trim();
-              if (!value) {
-                return;
-              }
-              apply(
-                `${dateExpr} ${isNeq ? 'IS DISTINCT FROM' : '='} :${valueParam}`,
-                withCol({ [valueParam]: value }),
-              );
-              break;
-            }
-            if (columnType === CustomTableColumnType.BOOLEAN) {
-              const raw =
-                typeof filter.value === 'boolean'
-                  ? filter.value
-                  : String(filter.value ?? '').trim();
-              if (raw === '') {
-                return;
-              }
-              const value =
-                typeof raw === 'boolean'
-                  ? raw
-                  : ['true', '1', 'yes', 'y', 't'].includes(raw.toLowerCase());
-              apply(
-                `${boolExpr} ${isNeq ? 'IS DISTINCT FROM' : '='} :${valueParam}`,
-                withCol({ [valueParam]: value }),
-              );
-              break;
-            }
-            if (columnType === CustomTableColumnType.MULTI_SELECT) {
-              const value =
-                typeof filter.value === 'string'
-                  ? filter.value.trim()
-                  : String(filter.value ?? '').trim();
-              if (!value) {
-                return;
-              }
-              apply(
-                `(CASE WHEN jsonb_typeof(r.data -> :${colParam}) = 'array'
-                  THEN ${isNeq ? 'NOT ' : ''}EXISTS (
-                    SELECT 1 FROM jsonb_array_elements_text(r.data -> :${colParam}) AS elem
-                    WHERE elem = :${valueParam}
-                  )
-                  ELSE ${isNeq ? 'true' : 'false'} END)`,
-                withCol({ [valueParam]: value }),
-              );
-              break;
-            }
-            {
-              const value =
-                typeof filter.value === 'string'
-                  ? filter.value.trim()
-                  : String(filter.value ?? '').trim();
-              if (!value && value !== '') {
-                return;
-              }
-              apply(
-                `${textExpr} ${isNeq ? 'IS DISTINCT FROM' : '='} :${valueParam}`,
-                withCol({ [valueParam]: value }),
-              );
-              break;
-            }
-          }
-          case 'gt':
-          case 'gte':
-          case 'lt':
-          case 'lte': {
-            const cmp = op === 'gt' ? '>' : op === 'gte' ? '>=' : op === 'lt' ? '<' : '<=';
-            if (isNumericColumnType(columnType)) {
-              const value = Number(filter.value);
-              if (!Number.isFinite(value)) {
-                return;
-              }
-              apply(`${numericExpr} ${cmp} :${valueParam}`, withCol({ [valueParam]: value }));
-              break;
-            }
-            if (columnType === CustomTableColumnType.DATE) {
-              const value =
-                typeof filter.value === 'string'
-                  ? filter.value.trim()
-                  : String(filter.value ?? '').trim();
-              if (!value) {
-                return;
-              }
-              apply(`${dateExpr} ${cmp} :${valueParam}`, withCol({ [valueParam]: value }));
-              break;
-            }
-            throw new BadRequestException(
-              appError('FILTER_OPERATOR_UNSUPPORTED', {
-                operator: String(op),
-                type: String(columnType),
-              }),
-            );
-          }
-          case 'between': {
-            const value = filter.value;
-            const arr = Array.isArray(value) ? value : undefined;
-            if (!arr || arr.length < 2) {
-              return;
-            }
-            const [rawMin, rawMax] = arr;
-            if (isNumericColumnType(columnType)) {
-              const min = Number(rawMin);
-              const max = Number(rawMax);
-              if (!(Number.isFinite(min) && Number.isFinite(max))) {
-                return;
-              }
-              apply(
-                `${numericExpr} BETWEEN :${valueParam} AND :${valueParam2}`,
-                withCol({ [valueParam]: min, [valueParam2]: max }),
-              );
-              break;
-            }
-            if (columnType === CustomTableColumnType.DATE) {
-              const min = typeof rawMin === 'string' ? rawMin.trim() : String(rawMin ?? '').trim();
-              const max = typeof rawMax === 'string' ? rawMax.trim() : String(rawMax ?? '').trim();
-              if (!(min && max)) {
-                return;
-              }
-              apply(
-                `${dateExpr} BETWEEN :${valueParam} AND :${valueParam2}`,
-                withCol({ [valueParam]: min, [valueParam2]: max }),
-              );
-              break;
-            }
-            throw new BadRequestException(
-              appError('FILTER_BETWEEN_UNSUPPORTED', { type: String(columnType) }),
-            );
-          }
-          case 'in': {
-            const value = filter.value;
-            const arr = Array.isArray(value)
-              ? value
-              : typeof value === 'string'
-                ? value.split(',')
-                : [];
-            const values = arr.map(v => String(v).trim()).filter(Boolean);
-            if (!values.length) {
-              return;
-            }
-
-            if (columnType === CustomTableColumnType.MULTI_SELECT) {
-              apply(
-                `(CASE WHEN jsonb_typeof(r.data -> :${colParam}) = 'array'
-                  THEN EXISTS (
-                    SELECT 1 FROM jsonb_array_elements_text(r.data -> :${colParam}) AS elem
-                    WHERE elem IN (:...${valuesParam})
-                  )
-                  ELSE false END)`,
-                withCol({ [valuesParam]: values }),
-              );
-              break;
-            }
-
-            if (isNumericColumnType(columnType)) {
-              const nums = values.map(v => Number(v)).filter(v => Number.isFinite(v));
-              if (!nums.length) {
-                return;
-              }
-              apply(`${numericExpr} IN (:...${valuesParam})`, withCol({ [valuesParam]: nums }));
-              break;
-            }
-
-            apply(`${textExpr} IN (:...${valuesParam})`, withCol({ [valuesParam]: values }));
-            break;
-          }
-          default:
-            throw new BadRequestException(
-              appError('FILTER_OPERATOR_UNKNOWN', { operator: String(op) }),
-            );
-        }
-      });
-    }
-  }
-
-  private applyRowSort(
-    query: SelectQueryBuilder<CustomTableRow>,
-    sort: CustomTableRowSortDto,
-    typeByKey: Map<string, CustomTableColumnType>,
-  ): void {
-    const col = sort.col?.trim();
-    if (!col) {
-      throw new BadRequestException(appError('SORT_INVALID'));
-    }
-    const columnType = typeByKey.get(col);
-    if (!columnType) {
-      throw new BadRequestException(appError('SORT_COLUMN_NOT_FOUND', { column: String(col) }));
-    }
-    const direction = sort.dir === 'desc' ? 'DESC' : 'ASC';
-    const sortExpr = this.sortExprForColumnType('s_col', columnType);
-    // Пустые ячейки всегда внизу — иначе при DESC список открывается пустотой.
-    query
-      .orderBy(sortExpr, direction, 'NULLS LAST')
-      .addOrderBy('r.rowNumber', 'ASC')
-      .setParameter('s_col', col);
+    return new Map<string, CustomTableColumnType>(columns.map(c => [c.key, storageTypeOf(c)]));
   }
 
   /**
@@ -3738,9 +2715,9 @@ export class CustomTablesService {
         ? await this.loadColumnTypeMap(tableId)
         : new Map<string, CustomTableColumnType>();
 
-    this.applyRowFilters(query, rawFilters, typeByKey);
+    applyRowFilters(query, rawFilters, typeByKey);
     if (params.sort) {
-      this.applyRowSort(query, params.sort, typeByKey);
+      applyRowSort(query, params.sort, typeByKey);
     }
     return query;
   }
@@ -3759,8 +2736,8 @@ export class CustomTablesService {
     columns: CustomTableColumn[],
     rowCount: number,
   ): Promise<void> {
-    const viewColumns = this.getViewSettingsColumns(this.getViewSettingsObject(table));
-    const summaries = this.readSummaries(table);
+    const viewColumns = getViewSettingsColumns(getViewSettingsObject(table));
+    const summaries = readSummaries(table);
     const FN: Record<string, string> = {
       sum: 'SUM',
       avg: 'AVERAGE',
@@ -3816,97 +2793,6 @@ export class CustomTablesService {
         e: { r: lastRow - 1, c: Math.max(columns.length - 1, 1) },
       });
     }
-  }
-
-  /** A column title is editor input: it must not open as a formula in the header row. */
-  private exportHeader(col: CustomTableColumn): string {
-    return neutralizeSpreadsheetFormulaCell(col.title || col.key);
-  }
-
-  private exportCellValue(raw: unknown, columnType: CustomTableColumnType): unknown {
-    if (raw === null || raw === undefined) {
-      return '';
-    }
-    if (Array.isArray(raw)) {
-      return neutralizeSpreadsheetFormulaCell(raw.map(v => String(v ?? '')).join(', '));
-    }
-    if (isNumericColumnType(columnType)) {
-      const num = Number(raw);
-      return Number.isFinite(num) ? num : String(raw);
-    }
-    if (columnType === CustomTableColumnType.BOOLEAN) {
-      if (typeof raw === 'boolean') {
-        return raw;
-      }
-      const text = String(raw).toLowerCase();
-      if (['true', 't', '1', 'yes', 'y'].includes(text)) {
-        return true;
-      }
-      if (['false', 'f', '0', 'no', 'n'].includes(text)) {
-        return false;
-      }
-      return String(raw);
-    }
-    if (typeof raw === 'object') {
-      return neutralizeSpreadsheetFormulaCell(JSON.stringify(raw));
-    }
-    // Numbers and booleans returned above stay typed; only free text can carry
-    // a leading formula character.
-    return neutralizeSpreadsheetFormulaCell(String(raw));
-  }
-
-  /**
-   * SELECT-выражения агрегатов с алиасами agg_0..agg_N. Общие для плоских
-   * итогов и для группировки, чтобы одна и та же функция считалась одинаково.
-   */
-  private buildAggregateSelections(
-    query: SelectQueryBuilder<CustomTableRow>,
-    aggs: CustomTableAggregateDto[],
-    typeByKey: Map<string, CustomTableColumnType>,
-  ): string[] {
-    return aggs.map((agg, index) => {
-      const col = agg.col?.trim();
-      if (!col) {
-        throw new BadRequestException(appError('AGG_INVALID'));
-      }
-      const columnType = typeByKey.get(col);
-      if (!columnType) {
-        throw new BadRequestException(appError('AGG_COLUMN_NOT_FOUND', { column: String(col) }));
-      }
-      if (!CUSTOM_TABLE_AGGREGATE_FNS.includes(agg.fn)) {
-        throw new BadRequestException(appError('AGG_FUNCTION_UNKNOWN', { fn: String(agg.fn) }));
-      }
-
-      const colParam = `a_col_${index}`;
-      const exprs = this.buildTypedValueExprs(colParam);
-      query.setParameter(colParam, col);
-
-      if (agg.fn === 'count') {
-        // Считаем заполненные ячейки: пустые в итог не идут.
-        return `COUNT(NULLIF(${exprs.textCoalescedExpr}, '')) AS "agg_${index}"`;
-      }
-      if (isNumericColumnType(columnType)) {
-        return `${agg.fn.toUpperCase()}(${exprs.numericExpr}) AS "agg_${index}"`;
-      }
-      if (columnType === CustomTableColumnType.DATE && (agg.fn === 'min' || agg.fn === 'max')) {
-        return `${agg.fn.toUpperCase()}(${exprs.dateExpr}) AS "agg_${index}"`;
-      }
-      throw new BadRequestException(
-        appError('AGG_FUNCTION_UNSUPPORTED', { fn: String(agg.fn), type: String(columnType) }),
-      );
-    });
-  }
-
-  /** Приводит сырое значение агрегата из БД к числу или дате. */
-  private normalizeAggregateValue(value: unknown): number | string | null {
-    if (value === null || value === undefined) {
-      return null;
-    }
-    if (value instanceof Date) {
-      return value.toISOString().slice(0, 10);
-    }
-    const num = Number(value);
-    return Number.isFinite(num) ? num : String(value);
   }
 
   /**
@@ -4008,14 +2894,14 @@ export class CustomTablesService {
     // ORDER BY из базового запроса несовместим с агрегацией без GROUP BY.
     query.orderBy();
 
-    const selections = this.buildAggregateSelections(query, aggs, typeByKey);
+    const selections = buildAggregateSelections(query, aggs, typeByKey);
 
     const raw = await query.select(selections).getRawOne<Record<string, unknown>>();
 
     const items = aggs.map((agg, index) => ({
       col: agg.col,
       fn: agg.fn,
-      value: this.normalizeAggregateValue(raw?.[`agg_${index}`]),
+      value: normalizeAggregateValue(raw?.[`agg_${index}`]),
     }));
 
     return { items, total };
@@ -4065,13 +2951,13 @@ export class CustomTablesService {
     // Порядок строк из базового запроса к группам отношения не имеет.
     query.orderBy();
 
-    const groupExpr = this.buildTypedValueExprs('g_col').textExpr;
+    const groupExpr = buildTypedValueExprs('g_col').textExpr;
     query.setParameter('g_col', groupBy);
 
     const selections = [
       `${groupExpr} AS "group_key"`,
       'COUNT(*) AS "group_count"',
-      ...this.buildAggregateSelections(query, aggs, typeByKey),
+      ...buildAggregateSelections(query, aggs, typeByKey),
     ];
 
     const safeLimit = Math.min(Math.max(params.limit ?? 200, 1), 1000);
@@ -4089,7 +2975,7 @@ export class CustomTablesService {
       aggregates: aggs.map((agg, index) => ({
         col: agg.col,
         fn: agg.fn,
-        value: this.normalizeAggregateValue(row[`agg_${index}`]),
+        value: normalizeAggregateValue(row[`agg_${index}`]),
       })),
     }));
 
@@ -4144,26 +3030,26 @@ export class CustomTablesService {
       }
       // Формулы и подписи связей считаем и для выгрузки: иначе колонки
       // уехали бы в файл пустыми или с идентификаторами вместо названий.
-      this.applyFormulaColumns(batch, allColumns);
+      applyFormulaColumns(batch, allColumns);
       await this.applyRelationLabels(batch, allColumns);
       for (const row of batch) {
         const record: Record<string, unknown> = {};
         const labels = (row as CustomTableRow & { relationLabels?: Record<string, string> })
           .relationLabels;
         for (const col of columns) {
-          const header = this.exportHeader(col);
+          const header = exportHeader(col);
           // В выгрузку идёт подпись связанной строки: идентификатор в отчёте
           // человеку ничего не говорит.
           record[header] =
             col.type === CustomTableColumnType.RELATION
               ? (labels?.[col.key] ?? '')
-              : this.exportCellValue(row.data?.[col.key], col.type);
+              : exportCellValue(row.data?.[col.key], col.type);
         }
         records.push(record);
       }
     }
 
-    const headers = columns.map(col => this.exportHeader(col));
+    const headers = columns.map(col => exportHeader(col));
     const worksheet = xlsx.utils.json_to_sheet(records, { header: headers });
     await this.appendExportTotals(worksheet, table, columns, records.length);
 
@@ -4228,18 +3114,18 @@ export class CustomTablesService {
             style: true,
           },
         });
-        this.mergeRowStyles(rows, styles);
+        mergeRowStyles(rows, styles);
       } catch (_error) {
         this.logger.warn(`Failed to load cell styles for tableId=${tableId}`);
       }
 
       const tableColumns = await this.loadColumnsWithConfig(tableId);
-      this.applyFormulaColumns(rows, tableColumns);
+      applyFormulaColumns(rows, tableColumns);
       await this.applyRelationLabels(rows, tableColumns);
 
       return { items: rows, total };
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
   }
 
@@ -4254,7 +3140,7 @@ export class CustomTablesService {
     if (!uniqueRowIds.length) {
       return { items: [] };
     }
-    const validRowIds = uniqueRowIds.filter(rowId => this.isUuid(rowId));
+    const validRowIds = uniqueRowIds.filter(rowId => isUuid(rowId));
     if (!validRowIds.length) {
       return {
         items: uniqueRowIds.map(rowId => ({ rowId, paid: null })),
@@ -4279,17 +3165,17 @@ export class CustomTablesService {
         },
       });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
 
-    const { commentKeys, counterpartyKeys } = this.getPaidStatusFieldKeys(columns);
+    const { commentKeys, counterpartyKeys } = getPaidStatusFieldKeys(columns);
     const inputs: PaidStatusInput[] = rows.map(row => {
       const data = row.data || {};
-      let comment = this.collectRowText(data, commentKeys);
-      const counterparty = this.collectRowText(data, counterpartyKeys);
+      let comment = collectRowText(data, commentKeys);
+      const counterparty = collectRowText(data, counterpartyKeys);
       if (!(comment || counterparty)) {
         const fallbackKeys = Object.keys(data);
-        comment = this.collectRowText(data, fallbackKeys);
+        comment = collectRowText(data, fallbackKeys);
       }
       return {
         id: row.id,
@@ -4306,16 +3192,6 @@ export class CustomTablesService {
       paid: byId.has(rowId) ? (byId.get(rowId) as boolean | null) : null,
     }));
     return { items };
-  }
-
-  private isBlankCellValue(value: unknown): boolean {
-    if (value === null || value === undefined) {
-      return true;
-    }
-    if (Array.isArray(value)) {
-      return value.length === 0;
-    }
-    return String(value).trim() === '';
   }
 
   /**
@@ -4354,13 +3230,13 @@ export class CustomTablesService {
         const value = data[col.key];
 
         // При частичном обновлении отсутствующий ключ означает «не меняем».
-        if (col.isRequired && (present || !options.partial) && this.isBlankCellValue(value)) {
+        if (col.isRequired && (present || !options.partial) && isBlankCellValue(value)) {
           throw new BadRequestException(
             appError('COLUMN_REQUIRED_VALUE', { column: String(col.title) }),
           );
         }
 
-        if (!(col.isUnique && present) || this.isBlankCellValue(value)) {
+        if (!(col.isUnique && present) || isBlankCellValue(value)) {
           continue;
         }
 
@@ -4399,7 +3275,7 @@ export class CustomTablesService {
     await this.ensureCanEditCustomTables(userId, workspaceId);
     await this.requireTable(workspaceId, tableId);
     const allowedKeys = await this.getAllowedColumnKeys(tableId);
-    const data = this.sanitizeRowData(dto.data, allowedKeys);
+    const data = sanitizeRowData(dto.data, allowedKeys);
     await this.validateRowsAgainstColumns(tableId, [data]);
     const rowNumber = dto.rowNumber ?? (await this.getNextRowNumber(tableId));
 
@@ -4413,7 +3289,7 @@ export class CustomTablesService {
     try {
       saved = await this.customTableRowRepository.save(row);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
@@ -4427,7 +3303,7 @@ export class CustomTablesService {
     // В ответе — уже посчитанные формулы: грид обновляет строку из ответа,
     // не перечитывая таблицу, и без этого формульные ячейки отставали бы.
     await this.recalcAfterWrite(tableId, workspaceId, [saved]);
-    this.applyFormulaColumns(
+    applyFormulaColumns(
       [saved],
       await this.customTableColumnRepository.find({ where: { tableId } }),
     );
@@ -4443,7 +3319,7 @@ export class CustomTablesService {
   ): Promise<CustomTableRow> {
     await this.ensureCanEditCustomTables(userId, workspaceId);
     const table = await this.requireTable(workspaceId, tableId);
-    if (!this.isUuid(rowId)) {
+    if (!isUuid(rowId)) {
       throw new BadRequestException(appError('ROW_ID_INVALID'));
     }
     let row: CustomTableRow | null = null;
@@ -4452,14 +3328,14 @@ export class CustomTablesService {
         where: { id: rowId, tableId },
       });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     if (!row) {
       throw new NotFoundException(appError('ROW_NOT_FOUND'));
     }
 
     const allowedKeys = await this.getAllowedColumnKeys(tableId);
-    let patch = this.sanitizeRowData(dto.data, allowedKeys);
+    let patch = sanitizeRowData(dto.data, allowedKeys);
     const writeBack = await this.writeBackAppFields(userId, workspaceId, table, row, patch);
     if (writeBack) {
       // The row shows the app record: its app cells take what the app now holds,
@@ -4483,7 +3359,7 @@ export class CustomTablesService {
       try {
         await this.customTableRowRepository.save(row);
       } catch (error) {
-        this.throwHelpfulSchemaError(error);
+        throwHelpfulSchemaError(error);
       }
       throw writeBack.error;
     }
@@ -4492,16 +3368,16 @@ export class CustomTablesService {
     try {
       saved = await this.customTableRowRepository.save(row);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     const patchKeys = Object.keys(patch || {}).filter(
-      key => !this.sameCellValue(beforeData?.[key] ?? null, (patch[key] ?? null) as SourceValue),
+      key => !sameCellValue(beforeData?.[key] ?? null, (patch[key] ?? null) as SourceValue),
     );
     const batchId = patchKeys.length > 1 ? randomUUID() : null;
 
     for (const key of patchKeys) {
       const beforeValue = beforeData?.[key] ?? null;
-      const afterValue = this.toRowDataRecord(saved.data)[key] ?? null;
+      const afterValue = toRowDataRecord(saved.data)[key] ?? null;
       await this.logEvent({
         userId,
         workspaceId,
@@ -4543,7 +3419,7 @@ export class CustomTablesService {
     // В ответе — уже посчитанные формулы: грид обновляет строку из ответа,
     // не перечитывая таблицу, и без этого формульные ячейки отставали бы.
     await this.recalcAfterWrite(tableId, workspaceId, [saved]);
-    this.applyFormulaColumns(
+    applyFormulaColumns(
       [saved],
       await this.customTableColumnRepository.find({ where: { tableId } }),
     );
@@ -4607,7 +3483,7 @@ export class CustomTablesService {
   ): Promise<void> {
     await this.ensureCanEditCustomTables(userId, workspaceId);
     await this.requireTable(workspaceId, tableId);
-    if (!this.isUuid(rowId)) {
+    if (!isUuid(rowId)) {
       throw new BadRequestException(appError('ROW_ID_INVALID'));
     }
     let row: CustomTableRow | null = null;
@@ -4616,7 +3492,7 @@ export class CustomTablesService {
         where: { id: rowId, tableId },
       });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     if (!row) {
       throw new NotFoundException(appError('ROW_NOT_FOUND'));
@@ -4624,7 +3500,7 @@ export class CustomTablesService {
     try {
       await this.customTableRowRepository.delete({ id: rowId, tableId });
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
@@ -4655,7 +3531,7 @@ export class CustomTablesService {
       return this.customTableRowRepository.create({
         tableId,
         rowNumber,
-        data: this.sanitizeRowData(row.data, allowedKeys),
+        data: sanitizeRowData(row.data, allowedKeys),
         styles: row.styles ?? {},
       });
     });
@@ -4664,14 +3540,14 @@ export class CustomTablesService {
     // потому что до вставки их там ещё нет.
     await this.validateRowsAgainstColumns(
       tableId,
-      rows.map(row => this.toRowDataRecord(row.data)),
+      rows.map(row => toRowDataRecord(row.data)),
     );
 
     let savedRows: CustomTableRow[];
     try {
       savedRows = await this.customTableRowRepository.save(rows);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logRowBatchCreate({
       userId,
@@ -4683,7 +3559,7 @@ export class CustomTablesService {
       },
     });
     await this.recalcAfterWrite(tableId, workspaceId, savedRows);
-    this.applyFormulaColumns(
+    applyFormulaColumns(
       savedRows,
       await this.customTableColumnRepository.find({ where: { tableId } }),
     );
@@ -4716,8 +3592,8 @@ export class CustomTablesService {
       throw new BadRequestException(appError('COLUMN_NOT_FOUND'));
     }
 
-    const viewSettings = this.getViewSettingsObject(table) as JsonObject;
-    const columns = this.getViewSettingsColumns(viewSettings);
+    const viewSettings = getViewSettingsObject(table) as JsonObject;
+    const columns = getViewSettingsColumns(viewSettings);
     const existing =
       columns[columnKey] && typeof columns[columnKey] === 'object' ? columns[columnKey] : {};
     const next = { ...existing };
@@ -4738,7 +3614,7 @@ export class CustomTablesService {
     try {
       saved = await this.customTableRepository.save(table);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
@@ -4777,14 +3653,14 @@ export class CustomTablesService {
       }
     }
 
-    const viewSettings = this.getViewSettingsObject(table) as JsonObject;
+    const viewSettings = getViewSettingsObject(table) as JsonObject;
     table.viewSettings = { ...viewSettings, conditionalRules: rules };
 
     let saved: CustomTable;
     try {
       saved = await this.customTableRepository.save(table);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
@@ -4834,14 +3710,14 @@ export class CustomTablesService {
       throw new BadRequestException(appError('VIEW_ACTIVE_MISSING'));
     }
 
-    const viewSettings = this.getViewSettingsObject(table) as JsonObject;
+    const viewSettings = getViewSettingsObject(table) as JsonObject;
     table.viewSettings = { ...viewSettings, views: dto.views, activeViewId };
 
     let saved: CustomTable;
     try {
       saved = await this.customTableRepository.save(table);
     } catch (error) {
-      this.throwHelpfulSchemaError(error);
+      throwHelpfulSchemaError(error);
     }
     await this.logEvent({
       userId,
