@@ -28,6 +28,8 @@ export const ACCOUNTS_ERRORS = {
   AUTH_2FA_NOT_ENABLED: 'Two-factor authentication is not enabled',
   AUTH_2FA_SETUP_NOT_STARTED: 'Start the setup before confirming a code',
   AUTH_2FA_VERIFICATION_CODE_INVALID: 'Invalid verification code',
+  AUTH_DEMO_DISABLED: 'This server does not offer a demo',
+  AUTH_DEMO_FULL: 'The demo is full right now. Please try again in a little while',
   AUTH_2FA_CODE_INVALID: 'Invalid two-factor code',
   AUTHZ_PERMISSIONS_REQUIRED: 'Insufficient permissions. Required: {{permissions}}',
   AUTHZ_API_KEY_SCOPE_MISSING: 'API key scope missing: {{scopes}}',

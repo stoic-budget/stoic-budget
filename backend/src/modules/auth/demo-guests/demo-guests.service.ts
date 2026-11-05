@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException, ServiceUnavailableException } fr
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { randomBytes, randomUUID } from 'crypto';
 import { type DataSource, LessThan, Like, type Repository } from 'typeorm';
+import { appError } from '../../../common/errors/app-error';
 import { hashPassword } from '../../../common/utils/password-hash.util';
 import { User, UserRole, Workspace } from '../../../entities';
 import { DemoWorkspaceService } from '../../workspaces/demo-workspace/demo-workspace.service';
@@ -36,11 +37,11 @@ export class DemoGuestsService {
    */
   async create(sessionContext: SessionContext): Promise<AuthResponseDto> {
     if (!demoGuestsEnabled()) {
-      throw new NotFoundException();
+      throw new NotFoundException(appError('AUTH_DEMO_DISABLED'));
     }
     const alive = await this.userRepository.count({ where: { email: GUEST_EMAILS } });
     if (alive >= demoGuestsMax()) {
-      throw new ServiceUnavailableException();
+      throw new ServiceUnavailableException(appError('AUTH_DEMO_FULL'));
     }
 
     const guest = await this.userRepository.save(

@@ -69,7 +69,8 @@ describe('Demo guests (e2e)', () => {
 
   it('is not there unless the instance turns it on', async () => {
     delete process.env.DEMO_GUESTS_ENABLED;
-    await createGuest().expect(404);
+    const res = await createGuest().expect(404);
+    expect(res.body.error.code).toBe('AUTH_DEMO_DISABLED');
     expect(await guestCount()).toBe(0);
   });
 
@@ -112,7 +113,8 @@ describe('Demo guests (e2e)', () => {
   it('turns visitors away once DEMO_GUESTS_MAX guests are alive', async () => {
     process.env.DEMO_GUESTS_MAX = '1';
     await createGuest().expect(201);
-    await createGuest().expect(503);
+    const full = await createGuest().expect(503);
+    expect(full.body.error.code).toBe('AUTH_DEMO_FULL');
     expect(await guestCount()).toBe(1);
   });
 
