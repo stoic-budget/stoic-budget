@@ -1,16 +1,12 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-
 import CustomDatePicker from '@/app/components/CustomDatePicker';
-
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useLocale } from '@/app/i18n';
-
 import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { resolveLocaleTag } from '@/app/lib/user-format';
-
 import type { TableCategory } from '../hooks/useTablesList';
 import { DIRECTION_OPTIONS, type SourceDef, type SourceFilters, TYPE_OPTIONS } from '../sources';
 import { FilterDrawerField, type FilterDrawerLabels } from './FilterDrawerField';

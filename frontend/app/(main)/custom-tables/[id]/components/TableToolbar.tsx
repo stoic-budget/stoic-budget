@@ -4,7 +4,6 @@ import { useRef } from 'react';
 import { StatementsSearchPopover } from '@/app/(main)/statements/components/filters/StatementsSearchPopover';
 import { Maximize, Minimize, Plus, Trash2, X } from '@/app/components/icons';
 import { Button } from '@/app/components/ui/button';
-
 import { TABULAR_FILE_ACCEPT } from '../utils/tabularFileReader';
 import type { CustomTableColumn } from '../utils/types';
 import { MoreMenu, ViewMenu } from './TableToolbarMenus';

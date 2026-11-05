@@ -4,10 +4,8 @@ import type { SortingState } from '@tanstack/react-table';
 import { useEffect, useRef } from 'react';
 import { DataGrid, useDataGrid } from '@/app/components/data-grid';
 import { Plus } from '@/app/components/icons';
-
 import { useFillViewport } from '../hooks/useFillViewport';
 import { useGridColumns } from '../hooks/useGridColumns';
-
 import { type AggregateFn, type CustomTableColumn, type CustomTableGridRow } from '../utils/types';
 import { type ColumnHeaderLabels } from './ColumnHeader';
 import { type CellLabels, type UpdateCellFn } from './cells/EditableCell';

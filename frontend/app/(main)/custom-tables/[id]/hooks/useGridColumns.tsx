@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react';
 import { type GridColumnDef } from '@/app/components/data-grid';
-
 import { Checkbox } from '@/app/components/ui/checkbox';
 import { AggregateFooter } from '../components/AggregateFooter';
 import { ColumnMenu } from '../components/ColumnHeader';

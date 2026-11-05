@@ -2,9 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { CategoryPickerField } from '@/app/components/categories/CategoryPickerField';
-
 import { FULL_SCREEN_ON_PHONE, ModalFooter, ModalShell } from '@/app/components/ui/modal-shell';
-
 import type { CreateTableForm } from '../hooks/useCreateTable';
 import { useSourcePreview } from '../hooks/useSourcePreview';
 import type { TableCategory } from '../hooks/useTablesList';

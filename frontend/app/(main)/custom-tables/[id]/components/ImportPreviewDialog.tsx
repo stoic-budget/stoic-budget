@@ -6,7 +6,6 @@ import { Select } from '@/app/components/ui/select';
 import { SnapshotSkeleton } from '@/app/components/ui/snapshot-skeleton/SnapshotSkeleton';
 import { fill, findRequiredProblems } from '../utils/importPreviewHelpers';
 import type { UsePasteImportReturn } from '../utils/pasteImportTypes';
-
 import type { CustomTableColumn } from '../utils/types';
 import { ImportMappingRow } from './ImportMappingRow';
 

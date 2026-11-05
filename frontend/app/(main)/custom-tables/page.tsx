@@ -14,7 +14,6 @@ import { AppPagination } from '@/app/components/ui/pagination';
 import { Select } from '@/app/components/ui/select';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useIntlayer } from '@/app/i18n';
-
 import { CreateTableDialog } from './components/CreateTableDialog';
 import { useCreateTable } from './hooks/useCreateTable';
 import { useListColumns } from './hooks/useListColumns';

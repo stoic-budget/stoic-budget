@@ -1,18 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-
 import { PRIVATE_CLASS } from '@/app/components/ui/private-amount';
-
 import { useLocale } from '@/app/i18n';
 import { usePrivacyMode } from '@/app/lib/privacy-mode';
-
 import { resolveLocaleTag } from '@/app/lib/user-format';
-
 import type { SourcePreview } from '../hooks/useSourcePreview';
-
 import { type SourceDef } from '../sources';
-
 import type { SourceFilterPanelLabels } from './source-filter-labels';
 import { ENUM_FIELDS, formatPreviewCell } from './source-preview-format';
 

@@ -2,7 +2,6 @@
 
 import MenuList from '@mui/material/MenuList';
 import { useState } from 'react';
-
 import { MoreHorizontal, SlidersHorizontal } from '@/app/components/icons';
 import { Button } from '@/app/components/ui/button';
 import { DrawerShell } from '@/app/components/ui/drawer-shell';
@@ -15,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/app/components/ui/dropdown-menu';
-
 import type { TableToolbarProps } from './TableToolbar';
 
 /** Grouping and column visibility, behind one quiet "View" button that opens a side panel. */

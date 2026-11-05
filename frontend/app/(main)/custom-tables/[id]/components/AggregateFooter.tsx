@@ -2,12 +2,9 @@
 
 import { PRIVATE_CLASS } from '@/app/components/ui/private-amount';
 import { Select } from '@/app/components/ui/select';
-
 import { formatCellNumber } from '../utils/numberFormat';
 import { AGGREGATE_FNS, type AggregateFn, type CustomTableColumn } from '../utils/types';
-
 import { numberFormatFor } from './cells/formatCell';
-
 import type { TableGridProps } from './TableGrid';
 
 export function AggregateFooter({

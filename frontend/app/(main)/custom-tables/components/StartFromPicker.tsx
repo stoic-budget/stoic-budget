@@ -1,11 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-
 import { Check } from '@/app/components/icons';
-
 import { TextTabs } from '@/app/components/ui/text-tabs';
-
 import { findSource, SOURCE_KINDS, type SourceKind } from '../sources';
 import { TABLE_TEMPLATES, type TableTemplateId } from '../templates';
 import type { CreateTableDialogProps } from './CreateTableDialog';
