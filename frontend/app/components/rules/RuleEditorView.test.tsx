@@ -44,6 +44,22 @@ const STORE = 'ACME Store - Wireless Buds';
 const ELECTRONICS = categoryItem({ id: '00000000-0000-4000-8000-000000000001', name: 'Electronics' });
 const CARD = walletItem({ id: '00000000-0000-4000-8000-000000000002', name: 'Everyday card' });
 
+const CAFE = {
+  id: '00000000-0000-4000-8000-000000000009',
+  name: 'Corner Café',
+  mode: 'auto' as const,
+  category: null,
+  defaultCategory: null,
+  countryCode: null,
+  vatId: null,
+  vatIdStatus: null,
+  vatIdName: null,
+  vatIdCheckedAt: null,
+  supplyType: null,
+  transactionCount: 3,
+  lastSeen: null,
+};
+
 const saved: CategorizationRule = {
   id: 'rule-1',
   name: 'ACME is electronics',
@@ -95,6 +111,7 @@ beforeEach(() => {
     if (url === '/categories') return apiResponse([ELECTRONICS]);
     if (url === '/wallets') return apiResponse([CARD]);
     if (url === '/tags') return apiResponse([]);
+    if (url === `/payees/${CAFE.id}`) return apiResponse(CAFE);
     if (url.startsWith('/workspaces/')) return apiResponse({ members: [] });
     throw new Error(`unexpected GET ${url}`);
   });
@@ -102,7 +119,14 @@ beforeEach(() => {
     if (url === '/categorization-rules/test') return apiResponse(preview);
     if (url === '/categorization-rules') return apiResponse({ ...saved, id: 'rule-new', ...body });
     if (url.endsWith('/apply'))
-      return apiResponse({ applied: 2, skippedManual: 0, tagged: 0, moved: 0 });
+      return apiResponse({
+        applied: 2,
+        skippedManual: 0,
+        tagged: 0,
+        moved: 0,
+        commented: 0,
+        renamed: 0,
+      });
     throw new Error(`unexpected POST ${url}`);
   });
   put.mockResolvedValue(apiResponse(saved));
@@ -320,6 +344,43 @@ describe('RuleEditorView', () => {
       expect(put).toHaveBeenCalledWith(
         '/categorization-rules/rule-1',
         expect.objectContaining({ conditions, matchMode: 'any' }),
+      ),
+    );
+  });
+
+  it('writes a comment and gives a payee, and can take the payee off again', async () => {
+    get.mockImplementation(async (url: string) => {
+      if (url === '/categorization-rules/rule-1')
+        return apiResponse({ ...saved, result: { payeeId: CAFE.id } });
+      if (url === `/payees/${CAFE.id}`) return apiResponse(CAFE);
+      if (url === '/categories') return apiResponse([ELECTRONICS]);
+      if (url === '/wallets') return apiResponse([CARD]);
+      if (url === '/tags') return apiResponse([]);
+      if (url.startsWith('/workspaces/')) return apiResponse({ members: [] });
+      throw new Error(`unexpected GET ${url}`);
+    });
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+
+    // The payee the rule names is shown by its name, with what the rule will not do.
+    expect(await screen.findByText('Corner Café')).toBeTruthy();
+    expect(screen.getByText('A payee you chose for a row by hand stays.')).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Comment'), { target: { value: 'Team coffee' } });
+    expect(screen.getByText('Written only when the row has no comment yet.')).toBeTruthy();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({ result: { payeeId: CAFE.id, comment: 'Team coffee' } }),
+      ),
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Corner Café' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+    await waitFor(() =>
+      expect(put).toHaveBeenLastCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({ result: { comment: 'Team coffee' } }),
       ),
     );
   });

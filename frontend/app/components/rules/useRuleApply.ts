@@ -29,6 +29,8 @@ export function useRuleApply(walletName: (id: string) => string | null) {
               applied: t.toast.applied.value,
               appliedAll: t.toast.appliedAll.value,
               movedPart: t.toast.movedPart.value,
+              commentedPart: t.toast.commentedPart.value,
+              renamedPart: t.toast.renamedPart.value,
             },
             nameOf(rule),
           ),

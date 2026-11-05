@@ -81,7 +81,8 @@ export function RuleEditorView({ id }: { id: string }) {
     Boolean(result.categoryId) ||
     Boolean(result.walletId) ||
     result.ownerMemberId !== undefined ||
-    Boolean(result.tagIds?.length);
+    Boolean(result.tagIds?.length) ||
+    Boolean(result.comment?.trim() || result.payeeId || result.payeeName);
   const problem =
     conditions.length === 0 ? t.dialog.needsCondition : hasAction ? null : t.dialog.needsAction;
 

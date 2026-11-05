@@ -33,11 +33,13 @@ import {
 export function RulesView() {
   const t = useIntlayer('categorizationRules');
   const router = useRouter();
-  const { words, names } = useRuleNames();
   const { hasPermission } = usePermissions();
   const canEdit = hasPermission('category.edit');
   const canDelete = hasPermission('category.delete');
   const rules = useRulesList();
+  const list = rules.data?.data ?? [];
+  const payeeIds = [...new Set(list.flatMap(rule => rule.result.payeeId ?? []))];
+  const { words, names } = useRuleNames(payeeIds);
   const toggle = useToggleRule();
   const remove = useDeleteRule();
   const reorder = useReorderRules();
@@ -49,8 +51,6 @@ export function RulesView() {
       router.replace(`/rules/${focusId}`);
     }
   }, [focusId, router]);
-
-  const list = rules.data?.data ?? [];
 
   const handleDelete = (rule: Rule) =>
     void remove.mutateAsync(rule.id).then(

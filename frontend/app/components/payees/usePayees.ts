@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import apiClient from '@/app/lib/api';
@@ -41,6 +41,20 @@ export function usePayee(id: string | null) {
     queryFn: ({ signal }) => apiQueryDecoded({ url: `/payees/${id}`, signal, contract: 'Payee' }),
     enabled: Boolean(workspaceId && id),
   });
+}
+
+/** The names of a few payees known by id, as a lookup; null while one loads or when it is gone. */
+export function usePayeeNames(ids: readonly string[]): (id: string) => string | null {
+  const workspaceId = useWorkspaceId();
+  const payees = useQueries({
+    queries: ids.map(id => ({
+      queryKey: queryKeys.payee(workspaceId, id),
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        apiQueryDecoded({ url: `/payees/${id}`, signal, contract: 'Payee' }),
+      enabled: Boolean(workspaceId),
+    })),
+  });
+  return id => payees[ids.indexOf(id)]?.data?.name ?? null;
 }
 
 /**

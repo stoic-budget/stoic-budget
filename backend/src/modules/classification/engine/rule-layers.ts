@@ -13,6 +13,8 @@ export const LAYERED_FIELDS = [
   'article',
   'activityType',
   'ownerMemberId',
+  'comment',
+  'payeeId',
 ] as const;
 export type LayeredField = (typeof LAYERED_FIELDS)[number];
 

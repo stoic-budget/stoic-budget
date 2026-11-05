@@ -7,9 +7,11 @@ import {
   assertWorkspaceRefs,
 } from '../../../common/utils/workspace-refs.util';
 import { PaymentType } from '../../../contracts';
+import { Payee } from '../../../entities/payee.entity';
 import { Tag } from '../../../entities/tag.entity';
 import { Wallet } from '../../../entities/wallet.entity';
 import type { WorkspaceMember } from '../../../entities/workspace-member.entity';
+import { findOrCreatePayeeByName } from '../../payees/payee-resolution';
 import type {
   ClassificationCondition,
   ClassificationResult,
@@ -144,6 +146,7 @@ export async function assertRuleRefs(
   await Promise.all([
     assertWorkspaceOwned(manager, Wallet, walletIds, workspaceId),
     assertWorkspaceOwned(manager, Tag, rule.result?.tagIds ?? [], workspaceId),
+    assertWorkspaceOwned(manager, Payee, [rule.result?.payeeId], workspaceId),
     assertWorkspaceRefs(manager, workspaceId, rule.result ?? {}),
     assertOwnerMemberInWorkspace(members, workspaceId, rule.result?.ownerMemberId),
   ]);
@@ -151,5 +154,29 @@ export async function assertRuleRefs(
 
 /** Whether the rule sets anything "apply to existing rows" can write. */
 export function hasApplicableAction(result: ClassificationResult): boolean {
-  return Boolean(result.categoryId || result.walletId || result.tagIds?.length);
+  return Boolean(
+    result.categoryId ||
+      result.walletId ||
+      result.tagIds?.length ||
+      result.comment ||
+      result.payeeId,
+  );
+}
+
+/**
+ * What a rule sets, as it is stored: a payee given by name becomes the id of
+ * the workspace's payee of that name, made now when there is none. An id
+ * given beside the name is the one that counts.
+ */
+export async function resolveRulePayee<Result extends ClassificationResult>(
+  manager: EntityManager,
+  workspaceId: string,
+  input: Result & { payeeName?: string },
+): Promise<Result> {
+  const { payeeName, ...result } = input;
+  if (payeeName === undefined || result.payeeId) {
+    return result as Result;
+  }
+  const payee = await findOrCreatePayeeByName(manager, workspaceId, payeeName);
+  return { ...result, payeeId: payee.id } as Result;
 }

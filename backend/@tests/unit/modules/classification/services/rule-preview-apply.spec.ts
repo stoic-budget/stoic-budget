@@ -240,7 +240,7 @@ describe('rule preview against the rules ranked above', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0 });
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0, commented: 0, renamed: 0 });
     expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
       'cable',
     ]);
@@ -308,7 +308,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0 });
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0, commented: 0, renamed: 0 });
     expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
       'open',
     ]);
@@ -328,7 +328,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 1, moved: 0 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 1, moved: 0, commented: 0, renamed: 0 });
     expect(transactions.update).not.toHaveBeenCalled();
   });
 
@@ -347,7 +347,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 2, skippedManual: 2, tagged: 0, moved: 0 });
+    expect(result).toEqual({ applied: 2, skippedManual: 2, tagged: 0, moved: 0, commented: 0, renamed: 0 });
     const [where, values] = transactions.update.mock.calls[0] as unknown as [
       { id: { value: string[] }; workspaceId: string },
       Record<string, unknown>,
@@ -398,7 +398,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 0, moved: 0 });
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 0, moved: 0, commented: 0, renamed: 0 });
     expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
       'open',
     ]);
@@ -416,7 +416,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 0 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 0, commented: 0, renamed: 0 });
     expect(transactions.update).not.toHaveBeenCalled();
   });
 });
@@ -469,7 +469,7 @@ describe('a rule that names an account', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 2 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 2, commented: 0, renamed: 0 });
     const [where, values] = transactions.update.mock.calls[0] as unknown as [
       { id: { value: string[] }; workspaceId: string },
       Record<string, unknown>,
@@ -485,6 +485,49 @@ describe('a rule that names an account', () => {
     expect(events[0].diff).toEqual({
       before: { walletId: 'wallet-card' },
       after: { walletId: 'wallet-cash' },
+    });
+  });
+});
+
+describe('a rule that writes a comment and gives a payee', () => {
+  const commenting = {
+    ...storeRule,
+    result: { comment: 'Gadgets for the office', payeeId: 'payee-acme' },
+  } as unknown as CategorizationRule;
+
+  it('writes the comment only where there is none, and the payee never over one picked by hand', async () => {
+    const { rulesService, transactions, tax, audit } = build([
+      row('bare'),
+      row('commented', { comments: 'my own comment' }),
+      row('picked', { payeeId: 'payee-other', payeeSource: 'manual' }),
+      row('there', { payeeId: 'payee-acme', comments: 'kept' }),
+      row('other', { counterpartyName: 'Corner Bakery' }),
+    ]);
+
+    const result = await rulesService.applyRuleToExisting({
+      rule: commenting,
+      userId: 'user-1',
+      viewerMemberId: ME,
+    });
+
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 0, commented: 2, renamed: 2 });
+    const writes = (transactions.update.mock.calls as unknown as Array<
+      [{ id: { value: string[] } }, Record<string, unknown>]
+    >).map(([where, values]) => [where.id.value, values]);
+    expect(writes).toEqual([
+      [['bare', 'picked'], { comments: 'Gadgets for the office' }],
+      [['bare', 'commented'], { payeeId: 'payee-acme', payeeSource: 'rule' }],
+    ]);
+    // The payee decides the reverse charge.
+    expect(tax.reassess).toHaveBeenCalledWith(WORKSPACE, { ids: ['bare', 'commented'] });
+    const events = audit.createBatchEvents.mock.calls[0][0] as Array<{
+      entityId: string;
+      diff: { before: Record<string, unknown>; after: Record<string, unknown> };
+    }>;
+    expect(events.map(event => event.entityId)).toEqual(['bare', 'commented', 'picked']);
+    expect(events[1].diff).toEqual({
+      before: { payeeId: undefined },
+      after: { payeeId: 'payee-acme' },
     });
   });
 });
