@@ -1,10 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-  buildPayablesListParams,
-  formatPayableDate,
-  isPayableOverdue,
-  sortPayables,
-} from './payables-utils';
+import { buildPayablesListParams, formatPayableDate, isPayableOverdue, sortPayables, DEFAULT_PAYABLES_FILTERS, filtersFromSearchParams } from './payables-utils';
 
 describe('payables-utils', () => {
   it('builds list params with sort and optional pagination', () => {
@@ -125,5 +120,20 @@ describe('payables-utils', () => {
     );
 
     expect(sorted.map(item => item.id)).toEqual(['a', 'b']);
+  });
+});
+
+describe('filtersFromSearchParams', () => {
+  it('takes a known status and source from the address', () => {
+    expect(
+      filtersFromSearchParams(new URLSearchParams('status=overdue&source=invoice')),
+    ).toEqual({ ...DEFAULT_PAYABLES_FILTERS, status: 'overdue', source: 'invoice' });
+  });
+
+  it('ignores values it does not know, and a missing address', () => {
+    expect(filtersFromSearchParams(new URLSearchParams('status=nonsense&source=x'))).toEqual(
+      DEFAULT_PAYABLES_FILTERS,
+    );
+    expect(filtersFromSearchParams(null)).toEqual(DEFAULT_PAYABLES_FILTERS);
   });
 });

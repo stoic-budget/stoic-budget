@@ -1,9 +1,7 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
-import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import React from 'react';
 import { Plus } from '@/app/components/icons';
 import { useQuickActions } from '@/app/components/mobile/quick-actions-store';
 import { Button } from '@/app/components/ui/button';
@@ -11,85 +9,41 @@ import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAttentionFocus } from '@/app/hooks/useAttentionFocus';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useTags } from '@/app/hooks/useTags';
-import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer, useLocale } from '@/app/i18n';
-import { getApiErrorMessage } from '@/app/lib/api-error';
 import { FALLBACK_CURRENCY } from '@/app/lib/currency';
-import {
-  type CreatePayableInput,
-  type ListPayablesParams,
-  type Payable,
-  type PayableDirection,
-  type PayablesSummary,
-  payablesApi,
-  type UpdatePayableInput,
-} from '@/app/lib/payables-api';
-import { queryKeys } from '@/app/lib/query-keys';
+import type { PayableDirection } from '@/app/lib/payables-api';
 import { getNestedValue, resolveLabel } from '@/app/lib/side-panel-utils';
 import { tokens } from '@/lib/theme-tokens';
 import { dueDateSpan, payableFilterExtras } from '../filters/filter-summary';
 import { TransactionsPageTitle } from '../TransactionsPageTitle';
 import { CreatePayableDrawer } from './CreatePayableDrawer';
-import { MarkPaidDialog, type MarkPaidResult } from './MarkPaidDialog';
+import { usePayableActions } from './hooks/usePayableActions';
+import { PAGE_SIZE, usePayablesData } from './hooks/usePayablesData';
+import { usePayablesFilters } from './hooks/usePayablesFilters';
+import { usePayablesLabels } from './hooks/usePayablesLabels';
+import { MarkPaidDialog } from './MarkPaidDialog';
 import PayableFiltersBar from './PayableFiltersBar';
 import PayableSummaryCards from './PayableSummaryCards';
 import { PayablesListLoading } from './PayablesListLoading';
 import { PayablesViewSkeleton } from './PayablesViewSkeleton';
-import {
-  buildPayablesListParams,
-  DEFAULT_PAYABLES_FILTERS,
-  type PayablesFiltersState,
-} from './payables-utils';
+import { DEFAULT_PAYABLES_FILTERS } from './payables-utils';
 
-const DEFAULT_SUMMARY: PayablesSummary = {
-  toPay: 0,
-  overdue: 0,
-  dueThisWeek: 0,
-  paidThisMonth: 0,
-  paidTotal: 0,
-  toPayCount: 0,
-  overdueCount: 0,
-  paidTotalCount: 0,
-  dueThisWeekCount: 0,
-  unbookedTotal: 0,
-  unbookedCount: 0,
-  convertedCurrencies: [],
-};
-
-const PAGE_SIZE = 20;
-
-const getErrorMessage = (error: unknown, fallback: string): string => {
-  if (!error || typeof error !== 'object') {
-    return fallback;
-  }
-
-  const candidate = error as {
-    response?: { data?: { message?: string | string[]; error?: { message?: string } | string } };
-    message?: string;
-  };
-
-  const message = candidate.response?.data?.message;
-  if (Array.isArray(message)) {
-    return message.join(', ');
-  }
-  if (typeof message === 'string' && message.trim()) {
-    return message;
-  }
-  if (typeof candidate.response?.data?.error === 'string' && candidate.response.data.error.trim()) {
-    return candidate.response.data.error;
-  }
-  if (
-    candidate.response?.data?.error &&
-    typeof candidate.response.data.error === 'object' &&
-    typeof candidate.response.data.error.message === 'string'
-  ) {
-    return candidate.response.data.error.message;
-  }
-  if (typeof candidate.message === 'string' && candidate.message.trim()) {
-    return candidate.message;
-  }
-  return fallback;
-};
+const PayablesNotice = ({ children }: { children: React.ReactNode }): React.JSX.Element => (
+  <div className="container-shared" style={{ padding: '40px 16px' }}>
+    <div
+      style={{
+        borderRadius: tokens.radius.lg,
+        border: '1px solid var(--border-color)',
+        background: 'var(--card-bg)',
+        padding: 24,
+        fontSize: 14,
+        color: 'var(--text-secondary)',
+      }}
+    >
+      {children}
+    </div>
+  </div>
+);
 
 type PayablesViewProps = {
   /** Which side of the ledger this view manages. Defaults to money the workspace owes. */
@@ -97,7 +51,6 @@ type PayablesViewProps = {
 };
 
 export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}): React.JSX.Element {
-  const searchParams = useSearchParams();
   useAttentionFocus();
   const { user, loading: authLoading } = useAuth();
   const { currentWorkspace, loading: workspaceLoading } = useWorkspace();
@@ -106,451 +59,34 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
   const tagsText = useIntlayer('tagsPage');
   const { data: tags } = useTags();
   const router = useRouter();
-  const t = useIntlayer('statementsPage');
-  const tx = useCallback((path: string[]) => resolveLabel(getNestedValue(t, path)), [t]);
-  // Receivables reuse the payables screen; only the wording that names the counterparty
-  // or the money flow switches, and it lives under the `receivables` content key.
-  const dx = useCallback(
-    (path: string[]) =>
-      direction === 'receivable' ? tx(['receivables', ...path]) : tx(['payables', ...path]),
-    [direction, tx],
-  );
-  const workspaceId = useWorkspaceId();
-  const queryClient = useQueryClient();
-  const [summary, setSummary] = useState<PayablesSummary>(DEFAULT_SUMMARY);
-  const [items, setItems] = useState<Payable[]>([]);
-  const [filters, setFilters] = useState<PayablesFiltersState>(DEFAULT_PAYABLES_FILTERS);
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [, setRefreshing] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [editingPayable, setEditingPayable] = useState<Payable | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [markingPaidId, setMarkingPaidId] = useState<string | null>(null);
-  const [payingPayable, setPayingPayable] = useState<Payable | null>(null);
-  const [removingPaymentId, setRemovingPaymentId] = useState<string | null>(null);
-  const [archivingId, setArchivingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [queryPage, setQueryPage] = useState(1);
-  const requestVersionRef = useRef(0);
-
-  useEffect(() => {
-    const status = searchParams?.get('status');
-    const source = searchParams?.get('source');
-
-    const nextFilters = {
-      ...DEFAULT_PAYABLES_FILTERS,
-      status:
-        status === 'to_pay' ||
-        status === 'scheduled' ||
-        status === 'partially_paid' ||
-        status === 'paid' ||
-        status === 'overdue' ||
-        status === 'archived'
-          ? status
-          : DEFAULT_PAYABLES_FILTERS.status,
-      source:
-        source === 'manual' || source === 'invoice' || source === 'statement'
-          ? source
-          : DEFAULT_PAYABLES_FILTERS.source,
-    } satisfies PayablesFiltersState;
-
-    setFilters(current => {
-      if (
-        current.search === nextFilters.search &&
-        current.status === nextFilters.status &&
-        current.source === nextFilters.source &&
-        current.dueDateFrom === nextFilters.dueDateFrom &&
-        current.dueDateTo === nextFilters.dueDateTo &&
-        current.tagId === nextFilters.tagId &&
-        current.sort === nextFilters.sort
-      ) {
-        return current;
-      }
-
-      return nextFilters;
-    });
-    setPage(1);
-    setQueryPage(1);
-  }, [searchParams]);
-
-  const labels = useMemo(
-    () => ({
-      title: dx(['title']),
-      subtitle: dx(['subtitle']),
-      add: dx(['add']),
-      export: tx(['payables', 'export']),
-      summary: {
-        toPay: dx(['summary', 'toPay']),
-        overdue: tx(['payables', 'summary', 'overdue']),
-        dueThisWeek: tx(['payables', 'summary', 'dueThisWeek']),
-        paidTotal: dx(['summary', 'paidThisMonth']),
-        itemsSuffix: tx(['payables', 'summary', 'itemsSuffix']),
-        convertedNote: tx(['payables', 'summary', 'convertedNote']),
-      },
-      filters: {
-        status: tx(['payables', 'filters', 'status']),
-        source: tx(['payables', 'filters', 'source']),
-        dueFrom: tx(['payables', 'filters', 'dueFrom']),
-        dueTo: tx(['payables', 'filters', 'dueTo']),
-        sort: tx(['payables', 'filters', 'sort']),
-        reset: tx(['payables', 'filters', 'reset']),
-        allStatuses: tx(['payables', 'filters', 'allStatuses']),
-        allSources: tx(['payables', 'filters', 'allSources']),
-        allTags: tx(['payables', 'filters', 'allTags']),
-        statusOptions: {
-          to_pay: dx(['status', 'toPay']),
-          scheduled: tx(['payables', 'status', 'scheduled']),
-          partially_paid: dx(['status', 'partiallyPaid']),
-          paid: dx(['status', 'paid']),
-          overdue: tx(['payables', 'status', 'overdue']),
-          archived: tx(['payables', 'status', 'archived']),
-        },
-        sourceOptions: {
-          manual: tx(['payables', 'sources', 'manual']),
-          invoice: tx(['payables', 'sources', 'invoice']),
-          statement: tx(['payables', 'sources', 'statement']),
-        },
-        sortOptions: {
-          dueDateAsc: tx(['payables', 'sort', 'dueDateAsc']),
-          dueDateDesc: tx(['payables', 'sort', 'dueDateDesc']),
-          amountDesc: tx(['payables', 'sort', 'amountDesc']),
-          vendorAsc: dx(['sort', 'vendorAsc']),
-        },
-      },
-      list: {
-        vendor: dx(['list', 'vendor']),
-        dueDate: tx(['payables', 'list', 'dueDate']),
-        amount: tx(['payables', 'list', 'amount']),
-        source: tx(['payables', 'list', 'source']),
-        status: tx(['payables', 'list', 'status']),
-        actions: tx(['payables', 'list', 'actions']),
-        markPaid: dx(['actions', 'markPaid']),
-        edit: tx(['payables', 'actions', 'edit']),
-        archive: tx(['payables', 'actions', 'archive']),
-        delete: tx(['payables', 'actions', 'delete']),
-        pageShown: tx(['pagination', 'shown']),
-        previous: tx(['pagination', 'previous']),
-        next: tx(['pagination', 'next']),
-        pageOf: tx(['pagination', 'pageOf']),
-        statusLabels: {
-          to_pay: dx(['status', 'toPay']),
-          scheduled: tx(['payables', 'status', 'scheduled']),
-          partially_paid: dx(['status', 'partiallyPaid']),
-          paid: dx(['status', 'paid']),
-          overdue: tx(['payables', 'status', 'overdue']),
-          archived: tx(['payables', 'status', 'archived']),
-        },
-        amountPaid: dx(['list', 'amountPaid']),
-        sourceLabels: {
-          manual: tx(['payables', 'sources', 'manual']),
-          invoice: tx(['payables', 'sources', 'invoice']),
-          statement: tx(['payables', 'sources', 'statement']),
-        },
-      },
-      drawer: {
-        createTitle: dx(['drawer', 'createTitle']),
-        editTitle: dx(['drawer', 'editTitle']),
-        vendor: dx(['drawer', 'vendor']),
-        amount: tx(['payables', 'drawer', 'amount']),
-        currency: tx(['payables', 'drawer', 'currency']),
-        dueDate: tx(['payables', 'drawer', 'dueDate']),
-        source: tx(['payables', 'drawer', 'source']),
-        status: tx(['payables', 'drawer', 'status']),
-        comment: tx(['payables', 'drawer', 'comment']),
-        save: tx(['payables', 'drawer', 'save']),
-        saving: tx(['payables', 'drawer', 'saving']),
-        cancel: tx(['payables', 'drawer', 'cancel']),
-        sourceOptions: {
-          manual: tx(['payables', 'sources', 'manual']),
-          invoice: tx(['payables', 'sources', 'invoice']),
-          statement: tx(['payables', 'sources', 'statement']),
-        },
-        statusOptions: {
-          to_pay: dx(['status', 'toPay']),
-          scheduled: tx(['payables', 'status', 'scheduled']),
-          paid: dx(['status', 'paid']),
-          overdue: tx(['payables', 'status', 'overdue']),
-          archived: tx(['payables', 'status', 'archived']),
-        },
-      },
-      emptyTitle: dx(['empty', 'title']),
-      emptyDescription: dx(['empty', 'description']),
-      authLoading: tx(['payables', 'auth', 'loading']),
-      loginRequired: dx(['auth', 'loginRequired']),
-      noWorkspace: dx(['auth', 'workspaceRequired']),
-      toasts: {
-        loadFailed: dx(['toasts', 'loadFailed']),
-        createSuccess: dx(['toasts', 'createSuccess']),
-        createFailed: dx(['toasts', 'createFailed']),
-        updateSuccess: dx(['toasts', 'updateSuccess']),
-        updateFailed: dx(['toasts', 'updateFailed']),
-        markPaidSuccess: dx(['toasts', 'markPaidSuccess']),
-        markPaidFailed: dx(['toasts', 'markPaidFailed']),
-        archiveSuccess: dx(['toasts', 'archiveSuccess']),
-        archiveFailed: dx(['toasts', 'archiveFailed']),
-        deleteSuccess: dx(['toasts', 'deleteSuccess']),
-        deleteFailed: dx(['toasts', 'deleteFailed']),
-        deleteConfirm: tx(['payables', 'toasts', 'deleteConfirm']),
-      },
-    }),
-    [dx, tx],
-  );
-
-  const loadData = useCallback(
-    async (options?: { silent?: boolean }) => {
-      if (!(user && currentWorkspace)) {
-        setLoading(false);
-        return;
-      }
-
-      if (options?.silent) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-
-      const requestVersion = ++requestVersionRef.current;
-
-      return await (async () => {
-        const [summaryResponse, listResponse] = await Promise.all([
-          payablesApi.getSummary(direction),
-          payablesApi.list(
-            buildPayablesListParams(filters, {
-              page: queryPage,
-              limit: PAGE_SIZE,
-              direction,
-            }) as ListPayablesParams,
-          ),
-        ]);
-
-        if (requestVersion !== requestVersionRef.current) {
-          return;
-        }
-
-        const nextTotalPages = Math.max(1, listResponse.totalPages || 1);
-
-        if (listResponse.total > 0 && queryPage > nextTotalPages) {
-          setPage(nextTotalPages);
-          setQueryPage(nextTotalPages);
-          return;
-        }
-
-        setSummary(summaryResponse);
-        setItems(listResponse.data);
-        setTotal(listResponse.total);
-        setTotalPages(nextTotalPages);
-        setPage(Math.min(queryPage, nextTotalPages));
-      })()
-        .catch(async error => {
-          if (requestVersion !== requestVersionRef.current) {
-            return;
-          }
-          toast.error(getErrorMessage(error, labels.toasts.loadFailed));
-        })
-        .finally(async () => {
-          if (requestVersion === requestVersionRef.current) {
-            setLoading(false);
-            setRefreshing(false);
-          }
-        });
-    },
-    [currentWorkspace, direction, filters, labels.toasts.loadFailed, queryPage, user],
-  );
-
-  useEffect(() => {
-    if (authLoading || workspaceLoading) {
-      return;
-    }
-    void loadData();
-  }, [authLoading, workspaceLoading, loadData]);
-
-  const handleFiltersChange = useCallback((next: PayablesFiltersState) => {
-    setFilters(next);
-    setPage(1);
-    setQueryPage(1);
-  }, []);
-
-  const handlePageChange = useCallback((nextPage: number) => {
-    setPage(nextPage);
-    setQueryPage(nextPage);
-  }, []);
-
-  const openCreateDrawer = (): void => {
-    setEditingPayable(null);
-    setDrawerOpen(true);
-  };
-  useQuickActions([{ id: 'add', label: labels.add, icon: Plus, run: openCreateDrawer }]);
-
-  const handleEdit = async (payable: Payable): Promise<void> => {
-    await (async () => {
-      const fresh = await payablesApi.getOne(payable.id);
-      setEditingPayable(fresh);
-      setDrawerOpen(true);
-    })().catch(async error => {
-      toast.error(getErrorMessage(error, labels.toasts.loadFailed));
-    });
-  };
-
-  const handleSave = async (payload: CreatePayableInput | UpdatePayableInput): Promise<void> => {
-    setSaving(true);
-
-    await (async () => {
-      if (editingPayable) {
-        await payablesApi.update(editingPayable.id, payload as UpdatePayableInput);
-        toast.success(labels.toasts.updateSuccess);
-      } else {
-        await payablesApi.create({ ...(payload as CreatePayableInput), direction });
-        toast.success(labels.toasts.createSuccess);
-      }
-
-      setDrawerOpen(false);
-      setEditingPayable(null);
-      await loadData({ silent: true });
-    })()
-      .catch(async error => {
-        toast.error(
-          getErrorMessage(
-            error,
-            editingPayable ? labels.toasts.updateFailed : labels.toasts.createFailed,
-          ),
-        );
-      })
-      .finally(async () => {
-        setSaving(false);
-      });
-  };
-
-  const handleMarkPaid = async (payable: Payable): Promise<void> => {
-    setPayingPayable(payable);
-  };
-
-  const confirmMarkPaid = async (payable: Payable, result: MarkPaidResult): Promise<void> => {
-    setMarkingPaidId(payable.id);
-
-    await (async () => {
-      const updated =
-        result.kind === 'full'
-          ? await payablesApi.markAsPaid(payable.id, result.payload)
-          : result.kind === 'book'
-            ? await payablesApi.bookPayment(payable.id, result.paymentId, result.payload)
-            : await payablesApi.addPayment(payable.id, result.payload);
-      // A bill that is still short keeps the dialog open on its new outstanding
-      // amount: instalments arrive one after another.
-      setPayingPayable(updated.status === 'partially_paid' ? updated : null);
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.payablePayments({ workspaceId, payableId: payable.id }),
-      });
-      toast.success(labels.toasts.markPaidSuccess);
-      await loadData({ silent: true });
-    })()
-      .catch(async error => {
-        // The payment refusals are coded, so they read in the user's language.
-        toast.error(getApiErrorMessage(error, labels.toasts.markPaidFailed));
-      })
-      .finally(async () => {
-        setMarkingPaidId(null);
-      });
-  };
-
-  const removePayment = async (payable: Payable, paymentId: string): Promise<void> => {
-    setRemovingPaymentId(paymentId);
-
-    await (async () => {
-      const updated = await payablesApi.removePayment(payable.id, paymentId);
-      setPayingPayable(updated);
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.payablePayments({ workspaceId, payableId: payable.id }),
-      });
-      await loadData({ silent: true });
-    })()
-      .catch(async error => {
-        toast.error(getApiErrorMessage(error, labels.toasts.markPaidFailed));
-      })
-      .finally(async () => {
-        setRemovingPaymentId(null);
-      });
-  };
-
-  const handleArchive = async (payable: Payable): Promise<void> => {
-    setArchivingId(payable.id);
-
-    await (async () => {
-      await payablesApi.archive(payable.id);
-      toast.success(labels.toasts.archiveSuccess);
-      await loadData({ silent: true });
-    })()
-      .catch(async error => {
-        toast.error(getErrorMessage(error, labels.toasts.archiveFailed));
-      })
-      .finally(async () => {
-        setArchivingId(null);
-      });
-  };
-
-  const handleDelete = async (payable: Payable): Promise<void> => {
-    const confirmMessage = labels.toasts.deleteConfirm.replace('{vendor}', payable.vendor);
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    setDeletingId(payable.id);
-
-    await (async () => {
-      await payablesApi.delete(payable.id);
-      toast.success(labels.toasts.deleteSuccess);
-      await loadData({ silent: true });
-    })()
-      .catch(async error => {
-        toast.error(getErrorMessage(error, labels.toasts.deleteFailed));
-      })
-      .finally(async () => {
-        setDeletingId(null);
-      });
-  };
+  const { labels, tx } = usePayablesLabels(direction);
+  const { filters, page, setPage, queryPage, setQueryPage, handleFiltersChange, handlePageChange } =
+    usePayablesFilters();
+  const { summary, items, total, totalPages, loading, loadData } = usePayablesData({
+    direction,
+    filters,
+    queryPage,
+    setPage,
+    setQueryPage,
+    loadFailedMessage: labels.toasts.loadFailed,
+  });
+  const actions = usePayableActions({
+    direction,
+    reload: () => loadData({ silent: true }),
+    toasts: labels.toasts,
+  });
+  useQuickActions([{ id: 'add', label: labels.add, icon: Plus, run: actions.openCreateDrawer }]);
 
   if (authLoading || workspaceLoading) {
     return <PayablesViewSkeleton direction={direction} />;
   }
 
   if (!user) {
-    return (
-      <div className="container-shared" style={{ padding: '40px 16px' }}>
-        <div
-          style={{
-            borderRadius: tokens.radius.lg,
-            border: '1px solid var(--border-color)',
-            background: 'var(--card-bg)',
-            padding: 24,
-            fontSize: 14,
-            color: 'var(--text-secondary)',
-          }}
-        >
-          {labels.loginRequired}
-        </div>
-      </div>
-    );
+    return <PayablesNotice>{labels.loginRequired}</PayablesNotice>;
   }
 
   if (!currentWorkspace) {
-    return (
-      <div className="container-shared" style={{ padding: '40px 16px' }}>
-        <div
-          style={{
-            borderRadius: tokens.radius.lg,
-            border: '1px solid var(--border-color)',
-            background: 'var(--card-bg)',
-            padding: 24,
-            fontSize: 14,
-            color: 'var(--text-secondary)',
-          }}
-        >
-          {labels.noWorkspace}
-        </div>
-      </div>
-    );
+    return <PayablesNotice>{labels.noWorkspace}</PayablesNotice>;
   }
 
   return (
@@ -603,7 +139,7 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
                 <Button variant="ghost" onClick={() => router.push('/statements/reconcile')}>
                   {tx(['payables', 'reconcile'])}
                 </Button>
-                <Button className="seneca-bottom-bar-source" onClick={openCreateDrawer}>
+                <Button className="seneca-bottom-bar-source" onClick={actions.openCreateDrawer}>
                   <Plus size={18} aria-hidden />
                   {labels.add}
                 </Button>
@@ -645,34 +181,35 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
               pageSize: PAGE_SIZE,
               onPageChange: handlePageChange,
             }}
-            actionState={{ markingPaidId, archivingId, deletingId }}
-            onEdit={handleEdit}
-            onMarkPaid={handleMarkPaid}
-            onArchive={handleArchive}
-            onDelete={handleDelete}
+            actionState={{
+              markingPaidId: actions.markingPaidId,
+              archivingId: actions.archivingId,
+              deletingId: actions.deletingId,
+            }}
+            onEdit={actions.handleEdit}
+            onMarkPaid={actions.handleMarkPaid}
+            onArchive={actions.handleArchive}
+            onDelete={actions.handleDelete}
           />
         </div>
       </div>
 
       <MarkPaidDialog
-        removingPaymentId={removingPaymentId}
-        onRemovePayment={(payable, paymentId) => void removePayment(payable, paymentId)}
-        payable={payingPayable}
-        submitting={markingPaidId !== null}
-        onClose={() => setPayingPayable(null)}
-        onConfirm={(payable, result) => void confirmMarkPaid(payable, result)}
+        removingPaymentId={actions.removingPaymentId}
+        onRemovePayment={(payable, paymentId) => void actions.removePayment(payable, paymentId)}
+        payable={actions.payingPayable}
+        submitting={actions.markingPaidId !== null}
+        onClose={() => actions.setPayingPayable(null)}
+        onConfirm={(payable, result) => void actions.confirmMarkPaid(payable, result)}
       />
 
       <CreatePayableDrawer
-        open={drawerOpen}
-        payable={editingPayable}
+        open={actions.drawerOpen}
+        payable={actions.editingPayable}
         defaultCurrency={(currentWorkspace.currency || FALLBACK_CURRENCY).toUpperCase()}
-        saving={saving}
-        onClose={() => {
-          setDrawerOpen(false);
-          setEditingPayable(null);
-        }}
-        onSubmit={handleSave}
+        saving={actions.saving}
+        onClose={actions.closeDrawer}
+        onSubmit={actions.handleSave}
         labels={labels.drawer}
       />
     </>
