@@ -33,6 +33,7 @@ import {
   toLineColumns,
   transactionLegs,
 } from './ledger-posting.rules';
+import { cashHomeOf, mirrorsAStatement } from './moved-rows';
 
 export type LedgerPostingErrorCode =
   | 'LEDGER_DISABLED'
@@ -595,10 +596,8 @@ export class LedgerPostingService {
     baseCurrency: string,
     openingAccountId: string,
   ): Promise<OpeningResult> {
-    const mirrorsStatement = await this.transactionRepository.exists({
-      where: { workspaceId, walletId: wallet.id, statementId: Not(IsNull()) },
-    });
-    if (mirrorsStatement) {
+    const mirrors = await mirrorsAStatement(this.transactionRepository, workspaceId, wallet.id);
+    if (mirrors) {
       return {
         cashAccountId: null,
         outcome: { status: 'skipped', reason: 'wallet_backed_by_statement' },
@@ -810,6 +809,7 @@ export class LedgerPostingService {
             id: true,
             bankName: true,
             accountNumber: true,
+            walletId: true,
             deletedAt: true,
           },
         })
@@ -817,6 +817,7 @@ export class LedgerPostingService {
     if (statement?.deletedAt) {
       return { skip: 'statement_deleted' };
     }
+    const cashHome = await cashHomeOf(this.statementRepository, tx, statement);
 
     const currency = tx.currency.toUpperCase();
     const system = await this.accountsService.systemAccountIds(tx.workspaceId);
@@ -844,7 +845,7 @@ export class LedgerPostingService {
       : tx.categoryId
         ? await this.accountsService.categoryAccountId(tx.workspaceId, tx.categoryId)
         : null;
-    const cash = await this.cashAccountOf(tx, statement, currency);
+    const cash = await this.cashAccountOf(tx, cashHome, currency);
 
     const result = transactionLegs(facts, {
       cash: cash ?? system[LEDGER_ACCOUNT_CODES.CASH_UNALLOCATED],
@@ -872,10 +873,13 @@ export class LedgerPostingService {
     };
   }
 
-  /** Statement, then wallet, then crypto wallet; null sends the money to CASH_UNALLOCATED. */
+  /**
+   * The statement the row is booked under (`cashHomeOf`), then its wallet, then
+   * its crypto wallet; null sends the money to CASH_UNALLOCATED.
+   */
   private async cashAccountOf(
     tx: Transaction,
-    statement: Statement | null,
+    statement: Pick<Statement, 'bankName' | 'accountNumber'> | null,
     currency: string,
   ): Promise<string | null> {
     if (statement) {
@@ -889,11 +893,7 @@ export class LedgerPostingService {
     if (tx.walletId) {
       const wallet = await this.walletRepository.findOne({
         where: { id: tx.walletId, workspaceId: tx.workspaceId },
-        select: {
-          id: true,
-          name: true,
-          currency: true,
-        },
+        select: { id: true, name: true, currency: true },
       });
       if (wallet) {
         return this.accountsService.walletCashAccountId(tx.workspaceId, wallet, currency);

@@ -90,3 +90,21 @@ export function describeResult(
   }
   return parts.join(' · ');
 }
+
+/** `2 rows refiled, 3 tagged · 1 rows moved to Cash`: what applying a rule did. */
+export function describeApplied(
+  done: { applied: number; tagged: number; moved: number },
+  texts: { applied: string; appliedAll: string; movedPart: string },
+  wallet: string,
+): string {
+  const parts: string[] = [];
+  if (done.tagged > 0) {
+    parts.push(fill(texts.appliedAll, { applied: done.applied, tagged: done.tagged }));
+  } else if (done.applied > 0 || done.moved === 0) {
+    parts.push(fill(texts.applied, { count: done.applied }));
+  }
+  if (done.moved > 0) {
+    parts.push(fill(texts.movedPart, { count: done.moved, wallet }));
+  }
+  return parts.join(' · ');
+}

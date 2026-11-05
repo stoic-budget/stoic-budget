@@ -76,6 +76,8 @@ export const TestCategorizationRuleBody = Schema.Struct({
   transactionIds: Schema.optional(Schema.Array(Schema.String).check(Schema.isMinLength(1))),
   /** The saved rule being edited: rules ranked above it are what can win its rows. */
   ruleId: Schema.optional(Schema.String.check(Schema.isUUID())),
+  /** The account the draft sets: the answer counts the matches it would move there. */
+  walletId: Schema.optional(Schema.String.check(Schema.isUUID())),
 });
 export type TestCategorizationRuleBody = Wire<typeof TestCategorizationRuleBody>;
 

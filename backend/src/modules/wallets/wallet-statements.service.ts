@@ -98,8 +98,8 @@ export class WalletStatementsService {
   }
 
   /**
-   * Moves statements, with all their rows, into the account. A row with no
-   * owner yet takes the account's; one somebody already assigned keeps it.
+   * Moves statements, with their rows, into the account. A row with no owner
+   * yet takes the account's; one somebody already assigned keeps it.
    */
   async attach(
     id: string,
@@ -129,16 +129,21 @@ export class WalletStatementsService {
     }
 
     await this.statementRepository.manager.transaction(async manager => {
-      await manager.update(Statement, { id: In(ids), workspaceId }, { walletId: wallet.id });
-      await manager.update(
-        Transaction,
-        { statementId: In(ids), workspaceId },
-        { walletId: wallet.id },
+      // Before the statements change hands: a row a rule put in another account
+      // than its statement's stays there, the rest follow the statement.
+      await manager.query(
+        `UPDATE transactions row SET wallet_id = $3
+           FROM statements statement
+          WHERE statement.id = row.statement_id AND statement.id = ANY($1::uuid[])
+            AND row.workspace_id = $2 AND statement.workspace_id = $2
+            AND (row.wallet_id IS NULL OR row.wallet_id IS NOT DISTINCT FROM statement.wallet_id)`,
+        [ids, workspaceId, wallet.id],
       );
+      await manager.update(Statement, { id: In(ids), workspaceId }, { walletId: wallet.id });
       if (wallet.ownerMemberId) {
         await manager.update(
           Transaction,
-          { statementId: In(ids), workspaceId, ownerMemberId: IsNull() },
+          { statementId: In(ids), workspaceId, walletId: wallet.id, ownerMemberId: IsNull() },
           { ownerMemberId: wallet.ownerMemberId },
         );
       }

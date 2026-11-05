@@ -68,6 +68,7 @@ export function RuleActionsField({
           />
         </div>
       )}
+      {result.walletId && <span className="seneca-rule-dialog__hint">{t.dialog.walletHint}</span>}
       {ownerOptions.length > 1 && (
         <div className="seneca-rule-dialog__action">
           <span className="seneca-rule-dialog__action-label">{t.dialog.ownerLabel}</span>

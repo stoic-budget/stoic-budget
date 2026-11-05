@@ -271,25 +271,30 @@ describe('StatementProcessingService', () => {
       statement.accountNumber = null;
     });
 
-    it('puts every row in the account the statement was uploaded to', async () => {
+    it('puts every row in the account the statement was uploaded to, unless a rule names another', async () => {
       statement.walletId = 'wallet-everyday';
       walletRepository.findOne.mockResolvedValueOnce({
         id: 'wallet-everyday',
         ownerMemberId: 'member-1',
       });
-      // A rule pointing elsewhere does not move a row out of its statement's account.
-      classificationService.classifyTransaction.mockResolvedValue({
+      // A rule that names an account beats the statement's, for the row it matched only.
+      classificationService.classifyTransaction.mockResolvedValueOnce({
         categoryId: 'cat-1',
         walletId: 'wallet-other',
+        ownerMemberId: 'member-2',
       } as never);
 
       await service.processStatement(statement.id);
 
       expect(savedTransactions).toHaveLength(2);
-      for (const row of savedTransactions) {
-        expect(row).toMatchObject({ walletId: 'wallet-everyday', ownerMemberId: 'member-1' });
-      }
-      classificationService.classifyTransaction.mockResolvedValue({ categoryId: 'cat-1' });
+      expect(savedTransactions[0]).toMatchObject({
+        walletId: 'wallet-other',
+        ownerMemberId: 'member-2',
+      });
+      expect(savedTransactions[1]).toMatchObject({
+        walletId: 'wallet-everyday',
+        ownerMemberId: 'member-1',
+      });
     });
 
     it('finds the account by the statement number and keeps the match', async () => {

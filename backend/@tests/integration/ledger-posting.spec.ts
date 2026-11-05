@@ -37,6 +37,7 @@ import {
   Transaction,
   TransactionType,
   User,
+  Wallet,
   Workspace,
 } from '../../src/entities';
 import {
@@ -678,6 +679,73 @@ describe('ledger posting engine (real Postgres)', () => {
     const codes = (await linesOf(entryId)).map(line => line.code);
     expect(codes).toContain(LEDGER_ACCOUNT_CODES.RECEIVABLES);
     expect(codes).not.toContain(categoryAccountCode('income', category.consulting));
+  });
+
+  it('books a row a rule moved out of its statement where the money of its new account is', async () => {
+    const walletRepo = dataSource.getRepository(Wallet);
+    const statementRepo = dataSource.getRepository(Statement);
+    const wallet = (name: string, initialBalance = 0) =>
+      walletRepo.save(walletRepo.create({ userId, workspaceId, name, currency: 'EUR', initialBalance }));
+    const everyday = await wallet('Everyday account');
+    const cashBox = await wallet('Cash box', 50);
+    const savings = await wallet('Savings account', 70);
+    await statementRepo.update(eurStatementId, { walletId: everyday.id });
+    const savingsStatement = await statementRepo.save(
+      statementRepo.create({
+        userId,
+        workspaceId,
+        fileName: 'savings.pdf',
+        filePath: '/tmp/savings.pdf',
+        fileType: FileType.PDF,
+        fileSize: 1,
+        fileHash: randomUUID(),
+        bankName: BankName.OTHER,
+        status: StatementStatus.COMPLETED,
+        accountNumber: 'DE00 0000 0000 0000 0000 77',
+        currency: 'EUR',
+        walletId: savings.id,
+      }),
+    );
+
+    const row = (walletId: string) =>
+      insertTransaction({ amount: 20, debit: 20, categoryId: category.food, statementId: eurStatementId, walletId });
+    /** The cash account the row's entry credits. */
+    const cashOf = async (transactionId: string) => {
+      const outcome = await posting.postTransaction(workspaceId, transactionId);
+      expect(['posted', 'unchanged']).toContain(outcome.status);
+      const lines = await linesOf((outcome as { entryId: string }).entryId);
+      return lines.find(line => line.code.startsWith('CASH_'))?.code;
+    };
+    const cashCode = async (where: string, params: unknown[]) =>
+      (await query<{ code: string }>(`SELECT "code" FROM "ledger_accounts" WHERE ${where}`, params))[0]?.code;
+
+    const stays = await cashOf(await row(everyday.id));
+    const toCashBox = await cashOf(await row(cashBox.id));
+    const toSavings = await cashOf(await row(savings.id));
+
+    // Its statement's own account: booked under the statement, as ever.
+    expect(stays).toBe(await cashOf(tx.income));
+    // An account with no statements keeps its money under the wallet itself.
+    expect(toCashBox).toBe(await cashCode(`"wallet_id" = $1`, [cashBox.id]));
+    // An account that has statements keeps it under them.
+    expect(toSavings).not.toBe(stays);
+    expect(toSavings).not.toMatch(/^CASH_W_/);
+    expect(savingsStatement.id).toBeTruthy();
+
+    // The cash box is still a wallet of its own: its opening balance is booked.
+    // The savings account has a statement, which carries its opening: the wallet's own is not booked.
+    const openings = await posting.postOpeningBalances(workspaceId);
+    expect(openings.map(result => result.outcome)).toContainEqual({
+      status: 'skipped',
+      reason: 'wallet_backed_by_statement',
+    });
+    const cashBoxAccount = await query<{ id: string }>(
+      `SELECT "id" FROM "ledger_accounts" WHERE "wallet_id" = $1`,
+      [cashBox.id],
+    );
+    expect(openings.find(result => result.cashAccountId === cashBoxAccount[0].id)?.outcome.status).toBe(
+      'posted',
+    );
   });
 
   it('leaves the whole ledger balanced, entry by entry', async () => {

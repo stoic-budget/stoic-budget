@@ -1,4 +1,8 @@
+import { ActorType, AuditAction, EntityType } from '../../../entities/audit-event.entity';
 import type { CategorizationRule } from '../../../entities/categorization-rule.entity';
+import { TransactionCategorySource } from '../../../entities/transaction.entity';
+import type { CreateAuditEventDto } from '../../audit/interfaces/audit-event.interface';
+import type { RuleApplyPlan } from '../engine/rule-apply-plan';
 import type { ClassificationCondition } from '../interfaces/classification-rule.interface';
 
 export type CategorizationRuleAuditSnapshot = {
@@ -34,4 +38,44 @@ export function toRuleAuditSnapshot(rule: CategorizationRule): CategorizationRul
     createdAt: rule.createdAt.toISOString(),
     updatedAt: rule.updatedAt.toISOString(),
   };
+}
+
+/**
+ * One event per row an apply changed, with what it was before: the category
+ * and the account can be put back from it. A row that only got tags has no
+ * diff, since tags are added and nothing is taken away.
+ */
+export function ruleApplyEvents(
+  plan: RuleApplyPlan,
+  input: { rule: CategorizationRule; userId: string; tagIds: readonly string[] },
+): CreateAuditEventDto[] {
+  const { rule, userId, tagIds } = input;
+  const { categoryId, walletId } = rule.result;
+  const refiled = new Set(plan.refiled.map(row => row.id));
+  const moved = new Set(plan.moved.map(row => row.id));
+  const tagged = new Set(plan.tagged.map(row => row.id));
+  return plan.matches
+    .filter(row => refiled.has(row.id) || moved.has(row.id) || tagged.has(row.id))
+    .map(row => {
+      const before: Record<string, unknown> = {};
+      const after: Record<string, unknown> = {};
+      if (refiled.has(row.id)) {
+        Object.assign(before, { categoryId: row.categoryId, categorySource: row.categorySource });
+        Object.assign(after, { categoryId, categorySource: TransactionCategorySource.RULE });
+      }
+      if (moved.has(row.id)) {
+        before.walletId = row.walletId;
+        after.walletId = walletId;
+      }
+      return {
+        workspaceId: rule.workspaceId,
+        actorType: ActorType.USER,
+        actorId: userId,
+        entityType: EntityType.TRANSACTION,
+        entityId: row.id,
+        action: AuditAction.APPLY_RULE,
+        diff: Object.keys(after).length > 0 ? { before, after } : null,
+        meta: { ruleId: rule.id, ruleName: rule.name, confidence: 1, tagIds: [...tagIds] },
+      };
+    });
 }

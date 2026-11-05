@@ -97,15 +97,22 @@ export const CategorizationRuleTestResult = Schema.Struct({
   ),
   /** Matches a higher-ranked rule takes first. */
   shadowed: Schema.Number,
+  /** Matches applying the rule would move to the account it sets. */
+  movable: Schema.Number,
 });
 export type CategorizationRuleTestResult = Wire<typeof CategorizationRuleTestResult>;
 
-/** `POST /categorization-rules/:id/apply`: rows refiled, rows whose hand-picked category stayed, rows tagged. */
+/**
+ * `POST /categorization-rules/:id/apply`: rows refiled, rows whose hand-picked
+ * category stayed, rows tagged, rows moved to the rule's account.
+ */
 export const CategorizationRuleApplyResult = Schema.Struct({
   applied: Schema.Number,
   skippedManual: Schema.Number,
   /** Rows that got at least one of the rule's tags, filed by hand or not. */
   tagged: Schema.Number,
+  /** Rows that sat in another account and are now in the rule's. */
+  moved: Schema.Number,
 });
 export type CategorizationRuleApplyResult = Wire<typeof CategorizationRuleApplyResult>;
 

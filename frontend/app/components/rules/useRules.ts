@@ -164,7 +164,7 @@ export function useDeleteRule() {
   });
 }
 
-/** Files the rule's existing matches and tags them; every figure built from them moves. */
+/** Files, tags and moves the rule's existing matches; every figure built from them moves. */
 export function useApplyRule() {
   return useMutation({
     mutationFn: (id: string) =>
@@ -186,12 +186,29 @@ export function completeConditions(conditions: RuleCondition[]): RuleCondition[]
   return conditions.filter(condition => String(condition.value).trim() !== '');
 }
 
+/** What a rule would match today: `POST /categorization-rules/test`. */
+export function previewRule(
+  body: ContractInput<'TestCategorizationRuleBody'>,
+  signal?: AbortSignal,
+) {
+  return apiClient
+    .post('/categorization-rules/test', body, { signal })
+    .then(response =>
+      checkContract('CategorizationRuleTestResult', response.data, '/categorization-rules/test'),
+    );
+}
+
 /**
  * What the conditions match among the workspace's rows, a moment after typing
  * stops. `ruleId` is the saved rule being edited: rows a rule above it takes
- * come back marked.
+ * come back marked. `walletId` is the account the draft sets: the answer says
+ * how many matches would move there.
  */
-export function useRulePreview(conditions: RuleCondition[], ruleId: string | null) {
+export function useRulePreview(
+  conditions: RuleCondition[],
+  ruleId: string | null,
+  walletId: string | null = null,
+) {
   const workspaceId = useWorkspaceId();
   const complete = completeConditions(conditions);
   const serialized = JSON.stringify(complete);
@@ -203,24 +220,16 @@ export function useRulePreview(conditions: RuleCondition[], ruleId: string | nul
   const settledConditions = JSON.parse(settled) as RuleCondition[];
 
   return useQuery({
-    queryKey: queryKeys.categorizationRulePreview(workspaceId, settledConditions, ruleId),
+    queryKey: queryKeys.categorizationRulePreview(workspaceId, settledConditions, ruleId, walletId),
     queryFn: ({ signal }) =>
-      apiClient
-        .post(
-          '/categorization-rules/test',
-          {
-            conditions: settledConditions,
-            ...(ruleId ? { ruleId } : {}),
-          } satisfies ContractInput<'TestCategorizationRuleBody'>,
-          { signal },
-        )
-        .then(response =>
-          checkContract(
-            'CategorizationRuleTestResult',
-            response.data,
-            '/categorization-rules/test',
-          ),
-        ),
+      previewRule(
+        {
+          conditions: settledConditions,
+          ...(ruleId ? { ruleId } : {}),
+          ...(walletId ? { walletId } : {}),
+        },
+        signal,
+      ),
     enabled: Boolean(workspaceId) && settledConditions.length > 0,
     placeholderData: previous => previous,
   });

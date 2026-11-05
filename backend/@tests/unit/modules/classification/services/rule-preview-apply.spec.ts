@@ -56,8 +56,9 @@ function build(
   const tax = { reassess: vi.fn(async () => 0) };
   // Every rule of the workspace, best first, as the preview reads them to rank.
   const allRules = { find: vi.fn(async () => options.allRules ?? []) };
-  // The tags of the workspace that still exist.
+  // The tags of the workspace that still exist; every category and account a rule names is its own.
   const tags = {
+    countBy: async ({ id }: { id: { value: string[] } }) => id.value.length,
     find: vi.fn(async ({ where }: { where: { id: { value: string[] } } }) =>
       where.id.value.filter(id => (options.tags ?? []).includes(id)).map(id => ({ id })),
     ),
@@ -268,7 +269,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2 });
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0 });
     expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
       'open',
     ]);
@@ -288,7 +289,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 1 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 1, moved: 0 });
     expect(transactions.update).not.toHaveBeenCalled();
   });
 
@@ -307,7 +308,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 2, skippedManual: 2, tagged: 0 });
+    expect(result).toEqual({ applied: 2, skippedManual: 2, tagged: 0, moved: 0 });
     const [where, values] = transactions.update.mock.calls[0] as unknown as [
       { id: { value: string[] }; workspaceId: string },
       Record<string, unknown>,
@@ -355,7 +356,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 0 });
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 0, moved: 0 });
     expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
       'open',
     ]);
@@ -373,8 +374,76 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 0 });
     expect(transactions.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('a rule that names an account', () => {
+  const toCash = {
+    ...storeRule,
+    result: { walletId: 'wallet-cash' },
+  } as unknown as CategorizationRule;
+  const rows = () => [
+    row('elsewhere', { walletId: 'wallet-card' }),
+    row('nowhere', { walletId: null }),
+    row('there', { walletId: 'wallet-cash' }),
+    row('transfer', { walletId: 'wallet-card', transferPairId: 'pair-1' }),
+    row('other', { counterpartyName: 'Corner Bakery', walletId: 'wallet-card' }),
+  ];
+
+  it('says in the preview how many matches would move', async () => {
+    const { rulesService } = build(rows());
+
+    const preview = await rulesService.previewRule({
+      workspaceId: WORKSPACE,
+      viewerMemberId: ME,
+      conditions: storeRule.conditions,
+      walletId: 'wallet-cash',
+    });
+
+    expect(preview.matchedTransactions).toBe(4);
+    expect(preview.movable).toBe(2);
+  });
+
+  it('moves nothing in the preview of a rule that names no account', async () => {
+    const { rulesService } = build(rows());
+
+    const preview = await rulesService.previewRule({
+      workspaceId: WORKSPACE,
+      viewerMemberId: ME,
+      conditions: storeRule.conditions,
+    });
+
+    expect(preview.movable).toBe(0);
+  });
+
+  it('moves its matches there, but not a leg of a transfer, and says what moved', async () => {
+    const { rulesService, transactions, audit } = build(rows());
+
+    const result = await rulesService.applyRuleToExisting({
+      rule: toCash,
+      userId: 'user-1',
+      viewerMemberId: ME,
+    });
+
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 2 });
+    const [where, values] = transactions.update.mock.calls[0] as unknown as [
+      { id: { value: string[] }; workspaceId: string },
+      Record<string, unknown>,
+    ];
+    expect(where.id.value).toEqual(['elsewhere', 'nowhere']);
+    expect(where.workspaceId).toBe(WORKSPACE);
+    expect(values).toEqual({ walletId: 'wallet-cash' });
+    const events = audit.createBatchEvents.mock.calls[0][0] as Array<{
+      entityId: string;
+      diff: { before: unknown; after: unknown };
+    }>;
+    expect(events.map(event => event.entityId)).toEqual(['elsewhere', 'nowhere']);
+    expect(events[0].diff).toEqual({
+      before: { walletId: 'wallet-card' },
+      after: { walletId: 'wallet-cash' },
+    });
   });
 });
 

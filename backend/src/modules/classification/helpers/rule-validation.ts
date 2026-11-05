@@ -81,3 +81,8 @@ export async function assertRuleRefs(
     assertOwnerMemberInWorkspace(members, workspaceId, rule.result?.ownerMemberId),
   ]);
 }
+
+/** Whether the rule sets anything "apply to existing rows" can write. */
+export function hasApplicableAction(result: ClassificationResult): boolean {
+  return Boolean(result.categoryId || result.walletId || result.tagIds?.length);
+}

@@ -8,6 +8,7 @@ const post = vi.fn();
 const put = vi.fn();
 const del = vi.fn();
 const permissions = vi.hoisted(() => ({ allowed: true }));
+const offers = vi.hoisted(() => ({ last: null as null | { message: string; onApply: () => void } }));
 const search = vi.hoisted(() => ({ params: new URLSearchParams() }));
 const router = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
 
@@ -28,6 +29,11 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => search.params,
   usePathname: () => '/rules',
   useRouter: () => router,
+}));
+vi.mock('@/app/components/payees/offer-action-toast', () => ({
+  offerAction: (options: { message: string; onApply: () => void }) => {
+    offers.last = options;
+  },
 }));
 
 import type { CategorizationRule, CategorizationRuleSuggestionList } from '@/app/lib/contracts';
@@ -100,7 +106,8 @@ describe('RulesView', () => {
     search.params = new URLSearchParams();
     put.mockResolvedValue(apiResponse(rule()));
     del.mockResolvedValue(apiResponse(null));
-    post.mockResolvedValue(apiResponse({ applied: 2, skippedManual: 1, tagged: 3 }));
+    offers.last = null;
+    post.mockResolvedValue(apiResponse({ applied: 2, skippedManual: 1, tagged: 3, moved: 0 }));
   });
 
   it('lays each rule out as a row: what it matches, what it sets, how often it fired', async () => {
@@ -157,6 +164,44 @@ describe('RulesView', () => {
     await userEvent.click(await screen.findByRole('button', { name: /Rule actions: ACME/ }));
     await userEvent.click(await screen.findByRole('menuitem', { name: 'Apply to existing rows' }));
 
+    await waitFor(() => expect(post).toHaveBeenCalledWith('/categorization-rules/rule-1/apply'));
+    expect(offers.last).toBeNull();
+  });
+
+  it('asks before a rule that names an account moves existing rows there', async () => {
+    const moving = rule({ result: { walletId: CARD.id } });
+    mockApi([moving]);
+    post.mockImplementation(async (url: string) =>
+      url === '/categorization-rules/test'
+        ? apiResponse({
+            totalTransactions: 40,
+            matchedTransactions: 3,
+            overridable: 0,
+            shadowed: 0,
+            movable: 2,
+            truncated: false,
+            matches: [],
+          })
+        : apiResponse({ applied: 0, skippedManual: 0, tagged: 0, moved: 2 }),
+    );
+    renderWithQuery(<RulesView />);
+
+    await userEvent.click(await screen.findByRole('button', { name: /Rule actions: ACME/ }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Apply to existing rows' }));
+
+    await waitFor(() =>
+      expect(offers.last?.message).toBe(
+        'This rule moves 2 existing rows to Everyday card. Apply it to them?',
+      ),
+    );
+    expect(post).toHaveBeenCalledWith(
+      '/categorization-rules/test',
+      { conditions: moving.conditions, ruleId: 'rule-1', walletId: CARD.id },
+      expect.anything(),
+    );
+    expect(post).not.toHaveBeenCalledWith('/categorization-rules/rule-1/apply');
+
+    offers.last?.onApply();
     await waitFor(() => expect(post).toHaveBeenCalledWith('/categorization-rules/rule-1/apply'));
   });
 

@@ -1118,6 +1118,7 @@ describe('API contracts (e2e)', () => {
           applied: 0,
           skippedManual: 0,
           tagged: preview.body.matchedTransactions,
+          moved: 0,
         });
       } finally {
         for (const id of ids) {

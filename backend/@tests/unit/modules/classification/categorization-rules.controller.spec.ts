@@ -447,17 +447,29 @@ describe('CategorizationRulesController', () => {
       ).resolves.toEqual({ applied: 0, skippedManual: 0, tagged: 3 });
     });
 
-    it('refuses a rule that sets neither a category nor tags', async () => {
+    it('refuses a rule that sets nothing an apply writes: only the owner', async () => {
       mockRuleRepository.findOne.mockResolvedValue({
         id: 'rule-1',
         workspaceId: mockWorkspaceId,
-        result: { walletId: 'wallet-1' },
+        result: { ownerMemberId: null },
       });
 
       await expect(
         controller.applyRule({ id: 'rule-1' }, mockUser as any, mockWorkspaceId, null),
-      ).rejects.toThrow('neither a category nor tags');
+      ).rejects.toThrow('no category, account or tags');
       expect(mockRuleApplicationService.applyRuleToExisting).not.toHaveBeenCalled();
+    });
+
+    it('applies a rule that only names an account', async () => {
+      const rule = { id: 'rule-1', workspaceId: mockWorkspaceId, result: { walletId: 'wallet-1' } };
+      mockRuleRepository.findOne.mockResolvedValue(rule);
+      mockRuleApplicationService.applyRuleToExisting.mockResolvedValue({ moved: 2 });
+
+      await controller.applyRule({ id: 'rule-1' }, mockUser as any, mockWorkspaceId, null);
+
+      expect(mockRuleApplicationService.applyRuleToExisting).toHaveBeenCalledWith(
+        expect.objectContaining({ rule }),
+      );
     });
 
     it('is not found for a rule outside the workspace', async () => {

@@ -71,7 +71,9 @@ function RuleRow({
     transition,
     isDragging,
   } = useSortable({ id: rule.id, disabled: !actions.canEdit });
-  const settable = Boolean(rule.result.categoryId || rule.result.tagIds?.length);
+  const settable = Boolean(
+    rule.result.categoryId || rule.result.walletId || rule.result.tagIds?.length,
+  );
 
   return (
     <tr

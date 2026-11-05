@@ -145,4 +145,54 @@ DATA:OFXSGML
     expect(own.categorySource).toBe('rule');
     expect(household.categorySource).not.toBe('rule');
   });
+
+  it("puts a row in the account a rule names, over its statement's, and keeps it there", async () => {
+    const wallet = (name: string) =>
+      as(request(server()).post('/wallets')).send({ name, currency: 'USD' }).expect(201);
+    const bank = (await wallet('Everyday account')).body.id as string;
+    const giving = (await wallet('Giving account')).body.id as string;
+    const rule = await as(request(server()).post('/categorization-rules'))
+      .send({
+        name: 'Donations go to the giving account',
+        conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'charity fund' }],
+        result: { walletId: giving },
+      })
+      .expect(201);
+    const walletOf = async (name: string) => {
+      const [row]: Array<{ wallet_id: string; statement_id: string }> = await dataSource.query(
+        'SELECT wallet_id, statement_id FROM transactions WHERE workspace_id = $1 AND counterparty_name = $2',
+        [owner.workspaceId, name],
+      );
+      return row;
+    };
+
+    await importRows(ofx('888000111', 'W1', 'CHARITY FUND'), bank);
+    await importRows(ofx('888000111', 'W2', 'HARDWARE SHOP'), bank);
+
+    // The rule beats the statement's account; the row beside it stays with the statement.
+    const donation = await walletOf('CHARITY FUND');
+    expect(donation.wallet_id).toBe(giving);
+    expect((await walletOf('HARDWARE SHOP')).wallet_id).toBe(bank);
+
+    // Attaching the statement again does not take the row back.
+    await as(request(server()).post(`/wallets/${bank}/statements`))
+      .send({ statementIds: [donation.statement_id] })
+      .expect(201);
+    expect((await walletOf('CHARITY FUND')).wallet_id).toBe(giving);
+
+    // Put back by hand, the row is moved again by "apply to existing rows", and the answer says so.
+    await dataSource.query(
+      'UPDATE transactions SET wallet_id = $1 WHERE workspace_id = $2 AND counterparty_name = $3',
+      [bank, owner.workspaceId, 'CHARITY FUND'],
+    );
+    const preview = await as(request(server()).post('/categorization-rules/test'))
+      .send({ conditions: rule.body.conditions, ruleId: rule.body.id, walletId: giving })
+      .expect(200);
+    expect(preview.body.movable).toBe(1);
+    const applied = await as(
+      request(server()).post(`/categorization-rules/${rule.body.id}/apply`),
+    ).expect(200);
+    expect(applied.body).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 1 });
+    expect((await walletOf('CHARITY FUND')).wallet_id).toBe(giving);
+  });
 });

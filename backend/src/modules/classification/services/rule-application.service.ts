@@ -4,15 +4,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
 import { In, type Repository } from 'typeorm';
 import { canReadPrivate } from '../../../common/utils/transaction-privacy.util';
-import { ActorType, AuditAction, EntityType } from '../../../entities/audit-event.entity';
+import { workspaceOwnsRefs } from '../../../common/utils/workspace-refs.util';
 import { CategorizationRule } from '../../../entities/categorization-rule.entity';
 import { Transaction, TransactionCategorySource } from '../../../entities/transaction.entity';
 import { AuditService } from '../../audit/audit.service';
 import { TaxAssignmentService } from '../../tax/tax-assignment.service';
 import { hasDecidedCategory } from '../engine/category-decision';
-import { planRuleApply } from '../engine/rule-apply-plan';
+import { movesToWallet, planRuleApply } from '../engine/rule-apply-plan';
 import { explainMatch, matchesConditions } from '../engine/rule-conditions';
 import { addTransactionTags, ownedTagIds } from '../engine/rule-tags';
+import { ruleApplyEvents } from '../helpers/rule-audit';
 import type { ClassificationCondition } from '../interfaces/classification-rule.interface';
 import { ClassificationService } from './classification.service';
 
@@ -115,6 +116,8 @@ export class RuleApplicationService {
     conditions: ClassificationCondition[];
     transactionIds?: readonly string[];
     ruleId?: string;
+    /** The account the rule sets: matches elsewhere would move there. */
+    walletId?: string;
   }) {
     const { rows, truncated } = await this.rowsForRule(input.workspaceId, input.transactionIds);
     const above = await this.rulesAbove(input.workspaceId, input.ruleId);
@@ -130,6 +133,7 @@ export class RuleApplicationService {
       matchedTransactions: matches.length,
       overridable: matches.filter(({ row }) => !hasDecidedCategory(row)).length,
       shadowed: matches.filter(({ wonBy }) => wonBy).length,
+      movable: matches.filter(({ row }) => movesToWallet(row, input.walletId)).length,
       truncated,
       matches: matches.slice(0, RULE_PREVIEW_MATCHES).map(({ row, wonBy }) => ({
         id: row.id,
@@ -148,24 +152,26 @@ export class RuleApplicationService {
   }
 
   /**
-   * Files the workspace's existing matches under the rule's category and adds
-   * its tags, a page of rows at a time until every row was looked at. Which
-   * rows change is `planRuleApply`'s call. Wallet and owner are not touched on
-   * old rows: moving a row between accounts changes balances, and that is not
-   * what "apply" promises.
+   * Files the workspace's existing matches under the rule's category, adds its
+   * tags and moves them to its account, a page of rows at a time until every
+   * row was looked at. Which rows change is `planRuleApply`'s call. The owner
+   * is not touched on old rows: nothing tells an owner somebody assigned from
+   * one the row inherited. A rule naming what is not this workspace's applies
+   * nothing, as on import.
    */
   async applyRuleToExisting(input: {
     rule: CategorizationRule;
     userId: string;
     viewerMemberId: string | null;
-  }): Promise<{ applied: number; skippedManual: number; tagged: number }> {
+  }): Promise<{ applied: number; skippedManual: number; tagged: number; moved: number }> {
     const { rule, userId, viewerMemberId } = input;
     const { workspaceId } = rule;
-    const categoryId = rule.result.categoryId;
+    const { categoryId, walletId } = rule.result;
     const manager = this.transactionRepository.manager;
     const tagIds = await ownedTagIds(manager, workspaceId, rule.result.tagIds);
-    const totals = { applied: 0, skippedManual: 0, tagged: 0 };
-    if (!categoryId && tagIds.length === 0) {
+    const totals = { applied: 0, skippedManual: 0, tagged: 0, moved: 0 };
+    const owned = await workspaceOwnsRefs(manager, workspaceId, rule.result);
+    if (!(owned && (categoryId || walletId || tagIds.length > 0))) {
       return totals;
     }
     let touchedRows = 0;
@@ -174,6 +180,7 @@ export class RuleApplicationService {
         viewerMemberId,
         setsCategory: Boolean(categoryId),
         setsTags: tagIds.length > 0,
+        walletId,
       });
       const refiledIds = plan.refiled.map(row => row.id);
       if (refiledIds.length > 0) {
@@ -184,36 +191,25 @@ export class RuleApplicationService {
         // A raw update: the tax subscriber did not see the new category.
         await this.taxAssignmentService.reassess(workspaceId, { ids: refiledIds });
       }
+      if (plan.moved.length > 0) {
+        await this.transactionRepository.update(
+          { id: In(plan.moved.map(row => row.id)), workspaceId },
+          { walletId },
+        );
+      }
       await addTransactionTags(
         manager,
         workspaceId,
         plan.tagged.map(row => row.id),
         tagIds,
       );
-      const refiled = new Set(refiledIds);
-      // Tags go on every match, so with tags every match was touched.
-      const touched = plan.tagged.length > 0 ? plan.matches : plan.refiled;
-      await this.auditService.createBatchEvents(
-        touched.map(row => ({
-          workspaceId,
-          actorType: ActorType.USER,
-          actorId: userId,
-          entityType: EntityType.TRANSACTION,
-          entityId: row.id,
-          action: AuditAction.APPLY_RULE,
-          diff: refiled.has(row.id)
-            ? {
-                before: { categoryId: row.categoryId, categorySource: row.categorySource },
-                after: { categoryId, categorySource: TransactionCategorySource.RULE },
-              }
-            : null,
-          meta: { ruleId: rule.id, ruleName: rule.name, confidence: 1, tagIds },
-        })),
-      );
-      touchedRows += touched.length;
+      const events = ruleApplyEvents(plan, { rule, userId, tagIds });
+      await this.auditService.createBatchEvents(events);
+      touchedRows += events.length;
       totals.applied += refiledIds.length;
       totals.skippedManual += categoryId ? plan.matches.length - refiledIds.length : 0;
       totals.tagged += plan.tagged.length;
+      totals.moved += plan.moved.length;
     }
     if (touchedRows > 0) {
       await this.classificationService.recordRuleMatch(rule.id, workspaceId, touchedRows);

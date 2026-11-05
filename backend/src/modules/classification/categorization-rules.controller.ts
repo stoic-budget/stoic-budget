@@ -38,7 +38,11 @@ import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { toRuleAuditSnapshot } from './helpers/rule-audit';
-import { assertConditionsValid, assertRuleRefs } from './helpers/rule-validation';
+import {
+  assertConditionsValid,
+  assertRuleRefs,
+  hasApplicableAction,
+} from './helpers/rule-validation';
 import { RuleApplicationService } from './services/rule-application.service';
 import { RuleOrderService } from './services/rule-order.service';
 
@@ -224,12 +228,13 @@ export class CategorizationRulesController {
       conditions: dto.conditions,
       transactionIds: dto.transactionIds,
       ruleId: dto.ruleId,
+      walletId: dto.walletId,
     });
   }
 
   /**
-   * Files the existing rows the rule matches under its category and adds its
-   * tags. Asked for by the user after saving a rule, never run on its own.
+   * Files the existing rows the rule matches under its category, adds its tags
+   * and moves them to its account. Asked for by the user, never run on its own.
    */
   @Post(':id/apply')
   @HttpCode(HttpStatus.OK)
@@ -242,7 +247,7 @@ export class CategorizationRulesController {
     @WorkspaceMemberId() selfMemberId: string | null,
   ) {
     const rule = await this.findRule(id, workspaceId);
-    if (!(rule.result.categoryId || rule.result.tagIds?.length)) {
+    if (!hasApplicableAction(rule.result)) {
       throw new BadRequestException(appError('CATEGORIZATION_RULE_NO_CATEGORY'));
     }
     return this.ruleApplicationService.applyRuleToExisting({

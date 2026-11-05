@@ -85,6 +85,7 @@ beforeEach(() => {
     matchedTransactions: 2,
     overridable: 2,
     shadowed: 0,
+    movable: 0,
     truncated: false,
     matches: [match('tx-1'), match('tx-2')],
   };
@@ -99,7 +100,8 @@ beforeEach(() => {
   post.mockImplementation(async (url: string, body: { name?: string }) => {
     if (url === '/categorization-rules/test') return apiResponse(preview);
     if (url === '/categorization-rules') return apiResponse({ ...saved, id: 'rule-new', ...body });
-    if (url.endsWith('/apply')) return apiResponse({ applied: 2, skippedManual: 0, tagged: 0 });
+    if (url.endsWith('/apply'))
+      return apiResponse({ applied: 2, skippedManual: 0, tagged: 0, moved: 0 });
     throw new Error(`unexpected POST ${url}`);
   });
   put.mockResolvedValue(apiResponse(saved));
@@ -154,11 +156,25 @@ describe('RuleEditorView', () => {
     ]);
   });
 
-  it('saves without a priority, so the server puts the new rule on top, then offers to refile', async () => {
+  it('saves without a priority, so the server puts the new rule on top, and asks before moving rows', async () => {
     search.params = new URLSearchParams({ payee: STORE });
+    preview = { ...preview, movable: 2 };
     renderWithQuery(<RuleEditorView id="new" />);
     await screen.findByRole('table');
     selectOption(screen.getByRole('combobox', { name: 'Account' }), CARD.name);
+    // The preview is asked again with the account, to count the rows that would move.
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        '/categorization-rules/test',
+        expect.objectContaining({ walletId: CARD.id }),
+        expect.anything(),
+      ),
+    );
+    expect(
+      screen.getByText(
+        'A matching row goes to this account, even when its statement belongs to another one.',
+      ),
+    ).toBeTruthy();
 
     await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
 
@@ -170,8 +186,11 @@ describe('RuleEditorView', () => {
       }),
     );
     expect(router.push).toHaveBeenCalledWith('/rules');
-    // A rule that sets neither a category nor tags has nothing to apply to old rows.
-    expect(offers.last).toBeNull();
+    await waitFor(() =>
+      expect(offers.last?.message).toBe(
+        'This rule moves 2 existing rows to Everyday card. Apply it to them?',
+      ),
+    );
   });
 
   it('edits a saved rule and offers to refile the matches nobody chose', async () => {
