@@ -1,5 +1,27 @@
 import { describe, expect, it } from 'vitest';
-import { resolveBankLogo } from './index';
+import { listSupportedBanks, resolveBankLogo } from './index';
+
+describe('listSupportedBanks', () => {
+  it('lists every bank with a parser of its own, Bereke once and no placeholder', () => {
+    const banks = listSupportedBanks();
+
+    expect(banks).toHaveLength(36);
+    expect(banks.map(bank => bank.key)).not.toContain('other');
+    expect(new Set(banks.map(bank => bank.key)).size).toBe(banks.length);
+  });
+
+  it('sorts the banks by name', () => {
+    const names = listSupportedBanks().map(bank => bank.displayName);
+
+    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
+  });
+
+  it('gives each bank the same logo and name as resolving it by key', () => {
+    for (const bank of listSupportedBanks()) {
+      expect(resolveBankLogo(bank.key)).toEqual(bank);
+    }
+  });
+});
 
 describe('resolveBankLogo', () => {
   it.each([
