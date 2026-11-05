@@ -2,7 +2,9 @@ import type { Mock } from 'vitest';
 import { BadRequestException } from "@nestjs/common";
 import { CustomTableSource } from "../../../src/entities/custom-table.entity";
 import { CustomTableColumnType } from "../../../src/entities/custom-table-column.entity";
-import { CustomTablesService } from "../../../src/modules/custom-tables/custom-tables.service";
+import type { CustomTablesService } from "../../../src/modules/custom-tables/custom-tables.service";
+import type { CustomTableSourceSyncService } from "../../../src/modules/custom-tables/custom-table-source-sync.service";
+import { buildCustomTablesService } from "./helpers/build-custom-tables-service";
 import type {
 	SourceAdapter,
 	SourceRow,
@@ -111,7 +113,7 @@ function build(adapter: SourceAdapter) {
 			key: `col_${i}`,
 		})),
 	);
-	const service = new CustomTablesService(
+	const service = buildCustomTablesService(
 		repos.customTable as never,
 		repos.category as never,
 		repos.column as never,
@@ -466,6 +468,9 @@ describe("CustomTablesService.refreshFromSource", () => {
 	});
 });
 
+const sourceSyncOf = (service: unknown) =>
+	(service as { sourceSync: CustomTableSourceSyncService }).sourceSync;
+
 describe("CustomTablesService.addSourceStatements", () => {
 	const DOC_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 	const DOC_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -485,7 +490,7 @@ describe("CustomTablesService.addSourceStatements", () => {
 		built.repos.customTable.findOne.mockResolvedValue(table);
 		built.repos.statement.count.mockResolvedValue(foundStatements);
 		vi
-			.spyOn(built.service, "refreshFromSource")
+			.spyOn(sourceSyncOf(built.service), "refreshFromSource")
 			.mockResolvedValue({
 				tableId: TABLE_ID,
 				inserted: 2,
@@ -522,7 +527,7 @@ describe("CustomTablesService.addSourceStatements", () => {
 				}),
 			},
 		);
-		expect(service.refreshFromSource).toHaveBeenCalledWith(
+		expect(sourceSyncOf(service).refreshFromSource).toHaveBeenCalledWith(
 			"user-1",
 			"workspace-1",
 			TABLE_ID,

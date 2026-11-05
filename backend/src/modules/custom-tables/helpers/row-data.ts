@@ -32,6 +32,9 @@ export type RowDataValue =
   | JsonObject
   | RowDataValue[];
 
+export type CustomTableWithViewSettings = CustomTable & { viewSettings?: JsonObject };
+export type ColumnDefinitionConfig = JsonObject | null;
+export type RowInsertData = Record<string, string | number | null>;
 export type JsonObject = Record<string, unknown>;
 
 export function toRowDataRecord(data: unknown): RowDataRecord {

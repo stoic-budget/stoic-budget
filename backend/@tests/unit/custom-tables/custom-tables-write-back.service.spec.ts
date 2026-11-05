@@ -1,7 +1,8 @@
 import { BadRequestException } from "@nestjs/common";
 import { EntityType } from "../../../src/entities/audit-event.entity";
 import { CustomTableColumnType } from "../../../src/entities/custom-table-column.entity";
-import { CustomTablesService } from "../../../src/modules/custom-tables/custom-tables.service";
+import type { CustomTablesService } from "../../../src/modules/custom-tables/custom-tables.service";
+import { buildCustomTablesService } from "./helpers/build-custom-tables-service";
 import { workspaceCurrencyStub } from "../../helpers/workspace-currency-stub";
 
 const TABLE_ID = "11111111-1111-4111-8111-111111111111";
@@ -65,7 +66,7 @@ const setup = (options: {
 			return options.writeBack ?? { values: {}, error: null };
 		}),
 	};
-	const service = new CustomTablesService(
+	const service = buildCustomTablesService(
 		customTableRepository as never,
 		{} as never,
 		customTableColumnRepository as never,

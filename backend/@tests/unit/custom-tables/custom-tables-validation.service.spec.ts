@@ -1,5 +1,6 @@
 import { CustomTableColumnType } from '../../../src/entities/custom-table-column.entity';
-import { CustomTablesService } from '../../../src/modules/custom-tables/custom-tables.service';
+import type { CustomTablesService } from '../../../src/modules/custom-tables/custom-tables.service';
+import { buildCustomTablesService } from './helpers/build-custom-tables-service';
 
 const createRepositoryMock = () => ({
   findOne: vi.fn(),
@@ -64,7 +65,7 @@ function buildService(duplicateExists = false): {
     data: { inn: '123' },
   });
 
-  const service = new CustomTablesService(
+  const service = buildCustomTablesService(
     customTableRepository as never,
     createRepositoryMock() as never,
     customTableColumnRepository as never,
