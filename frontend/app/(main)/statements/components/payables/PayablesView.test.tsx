@@ -30,6 +30,7 @@ const apiMocks = vi.hoisted(() => ({
   update: vi.fn(),
   markAsPaid: vi.fn(),
   addPayment: vi.fn(),
+  removePayment: vi.fn(),
   archive: vi.fn(),
   delete: vi.fn(),
   exportList: vi.fn(),
@@ -49,6 +50,7 @@ vi.mock('./MarkPaidDialog', () => ({
       payable: { id: string },
       result: { kind: 'full' | 'payment'; payload: Record<string, unknown> },
     ) => void;
+    onRemovePayment: (payable: { id: string }, paymentId: string) => void;
   }) =>
     props.payable ? (
       <>
@@ -73,6 +75,12 @@ vi.mock('./MarkPaidDialog', () => ({
           }
         >
           Confirm part
+        </button>
+        <button
+          type="button"
+          onClick={() => props.onRemovePayment(props.payable as { id: string }, 'payment-1')}
+        >
+          Remove payment
         </button>
       </>
     ) : null,
@@ -471,5 +479,132 @@ describe('PayablesView', () => {
     await waitFor(() => {
       expect(apiMocks.list).toHaveBeenCalledWith(expect.objectContaining({ status: 'overdue' }));
     });
+  });
+
+  const openRowAction = async (action: string) => {
+    await screen.findByText('ACME LLC');
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    });
+    fireEvent.click(await screen.findByText(action));
+  };
+
+  it('says why the list could not load', async () => {
+    apiMocks.list.mockRejectedValueOnce(new Error('the server is away'));
+
+    renderWithQuery(<PayablesView />);
+
+    await waitFor(() => expect(toastMock.error).toHaveBeenCalledWith('the server is away'));
+  });
+
+  it('edits the freshly read entry, then reloads without the skeleton', async () => {
+    const entry = (await apiMocks.list()).data[0];
+    apiMocks.list.mockClear();
+    apiMocks.getOne.mockResolvedValue({ ...entry, comment: 'Read just now' });
+    apiMocks.update.mockResolvedValue({});
+
+    renderWithQuery(<PayablesView />);
+    await openRowAction('Edit');
+    expect(await screen.findByDisplayValue('Read just now')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() =>
+      expect(apiMocks.update).toHaveBeenCalledWith(
+        'payable-1',
+        expect.objectContaining({ comment: 'Read just now' }),
+      ),
+    );
+    await waitFor(() => expect(apiMocks.list).toHaveBeenCalledTimes(2));
+    expect(toastMock.success).toHaveBeenCalledWith('Payable updated');
+    expect(screen.getByText('ACME LLC')).toBeInTheDocument();
+  });
+
+  it('keeps the form open when saving fails', async () => {
+    apiMocks.create.mockRejectedValue(new Error('vendor refused'));
+
+    renderWithQuery(<PayablesView />);
+    await screen.findByText('ACME LLC');
+    fireEvent.click(screen.getByRole('button', { name: 'Add payable' }));
+    fireEvent.change(await screen.findByLabelText(/Vendor/), { target: { value: 'Example Shop' } });
+    fireEvent.change(screen.getByLabelText(/Amount/), { target: { value: '25' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(toastMock.error).toHaveBeenCalledWith('vendor refused'));
+    expect(apiMocks.create).toHaveBeenCalledWith(expect.objectContaining({ direction: 'payable' }));
+    expect(screen.getByDisplayValue('Example Shop')).toBeInTheDocument();
+  });
+
+  it('archives and reloads', async () => {
+    apiMocks.archive.mockResolvedValue({});
+    renderWithQuery(<PayablesView />);
+
+    await openRowAction('Archive');
+
+    await waitFor(() => expect(apiMocks.archive).toHaveBeenCalledWith('payable-1'));
+    await waitFor(() => expect(apiMocks.list).toHaveBeenCalledTimes(2));
+    expect(toastMock.success).toHaveBeenCalledWith('Payable archived');
+  });
+
+  it('deletes after confirmation, and reports a refusal', async () => {
+    apiMocks.delete.mockRejectedValueOnce(new Error('still linked'));
+    renderWithQuery(<PayablesView />);
+
+    await openRowAction('Delete');
+
+    await waitFor(() => expect(toastMock.error).toHaveBeenCalledWith('still linked'));
+    expect(apiMocks.list).toHaveBeenCalledTimes(1);
+
+    apiMocks.delete.mockResolvedValueOnce({});
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    });
+    fireEvent.click(await screen.findByText('Delete'));
+    await waitFor(() => expect(apiMocks.list).toHaveBeenCalledTimes(2));
+    expect(toastMock.success).toHaveBeenCalledWith('Payable deleted');
+  });
+
+  it('removes a payment and reopens on the updated bill', async () => {
+    apiMocks.removePayment.mockResolvedValue({ id: 'payable-1', status: 'to_pay' });
+    renderWithQuery(<PayablesView />);
+    await screen.findByText('ACME LLC');
+    fireEvent.click(screen.getByText('Mark paid'));
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Remove payment' }));
+
+    await waitFor(() =>
+      expect(apiMocks.removePayment).toHaveBeenCalledWith('payable-1', 'payment-1'),
+    );
+    await waitFor(() => expect(apiMocks.list).toHaveBeenCalledTimes(2));
+    expect(screen.getByRole('button', { name: 'Remove payment' })).toBeInTheDocument();
+  });
+
+  it('follows a new status in the address and goes back to page one', async () => {
+    navigationState.searchParams = new URLSearchParams('status=overdue');
+    const Page = () => {
+      const [, redraw] = React.useState(0);
+      return (
+        <>
+          <button type="button" onClick={() => redraw(n => n + 1)}>
+            Redraw
+          </button>
+          <PayablesView />
+        </>
+      );
+    };
+    renderWithQuery(<Page />);
+    await waitFor(() =>
+      expect(apiMocks.list).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'overdue', page: 1 }),
+      ),
+    );
+
+    navigationState.searchParams = new URLSearchParams('status=paid&source=nonsense');
+    fireEvent.click(screen.getByRole('button', { name: 'Redraw' }));
+
+    await waitFor(() =>
+      expect(apiMocks.list).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: 'paid', source: undefined, page: 1 }),
+      ),
+    );
   });
 });
