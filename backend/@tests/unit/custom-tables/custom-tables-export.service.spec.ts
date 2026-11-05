@@ -1,7 +1,8 @@
 import type { Mock } from 'vitest';
 import * as xlsx from 'xlsx';
 import { CustomTableColumnType } from '../../../src/entities/custom-table-column.entity';
-import { CustomTablesService } from '../../../src/modules/custom-tables/custom-tables.service';
+import type { CustomTablesService } from '../../../src/modules/custom-tables/custom-tables.service';
+import { buildCustomTablesService } from './helpers/build-custom-tables-service';
 
 const createRepositoryMock = () => ({
   findOne: vi.fn(),
@@ -70,7 +71,7 @@ function buildService(
   rowQueryBuilder.clone.mockReturnValue(rowQueryBuilder);
   customTableRowRepository.createQueryBuilder.mockReturnValue(rowQueryBuilder);
 
-  const service = new CustomTablesService(
+  const service = buildCustomTablesService(
     customTableRepository as never,
     createRepositoryMock() as never,
     customTableColumnRepository as never,
@@ -141,7 +142,10 @@ describe('CustomTablesService.exportRows', () => {
         viewSettings: { summaries: [{ id: 's1', title: '@total', expression: 'SUM(1)' }] },
       },
     );
-    vi.spyOn(service, 'getSummaries').mockResolvedValue({
+    vi.spyOn(
+      (service as unknown as { views: { getSummaries: () => Promise<unknown> } }).views,
+      'getSummaries',
+    ).mockResolvedValue({
       items: [{ id: 's1', title: '@total', expression: 'SUM(1)', value: '-1+cmd' }],
     } as never);
 

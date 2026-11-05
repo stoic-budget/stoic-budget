@@ -1,6 +1,7 @@
 import type { Mock } from 'vitest';
 import { CustomTableColumnType } from "../../../src/entities/custom-table-column.entity";
-import { CustomTablesService } from "../../../src/modules/custom-tables/custom-tables.service";
+import type { CustomTablesService } from "../../../src/modules/custom-tables/custom-tables.service";
+import { buildCustomTablesService } from "./helpers/build-custom-tables-service";
 
 const TABLE_ID = "11111111-1111-4111-8111-111111111111";
 
@@ -64,7 +65,7 @@ function build() {
 		rowNumber: 1,
 		data: { col_amount: 1500, col_qty: 2 },
 	});
-	const service = new CustomTablesService(
+	const service = buildCustomTablesService(
 		repos.customTable as never,
 		repos.category as never,
 		repos.column as never,

@@ -1,7 +1,8 @@
 import type { Mock } from 'vitest';
 import { NotFoundException } from '@nestjs/common';
 import { CustomTableColumnType } from '../../../src/entities/custom-table-column.entity';
-import { CustomTablesService } from '../../../src/modules/custom-tables/custom-tables.service';
+import type { CustomTablesService } from '../../../src/modules/custom-tables/custom-tables.service';
+import { buildCustomTablesService } from './helpers/build-custom-tables-service';
 
 const createRepositoryMock = () => ({
   findOne: vi.fn(),
@@ -51,7 +52,7 @@ function buildService(): Harness {
   ]);
   workspaceMemberRepository.findOne.mockResolvedValue({ role: 'owner', permissions: {} });
 
-  const service = new CustomTablesService(
+  const service = buildCustomTablesService(
     customTableRepository as never,
     createRepositoryMock() as never,
     customTableColumnRepository as never,
@@ -109,8 +110,9 @@ describe('relation columns', () => {
 
   it('lists options labelled by the display column', async () => {
     const { service, rowRepo } = buildService();
-    const columnRepo = (service as unknown as { customTableColumnRepository: { findOne: Mock } })
-      .customTableColumnRepository;
+    const columnRepo = (
+      service as unknown as { relations: { customTableColumnRepository: { findOne: Mock } } }
+    ).relations.customTableColumnRepository;
     columnRepo.findOne.mockResolvedValue({
       key: 'vendor',
       type: CustomTableColumnType.RELATION,

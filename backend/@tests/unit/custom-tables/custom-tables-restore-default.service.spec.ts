@@ -6,7 +6,8 @@ import { CustomTableCellStyle } from "../../../src/entities/custom-table-cell-st
 import { CustomTableColumn, CustomTableColumnType } from "../../../src/entities/custom-table-column.entity";
 import { CustomTableColumnStyle } from "../../../src/entities/custom-table-column-style.entity";
 import { CustomTableRow } from "../../../src/entities/custom-table-row.entity";
-import { CustomTablesService } from "../../../src/modules/custom-tables/custom-tables.service";
+import type { CustomTablesService } from "../../../src/modules/custom-tables/custom-tables.service";
+import { buildCustomTablesService } from "./helpers/build-custom-tables-service";
 import { workspaceCurrencyStub } from "../../helpers/workspace-currency-stub";
 
 const TABLE_ID = "11111111-1111-4111-8111-111111111111";
@@ -105,7 +106,7 @@ const setup = (options: { binding?: unknown; columns?: unknown[]; sourceKeys?: s
 	};
 	const auditService = { createEvent: vi.fn().mockResolvedValue(undefined) };
 	const workspaceMemberRepository = { findOne: vi.fn().mockResolvedValue(null) };
-	const service = new CustomTablesService(
+	const service = buildCustomTablesService(
 		customTableRepository as never,
 		{} as never,
 		{} as never,
@@ -128,7 +129,10 @@ const setup = (options: { binding?: unknown; columns?: unknown[]; sourceKeys?: s
 	);
 	// The re-fill is covered by the refresh tests; here it only has to be reached with the right input.
 	const applySourceRows = vi
-		.spyOn(service as unknown as { applySourceRows: () => Promise<unknown> }, "applySourceRows")
+		.spyOn(
+			(service as unknown as { sourceSync: { applySourceRows: () => Promise<unknown> } }).sourceSync,
+			"applySourceRows",
+		)
 		.mockImplementation(async () => {
 			order.push("refill");
 			return { inserted: 0, updated: 2, unchanged: 0, total: 2, syncedAt: "now" };

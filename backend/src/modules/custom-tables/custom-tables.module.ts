@@ -32,17 +32,36 @@ import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { TaxModule } from '../tax/tax.module';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { WorkspaceCurrencyModule } from '../workspaces/workspace-currency.module';
+import { CustomTableCatalogService } from './custom-table-catalog.service';
+import { CustomTableColumnStylesService } from './custom-table-column-styles.service';
+import { CustomTableColumnsService } from './custom-table-columns.service';
 import { CustomTableCommentsController } from './custom-table-comments.controller';
 import { CustomTableCommentsService } from './custom-table-comments.service';
+import { CustomTableConvertedStatementsService } from './custom-table-converted-statements.service';
+import { CustomTableDataEntrySyncService } from './custom-table-data-entry-sync.service';
+import { CustomTableExportService } from './custom-table-export.service';
 import { CustomTableExportSchedulesScheduler } from './custom-table-export-schedules.scheduler';
 import { CustomTableExportSchedulesService } from './custom-table-export-schedules.service';
+import { CustomTableFormulaColumnsService } from './custom-table-formula-columns.service';
+import { CustomTableFromDataEntryService } from './custom-table-from-data-entry.service';
+import { CustomTableFromDataEntryTabService } from './custom-table-from-data-entry-tab.service';
+import { CustomTableFromSourceService } from './custom-table-from-source.service';
 import { CustomTableMoneyTotalService } from './custom-table-money-total.service';
+import { CustomTablePaidStatusService } from './custom-table-paid-status.service';
+import { CustomTableRelationsService } from './custom-table-relations.service';
+import { CustomTableRowQueryService } from './custom-table-row-query.service';
+import { CustomTableRowValidationService } from './custom-table-row-validation.service';
+import { CustomTableRowsService } from './custom-table-rows.service';
 import {
   CustomTableSharesController,
   PublicCustomTableSharesController,
 } from './custom-table-shares.controller';
 import { CustomTableSharesService } from './custom-table-shares.service';
+import { CustomTableSourceSyncService } from './custom-table-source-sync.service';
 import { CustomTableSourcesService } from './custom-table-sources.service';
+import { CustomTableStatementConversionService } from './custom-table-statement-conversion.service';
+import { CustomTableSupportService } from './custom-table-support.service';
+import { CustomTableViewSettingsService } from './custom-table-view-settings.service';
 import { CustomTablesController } from './custom-tables.controller';
 import { CustomTablesService } from './custom-tables.service';
 import { CustomTablesCacheService } from './custom-tables-cache.service';
@@ -97,6 +116,25 @@ import { SourceWriteBackService } from './write-back/source-write-back.service';
   ],
   providers: [
     CustomTablesService,
+    CustomTableSupportService,
+    CustomTableCatalogService,
+    CustomTableRelationsService,
+    CustomTableRowQueryService,
+    CustomTableViewSettingsService,
+    CustomTableExportService,
+    CustomTableFormulaColumnsService,
+    CustomTableColumnsService,
+    CustomTableColumnStylesService,
+    CustomTableRowValidationService,
+    CustomTableRowsService,
+    CustomTablePaidStatusService,
+    CustomTableSourceSyncService,
+    CustomTableFromSourceService,
+    CustomTableFromDataEntryService,
+    CustomTableFromDataEntryTabService,
+    CustomTableDataEntrySyncService,
+    CustomTableStatementConversionService,
+    CustomTableConvertedStatementsService,
     CustomTablesCacheService,
     CustomTableSourcesService,
     FormulaRecalcService,

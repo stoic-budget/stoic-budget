@@ -7,7 +7,8 @@ import {
 import { CustomTableSource } from "../../../src/entities/custom-table.entity";
 import { CustomTableColumnType } from "../../../src/entities/custom-table-column.entity";
 import { TransactionType } from "../../../src/entities/transaction.entity";
-import { CustomTablesService } from "../../../src/modules/custom-tables/custom-tables.service";
+import type { CustomTablesService } from "../../../src/modules/custom-tables/custom-tables.service";
+import { buildCustomTablesService as buildFacade } from "./helpers/build-custom-tables-service";
 import { workspaceCurrencyStub } from '../../helpers/workspace-currency-stub';
 
 const createRepositoryMock = () => ({
@@ -43,7 +44,7 @@ const buildCustomTablesService = (classificationService?: {
 		createBatchEvents: vi.fn().mockResolvedValue(undefined),
 	};
 
-	const service = new CustomTablesService(
+	const service = buildFacade(
 		customTableRepository as never,
 		categoryRepository as never,
 		customTableColumnRepository as never,
