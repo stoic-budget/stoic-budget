@@ -112,7 +112,7 @@ Stoic Budget is a full-stack platform for importing, categorizing and analyzing 
 
 ### Get your data in
 
-- **Any statement file** — PDF, CSV, XLSX / XLS, DOCX, OFX / QFX, QIF, MT940, CAMT.053, or a photo of a statement (OCR). Native parsers for several banks, CSV presets for 20+ banks and fintechs, and a generic table reader for any other PDF — see [Supported Banks](#supported-banks).
+- **Any statement file** — PDF, CSV, XLSX / XLS, DOCX, OFX / QFX, QIF, MT940, CAMT.053, or a photo of a statement (OCR). Native PDF parsers for 36 banks, CSV presets for 20+ banks and fintechs, and a generic table reader for any other PDF — see [Supported Banks](#supported-banks).
 - **Teach the parser** — when a PDF layout is not recognised, mark its columns on the page once; the next statement from that bank is read by itself.
 - **No double imports** — the same file is recognised by its hash, and rows repeated across overlapping statements are flagged as duplicates to merge or dismiss.
 - **Format-change checks** — when a bank changes its statement layout, the import says so instead of quietly reading it wrong.
@@ -179,6 +179,18 @@ Setting expectations upfront:
 | 🇰🇿 Bereke Bank (new format) | PDF | `BerekeNewParser` — native |
 | 🇰🇿 Bereke Bank (legacy format) | PDF | `BerekeOldParser` — native |
 | 🇮🇱 Bank Hapoalim / Isracard | PDF | `HapoalimParser` — native (Hebrew) |
+| 🇺🇸 Ally Bank, Associated Bank, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU | PDF | Native — a parser per bank on `GenericPdfParser` |
+| 🇨🇦 ATB Financial, CIBC, Coast Capital | PDF | Native — a parser per bank on `GenericPdfParser` |
+| 🇬🇧 Barclays, Bank of Scotland | PDF | Native — a parser per bank on `GenericPdfParser` |
+| 🇫🇷 Crédit Agricole | PDF | `CreditAgricoleParser` — native |
+| 🇵🇱 BNP Paribas Bank Polska | PDF | `BnpParibasParser` — native |
+| 🇦🇺 ANZ, Bendigo Bank, BOQ, CommBank | PDF | Native — a parser per bank on `GenericPdfParser` |
+| 🇿🇦 Absa, Capitec | PDF | Native — a parser per bank on `GenericPdfParser` |
+| 🇮🇳 Axis Bank, Citibank | PDF | Native — a parser per bank on `GenericPdfParser` |
+| 🇧🇷 Banco do Brasil | PDF | `BancoDoBrasilParser` — native |
+| 🇭🇰 Bank of China (Hong Kong) | PDF | `BankOfChinaParser` — native |
+| 🇵🇭 BPI | PDF | `BpiParser` — native |
+| 🇱🇰 Commercial Bank of Ceylon | PDF | `CommercialBankParser` — native |
 | 🌍 Revolut, Wise, PayPal | CSV | `CsvParser` — column presets per bank |
 | 🇬🇧 Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds | CSV | `CsvParser` — column presets per bank |
 | 🇺🇸 Chase, Bank of America, Capital One, American Express, Wells Fargo | CSV | `CsvParser` — column presets per bank |

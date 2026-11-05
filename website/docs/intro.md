@@ -11,8 +11,8 @@ exports into reliable, queryable financial data.
 
 ## What you can do with Stoic Budget
 
-- Import statements from PDF, CSV, XLSX, DOCX, and image files, with OCR for scans and native parsers for Kaspi,
-  Bereke, and Bank Hapoalim / Isracard.
+- Import statements from PDF, CSV, XLSX, DOCX, and image files, with OCR for scans and native parsers for
+  [36 banks](reference/supported-banks).
 - Normalize, deduplicate, and classify transactions with rules and payee history.
 - Collect receipts by upload or from an IMAP inbox and see where each was bought on a self-hosted map
   ([Receipt Maps](guides/receipt-maps)).
