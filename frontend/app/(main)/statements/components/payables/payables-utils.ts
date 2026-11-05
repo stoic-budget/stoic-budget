@@ -206,3 +206,25 @@ export function toneOf(payable: Payable, overdue: boolean): StatusTone {
   }
   return payable.status === 'partially_paid' ? 'partial' : 'neutral';
 }
+
+const PAYABLE_STATUSES = ['to_pay', 'scheduled', 'partially_paid', 'paid', 'overdue', 'archived'];
+const PAYABLE_SOURCES = ['manual', 'invoice', 'statement'];
+
+/** Status and source a link can preselect; anything else in the address is ignored. */
+export const filtersFromSearchParams = (
+  searchParams: Pick<URLSearchParams, 'get'> | null,
+): PayablesFiltersState => {
+  const status = searchParams?.get('status');
+  const source = searchParams?.get('source');
+  return {
+    ...DEFAULT_PAYABLES_FILTERS,
+    status:
+      status && PAYABLE_STATUSES.includes(status)
+        ? (status as PayablesFiltersState['status'])
+        : DEFAULT_PAYABLES_FILTERS.status,
+    source:
+      source && PAYABLE_SOURCES.includes(source)
+        ? (source as PayablesFiltersState['source'])
+        : DEFAULT_PAYABLES_FILTERS.source,
+  };
+};

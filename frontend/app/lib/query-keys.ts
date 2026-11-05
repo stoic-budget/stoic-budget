@@ -47,6 +47,7 @@ export const queryKeys = {
   walletsSummary: (workspaceId: string | null) => ['wallets', workspaceId, 'summary'] as const,
   walletsUnlinked: (workspaceId: string | null) => ['wallets', workspaceId, 'unlinked'] as const,
   wallet: (workspaceId: string | null, id: string) => ['wallets', workspaceId, 'one', id] as const,
+  payablesList: (workspaceId: string | null) => ['payables', workspaceId, 'list'] as const,
   payablePaymentCandidates: (o: { workspaceId: string | null; payableId: string }) =>
     ['payables', o.workspaceId, o.payableId, 'payment-candidates'] as const,
   payablePayments: (o: { workspaceId: string | null; payableId: string }) =>
