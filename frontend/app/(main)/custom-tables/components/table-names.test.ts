@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { distinctName } from './CreateTableDialog';
+import { distinctName } from './table-names';
 
 describe('distinctName', () => {
   it('keeps a name nobody uses', () => {

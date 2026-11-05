@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatPreviewCell } from './SourceFilterPanel';
+import { formatPreviewCell } from './source-preview-format';
 
 const row = { currency: 'EUR' };
 
