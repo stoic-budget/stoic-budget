@@ -18,8 +18,9 @@ be previewed, audited, or reprocessed.
    - `STATEMENT_PARSING_CONCURRENCY` (default 5) limits how many statements are parsed at once
 
 3. **Parser selection**
-   - `ParserFactoryService` detects the bank from the document text (bank name, then BIC) and holds the parsers:
-     Bereke (new layout), Bereke (old layout), Kaspi, Hapoalim, generic PDF, Excel, CSV, and DOCX
+   - `ParserFactoryService` detects the bank from the document text (bank name, then BIC) and holds the parsers
+     from `parser-registry.ts`: one per [supported bank](../reference/supported-banks), generic PDF, Excel, CSV, DOCX,
+     OFX, QIF, CAMT.053, and MT940
    - `OcrService` (tesseract.js) extracts text from images and scans
 
 4. **Quality gate**

@@ -7,7 +7,7 @@ const features = [
   {
     title: 'Statement import',
     description:
-      'PDF, CSV, XLSX, DOCX and image files. Native parsers for Kaspi, Bereke and Bank Hapoalim / Isracard, OCR for scans, and a generic table parser for any other bank. SHA-256 hashing stops duplicate uploads.',
+      'PDF, CSV, XLSX, DOCX and image files. Native parsers for 36 banks, OCR for scans, and a generic table parser for any other bank. SHA-256 hashing stops duplicate uploads.',
   },
   {
     title: 'Clean, categorized data',
