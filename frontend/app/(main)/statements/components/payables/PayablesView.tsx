@@ -60,19 +60,17 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
   const { data: tags } = useTags();
   const router = useRouter();
   const { labels, tx } = usePayablesLabels(direction);
-  const { filters, page, setPage, queryPage, setQueryPage, handleFiltersChange, handlePageChange } =
-    usePayablesFilters();
-  const { summary, items, total, totalPages, loading, loadData } = usePayablesData({
+  const { filters, page, setPage, handleFiltersChange } = usePayablesFilters();
+  const { summary, items, total, totalPages, loading, reload } = usePayablesData({
     direction,
     filters,
-    queryPage,
+    page,
     setPage,
-    setQueryPage,
     loadFailedMessage: labels.toasts.loadFailed,
   });
   const actions = usePayableActions({
     direction,
-    reload: () => loadData({ silent: true }),
+    reload,
     toasts: labels.toasts,
   });
   useQuickActions([{ id: 'add', label: labels.add, icon: Plus, run: actions.openCreateDrawer }]);
@@ -179,7 +177,7 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
               totalPages,
               totalItems: total,
               pageSize: PAGE_SIZE,
-              onPageChange: handlePageChange,
+              onPageChange: setPage,
             }}
             actionState={{
               markingPaidId: actions.markingPaidId,

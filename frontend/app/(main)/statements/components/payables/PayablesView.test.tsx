@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { renderWithQuery } from '@/app/test/query-wrapper';
+import { createTestQueryClient, renderWithQuery } from '@/app/test/query-wrapper';
 import React from 'react';
 import { act } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -606,5 +606,39 @@ describe('PayablesView', () => {
         expect.objectContaining({ status: 'paid', source: undefined, page: 1 }),
       ),
     );
+  });
+
+  it('keeps the rows on screen while a change reloads them', async () => {
+    apiMocks.archive.mockResolvedValue({});
+    let answer: (value: unknown) => void = () => {};
+    renderWithQuery(<PayablesView />);
+    await screen.findByText('ACME LLC');
+    apiMocks.list.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          answer = resolve;
+        }),
+    );
+
+    await openRowAction('Archive');
+
+    await waitFor(() => expect(apiMocks.archive).toHaveBeenCalled());
+    expect(screen.getByText('ACME LLC')).toBeInTheDocument();
+    await act(async () => {
+      answer({ data: [], total: 0, page: 1, limit: 20, totalPages: 1 });
+    });
+  });
+
+  it('reads the rows again when the page is opened a second time', async () => {
+    const client = createTestQueryClient();
+    const first = renderWithQuery(<PayablesView />, { client });
+    await screen.findByText('ACME LLC');
+    first.unmount();
+
+    renderWithQuery(<PayablesView />, { client });
+
+    // Last visit's rows at once, and fresh ones behind them.
+    expect(screen.getByText('ACME LLC')).toBeInTheDocument();
+    await waitFor(() => expect(apiMocks.list).toHaveBeenCalledTimes(2));
   });
 });

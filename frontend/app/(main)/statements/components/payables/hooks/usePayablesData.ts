@@ -1,17 +1,19 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/hooks/useAuth';
+import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { getApiErrorMessage } from '@/app/lib/api-error';
 import {
   type ListPayablesParams,
-  type Payable,
   type PayableDirection,
   type PayablesSummary,
   payablesApi,
 } from '@/app/lib/payables-api';
+import { queryKeys } from '@/app/lib/query-keys';
 import { buildPayablesListParams, type PayablesFiltersState } from '../payables-utils';
 
 const DEFAULT_SUMMARY: PayablesSummary = {
@@ -35,95 +37,68 @@ export const PAGE_SIZE = 20;
 export function usePayablesData({
   direction,
   filters,
-  queryPage,
+  page,
   setPage,
-  setQueryPage,
   loadFailedMessage,
 }: {
   direction: PayableDirection;
   filters: PayablesFiltersState;
-  queryPage: number;
+  page: number;
   setPage: (page: number) => void;
-  setQueryPage: (page: number) => void;
   loadFailedMessage: string;
 }) {
   const { user, loading: authLoading } = useAuth();
   const { currentWorkspace, loading: workspaceLoading } = useWorkspace();
-  const [summary, setSummary] = useState<PayablesSummary>(DEFAULT_SUMMARY);
-  const [items, setItems] = useState<Payable[]>([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [, setRefreshing] = useState(false);
-  const requestVersionRef = useRef(0);
+  const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
+  const params = buildPayablesListParams(filters, {
+    page,
+    limit: PAGE_SIZE,
+    direction,
+  }) as ListPayablesParams;
 
-  const loadData = useCallback(
-    async (options?: { silent?: boolean }) => {
-      if (!(user && currentWorkspace)) {
-        setLoading(false);
-        return;
-      }
-
-      if (options?.silent) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-
-      const requestVersion = ++requestVersionRef.current;
-
-      return await (async () => {
-        const [summaryResponse, listResponse] = await Promise.all([
-          payablesApi.getSummary(direction),
-          payablesApi.list(
-            buildPayablesListParams(filters, {
-              page: queryPage,
-              limit: PAGE_SIZE,
-              direction,
-            }) as ListPayablesParams,
-          ),
-        ]);
-
-        if (requestVersion !== requestVersionRef.current) {
-          return;
-        }
-
-        const nextTotalPages = Math.max(1, listResponse.totalPages || 1);
-
-        if (listResponse.total > 0 && queryPage > nextTotalPages) {
-          setPage(nextTotalPages);
-          setQueryPage(nextTotalPages);
-          return;
-        }
-
-        setSummary(summaryResponse);
-        setItems(listResponse.data);
-        setTotal(listResponse.total);
-        setTotalPages(nextTotalPages);
-        setPage(Math.min(queryPage, nextTotalPages));
-      })()
-        .catch(async error => {
-          if (requestVersion !== requestVersionRef.current) {
-            return;
-          }
-          toast.error(getApiErrorMessage(error, loadFailedMessage));
-        })
-        .finally(async () => {
-          if (requestVersion === requestVersionRef.current) {
-            setLoading(false);
-            setRefreshing(false);
-          }
-        });
+  const { data, error, isPending } = useQuery({
+    queryKey: [...queryKeys.payablesList(workspaceId), params],
+    queryFn: async () => {
+      const [summary, list] = await Promise.all([
+        payablesApi.getSummary(direction),
+        payablesApi.list(params),
+      ]);
+      return { summary, list };
     },
-    [currentWorkspace, direction, filters, loadFailedMessage, queryPage, user],
-  );
+    enabled: Boolean(user && currentWorkspace) && !authLoading && !workspaceLoading,
+    // Invoices, statements and bank checks change these rows from other pages,
+    // so coming back always reads them again.
+    staleTime: 0,
+  });
+
+  const totalPages = Math.max(1, data?.list.totalPages || 1);
+  const total = data?.list.total ?? 0;
+  // The filtered results shrank under the page we were on.
+  const pastTheEnd = total > 0 && page > totalPages;
+  useEffect(() => {
+    if (pastTheEnd) {
+      setPage(totalPages);
+    }
+  }, [pastTheEnd, totalPages, setPage]);
 
   useEffect(() => {
-    if (authLoading || workspaceLoading) {
-      return;
+    if (error) {
+      toast.error(getApiErrorMessage(error, loadFailedMessage));
     }
-    void loadData();
-  }, [authLoading, workspaceLoading, loadData]);
+  }, [error, loadFailedMessage]);
 
-  return { summary, items, total, totalPages, loading, loadData };
+  const reload = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: queryKeys.payablesList(workspaceId) }),
+    [queryClient, workspaceId],
+  );
+
+  return {
+    summary: data?.summary ?? DEFAULT_SUMMARY,
+    items: data?.list.data ?? [],
+    total,
+    totalPages,
+    loading: isPending || pastTheEnd,
+    reload,
+  };
 }

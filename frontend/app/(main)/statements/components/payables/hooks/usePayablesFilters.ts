@@ -13,7 +13,6 @@ export function usePayablesFilters() {
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<PayablesFiltersState>(DEFAULT_PAYABLES_FILTERS);
   const [page, setPage] = useState(1);
-  const [queryPage, setQueryPage] = useState(1);
 
   useEffect(() => {
     const nextFilters = filtersFromSearchParams(searchParams);
@@ -34,19 +33,12 @@ export function usePayablesFilters() {
       return nextFilters;
     });
     setPage(1);
-    setQueryPage(1);
   }, [searchParams]);
 
   const handleFiltersChange = useCallback((next: PayablesFiltersState) => {
     setFilters(next);
     setPage(1);
-    setQueryPage(1);
   }, []);
 
-  const handlePageChange = useCallback((nextPage: number) => {
-    setPage(nextPage);
-    setQueryPage(nextPage);
-  }, []);
-
-  return { filters, page, setPage, queryPage, setQueryPage, handleFiltersChange, handlePageChange };
+  return { filters, page, setPage, handleFiltersChange };
 }
