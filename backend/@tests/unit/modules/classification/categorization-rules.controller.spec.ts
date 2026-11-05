@@ -314,6 +314,8 @@ describe('CategorizationRulesController', () => {
         workspaceId: mockWorkspaceId,
         viewerMemberId: 'member-1',
         conditions: dto.conditions,
+        // All of the conditions, unless the caller asks for any.
+        matchMode: 'all',
         transactionIds: undefined,
         ruleId: undefined,
       });

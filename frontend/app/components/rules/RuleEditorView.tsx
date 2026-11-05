@@ -64,6 +64,7 @@ export function RuleEditorView({ id }: { id: string }) {
     draft?.conditions ?? [],
     isNew ? null : id,
     draft?.result.walletId ?? null,
+    draft?.matchMode,
   );
 
   if (!isNew && saved.isError) {
@@ -89,10 +90,9 @@ export function RuleEditorView({ id }: { id: string }) {
       return;
     }
     const body: RuleDraftBody = {
-      name: draft.name.trim() || describeConditions(conditions, words, names),
-      conditions: conditions.map(condition =>
-        condition.field === 'amount' ? { ...condition, value: Number(condition.value) } : condition,
-      ),
+      name: draft.name.trim() || describeConditions(conditions, words, names, draft.matchMode),
+      conditions,
+      matchMode: draft.matchMode,
       result: draft.result,
     };
     // Read before leaving the page: the preview is of what is being saved.

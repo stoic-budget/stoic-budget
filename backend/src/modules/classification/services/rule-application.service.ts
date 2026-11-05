@@ -11,10 +11,13 @@ import { AuditService } from '../../audit/audit.service';
 import { TaxAssignmentService } from '../../tax/tax-assignment.service';
 import { hasDecidedCategory } from '../engine/category-decision';
 import { movesToWallet, planRuleApply } from '../engine/rule-apply-plan';
-import { explainMatch, matchesConditions, matchesRule } from '../engine/rule-conditions';
+import { explainMatch, matchesRule } from '../engine/rule-conditions';
 import { addTransactionTags, ownedTagIds } from '../engine/rule-tags';
 import { ruleApplyEvents } from '../helpers/rule-audit';
-import type { ClassificationCondition } from '../interfaces/classification-rule.interface';
+import type {
+  ClassificationCondition,
+  MatchMode,
+} from '../interfaces/classification-rule.interface';
 import { ClassificationService } from './classification.service';
 
 /** How many of a workspace's most recent rows a rule preview looks at. */
@@ -115,6 +118,7 @@ export class RuleApplicationService {
     workspaceId: string;
     viewerMemberId: string | null;
     conditions: ClassificationCondition[];
+    matchMode?: MatchMode;
     transactionIds?: readonly string[];
     ruleId?: string;
     /** The account the rule sets: matches elsewhere would move there. */
@@ -124,7 +128,7 @@ export class RuleApplicationService {
     const above = await this.rulesAbove(input.workspaceId, input.ruleId);
     const readable = rows.filter(row => canReadPrivate(row, input.viewerMemberId));
     const matches = readable
-      .filter(row => matchesConditions(row, input.conditions))
+      .filter(row => matchesRule(row, input))
       .map(row => {
         // Rules add up, so only a rule that sets a category takes that from this one.
         const winner = above.find(rule => rule.result.categoryId && matchesRule(row, rule));
@@ -143,7 +147,7 @@ export class RuleApplicationService {
         amount: row.debit || row.credit || row.amount,
         counterparty: row.counterpartyName,
         purpose: row.paymentPurpose,
-        matchReason: explainMatch(row, input.conditions),
+        matchReason: explainMatch(row, input.conditions, input.matchMode),
         direction: row.transactionType ?? null,
         currency: row.currency,
         categoryId: row.categoryId ?? null,

@@ -3,10 +3,15 @@ export interface ClassificationRule {
   name: string;
   type: 'category' | 'branch' | 'wallet' | 'article' | 'activity_type';
   conditions: ClassificationCondition[];
+  /** How the conditions combine; all of them when absent. */
+  matchMode?: MatchMode;
   result: ClassificationResult;
   priority: number;
   isActive: boolean;
 }
+
+/** Whether a row has to pass all of a rule's conditions or any one of them. */
+export type MatchMode = 'all' | 'any';
 
 export interface ClassificationCondition {
   field:
@@ -24,7 +29,11 @@ export interface ClassificationCondition {
     | 'direction'
     | 'payment_type'
     /** The account (wallet) the row sits in, by id. */
-    | 'wallet';
+    | 'wallet'
+    /** The row's currency code. */
+    | 'currency'
+    /** The day number, 1 to 31, of the row's date. */
+    | 'day_of_month';
   operator:
     | 'contains'
     | 'equals'
@@ -32,8 +41,16 @@ export interface ClassificationCondition {
     | 'ends_with'
     | 'regex'
     | 'greater_than'
-    | 'less_than';
-  value: string | number;
+    | 'less_than'
+    /** Negations hold for a row with no value: it does not contain anything. */
+    | 'not_contains'
+    | 'not_equals'
+    /** From `value` to `valueTo`, both included. */
+    | 'between';
+  /** Several values mean "any of them"; with a negation, none of them. */
+  value: string | number | readonly string[];
+  /** The upper end of `between`. */
+  valueTo?: number;
 }
 
 export interface ClassificationResult {

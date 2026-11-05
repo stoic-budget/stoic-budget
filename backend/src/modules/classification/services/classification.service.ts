@@ -102,10 +102,8 @@ export class ClassificationService {
     // A relation for a new row; callers updating an existing row add them instead.
     const tags = await ruleTags(manager, workspaceId, layers.tagIds);
     if (tags) classification.tags = tags;
-    await this.recordRuleMatch(
-      layers.contributors.map(rule => rule.id),
-      workspaceId,
-    );
+    const contributorIds = layers.contributors.map(rule => rule.id);
+    await this.recordRuleMatch(contributorIds, workspaceId);
 
     // Auto-classify category if not set
     if (!classification.categoryId) {
@@ -390,6 +388,7 @@ export class ClassificationService {
       name: rule.name,
       type: 'category',
       conditions: rule.conditions,
+      matchMode: rule.matchMode,
       result: rule.result,
       priority: rule.priority,
       isActive: rule.isActive,

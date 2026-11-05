@@ -104,6 +104,7 @@ export class CategorizationRulesController {
       name: dto.name,
       description: dto.description || null,
       conditions: dto.conditions,
+      matchMode: dto.matchMode ?? 'all',
       result: dto.result,
       // A new rule is usually the more specific one, so it goes on top.
       priority: dto.priority ?? (await this.ruleOrderService.topPriority(workspaceId)),
@@ -153,6 +154,9 @@ export class CategorizationRulesController {
     await this.assertRefs(workspaceId, dto);
     if (dto.conditions != null) {
       rule.conditions = dto.conditions;
+    }
+    if (dto.matchMode != null) {
+      rule.matchMode = dto.matchMode;
     }
     if (dto.result != null) {
       rule.result = dto.result;
@@ -226,6 +230,7 @@ export class CategorizationRulesController {
       workspaceId,
       viewerMemberId: selfMemberId,
       conditions: dto.conditions,
+      matchMode: dto.matchMode ?? 'all',
       transactionIds: dto.transactionIds,
       ruleId: dto.ruleId,
       walletId: dto.walletId,

@@ -13,6 +13,7 @@ export type CategorizationRuleAuditSnapshot = {
   name: string;
   description: string | null;
   conditions: ClassificationCondition[];
+  matchMode: CategorizationRule['matchMode'];
   result: CategorizationRule['result'];
   priority: number;
   isActive: boolean;
@@ -31,6 +32,7 @@ export function toRuleAuditSnapshot(rule: CategorizationRule): CategorizationRul
     name: rule.name,
     description: rule.description,
     conditions: rule.conditions,
+    matchMode: rule.matchMode,
     result: rule.result,
     priority: rule.priority,
     isActive: rule.isActive,

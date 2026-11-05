@@ -1,5 +1,5 @@
 import type { PaymentType } from '@/app/lib/contracts';
-import type { RuleCondition, RuleDraftBody } from './types';
+import { type RuleCondition, type RuleDraftBody, type RuleMatchMode, valuesOf } from './types';
 
 /** Puts values into a translated line: `fill('Matched {count} times', { count: 3 })`. */
 export function fill(text: string, values: Record<string, string | number>): string {
@@ -16,6 +16,7 @@ export interface RuleWords {
   direction: Record<'income' | 'expense', string>;
   paymentType: Record<PaymentType, string>;
   and: string;
+  or: string;
   category: string;
   wallet: string;
   owner: string;
@@ -32,9 +33,13 @@ export interface RuleNames {
   tag: (id: string) => string | null;
 }
 
-function conditionValue(condition: RuleCondition, words: RuleWords, names: RuleNames): string {
-  const value = String(condition.value);
-  switch (condition.field) {
+function oneValue(
+  field: RuleCondition['field'],
+  value: string,
+  words: RuleWords,
+  names: RuleNames,
+): string {
+  switch (field) {
     case 'owner':
       return names.owner(value) ?? words.unknown;
     case 'wallet':
@@ -43,11 +48,24 @@ function conditionValue(condition: RuleCondition, words: RuleWords, names: RuleN
       return value === 'income' || value === 'expense' ? words.direction[value] : value;
     case 'payment_type':
       return words.paymentType[value as PaymentType] ?? value;
+    case 'currency':
+      return value.toUpperCase();
     case 'amount':
+    case 'day_of_month':
       return value;
     default:
       return `“${value}”`;
   }
+}
+
+/** `“acme” or “corner bakery”`, `10–20`: what a condition is checked against. */
+function conditionValue(condition: RuleCondition, words: RuleWords, names: RuleNames): string {
+  if (condition.operator === 'between') {
+    return `${condition.value}–${condition.valueTo}`;
+  }
+  return valuesOf(condition)
+    .map(value => oneValue(condition.field, value, words, names))
+    .join(` ${words.or} `);
 }
 
 /** `Payee contains "acme" and Amount is more than 20`, for the list and a default name. */
@@ -55,13 +73,14 @@ export function describeConditions(
   conditions: readonly RuleCondition[],
   words: RuleWords,
   names: RuleNames,
+  matchMode: RuleMatchMode = 'all',
 ): string {
   return conditions
     .map(
       condition =>
         `${words.field[condition.field]} ${words.operator[condition.operator]} ${conditionValue(condition, words, names)}`,
     )
-    .join(` ${words.and} `);
+    .join(` ${matchMode === 'any' ? words.or : words.and} `);
 }
 
 /** `file under Groceries · account Main card · tag Gadgets`: what a matching row gets. */

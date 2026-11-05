@@ -1127,6 +1127,50 @@ describe('API contracts (e2e)', () => {
       }
     });
 
+    it('a rule with several values, a range and "any of these", saved, read back and previewed', async () => {
+      const categories = await get('/categories?type=expense');
+      const conditions = [
+        { field: 'counterparty_name', operator: 'contains', value: ['contract coffee', 'no such shop'] },
+        { field: 'amount', operator: 'between', value: 100000, valueTo: 200000 },
+        { field: 'currency', operator: 'not_equals', value: 'XXX' },
+      ];
+      const created = await send('post', '/categorization-rules', {
+        name: 'Coffee or a large sum',
+        conditions,
+        matchMode: 'any',
+        result: { categoryId: categories.body[1].id },
+      }).expect(201);
+      try {
+        matches(CategorizationRuleContract, created.body);
+        expect(created.body.matchMode).toBe('any');
+        expect(created.body.conditions).toEqual(conditions);
+
+        const any = await send('post', '/categorization-rules/test', {
+          conditions: conditions.slice(0, 2),
+          matchMode: 'any',
+        }).expect(200);
+        matches(CategorizationRuleTestResult, any.body);
+        const all = await send('post', '/categorization-rules/test', {
+          conditions: conditions.slice(0, 2),
+        }).expect(200);
+        // Coffee rows are no large sums: any of the two finds them, both together find none.
+        expect(any.body.matchedTransactions).toBeGreaterThan(0);
+        expect(all.body.matchedTransactions).toBe(0);
+
+        const back = await send('put', `/categorization-rules/${created.body.id}`, {
+          matchMode: 'all',
+        }).expect(200);
+        expect(back.body.matchMode).toBe('all');
+        // A range the wrong way round, and a rule with no conditions left, are refused.
+        await send('put', `/categorization-rules/${created.body.id}`, {
+          conditions: [{ field: 'amount', operator: 'between', value: 20, valueTo: 10 }],
+        }).expect(400);
+        await send('put', `/categorization-rules/${created.body.id}`, { conditions: [] }).expect(400);
+      } finally {
+        await send('delete', `/categorization-rules/${created.body.id}`).expect(204);
+      }
+    });
+
     it('GET /categorization-rules/suggestions offers a payee filed by hand again and again', async () => {
       const categories = await get('/categories?type=expense');
       const merchant = 'Suggested Bakery';

@@ -3,6 +3,7 @@
 import * as Schema from 'effect/Schema';
 import * as Struct from 'effect/Struct';
 import { Timestamp, type Wire } from '../common/wire';
+import { RuleMatchMode } from '../requests/classification';
 import { TransactionListItem } from '../transactions/transaction-list';
 
 /** One test a rule runs on a transaction, as stored. */
@@ -17,6 +18,8 @@ const ClassificationCondition = Schema.Struct({
     'direction',
     'payment_type',
     'wallet',
+    'currency',
+    'day_of_month',
   ]),
   operator: Schema.Literals([
     'contains',
@@ -26,8 +29,14 @@ const ClassificationCondition = Schema.Struct({
     'regex',
     'greater_than',
     'less_than',
+    'not_contains',
+    'not_equals',
+    'between',
   ]),
-  value: Schema.Union([Schema.String, Schema.Number]),
+  /** Several values mean "any of them". */
+  value: Schema.Union([Schema.String, Schema.Number, Schema.Array(Schema.String)]),
+  /** The upper end of `between`. */
+  valueTo: Schema.optional(Schema.Number),
 });
 
 /** What a matching rule sets on the transaction; a key it leaves out is left alone. */
@@ -49,6 +58,8 @@ export const CategorizationRule = Schema.Struct({
   name: Schema.String,
   description: Schema.NullOr(Schema.String),
   conditions: Schema.Array(ClassificationCondition),
+  /** Whether a row has to pass all of the conditions or any one of them. */
+  matchMode: RuleMatchMode,
   result: ClassificationResult,
   priority: Schema.Number,
   isActive: Schema.Boolean,

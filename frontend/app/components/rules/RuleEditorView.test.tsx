@@ -49,6 +49,7 @@ const saved: CategorizationRule = {
   name: 'ACME is electronics',
   description: null,
   conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'ACME Store' }],
+  matchMode: 'all',
   result: { categoryId: ELECTRONICS.id },
   priority: 2,
   isActive: true,
@@ -182,6 +183,7 @@ describe('RuleEditorView', () => {
       expect(post).toHaveBeenCalledWith('/categorization-rules', {
         name: `Payee contains “${STORE}”`,
         conditions: [{ field: 'counterparty_name', operator: 'contains', value: STORE }],
+        matchMode: 'all',
         result: { walletId: CARD.id },
       }),
     );
@@ -214,6 +216,7 @@ describe('RuleEditorView', () => {
       expect(put).toHaveBeenCalledWith('/categorization-rules/rule-1', {
         name: 'ACME gadgets',
         conditions: saved.conditions,
+        matchMode: 'all',
         result: { categoryId: ELECTRONICS.id },
       }),
     );
@@ -248,6 +251,77 @@ describe('RuleEditorView', () => {
     await screen.findByRole('table');
     expect(screen.queryByText(/never applies/)).toBeNull();
     expect(screen.queryByText(/a rule above/)).toBeNull();
+  });
+
+  it('keeps several values in one condition, any of which matches', async () => {
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+    const value = (await screen.findByLabelText('Value')) as HTMLInputElement;
+    await waitFor(() => expect(value.value).toBe('ACME Store'));
+
+    // Enter keeps what was typed as a chip and starts the next value.
+    fireEvent.keyDown(value, { key: 'Enter' });
+    fireEvent.change(screen.getByLabelText('Value'), { target: { value: 'Corner Bakery' } });
+
+    expect(screen.getByRole('button', { name: 'Remove ACME Store' })).toBeTruthy();
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        '/categorization-rules/test',
+        expect.objectContaining({
+          conditions: [
+            { field: 'counterparty_name', operator: 'contains', value: ['ACME Store', 'Corner Bakery'] },
+          ],
+        }),
+        expect.anything(),
+      ),
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove ACME Store' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+    // One value left is saved as a plain one.
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({
+          conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'Corner Bakery' }],
+        }),
+      ),
+    );
+  });
+
+  it('asks for any one of the conditions, with a range of amounts as one of them', async () => {
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+    await screen.findByRole('table');
+    // One condition has nothing to combine with.
+    expect(screen.queryByRole('combobox', { name: 'How the conditions combine' })).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add condition' }));
+    selectOption(screen.getAllByLabelText('Field')[1], 'Amount');
+    selectOption(screen.getAllByLabelText('Check')[1], 'is between');
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '10' } });
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '20.5' } });
+    selectOption(
+      screen.getByRole('combobox', { name: 'How the conditions combine' }),
+      'When any of these matches',
+    );
+
+    const conditions = [
+      { field: 'counterparty_name', operator: 'contains', value: 'ACME Store' },
+      { field: 'amount', operator: 'between', value: 10, valueTo: 20.5 },
+    ];
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        '/categorization-rules/test',
+        expect.objectContaining({ conditions, matchMode: 'any' }),
+        expect.anything(),
+      ),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({ conditions, matchMode: 'any' }),
+      ),
+    );
   });
 
   it('asks for a condition before it looks anything up', async () => {

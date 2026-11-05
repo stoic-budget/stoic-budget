@@ -155,7 +155,7 @@ const OPERATION_WORDS = new Set([
   'списание',
 ]);
 
-const stripDiacritics = (value: string): string =>
+export const stripDiacritics = (value: string): string =>
   value.normalize('NFKD').replace(/\p{Diacritic}/gu, '');
 
 const isPlaceholder = (value: string): boolean => PLACEHOLDERS.has(value.trim().toLowerCase());

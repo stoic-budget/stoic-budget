@@ -60,6 +60,7 @@ function rule(overrides: Partial<CategorizationRule> = {}): CategorizationRule {
     name: 'ACME is electronics',
     description: null,
     conditions: [{ field: 'counterparty_name', operator: 'contains', value: STORE }],
+    matchMode: 'all',
     result: { categoryId: ELECTRONICS.id },
     priority: 0,
     isActive: true,
@@ -144,6 +145,26 @@ describe('RulesView', () => {
 
     expect(await screen.findByText('No rules yet')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'New rule' }).getAttribute('href')).toBe('/rules/new');
+  });
+
+  it('words several values, a range, a negation and "any of these" the way they combine', async () => {
+    mockApi([
+      rule({
+        conditions: [
+          { field: 'counterparty_name', operator: 'contains', value: [STORE, 'Corner Bakery'] },
+          { field: 'amount', operator: 'between', value: 10, valueTo: 20 },
+          { field: 'currency', operator: 'not_equals', value: 'eur' },
+        ],
+        matchMode: 'any',
+      }),
+    ]);
+    renderWithQuery(<RulesView />);
+
+    expect(
+      await screen.findByText(
+        'Payee contains “ACME Store” or “Corner Bakery” or Amount is between 10–20 or Currency is not EUR',
+      ),
+    ).toBeTruthy();
   });
 
   it('pauses a rule with its switch', async () => {
