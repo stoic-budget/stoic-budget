@@ -9,7 +9,7 @@ export const DRAFT_ROW_ID_PREFIX = 'temp-';
 
 export const isDraftRowId = (rowId: string): boolean => rowId.startsWith(DRAFT_ROW_ID_PREFIX);
 
-/** Повторяет isBlankCellValue из backend/custom-tables.service.ts. */
+/** Повторяет isBlankCellValue из backend custom-tables/helpers/row-data.ts. */
 export const isBlankCellValue = (value: unknown): boolean => {
   if (value === null || value === undefined) {
     return true;

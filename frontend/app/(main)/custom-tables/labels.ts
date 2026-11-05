@@ -1,6 +1,6 @@
 import type { useIntlayer } from '@/app/i18n';
 import type { CreateTableDialogLabels } from './components/CreateTableDialog';
-import type { SourceFilterPanelLabels } from './components/SourceFilterPanel';
+import type { SourceFilterPanelLabels } from './components/source-filter-labels';
 import { SOURCE_KINDS, type SourceKind } from './sources';
 import { TABLE_TEMPLATES, type TableTemplateId } from './templates';
 
