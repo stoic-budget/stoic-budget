@@ -286,6 +286,17 @@ jobs:
             node scripts/check-file-size.mjs --base "origin/$BASE_REF"
           fi
 
+      # Same rule as the pre-commit hook: no component adds a request.
+      - name: Requests in components
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          node --test scripts/check-component-requests.test.mjs
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            node scripts/check-component-requests.mjs --base "origin/$BASE_REF"
+          fi
+
       # The Worker that receives shared statement layouts (infra/parser-submissions).
       - name: Parser submissions worker
         run: npm run test:parser-submissions

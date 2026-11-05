@@ -19,6 +19,7 @@
     "contracts:check": "node scripts/sync-contracts.mjs --check",
     "test:sync-contracts": "node --test scripts/sync-contracts.test.mjs",
     "test:file-size": "node --test scripts/check-file-size.test.mjs",
+    "test:component-requests": "node --test scripts/check-component-requests.test.mjs",
     "licenses:check": "node scripts/check-licenses.mjs",
     "test:licenses": "node --test scripts/check-licenses.test.mjs",
     "test:parser-submissions": "node --test infra/parser-submissions/src/*.test.ts backend/scripts/layout-submission-vet.test.mjs",
