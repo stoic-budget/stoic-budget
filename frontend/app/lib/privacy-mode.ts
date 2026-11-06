@@ -47,6 +47,15 @@ export function setPrivacyMode(on: boolean): void {
   window.dispatchEvent(new Event(PRIVACY_EVENT));
 }
 
+/** Hiding is instant; showing the real figures waits for the reader's OK. */
+export function togglePrivacyMode(revealConfirm: string): void {
+  const on = readStored();
+  if (on && !window.confirm(revealConfirm)) {
+    return;
+  }
+  setPrivacyMode(!on);
+}
+
 function subscribe(onChange: () => void): () => void {
   // Another tab switched it: follow, and keep the document attribute in step.
   const onStorage = (event: StorageEvent) => {

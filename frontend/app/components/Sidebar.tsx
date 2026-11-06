@@ -12,7 +12,7 @@ import { useNotifications } from '@/app/hooks/useNotifications';
 import { usePermissions } from '@/app/hooks/usePermissions';
 import { useIntlayer } from '@/app/i18n';
 import { useExperimentalMode } from '@/app/lib/experimental-mode';
-import { setPrivacyMode, usePrivacyMode } from '@/app/lib/privacy-mode';
+import { togglePrivacyMode, usePrivacyMode } from '@/app/lib/privacy-mode';
 import { openCommandPalette } from './command-palette/command-palette-store';
 import { Bell, ChevronDown, CircleHelp, Eye, EyeOff, Heart, Search, Settings } from './icons';
 import { AccountMenu } from './navigation/AccountMenu';
@@ -153,7 +153,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
             type="button"
             className="seneca-sidebar__brand-action"
             onClick={() => {
-              setPrivacyMode(!privacy);
+              togglePrivacyMode(userMenu.privacyRevealConfirm.value);
             }}
             aria-pressed={privacy}
             title={userMenu.privacyMode.value}
