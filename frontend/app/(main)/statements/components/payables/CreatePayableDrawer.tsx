@@ -176,7 +176,7 @@ export function CreatePayableDrawer({
           </div>
         }
       >
-        <div className="seneca-payable-drawer__body">
+        <div className="seneca-payable-drawer__body seneca-payable-drawer__body--even">
           <div style={{ display: 'grid', gap: 16 }}>
             <div className="seneca-payable-drawer__field-group">
               <label className="seneca-payable-drawer__field-label" htmlFor="payable-vendor">
@@ -294,12 +294,11 @@ export function CreatePayableDrawer({
           </div>
 
           <div className="seneca-payable-drawer__footer">
-            <MuiButton variant="outlined" sx={{ flex: 1 }} onClick={onClose}>
+            <MuiButton variant="outlined" onClick={onClose}>
               {labels.cancel}
             </MuiButton>
             <MuiButton
               variant="contained"
-              sx={{ flex: 1 }}
               onClick={() => void handleSubmit()}
               disabled={!canSubmit || saving}
             >
