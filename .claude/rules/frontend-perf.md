@@ -9,6 +9,7 @@ paths:
 - **Local State**: Use `useState` for component-only state.
 - **Global State**: Use `Zustand` or specialized Context providers for cross-page state (e.g., WorkspaceContext).
 - **Server State**: Use `React Query` (TanStack Query) for data fetching, caching, and synchronization. Never store fetched API data in global state manually.
+- **Requests**: Never in a component. Put them in a hook or an api module; `scripts/check-component-requests.mjs` refuses new ones.
 
 ## 2. Performance Optimization
 - **Memoization**: Use `useMemo` and `useCallback` for expensive calculations or when passing functions to memoized components.

@@ -37,11 +37,12 @@ export function isChecked(file) {
 
 const COMMENT_ONLY = /^(\/\/|\/\*|\*|\{\s*\/\*)/;
 
+export const isCommentOnly = line => COMMENT_ONLY.test(line.trim());
+
 /** Lines that are neither blank nor only a comment. */
 export function countCodeLines(source) {
   return source.split('\n').filter(line => {
-    const text = line.trim();
-    return text !== '' && !COMMENT_ONLY.test(text);
+    return line.trim() !== '' && !isCommentOnly(line);
   }).length;
 }
 
@@ -77,7 +78,7 @@ function stagedBaseRefs(cwd) {
  * The files a change adds or modifies, with their previous versions:
  * `[{ file, befores, after }]`, `befores` empty for a new file.
  */
-function changedFiles(cwd, { staged, base }) {
+export function changedFiles(cwd, { staged, base }) {
   const diffArgs = staged
     ? ['diff', '--cached', '--name-status', '-M', '--diff-filter=AMR']
     : ['diff', '--name-status', '-M', '--diff-filter=AMR', `${base}...HEAD`];

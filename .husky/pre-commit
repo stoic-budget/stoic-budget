@@ -2,3 +2,5 @@
 node scripts/sync-contracts.mjs --check
 # No source file over 300 lines of code may be added or grow (see the script).
 node scripts/check-file-size.mjs --staged
+# No component may add a request; they belong in hooks and api modules (see the script).
+node scripts/check-component-requests.mjs --staged
