@@ -509,7 +509,6 @@ export default function WorkspaceMembersView() {
       }}
     >
       <Box
-        data-tour-shot="workspaces-members"
         sx={{
           maxWidth: 1120,
           px: { xs: 2.5, sm: 4 },

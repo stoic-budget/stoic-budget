@@ -65,7 +65,6 @@ export function CalculatorTab() {
         </Typography>
 
         <Box
-          data-tour-shot="roi-inputs"
           sx={{
             border: '1px solid',
             borderColor: 'divider',
@@ -134,7 +133,6 @@ export function CalculatorTab() {
 
           {result !== null && result.annualIncome > 0 && (
             <Box
-              data-tour-shot="roi-chart"
               sx={{ borderTop: '1px solid', borderColor: 'divider', mt: 3, pt: 3 }}
             >
               <Typography sx={{ fontSize: 13, color: 'var(--text-muted)' }}>
@@ -149,7 +147,6 @@ export function CalculatorTab() {
               />
 
               <Box
-                data-tour-shot="roi-table"
                 sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}
               >
                 <Box sx={{ display: 'flex', gap: 2 }}>

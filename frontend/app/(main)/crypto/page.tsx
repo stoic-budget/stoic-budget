@@ -85,7 +85,6 @@ export default function CryptoPage(): React.JSX.Element {
         <PageTitle path="/crypto" />
       </Box>
       <Box
-        data-tour-shot="crypto-actions"
         sx={{
           display: 'flex',
           justifyContent: { xs: 'stretch', sm: 'flex-end' },
@@ -112,7 +111,6 @@ export default function CryptoPage(): React.JSX.Element {
           variant="contained"
           className="seneca-bottom-bar-source"
           onClick={() => setDrawerOpen(true)}
-          data-tour-shot="crypto-connect"
         >
           <Plus size={18} aria-hidden />
           {t.connect}
