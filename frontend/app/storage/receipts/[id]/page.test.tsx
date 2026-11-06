@@ -1205,4 +1205,165 @@ describe('ReceiptDocumentPage', () => {
     expect(exportButton).toBeTruthy();
     expect(exportButton?.disabled).toBe(false);
   });
+
+  describe('when something fails', () => {
+    const RECEIPT = {
+      id: 'receipt-1',
+      subject: 'Example Shop receipt',
+      sender: 'camera-scan',
+      source: 'scan',
+      status: 'draft',
+      receivedAt: '2026-03-29T10:30:00.000Z',
+      metadata: { attachments: [{ filename: 'example.jpg', mimeType: 'image/jpeg' }] },
+      parsedData: { vendor: 'Example Shop', amount: 500, currency: 'EUR', date: '2026-03-29' },
+    };
+    const previewAnswer = {
+      ok: true,
+      headers: { get: () => 'image/jpeg' },
+      blob: async () => new Blob(['image'], { type: 'image/jpeg' }),
+    } as unknown as Response;
+
+    const open = async () => {
+      apiMocks.mockApiGet.mockImplementation((url: string) =>
+        Promise.resolve({ data: url === '/receipts/receipt-1' ? RECEIPT : [] }),
+      );
+      vi.mocked(fetch).mockResolvedValue(previewAnswer);
+      await act(async () => {
+        root.render(
+          <TestProviders>
+            <ReceiptDocumentPage />
+          </TestProviders>,
+        );
+      });
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+    };
+    const clickButton = async (text: string) => {
+      const button = Array.from(document.body.querySelectorAll('button')).find(item =>
+        item.textContent?.includes(text),
+      );
+      expect(button, text).toBeTruthy();
+      await act(async () => {
+        button?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+    };
+
+    it('says the receipt could not load', async () => {
+      apiMocks.mockApiGet.mockRejectedValue(new Error('offline'));
+      await act(async () => {
+        root.render(
+          <TestProviders>
+            <ReceiptDocumentPage />
+          </TestProviders>,
+        );
+      });
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(toast.error).toHaveBeenCalledTimes(1);
+      const message = vi.mocked(toast.error).mock.calls[0][0] as string;
+      expect(container.querySelector('[role="alert"]')?.textContent).toContain(message);
+    });
+
+    it('reports a failed autosave and keeps what was typed', async () => {
+      await open();
+      apiMocks.mockApiPatch.mockRejectedValue(new Error('offline'));
+      const vendor = container.querySelector('input[aria-label="Vendor"]') as HTMLInputElement;
+
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set?.call(
+          vendor,
+          'ACME Store',
+        );
+        vendor.dispatchEvent(new Event('input', { bubbles: true }));
+        vi.advanceTimersByTime(300);
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(apiMocks.mockApiPatch).toHaveBeenCalledTimes(1);
+      expect(toast.error).toHaveBeenCalledTimes(1);
+      expect(vendor.value).toBe('ACME Store');
+    });
+
+    it('saves only the last of quick edits', async () => {
+      await open();
+      apiMocks.mockApiPatch.mockResolvedValue({ data: {} });
+      const vendor = container.querySelector('input[aria-label="Vendor"]') as HTMLInputElement;
+      const type = (text: string) => {
+        Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set?.call(
+          vendor,
+          text,
+        );
+        vendor.dispatchEvent(new Event('input', { bubbles: true }));
+      };
+
+      await act(async () => {
+        type('ACME');
+        vi.advanceTimersByTime(100);
+        type('ACME Store');
+        vi.advanceTimersByTime(300);
+        await Promise.resolve();
+      });
+
+      expect(apiMocks.mockApiPatch).toHaveBeenCalledTimes(1);
+      expect(apiMocks.mockApiPatch.mock.calls[0][1].parsedData.vendor).toBe('ACME Store');
+    });
+
+    it('downloads under the attachment name, and reports a refusal', async () => {
+      await open();
+      const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+      let name = '';
+      click.mockImplementation(function (this: HTMLAnchorElement) {
+        name = this.download;
+      });
+
+      await clickButton('Download');
+      expect(name).toBe('example.jpg');
+      expect(toast.error).not.toHaveBeenCalled();
+
+      vi.mocked(fetch).mockResolvedValue({ ok: false, status: 500 } as Response);
+      await clickButton('Download');
+      expect(toast.error).toHaveBeenCalledTimes(1);
+      click.mockRestore();
+    });
+
+    it('stays on the page when approving fails', async () => {
+      await open();
+      apiMocks.mockApiPatch.mockResolvedValue({ data: {} });
+      apiMocks.mockApiPost.mockRejectedValue(new Error('refused'));
+
+      await clickButton('Approve');
+
+      expect(toast.error).toHaveBeenCalledTimes(1);
+      expect(routerMocks.push).not.toHaveBeenCalled();
+    });
+
+    it('stays on the page when the export fails partway', async () => {
+      await open();
+      apiMocks.mockApiPost.mockRejectedValue(new Error('refused'));
+
+      await clickButton('Export to table');
+      const dialogButtons = Array.from(document.body.querySelectorAll('button')).filter(item =>
+        item.textContent?.includes('Export'),
+      );
+      await act(async () => {
+        dialogButtons.at(-1)?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(apiMocks.mockApiPost).toHaveBeenCalled();
+      expect(toast.error).toHaveBeenCalledTimes(1);
+      expect(routerMocks.push).not.toHaveBeenCalled();
+    });
+  });
 });
