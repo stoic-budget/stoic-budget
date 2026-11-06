@@ -97,6 +97,11 @@ export type CashState = { walletId: string | null; paidOn: string; categoryId: s
 /** The "wallet" of cash handed over in person and kept nowhere: booked with no wallet. */
 export const IN_HAND = 'in-hand';
 
+/** A wallet the cash went into, or cash in hand kept in none. */
+export function cashSource(walletId: string): { payFromWalletId?: string; inHand?: boolean } {
+  return walletId === IN_HAND ? { inHand: true } : { payFromWalletId: walletId };
+}
+
 /** Where and when a cash payment was made; the server records it as a transaction. */
 export function CashFields(props: {
   wallets: WalletOption[];

@@ -1374,6 +1374,43 @@ describe('API contracts (e2e)', () => {
       await post(`/payables/${payableId}/payments`, { amount: 20, paidOn: '2026-10-01' });
     });
 
+    it('POST /payables with a payment answers the settled bill', async () => {
+      const wallet = await request(app.getHttpServer())
+        .post('/wallets')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('x-workspace-id', owner.workspaceId)
+        .send({ name: 'Contract Till', currency: 'USD' })
+        .expect(201);
+      const enter = () =>
+        request(app.getHttpServer())
+          .post('/payables')
+          .set('Authorization', `Bearer ${owner.token}`)
+          .set('x-workspace-id', owner.workspaceId)
+          .set('idempotency-key', 'contract-settled-bill')
+          .send({
+            direction: 'receivable',
+            vendor: 'Contract Client',
+            amount: 75,
+            currency: 'USD',
+            status: 'paid',
+            payment: { payFromWalletId: wallet.body.id, paidOn: '2026-10-01' },
+          })
+          .expect(201);
+      const settled = await enter();
+      expect(settled.body).toMatchObject({ status: 'paid', paidAmount: '75.00' });
+      expect(settled.body.linkedTransactionId).toEqual(expect.any(String));
+
+      // The same form sent again answers the same bill, with no second transaction.
+      const repeated = await enter();
+      expect(repeated.body.id).toBe(settled.body.id);
+      const [{ count }] = await dataSource.query(
+        `SELECT COUNT(*)::int AS count FROM transactions
+          WHERE workspace_id = $1 AND counterparty_name = 'Contract Client'`,
+        [owner.workspaceId],
+      );
+      expect(count).toBe(1);
+    });
+
     it('GET /payables (both directions) and /payables/:id', async () => {
       const bills = await get('/payables?direction=payable');
       matches(PayableListPage, bills.body);

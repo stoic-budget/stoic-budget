@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { IdempotencyService } from '../../common/services/idempotency.service';
 import { Category } from '../../entities/category.entity';
+import { IdempotencyKey } from '../../entities/idempotency-key.entity';
 import { Payable } from '../../entities/payable.entity';
 import { PayablePayment } from '../../entities/payable-payment.entity';
 import { Statement } from '../../entities/statement.entity';
@@ -31,6 +33,7 @@ import { UnbookedPaymentsService } from './unbooked-payments.service';
       Wallet,
       Category,
       Tag,
+      IdempotencyKey,
     ]),
     AuditModule,
     ExchangeRatesModule,
@@ -42,6 +45,7 @@ import { UnbookedPaymentsService } from './unbooked-payments.service';
   controllers: [PayablesController],
   providers: [
     PayablesService,
+    IdempotencyService,
     PayablesExportService,
     PayablesScheduler,
     UnbookedPaymentsService,

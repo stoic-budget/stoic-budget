@@ -530,8 +530,16 @@ describe('PayablesView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(toastMock.error).toHaveBeenCalledWith('vendor refused'));
-    expect(apiMocks.create).toHaveBeenCalledWith(expect.objectContaining({ direction: 'payable' }));
+    expect(apiMocks.create).toHaveBeenCalledWith(
+      expect.objectContaining({ direction: 'payable' }),
+      expect.any(String),
+    );
     expect(screen.getByDisplayValue('Example Shop')).toBeInTheDocument();
+
+    // Saving the same form again is the same request: it must not book the money twice.
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(apiMocks.create).toHaveBeenCalledTimes(2));
+    expect(apiMocks.create.mock.calls[1][1]).toBe(apiMocks.create.mock.calls[0][1]);
   });
 
   it('archives and reloads', async () => {

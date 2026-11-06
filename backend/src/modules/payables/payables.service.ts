@@ -56,6 +56,7 @@ import {
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { ExportFormat, PayablesSortOption } from './dto/filter-payables.dto';
+import { assertOneSource, exactSubset } from './payable-payments.util';
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayablesExportService } from './payables-export.service';
 import { UnbookedPaymentsService } from './unbooked-payments.service';
@@ -142,11 +143,25 @@ export class PayablesService {
     this.pendingEvents.get(manager)?.push([name, payload]);
   }
 
+  /**
+   * Saves a bill. With a `payment` the money has already moved: the bill, its
+   * transaction and its payment are saved together, or none of them is.
+   */
   async create(workspaceId: string, userId: string, dto: CreatePayableBody): Promise<Payable> {
+    const { payment } = dto;
     // Paid is what the payment log says; a bill set paid by hand has no payment
     // and no transaction, so the money it says came in shows in no figure.
-    if (toEnum(PayableStatus, dto.status) === PayableStatus.PAID) {
+    if (!payment && toEnum(PayableStatus, dto.status) === PayableStatus.PAID) {
       throw new BadRequestException(appError('PAYABLE_PAID_THROUGH_PAYMENT'));
+    }
+    if (payment) {
+      assertOneSource(payment);
+      if (!(payment.payFromWalletId || payment.inHand)) {
+        throw new BadRequestException(appError('PAYABLE_BOOK_NEEDS_SOURCE'));
+      }
+      if (dto.amount <= 0) {
+        throw new BadRequestException(appError('PAYABLE_PAYMENT_NOT_POSITIVE'));
+      }
     }
     await this.assertLinkedEntitiesInWorkspace(
       workspaceId,
@@ -163,18 +178,26 @@ export class PayablesService {
       amount: dto.amount,
       currency: await this.workspaceCurrency.resolveFor(workspaceId, dto.currency),
       dueDate: parsePayableDate(dto.dueDate),
-      status: toEnum(PayableStatus, dto.status) || PayableStatus.TO_PAY,
+      // With a payment the status comes from it, once it is recorded.
+      status: (!payment && toEnum(PayableStatus, dto.status)) || PayableStatus.TO_PAY,
       linkedTransactionId: dto.linkedTransactionId || null,
       source: toEnum(PayableSource, dto.source) || PayableSource.MANUAL,
       isRecurring: dto.isRecurring ?? false,
       comment: dto.comment || null,
       statementId: dto.statementId || null,
-      paidAt: dto.status === PayableStatus.PAID ? new Date() : null,
+      paidAt: null,
       dueSoonNotifiedAt: null,
       tags,
     });
 
-    return this.asStored(await this.payableRepository.save(payable));
+    if (!payment) {
+      return this.asStored(await this.payableRepository.save(payable));
+    }
+    const saved = await this.inPaymentTransaction(async manager =>
+      this.settle(manager, await manager.getRepository(Payable).save(payable), payment, userId),
+    );
+    await this.notifyMarkedPaid(saved, userId);
+    return saved;
   }
 
   async findAll(workspaceId: string, filters: FilterPayablesBody) {
@@ -267,7 +290,7 @@ export class PayablesService {
     userId: string,
     payload: MarkPayablePaidBody,
   ): Promise<Payable> {
-    this.assertOneSource(payload);
+    assertOneSource(payload);
     await this.findOne(id, workspaceId);
     await this.assertLinkedTransactionInWorkspace(workspaceId, payload.linkedTransactionId ?? null);
 
@@ -276,50 +299,64 @@ export class PayablesService {
         where: { id, workspaceId },
         lock: { mode: 'pessimistic_write' },
       });
-      if (payload.payFromWalletId || payload.inHand) {
-        if (payable.status === PayableStatus.PAID && payable.linkedTransactionId) {
-          return payable;
-        }
-        if (payable.linkedTransactionId) {
-          throw new ConflictException(appError('PAYABLE_ALREADY_LINKED'));
-        }
-        payable.linkedTransactionId = await this.recordCashPayment(
-          manager,
-          payable,
-          payload.payFromWalletId ?? null,
-          payload,
-        );
+      return this.settle(manager, payable, payload, userId);
+    });
+    await this.notifyMarkedPaid(saved, userId);
+    return saved;
+  }
+
+  /** Records one payment for everything still outstanding, from the source the payload names. */
+  private async settle(
+    manager: EntityManager,
+    payable: Payable,
+    payload: MarkPayablePaidBody,
+    userId: string,
+  ): Promise<Payable> {
+    if (payload.payFromWalletId || payload.inHand) {
+      if (payable.status === PayableStatus.PAID && payable.linkedTransactionId) {
+        return payable;
       }
-      // Swapping the payment silently would leave the old one (a recorded cash
-      // payment, say) in the books as well: the expense would count twice.
-      if (
-        payload.linkedTransactionId &&
-        payable.linkedTransactionId &&
-        payable.linkedTransactionId !== payload.linkedTransactionId
-      ) {
+      if (payable.linkedTransactionId) {
         throw new ConflictException(appError('PAYABLE_ALREADY_LINKED'));
       }
-      if (payload.linkedTransactionId) {
-        await this.assertCoversOutstanding(manager, payable, payload.linkedTransactionId);
-      }
-      payable.linkedTransactionId = payload.linkedTransactionId || payable.linkedTransactionId;
-      // Settling in full is one payment for everything still outstanding, so
-      // the payment log is the whole truth and the status is derived from it.
-      await this.recordPayment(manager, payable, {
-        amount: this.outstandingOf(payable),
-        paidOn: payload.paidOn ?? this.toDateString(new Date()),
-        transactionId: payable.linkedTransactionId,
-        createdById: userId,
-      });
-      return this.linkIfUnbooked(
+      payable.linkedTransactionId = await this.recordCashPayment(
         manager,
-        await this.applyPaymentTotals(manager, payable, workspaceId),
+        payable,
+        payload.payFromWalletId ?? null,
+        payload,
       );
+    }
+    // Swapping the payment silently would leave the old one (a recorded cash
+    // payment, say) in the books as well: the expense would count twice.
+    if (
+      payload.linkedTransactionId &&
+      payable.linkedTransactionId &&
+      payable.linkedTransactionId !== payload.linkedTransactionId
+    ) {
+      throw new ConflictException(appError('PAYABLE_ALREADY_LINKED'));
+    }
+    if (payload.linkedTransactionId) {
+      await this.assertCoversOutstanding(manager, payable, payload.linkedTransactionId);
+    }
+    payable.linkedTransactionId = payload.linkedTransactionId || payable.linkedTransactionId;
+    // Settling in full is one payment for everything still outstanding, so
+    // the payment log is the whole truth and the status is derived from it.
+    await this.recordPayment(manager, payable, {
+      amount: this.outstandingOf(payable),
+      paidOn: payload.paidOn ?? this.toDateString(new Date()),
+      transactionId: payable.linkedTransactionId,
+      createdById: userId,
     });
+    return this.linkIfUnbooked(
+      manager,
+      await this.applyPaymentTotals(manager, payable, payable.workspaceId),
+    );
+  }
 
+  private async notifyMarkedPaid(saved: Payable, userId: string): Promise<void> {
     try {
       await this.notificationsService.createForWorkspaceMembers({
-        workspaceId,
+        workspaceId: saved.workspaceId,
         actorId: userId,
         type: NotificationType.PAYABLE_MARKED_PAID,
         category: NotificationCategory.WORKSPACE_ACTIVITY,
@@ -338,8 +375,6 @@ export class PayablesService {
         `Failed to send payable paid notification for ${saved.id}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
-
-    return saved;
   }
 
   /**
@@ -472,7 +507,7 @@ export class PayablesService {
     userId: string,
     dto: AddPayablePaymentBody,
   ): Promise<Payable> {
-    this.assertOneSource(dto);
+    assertOneSource(dto);
     await this.findOne(id, workspaceId);
     await this.assertLinkedTransactionInWorkspace(workspaceId, dto.linkedTransactionId ?? null);
 
@@ -540,7 +575,7 @@ export class PayablesService {
     userId: string,
     dto: BookPayablePaymentBody,
   ): Promise<Payable> {
-    this.assertOneSource(dto);
+    assertOneSource(dto);
     if (!(dto.linkedTransactionId || dto.payFromWalletId || dto.inHand)) {
       throw new BadRequestException(appError('PAYABLE_BOOK_NEEDS_SOURCE'));
     }
@@ -589,20 +624,6 @@ export class PayablesService {
         await manager.getRepository(Payable).findOneOrFail({ where: { id, workspaceId } }),
       );
     });
-  }
-
-  /** The money came one way: a bank row, a wallet, or cash in hand — never two at once. */
-  private assertOneSource(source: {
-    linkedTransactionId?: string | null;
-    payFromWalletId?: string | null;
-    inHand?: boolean | null;
-  }): void {
-    const sources = [source.linkedTransactionId, source.payFromWalletId, source.inHand].filter(
-      Boolean,
-    );
-    if (sources.length > 1) {
-      throw new BadRequestException(appError('PAYABLE_PAYMENT_AMBIGUOUS'));
-    }
   }
 
   /** A row may pay several bills, but not more than its own amount, in the bill's currency. */
@@ -787,7 +808,7 @@ export class PayablesService {
       outstanding: this.round2(Number(row.outstanding)),
     }));
 
-    const exact = this.exactSubset(
+    const exact = exactSubset(
       pool.map(bill => bill.outstanding),
       available,
     );
@@ -820,30 +841,6 @@ export class PayablesService {
       left = this.round2(left - amount);
     }
     return { ...empty, unallocated: this.round2(left), allocations };
-  }
-
-  /**
-   * The smallest set of bills that adds up to the amount, by index.
-   *
-   * Exhaustive over at most 2^12 combinations — the pool is capped, so this
-   * stays a few thousand additions rather than a search problem.
-   */
-  private exactSubset(amounts: number[], target: number): number[] | null {
-    let best: number[] | null = null;
-    for (let mask = 1; mask < 1 << amounts.length; mask++) {
-      const picked: number[] = [];
-      let sum = 0;
-      for (let index = 0; index < amounts.length; index++) {
-        if (mask & (1 << index)) {
-          picked.push(index);
-          sum += amounts[index];
-        }
-      }
-      if (Math.abs(sum - target) <= 0.01 && (!best || picked.length < best.length)) {
-        best = picked;
-      }
-    }
-    return best;
   }
 
   private async recordPayment(

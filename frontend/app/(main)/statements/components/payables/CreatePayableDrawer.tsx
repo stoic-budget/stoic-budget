@@ -14,15 +14,21 @@ import { FALLBACK_CURRENCY } from '@/app/lib/currency';
 import type {
   CreatePayableInput,
   Payable,
+  PayableDirection,
   PayableSource,
   PayableStatus,
   UpdatePayableInput,
 } from '@/app/lib/payables-api';
+import { useCashPaymentOptions } from './hooks/useCashPaymentOptions';
+import { type CashState, cashSource, IN_HAND, today } from './MarkPaidFields';
+import { PaidNowFields } from './PaidNowFields';
 import { type PayableFormState, toFormState } from './payable-form-state';
 
 interface CreatePayableDrawerProps {
   open: boolean;
   payable?: Payable | null;
+  /** Which side of the ledger a new entry is on; picks the categories of its payment. */
+  direction?: PayableDirection;
   initialValues?: CreatePayableInput | null;
   /** Currency preselected for new entries; the workspace currency. */
   defaultCurrency?: string;
@@ -48,9 +54,12 @@ interface CreatePayableDrawerProps {
   };
 }
 
+const emptyCash = (): CashState => ({ walletId: null, paidOn: today(), categoryId: '' });
+
 export function CreatePayableDrawer({
   open,
   payable,
+  direction = 'payable',
   initialValues,
   defaultCurrency = FALLBACK_CURRENCY,
   saving,
@@ -61,6 +70,20 @@ export function CreatePayableDrawer({
   const [form, setForm] = useState<PayableFormState>(() =>
     toFormState(payable, initialValues, defaultCurrency),
   );
+  const [cash, setCash] = useState<CashState>(emptyCash);
+  // A new entry may be money that has already moved; an edit keeps recording it through Mark paid.
+  const paidNow = !payable && form.status === 'paid';
+  const cashOptions = useCashPaymentOptions({
+    currency: form.currency || defaultCurrency,
+    direction,
+    enabled: open && paidNow,
+  });
+  // The first account until one is picked, and again when the currency rules the picked one out.
+  // No account in this currency: cash in hand is what is left.
+  const account =
+    cash.walletId === IN_HAND || cashOptions.wallets.some(wallet => wallet.id === cash.walletId)
+      ? cash.walletId
+      : (cashOptions.wallets[0]?.id ?? (cashOptions.walletsLoading ? null : IN_HAND));
   const currencyPicker = useCurrencyPickerState(form.currency || defaultCurrency);
   const {
     currencyDrawerOpen,
@@ -82,9 +105,14 @@ export function CreatePayableDrawer({
       return;
     }
     setForm(toFormState(payable, initialValues, defaultCurrency));
+    setCash(emptyCash());
   }, [defaultCurrency, initialValues, open, payable, setCurrencyDrawerOpen, setCurrencySearch]);
 
-  const canSubmit = useMemo(() => form.vendor.trim().length > 0 && Number(form.amount) > 0, [form]);
+  const canSubmit = useMemo(
+    () =>
+      form.vendor.trim().length > 0 && Number(form.amount) > 0 && (!paidNow || account !== null),
+    [account, form, paidNow],
+  );
 
   const handleSubmit = async (): Promise<void> => {
     if (!canSubmit) {
@@ -95,11 +123,21 @@ export function CreatePayableDrawer({
       vendor: form.vendor.trim(),
       amount: Number(form.amount),
       currency: form.currency.trim().toUpperCase() || defaultCurrency,
-      dueDate: form.dueDate || undefined,
+      // Settled with no due date: the list and its date filter go by the day it was paid.
+      dueDate: form.dueDate || (paidNow ? cash.paidOn : undefined),
       source: form.source,
       status: form.status,
       comment: form.comment.trim() || undefined,
       tagIds: form.tags.map(tag => tag.id),
+      ...(paidNow && account
+        ? {
+            payment: {
+              ...cashSource(account),
+              paidOn: cash.paidOn,
+              categoryId: cash.categoryId || undefined,
+            },
+          }
+        : {}),
     });
   };
 
@@ -221,13 +259,24 @@ export function CreatePayableDrawer({
                 sx={FORM_CONTROL_SX}
                 value={form.status}
                 onChange={value => setForm(prev => ({ ...prev, status: value as PayableStatus }))}
-                // Paid comes from recording the payment (Mark paid), which books the
-                // money; an edit cannot make an open bill paid, only keep a paid one so.
+                // Paid comes from recording the payment, which books the money: a new bill
+                // asks for it below, and an edit cannot make an open bill paid, only keep
+                // a paid one so.
                 options={Object.entries(labels.statusOptions)
-                  .filter(([value]) => value !== 'paid' || payable?.status === 'paid')
+                  .filter(([value]) => value !== 'paid' || !payable || payable.status === 'paid')
                   .map(([value, label]) => ({ value, label }))}
               />
             </div>
+
+            {paidNow && (
+              <PaidNowFields
+                wallets={cashOptions.wallets}
+                categories={cashOptions.categories}
+                account={account}
+                value={cash}
+                onChange={setCash}
+              />
+            )}
 
             <div className="seneca-payable-drawer__field-group">
               <label className="seneca-payable-drawer__field-label" htmlFor="payable-comment">

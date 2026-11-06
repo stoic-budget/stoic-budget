@@ -204,6 +204,7 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
       <CreatePayableDrawer
         open={actions.drawerOpen}
         payable={actions.editingPayable}
+        direction={direction}
         defaultCurrency={(currentWorkspace.currency || FALLBACK_CURRENCY).toUpperCase()}
         saving={actions.saving}
         onClose={actions.closeDrawer}

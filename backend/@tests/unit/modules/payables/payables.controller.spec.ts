@@ -14,6 +14,30 @@ vi.mock('fs', async () => {
 });
 
 describe('PayablesController', () => {
+  it('answers a repeated idempotency key with the first bill, without creating another', async () => {
+    const first = { id: 'p1' };
+    const payablesService = { create: vi.fn(async () => first) };
+    const stored = new Map<string, unknown>();
+    const idempotency = {
+      checkKey: vi.fn(async (key: string) =>
+        stored.has(key) ? { data: stored.get(key), cached: true } : null,
+      ),
+      storeKey: vi.fn(async (key: string, _user: string, _workspace: string, data: unknown) => {
+        stored.set(key, data);
+      }),
+    };
+    const controller = new PayablesController(payablesService as any, idempotency as any);
+    const body = { vendor: 'Acme', amount: 10 } as any;
+    const user = { id: 'user-1' } as any;
+
+    expect(await controller.create(body, user, 'workspace-1', 'form-1')).toEqual(first);
+    expect(await controller.create(body, user, 'workspace-1', 'form-1')).toEqual(first);
+
+    expect(payablesService.create).toHaveBeenCalledTimes(1);
+    // The key table is shared: this endpoint's keys cannot collide with another's.
+    expect(idempotency.storeKey).toHaveBeenCalledWith('payable:form-1', 'user-1', 'workspace-1', first);
+  });
+
   it('proxies CRUD, summary, status actions, and export to service', async () => {
     const fs = await import('fs');
     const stream = new PassThrough();
@@ -33,7 +57,7 @@ describe('PayablesController', () => {
       remove: vi.fn(async () => undefined),
       exportData: vi.fn(async () => ({ filePath: '/tmp/p.csv', fileName: 'p.csv', contentType: 'text/csv' })),
     };
-    const controller = new PayablesController(payablesService as any);
+    const controller = new PayablesController(payablesService as any, {} as any);
     const user = { id: 'user-1' } as any;
     const workspaceId = 'workspace-1';
     const res = new PassThrough() as any;

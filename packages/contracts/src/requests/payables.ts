@@ -22,6 +22,19 @@ export const CreatePayableBody = Schema.Struct({
   tagIds: optionalNullable(
     Schema.Array(Schema.String.check(Schema.isUUID())).check(Schema.isMaxLength(50)),
   ),
+  /** The money has already moved: the bill is saved settled, with this payment. Create only. */
+  payment: optionalNullable(
+    Schema.Struct({
+      /** The wallet it went into or left: recorded as a new transaction of that wallet. */
+      payFromWalletId: optionalNullable(Schema.String.check(Schema.isUUID())),
+      /** Cash handed over in person, kept in no wallet: booked as a transaction without one. */
+      inHand: optionalNullable(Schema.Boolean),
+      /** Day of the payment; today when omitted. */
+      paidOn: optionalNullable(IsoDateString),
+      /** Category of the payment's transaction. */
+      categoryId: optionalNullable(Schema.String.check(Schema.isUUID())),
+    }),
+  ),
 });
 export type CreatePayableBody = Wire<typeof CreatePayableBody>;
 
@@ -78,7 +91,7 @@ export const AllocateTransactionBody = Schema.Struct({
 export type AllocateTransactionBody = Wire<typeof AllocateTransactionBody>;
 
 export const UpdatePayableBody = CreatePayableBody.mapFields(
-  Struct.omit(['linkedTransactionId', 'comment', 'statementId']),
+  Struct.omit(['linkedTransactionId', 'comment', 'statementId', 'payment']),
 )
   .mapFields(Struct.map(optionalNullable))
   .mapFields(

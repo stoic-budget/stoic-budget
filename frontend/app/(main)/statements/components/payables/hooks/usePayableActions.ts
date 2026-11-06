@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { getApiErrorMessage } from '@/app/lib/api-error';
@@ -38,7 +38,14 @@ export function usePayableActions({
   const [archivingId, setArchivingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // One per opened form: saving it again after a lost answer books the money once.
+  const createKey = useRef<string | undefined>(undefined);
+
   const openCreateDrawer = (): void => {
+    createKey.current =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : String(Date.now());
     setEditingPayable(null);
     setDrawerOpen(true);
   };
@@ -60,7 +67,10 @@ export function usePayableActions({
         await payablesApi.update(editingPayable.id, payload as UpdatePayableInput);
         toast.success(toasts.updateSuccess);
       } else {
-        await payablesApi.create({ ...(payload as CreatePayableInput), direction });
+        await payablesApi.create(
+          { ...(payload as CreatePayableInput), direction },
+          createKey.current,
+        );
         toast.success(toasts.createSuccess);
       }
 

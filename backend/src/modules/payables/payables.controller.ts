@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Post, Put, Res } from '@nestjs/common';
+import { Controller, Delete, Get, Headers, Post, Put, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import * as fs from 'fs';
 import { AllowInVersion } from '../../common/decorators/allow-in-version.decorator';
@@ -9,6 +9,7 @@ import { SchemaParams, SchemaQuery } from '../../common/effect/schema-query';
 import { SchemaResponse } from '../../common/effect/schema-response';
 import { toEnum } from '../../common/effect/to-enum';
 import { Permission } from '../../common/enums/permissions.enum';
+import { IdempotencyService } from '../../common/services/idempotency.service';
 import { buildContentDisposition } from '../../common/utils/http-file.util';
 import { deletedResponse } from '../../common/utils/responses.util';
 import {
@@ -41,8 +42,12 @@ import { PayablesService } from './payables.service';
 
 @Controller('payables')
 export class PayablesController {
-  constructor(private readonly payablesService: PayablesService) {}
+  constructor(
+    private readonly payablesService: PayablesService,
+    private readonly idempotencyService: IdempotencyService,
+  ) {}
 
+  /** Send `idempotency-key` to make a retried request return the first bill. */
   @Post()
   @WorkspaceAuth(Permission.PAYABLE_CREATE)
   @Audit({ entityType: EntityType.PAYABLE, includeDiff: true, isUndoable: true })
@@ -51,8 +56,21 @@ export class PayablesController {
     @SchemaBody(CreatePayableBody) createDto: CreatePayableBody,
     @CurrentUser() user: User,
     @WorkspaceId() workspaceId: string,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.payablesService.create(workspaceId, user.id, createDto);
+    // Namespaced: the key table is shared by every endpoint that takes one.
+    const key = idempotencyKey ? `payable:${idempotencyKey}` : null;
+    if (key) {
+      const cached = await this.idempotencyService.checkKey(key, user.id, workspaceId);
+      if (cached) {
+        return cached.data;
+      }
+    }
+    const payable = await this.payablesService.create(workspaceId, user.id, createDto);
+    if (key) {
+      await this.idempotencyService.storeKey(key, user.id, workspaceId, payable);
+    }
+    return payable;
   }
 
   @Get()
