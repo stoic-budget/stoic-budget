@@ -19,6 +19,7 @@ import {
   type InvestmentAssetClass,
   useInvestments,
 } from '../hooks/useInvestments';
+import { isStaleQuote } from './investment-price';
 import { CardTitle, cardSx } from './net-worth-ui';
 
 /**
@@ -377,16 +378,14 @@ export function InvestmentsCard({ currency, locale, embedded = false }: Investme
                     <td>{holding.quantity}</td>
                     <td>
                       <PrivateAmount>{holding.price}</PrivateAmount> {holding.priceCurrency}
-                      {holding.priceSource === 'manual' && (
+                      {(holding.priceSource === 'manual' || isStaleQuote(holding)) && (
                         <Typography
                           component="span"
                           variant="caption"
-                          sx={{
-                            color: 'text.secondary',
-                          }}
+                          sx={{ color: 'text.secondary' }}
                         >
                           {' '}
-                          · {t.manualPrice}
+                          · {holding.priceSource === 'manual' ? t.manualPrice : t.stalePrice}
                         </Typography>
                       )}
                     </td>

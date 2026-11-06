@@ -35,7 +35,7 @@ in clear, or a browser extension reading the page.
 | Destination | Sent | When | Off switch |
 |---|---|---|---|
 | Exchange-rate provider | Currency pairs and dates | Multi-currency totals | Single currency, or set rates by hand |
-| Stooq / CoinGecko | Tickers | "Refresh prices" on the net-worth page | Enter prices by hand |
+| Yahoo Finance / CoinGecko | Tickers | "Refresh prices" on the net-worth page | Enter prices by hand |
 | Your map tile server / Nominatim | Receipt coordinates | Receipt maps, if enabled | Do not enable receipt location |
 | Telegram | Reports and replies to the bot | Only if the bot is connected | Disconnect Telegram |
 | SMTP | Invitations, password resets | Only if SMTP is set | Leave SMTP unset |

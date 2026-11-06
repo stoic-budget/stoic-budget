@@ -27,7 +27,7 @@ describe('InvestmentsScheduler', () => {
   it('keeps going when one workspace cannot be priced', async () => {
     const refreshPrices = vi
       .fn()
-      .mockRejectedValueOnce(new Error('Stooq is down'))
+      .mockRejectedValueOnce(new Error('Quotes are down'))
       .mockResolvedValueOnce(1);
     const { scheduler } = createScheduler({ refreshPrices });
 
