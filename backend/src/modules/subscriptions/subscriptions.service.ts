@@ -80,6 +80,8 @@ import {
   pastMonthStatus,
 } from './month-status-history';
 import { payeeMatchesVendor } from './payee-match.util';
+import type { BusinessSubscriptionsReport } from './subscription-business-report';
+import { rememberDismissedVendors } from './subscription-dismissals';
 import {
   costPerUse,
   describePriceChange,
@@ -94,30 +96,6 @@ const CANDIDATE_LOOKBACK_DAYS = 400;
 const CANDIDATE_LIMIT = 50;
 /** A charge more than this far off the expected price is a price change. */
 const PRICE_CHANGE_TOLERANCE = 0.05;
-
-export interface BusinessSubscriptionsReport {
-  currency: string;
-  rows: Array<{
-    id: string;
-    vendorName: string;
-    owner: string | null;
-    ownerId: string | null;
-    monthlyCost: number;
-    frequency: SubscriptionFrequency;
-    amount: number;
-    subscriptionCurrency: string;
-    nextChargeDate: Date | null;
-    reviewAt: Date | null;
-    riskStatus: SubscriptionRiskStatus;
-  }>;
-  byOwner: Array<{
-    owner: string | null;
-    ownerId: string | null;
-    monthlyCost: number;
-    count: number;
-  }>;
-  totalMonthlyCost: number;
-}
 
 export interface ChargeCalendarRow {
   subscriptionId: string;
@@ -376,11 +354,12 @@ export class SubscriptionsService {
     return saved;
   }
 
-  /** A dismissed detection is deleted outright, so it is logged as a deletion. */
+  /** A dismissed detection is deleted, so it is logged as a deletion; its vendor is remembered. */
   async dismiss(id: string, workspaceId: string, userId: string): Promise<void> {
     const subscription = await this.findOne(id, workspaceId);
     const before = subscriptionSnapshot(subscription);
     await this.subscriptionRepository.remove(subscription);
+    await rememberDismissedVendors(this.workspaceRepository, workspaceId, subscription);
     await this.audit({
       workspaceId,
       actorType: ActorType.USER,
