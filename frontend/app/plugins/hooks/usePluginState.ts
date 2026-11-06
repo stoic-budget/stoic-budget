@@ -13,17 +13,23 @@ const SETTINGS_KEY = {
   'mcp-server': 'mcp',
 } as const satisfies Record<PluginKey, string>;
 
-/** A missing or non-boolean switch counts as off, as on the server. */
+const DEFAULT_ENABLED: Record<PluginKey, boolean> = {
+  'ai-assistant': true,
+  webhooks: false,
+  'mcp-server': false,
+};
+
+/** A missing or non-boolean switch takes its default, as on the server. */
 export function readPluginSwitch(
   settings: Record<string, unknown> | null | undefined,
   key: PluginKey,
 ): boolean {
   const plugins = settings?.plugins;
-  return (
-    typeof plugins === 'object' &&
-    plugins !== null &&
-    (plugins as Record<string, unknown>)[SETTINGS_KEY[key]] === true
-  );
+  const stored =
+    typeof plugins === 'object' && plugins !== null
+      ? (plugins as Record<string, unknown>)[SETTINGS_KEY[key]]
+      : undefined;
+  return typeof stored === 'boolean' ? stored : DEFAULT_ENABLED[key];
 }
 
 /** Plugin switches of the open workspace; only owners and admins may flip them. */

@@ -44,6 +44,7 @@ vi.mock('@/app/components/icons', () => ({
 
 // The heading reads the whole sidebar config; it has tests of its own.
 vi.mock('@/app/components/ui/page-title', () => ({ PageTitle: () => null }));
+vi.mock('./components/AiAssistantButton', () => ({ AiAssistantButton: () => null }));
 
 vi.mock('@/app/components/ui/snapshot-skeleton/SnapshotSkeleton', () => ({
   SnapshotSkeleton: ({ loading, children }: { loading: boolean; children?: React.ReactNode }) =>

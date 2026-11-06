@@ -1,6 +1,6 @@
 /**
  * Which plugins a workspace has switched on. Stored under `settings.plugins`
- * next to `processing` and `profile`; a missing key means off.
+ * next to `processing` and `profile`; a missing key takes its default.
  */
 
 export const pluginKeys = ['webhooks', 'mcp', 'aiAssistant'] as const;
@@ -11,12 +11,12 @@ export type WorkspacePluginSettings = Record<WorkspacePluginKey, boolean>;
 export const DEFAULT_PLUGIN_SETTINGS: WorkspacePluginSettings = {
   webhooks: false,
   mcp: false,
-  aiAssistant: false,
+  aiAssistant: true,
 };
 
 const PLUGINS_KEY = 'plugins';
 
-/** Reads the switches off a workspace; anything but a boolean counts as off. */
+/** Reads the switches off a workspace; anything but a boolean takes the default. */
 export const readPluginSettings = (
   workspace?: { settings?: Record<string, unknown> | null } | null,
 ): WorkspacePluginSettings => {
