@@ -2,9 +2,15 @@
 
 import { Box, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
+import { usePathname, useSearchParams } from 'next/navigation';
 import type React from 'react';
 import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
+import {
+  formatMonthParam,
+  parseMonthParam,
+} from '@/app/(main)/dashboard/helpers/dashboard-url-state';
+import { useMonthLabel } from '@/app/components/dashboard/use-month-label';
 import {
   DollarSign,
   Flag,
@@ -17,7 +23,8 @@ import {
 } from '@/app/components/icons';
 import { PanelBackTitle } from '@/app/components/panels/panel-ui';
 import { DrawerShell } from '@/app/components/ui/drawer-shell';
-import { useIntlayer } from '@/app/i18n';
+import { useIntlayer, useLocale } from '@/app/i18n';
+import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
 import { tokens } from '@/lib/theme-tokens';
 import { promptTemplates } from './prompt-templates';
 
@@ -39,9 +46,42 @@ interface AiAssistantDrawerProps {
   zIndex?: number;
 }
 
+/**
+ * Opens ChatGPT with the prompt, in the address or, when too long for one, on
+ * the clipboard. False when the browser refused: it may do that this far from
+ * the click, and the user then gets a second click. Not `noopener`, which would
+ * make a refused window look like an opened one.
+ */
+async function handOver(prompt: string, onCopied: () => void): Promise<boolean> {
+  const url = `${CHATGPT_URL}?q=${encodeURIComponent(prompt)}`;
+  const fits = url.length <= MAX_URL_LENGTH;
+  if (!fits) {
+    const copied = await navigator.clipboard.writeText(prompt).then(
+      () => true,
+      () => false,
+    );
+    if (!copied) return false;
+    onCopied();
+  }
+  const opened = window.open(fits ? url : CHATGPT_URL, '_blank');
+  if (!opened) return false;
+  opened.opener = null;
+  return true;
+}
+
 export function AiAssistantDrawer({ isOpen, onClose, onBack, zIndex }: AiAssistantDrawerProps) {
   const t = useIntlayer('aiAssistantDrawer');
+  const { locale } = useLocale();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [loadingKey, setLoadingKey] = useState<string | null>(null);
+  /** A prompt built but refused by the browser, waiting for a second click. */
+  const [ready, setReady] = useState<{ key: string; prompt: string } | null>(null);
+  // Only the dashboard's own month counts: `?month=` means other things on other pages.
+  const pickedMonth =
+    pathname === DEFAULT_APP_ROUTE ? parseMonthParam(searchParams?.get('month')) : null;
+  const month = pickedMonth ? formatMonthParam(pickedMonth) : null;
+  const monthLabel = useMonthLabel(pickedMonth ?? new Date(0));
 
   const cards: CardDef[] = [
     {
@@ -100,18 +140,16 @@ export function AiAssistantDrawer({ isOpen, onClose, onBack, zIndex }: AiAssista
       if (!template) return;
 
       setLoadingKey(key);
+      setReady(null);
 
       await (async () => {
-        const prompt = await template.buildPrompt();
-        const encoded = encodeURIComponent(prompt);
-        const url = `${CHATGPT_URL}?q=${encoded}`;
-
-        if (url.length > MAX_URL_LENGTH) {
-          await navigator.clipboard.writeText(prompt);
-          toast.success(t.copied.value);
-          window.open(CHATGPT_URL, '_blank', 'noopener,noreferrer');
-        } else {
-          window.open(url, '_blank', 'noopener,noreferrer');
+        const prompt = await template.buildPrompt({
+          month,
+          locale: String(locale),
+        });
+        const handedOver = await handOver(prompt, () => toast.success(t.copied.value));
+        if (!handedOver) {
+          setReady({ key, prompt });
         }
       })()
         .catch(async () => {
@@ -121,22 +159,47 @@ export function AiAssistantDrawer({ isOpen, onClose, onBack, zIndex }: AiAssista
           setLoadingKey(null);
         });
     },
-    [t.copied, t.loadFailed],
+    [t.copied, t.loadFailed, month, locale],
   );
+
+  /** The second click: a fresh gesture the browser will not refuse. */
+  const handleReadyClick = useCallback(
+    async (key: string, prompt: string) => {
+      const handedOver = await handOver(prompt, () => toast.success(t.copied.value));
+      setReady(handedOver ? null : { key, prompt });
+    },
+    [t.copied],
+  );
+
+  const closeDrawer = useCallback(() => {
+    setReady(null);
+    onClose();
+  }, [onClose]);
 
   return (
     <DrawerShell
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={closeDrawer}
       title={onBack ? <PanelBackTitle title={t.title} onBack={onBack} /> : t.title}
       position="right"
       width="lg"
       zIndex={zIndex}
     >
       <Box sx={{ px: 2, pb: 2 }}>
-        <Typography sx={{ fontSize: 13, color: 'var(--text-secondary)', mb: 2.5 }}>
+        <Typography
+          sx={{
+            fontSize: 13,
+            color: 'var(--text-secondary)',
+            mb: pickedMonth ? 0.5 : 2.5,
+          }}
+        >
           {t.subtitle}
         </Typography>
+        {pickedMonth && (
+          <Typography sx={{ fontSize: 13, color: 'var(--text-secondary)', mb: 2.5 }}>
+            {t.selectedMonth.value.replace('{month}', monthLabel)}
+          </Typography>
+        )}
 
         <Box
           sx={{
@@ -147,11 +210,13 @@ export function AiAssistantDrawer({ isOpen, onClose, onBack, zIndex }: AiAssista
         >
           {cards.map(card => {
             const isLoading = loadingKey === card.key;
+            const readyPrompt = ready?.key === card.key ? ready.prompt : null;
             return (
               <Box
                 key={card.key}
                 onClick={() => {
-                  if (!isLoading) void handleCardClick(card.key);
+                  if (readyPrompt) void handleReadyClick(card.key, readyPrompt);
+                  else if (!isLoading) void handleCardClick(card.key);
                 }}
                 sx={{
                   border: '1px solid var(--border-color)',
@@ -184,10 +249,22 @@ export function AiAssistantDrawer({ isOpen, onClose, onBack, zIndex }: AiAssista
                 >
                   {card.icon}
                 </Box>
-                <Typography sx={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)' }}>
+                <Typography
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: 13,
+                    color: 'var(--text-primary)',
+                  }}
+                >
                   {card.title}
                 </Typography>
-                <Typography sx={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: 'var(--text-secondary)',
+                    lineHeight: 1.4,
+                  }}
+                >
                   {card.description}
                 </Typography>
                 <Typography
@@ -199,7 +276,7 @@ export function AiAssistantDrawer({ isOpen, onClose, onBack, zIndex }: AiAssista
                     pt: 0.5,
                   }}
                 >
-                  {isLoading ? t.loading : t.run}
+                  {isLoading ? t.loading : readyPrompt ? t.ready : t.run}
                 </Typography>
               </Box>
             );
