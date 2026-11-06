@@ -15,6 +15,7 @@ import { PRIVATE_CLASS } from '../ui/private-amount';
 import { TextTabs } from '../ui/text-tabs';
 import { formatDate } from './helpers/transactionFormatters';
 import { useTransactionReviewActions } from './hooks/useTransactionReviewActions';
+import { TransactionCommentSection } from './TransactionCommentSection';
 import { TransactionDetailsTab } from './TransactionDetailsTab';
 import { TransactionHistoryTab } from './TransactionHistoryTab';
 import type { Category, Transaction } from './types';
@@ -249,6 +250,13 @@ export default function DetailsDrawer({
               onMarkIgnored={onMarkIgnored}
               onSplitDone={onSplitDone}
             />
+            {!transaction.isPrivate && (
+              <TransactionCommentSection
+                key={transaction.id}
+                transactionId={transaction.id}
+                comment={transaction.comments ?? null}
+              />
+            )}
             {/* Income adds to a goal, an expense takes from it. */}
             <div style={{ marginTop: 24 }}>
               <GoalLinkField

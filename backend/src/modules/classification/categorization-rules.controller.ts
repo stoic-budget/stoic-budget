@@ -42,6 +42,7 @@ import {
   assertConditionsValid,
   assertRuleRefs,
   hasApplicableAction,
+  resolveRulePayee,
 } from './helpers/rule-validation';
 import { RuleApplicationService } from './services/rule-application.service';
 import { RuleOrderService } from './services/rule-order.service';
@@ -97,6 +98,7 @@ export class CategorizationRulesController {
   ) {
     assertConditionsValid(dto.conditions);
     await this.assertRefs(workspaceId, dto);
+    const result = await resolveRulePayee(this.manager, workspaceId, dto.result);
 
     const rule = this.categorizationRuleRepository.create({
       userId: user.id,
@@ -104,7 +106,8 @@ export class CategorizationRulesController {
       name: dto.name,
       description: dto.description || null,
       conditions: dto.conditions,
-      result: dto.result,
+      matchMode: dto.matchMode ?? 'all',
+      result,
       // A new rule is usually the more specific one, so it goes on top.
       priority: dto.priority ?? (await this.ruleOrderService.topPriority(workspaceId)),
       isActive: dto.isActive ?? true,
@@ -154,8 +157,11 @@ export class CategorizationRulesController {
     if (dto.conditions != null) {
       rule.conditions = dto.conditions;
     }
+    if (dto.matchMode != null) {
+      rule.matchMode = dto.matchMode;
+    }
     if (dto.result != null) {
-      rule.result = dto.result;
+      rule.result = await resolveRulePayee(this.manager, workspaceId, dto.result);
     }
     if (dto.priority != null) {
       rule.priority = dto.priority;
@@ -226,6 +232,7 @@ export class CategorizationRulesController {
       workspaceId,
       viewerMemberId: selfMemberId,
       conditions: dto.conditions,
+      matchMode: dto.matchMode ?? 'all',
       transactionIds: dto.transactionIds,
       ruleId: dto.ruleId,
       walletId: dto.walletId,
@@ -234,7 +241,8 @@ export class CategorizationRulesController {
 
   /**
    * Files the existing rows the rule matches under its category, adds its tags
-   * and moves them to its account. Asked for by the user, never run on its own.
+   * and its comment, moves them to its account and gives them its payee. Asked for
+   * by the user, never run on its own.
    */
   @Post(':id/apply')
   @HttpCode(HttpStatus.OK)
@@ -266,16 +274,15 @@ export class CategorizationRulesController {
     return rule;
   }
 
+  private get manager() {
+    return this.categorizationRuleRepository.manager;
+  }
+
   /** Every id the rule names, in what it matches and what it sets, is this workspace's. */
   private assertRefs(
     workspaceId: string,
     dto: Pick<UpdateCategorizationRuleBody, 'conditions' | 'result'>,
   ) {
-    return assertRuleRefs(
-      this.categorizationRuleRepository.manager,
-      this.workspaceMemberRepository,
-      workspaceId,
-      dto,
-    );
+    return assertRuleRefs(this.manager, this.workspaceMemberRepository, workspaceId, dto);
   }
 }

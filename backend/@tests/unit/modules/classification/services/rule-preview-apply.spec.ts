@@ -185,10 +185,11 @@ describe('rule preview against the rules ranked above', () => {
     id: 'rule-top',
     name: 'Anything with buds is a gift',
     conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'wireless buds' }],
+    result: { categoryId: 'cat-gifts' },
     isActive: true,
   };
 
-  it('marks the matches a higher rule takes first, and counts them', async () => {
+  it('marks the matches whose category a higher rule sets, and counts them', async () => {
     const { rulesService } = build([row('buds'), row('cable', { counterpartyName: 'ACME Store - Cable' })], {
       allRules: [bakeryFirst, { ...storeRule }],
     });
@@ -204,6 +205,44 @@ describe('rule preview against the rules ranked above', () => {
     expect(preview.matches.map(match => [match.id, match.wonBy?.id ?? null])).toEqual([
       ['buds', 'rule-top'],
       ['cable', null],
+    ]);
+  });
+
+  it('is not outranked by a higher rule that only tags: rules add up', async () => {
+    const { rulesService } = build([row('buds')], {
+      allRules: [{ ...bakeryFirst, result: { tagIds: ['tag-gifts'] } }, { ...storeRule }],
+    });
+
+    const preview = await rulesService.previewRule({
+      workspaceId: WORKSPACE,
+      viewerMemberId: ME,
+      conditions: storeRule.conditions,
+      ruleId: storeRule.id,
+    });
+
+    expect(preview.shadowed).toBe(0);
+    expect(preview.matches[0].wonBy).toBeNull();
+  });
+
+  it('applies only what no higher rule sets: the category stays with the rule above, the tags are added', async () => {
+    const below = {
+      ...storeRule,
+      result: { categoryId: 'cat-electronics', tagIds: ['tag-gadgets'] },
+    } as unknown as CategorizationRule;
+    const { rulesService, transactions } = build(
+      [row('buds'), row('cable', { counterpartyName: 'ACME Store - Cable' })],
+      { allRules: [bakeryFirst, below], tags: ['tag-gadgets'] },
+    );
+
+    const result = await rulesService.applyRuleToExisting({
+      rule: below,
+      userId: 'user-1',
+      viewerMemberId: ME,
+    });
+
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0, commented: 0, renamed: 0 });
+    expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
+      'cable',
     ]);
   });
 
@@ -269,7 +308,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0 });
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0, commented: 0, renamed: 0 });
     expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
       'open',
     ]);
@@ -289,7 +328,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 1, moved: 0 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 1, moved: 0, commented: 0, renamed: 0 });
     expect(transactions.update).not.toHaveBeenCalled();
   });
 
@@ -308,7 +347,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 2, skippedManual: 2, tagged: 0, moved: 0 });
+    expect(result).toEqual({ applied: 2, skippedManual: 2, tagged: 0, moved: 0, commented: 0, renamed: 0 });
     const [where, values] = transactions.update.mock.calls[0] as unknown as [
       { id: { value: string[] }; workspaceId: string },
       Record<string, unknown>,
@@ -321,10 +360,13 @@ describe('applying a rule to existing rows', () => {
       categoryReason: storeRule.name,
     });
     expect(audit.createBatchEvents.mock.calls[0][0]).toHaveLength(2);
-    expect(rules.update).toHaveBeenCalledWith(
-      { id: storeRule.id, workspaceId: WORKSPACE },
-      expect.objectContaining({ lastMatchedAt: expect.any(Date) }),
-    );
+    const [counted, counter] = rules.update.mock.calls[0] as unknown as [
+      { id: { value: string[] }; workspaceId: string },
+      Record<string, unknown>,
+    ];
+    expect(counted.id.value).toEqual([storeRule.id]);
+    expect(counted.workspaceId).toBe(WORKSPACE);
+    expect(counter).toEqual(expect.objectContaining({ lastMatchedAt: expect.any(Date) }));
   });
 
   it('goes through every row of the workspace, a page at a time', async () => {
@@ -356,7 +398,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 0, moved: 0 });
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 0, moved: 0, commented: 0, renamed: 0 });
     expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
       'open',
     ]);
@@ -374,7 +416,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 0 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 0, commented: 0, renamed: 0 });
     expect(transactions.update).not.toHaveBeenCalled();
   });
 });
@@ -427,7 +469,7 @@ describe('a rule that names an account', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 2 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 2, commented: 0, renamed: 0 });
     const [where, values] = transactions.update.mock.calls[0] as unknown as [
       { id: { value: string[] }; workspaceId: string },
       Record<string, unknown>,
@@ -443,6 +485,49 @@ describe('a rule that names an account', () => {
     expect(events[0].diff).toEqual({
       before: { walletId: 'wallet-card' },
       after: { walletId: 'wallet-cash' },
+    });
+  });
+});
+
+describe('a rule that writes a comment and gives a payee', () => {
+  const commenting = {
+    ...storeRule,
+    result: { comment: 'Gadgets for the office', payeeId: 'payee-acme' },
+  } as unknown as CategorizationRule;
+
+  it('writes the comment only where there is none, and the payee never over one picked by hand', async () => {
+    const { rulesService, transactions, tax, audit } = build([
+      row('bare'),
+      row('commented', { comments: 'my own comment' }),
+      row('picked', { payeeId: 'payee-other', payeeSource: 'manual' }),
+      row('there', { payeeId: 'payee-acme', comments: 'kept' }),
+      row('other', { counterpartyName: 'Corner Bakery' }),
+    ]);
+
+    const result = await rulesService.applyRuleToExisting({
+      rule: commenting,
+      userId: 'user-1',
+      viewerMemberId: ME,
+    });
+
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 0, commented: 2, renamed: 2 });
+    const writes = (transactions.update.mock.calls as unknown as Array<
+      [{ id: { value: string[] } }, Record<string, unknown>]
+    >).map(([where, values]) => [where.id.value, values]);
+    expect(writes).toEqual([
+      [['bare', 'picked'], { comments: 'Gadgets for the office' }],
+      [['bare', 'commented'], { payeeId: 'payee-acme', payeeSource: 'rule' }],
+    ]);
+    // The payee decides the reverse charge.
+    expect(tax.reassess).toHaveBeenCalledWith(WORKSPACE, { ids: ['bare', 'commented'] });
+    const events = audit.createBatchEvents.mock.calls[0][0] as Array<{
+      entityId: string;
+      diff: { before: Record<string, unknown>; after: Record<string, unknown> };
+    }>;
+    expect(events.map(event => event.entityId)).toEqual(['bare', 'commented', 'picked']);
+    expect(events[1].diff).toEqual({
+      before: { payeeId: undefined },
+      after: { payeeId: 'payee-acme' },
     });
   });
 });
@@ -466,6 +551,17 @@ describe('rules on a receipt or an invoice', () => {
       reason: storeRule.name,
     });
     expect(rules.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('looks past a rule that only tags to the one below that sets a category', async () => {
+    const tagsOnly = { ...storeRule, id: 'rule-tags', name: 'ACME is tagged', result: { tagIds: ['tag-gadgets'] } };
+    const { service } = build([], { rules: [tagsOnly, storeRule] });
+
+    await expect(suggest(service)).resolves.toEqual({
+      categoryId: 'cat-electronics',
+      source: TransactionCategorySource.RULE,
+      reason: storeRule.name,
+    });
   });
 
   it("passes over a rule naming another workspace's category", async () => {

@@ -30,8 +30,8 @@ describe('a rule that tags and asks for the account', () => {
     isActive: true,
   };
 
-  function build() {
-    const rules = { find: vi.fn(async () => [tagRule]), update: vi.fn() };
+  function build(stored: unknown[] = [tagRule]) {
+    const rules = { find: vi.fn(async () => stored), update: vi.fn() };
     const tags = {
       // Only tag-gadgets still exists in the workspace.
       find: vi.fn(async ({ where }: { where: { id: { value: string[] }; workspaceId: string } }) =>
@@ -40,6 +40,7 @@ describe('a rule that tags and asks for the account', () => {
           : [],
       ),
     };
+    const audit = { createEvent: vi.fn() };
     const wallets = {
       manager: {
         getRepository: (entity: { name?: string }) =>
@@ -56,9 +57,9 @@ describe('a rule that tags and asks for the account', () => {
       rules as never,
       {} as never,
       { get: vi.fn(), set: vi.fn() } as never,
-      { createEvent: vi.fn() } as unknown as AuditService,
+      audit as unknown as AuditService,
     );
-    return service;
+    return Object.assign(service, { rules, audit });
   }
 
   const imported = (walletId: string) =>
@@ -79,6 +80,71 @@ describe('a rule that tags and asks for the account', () => {
     expect(classification.categoryId).toBe('cat-electronics');
     expect(classification.categorySource).toBe(TransactionCategorySource.RULE);
     expect(classification.tags).toEqual([{ id: 'tag-gadgets' }]);
+  });
+
+  it('lays every matching rule over the row: the best one decides a field, each adds its tags', async () => {
+    const tagsOnly = {
+      ...tagRule,
+      id: 'rule-tags',
+      name: 'ACME is tagged',
+      priority: 2,
+      result: { tagIds: ['tag-gadgets'] },
+    };
+    const files = { ...tagRule, id: 'rule-files', name: 'ACME is electronics', priority: 1, result: { categoryId: 'cat-electronics' } };
+    const filesLower = { ...tagRule, id: 'rule-lower', name: 'ACME is a gift', priority: 0, result: { categoryId: 'cat-gifts' } };
+    const service = build([tagsOnly, files, filesLower]);
+
+    const classification = await service.classifyTransaction(
+      { ...imported('wallet-card'), id: 'tx-1' } as Transaction,
+      'user-1',
+    );
+
+    expect(classification.categoryId).toBe('cat-electronics');
+    expect(classification.categoryReason).toBe('ACME is electronics');
+    expect(classification.tags).toEqual([{ id: 'tag-gadgets' }]);
+    // The two rules that added something are counted and named in the row's history; the third added nothing.
+    const [where] = service.rules.update.mock.calls[0] as unknown as [{ id: { value: string[] } }];
+    expect(where.id.value).toEqual(['rule-tags', 'rule-files']);
+    expect(service.audit.createEvent.mock.calls.map(([event]) => event.meta.ruleId)).toEqual([
+      'rule-tags',
+      'rule-files',
+    ]);
+  });
+
+  it("gives a new row the rule's comment and payee, and files it by that payee's history", async () => {
+    const naming = { ...tagRule, result: { comment: 'Gadgets for the office', payeeId: 'payee-acme' } };
+    const service = build([naming]);
+    const history = vi
+      .spyOn(service as never, 'autoClassifyCategory')
+      .mockResolvedValue(undefined as never);
+
+    const classification = await service.classifyTransaction(imported('wallet-card'), 'user-1');
+
+    expect(classification.comments).toBe('Gadgets for the office');
+    expect(classification.payeeId).toBe('payee-acme');
+    expect(classification.payeeSource).toBe('rule');
+    expect((history.mock.calls[0] as unknown as [Transaction])[0].payeeId).toBe('payee-acme');
+  });
+
+  it("leaves the comment a person wrote and the payee a person picked", async () => {
+    const naming = { ...tagRule, result: { comment: 'Gadgets for the office', payeeId: 'payee-acme' } };
+    const service = build([naming]);
+    vi.spyOn(service as never, 'autoClassifyCategory').mockResolvedValue(undefined as never);
+
+    const classification = await service.classifyTransaction(
+      {
+        ...imported('wallet-card'),
+        id: 'tx-1',
+        comments: 'my own comment',
+        payeeId: 'payee-other',
+        payeeSource: 'manual',
+      } as Transaction,
+      'user-1',
+    );
+
+    expect(classification.comments).toBeUndefined();
+    expect(classification.payeeId).toBeUndefined();
+    expect(classification.payeeSource).toBeUndefined();
   });
 
   it('does not fire for a row of another account', async () => {

@@ -18,6 +18,8 @@ export function useRuleWords(): RuleWords {
       direction: t.field.direction.value,
       payment_type: t.field.payment_type.value,
       wallet: t.field.wallet.value,
+      currency: t.field.currency.value,
+      day_of_month: t.field.day_of_month.value,
     },
     operator: {
       contains: t.operator.contains.value,
@@ -27,6 +29,9 @@ export function useRuleWords(): RuleWords {
       greater_than: t.operator.greater_than.value,
       less_than: t.operator.less_than.value,
       regex: t.operator.regex.value,
+      not_contains: t.operator.not_contains.value,
+      not_equals: t.operator.not_equals.value,
+      between: t.operator.between.value,
     },
     direction: { income: t.direction.income.value, expense: t.direction.expense.value },
     paymentType: {
@@ -40,10 +45,13 @@ export function useRuleWords(): RuleWords {
       interest: types.interest.value,
     },
     and: t.page.and.value,
+    or: t.page.or.value,
     category: t.result.category.value,
     wallet: t.result.wallet.value,
     owner: t.result.owner.value,
     tags: t.result.tags.value,
+    comment: t.result.comment.value,
+    payee: t.result.payee.value,
     shared: t.result.shared.value,
     unknown: t.result.unknown.value,
   };

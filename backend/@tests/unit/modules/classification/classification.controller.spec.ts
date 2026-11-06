@@ -65,7 +65,6 @@ describe('ClassificationController', () => {
       expect.objectContaining({ id: 'tx-1' }),
       'u1',
       null,
-      { bypassCache: true },
     );
   });
 

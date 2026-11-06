@@ -192,7 +192,14 @@ DATA:OFXSGML
     const applied = await as(
       request(server()).post(`/categorization-rules/${rule.body.id}/apply`),
     ).expect(200);
-    expect(applied.body).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 1 });
+    expect(applied.body).toEqual({
+      applied: 0,
+      skippedManual: 0,
+      tagged: 0,
+      moved: 1,
+      commented: 0,
+      renamed: 0,
+    });
     expect((await walletOf('CHARITY FUND')).wallet_id).toBe(giving);
   });
 });

@@ -135,6 +135,7 @@ describe('DetailsDrawer', () => {
                   name: 'Coffee shops',
                   description: null,
                   conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'coffee' }],
+                  matchMode: 'all',
                   result: { categoryId: 'cat-1' },
                   priority: 1,
                   isActive: true,

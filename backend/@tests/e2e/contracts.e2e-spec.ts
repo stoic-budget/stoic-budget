@@ -1119,11 +1119,94 @@ describe('API contracts (e2e)', () => {
           skippedManual: 0,
           tagged: preview.body.matchedTransactions,
           moved: 0,
+          commented: 0,
+          renamed: 0,
         });
       } finally {
         for (const id of ids) {
           await send('delete', `/categorization-rules/${id}`).expect(204);
         }
+      }
+    });
+
+    it('a rule with several values, a range and "any of these", saved, read back and previewed', async () => {
+      const categories = await get('/categories?type=expense');
+      const conditions = [
+        { field: 'counterparty_name', operator: 'contains', value: ['contract coffee', 'no such shop'] },
+        { field: 'amount', operator: 'between', value: 100000, valueTo: 200000 },
+        { field: 'currency', operator: 'not_equals', value: 'XXX' },
+      ];
+      const created = await send('post', '/categorization-rules', {
+        name: 'Coffee or a large sum',
+        conditions,
+        matchMode: 'any',
+        result: { categoryId: categories.body[1].id },
+      }).expect(201);
+      try {
+        matches(CategorizationRuleContract, created.body);
+        expect(created.body.matchMode).toBe('any');
+        expect(created.body.conditions).toEqual(conditions);
+
+        const any = await send('post', '/categorization-rules/test', {
+          conditions: conditions.slice(0, 2),
+          matchMode: 'any',
+        }).expect(200);
+        matches(CategorizationRuleTestResult, any.body);
+        const all = await send('post', '/categorization-rules/test', {
+          conditions: conditions.slice(0, 2),
+        }).expect(200);
+        // Coffee rows are no large sums: any of the two finds them, both together find none.
+        expect(any.body.matchedTransactions).toBeGreaterThan(0);
+        expect(all.body.matchedTransactions).toBe(0);
+
+        const back = await send('put', `/categorization-rules/${created.body.id}`, {
+          matchMode: 'all',
+        }).expect(200);
+        expect(back.body.matchMode).toBe('all');
+        // A range the wrong way round, and a rule with no conditions left, are refused.
+        await send('put', `/categorization-rules/${created.body.id}`, {
+          conditions: [{ field: 'amount', operator: 'between', value: 20, valueTo: 10 }],
+        }).expect(400);
+        await send('put', `/categorization-rules/${created.body.id}`, { conditions: [] }).expect(400);
+      } finally {
+        await send('delete', `/categorization-rules/${created.body.id}`).expect(204);
+      }
+    });
+
+    it('a rule that writes a comment and gives a payee by name, applied to existing rows', async () => {
+      const conditions = [
+        { field: 'counterparty_name', operator: 'contains', value: 'contract coffee' },
+      ];
+      const created = await send('post', '/categorization-rules', {
+        name: 'Coffee is the corner café',
+        conditions,
+        result: { comment: 'Team coffee', payeeName: 'Corner Café' },
+      }).expect(201);
+      try {
+        matches(CategorizationRuleContract, created.body);
+        // The name became the workspace's payee; the rule keeps its id.
+        expect(created.body.result.comment).toBe('Team coffee');
+        expect(created.body.result.payeeName).toBeUndefined();
+        const payee = await get(`/payees/${created.body.result.payeeId}`);
+        expect(payee.body.name).toBe('Corner Café');
+
+        const preview = await send('post', '/categorization-rules/test', { conditions }).expect(200);
+        const applied = await send('post', `/categorization-rules/${created.body.id}/apply`).expect(200);
+        matches(CategorizationRuleApplyResult, applied.body);
+        expect(applied.body.renamed).toBe(preview.body.matchedTransactions);
+        expect(applied.body.commented).toBeGreaterThan(0);
+        // A second run finds nothing left to write.
+        const again = await send('post', `/categorization-rules/${created.body.id}/apply`).expect(200);
+        expect(again.body).toEqual({
+          applied: 0,
+          skippedManual: 0,
+          tagged: 0,
+          moved: 0,
+          commented: 0,
+          renamed: 0,
+        });
+      } finally {
+        await send('delete', `/categorization-rules/${created.body.id}`).expect(204);
       }
     });
 

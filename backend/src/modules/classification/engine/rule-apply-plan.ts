@@ -1,8 +1,13 @@
 import { canReadPrivate } from '../../../common/utils/transaction-privacy.util';
 import type { Transaction } from '../../../entities/transaction.entity';
-import type { ClassificationCondition } from '../interfaces/classification-rule.interface';
+import type {
+  ClassificationCondition,
+  ClassificationResult,
+} from '../interfaces/classification-rule.interface';
 import { hasDecidedCategory } from './category-decision';
-import { matchesConditions } from './rule-conditions';
+import { matchesRule } from './rule-conditions';
+import { decides, type LayeredField } from './rule-layers';
+import { hasNoComment, pickedByHand } from './rule-result';
 
 /** What applying a rule changes among a page of existing rows. */
 export interface RuleApplyPlan {
@@ -14,6 +19,10 @@ export interface RuleApplyPlan {
   tagged: Transaction[];
   /** Matches that move to the rule's account. */
   moved: Transaction[];
+  /** Matches with no comment yet, which take the rule's. */
+  commented: Transaction[];
+  /** Matches that take the rule's payee: not theirs already, not picked by a person. */
+  renamed: Transaction[];
 }
 
 /**
@@ -33,26 +42,45 @@ export function movesToWallet(
  * every match, since adding one takes nothing away. Another member's private
  * row is not a match at all. A rule that names an account moves its matches
  * there: the user asked for it knowing the balances of both accounts change.
+ * Rules add up, best first, so what a rule ranked above sets on a row is that
+ * rule's to set: this one leaves the category or the account of such a row.
+ * A comment goes only where there is none, and a payee never over a person's pick.
  */
 export function planRuleApply(
   rows: readonly Transaction[],
   rule: { conditions: ClassificationCondition[] },
   input: {
+    /** The active rules ranked above this one: what they set on a row, this one does not. */
+    above?: ReadonlyArray<{ conditions: ClassificationCondition[]; result: ClassificationResult }>;
     viewerMemberId: string | null;
     setsCategory: boolean;
     setsTags: boolean;
     walletId?: string;
+    comment?: string;
+    payeeId?: string;
   },
 ): RuleApplyPlan {
   const matches = rows.filter(
-    row => canReadPrivate(row, input.viewerMemberId) && matchesConditions(row, rule.conditions),
+    row => canReadPrivate(row, input.viewerMemberId) && matchesRule(row, rule),
   );
+  const wins = (row: Transaction, field: LayeredField) =>
+    !(input.above ?? []).some(higher => decides(higher.result, field) && matchesRule(row, higher));
   return {
     matches,
     refiled: input.setsCategory
-      ? matches.filter(row => !(hasDecidedCategory(row) || row.taxLocked))
+      ? matches.filter(
+          row => !(hasDecidedCategory(row) || row.taxLocked) && wins(row, 'categoryId'),
+        )
       : [],
     tagged: input.setsTags ? matches : [],
-    moved: matches.filter(row => movesToWallet(row, input.walletId)),
+    moved: matches.filter(row => movesToWallet(row, input.walletId) && wins(row, 'walletId')),
+    commented: input.comment
+      ? matches.filter(row => hasNoComment(row) && wins(row, 'comment'))
+      : [],
+    renamed: input.payeeId
+      ? matches.filter(
+          row => row.payeeId !== input.payeeId && !pickedByHand(row) && wins(row, 'payeeId'),
+        )
+      : [],
   };
 }

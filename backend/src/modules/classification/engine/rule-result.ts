@@ -1,38 +1,73 @@
 import { type Transaction, TransactionCategorySource } from '../../../entities/transaction.entity';
-import type { ClassificationRule } from '../interfaces/classification-rule.interface';
+import type { RuleLayers } from './rule-layers';
 
 /**
- * Writes what a matched rule sets onto the classification. A key the rule
- * leaves out is left alone. Tags are not written here: they are added to a
- * row, never assigned, and the caller knows which of them still exist.
- *
- * @returns whether the rule named the owner, which then beats the wallet's.
+ * What a rule can ask about a bank row besides its payee, purpose and amount.
+ * A category asked for ahead of the row itself (a re-suggest) passes these on.
  */
-export function applyRuleResult(
-  rule: ClassificationRule,
+export type RuleRowFacts = Pick<
+  Transaction,
+  | 'walletId'
+  | 'ownerMemberId'
+  | 'paymentType'
+  | 'documentNumber'
+  | 'counterpartyBin'
+  | 'currency'
+  | 'transactionDate'
+>;
+
+/** A rule's comment fills an empty one; what a person wrote stays. */
+export function hasNoComment(row: Pick<Partial<Transaction>, 'comments'>): boolean {
+  return !row.comments?.trim();
+}
+
+/** A payee a person picked for the row is theirs to change, not a rule's. */
+export function pickedByHand(row: Pick<Partial<Transaction>, 'payeeSource'>): boolean {
+  return row.payeeSource === 'manual';
+}
+
+/**
+ * Writes what the matching rules set onto the classification: each field from
+ * the best rule that decides it. A field no rule decides is left alone, and so
+ * are the comment and the payee a person gave `row`. Tags
+ * are not written here: they are added to a row, never assigned, and the
+ * caller knows which of them still exist.
+ *
+ * @returns whether a rule named the owner, which then beats the wallet's.
+ */
+export function applyRuleLayers(
+  layers: RuleLayers,
   classification: Partial<Transaction>,
+  row: Pick<Partial<Transaction>, 'comments' | 'payeeSource'>,
 ): { ruleSetOwner: boolean } {
-  const { result } = rule;
-  if (result.categoryId) {
-    classification.categoryId = result.categoryId;
+  const { setBy } = layers;
+  if (setBy.categoryId) {
+    classification.categoryId = setBy.categoryId.result.categoryId;
     classification.categorySource = TransactionCategorySource.RULE;
-    classification.categoryReason = rule.name;
+    classification.categoryReason = setBy.categoryId.name;
   }
-  if (result.branchId) {
-    classification.branchId = result.branchId;
+  if (setBy.branchId) {
+    classification.branchId = setBy.branchId.result.branchId;
   }
-  if (result.walletId) {
-    classification.walletId = result.walletId;
+  if (setBy.walletId) {
+    classification.walletId = setBy.walletId.result.walletId;
   }
-  if (result.article) {
-    classification.article = result.article;
+  if (setBy.article) {
+    classification.article = setBy.article.result.article;
   }
-  if (result.activityType) {
-    classification.activityType = result.activityType;
+  if (setBy.activityType) {
+    classification.activityType = setBy.activityType.result.activityType;
   }
-  if (result.ownerMemberId === undefined) {
+  if (setBy.comment && hasNoComment(row)) {
+    classification.comments = setBy.comment.result.comment;
+  }
+  if (setBy.payeeId && !pickedByHand(row)) {
+    classification.payeeId = setBy.payeeId.result.payeeId;
+    classification.payeeSource = 'rule';
+  }
+  if (!setBy.ownerMemberId) {
     return { ruleSetOwner: false };
   }
-  classification.ownerMemberId = result.ownerMemberId;
+  classification.ownerMemberId = setBy.ownerMemberId.result.ownerMemberId;
   return { ruleSetOwner: true };
 }

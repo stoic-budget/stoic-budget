@@ -53,6 +53,8 @@ export function RuleEditorForm({ draft, onChange, targets, onSubmit }: RuleEdito
       <RuleConditionsField
         conditions={draft.conditions}
         onChange={conditions => onChange(current => ({ ...current, conditions }))}
+        matchMode={draft.matchMode}
+        onMatchModeChange={matchMode => onChange(current => ({ ...current, matchMode }))}
         ownerOptions={ownerOptions}
         hasMembers={members.length > 0}
         walletOptions={wallets.map(wallet => ({ value: wallet.id, label: wallet.name }))}
