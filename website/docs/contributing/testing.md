@@ -30,6 +30,49 @@ npm test
 
 Run them from `frontend/`. Tests sit next to the code as `*.test.ts` / `*.test.tsx`.
 
+## Writing tests
+
+Backend example:
+
+```typescript
+describe('UserService', () => {
+  let service: UserService;
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      providers: [UserService],
+    }).compile();
+
+    service = module.get<UserService>(UserService);
+  });
+
+  it('should create a user', async () => {
+    const dto: CreateUserDto = {
+      email: 'test@example.com',
+      name: 'Test User',
+    };
+
+    const result = await service.create(dto);
+
+    expect(result.email).toBe(dto.email);
+  });
+});
+```
+
+Frontend example:
+
+```typescript
+import { render, screen } from '@testing-library/react';
+import { Button } from './Button';
+
+describe('Button', () => {
+  it('renders button with text', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeInTheDocument();
+  });
+});
+```
+
 ## Coverage
 
 The backend unit config enforces a global floor of 8% statements, 5% branches, 8% functions, and 8% lines; the

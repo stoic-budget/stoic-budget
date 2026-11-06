@@ -56,4 +56,45 @@ production), health checks at `GET /api/v1/health` and `GET /api/v1/health/ready
 request and trace IDs. Stoic Budget does not ship a monitoring stack — point your own collector at the endpoint. See
 [Observability](../guides/observability).
 
+## Repository layout
+
+```
+stoic-budget/
+├── backend/                    # NestJS backend
+│   ├── src/
+│   │   ├── modules/           # Feature modules
+│   │   │   ├── auth/         # Authentication
+│   │   │   ├── users/        # User management
+│   │   │   ├── statements/   # Statement processing
+│   │   │   └── ...
+│   │   ├── entities/         # TypeORM entities
+│   │   ├── common/           # Shared utilities
+│   │   ├── config/           # Configuration
+│   │   ├── migrations/       # Database migrations
+│   │   └── main.ts           # Entry point
+│   └── @tests/               # Unit, integration and e2e tests
+│
+├── frontend/                  # vinext frontend
+│   ├── app/                  # App Router pages
+│   │   ├── (auth)/          # Auth pages
+│   │   ├── (main)/          # Signed-in app routes
+│   │   ├── admin/           # Admin dashboard
+│   │   ├── components/      # Shared components
+│   │   ├── lib/             # API client, CSRF helper, utilities
+│   │   ├── styles/          # Global SCSS
+│   │   └── ...
+│   └── public/              # Static assets
+│
+├── packages/contracts/        # API schemas, copied into both apps by contracts:sync
+├── docs/                     # Plans, CI and security notes
+├── website/                  # Docusaurus documentation site
+└── scripts/                  # Helper scripts
+```
+
+- **`backend/src/modules/`**: Each feature is a self-contained module
+- **`backend/src/entities/`**: Database models (TypeORM)
+- **`backend/src/common/`**: Shared decorators, guards, pipes
+- **`frontend/app/`**: App Router structure
+- **`frontend/app/components/`**: Reusable React components
+
 Next: [Backend Architecture](backend)

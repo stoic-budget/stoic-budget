@@ -20,6 +20,13 @@ feat(parsing): add Bereke bank PDF parser
 fix(import): handle duplicate session retries
 ```
 
+The types are `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore` and `ci`.
+
+- Use the present tense and the imperative mood ("Add feature", not "Added feature" or "Adds feature")
+- Limit the first line to 72 characters or less
+- Separate the subject from the body with a blank line, and wrap the body at 72 characters
+- Reference issues and pull requests in the footer
+
 The `pre-push` hook runs the backend unit tests when `backend/src` changed.
 
 ## Pull requests
@@ -46,5 +53,13 @@ npm --prefix frontend run type-check
 make test
 make build
 ```
+
+## Adding a new feature
+
+1. **Backend:** create `backend/src/modules/my-feature/` with `my-feature.module.ts`, `my-feature.service.ts` and
+   `my-feature.controller.ts`.
+2. **Frontend:** create `frontend/app/my-feature/` with `page.tsx` and `components/`.
+3. **Tests:** `backend/@tests/unit/.../my-feature.service.spec.ts`, and `MyFeature.test.tsx` next to the component.
+4. **Documentation:** add to the relevant pages in `website/docs/`, and update the API docs if you add endpoints.
 
 Next: [Testing](testing)

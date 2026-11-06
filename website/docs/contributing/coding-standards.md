@@ -12,6 +12,9 @@ Stoic Budget uses Biome for linting and formatting in both apps; frontend SCSS i
 - Prefer `const` (`useConst` is an error)
 - Avoid `any` (`noExplicitAny` warns)
 - Keep functions small and focused
+- Use async/await instead of callbacks
+- Add JSDoc comments for public APIs
+- Use interfaces for object shapes, and export types that are used across modules
 - Code comments and commit messages in English
 
 ## Naming conventions
@@ -20,6 +23,7 @@ Stoic Budget uses Biome for linting and formatting in both apps; frontend SCSS i
 - `PascalCase` for classes, types, and React component files (for example `AppChrome.tsx`)
 - `kebab-case` for other files (for example `password-reset.service.ts`)
 - `UPPER_SNAKE_CASE` for constants
+- Prefix interfaces with `I` only when necessary, and use descriptive names rather than abbreviations
 
 Biome does not enforce naming (`useNamingConvention` is off), so match the files next to yours.
 
@@ -46,5 +50,14 @@ make format
 - Ensure tests cover new behavior
 - Document any breaking changes
 - Add migration notes for schema updates
+
+## Documentation
+
+- Use Markdown, with code examples where applicable
+- Keep line length under 100 characters
+- Use descriptive link text (not "click here") and proper heading hierarchy (h1 → h2 → h3)
+- Add a table of contents to long documents
+- Update the relevant docs when changing functionality
+- Explain both "what" and "why"
 
 Next: [Adding a Bank Parser](adding-a-bank-parser)
