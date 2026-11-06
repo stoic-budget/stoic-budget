@@ -156,6 +156,50 @@ describe('InvestmentsService flows', () => {
   });
 });
 
+describe('InvestmentsService snapshots', () => {
+  function serviceWith(rate: number | null) {
+    const holding = {
+      id: 'holding-1',
+      workspaceId: 'ws-1',
+      accountId: 'account-1',
+      quantity: '2',
+      price: '100',
+      priceCurrency: 'USD',
+    };
+    const updateSnapshot = vi.fn(async () => undefined);
+    const service = new InvestmentsService(
+      {} as never,
+      { find: vi.fn(async () => [holding]) } as never,
+      {} as never,
+      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as never,
+      { updateSnapshot } as never,
+      { getRateOrNull: vi.fn(async () => rate) } as never,
+      {} as never,
+      {} as never,
+    );
+    vi.spyOn((service as never as { logger: { warn: () => void } }).logger, 'warn').mockImplementation(
+      () => undefined,
+    );
+    return { service, updateSnapshot };
+  }
+
+  it('writes the value converted at the known rate', async () => {
+    const { service, updateSnapshot } = serviceWith(0.5);
+    await service.writeSnapshot(null, 'ws-1', 'account-1');
+    expect(updateSnapshot).toHaveBeenCalledWith(null, 'ws-1', {
+      accountId: 'account-1',
+      amount: 100,
+      currency: 'EUR',
+    });
+  });
+
+  it('keeps the last snapshot rather than writing a zero when no rate is known', async () => {
+    const { service, updateSnapshot } = serviceWith(null);
+    await service.writeSnapshot(null, 'ws-1', 'account-1');
+    expect(updateSnapshot).not.toHaveBeenCalled();
+  });
+});
+
 describe('InvestmentsService contributionsBetween', () => {
   it('nets withdrawals against contributions and leaves dividends out', async () => {
     const { flows, qb } = createService();
