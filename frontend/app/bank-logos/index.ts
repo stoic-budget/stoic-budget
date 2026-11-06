@@ -273,3 +273,10 @@ export const resolveBankLogo = (bankName?: string | null): ResolvedBankLogo => {
     displayName: DISPLAY_NAME_BY_KEY[key],
   };
 };
+
+/** Every bank with a parser of its own, by name. */
+export const listSupportedBanks = (): ResolvedBankLogo[] =>
+  (Object.keys(DISPLAY_NAME_BY_KEY) as BankLogoKey[])
+    .filter(key => key !== 'other')
+    .map(key => ({ key, src: LOGO_SRC_BY_KEY[key], displayName: DISPLAY_NAME_BY_KEY[key] }))
+    .sort((a, b) => a.displayName.localeCompare(b.displayName));
