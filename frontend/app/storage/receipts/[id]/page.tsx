@@ -1,538 +1,55 @@
 'use client';
 import { Box, Typography } from '@mui/material';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import toast from 'react-hot-toast';
-import { AlertCircle, ArrowLeft } from '@/app/components/icons';
+import { useState } from 'react';
+import { ArrowLeft } from '@/app/components/icons';
 import { EInvoicePanel } from '@/app/components/receipts/EInvoicePanel';
 import { ReceiptLocationSection } from '@/app/components/receipts/location/ReceiptLocationSection';
 import { ReceiptLinks } from '@/app/components/receipts/ReceiptLinks';
 import { ReceiptParsedDataForm } from '@/app/components/receipts/ReceiptParsedDataForm';
 import { ReceiptTransactionMatch } from '@/app/components/receipts/ReceiptTransactionMatch';
-import type {
-  EditableReceiptParsedData,
-  ReceiptCategoryOption,
-} from '@/app/components/receipts/receipt-types';
-import { Spinner } from '@/app/components/ui/spinner';
 import { useIntlayer } from '@/app/i18n';
-import apiClient, { apiBaseUrl, type ReceiptRecord, receiptsApi } from '@/app/lib/api';
 import { FALLBACK_CURRENCY } from '@/app/lib/currency';
-import { invalidateDocumentLists } from '@/app/lib/invalidate-document-lists';
-import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { formatStoredDate } from '@/app/lib/user-format-store';
-import { getWorkspaceHeaders } from '@/app/lib/workspace-headers';
 import { tokens } from '@/lib/theme-tokens';
+import { useReceiptActions } from './hooks/useReceiptActions';
+import { useReceiptAutosave } from './hooks/useReceiptAutosave';
+import { useReceiptDocument } from './hooks/useReceiptDocument';
+import { useReceiptPreview } from './hooks/useReceiptPreview';
+import { ReceiptExportDialog } from './ReceiptExportDialog';
 import { ReceiptHeaderActions } from './ReceiptHeaderActions';
+import { ReceiptLoadError } from './ReceiptLoadError';
 import { ReceiptPageSkeleton } from './ReceiptPageSkeleton';
-import {
-  buildInitialForm,
-  buildParsedDataPayload,
-  buildReceiptDisplayTitle,
-  buildReceiptExportData,
-} from './receipt-form';
-
-type PreviewFetchResult = {
-  url: string | null;
-  mimeType: string | null;
-  error?: string;
-};
-
-async function fetchReceiptPreview(receiptId: string): Promise<PreviewFetchResult> {
-  try {
-    const response = await fetch(`${apiBaseUrl}/receipts/${receiptId}/file`, {
-      method: 'GET',
-      headers: getWorkspaceHeaders(),
-      credentials: 'include',
-    });
-    if (!response.ok) {
-      throw new Error(`Preview request failed: ${response.status}`);
-    }
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const mimeType = response.headers.get('content-type') || blob.type || null;
-    return { url, mimeType };
-  } catch (err) {
-    console.error('Failed to load receipt preview:', err);
-    return { url: null, mimeType: null, error: 'Preview unavailable' };
-  }
-}
-
-const previewPlaceholderSx = (inkColor: string) => ({
-  display: 'flex',
-  height: '100%',
-  minHeight: 388,
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: 14,
-  color: inkColor,
-});
-
-function ReceiptPreviewContent({
-  loading,
-  error,
-  url,
-  isPdf,
-  title,
-  inkColor,
-  borderColor,
-}: {
-  loading: boolean;
-  error: string | null;
-  url: string | null;
-  isPdf: boolean;
-  title: string;
-  inkColor: string;
-  borderColor: string;
-}) {
-  const t = useIntlayer('receiptDocumentPage');
-  if (loading) {
-    return <Box sx={previewPlaceholderSx(inkColor)}>{t.preparingPreview}</Box>;
-  }
-  // `error` is only ever set when the preview fetch failed; show the localized message.
-  if (error || !url) {
-    return <Box sx={previewPlaceholderSx(inkColor)}>{t.previewUnavailable}</Box>;
-  }
-  if (isPdf) {
-    return (
-      <iframe
-        src={url}
-        title={title}
-        style={{
-          height: '100%',
-          minHeight: 760,
-          width: '100%',
-          border: `1px solid ${borderColor}`,
-          borderRadius: tokens.radius.md,
-          background: 'var(--card-bg)',
-          display: 'block',
-        }}
-      />
-    );
-  }
-  return (
-    <Box sx={{ display: 'flex', minHeight: '100%', minWidth: '100%', justifyContent: 'center' }}>
-      <Box
-        component="img"
-        src={url}
-        alt={title}
-        sx={{
-          height: 'auto',
-          minHeight: 0,
-          width: '180%',
-          minWidth: 720,
-          maxWidth: 'none',
-          objectFit: 'contain',
-          // A phone fits the whole receipt to the width instead of a zoomed crop.
-          '@media (max-width: 1023px)': { width: '100%', minWidth: 0 },
-        }}
-      />
-    </Box>
-  );
-}
+import { ReceiptPreviewContent } from './ReceiptPreviewContent';
+import { buildReceiptDisplayTitle } from './receipt-form';
 
 export default function ReceiptDocumentPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const receiptId = params.id;
   const { resolvedTheme } = useTheme();
   const c = resolvedTheme === 'dark' ? tokens.dark.color : tokens.color;
   const t = useIntlayer('receiptDocumentPage');
 
-  const [receipt, setReceipt] = useState<ReceiptRecord | null>(null);
-  const [categories, setCategories] = useState<ReceiptCategoryOption[]>([]);
-  const [formValue, setFormValue] = useState<EditableReceiptParsedData>(buildInitialForm(null));
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [exportingToTable, setExportingToTable] = useState(false);
+  const { receipt, setReceipt, categories, formValue, setFormValue, loading, error, loadData } =
+    useReceiptDocument(receiptId);
+  const { previewLoading, previewUrl, previewMimeType, previewError } = useReceiptPreview(receipt);
+  const { handleFormChange, lastSavedPayloadRef } = useReceiptAutosave(
+    receipt,
+    setReceipt,
+    setFormValue,
+  );
+  const { saving, exportingToTable, handleApprove, handleDownload, handleExportToTable } =
+    useReceiptActions(receipt, formValue, lastSavedPayloadRef);
   const [exportConfirmOpen, setExportConfirmOpen] = useState(false);
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [previewMimeType, setPreviewMimeType] = useState<string | null>(null);
-  const [previewError, setPreviewError] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadData = useCallback(async () => {
-    await (async () => {
-      setLoading(true);
-      setError(null);
-
-      const [nextReceipt, nextCategories] = await Promise.all([
-        apiQueryDecoded({ url: `/receipts/${receiptId}`, contract: 'ReceiptRecord' }),
-        apiQueryDecoded({ url: '/categories', contract: 'CategoryList' }),
-      ]);
-
-      setReceipt(nextReceipt);
-      setFormValue(buildInitialForm(nextReceipt));
-      setCategories(nextCategories);
-    })()
-      .catch(async loadError => {
-        console.error('Failed to load receipt details:', loadError);
-        setError(t.loadFailed.value);
-        toast.error(t.loadFailed.value);
-      })
-      .finally(async () => {
-        setLoading(false);
-      });
-  }, [receiptId, t]);
-
-  useEffect(() => {
-    void loadData();
-  }, [loadData]);
-
-  useEffect(() => {
-    if (!receipt) {
-      setPreviewUrl(currentUrl => {
-        if (currentUrl) {
-          URL.revokeObjectURL(currentUrl);
-        }
-        return null;
-      });
-      setPreviewMimeType(null);
-      setPreviewError(null);
-      setPreviewLoading(false);
-      return;
-    }
-
-    let active = true;
-    let objectUrl: string | null = null;
-
-    const revokeAndSet = (nextUrl: string | null) => {
-      setPreviewUrl(currentUrl => {
-        if (currentUrl) {
-          URL.revokeObjectURL(currentUrl);
-        }
-        return nextUrl;
-      });
-    };
-
-    const run = async () => {
-      setPreviewLoading(true);
-      setPreviewError(null);
-      const result = await fetchReceiptPreview(receipt.id);
-      objectUrl = result.url;
-      if (!active) {
-        return;
-      }
-      if (result.error) {
-        setPreviewError(result.error);
-      }
-      revokeAndSet(result.url);
-      setPreviewMimeType(result.mimeType);
-      setPreviewLoading(false);
-    };
-
-    void run();
-
-    return () => {
-      active = false;
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [receipt]);
-
-  const lastSavedPayloadRef = useRef<string | null>(null);
-  const autosaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (!receipt) {
-      lastSavedPayloadRef.current = null;
-      return;
-    }
-
-    lastSavedPayloadRef.current = JSON.stringify(buildParsedDataPayload(buildInitialForm(receipt)));
-  }, [receipt]);
-
-  useEffect(() => {
-    return () => {
-      if (autosaveTimeoutRef.current) {
-        clearTimeout(autosaveTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const persistParsedData = useCallback(
-    async (nextValue: EditableReceiptParsedData) => {
-      if (!receipt) {
-        return;
-      }
-
-      const nextPayload = buildParsedDataPayload(nextValue);
-      const serializedPayload = JSON.stringify(nextPayload);
-
-      if (serializedPayload === lastSavedPayloadRef.current) {
-        return;
-      }
-
-      await (async () => {
-        await apiClient.patch(`/receipts/${receipt.id}`, {
-          parsedData: nextPayload,
-        } satisfies ContractInput<'UpdateReceiptBody'>);
-        lastSavedPayloadRef.current = serializedPayload;
-        invalidateDocumentLists();
-        setReceipt(currentReceipt =>
-          currentReceipt
-            ? {
-                ...currentReceipt,
-                parsedData: {
-                  ...currentReceipt.parsedData,
-                  ...nextPayload,
-                },
-              }
-            : currentReceipt,
-        );
-      })().catch(async () => {
-        toast.error(t.autosaveFailed.value);
-      });
-    },
-    [receipt, t],
-  );
-
-  const handleFormChange = useCallback(
-    (nextValue: EditableReceiptParsedData) => {
-      setFormValue(nextValue);
-
-      if (autosaveTimeoutRef.current) {
-        clearTimeout(autosaveTimeoutRef.current);
-      }
-
-      autosaveTimeoutRef.current = setTimeout(() => {
-        void persistParsedData(nextValue);
-      }, 250);
-    },
-    [persistParsedData],
-  );
-
-  const handleApprove = async (options: { transactionId?: string | null } = {}) => {
-    if (!receipt) {
-      return;
-    }
-    // Booking it without a date would date the expense today. A bank row to
-    // attach to brings its own date.
-    if (!(formValue.date || options.transactionId)) {
-      toast.error(t.approveNeedsDate.value);
-      return;
-    }
-
-    setSaving(true);
-
-    await (async () => {
-      const currentPayload = buildParsedDataPayload(formValue);
-      await apiClient.patch(`/receipts/${receipt.id}`, {
-        parsedData: currentPayload,
-      } satisfies ContractInput<'UpdateReceiptBody'>);
-      lastSavedPayloadRef.current = JSON.stringify(currentPayload);
-      await receiptsApi.approveReceipt(receipt.id, options);
-      toast.success(t.approved.value);
-      // It leaves the Review queue; both lists are cached for 30s.
-      invalidateDocumentLists();
-      router.push(searchParams.get('from') === 'review' ? '/review' : '/statements/submit');
-    })()
-      .catch(async () => {
-        toast.error(t.approveFailed.value);
-      })
-      .finally(async () => {
-        setSaving(false);
-      });
-  };
-
-  const handleDownload = async () => {
-    if (!receipt) {
-      return;
-    }
-
-    await (async () => {
-      const response = await fetch(`${apiBaseUrl}/receipts/${receipt.id}/file`, {
-        method: 'GET',
-        headers: getWorkspaceHeaders(),
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error(`Download request failed: ${response.status}`);
-      }
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download =
-        receipt.metadata?.attachments?.[0]?.filename || receipt.subject || `${receipt.id}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    })().catch(async downloadError => {
-      console.error('Failed to download receipt:', downloadError);
-      toast.error(t.downloadFailed.value);
-    });
-  };
-
-  const handleExportToTable = async () => {
-    if (!receipt) {
-      toast.error(t.exportUnavailable.value);
-      return;
-    }
-
-    setExportingToTable(true);
-
-    return await (async () => {
-      const exportData = buildReceiptExportData(receipt, formValue, {
-        item: t.columns.item.value,
-        vendor: t.columns.vendor.value,
-        date: t.columns.date.value,
-        amount: t.columns.amount.value,
-        currency: t.columns.currency.value,
-        source: t.columns.source.value,
-        status: t.columns.status.value,
-      });
-
-      if (!(exportData.columns.length && exportData.rows.length)) {
-        toast.error(t.exportNoFields.value);
-        return;
-      }
-
-      const createTableResponse = await apiClient.post('/custom-tables', {
-        name: t.tableName.value.replace('{subject}', receipt.subject).slice(0, 120),
-        description: t.tableDescription.value.replace(
-          '{date}',
-          formatStoredDate(receipt.receivedAt),
-        ),
-      } satisfies ContractInput<'CreateCustomTableBody'>);
-
-      const createdTable = await checkContract(
-        'CreatedCustomTable',
-        createTableResponse.data,
-        '/custom-tables',
-      );
-      const tableId = createdTable.id;
-
-      if (!tableId) {
-        toast.error(t.exportFailed.value);
-        router.push('/custom-tables');
-        return;
-      }
-
-      const createdColumns = await Promise.all(
-        exportData.columns.map(async column => {
-          const response = await apiClient.post(`/custom-tables/${tableId}/columns`, {
-            title: column.title,
-            type: column.type,
-          } satisfies ContractInput<'CreateCustomTableColumnBody'>);
-          return checkContract(
-            'CustomTableColumnItem',
-            response.data,
-            '/custom-tables/:id/columns',
-          );
-        }),
-      );
-
-      const columnKeyByField = exportData.columns.reduce<Record<string, string>>(
-        (acc, column, index) => {
-          const key = createdColumns[index]?.key;
-          if (key) {
-            acc[column.field] = key;
-          }
-          return acc;
-        },
-        {},
-      );
-
-      const rows = exportData.rows.map(row => {
-        const data = Object.entries(row).reduce<Record<string, string | number>>(
-          (acc, [field, value]) => {
-            const key = columnKeyByField[field];
-            if (key && value !== undefined && value !== '') {
-              acc[key] = value;
-            }
-            return acc;
-          },
-          {},
-        );
-
-        return { data };
-      });
-
-      await apiClient.post(`/custom-tables/${tableId}/rows/batch`, {
-        rows,
-      } satisfies ContractInput<'BatchCreateCustomTableRowsBody'>);
-
-      toast.success(t.exportSuccess.value);
-      router.push(`/custom-tables/${tableId}`);
-      return;
-    })()
-      .catch(async () => {
-        toast.error(t.exportFailed.value);
-      })
-      .finally(async () => {
-        setExportingToTable(false);
-      });
-  };
 
   if (loading) {
     return <ReceiptPageSkeleton />;
   }
 
   if (error || !receipt) {
-    return (
-      <Box
-        className="container-shared"
-        sx={{
-          height: '100%',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          px: { xs: 2, sm: 3, lg: 4 },
-          py: 4,
-        }}
-      >
-        <Box
-          role="alert"
-          sx={{
-            mb: 2,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-            border: `1px solid ${c.dangerSoft}`,
-            borderRadius: tokens.radius.md,
-            bgcolor: c.dangerSoft,
-            px: 2,
-            py: 1.5,
-            fontSize: 14,
-            color: c.danger,
-          }}
-        >
-          <AlertCircle size={18} aria-hidden style={{ flexShrink: 0 }} />
-          {error || t.notFound}
-        </Box>
-        <Box
-          component="button"
-          type="button"
-          onClick={() => router.back()}
-          sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 0.5,
-            fontSize: 13,
-            fontWeight: 500,
-            color: c.ink500,
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            p: 0,
-            '&:hover': { color: c.ink700 },
-          }}
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          {t.back}
-        </Box>
-      </Box>
-    );
+    return <ReceiptLoadError message={error} />;
   }
 
   const attachment = receipt.metadata?.attachments?.[0];
@@ -757,66 +274,16 @@ export default function ReceiptDocumentPage() {
         </Box>
       </Box>
 
-      <Dialog
+      <ReceiptExportDialog
         open={exportConfirmOpen}
+        exporting={exportingToTable}
+        disabled={exportingToTable || !canExportToTable}
         onClose={() => setExportConfirmOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle sx={{ fontSize: 22, fontWeight: 600 }}>{t.confirmExportTitle}</DialogTitle>
-        <DialogContent dividers>
-          <Typography style={{ fontSize: 16, lineHeight: 2, color: c.ink800 }}>
-            {t.confirmExportBody}
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ px: 4, py: 3, gap: 1.5 }}>
-          <Box
-            component="button"
-            type="button"
-            onClick={() => setExportConfirmOpen(false)}
-            sx={{
-              border: `1px solid ${c.ink150}`,
-              bgcolor: 'background.paper',
-              px: 3,
-              py: 1.25,
-              fontSize: 16,
-              fontWeight: 500,
-              color: c.ink700,
-              cursor: 'pointer',
-              '&:hover': { borderColor: 'primary.main', color: 'primary.main' },
-            }}
-          >
-            {t.cancel}
-          </Box>
-          <Box
-            component="button"
-            type="button"
-            onClick={() => {
-              setExportConfirmOpen(false);
-              void handleExportToTable();
-            }}
-            disabled={exportingToTable || !canExportToTable}
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 1,
-              bgcolor: 'var(--primary-fill)',
-              px: 3,
-              py: 1.25,
-              fontSize: 16,
-              fontWeight: 500,
-              color: '#fff',
-              cursor: 'pointer',
-              border: 'none',
-              '&:hover': { bgcolor: 'primary.dark' },
-              '&:disabled': { cursor: 'not-allowed', opacity: 0.5 },
-            }}
-          >
-            {exportingToTable ? <Spinner className="h-4 w-4" /> : null}
-            {t.confirmExport}
-          </Box>
-        </DialogActions>
-      </Dialog>
+        onConfirm={() => {
+          setExportConfirmOpen(false);
+          void handleExportToTable();
+        }}
+      />
     </Box>
   );
 }
