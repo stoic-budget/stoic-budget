@@ -22,6 +22,7 @@ Run `make help` for the same list in your terminal. Docker targets use `docker c
 
 - `make start` - Start all services in production mode; builds the images locally (`docker compose up -d --build`)
 - `make dev` - Start all services in development mode with hot reload
+- `make upgrade` - Back up the database, pull the newest release and restart; see [Upgrading](../deployment/docker#upgrading)
 - `make stop` - Stop all services
 - `make restart` - Restart all services
 - `make clean` - Stop services and remove volumes, including the dev `node_modules` volumes
@@ -60,7 +61,7 @@ These run inside the running `seneca-backend` container. The production backend 
 
 ## Testing
 
-- `make test` - Backend unit tests (Jest) and frontend tests (Vitest)
+- `make test` - Backend unit tests and frontend tests
 - `make test-backend` - Backend unit tests
 - `make test-frontend` - Frontend tests
 - `make test-watch` - Backend tests in watch mode

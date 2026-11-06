@@ -26,6 +26,16 @@ The backend defines 85 entities under `backend/src/entities`. Highlights, by tab
 - `npm run migration:run` takes a lock against concurrent runs; `npm --prefix backend run migration:run:dev` is
   the ts-node path for development
 
+```bash
+# Generate a migration after changing an entity
+make migrate-generate name=AddTransactionMerchantColumn
+# or locally:
+cd backend && npm run migration:generate -- src/migrations/AddTransactionMerchantColumn
+
+# Revert the last applied migration
+make migrate-revert
+```
+
 ## Data safety patterns
 
 - Every tenant-owned query filters by `workspaceId`

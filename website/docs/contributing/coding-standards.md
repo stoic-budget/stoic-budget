@@ -12,6 +12,7 @@ Stoic Budget uses Biome for linting and formatting in both apps; frontend SCSS i
 - Prefer `const` (`useConst` is an error)
 - Avoid `any` (`noExplicitAny` warns)
 - Keep functions small and focused
+- Code comments and commit messages in English
 
 ## Naming conventions
 
@@ -37,6 +38,8 @@ make format
 - Every tenant-owned query filters by `workspaceId`
 - Keep controllers thin: logic in services, input validation in DTOs
 - Schema changes only through migrations
+- `file_hash` (SHA-256) for idempotent file operations
+- Structured JSON logging with correlation IDs
 
 ## Code review expectations
 

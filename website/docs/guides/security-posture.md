@@ -30,6 +30,21 @@ in clear, or a browser extension reading the page.
 - Statements and receipts on disk are not encrypted by the app; use disk encryption and encrypted
   backups on the host.
 
+## Accounts and sessions
+
+- Sessions live in HttpOnly cookies: access token (30 min) + refresh token (30 d), tracked per device; the login
+  response body carries no token.
+- Refresh tokens rotate on every use and old tokens are invalidated.
+- Double-submit CSRF protection for cookie-authenticated writes; header-authenticated clients (`Authorization`,
+  `X-Api-Key`) are exempt.
+- Optional TOTP two-factor authentication with recovery codes.
+- Single-use password reset (1 h) and email change (24 h) tokens; the reset endpoint answers the same way for known
+  and unknown addresses.
+- Bcrypt password hashing (12 rounds by default, `BCRYPT_ROUNDS`).
+- helmet security headers, a CORS allowlist and Redis-backed rate limits.
+- Workspace roles are enforced on every request by guards at the controller level.
+- The audit log records most mutating operations, with rollback for critical changes.
+
 ## What leaves your server, and when
 
 | Destination | Sent | When | Off switch |

@@ -30,9 +30,9 @@ deployment changes.
 
 ## CI checks
 
-CI runs policy-as-code, shell/Dockerfile/config scans, Biome, type checks, backend unit and e2e tests,
-builds, dependency audits and license checks, a secrets scan, and a Docker image build. Frontend Vitest tests are
-not part of CI — run them locally. See [CI/CD](../deployment/ci-cd).
+CI runs policy-as-code, shell/Dockerfile/config scans, Biome, type checks, backend unit and e2e tests, frontend
+tests, builds, dependency audits and license checks, a secrets scan, and a Docker image build. See
+[CI/CD](../deployment/ci-cd).
 
 On pull requests, changes to migrations, entities, or `data-source.ts` need the `db-approved` label; changes to the
 auth module, `common/guards`, `common/decorators`, or permissions/roles code need `security-approved`.

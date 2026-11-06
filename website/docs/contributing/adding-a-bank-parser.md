@@ -52,4 +52,20 @@ Then import a sample file through the UI.
 
 Add the bank to [Supported Banks](../reference/supported-banks).
 
+## Debugging scripts
+
+```bash
+cd backend
+
+# Print what the parsers read from a file
+npm run parse:debug -- /path/to/statement.pdf
+
+# Dump the raw PDF table structure, useful for a new bank format
+# (writes <file>.tables.json unless you pass an output path)
+npm run parse:tables -- /path/to/statement.pdf
+
+# Compare the parsing output of a file with an expected result
+npm run parse:diff -- /path/to/statement.pdf /path/to/expected.json
+```
+
 Next: [Deployment](../deployment/docker)

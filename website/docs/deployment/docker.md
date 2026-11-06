@@ -150,6 +150,14 @@ The production backend and frontend images define Docker `HEALTHCHECK`s.
 Data lives in named volumes: `postgres_data`, `redis_data`, and `backend_uploads` (mounted at `/app/uploads`),
 plus `map_data` and `nominatim_data` when the map profiles run. Back them up or map them to persistent storage.
 
+To check that every statement still has its file, run these from `backend/` in a source checkout (the production
+image has no npm):
+
+```bash
+npm run storage:verify   # reports statements whose file is neither on disk nor in the database
+npm run storage:repair   # also restores to disk the files only the database still holds
+```
+
 ## Logs
 
 ```bash

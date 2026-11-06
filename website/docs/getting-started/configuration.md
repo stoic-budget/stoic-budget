@@ -33,6 +33,25 @@ Also set for production:
 Optional: `IMAGE_TAG` pins the prebuilt GHCR images, and `DB_QUERY_LOGGING=true` logs every SQL
 query.
 
+## Product name
+
+`APP_NAME` in the root `.env` (default `Stoic Budget`) is the name people see: the UI and all its
+translations, page titles, e-mails, Telegram replies, PDF/DATEV/e-invoice metadata, and export file
+names created from then on. The backend reads it at startup; the frontend bakes it in at build time
+(`docker-compose.yml` passes it as `NEXT_PUBLIC_APP_NAME`), so restart the dev stack or rebuild the
+frontend image after changing it.
+
+## Admin user
+
+```bash
+make admin email=admin@example.com password=admin123 name="Admin User"
+
+# Local, no Docker
+cd backend && npm run create-admin -- admin@example.com admin123 "Admin User"
+```
+
+Admin users have access to the `/admin` dashboard with full user management and system stats.
+
 ## Sessions, CORS and security
 
 Browsers authenticate with HttpOnly cookies (`access_token`, `refresh_token`). Cookie-authenticated
@@ -56,7 +75,8 @@ map. Leave them unset to keep the feature off. See [Receipt Maps](../guides/rece
 
 ## Backend environment (backend/.env)
 
-When the backend runs on your host, it reads `backend/.env`. The generated development values:
+When the backend runs on your host, it reads `backend/.env`; edit it to override a value (frontend
+overrides go in `frontend/.env.local`). The generated development values:
 
 ```bash
 DATABASE_URL=postgresql://finflow:finflow@localhost:5434/finflow
