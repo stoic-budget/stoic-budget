@@ -107,12 +107,10 @@ export class ClassificationController {
           continue;
         }
 
-        // Bypass the 5-minute cache: the point of a re-run is new rules or patterns.
         const { tags, ...classification } = await this.classificationService.classifyTransaction(
           transaction,
           user.id,
           batchId,
-          { bypassCache: true },
         );
 
         // Check if categoryId was actually assigned

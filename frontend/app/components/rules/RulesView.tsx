@@ -14,11 +14,11 @@ import { useIntlayer } from '@/app/i18n';
 import { RuleSuggestions } from './RuleSuggestions';
 import { RulesSkeleton } from './RulesSkeleton';
 import { RulesTable } from './RulesTable';
-import { fill } from './rule-text';
 import type { Rule } from './types';
+import { useRuleApply } from './useRuleApply';
 import { useRuleNames } from './useRuleNames';
 import {
-  useApplyRule,
+  previewRule,
   useDeleteRule,
   useReorderRules,
   useRulesList,
@@ -33,15 +33,17 @@ import {
 export function RulesView() {
   const t = useIntlayer('categorizationRules');
   const router = useRouter();
-  const { words, names } = useRuleNames();
   const { hasPermission } = usePermissions();
   const canEdit = hasPermission('category.edit');
   const canDelete = hasPermission('category.delete');
   const rules = useRulesList();
+  const list = rules.data?.data ?? [];
+  const payeeIds = [...new Set(list.flatMap(rule => rule.result.payeeId ?? []))];
+  const { words, names } = useRuleNames(payeeIds);
   const toggle = useToggleRule();
   const remove = useDeleteRule();
   const reorder = useReorderRules();
-  const apply = useApplyRule();
+  const applying = useRuleApply(names.wallet);
   const focusId = useSearchParams().get('focus');
 
   useEffect(() => {
@@ -50,24 +52,27 @@ export function RulesView() {
     }
   }, [focusId, router]);
 
-  const list = rules.data?.data ?? [];
-
   const handleDelete = (rule: Rule) =>
     void remove.mutateAsync(rule.id).then(
       () => toast.success(t.toast.deleted.value),
       () => toast.error(t.toast.deleteFailed.value),
     );
 
-  const handleApply = (rule: Rule) =>
-    void apply.mutateAsync(rule.id).then(
-      done =>
-        toast.success(
-          done.tagged > 0
-            ? fill(t.toast.appliedAll.value, { applied: done.applied, tagged: done.tagged })
-            : fill(t.toast.applied.value, { count: done.applied }),
-        ),
-      () => toast.error(t.toast.applyFailed.value),
-    );
+  // A rule that names an account moves rows between accounts: it says how many and asks.
+  const handleApply = async (rule: Rule) => {
+    const { walletId } = rule.result;
+    const moving = walletId
+      ? await previewRule({ conditions: rule.conditions, ruleId: rule.id, walletId }).then(
+          preview => preview.movable,
+          () => 0,
+        )
+      : 0;
+    if (moving > 0) {
+      applying.offer(rule, applying.moveQuestion(rule, moving));
+    } else {
+      applying.run(rule);
+    }
+  };
 
   const handleReorder = (next: Rule[]) =>
     void reorder.mutateAsync(next).catch(() => toast.error(t.toast.orderFailed.value));
@@ -126,7 +131,7 @@ export function RulesView() {
             canDelete={canDelete}
             onReorder={handleReorder}
             onToggle={(rule, isActive) => void toggle.mutateAsync({ id: rule.id, isActive })}
-            onApply={handleApply}
+            onApply={rule => void handleApply(rule)}
             onDelete={handleDelete}
             onEdit={rule => router.push(`/rules/${rule.id}`)}
           />

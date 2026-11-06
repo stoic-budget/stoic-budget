@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { ChevronLeft } from '@/app/components/icons';
-import { offerAction } from '@/app/components/payees/offer-action-toast';
 import { LoadError } from '@/app/components/ui/load-error';
 import { usePermissions } from '@/app/hooks/usePermissions';
 import { useIntlayer } from '@/app/i18n';
@@ -16,12 +15,13 @@ import { RuleMatchesTable } from './RuleMatchesTable';
 import { seedFromParams, seedOf } from './rule-seed';
 import { describeConditions, fill } from './rule-text';
 import type { RuleDraftBody, RuleSeed } from './types';
+import { useRuleApply } from './useRuleApply';
 import { useRuleNames } from './useRuleNames';
-import { completeConditions, useApplyRule, useRule, useRulePreview, useSaveRule } from './useRules';
+import { completeConditions, useRule, useRulePreview, useSaveRule } from './useRules';
 
 /**
- * How many existing rows applying the rule would change: every match when it
- * adds tags, else the matches nobody filed by hand when it sets a category.
+ * How many existing rows applying the rule would file or tag: every match when
+ * it adds tags, else the matches nobody filed by hand when it sets a category.
  */
 function rowsToApply(
   result: RuleSeed['result'],
@@ -52,7 +52,7 @@ export function RuleEditorView({ id }: { id: string }) {
   const { words, names } = targets;
   const saved = useRule(isNew ? null : id);
   const save = useSaveRule();
-  const apply = useApplyRule();
+  const applying = useRuleApply(names.wallet);
   const [edited, setEdited] = useState<RuleSeed | null>(null);
 
   // The form holds the user's edits; until the first one it shows the rule as loaded.
@@ -60,7 +60,12 @@ export function RuleEditorView({ id }: { id: string }) {
     ? seedFromParams(new URLSearchParams(params.toString()))
     : saved.data && seedOf(saved.data);
   const draft = edited ?? loaded ?? null;
-  const preview = useRulePreview(draft?.conditions ?? [], isNew ? null : id);
+  const preview = useRulePreview(
+    draft?.conditions ?? [],
+    isNew ? null : id,
+    draft?.result.walletId ?? null,
+    draft?.matchMode,
+  );
 
   if (!isNew && saved.isError) {
     return (
@@ -76,7 +81,8 @@ export function RuleEditorView({ id }: { id: string }) {
     Boolean(result.categoryId) ||
     Boolean(result.walletId) ||
     result.ownerMemberId !== undefined ||
-    Boolean(result.tagIds?.length);
+    Boolean(result.tagIds?.length) ||
+    Boolean(result.comment?.trim() || result.payeeId || result.payeeName);
   const problem =
     conditions.length === 0 ? t.dialog.needsCondition : hasAction ? null : t.dialog.needsAction;
 
@@ -85,14 +91,14 @@ export function RuleEditorView({ id }: { id: string }) {
       return;
     }
     const body: RuleDraftBody = {
-      name: draft.name.trim() || describeConditions(conditions, words, names),
-      conditions: conditions.map(condition =>
-        condition.field === 'amount' ? { ...condition, value: Number(condition.value) } : condition,
-      ),
+      name: draft.name.trim() || describeConditions(conditions, words, names, draft.matchMode),
+      conditions,
+      matchMode: draft.matchMode,
       result: draft.result,
     };
     // Read before leaving the page: the preview is of what is being saved.
     const pending = rowsToApply(draft.result, preview.data);
+    const moving = draft.result.walletId ? (preview.data?.movable ?? 0) : 0;
     const tags = Boolean(draft.result.tagIds?.length);
     const rule = await save.mutateAsync({ id: draft.id, body }).catch(() => null);
     if (!rule) {
@@ -101,24 +107,13 @@ export function RuleEditorView({ id }: { id: string }) {
     }
     toast.success(t.toast.saved.value);
     router.push('/rules');
-    if (pending > 0) {
-      offerAction({
-        message: fill((tags ? t.toast.applyOfferAll : t.toast.applyOffer).value, {
-          count: pending,
-        }),
-        applyLabel: t.toast.apply.value,
-        dismissLabel: t.toast.notNow.value,
-        onApply: () =>
-          void apply.mutateAsync(rule.id).then(
-            done =>
-              toast.success(
-                done.tagged > 0
-                  ? fill(t.toast.appliedAll.value, { applied: done.applied, tagged: done.tagged })
-                  : fill(t.toast.applied.value, { count: done.applied }),
-              ),
-            () => toast.error(t.toast.applyFailed.value),
-          ),
-      });
+    if (moving > 0) {
+      applying.offer(rule, applying.moveQuestion(rule, moving));
+    } else if (pending > 0) {
+      applying.offer(
+        rule,
+        fill((tags ? t.toast.applyOfferAll : t.toast.applyOffer).value, { count: pending }),
+      );
     }
   };
 

@@ -27,7 +27,7 @@ function signedAmount(match: Match, locale: string): string {
 
 /**
  * The editor's answer to "what would this rule match today?": the counts, a
- * warning when a rule above takes every match, and the rows themselves.
+ * warning when a rule above sets the category of every match, and the rows.
  */
 export function RuleMatchesTable({
   problem,
@@ -47,8 +47,10 @@ export function RuleMatchesTable({
     );
   }
 
-  const neverWins =
-    preview.matchedTransactions > 0 && preview.shadowed === preview.matchedTransactions;
+  // Rules add up: a rule above takes only the category from this one, so it
+  // matters only to a rule that sets one.
+  const shadowed = setsCategory ? preview.shadowed : 0;
+  const neverWins = preview.matchedTransactions > 0 && shadowed === preview.matchedTransactions;
   return (
     <section className="seneca-rule-matches" aria-live="polite">
       <h2 className="seneca-rule-matches__title">{t.dialog.previewTitle}</h2>
@@ -66,9 +68,9 @@ export function RuleMatchesTable({
         <p className="seneca-rule-matches__warning" role="status">
           {t.editor.neverWins}
         </p>
-      ) : preview.shadowed > 0 ? (
+      ) : shadowed > 0 ? (
         <p className="seneca-rule-matches__hint">
-          {fill(t.editor.someShadowed.value, { count: preview.shadowed })}
+          {fill(t.editor.someShadowed.value, { count: shadowed })}
         </p>
       ) : null}
       {preview.matches.length > 0 && (
@@ -89,7 +91,9 @@ export function RuleMatchesTable({
               {preview.matches.map(match => (
                 <tr
                   key={match.id}
-                  className={match.wonBy ? 'seneca-rule-matches__row--taken' : undefined}
+                  className={
+                    setsCategory && match.wonBy ? 'seneca-rule-matches__row--taken' : undefined
+                  }
                 >
                   <td className="seneca-rule-matches__date">
                     {match.date ? formatDate(match.date, locale) : ''}
@@ -99,7 +103,7 @@ export function RuleMatchesTable({
                   <td className="seneca-rule-matches__num">{signedAmount(match, locale)}</td>
                   <td>
                     {match.categoryId ? (categoryName(match.categoryId) ?? '') : ''}
-                    {match.wonBy ? (
+                    {setsCategory && match.wonBy ? (
                       <span className="seneca-rule-matches__taken">
                         {fill(t.editor.wonBy.value, { name: match.wonBy.name })}
                       </span>

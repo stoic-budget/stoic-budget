@@ -9,7 +9,14 @@ import { invalidateFinancialData } from '@/app/lib/invalidate-document-lists';
 import type { ContractInput } from '@/app/lib/query-fn-schema';
 import { apiQueryDecoded, checkContract } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
-import type { Rule, RuleCondition, RuleDraftBody } from './types';
+import {
+  NUMBER_FIELDS,
+  type Rule,
+  type RuleCondition,
+  type RuleDraftBody,
+  type RuleMatchMode,
+  valuesOf,
+} from './types';
 
 /** How long the preview waits for typing to stop before asking the server. */
 const PREVIEW_DEBOUNCE_MS = 400;
@@ -164,7 +171,7 @@ export function useDeleteRule() {
   });
 }
 
-/** Files the rule's existing matches and tags them; every figure built from them moves. */
+/** Files, tags and moves the rule's existing matches; every figure built from them moves. */
 export function useApplyRule() {
   return useMutation({
     mutationFn: (id: string) =>
@@ -181,17 +188,53 @@ export function useApplyRule() {
   });
 }
 
-/** Conditions the server would accept: a value in every row. */
+/**
+ * Conditions the server would accept, as it stores them: a value in every row
+ * (blank ones of a list dropped, one left alone a plain value), numbers as
+ * numbers, and both ends of a range.
+ */
 export function completeConditions(conditions: RuleCondition[]): RuleCondition[] {
-  return conditions.filter(condition => String(condition.value).trim() !== '');
+  return conditions.flatMap((condition): RuleCondition[] => {
+    const values = valuesOf(condition).filter(value => value.trim() !== '');
+    if (values.length === 0) {
+      return [];
+    }
+    if (NUMBER_FIELDS.includes(condition.field)) {
+      const { valueTo, ...rest } = condition;
+      const range = condition.operator === 'between';
+      if (range && valueTo === undefined) {
+        return [];
+      }
+      return [{ ...rest, value: Number(values[0]), ...(range ? { valueTo } : {}) }];
+    }
+    return [{ ...condition, value: values.length === 1 ? values[0] : values }];
+  });
+}
+
+/** What a rule would match today: `POST /categorization-rules/test`. */
+export function previewRule(
+  body: ContractInput<'TestCategorizationRuleBody'>,
+  signal?: AbortSignal,
+) {
+  return apiClient
+    .post('/categorization-rules/test', body, { signal })
+    .then(response =>
+      checkContract('CategorizationRuleTestResult', response.data, '/categorization-rules/test'),
+    );
 }
 
 /**
  * What the conditions match among the workspace's rows, a moment after typing
  * stops. `ruleId` is the saved rule being edited: rows a rule above it takes
- * come back marked.
+ * come back marked. `walletId` is the account the draft sets: the answer says
+ * how many matches would move there. `matchMode` is how the conditions combine.
  */
-export function useRulePreview(conditions: RuleCondition[], ruleId: string | null) {
+export function useRulePreview(
+  conditions: RuleCondition[],
+  ruleId: string | null,
+  walletId: string | null = null,
+  matchMode: RuleMatchMode = 'all',
+) {
   const workspaceId = useWorkspaceId();
   const complete = completeConditions(conditions);
   const serialized = JSON.stringify(complete);
@@ -203,24 +246,22 @@ export function useRulePreview(conditions: RuleCondition[], ruleId: string | nul
   const settledConditions = JSON.parse(settled) as RuleCondition[];
 
   return useQuery({
-    queryKey: queryKeys.categorizationRulePreview(workspaceId, settledConditions, ruleId),
+    queryKey: queryKeys.categorizationRulePreview(
+      workspaceId,
+      { conditions: settledConditions, matchMode },
+      ruleId,
+      walletId,
+    ),
     queryFn: ({ signal }) =>
-      apiClient
-        .post(
-          '/categorization-rules/test',
-          {
-            conditions: settledConditions,
-            ...(ruleId ? { ruleId } : {}),
-          } satisfies ContractInput<'TestCategorizationRuleBody'>,
-          { signal },
-        )
-        .then(response =>
-          checkContract(
-            'CategorizationRuleTestResult',
-            response.data,
-            '/categorization-rules/test',
-          ),
-        ),
+      previewRule(
+        {
+          conditions: settledConditions,
+          ...(matchMode === 'any' ? { matchMode } : {}),
+          ...(ruleId ? { ruleId } : {}),
+          ...(walletId ? { walletId } : {}),
+        },
+        signal,
+      ),
     enabled: Boolean(workspaceId) && settledConditions.length > 0,
     placeholderData: previous => previous,
   });

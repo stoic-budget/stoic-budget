@@ -62,6 +62,9 @@ export enum TransferPairSource {
   REJECTED = 'rejected',
 }
 
+/** A column only database triggers write: never selected by default, never saved back. */
+const TRIGGER_WRITTEN = { select: false, insert: false, update: false } as const;
+
 @Entity('transactions')
 @Index('IDX_transactions_workspace_date_amount', ['workspaceId', 'transactionDate', 'amount'])
 // Partial, matching the migration: only split rows are ever looked up by group.
@@ -296,6 +299,14 @@ export class Transaction {
   payeeId: string | null;
 
   /**
+   * Who gave the row its payee when it was not its descriptor's own alias:
+   * `manual` for a person, `rule` for a categorization rule. A rule never
+   * replaces the pick of a person.
+   */
+  @Column({ name: 'payee_source', type: 'varchar', length: 8, nullable: true })
+  payeeSource: 'manual' | 'rule' | null;
+
+  /**
    * Derived on write so that every path that books a transaction — import,
    * scan, receipt, payable, manual entry, custom table, Telegram — keys the
    * payee the same way without having to remember to.
@@ -377,38 +388,17 @@ export class Transaction {
    * transaction that books the row. Never written by the application:
    * a stale value saved back from a loaded entity would lose a change.
    */
-  @Column({ name: 'ledger_dirty', select: false, insert: false, update: false, default: true })
+  @Column({ name: 'ledger_dirty', default: true, ...TRIGGER_WRITTEN })
   ledgerDirty: boolean;
 
-  @Column({
-    name: 'ledger_posted_at',
-    type: 'timestamptz',
-    nullable: true,
-    select: false,
-    insert: false,
-    update: false,
-  })
+  @Column({ name: 'ledger_posted_at', type: 'timestamptz', nullable: true, ...TRIGGER_WRITTEN })
   ledgerPostedAt: Date | null;
 
   /** Why the last posting attempt failed; the row is retried after a pause. */
-  @Column({
-    name: 'ledger_error',
-    type: 'text',
-    nullable: true,
-    select: false,
-    insert: false,
-    update: false,
-  })
+  @Column({ name: 'ledger_error', type: 'text', nullable: true, ...TRIGGER_WRITTEN })
   ledgerError: string | null;
 
-  @Column({
-    name: 'ledger_attempted_at',
-    type: 'timestamptz',
-    nullable: true,
-    select: false,
-    insert: false,
-    update: false,
-  })
+  @Column({ name: 'ledger_attempted_at', type: 'timestamptz', nullable: true, ...TRIGGER_WRITTEN })
   ledgerAttemptedAt: Date | null;
 
   @Column({

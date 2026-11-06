@@ -129,7 +129,7 @@ export const DOCUMENTS_ERRORS = {
   // ── classification & review ─────────────────────────────────────────────
   CATEGORIZATION_RULE_NOT_FOUND: 'Categorization rule not found',
   CATEGORIZATION_RULE_PATTERN_INVALID: 'Invalid pattern: {{pattern}}',
-  CATEGORIZATION_RULE_NO_CATEGORY: 'The rule sets neither a category nor tags to apply',
+  CATEGORIZATION_RULE_NO_CATEGORY: 'The rule sets nothing to apply to existing rows',
   CATEGORIZATION_RULE_CONDITION_INVALID: 'Invalid condition on {{field}}: {{value}}',
   CATEGORIZATION_RULE_ORDER_STALE: 'The rules changed meanwhile; reload the page and try again',
   CLASSIFICATION_TRANSACTION_NOT_FOUND: 'Transaction not found',

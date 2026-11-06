@@ -11,6 +11,7 @@ import {
 import type {
   ClassificationCondition,
   ClassificationResult,
+  MatchMode,
 } from '../modules/classification/interfaces/classification-rule.interface';
 import { User } from './user.entity';
 import { Workspace } from './workspace.entity';
@@ -42,6 +43,10 @@ export class CategorizationRule {
 
   @Column({ type: 'jsonb' })
   conditions: ClassificationCondition[];
+
+  /** Whether a row has to pass all of the conditions or any one of them. */
+  @Column({ name: 'match_mode', type: 'varchar', length: 8, default: 'all' })
+  matchMode: MatchMode;
 
   @Column({ type: 'jsonb' })
   result: ClassificationResult;

@@ -5,11 +5,14 @@ import { Plus, X } from '@/app/components/icons';
 import { OWNER_SHARED } from '@/app/components/transactions/OwnerFilterDropdown';
 import { Select } from '@/app/components/ui/select';
 import { useIntlayer } from '@/app/i18n';
+import { RuleConditionValue } from './RuleConditionValue';
 import {
   EMPTY_CONDITION,
+  MULTI_VALUE_FIELDS,
   operatorsFor,
   type RuleCondition,
   type RuleField,
+  type RuleMatchMode,
   TEXT_FIELDS,
 } from './types';
 import { useRuleWords } from './useRuleWords';
@@ -17,6 +20,9 @@ import { useRuleWords } from './useRuleWords';
 interface RuleConditionsFieldProps {
   conditions: RuleCondition[];
   onChange: (conditions: RuleCondition[]) => void;
+  /** Whether a row has to pass all of the conditions or any one of them. */
+  matchMode: RuleMatchMode;
+  onMatchModeChange: (matchMode: RuleMatchMode) => void;
   /** Who a row can belong to; empty in a workspace of one, which hides the owner field. */
   ownerOptions: Option[];
   hasMembers: boolean;
@@ -26,10 +32,12 @@ interface RuleConditionsFieldProps {
 
 type Option = { value: string; label: string };
 
-/** The editor's conditions: rows of field, check and value that must all hold. */
+/** The editor's conditions: rows of field, check and value, of which all or any one must hold. */
 export function RuleConditionsField({
   conditions,
   onChange,
+  matchMode,
+  onMatchModeChange,
   ownerOptions,
   hasMembers,
   walletOptions,
@@ -40,6 +48,8 @@ export function RuleConditionsField({
   const fieldOptions: RuleField[] = [
     ...TEXT_FIELDS,
     'amount',
+    'currency',
+    'day_of_month',
     'direction',
     'payment_type',
     ...(walletOptions.length > 0 ? (['wallet'] as RuleField[]) : []),
@@ -49,11 +59,7 @@ export function RuleConditionsField({
   const choices: Partial<Record<RuleField, Option[]>> = {
     owner: ownerOptions,
     wallet: walletOptions,
-    // Only the two kinds the sample statement shows; the backend accepts all eight.
-    payment_type: [
-      { value: 'card', label: words.paymentType.card },
-      { value: 'bank_transfer_in', label: words.paymentType.bank_transfer_in },
-    ],
+    payment_type: Object.entries(words.paymentType).map(([value, label]) => ({ value, label })),
     direction: [
       { value: 'expense', label: words.direction.expense },
       { value: 'income', label: words.direction.income },
@@ -70,9 +76,30 @@ export function RuleConditionsField({
       value: field === 'owner' ? OWNER_SHARED : (choices[field]?.[0]?.value ?? ''),
     });
 
+  // What a check keeps of the condition: a range's upper end goes with the range.
+  const changeOperator = (index: number, operator: RuleCondition['operator']) => {
+    const { valueTo, ...rest } = conditions[index];
+    setCondition(index, { ...rest, operator, ...(operator === 'between' ? { valueTo } : {}) });
+  };
+
   return (
     <fieldset className="seneca-rule-dialog__group">
-      <legend className="seneca-rule-dialog__label">{t.dialog.conditionsLabel}</legend>
+      <legend className="seneca-rule-dialog__label">
+        {conditions.length > 1 ? (
+          <Select
+            inputProps={{ 'aria-label': t.dialog.matchModeLabel.value }}
+            value={matchMode}
+            onChange={value => onMatchModeChange(value === 'any' ? 'any' : 'all')}
+            options={[
+              { value: 'all', label: t.dialog.conditionsLabel.value },
+              { value: 'any', label: t.dialog.conditionsLabelAny.value },
+            ]}
+            size="small"
+          />
+        ) : (
+          t.dialog.conditionsLabel
+        )}
+      </legend>
       {conditions.map((condition, index) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: rows have no identity but their place
         <div className="seneca-rule-dialog__condition" key={index}>
@@ -89,35 +116,17 @@ export function RuleConditionsField({
           <Select
             inputProps={{ 'aria-label': t.dialog.operatorLabel.value }}
             value={condition.operator}
-            onChange={value =>
-              setCondition(index, {
-                ...condition,
-                operator: value as RuleCondition['operator'],
-              })
-            }
+            onChange={value => changeOperator(index, value as RuleCondition['operator'])}
             options={[...new Set([...operatorsFor(condition.field), condition.operator])].map(
               operator => ({ value: operator, label: words.operator[operator] }),
             )}
             size="small"
           />
-          {choices[condition.field] ? (
-            <Select
-              inputProps={{ 'aria-label': t.dialog.valueLabel.value }}
-              value={String(condition.value)}
-              onChange={value => setCondition(index, { ...condition, value })}
-              options={choices[condition.field] ?? []}
-              size="small"
-            />
-          ) : (
-            <input
-              aria-label={t.dialog.valueLabel.value}
-              className="seneca-rule-dialog__input"
-              type={condition.field === 'amount' ? 'number' : 'text'}
-              inputMode={condition.field === 'amount' ? 'decimal' : undefined}
-              value={String(condition.value)}
-              onChange={event => setCondition(index, { ...condition, value: event.target.value })}
-            />
-          )}
+          <RuleConditionValue
+            condition={condition}
+            onChange={next => setCondition(index, next)}
+            choices={choices[condition.field]}
+          />
           {conditions.length > 1 && (
             <button
               type="button"
@@ -130,6 +139,9 @@ export function RuleConditionsField({
           )}
         </div>
       ))}
+      {conditions.some(condition => MULTI_VALUE_FIELDS.includes(condition.field)) && (
+        <span className="seneca-rule-dialog__hint">{t.dialog.valuesHint}</span>
+      )}
       <Button
         type="button"
         variant="text"

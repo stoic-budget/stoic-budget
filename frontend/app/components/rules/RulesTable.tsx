@@ -71,7 +71,8 @@ function RuleRow({
     transition,
     isDragging,
   } = useSortable({ id: rule.id, disabled: !actions.canEdit });
-  const settable = Boolean(rule.result.categoryId || rule.result.tagIds?.length);
+  const { categoryId, walletId, tagIds, comment, payeeId } = rule.result;
+  const settable = Boolean(categoryId || walletId || tagIds?.length || comment || payeeId);
 
   return (
     <tr
@@ -105,7 +106,9 @@ function RuleRow({
         </NextLink>
         {!rule.isActive && <span className="seneca-rules-table__paused">{t.page.paused}</span>}
       </td>
-      <td data-label={t.page.when.value}>{describeConditions(rule.conditions, words, names)}</td>
+      <td data-label={t.page.when.value}>
+        {describeConditions(rule.conditions, words, names, rule.matchMode)}
+      </td>
       <td data-label={t.page.thenLabel.value}>{describeResult(rule.result, words, names)}</td>
       <td className="seneca-rules-table__stats">
         {rule.matchCount > 0

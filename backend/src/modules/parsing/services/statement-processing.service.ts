@@ -948,8 +948,8 @@ export class StatementProcessingService {
         paymentType: parsed.paymentType ?? null,
         transactionType,
         workspaceId: statement.workspaceId,
-        // The statement's account, so a rule can ask which account a row is in.
-        walletId: account?.id ?? null,
+        // The statement's account and its owner, so a rule can ask about either.
+        ...accountFields(account, {}),
       } as Transaction;
 
       const classification = await this.classificationService.classifyTransaction(
@@ -985,7 +985,7 @@ export class StatementProcessingService {
         paymentType: parsed.paymentType,
         transactionType,
         ...classification,
-        ...accountFields(account, classification.ownerMemberId),
+        ...accountFields(account, classification),
         vendorNormalized: null,
         categoryHint: null,
         transactionNature: null,

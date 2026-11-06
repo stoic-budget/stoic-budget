@@ -11,6 +11,8 @@ export interface Transaction {
   counterpartyName: string;
   counterpartyBin?: string;
   paymentPurpose: string;
+  /** The row's own remark: it goes to exports, and a rule can fill it. */
+  comments?: string | null;
   paymentType?: PaymentType | null;
   debit: number;
   credit: number;

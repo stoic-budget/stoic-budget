@@ -1,5 +1,6 @@
 import type { DataSource } from 'typeorm';
 import type { Statement } from '../../../entities/statement.entity';
+import type { Transaction } from '../../../entities/transaction.entity';
 import { Wallet } from '../../../entities/wallet.entity';
 import { linkedSources, sourceOfStatement } from '../../wallets/linked-sources';
 import {
@@ -67,17 +68,19 @@ async function accountOfSource(
 }
 
 /**
- * A statement is of one account, so its rows are too; a rule may still name the
- * person (`ruleOwner` set, even to null), otherwise the row starts on the
- * account's owner.
+ * A statement is of one account, so its rows are too, unless a rule named
+ * another account: then the classification already carries it with its owner,
+ * and nothing is added. A rule may also name only the person (`ownerMemberId`
+ * set, even to null); otherwise the row starts on the account's owner.
  */
 export function accountFields(
   account: StatementAccount | null,
-  ruleOwner: string | null | undefined,
+  classification: Pick<Partial<Transaction>, 'walletId' | 'ownerMemberId'>,
 ): { walletId?: string; ownerMemberId?: string | null } {
-  if (!account) {
+  if (!account || classification.walletId) {
     return {};
   }
+  const ruleOwner = classification.ownerMemberId;
   return {
     walletId: account.id,
     ownerMemberId: ruleOwner !== undefined ? ruleOwner : account.ownerMemberId,
