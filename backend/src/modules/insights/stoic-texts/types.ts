@@ -34,7 +34,13 @@ export type StoicMessageKey =
   // Goals and commitments
   | 'stoic.goal_behind' // goal, requiredAmount, paceAmount, monthsLate
   | 'stoic.goal_not_feasible' // goal, requiredAmount, freeAmount
-  | 'stoic.shortfall' // date, lowestAmount, committedAmount
+  | 'stoic.goal_no_date' // goal, percent
+  | 'stoic.shortfall' // date, lowestAmount
+  // Rules: decisions made once, and whether they still hold
+  | 'stoic.rule_broken' // rule
+  | 'stoic.rule_contradicted' // rule, count
+  | 'stoic.rule_worth_writing' // count, payee, decided
+  | 'stoic.rule_idle' // rule, months
   // Praise
   | 'stoic.praise_within_plan' // months
   | 'stoic.praise_virtue' // planned, actual
@@ -46,12 +52,12 @@ export type StoicMessageKey =
   | 'stoic.praise_necessity_stable' // months
   | 'stoic.praise_generosity' // percent, givenAmount, months
   | 'stoic.praise_steady' // (none)
-  // Named experts' principles applied to the user's numbers
-  | 'expert.pay_yourself_first' // savingsPercent, tenthAmount, months
-  | 'expert.rule_50_30_20' // needsPercent, wantsPercent, savingsPercent
-  | 'expert.room_for_error' // cushionDays, targetAmount
-  | 'expert.lifestyle_creep' // expenseGrowth, incomeGrowth
-  | 'expert.life_energy'; // merchant, totalAmount, hours
+  | 'stoic.praise_rules_hold' // percent
+  // Reflections: Stoic teaching applied to the quarter's numbers
+  | 'stoic.keep_first' // savingsPercent, tenthAmount, months
+  | 'stoic.prepare_beforehand' // cushionDays, targetAmount
+  | 'stoic.wants_outrun_income' // expenseGrowth, incomeGrowth
+  | 'stoic.price_in_life'; // merchant, totalAmount, hours
 
 export interface StoicText {
   title: string;

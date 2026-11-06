@@ -59,92 +59,25 @@ export const tr: QuoteTexts = {
       '…onlara sahipken yapmacıksız tadını çıkarır, sahip olmadığında ise onları istemezdi.',
     'marcus-very-little-needed': '…mutlu bir hayat yaşamak için gerçekten pek az şey gereklidir.',
     'marcus-be-such': 'İyi bir insanın nasıl olması gerektiği üzerine artık hiç konuşma, öyle ol.',
-    'buffett-swimming-naked': 'Sonuçta kimin çıplak yüzdüğünü ancak sular çekildiğinde anlarsınız.',
-    'buffett-borrowed-money':
-      'Hiç şüphesiz bazı insanlar borç para kullanarak çok zengin oldu. Ancak bu aynı zamanda çok yoksullaşmanın da bir yolu olmuştur.',
-    'buffett-possessions': 'Çoğu zaman, devasa bir eşya koleksiyonu sonunda sahibine sahip olur.',
-    'buffett-one-percent':
-      "Hak senetlerimin (Berkshire Hathaway hisse senetleri) %1'inden fazlasını kendimiz için kullansaydık, ne mutluluğumuz ne de esenliğimiz artardı.",
-    'munger-learning-machines':
-      'Hayatta en akıllı olmayan insanların yükseldiğini sürekli görüyorum… ama onlar öğrenme makineleridir. Her gece, sabah kalktıklarından biraz daha bilge olarak yatarlar.',
-    'munger-mozart-overspent':
-      "Bir zamanlar dünyanın en ünlü bestecisi olan bir adam vardı, ama son derece mutsuzdu… ve nedenlerinden biri, her zaman gelirinden fazlasını harcamasıydı. Bu Mozart'tı.",
-    'munger-terrible-blows':
-      'Hayat korkunç darbeler, dehşet verici darbeler, haksız darbeler indirecek. Önemi yok… göreviniz kendinize acımaya gömülmek değil, o korkunç darbeyi yapıcı bir şekilde kullanmaktı.',
-    'munger-disastrous-modes':
-      'Genel olarak konuşursak, kıskançlık, içerleme, intikam ve kendine acıma felaket getiren düşünce biçimleridir.',
-    'graham-worst-enemy':
-      'Yatırımcının asıl sorunu—hatta en büyük düşmanı—büyük olasılıkla kendisidir.',
-    'graham-margin-of-safety':
-      'Sağlam yatırımın sırrını üç kelimeye indirgeme gibi bir meydan okumayla karşılaşınca, şu düsturu öneriyoruz: GÜVENLİK PAYI.',
-    'graham-prudent-principles':
-      "Wall Street'in birkaç ihtiyatlı ilkesi var; sorun şu ki bunlar en çok ihtiyaç duyulduklarında hep unutulur.",
-    'bogle-courage-press-on':
-      'Ne olursa olsun devam etme cesareti—ister sakin ister dalgalı denizlerle karşılaşalım, özellikle de piyasa fırtınaları etrafımızda uğuldarken—başarılı yatırımcının özünü oluşturan niteliktir.',
-    'bogle-own-worst-enemy': 'Evet, yatırımcı çoğu zaman kendi en büyük düşmanıdır.',
-    'bogle-dont-stop-regular-investing':
-      'Allah aşkına, piyasa düşüyor diye düzenli yatırım programınızı durdurmayın.',
-    'bogle-great-game-of-life':
-      'Unutmayın, hayatın büyük oyunu parayla ilgili değildir; dünyayı yeniden inşa etmek için elinizden gelenin en iyisini yapmakla ilgilidir.',
-    'lynch-family-budget': 'Hisse senedi almadan önce aile bütçesini gözden geçirmek mantıklıdır.',
-    'lynch-afford-to-lose':
-      'Yalnızca, kaybı öngörülebilir gelecekte günlük yaşamınızı hiç etkilemeyecek kadarını yatırın.',
-    'dalio-pain-reflection': 'Acı + Düşünme = İlerleme.',
-    'dalio-habit-controls-you':
-      'Hemen hemen herhangi bir şeyi zaman içinde yeterince sık yaparsanız, sizi kontrol edecek bir alışkanlık edinirsiniz.',
-    'dalio-avoid-temptations':
-      'Gerçekten istediklerini seçen, onları gerçekten istediklerinden uzaklaştıran ayartılardan kaçınan ve acıların üstesinden gelen insanların başarılı bir hayat sürme olasılığı çok daha yüksektir.',
-    'housel-spending-to-show':
-      'İnsanlara ne kadar paranız olduğunu göstermek için para harcamak, daha az paraya sahip olmanın en hızlı yoludur.',
-    'housel-desire-less':
-      'Tasarruf daha az harcayarak yaratılabilir. Daha az arzularsanız daha az harcayabilirsiniz. Başkalarının sizin hakkınızda ne düşündüğünü daha az önemserseniz de daha az arzularsınız.',
-    'housel-goalpost': 'En zor finansal beceri, kale direklerinin yer değiştirmesini durdurmaktır.',
-    'housel-plan-survive-reality': 'Bir plan ancak gerçekliğe dayanabiliyorsa işe yarar.',
-    'franklin-small-leak':
-      'Küçük harcamalara dikkat edin; küçük bir sızıntı büyük bir gemiyi batırır.',
-    'franklin-saving-and-getting':
-      'Zengin olmak istiyorsanız, kazanmayı düşündüğünüz kadar biriktirmeyi de düşünün.',
-    'franklin-no-need': 'İhtiyacın olmayanı satın al, çok geçmeden ihtiyaçlarını satarsın.',
-    'franklin-first-desire':
-      'İlk arzuyu bastırmak, ardından gelenlerin hepsini tatmin etmekten daha kolaydır.',
-    'franklin-age-and-want':
-      'Yaşlılık ve yoksulluk için elinden geldiğince biriktir; hiçbir sabah güneşi bütün gün sürmez.',
-    'franklin-comfort-and-help':
-      'Şu anda yardıma muhtaç görünenlere karşı merhametsiz olmayın, onları teselli edin ve onlara yardım edin.',
-    'clason-part-of-all-you-earn':
-      'Kazandığınız her şeyin bir kısmı saklamanız için sizindir. Ne kadar az kazanırsanız kazanın, bu onda birden az olmamalıdır.',
-    'clason-tree-of-wealth':
-      'Servet, bir ağaç gibi, minicik bir tohumdan büyür. Biriktirdiğiniz ilk bakır para, servet ağacınızın büyüyeceği tohumdur.',
-    'clason-necessary-expenses':
-      "Her birimizin 'zorunlu harcamalarımız' dediği şey, aksine karşı çıkmadığımız sürece her zaman gelirimize eşit olacak kadar büyür.",
-    'clason-little-caution': 'Biraz ihtiyat, büyük bir pişmanlıktan iyidir.',
-    'clason-cultivate-thy-powers':
-      'Kendi güçlerini geliştir; çalış ve daha bilge ol, daha becerikli ol, kendine saygı duyacak şekilde davran.',
-    'stanley-accumulate-not-spend':
-      'Her yıl iyi bir gelir elde edip hepsini harcıyorsanız, zenginleşmiyorsunuz. Sadece yüksek bir hayat sürüyorsunuz. Servet, biriktirdiğinizdir, harcadığınız değil.',
-    'stanley-below-your-means':
-      'Geliriniz ne olursa olsun, her zaman imkânlarınızın altında yaşayın.',
-    'stanley-self-discipline':
-      'Servet çoğu zaman sıkı çalışma, azim, planlama ve hepsinden önemlisi öz disiplinle geçen bir yaşam tarzının sonucudur.',
-    'robin-life-energy': 'Para, yaşam enerjimizi karşılığında vermeyi seçtiğimiz bir şeydir.',
-    'robin-enough': "Doyum Eğrisi'nin zirvesinde yeterince şeye sahibizdir.",
-    'warren-must-haves': 'Olmazsa olmazlar, ne olursa olsun ödemek zorunda olacağınız şeylerdir.',
+    'seneca-what-is-wisdom':
+      'Bilgelik nedir? Hep aynı şeyleri istemek ve hep aynı şeyleri reddetmek.',
+    'seneca-no-right-wind':
+      'İnsan hangi limana yol aldığını bilmiyorsa, hiçbir rüzgâr ona uygun değildir.',
+    'epictetus-prescribe-a-character':
+      'Hemen kendine belli bir karakter ve belli bir biçim belirle; hem yalnızken hem insanlarla karşılaştığında ona uyarsın.',
+    'epictetus-little-things':
+      'O hâlde küçük şeylerden başla. Yağ mı döküldü? Biraz şarap mı çalındı? O sırada de ki: huzursuzluktan kurtuluş bu bedelle satılır; dinginlik bu bedelle satılır; ama hiçbir şey karşılıksız elde edilmez.',
+    'epictetus-as-if-laws':
+      'Hayatın yönetimi için sana önerilen kurallar neyse, onlara yasalarmış gibi bağlı kal; sanki herhangi birini çiğnersen din dışı bir suç işlemiş olacakmışsın gibi.',
+    'marcus-whole-of-life': 'Bütün hayatını düşünerek kendini tedirgin etme.',
+    'marcus-third-thing':
+      'İyi bir iş yaptığında ve bir başkası onu aldığında, aptallar gibi bunların yanında üçüncü bir şeyi, iyilik yapmış olmanın şöhretini ya da karşılığını neden hâlâ arıyorsun?',
+    'marcus-what-more':
+      'Bir insana hizmet ettiğinde daha ne istiyorsun? Doğana uygun bir şey yaptığın yetmiyor mu da bunun karşılığını almaya çalışıyorsun?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren ve Amelia Warren Tyagi',
     Epictetus: 'Epiktetos',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marcus Aurelius',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley ve William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin ve Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

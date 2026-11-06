@@ -59,89 +59,23 @@ export const ko: QuoteTexts = {
     'marcus-had-them-not': '…그것들이 있을 때는 꾸밈없이 즐겼고, 없을 때는 아쉬워하지 않았다.',
     'marcus-very-little-needed': '…행복한 삶을 사는 데 필요한 것은 참으로 아주 적다.',
     'marcus-be-such': '선한 사람이 어떠해야 하는지 더는 논하지 말고, 그런 사람이 되어라.',
-    'buffett-swimming-naked':
-      '결국 물이 빠지고 나서야 누가 벌거벗고 수영하고 있었는지 알게 됩니다.',
-    'buffett-borrowed-money':
-      '틀림없이 빌린 돈을 이용해 큰 부자가 된 사람들도 있습니다. 하지만 그것은 아주 가난해지는 길이기도 했습니다.',
-    'buffett-possessions': '너무나 자주, 방대한 소유물은 결국 그 주인을 소유하게 됩니다.',
-    'buffett-one-percent':
-      '우리가 내 청구권(버크셔 해서웨이 주식 증서)의 1% 이상을 우리 자신을 위해 쓴다 해도, 우리의 행복도 안녕도 더 나아지지 않을 것입니다.',
-    'munger-learning-machines':
-      '저는 가장 똑똑하지는 않은 사람들이 인생에서 성공하는 것을 끊임없이 봅니다… 하지만 그들은 학습 기계입니다. 그들은 매일 밤 아침에 일어났을 때보다 조금 더 현명해져서 잠자리에 듭니다.',
-    'munger-mozart-overspent':
-      '세계에서 가장 유명한 작곡가가 된 사람이 있었지만, 그는 몹시 비참했습니다… 그 이유 중 하나는 늘 수입보다 더 많이 썼기 때문입니다. 그가 모차르트였습니다.',
-    'munger-terrible-blows':
-      '인생에는 끔찍한 타격, 무시무시한 타격, 부당한 타격이 있을 것입니다. 상관없습니다… 여러분의 의무는 자기 연민에 빠지는 것이 아니라 그 끔찍한 타격을 건설적으로 활용하는 것이었습니다.',
-    'munger-disastrous-modes':
-      '일반적으로 말해, 질투, 원망, 복수, 자기 연민은 파멸적인 사고방식입니다.',
-    'graham-worst-enemy': '투자자의 주된 문제, 심지어 최악의 적은 바로 자기 자신일 가능성이 높다.',
-    'graham-margin-of-safety':
-      '건전한 투자의 비결을 세 단어로 압축하라는 비슷한 과제를 받는다면, 우리는 감히 이 모토를 제시하겠다. 안전마진(MARGIN OF SAFETY).',
-    'graham-prudent-principles':
-      '월스트리트에도 몇 가지 신중한 원칙이 있다. 문제는 그것들이 가장 필요할 때 언제나 잊힌다는 것이다.',
-    'bogle-courage-press-on':
-      '개의치 않고 계속 나아가는 용기, 즉 잔잔한 바다를 만나든 거친 바다를 만나든, 특히 시장의 폭풍이 주위에서 울부짖을 때에도 나아가는 용기야말로 성공한 투자자의 가장 본질적인 자질이다.',
-    'bogle-own-worst-enemy': '그렇다, 투자자는 종종 자기 자신의 최악의 적이다.',
-    'bogle-dont-stop-regular-investing':
-      '제발, 시장이 하락한다고 해서 정기적인 투자 프로그램을 멈추지 마라.',
-    'bogle-great-game-of-life':
-      '인생이라는 위대한 게임은 돈에 관한 것이 아님을 기억하라. 그것은 세상을 새롭게 만들기 위해 최선을 다하는 것에 관한 것이다.',
-    'lynch-family-budget': '주식을 사기 전에 가계 예산을 검토하는 것이 합리적이다.',
-    'lynch-afford-to-lose':
-      '잃더라도 가까운 미래에 일상생활에 아무런 영향을 주지 않을 만큼의 돈만 투자하라.',
-    'dalio-pain-reflection': '고통 + 성찰 = 발전.',
-    'dalio-habit-controls-you':
-      '거의 어떤 일이든 오랜 시간 충분히 자주 하면, 당신을 지배하는 습관이 생긴다.',
-    'dalio-avoid-temptations':
-      '자신이 정말로 원하는 것을 선택하고, 그것에서 멀어지게 하는 유혹을 피하고 고통을 이겨내는 사람들은 성공적인 삶을 살 가능성이 훨씬 높다.',
-    'housel-spending-to-show':
-      '자신이 돈이 얼마나 많은지 사람들에게 보여 주려고 돈을 쓰는 것은 돈을 줄이는 가장 빠른 길이다.',
-    'housel-desire-less':
-      '저축은 덜 씀으로써 만들어질 수 있다. 덜 원하면 덜 쓸 수 있다. 그리고 남들이 당신을 어떻게 생각하는지 덜 신경 쓰면 덜 원하게 될 것이다.',
-    'housel-goalpost': '가장 어려운 재무 기술은 골대가 움직이지 않게 하는 것이다.',
-    'housel-plan-survive-reality': '계획은 현실에서 살아남을 수 있을 때만 쓸모가 있다.',
-    'franklin-small-leak': '작은 지출을 조심하라. 작은 구멍 하나가 큰 배를 가라앉힌다.',
-    'franklin-saving-and-getting': '부유해지고 싶다면 버는 것뿐 아니라 모으는 것도 생각하라.',
-    'franklin-no-need': '필요 없는 것을 사면, 머지않아 필요한 것을 팔게 될 것이다.',
-    'franklin-first-desire':
-      '첫 번째 욕망을 누르는 것이 그 뒤를 잇는 모든 욕망을 채우는 것보다 쉽다.',
-    'franklin-age-and-want':
-      '노년과 궁핍에 대비해 할 수 있을 때 저축하라. 아침 해는 하루 종일 가지 않는다.',
-    'franklin-comfort-and-help':
-      '지금 도움이 필요해 보이는 이들에게 인색하지 말고, 그들을 위로하고 도와라.',
-    'clason-part-of-all-you-earn':
-      '당신이 버는 모든 것의 일부는 당신이 간직할 몫이다. 아무리 적게 벌더라도 그것은 10분의 1보다 적어서는 안 된다.',
-    'clason-tree-of-wealth':
-      '부는 나무처럼 작은 씨앗에서 자란다. 당신이 저축하는 첫 동전이 당신의 부의 나무가 자라날 씨앗이다.',
-    'clason-necessary-expenses':
-      '우리 각자가 ‘필요한 지출’이라고 부르는 것은, 우리가 이에 맞서지 않는 한 언제나 수입과 같아질 만큼 늘어난다.',
-    'clason-little-caution': '큰 후회보다는 작은 조심이 낫다.',
-    'clason-cultivate-thy-powers':
-      '그대 자신의 능력을 기르고, 배우고 더 지혜로워지며, 더 숙련되고, 스스로를 존중할 수 있도록 행동하라.',
-    'stanley-accumulate-not-spend':
-      '매년 좋은 수입을 올리고 그것을 모두 써 버린다면, 당신은 더 부유해지는 것이 아니다. 그저 호화롭게 살고 있을 뿐이다. 부는 당신이 모은 것이지, 쓴 것이 아니다.',
-    'stanley-below-your-means': '수입이 얼마이든, 언제나 분수에 맞게 그보다 적게 쓰며 살라.',
-    'stanley-self-discipline':
-      '부는 대개 근면, 인내, 계획, 그리고 무엇보다 자기 절제의 생활 방식에서 비롯된다.',
-    'robin-life-energy': '돈은 우리가 우리의 생명 에너지를 주고 바꾸기로 선택한 무언가다.',
-    'robin-enough': '충족 곡선의 정점에서 우리는 충분히 가지고 있다.',
-    'warren-must-haves': '필수 지출은 무슨 일이 있어도 지불해야 하는 것들이다.',
+    'seneca-what-is-wisdom': '지혜란 무엇인가? 늘 같은 것을 원하고, 늘 같은 것을 거부하는 것이다.',
+    'seneca-no-right-wind': '어느 항구로 가는지 모르는 사람에게는 어떤 바람도 순풍이 아니다.',
+    'epictetus-prescribe-a-character':
+      '곧바로 자신에게 어떤 성격과 어떤 모습을 정해 주어라. 혼자 있을 때나 사람들을 만날 때나 그것을 지켜라.',
+    'epictetus-little-things':
+      '그러니 작은 일부터 시작하라. 기름이 엎질러졌는가? 포도주를 조금 도둑맞았는가? 그럴 때 말하라. 이만한 값에 마음의 흔들리지 않음이 팔리고, 이만한 값에 평온이 팔린다. 그러나 공짜로 얻어지는 것은 아무것도 없다고.',
+    'epictetus-as-if-laws':
+      '삶을 살아가는 데 관한 어떤 규칙이 네게 제시되든, 그것이 법인 듯, 하나라도 어기면 불경의 죄를 짓는 듯 지켜라.',
+    'marcus-whole-of-life': '네 삶 전체를 생각하며 스스로를 어지럽히지 말라.',
+    'marcus-third-thing':
+      '네가 선한 일을 했고 다른 사람이 그것을 받았다면, 왜 어리석은 자들처럼 이 둘 밖에서 세 번째 것, 곧 선행을 했다는 평판이나 보답을 아직도 찾느냐?',
+    'marcus-what-more':
+      '사람에게 도움을 주었는데 그 이상 무엇을 더 바라느냐? 네 본성에 맞는 일을 했으면 만족하지 않고, 그 대가를 받기를 구하느냐?',
   },
   authors: {
-    'Benjamin Franklin': '벤저민 프랭클린',
-    'Benjamin Graham': '벤저민 그레이엄',
-    'Charlie Munger': '찰리 멍거',
-    'Elizabeth Warren & Amelia Warren Tyagi': '엘리자베스 워런 & 아멜리아 워런 티아기',
     Epictetus: '에픽테토스',
-    'George S. Clason': '조지 S. 클레이슨',
-    'John C. Bogle': '존 C. 보글',
     'Marcus Aurelius': '마르쿠스 아우렐리우스',
-    'Morgan Housel': '모건 하우절',
-    'Peter Lynch': '피터 린치',
-    'Ray Dalio': '레이 달리오',
     Seneca: '세네카',
-    'Thomas J. Stanley & William D. Danko': '토머스 J. 스탠리 & 윌리엄 D. 댄코',
-    'Vicki Robin & Joe Dominguez': '비키 로빈 & 조 도밍게즈',
-    'Warren Buffett': '워런 버핏',
   },
 };

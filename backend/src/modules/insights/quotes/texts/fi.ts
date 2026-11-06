@@ -59,92 +59,25 @@ export const fi: QuoteTexts = {
     'marcus-very-little-needed': '…onnelliseen elämään tarvitaan todella vähän.',
     'marcus-be-such':
       'Älä enää puhu lainkaan siitä, millainen hyvän ihmisen tulisi olla — ole sellainen.',
-    'buffett-swimming-naked':
-      'Loppujen lopuksi selviää vasta vuoroveden laskiessa, kuka uii alasti.',
-    'buffett-borrowed-money':
-      'Jotkut ovat epäilemättä rikastuneet suuresti lainarahalla. Mutta se on ollut myös tapa köyhtyä suuresti.',
-    'buffett-possessions': 'Liian usein laaja tavarakokoelma päätyy omistamaan omistajansa.',
-    'buffett-one-percent':
-      'Jos käyttäisimme itseemme enemmän kuin 1 % saamisistani (Berkshire Hathawayn osakekirjoista), kumpikaan — onnellisuutemme tai hyvinvointimme — ei kasvaisi.',
-    'munger-learning-machines':
-      'Näen jatkuvasti ihmisten nousevan elämässä, jotka eivät ole älykkäimpiä… mutta he ovat oppimiskoneita. He menevät nukkumaan joka ilta hieman viisaampina kuin heräsivät.',
-    'munger-mozart-overspent':
-      'Oli kerran mies, josta tuli maailman kuuluisin säveltäjä, mutta hän oli äärimmäisen onneton… ja yksi syy oli se, että hän käytti aina enemmän kuin tienasi. Se oli Mozart.',
-    'munger-terrible-blows':
-      'Elämä antaa kauheita iskuja, hirveitä iskuja, epäoikeudenmukaisia iskuja. Sillä ei ole väliä… velvollisuutesi ei ollut vajota itsesääliin, vaan käyttää kauhea isku rakentavasti.',
-    'munger-disastrous-modes':
-      'Yleisesti ottaen kateus, kauna, kosto ja itsesääli ovat tuhoisia ajattelutapoja.',
-    'graham-worst-enemy':
-      'Sijoittajan tärkein ongelma — ja kaiketi pahin vihollinen — on todennäköisesti hän itse.',
-    'graham-margin-of-safety':
-      'Kun meiltä pyydetään tiivistämään terveen sijoittamisen salaisuus kolmeen sanaan, uskallamme esittää tunnuslauseen: TURVAMARGINAALI.',
-    'graham-prudent-principles':
-      'Wall Streetillä on muutama harkittu periaate; vika on siinä, että ne unohdetaan aina juuri kun niitä eniten tarvitaan.',
-    'bogle-courage-press-on':
-      'Rohkeus jatkaa tilanteesta riippumatta — olipa meri tyyni tai myrskyinen, ja erityisesti kun markkinoiden myrskyt ulvovat ympärillämme — on menestyvän sijoittajan olennaisin ominaisuus.',
-    'bogle-own-worst-enemy': 'Kyllä, sijoittaja on usein itse pahin vihollisensa.',
-    'bogle-dont-stop-regular-investing':
-      'Herran tähden, älä lopeta säännöllistä säästämistä siksi, että markkina laskee.',
-    'bogle-great-game-of-life':
-      'Muista, että elämän suuri peli ei ole rahasta; se on siitä, että teet parhaasi rakentaaksesi maailman uudelleen.',
-    'lynch-family-budget': 'On järkevää käydä perheen budjetti läpi ennen osakkeiden ostoa.',
-    'lynch-afford-to-lose':
-      'Sijoita vain sellainen summa, jonka voit menettää ilman että menetys vaikuttaa arkeesi lähitulevaisuudessa.',
-    'dalio-pain-reflection': 'Tuska + pohdinta = edistys.',
-    'dalio-habit-controls-you':
-      'Jos teet jotakin riittävän usein riittävän pitkään, syntyy tapa, joka alkaa ohjata sinua.',
-    'dalio-avoid-temptations':
-      'Ihmiset, jotka valitsevat sen mitä todella haluavat, välttävät houkutukset ja kestävät kivut, jotka vievät heitä pois siitä mitä todella haluavat, elävät paljon todennäköisemmin onnistunutta elämää.',
-    'housel-spending-to-show':
-      'Rahan käyttäminen sen näyttämiseen, kuinka paljon rahaa sinulla on, on nopein tie siihen, että rahaa on vähemmän.',
-    'housel-desire-less':
-      'Säästöt syntyvät kuluttamalla vähemmän. Voit kuluttaa vähemmän, jos haluat vähemmän. Ja haluat vähemmän, jos välität vähemmän siitä, mitä muut sinusta ajattelevat.',
-    'housel-goalpost': 'Vaikein taloustaito on saada maalitolppa pysymään paikallaan.',
-    'housel-plan-survive-reality':
-      'Suunnitelma on hyödyllinen vain, jos se selviää todellisuudesta.',
-    'franklin-small-leak': 'Varo pieniä menoja; pieni vuoto upottaa suuren laivan.',
-    'franklin-saving-and-getting':
-      'Jos tahdot vaurastua, ajattele säästämistä yhtä paljon kuin ansaitsemista.',
-    'franklin-no-need': 'Osta mitä et tarvitse, ja pian joudut myymään tarpeellisesi.',
-    'franklin-first-desire':
-      'Ensimmäinen halu on helpompi tukahduttaa kuin kaikki sitä seuraavat tyydyttää.',
-    'franklin-age-and-want':
-      'Säästä vanhuutta ja puutetta varten, kun voit; aamuaurinko ei kestä koko päivää.',
-    'franklin-comfort-and-help':
-      'Älä ole armoton niitä kohtaan, jotka nyt näyttävät puutteessa olevan; lohduta ja auta heitä.',
-    'clason-part-of-all-you-earn':
-      'Osa kaikesta mitä ansaitset on sinun pidettäväksesi. Sen tulisi olla vähintään kymmenesosa, olkoon ansio kuinka pieni.',
-    'clason-tree-of-wealth':
-      'Vauraus kasvaa, kuin puu, pienestä siemenestä. Ensimmäinen kolikko, jonka säästät, on siemen, josta vaurauden puusi kasvaa.',
-    'clason-necessary-expenses':
-      'Se mitä kukin meistä kutsuu ”välttämättömiksi menoiksi”, kasvaa aina tulojen tasolle, ellemme pane vastaan.',
-    'clason-little-caution': 'Parempi hiukan varovaisuutta kuin suuri kaduttaminen.',
-    'clason-cultivate-thy-powers':
-      'Kehitä omia voimiasi: opiskele ja viisastu, tule taitavammaksi ja toimi niin, että voit kunnioittaa itseäsi.',
-    'stanley-accumulate-not-spend':
-      'Jos tienaat hyvin joka vuosi ja käytät kaiken, et vaurastu. Elät vain komeasti. Vauraus on sitä mitä kerrytät, ei sitä mitä kulutat.',
-    'stanley-below-your-means': 'Olkoon tulosi mitkä tahansa: elä aina varojesi alapuolella.',
-    'stanley-self-discipline':
-      'Vauraus on useammin seurausta elämäntavasta, jossa on kovaa työtä, sitkeyttä, suunnittelua ja ennen kaikkea itsekuria.',
-    'robin-life-energy': 'Raha on jotakin, jota vastaan päätämme vaihtaa elämänenergiamme.',
-    'robin-enough': 'Tyytyväisyyskäyrän huipulla meillä on riittävästi.',
-    'warren-must-haves': '”Pakolliset” ovat niitä asioita, jotka on maksettava, käy kuinka käy.',
+    'seneca-what-is-wisdom':
+      'Mitä on viisaus? Haluta aina samoja asioita ja kieltäytyä aina samoista.',
+    'seneca-no-right-wind':
+      'Kun ihminen ei tiedä, mihin satamaan on matkalla, mikään tuuli ei ole oikea.',
+    'epictetus-prescribe-a-character':
+      'Määrää heti itsellesi jokin luonne ja muoto, jota noudatat sekä yksin ollessasi että ihmisten parissa.',
+    'epictetus-little-things':
+      'Aloita siis pienistä asioista. Valuiko öljyä? Varastettiinko vähän viiniä? Sano tilaisuuden tullen: tällä hinnalla ostetaan mielenrauha, tällä hinnalla tyyneys, mutta mitään ei saa ilmaiseksi.',
+    'epictetus-as-if-laws':
+      'Mitä tahansa sääntöjä sinulle elämän ohjeeksi esitetään, pysy niissä kuin lakeissa, ikään kuin syyllistyisit jumalattomuuteen, jos rikkoisit mitään niistä.',
+    'marcus-whole-of-life': 'Älä häiritse itseäsi ajattelemalla koko elämääsi.',
+    'marcus-third-thing':
+      'Kun olet tehnyt hyvän teon ja toinen on sen vastaanottanut, miksi etsit vielä kolmatta asiaa niiden lisäksi, kuten tyhmät, joko hyvän teon maineen tai vastapalveluksen toivossa?',
+    'marcus-what-more':
+      'Mitä enemmän haluat, kun olet tehnyt ihmiselle palveluksen? Eikö riitä, että olet tehnyt jotakin luontosi mukaista, ja etsitkö vielä palkkaa siitä?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Epictetus',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marcus Aurelius',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

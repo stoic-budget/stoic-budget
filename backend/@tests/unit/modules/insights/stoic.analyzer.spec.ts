@@ -13,33 +13,64 @@ import {
 
 function analyzerWith(
   ledgerBalance: StoicBalance,
-  options: { goalsFail?: boolean; shortfallDate?: string | null } = {},
+  options: {
+    goalsFail?: boolean;
+    goals?: unknown[];
+    shortfallDate?: string | null;
+    unconfirmedRows?: number;
+    rulesFail?: boolean;
+  } = {},
 ) {
   const ledger = { monthlyBalance: vi.fn(async () => ledgerBalance) };
-  const behaviorService = { load: vi.fn(async () => behavior()) };
+  const behaviorService = {
+    load: vi.fn(async () => behavior({ unconfirmedRows: options.unconfirmedRows ?? 0 })),
+    reserve: vi.fn(async () => 100000),
+  };
   const goalsService = {
     findAll: vi.fn(async () => {
       if (options.goalsFail) {
         throw new Error('goals down');
       }
-      return [];
+      return options.goals ?? [];
     }),
   };
-  const goalPlanService = { getPlan: vi.fn() };
-  const dashboardService = {
-    getCommitments: vi.fn(async () => ({
+  const goalPlanService = {
+    getPlan: vi.fn(async () => ({
+      status: 'no_deadline',
+      requiredPerMonth: null,
+      pace: { perMonth: 0 },
+      forecast: { monthsLate: null },
+      capacity: { free: 0 },
+    })),
+  };
+  const forecastService = {
+    getForecast: vi.fn(async () => ({
       openingBalance: 100000,
       shortfallDate: options.shortfallDate ?? null,
       lowestBalance: -250,
-      totalCommitted: 1800,
     })),
+  };
+  const ruleHealthService = {
+    load: vi.fn(async () => {
+      if (options.rulesFail) {
+        throw new Error('rules down');
+      }
+      return {
+        broken: [],
+        contradicted: [],
+        worthWriting: null,
+        idle: [],
+        filed: { byRule: 0, total: 0 },
+      };
+    }),
   };
   const analyzer = new StoicAnalyzer(
     ledger as any,
     behaviorService as any,
     goalsService as any,
     goalPlanService as any,
-    dashboardService as any,
+    { get: () => forecastService } as any,
+    ruleHealthService as any,
   );
   return { analyzer, ledger, behaviorService };
 }
@@ -117,6 +148,45 @@ describe('StoicAnalyzer', () => {
     const bad = analyzerWith(balance([month(0, leisureHeavy), month(1, onPlan)]));
     const badInsights = await bad.analyzer.analyze(context, SEPT_20);
     expect(badInsights.map(item => item.type)).not.toContain(InsightType.STOIC_PRAISE);
+  });
+
+  it('praises nothing while rows of the judged month wait in Review', async () => {
+    const { analyzer } = analyzerWith(balance([month(0, onPlan), month(1, onPlan)]), {
+      unconfirmedRows: 3,
+    });
+
+    const insights = await analyzer.analyze(context, SEPT_20);
+
+    expect(insights.map(item => item.type)).not.toContain(InsightType.STOIC_PRAISE);
+  });
+
+  it('asks a date only of a goal that has had time to move', async () => {
+    const undated = (id: string, createdAt: Date) => ({
+      id,
+      name: id,
+      percent: 10,
+      isReached: false,
+      targetDate: null,
+      createdAt,
+    });
+    const { analyzer } = analyzerWith(balance([month(0, onPlan)]), {
+      goals: [undated('Just set', new Date(2026, 8, 10)), undated('Old', new Date(2026, 5, 1))],
+    });
+
+    const insights = await analyzer.analyze(context, SEPT_20);
+
+    const card = insights.find(item => item.messageKey === 'stoic.goal_no_date');
+    expect(card?.messageParams).toMatchObject({ goal: 'Old', percent: 10 });
+  });
+
+  it('keeps going when the rules cannot be read', async () => {
+    const { analyzer } = analyzerWith(balance([month(0, leisureHeavy)]), { rulesFail: true });
+
+    const insights = await analyzer.analyze(context, SEPT_20);
+
+    expect(insights.map(item => (item as { messageKey: string }).messageKey)).toContain(
+      'stoic.leisure_over_plan',
+    );
   });
 
   it('keeps going when one data source fails', async () => {

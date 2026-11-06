@@ -52,90 +52,23 @@ export const cs: QuoteTexts = {
     'marcus-had-them-not': '…když je měl, užíval je bez afektu, a když je neměl, nechyběly mu.',
     'marcus-very-little-needed': '…k šťastnému životu je vskutku potřeba velmi málo.',
     'marcus-be-such': 'Už vůbec nemluv o tom, jaký má dobrý člověk být — buď takový.',
-    'buffett-swimming-naked': 'Koneckonců teprve při odlivu se pozná, kdo plave nahý.',
-    'buffett-borrowed-money':
-      'Někteří lidé nepochybně velmi zbohatli díky vypůjčeným penězům. Byla to však také cesta, jak velmi zchudnout.',
-    'buffett-possessions': 'Příliš často rozsáhlá sbírka majetku nakonec vlastní svého vlastníka.',
-    'buffett-one-percent':
-      'Kdybychom na sebe použili více než 1 % mých pohledávek (akciových certifikátů Berkshire Hathaway), nezvýšilo by to ani naše štěstí, ani naši pohodu.',
-    'munger-learning-machines':
-      'Pořád vidím, jak v životě stoupají lidé, kteří nejsou ti nejchytřejší… ale jsou to učící se stroje. Každý večer jdou spát o něco moudřejší, než když vstali.',
-    'munger-mozart-overspent':
-      'Byl jeden muž, který se stal nejslavnějším skladatelem světa, ale byl naprosto nešťastný… a jedním z důvodů bylo, že vždy utrácel víc, než vydělal. Byl to Mozart.',
-    'munger-terrible-blows':
-      'Život přinese strašné rány, hrozné rány, nespravedlivé rány. Na tom nezáleží… tvou povinností nebylo utopit se v sebelítosti, ale využít tu strašnou ránu konstruktivně.',
-    'munger-disastrous-modes':
-      'Obecně řečeno, závist, zahořklost, pomsta a sebelítost jsou katastrofální způsoby myšlení.',
-    'graham-worst-enemy':
-      'Hlavním problémem investora — a snad i jeho nejhorším nepřítelem — bude pravděpodobně on sám.',
-    'graham-margin-of-safety':
-      'Máme-li vystihnout tajemství zdravého investování třemi slovy, odvážíme se motta: BEZPEČNOSTNÍ POLŠTÁŘ.',
-    'graham-prudent-principles':
-      'Wall Street má několik rozumných zásad; potíž je, že se vždy zapomenou právě tehdy, kdy jsou nejvíc potřeba.',
-    'bogle-courage-press-on':
-      'Odvaha pokračovat bez ohledu na okolnosti — ať je more klidné, nebo rozbouřené, a zvlášť když okolo zuří tržní bouře — je nejpodstatnější vlastností úspěšného investora.',
-    'bogle-own-worst-enemy': 'Ano, investor je často svým nejhorším nepřítelem.',
-    'bogle-dont-stop-regular-investing':
-      'Pro všechno na světě, nepřerušujte pravidelné investování jen proto, že trh klesá.',
-    'bogle-great-game-of-life':
-      'Pamatujte, že velká hra života není o penězích; je o tom, abyste ze sebe vydali to nejlepší a budovali svět znovu.',
-    'lynch-family-budget': 'Má smysl projít rodinný rozpočet, než začnete kupovat akcie.',
-    'lynch-afford-to-lose':
-      'Investujte jen to, co si můžete dovolit ztratit, aniž by ta ztráta v dohledné době jakkoli zasáhla váš každodenní život.',
-    'dalio-pain-reflection': 'Bolest + reflexe = pokrok.',
-    'dalio-habit-controls-you':
-      'Budete-li cokoli dělat dostatečně často a dostatečně dlouho, vytvoří se zvyk, který začne ovládat vás.',
-    'dalio-avoid-temptations':
-      'Lidé, kteří si vyberou, co skutečně chtějí, vyhnou se pokušením a projdou bolestmi, které je od toho odvádějí, mají na úspěšný život mnohem větší šanci.',
-    'housel-spending-to-show':
-      'Utrácet peníze, abyste lidem ukázali, kolik peněz máte, je nejrychlejší cesta, jak mít peněz méně.',
-    'housel-desire-less':
-      'Úspory vznikají tím, že utrácíte méně. Utrácet méně můžete, pokud méně chcete. A méně chtít budete, pokud vám bude méně záležet na tom, co si o vás myslí druzí.',
-    'housel-goalpost': 'Nejtěžší finanční dovedností je přimět branku, aby se přestala posouvat.',
-    'housel-plan-survive-reality': 'Plán je užitečný jen tehdy, přežije-li realitu.',
-    'franklin-small-leak': 'Dávej pozor na malé výdaje; malá trhlina potopí velkou lodˇ.',
-    'franklin-saving-and-getting':
-      'Chceš-li zbohatnout, mysli na spoření stejně jako na vydělávání.',
-    'franklin-no-need': 'Kupuj, co nepotřebuješ, a zakrátko budeš prodávat, co potřebuješ.',
-    'franklin-first-desire':
-      'Snazší je potlačit první žádost než ukojit všechny, které po ní přijdou.',
-    'franklin-age-and-want':
-      'Spoř na stáří a nedostatek, dokud můžeš; žádné ranní slunce nevydrží celý den.',
-    'franklin-comfort-and-help':
-      'Nebuď nemilosrdný k těm, kdo se zdají být v nouzi; raději je potěš a pomoz jim.',
-    'clason-part-of-all-you-earn':
-      'Část všeho, co vyděláš, je tvá, abys si ji nechal. Nemá být menší než desetina, jakkoli málo vyděláváš.',
-    'clason-tree-of-wealth':
-      'Bohatství roste, jako strom, z malého semínka. První měďák, který uspoříš, je semínko, z něhož vyroste tvůj strom bohatství.',
-    'clason-necessary-expenses':
-      'To, co každý z nás nazývá „nutnými výdaji“, vždy vyroste až na úroveň našich příjmů, pokud se tomu nepostavíme.',
-    'clason-little-caution': 'Lepší trocha opatrnosti než velká lítost.',
-    'clason-cultivate-thy-powers':
-      'Pěstuj své vlastní síly: studuj a buď moudřejší, zručnější, a jednej tak, abys mohl sám sebe respektovat.',
-    'stanley-accumulate-not-spend':
-      'Vyděláváte-li každý rok dobře a všechno utratíte, nebohatnete. Jen žijete na vysoké noze. Bohatství je to, co nahromadíte, ne to, co utratíte.',
-    'stanley-below-your-means': 'Jakýkoli je váš příjem, žijte vždy pod své možnosti.',
-    'stanley-self-discipline':
-      'Bohatství je častěji výsledkem životního stylu tvrdé práce, vytrvalosti, plánování a především sebedisciplíny.',
-    'robin-life-energy': 'Peníze jsou něco, za co se rozhodujeme vyměnit svou životní energii.',
-    'robin-enough': 'Na vrcholu křivky naplnění máme dost.',
-    'warren-must-haves': '„Musím mít“ jsou věci, které budete muset zaplatit, ať se stane cokoli.',
+    'seneca-what-is-wisdom': 'Co je moudrost? Stále chtít totéž a stále odmítat totéž.',
+    'seneca-no-right-wind': 'Když člověk neví, do jakého přístavu míří, žádný vítr není ten pravý.',
+    'epictetus-prescribe-a-character':
+      'Předepiš si hned nějaký charakter a nějakou podobu, kterou budeš dodržovat, ať jsi sám, nebo mezi lidmi.',
+    'epictetus-little-things':
+      'Začni tedy od maličkostí. Rozlil se olej? Ukradlo se trochu vína? Řekni si při té příležitosti: za takovou cenu se prodává klid mysli, za takovou cenu se prodává pokoj, ale zadarmo se nedostane nic.',
+    'epictetus-as-if-laws':
+      'Jakákoli pravidla ti jsou předložena pro vedení života, drž se jich jako zákonů, jako by ses dopustil bezbožnosti, kdybys kterékoli z nich porušil.',
+    'marcus-whole-of-life': 'Nevyrušuj se myšlenkou na celek svého života.',
+    'marcus-third-thing':
+      'Když jsi vykonal dobrý čin a jiný jej přijal, proč ještě hledáš třetí věc vedle těchto dvou, jako to dělají pošetilci, buď pověst dobrého činu, nebo odměnu?',
+    'marcus-what-more':
+      'Co víc chceš, když jsi člověku prokázal službu? Nestačí ti, že jsi učinil něco, co odpovídá tvé přirozenosti, a hledáš za to ještě platbu?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Epictetus',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marcus Aurelius',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

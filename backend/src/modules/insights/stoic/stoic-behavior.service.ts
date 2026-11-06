@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, type Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { flowsSql } from '../../../common/utils/counted-transactions.util';
 import {
   PRIVACY_VIEWER_PARAM,
@@ -12,12 +12,18 @@ import {
   SubscriptionStatus,
 } from '../../../entities/subscription.entity';
 import { Transaction, TransactionType } from '../../../entities/transaction.entity';
+import { RESERVE_WALLET_TYPES } from '../../../entities/wallet.entity';
 import { computeMonthRange, toMonthKey } from '../../budgets/budget-period.util';
+import { spendableBalance } from '../../dashboard/opening-balance';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
 import { buildRateMap, convertWith, round2 } from '../../goals/goal-money.util';
+import { unconfirmedRowsQuery } from '../../review-inbox/review-queue.queries';
 
 export interface MerchantMonth {
+  /** The payee's name when the row has one, so one shop under two bank spellings is one. */
   name: string;
+  /** The bank's own text carrying most of the money: what the reports list by. */
+  bankName: string;
   /** The category most of this merchant's spending was filed under. */
   categoryId: string | null;
   count: number;
@@ -47,6 +53,8 @@ export interface StoicBehavior {
   /** The judged month and the seven before it, newest first. */
   cashFlow: CashFlowMonth[];
   subscriptions: { count: number; monthlyTotal: number };
+  /** Rows of the judged month still waiting in Review, which no figure counts yet. */
+  unconfirmedRows: number;
 }
 
 const MONTHLY_FACTOR: Record<SubscriptionFrequency, number> = {
@@ -58,6 +66,8 @@ const MONTHLY_FACTOR: Record<SubscriptionFrequency, number> = {
 
 /** The judged month and seven before it: enough for two finished quarters side by side. */
 const CASH_FLOW_MONTHS = 8;
+
+const MERCHANT_NAME_SQL = 'COALESCE(payee.name, t.counterparty_name)';
 
 @Injectable()
 export class StoicBehaviorService {
@@ -85,30 +95,36 @@ export class StoicBehaviorService {
     // feed the merchant lists; their money still counts in every total below.
     const named = readablePrivateSql('t');
     const nobody = { [PRIVACY_VIEWER_PARAM]: null };
-    const [merchantRows, previousRows, weekdayRows, flowRows, subscriptions] = await Promise.all([
+    const [
+      merchantRows,
+      currentCounts,
+      previousRows,
+      weekdayRows,
+      flowRows,
+      subscriptions,
+      unconfirmedRows,
+    ] = await Promise.all([
       this.expenses(workspaceId, month)
         .andWhere(named, nobody)
-        .select('t.counterparty_name', 'name')
+        .leftJoin('t.payee', 'payee')
+        .select(MERCHANT_NAME_SQL, 'name')
+        .addSelect('t.counterparty_name', 'bankName')
         .addSelect('t.category_id', 'categoryId')
         .addSelect('t.currency', 'currency')
-        .addSelect('COUNT(*)', 'count')
         .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
-        .groupBy('t.counterparty_name')
+        .groupBy(MERCHANT_NAME_SQL)
+        .addGroupBy('t.counterparty_name')
         .addGroupBy('t.category_id')
         .addGroupBy('t.currency')
         .getRawMany<{
           name: string;
+          bankName: string;
           categoryId: string | null;
           currency: string;
-          count: string;
           total: string;
         }>(),
-      this.expenses(workspaceId, previous)
-        .andWhere(named, nobody)
-        .select('t.counterparty_name', 'name')
-        .addSelect('COUNT(*)', 'count')
-        .groupBy('t.counterparty_name')
-        .getRawMany<{ name: string; count: string }>(),
+      this.purchaseCounts(workspaceId, month),
+      this.purchaseCounts(workspaceId, previous),
       this.expenses(workspaceId, month)
         .select('t.category_id', 'categoryId')
         .addSelect('t.currency', 'currency')
@@ -140,10 +156,8 @@ export class StoicBehaviorService {
         .addGroupBy('t.currency')
         .getRawMany<{ month: string; type: TransactionType; currency: string; total: string }>(),
       this.subscriptionRepository.find({
-        where: {
-          workspaceId,
-          status: In([SubscriptionStatus.ACTIVE, SubscriptionStatus.DETECTED]),
-        },
+        // A detected one is only a guess until the person confirms it in Review.
+        where: { workspaceId, status: SubscriptionStatus.ACTIVE },
         select: {
           id: true,
           amount: true,
@@ -151,6 +165,10 @@ export class StoicBehaviorService {
           frequency: true,
         },
       }),
+      unconfirmedRowsQuery(this.transactionRepository, workspaceId)
+        .andWhere('t.transactionDate >= :start', { start: month.start })
+        .andWhere('t.transactionDate <= :end', { end: month.end })
+        .getCount(),
     ]);
 
     const rates = await buildRateMap(
@@ -166,7 +184,7 @@ export class StoicBehaviorService {
     );
 
     return {
-      merchants: this.mergeMerchants(merchantRows, rates),
+      merchants: this.mergeMerchants(merchantRows, currentCounts, rates),
       previousCounts: Object.fromEntries(
         previousRows.map(row => [row.name, Number.parseInt(row.count, 10) || 0]),
       ),
@@ -182,7 +200,36 @@ export class StoicBehaviorService {
           ),
         ),
       },
+      unconfirmedRows,
     };
+  }
+
+  /**
+   * The money to fall back on today, in `currency`: everyday accounts, savings and
+   * deposits, less what the cards owe. Without any account, `fallback`.
+   */
+  async reserve(workspaceId: string, currency: string, fallback: number): Promise<number> {
+    return spendableBalance(this.transactionRepository, workspaceId, {
+      walletTypes: RESERVE_WALLET_TYPES,
+      convert: async (amount, from) =>
+        convertWith(
+          await buildRateMap(this.exchangeRatesService, [from], currency, workspaceId),
+          amount,
+          from,
+        ),
+      allTime: async () => fallback,
+    });
+  }
+
+  /** Purchases per merchant in a month. The parts of a split are one purchase. */
+  private purchaseCounts(workspaceId: string, range: { start: Date; end: Date }) {
+    return this.expenses(workspaceId, range)
+      .andWhere(readablePrivateSql('t'), { [PRIVACY_VIEWER_PARAM]: null })
+      .leftJoin('t.payee', 'payee')
+      .select(MERCHANT_NAME_SQL, 'name')
+      .addSelect('COUNT(DISTINCT COALESCE(t.split_group_id::text, t.id::text))', 'count')
+      .groupBy(MERCHANT_NAME_SQL)
+      .getRawMany<{ name: string; count: string }>();
   }
 
   private expenses(workspaceId: string, range: { start: Date; end: Date }) {
@@ -201,29 +248,40 @@ export class StoicBehaviorService {
   private mergeMerchants(
     rows: Array<{
       name: string;
+      bankName: string;
       categoryId: string | null;
       currency: string;
-      count: string;
       total: string;
     }>,
+    counts: Array<{ name: string; count: string }>,
     rates: Map<string, number>,
   ): MerchantMonth[] {
     const byName = new Map<
       string,
-      { count: number; total: number; byCategory: Map<string | null, number> }
+      {
+        total: number;
+        byCategory: Map<string | null, number>;
+        byBankName: Map<string, number>;
+      }
     >();
     for (const row of rows) {
-      const entry = byName.get(row.name) ?? { count: 0, total: 0, byCategory: new Map() };
+      const entry = byName.get(row.name) ?? {
+        total: 0,
+        byCategory: new Map(),
+        byBankName: new Map(),
+      };
       const amount = convertWith(rates, row.total, row.currency);
-      entry.count += Number.parseInt(row.count, 10) || 0;
       entry.total += amount;
       entry.byCategory.set(row.categoryId, (entry.byCategory.get(row.categoryId) ?? 0) + amount);
+      entry.byBankName.set(row.bankName, (entry.byBankName.get(row.bankName) ?? 0) + amount);
       byName.set(row.name, entry);
     }
+    const countOf = new Map(counts.map(row => [row.name, Number.parseInt(row.count, 10) || 0]));
     return [...byName].map(([name, entry]) => ({
       name,
+      bankName: [...entry.byBankName].sort((a, b) => b[1] - a[1])[0]?.[0] ?? name,
       categoryId: [...entry.byCategory].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null,
-      count: entry.count,
+      count: countOf.get(name) ?? 0,
       total: round2(entry.total),
     }));
   }

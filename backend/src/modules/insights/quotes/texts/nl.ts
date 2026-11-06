@@ -63,96 +63,25 @@ export const nl: QuoteTexts = {
       '…er is werkelijk maar heel weinig nodig om een gelukkig leven te leiden.',
     'marcus-be-such':
       'Praat helemaal niet meer over hoe een goed mens moet zijn, maar wees er een.',
-    'buffett-swimming-naked': 'Uiteindelijk zie je pas wie er naakt zwemt als het eb wordt.',
-    'buffett-borrowed-money':
-      'Ongetwijfeld zijn sommige mensen heel rijk geworden door geleend geld te gebruiken. Maar het is ook een manier geweest om heel arm te worden.',
-    'buffett-possessions':
-      'Te vaak gaat een enorme verzameling bezittingen uiteindelijk haar eigenaar bezitten.',
-    'buffett-one-percent':
-      'Als we meer dan 1% van mijn tegoedbonnen (aandelencertificaten van Berkshire Hathaway) aan onszelf zouden besteden, zouden noch ons geluk noch ons welzijn erop vooruitgaan.',
-    'munger-learning-machines':
-      'Ik zie voortdurend mensen hogerop komen die niet de slimsten zijn… maar het zijn leermachines. Ze gaan elke avond iets wijzer naar bed dan ze opstonden.',
-    'munger-mozart-overspent':
-      'Er was eens een man die de beroemdste componist ter wereld werd, maar hij was diep ongelukkig… en een van de redenen was dat hij altijd meer uitgaf dan hij verdiende. Dat was Mozart.',
-    'munger-terrible-blows':
-      'Het leven zal verschrikkelijke klappen uitdelen, afschuwelijke klappen, oneerlijke klappen. Maakt niet uit… het was je plicht niet om weg te zinken in zelfmedelijden, maar om die verschrikkelijke klap op een constructieve manier te benutten.',
-    'munger-disastrous-modes':
-      'Over het algemeen zijn afgunst, wrok, wraak en zelfmedelijden rampzalige manieren van denken.',
-    'graham-worst-enemy':
-      'Het grootste probleem van de belegger — en zelfs zijn ergste vijand — is waarschijnlijk hijzelf.',
-    'graham-margin-of-safety':
-      'Gesteld voor een vergelijkbare uitdaging om het geheim van verstandig beleggen in drie woorden te vatten, wagen we het motto: VEILIGHEIDSMARGE.',
-    'graham-prudent-principles':
-      'Wall Street kent een paar verstandige principes; het probleem is dat ze altijd vergeten worden wanneer ze het hardst nodig zijn.',
-    'bogle-courage-press-on':
-      'De moed om hoe dan ook door te zetten — of we nu een kalme of een woelige zee tegemoet gaan, en vooral wanneer de stormen op de markt om ons heen gieren — is de wezenlijke eigenschap van de succesvolle belegger.',
-    'bogle-own-worst-enemy': 'Ja, de belegger is vaak zijn eigen ergste vijand.',
-    'bogle-dont-stop-regular-investing':
-      'In godsnaam, stop niet met regelmatig beleggen omdat de markt daalt.',
-    'bogle-great-game-of-life':
-      'Onthoud dat het grote spel van het leven niet om geld draait; het draait erom je best te doen om de wereld opnieuw op te bouwen.',
-    'lynch-family-budget':
-      'Het is verstandig om het gezinsbudget door te nemen voordat je aandelen koopt.',
-    'lynch-afford-to-lose':
-      'Beleg alleen wat je zou kunnen missen zonder dat dat verlies in de voorzienbare toekomst enig effect heeft op je dagelijks leven.',
-    'dalio-pain-reflection': 'Pijn + Reflectie = Vooruitgang.',
-    'dalio-habit-controls-you':
-      'Als je vrijwel wat dan ook maar vaak genoeg doet over een langere tijd, vorm je een gewoonte die jou gaat beheersen.',
-    'dalio-avoid-temptations':
-      'Mensen die kiezen wat ze echt willen, en de verleidingen vermijden en de pijn overwinnen die hen wegdrijven van wat ze echt willen, hebben een veel grotere kans op een succesvol leven.',
-    'housel-spending-to-show':
-      'Geld uitgeven om mensen te laten zien hoeveel geld je hebt, is de snelste manier om minder geld te hebben.',
-    'housel-desire-less':
-      'Sparen kan ontstaan door minder uit te geven. Je kunt minder uitgeven als je minder verlangt. En je zult minder verlangen als het je minder kan schelen wat anderen van je denken.',
-    'housel-goalpost':
-      'De moeilijkste financiële vaardigheid is ervoor zorgen dat de doelpaal niet meer verschuift.',
-    'housel-plan-survive-reality':
-      'Een plan is alleen nuttig als het de werkelijkheid kan overleven.',
-    'franklin-small-leak':
-      'Pas op voor kleine uitgaven; een klein lek doet een groot schip zinken.',
-    'franklin-saving-and-getting':
-      'Als je rijk wilt worden, denk dan aan sparen en niet alleen aan verdienen.',
-    'franklin-no-need':
-      'Koop wat je niet nodig hebt, en weldra zul je moeten verkopen wat je wel nodig hebt.',
-    'franklin-first-desire':
-      'Het is gemakkelijker het eerste verlangen te onderdrukken dan alle verlangens te bevredigen die erop volgen.',
-    'franklin-age-and-want':
-      'Spaar voor ouderdom en gebrek zolang je kunt; geen ochtendzon duurt de hele dag.',
-    'franklin-comfort-and-help':
-      'Wees niet liefdeloos tegenover hen die het op dit moment nodig lijken te hebben, maar troost en help hen.',
-    'clason-part-of-all-you-earn':
-      'Een deel van alles wat je verdient, is van jou om te houden. Het mag niet minder zijn dan een tiende, hoe weinig je ook verdient.',
-    'clason-tree-of-wealth':
-      'Rijkdom groeit, net als een boom, uit een piepklein zaadje. De eerste koperen munt die je spaart, is het zaadje waaruit je boom van rijkdom zal groeien.',
-    'clason-necessary-expenses':
-      'Wat ieder van ons zijn “noodzakelijke uitgaven” noemt, zal altijd groeien tot het gelijk is aan ons inkomen, tenzij we ons daartegen verzetten.',
-    'clason-little-caution': 'Beter een beetje voorzichtigheid dan veel spijt.',
-    'clason-cultivate-thy-powers':
-      'Ontwikkel je eigen vermogens, studeer en word wijzer, word vaardiger, handel zo dat je jezelf kunt respecteren.',
-    'stanley-accumulate-not-spend':
-      'Als je elk jaar een goed inkomen hebt en het allemaal uitgeeft, word je niet rijker. Je leeft gewoon op grote voet. Rijkdom is wat je opbouwt, niet wat je uitgeeft.',
-    'stanley-below-your-means': 'Wat je inkomen ook is, leef altijd onder je stand.',
-    'stanley-self-discipline':
-      'Rijkdom is vaker het resultaat van een levensstijl van hard werken, doorzettingsvermogen, planning en vooral zelfdiscipline.',
-    'robin-life-energy': 'Geld is iets waarvoor we ervoor kiezen onze levensenergie te ruilen.',
-    'robin-enough': 'Op het hoogtepunt van de vervullingscurve hebben we genoeg.',
-    'warren-must-haves': 'Onmisbare uitgaven zijn de dingen die je hoe dan ook moet betalen.',
+    'seneca-what-is-wisdom':
+      'Wat is wijsheid? Altijd dezelfde dingen willen en altijd dezelfde dingen afwijzen.',
+    'seneca-no-right-wind':
+      'Wanneer iemand niet weet welke haven hij aandoet, is geen wind de goede.',
+    'epictetus-prescribe-a-character':
+      'Schrijf jezelf onmiddellijk een bepaald karakter en een bepaalde vorm voor, die je in acht neemt zowel wanneer je alleen bent als wanneer je mensen ontmoet.',
+    'epictetus-little-things':
+      'Begin dus met kleine dingen. Is de olie gemorst? Is een beetje wijn gestolen? Zeg bij zulk een gelegenheid: voor zo’n prijs wordt onverstoorbaarheid verkocht; voor zo’n prijs wordt gemoedsrust verkocht, maar niets krijg je voor niets.',
+    'epictetus-as-if-laws':
+      'Welke regels voor de levensgang je ook worden voorgehouden, houd je eraan alsof het wetten waren, alsof je goddeloos zou handelen als je er één overtrad.',
+    'marcus-whole-of-life': 'Verontrust jezelf niet door aan je hele leven te denken.',
+    'marcus-third-thing':
+      'Wanneer je een goede daad hebt verricht en een ander haar heeft ontvangen, waarom zoek je dan nog een derde ding erbij, zoals dwazen doen, namelijk de roep een goede daad te hebben verricht of een wedergave te krijgen?',
+    'marcus-what-more':
+      'Want wat wil je méér wanneer je een mens een dienst hebt bewezen? Is het je niet genoeg iets te hebben gedaan dat in overeenstemming is met je natuur, en zoek je daarvoor betaald te worden?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Epictetus',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marcus Aurelius',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

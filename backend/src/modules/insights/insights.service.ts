@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, type Repository } from 'typeorm';
-import { Insight, InsightCategory } from '../../entities/insight.entity';
+import { Insight } from '../../entities/insight.entity';
 import { User } from '../../entities/user.entity';
+import { chooseAdviceCards } from './advice-cards';
 import type { InsightCandidate } from './analyzers/analyzer.interface';
 import { FinancialAnalyzer } from './analyzers/financial.analyzer';
 import { OperationalAnalyzer } from './analyzers/operational.analyzer';
@@ -55,7 +56,7 @@ export class InsightsService {
       this.financialAnalyzer.analyze(context),
       this.stoicAnalyzer.analyze(context),
     ]);
-    const candidates = [...operational, ...financial, ...stoic];
+    const candidates = [...operational, ...chooseAdviceCards(financial, stoic)];
 
     // One refresh writes a handful of insights for the same recipient — read
     // the locale they are phrased in once, not once per insight.
@@ -80,10 +81,10 @@ export class InsightsService {
       }
     }
 
-    await this.retireStaleStoic(
+    await this.retireStale(
       userId,
       workspaceId,
-      stoic.map(candidate => candidate.deduplicationKey),
+      candidates.map(candidate => candidate.deduplicationKey),
     );
 
     return {
@@ -95,13 +96,12 @@ export class InsightsService {
   }
 
   /**
-   * Stoic advice describes the month as it stands, and its kinds exclude each
-   * other — praise appears only when nothing needs correcting. A Stoic row
-   * whose condition no longer holds is removed rather than left to expire, so
-   * yesterday's praise never sits next to today's correction. The analyzer
-   * recomputes everything from transactions, so nothing is lost.
+   * Advice describes things as they stand. A row whose condition no longer holds
+   * is removed rather than left to expire: the budget it asked for now exists,
+   * and yesterday's praise must not sit next to today's correction. Every keyed
+   * row is computed afresh from transactions, so nothing is lost.
    */
-  private async retireStaleStoic(
+  private async retireStale(
     userId: string,
     workspaceId: string,
     currentKeys: string[],
@@ -112,9 +112,7 @@ export class InsightsService {
       .from(Insight)
       .where('user_id = :userId', { userId })
       .andWhere('workspace_id = :workspaceId', { workspaceId })
-      .andWhere('category IN (:...categories)', {
-        categories: [InsightCategory.STOIC, InsightCategory.EXPERT],
-      })
+      .andWhere('message_key IS NOT NULL')
       .andWhere('is_dismissed = false');
     if (currentKeys.length > 0) {
       query.andWhere('deduplication_key NOT IN (:...currentKeys)', { currentKeys });
@@ -174,7 +172,7 @@ export class InsightsService {
       return insight;
     }
     const text = this.localizeText(insight, locale);
-    const data = this.localizeExpert(insight.data, locale);
+    const data = this.localizeAuthor(insight.data, locale);
     if (!text && data === insight.data) {
       return insight;
     }
@@ -198,21 +196,20 @@ export class InsightsService {
   }
 
   /**
-   * Expert cards credit a named author, and those names are already translated
-   * for the quote of the day — the same table serves both, so the credit line
-   * does not stay English under a card that is otherwise translated. The work
+   * Reflections credit the Stoic they draw on, and those names are already
+   * translated for the quote of the day — the same table serves both. The work
    * keeps its published title, the way the quote banner cites its source.
    */
-  private localizeExpert(
+  private localizeAuthor(
     data: Record<string, unknown> | null,
     locale: string,
   ): Record<string, unknown> | null {
-    const expert = data?.expert;
-    if (typeof expert !== 'string') {
+    const author = data?.author;
+    if (typeof author !== 'string') {
       return data;
     }
-    const translated = QUOTE_TEXTS[locale]?.authors[expert];
-    return translated && translated !== expert ? { ...data, expert: translated } : data;
+    const translated = QUOTE_TEXTS[locale]?.authors[author];
+    return translated && translated !== author ? { ...data, author: translated } : data;
   }
 
   async getSummary(userId: string, workspaceId: string) {
@@ -434,13 +431,4 @@ export function isStillSnoozed(
   const before = countIn(dismissed.data);
   const after = countIn(candidate.data);
   return before === null || after === null || after <= before;
-}
-
-/** JSON with sorted keys — jsonb does not keep the order the row was written in. */
-function stableJson(value: unknown): string {
-  return JSON.stringify(value, (_, inner: unknown) =>
-    inner && typeof inner === 'object' && !Array.isArray(inner)
-      ? Object.fromEntries(Object.entries(inner).sort(([a], [b]) => a.localeCompare(b)))
-      : inner,
-  );
 }

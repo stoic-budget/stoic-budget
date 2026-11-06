@@ -54,12 +54,12 @@ const ru: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Норма сбережений выросла',
     message:
-      'Вы сохранили {{rate}}% дохода — на {{diff}} п.п. больше прошлого месяца. Умеренность работает.',
+      'За последний полный месяц вы сохранили {{rate}}% дохода — на {{diff}} п.п. больше, чем месяцем раньше. Умеренность работает.',
   },
   'trend.savings_rate_down': {
     title: 'Норма сбережений упала',
     message:
-      'Вы сохранили {{rate}}% дохода — на {{diff}} п.п. меньше прошлого месяца. Смотрите на то, что выросло, а не на то, чего не хватает.',
+      'За последний полный месяц вы сохранили {{rate}}% дохода — на {{diff}} п.п. меньше, чем месяцем раньше. Смотрите на то, что выросло, а не на то, чего не хватает.',
   },
   'pattern.risky_allocation': {
     title: 'Слишком многое зависит от фортуны',
@@ -96,12 +96,12 @@ const en: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Savings rate is up',
     message:
-      'You kept {{rate}}% of income — {{diff}} pts more than last month. Moderation is doing its work.',
+      'In the last full month you kept {{rate}}% of income, {{diff}} points more than the month before. Moderation works.',
   },
   'trend.savings_rate_down': {
     title: 'Savings rate is down',
     message:
-      'You kept {{rate}}% of income — {{diff}} pts less than last month. Look at what grew, not at what you lack.',
+      'In the last full month you kept {{rate}}% of income, {{diff}} points less than the month before. Look at what grew, not at what is lacking.',
   },
   'pattern.risky_allocation': {
     title: 'Too much depends on fortune',
@@ -137,12 +137,12 @@ const kk: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Жинақ үлесі өсті',
     message:
-      'Табыстың {{rate}}%-ын сақтадыңыз — өткен айдан {{diff}} т.т. артық. Байсалдылық өз жемісін беруде.',
+      'Соңғы толық айда табыстың {{rate}}% сақтадыңыз, бұл алдыңғы айдан {{diff}} пайыздық тармаққа артық. Өлшем сақтау жұмыс істейді.',
   },
   'trend.savings_rate_down': {
     title: 'Жинақ үлесі төмендеді',
     message:
-      'Табыстың {{rate}}%-ын сақтадыңыз — өткен айдан {{diff}} т.т. кем. Жетіспейтінге емес, өскенге қараңыз.',
+      'Соңғы толық айда табыстың {{rate}}% сақтадыңыз, бұл алдыңғы айдан {{diff}} пайыздық тармаққа кем. Нені жетпейтінін емес, нені өскенін қараңыз.',
   },
   'pattern.risky_allocation': {
     title: 'Тым көп нәрсе сәттілікке байланысты',
@@ -180,12 +180,12 @@ const de: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Sparquote gestiegen',
     message:
-      'Sie haben {{rate}}% des Einkommens behalten — {{diff}} Pp. mehr als im Vormonat. Maßhalten wirkt.',
+      'Im letzten vollen Monat blieben Ihnen {{rate}}% des Einkommens, {{diff}} Punkte mehr als im Monat davor. Mäßigung wirkt.',
   },
   'trend.savings_rate_down': {
     title: 'Sparquote gesunken',
     message:
-      'Sie haben {{rate}}% des Einkommens behalten — {{diff}} Pp. weniger als im Vormonat. Schauen Sie auf das, was gewachsen ist, nicht auf das, was fehlt.',
+      'Im letzten vollen Monat blieben Ihnen {{rate}}% des Einkommens, {{diff}} Punkte weniger als im Monat davor. Sehen Sie auf das, was gewachsen ist, nicht auf das, was fehlt.',
   },
   'pattern.risky_allocation': {
     title: 'Zu viel hängt vom Glück ab',
@@ -222,12 +222,12 @@ const fr: TranslationMap = {
   'trend.savings_rate_up': {
     title: "Taux d'épargne en hausse",
     message:
-      'Vous avez gardé {{rate}}% de vos revenus — {{diff}} pts de plus que le mois dernier. La modération porte ses fruits.',
+      'Le dernier mois complet, vous avez gardé {{rate}}% de vos revenus, soit {{diff}} points de plus que le mois précédent. La modération porte ses fruits.',
   },
   'trend.savings_rate_down': {
     title: "Taux d'épargne en baisse",
     message:
-      'Vous avez gardé {{rate}}% de vos revenus — {{diff}} pts de moins que le mois dernier. Regardez ce qui a grandi, non ce qui vous manque.',
+      'Le dernier mois complet, vous avez gardé {{rate}}% de vos revenus, soit {{diff}} points de moins que le mois précédent. Regardez ce qui a grandi, non ce qui manque.',
   },
   'pattern.risky_allocation': {
     title: 'Trop de choses dépendent de la fortune',
@@ -262,12 +262,12 @@ const es: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Tasa de ahorro al alza',
     message:
-      'Conservaste el {{rate}}% de tus ingresos: {{diff}} pp más que el mes pasado. La moderación da fruto.',
+      'En el último mes completo conservaste el {{rate}}% de tus ingresos, {{diff}} puntos más que el mes anterior. La moderación funciona.',
   },
   'trend.savings_rate_down': {
     title: 'Tasa de ahorro a la baja',
     message:
-      'Conservaste el {{rate}}% de tus ingresos: {{diff}} pp menos que el mes pasado. Mira lo que creció, no lo que te falta.',
+      'En el último mes completo conservaste el {{rate}}% de tus ingresos, {{diff}} puntos menos que el mes anterior. Mira lo que creció, no lo que falta.',
   },
   'pattern.risky_allocation': {
     title: 'Demasiado depende de la fortuna',
@@ -303,12 +303,12 @@ const pt: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Taxa de poupança subiu',
     message:
-      'Você guardou {{rate}}% da renda — {{diff}} p.p. a mais que no mês passado. A moderação está dando resultado.',
+      'No último mês completo você guardou {{rate}}% da renda, {{diff}} pontos a mais que no mês anterior. A moderação funciona.',
   },
   'trend.savings_rate_down': {
     title: 'Taxa de poupança caiu',
     message:
-      'Você guardou {{rate}}% da renda — {{diff}} p.p. a menos que no mês passado. Olhe para o que cresceu, não para o que falta.',
+      'No último mês completo você guardou {{rate}}% da renda, {{diff}} pontos a menos que no mês anterior. Olhe para o que cresceu, não para o que falta.',
   },
   'pattern.risky_allocation': {
     title: 'Coisas demais dependem da sorte',
@@ -343,12 +343,12 @@ const tr: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Tasarruf oranı arttı',
     message:
-      'Gelirin %{{rate}} kadarını korudunuz — geçen aydan {{diff}} puan fazla. Ölçülülük işini yapıyor.',
+      'Son tam ayda gelirinizin %{{rate}} kadarını elinizde tuttunuz; bu, önceki aydan {{diff}} puan fazla. Ölçülülük işe yarıyor.',
   },
   'trend.savings_rate_down': {
     title: 'Tasarruf oranı düştü',
     message:
-      'Gelirin %{{rate}} kadarını korudunuz — geçen aydan {{diff}} puan az. Eksik olana değil, büyüyene bakın.',
+      'Son tam ayda gelirinizin %{{rate}} kadarını elinizde tuttunuz; bu, önceki aydan {{diff}} puan az. Neyin eksik olduğuna değil, neyin büyüdüğüne bakın.',
   },
   'pattern.risky_allocation': {
     title: 'Çok şey talihe bağlı',
@@ -384,12 +384,12 @@ const uk: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Норма заощаджень зросла',
     message:
-      'Ви зберегли {{rate}}% доходу — на {{diff}} в.п. більше, ніж минулого місяця. Поміркованість працює.',
+      'За останній повний місяць ви зберегли {{rate}}% доходу, на {{diff}} п. п. більше, ніж місяцем раніше. Помірність працює.',
   },
   'trend.savings_rate_down': {
     title: 'Норма заощаджень впала',
     message:
-      'Ви зберегли {{rate}}% доходу — на {{diff}} в.п. менше, ніж минулого місяця. Дивіться на те, що виросло, а не на те, чого бракує.',
+      'За останній повний місяць ви зберегли {{rate}}% доходу, на {{diff}} п. п. менше, ніж місяцем раніше. Дивіться на те, що зросло, а не на те, чого бракує.',
   },
   'pattern.risky_allocation': {
     title: 'Забагато залежить від фортуни',
@@ -422,12 +422,13 @@ const zh: TranslationMap = {
   },
   'trend.savings_rate_up': {
     title: '储蓄率上升',
-    message: '您留住了收入的 {{rate}}%，比上月高 {{diff}} 个百分点。节制正在发挥作用。',
+    message:
+      '在最近一个完整的月份里，您留下了收入的 {{rate}}%，比前一个月多 {{diff}} 个百分点。节制是有效的。',
   },
   'trend.savings_rate_down': {
     title: '储蓄率下降',
     message:
-      '您留住了收入的 {{rate}}%，比上月低 {{diff}} 个百分点。看看已经增长的，而不是所缺少的。',
+      '在最近一个完整的月份里，您留下了收入的 {{rate}}%，比前一个月少 {{diff}} 个百分点。请看增长了什么，而不是缺少了什么。',
   },
   'pattern.risky_allocation': {
     title: '太多东西取决于运气',
@@ -464,12 +465,12 @@ const pl: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Stopa oszczędności wzrosła',
     message:
-      'Zachowano {{rate}}% dochodu — o {{diff}} p.p. więcej niż w zeszłym miesiącu. Umiar działa.',
+      'W ostatnim pełnym miesiącu zostało Ci {{rate}}% dochodów, o {{diff}} p.p. więcej niż miesiąc wcześniej. Umiar działa.',
   },
   'trend.savings_rate_down': {
     title: 'Stopa oszczędności spadła',
     message:
-      'Zachowano {{rate}}% dochodu — o {{diff}} p.p. mniej niż w zeszłym miesiącu. Patrz na to, co urosło, a nie na to, czego brakuje.',
+      'W ostatnim pełnym miesiącu zostało Ci {{rate}}% dochodów, o {{diff}} p.p. mniej niż miesiąc wcześniej. Patrz na to, co urosło, nie na to, czego brakuje.',
   },
   'pattern.risky_allocation': {
     title: 'Zbyt wiele zależy od losu',
@@ -505,12 +506,12 @@ const it: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Tasso di risparmio in aumento',
     message:
-      'Hai conservato il {{rate}}% del reddito: {{diff}} p.p. in più del mese scorso. La moderazione sta dando frutto.',
+      'Nell’ultimo mese completo hai tenuto il {{rate}}% delle entrate, {{diff}} punti in più del mese prima. La moderazione funziona.',
   },
   'trend.savings_rate_down': {
     title: 'Tasso di risparmio in calo',
     message:
-      'Hai conservato il {{rate}}% del reddito: {{diff}} p.p. in meno del mese scorso. Guarda ciò che è cresciuto, non ciò che ti manca.',
+      'Nell’ultimo mese completo hai tenuto il {{rate}}% delle entrate, {{diff}} punti in meno del mese prima. Guarda ciò che è cresciuto, non ciò che manca.',
   },
   'pattern.risky_allocation': {
     title: 'Troppo dipende dalla fortuna',
@@ -547,12 +548,12 @@ const sk: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Miera úspor stúpla',
     message:
-      'Ušetrili ste {{rate}}% príjmu — o {{diff}} p.b. viac než minulý mesiac. Striedmosť prináša ovocie.',
+      'V poslednom celom mesiaci ste si ponechali {{rate}}% príjmu, o {{diff}} p. b. viac ako mesiac predtým. Striedmosť funguje.',
   },
   'trend.savings_rate_down': {
     title: 'Miera úspor klesla',
     message:
-      'Ušetrili ste {{rate}}% príjmu — o {{diff}} p.b. menej než minulý mesiac. Pozerajte na to, čo narástlo, nie na to, čo chýba.',
+      'V poslednom celom mesiaci ste si ponechali {{rate}}% príjmu, o {{diff}} p. b. menej ako mesiac predtým. Pozerajte sa na to, čo vyrástlo, nie na to, čo chýba.',
   },
   'pattern.risky_allocation': {
     title: 'Príliš veľa závisí od šťasteny',
@@ -587,12 +588,12 @@ const ja: TranslationMap = {
   'trend.savings_rate_up': {
     title: '貯蓄率が上昇',
     message:
-      '収入の {{rate}}% を残せました。先月より {{diff}} ポイント増です。節度が実を結んでいます。',
+      '直近の丸一か月では、収入の {{rate}}% を残しました。前の月より {{diff}} ポイント多くなっています。節度は効いています。',
   },
   'trend.savings_rate_down': {
     title: '貯蓄率が低下',
     message:
-      '収入の {{rate}}% を残しました。先月より {{diff}} ポイント減です。足りないものではなく、育ったものに目を向けましょう。',
+      '直近の丸一か月では、収入の {{rate}}% を残しました。前の月より {{diff}} ポイント少なくなっています。足りないものではなく、増えたものを見てください。',
   },
   'pattern.risky_allocation': {
     title: '運に左右されるものが多すぎます',
@@ -627,12 +628,12 @@ const ko: TranslationMap = {
   'trend.savings_rate_up': {
     title: '저축률 상승',
     message:
-      '소득의 {{rate}}%를 지켰습니다. 지난달보다 {{diff}}%p 높습니다. 절제가 효과를 내고 있습니다.',
+      '직전의 한 달 전체에서 소득의 {{rate}}%를 남겼습니다. 그 전달보다 {{diff}}퍼센트포인트 많습니다. 절제는 효과가 있습니다.',
   },
   'trend.savings_rate_down': {
     title: '저축률 하락',
     message:
-      '소득의 {{rate}}%를 지켰습니다. 지난달보다 {{diff}}%p 낮습니다. 부족한 것이 아니라 자라난 것을 보세요.',
+      '직전의 한 달 전체에서 소득의 {{rate}}%를 남겼습니다. 그 전달보다 {{diff}}퍼센트포인트 적습니다. 부족한 것이 아니라 늘어난 것을 보세요.',
   },
   'pattern.risky_allocation': {
     title: '너무 많은 것이 운에 달려 있습니다',
@@ -666,12 +667,13 @@ const hi: TranslationMap = {
   },
   'trend.savings_rate_up': {
     title: 'बचत दर बढ़ी',
-    message: 'आपने आय का {{rate}}% बचाया — पिछले महीने से {{diff}} अंक अधिक। संयम अपना काम कर रहा है।',
+    message:
+      'पिछले पूरे महीने में आपके पास आय का {{rate}}% बचा, पिछले महीने से {{diff}} प्रतिशत अंक अधिक। संयम काम करता है।',
   },
   'trend.savings_rate_down': {
     title: 'बचत दर घटी',
     message:
-      'आपने आय का {{rate}}% बचाया — पिछले महीने से {{diff}} अंक कम। जो बढ़ा है उसे देखें, जो कम है उसे नहीं।',
+      'पिछले पूरे महीने में आपके पास आय का {{rate}}% बचा, पिछले महीने से {{diff}} प्रतिशत अंक कम। देखें कि क्या बढ़ा, यह नहीं कि क्या कम है।',
   },
   'pattern.risky_allocation': {
     title: 'बहुत कुछ भाग्य पर निर्भर है',
@@ -708,12 +710,12 @@ const nl: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Spaarquote gestegen',
     message:
-      'Je hield {{rate}}% van je inkomen over — {{diff}} procentpunt meer dan vorige maand. Matigheid doet haar werk.',
+      'In de laatste volledige maand hield je {{rate}}% van je inkomen over, {{diff}} punten meer dan de maand ervoor. Matiging werkt.',
   },
   'trend.savings_rate_down': {
     title: 'Spaarquote gedaald',
     message:
-      'Je hield {{rate}}% van je inkomen over — {{diff}} procentpunt minder dan vorige maand. Kijk naar wat gegroeid is, niet naar wat ontbreekt.',
+      'In de laatste volledige maand hield je {{rate}}% van je inkomen over, {{diff}} punten minder dan de maand ervoor. Kijk naar wat is gegroeid, niet naar wat ontbreekt.',
   },
   'pattern.risky_allocation': {
     title: 'Te veel hangt af van het lot',
@@ -749,12 +751,12 @@ const sv: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Sparkvoten har ökat',
     message:
-      'Du behöll {{rate}}% av inkomsten — {{diff}} procentenheter mer än förra månaden. Måttfullheten gör sitt jobb.',
+      'Under den senaste hela månaden behöll du {{rate}}% av inkomsten, {{diff}} punkter mer än månaden innan. Måttfullhet fungerar.',
   },
   'trend.savings_rate_down': {
     title: 'Sparkvoten har minskat',
     message:
-      'Du behöll {{rate}}% av inkomsten — {{diff}} procentenheter mindre än förra månaden. Se på det som har vuxit, inte på det som fattas.',
+      'Under den senaste hela månaden behöll du {{rate}}% av inkomsten, {{diff}} punkter mindre än månaden innan. Se på det som har vuxit, inte på det som saknas.',
   },
   'pattern.risky_allocation': {
     title: 'För mycket hänger på turen',
@@ -790,12 +792,12 @@ const vi: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Tỷ lệ tiết kiệm tăng',
     message:
-      'Bạn giữ lại {{rate}}% thu nhập — nhiều hơn tháng trước {{diff}} điểm. Sự điều độ đang phát huy tác dụng.',
+      'Trong tháng trọn vẹn gần nhất, bạn giữ lại {{rate}}% thu nhập, nhiều hơn tháng trước {{diff}} điểm phần trăm. Điều độ có tác dụng.',
   },
   'trend.savings_rate_down': {
     title: 'Tỷ lệ tiết kiệm giảm',
     message:
-      'Bạn giữ lại {{rate}}% thu nhập — ít hơn tháng trước {{diff}} điểm. Hãy nhìn vào những gì đã lớn lên, không phải những gì còn thiếu.',
+      'Trong tháng trọn vẹn gần nhất, bạn giữ lại {{rate}}% thu nhập, ít hơn tháng trước {{diff}} điểm phần trăm. Hãy nhìn vào cái đã tăng lên, đừng nhìn vào cái còn thiếu.',
   },
   'pattern.risky_allocation': {
     title: 'Quá nhiều thứ phụ thuộc vào may rủi',
@@ -831,12 +833,12 @@ const id: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Rasio tabungan naik',
     message:
-      'Anda menyimpan {{rate}}% pendapatan — {{diff}} poin lebih tinggi dari bulan lalu. Pengendalian diri membuahkan hasil.',
+      'Pada bulan penuh terakhir Anda menyimpan {{rate}}% dari pendapatan, {{diff}} poin lebih banyak daripada bulan sebelumnya. Kesederhanaan membuahkan hasil.',
   },
   'trend.savings_rate_down': {
     title: 'Rasio tabungan turun',
     message:
-      'Anda menyimpan {{rate}}% pendapatan — {{diff}} poin lebih rendah dari bulan lalu. Lihat apa yang telah tumbuh, bukan apa yang kurang.',
+      'Pada bulan penuh terakhir Anda menyimpan {{rate}}% dari pendapatan, {{diff}} poin lebih sedikit daripada bulan sebelumnya. Lihatlah apa yang bertambah, bukan apa yang kurang.',
   },
   'pattern.risky_allocation': {
     title: 'Terlalu banyak bergantung pada nasib',
@@ -873,12 +875,12 @@ const da: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Opsparingsraten er steget',
     message:
-      'Du beholdt {{rate}} % af indtægten — {{diff}} point mere end sidste måned. Mådeholdet gør sit arbejde.',
+      'I den seneste hele måned beholdt du {{rate}} % af indkomsten, {{diff}} point mere end måneden før. Mådehold virker.',
   },
   'trend.savings_rate_down': {
     title: 'Opsparingsraten er faldet',
     message:
-      'Du beholdt {{rate}} % af indtægten — {{diff}} point mindre end sidste måned. Se på det, der voksede, ikke på det, du mangler.',
+      'I den seneste hele måned beholdt du {{rate}} % af indkomsten, {{diff}} point mindre end måneden før. Se på det, der er vokset, ikke på det, der mangler.',
   },
   'pattern.risky_allocation': {
     title: 'For meget afhænger af held',
@@ -915,12 +917,12 @@ const nb: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Spareraten er opp',
     message:
-      'Du beholdt {{rate}} % av inntekten — {{diff}} poeng mer enn forrige måned. Måteholdet gjør sitt.',
+      'I den siste hele måneden beholdt du {{rate}} % av inntekten, {{diff}} poeng mer enn måneden før. Måtehold virker.',
   },
   'trend.savings_rate_down': {
     title: 'Spareraten er ned',
     message:
-      'Du beholdt {{rate}} % av inntekten — {{diff}} poeng mindre enn forrige måned. Se på det som vokste, ikke på det du mangler.',
+      'I den siste hele måneden beholdt du {{rate}} % av inntekten, {{diff}} poeng mindre enn måneden før. Se på det som har vokst, ikke på det som mangler.',
   },
   'pattern.risky_allocation': {
     title: 'For mye avhenger av flaks',
@@ -957,12 +959,12 @@ const nn: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Sparerata er opp',
     message:
-      'Du heldt att {{rate}} % av inntekta — {{diff}} poeng meir enn førre månad. Måtehaldet gjer sitt.',
+      'I den siste heile månaden heldt du att {{rate}} % av inntekta, {{diff}} poeng meir enn månaden før. Måtehald verkar.',
   },
   'trend.savings_rate_down': {
     title: 'Sparerata er ned',
     message:
-      'Du heldt att {{rate}} % av inntekta — {{diff}} poeng mindre enn førre månad. Sjå på det som voks, ikkje på det du manglar.',
+      'I den siste heile månaden heldt du att {{rate}} % av inntekta, {{diff}} poeng mindre enn månaden før. Sjå på det som har vakse, ikkje på det som manglar.',
   },
   'pattern.risky_allocation': {
     title: 'For mykje heng på flaks',
@@ -999,12 +1001,12 @@ const fi: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Säästöaste nousi',
     message:
-      'Pidit {{rate}} % tuloista — {{diff}} pistettä enemmän kuin viime kuussa. Kohtuus tekee työtään.',
+      'Viimeisen täyden kuukauden aikana säästit {{rate}} % tuloistasi, {{diff}} prosenttiyksikköä enemmän kuin edellisenä. Kohtuus toimii.',
   },
   'trend.savings_rate_down': {
     title: 'Säästöaste laski',
     message:
-      'Pidit {{rate}} % tuloista — {{diff}} pistettä vähemmän kuin viime kuussa. Katso mikä kasvoi, älä sitä mitä puuttuu.',
+      'Viimeisen täyden kuukauden aikana säästit {{rate}} % tuloistasi, {{diff}} prosenttiyksikköä vähemmän kuin edellisenä. Katso, mikä kasvoi, älä sitä, mikä puuttuu.',
   },
   'pattern.risky_allocation': {
     title: 'Liian paljon riippuu onnesta',
@@ -1040,12 +1042,12 @@ const is: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Sparnaðarhlutfall hækkar',
     message:
-      'Þú hélst {{rate}} % af tekjum — {{diff}} stigum meira en síðasta mánuð. Hófsemin vinnur sitt verk.',
+      'Í síðasta fulla mánuði hélstu eftir {{rate}} % af tekjunum, {{diff}} prósentustigum meira en mánuðinn á undan. Hófsemi virkar.',
   },
   'trend.savings_rate_down': {
     title: 'Sparnaðarhlutfall lækkar',
     message:
-      'Þú hélst {{rate}} % af tekjum — {{diff}} stigum minna en síðasta mánuð. Horfðu á það sem vex, ekki á það sem vantar.',
+      'Í síðasta fulla mánuði hélstu eftir {{rate}} % af tekjunum, {{diff}} prósentustigum minna en mánuðinn á undan. Líttu á það sem óx, ekki það sem vantar.',
   },
   'pattern.risky_allocation': {
     title: 'Of margt hangir á gæfunni',
@@ -1082,12 +1084,12 @@ const fo: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Sparistigið er hægri',
     message:
-      'Tú helt {{rate}} % av inntøkuni — {{diff}} stig meira enn seinasta mánað. Mátahaldið ger sítt.',
+      'Seinasta fulla mánaðin helt tú {{rate}} % av inntøkuni eftir, {{diff}} prosentstig meira enn mánaðin undan. Mátahald riggar.',
   },
   'trend.savings_rate_down': {
     title: 'Sparistigið er lægri',
     message:
-      'Tú helt {{rate}} % av inntøkuni — {{diff}} stig minni enn seinasta mánað. Hygg at tí sum vaks, ikki at tí tú manglar.',
+      'Seinasta fulla mánaðin helt tú {{rate}} % av inntøkuni eftir, {{diff}} prosentstig minni enn mánaðin undan. Hygg at tí, sum vaks, ikki at tí, sum manglar.',
   },
   'pattern.risky_allocation': {
     title: 'Ov mikið hongur á happi',
@@ -1123,12 +1125,12 @@ const cs: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Míra spoření vzrostla',
     message:
-      'Ponechali jste si {{rate}} % příjmu — o {{diff}} bodů více než minulý měsíc. Umírněnost koná své.',
+      'V posledním celém měsíci jste si ponechali {{rate}} % příjmů, o {{diff}} p. b. více než měsíc předtím. Střídmost funguje.',
   },
   'trend.savings_rate_down': {
     title: 'Míra spoření klesla',
     message:
-      'Ponechali jste si {{rate}} % příjmu — o {{diff}} bodů méně než minulý měsíc. Hleďte na to, co vyrostlo, ne na to, co chybí.',
+      'V posledním celém měsíci jste si ponechali {{rate}} % příjmů, o {{diff}} p. b. méně než měsíc předtím. Dívejte se na to, co vyrostlo, ne na to, co chybí.',
   },
   'pattern.risky_allocation': {
     title: 'Příliš mnoho závisí na náhodě',
@@ -1166,12 +1168,12 @@ const bg: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Нормата на спестяване се повиши',
     message:
-      'Запазихте {{rate}} % от дохода — {{diff}} пункта повече от миналия месец. Умереността си върши работата.',
+      'През последния пълен месец запазихте {{rate}} % от дохода си, с {{diff}} пункта повече от месеца преди това. Умереността действа.',
   },
   'trend.savings_rate_down': {
     title: 'Нормата на спестяване спадна',
     message:
-      'Запазихте {{rate}} % от дохода — {{diff}} пункта по-малко от миналия месец. Гледайте какво нарасна, не какво ви липсва.',
+      'През последния пълен месец запазихте {{rate}} % от дохода си, с {{diff}} пункта по-малко от месеца преди това. Гледайте какво е нараснало, а не какво липсва.',
   },
   'pattern.risky_allocation': {
     title: 'Прекалено много зависи от случайността',
@@ -1207,12 +1209,12 @@ const hr: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Stopa štednje je porasla',
     message:
-      'Zadržali ste {{rate}} % prihoda — {{diff}} bodova više nego prošli mjesec. Umjerenost radi svoje.',
+      'U zadnjem punom mjesecu zadržali ste {{rate}} % prihoda, {{diff}} postotnih bodova više nego mjesec prije. Umjerenost djeluje.',
   },
   'trend.savings_rate_down': {
     title: 'Stopa štednje je pala',
     message:
-      'Zadržali ste {{rate}} % prihoda — {{diff}} bodova manje nego prošli mjesec. Gledajte što je naraslo, ne što vam manjka.',
+      'U zadnjem punom mjesecu zadržali ste {{rate}} % prihoda, {{diff}} postotnih bodova manje nego mjesec prije. Gledajte ono što je poraslo, ne ono čega nedostaje.',
   },
   'pattern.risky_allocation': {
     title: 'Previše ovisi o sreći',
@@ -1248,12 +1250,12 @@ const sr: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Стопа штедње је порасла',
     message:
-      'Задржали сте {{rate}} % прихода — {{diff}} поена више него прошлог месеца. Умереност радi своје.',
+      'У последњем целом месецу задржали сте {{rate}} % прихода, {{diff}} поена више него месец раније. Умереност делује.',
   },
   'trend.savings_rate_down': {
     title: 'Стопа штедње је пала',
     message:
-      'Задржали сте {{rate}} % прихода — {{diff}} поена мање него прошлог месеца. Гледајте шта је нарасло, не шта вам мањка.',
+      'У последњем целом месецу задржали сте {{rate}} % прихода, {{diff}} поена мање него месец раније. Гледајте шта је порасло, а не шта недостаје.',
   },
   'pattern.risky_allocation': {
     title: 'Превише зависи од среће',
@@ -1289,12 +1291,12 @@ const sl: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Stopnja varčevanja je zrasla',
     message:
-      'Obdržali ste {{rate}} % prihodka — {{diff}} točk več kot prejšnji mesec. Zmernost opravlja svoje.',
+      'V zadnjem polnem mesecu ste obdržali {{rate}} % prihodkov, {{diff}} odstotnih točk več kot mesec prej. Zmernost deluje.',
   },
   'trend.savings_rate_down': {
     title: 'Stopnja varčevanja je padla',
     message:
-      'Obdržali ste {{rate}} % prihodka — {{diff}} točk manj kot prejšnji mesec. Glejte, kaj je zraslo, ne kaj vam manjka.',
+      'V zadnjem polnem mesecu ste obdržali {{rate}} % prihodkov, {{diff}} odstotnih točk manj kot mesec prej. Poglejte, kaj je zraslo, ne kaj manjka.',
   },
   'pattern.risky_allocation': {
     title: 'Preveč je odvisno od sreče',
@@ -1331,12 +1333,12 @@ const mk: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Стапката на штедење е повисока',
     message:
-      'Задржавте {{rate}} % од приходот — {{diff}} поени повеќе од минатиот месец. Умереноста си го прави своето.',
+      'Во последниот цел месец задржавте {{rate}} % од приходот, {{diff}} поени повеќе отколку месецот претходно. Умереноста дејствува.',
   },
   'trend.savings_rate_down': {
     title: 'Стапката на штедење е пониска',
     message:
-      'Задржавте {{rate}} % од приходот — {{diff}} поени помалку од минатиот месец. Гледајте што порасна, не што ви недостига.',
+      'Во последниот цел месец задржавте {{rate}} % од приходот, {{diff}} поени помалку отколку месецот претходно. Гледајте што порасна, а не што недостига.',
   },
   'pattern.risky_allocation': {
     title: 'Премногу зависи од среќата',
@@ -1372,12 +1374,12 @@ const be: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Норма заашчаджэння выросла',
     message:
-      'Вы пакінулі {{rate}} % прыбытку — на {{diff}} пунктаў больш, чым у мінулым месяцы. Памяркоўнасць робіць сваё.',
+      'За апошні поўны месяц вы захавалі {{rate}} % даходу, на {{diff}} п. п. больш, чым месяцам раней. Памеранасць працуе.',
   },
   'trend.savings_rate_down': {
     title: 'Норма заашчаджэння ўпала',
     message:
-      'Вы пакінулі {{rate}} % прыбытку — на {{diff}} пунктаў менш, чым у мінулым месяцы. Глядзіце на тое, што вырасла, а не на тое, чаго не хапае.',
+      'За апошні поўны месяц вы захавалі {{rate}} % даходу, на {{diff}} п. п. менш, чым месяцам раней. Глядзіце на тое, што вырасла, а не на тое, чаго бракуе.',
   },
   'pattern.risky_allocation': {
     title: 'Залішне многае залежыць ад выпадку',
@@ -1413,12 +1415,12 @@ const bs: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Stopa štednje je porasla',
     message:
-      'Zadržali ste {{rate}} % prihoda — {{diff}} bodova više nego prošli mjesec. Umjerenost radi svoje.',
+      'U zadnjem punom mjesecu zadržali ste {{rate}} % prihoda, {{diff}} procentnih poena više nego mjesec prije. Umjerenost djeluje.',
   },
   'trend.savings_rate_down': {
     title: 'Stopa štednje je pala',
     message:
-      'Zadržali ste {{rate}} % prihoda — {{diff}} bodova manje nego prošli mjesec. Gledajte šta je naraslo, ne šta vam manjka.',
+      'U zadnjem punom mjesecu zadržali ste {{rate}} % prihoda, {{diff}} procentnih poena manje nego mjesec prije. Gledajte ono što je poraslo, ne ono čega nedostaje.',
   },
   'pattern.risky_allocation': {
     title: 'Previše zavisi od sreće',
@@ -1455,12 +1457,12 @@ const hsb: TranslationMap = {
   'trend.savings_rate_up': {
     title: 'Lutowanska kwota je rostła',
     message:
-      'Sće {{rate}} % dochoda zdźeržał — {{diff}} dypkow wjace hač zašły měsac. Měrnosć swoje čini.',
+      'W poslednim połnym měsacu sće sej {{rate}} % dochodu wobchował, wo {{diff}} procentowe dypki wjace hač měsac do toho. Mjerowanje funguje.',
   },
   'trend.savings_rate_down': {
     title: 'Lutowanska kwota je spadnyła',
     message:
-      'Sće {{rate}} % dochoda zdźeržał — {{diff}} dypkow mjenje hač zašły měsac. Hladajće na to, což rostło je, nic na to, což wam pobrachuje.',
+      'W poslednim połnym měsacu sće sej {{rate}} % dochodu wobchował, wo {{diff}} procentowe dypki mjenje hač měsac do toho. Hladajće na to, štož je porosćeło, nic na to, štož pobrachuje.',
   },
   'pattern.risky_allocation': {
     title: 'Přewjele wot zbožá wotwisuje',

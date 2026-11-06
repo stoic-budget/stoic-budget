@@ -21,7 +21,8 @@ function signals(overrides: Partial<StoicContext>) {
     balance: balance([month(0, onPlan)]),
     behavior: null,
     goals: [],
-    commitments: null,
+    outlook: null,
+    rules: null,
     ...overrides,
   });
 }
@@ -254,7 +255,7 @@ describe('Stoic signals — behaviour', () => {
   it('counts small repeated purchases at one leisure merchant', () => {
     const signal = find(
       withBehavior({
-        merchants: [{ name: 'Coffee Bar', categoryId: 'cat-1', count: 12, total: 54 }],
+        merchants: [{ name: 'Coffee Bar', bankName: 'COFFEE BAR 1', categoryId: 'cat-1', count: 12, total: 54 }],
       }),
       'stoic.small_purchases',
     );
@@ -265,7 +266,7 @@ describe('Stoic signals — behaviour', () => {
     expect(
       keys(
         withBehavior({
-          merchants: [{ name: 'Lidl', categoryId: 'food', count: 14, total: 280 }],
+          merchants: [{ name: 'Grocer', bankName: 'Grocer', categoryId: 'food', count: 14, total: 280 }],
         }),
       ),
     ).not.toContain('stoic.small_purchases');
@@ -274,7 +275,7 @@ describe('Stoic signals — behaviour', () => {
   it('praises fewer small purchases than the month before, scaled to the days so far', () => {
     const signal = find(
       withBehavior({
-        merchants: [{ name: 'Coffee Bar', categoryId: 'cat-1', count: 2, total: 9 }],
+        merchants: [{ name: 'Coffee Bar', bankName: 'COFFEE BAR 1', categoryId: 'cat-1', count: 2, total: 9 }],
         previousCounts: { 'Coffee Bar': 12 },
       }),
       'stoic.praise_fewer_small',
@@ -292,11 +293,11 @@ describe('Stoic signals — behaviour', () => {
     expect(
       find(
         withBehavior({
-          merchants: [{ name: 'Steam', categoryId: 'cat-1', count: 3, total: 250 }],
+          merchants: [{ name: 'ACME Games', bankName: 'ACME Games', categoryId: 'cat-1', count: 3, total: 250 }],
         }),
         'stoic.top_merchant',
       )?.params,
-    ).toEqual({ merchant: 'Steam', percent: 25, totalAmount: 250 });
+    ).toEqual({ merchant: 'ACME Games', percent: 25, totalAmount: 250 });
   });
 
   it('notices one category holding most of the leisure', () => {
@@ -442,22 +443,32 @@ describe('Stoic signals — goals and commitments', () => {
     });
   });
 
+  it('asks for a date only when nothing goes into an undated goal', () => {
+    const undated = { status: 'no_deadline', requiredPerMonth: null, monthsLate: null } as const;
+    expect(
+      find({ goals: [goal({ ...undated, pacePerMonth: 0 })] }, 'stoic.goal_no_date')?.params,
+    ).toEqual({ goal: 'Lisbon', percent: 40 });
+    expect(
+      find({ goals: [goal({ ...undated, pacePerMonth: 50 })] }, 'stoic.goal_no_date'),
+    ).toBeUndefined();
+  });
+
   it('foresees the day the balance goes below zero', () => {
     expect(
       find(
         {
-          commitments: { shortfallDate: '2026-10-05', lowestBalance: -250.4, totalCommitted: 1800 },
+          outlook: { shortfallDate: '2026-10-05', lowestBalance: -250.4, reserve: 500 },
         },
         'stoic.shortfall',
       )?.params,
-    ).toEqual({ date: '2026-10-05', lowestAmount: -250, committedAmount: 1800 });
+    ).toEqual({ date: '2026-10-05', lowestAmount: -250 });
   });
 
   it('works without any budgets at all', () => {
     const found = keys({
       balance: balance([month(0, onPlan, { intended: totals({}) })]),
       goals: [goal({ monthsLate: 1 })],
-      commitments: { shortfallDate: '2026-10-05', lowestBalance: -1, totalCommitted: 10 },
+      outlook: { shortfallDate: '2026-10-05', lowestBalance: -1, reserve: 500 },
     });
     expect(found).toEqual(expect.arrayContaining(['stoic.goal_behind', 'stoic.shortfall']));
   });

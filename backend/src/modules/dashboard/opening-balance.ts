@@ -1,7 +1,7 @@
 import type { Repository } from 'typeorm';
 import { countedSql } from '../../common/utils/counted-transactions.util';
 import type { Transaction } from '../../entities/transaction.entity';
-import { SPENDABLE_WALLET_TYPES } from '../../entities/wallet.entity';
+import { SPENDABLE_WALLET_TYPES, type WalletType } from '../../entities/wallet.entity';
 
 type CurrencyBalance = { currency: string; balance: string };
 
@@ -41,9 +41,12 @@ export async function spendableBalance(
   {
     convert,
     allTime,
+    walletTypes = SPENDABLE_WALLET_TYPES,
   }: {
     convert: (amount: string, currency: string) => Promise<number>;
     allTime: () => Promise<number>;
+    /** Which accounts count; a reserve reads savings and deposits too. */
+    walletTypes?: readonly WalletType[];
   },
 ): Promise<number> {
   if (!(await hasActiveAccounts(transactionRepo, workspaceId))) {
@@ -75,7 +78,7 @@ export async function spendableBalance(
         ORDER BY s.bank_name, s.account_number, s.currency,
           COALESCE(s.statement_date_to, s.created_at::date) DESC, s.created_at DESC
      ) latest`,
-    [workspaceId, [...SPENDABLE_WALLET_TYPES]],
+    [workspaceId, [...walletTypes]],
   );
   return Math.round((await sumConverted(rows, convert)) * 100) / 100;
 }

@@ -63,95 +63,25 @@ export const vi: QuoteTexts = {
     'marcus-very-little-needed': '…thực sự chỉ cần rất ít để sống một cuộc đời hạnh phúc.',
     'marcus-be-such':
       'Đừng bàn luận thêm nữa về việc một người tốt phải là người như thế nào, mà hãy là người như thế.',
-    'buffett-swimming-naked':
-      'Rốt cuộc, chỉ khi thủy triều rút đi, bạn mới biết ai đang bơi khỏa thân.',
-    'buffett-borrowed-money':
-      'Không nghi ngờ gì, một số người đã trở nên rất giàu nhờ sử dụng tiền vay. Tuy nhiên, đó cũng là một cách để trở nên rất nghèo.',
-    'buffett-possessions':
-      'Quá thường xuyên, một bộ sưu tập tài sản đồ sộ rốt cuộc lại chiếm hữu chính chủ nhân của nó.',
-    'buffett-one-percent':
-      'Nếu chúng tôi dùng hơn 1% số giấy đòi nợ của tôi (chứng chỉ cổ phiếu Berkshire Hathaway) cho bản thân, thì cả hạnh phúc lẫn sự an lạc của chúng tôi đều không được nâng lên.',
-    'munger-learning-machines':
-      'Tôi thường xuyên thấy những người vươn lên trong cuộc sống mà không phải là người thông minh nhất… nhưng họ là những cỗ máy học hỏi. Mỗi tối họ đi ngủ khôn ngoan hơn một chút so với lúc thức dậy.',
-    'munger-mozart-overspent':
-      'Từng có một người trở thành nhà soạn nhạc nổi tiếng nhất thế giới, nhưng ông hoàn toàn khốn khổ… và một trong những lý do là ông luôn tiêu vượt quá thu nhập của mình. Đó là Mozart.',
-    'munger-terrible-blows':
-      'Cuộc đời sẽ có những đòn giáng khủng khiếp, những đòn giáng kinh hoàng, những đòn giáng bất công. Không quan trọng… bổn phận của bạn không phải là chìm đắm trong sự tự thương hại, mà là tận dụng đòn giáng khủng khiếp đó một cách xây dựng.',
-    'munger-disastrous-modes':
-      'Nói chung, đố kỵ, oán giận, báo thù và tự thương hại là những lối suy nghĩ tai hại.',
-    'graham-worst-enemy':
-      'Vấn đề chính của nhà đầu tư — và thậm chí là kẻ thù tồi tệ nhất của anh ta — rất có thể là chính anh ta.',
-    'graham-margin-of-safety':
-      'Đối mặt với một thách thức tương tự là chắt lọc bí quyết đầu tư đúng đắn vào ba chữ, chúng tôi mạnh dạn đưa ra phương châm: BIÊN AN TOÀN.',
-    'graham-prudent-principles':
-      'Phố Wall có một vài nguyên tắc thận trọng; rắc rối là chúng luôn bị lãng quên khi cần đến chúng nhất.',
-    'bogle-courage-press-on':
-      'Lòng can đảm tiếp tục tiến bước bất kể điều gì — bất kể chúng ta gặp biển lặng hay biển động, và nhất là khi bão thị trường gào thét quanh ta — là phẩm chất cốt lõi của nhà đầu tư thành công.',
-    'bogle-own-worst-enemy': 'Đúng vậy, nhà đầu tư thường là kẻ thù tồi tệ nhất của chính mình.',
-    'bogle-dont-stop-regular-investing':
-      'Vì Chúa, đừng dừng chương trình đầu tư đều đặn chỉ vì thị trường đi xuống.',
-    'bogle-great-game-of-life':
-      'Hãy nhớ rằng cuộc chơi lớn của đời người không phải là về tiền bạc; mà là về việc cố gắng hết sức để xây dựng lại thế giới.',
-    'lynch-family-budget': 'Việc xem lại ngân sách gia đình trước khi mua cổ phiếu là hợp lý.',
-    'lynch-afford-to-lose':
-      'Chỉ đầu tư số tiền bạn có thể mất mà khoản mất đó không ảnh hưởng gì đến cuộc sống hằng ngày của bạn trong tương lai gần.',
-    'dalio-pain-reflection': 'Nỗi đau + Suy ngẫm = Tiến bộ.',
-    'dalio-habit-controls-you':
-      'Nếu bạn làm hầu như bất cứ việc gì đủ thường xuyên theo thời gian, bạn sẽ hình thành một thói quen chi phối bạn.',
-    'dalio-avoid-temptations':
-      'Những người chọn điều họ thực sự muốn, tránh những cám dỗ và vượt qua những nỗi đau đẩy họ xa khỏi điều họ thực sự muốn, có khả năng sống thành công cao hơn nhiều.',
-    'housel-spending-to-show':
-      'Tiêu tiền để cho người khác thấy bạn có bao nhiêu tiền là cách nhanh nhất để có ít tiền hơn.',
-    'housel-desire-less':
-      'Tiết kiệm có thể được tạo ra bằng cách tiêu ít hơn. Bạn có thể tiêu ít hơn nếu bạn ham muốn ít hơn. Và bạn sẽ ham muốn ít hơn nếu bạn bớt bận tâm đến việc người khác nghĩ gì về mình.',
-    'housel-goalpost': 'Kỹ năng tài chính khó nhất là khiến cột mốc ngừng dịch chuyển.',
-    'housel-plan-survive-reality': 'Một kế hoạch chỉ hữu ích nếu nó có thể sống sót trước thực tế.',
-    'franklin-small-leak':
-      'Hãy cẩn thận với những khoản chi nhỏ; một lỗ rò nhỏ sẽ làm đắm cả con tàu lớn.',
-    'franklin-saving-and-getting':
-      'Nếu muốn giàu có, hãy nghĩ đến việc tiết kiệm cũng như việc kiếm tiền.',
-    'franklin-no-need':
-      'Hãy mua thứ ngươi không cần, và chẳng bao lâu ngươi sẽ phải bán những thứ thiết yếu của mình.',
-    'franklin-first-desire':
-      'Kìm nén ham muốn đầu tiên dễ hơn là thỏa mãn tất cả những ham muốn theo sau nó.',
-    'franklin-age-and-want':
-      'Hãy để dành cho tuổi già và lúc túng thiếu khi còn có thể; không có mặt trời buổi sáng nào kéo dài suốt cả ngày.',
-    'franklin-comfort-and-help':
-      'Đừng thiếu lòng bác ái với những người lúc này có vẻ đang túng thiếu, mà hãy an ủi và giúp đỡ họ.',
-    'clason-part-of-all-you-earn':
-      'Một phần trong tất cả những gì bạn kiếm được là của bạn để giữ lại. Phần đó không được ít hơn một phần mười, dù bạn kiếm được ít đến đâu.',
-    'clason-tree-of-wealth':
-      'Của cải, như một cái cây, lớn lên từ một hạt giống nhỏ. Đồng xu đầu tiên bạn để dành là hạt giống từ đó cây của cải của bạn sẽ lớn lên.',
-    'clason-necessary-expenses':
-      "Cái mà mỗi chúng ta gọi là 'chi phí cần thiết' sẽ luôn tăng lên bằng thu nhập của chúng ta, trừ khi chúng ta phản kháng.",
-    'clason-little-caution': 'Thà thận trọng một chút còn hơn hối tiếc nhiều.',
-    'clason-cultivate-thy-powers':
-      'Hãy vun đắp năng lực của chính mình, học hỏi và trở nên khôn ngoan hơn, trở nên khéo léo hơn, hành động sao cho tự trọng chính mình.',
-    'stanley-accumulate-not-spend':
-      'Nếu mỗi năm bạn có thu nhập tốt và tiêu hết, bạn không giàu lên. Bạn chỉ đang sống xa hoa. Của cải là những gì bạn tích lũy, không phải những gì bạn tiêu.',
-    'stanley-below-your-means':
-      'Dù thu nhập của bạn là bao nhiêu, hãy luôn sống dưới mức khả năng của mình.',
-    'stanley-self-discipline':
-      'Của cải thường là kết quả của một lối sống làm việc chăm chỉ, kiên trì, có kế hoạch và, trên hết, kỷ luật bản thân.',
-    'robin-life-energy': 'Tiền là thứ mà chúng ta chọn đánh đổi năng lượng sống của mình để có.',
-    'robin-enough': 'Ở đỉnh của Đường cong Viên mãn, chúng ta có đủ.',
-    'warren-must-haves': 'Những khoản Bắt buộc là những thứ bạn sẽ phải trả dù thế nào đi nữa.',
+    'seneca-what-is-wisdom':
+      'Trí tuệ là gì? Luôn ham muốn những điều như nhau, và luôn từ chối những điều như nhau.',
+    'seneca-no-right-wind':
+      'Khi một người không biết mình đang hướng tới bến nào, thì gió nào cũng không thuận.',
+    'epictetus-prescribe-a-character':
+      'Hãy lập tức tự đặt cho mình một tính cách và một dáng vẻ, mà bạn sẽ giữ cả khi ở một mình lẫn khi gặp người khác.',
+    'epictetus-little-things':
+      'Vậy hãy bắt đầu từ những điều nhỏ. Dầu bị đổ ư? Một chút rượu bị lấy trộm ư? Nhân dịp ấy hãy tự nhủ: với giá này người ta bán sự không xao động, với giá này người ta bán sự bình thản, nhưng không có gì có được mà không phải trả.',
+    'epictetus-as-if-laws':
+      'Bất cứ quy tắc nào về cách sống được đề ra cho bạn, hãy tuân theo chúng như thể đó là luật, như thể bạn sẽ mắc tội bất kính nếu vi phạm bất kỳ điều nào.',
+    'marcus-whole-of-life': 'Đừng làm rối tâm trí mình bằng cách nghĩ về toàn bộ cuộc đời mình.',
+    'marcus-third-thing':
+      'Khi bạn đã làm một việc tốt và người khác đã nhận nó, sao bạn còn tìm thêm một điều thứ ba ngoài những điều ấy, như kẻ ngu, hoặc để có tiếng đã làm việc tốt, hoặc để được đáp lại?',
+    'marcus-what-more':
+      'Bạn còn muốn gì hơn khi đã giúp một người? Bạn không bằng lòng rằng mình đã làm điều phù hợp với bản tính mình sao, mà còn đòi được trả công cho nó?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Epictetus',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marcus Aurelius',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

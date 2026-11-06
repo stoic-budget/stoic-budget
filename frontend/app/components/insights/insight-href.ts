@@ -22,10 +22,10 @@ const STATIC_ROUTES: Record<string, string> = {
   'operational.uncategorized_count': '/statements/submit?missingCategory=true',
   'operational.duplicate_detected': '/review?kind=duplicate',
   'pattern.risky_allocation': '/net-worth?focus=card:risk',
-  'forecast.monthly': '/dashboard',
-  'pattern.detected': '/subscriptions',
   'stoic.unclassified': '/budgets?focus=stoic:unclassified',
   'stoic.subscriptions': '/subscriptions',
+  // The balance below zero is the Forecast page's own line.
+  'stoic.commitments': '/forecast',
 };
 
 /**
@@ -58,15 +58,20 @@ const stoicClassRoute = (data: InsightData): string => {
   });
 };
 
-const EXPERT_TARGETS: Record<string, string> = {
-  budgets: '/budgets',
+const REFLECTION_TARGETS: Record<string, string> = {
   goals: '/goals',
   dashboard: '/dashboard',
+  'net-worth': '/net-worth',
   merchants: CASH_FLOW,
 };
 
 /** Advice about one budget lands on its card; otherwise on its class. */
 const budgetRoute = (data: InsightData): string => {
+  // Spending no budget watches: open the form for the largest of it.
+  const newBudget = readString(data, 'newBudgetCategoryId');
+  if (newBudget !== null) {
+    return `/budgets?newBudgetCategory=${encodeURIComponent(newBudget)}`;
+  }
   const categoryId = readString(data, 'categoryId');
   return categoryId === null
     ? stoicClassRoute(data)
@@ -122,13 +127,19 @@ const DATA_ROUTES: Record<string, (data: InsightData) => string | null> = {
   },
   'stoic.intent_gap': stoicClassRoute,
   'stoic.virtue_neglected': stoicClassRoute,
-  'stoic.praise': data => goalRoute(data) ?? stoicClassRoute(data),
+  'stoic.praise': data =>
+    readString(data, 'target') === 'rules' ? '/rules' : (goalRoute(data) ?? stoicClassRoute(data)),
+  // One rule's page, or the list where the suggested rules wait.
+  'stoic.rule': data => {
+    const ruleId = readString(data, 'ruleId');
+    return ruleId === null ? '/rules' : `/rules/${encodeURIComponent(ruleId)}`;
+  },
   // Either a class that keeps drifting or one budget that keeps breaking its limit.
   'stoic.repeated': budgetRoute,
   'stoic.plan': budgetRoute,
   'stoic.generosity': stoicClassRoute,
-  // A principle points at where its numbers live.
-  'expert.principle': data => EXPERT_TARGETS[readString(data, 'target') ?? ''] ?? '/advice',
+  // A reflection points at where its numbers live.
+  'stoic.reflection': data => REFLECTION_TARGETS[readString(data, 'target') ?? ''] ?? '/advice',
   'stoic.habit': habitRoute,
   // The savings-rate KPI lives on the dashboard Overview.
   'trend.savings_rate': data =>
@@ -136,10 +147,9 @@ const DATA_ROUTES: Record<string, (data: InsightData) => string | null> = {
       month: readMonth(data),
       focus: 'kpi:savings-rate',
     }),
-  // Income and the cash runway both live on the dashboard overview. Without a
-  // month it shows the latest one with data, which need not be the judged one.
+  // Income lives on the dashboard overview. Without a month it shows the latest
+  // one with data, which need not be the judged one.
   'stoic.fortune': data => withQuery('/dashboard', { month: readMonth(data) }),
-  'stoic.commitments': data => withQuery('/dashboard', { month: readMonth(data) }),
   'stoic.goal': data => goalRoute(data) ?? '/goals',
 };
 

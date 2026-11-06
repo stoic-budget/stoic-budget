@@ -391,21 +391,21 @@ describe('InsightsService', () => {
     expect(items[2].title).toBe('Hand-written');
   });
 
-  it('credits the expert by their name in the reader language', async () => {
+  it('credits the Stoic by name in the reader language', async () => {
     const listQb = createQueryBuilderMock();
     listQb.getManyAndCount.mockResolvedValueOnce([
       [
         {
           id: 'insight-1',
-          messageKey: 'expert.rule_50_30_20',
+          messageKey: 'stoic.keep_first',
           // Уже на языке читателя: текст не перерисовывается, а подпись обязана.
           messageParams: { locale: 'ru', variant: 0 },
-          title: 'Формула сбалансированных денег',
+          title: 'Сначала сохраните свою часть',
           message: 'unchanged',
           data: {
-            expert: 'Elizabeth Warren & Amelia Warren Tyagi',
-            work: 'All Your Worth (2005)',
-            target: 'budgets',
+            author: 'Seneca',
+            work: 'Moral Letters to Lucilius, Letter 1',
+            target: 'goals',
           },
         },
       ],
@@ -420,12 +420,12 @@ describe('InsightsService', () => {
     });
 
     expect(items[0].data).toEqual({
-      expert: 'Элизабет Уоррен и Амелия Уоррен Тьяги',
+      author: 'Сенека',
       // Название книги остаётся как издано — так же цитирует источник баннер.
-      work: 'All Your Worth (2005)',
-      target: 'budgets',
+      work: 'Moral Letters to Lucilius, Letter 1',
+      target: 'goals',
     });
-    expect(items[0].title).toBe('Формула сбалансированных денег');
+    expect(items[0].title).toBe('Сначала сохраните свою часть');
   });
 
   it('leaves the stored text alone when no locale is asked for', async () => {
@@ -477,7 +477,7 @@ describe('InsightsService', () => {
       );
     });
 
-    it('removes Stoic rows that no longer hold, keeping the current ones', async () => {
+    it('removes keyed rows that no longer hold, keeping the current ones', async () => {
       const qb = createQueryBuilderMock();
       insightRepository.createQueryBuilder.mockReturnValue(qb);
 
@@ -488,9 +488,7 @@ describe('InsightsService', () => {
       expect(qb.andWhere).toHaveBeenCalledWith('workspace_id = :workspaceId', {
         workspaceId: 'workspace-1',
       });
-      expect(qb.andWhere).toHaveBeenCalledWith('category IN (:...categories)', {
-        categories: ['stoic', 'expert'],
-      });
+      expect(qb.andWhere).toHaveBeenCalledWith('message_key IS NOT NULL');
       expect(qb.andWhere).toHaveBeenCalledWith('deduplication_key NOT IN (:...currentKeys)', {
         currentKeys: [stoicCandidate.deduplicationKey],
       });

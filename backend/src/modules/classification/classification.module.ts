@@ -8,6 +8,7 @@ import { PayeeAlias } from '../../entities/payee-alias.entity';
 import { Receipt } from '../../entities/receipt.entity';
 import { Statement } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
+import { ViewPreference } from '../../entities/view-preference.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { AuditModule } from '../audit/audit.module';
@@ -17,6 +18,7 @@ import { CategorizationRulesController } from './categorization-rules.controller
 import { ClassificationController } from './classification.controller';
 import { ClassificationService } from './services/classification.service';
 import { RuleApplicationService } from './services/rule-application.service';
+import { RuleHealthService } from './services/rule-health.service';
 import { RuleOrderService } from './services/rule-order.service';
 import { RuleSuggestionsService } from './services/rule-suggestions.service';
 import { PayeeLearningService } from './suggestions/payee-learning.service';
@@ -39,6 +41,7 @@ import { StatementSuggestionsService } from './suggestions/statement-suggestions
       WorkspaceMember,
       Workspace,
       User,
+      ViewPreference,
     ]),
     AuditModule,
     TaxModule,
@@ -55,10 +58,11 @@ import { StatementSuggestionsService } from './suggestions/statement-suggestions
     RuleApplicationService,
     RuleOrderService,
     RuleSuggestionsService,
+    RuleHealthService,
     StatementSuggestionsService,
     PayeeLearningService,
     PayeeLearningSubscriber,
   ],
-  exports: [ClassificationService],
+  exports: [ClassificationService, RuleHealthService],
 })
 export class ClassificationModule {}

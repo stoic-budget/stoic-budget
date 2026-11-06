@@ -60,92 +60,24 @@ export const is: QuoteTexts = {
     'marcus-very-little-needed': '…í raun þarf sannarlega mjög lítið til að lifa farsælu lífi.',
     'marcus-be-such':
       'Talaðu ekki lengur um hvers konar maður góður maður ætti að vera — vertu slíkur.',
-    'buffett-swimming-naked': 'Það kemur í ljós hver svamlar nakinn aðeins þegar fjarar út.',
-    'buffett-borrowed-money':
-      'Vafalaust hafa sumir orðið mjög ríkir með lánsfé. En það hefur líka verið leið til að verða mjög fátækur.',
-    'buffett-possessions': 'Of oft endar stórt safn eigna með því að eiga eiganda sinn.',
-    'buffett-one-percent':
-      'Ef við vörðum meira en 1 % af kröfum mínum (hlutabréfum í Berkshire Hathaway) á okkur sjálf, yrði hvorki hamingja okkar né velferð meiri.',
-    'munger-learning-machines':
-      'Ég sé stöðugt fólk komast áfram í lífinu sem er ekki það gáfaðasta… en það eru lærdómsvélar. Það fer að sofa hvert kvöld dálítið vitrara en þegar það vaknaði.',
-    'munger-mozart-overspent':
-      'Einu sinni var maður sem varð frægasta tónskáld heims, en hann var hörmulega óhamingjusamur… og ein ástæðan var að hann eyddi alltaf meira en hann hafði. Það var Mozart.',
-    'munger-terrible-blows':
-      'Lífið veitir hræðileg högg, ömurleg högg, ósanngjörn högg. Það skiptir ekki máli… skylda þín var ekki að sökkva í sjálfsvorkunn heldur að nýta hið hræðilega högg til uppbyggingar.',
-    'munger-disastrous-modes':
-      'Almennt talað eru öfund, gremja, hefnd og sjálfsvorkunn hörmulegir hugsunarhættir.',
-    'graham-worst-enemy':
-      'Helsta vandamál fjárfestisins — og jafnvel versti óvinur hans — er líklega hann sjálfur.',
-    'graham-margin-of-safety':
-      'Þegar við eigum að þjappa leyndardómi heilbrigðrar fjárfestingar í þrjú orð, leyfum við okkur einkunnarorðin: ÖRYGGISBIL.',
-    'graham-prudent-principles':
-      'Wall Street hefur nokkrar ráðdeildarreglur; vandinn er að þær gleymast alltaf þegar þeirra er mest þörf.',
-    'bogle-courage-press-on':
-      'Hugrekkið til að halda áfram hvað sem gerist — hvort sjórinn er kyrr eða órór, og sérstaklega þegar stormar markaðarins gnýja um okkur — er helsti eiginleiki hins árangursríka fjárfestis.',
-    'bogle-own-worst-enemy': 'Jú, fjárfestirinn er oft sinn versti óvinur.',
-    'bogle-dont-stop-regular-investing':
-      'Í guðs bænum, hættu ekki reglulegum sparnaði vegna þess að markaðurinn fellur.',
-    'bogle-great-game-of-life':
-      'Mundu að stóra spil lífsins er ekki um peninga; það er um að gera sitt besta til að byggja heiminn upp á ný.',
-    'lynch-family-budget':
-      'Það er vit í að fara yfir fjárhag heimilisins áður en þú kaupir hlutabréf.',
-    'lynch-afford-to-lose':
-      'Fjárfestu aðeins því sem þú gætir misst án þess að missirinn hefði nokkur áhrif á daglegt líf þitt í fyrirsjáanlegri framtíð.',
-    'dalio-pain-reflection': 'Sársauki + umhugsun = framfarir.',
-    'dalio-habit-controls-you':
-      'Gerir þú nánast hvað sem er nógu oft með tímanum, myndast vani sem fer að stjórna þér.',
-    'dalio-avoid-temptations':
-      'Fólk sem velur það sem það í raun vill, forðast freistingarnar og kemst yfir sársaukann sem dregur það frá því sem það í raun vill, er miklu líklegra til að lifa farsælu lífi.',
-    'housel-spending-to-show':
-      'Að verja peningum til að sýna fólki hve mikla peninga þú hefur er fljótlegasta leiðin til að hafa minni peninga.',
-    'housel-desire-less':
-      'Sparnaður verður til með því að eyða minna. Þú getur eytt minna ef þú sækist eftir minna. Og þú sækist eftir minna ef þér er minna sama um hvað aðrir hugsa um þig.',
-    'housel-goalpost':
-      'Erfiðasta fjárhagslega kunnáttan er að fá markstöngina til að hætta að hreyfast.',
-    'housel-plan-survive-reality': 'Áætlun er aðeins gagnleg ef hún lifir raunveruleikann af.',
-    'franklin-small-leak': 'Gættu þín á litlum útgjöldum; lítill leki sekkur stóru skipi.',
-    'franklin-saving-and-getting': 'Viljir þú verða ríkur, hugsaðu jafnt um að spara og að afla.',
-    'franklin-no-need':
-      'Kauptu það sem þú þarft ekki, og fyrr en varir verður þú að selja það nauðsynlega.',
-    'franklin-first-desire':
-      'Það er auðveldara að kæfa fyrstu löngunina en að fullnægja öllum sem á eftir koma.',
-    'franklin-age-and-want':
-      'Spara fyrir elli og skort á meðan þú getur; engin morgunsól stendur allan daginn.',
-    'franklin-comfort-and-help':
-      'Vertu ekki ómildur við þá sem nú virðast í þörf; hughreystu þá og hjálpaðu þeim.',
-    'clason-part-of-all-you-earn':
-      'Hluti af öllu sem þú vinnur fyrir er þinn að halda. Hann ætti ekki að vera minni en tíundi hluti, hversu lítið þú svo vinnur þér inn.',
-    'clason-tree-of-wealth':
-      'Auður vex, eins og tré, af litlu fræi. Fyrsti koparpeningurinn sem þú sparar er fræið sem auðstré þitt vex af.',
-    'clason-necessary-expenses':
-      'Það sem hvert okkar kallar „nauðsynleg útgjöld“ vex alltaf upp í tekjurnar okkar nema við setjum okkur á móti.',
-    'clason-little-caution': 'Betri er dálítil varúð en mikil eftirsjá.',
-    'clason-cultivate-thy-powers':
-      'Rækta þína eigin krafta: lærðu og verð vitrari, verð hæfari, og hagaðu þér svo að þú getir virt sjálfan þig.',
-    'stanley-accumulate-not-spend':
-      'Hafir þú góðar tekjur hvert ár og eyðir þeim öllum verður þú ekki ríkari. Þú lifir aðeins hátt. Auður er það sem þú safnar, ekki það sem þú eyðir.',
-    'stanley-below-your-means': 'Hverjar sem tekjur þínar eru: lifðu alltaf undir efnum þínum.',
-    'stanley-self-discipline':
-      'Auður er oftar afleiðing lífsstíls með mikilli vinnu, þrautseigju, skipulagi og — fyrst og fremst — sjálfsstjórn.',
-    'robin-life-energy': 'Peningar eru eitthvað sem við veljum að skipta lífsorku okkar fyrir.',
-    'robin-enough': 'Á toppi ánægjuferilsins höfum við nóg.',
-    'warren-must-haves': '„Þarf-að-hafa“ eru það sem þú verður að greiða hvað sem gerist.',
+    'seneca-what-is-wisdom': 'Hvað er viska? Að þrá alltaf hið sama og hafna alltaf hinu sama.',
+    'seneca-no-right-wind':
+      'Þegar maður veit ekki í hvaða höfn hann stefnir er enginn vindur hagstæður.',
+    'epictetus-prescribe-a-character':
+      'Mæltu þér strax fyrir einhverja skapgerð og einhverja mynd sem þú heldur bæði þegar þú ert einn og þegar þú hittir menn.',
+    'epictetus-little-things':
+      'Byrjaðu því á litlu hlutunum. Hefur olía hellst niður? Hefur einhverju víni verið stolið? Segðu við það tækifæri: á þessu verði er hugarró seld, á þessu verði er ró seld, en ekkert fæst fyrir ekkert.',
+    'epictetus-as-if-laws':
+      'Hverjar sem þær reglur eru sem þér eru settar fyrir lífsins breytni, fylgdu þeim eins og lögum, eins og þú yrðir sekur um guðleysi ef þú brytir nokkra þeirra.',
+    'marcus-whole-of-life': 'Raskaðu ekki ró þinni með því að hugsa um allt líf þitt.',
+    'marcus-third-thing':
+      'Þegar þú hefur gert góðverk og annar hefur þegið það, hví leitar þú enn að þriðja hlutnum auk þessara, eins og heimskingjar, annaðhvort til að fá orð fyrir að hafa gert gott eða til að fá endurgjald?',
+    'marcus-what-more':
+      'Hvers meira krefst þú þegar þú hefur gert manni greiða? Nægir þér ekki að hafa gert það sem samræmist eðli þínu, og leitar þú samt launa fyrir það?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Epictetus',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marcus Aurelius',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

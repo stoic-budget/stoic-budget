@@ -2,8 +2,8 @@ import type { QuoteEntry } from './types';
 
 /**
  * Every quote here was checked word for word against its source (public-domain
- * translations for the Stoics, shareholder letters, speeches, the books
- * themselves). Popular misattributions were rejected on purpose — do not add a
+ * translations). Only Seneca, Marcus Aurelius and Epictetus: advice stays
+ * within Stoicism. Popular misattributions were rejected on purpose — do not add a
  * quote without its source. Texts per language live in texts/<locale>.ts.
  */
 export const QUOTES: QuoteEntry[] = [
@@ -232,308 +232,59 @@ export const QUOTES: QuoteEntry[] = [
     themes: ['self_improvement', 'discipline'],
   },
   {
-    id: 'buffett-swimming-naked',
-    author: 'Warren Buffett',
-    source: 'Berkshire Hathaway shareholder letter, 2001',
-    sourceUrl: 'https://www.berkshirehathaway.com/2001ar/2001letter.html',
-    themes: ['foresight'],
-  },
-  {
-    id: 'buffett-borrowed-money',
-    author: 'Warren Buffett',
-    source: 'Berkshire Hathaway shareholder letter, 2010',
-    sourceUrl: 'https://www.berkshirehathaway.com/letters/2010ltr.pdf',
-    themes: ['foresight'],
-  },
-  {
-    id: 'buffett-possessions',
-    author: 'Warren Buffett',
-    source: 'Warren Buffett, Giving Pledge letter, 2010',
-    sourceUrl: 'https://givingpledge.org/pledger?pledgerId=177',
-    themes: ['needs', 'contentment'],
-  },
-  {
-    id: 'buffett-one-percent',
-    author: 'Warren Buffett',
-    source: 'Warren Buffett, Giving Pledge letter, 2010',
-    sourceUrl: 'https://givingpledge.org/pledger?pledgerId=177',
-    themes: ['generosity', 'contentment'],
-  },
-  {
-    id: 'munger-learning-machines',
-    author: 'Charlie Munger',
-    source: 'Charlie Munger, USC Gould School of Law commencement address, 13 May 2007',
-    sourceUrl:
-      'https://jamesclear.com/great-speeches/2007-usc-law-school-commencement-address-by-charlie-munger',
-    themes: ['self_improvement', 'small_things', 'habit'],
-  },
-  {
-    id: 'munger-mozart-overspent',
-    author: 'Charlie Munger',
-    source: 'Charlie Munger, USC Gould School of Law commencement address, 13 May 2007',
-    sourceUrl:
-      'https://jamesclear.com/great-speeches/2007-usc-law-school-commencement-address-by-charlie-munger',
-    themes: ['needs', 'temperance'],
-  },
-  {
-    id: 'munger-terrible-blows',
-    author: 'Charlie Munger',
-    source: 'Charlie Munger, USC Gould School of Law commencement address, 13 May 2007',
-    sourceUrl:
-      'https://jamesclear.com/great-speeches/2007-usc-law-school-commencement-address-by-charlie-munger',
-    themes: ['fortune'],
-  },
-  {
-    id: 'munger-disastrous-modes',
-    author: 'Charlie Munger',
-    source: 'Charlie Munger, USC Gould School of Law commencement address, 13 May 2007',
-    sourceUrl:
-      'https://jamesclear.com/great-speeches/2007-usc-law-school-commencement-address-by-charlie-munger',
-    themes: ['contentment', 'habit'],
-  },
-  {
-    id: 'graham-worst-enemy',
-    author: 'Benjamin Graham',
-    source:
-      'The Intelligent Investor (4th rev. ed., 1973; HarperBusiness 2003 printing with Zweig commentary), Introduction: What This Book Expects to Accomplish',
-    sourceUrl:
-      'https://www.harpercollins.com/products/the-intelligent-investor-rev-ed-benjamin-graham',
+    id: 'seneca-what-is-wisdom',
+    author: 'Seneca',
+    source: 'Moral Letters to Lucilius, Letter 20, tr. R. M. Gummere',
+    sourceUrl: 'https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_20',
     themes: ['discipline', 'habit'],
   },
   {
-    id: 'graham-margin-of-safety',
-    author: 'Benjamin Graham',
-    source:
-      'The Intelligent Investor (4th rev. ed., 1973; HarperBusiness 2003 printing with Zweig commentary), Chapter 20: "Margin of Safety" as the Central Concept of Investment',
-    sourceUrl:
-      'https://www.harpercollins.com/products/the-intelligent-investor-rev-ed-benjamin-graham',
-    themes: ['foresight'],
+    id: 'seneca-no-right-wind',
+    author: 'Seneca',
+    source: 'Moral Letters to Lucilius, Letter 71, tr. R. M. Gummere',
+    sourceUrl: 'https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_71',
+    themes: ['patience', 'discipline'],
   },
   {
-    id: 'graham-prudent-principles',
-    author: 'Benjamin Graham',
-    source:
-      'The Intelligent Investor (4th rev. ed., 1973; HarperBusiness 2003 printing with Zweig commentary), Chapter 16, p. 225 (1973 ed.)',
-    sourceUrl: 'https://en.wikiquote.org/wiki/Benjamin_Graham',
-    themes: ['discipline', 'foresight'],
-  },
-  {
-    id: 'bogle-courage-press-on',
-    author: 'John C. Bogle',
-    source:
-      'John C. Bogle, speech at Trinity University Policymaker Breakfast Series, 16 April 2001',
-    sourceUrl: 'https://en.wikiquote.org/wiki/John_Bogle',
-    themes: ['fortune', 'discipline'],
-  },
-  {
-    id: 'bogle-own-worst-enemy',
-    author: 'John C. Bogle',
-    source: 'John C. Bogle, speech to the Financial Analysts of Philadelphia, 15 February 2001',
-    sourceUrl: 'https://en.wikiquote.org/wiki/John_Bogle',
+    id: 'epictetus-prescribe-a-character',
+    author: 'Epictetus',
+    source: 'Epictetus, Enchiridion 33, tr. George Long',
+    sourceUrl: 'https://www.gutenberg.org/files/10661/10661-h/10661-h.htm',
     themes: ['discipline', 'habit'],
   },
   {
-    id: 'bogle-dont-stop-regular-investing',
-    author: 'John C. Bogle',
-    source: 'John C. Bogle, Bogleheads conference, 2018 (video)',
-    sourceUrl: 'https://en.wikiquote.org/wiki/John_Bogle',
-    themes: ['patience', 'discipline', 'fortune'],
+    id: 'epictetus-little-things',
+    author: 'Epictetus',
+    source: 'Epictetus, Enchiridion 12, tr. George Long',
+    sourceUrl: 'https://www.gutenberg.org/files/10661/10661-h/10661-h.htm',
+    themes: ['small_things', 'patience'],
   },
   {
-    id: 'bogle-great-game-of-life',
-    author: 'John C. Bogle',
-    source:
-      'John C. Bogle, "Enough", commencement address, McDonough School of Business, Georgetown University, May 2007',
-    sourceUrl: 'https://jamesclear.com/great-speeches/enough-by-john-c-bogle',
-    themes: ['contentment', 'generosity'],
-  },
-  {
-    id: 'lynch-family-budget',
-    author: 'Peter Lynch',
-    source:
-      'One Up on Wall Street (Simon & Schuster, millennium edition 2000), ch. 4 "Passing the Mirror Test"',
-    sourceUrl:
-      'https://www.simonandschuster.com/books/One-Up-On-Wall-Street/Peter-Lynch/9780743200400',
-    themes: ['discipline', 'foresight'],
-  },
-  {
-    id: 'lynch-afford-to-lose',
-    author: 'Peter Lynch',
-    source:
-      'One Up on Wall Street (Simon & Schuster, millennium edition 2000), ch. 4 "Passing the Mirror Test"',
-    sourceUrl:
-      'https://www.simonandschuster.com/books/One-Up-On-Wall-Street/Peter-Lynch/9780743200400',
-    themes: ['foresight'],
-  },
-  {
-    id: 'dalio-pain-reflection',
-    author: 'Ray Dalio',
-    source: 'Principles: Life and Work (Simon & Schuster, 2017), Life Principles 1.7',
-    sourceUrl: 'https://www.principles.com/',
-    themes: ['fortune', 'self_improvement'],
-  },
-  {
-    id: 'dalio-habit-controls-you',
-    author: 'Ray Dalio',
-    source:
-      'Principles: Life and Work (Simon & Schuster, 2017), Life Principles, "Choose your habits well"',
-    sourceUrl: 'https://www.principles.com/',
-    themes: ['habit', 'small_things'],
-  },
-  {
-    id: 'dalio-avoid-temptations',
-    author: 'Ray Dalio',
-    source:
-      'Principles: Life and Work (Simon & Schuster, 2017), Life Principles 1.8 "Weigh second- and third-order consequences"',
-    sourceUrl: 'https://www.principles.com/',
-    themes: ['temperance', 'discipline'],
-  },
-  {
-    id: 'housel-spending-to-show',
-    author: 'Morgan Housel',
-    source: 'The Psychology of Money (Harriman House, 2020), ch. 9 "Wealth is What You Don\'t See"',
-    sourceUrl: 'https://www.harriman-house.com/psychologyofmoney',
-    themes: ['needs', 'temperance'],
-  },
-  {
-    id: 'housel-desire-less',
-    author: 'Morgan Housel',
-    source: 'The Psychology of Money (Harriman House, 2020), ch. 10 "Save Money"',
-    sourceUrl: 'https://www.harriman-house.com/psychologyofmoney',
-    themes: ['needs', 'contentment'],
-  },
-  {
-    id: 'housel-goalpost',
-    author: 'Morgan Housel',
-    source: 'The Psychology of Money (Harriman House, 2020), ch. 3 "Never Enough"',
-    sourceUrl: 'https://www.harriman-house.com/psychologyofmoney',
-    themes: ['contentment', 'needs'],
-  },
-  {
-    id: 'housel-plan-survive-reality',
-    author: 'Morgan Housel',
-    source:
-      'The Psychology of Money (Harriman House, 2020), ch. 5 "Getting Wealthy vs. Staying Wealthy"',
-    sourceUrl: 'https://www.harriman-house.com/psychologyofmoney',
-    themes: ['foresight'],
-  },
-  {
-    id: 'franklin-small-leak',
-    author: 'Benjamin Franklin',
-    source: 'The Way to Wealth (1758)',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/36151',
-    themes: ['small_things', 'habit'],
-  },
-  {
-    id: 'franklin-saving-and-getting',
-    author: 'Benjamin Franklin',
-    source: 'The Way to Wealth (1758)',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/36151',
-    themes: ['discipline', 'patience'],
-  },
-  {
-    id: 'franklin-no-need',
-    author: 'Benjamin Franklin',
-    source: 'The Way to Wealth (1758)',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/36151',
-    themes: ['needs', 'temperance'],
-  },
-  {
-    id: 'franklin-first-desire',
-    author: 'Benjamin Franklin',
-    source: 'The Way to Wealth (1758)',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/36151',
-    themes: ['temperance', 'needs'],
-  },
-  {
-    id: 'franklin-age-and-want',
-    author: 'Benjamin Franklin',
-    source: 'The Way to Wealth (1758)',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/36151',
-    themes: ['foresight', 'fortune', 'patience'],
-  },
-  {
-    id: 'franklin-comfort-and-help',
-    author: 'Benjamin Franklin',
-    source: 'The Way to Wealth (1758)',
-    sourceUrl: 'https://www.gutenberg.org/ebooks/36151',
-    themes: ['generosity', 'fortune'],
-  },
-  {
-    id: 'clason-part-of-all-you-earn',
-    author: 'George S. Clason',
-    source: 'The Richest Man in Babylon (1926), ch. "The Richest Man in Babylon"',
-    sourceUrl: 'https://en.wikisource.org/wiki/The_Richest_Man_In_Babylon/Chapter_2',
+    id: 'epictetus-as-if-laws',
+    author: 'Epictetus',
+    source: 'Epictetus, Enchiridion 50, tr. George Long',
+    sourceUrl: 'https://www.gutenberg.org/files/10661/10661-h/10661-h.htm',
     themes: ['discipline', 'habit'],
   },
   {
-    id: 'clason-tree-of-wealth',
-    author: 'George S. Clason',
-    source: 'The Richest Man in Babylon (1926), ch. "The Richest Man in Babylon"',
-    sourceUrl: 'https://en.wikisource.org/wiki/The_Richest_Man_In_Babylon/Chapter_2',
-    themes: ['patience', 'small_things'],
+    id: 'marcus-whole-of-life',
+    author: 'Marcus Aurelius',
+    source: 'Meditations 8.36, tr. George Long',
+    sourceUrl: 'https://www.gutenberg.org/files/15877/15877-h/15877-h.htm',
+    themes: ['patience', 'foresight'],
   },
   {
-    id: 'clason-necessary-expenses',
-    author: 'George S. Clason',
-    source: 'The Richest Man in Babylon (1926), ch. "Seven Cures for a Lean Purse" (Second Cure)',
-    sourceUrl: 'https://en.wikisource.org/wiki/The_Richest_Man_In_Babylon/Chapter_3',
-    themes: ['needs', 'habit'],
+    id: 'marcus-third-thing',
+    author: 'Marcus Aurelius',
+    source: 'Meditations 7.73, tr. George Long',
+    sourceUrl: 'https://www.gutenberg.org/files/15877/15877-h/15877-h.htm',
+    themes: ['generosity'],
   },
   {
-    id: 'clason-little-caution',
-    author: 'George S. Clason',
-    source: 'The Richest Man in Babylon (1926), ch. "The Gold Lender of Babylon"',
-    sourceUrl: 'https://en.wikisource.org/wiki/The_Richest_Man_In_Babylon/Chapter_6',
-    themes: ['foresight'],
-  },
-  {
-    id: 'clason-cultivate-thy-powers',
-    author: 'George S. Clason',
-    source: 'The Richest Man in Babylon (1926), ch. "Seven Cures for a Lean Purse" (Seventh Cure)',
-    sourceUrl: 'https://en.wikisource.org/wiki/The_Richest_Man_In_Babylon/Chapter_3',
-    themes: ['self_improvement'],
-  },
-  {
-    id: 'stanley-accumulate-not-spend',
-    author: 'Thomas J. Stanley & William D. Danko',
-    source: 'The Millionaire Next Door (1996), Introduction',
-    sourceUrl: 'https://archive.org/details/millionairenextd00stan',
-    themes: ['needs', 'habit'],
-  },
-  {
-    id: 'stanley-below-your-means',
-    author: 'Thomas J. Stanley & William D. Danko',
-    source: 'The Millionaire Next Door (1996)',
-    sourceUrl: 'https://archive.org/details/millionairenextd00stan',
-    themes: ['needs', 'discipline', 'contentment'],
-  },
-  {
-    id: 'stanley-self-discipline',
-    author: 'Thomas J. Stanley & William D. Danko',
-    source: 'The Millionaire Next Door (1996), Introduction',
-    sourceUrl: 'https://archive.org/details/millionairenextd00stan',
-    themes: ['discipline', 'habit', 'patience'],
-  },
-  {
-    id: 'robin-life-energy',
-    author: 'Vicki Robin & Joe Dominguez',
-    source: 'Your Money or Your Life (1992), ch. 2 "Money Ain\'t What It Used to Be—and Never Was"',
-    sourceUrl: 'https://archive.org/details/yourmoneyoryourl1992domi',
-    themes: ['needs', 'habit'],
-  },
-  {
-    id: 'robin-enough',
-    author: 'Vicki Robin & Joe Dominguez',
-    source: 'Your Money or Your Life (1992)',
-    sourceUrl: 'https://archive.org/details/yourmoneyoryourl1992domi',
-    themes: ['contentment'],
-  },
-  {
-    id: 'warren-must-haves',
-    author: 'Elizabeth Warren & Amelia Warren Tyagi',
-    source: 'All Your Worth: The Ultimate Lifetime Money Plan (2005)',
-    sourceUrl: 'https://archive.org/details/allyourworthulti00warr',
-    themes: ['needs', 'foresight'],
+    id: 'marcus-what-more',
+    author: 'Marcus Aurelius',
+    source: 'Meditations 9.42, tr. George Long',
+    sourceUrl: 'https://www.gutenberg.org/files/15877/15877-h/15877-h.htm',
+    themes: ['generosity', 'self_improvement'],
   },
 ];

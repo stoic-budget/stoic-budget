@@ -5,15 +5,7 @@ import { DateOnlyInput, NumericInput } from '../common/requests';
 import type { Wire } from '../common/wire';
 
 /** The backend `InsightCategory` enum. */
-const InsightCategory = Schema.Literals([
-  'pattern',
-  'anomaly',
-  'operational',
-  'trend',
-  'workflow',
-  'stoic',
-  'expert',
-]);
+const InsightCategory = Schema.Literals(['pattern', 'operational', 'trend', 'stoic']);
 
 /** The interface language; one without translations falls back to English. */
 const Locale = Schema.String.check(Schema.isMaxLength(16));

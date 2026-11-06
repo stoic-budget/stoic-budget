@@ -60,96 +60,25 @@ export const pt: QuoteTexts = {
       '…quando as tinha, desfrutava-as sem afetação, e quando não as tinha, não sentia falta delas.',
     'marcus-very-little-needed': '…muito pouco, de fato, é necessário para viver uma vida feliz.',
     'marcus-be-such': 'Não discutas mais, de modo algum, como deve ser um homem bom; sê assim.',
-    'buffett-swimming-naked':
-      'Afinal, só quando a maré baixa você descobre quem estava nadando nu.',
-    'buffett-borrowed-money':
-      'Sem dúvida, algumas pessoas ficaram muito ricas usando dinheiro emprestado. No entanto, esse também tem sido um caminho para ficar muito pobre.',
-    'buffett-possessions':
-      'Com muita frequência, uma vasta coleção de posses acaba possuindo seu dono.',
-    'buffett-one-percent':
-      'Se usássemos conosco mais de 1% dos meus títulos (os certificados de ações da Berkshire Hathaway), nem nossa felicidade nem nosso bem-estar aumentariam.',
-    'munger-learning-machines':
-      'Vejo constantemente subirem na vida pessoas que não são as mais inteligentes… mas são máquinas de aprender. Vão para a cama todas as noites um pouco mais sábias do que quando se levantaram.',
-    'munger-mozart-overspent':
-      'Houve uma vez um homem que se tornou o compositor mais famoso do mundo, mas era profundamente infeliz… e uma das razões era que sempre gastava mais do que ganhava. Era Mozart.',
-    'munger-terrible-blows':
-      'A vida terá golpes terríveis, golpes horríveis, golpes injustos. Não importa… seu dever não era afundar na autopiedade, mas usar o golpe terrível de forma construtiva.',
-    'munger-disastrous-modes':
-      'De modo geral, inveja, ressentimento, vingança e autopiedade são formas desastrosas de pensar.',
-    'graham-worst-enemy':
-      'O principal problema do investidor — e até mesmo seu pior inimigo — provavelmente é ele mesmo.',
-    'graham-margin-of-safety':
-      'Diante de um desafio semelhante de destilar em três palavras o segredo do investimento sólido, arriscamos o lema: MARGEM DE SEGURANÇA.',
-    'graham-prudent-principles':
-      'Wall Street tem alguns princípios prudentes; o problema é que eles são sempre esquecidos quando mais se precisa deles.',
-    'bogle-courage-press-on':
-      'A coragem de seguir em frente, aconteça o que acontecer — com mar calmo ou agitado, e especialmente quando as tempestades do mercado uivam ao nosso redor —, é o atributo essencial do investidor bem-sucedido.',
-    'bogle-own-worst-enemy': 'Sim, o investidor muitas vezes é seu próprio pior inimigo.',
-    'bogle-dont-stop-regular-investing':
-      'Pelo amor de Deus, não interrompa um programa de investimento regular porque o mercado caiu.',
-    'bogle-great-game-of-life':
-      'Lembre-se de que o grande jogo da vida não é sobre dinheiro; é sobre fazer o seu melhor para construir o mundo de novo.',
-    'lynch-family-budget': 'Faz sentido rever o orçamento familiar antes de comprar ações.',
-    'lynch-afford-to-lose':
-      'Invista apenas o que você poderia se dar ao luxo de perder sem que essa perda tivesse qualquer efeito na sua vida diária no futuro previsível.',
-    'dalio-pain-reflection': 'Dor + Reflexão = Progresso.',
-    'dalio-habit-controls-you':
-      'Se você fizer quase qualquer coisa com frequência suficiente ao longo do tempo, formará um hábito que controlará você.',
-    'dalio-avoid-temptations':
-      'Pessoas que escolhem o que realmente querem, e evitam as tentações e superam as dores que as afastam do que realmente querem, têm muito mais chances de ter uma vida bem-sucedida.',
-    'housel-spending-to-show':
-      'Gastar dinheiro para mostrar às pessoas quanto dinheiro você tem é o caminho mais rápido para ter menos dinheiro.',
-    'housel-desire-less':
-      'É possível poupar gastando menos. Você pode gastar menos se desejar menos. E vai desejar menos se se importar menos com o que os outros pensam de você.',
-    'housel-goalpost':
-      'A habilidade financeira mais difícil é fazer a linha de chegada parar de se mover.',
-    'housel-plan-survive-reality': 'Um plano só é útil se puder sobreviver à realidade.',
-    'franklin-small-leak':
-      'Cuidado com as pequenas despesas; um pequeno vazamento afunda um grande navio.',
-    'franklin-saving-and-getting': 'Se quiser ser rico, pense tanto em poupar quanto em ganhar.',
-    'franklin-no-need':
-      'Compra o que não precisas, e em pouco tempo venderás o que te é necessário.',
-    'franklin-first-desire':
-      'É mais fácil reprimir o primeiro desejo do que satisfazer todos os que o seguem.',
-    'franklin-age-and-want':
-      'Para a velhice e a necessidade, poupe enquanto puder; nenhum sol da manhã dura o dia inteiro.',
-    'franklin-comfort-and-help':
-      'Não seja pouco caridoso com aqueles que agora parecem precisar disso, mas conforte-os e ajude-os.',
-    'clason-part-of-all-you-earn':
-      'Uma parte de tudo o que você ganha é sua para guardar. Não deve ser menos de um décimo, por menos que você ganhe.',
-    'clason-tree-of-wealth':
-      'A riqueza, como uma árvore, cresce a partir de uma pequena semente. A primeira moeda de cobre que você poupar é a semente da qual crescerá sua árvore da riqueza.',
-    'clason-necessary-expenses':
-      'O que cada um de nós chama de “despesas necessárias” sempre crescerá até igualar nossa renda, a menos que nos oponhamos a isso.',
-    'clason-little-caution': 'Melhor um pouco de cautela do que um grande arrependimento.',
-    'clason-cultivate-thy-powers':
-      'Cultiva teus próprios poderes, estuda e torna-te mais sábio, torna-te mais hábil, age de modo a respeitar a ti mesmo.',
-    'stanley-accumulate-not-spend':
-      'Se você tem uma boa renda todo ano e gasta tudo, não está ficando mais rico. Está apenas vivendo com luxo. Riqueza é o que você acumula, não o que gasta.',
-    'stanley-below-your-means':
-      'Qualquer que seja sua renda, viva sempre abaixo das suas possibilidades.',
-    'stanley-self-discipline':
-      'A riqueza é, na maioria das vezes, resultado de um estilo de vida de trabalho duro, perseverança, planejamento e, sobretudo, autodisciplina.',
-    'robin-life-energy': 'Dinheiro é algo pelo qual escolhemos trocar nossa energia vital.',
-    'robin-enough': 'No pico da Curva da Satisfação, temos o suficiente.',
-    'warren-must-haves':
-      'Os itens indispensáveis são as coisas que você terá de pagar aconteça o que acontecer.',
+    'seneca-what-is-wisdom':
+      'O que é a sabedoria? Desejar sempre as mesmas coisas e recusar sempre as mesmas coisas.',
+    'seneca-no-right-wind':
+      'Quando um homem não sabe a que porto se dirige, nenhum vento lhe é favorável.',
+    'epictetus-prescribe-a-character':
+      'Prescreve-te de imediato um certo caráter e uma certa forma de conduta, que guardarás tanto quando estiveres só como quando encontrares outros homens.',
+    'epictetus-little-things':
+      'Começa, pois, pelas coisas pequenas. Derramou-se o azeite? Roubaram um pouco de vinho? Diz nessa ocasião: por este preço se vende a ausência de perturbação; por este preço se vende a tranquilidade; mas nada se obtém de graça.',
+    'epictetus-as-if-laws':
+      'Quaisquer regras para a conduta da vida que te sejam propostas, atém-te a elas como se fossem leis, como se fosses culpado de impiedade se transgredisses alguma.',
+    'marcus-whole-of-life': 'Não te perturbes pensando em toda a tua vida.',
+    'marcus-third-thing':
+      'Quando fizeste uma boa ação e outro a recebeu, por que ainda procuras, como os insensatos, uma terceira coisa além dessas: a reputação de ter agido bem ou uma retribuição?',
+    'marcus-what-more':
+      'Que mais queres, quando prestaste um serviço a um homem? Não te basta ter feito algo conforme à tua natureza, e procuras ser pago por isso?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Epicteto',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marco Aurélio',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Sêneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

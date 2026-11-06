@@ -58,91 +58,25 @@ export const sl: QuoteTexts = {
       '…ko jih je imel, jih je užival brez pretvarjanja, in ko jih ni imel, jih ni pogrešal.',
     'marcus-very-little-needed': '…za srečno življenje je resnično potrebno zelo malo.',
     'marcus-be-such': 'Ne govori več o tem, kakšen naj bi bil dober človek — bodi takšen.',
-    'buffett-swimming-naked': 'Navsezadnje se šele ob oseki izve, kdo plava gol.',
-    'buffett-borrowed-money':
-      'Nekateri so nedvomno zelo obogateli z izposojenim denarjem. A to je bila tudi pot, kako zelo obubožati.',
-    'buffett-possessions': 'Prepogosto obsežna zbirka imetja na koncu posedujejo svojega lastnika.',
-    'buffett-one-percent':
-      'Če bi zase porabila več kot 1 % mojih terjatev (delniških listin Berkshire Hathaway), se ne bi povečala niti naša sreča niti naše dobro počutje.',
-    'munger-learning-machines':
-      'Nenehno vidim ljudi, ki se v življenju vzpenjajo in niso najpametnejši… so pa stroji za učenje. Vsak večer gredo spat malo bolj modri, kot so vstali.',
-    'munger-mozart-overspent':
-      'Nekoč je bil človek, ki je postal najslavnejši skladatelj na svetu, a je bil skrajno nesrečen… in eden od razlogov je bil, da je vedno porabil več, kot je zaslužil. To je bil Mozart.',
-    'munger-terrible-blows':
-      'Življenje bo prineslo strašne udarce, grozne udarce, nepravične udarce. To ni pomembno… vaša dolžnost ni bila utoniti v samopomilovanju, ampak strašen udarec uporabiti ustvarjalno.',
-    'munger-disastrous-modes':
-      'Na splošno so zavist, zamera, maščevanje in samopomilovanje pogubni načini mišljenja.',
-    'graham-worst-enemy':
-      'Glavna težava vlagatelja — in morda celo njegov najhujši sovražnik — je najverjetneje on sam.',
-    'graham-margin-of-safety':
-      'Če naj skrivnost zdravega vlaganja strnemo v tri besede, si drznemo geslo: VARNOSTNA REZERVA.',
-    'graham-prudent-principles':
-      'Wall Street ima nekaj preudarnih načel; težava je, da jih vedno pozabijo takrat, ko jih najbolj potrebujejo.',
-    'bogle-courage-press-on':
-      'Pogum, da vztrajaš ne glede na vse — ne glede na to, ali je morje mirno ali razburkano, in še posebej, ko okoli nas tulijo tržni viharji — je bistvena lastnost uspešnega vlagatelja.',
-    'bogle-own-worst-enemy': 'Da, vlagatelj je pogosto svoj najhujši sovražnik.',
-    'bogle-dont-stop-regular-investing':
-      'Za božjo voljo, ne prekinite rednega vlaganja zato, ker trg pada.',
-    'bogle-great-game-of-life':
-      'Zapomnite si, da velika igra življenja ni o denarju; je o tem, da po svojih najboljših močeh znova zgradite svet.',
-    'lynch-family-budget': 'Smiselno je pregledati družinski proračun, preden kupite delnice.',
-    'lynch-afford-to-lose':
-      'Vložite le toliko, kolikor si lahko privoščite izgubiti, ne da bi izguba v predvidljivem času kakor koli vplivala na vaše vsakdanje življenje.',
-    'dalio-pain-reflection': 'Bolečina + razmislek = napredek.',
-    'dalio-habit-controls-you':
-      'Če boste nekaj počeli dovolj pogosto in dovolj dolgo, se bo izoblikovala navada, ki bo začela obvladovati vas.',
-    'dalio-avoid-temptations':
-      'Ljudje, ki izberejo to, kar si zares želijo, se izogibajo skušnjavam in prebolijo bolečine, ki jih odvračajo od tega, kar si zares želijo, imajo veliko več možnosti za uspešno življenje.',
-    'housel-spending-to-show':
-      'Zapravljati denar, da bi ljudem pokazali, koliko denarja imate, je najhitrejša pot do tega, da ga imate manj.',
-    'housel-desire-less':
-      'Prihranki nastajajo s tem, da porabite manj. Manj lahko porabite, če si manj želite. In manj si boste želeli, če vam bo manj pomembno, kaj drugi mislijo o vas.',
-    'housel-goalpost': 'Najtežja finančna spretnost je prepričati vratnico, naj se neha premikati.',
-    'housel-plan-survive-reality': 'Načrt je koristen le, če preživi stvarnost.',
-    'franklin-small-leak': 'Pazi na majhne izdatke; majhna razpoka potopi veliko ladjo.',
-    'franklin-saving-and-getting':
-      'Če želiš biti premožen, misli na varčevanje prav toliko kot na zaslužek.',
-    'franklin-no-need': 'Kupuj, česar ne potrebuješ, in kmalu boš prodajal, kar potrebuješ.',
-    'franklin-first-desire': 'Lažje je zadušiti prvo željo kot zadovoljiti vse, ki ji sledijo.',
-    'franklin-age-and-want':
-      'Varčuj za starost in pomanjkanje, dokler lahko; nobeno jutranje sonce ne traja ves dan.',
-    'franklin-comfort-and-help':
-      'Ne bodi neusmiljen do tistih, ki se zdaj zdijo pomoči potrebni; raje jih potolaži in jim pomagaj.',
-    'clason-part-of-all-you-earn':
-      'Del vsega, kar zaslužiš, je tvoj, da ga obdržiš. Ne sme biti manjši od desetine, kakor koli malo zaslužiš.',
-    'clason-tree-of-wealth':
-      'Bogastvo raste, kakor drevo, iz drobnega semena. Prvi novec, ki ga prihraniš, je seme, iz katerega bo zraslo tvoje drevo bogastva.',
-    'clason-necessary-expenses':
-      'To, kar vsak od nas imenuje „nujni izdatki“, bo vedno zraslo do višine naših prihodkov, če se temu ne upremo.',
-    'clason-little-caution': 'Bolje malo previdnosti kot veliko obžalovanja.',
-    'clason-cultivate-thy-powers':
-      'Negúj svoje lastne moči: uči se in bodi modrejši, spretnejši, in ravnaj tako, da lahko spoštuješ sebe.',
-    'stanley-accumulate-not-spend':
-      'Če vsako leto dobro zaslužite in vse porabite, ne postajate premožnejši. Samo živite na veliko. Premoženje je to, kar nakopičite, ne to, kar porabite.',
-    'stanley-below-your-means':
-      'Kakršen koli je vaš prihodek, vedno živite pod svojimi zmožnostmi.',
-    'stanley-self-discipline':
-      'Premoženje je pogosteje posledica življenjskega sloga trdega dela, vztrajnosti, načrtovanja in predvsem samodiscipline.',
-    'robin-life-energy': 'Denar je nekaj, za kar se odločimo zamenjati svojo življenjsko energijo.',
-    'robin-enough': 'Na vrhu krivulje izpolnjenosti imamo dovolj.',
-    'warren-must-haves':
-      '„Nujno potrebno“ so stvari, ki jih boste morali plačati, naj se zgodi kar koli.',
+    'seneca-what-is-wisdom':
+      'Kaj je modrost? Vedno si želeti iste stvari in vedno zavračati iste stvari.',
+    'seneca-no-right-wind':
+      'Kadar človek ne ve, v katero pristanišče pluje, mu noben veter ni naklonjen.',
+    'epictetus-prescribe-a-character':
+      'Takoj si predpiši neki značaj in neko podobo, ki ju boš ohranjal tako, ko si sam, kakor ko srečaš ljudi.',
+    'epictetus-little-things':
+      'Začni torej z malimi stvarmi. Se je razlilo olje? Je bilo ukradeno malo vina? Ob tej priložnosti reci: za takšno ceno se prodaja svoboda od vznemirjenja, za takšno ceno se prodaja spokojnost, toda nič se ne dobi zastonj.',
+    'epictetus-as-if-laws':
+      'Kakršna koli pravila za vodenje življenja so ti predlagana, drži se jih, kakor da so zakoni, kakor da bi bil kriv brezbožnosti, če bi kar koli od tega prekršil.',
+    'marcus-whole-of-life': 'Ne vznemirjaj se z mislijo na vse svoje življenje.',
+    'marcus-third-thing':
+      'Kadar si storil dobro dejanje in ga je drugi sprejel, zakaj še iščeš tretjo stvar poleg tega, kakor norci, bodisi da bi imel sloves dobrotnika bodisi da bi dobil povračilo?',
+    'marcus-what-more':
+      'Kaj več še hočeš, ko si človeku storil uslugo? Ti ne zadošča, da si storil nekaj, kar je skladno s tvojo naravo, in iščeš plačilo zanj?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Epictetus',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marcus Aurelius',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

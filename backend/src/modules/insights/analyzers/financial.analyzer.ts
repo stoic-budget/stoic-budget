@@ -6,10 +6,12 @@ import { Budget } from '../../../entities/budget.entity';
 import { InsightCategory, InsightSeverity, InsightType } from '../../../entities/insight.entity';
 import { Transaction, TransactionType } from '../../../entities/transaction.entity';
 import { Workspace } from '../../../entities/workspace.entity';
+import { UNCATEGORIZED_CATEGORY_NAME } from '../../categories/uncategorized-category';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
 import { buildRateMap, convertWith, normalizeCurrency } from '../../goals/goal-money.util';
 import { NetWorthService } from '../../net-worth/net-worth.service';
 import type { AnalysisContext, InsightAnalyzer, InsightCandidate } from './analyzer.interface';
+import { endOfMonth, monthBounds, monthKey, monthsBetween, round2 } from './month-bounds';
 
 /** How many fully-elapsed months a category is compared against. */
 const TRAILING_MONTHS = 3;
@@ -137,6 +139,7 @@ export class FinancialAnalyzer implements InsightAnalyzer {
       },
       deduplicationKey: `financial:risky_allocation:${workspaceId}`,
       data: {
+        priority: 62,
         riskyPercent: netWorth.riskyPercent,
         threshold: RISKY_ALLOCATION_THRESHOLD_PERCENT,
         assetsTotal: netWorth.assetsTotal,
@@ -170,6 +173,10 @@ export class FinancialAnalyzer implements InsightAnalyzer {
       .andWhere('t.is_duplicate = false')
       .andWhere('t.transfer_pair_id IS NULL')
       .andWhere(flowsSql('t'))
+      // The rows still waiting for a category say nothing about any one spending.
+      .andWhere('LOWER(category.name) <> LOWER(:uncategorized)', {
+        uncategorized: UNCATEGORIZED_CATEGORY_NAME,
+      })
       .groupBy('t.category_id')
       .addGroupBy('category.name')
       .addGroupBy("date_trunc('month', t.transaction_date)")
@@ -250,6 +257,7 @@ export class FinancialAnalyzer implements InsightAnalyzer {
       },
       deduplicationKey: `financial:category_rising:${workspaceId}:${best.row.categoryId}`,
       data: {
+        priority: 58,
         // The month the comparison is about: the link carries it so the
         // leaderboard it opens shows this month's total, not an all-time one.
         month: monthKey(now),
@@ -315,6 +323,7 @@ export class FinancialAnalyzer implements InsightAnalyzer {
       messageParams: { category: top.categoryName },
       deduplicationKey: `financial:unbudgeted_top:${workspaceId}:${top.categoryId}`,
       data: {
+        priority: 22,
         categoryId: top.categoryId,
         categoryName: top.categoryName,
         amount: round2(top.total),
@@ -324,19 +333,18 @@ export class FinancialAnalyzer implements InsightAnalyzer {
   }
 
   /**
-   * Savings rate (net / income) this month against last month.
-   *
-   * Both months are read as-is, including the current partial one: the point
-   * is to notice the shift while it can still be acted on. A month with no
-   * income is skipped — a share of zero is not 0%, it is undefined.
+   * Savings rate (net / income) of the last finished month against the one
+   * before it. A running month says nothing yet: with the salary in and the
+   * bills to come it reads as saving nearly everything. A month with no income
+   * is skipped — a share of zero is not 0%, it is undefined.
    */
   private async savingsRateAdvice(
     workspaceId: string,
     now: Date,
   ): Promise<InsightCandidate | null> {
     const [current, previous] = await Promise.all([
-      this.monthlyTotals(workspaceId, now, 0),
       this.monthlyTotals(workspaceId, now, 1),
+      this.monthlyTotals(workspaceId, now, 2),
     ]);
 
     if (current.income <= 0 || previous.income <= 0) {
@@ -352,15 +360,21 @@ export class FinancialAnalyzer implements InsightAnalyzer {
     }
 
     const isUp = diff > 0;
+    const judged = monthKey(monthBounds(now, 1).start);
     return {
       type: InsightType.SAVINGS_RATE_TREND,
       category: InsightCategory.TREND,
       severity: isUp ? InsightSeverity.INFO : InsightSeverity.WARN,
       messageKey: isUp ? 'trend.savings_rate_up' : 'trend.savings_rate_down',
-      messageParams: { rate: Math.round(currentRate), diff: Math.abs(Math.round(diff)) },
-      deduplicationKey: `financial:savings_rate:${workspaceId}:${monthKey(now)}`,
+      // Spending past income keeps nothing: the text says 0%, not a negative share.
+      messageParams: {
+        rate: Math.max(Math.round(currentRate), 0),
+        diff: Math.abs(Math.round(diff)),
+      },
+      deduplicationKey: `financial:savings_rate:${workspaceId}:${judged}`,
       data: {
-        month: monthKey(now),
+        priority: isUp ? 0 : 48,
+        month: judged,
         currentRate: Math.round(currentRate),
         previousRate: Math.round(previousRate),
         income: round2(current.income),
@@ -407,28 +421,4 @@ export class FinancialAnalyzer implements InsightAnalyzer {
       { income: 0, spent: 0 },
     );
   }
-}
-
-function monthBounds(now: Date, monthsAgo: number): { start: Date; end: Date } {
-  const start = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
-  const end = new Date(now.getFullYear(), now.getMonth() - monthsAgo + 1, 0);
-  return { start, end };
-}
-
-function monthsBetween(earlier: Date, later: Date): number {
-  return (
-    (later.getFullYear() - earlier.getFullYear()) * 12 + (later.getMonth() - earlier.getMonth())
-  );
-}
-
-function endOfMonth(now: Date): Date {
-  return new Date(now.getFullYear(), now.getMonth() + 1, 1);
-}
-
-function monthKey(now: Date): string {
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function round2(value: number): number {
-  return Math.round(value * 100) / 100;
 }

@@ -98,13 +98,10 @@ describe('insightHref', () => {
     expect(insightHref(makeInsight({ type: 'pattern.risky_allocation' }))).toBe(
       '/net-worth?focus=card:risk',
     );
-    expect(insightHref(makeInsight({ type: 'forecast.monthly' }))).toBe('/dashboard');
-    expect(insightHref(makeInsight({ type: 'pattern.detected' }))).toBe('/subscriptions');
   });
 
   it('leaves types with nowhere useful to go unlinked', () => {
-    expect(insightHref(makeInsight({ type: 'workflow.tip' }))).toBeNull();
-    expect(insightHref(makeInsight({ type: 'rule.suggestion' }))).toBeNull();
+    expect(insightHref(makeInsight({ type: 'some.unknown_type' }))).toBeNull();
   });
 
   it('sends Stoic advice about a class to that class in Budgets', () => {
@@ -172,7 +169,7 @@ describe('insightHref', () => {
   it('sends habits, fortune, commitments and subscriptions to where they are seen', () => {
     expect(insightHref(makeInsight({ type: 'stoic.habit' }))).toBe('/reports?tab=cash-flow');
     expect(insightHref(makeInsight({ type: 'stoic.fortune' }))).toBe('/dashboard');
-    expect(insightHref(makeInsight({ type: 'stoic.commitments' }))).toBe('/dashboard');
+    expect(insightHref(makeInsight({ type: 'stoic.commitments' }))).toBe('/forecast');
     expect(insightHref(makeInsight({ type: 'stoic.subscriptions' }))).toBe('/subscriptions');
   });
 
@@ -199,15 +196,31 @@ describe('insightHref', () => {
     );
     expect(
       insightHref(makeInsight({ type: 'stoic.commitments', data: { month: '2026-08' } })),
-    ).toBe('/dashboard?month=2026-08');
+    ).toBe('/forecast');
   });
 
-  it('sends an expert principle to where its numbers live', () => {
+  it('sends a reflection to where its numbers live', () => {
     expect(
-      insightHref(makeInsight({ type: 'expert.principle', data: { target: 'budgets' } })),
-    ).toBe('/budgets');
+      insightHref(makeInsight({ type: 'stoic.reflection', data: { target: 'net-worth' } })),
+    ).toBe('/net-worth');
     expect(
-      insightHref(makeInsight({ type: 'expert.principle', data: { target: 'merchants' } })),
+      insightHref(makeInsight({ type: 'stoic.reflection', data: { target: 'merchants' } })),
     ).toBe('/reports?tab=cash-flow');
+  });
+
+  it('sends rule advice to the rule, or to the list when it names none', () => {
+    expect(insightHref(makeInsight({ type: 'stoic.rule', data: { ruleId: 'r/1' } }))).toBe(
+      '/rules/r%2F1',
+    );
+    expect(insightHref(makeInsight({ type: 'stoic.rule', data: { count: 2 } }))).toBe('/rules');
+    expect(insightHref(makeInsight({ type: 'stoic.praise', data: { target: 'rules' } }))).toBe(
+      '/rules',
+    );
+  });
+
+  it('opens the budget form for spending no budget watches', () => {
+    expect(
+      insightHref(makeInsight({ type: 'stoic.plan', data: { newBudgetCategoryId: 'cat-1' } })),
+    ).toBe('/budgets?newBudgetCategory=cat-1');
   });
 });
