@@ -3,8 +3,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { IntlayerProviderContent } from 'react-intlayer';
 import { describe, expect, it, vi } from 'vitest';
 import WelcomeTutorialDialog from './WelcomeTutorialDialog';
-import { TUTORIAL_SCREENS } from './welcome-tutorial-screens';
-import type { TutorialStep } from './welcome-tutorial-steps';
+import { TUTORIAL_POINTS, type TutorialStep } from './welcome-tutorial-steps';
 
 const STEPS: TutorialStep[] = [
   {
@@ -13,7 +12,7 @@ const STEPS: TutorialStep[] = [
     label: 'Dashboard',
     title: 'Dashboard',
     icon: <span />,
-    fragments: TUTORIAL_SCREENS.dashboard,
+    points: TUTORIAL_POINTS.dashboard,
   },
   {
     id: 'crypto',
@@ -21,7 +20,7 @@ const STEPS: TutorialStep[] = [
     label: 'Crypto',
     title: 'Crypto',
     icon: <span />,
-    fragments: TUTORIAL_SCREENS.crypto,
+    points: TUTORIAL_POINTS.crypto,
   },
 ];
 
@@ -138,17 +137,11 @@ describe('WelcomeTutorialDialog', () => {
     expect(screen.getByRole('dialog').className).toContain('MuiDialog-paperFullScreen');
   });
 
-  it('loads the screenshots of the current language, and the English ones when they are missing', () => {
-    renderDialog(vi.fn(), 'de');
-    // The first frame is the dashboard's categories.
-    const [image] = screen.getAllByRole('img');
-    expect(decodeURIComponent(image.getAttribute('src') ?? '')).toContain(
-      '/tour/de/dashboard-categories-light.webp',
-    );
-
-    fireEvent.error(image);
-    expect(decodeURIComponent(image.getAttribute('src') ?? '')).toContain(
-      '/tour/en/dashboard-categories-light.webp',
-    );
+  it('shows only words: no pictures, and the text of every point', () => {
+    renderDialog(vi.fn());
+    expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.getByText('Where it goes')).toBeTruthy();
+    expect(screen.getByText('Pick a month')).toBeTruthy();
+    expect(screen.getByText('Latest activity')).toBeTruthy();
   });
 });

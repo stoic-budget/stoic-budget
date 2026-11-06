@@ -1,132 +1,76 @@
 import type { SxProps, Theme } from '@mui/material';
 
-/**
- * One guide page. On a wide screen two columns, centred on the screen: the words on
- * the left, one large picture of the page on the right, as tall as the screen allows
- * (it scrolls only when the screen is tiny). On a phone the picture comes after the
- * words.
- */
+// A laptop at 150% scale has about 570px of height: the large type would push the list out of view.
+const SHORT_SCREEN = '@media (min-width: 900px) and (max-height: 700px)';
+
+/** One guide page: only words, centred on the screen. It scrolls when the screen is tiny. */
 export const bodySx = {
   flex: 1,
   minHeight: 0,
-  width: '100%',
-  maxWidth: 1440,
-  mx: 'auto',
   overflowY: 'auto',
   px: { xs: 2, md: 6 },
   py: { xs: 3, md: 5 },
-  display: { xs: 'flex', md: 'grid' },
-  flexDirection: 'column',
-  gap: { xs: 3, md: 6 },
-  gridTemplateColumns: 'minmax(0, 5fr) minmax(0, 7fr)',
-  gridTemplateRows: 'minmax(0, 1fr)',
-  // A phone stacks full-width blocks; a wide screen centres both columns vertically.
-  alignItems: { xs: 'stretch', md: 'center' },
+  display: 'flex',
+  [SHORT_SCREEN]: { py: 2 },
 } satisfies SxProps<Theme>;
 
-export const textColumnSx = { minWidth: 0 } satisfies SxProps<Theme>;
+// Auto margins, not align-items: a column taller than the screen must keep its top in reach.
+export const textColumnSx = {
+  m: 'auto',
+  width: '100%',
+  maxWidth: 800,
+  textAlign: 'center',
+} satisfies SxProps<Theme>;
 
 export const eyebrowSx = {
   display: 'inline-flex',
   alignItems: 'center',
   gap: 1,
   color: 'var(--primary)',
-  fontSize: 14,
+  fontSize: { xs: 15, md: 18 },
   fontWeight: 500,
 } satisfies SxProps<Theme>;
 
 export const taglineSx = {
-  mt: 1,
-  fontSize: { xs: 22, md: 28 },
+  mt: 1.5,
+  fontSize: { xs: 32, md: 52 },
   fontWeight: 500,
-  lineHeight: 1.25,
+  lineHeight: 1.15,
+  textWrap: 'balance',
   color: 'var(--foreground)',
+  [SHORT_SCREEN]: { mt: 0.5, fontSize: 36 },
 } satisfies SxProps<Theme>;
 
 export const descriptionSx = {
-  mt: 1,
-  fontSize: { xs: 15, md: 16 },
-  lineHeight: 1.6,
+  mt: 2,
+  fontSize: { xs: 18, md: 22 },
+  lineHeight: 1.5,
+  textWrap: 'balance',
   color: 'var(--text-muted)',
+  [SHORT_SCREEN]: { mt: 1, fontSize: 18 },
 } satisfies SxProps<Theme>;
 
 export const pointsSx = {
   listStyle: 'none',
   p: 0,
   m: 0,
-  mt: 3,
+  mt: { xs: 3, md: 5 },
   display: 'grid',
-  gap: 2,
+  gap: { xs: 2.5, md: 3 },
+  [SHORT_SCREEN]: { mt: 2.5, gap: 1.5 },
 } satisfies SxProps<Theme>;
 
 export const pointTitleSx = {
-  fontSize: 15,
+  fontSize: { xs: 17, md: 20 },
   fontWeight: 500,
   color: 'var(--foreground)',
+  [SHORT_SCREEN]: { fontSize: 16 },
 } satisfies SxProps<Theme>;
 
 export const pointTextSx = {
-  mt: 0.25,
-  fontSize: 14,
+  mt: 0.5,
+  fontSize: { xs: 16, md: 18 },
   lineHeight: 1.5,
   color: 'var(--text-muted)',
-} satisfies SxProps<Theme>;
-
-/**
- * The picture's cell: on a wide screen a size container, so the picture can take the
- * largest box of its proportions that fits (container query units); on a phone just
- * the full width.
- */
-export const pictureCellSx = {
-  minWidth: 0,
-  height: { md: '100%' },
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  containerType: { md: 'size' },
-} satisfies SxProps<Theme>;
-
-/**
- * The picture with its "Demo" label above it: as wide as the cell allows, and no
- * taller than the cell (less the label's line).
- */
-export function figureSx(aspect: number): SxProps<Theme> {
-  return {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    gap: 1,
-    width: { xs: '100%', md: `min(100cqw, calc((100cqh - 32px) * ${aspect}))` },
-  };
-}
-
-export function pictureSx(aspect: number): SxProps<Theme> {
-  return {
-    position: 'relative',
-    width: '100%',
-    aspectRatio: String(aspect),
-    borderRadius: '12px',
-    overflow: 'hidden',
-    // A hairline, no shadow; the soft fill shows while the screenshot loads.
-    border: '1px solid var(--border)',
-    bgcolor: 'var(--surface-soft)',
-  };
-}
-
-/** "Demo" next to the picture, never over it: the figures are sample data, not the reader's. */
-export const demoBadgeSx = {
-  px: 1,
-  py: 0.25,
-  borderRadius: 999,
-  border: '1px solid var(--border)',
-  color: 'var(--text-muted)',
-  fontSize: 12,
-  fontWeight: 500,
-  lineHeight: 1.5,
-} satisfies SxProps<Theme>;
-
-export const demoNoteSx = {
-  mt: 3,
-  fontSize: 13,
-  color: 'var(--text-muted)',
+  [SHORT_SCREEN]: { mt: 0, fontSize: 15 },
 } satisfies SxProps<Theme>;

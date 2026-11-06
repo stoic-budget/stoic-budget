@@ -1,7 +1,22 @@
 import type { ReactElement, ReactNode } from 'react';
 import type { NavItem } from '@/app/components/navigation/helpers/navigation-config';
 import { TUTORIAL_PAGES, type TutorialStepId } from './welcome-tutorial-routes';
-import { TUTORIAL_SCREENS, type TutorialFragment } from './welcome-tutorial-screens';
+
+export const TUTORIAL_POINTS: Record<TutorialStepId, readonly string[]> = {
+  dashboard: ['categories', 'month', 'recent'],
+  statements: ['list', 'upload'],
+  tables: ['grid', 'list'],
+  workspaces: ['list', 'members', 'categories'],
+  reports: ['flow', 'templates', 'categories'],
+  taxDeclaration: ['gate', 'steps'],
+  netWorth: ['chart', 'allocation', 'risk'],
+  budgets: ['cards', 'over'],
+  advice: ['info', 'attention'],
+  goals: ['list', 'progress'],
+  roi: ['chart', 'inputs', 'table'],
+  subscriptions: ['calendar', 'kpis', 'list'],
+  crypto: ['wallets', 'connect'],
+};
 
 export interface TutorialStep {
   id: TutorialStepId;
@@ -11,7 +26,8 @@ export interface TutorialStep {
   /** The same label as plain text, for attributes. */
   title: string;
   icon: ReactElement;
-  fragments: TutorialFragment[];
+  /** Keys of the page's points in the `welcomeTutorialSteps` dictionary, in reading order. */
+  points: readonly string[];
 }
 
 /**
@@ -34,7 +50,7 @@ export function buildTutorialSteps(
         label: item.label,
         title: titleOf(page.id),
         icon: item.icon,
-        fragments: TUTORIAL_SCREENS[page.id],
+        points: TUTORIAL_POINTS[page.id],
       },
     ];
   });

@@ -16,6 +16,24 @@ export const enterSx = {
   '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
 } as const;
 
+const blurIn = keyframes`
+  from { opacity: 0; filter: blur(14px); transform: translateY(8px); }
+  to { opacity: 1; filter: none; transform: none; }
+`;
+
+const BLUR_IN_STAGGER_MS = 80;
+
+/**
+ * Text comes into focus, one block after another; `order` is the block's place in line.
+ * Nothing is held after the end: a filter left on would soften the letters.
+ */
+export function blurInSx(order: number) {
+  return {
+    animation: `${blurIn} 600ms cubic-bezier(0.22, 1, 0.36, 1) ${order * BLUR_IN_STAGGER_MS}ms backwards`,
+    '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+  } as const;
+}
+
 /** Warm paper in light; in dark the card tone, a step up from the page behind it. */
 export const paperBackground = (theme: Theme): string =>
   theme.palette.mode === 'dark' ? 'var(--card)' : 'var(--background)';
