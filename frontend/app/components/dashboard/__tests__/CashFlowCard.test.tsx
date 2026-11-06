@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '../test-setup';
 import { CashFlowCard, typicalSpend } from '../CashFlowCard';
 import { wholeLine } from './whole-line';
@@ -132,6 +132,7 @@ describe('CashFlowCard', () => {
       removeEventListener: vi.fn(),
     }));
     vi.stubGlobal('matchMedia', matchMedia);
+    window.localStorage.setItem('seneca.cashFlowView', 'chart');
     const soFar = [day('2026-07-01', 900, 100), day('2026-07-02', 80, 0)];
 
     try {
@@ -254,6 +255,44 @@ describe('CashFlowCard', () => {
 
       render(<CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />);
       expect(screen.queryByTestId('mock-chart')).toBeNull();
+    });
+
+    describe('on a phone', () => {
+      beforeEach(() => {
+        vi.stubGlobal(
+          'matchMedia',
+          vi.fn(() => ({
+            matches: true,
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+          })),
+        );
+      });
+      afterEach(() => vi.unstubAllGlobals());
+
+      it('opens on the calendar when no view was picked', () => {
+        render(<CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />);
+
+        expect(screen.getByRole('tab', { name: 'Calendar' })).toHaveAttribute(
+          'aria-selected',
+          'true',
+        );
+        expect(screen.queryByTestId('mock-chart')).toBeNull();
+      });
+
+      it('keeps the view the reader picked', () => {
+        window.localStorage.setItem('seneca.cashFlowView', 'chart');
+        render(<CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />);
+
+        expect(screen.getByRole('tab', { name: 'Chart' })).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByTestId('mock-chart')).toBeInTheDocument();
+      });
+    });
+
+    it('opens on the chart on a wider screen when no view was picked', () => {
+      render(<CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />);
+
+      expect(screen.getByRole('tab', { name: 'Chart' })).toHaveAttribute('aria-selected', 'true');
     });
   });
 

@@ -2,7 +2,7 @@
 
 import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
 import type React from 'react';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { formatMonthLabel, niceCeiling } from '@/app/components/charts/chart-format';
 import { LazyCashFlowBars } from '@/app/components/charts/lazy-charts';
 import { PRIVATE_CLASS, PrivateAmount } from '@/app/components/ui/private-amount';
@@ -40,13 +40,13 @@ function subscribePhone(onChange: () => void): () => void {
   return () => query.removeEventListener('change', onChange);
 }
 
+function isPhoneNow(): boolean {
+  return typeof window.matchMedia === 'function' && window.matchMedia(PHONE_QUERY).matches;
+}
+
 /** False on the server and in the first client render, so hydration matches. */
 function useIsPhone(): boolean {
-  return useSyncExternalStore(
-    subscribePhone,
-    () => typeof window.matchMedia === 'function' && window.matchMedia(PHONE_QUERY).matches,
-    () => false,
-  );
+  return useSyncExternalStore(subscribePhone, isPhoneNow, () => false);
 }
 
 type CashFlowView = 'chart' | 'calendar' | 'flow';
@@ -56,12 +56,14 @@ const VIEWS: CashFlowView[] = ['chart', 'calendar', 'flow'];
 /** Which view this reader left the card in; a convenience of this browser only. */
 const VIEW_KEY = 'seneca.cashFlowView';
 
+/** The saved view, else what fits the screen: a phone opens on the calendar. */
 function readView(): CashFlowView {
+  const fallback: CashFlowView = isPhoneNow() ? 'calendar' : 'chart';
   try {
     const saved = window.localStorage.getItem(VIEW_KEY);
-    return VIEWS.find(view => view === saved) ?? 'chart';
+    return VIEWS.find(view => view === saved) ?? fallback;
   } catch {
-    return 'chart';
+    return fallback;
   }
 }
 
@@ -116,9 +118,9 @@ export function CashFlowCard({
   const budgeted = days.reduce((sum, day) => sum + day.budgeted, 0);
   const hasMoney = days.some(day => day.income !== 0 || day.expense !== 0);
   const isPhone = useIsPhone();
-  // The chart first, as the server drew it; the remembered view after mount, so hydration matches.
+  // The chart first, as the server drew it; the real view before the first paint, so hydration matches.
   const [view, setView] = useState<CashFlowView>('chart');
-  useEffect(() => setView(readView()), []);
+  useLayoutEffect(() => setView(readView()), []);
   const changeView = (next: CashFlowView) => {
     setView(next);
     storeView(next);
