@@ -47,15 +47,18 @@ async function standIn(url: string, init: RequestInit = {}): Promise<Response> {
       session_id: 'sess-1',
       aspsp: { name: 'Nordea', country: 'FI' },
       access: { valid_until: '2026-12-01T00:00:00.000Z' },
-      accounts: [{ uid: 'acc-1', name: 'Account', currency: 'EUR' }],
+      accounts: [
+        { uid: 'acc-1', identification_hash: 'account-hash', name: 'Account', currency: 'EUR' },
+      ],
     });
   }
   if (path.startsWith('/sessions/sess-1')) {
     return json({
-      session_id: 'sess-1',
+      status: 'AUTHORIZED',
       aspsp: { name: 'Nordea', country: 'FI' },
       access: { valid_until: '2026-12-01T00:00:00.000Z' },
-      accounts: [{ uid: 'acc-1', name: 'Account', currency: 'EUR' }],
+      accounts: ['acc-1'],
+      accounts_data: [{ uid: 'acc-1', identification_hash: 'account-hash' }],
     });
   }
   if (path.startsWith('/accounts/acc-1/balances')) {
@@ -209,7 +212,7 @@ describe('Bank sync through Enable Banking (e2e)', () => {
     // Accounts from a link the user just authorized start on.
     expect(completed.body.config.accounts).toEqual([
       expect.objectContaining({
-        id: 'acc-1',
+        id: expect.stringMatching(/^eb-/),
         org: 'Nordea',
         currency: 'EUR',
         enabled: true,
@@ -234,6 +237,6 @@ describe('Bank sync through Enable Banking (e2e)', () => {
       request(server()).get(`/transactions?statementId=${statementId}`),
     ).expect(200);
     expect(rows.body.data).toHaveLength(1);
-    expect(rows.body.data[0]).toMatchObject({ documentNumber: 'acc-1:EB-1' });
+    expect(rows.body.data[0].documentNumber).toMatch(/^eb-[0-9a-f]+:EB-1$/);
   }, 240_000);
 });

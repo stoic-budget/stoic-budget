@@ -27,8 +27,10 @@ import {
   EnableBankingInstitution,
   EnableBankingInstitutions,
   EnableBankingSession,
+  EnableBankingSessionState,
   EnableBankingTransaction,
   EnableBankingTransactionPage,
+  linkAccountsOf,
   normalizeTransaction,
   signJwt,
 } from './enable-banking.mapping';
@@ -143,6 +145,7 @@ export class EnableBankingProvider implements RedirectBankSyncProvider {
       institution: session.aspsp?.name ?? 'Unknown',
       country: session.aspsp?.country ?? null,
       consentExpiresAt: session.access?.valid_until ? new Date(session.access.valid_until) : null,
+      accounts: linkAccountsOf(session),
     };
   }
 
@@ -151,28 +154,38 @@ export class EnableBankingProvider implements RedirectBankSyncProvider {
     options: BankSyncFetchOptions = {},
   ): Promise<BankSyncAccount[]> {
     const accounts: BankSyncAccount[] = [];
+    const now = new Date();
     for (const link of context.links) {
-      const session = await this.request(
-        'GET',
-        `/sessions/${encodeURIComponent(link.id)}`,
-        context.secrets,
-        EnableBankingSession,
-        { psu: context.psu },
-      );
-      const consentExpiresAt = session.access?.valid_until
+      // A lapsed consent can answer nothing, and asking would spend the bank's
+      // daily calls. Listed all the same when only the list is wanted, so the
+      // account keeps its wallet until the bank is re-authorized.
+      const lapsed = link.consentExpiresAt != null && link.consentExpiresAt <= now;
+      const session = lapsed
+        ? null
+        : await this.request(
+            'GET',
+            `/sessions/${encodeURIComponent(link.id)}`,
+            context.secrets,
+            EnableBankingSessionState,
+            { psu: context.psu },
+          );
+      const authorized = session !== null && (session.status ?? 'AUTHORIZED') === 'AUTHORIZED';
+      if (!(authorized || options.balancesOnly)) continue;
+      const consentExpiresAt = session?.access?.valid_until
         ? new Date(session.access.valid_until)
         : (link.consentExpiresAt ?? null);
-      for (const raw of session.accounts ?? []) {
-        if (!raw.uid) continue;
+      for (const account of link.accounts ?? []) {
         accounts.push({
-          id: raw.uid,
-          name: raw.name || raw.account_id?.iban || raw.uid,
-          org: session.aspsp?.name || raw.account_servicer?.name || link.institution,
-          currency: (raw.currency || '').toUpperCase(),
-          ...(await this.balanceOf(raw.uid, context)),
+          id: account.id,
+          name: account.name,
+          org: session?.aspsp?.name || link.institution,
+          currency: account.currency,
+          ...(authorized
+            ? await this.balanceOf(account.ref, context)
+            : { balance: null, balanceDate: null }),
           transactions: options.balancesOnly
             ? []
-            : await this.transactionsOf(raw.uid, context, options.since),
+            : await this.transactionsOf(account.ref, context, options.since),
           linkId: link.id,
           consentExpiresAt,
         });

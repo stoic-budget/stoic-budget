@@ -48,6 +48,16 @@ export interface BankSyncFetchOptions {
   balancesOnly?: boolean;
 }
 
+/** An account as its authorization described it, for providers that say so only once. */
+export interface BankSyncLinkAccount {
+  /** The id we keep: the same account has the same one after re-authorizing the bank. */
+  id: string;
+  /** What the provider calls the account within this authorization. */
+  ref: string;
+  name: string;
+  currency: string;
+}
+
 /** One bank authorization inside a connection. `token` providers have exactly one, implicit. */
 export interface BankSyncLink {
   id: string;
@@ -55,6 +65,7 @@ export interface BankSyncLink {
   institution: string;
   country?: string | null;
   consentExpiresAt?: Date | null;
+  accounts?: BankSyncLinkAccount[];
 }
 
 export interface BankSyncInstitution {

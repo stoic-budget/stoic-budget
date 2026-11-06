@@ -21,7 +21,17 @@ afterAll(() => effects.onModuleDestroy());
 const providerWith = (fetchUrl: (url: string, init?: RequestInit) => Promise<Response>) =>
   new EnableBankingProvider(fetchUrl, effects);
 
-const context = { secrets, links: [{ id: 'sess-1', institution: 'Nordea', country: 'FI' }] };
+const context = {
+  secrets,
+  links: [
+    {
+      id: 'sess-1',
+      institution: 'Nordea',
+      country: 'FI',
+      accounts: [{ id: 'stable-1', ref: 'acc-1', name: 'Käyttötili', currency: 'EUR' }],
+    },
+  ],
+};
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -132,6 +142,11 @@ describe('EnableBankingProvider linking', () => {
         session_id: 'sess-9',
         aspsp: { name: 'Nordea', country: 'FI' },
         access: { valid_until: '2026-12-01T00:00:00.000Z' },
+        accounts: [
+          { uid: 'acc-1', identification_hash: 'a/b+c=', name: 'Käyttötili', currency: 'eur' },
+          { uid: 'acc-2', name: null, account_id: { iban: 'XX00EXAMPLE' }, currency: 'USD' },
+          { identification_hash: 'closed-account', name: 'Closed', currency: 'EUR' },
+        ],
       },
     });
     const link = await providerWith(fetchUrl).completeLink(secrets, 'code-1');
@@ -141,7 +156,27 @@ describe('EnableBankingProvider linking', () => {
       institution: 'Nordea',
       country: 'FI',
       consentExpiresAt: new Date('2026-12-01T00:00:00.000Z'),
+      accounts: [
+        { id: expect.stringMatching(/^eb-[0-9a-f]{32}$/), ref: 'acc-1', name: 'Käyttötili', currency: 'EUR' },
+        { id: 'acc-2', ref: 'acc-2', name: 'XX00EXAMPLE', currency: 'USD' },
+      ],
     });
+  });
+
+  it('gives an account the same id in every session', async () => {
+    const complete = async (uid: string) => {
+      const { fetchUrl } = stubFetch({
+        '/sessions': {
+          session_id: `sess-${uid}`,
+          accounts: [{ uid, identification_hash: 'same-account', name: 'Main', currency: 'EUR' }],
+        },
+      });
+      const link = await providerWith(fetchUrl).completeLink(secrets, 'code');
+      return link.accounts?.[0];
+    };
+    const [before, after] = [await complete('uid-old'), await complete('uid-new')];
+    expect(before?.id).toBe(after?.id);
+    expect(before?.ref).not.toBe(after?.ref);
   });
 
   it('reports a refused credential as an auth error and a rate limit as temporary', async () => {
@@ -168,7 +203,10 @@ describe('EnableBankingProvider pulling', () => {
     session_id: 'sess-1',
     aspsp: { name: 'Nordea', country: 'FI' },
     access: { valid_until: '2026-12-01T00:00:00.000Z' },
-    accounts: [{ uid: 'acc-1', name: 'Käyttötili', currency: 'eur' }],
+    status: 'AUTHORIZED',
+    // As the API sends it: bare uids here, the descriptions only in POST /sessions.
+    accounts: ['acc-1'],
+    accounts_data: [{ uid: 'acc-1', identification_hash: 'hash-1' }],
   };
 
   it('reads the closing booked balance and sends the PSU headers', async () => {
@@ -190,7 +228,7 @@ describe('EnableBankingProvider pulling', () => {
       { balancesOnly: true },
     );
     expect(accounts[0]).toMatchObject({
-      id: 'acc-1',
+      id: 'stable-1',
       name: 'Käyttötili',
       org: 'Nordea',
       currency: 'EUR',
@@ -203,6 +241,25 @@ describe('EnableBankingProvider pulling', () => {
     const headers = calls.at(-1)?.init.headers as Record<string, string>;
     expect(headers['psu-ip-address']).toBe('203.0.113.7');
     expect(headers['psu-user-agent']).toBe('Seneca/1.0');
+  });
+
+  it('still lists a lapsed link for the account list, without calling anything', async () => {
+    const { fetchUrl, calls } = stubFetch({});
+    const lapsed = {
+      ...context,
+      links: [{ ...context.links[0], consentExpiresAt: new Date('2020-01-01T00:00:00.000Z') }],
+    };
+    const accounts = await providerWith(fetchUrl).fetchAccounts(lapsed, { balancesOnly: true });
+    expect(calls).toHaveLength(0);
+    expect(accounts[0]).toMatchObject({ id: 'stable-1', balance: null, transactions: [] });
+    await expect(providerWith(fetchUrl).fetchAccounts(lapsed)).resolves.toEqual([]);
+    expect(calls).toHaveLength(0);
+  });
+
+  it('pulls nothing from a session the bank no longer authorizes', async () => {
+    const { fetchUrl, calls } = stubFetch({ '/sessions/': { ...session, status: 'EXPIRED' } });
+    await expect(providerWith(fetchUrl).fetchAccounts(context)).resolves.toEqual([]);
+    expect(calls).toHaveLength(1);
   });
 
   it('omits the PSU headers entirely when only one of them is known', async () => {
