@@ -38,7 +38,7 @@ describe('TwoFactorService', () => {
           provide: getRepositoryToken(User),
           useValue: {
             findOne: vi.fn(async () => stored as User),
-            update: vi.fn(async (_id: string, patch: Partial<User>) => {
+            update: vi.fn(async (_id: unknown, patch: Partial<User>) => {
               Object.assign(stored, patch);
               return { affected: 1 };
             }),
@@ -61,6 +61,10 @@ describe('TwoFactorService', () => {
     const { recoveryCodes } = await service.enable('u1', generateSync({ secret }));
     return { secret, recoveryCodes };
   };
+
+  // The code that enabled 2FA spent the current step, so a login needs the next one.
+  const nextCode = (secret: string) =>
+    generateSync({ secret, epoch: Math.floor(Date.now() / 1000) + 30 });
 
   it('rejects setup when the current password is wrong', async () => {
     await expect(service.setup('u1', 'nope')).rejects.toBeInstanceOf(ForbiddenException);
@@ -97,8 +101,28 @@ describe('TwoFactorService', () => {
   it('accepts a current TOTP code at login and rejects a wrong one', async () => {
     const { secret } = await enable();
 
-    await expect(service.assertLoginCode('u1', generateSync({ secret }))).resolves.toBeUndefined();
+    await expect(service.assertLoginCode('u1', nextCode(secret))).resolves.toBeUndefined();
     await expect(service.assertLoginCode('u1', '000000')).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
+  });
+
+  it('refuses the code that enabled 2FA and a code already used to log in', async () => {
+    const { secret } = await enable();
+    await expect(service.assertLoginCode('u1', generateSync({ secret }))).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
+
+    const code = nextCode(secret);
+    await expect(service.assertLoginCode('u1', code)).resolves.toBeUndefined();
+    await expect(service.assertLoginCode('u1', code)).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('lets only one of two logins racing with the same code through', async () => {
+    const { secret } = await enable();
+    // The other login claimed this step between the read and the write.
+    userRepository.update.mockResolvedValueOnce({ affected: 0 } as never);
+    await expect(service.assertLoginCode('u1', nextCode(secret))).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
   });
