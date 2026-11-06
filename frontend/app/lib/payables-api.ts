@@ -48,6 +48,13 @@ export interface CreatePayableInput {
   comment?: string;
   statementId?: string;
   tagIds?: string[];
+  /** The money has already moved: the bill is saved settled, with this payment. */
+  payment?: {
+    payFromWalletId?: string;
+    inHand?: boolean;
+    paidOn?: string;
+    categoryId?: string;
+  };
 }
 
 export interface UpdatePayableInput {
@@ -167,10 +174,12 @@ export const payablesApi = {
     return checkContract('PayablesSummary', unwrapData(response), '/payables/summary');
   },
 
-  async create(payload: CreatePayableInput): Promise<Payable> {
+  /** `idempotencyKey`: a retry of the same form returns the first bill, not a second one. */
+  async create(payload: CreatePayableInput, idempotencyKey?: string): Promise<Payable> {
     const response = await apiClient.post(
       '/payables',
       payload satisfies ContractInput<'CreatePayableBody'>,
+      idempotencyKey ? { headers: { 'idempotency-key': idempotencyKey } } : undefined,
     );
     return checkContract('Payable', unwrapData(response), '/payables');
   },

@@ -91,7 +91,7 @@ export default function CustomDatePicker({
             id,
             size: large ? 'medium' : size,
             error,
-            sx: large ? { '& .MuiInputBase-root': FORM_CONTROL_SX } : undefined,
+            sx: large ? { '& .MuiPickersInputBase-root': FORM_CONTROL_SX } : undefined,
             helperText: helperText,
             placeholder: placeholder,
           } as any,

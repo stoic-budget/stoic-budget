@@ -21,14 +21,15 @@ import {
   type PayablePayment,
   payablesApi,
 } from '@/app/lib/payables-api';
-import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
+import { useCashPaymentOptions } from './hooks/useCashPaymentOptions';
 import {
   AmountFields,
   type AmountState,
   CandidateList,
   CashFields,
   type CashState,
+  cashSource,
   IN_HAND,
   PaymentLog,
   today,
@@ -74,7 +75,7 @@ export function MarkPaidDialog(props: MarkPaidDialogProps): React.JSX.Element | 
 function usePaymentOptions(payable: Payable) {
   const workspaceId = useWorkspaceId();
   const currency = payable.currency.toUpperCase();
-  const categoryType = payable.direction === 'receivable' ? 'income' : 'expense';
+  const cash = useCashPaymentOptions({ currency, direction: payable.direction });
 
   const candidates = useQuery({
     queryKey: queryKeys.payablePaymentCandidates({ workspaceId, payableId: payable.id }),
@@ -86,28 +87,12 @@ function usePaymentOptions(payable: Payable) {
     queryFn: () => payablesApi.payments(payable.id),
     enabled: Boolean(workspaceId),
   });
-  const wallets = useQuery({
-    queryKey: queryKeys.wallets(workspaceId),
-    queryFn: ({ signal }) => apiQueryDecoded({ url: '/wallets', signal, contract: 'WalletList' }),
-    enabled: Boolean(workspaceId),
-  });
-  const categories = useQuery({
-    queryKey: queryKeys.categories(workspaceId),
-    queryFn: ({ signal }) =>
-      apiQueryDecoded({ url: '/categories', signal, contract: 'CategoryList' }),
-    enabled: Boolean(workspaceId),
-  });
-
   return {
     currency,
     candidates: candidates.data ?? [],
     candidatesLoading: candidates.isPending,
     payments: (payments.data ?? []) as PayablePayment[],
-    wallets: (wallets.data ?? []).filter(
-      wallet => wallet.isActive !== false && wallet.currency.toUpperCase() === currency,
-    ),
-    walletsLoading: wallets.isPending,
-    categories: (categories.data ?? []).filter(category => category.type === categoryType),
+    ...cash,
   };
 }
 
@@ -167,11 +152,6 @@ function buildResult(
   return settlesInFull
     ? { kind: 'full', payload: {} }
     : { kind: 'payment', payload: { amount, feeAmount: fee || undefined } };
-}
-
-/** A wallet the cash went into, or cash in hand kept in none. */
-function cashSource(walletId: string): { payFromWalletId?: string; inHand?: boolean } {
-  return walletId === IN_HAND ? { inHand: true } : { payFromWalletId: walletId };
 }
 
 /** For a payment recorded without money: the bank row or the wallet it went into. */

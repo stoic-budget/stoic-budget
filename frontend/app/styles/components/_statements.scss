@@ -2181,8 +2181,41 @@
     gap: 16px;
   }
 
+  // A form whose fields keep to one border and one pair of columns.
+  &__body--even {
+    // MUI's fields, the date picker's and the category button; hover, focus and
+    // error keep their own border.
+    .MuiOutlinedInput-root:not(:hover, .Mui-focused, .Mui-error) .MuiOutlinedInput-notchedOutline,
+    .MuiPickersOutlinedInput-root:not(:hover, .Mui-focused, .Mui-error)
+      .MuiPickersOutlinedInput-notchedOutline,
+    #payable-category:not(:hover, :focus-visible),
+    .seneca-payable-drawer__currency-trigger:not(:focus-visible),
+    .seneca-payable-drawer__textarea {
+      border-color: $seneca-color-slot-border;
+
+      @include dark {
+        border-color: $seneca-color-border-strong-dk;
+      }
+    }
+
+    // Text starts where it does in the inputs above, at their size.
+    .seneca-payable-drawer__textarea {
+      padding: 12px 14px;
+      font-size: 16px;
+    }
+
+    // The same two columns as the fields above.
+    .seneca-payable-drawer__footer {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+  }
+
   &__field-group {
     display: grid;
+    // Not auto: the date picker's own width would push past the column.
+    grid-template-columns: minmax(0, 1fr);
     gap: 8px;
   }
 
@@ -2198,11 +2231,12 @@
 
   &__2col {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
 
     @media (min-width: 640px) {
-      grid-template-columns: repeat(2, 1fr);
+      // minmax(0, …): equal columns whatever the fields inside would like to be.
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 

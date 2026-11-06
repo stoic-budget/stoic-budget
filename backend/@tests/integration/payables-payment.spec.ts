@@ -413,6 +413,88 @@ describe('settling payables (real Postgres)', () => {
     expect((await payableRepo.findOneByOrFail({ id: open.id })).status).toBe(PayableStatus.TO_PAY);
   });
 
+  describe('a bill entered as already settled', () => {
+    const settled = (vendor: string, overrides: Record<string, unknown> = {}) => ({
+      vendor,
+      amount: 900,
+      currency: 'EUR',
+      status: 'paid' as const,
+      payment: { payFromWalletId: walletId, paidOn: daysAgo(2), categoryId },
+      ...overrides,
+    });
+
+    it('is saved closed, with its transaction in the account and its payment on the log', async () => {
+      const vendor = 'Settled at once';
+      const saved = await payables.create(workspaceId, userId, settled(vendor));
+
+      expect(saved).toMatchObject({ status: PayableStatus.PAID, vendor });
+      expect(Number(saved.paidAmount)).toBe(900);
+      const created = await txRepo.findOneByOrFail({ id: saved.linkedTransactionId as string });
+      expect(created).toMatchObject({
+        walletId,
+        workspaceId,
+        categoryId,
+        currency: 'EUR',
+        transactionType: TransactionType.EXPENSE,
+        counterpartyName: vendor,
+      });
+      expect(Number(created.debit)).toBe(900);
+      expect(String(created.transactionDate).slice(0, 10)).toBe(daysAgo(2));
+
+      const log = await payables.listPayments(saved.id, workspaceId);
+      expect(log).toHaveLength(1);
+      expect(log[0]).toMatchObject({ transactionId: created.id, paidOn: daysAgo(2) });
+    });
+
+    it('books income for money received', async () => {
+      const saved = await payables.create(
+        workspaceId,
+        userId,
+        settled('Received at once', { direction: 'receivable', payment: { payFromWalletId: walletId } }),
+      );
+
+      const created = await txRepo.findOneByOrFail({ id: saved.linkedTransactionId as string });
+      expect(created.transactionType).toBe(TransactionType.INCOME);
+      expect(Number(created.credit)).toBe(900);
+      expect(created.debit).toBeNull();
+    });
+
+    it('books cash in hand in no account', async () => {
+      const saved = await payables.create(
+        workspaceId,
+        userId,
+        settled('Cash at once', { payment: { inHand: true } }),
+      );
+
+      expect(saved.status).toBe(PayableStatus.PAID);
+      const created = await txRepo.findOneByOrFail({ id: saved.linkedTransactionId as string });
+      expect(created.walletId).toBeNull();
+    });
+
+    it('leaves nothing behind when the payment cannot be recorded', async () => {
+      const foreign = await dataSource
+        .getRepository(Wallet)
+        .save({ userId, workspaceId, name: 'Dollars', currency: 'USD' });
+      const before = await txRepo.count();
+      const cases: Array<[string, Record<string, unknown>, string]> = [
+        ['Other currency', { payment: { payFromWalletId: foreign.id } }, 'PAYABLE_WALLET_CURRENCY_MISMATCH'],
+        ['Unknown wallet', { payment: { payFromWalletId: randomUUID() } }, 'PAYABLE_WALLET_NOT_FOUND'],
+        ['Unknown category', { payment: { inHand: true, categoryId: randomUUID() } }, 'PAYABLE_CATEGORY_NOT_FOUND'],
+        ['No source', { payment: { paidOn: daysAgo(1) } }, 'PAYABLE_BOOK_NEEDS_SOURCE'],
+        ['Two sources', { payment: { inHand: true, payFromWalletId: walletId } }, 'PAYABLE_PAYMENT_AMBIGUOUS'],
+        ['Nothing to pay', { amount: 0 }, 'PAYABLE_PAYMENT_NOT_POSITIVE'],
+      ];
+
+      for (const [vendor, overrides, code] of cases) {
+        expect(
+          await errorOf(payables.create(workspaceId, userId, settled(vendor, overrides))),
+        ).toEqual({ status: 400, code });
+        expect(await payableRepo.existsBy({ vendor })).toBe(false);
+      }
+      expect(await txRepo.count()).toBe(before);
+    });
+  });
+
   it('still saves an edit of a bill that was paid through its payment', async () => {
     const payable = await bill();
     await payables.markAsPaid(payable.id, workspaceId, userId, { payFromWalletId: walletId });
