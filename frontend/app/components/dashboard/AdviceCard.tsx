@@ -1,17 +1,14 @@
 'use client';
 
 import type React from 'react';
+import { byImportance } from '@/app/components/insights/advice-order';
 import { insightHref } from '@/app/components/insights/insight-href';
-import { type Insight, useInsights } from '@/app/hooks/useInsights';
+import { useInsights } from '@/app/hooks/useInsights';
 import { useIntlayer } from '@/app/i18n';
 import { useTodayNote } from './overview-month';
 import { CardLink, DashboardCard, ListRow } from './ui';
 
 const VISIBLE_ITEMS = 3;
-
-/** The advice page's order: the Stoic reading of the month, then the experts, then observations. */
-const rank = (item: Insight): number =>
-  item.type.startsWith('stoic.') ? 2 : item.type === 'expert.principle' ? 1 : 0;
 
 /**
  * The top of the advice feed. Warnings already reach every page through the
@@ -27,7 +24,7 @@ export function AdviceCard(): React.JSX.Element | null {
     return null;
   }
 
-  const top = [...items].sort((a, b) => rank(b) - rank(a)).slice(0, VISIBLE_ITEMS);
+  const top = [...items].sort(byImportance).slice(0, VISIBLE_ITEMS);
   return (
     <DashboardCard
       title={t.sections.advice}

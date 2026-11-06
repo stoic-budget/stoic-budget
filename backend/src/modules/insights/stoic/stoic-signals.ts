@@ -5,7 +5,16 @@ import type {
   StoicMonth,
   StoicTotals,
 } from '../../budgets/stoic/stoic-ledger.service';
+import { isUncategorizedName } from '../../categories/uncategorized-category';
+import type { RuleHealth } from '../../classification/services/rule-health.service';
 import type { StoicMessageKey } from '../stoic-texts/types';
+import {
+  goalSignals,
+  type StoicGoalView,
+  type StoicOutlook,
+  shortfallSignals,
+} from './goal-signals';
+import { ruleSignals } from './rule-signals';
 import type { StoicBehavior } from './stoic-behavior.service';
 
 /** Points of spending share between what was planned for a class and what it got. */
@@ -51,31 +60,15 @@ export const JUDGE_CURRENT_FROM_DAY = 10;
  */
 export const SERIOUS_PRIORITY = 40;
 
-export interface StoicGoalView {
-  id: string;
-  name: string;
-  percent: number;
-  status: 'reached' | 'no_deadline' | 'on_track' | 'tight' | 'not_feasible';
-  requiredPerMonth: number | null;
-  pacePerMonth: number;
-  monthsLate: number | null;
-  freePerMonth: number;
-}
-
-export interface StoicCommitments {
-  /** Balance today, the start of the projection. */
-  openingBalance: number;
-  shortfallDate: string | null;
-  lowestBalance: number;
-  totalCommitted: number;
-}
+export type { StoicGoalView, StoicOutlook };
 
 export interface StoicContext {
   now: Date;
   balance: StoicBalance;
   behavior: StoicBehavior | null;
   goals: StoicGoalView[];
-  commitments: StoicCommitments | null;
+  outlook: StoicOutlook | null;
+  rules: RuleHealth | null;
 }
 
 export interface StoicSignal {
@@ -161,12 +154,16 @@ export function collectSignals(context: StoicContext): StoicSignal[] {
       ? generositySignals(balance, context.behavior, reference)
       : []),
     ...goalSignals(context.goals),
-    ...commitmentSignals(context.commitments),
+    ...shortfallSignals(context.outlook),
+    ...ruleSignals(context.rules),
   ];
 }
 
 function unclassified(balance: StoicBalance): StoicSignal[] {
-  const unjudged = balance.categories.filter(category => category.active && !category.stoicClass);
+  // "Uncategorized" is no judgment anyone could make: its rows wait for a category.
+  const unjudged = balance.categories.filter(
+    category => category.active && !category.stoicClass && !isUncategorizedName(category.name),
+  );
   return unjudged.length === 0
     ? []
     : [
@@ -286,7 +283,7 @@ function planSignals(
     });
   }
 
-  signals.push(...unbudgetedSignal(reference, spent));
+  signals.push(...unbudgetedSignal(reference, spent, nameOf));
   return signals;
 }
 
@@ -320,10 +317,17 @@ function classGapSignals(
 }
 
 /** Spending no budget watches, once it is a large part of the month. */
-function unbudgetedSignal(reference: StoicMonth, spent: number): StoicSignal[] {
-  const unbudgeted = Object.entries(reference.spentByCategory)
+function unbudgetedSignal(
+  reference: StoicMonth,
+  spent: number,
+  nameOf: Map<string, string>,
+): StoicSignal[] {
+  const outside = Object.entries(reference.spentByCategory)
     .filter(([categoryId]) => !(categoryId in reference.limitByCategory))
-    .reduce((sum, [, amount]) => sum + amount, 0);
+    .sort((a, b) => b[1] - a[1]);
+  const unbudgeted = outside.reduce((sum, [, amount]) => sum + amount, 0);
+  // The card opens the form for the largest of it, the one a limit would help most.
+  const largest = outside.find(([categoryId]) => !isUncategorizedName(nameOf.get(categoryId)));
   if (spent > 0 && unbudgeted / spent >= UNBUDGETED_SHARE) {
     return [
       {
@@ -331,6 +335,7 @@ function unbudgetedSignal(reference: StoicMonth, spent: number): StoicSignal[] {
         type: InsightType.STOIC_PLAN,
         priority: 25,
         params: { percent: pct((unbudgeted / spent) * 100), unbudgetedAmount: money(unbudgeted) },
+        data: largest ? { newBudgetCategoryId: largest[0] } : undefined,
       },
     ];
   }
@@ -441,7 +446,8 @@ function paceSignals(
             limitAmount: money(runningOut.limit),
             spentAmount: money(runningOut.spent),
           },
-          data: { categoryId: runningOut.categoryId },
+          // About the running month, whichever month the rest of the advice judges.
+          data: { categoryId: runningOut.categoryId, month: current.month },
           subject: runningOut.categoryId,
         },
       ]
@@ -554,7 +560,7 @@ function behaviorSignals(
         type: InsightType.STOIC_HABIT,
         priority: 40,
         params: { merchant: small.name, count: small.count, totalAmount: money(small.total) },
-        data: { merchant: small.name },
+        data: { merchant: small.bankName },
         subject: small.name,
       });
     }
@@ -577,7 +583,7 @@ function behaviorSignals(
           percent: pct((top.total / monthTotal) * 100),
           totalAmount: money(top.total),
         },
-        data: { merchant: top.name },
+        data: { merchant: top.bankName },
         subject: top.name,
       });
     }
@@ -642,6 +648,7 @@ function fewerSmallPurchases(
     .filter(merchant => isLeisureLike(merchant.categoryId))
     .map(merchant => ({
       name: merchant.name,
+      bankName: merchant.bankName,
       before: behavior.previousCounts[merchant.name] ?? 0,
       after: Math.round(merchant.count * scale),
     }))
@@ -658,7 +665,7 @@ function fewerSmallPurchases(
           priority: 0,
           praise: true,
           params: { merchant: improved.name, before: improved.before, after: improved.after },
-          data: { merchant: improved.name },
+          data: { merchant: improved.bankName },
         },
       ]
     : [];
@@ -803,79 +810,4 @@ function generositySignals(
     ];
   }
   return [];
-}
-
-function goalSignals(goals: StoicGoalView[]): StoicSignal[] {
-  const notFeasible = goals.find(goal => goal.status === 'not_feasible');
-  if (notFeasible && notFeasible.requiredPerMonth !== null) {
-    return [
-      {
-        key: 'stoic.goal_not_feasible',
-        type: InsightType.STOIC_GOAL,
-        priority: 85,
-        params: {
-          goal: notFeasible.name,
-          requiredAmount: money(notFeasible.requiredPerMonth),
-          freeAmount: money(notFeasible.freePerMonth),
-        },
-        data: { goalId: notFeasible.id },
-        subject: notFeasible.id,
-      },
-    ];
-  }
-
-  const behind = goals
-    .filter(goal => (goal.monthsLate ?? 0) > 0 && goal.requiredPerMonth !== null)
-    .sort((a, b) => (b.monthsLate ?? 0) - (a.monthsLate ?? 0))[0];
-  if (behind) {
-    return [
-      {
-        key: 'stoic.goal_behind',
-        type: InsightType.STOIC_GOAL,
-        priority: 50,
-        params: {
-          goal: behind.name,
-          requiredAmount: money(behind.requiredPerMonth ?? 0),
-          paceAmount: money(behind.pacePerMonth),
-          monthsLate: behind.monthsLate ?? 0,
-        },
-        data: { goalId: behind.id },
-        subject: behind.id,
-      },
-    ];
-  }
-
-  const onTrack = goals
-    .filter(goal => goal.status === 'on_track')
-    .sort((a, b) => b.percent - a.percent)[0];
-  return onTrack
-    ? [
-        {
-          key: 'stoic.praise_goal_on_track',
-          type: InsightType.STOIC_PRAISE,
-          priority: 0,
-          praise: true,
-          params: { goal: onTrack.name, percent: pct(onTrack.percent) },
-          data: { goalId: onTrack.id },
-        },
-      ]
-    : [];
-}
-
-function commitmentSignals(commitments: StoicCommitments | null): StoicSignal[] {
-  if (!commitments?.shortfallDate) {
-    return [];
-  }
-  return [
-    {
-      key: 'stoic.shortfall',
-      type: InsightType.STOIC_COMMITMENTS,
-      priority: 100,
-      params: {
-        date: commitments.shortfallDate,
-        lowestAmount: money(commitments.lowestBalance),
-        committedAmount: money(commitments.totalCommitted),
-      },
-    },
-  ];
 }

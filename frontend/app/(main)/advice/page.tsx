@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { ArrowRight, BookOpen, CheckCircle2, Scale, X } from '@/app/components/icons';
+import { byImportance, isGoodNews, needsAttention } from '@/app/components/insights/advice-order';
 import { insightHref } from '@/app/components/insights/insight-href';
 import { isWorkInsight } from '@/app/components/insights/work-insights';
 import { EmptyState } from '@/app/components/ui/EmptyState';
@@ -30,43 +31,34 @@ const ADVICE_SKELETON_KEYS = [
 /** One column of reading width: the arrow and Dismiss stay next to the words they act on. */
 const LIST_MAX_WIDTH = 760;
 
+const isReflection = (item: Insight) => item.type === 'stoic.reflection';
 const isStoic = (item: Insight) => item.type.startsWith('stoic.');
-const isPraise = (item: Insight) => item.type === 'stoic.praise';
-const isExpert = (item: Insight) => item.type === 'expert.principle';
+
+/** "Seneca, Moral Letters to Lucilius, Letter 18" for reflections. */
+function sourceCredit(item: Insight): string | null {
+  const author = item.data?.author;
+  const work = item.data?.work;
+  return typeof author === 'string' && typeof work === 'string' ? `${author}, ${work}` : null;
+}
 
 /**
- * Advice that asks for something: a cost that rose, an unusual charge, a plan
- * that slipped. The rest is information and stays without an accent.
+ * The month the advice judged, when it is not the running one: in the first days
+ * of a month the reading is about the month before.
  */
-const ATTENTION_TYPES = new Set([
-  'spending.spike',
-  'transaction.unusual',
-  'pattern.detected',
-  'pattern.risky_allocation',
-  'trend.spending_up',
-  'stoic.intent_gap',
-  'stoic.virtue_neglected',
-  'stoic.repeated',
-  'stoic.unclassified',
-  'stoic.plan',
-  'stoic.commitments',
-  'stoic.subscriptions',
-  'stoic.generosity',
-]);
-const needsAttention = (item: Insight) =>
-  ATTENTION_TYPES.has(item.type) || item.messageKey === 'trend.savings_rate_down';
-
-/** Good news: the user is doing well, so it gets a sage check rather than nothing. */
-const isGoodNews = (item: Insight) =>
-  isPraise(item) ||
-  item.type === 'trend.spending_down' ||
-  (item.type === 'trend.savings_rate' && item.messageKey !== 'trend.savings_rate_down');
-
-/** "Morgan Housel, The Psychology of Money (2020)" for expert cards. */
-function expertCredit(item: Insight): string | null {
-  const expert = item.data?.expert;
-  const work = item.data?.work;
-  return typeof expert === 'string' && typeof work === 'string' ? `${expert}, ${work}` : null;
+function judgedMonth(item: Insight, locale: string): string | null {
+  const month = item.data?.month;
+  if (typeof month !== 'string' || !/^\d{4}-\d{2}$/.test(month)) {
+    return null;
+  }
+  const now = new Date();
+  const running = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  if (month === running) {
+    return null;
+  }
+  const [year, index] = month.split('-').map(Number);
+  return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(
+    new Date(year, index - 1, 1),
+  );
 }
 
 /** "2 days ago", in the reader's language. */
@@ -80,21 +72,21 @@ function ago(iso: string, locale: string): string {
 
 /**
  * The mark before a line: an ochre dot for what needs doing, a sage check for
- * good news, a grey glyph naming a Stoic or expert reading, otherwise nothing.
+ * good news, a grey glyph naming a Stoic reading or reflection, otherwise nothing.
  * A bulb on every line repeated the sidebar and said nothing.
  */
 function AdviceMark({ item }: { item: Insight }): React.JSX.Element {
-  if (needsAttention(item) && !isPraise(item)) {
+  if (needsAttention(item)) {
     return <Box className="seneca-advice__dot" aria-hidden />;
   }
   if (isGoodNews(item)) {
     return <CheckCircle2 size={18} color="var(--money-up)" aria-hidden />;
   }
+  if (isReflection(item)) {
+    return <BookOpen size={18} color="var(--muted-foreground)" aria-hidden />;
+  }
   if (isStoic(item)) {
     return <Scale size={18} color="var(--muted-foreground)" aria-hidden />;
-  }
-  if (isExpert(item)) {
-    return <BookOpen size={18} color="var(--muted-foreground)" aria-hidden />;
   }
   return <span aria-hidden />;
 }
@@ -113,6 +105,7 @@ function AdviceRow({
   onDismiss: (id: string) => void;
 }): React.JSX.Element {
   const href = insightHref(item);
+  const month = judgedMonth(item, locale);
   const body = (
     <>
       <Box sx={{ width: 18, pt: 0.375, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
@@ -123,16 +116,17 @@ function AdviceRow({
         <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.25 }}>
           {item.message}
         </Typography>
-        {expertCredit(item) && (
+        {sourceCredit(item) && (
           <Typography
             variant="caption"
             component="p"
             sx={{ color: 'text.secondary', fontStyle: 'italic' }}
           >
-            — {expertCredit(item)}
+            — {sourceCredit(item)}
           </Typography>
         )}
         <Typography variant="caption" component="p" sx={{ color: 'text.secondary', mt: 0.5 }}>
+          {month ? `${month} · ` : ''}
           {ago(item.createdAt, locale)}
         </Typography>
       </Box>
@@ -230,11 +224,7 @@ export default function AdvicePage() {
   } = useInsights({
     severities: ['info', 'warn', 'critical'],
   });
-  const unordered = everything.filter(item => !isWorkInsight(item));
-  // The Stoic reading of the month comes first; plain observations follow.
-  // The Stoic reading of the month first, then the experts, then plain observations.
-  const rank = (item: Insight) => (isStoic(item) ? 2 : isExpert(item) ? 1 : 0);
-  const items = [...unordered].sort((a, b) => rank(b) - rank(a));
+  const items = everything.filter(item => !isWorkInsight(item)).sort(byImportance);
   const refreshInsights = useRefreshInsights();
   const triggerRefresh = refreshInsights.mutate;
   // Switching the interface language rewrites the advice in it.

@@ -6,7 +6,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useLocale } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
 import type { Insight, InsightList, InsightSeverity } from '@/app/lib/contracts';
@@ -131,7 +131,6 @@ export function useInsights({ severities }: UseInsightsOptions): UseInsightsStat
 /**
  * Пересчёт аналитики перед чтением. Вынесен из запроса: внутри queryFn он делал
  * бы её нечистой и потребовал бы положить флаг в ключ, разделив общий кэш.
- * Дёргается только на странице, которую пользователь открыл намеренно.
  */
 /**
  * Recomputes the advice on the server. The argument is the interface
@@ -151,4 +150,34 @@ export function useRefreshInsights(): UseMutationResult<unknown, Error, string> 
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: queryKeys.insightsAll(workspaceId) }),
   });
+}
+
+const refreshedOnKey = (workspaceId: string) => `advice-refreshed-on:${workspaceId}`;
+
+/**
+ * Recomputes the advice once a day per workspace, whichever page the person
+ * opens first: the dashboard card and the quote of the day read the same rows,
+ * and someone who never opens the Advice page would otherwise see old ones.
+ * The mark is only a convenience; without storage a visit refreshes once more.
+ */
+export function useDailyAdviceRefresh(): void {
+  const workspaceId = useWorkspaceId();
+  const { locale } = useLocale();
+  const { mutate } = useRefreshInsights();
+
+  useEffect(() => {
+    if (!workspaceId) {
+      return;
+    }
+    const today = new Date().toDateString();
+    try {
+      if (localStorage.getItem(refreshedOnKey(workspaceId)) === today) {
+        return;
+      }
+      localStorage.setItem(refreshedOnKey(workspaceId), today);
+    } catch {
+      // Blocked storage: refresh anyway.
+    }
+    mutate(locale);
+  }, [workspaceId, locale, mutate]);
 }

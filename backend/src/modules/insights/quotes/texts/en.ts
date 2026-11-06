@@ -63,93 +63,25 @@ export const en: QuoteTexts = {
     'marcus-very-little-needed': '…very little indeed is necessary for living a happy life.',
     'marcus-be-such':
       'No longer talk at all about the kind of man that a good man ought to be, but be such.',
-    'buffett-swimming-naked':
-      'After all, you only find out who is swimming naked when the tide goes out.',
-    'buffett-borrowed-money':
-      "Unquestionably, some people have become very rich through the use of borrowed money. However, that's also been a way to get very poor.",
-    'buffett-possessions':
-      'Too often, a vast collection of possessions ends up possessing its owner.',
-    'buffett-one-percent':
-      'Were we to use more than 1% of my claim checks (Berkshire Hathaway stock certificates) on ourselves, neither our happiness nor our well-being would be enhanced.',
-    'munger-learning-machines':
-      'I constantly see people rise in life who are not the smartest… but they are learning machines. They go to bed every night a little wiser than when they got up.',
-    'munger-mozart-overspent':
-      'There once was a man who became the most famous composer in the world, but he was utterly miserable… and one of the reasons was he always overspent his income. That was Mozart.',
-    'munger-terrible-blows':
-      "Life will have terrible blows, horrible blows, unfair blows. Doesn't matter… your duty was not to be submerged in self-pity, but to utilize the terrible blow in a constructive fashion.",
-    'munger-disastrous-modes':
-      'Generally speaking, envy, resentment, revenge, and self-pity are disastrous modes of thought.',
-    'graham-worst-enemy':
-      "The investor's chief problem—and even his worst enemy—is likely to be himself.",
-    'graham-margin-of-safety':
-      'Confronted with a like challenge to distill the secret of sound investment into three words, we venture the motto, MARGIN OF SAFETY.',
-    'graham-prudent-principles':
-      'Wall Street has a few prudent principles; the trouble is that they are always forgotten when they are most needed.',
-    'bogle-courage-press-on':
-      'The courage to press on regardless—regardless of whether we face calm seas or rough seas, and especially when the market storms howl around us—is the quintessential attribute of the successful investor.',
-    'bogle-own-worst-enemy': 'Yes, the investor is often his own worst enemy.',
-    'bogle-dont-stop-regular-investing':
-      "For God's sake, don't stop a program of regular investing because the market goes down.",
-    'bogle-great-game-of-life':
-      'Remember that the great game of life is not about money; it is about doing your best to build the world anew.',
-    'lynch-family-budget': 'It makes sense to review the family budget before you buy stocks.',
-    'lynch-afford-to-lose':
-      'Only invest what you could afford to lose without that loss having any effect on your daily life in the foreseeable future.',
-    'dalio-pain-reflection': 'Pain + Reflection = Progress.',
-    'dalio-habit-controls-you':
-      'If you do just about anything frequently enough over time, you will form a habit that will control you.',
-    'dalio-avoid-temptations':
-      'People who choose what they really want, and avoid the temptations and get over the pains that drive them away from what they really want, are much more likely to have successful lives.',
-    'housel-spending-to-show':
-      'Spending money to show people how much money you have is the fastest way to have less money.',
-    'housel-desire-less':
-      'Savings can be created by spending less. You can spend less if you desire less. And you will desire less if you care less about what others think of you.',
-    'housel-goalpost': 'The hardest financial skill is getting the goalpost to stop moving.',
-    'housel-plan-survive-reality': 'A plan is only useful if it can survive reality.',
-    'franklin-small-leak': 'Beware of little expenses; a small leak will sink a great ship.',
-    'franklin-saving-and-getting':
-      'If you would be wealthy, think of saving as well as of getting.',
-    'franklin-no-need':
-      'Buy what thou hast no need of, and ere long thou shalt sell thy necessaries.',
-    'franklin-first-desire':
-      'It is easier to suppress the first desire than to satisfy all that follow it.',
-    'franklin-age-and-want':
-      'For age and want save while you may; no morning sun lasts a whole day.',
-    'franklin-comfort-and-help':
-      'Be not uncharitable to those that at present seem to want it, but comfort and help them.',
-    'clason-part-of-all-you-earn':
-      'A part of all you earn is yours to keep. It should be not less than a tenth no matter how little you earn.',
-    'clason-tree-of-wealth':
-      'Wealth, like a tree, grows from a tiny seed. The first copper you save is the seed from which your tree of wealth shall grow.',
-    'clason-necessary-expenses':
-      "What each of us calls our 'necessary expenses' will always grow to equal our incomes unless we protest to the contrary.",
-    'clason-little-caution': 'Better a little caution than a great regret.',
-    'clason-cultivate-thy-powers':
-      'Cultivate thy own powers, to study and become wiser, to become more skillful, to so act as to respect thyself.',
-    'stanley-accumulate-not-spend':
-      'If you make a good income each year and spend it all, you are not getting wealthier. You are just living high. Wealth is what you accumulate, not what you spend.',
-    'stanley-below-your-means': 'Whatever your income, always live below your means.',
-    'stanley-self-discipline':
-      'Wealth is more often the result of a lifestyle of hard work, perseverance, planning, and, most of all, self-discipline.',
-    'robin-life-energy': 'Money is something we choose to trade our life energy for.',
-    'robin-enough': 'At the peak of the Fulfillment Curve we have enough.',
-    'warren-must-haves': 'Must-Haves are the things you will have to pay no matter what.',
+    'seneca-what-is-wisdom':
+      'What is wisdom? Always desiring the same things, and always refusing the same things.',
+    'seneca-no-right-wind':
+      'When a man does not know what harbour he is making for, no wind is the right wind.',
+    'epictetus-prescribe-a-character':
+      'Immediately prescribe some character and some form to yourself, which you shall observe both when you are alone and when you meet with men.',
+    'epictetus-little-things':
+      'Begin then from little things. Is the oil spilled? Is a little wine stolen? Say on the occasion, at such price is sold freedom from perturbation; at such price is sold tranquillity, but nothing is got for nothing.',
+    'epictetus-as-if-laws':
+      'Whatever things (rules) are proposed to you (for the conduct of life) abide by them, as if they were laws, as if you would be guilty of impiety if you transgressed any of them.',
+    'marcus-whole-of-life': 'Do not disturb thyself by thinking of the whole of thy life.',
+    'marcus-third-thing':
+      'When thou hast done a good act and another has received it, why dost thou still look for a third thing besides these, as fools do, either to have the reputation of having done a good act or to obtain a return?',
+    'marcus-what-more':
+      'For what more dost thou want when thou hast done a man a service? art thou not content that thou hast done something conformable to thy nature, and dost thou seek to be paid for it?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Epictetus',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marcus Aurelius',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

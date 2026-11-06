@@ -59,89 +59,24 @@ export const bs: QuoteTexts = {
     'marcus-very-little-needed': '…za srećan život zaista je potrebno vrlo malo.',
     'marcus-be-such':
       'Ne govori više ni riječi o tome kakav bi dobar čovjek trebao biti — budi takav.',
-    'buffett-swimming-naked': 'Na kraju se tek za oseke vidi ko pliva gol.',
-    'buffett-borrowed-money':
-      'Nema sumnje, neki su se silno obogatili posuđenim novcem. No to je bio i način da se silno osiromaši.',
-    'buffett-possessions': 'Previše često velika zbirka imetka na kraju posjeduje svog vlasnika.',
-    'buffett-one-percent':
-      'Da na sebe potrošimo više od 1 % mojih potraživanja (dionica Berkshire Hathawaya), ne bi se povećala ni naša sreća ni naše blagostanje.',
-    'munger-learning-machines':
-      'Stalno vidim ljude koji napreduju u životu a nisu najpametniji… ali su mašine za učenje. Svake večeri idu spavati malo mudriji nego kad su ustali.',
-    'munger-mozart-overspent':
-      'Bio je jednom čovjek koji je postao najslavniji kompozitor svijeta, ali je bio krajnje nesrećan… a jedan od razloga bio je to što je uvijek trošio više nego što je zarađivao. Bio je to Mozart.',
-    'munger-terrible-blows':
-      'Život će donijeti strašne udarce, grozne udarce, nepravedne udarce. Nije važno… vaša dužnost nije bila utopiti se u samosažaljenju, nego taj strašni udarac iskoristiti stvaralački.',
-    'munger-disastrous-modes':
-      'Općenito govoreći, zavist, ogorčenost, osveta i samosažaljenje pogubni su načini mišljenja.',
-    'graham-worst-enemy':
-      'Glavni problem ulagača — a možda i njegov najgori neprijatelj — vjerovatno je on sam.',
-    'graham-margin-of-safety':
-      'Zamoljeni da tajnu zdravog ulaganja sažmemo u tri riječi, odvažujemo se na moto: MARGINA SIGURNOSTI.',
-    'graham-prudent-principles':
-      'Wall Street ima nekoliko razboritih načela; nevolja je u tome da se uvijek zaborave kad su najpotrebnija.',
-    'bogle-courage-press-on':
-      'Hrabrost da se nastavi bez obzira na sve — bez obzira na to je li more mirno ili uzburkano, a posebno kad oko nas zavijaju tržišne bure — najvažnija je odlika uspješnog ulagača.',
-    'bogle-own-worst-enemy': 'Da, ulagač je često sam sebi najgori neprijatelj.',
-    'bogle-dont-stop-regular-investing':
-      'Zaboga, ne prekidajte program redovnog ulaganja zato što tržište pada.',
-    'bogle-great-game-of-life':
-      'Zapamtite da velika igra života nije o novcu; ona je o tome da date najbolje od sebe i svijet izgradite nanovo.',
-    'lynch-family-budget': 'Ima smisla pregledati porodični budžet prije nego kupite dionice.',
-    'lynch-afford-to-lose':
-      'Ulažite samo ono što možete izgubiti, a da taj gubitak u doglednoj budućnosti nikako ne utiče na vaš svakodnevni život.',
-    'dalio-pain-reflection': 'Bol + promišljanje = napredak.',
-    'dalio-habit-controls-you':
-      'Budete li bilo šta činili dovoljno često i dovoljno dugo, nastat će navika koja će upravljati vama.',
-    'dalio-avoid-temptations':
-      'Ljudi koji odaberu ono što zaista žele, izbjegnu iskušenja i prebole bolove koji ih odvode od toga što zaista žele, imaju mnogo veće šanse za uspješan život.',
-    'housel-spending-to-show':
-      'Trošiti novac da ljudima pokažete koliko novca imate najbrži je način da ga imate manje.',
-    'housel-desire-less':
-      'Ušteda nastaje time što trošite manje. Manje možete trošiti ako manje žudite. A manje ćete žudjeti ako vam je manje važno šta drugi misle o vama.',
-    'housel-goalpost':
-      'Najteža finansijska vještina jest nagovoriti vratnicu da se prestane pomicati.',
-    'housel-plan-survive-reality': 'Plan je koristan samo ako preživi stvarnost.',
-    'franklin-small-leak': 'Čuvaj se malih troškova; mala pukotina potopi veliki brod.',
-    'franklin-saving-and-getting': 'Želiš li biti imućan, misli na štednju jednako kao na zaradu.',
-    'franklin-no-need': 'Kupuj ono što ti ne treba, i uskoro ćeš prodavati ono što ti je potrebno.',
-    'franklin-first-desire': 'Lakše je potisnuti prvu želju nego zadovoljiti sve one koje slijede.',
-    'franklin-age-and-want':
-      'Štedi za starost i nedostatak dok možeš; nijedno jutarnje sunce ne traje cijeli dan.',
-    'franklin-comfort-and-help':
-      'Ne budi nemilosrdan prema onima koji se sad čine potrebitima; radije ih utješi i pomozi im.',
-    'clason-part-of-all-you-earn':
-      'Dio svega što zaradiš tvoj je da ga zadržiš. Ne smije biti manji od desetine, koliko god malo zarađivao.',
-    'clason-tree-of-wealth':
-      'Bogatstvo raste, kao drvo, iz malenog sjemena. Prvi bakrenjak koji uštediš sjeme je iz kojeg će izrasti tvoje drvo bogatstva.',
-    'clason-necessary-expenses':
-      'Ono što svaki od nas naziva „nužnim troškovima“ uvijek će narasti do visine naših prihoda, osim ako se tome ne usprotivimo.',
-    'clason-little-caution': 'Bolje malo opreza nego veliko žaljenje.',
-    'clason-cultivate-thy-powers':
-      'Uzgajaj svoje vlastite snage: uči i postani mudriji, postani vještiji, i postupaj tako da možeš poštovati sebe.',
-    'stanley-accumulate-not-spend':
-      'Ako svake godine dobro zaradite i sve potrošite, ne postajete imućniji. Samo živite na visokoj nozi. Bogatstvo je ono što nakupite, a ne ono što potrošite.',
-    'stanley-below-your-means': 'Kakav god bio vaš prihod, uvijek živite ispod svojih mogućnosti.',
-    'stanley-self-discipline':
-      'Bogatstvo je češće posljedica životnog stila teškog rada, upornosti, planiranja i, iznad svega, samodiscipline.',
-    'robin-life-energy': 'Novac je nešto za što odlučujemo zamijeniti svoju životnu energiju.',
-    'robin-enough': 'Na vrhu krivulje ispunjenja imamo dovoljno.',
-    'warren-must-haves': '„Mora se imati“ su stvari koje ćete morati platiti bez obzira na sve.',
+    'seneca-what-is-wisdom':
+      'Šta je mudrost? Uvijek željeti iste stvari i uvijek odbijati iste stvari.',
+    'seneca-no-right-wind': 'Kad čovjek ne zna u koju luku plovi, nijedan mu vjetar nije povoljan.',
+    'epictetus-prescribe-a-character':
+      'Odmah propiši sebi neki karakter i neki oblik, koje ćeš držati i kad si sam i kad se susrećeš s ljudima.',
+    'epictetus-little-things':
+      'Počni dakle od malih stvari. Je li se prolilo ulje? Je li ukradeno malo vina? Reci u tom trenutku: tom se cijenom prodaje oslobođenje od uznemirenosti, tom se cijenom prodaje spokoj, ali ništa se ne dobiva badava.',
+    'epictetus-as-if-laws':
+      'Kakva god ti se pravila za vođenje života predlože, drži ih se kao da su zakoni, kao da bi bio kriv za bezbožnost kad bi ijedno prekršio.',
+    'marcus-whole-of-life': 'Ne uznemiruj se mišlju o cijelom svom životu.',
+    'marcus-third-thing':
+      'Kad si učinio dobro djelo, a drugi ga je primio, zašto još tražiš treću stvar povrh toga, kao što čine ludi, bilo da steknu glas dobročinitelja ili da dobiju uzvrat?',
+    'marcus-what-more':
+      'Šta još želiš kad si čovjeku učinio uslugu? Zar ti nije dosta što si učinio nešto što odgovara tvojoj naravi, pa tražiš da ti se za to plati?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Epictetus',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marcus Aurelius',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

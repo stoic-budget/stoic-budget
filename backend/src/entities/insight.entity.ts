@@ -13,25 +13,13 @@ import { User } from './user.entity';
 import { Workspace } from './workspace.entity';
 
 export enum InsightType {
-  RULE_SUGGESTION = 'rule.suggestion',
-  PATTERN_DETECTED = 'pattern.detected',
-  SPENDING_SPIKE = 'spending.spike',
-  UNUSUAL_TRANSACTION = 'transaction.unusual',
-  NEW_COUNTERPARTY = 'counterparty.new',
   CATEGORY_DOMINANCE = 'category.dominance',
   UNAPPROVED_COUNT = 'operational.unapproved_count',
   UNCATEGORIZED_COUNT = 'operational.uncategorized_count',
   DUPLICATE_DETECTED = 'operational.duplicate_detected',
   SPENDING_TREND_UP = 'trend.spending_up',
-  SPENDING_TREND_DOWN = 'trend.spending_down',
   SAVINGS_RATE_TREND = 'trend.savings_rate',
   RISKY_ALLOCATION = 'pattern.risky_allocation',
-  MONTHLY_FORECAST = 'forecast.monthly',
-  UNUSED_RULES = 'workflow.unused_rules',
-  CLASSIFICATION_ACCURACY = 'workflow.classification_accuracy',
-  WORKFLOW_TIP = 'workflow.tip',
-  /** Written by the local model on the AI analysis page, not by a server analyzer. */
-  AI_SUMMARY = 'ai.summary',
   /** Stoic advice: plan (budget limits) against reality, per Stoic class. */
   STOIC_INTENT_GAP = 'stoic.intent_gap',
   STOIC_VIRTUE_NEGLECTED = 'stoic.virtue_neglected',
@@ -51,18 +39,17 @@ export enum InsightType {
   STOIC_SUBSCRIPTIONS = 'stoic.subscriptions',
   /** Earning well, giving little to others. */
   STOIC_GENEROSITY = 'stoic.generosity',
-  /** A named expert's principle applied to the user's own numbers. */
-  EXPERT_PRINCIPLE = 'expert.principle',
+  /** A rule that no longer holds, or a decision worth making into one. */
+  STOIC_RULE = 'stoic.rule',
+  /** Stoic teaching applied to the user's own numbers, with its source. */
+  STOIC_REFLECTION = 'stoic.reflection',
 }
 
 export enum InsightCategory {
   PATTERN = 'pattern',
-  ANOMALY = 'anomaly',
   OPERATIONAL = 'operational',
   TREND = 'trend',
-  WORKFLOW = 'workflow',
   STOIC = 'stoic',
-  EXPERT = 'expert',
 }
 
 export enum InsightSeverity {

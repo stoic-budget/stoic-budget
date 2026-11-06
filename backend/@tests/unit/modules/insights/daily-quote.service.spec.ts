@@ -123,9 +123,28 @@ describe('DailyQuoteService', () => {
   });
 });
 
+describe('Quotes stay within Stoicism', () => {
+  it('holds only Seneca, Marcus Aurelius and Epictetus', () => {
+    expect([...new Set(QUOTES.map(quote => quote.author))].sort()).toEqual([
+      'Epictetus',
+      'Marcus Aurelius',
+      'Seneca',
+    ]);
+  });
+
+  it('has a Stoic to say something on every theme advice can ask for', () => {
+    for (const theme of new Set(Object.values(SITUATION_THEMES))) {
+      expect({ theme, enough: QUOTES.filter(q => q.themes.includes(theme)).length >= 3 }).toEqual({
+        theme,
+        enough: true,
+      });
+    }
+  });
+});
+
 describe('Quote thumbs', () => {
-  // Long enough for every rotation to come round many times.
-  const seeds = Array.from({ length: 5000 }, (_, index) => index);
+  // Whole rounds of the two slots each quote owns, long enough to come round many times.
+  const seeds = Array.from({ length: QUOTES.length * 2 * 60 }, (_, index) => index);
   const shown = (votes: Record<string, 1 | -1>) =>
     seeds.map(seed => pickQuote(QUOTES, votes, seed));
   const share = (picks: typeof QUOTES, author: string) =>
@@ -201,7 +220,7 @@ describe('Quote thumbs', () => {
     });
     expect(service.users.query).toHaveBeenLastCalledWith(
       expect.stringContaining('jsonb_build_object'),
-      ['user-1', quoteId, -1, QUOTES.length, '2026-09-29'],
+      ['user-1', quoteId, -1, 100, '2026-09-29'],
     );
     expect(await service.vote('user-1', quoteId, 0)).toEqual({ vote: null });
     expect(service.users.query).toHaveBeenLastCalledWith(

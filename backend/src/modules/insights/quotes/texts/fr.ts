@@ -64,98 +64,25 @@ export const fr: QuoteTexts = {
     'marcus-very-little-needed':
       '…il faut en vérité très peu de chose pour vivre une vie heureuse.',
     'marcus-be-such': 'Ne discute plus du tout de ce que doit être l’homme de bien, mais sois-le.',
-    'buffett-swimming-naked':
-      'Après tout, ce n’est qu’à marée basse que l’on découvre qui se baignait nu.',
-    'buffett-borrowed-money':
-      'Sans aucun doute, certaines personnes sont devenues très riches grâce à l’argent emprunté. Mais cela a aussi été un moyen de devenir très pauvre.',
-    'buffett-possessions':
-      'Trop souvent, une vaste collection de biens finit par posséder son propriétaire.',
-    'buffett-one-percent':
-      'Si nous utilisions pour nous-mêmes plus de 1 % de mes titres (les certificats d’actions de Berkshire Hathaway), ni notre bonheur ni notre bien-être n’en seraient accrus.',
-    'munger-learning-machines':
-      'Je vois constamment s’élever dans la vie des gens qui ne sont pas les plus intelligents… mais ce sont des machines à apprendre. Ils se couchent chaque soir un peu plus sages qu’au lever.',
-    'munger-mozart-overspent':
-      'Il était une fois un homme qui devint le compositeur le plus célèbre du monde, mais il était profondément malheureux… et l’une des raisons était qu’il dépensait toujours plus que ses revenus. C’était Mozart.',
-    'munger-terrible-blows':
-      'La vie aura des coups terribles, des coups horribles, des coups injustes. Peu importe… votre devoir n’était pas de sombrer dans l’apitoiement sur vous-même, mais d’utiliser ce coup terrible de manière constructive.',
-    'munger-disastrous-modes':
-      'D’une manière générale, l’envie, le ressentiment, la vengeance et l’apitoiement sur soi-même sont des modes de pensée désastreux.',
-    'graham-worst-enemy':
-      'Le principal problème de l’investisseur — et même son pire ennemi — sera probablement lui-même.',
-    'graham-margin-of-safety':
-      'Confrontés au même défi de distiller en trois mots le secret d’un investissement sain, nous nous risquons à proposer la devise : MARGE DE SÉCURITÉ.',
-    'graham-prudent-principles':
-      'Wall Street a quelques principes prudents ; le problème, c’est qu’on les oublie toujours au moment où l’on en a le plus besoin.',
-    'bogle-courage-press-on':
-      'Le courage de persévérer quoi qu’il arrive — que la mer soit calme ou agitée, et surtout quand les tempêtes du marché hurlent autour de nous — est la qualité par excellence de l’investisseur qui réussit.',
-    'bogle-own-worst-enemy': 'Oui, l’investisseur est souvent son propre pire ennemi.',
-    'bogle-dont-stop-regular-investing':
-      'Pour l’amour de Dieu, n’arrêtez pas un programme d’investissement régulier parce que le marché baisse.',
-    'bogle-great-game-of-life':
-      'Souvenez-vous que le grand jeu de la vie n’est pas une question d’argent ; il s’agit de faire de son mieux pour rebâtir le monde.',
-    'lynch-family-budget':
-      'Il est judicieux de revoir le budget familial avant d’acheter des actions.',
-    'lynch-afford-to-lose':
-      'N’investissez que ce que vous pourriez vous permettre de perdre sans que cette perte ait le moindre effet sur votre vie quotidienne dans un avenir prévisible.',
-    'dalio-pain-reflection': 'Douleur + Réflexion = Progrès.',
-    'dalio-habit-controls-you':
-      'Si vous faites à peu près n’importe quoi assez souvent au fil du temps, vous prendrez une habitude qui vous contrôlera.',
-    'dalio-avoid-temptations':
-      'Les gens qui choisissent ce qu’ils veulent vraiment, évitent les tentations et surmontent les douleurs qui les éloignent de ce qu’ils veulent vraiment ont beaucoup plus de chances de réussir leur vie.',
-    'housel-spending-to-show':
-      'Dépenser de l’argent pour montrer aux autres combien vous en avez est le moyen le plus rapide d’en avoir moins.',
-    'housel-desire-less':
-      'L’épargne peut naître d’une baisse des dépenses. Vous pouvez dépenser moins si vous désirez moins. Et vous désirerez moins si vous vous souciez moins de ce que les autres pensent de vous.',
-    'housel-goalpost':
-      'La compétence financière la plus difficile est de faire en sorte que la ligne d’arrivée cesse de se déplacer.',
-    'housel-plan-survive-reality': 'Un plan n’est utile que s’il peut survivre à la réalité.',
-    'franklin-small-leak':
-      'Prenez garde aux petites dépenses ; une petite voie d’eau suffit à couler un grand navire.',
-    'franklin-saving-and-getting':
-      'Si vous voulez être riche, pensez à épargner autant qu’à gagner.',
-    'franklin-no-need': 'Achète ce dont tu n’as pas besoin, et bientôt tu vendras ton nécessaire.',
-    'franklin-first-desire':
-      'Il est plus facile de réprimer le premier désir que de satisfaire tous ceux qui le suivent.',
-    'franklin-age-and-want':
-      'Pour la vieillesse et le besoin, épargnez tant que vous le pouvez ; nul soleil du matin ne dure toute la journée.',
-    'franklin-comfort-and-help':
-      'Ne soyez pas sans charité envers ceux qui semblent aujourd’hui en avoir besoin, mais réconfortez-les et aidez-les.',
-    'clason-part-of-all-you-earn':
-      'Une part de tout ce que tu gagnes t’appartient et tu dois la garder. Elle ne devrait pas être inférieure à un dixième, si peu que tu gagnes.',
-    'clason-tree-of-wealth':
-      'La richesse, comme un arbre, pousse à partir d’une minuscule graine. La première pièce de cuivre que tu économises est la graine d’où poussera ton arbre de richesse.',
-    'clason-necessary-expenses':
-      'Ce que chacun de nous appelle ses « dépenses nécessaires » augmentera toujours jusqu’à égaler ses revenus, à moins que nous ne nous y opposions.',
-    'clason-little-caution': 'Mieux vaut un peu de prudence qu’un grand regret.',
-    'clason-cultivate-thy-powers':
-      'Cultive tes propres facultés, étudie et deviens plus sage, deviens plus habile, agis de manière à te respecter toi-même.',
-    'stanley-accumulate-not-spend':
-      'Si vous gagnez bien votre vie chaque année et que vous dépensez tout, vous ne vous enrichissez pas. Vous menez simplement grand train. La richesse, c’est ce que vous accumulez, pas ce que vous dépensez.',
-    'stanley-below-your-means':
-      'Quels que soient vos revenus, vivez toujours en dessous de vos moyens.',
-    'stanley-self-discipline':
-      'La richesse est plus souvent le fruit d’un mode de vie fait de travail acharné, de persévérance, de planification et, surtout, d’autodiscipline.',
-    'robin-life-energy':
-      'L’argent est une chose contre laquelle nous choisissons d’échanger notre énergie vitale.',
-    'robin-enough': 'Au sommet de la courbe de l’épanouissement, nous avons assez.',
-    'warren-must-haves':
-      'Les indispensables sont les choses que vous devrez payer quoi qu’il arrive.',
+    'seneca-what-is-wisdom':
+      'Qu’est-ce que la sagesse ? Toujours désirer les mêmes choses, et toujours refuser les mêmes choses.',
+    'seneca-no-right-wind':
+      'Quand on ne sait pas vers quel port l’on navigue, aucun vent n’est favorable.',
+    'epictetus-prescribe-a-character':
+      'Prescris-toi aussitôt un certain caractère et une certaine forme de conduite, que tu garderas aussi bien seul qu’en présence des hommes.',
+    'epictetus-little-things':
+      'Commence donc par les petites choses. L’huile est-elle renversée ? Un peu de vin a-t-il été volé ? Dis-toi en pareil cas : voilà le prix auquel se vend l’absence de trouble ; voilà le prix auquel se vend la tranquillité ; mais rien ne s’obtient pour rien.',
+    'epictetus-as-if-laws':
+      'Toutes les règles de conduite de vie qui te sont proposées, tiens-t’y comme à des lois, comme si c’était une impiété que d’en transgresser une seule.',
+    'marcus-whole-of-life': 'Ne te trouble pas en pensant à toute ta vie.',
+    'marcus-third-thing':
+      'Quand tu as fait une bonne action et qu’un autre l’a reçue, pourquoi cherches-tu encore, comme les insensés, une troisième chose en plus : la réputation d’avoir bien agi, ou un retour ?',
+    'marcus-what-more':
+      'Que veux-tu de plus, quand tu as rendu service à un homme ? Ne te suffit-il pas d’avoir fait quelque chose conforme à ta nature, et cherches-tu à en être payé ?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Épictète',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marc Aurèle',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Sénèque',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

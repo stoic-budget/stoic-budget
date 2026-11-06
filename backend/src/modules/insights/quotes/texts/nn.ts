@@ -62,92 +62,24 @@ export const nn: QuoteTexts = {
     'marcus-very-little-needed': '…det trengst sanneleg svært lite for å leve eit lukkeleg liv.',
     'marcus-be-such':
       'Snakk ikkje meir om kva slags menneske eit godt menneske bør vere — ver det.',
-    'buffett-swimming-naked':
-      'Ein finn tross alt ikkje ut kven som sym naken før tidvatnet trekkjer seg ut.',
-    'buffett-borrowed-money':
-      'Nokre har utan tvil vorte svært rike ved å bruke lånte pengar. Men det har også vore ein veg til å bli svært fattig.',
-    'buffett-possessions': 'Alt for ofte endar ei stor samling eigedelar med å eige eigaren sin.',
-    'buffett-one-percent':
-      'Om vi brukte meir enn 1 % av fordringane mine (aksjebreva i Berkshire Hathaway) på oss sjølve, ville korkje lukka eller velvera vår bli større.',
-    'munger-learning-machines':
-      'Eg ser heile tida folk stige i livet som ikkje er dei smartaste… men dei er læringsmaskiner. Dei legg seg kvar kveld litt visare enn då dei stod opp.',
-    'munger-mozart-overspent':
-      'Det var ein gong ein mann som vart verdas mest kjende komponist, men han var djupt ulukkeleg… og éin av grunnane var at han alltid brukte meir enn han tente. Det var Mozart.',
-    'munger-terrible-blows':
-      'Livet vil gje forferdelege slag, grusame slag, urettferdige slag. Det har ingenting å seie… plikta di var ikkje å søkke ned i sjølvmedkjensle, men å bruke det forferdelege slaget konstruktivt.',
-    'munger-disastrous-modes':
-      'Generelt sett er misunning, bitterheit, hemn og sjølvmedkjensle katastrofale måtar å tenkje på.',
-    'graham-worst-enemy':
-      'Det største problemet til investoren — og kanskje den verste fienden — er sannsynlegvis han sjølv.',
-    'graham-margin-of-safety':
-      'Stilte overfor oppgåva å koke løyndomen bak sunn investering ned til tre ord, vågar vi mottoet: TRYGGLEIKSMARGIN.',
-    'graham-prudent-principles':
-      'Wall Street har nokre få fornuftige prinsipp; problemet er at dei alltid blir gløymde når dei trengst mest.',
-    'bogle-courage-press-on':
-      'Motet til å halde ut uansett — uansett om vi møter stille eller røft hav, og særleg når marknadens stormar ul rundt oss — er den viktigaste eigenskapen til den vellukka investoren.',
-    'bogle-own-worst-enemy': 'Ja, investoren er ofte sin eigen verste fiende.',
-    'bogle-dont-stop-regular-investing':
-      'For guds skuld: ikkje stopp eit program med regelmessig sparing fordi marknaden fell.',
-    'bogle-great-game-of-life':
-      'Hugs at det store spelet i livet ikkje handlar om pengar; det handlar om å gjere sitt beste for å byggje verda på nytt.',
-    'lynch-family-budget': 'Det er fornuftig å gå gjennom familiebudsjettet før du kjøper aksjar.',
-    'lynch-afford-to-lose':
-      'Investér berre det du kan tape utan at tapet får nokon verknad på kvardagen din i overskodeleg framtid.',
-    'dalio-pain-reflection': 'Smerte + refleksjon = framgang.',
-    'dalio-habit-controls-you':
-      'Gjer du nesten kva som helst ofte nok over tid, dannar du ein vane som kjem til å styre deg.',
-    'dalio-avoid-temptations':
-      'Folk som vel det dei verkeleg vil, unngår freistingane og kjem gjennom smertene som driv dei bort frå det dei verkeleg vil, har mykje større sjanse for eit vellukka liv.',
-    'housel-spending-to-show':
-      'Å bruke pengar for å vise folk kor mykje pengar du har, er den raskaste vegen til å ha mindre pengar.',
-    'housel-desire-less':
-      'Sparing blir skapt ved å bruke mindre. Du kan bruke mindre om du begjærer mindre. Og du vil begjære mindre om du bryr deg mindre om kva andre tenkjer om deg.',
-    'housel-goalpost':
-      'Den vanskelegaste økonomiske ferdigheita er å få målstonga til å slutte å flytte seg.',
-    'housel-plan-survive-reality': 'Ein plan er berre nyttig om han kan overleve røyndomen.',
-    'franklin-small-leak': 'Vakt deg for små utgifter; ein liten lekkasje senkar eit stort skip.',
-    'franklin-saving-and-getting': 'Vil du bli rik, tenk like mykje på å spare som på å tene.',
-    'franklin-no-need': 'Kjøp det du ikkje har bruk for, og snart må du selje det nødvendige.',
-    'franklin-first-desire':
-      'Det er lettare å undertrykkje det første begjæret enn å tilfredsstille alle som følgjer.',
-    'franklin-age-and-want':
-      'Spar til alderdom og naud mens du kan; inga morgonsol varer heile dagen.',
-    'franklin-comfort-and-help':
-      'Ver ikkje ukjærleg mot dei som no synest å mangle; trøyst og hjelp dei i staden.',
-    'clason-part-of-all-you-earn':
-      'Ein del av alt du tener, er din å behalde. Han bør ikkje vere mindre enn ein tiandedel, uansett kor lite du tener.',
-    'clason-tree-of-wealth':
-      'Rikdom veks, som eit tre, av eit lite frø. Den første koparskillingen du sparar, er frøet som rikdomstreet ditt skal vekse av.',
-    'clason-necessary-expenses':
-      'Det vi kvar for oss kallar «nødvendige utgifter», vil alltid vekse til å svare til inntekta vår med mindre vi set oss imot.',
-    'clason-little-caution': 'Betre litt varsemd enn ein stor anger.',
-    'clason-cultivate-thy-powers':
-      'Dyrk dine eigne krefter: studer og bli visare, bli dugande, og handle slik at du kan respektere deg sjølv.',
-    'stanley-accumulate-not-spend':
-      'Tener du godt kvart år og brukar alt, blir du ikkje rikare. Du lever berre høgt. Rikdom er det du samlar, ikkje det du brukar.',
-    'stanley-below-your-means': 'Uansett inntekt: lev alltid under evne.',
-    'stanley-self-discipline':
-      'Rikdom er oftare resultatet av ein livsstil med hardt arbeid, tolsemd, planlegging og — mest av alt — sjølvdisiplin.',
-    'robin-life-energy': 'Pengar er noko vi vel å byte livsenergien vår for.',
-    'robin-enough': 'På toppen av tilfredsheitskurva har vi nok.',
-    'warren-must-haves':
-      '«Må-haves» er dei tinga du blir nøydd til å betale, uansett kva som skjer.',
+    'seneca-what-is-wisdom': 'Kva er visdom? Alltid å ønskje det same og alltid å avvise det same.',
+    'seneca-no-right-wind':
+      'Når eit menneske ikkje veit kva hamn det styrer mot, er ingen vind den rette.',
+    'epictetus-prescribe-a-character':
+      'Foreskriv deg straks eit bestemt vesen og ei bestemt form, som du held fast ved både når du er åleine og når du møter menneske.',
+    'epictetus-little-things':
+      'Byrj difor med dei små tinga. Er oljen sølt? Er litt vin stolen? Sei ved eit slikt høve: til denne prisen blir uforstyrrelse selt; til denne prisen blir ro selt, men ingenting får ein for ingenting.',
+    'epictetus-as-if-laws':
+      'Kva reglar for livsførsla som enn blir lagde fram for deg, hald fast ved dei som om dei var lover, som om du ville gjere deg skyldig i gudløyse viss du braut nokon av dei.',
+    'marcus-whole-of-life': 'Forstyrr ikkje deg sjølv ved å tenkje på heile livet ditt.',
+    'marcus-third-thing':
+      'Når du har gjort ei god gjerning og ein annan har teke imot henne, kvifor søkjer du då enno ei tredje ting utover desse, slik dei uforstandige gjer, nemleg å få ry for å ha gjort ei god gjerning eller å få noko att?',
+    'marcus-what-more':
+      'For kva meir vil du ha når du har gjort eit menneske ei teneste? Er det ikkje nok for deg å ha gjort noko som er i samsvar med di natur, og søkjer du å bli betalt for det?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Epictetus',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marcus Aurelius',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

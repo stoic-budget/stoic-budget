@@ -47,6 +47,28 @@ describe('Stoic texts', () => {
     },
   );
 
+  it('leaves no outside author in the advice, and no key outside the Stoic voice', () => {
+    expect(Object.keys(en).filter(key => !key.startsWith('stoic.'))).toEqual([]);
+    const authors = /Clason|Housel|Warren|Tyagi|Stanley|Danko|Dominguez|Robin|Babylon|Psychology of Money/;
+    for (const variants of Object.values(en)) {
+      for (const variant of variants) {
+        expect(variant.title + variant.message).not.toMatch(authors);
+      }
+    }
+  });
+
+  it('never says "this month": early in a month the advice judges the one before', () => {
+    const judged = Object.entries(en).filter(([key]) => key !== 'stoic.generosity_gap');
+    for (const [key, variants] of judged) {
+      for (const variant of variants) {
+        expect({ key, text: variant.title + variant.message }).not.toEqual({
+          key,
+          text: expect.stringMatching(/this month|last month/i),
+        });
+      }
+    }
+  });
+
   it('picks the wording by variant and wraps around', () => {
     const params = { planned: 10, actual: 31 };
     const titles = [0, 1, 2, 3, 4].map(
@@ -62,7 +84,6 @@ describe('Stoic texts', () => {
     const params = {
       date: '2026-10-05',
       lowestAmount: -250,
-      committedAmount: 1800,
       currency: 'EUR',
       variant: 4,
     };

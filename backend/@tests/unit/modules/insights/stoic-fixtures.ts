@@ -68,6 +68,7 @@ export function behavior(overrides: Partial<StoicBehavior> = {}): StoicBehavior 
     totalByCategory: {},
     cashFlow: [],
     subscriptions: { count: 0, monthlyTotal: 0 },
+    unconfirmedRows: 0,
     ...overrides,
   };
 }

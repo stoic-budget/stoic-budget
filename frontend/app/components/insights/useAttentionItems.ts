@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useInsights } from '@/app/hooks/useInsights';
+import { useDailyAdviceRefresh, useInsights } from '@/app/hooks/useInsights';
 import { byWorkPriority, isWorkInsight, type WorkInsight } from './work-insights';
 
 export interface AttentionItems {
@@ -13,6 +13,8 @@ export interface AttentionItems {
 
 /** The work items for the strip above the page, most blocking first. */
 export function useAttentionItems(): AttentionItems {
+  // The strip is on every page, so the day's first page keeps the advice current.
+  useDailyAdviceRefresh();
   const { items, isPending, dismiss } = useInsights({ severities: ['warn', 'critical'] });
   const work = useMemo(() => items.filter(isWorkInsight).sort(byWorkPriority), [items]);
   return { items: work, isPending, snooze: dismiss };

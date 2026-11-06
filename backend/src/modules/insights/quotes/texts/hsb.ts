@@ -58,92 +58,23 @@ export const hsb: QuoteTexts = {
       '…hdyž je měł, wužiwaše je bjez přetwarjenja, a hdyž njeměł, njetrjebaše je.',
     'marcus-very-little-needed': '…za zbožowne žiwjenje je woprawdźe jara mało trěbne.',
     'marcus-be-such': 'Njerěč wjace wo tym, kajki měł dobry čłowjek być — budź tajki.',
-    'buffett-swimming-naked': 'Na kóncu so jenož při wotpadnjenju wody zhoni, štó nahi płuwa.',
-    'buffett-borrowed-money':
-      'Bjez dwěla su so někotři z požčanymi pjenjezami jara zbohaćili. Ale to bě tež puć, kak jara wzubožić.',
-    'buffett-possessions': 'Přečasto wulka zběrka majetka na kóncu swojeho wobsedźerja wobsedźi.',
-    'buffett-one-percent':
-      'Hdy bychmy na sebje wjace hač 1 % mojich žadosćow (akcijowych listow Berkshire Hathaway) wužiwali, njebychu so ani naše zbožo ani naše dobre měnjenje powjetšili.',
-    'munger-learning-machines':
-      'Widźu stajnje ludźi, kiž w žiwjenju postupuja a njejsu najmudriši… ale su mašiny za wuknjenje. Kóždy wječor du spać mało mudriši hač hdyž stanychu.',
-    'munger-mozart-overspent':
-      'Bě raz muž, kiž bu najznaćiši komponist swěta, ale bě dospołnje njezbožowny… a jedna z přičin bě, zo stajnje wjace wudawaše hač zasłužeše. To bě Mozart.',
-    'munger-terrible-blows':
-      'Žiwjenje přinjese strašne razy, hrózbne razy, njeprawe razy. To ničo njeznamjenja… waša winowatosć njebě so w swójskej lutosći potepić, ale strašny raz konstruktiwnje wužiwać.',
-    'munger-disastrous-modes':
-      'Zwonka wšeho su zawidźeńca, zacpěće, mstwa a swójska lutosć katastrofalne družiny myslenja.',
-    'graham-worst-enemy':
-      'Hłowny problem inwestora — a snano jeho najhórši njepřijaćel — je najwjerjepodobnišo wón sam.',
-    'graham-margin-of-safety':
-      'Jeli mamy tajnstwo strowego inwestowanja do třoch słowow zjeć, zwěrimy sej motto: WĚSTOSTNA MARŽA.',
-    'graham-prudent-principles':
-      'Wall Street ma někotre mudre principy; bjeda je, zo so stajnje runje tehdy zabywaja, hdyž su najtrěbniše.',
-    'bogle-courage-press-on':
-      'Mužnosć dale hić, njedźiwajo na wšo — njedźiwajo na to, hač je morjo spokojne abo njespokojne, a wosebje hdyž wiki wokoło nas wuja — je najwažniša kajkosć wuspěšneho inwestora.',
-    'bogle-own-worst-enemy': 'Haj, inwestor je husto sam sebi najhórši njepřijaćel.',
-    'bogle-dont-stop-regular-investing':
-      'Prošu was: njepřetorhńće regularne inwestowanje jenož tohodla, zo wiki spadnu.',
-    'bogle-great-game-of-life':
-      'Mějće na pomjatku, zo wulka hra žiwjenja njeje wo pjenjezach; je wo tym, zo dawaće najlěpše ze sebje a swět znowa twariće.',
-    'lynch-family-budget': 'Ma zmysł swójbny budget přehladać, prjedy hač akcije kupiće.',
-    'lynch-afford-to-lose':
-      'Inwestujće jenož to, což móžeće zhubić, bjeztoho zo by so ta zhubja w přewidnej přichodnosći na waš wšědny dźeń wuskutkowała.',
-    'dalio-pain-reflection': 'Bolosć + rozmyslowanje = postup.',
-    'dalio-habit-controls-you':
-      'Jeli něšto dosć husto a dosć dołho činiće, nastanje nawyk, kotryž was wodźić započnje.',
-    'dalio-avoid-temptations':
-      'Ludźo, kiž wuzwoleja to, což woprawdźe chcedźa, pokušenjam wuhibnu a bolosće přetrajeja, kotrež jich wot toho wotwodźa, maja hoberske lěpše šansy na wuspěšne žiwjenje.',
-    'housel-spending-to-show':
-      'Pjenjezy wudawać, zo byšće ludźom pokazał, kelko pjenjez maće, je najspěšniši puć, zo byšće mjenje pjenjez měł.',
-    'housel-desire-less':
-      'Lutowanja nastawaja z tym, zo mjenje wudawaće. Mjenje wudawać móžeće, jeli mjenje žadaće. A mjenje budźeće žadać, jeli so mjenje staraće, što druzy wo was mysla.',
-    'housel-goalpost': 'Najćešša financna zamóžnosć je, zo so hrodźa přestanje přesuwać.',
-    'housel-plan-survive-reality': 'Plan je jenož wužitny, jeli woprawdźitosć přežiwi.',
-    'franklin-small-leak': 'Wariš so małych wudawkow; mała šćěrbina wulki čołm potepi.',
-    'franklin-saving-and-getting':
-      'Chceš-li bohaty być, mysli na lutowanje runje tak kaž na zasłužbu.',
-    'franklin-no-need': 'Kup, čehož njetrjebaš, a bórze budźeš předawać, což trěbne je.',
-    'franklin-first-desire':
-      'Lěpje je prěnju žadosć potłóčić hač wšě, kotrež po njej slěduja, nasytić.',
-    'franklin-age-and-want':
-      'Lutuj za starobu a nuzu, dokulž móžeš; žane ranišne słónco cyły dźeń njetraje.',
-    'franklin-comfort-and-help':
-      'Njebudź njemiłosćiwy k tym, kiž so nětko w nuzy zdadźa; lěpje jich troštuj a pomhaj jim.',
-    'clason-part-of-all-you-earn':
-      'Dźěl wšeho, což zasłužiš, je twój, zo by jón wobchował. Njeměł mjeńši hač dźesatka być, kak mało tež zasłužiš.',
-    'clason-tree-of-wealth':
-      'Bohatstwo rosće, kaž štom, z małeho symjenja. Prěni mjedźany pjenjez, kotryž zalutuješ, je symjo, z kotrehož twój štom bohatstwa rosće.',
-    'clason-necessary-expenses':
-      'To, což kóždy z nas „trěbne wudawki“ mjenuje, dorosće stajnje do wysokosće našich dochodow, jeli so tomu njespřećiwimy.',
-    'clason-little-caution': 'Lěpje mało wobhladnosće hač wulka žałosć.',
-    'clason-cultivate-thy-powers':
-      'Pěstuj swoje swójske mocy: wuknij a budź mudriši, zamóžniši, a wobchadźej tak, zo móžeš sebje respektować.',
-    'stanley-accumulate-not-spend':
-      'Jeli kóžde lěto derje zasłužiće a wšo wudaće, njebudźeće bohatši. Jenož wysoko žiwjeće. Bohatstwo je to, což zhromadźiće, nic to, což wudaće.',
-    'stanley-below-your-means':
-      'Kajkiž tež waš dochod je, žiwjejće stajnje pod swojimi móžnosćemi.',
-    'stanley-self-discipline':
-      'Bohatstwo je husćišo wuslědk žiwjenskeho stila ćežkeho dźěła, wutrajnosće, planowanja a — nadewšo — swójskeje discipliny.',
-    'robin-life-energy':
-      'Pjenjezy su něšto, za čož so rozsudźimy swoju žiwjensku energiju wuměnić.',
-    'robin-enough': 'Na wjeršku kriwje spokojnosće mamy dosć.',
-    'warren-must-haves': '„Dyrbimy měć“ su wěcy, kotrež dyrbiće zapłaćić, što so tež stanje.',
+    'seneca-what-is-wisdom': 'Što je mudrosć? Přeco samsne chcyć a přeco samsne wotpokazać.',
+    'seneca-no-right-wind': 'Hdyž čłowjek njewě, kotry přistaw naměrja, žadyn wjetřik njeje prawy.',
+    'epictetus-prescribe-a-character':
+      'Předpisaj sej hnydom někajki charakter a někajku formu, kotruž dźeržiš, hdyž sy sam kaž tež hdyž z ludźimi zetkawaš.',
+    'epictetus-little-things':
+      'Započń tuž z małymi wěcemi. Je so wolij wutorhnył? Je so trochu wina pokradnyło? Rjeknje při tej składnosći: za tutu płaćiznu so měr ducha předawa, za tutu płaćiznu so pokoj předawa, ale darmo so ničo njedóstanje.',
+    'epictetus-as-if-laws':
+      'Kajkežkuli prawidła so tebi k wjedźenju žiwjenja předleža, dźerž so jich kaž zakonjow, kaž by so bohabojnosće wobskoćił, jeli by někajke z nich přestupił.',
+    'marcus-whole-of-life': 'Njerozrudź so myslenjom na cyłe swoje žiwjenje.',
+    'marcus-third-thing':
+      'Hdyž sy dobry skutk wuwjedł a druhi jón přiwzał, čehodla hišće třeći wěc pódla tutej pytaš, kaž błudnicy, abo dobreje wopinje dla abo zapłaćenja dla?',
+    'marcus-what-more':
+      'Što wjace chceš, hdyž sy čłowjekej słužbu wopokazał? Njedosaha ći, zo sy něšto činił, štož twojej přirodźe wotpowěduje, a pytaš hišće zapłatu za to?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren & Amelia Warren Tyagi',
     Epictetus: 'Epictetus',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Marcus Aurelius',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley & William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin & Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

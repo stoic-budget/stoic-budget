@@ -62,98 +62,25 @@ export const de: QuoteTexts = {
       '…wenn er sie hatte, genoss er sie ohne Ziererei, und wenn er sie nicht hatte, vermisste er sie nicht.',
     'marcus-very-little-needed': '…für ein glückliches Leben ist nur sehr wenig nötig.',
     'marcus-be-such': 'Rede nicht länger darüber, wie ein guter Mensch sein soll, sondern sei es.',
-    'buffett-swimming-naked': 'Schließlich erfährt man erst bei Ebbe, wer nackt geschwommen ist.',
-    'buffett-borrowed-money':
-      'Zweifellos sind manche Menschen durch geliehenes Geld sehr reich geworden. Es war jedoch auch ein Weg, sehr arm zu werden.',
-    'buffett-possessions':
-      'Allzu oft endet eine riesige Sammlung von Besitztümern damit, dass sie ihren Besitzer besitzt.',
-    'buffett-one-percent':
-      'Würden wir mehr als 1 % meiner Anteilsscheine (Aktienzertifikate von Berkshire Hathaway) für uns selbst verwenden, würden weder unser Glück noch unser Wohlbefinden steigen.',
-    'munger-learning-machines':
-      'Ich sehe ständig Menschen im Leben aufsteigen, die nicht die Klügsten sind… aber sie sind Lernmaschinen. Sie gehen jeden Abend ein wenig klüger ins Bett, als sie aufgestanden sind.',
-    'munger-mozart-overspent':
-      'Es gab einmal einen Mann, der der berühmteste Komponist der Welt wurde, aber er war zutiefst unglücklich… und einer der Gründe war, dass er stets mehr ausgab, als er einnahm. Das war Mozart.',
-    'munger-terrible-blows':
-      'Das Leben wird schreckliche Schläge austeilen, furchtbare Schläge, unfaire Schläge. Egal… Ihre Pflicht war es, nicht in Selbstmitleid zu versinken, sondern den schrecklichen Schlag konstruktiv zu nutzen.',
-    'munger-disastrous-modes':
-      'Allgemein gesagt sind Neid, Groll, Rache und Selbstmitleid verheerende Denkweisen.',
-    'graham-worst-enemy':
-      'Das Hauptproblem des Anlegers – und sogar sein schlimmster Feind – ist wahrscheinlich er selbst.',
-    'graham-margin-of-safety':
-      'Vor die ähnliche Aufgabe gestellt, das Geheimnis solider Geldanlage in drei Worte zu fassen, wagen wir das Motto: SICHERHEITSMARGE.',
-    'graham-prudent-principles':
-      'Die Wall Street hat einige kluge Grundsätze; das Problem ist, dass sie immer dann vergessen werden, wenn man sie am dringendsten braucht.',
-    'bogle-courage-press-on':
-      'Der Mut, unbeirrt weiterzumachen – ganz gleich, ob die See ruhig oder rau ist, und besonders, wenn die Stürme des Marktes um uns heulen –, ist die wesentlichste Eigenschaft des erfolgreichen Anlegers.',
-    'bogle-own-worst-enemy': 'Ja, der Anleger ist oft sein eigener schlimmster Feind.',
-    'bogle-dont-stop-regular-investing':
-      'Um Himmels willen, hören Sie nicht mit regelmäßigem Investieren auf, nur weil der Markt fällt.',
-    'bogle-great-game-of-life':
-      'Denken Sie daran, dass es im großen Spiel des Lebens nicht um Geld geht; es geht darum, Ihr Bestes zu geben, um die Welt neu zu erbauen.',
-    'lynch-family-budget':
-      'Es ist sinnvoll, das Familienbudget zu überprüfen, bevor man Aktien kauft.',
-    'lynch-afford-to-lose':
-      'Investieren Sie nur, was Sie verlieren könnten, ohne dass dieser Verlust in absehbarer Zukunft irgendeine Auswirkung auf Ihr tägliches Leben hätte.',
-    'dalio-pain-reflection': 'Schmerz + Reflexion = Fortschritt.',
-    'dalio-habit-controls-you':
-      'Wenn Sie so gut wie irgendetwas über längere Zeit oft genug tun, bilden Sie eine Gewohnheit, die Sie beherrschen wird.',
-    'dalio-avoid-temptations':
-      'Menschen, die wählen, was sie wirklich wollen, und die Versuchungen meiden und die Schmerzen überwinden, die sie davon abbringen, führen sehr viel wahrscheinlicher ein erfolgreiches Leben.',
-    'housel-spending-to-show':
-      'Geld auszugeben, um anderen zu zeigen, wie viel Geld man hat, ist der schnellste Weg, weniger Geld zu haben.',
-    'housel-desire-less':
-      'Ersparnisse entstehen, wenn man weniger ausgibt. Weniger ausgeben kann man, wenn man weniger begehrt. Und weniger begehren wird man, wenn einem weniger wichtig ist, was andere von einem denken.',
-    'housel-goalpost':
-      'Die schwierigste finanzielle Fähigkeit ist es, das Ziel nicht immer weiter zu verschieben.',
-    'housel-plan-survive-reality':
-      'Ein Plan ist nur nützlich, wenn er die Wirklichkeit überstehen kann.',
-    'franklin-small-leak':
-      'Hüte dich vor kleinen Ausgaben; ein kleines Leck bringt ein großes Schiff zum Sinken.',
-    'franklin-saving-and-getting':
-      'Wenn du wohlhabend werden willst, denke ans Sparen ebenso wie ans Verdienen.',
-    'franklin-no-need':
-      'Kaufe, was du nicht brauchst, und bald wirst du verkaufen müssen, was du brauchst.',
-    'franklin-first-desire':
-      'Es ist leichter, den ersten Wunsch zu unterdrücken, als alle zu befriedigen, die ihm folgen.',
-    'franklin-age-and-want':
-      'Für Alter und Not spare, solange du kannst; keine Morgensonne währt den ganzen Tag.',
-    'franklin-comfort-and-help':
-      'Sei nicht lieblos zu denen, die gerade in Not zu sein scheinen, sondern tröste und hilf ihnen.',
-    'clason-part-of-all-you-earn':
-      'Ein Teil von allem, was du verdienst, gehört dir und ist zu behalten. Er sollte nicht weniger als ein Zehntel betragen, wie wenig du auch verdienst.',
-    'clason-tree-of-wealth':
-      'Reichtum wächst wie ein Baum aus einem winzigen Samen. Die erste Kupfermünze, die du sparst, ist der Samen, aus dem dein Baum des Reichtums wachsen wird.',
-    'clason-necessary-expenses':
-      'Was jeder von uns seine „notwendigen Ausgaben“ nennt, wird stets so weit wachsen, bis es unserem Einkommen gleichkommt, wenn wir uns nicht dagegen wehren.',
-    'clason-little-caution': 'Lieber ein wenig Vorsicht als großes Bedauern.',
-    'clason-cultivate-thy-powers':
-      'Entwickle deine eigenen Kräfte, lerne und werde weiser, werde geschickter, handle so, dass du dich selbst achten kannst.',
-    'stanley-accumulate-not-spend':
-      'Wenn Sie jedes Jahr gut verdienen und alles ausgeben, werden Sie nicht wohlhabender. Sie leben nur auf großem Fuß. Vermögen ist, was Sie ansammeln, nicht, was Sie ausgeben.',
-    'stanley-below-your-means':
-      'Wie hoch Ihr Einkommen auch ist, leben Sie immer unter Ihren Verhältnissen.',
-    'stanley-self-discipline':
-      'Vermögen ist häufiger das Ergebnis eines Lebensstils aus harter Arbeit, Ausdauer, Planung und vor allem Selbstdisziplin.',
-    'robin-life-energy': 'Geld ist etwas, wofür wir unsere Lebensenergie einzutauschen wählen.',
-    'robin-enough': 'Auf dem Gipfel der Erfüllungskurve haben wir genug.',
-    'warren-must-haves':
-      'Die Muss-Ausgaben sind die Dinge, die Sie auf jeden Fall bezahlen müssen.',
+    'seneca-what-is-wisdom':
+      'Was ist Weisheit? Immer dasselbe zu wollen und immer dasselbe abzulehnen.',
+    'seneca-no-right-wind':
+      'Wer nicht weiß, welchen Hafen er ansteuert, dem ist kein Wind der rechte.',
+    'epictetus-prescribe-a-character':
+      'Gib dir sogleich ein bestimmtes Wesen und eine bestimmte Form vor, die du bewahrst, wenn du allein bist und wenn du Menschen begegnest.',
+    'epictetus-little-things':
+      'Fange also mit kleinen Dingen an. Ist das Öl verschüttet? Ist ein wenig Wein gestohlen? Sage dir bei solcher Gelegenheit: Zu diesem Preis wird Unerschütterlichkeit verkauft; zu diesem Preis wird Gelassenheit verkauft, doch nichts bekommt man umsonst.',
+    'epictetus-as-if-laws':
+      'Was immer dir an Regeln für die Führung des Lebens vorgelegt wird, daran halte dich, als wären es Gesetze, als würdest du dich der Gottlosigkeit schuldig machen, wenn du eine davon übertrittst.',
+    'marcus-whole-of-life': 'Beunruhige dich nicht, indem du an dein ganzes Leben denkst.',
+    'marcus-third-thing':
+      'Wenn du eine gute Tat getan hast und ein anderer sie empfangen hat, warum suchst du dann noch ein Drittes dazu, wie die Toren, nämlich den Ruf, Gutes getan zu haben, oder eine Gegenleistung?',
+    'marcus-what-more':
+      'Denn was willst du mehr, wenn du einem Menschen einen Dienst erwiesen hast? Genügt es dir nicht, etwas getan zu haben, das deiner Natur gemäß ist, und willst du dafür bezahlt werden?',
   },
   authors: {
-    'Benjamin Franklin': 'Benjamin Franklin',
-    'Benjamin Graham': 'Benjamin Graham',
-    'Charlie Munger': 'Charlie Munger',
-    'Elizabeth Warren & Amelia Warren Tyagi': 'Elizabeth Warren und Amelia Warren Tyagi',
     Epictetus: 'Epiktet',
-    'George S. Clason': 'George S. Clason',
-    'John C. Bogle': 'John C. Bogle',
     'Marcus Aurelius': 'Mark Aurel',
-    'Morgan Housel': 'Morgan Housel',
-    'Peter Lynch': 'Peter Lynch',
-    'Ray Dalio': 'Ray Dalio',
     Seneca: 'Seneca',
-    'Thomas J. Stanley & William D. Danko': 'Thomas J. Stanley und William D. Danko',
-    'Vicki Robin & Joe Dominguez': 'Vicki Robin und Joe Dominguez',
-    'Warren Buffett': 'Warren Buffett',
   },
 };

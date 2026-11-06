@@ -319,23 +319,23 @@ describe('TaxesCard', () => {
 });
 
 describe('AdviceCard', () => {
-  it('shows the top three pieces of advice, the Stoic reading first', async () => {
+  it('shows the three most important pieces of advice', async () => {
     serve({
       '/insights': insightPage([
-        insight({ id: 'i-1', title: 'First observation' }),
-        insight({ id: 'i-2', title: 'Second observation' }),
-        insight({ id: 'i-3', title: 'Third observation' }),
-        insight({ id: 'i-4', title: 'Stoic reading', type: 'stoic.balance' }),
-        insight({ id: 'i-5', title: 'A warning', severity: 'warn' }),
+        insight({ id: 'i-1', title: 'A small note', data: { priority: 10 } }),
+        insight({ id: 'i-2', title: 'A goal out of reach', data: { priority: 85 } }),
+        insight({ id: 'i-3', title: 'A note without rank' }),
+        insight({ id: 'i-4', title: 'The balance below zero', data: { priority: 100 } }),
+        insight({ id: 'i-5', title: 'A warning', severity: 'warn', data: { priority: 200 } }),
       ]),
     });
     renderWithQuery(<AdviceCard />);
 
-    await screen.findByText('Stoic reading');
+    await screen.findByText('The balance below zero');
     const titles = [...document.querySelectorAll('.seneca-dashboard__row-primary')].map(
       node => node.textContent,
     );
-    expect(titles).toEqual(['Stoic reading', 'First observation', 'Second observation']);
+    expect(titles).toEqual(['The balance below zero', 'A goal out of reach', 'A small note']);
   });
 
   it('draws nothing without advice', async () => {

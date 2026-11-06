@@ -22,7 +22,12 @@ vi.mock('@/app/i18n', () => ({
 }));
 
 import { createTestQueryClient, renderHookWithQuery } from '../test/query-wrapper';
-import { type InsightSeverity, useInsights, useRefreshInsights } from './useInsights';
+import {
+  type InsightSeverity,
+  useDailyAdviceRefresh,
+  useInsights,
+  useRefreshInsights,
+} from './useInsights';
 import { insightPage } from '@/app/test/fixtures/contracts';
 
 function insight(id: string, severity: InsightSeverity) {
@@ -180,5 +185,32 @@ describe('useInsights', () => {
 
     await waitFor(() => expect(result.current.isPending).toBe(false));
     expect(result.current.items).toEqual([]);
+  });
+
+  describe('useDailyAdviceRefresh', () => {
+    const refreshCalls = () =>
+      apiMocks.post.mock.calls.filter(([url]) => url === '/insights/refresh').length;
+
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('recomputes once a day for the workspace, however many pages mount it', async () => {
+      apiMocks.get.mockResolvedValue({ data: insightPage([]) });
+
+      renderHookWithQuery(() => useDailyAdviceRefresh());
+      renderHookWithQuery(() => useDailyAdviceRefresh());
+
+      await waitFor(() => expect(refreshCalls()).toBe(1));
+    });
+
+    it('recomputes again on a new day', async () => {
+      apiMocks.get.mockResolvedValue({ data: insightPage([]) });
+      localStorage.setItem('advice-refreshed-on:workspace-1', 'an earlier day');
+
+      renderHookWithQuery(() => useDailyAdviceRefresh());
+
+      await waitFor(() => expect(refreshCalls()).toBe(1));
+    });
   });
 });

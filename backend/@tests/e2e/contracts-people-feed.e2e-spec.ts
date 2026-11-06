@@ -99,8 +99,8 @@ describe('API contracts: people feed (e2e)', () => {
     const saved = await ctx.dataSource.getRepository(Insight).save({
       userId: ctx.owner.userId,
       workspaceId: ctx.owner.workspaceId,
-      type: InsightType.SPENDING_SPIKE,
-      category: InsightCategory.ANOMALY,
+      type: InsightType.SPENDING_TREND_UP,
+      category: InsightCategory.TREND,
       title: 'Spending spike',
       message: 'More than usual this week',
     });

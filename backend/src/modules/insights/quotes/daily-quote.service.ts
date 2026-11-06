@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, MoreThan, type Repository } from 'typeorm';
+import { IsNull, MoreThan, type Repository } from 'typeorm';
 import { appError } from '../../../common/errors/app-error';
 import { Insight, InsightCategory } from '../../../entities/insight.entity';
 import { User } from '../../../entities/user.entity';
@@ -32,8 +32,11 @@ export interface DailyQuote {
   vote: 1 | -1 | null;
 }
 
-/** More thumbs than the catalogue holds quotes can only be someone filling the column. */
-const MAX_VOTES = QUOTES.length;
+/**
+ * More thumbs than this can only be someone filling the column. Above the
+ * catalogue's size: thumbs on quotes since retired stay stored and count here.
+ */
+const MAX_VOTES = 100;
 
 function hash(text: string): number {
   let value = 0;
@@ -82,14 +85,14 @@ export class DailyQuoteService {
             userId,
             workspaceId,
             isDismissed: false,
-            category: In([InsightCategory.STOIC, InsightCategory.EXPERT]),
+            category: InsightCategory.STOIC,
             expiresAt: MoreThan(now),
           },
           {
             userId,
             workspaceId,
             isDismissed: false,
-            category: In([InsightCategory.STOIC, InsightCategory.EXPERT]),
+            category: InsightCategory.STOIC,
             expiresAt: IsNull(),
           },
         ],

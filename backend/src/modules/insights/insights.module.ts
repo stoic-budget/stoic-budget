@@ -10,7 +10,7 @@ import {
   Workspace,
 } from '../../entities';
 import { StoicLedgerService } from '../budgets/stoic/stoic-ledger.service';
-import { DashboardModule } from '../dashboard/dashboard.module';
+import { ClassificationModule } from '../classification/classification.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { GoalsModule } from '../goals/goals.module';
 import { NetWorthModule } from '../net-worth/net-worth.module';
@@ -41,7 +41,7 @@ import { StoicBehaviorService } from './stoic/stoic-behavior.service';
     NetWorthModule,
     ExchangeRatesModule,
     GoalsModule,
-    DashboardModule,
+    ClassificationModule,
   ],
   controllers: [InsightsController],
   providers: [

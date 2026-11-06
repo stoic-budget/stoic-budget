@@ -35,6 +35,13 @@ export const DEBT_WALLET_TYPES: readonly WalletType[] = ['credit_card', 'loan'];
 /** Money that can be spent today: safe-to-spend and the forecast start here. */
 export const SPENDABLE_WALLET_TYPES: readonly WalletType[] = ['checking', 'cash', 'credit_card'];
 
+/** Money to fall back on: what can be spent today plus savings and deposits. */
+export const RESERVE_WALLET_TYPES: readonly WalletType[] = [
+  ...SPENDABLE_WALLET_TYPES,
+  'savings',
+  'deposit',
+];
+
 @Entity('wallets')
 export class Wallet {
   @PrimaryGeneratedColumn('uuid')

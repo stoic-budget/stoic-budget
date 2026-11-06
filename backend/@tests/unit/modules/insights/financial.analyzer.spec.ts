@@ -345,6 +345,26 @@ describe('FinancialAnalyzer', () => {
     }
   });
 
+  it('says 0% kept, not a negative share, when spending passed income', async () => {
+    const analyzer = new FinancialAnalyzer(
+      createTransactionRepository({
+        monthlyTotals: [
+          { income: '1000', spent: '1200' }, // -20%
+          { income: '1000', spent: '600' }, // 40%
+        ],
+      }),
+      createBudgetRepository([]),
+      createNetWorthService(),
+      createRates(),
+      createWorkspaceRepository(),
+    );
+
+    const results = await analyzer.analyze(CONTEXT);
+    const savings = results.find(item => item.type === InsightType.SAVINGS_RATE_TREND);
+
+    expect(savings?.messageParams).toEqual({ rate: 0, diff: 60 });
+  });
+
   it('reports a rising savings rate as information, not a warning', async () => {
     const analyzer = new FinancialAnalyzer(
       createTransactionRepository({
@@ -367,9 +387,11 @@ describe('FinancialAnalyzer', () => {
       messageParams: { rate: 50, diff: 30 },
       severity: InsightSeverity.INFO,
     });
+    // The last finished month: a running one says nothing yet.
     const now = new Date();
+    const judged = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     expect(savings?.data).toMatchObject({
-      month: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
+      month: `${judged.getFullYear()}-${String(judged.getMonth() + 1).padStart(2, '0')}`,
     });
   });
 

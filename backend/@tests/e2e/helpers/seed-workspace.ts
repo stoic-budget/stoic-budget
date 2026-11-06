@@ -350,8 +350,8 @@ export async function seedWorkspace(
   await dataSource.getRepository(Insight).save({
     userId: owner.userId,
     workspaceId: owner.workspaceId,
-    type: InsightType.SPENDING_SPIKE,
-    category: InsightCategory.ANOMALY,
+    type: InsightType.SPENDING_TREND_UP,
+    category: InsightCategory.TREND,
     title: `${marker} insight`,
     message: `${marker} insight`,
   });
