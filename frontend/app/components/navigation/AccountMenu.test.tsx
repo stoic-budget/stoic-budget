@@ -52,6 +52,19 @@ describe('AccountMenu', () => {
     expect(items.indexOf('privacyMode')).toBe(items.indexOf('darkMode') + 1);
   });
 
+  it('keeps the amounts hidden when the reader declines to show them', () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    act(() => setPrivacyMode(true));
+    render(<AccountMenu variant="mobile" />);
+    fireEvent.click(screen.getByRole('button', { name: /Administrator/ }));
+
+    fireEvent.click(screen.getByRole('menuitem', { name: /privacyMode/ }));
+
+    expect(confirm).toHaveBeenCalledOnce();
+    expect(document.documentElement.dataset.privacy).toBe('on');
+    confirm.mockRestore();
+  });
+
   it('opens the admin page for whoever may read the audit log, in place of what was new', () => {
     permissions.granted = ['audit_log.view'];
     render(<AccountMenu />);

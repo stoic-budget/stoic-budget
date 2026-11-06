@@ -27,7 +27,7 @@ import { usePermissions } from '@/app/hooks/usePermissions';
 import { useIntlayer } from '@/app/i18n';
 import { normalizeAvatarUrl } from '@/app/lib/avatar-url';
 import { avatarInitial, avatarTone } from '@/app/lib/initial-avatar';
-import { setPrivacyMode, usePrivacyMode } from '@/app/lib/privacy-mode';
+import { togglePrivacyMode, usePrivacyMode } from '@/app/lib/privacy-mode';
 import { useThemePreference } from './hooks/useThemePreference';
 
 /**
@@ -181,7 +181,7 @@ export function AccountMenu({
         {/* Amounts as scribbles until hovered, on this device; stays open like the theme row.
             The sidebar has its own icon in the header; only the mobile drawer needs the row. */}
         {variant === 'mobile' ? (
-          <MenuItem onClick={() => setPrivacyMode(!privacy)}>
+          <MenuItem onClick={() => togglePrivacyMode(userMenu.privacyRevealConfirm.value)}>
             <ListItemIcon>
               <Eye size={18} />
             </ListItemIcon>
