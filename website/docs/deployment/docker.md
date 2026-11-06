@@ -45,7 +45,7 @@ This starts:
 - PostgreSQL 14
 - Redis 7
 - NestJS backend
-- Next.js frontend
+- React frontend on vinext
 
 Migrations run automatically when the backend starts (`RUN_MIGRATIONS=true`). PostgreSQL and Redis publish their
 ports on `127.0.0.1` only.

@@ -1,9 +1,11 @@
 ---
 title: Frontend Architecture
-description: Next.js routes, components, and state
+description: Routes, components, and state
 ---
 
-The frontend is a Next.js 16 app (React 19, MUI 7) with route groups and modular UI components.
+The frontend is a React 19 and MUI 9 app with route groups and modular UI components. It builds with
+[vinext](https://vinext.dev/), which runs the Next.js App Router API on Vite: `vite dev` and `vite build`, with output
+in `frontend/dist/standalone`.
 
 ## Route structure
 
@@ -42,7 +44,7 @@ describe; `intlayer build` runs on `postinstall` and `prebuild`.
 
 ## Styling and tooling
 
-- MUI 7 with Emotion, plus SCSS under `app/styles` (checked by stylelint via `npm run lint:css`)
+- MUI 9 with Emotion, plus SCSS under `app/styles` (checked by stylelint via `npm run lint:css`)
 - Charts use Recharts and ECharts
 - `npm run lint:check` runs Biome; `npm test` runs Vitest
 

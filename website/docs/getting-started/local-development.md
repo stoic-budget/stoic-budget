@@ -66,7 +66,7 @@ npm --prefix frontend install
 npm --prefix frontend run dev
 ```
 
-The web app runs at `http://localhost:3000`. The Next.js server proxies `/api/*` and `/uploads/*`
+The web app runs at `http://localhost:3000`. The frontend server proxies `/api/*` and `/uploads/*`
 to `API_PROXY_TARGET` (default `http://127.0.0.1:3001`), so the browser talks to one origin.
 
 `npm run dev` at the repository root starts steps 3 and 4 together.

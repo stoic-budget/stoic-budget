@@ -3,7 +3,7 @@ title: Architecture Overview
 description: Service topology and request flow
 ---
 
-Stoic Budget runs as four services: a Next.js frontend, a NestJS API, PostgreSQL, and Redis. Two optional Docker Compose
+Stoic Budget runs as four services: a React frontend on vinext, a NestJS API, PostgreSQL, and Redis. Two optional Docker Compose
 profiles add self-hosted receipt maps: `maps` (`map-assets`, `map-tiles-init`, `tileserver`) and `geocoder`
 (`nominatim`). Background work — the statement parsing queue and scheduled jobs — runs inside the backend
 process; there are no separate worker services.
@@ -12,10 +12,10 @@ process; there are no separate worker services.
 
 ## Core services
 
-1. **Frontend (Next.js)**
+1. **Frontend (vinext)**
    - Web UI for uploads, dashboards, and configuration
-   - Proxies API requests to the backend through a Next.js rewrite (`API_PROXY_TARGET`, `http://backend:3001` in
-     Docker)
+   - Proxies API requests to the backend through a rewrite in `next.config.mjs` (`API_PROXY_TARGET`,
+     `http://backend:3001` in Docker)
 
 2. **Backend (NestJS)**
    - REST API at `/api/v1` and Socket.IO for real-time notifications
@@ -24,7 +24,7 @@ process; there are no separate worker services.
    - BullMQ queue for statement parsing, `@nestjs/schedule` for cron jobs
 
 3. **PostgreSQL**
-   - 85 TypeORM entities and 142 migrations; schema changes only through migrations
+   - TypeORM entities; schema changes only through migrations
 
 4. **Redis**
    - BullMQ statement parsing queue

@@ -102,7 +102,7 @@ env values with the same purpose are only temporary fallback defaults. See
 - `NEXT_PUBLIC_SUPPORT_EMAIL` — where "report an error" in the tax screens sends people
 
 `NEXT_PUBLIC_*` values are compiled into the frontend at build time, so the prebuilt image needs a
-rebuild to change them. The Next.js server proxies `/api/*` and `/uploads/*` to `API_PROXY_TARGET`
+rebuild to change them. The frontend server proxies `/api/*` and `/uploads/*` to `API_PROXY_TARGET`
 (default `http://127.0.0.1:3001`; the Docker dev stack uses `http://backend:3001`).
 
 ## Secrets management

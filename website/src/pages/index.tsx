@@ -81,7 +81,7 @@ const screenshots = [
 
 const stack = [
   'NestJS 11',
-  'Next.js 16',
+  'vinext',
   'React 19',
   'TypeScript',
   'PostgreSQL 14',
@@ -177,7 +177,7 @@ export default function Home(): JSX.Element {
         <section className="homepage-section">
           <div className="container">
             <h2>Tech stack</h2>
-            <p>A TypeScript monorepo: NestJS API, Next.js web app, PostgreSQL and Redis, all run with Docker Compose.</p>
+            <p>A TypeScript monorepo: NestJS API, React web app, PostgreSQL and Redis, all run with Docker Compose.</p>
             <div className="badge-row">
               {stack.map((item) => (
                 <span key={item} className="badge-pill">
