@@ -65,6 +65,12 @@ export const ClassificationResultInput = Schema.Struct({
   tagIds: Schema.optional(
     Schema.Array(Schema.String.check(Schema.isUUID())).check(Schema.isMaxLength(20)),
   ),
+  /** Written as the row's comment when it has none. */
+  comment: Schema.optional(Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(500))),
+  /** The payee the row is given, unless a person picked one for it. */
+  payeeId: Schema.optional(Schema.String.check(Schema.isUUID())),
+  /** Instead of `payeeId`: a payee by name, made on save when the workspace has none of it. */
+  payeeName: Schema.optional(Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(200))),
 });
 export type ClassificationResultInput = Wire<typeof ClassificationResultInput>;
 

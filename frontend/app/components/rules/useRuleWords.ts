@@ -50,6 +50,8 @@ export function useRuleWords(): RuleWords {
     wallet: t.result.wallet.value,
     owner: t.result.owner.value,
     tags: t.result.tags.value,
+    comment: t.result.comment.value,
+    payee: t.result.payee.value,
     shared: t.result.shared.value,
     unknown: t.result.unknown.value,
   };

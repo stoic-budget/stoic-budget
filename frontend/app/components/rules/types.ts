@@ -16,6 +16,11 @@ export interface RuleDraftBody {
     walletId?: string;
     ownerMemberId?: string | null;
     tagIds?: string[];
+    /** Written as the row's comment when it has none. */
+    comment?: string;
+    payeeId?: string;
+    /** A payee the workspace does not have yet: made when the rule is saved. */
+    payeeName?: string;
   };
 }
 

@@ -66,4 +66,8 @@ export interface ClassificationResult {
   ownerMemberId?: string | null;
   /** Tags added to the row. Never a replacement: the tags it already has stay. */
   tagIds?: string[];
+  /** Written as the row's comment when it has none: a person's comment is never replaced. */
+  comment?: string;
+  /** The payee the row is given, unless a person picked one for it. */
+  payeeId?: string;
 }

@@ -98,7 +98,7 @@ export class ClassificationService {
     const layers = layerRules(await applicableRules(manager, workspaceId, rules, transaction));
     // A rule naming the owner is an explicit instruction; the wallet is only a
     // default, so it must not overwrite one.
-    const { ruleSetOwner } = applyRuleLayers(layers, classification);
+    const { ruleSetOwner } = applyRuleLayers(layers, classification, transaction);
     // A relation for a new row; callers updating an existing row add them instead.
     const tags = await ruleTags(manager, workspaceId, layers.tagIds);
     if (tags) classification.tags = tags;
@@ -108,7 +108,8 @@ export class ClassificationService {
     // Auto-classify category if not set
     if (!classification.categoryId) {
       const match = await this.autoClassifyCategory(
-        transaction,
+        // The payee a rule gave the row is the one whose history files it.
+        { ...transaction, payeeId: classification.payeeId ?? transaction.payeeId } as Transaction,
         userId,
         classification.transactionType || TransactionType.EXPENSE,
         workspaceId,

@@ -4,7 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
 import { In, type Repository } from 'typeorm';
 import { canReadPrivate } from '../../../common/utils/transaction-privacy.util';
-import { workspaceOwnsRefs } from '../../../common/utils/workspace-refs.util';
 import { CategorizationRule } from '../../../entities/categorization-rule.entity';
 import { Transaction, TransactionCategorySource } from '../../../entities/transaction.entity';
 import { AuditService } from '../../audit/audit.service';
@@ -12,6 +11,7 @@ import { TaxAssignmentService } from '../../tax/tax-assignment.service';
 import { hasDecidedCategory } from '../engine/category-decision';
 import { movesToWallet, planRuleApply } from '../engine/rule-apply-plan';
 import { explainMatch, matchesRule } from '../engine/rule-conditions';
+import { ownsRuleRefs } from '../engine/rule-refs';
 import { addTransactionTags, ownedTagIds } from '../engine/rule-tags';
 import { ruleApplyEvents } from '../helpers/rule-audit';
 import type {
@@ -22,6 +22,12 @@ import { ClassificationService } from './classification.service';
 
 /** How many of a workspace's most recent rows a rule preview looks at. */
 const RULE_SCAN_LIMIT = 5000;
+/** What an apply did, by the kind of change. */
+type RuleApplyTotals = Record<
+  'applied' | 'skippedManual' | 'tagged' | 'moved' | 'commented' | 'renamed',
+  number
+>;
+
 /** How many rows an apply reads and writes at a time. */
 const RULE_APPLY_PAGE = 1000;
 /** How many matching rows the preview hands back as examples. */
@@ -159,7 +165,8 @@ export class RuleApplicationService {
 
   /**
    * Files the workspace's existing matches under the rule's category, adds its
-   * tags and moves them to its account, a page of rows at a time until every
+   * tags and comment, moves them to its account and gives them its payee, a page
+   * of rows at a time until every
    * row was looked at. Which rows change is `planRuleApply`'s call: a category
    * or an account a rule ranked above sets on a row is left to that rule. The owner
    * is not touched on old rows: nothing tells an owner somebody assigned from
@@ -170,15 +177,15 @@ export class RuleApplicationService {
     rule: CategorizationRule;
     userId: string;
     viewerMemberId: string | null;
-  }): Promise<{ applied: number; skippedManual: number; tagged: number; moved: number }> {
+  }): Promise<RuleApplyTotals> {
     const { rule, userId, viewerMemberId } = input;
     const { workspaceId } = rule;
-    const { categoryId, walletId } = rule.result;
+    const { categoryId, walletId, comment, payeeId } = rule.result;
     const manager = this.transactionRepository.manager;
     const tagIds = await ownedTagIds(manager, workspaceId, rule.result.tagIds);
-    const totals = { applied: 0, skippedManual: 0, tagged: 0, moved: 0 };
-    const owned = await workspaceOwnsRefs(manager, workspaceId, rule.result);
-    if (!(owned && (categoryId || walletId || tagIds.length > 0))) {
+    const totals = { applied: 0, skippedManual: 0, tagged: 0, moved: 0, commented: 0, renamed: 0 };
+    const owned = await ownsRuleRefs(manager, workspaceId, rule.result);
+    if (!(owned && (categoryId || walletId || comment || payeeId || tagIds.length > 0))) {
       return totals;
     }
     const above = await this.rulesAbove(workspaceId, rule.id);
@@ -190,7 +197,10 @@ export class RuleApplicationService {
         setsCategory: Boolean(categoryId),
         setsTags: tagIds.length > 0,
         walletId,
+        comment,
+        payeeId,
       });
+      const idsOf = (rows: Transaction[]) => rows.map(row => row.id);
       const refiledIds = plan.refiled.map(row => row.id);
       if (refiledIds.length > 0) {
         await this.transactionRepository.update(
@@ -202,9 +212,24 @@ export class RuleApplicationService {
       }
       if (plan.moved.length > 0) {
         await this.transactionRepository.update(
-          { id: In(plan.moved.map(row => row.id)), workspaceId },
+          { id: In(idsOf(plan.moved)), workspaceId },
           { walletId },
         );
+      }
+      if (plan.commented.length > 0) {
+        await this.transactionRepository.update(
+          { id: In(idsOf(plan.commented)), workspaceId },
+          { comments: comment },
+        );
+      }
+      if (plan.renamed.length > 0) {
+        const renamedIds = idsOf(plan.renamed);
+        await this.transactionRepository.update(
+          { id: In(renamedIds), workspaceId },
+          { payeeId, payeeSource: 'rule' },
+        );
+        // The payee decides the reverse charge, and the tax subscriber did not see it change.
+        await this.taxAssignmentService.reassess(workspaceId, { ids: renamedIds });
       }
       await addTransactionTags(
         manager,
@@ -219,6 +244,8 @@ export class RuleApplicationService {
       totals.skippedManual += categoryId ? plan.matches.length - refiledIds.length : 0;
       totals.tagged += plan.tagged.length;
       totals.moved += plan.moved.length;
+      totals.commented += plan.commented.length;
+      totals.renamed += plan.renamed.length;
     }
     if (touchedRows > 0) {
       await this.classificationService.recordRuleMatch(rule.id, workspaceId, touchedRows);

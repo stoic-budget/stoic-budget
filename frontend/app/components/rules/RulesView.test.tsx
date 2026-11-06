@@ -53,6 +53,22 @@ const ELECTRONICS = categoryItem({ id: '00000000-0000-4000-8000-000000000001', n
 const CARD = walletItem({ id: '00000000-0000-4000-8000-000000000002', name: 'Everyday card' });
 const GADGETS = { id: '00000000-0000-4000-8000-000000000003', name: 'Gadgets', color: null, usageCount: 2 };
 const BAKERY_PAYEE = '00000000-0000-4000-8000-000000000004';
+const CAFE = {
+  id: '00000000-0000-4000-8000-000000000009',
+  name: 'Corner Café',
+  mode: 'auto' as const,
+  category: null,
+  defaultCategory: null,
+  countryCode: null,
+  vatId: null,
+  vatIdStatus: null,
+  vatIdName: null,
+  vatIdCheckedAt: null,
+  supplyType: null,
+  transactionCount: 3,
+  lastSeen: null,
+};
+
 
 function rule(overrides: Partial<CategorizationRule> = {}): CategorizationRule {
   return {
@@ -95,6 +111,7 @@ function mockApi(
     if (url === '/categories') return apiResponse([ELECTRONICS]);
     if (url === '/wallets') return apiResponse([CARD]);
     if (url === '/tags') return apiResponse([GADGETS]);
+    if (url === `/payees/${CAFE.id}`) return apiResponse(CAFE);
     if (url.startsWith('/workspaces/')) return apiResponse({ members: [] });
     throw new Error(`unexpected GET ${url}`);
   });
@@ -108,7 +125,7 @@ describe('RulesView', () => {
     put.mockResolvedValue(apiResponse(rule()));
     del.mockResolvedValue(apiResponse(null));
     offers.last = null;
-    post.mockResolvedValue(apiResponse({ applied: 2, skippedManual: 1, tagged: 3, moved: 0 }));
+    post.mockResolvedValue(apiResponse({ applied: 2, skippedManual: 1, tagged: 3, moved: 0, commented: 0, renamed: 0 }));
   });
 
   it('lays each rule out as a row: what it matches, what it sets, how often it fired', async () => {
@@ -167,6 +184,13 @@ describe('RulesView', () => {
     ).toBeTruthy();
   });
 
+  it('says what payee and comment a rule gives its rows', async () => {
+    mockApi([rule({ result: { payeeId: CAFE.id, comment: 'Team coffee' } })]);
+    renderWithQuery(<RulesView />);
+
+    expect(await screen.findByText('payee Corner Café · comment “Team coffee”')).toBeTruthy();
+  });
+
   it('pauses a rule with its switch', async () => {
     mockApi([rule()]);
     renderWithQuery(<RulesView />);
@@ -203,7 +227,14 @@ describe('RulesView', () => {
             truncated: false,
             matches: [],
           })
-        : apiResponse({ applied: 0, skippedManual: 0, tagged: 0, moved: 2 }),
+        : apiResponse({
+            applied: 0,
+            skippedManual: 0,
+            tagged: 0,
+            moved: 2,
+            commented: 0,
+            renamed: 0,
+          }),
     );
     renderWithQuery(<RulesView />);
 

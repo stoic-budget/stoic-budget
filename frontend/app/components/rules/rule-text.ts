@@ -21,6 +21,8 @@ export interface RuleWords {
   wallet: string;
   owner: string;
   tags: string;
+  comment: string;
+  payee: string;
   shared: string;
   unknown: string;
 }
@@ -31,6 +33,7 @@ export interface RuleNames {
   wallet: (id: string) => string | null;
   owner: (memberId: string) => string | null;
   tag: (id: string) => string | null;
+  payee: (id: string) => string | null;
 }
 
 function oneValue(
@@ -107,23 +110,47 @@ export function describeResult(
     const tags = result.tagIds.map(id => names.tag(id) ?? words.unknown).join(', ');
     parts.push(fill(words.tags, { names: tags }));
   }
+  if (result.payeeId || result.payeeName) {
+    const payee = result.payeeName ?? names.payee(result.payeeId ?? '') ?? words.unknown;
+    parts.push(fill(words.payee, { name: payee }));
+  }
+  if (result.comment) {
+    const text = result.comment;
+    parts.push(fill(words.comment, { text: text.length > 40 ? `${text.slice(0, 40)}…` : text }));
+  }
   return parts.join(' · ');
+}
+
+/** The counts an apply answers. */
+export interface AppliedCounts {
+  applied: number;
+  tagged: number;
+  moved: number;
+  commented: number;
+  renamed: number;
 }
 
 /** `2 rows refiled, 3 tagged · 1 rows moved to Cash`: what applying a rule did. */
 export function describeApplied(
-  done: { applied: number; tagged: number; moved: number },
-  texts: { applied: string; appliedAll: string; movedPart: string },
+  done: AppliedCounts,
+  texts: Record<'applied' | 'appliedAll' | 'movedPart' | 'commentedPart' | 'renamedPart', string>,
   wallet: string,
 ): string {
   const parts: string[] = [];
+  const extra = done.moved + done.commented + done.renamed;
   if (done.tagged > 0) {
     parts.push(fill(texts.appliedAll, { applied: done.applied, tagged: done.tagged }));
-  } else if (done.applied > 0 || done.moved === 0) {
+  } else if (done.applied > 0 || extra === 0) {
     parts.push(fill(texts.applied, { count: done.applied }));
   }
   if (done.moved > 0) {
     parts.push(fill(texts.movedPart, { count: done.moved, wallet }));
+  }
+  if (done.renamed > 0) {
+    parts.push(fill(texts.renamedPart, { count: done.renamed }));
+  }
+  if (done.commented > 0) {
+    parts.push(fill(texts.commentedPart, { count: done.commented }));
   }
   return parts.join(' · ');
 }
