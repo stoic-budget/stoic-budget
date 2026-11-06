@@ -314,6 +314,8 @@ describe('CategorizationRulesController', () => {
         workspaceId: mockWorkspaceId,
         viewerMemberId: 'member-1',
         conditions: dto.conditions,
+        // All of the conditions, unless the caller asks for any.
+        matchMode: 'all',
         transactionIds: undefined,
         ruleId: undefined,
       });
@@ -456,7 +458,7 @@ describe('CategorizationRulesController', () => {
 
       await expect(
         controller.applyRule({ id: 'rule-1' }, mockUser as any, mockWorkspaceId, null),
-      ).rejects.toThrow('no category, account or tags');
+      ).rejects.toThrow('nothing to apply');
       expect(mockRuleApplicationService.applyRuleToExisting).not.toHaveBeenCalled();
     });
 

@@ -111,6 +111,42 @@ describe('a rule that tags and asks for the account', () => {
     ]);
   });
 
+  it("gives a new row the rule's comment and payee, and files it by that payee's history", async () => {
+    const naming = { ...tagRule, result: { comment: 'Gadgets for the office', payeeId: 'payee-acme' } };
+    const service = build([naming]);
+    const history = vi
+      .spyOn(service as never, 'autoClassifyCategory')
+      .mockResolvedValue(undefined as never);
+
+    const classification = await service.classifyTransaction(imported('wallet-card'), 'user-1');
+
+    expect(classification.comments).toBe('Gadgets for the office');
+    expect(classification.payeeId).toBe('payee-acme');
+    expect(classification.payeeSource).toBe('rule');
+    expect((history.mock.calls[0] as unknown as [Transaction])[0].payeeId).toBe('payee-acme');
+  });
+
+  it("leaves the comment a person wrote and the payee a person picked", async () => {
+    const naming = { ...tagRule, result: { comment: 'Gadgets for the office', payeeId: 'payee-acme' } };
+    const service = build([naming]);
+    vi.spyOn(service as never, 'autoClassifyCategory').mockResolvedValue(undefined as never);
+
+    const classification = await service.classifyTransaction(
+      {
+        ...imported('wallet-card'),
+        id: 'tx-1',
+        comments: 'my own comment',
+        payeeId: 'payee-other',
+        payeeSource: 'manual',
+      } as Transaction,
+      'user-1',
+    );
+
+    expect(classification.comments).toBeUndefined();
+    expect(classification.payeeId).toBeUndefined();
+    expect(classification.payeeSource).toBeUndefined();
+  });
+
   it('does not fire for a row of another account', async () => {
     const service = build();
     vi.spyOn(service as never, 'autoClassifyCategory').mockResolvedValue(undefined as never);

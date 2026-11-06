@@ -168,6 +168,7 @@ describe('Cross-workspace references (e2e)', () => {
       { categoryId: await theirCategory() },
       { walletId: await theirWallet() },
       { branchId: await theirBranch() },
+      { payeeId: await idIn(b, 'payees') },
     ]) {
       await as(request(server()).post('/categorization-rules'))
         .send({
@@ -210,6 +211,32 @@ describe('Cross-workspace references (e2e)', () => {
     );
     expect(row.category_id).not.toBe(await theirCategory());
     expect(row.wallet_id).not.toBe(await theirWallet());
+    expect(res.text).not.toContain(bMarker);
+  });
+
+  it('passes over a stored rule that names B’s payee', async () => {
+    const transactionId = await idIn(a, 'transactions');
+    const theirPayee = await idIn(b, 'payees');
+    await dataSource.query(
+      `INSERT INTO categorization_rules (user_id, workspace_id, name, conditions, result, priority, is_active)
+       VALUES ($1, $2, 'Xref stored payee', $3, $4, 998, true)`,
+      [
+        a.userId,
+        a.workspaceId,
+        JSON.stringify([{ field: 'amount', operator: 'greater_than', value: 0 }]),
+        JSON.stringify({ payeeId: theirPayee, comment: 'Xref comment' }),
+      ],
+    );
+    const res = await as(
+      request(server()).post(`/classification/transaction/${transactionId}`),
+    ).expect(200);
+    const [row] = await dataSource.query(
+      'SELECT payee_id, comments FROM transactions WHERE id = $1',
+      [transactionId],
+    );
+    // Passed over whole: neither its payee nor its comment reached the row.
+    expect(row.payee_id).not.toBe(theirPayee);
+    expect(row.comments).not.toBe('Xref comment');
     expect(res.text).not.toContain(bMarker);
   });
 

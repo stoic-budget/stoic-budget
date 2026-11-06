@@ -7,7 +7,7 @@ import { Payee, PayeeMode } from '../../../entities/payee.entity';
 import { Transaction } from '../../../entities/transaction.entity';
 import { decidePayeeCategory } from '../engine/payee-category.matcher';
 import { onlyPayeeEvidence } from '../engine/payee-evidence';
-import { matchesConditions } from '../engine/rule-conditions';
+import { matchesConditions, matchesRule } from '../engine/rule-conditions';
 import type { ClassificationCondition } from '../interfaces/classification-rule.interface';
 
 /** How many decided rows of a payee, under one category, make it worth a rule. */
@@ -126,7 +126,7 @@ export class RuleSuggestionsService {
       if (!payee || payee.mode !== PayeeMode.AUTO) {
         continue;
       }
-      if (rules.some(rule => matchesConditions(candidate.rows[0], rule.conditions))) {
+      if (rules.some(rule => matchesRule(candidate.rows[0], rule))) {
         continue;
       }
       const condition = conditionFor(payee, candidate.rows);

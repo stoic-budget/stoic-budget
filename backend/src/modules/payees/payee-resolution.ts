@@ -1,5 +1,8 @@
+import { BadRequestException } from '@nestjs/common';
 import type { EntityManager } from 'typeorm';
+import { appError } from '../../common/errors/app-error';
 import { type PayeeKeyInput, payeeKeyOf, payeeNameOf } from '../../common/utils/payee-key.util';
+import { Payee } from '../../entities/payee.entity';
 import { truncatedTwinId } from './payee-truncation';
 
 /**
@@ -73,4 +76,23 @@ export async function findPayeeId(
     [workspaceId, payeeKey],
   );
   return alias?.payee_id ?? null;
+}
+
+/** The workspace's payee of that name, whatever its case, made when there is none. */
+export async function findOrCreatePayeeByName(
+  manager: EntityManager,
+  workspaceId: string,
+  raw: string,
+): Promise<Payee> {
+  const name = raw.trim();
+  if (!name) {
+    throw new BadRequestException(appError('PAYEE_NAME_REQUIRED'));
+  }
+  const payees = manager.getRepository(Payee);
+  const existing = await payees
+    .createQueryBuilder('payee')
+    .where('payee.workspaceId = :workspaceId', { workspaceId })
+    .andWhere('LOWER(payee.name) = LOWER(:name)', { name })
+    .getOne();
+  return existing ?? payees.save(payees.create({ workspaceId, name }));
 }

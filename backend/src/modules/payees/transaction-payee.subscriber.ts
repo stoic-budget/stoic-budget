@@ -43,5 +43,7 @@ export class TransactionPayeeSubscriber implements EntitySubscriberInterface<Tra
       return;
     }
     transaction.payeeId = await resolvePayeeId(event.manager, transaction.workspaceId, transaction);
+    // The descriptor's own payee again: nobody chose it.
+    transaction.payeeSource = null;
   }
 }

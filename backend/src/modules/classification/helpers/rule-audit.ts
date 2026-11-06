@@ -13,6 +13,7 @@ export type CategorizationRuleAuditSnapshot = {
   name: string;
   description: string | null;
   conditions: ClassificationCondition[];
+  matchMode: CategorizationRule['matchMode'];
   result: CategorizationRule['result'];
   priority: number;
   isActive: boolean;
@@ -31,6 +32,7 @@ export function toRuleAuditSnapshot(rule: CategorizationRule): CategorizationRul
     name: rule.name,
     description: rule.description,
     conditions: rule.conditions,
+    matchMode: rule.matchMode,
     result: rule.result,
     priority: rule.priority,
     isActive: rule.isActive,
@@ -42,8 +44,8 @@ export function toRuleAuditSnapshot(rule: CategorizationRule): CategorizationRul
 }
 
 /**
- * One event per row an apply changed, with what it was before: the category
- * and the account can be put back from it. A row that only got tags has no
+ * One event per row an apply changed, with what it was before: the category,
+ * the account, the comment and the payee can be put back from it. A row that only got tags has no
  * diff, since tags are added and nothing is taken away.
  */
 export function ruleApplyEvents(
@@ -51,12 +53,21 @@ export function ruleApplyEvents(
   input: { rule: CategorizationRule; userId: string; tagIds: readonly string[] },
 ): CreateAuditEventDto[] {
   const { rule, userId, tagIds } = input;
-  const { categoryId, walletId } = rule.result;
-  const refiled = new Set(plan.refiled.map(row => row.id));
-  const moved = new Set(plan.moved.map(row => row.id));
-  const tagged = new Set(plan.tagged.map(row => row.id));
+  const { categoryId, walletId, comment, payeeId } = rule.result;
+  const idsOf = (rows: readonly Transaction[]) => new Set(rows.map(row => row.id));
+  const refiled = idsOf(plan.refiled);
+  const moved = idsOf(plan.moved);
+  const commented = idsOf(plan.commented);
+  const renamed = idsOf(plan.renamed);
+  const touched = idsOf([
+    ...plan.refiled,
+    ...plan.moved,
+    ...plan.tagged,
+    ...plan.commented,
+    ...plan.renamed,
+  ]);
   return plan.matches
-    .filter(row => refiled.has(row.id) || moved.has(row.id) || tagged.has(row.id))
+    .filter(row => touched.has(row.id))
     .map(row => {
       const before: Record<string, unknown> = {};
       const after: Record<string, unknown> = {};
@@ -67,6 +78,14 @@ export function ruleApplyEvents(
       if (moved.has(row.id)) {
         before.walletId = row.walletId;
         after.walletId = walletId;
+      }
+      if (commented.has(row.id)) {
+        before.comments = row.comments;
+        after.comments = comment;
+      }
+      if (renamed.has(row.id)) {
+        before.payeeId = row.payeeId;
+        after.payeeId = payeeId;
       }
       return {
         workspaceId: rule.workspaceId,

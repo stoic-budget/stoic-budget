@@ -69,8 +69,8 @@ export async function truncatedTwinId(
 }
 
 /**
- * Moves payees' rows, aliases and subscription links to `targetId`, then
- * deletes them. The data half of a merge; the caller audits it.
+ * Moves payees' rows, aliases, subscription links and the rules that name
+ * them to `targetId`, then deletes them. The data half of a merge; the caller audits it.
  */
 export async function movePayeesInto(
   manager: EntityManager,
@@ -93,6 +93,12 @@ export async function movePayeesInto(
      SELECT workspace_id, subscription_id, $1 FROM subscription_payees
       WHERE workspace_id = $2 AND payee_id = ANY($3::uuid[])
      ON CONFLICT (subscription_id, payee_id) DO NOTHING`,
+    [targetId, workspaceId, sourceIds],
+  );
+  // A rule that gave rows one of the sources gives them the target from now on.
+  await manager.query(
+    `UPDATE categorization_rules SET result = jsonb_set(result, '{payeeId}', to_jsonb($1::text))
+      WHERE workspace_id = $2 AND result ->> 'payeeId' = ANY($3::text[])`,
     [targetId, workspaceId, sourceIds],
   );
   await manager.query('DELETE FROM payees WHERE workspace_id = $1 AND id = ANY($2::uuid[])', [

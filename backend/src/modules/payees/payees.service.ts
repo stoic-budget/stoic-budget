@@ -32,6 +32,7 @@ import { hasDecidedCategory } from '../classification/engine/category-decision';
 import { ClassificationService } from '../classification/services/classification.service';
 import { ViesService } from '../reference-data/vies.service';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
+import { findOrCreatePayeeByName } from './payee-resolution';
 import { movePayeesInto } from './payee-truncation';
 import { UNDECIDED_CATEGORY_SOURCES } from './payee-undecided';
 
@@ -453,11 +454,15 @@ export class PayeesService {
     }
     const payee = dto.payeeId
       ? await this.findPayee(workspaceId, dto.payeeId)
-      : await this.findOrCreateByName(workspaceId, dto.name as string);
+      : await findOrCreatePayeeByName(this.dataSource.manager, workspaceId, dto.name as string);
 
+    // Marked as a person's pick: a rule that names a payee leaves the row alone.
     const updates: Partial<
-      Pick<Transaction, 'payeeId' | 'categoryId' | 'categorySource' | 'categoryReason'>
-    > = { payeeId: payee.id };
+      Pick<
+        Transaction,
+        'payeeId' | 'payeeSource' | 'categoryId' | 'categorySource' | 'categoryReason'
+      >
+    > = { payeeId: payee.id, payeeSource: 'manual' };
     // A row on a filed tax return keeps its category; only its payee moves.
     if (!(hasDecidedCategory(transaction) || transaction.taxLocked)) {
       const match = await this.classificationService.categoryForPayee(workspaceId, payee.id);
@@ -551,20 +556,5 @@ export class PayeesService {
       throw new BadRequestException(appError('PAYEE_CATEGORY_NOT_FOUND'));
     }
     return category;
-  }
-
-  private async findOrCreateByName(workspaceId: string, raw: string): Promise<Payee> {
-    const name = raw.trim();
-    if (!name) {
-      throw new BadRequestException(appError('PAYEE_NAME_REQUIRED'));
-    }
-    const existing = await this.payeeRepository
-      .createQueryBuilder('payee')
-      .where('payee.workspaceId = :workspaceId', { workspaceId })
-      .andWhere('LOWER(payee.name) = LOWER(:name)', { name })
-      .getOne();
-    return (
-      existing ?? this.payeeRepository.save(this.payeeRepository.create({ workspaceId, name }))
-    );
   }
 }

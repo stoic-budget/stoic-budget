@@ -44,11 +44,28 @@ const STORE = 'ACME Store - Wireless Buds';
 const ELECTRONICS = categoryItem({ id: '00000000-0000-4000-8000-000000000001', name: 'Electronics' });
 const CARD = walletItem({ id: '00000000-0000-4000-8000-000000000002', name: 'Everyday card' });
 
+const CAFE = {
+  id: '00000000-0000-4000-8000-000000000009',
+  name: 'Corner Café',
+  mode: 'auto' as const,
+  category: null,
+  defaultCategory: null,
+  countryCode: null,
+  vatId: null,
+  vatIdStatus: null,
+  vatIdName: null,
+  vatIdCheckedAt: null,
+  supplyType: null,
+  transactionCount: 3,
+  lastSeen: null,
+};
+
 const saved: CategorizationRule = {
   id: 'rule-1',
   name: 'ACME is electronics',
   description: null,
   conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'ACME Store' }],
+  matchMode: 'all',
   result: { categoryId: ELECTRONICS.id },
   priority: 2,
   isActive: true,
@@ -94,6 +111,7 @@ beforeEach(() => {
     if (url === '/categories') return apiResponse([ELECTRONICS]);
     if (url === '/wallets') return apiResponse([CARD]);
     if (url === '/tags') return apiResponse([]);
+    if (url === `/payees/${CAFE.id}`) return apiResponse(CAFE);
     if (url.startsWith('/workspaces/')) return apiResponse({ members: [] });
     throw new Error(`unexpected GET ${url}`);
   });
@@ -101,7 +119,14 @@ beforeEach(() => {
     if (url === '/categorization-rules/test') return apiResponse(preview);
     if (url === '/categorization-rules') return apiResponse({ ...saved, id: 'rule-new', ...body });
     if (url.endsWith('/apply'))
-      return apiResponse({ applied: 2, skippedManual: 0, tagged: 0, moved: 0 });
+      return apiResponse({
+        applied: 2,
+        skippedManual: 0,
+        tagged: 0,
+        moved: 0,
+        commented: 0,
+        renamed: 0,
+      });
     throw new Error(`unexpected POST ${url}`);
   });
   put.mockResolvedValue(apiResponse(saved));
@@ -182,6 +207,7 @@ describe('RuleEditorView', () => {
       expect(post).toHaveBeenCalledWith('/categorization-rules', {
         name: `Payee contains “${STORE}”`,
         conditions: [{ field: 'counterparty_name', operator: 'contains', value: STORE }],
+        matchMode: 'all',
         result: { walletId: CARD.id },
       }),
     );
@@ -214,6 +240,7 @@ describe('RuleEditorView', () => {
       expect(put).toHaveBeenCalledWith('/categorization-rules/rule-1', {
         name: 'ACME gadgets',
         conditions: saved.conditions,
+        matchMode: 'all',
         result: { categoryId: ELECTRONICS.id },
       }),
     );
@@ -248,6 +275,114 @@ describe('RuleEditorView', () => {
     await screen.findByRole('table');
     expect(screen.queryByText(/never applies/)).toBeNull();
     expect(screen.queryByText(/a rule above/)).toBeNull();
+  });
+
+  it('keeps several values in one condition, any of which matches', async () => {
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+    const value = (await screen.findByLabelText('Value')) as HTMLInputElement;
+    await waitFor(() => expect(value.value).toBe('ACME Store'));
+
+    // Enter keeps what was typed as a chip and starts the next value.
+    fireEvent.keyDown(value, { key: 'Enter' });
+    fireEvent.change(screen.getByLabelText('Value'), { target: { value: 'Corner Bakery' } });
+
+    expect(screen.getByRole('button', { name: 'Remove ACME Store' })).toBeTruthy();
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        '/categorization-rules/test',
+        expect.objectContaining({
+          conditions: [
+            { field: 'counterparty_name', operator: 'contains', value: ['ACME Store', 'Corner Bakery'] },
+          ],
+        }),
+        expect.anything(),
+      ),
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove ACME Store' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+    // One value left is saved as a plain one.
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({
+          conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'Corner Bakery' }],
+        }),
+      ),
+    );
+  });
+
+  it('asks for any one of the conditions, with a range of amounts as one of them', async () => {
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+    await screen.findByRole('table');
+    // One condition has nothing to combine with.
+    expect(screen.queryByRole('combobox', { name: 'How the conditions combine' })).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add condition' }));
+    selectOption(screen.getAllByLabelText('Field')[1], 'Amount');
+    selectOption(screen.getAllByLabelText('Check')[1], 'is between');
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '10' } });
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '20.5' } });
+    selectOption(
+      screen.getByRole('combobox', { name: 'How the conditions combine' }),
+      'When any of these matches',
+    );
+
+    const conditions = [
+      { field: 'counterparty_name', operator: 'contains', value: 'ACME Store' },
+      { field: 'amount', operator: 'between', value: 10, valueTo: 20.5 },
+    ];
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        '/categorization-rules/test',
+        expect.objectContaining({ conditions, matchMode: 'any' }),
+        expect.anything(),
+      ),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({ conditions, matchMode: 'any' }),
+      ),
+    );
+  });
+
+  it('writes a comment and gives a payee, and can take the payee off again', async () => {
+    get.mockImplementation(async (url: string) => {
+      if (url === '/categorization-rules/rule-1')
+        return apiResponse({ ...saved, result: { payeeId: CAFE.id } });
+      if (url === `/payees/${CAFE.id}`) return apiResponse(CAFE);
+      if (url === '/categories') return apiResponse([ELECTRONICS]);
+      if (url === '/wallets') return apiResponse([CARD]);
+      if (url === '/tags') return apiResponse([]);
+      if (url.startsWith('/workspaces/')) return apiResponse({ members: [] });
+      throw new Error(`unexpected GET ${url}`);
+    });
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+
+    // The payee the rule names is shown by its name, with what the rule will not do.
+    expect(await screen.findByText('Corner Café')).toBeTruthy();
+    expect(screen.getByText('A payee you chose for a row by hand stays.')).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Comment'), { target: { value: 'Team coffee' } });
+    expect(screen.getByText('Written only when the row has no comment yet.')).toBeTruthy();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({ result: { payeeId: CAFE.id, comment: 'Team coffee' } }),
+      ),
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Corner Café' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+    await waitFor(() =>
+      expect(put).toHaveBeenLastCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({ result: { comment: 'Team coffee' } }),
+      ),
+    );
   });
 
   it('asks for a condition before it looks anything up', async () => {

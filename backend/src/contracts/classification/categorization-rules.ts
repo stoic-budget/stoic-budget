@@ -3,6 +3,7 @@
 import * as Schema from 'effect/Schema';
 import * as Struct from 'effect/Struct';
 import { Timestamp, type Wire } from '../common/wire';
+import { RuleMatchMode } from '../requests/classification';
 import { TransactionListItem } from '../transactions/transaction-list';
 
 /** One test a rule runs on a transaction, as stored. */
@@ -17,6 +18,8 @@ const ClassificationCondition = Schema.Struct({
     'direction',
     'payment_type',
     'wallet',
+    'currency',
+    'day_of_month',
   ]),
   operator: Schema.Literals([
     'contains',
@@ -26,8 +29,14 @@ const ClassificationCondition = Schema.Struct({
     'regex',
     'greater_than',
     'less_than',
+    'not_contains',
+    'not_equals',
+    'between',
   ]),
-  value: Schema.Union([Schema.String, Schema.Number]),
+  /** Several values mean "any of them". */
+  value: Schema.Union([Schema.String, Schema.Number, Schema.Array(Schema.String)]),
+  /** The upper end of `between`. */
+  valueTo: Schema.optional(Schema.Number),
 });
 
 /** What a matching rule sets on the transaction; a key it leaves out is left alone. */
@@ -41,6 +50,10 @@ const ClassificationResult = Schema.Struct({
   ownerMemberId: Schema.optional(Schema.NullOr(Schema.String)),
   /** Tags added to a matching row; the ones it already has stay. */
   tagIds: Schema.optional(Schema.Array(Schema.String)),
+  /** Written as the row's comment when it has none. */
+  comment: Schema.optional(Schema.String),
+  /** The payee a matching row is given, unless a person picked one for it. */
+  payeeId: Schema.optional(Schema.String),
 });
 
 /** `GET /categorization-rules/:id`, and what creating or updating one answers. */
@@ -49,6 +62,8 @@ export const CategorizationRule = Schema.Struct({
   name: Schema.String,
   description: Schema.NullOr(Schema.String),
   conditions: Schema.Array(ClassificationCondition),
+  /** Whether a row has to pass all of the conditions or any one of them. */
+  matchMode: RuleMatchMode,
   result: ClassificationResult,
   priority: Schema.Number,
   isActive: Schema.Boolean,
@@ -104,7 +119,8 @@ export type CategorizationRuleTestResult = Wire<typeof CategorizationRuleTestRes
 
 /**
  * `POST /categorization-rules/:id/apply`: rows refiled, rows whose hand-picked
- * category stayed, rows tagged, rows moved to the rule's account.
+ * category stayed, rows tagged, rows moved to the rule's account, rows that
+ * got its comment or its payee.
  */
 export const CategorizationRuleApplyResult = Schema.Struct({
   applied: Schema.Number,
@@ -113,6 +129,10 @@ export const CategorizationRuleApplyResult = Schema.Struct({
   tagged: Schema.Number,
   /** Rows that sat in another account and are now in the rule's. */
   moved: Schema.Number,
+  /** Rows that had no comment and got the rule's. */
+  commented: Schema.Number,
+  /** Rows given the rule's payee. */
+  renamed: Schema.Number,
 });
 export type CategorizationRuleApplyResult = Wire<typeof CategorizationRuleApplyResult>;
 
