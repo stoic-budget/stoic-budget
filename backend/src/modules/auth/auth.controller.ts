@@ -39,6 +39,7 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import type { AuthResponseDto, TwoFactorChallengeDto } from './dto/auth-response.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { RegistrationOpenGuard } from './guards/registration-open.guard';
 import { PasswordResetService } from './password-reset.service';
 import type { TwoFactorSetupDto, TwoFactorStatusDto } from './two-factor.service';
 import { TwoFactorService } from './two-factor.service';
@@ -79,6 +80,7 @@ export class AuthController {
   // Unthrottled registration let the 409 "user already exists" response be used
   // to enumerate accounts at the global 500 req/min ceiling.
   @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @UseGuards(RegistrationOpenGuard)
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @SchemaResponse(RegisterResponse)
