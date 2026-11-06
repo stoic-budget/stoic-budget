@@ -10,7 +10,7 @@ export interface NewRuleDraft {
 }
 
 export function blankSeed(): RuleSeed {
-  return { id: null, name: '', conditions: [EMPTY_CONDITION], result: {} };
+  return { id: null, name: '', conditions: [EMPTY_CONDITION], matchMode: 'all', result: {} };
 }
 
 /** A saved rule as the editor holds it. */
@@ -19,6 +19,7 @@ export function seedOf(rule: Rule): RuleSeed {
     id: rule.id,
     name: rule.name,
     conditions: [...rule.conditions],
+    matchMode: rule.matchMode,
     result: {
       categoryId: rule.result.categoryId,
       walletId: rule.result.walletId,
@@ -26,6 +27,8 @@ export function seedOf(rule: Rule): RuleSeed {
         ? {}
         : { ownerMemberId: rule.result.ownerMemberId }),
       ...(rule.result.tagIds?.length ? { tagIds: [...rule.result.tagIds] } : {}),
+      ...(rule.result.comment ? { comment: rule.result.comment } : {}),
+      ...(rule.result.payeeId ? { payeeId: rule.result.payeeId } : {}),
     },
   };
 }
@@ -63,5 +66,11 @@ export function seedFromParams(params: URLSearchParams): RuleSeed {
     conditions.push({ field: 'direction', operator: 'equals', value: direction });
   }
   const categoryId = params.get('categoryId');
-  return { id: null, name: '', conditions, result: categoryId ? { categoryId } : {} };
+  return {
+    id: null,
+    name: '',
+    conditions,
+    matchMode: 'all',
+    result: categoryId ? { categoryId } : {},
+  };
 }

@@ -6,6 +6,7 @@ import { OWNER_SHARED } from '@/app/components/transactions/OwnerFilterDropdown'
 import { Select } from '@/app/components/ui/select';
 import { useIntlayer } from '@/app/i18n';
 import type { CategoryList, StorageTag, WalletList } from '@/app/lib/contracts';
+import { RulePayeeAction } from './RulePayeeAction';
 import type { RuleDraftBody } from './types';
 
 /** The select's value for "this rule does not touch the field". */
@@ -23,7 +24,7 @@ interface RuleActionsFieldProps {
   tags: readonly StorageTag[];
 }
 
-/** What a matching row gets: a category, an account, an owner, tags. Each is optional. */
+/** What a matching row gets: a category, an account, an owner, a payee, a comment, tags. Each is optional. */
 export function RuleActionsField({
   result,
   onChange,
@@ -68,6 +69,7 @@ export function RuleActionsField({
           />
         </div>
       )}
+      {result.walletId && <span className="seneca-rule-dialog__hint">{t.dialog.walletHint}</span>}
       {ownerOptions.length > 1 && (
         <div className="seneca-rule-dialog__action">
           <span className="seneca-rule-dialog__action-label">{t.dialog.ownerLabel}</span>
@@ -91,6 +93,23 @@ export function RuleActionsField({
           />
         </div>
       )}
+      <RulePayeeAction result={result} onChange={onChange} />
+      <div className="seneca-rule-dialog__action">
+        <label htmlFor="rule-comment" className="seneca-rule-dialog__action-label">
+          {t.dialog.commentLabel}
+        </label>
+        <input
+          id="rule-comment"
+          className="seneca-rule-dialog__input"
+          value={result.comment ?? ''}
+          maxLength={500}
+          onChange={event => {
+            const { comment: _dropped, ...rest } = result;
+            onChange(event.target.value ? { ...rest, comment: event.target.value } : rest);
+          }}
+        />
+      </div>
+      {result.comment && <span className="seneca-rule-dialog__hint">{t.dialog.commentHint}</span>}
       <TagPicker
         value={chosenTags}
         onChange={next => {

@@ -6,7 +6,10 @@ import { ActorType, AuditAction, EntityType } from '../../../entities/audit-even
 import { CategorizationRule } from '../../../entities/categorization-rule.entity';
 import { AuditService } from '../../audit/audit.service';
 
-/** The order the workspace's rules are tried in: the first one that matches a row files it. */
+/**
+ * The order the workspace's rules are laid over a row in: every match adds to
+ * it, and what two of them both set comes from the one ranked higher.
+ */
 @Injectable()
 export class RuleOrderService {
   constructor(

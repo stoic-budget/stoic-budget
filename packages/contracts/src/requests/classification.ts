@@ -2,6 +2,11 @@ import * as Schema from 'effect/Schema';
 import { optionalNullable } from '../common/requests';
 import type { Wire } from '../common/wire';
 
+const RuleText = Schema.String.check(Schema.isMaxLength(200));
+
+/** Whether a rule asks for all of its conditions or for any one of them. */
+export const RuleMatchMode = Schema.Literals(['all', 'any']);
+
 /** One test a categorization rule runs on a transaction. */
 export const ClassificationConditionInput = Schema.Struct({
   field: Schema.Literals([
@@ -16,6 +21,10 @@ export const ClassificationConditionInput = Schema.Struct({
     'payment_type',
     /** The account (wallet) the row sits in, by id. */
     'wallet',
+    /** The row's currency code. */
+    'currency',
+    /** The day number, 1 to 31, of the row's date. */
+    'day_of_month',
   ]),
   operator: Schema.Literals([
     'contains',
@@ -25,10 +34,21 @@ export const ClassificationConditionInput = Schema.Struct({
     'regex',
     'greater_than',
     'less_than',
+    'not_contains',
+    'not_equals',
+    /** From `value` to `valueTo`, both included. */
+    'between',
   ]),
   // Bounded: a rule runs against every imported row, and a long pattern is
-  // where a pathological regex hides.
-  value: Schema.Union([Schema.String.check(Schema.isMaxLength(200)), Schema.Finite]),
+  // where a pathological regex hides. Several values mean "any of them" (with
+  // a negation: none of them).
+  value: Schema.Union([
+    RuleText,
+    Schema.Finite,
+    Schema.Array(RuleText).check(Schema.isMinLength(1), Schema.isMaxLength(20)),
+  ]),
+  /** The upper end of `between`. */
+  valueTo: Schema.optional(Schema.Finite),
 });
 export type ClassificationConditionInput = Wire<typeof ClassificationConditionInput>;
 
@@ -45,6 +65,12 @@ export const ClassificationResultInput = Schema.Struct({
   tagIds: Schema.optional(
     Schema.Array(Schema.String.check(Schema.isUUID())).check(Schema.isMaxLength(20)),
   ),
+  /** Written as the row's comment when it has none. */
+  comment: Schema.optional(Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(500))),
+  /** The payee the row is given, unless a person picked one for it. */
+  payeeId: Schema.optional(Schema.String.check(Schema.isUUID())),
+  /** Instead of `payeeId`: a payee by name, made on save when the workspace has none of it. */
+  payeeName: Schema.optional(Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(200))),
 });
 export type ClassificationResultInput = Wire<typeof ClassificationResultInput>;
 
@@ -52,6 +78,7 @@ export const CreateCategorizationRuleBody = Schema.Struct({
   name: Schema.String.check(Schema.isMinLength(1)),
   description: optionalNullable(Schema.String),
   conditions: Schema.Array(ClassificationConditionInput).check(Schema.isMinLength(1)),
+  matchMode: optionalNullable(RuleMatchMode),
   result: ClassificationResultInput,
   priority: optionalNullable(Schema.Int),
   isActive: optionalNullable(Schema.Boolean),
@@ -61,7 +88,11 @@ export type CreateCategorizationRuleBody = Wire<typeof CreateCategorizationRuleB
 export const UpdateCategorizationRuleBody = Schema.Struct({
   name: optionalNullable(Schema.String),
   description: optionalNullable(Schema.String),
-  conditions: optionalNullable(Schema.Array(ClassificationConditionInput)),
+  // Never empty: a rule with no condition would otherwise be one about every row.
+  conditions: optionalNullable(
+    Schema.Array(ClassificationConditionInput).check(Schema.isMinLength(1)),
+  ),
+  matchMode: optionalNullable(RuleMatchMode),
   result: optionalNullable(ClassificationResultInput),
   priority: optionalNullable(Schema.Int),
   isActive: optionalNullable(Schema.Boolean),
@@ -70,10 +101,13 @@ export type UpdateCategorizationRuleBody = Wire<typeof UpdateCategorizationRuleB
 
 export const TestCategorizationRuleBody = Schema.Struct({
   conditions: Schema.Array(ClassificationConditionInput).check(Schema.isMinLength(1)),
+  matchMode: optionalNullable(RuleMatchMode),
   /** Rows to test against; without them the workspace's most recent rows are used. */
   transactionIds: Schema.optional(Schema.Array(Schema.String).check(Schema.isMinLength(1))),
   /** The saved rule being edited: rules ranked above it are what can win its rows. */
   ruleId: Schema.optional(Schema.String.check(Schema.isUUID())),
+  /** The account the draft sets: the answer counts the matches it would move there. */
+  walletId: Schema.optional(Schema.String.check(Schema.isUUID())),
 });
 export type TestCategorizationRuleBody = Wire<typeof TestCategorizationRuleBody>;
 

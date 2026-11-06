@@ -9,8 +9,6 @@ import {
   readProcessingSettings,
   type WorkspaceProcessingSettings,
 } from '../../../common/utils/workspace-processing.util';
-import { workspaceOwnsRefs } from '../../../common/utils/workspace-refs.util';
-import { ActorType, AuditAction, EntityType } from '../../../entities/audit-event.entity';
 import { Branch } from '../../../entities/branch.entity';
 import { CategorizationRule } from '../../../entities/categorization-rule.entity';
 import { Category, CategorySource, CategoryType } from '../../../entities/category.entity';
@@ -27,13 +25,12 @@ import { AuditService } from '../../audit/audit.service';
 import { UNCATEGORIZED_CATEGORY_NAME } from '../../categories/uncategorized-category';
 import { decidePayeeCategory } from '../engine/payee-category.matcher';
 import { onlyPayeeEvidence } from '../engine/payee-evidence';
-import { matchesConditions } from '../engine/rule-conditions';
-import { applyRuleResult } from '../engine/rule-result';
+import { layerRules } from '../engine/rule-layers';
+import { applicableRules } from '../engine/rule-refs';
+import { applyRuleLayers, type RuleRowFacts } from '../engine/rule-result';
 import { ruleTags } from '../engine/rule-tags';
-import {
-  type ClassificationCondition,
-  type ClassificationRule,
-} from '../interfaces/classification-rule.interface';
+import { ruleApplicationEvents } from '../helpers/rule-audit';
+import type { ClassificationRule } from '../interfaces/classification-rule.interface';
 import { newestHistoryByPayee, payeeIdOf, suggestCategory } from './auto-category';
 
 /** A category plus the step that found it and the payload the UI shows as "why". */
@@ -78,11 +75,9 @@ export class ClassificationService {
     transaction: Transaction,
     userId: string,
     batchId?: string | null,
-    options: { bypassCache?: boolean } = {},
   ): Promise<Partial<Transaction>> {
     const classification: Partial<Transaction> = {};
     const workspaceId = transaction.workspaceId || null;
-    let matchedRule: ClassificationRule | null = null;
 
     // Determine transaction type (income/expense)
     if (transaction.debit && transaction.debit > 0) {
@@ -95,36 +90,26 @@ export class ClassificationService {
     // keyed on it, and recomputing it per query would be a scan.
     classification.payeeKey = payeeKeyOf(transaction);
 
-    // Check cache first
-    const cacheKey = transaction.id ? `classification:${transaction.id}` : null;
-    if (cacheKey && !options.bypassCache) {
-      const cached = await this.cacheManager.get<Partial<Transaction>>(cacheKey);
-      if (cached) {
-        return cached;
-      }
-    }
-
+    // The workspace's rules, whoever wrote them: a rule is a decision about the
+    // workspace's money, so it applies to every member's imports. Every rule
+    // that matches adds to the row (engine/rule-layers).
+    const manager = this.walletRepository.manager;
+    const rules = await this.getClassificationRules(workspaceId);
+    const layers = layerRules(await applicableRules(manager, workspaceId, rules, transaction));
     // A rule naming the owner is an explicit instruction; the wallet is only a
     // default, so it must not overwrite one.
-    let ruleSetOwner = false;
-
-    // The workspace's rules, whoever wrote them: a rule is a decision about the
-    // workspace's money, so it applies to every member's imports.
-    const rules = await this.getClassificationRules(workspaceId);
-    const rule = await this.firstApplicableRule(rules, transaction, workspaceId);
-    if (rule) {
-      matchedRule = rule;
-      ({ ruleSetOwner } = applyRuleResult(rule, classification));
-      // A relation for a new row; callers updating an existing row add them instead.
-      const tags = await ruleTags(this.walletRepository.manager, workspaceId, rule.result.tagIds);
-      if (tags) classification.tags = tags;
-      await this.recordRuleMatch(rule.id, workspaceId);
-    }
+    const { ruleSetOwner } = applyRuleLayers(layers, classification, transaction);
+    // A relation for a new row; callers updating an existing row add them instead.
+    const tags = await ruleTags(manager, workspaceId, layers.tagIds);
+    if (tags) classification.tags = tags;
+    const contributorIds = layers.contributors.map(rule => rule.id);
+    await this.recordRuleMatch(contributorIds, workspaceId);
 
     // Auto-classify category if not set
     if (!classification.categoryId) {
       const match = await this.autoClassifyCategory(
-        transaction,
+        // The payee a rule gave the row is the one whose history files it.
+        { ...transaction, payeeId: classification.payeeId ?? transaction.payeeId } as Transaction,
         userId,
         classification.transactionType || TransactionType.EXPENSE,
         workspaceId,
@@ -148,8 +133,6 @@ export class ClassificationService {
     // moving a row to another wallet later does not reassign it behind the
     // user's back.
     //
-    // One primary-key lookup per transaction, and the whole classification is
-    // cached below, so it does not add a query per row of a re-imported file.
     if (classification.walletId && !ruleSetOwner) {
       classification.ownerMemberId = await this.walletOwnerMemberId(
         classification.walletId,
@@ -157,28 +140,10 @@ export class ClassificationService {
       );
     }
 
-    // Cache result for 5 minutes
-    if (cacheKey) {
-      await this.cacheManager.set(cacheKey, classification, 300000); // 5 minutes in ms
-    }
-
-    // A row not booked yet has no id to hang the event on; its category source
+    // A row not booked yet has no id to hang the events on; its category source
     // and reason carry the rule's name instead.
-    if (matchedRule && transaction.id) {
-      await this.auditService.createEvent({
-        workspaceId: transaction.workspaceId ?? null,
-        actorType: ActorType.USER,
-        actorId: userId,
-        entityType: EntityType.TRANSACTION,
-        entityId: transaction.id,
-        action: AuditAction.APPLY_RULE,
-        meta: {
-          ruleId: matchedRule.id,
-          ruleName: matchedRule.name,
-          confidence: 1,
-        },
-        batchId: batchId ?? null,
-      });
+    for (const event of ruleApplicationEvents({ transaction, layers, userId, batchId })) {
+      await this.auditService.createEvent(event);
     }
 
     return classification;
@@ -197,8 +162,11 @@ export class ClassificationService {
     paymentPurpose?: string | null;
     transactionType: TransactionType;
     amount?: number | null;
+    /** The bank row asked about, so rules on its account or payment type can match. */
+    row?: RuleRowFacts;
   }): Promise<AutoCategoryMatch | null> {
     const transaction = {
+      ...input.row,
       workspaceId: input.workspaceId,
       counterpartyName: input.counterpartyName,
       paymentPurpose: input.paymentPurpose ?? input.counterpartyName,
@@ -209,7 +177,10 @@ export class ClassificationService {
     } as Transaction;
 
     const rules = await this.getClassificationRules(input.workspaceId);
-    const rule = await this.firstApplicableRule(rules, transaction, input.workspaceId);
+    const manager = this.walletRepository.manager;
+    const matching = await applicableRules(manager, input.workspaceId, rules, transaction);
+    // The best rule that sets a category: one above it that only tags is no answer.
+    const rule = layerRules(matching).setBy.categoryId;
     if (rule?.result.categoryId) {
       await this.recordRuleMatch(rule.id, input.workspaceId);
       return {
@@ -222,42 +193,18 @@ export class ClassificationService {
     return (await this.matchByPayeeHistory(transaction, input.workspaceId)) ?? null;
   }
 
-  matchesRule(transaction: Transaction, conditions: ClassificationCondition[]): boolean {
-    return matchesConditions(transaction, conditions);
-  }
-
-  /**
-   * The highest-priority rule that matches and names only this workspace's
-   * category, branch and wallet. A rule saved before its targets were checked
-   * may still name another workspace's: it is passed over, not applied.
-   */
-  private async firstApplicableRule(
-    rules: ClassificationRule[],
-    transaction: Transaction,
-    workspaceId: string | null,
-  ): Promise<ClassificationRule | null> {
-    for (const rule of [...rules].sort((a, b) => b.priority - a.priority)) {
-      if (!this.matchesRule(transaction, rule.conditions)) {
-        continue;
-      }
-      if (
-        workspaceId &&
-        !(await workspaceOwnsRefs(this.walletRepository.manager, workspaceId, rule.result))
-      ) {
-        continue;
-      }
-      return rule;
-    }
-    return null;
-  }
-
   /** Keeps the "matched N times, last on …" line on the rules page true. */
-  async recordRuleMatch(ruleId: string | undefined, workspaceId: string | null, count = 1) {
-    if (!(ruleId && workspaceId) || count < 1) {
+  async recordRuleMatch(
+    ruleId: string | undefined | Array<string | undefined>,
+    workspaceId: string | null,
+    count = 1,
+  ) {
+    const ids = [ruleId].flat().filter((id): id is string => Boolean(id));
+    if (!(ids.length > 0 && workspaceId) || count < 1) {
       return;
     }
     await this.categorizationRuleRepository.update(
-      { id: ruleId, workspaceId },
+      { id: In(ids), workspaceId },
       { matchCount: () => `match_count + ${Math.trunc(count)}`, lastMatchedAt: new Date() },
     );
   }
@@ -442,6 +389,7 @@ export class ClassificationService {
       name: rule.name,
       type: 'category',
       conditions: rule.conditions,
+      matchMode: rule.matchMode,
       result: rule.result,
       priority: rule.priority,
       isActive: rule.isActive,

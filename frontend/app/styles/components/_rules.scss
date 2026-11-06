@@ -434,6 +434,26 @@
     }
   }
 
+  // The value of a condition: chips of the values kept so far, then the box
+  // being typed in; or the two ends of a range.
+  .seneca-rule-values {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+
+    // Wide enough to read what is typed: beside a chip it moves to its own line.
+    .seneca-rule-dialog__input {
+      flex: 1 1 120px;
+    }
+
+    // The two ends of a range share the row.
+    &--range .seneca-rule-dialog__input {
+      flex-basis: 72px;
+    }
+  }
+
   &__remove {
     display: inline-flex;
     align-items: center;

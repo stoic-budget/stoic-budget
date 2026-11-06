@@ -8,6 +8,7 @@ const post = vi.fn();
 const put = vi.fn();
 const del = vi.fn();
 const permissions = vi.hoisted(() => ({ allowed: true }));
+const offers = vi.hoisted(() => ({ last: null as null | { message: string; onApply: () => void } }));
 const search = vi.hoisted(() => ({ params: new URLSearchParams() }));
 const router = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
 
@@ -29,6 +30,11 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/rules',
   useRouter: () => router,
 }));
+vi.mock('@/app/components/payees/offer-action-toast', () => ({
+  offerAction: (options: { message: string; onApply: () => void }) => {
+    offers.last = options;
+  },
+}));
 
 import type { CategorizationRule, CategorizationRuleSuggestionList } from '@/app/lib/contracts';
 import { queryKeys } from '@/app/lib/query-keys';
@@ -47,6 +53,22 @@ const ELECTRONICS = categoryItem({ id: '00000000-0000-4000-8000-000000000001', n
 const CARD = walletItem({ id: '00000000-0000-4000-8000-000000000002', name: 'Everyday card' });
 const GADGETS = { id: '00000000-0000-4000-8000-000000000003', name: 'Gadgets', color: null, usageCount: 2 };
 const BAKERY_PAYEE = '00000000-0000-4000-8000-000000000004';
+const CAFE = {
+  id: '00000000-0000-4000-8000-000000000009',
+  name: 'Corner Café',
+  mode: 'auto' as const,
+  category: null,
+  defaultCategory: null,
+  countryCode: null,
+  vatId: null,
+  vatIdStatus: null,
+  vatIdName: null,
+  vatIdCheckedAt: null,
+  supplyType: null,
+  transactionCount: 3,
+  lastSeen: null,
+};
+
 
 function rule(overrides: Partial<CategorizationRule> = {}): CategorizationRule {
   return {
@@ -54,6 +76,7 @@ function rule(overrides: Partial<CategorizationRule> = {}): CategorizationRule {
     name: 'ACME is electronics',
     description: null,
     conditions: [{ field: 'counterparty_name', operator: 'contains', value: STORE }],
+    matchMode: 'all',
     result: { categoryId: ELECTRONICS.id },
     priority: 0,
     isActive: true,
@@ -88,6 +111,7 @@ function mockApi(
     if (url === '/categories') return apiResponse([ELECTRONICS]);
     if (url === '/wallets') return apiResponse([CARD]);
     if (url === '/tags') return apiResponse([GADGETS]);
+    if (url === `/payees/${CAFE.id}`) return apiResponse(CAFE);
     if (url.startsWith('/workspaces/')) return apiResponse({ members: [] });
     throw new Error(`unexpected GET ${url}`);
   });
@@ -100,7 +124,8 @@ describe('RulesView', () => {
     search.params = new URLSearchParams();
     put.mockResolvedValue(apiResponse(rule()));
     del.mockResolvedValue(apiResponse(null));
-    post.mockResolvedValue(apiResponse({ applied: 2, skippedManual: 1, tagged: 3 }));
+    offers.last = null;
+    post.mockResolvedValue(apiResponse({ applied: 2, skippedManual: 1, tagged: 3, moved: 0, commented: 0, renamed: 0 }));
   });
 
   it('lays each rule out as a row: what it matches, what it sets, how often it fired', async () => {
@@ -139,6 +164,33 @@ describe('RulesView', () => {
     expect(screen.getByRole('link', { name: 'New rule' }).getAttribute('href')).toBe('/rules/new');
   });
 
+  it('words several values, a range, a negation and "any of these" the way they combine', async () => {
+    mockApi([
+      rule({
+        conditions: [
+          { field: 'counterparty_name', operator: 'contains', value: [STORE, 'Corner Bakery'] },
+          { field: 'amount', operator: 'between', value: 10, valueTo: 20 },
+          { field: 'currency', operator: 'not_equals', value: 'eur' },
+        ],
+        matchMode: 'any',
+      }),
+    ]);
+    renderWithQuery(<RulesView />);
+
+    expect(
+      await screen.findByText(
+        'Payee contains “ACME Store” or “Corner Bakery” or Amount is between 10–20 or Currency is not EUR',
+      ),
+    ).toBeTruthy();
+  });
+
+  it('says what payee and comment a rule gives its rows', async () => {
+    mockApi([rule({ result: { payeeId: CAFE.id, comment: 'Team coffee' } })]);
+    renderWithQuery(<RulesView />);
+
+    expect(await screen.findByText('payee Corner Café · comment “Team coffee”')).toBeTruthy();
+  });
+
   it('pauses a rule with its switch', async () => {
     mockApi([rule()]);
     renderWithQuery(<RulesView />);
@@ -157,6 +209,51 @@ describe('RulesView', () => {
     await userEvent.click(await screen.findByRole('button', { name: /Rule actions: ACME/ }));
     await userEvent.click(await screen.findByRole('menuitem', { name: 'Apply to existing rows' }));
 
+    await waitFor(() => expect(post).toHaveBeenCalledWith('/categorization-rules/rule-1/apply'));
+    expect(offers.last).toBeNull();
+  });
+
+  it('asks before a rule that names an account moves existing rows there', async () => {
+    const moving = rule({ result: { walletId: CARD.id } });
+    mockApi([moving]);
+    post.mockImplementation(async (url: string) =>
+      url === '/categorization-rules/test'
+        ? apiResponse({
+            totalTransactions: 40,
+            matchedTransactions: 3,
+            overridable: 0,
+            shadowed: 0,
+            movable: 2,
+            truncated: false,
+            matches: [],
+          })
+        : apiResponse({
+            applied: 0,
+            skippedManual: 0,
+            tagged: 0,
+            moved: 2,
+            commented: 0,
+            renamed: 0,
+          }),
+    );
+    renderWithQuery(<RulesView />);
+
+    await userEvent.click(await screen.findByRole('button', { name: /Rule actions: ACME/ }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Apply to existing rows' }));
+
+    await waitFor(() =>
+      expect(offers.last?.message).toBe(
+        'This rule moves 2 existing rows to Everyday card. Apply it to them?',
+      ),
+    );
+    expect(post).toHaveBeenCalledWith(
+      '/categorization-rules/test',
+      { conditions: moving.conditions, ruleId: 'rule-1', walletId: CARD.id },
+      expect.anything(),
+    );
+    expect(post).not.toHaveBeenCalledWith('/categorization-rules/rule-1/apply');
+
+    offers.last?.onApply();
     await waitFor(() => expect(post).toHaveBeenCalledWith('/categorization-rules/rule-1/apply'));
   });
 

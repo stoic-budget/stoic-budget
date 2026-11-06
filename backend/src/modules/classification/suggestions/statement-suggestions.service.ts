@@ -185,6 +185,7 @@ export class StatementSuggestionsService {
       paymentPurpose,
       transactionType: row.transactionType,
       amount: row.amount,
+      row,
     });
   }
 
