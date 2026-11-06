@@ -4,6 +4,7 @@ import { SearchService } from '@/modules/search/search.service';
 
 const createQueryBuilderMock = (rows: unknown[]) => ({
   innerJoinAndSelect: vi.fn().mockReturnThis(),
+  leftJoinAndSelect: vi.fn().mockReturnThis(),
   where: vi.fn().mockReturnThis(),
   andWhere: vi.fn().mockReturnThis(),
   orderBy: vi.fn().mockReturnThis(),
@@ -68,6 +69,27 @@ describe('SearchService', () => {
         href: '/statements/pay',
         document: null,
       },
+    ]);
+  });
+
+  it('finds a row entered without a statement and opens its account', async () => {
+    const transactionRepo = createRepoMock([
+      { id: 't-1', statement: null, walletId: 'w-1', counterpartyName: 'Corner Cafe', paymentPurpose: '' },
+      { id: 't-2', statement: null, walletId: null, counterpartyName: 'Corner Shop', paymentPurpose: '' },
+    ]);
+    const service = new SearchService(
+      transactionRepo,
+      createRepoMock(),
+      createRepoMock(),
+      createRepoMock(),
+      createRepoMock(),
+    );
+
+    const result = await service.search('ws-1', 'corner');
+
+    expect(result.results).toEqual([
+      { kind: 'transaction', id: 't-1', title: 'Corner Cafe', subtitle: null, href: '/accounts/w-1', document: null },
+      { kind: 'transaction', id: 't-2', title: 'Corner Shop', subtitle: null, href: '/statements/transactions', document: null },
     ]);
   });
 
