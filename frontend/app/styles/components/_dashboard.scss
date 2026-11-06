@@ -1103,7 +1103,44 @@
   }
 
   &__title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 32px; /* the assistant button appears once the workspace is known */
     margin-bottom: 16px;
+  }
+
+  &__assistant-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border: 1px solid $seneca-color-ink-150;
+    border-radius: 50%;
+    background: $seneca-color-surface;
+    color: var(--primary);
+    cursor: pointer;
+    transition: background-color 120ms;
+
+    @include dark {
+      border-color: $seneca-color-ink-150-dk;
+      background: $seneca-color-surface-dk;
+    }
+
+    &:hover {
+      background: $seneca-color-ink-100;
+
+      @include dark {
+        background: $seneca-color-ink-100-dk;
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+    }
   }
 
   &__greet {

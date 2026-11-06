@@ -5,12 +5,12 @@ import {
 } from '@/common/utils/workspace-plugins.util';
 
 describe('readPluginSettings', () => {
-  it('treats a workspace without switches as having every plugin off', () => {
+  it('treats a workspace without switches as having only the AI assistant on', () => {
     expect(readPluginSettings(null)).toEqual(DEFAULT_PLUGIN_SETTINGS);
     expect(readPluginSettings({ settings: null })).toEqual({
       webhooks: false,
       mcp: false,
-      aiAssistant: false,
+      aiAssistant: true,
     });
     expect(readPluginSettings({ settings: { plugins: 'on' } })).toEqual(DEFAULT_PLUGIN_SETTINGS);
   });
@@ -21,8 +21,14 @@ describe('readPluginSettings', () => {
     expect(readPluginSettings({ settings })).toEqual({
       webhooks: true,
       mcp: false,
-      aiAssistant: false,
+      aiAssistant: true,
     });
+  });
+
+  it('keeps an AI assistant the workspace switched off', () => {
+    const settings = { plugins: { aiAssistant: false } };
+
+    expect(readPluginSettings({ settings }).aiAssistant).toBe(false);
   });
 });
 
@@ -41,9 +47,9 @@ describe('mergePluginSettings', () => {
     });
   });
 
-  it('starts from all-off on a workspace that never stored settings', () => {
+  it('starts from the defaults on a workspace that never stored settings', () => {
     expect(mergePluginSettings(null, { webhooks: true })).toEqual({
-      plugins: { webhooks: true, mcp: false, aiAssistant: false },
+      plugins: { webhooks: true, mcp: false, aiAssistant: true },
     });
   });
 });

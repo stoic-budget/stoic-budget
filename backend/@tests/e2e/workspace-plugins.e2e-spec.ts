@@ -106,7 +106,7 @@ describe('Workspace plugin switches (e2e)', () => {
     await app.close();
   });
 
-  it('starts a new workspace with every plugin off', async () => {
+  it('starts a new workspace with webhooks off', async () => {
     expect((await pluginsOf()) ?? {}).not.toMatchObject({ webhooks: true });
   });
 
@@ -125,7 +125,7 @@ describe('Workspace plugin switches (e2e)', () => {
     await setPlugins(member, { webhooks: true }).expect(403);
     await setPlugins(owner, { webhooks: true }).expect(200);
 
-    expect(await pluginsOf()).toEqual({ webhooks: true, mcp: false, aiAssistant: false });
+    expect(await pluginsOf()).toEqual({ webhooks: true, mcp: false, aiAssistant: true });
   });
 
   it('keeps the other switches and the processing settings when one changes', async () => {
@@ -136,7 +136,7 @@ describe('Workspace plugin switches (e2e)', () => {
     const res = await as(owner, request(server()).get('/workspaces')).expect(200);
     const list = Array.isArray(res.body) ? res.body : res.body.data;
     const settings = list.find((w: { id: string }) => w.id === owner.workspaceId).settings;
-    expect(settings.plugins).toEqual({ webhooks: true, mcp: true, aiAssistant: false });
+    expect(settings.plugins).toEqual({ webhooks: true, mcp: true, aiAssistant: true });
     expect(settings.processing.merchantLearning).toBe(false);
   });
 
