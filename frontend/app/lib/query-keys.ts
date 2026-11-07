@@ -113,8 +113,6 @@ export const queryKeys = {
   // Under the balance-sheet prefix: editing a day refreshes the sheet with it.
   balanceAccountHistory: (o: { workspaceId: string | null; accountId: string }) =>
     ['balance-sheet', o.workspaceId, 'history', o.accountId] as const,
-  tablesReport: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
-    ['tables-report', o.workspaceId, o.params] as const,
   storageFiles: (o: { workspaceId: string | null; listMode: 'active' | 'trash' }) =>
     ['storage-files', o.workspaceId, o.listMode] as const,
   taxReturn: (o: { workspaceId: string | null; periodStart: string; periodEnd: string }) =>
