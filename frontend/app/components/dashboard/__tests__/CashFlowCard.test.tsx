@@ -246,6 +246,29 @@ describe('CashFlowCard', () => {
       expect(screen.queryByText('Example Rentals')).toBeNull();
     });
 
+    it("links a day's row to where it came from, and leaves one with nowhere to go plain", () => {
+      const statementHref = '/statements/statement-1/edit';
+      const rent = {
+        date: '2026-07-03',
+        name: 'Example Rentals',
+        kind: 'expense',
+        amount: 468,
+        budgeted: 0,
+        href: statementHref,
+      };
+      const cash = { date: '2026-07-03', name: 'ACME Kiosk', kind: 'expense', amount: 3, budgeted: 0, href: null };
+      entriesMock.mockReturnValue([rent, cash]);
+      render(<CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />);
+      fireEvent.click(screen.getByRole('tab', { name: 'Calendar' }));
+      fireEvent.click(screen.getByRole('button', { name: 'July 3, −468' }));
+
+      expect(screen.getByRole('link', { name: /Example Rentals/ })).toHaveAttribute(
+        'href',
+        expect.stringContaining(statementHref),
+      );
+      expect(screen.getByText('ACME Kiosk').closest('a')).toBeNull();
+    });
+
     it('remembers the view in this browser', () => {
       const { unmount } = render(
         <CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />,

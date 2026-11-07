@@ -344,7 +344,11 @@ describe('API contracts (e2e)', () => {
       const res = await get(`/dashboard/cash-flow/entries?month=${month}`);
       matches(DashboardCashFlowEntriesResponse, res.body);
       expect(res.body.entries).toContainEqual(
-        expect.objectContaining({ name: 'Contract Coffee', kind: 'expense' }),
+        expect.objectContaining({
+          name: 'Contract Coffee',
+          kind: 'expense',
+          href: expect.stringMatching(/^\/(statements|storage)\//),
+        }),
       );
     });
 
