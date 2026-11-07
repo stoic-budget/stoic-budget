@@ -35,7 +35,6 @@ describe('queryKeys', () => {
       adminUsers: queryKeys.adminUsers('w1'),
       budgets: queryKeys.budgets('w1'),
       balanceSheet: queryKeys.balanceSheet({ workspaceId: 'w1', date: null, locale: 'en' }),
-      tablesReport: queryKeys.tablesReport({ workspaceId: 'w1', params: { days: 30 } }),
       storageFiles: queryKeys.storageFiles({ workspaceId: 'w1', listMode: 'trash' }),
       taxReturn: queryKeys.taxReturn({
         workspaceId: 'w1',
@@ -74,7 +73,6 @@ describe('queryKeys', () => {
       adminUsers: ['admin-users', 'w1'],
       budgets: ['budgets', 'w1'],
       balanceSheet: ['balance-sheet', 'w1', null, 'en'],
-      tablesReport: ['tables-report', 'w1', { days: 30 }],
       storageFiles: ['storage-files', 'w1', 'trash'],
       taxReturn: ['tax-return', 'w1', '2026-01-01', '2026-03-31'],
       subscriptions: ['subscriptions', 'w1', 'list', 'all'],

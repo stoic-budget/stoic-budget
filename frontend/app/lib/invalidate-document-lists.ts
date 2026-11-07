@@ -23,7 +23,6 @@ export const FINANCIAL_QUERY_ROOTS = [
   'wallets',
   'reconciliation',
   'ledger',
-  'tables-report',
   'categories',
   'tags',
   'payees',
