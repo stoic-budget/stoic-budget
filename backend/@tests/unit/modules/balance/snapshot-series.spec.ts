@@ -13,6 +13,21 @@ describe('snapshot series', () => {
     expect(presetWindowStart('1y', '2026-10-10')).toBe('2025-10-10');
   });
 
+  it('counts calendar days across a clock change, whatever the server time zone', () => {
+    const zone = process.env.TZ;
+    process.env.TZ = 'Europe/Berlin';
+    try {
+      expect(presetWindowStart('30d', '2026-11-07')).toBe('2026-10-08');
+      expect(everyDay('2026-03-28', '2026-03-30')).toEqual([
+        '2026-03-28',
+        '2026-03-29',
+        '2026-03-30',
+      ]);
+    } finally {
+      process.env.TZ = zone;
+    }
+  });
+
   it('holds each value until the next one is entered', () => {
     const byAccount = groupSnapshots([
       { accountId: 'a', snapshotDate: '2026-01-05', amount: 1 },
