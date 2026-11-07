@@ -4,7 +4,7 @@ description: What Stoic Budget is and who it helps
 ---
 
 Stoic Budget is an open-source, self-hosted financial data platform for importing, processing, and analyzing bank
-statements. It combines a NestJS API, a Next.js web app, and a structured parsing pipeline so teams can turn messy
+statements. It combines a NestJS API, a React web app, and a structured parsing pipeline so teams can turn messy
 exports into reliable, queryable financial data.
 
 ![Stoic Budget dashboard overview](/img/screenshots/dashboard-overview.png)
@@ -29,7 +29,7 @@ exports into reliable, queryable financial data.
 ## Quick facts
 
 - Backend: NestJS 11 with TypeORM and PostgreSQL
-- Frontend: Next.js 16 with React 19, UI in 35 languages
+- Frontend: vinext (the Next.js App Router API on Vite) with React 19, UI in 35 languages
 - Data services: PostgreSQL 14 + Redis 7 (Docker Compose)
 - Integrations: SMTP, IMAP, S3-compatible and WebDAV storage, SimpleFIN bank sync, Telegram,
   webhooks, and API keys

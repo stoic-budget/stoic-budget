@@ -7,7 +7,7 @@ Stoic Budget uses PostgreSQL through TypeORM, with migration-driven schema chang
 
 ## Entity model
 
-The backend defines 85 entities under `backend/src/entities`. Highlights, by table name:
+The backend defines its entities under `backend/src/entities`. Highlights, by table name:
 
 - `statements`, `transactions`, `import_sessions`, `receipts` for ingestion
 - `workspaces`, `workspace_members`, `users` for tenancy
@@ -19,12 +19,22 @@ The backend defines 85 entities under `backend/src/entities`. Highlights, by tab
 
 ## Migrations
 
-- 142 migrations stored under `backend/src/migrations`
+- Migrations are stored under `backend/src/migrations`
 - Schema changes are always migration-based (`synchronize: false`)
 - Migrations run on backend start unless `RUN_MIGRATIONS=false`
 - CI applies migrations twice to prove they are idempotent
 - `npm run migration:run` takes a lock against concurrent runs; `npm --prefix backend run migration:run:dev` is
   the ts-node path for development
+
+```bash
+# Generate a migration after changing an entity
+make migrate-generate name=AddTransactionMerchantColumn
+# or locally:
+cd backend && npm run migration:generate -- src/migrations/AddTransactionMerchantColumn
+
+# Revert the last applied migration
+make migrate-revert
+```
 
 ## Data safety patterns
 

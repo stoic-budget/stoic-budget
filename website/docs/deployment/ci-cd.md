@@ -16,13 +16,12 @@ Stoic Budget's pipelines live in `.github/workflows`.
 - `typecheck` - TypeScript checks for both apps
 - `tests` - backend unit + e2e tests against PostgreSQL 16 and Redis 7, with migrations applied twice to check
   idempotency
+- `frontend-tests` - frontend Vitest tests, when frontend code changes
 - `sonarcloud` - static analysis with the backend coverage report
 - `build` - frontend and backend production builds
 - `dependency-scan` - npm audits and license checks for every package
 - `secrets-scan` - Gitleaks
 - `docker` - image build with a Trivy scan and SBOM
-
-Frontend Vitest tests are not part of CI.
 
 ## Sensitive change protection
 

@@ -45,7 +45,7 @@ This starts:
 - PostgreSQL 14
 - Redis 7
 - NestJS backend
-- Next.js frontend
+- React frontend on vinext
 
 Migrations run automatically when the backend starts (`RUN_MIGRATIONS=true`). PostgreSQL and Redis publish their
 ports on `127.0.0.1` only.
@@ -149,6 +149,14 @@ The production backend and frontend images define Docker `HEALTHCHECK`s.
 
 Data lives in named volumes: `postgres_data`, `redis_data`, and `backend_uploads` (mounted at `/app/uploads`),
 plus `map_data` and `nominatim_data` when the map profiles run. Back them up or map them to persistent storage.
+
+To check that every statement still has its file, run these from `backend/` in a source checkout (the production
+image has no npm):
+
+```bash
+npm run storage:verify   # reports statements whose file is neither on disk nor in the database
+npm run storage:repair   # also restores to disk the files only the database still holds
+```
 
 ## Logs
 
