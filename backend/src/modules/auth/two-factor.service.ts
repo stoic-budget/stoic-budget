@@ -11,7 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
 import { generateSecret, generateURI, verifySync } from 'otplib';
 import * as qrCode from 'qrcode';
-import type { Repository } from 'typeorm';
+import { IsNull, LessThan, Or, type Repository } from 'typeorm';
 import { APP_NAME } from '../../common/brand';
 import { appError } from '../../common/errors/app-error';
 import { decryptText, encryptText } from '../../common/utils/encryption.util';
@@ -85,7 +85,8 @@ export class TwoFactorService {
     if (!user.twoFactorSecret) {
       throw new BadRequestException(appError('AUTH_2FA_SETUP_NOT_STARTED'));
     }
-    if (!this.verifyTotp(user.twoFactorSecret, code)) {
+    const timeStep = this.verifyTotp(user.twoFactorSecret, code);
+    if (timeStep === null) {
       throw new UnauthorizedException(appError('AUTH_2FA_VERIFICATION_CODE_INVALID'));
     }
 
@@ -93,6 +94,7 @@ export class TwoFactorService {
     await this.userRepository.update(userId, {
       twoFactorEnabledAt: new Date(),
       twoFactorRecoveryCodes: hashes,
+      twoFactorLastStep: timeStep,
     });
     await this.recordTwoFactorEvent(user, Severity.WARN, 'enabled');
 
@@ -107,6 +109,7 @@ export class TwoFactorService {
       twoFactorSecret: null,
       twoFactorEnabledAt: null,
       twoFactorRecoveryCodes: [],
+      twoFactorLastStep: null,
     });
     await this.recordTwoFactorEvent(user, Severity.CRITICAL, 'disabled');
   }
@@ -148,7 +151,8 @@ export class TwoFactorService {
       return;
     }
 
-    if (this.verifyTotp(user.twoFactorSecret, code)) {
+    const timeStep = this.verifyTotp(user.twoFactorSecret, code, user.twoFactorLastStep);
+    if (timeStep !== null && (await this.claimTimeStep(userId, timeStep))) {
       return;
     }
 
@@ -192,6 +196,7 @@ export class TwoFactorService {
         twoFactorSecret: true,
         twoFactorEnabledAt: true,
         twoFactorRecoveryCodes: true,
+        twoFactorLastStep: true,
       },
     });
 
@@ -212,17 +217,33 @@ export class TwoFactorService {
     }
   }
 
-  private verifyTotp(encryptedSecret: string, code: string): boolean {
+  /** The time step `code` belongs to, or null when it is wrong or that step is already spent. */
+  private verifyTotp(
+    encryptedSecret: string,
+    code: string,
+    afterTimeStep?: number | null,
+  ): number | null {
     const token = (code || '').replace(/\s/g, '');
     if (!/^\d{6}$/.test(token)) {
-      return false;
+      return null;
     }
 
-    return verifySync({
+    const result = verifySync({
       secret: decryptText(encryptedSecret),
       token,
       epochTolerance: EPOCH_TOLERANCE_SECONDS,
-    }).valid;
+      ...(afterTimeStep == null ? {} : { afterTimeStep }),
+    });
+    return result.valid && 'timeStep' in result ? result.timeStep : null;
+  }
+
+  /** Spends a time step. Conditional, so of two logins racing with one code only one wins. */
+  private async claimTimeStep(userId: string, timeStep: number): Promise<boolean> {
+    const result = await this.userRepository.update(
+      { id: userId, twoFactorLastStep: Or(IsNull(), LessThan(timeStep)) },
+      { twoFactorLastStep: timeStep },
+    );
+    return (result.affected ?? 0) > 0;
   }
 
   /** Returns the remaining hashes when `code` matched, or null when it did not. */

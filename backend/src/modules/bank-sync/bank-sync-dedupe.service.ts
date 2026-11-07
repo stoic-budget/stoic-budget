@@ -75,7 +75,8 @@ export class BankSyncDedupeService {
     // Without a wallet there is nothing to scope the comparison to, and matching
     // across the whole workspace would drop honest look-alikes from other accounts.
     if (byId.length === 0 || !account.walletId) return byId;
-    return this.withoutTolerantMatches(workspaceId, account.walletId, byId, currency);
+    const answered = new Set(rows.map(row => providerRowKey(account.id, row.id)));
+    return this.withoutTolerantMatches(workspaceId, account.walletId, byId, answered, currency);
   }
 
   private async withoutKnownIds(
@@ -101,6 +102,7 @@ export class BankSyncDedupeService {
     workspaceId: string,
     walletId: string,
     rows: BankSyncTransaction[],
+    answered: Set<string>,
     currency: string,
   ): Promise<BankSyncTransaction[]> {
     const tolerance = this.importConfig.getDedupDateToleranceDays();
@@ -110,8 +112,12 @@ export class BankSyncDedupeService {
     const existing = await this.transactionRepository.find({
       where: { workspaceId, walletId, transactionDate: Between(from, to) },
     });
-    if (existing.length === 0) return rows;
-    const stored = existing.map(row => ({ id: row.id, parsed: asComparable(row) }));
+    // A stored row the provider still lists under its own id is a different
+    // purchase, however alike: the same fare twice in three days is two fares.
+    const stored = existing
+      .filter(row => !(row.documentNumber && answered.has(row.documentNumber)))
+      .map(row => ({ id: row.id, parsed: asComparable(row) }));
+    if (stored.length === 0) return rows;
 
     const claimed = new Set<string>();
     return rows.filter(row => {

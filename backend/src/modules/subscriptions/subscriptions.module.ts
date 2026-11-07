@@ -17,6 +17,7 @@ import { GoalsModule } from '../goals/goals.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { TaxModule } from '../tax/tax.module';
 import { SubscriptionAutoLinkSubscriber } from './subscription-autolink.subscriber';
+import { SubscriptionDetectionScheduler } from './subscription-detection.scheduler';
 import { SubscriptionDetectionService } from './subscription-detection.service';
 import { SubscriptionEventsListener } from './subscription-events.listener';
 import { SubscriptionsController } from './subscriptions.controller';
@@ -47,6 +48,7 @@ import { SubscriptionsService } from './subscriptions.service';
   providers: [
     SubscriptionsService,
     SubscriptionDetectionService,
+    SubscriptionDetectionScheduler,
     SubscriptionEventsListener,
     SubscriptionAutoLinkSubscriber,
   ],

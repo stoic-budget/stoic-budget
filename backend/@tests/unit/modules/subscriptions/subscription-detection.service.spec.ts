@@ -9,8 +9,10 @@ import {
   SubscriptionStatus,
 } from '../../../../src/entities/subscription.entity';
 import { Transaction } from '../../../../src/entities/transaction.entity';
+import { Workspace } from '../../../../src/entities/workspace.entity';
 import { NotificationsService } from '../../../../src/modules/notifications/notifications.service';
 import { SubscriptionDetectionService } from '../../../../src/modules/subscriptions/subscription-detection.service';
+import { rememberDismissedVendors } from '../../../../src/modules/subscriptions/subscription-dismissals';
 
 const charge = (date: string, amount: number) => ({
   id: `tx-${date}`,
@@ -26,6 +28,7 @@ describe('SubscriptionDetectionService price changes', () => {
   let service: SubscriptionDetectionService;
   let transactions: ReturnType<typeof queryBuilderMock>;
   const subscriptionRepository = { findOne: vi.fn(), create: vi.fn(), save: vi.fn() };
+  const workspaceRepository = { findOne: vi.fn(), update: vi.fn() };
   const notificationsService = { createForWorkspaceMembers: vi.fn() };
 
   function queryBuilderMock(rows: unknown[]) {
@@ -46,6 +49,7 @@ describe('SubscriptionDetectionService price changes', () => {
         SubscriptionDetectionService,
         { provide: getRepositoryToken(Transaction), useValue: transactions },
         { provide: getRepositoryToken(Subscription), useValue: subscriptionRepository },
+        { provide: getRepositoryToken(Workspace), useValue: workspaceRepository },
         { provide: NotificationsService, useValue: notificationsService },
       ],
     }).compile();
@@ -55,6 +59,46 @@ describe('SubscriptionDetectionService price changes', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     subscriptionRepository.save.mockImplementation(async (row: Subscription) => row);
+  });
+
+  it('does not suggest a vendor the workspace dismissed', async () => {
+    await build([charge('2026-01-05', 10), charge('2026-02-05', 10), charge('2026-03-05', 10)]);
+    subscriptionRepository.findOne.mockResolvedValue(null);
+    subscriptionRepository.create.mockImplementation((row: unknown) => row);
+    workspaceRepository.findOne.mockResolvedValue({ settings: null });
+
+    await expect(service.runDetection('ws-1')).resolves.toHaveLength(1);
+
+    workspaceRepository.findOne.mockResolvedValue({ settings: { theme: 'kept' } });
+    await rememberDismissedVendors(workspaceRepository as never, 'ws-1', {
+      vendorName: 'Spotify',
+      vendorRaw: 'SPOTIFY P12345',
+    });
+    const saved = workspaceRepository.update.mock.calls[0][1].settings;
+    expect(saved.theme).toBe('kept');
+    workspaceRepository.findOne.mockResolvedValue({ settings: saved });
+    subscriptionRepository.create.mockClear();
+
+    await expect(service.runDetection('ws-1')).resolves.toEqual([]);
+    expect(subscriptionRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('still keeps a row the workspace has for a dismissed vendor up to date', async () => {
+    const existing = {
+      id: 'sub-1',
+      vendorName: 'Spotify',
+      amount: 10,
+      frequency: SubscriptionFrequency.MONTHLY,
+      status: SubscriptionStatus.ACTIVE,
+      detectionMeta: {},
+    } as unknown as Subscription;
+    await build([charge('2026-01-05', 10), charge('2026-02-05', 10)]);
+    subscriptionRepository.findOne.mockResolvedValue(existing);
+    workspaceRepository.findOne.mockResolvedValue({
+      settings: { dismissedSubscriptionVendors: ['spotify'] },
+    });
+    await service.runDetection('ws-1');
+    expect(subscriptionRepository.save).toHaveBeenCalledWith(existing);
   });
 
   it('flags a settled new price, stores the yearly effect and tells the workspace', async () => {

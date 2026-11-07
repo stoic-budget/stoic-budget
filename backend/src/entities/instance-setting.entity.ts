@@ -14,6 +14,8 @@ import { User } from './user.entity';
 export enum InstanceSettingKey {
   /** The bot every workspace without its own token uses. */
   TELEGRAM = 'telegram',
+  /** Whether someone without an invitation can create an account. */
+  REGISTRATION = 'registration',
 }
 
 /**
@@ -31,6 +33,10 @@ export class InstanceSetting {
 
   @Column({ name: 'encrypted_secrets', type: 'jsonb', default: () => "'{}'::jsonb" })
   encryptedSecrets: Record<string, string>;
+
+  /** A setting that is not a secret. */
+  @Column({ type: 'jsonb', nullable: true })
+  value: Record<string, unknown> | null;
 
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'updated_by_user_id' })

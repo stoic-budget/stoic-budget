@@ -1,4 +1,8 @@
-import type { BankSyncAccount, BankSyncLink } from './bank-sync-provider.interface';
+import type {
+  BankSyncAccount,
+  BankSyncLink,
+  BankSyncLinkAccount,
+} from './bank-sync-provider.interface';
 
 /**
  * How a feed is doing. `stale` and `incomplete` exist because the loudest
@@ -47,6 +51,7 @@ export interface BankSyncLinkSetting {
   institution: string;
   country: string | null;
   consentExpiresAt: string | null;
+  accounts: BankSyncLinkAccount[];
 }
 
 export interface BankSyncConnectionConfig {
@@ -95,6 +100,7 @@ function normalizeLink(raw: Partial<BankSyncLinkSetting>): BankSyncLinkSetting {
     institution: raw.institution ?? '',
     country: raw.country ?? null,
     consentExpiresAt: raw.consentExpiresAt ?? null,
+    accounts: Array.isArray(raw.accounts) ? raw.accounts : [],
   };
 }
 
@@ -145,7 +151,25 @@ export function linkSettingOf(link: BankSyncLink): BankSyncLinkSetting {
     institution: link.institution,
     country: link.country ?? null,
     consentExpiresAt: link.consentExpiresAt?.toISOString() ?? null,
+    accounts: link.accounts ?? [],
   };
+}
+
+/**
+ * Adds a link. Re-authorizing a bank hands its accounts to the new link, and an
+ * older link left with none is gone: its session is about to expire anyway.
+ */
+export function withLink(links: BankSyncLinkSetting[], added: BankSyncLink): BankSyncLinkSetting[] {
+  const link = linkSettingOf(added);
+  const taken = new Set(link.accounts.map(account => account.id));
+  const older = links
+    .filter(item => item.id !== link.id)
+    .map(item => ({
+      ...item,
+      accounts: item.accounts.filter(account => !taken.has(account.id)),
+    }))
+    .filter(item => item.accounts.length > 0);
+  return [...older, link];
 }
 
 export function linksOf(config: BankSyncConnectionConfig): BankSyncLink[] {
@@ -154,5 +178,6 @@ export function linksOf(config: BankSyncConnectionConfig): BankSyncLink[] {
     institution: link.institution,
     country: link.country,
     consentExpiresAt: link.consentExpiresAt ? new Date(link.consentExpiresAt) : null,
+    accounts: link.accounts,
   }));
 }

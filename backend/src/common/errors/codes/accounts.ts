@@ -10,6 +10,8 @@ export const ACCOUNTS_ERRORS = {
   AUTH_ACCOUNT_INACTIVE: 'User account is inactive',
   AUTH_USER_NOT_FOUND_OR_INACTIVE: 'User not found or inactive',
   AUTH_EMAIL_TAKEN: 'User with this email already exists',
+  AUTH_REGISTRATION_CLOSED:
+    'Registration on this server is closed. Ask its administrator for an invitation',
   AUTH_INVALID_CREDENTIALS: 'Invalid credentials',
   AUTH_INVITATION_NOT_PENDING: 'Invitation is not pending',
   AUTH_INVITATION_EMAIL_MISMATCH: 'Email does not match invitation',

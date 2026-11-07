@@ -56,6 +56,7 @@ services:
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
       - APP_URL=${APP_URL:-http://localhost:3000}
       - APP_NAME=${APP_NAME:-Stoic Budget}
+      - REGISTRATION_ENABLED=${REGISTRATION_ENABLED:-true}
       - DATABASE_URL=postgresql://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-finflow}
       - REDIS_HOST=redis
       - REDIS_PORT=6379

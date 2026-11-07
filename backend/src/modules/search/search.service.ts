@@ -78,9 +78,10 @@ export class SearchService {
   ): Promise<SearchResult[]> {
     const rows = await this.transactionRepo
       .createQueryBuilder('t')
-      .innerJoinAndSelect('t.statement', 's')
-      .where('s.workspaceId = :workspaceId', { workspaceId })
-      .andWhere('s.deletedAt IS NULL')
+      .leftJoinAndSelect('t.statement', 's')
+      .where('t.workspaceId = :workspaceId', { workspaceId })
+      // Rows entered by hand have no statement; a row of a trashed one stays hidden.
+      .andWhere('(t.statementId IS NULL OR s.id IS NOT NULL)')
       .andWhere(
         '(LOWER(t.counterpartyName) LIKE :needle OR LOWER(t.paymentPurpose) LIKE :needle)',
         { needle },
@@ -92,21 +93,23 @@ export class SearchService {
       .take(PER_KIND_LIMIT)
       .getMany();
 
-    // The inner join drops rows without a statement; this only tells the compiler.
-    const hits = rows.flatMap(row => (row.statement ? [{ row, statement: row.statement }] : []));
     const receipts = await findScanReceipts(
       this.receiptRepo,
       workspaceId,
-      hits.map(hit => hit.statement),
+      rows.flatMap(row => (row.statement ? [row.statement] : [])),
     );
-    return hits.map(({ row, statement }) => ({
+    return rows.map(row => ({
       kind: 'transaction' as const,
       id: row.id,
       title: row.counterpartyName,
       subtitle: row.paymentPurpose || null,
-      // A row lives in its document; there is no separate transactions list.
-      href: documentHref(statement, receipts),
-      document: documentFile(statement, receipts),
+      // A row lives in its document; one without a document, on its account.
+      href: row.statement
+        ? documentHref(row.statement, receipts)
+        : row.walletId
+          ? `/accounts/${row.walletId}`
+          : '/statements/transactions',
+      document: row.statement ? documentFile(row.statement, receipts) : null,
     }));
   }
 

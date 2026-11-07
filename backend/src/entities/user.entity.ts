@@ -177,6 +177,10 @@ export class User {
   twoFactorSecret: string | null;
 
   /** Non-null only after the user confirmed a code — 2FA is active from this moment. */
+  /** The last TOTP time step a login spent: a code works once, not for its whole window. */
+  @Column({ name: 'two_factor_last_step', type: 'integer', nullable: true, select: false })
+  twoFactorLastStep: number | null;
+
   @Column({ name: 'two_factor_enabled_at', type: 'timestamptz', nullable: true, default: null })
   twoFactorEnabledAt: Date | null;
 

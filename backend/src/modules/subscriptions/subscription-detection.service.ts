@@ -18,7 +18,9 @@ import {
   SubscriptionStatus,
 } from '../../entities/subscription.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
+import { Workspace } from '../../entities/workspace.entity';
 import { NotificationsService } from '../notifications/notifications.service';
+import { dismissedVendorsOf, subscriptionVendorKey } from './subscription-dismissals';
 import { describePriceChange, type PriceChange } from './subscription-insights.util';
 
 @Injectable()
@@ -30,6 +32,8 @@ export class SubscriptionDetectionService {
     private readonly transactionRepository: Repository<Transaction>,
     @InjectRepository(Subscription)
     private readonly subscriptionRepository: Repository<Subscription>,
+    @InjectRepository(Workspace)
+    private readonly workspaceRepository: Repository<Workspace>,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -63,16 +67,19 @@ export class SubscriptionDetectionService {
 
     const groups = new Map<string, Transaction[]>();
     for (const tx of transactions) {
-      const key = (tx.vendorNormalized ?? tx.counterpartyName).toLowerCase().trim();
+      const key = subscriptionVendorKey(tx.vendorNormalized ?? tx.counterpartyName);
       if (!key) continue;
       const group = groups.get(key) ?? [];
       group.push(tx);
       groups.set(key, group);
     }
 
+    const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
+    const dismissedVendors = dismissedVendorsOf(workspace?.settings);
+
     const detected: Subscription[] = [];
     const priceChanges: Array<{ subscription: Subscription; change: PriceChange }> = [];
-    for (const [, txs] of groups) {
+    for (const [key, txs] of groups) {
       if (txs.length < 2) continue;
 
       const result = this.analyzeGroup(txs);
@@ -116,6 +123,7 @@ export class SubscriptionDetectionService {
         }
         continue;
       }
+      if (dismissedVendors.has(key)) continue;
 
       const subscription = this.subscriptionRepository.create({
         workspaceId,

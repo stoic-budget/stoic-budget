@@ -12,6 +12,7 @@ turn the outbound parts off.
 | We defend against | How |
 |---|---|
 | Another workspace's member reading your data | Every query filters by `workspaceId`; tenant isolation is tested end to end |
+| Strangers signing up on a server open to the internet | Close sign-up under Admin > Users, or with `REGISTRATION_ENABLED=false`: only people with an invitation get in |
 | A stolen session cookie | Short-lived JWT in an `HttpOnly` cookie, refresh rotation, CSRF guard on every mutating route, 2FA with recovery codes |
 | An over-reaching script or AI agent | API keys carry scopes; a key never exceeds its owner's role; every write is audited as the key and is undoable |
 | The server being used to reach your network | The egress guard rejects private, loopback and link-local hosts for every outbound URL (SMTP, S3, WebDAV, IMAP, prices, maps) |
@@ -35,7 +36,7 @@ in clear, or a browser extension reading the page.
 | Destination | Sent | When | Off switch |
 |---|---|---|---|
 | Exchange-rate provider | Currency pairs and dates | Multi-currency totals | Single currency, or set rates by hand |
-| Stooq / CoinGecko | Tickers | "Refresh prices" on the net-worth page | Enter prices by hand |
+| Yahoo Finance / CoinGecko | Tickers | "Refresh prices" on the net-worth page | Enter prices by hand |
 | Your map tile server / Nominatim | Receipt coordinates | Receipt maps, if enabled | Do not enable receipt location |
 | Telegram | Reports and replies to the bot | Only if the bot is connected | Disconnect Telegram |
 | SMTP | Invitations, password resets | Only if SMTP is set | Leave SMTP unset |

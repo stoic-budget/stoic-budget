@@ -1,41 +1,39 @@
 import { EffectRuntime } from '@/common/effect/effect-runtime';
 import {
-  currencyForSymbol,
   normalizeStockSymbol,
-  parseStooqCsv,
   StockPriceService,
+  yahooSymbol,
 } from '@/modules/investments/stock-price.service';
 
 vi.mock('@/common/utils/egress-url.util', () => ({
   assertPublicEgressUrl: vi.fn(async () => undefined),
 }));
 
-describe('stock prices', () => {
-  it('reads closes out of the Stooq CSV and skips unknown symbols', () => {
-    const csv = [
-      'Symbol,Date,Time,Open,High,Low,Close,Volume',
-      'AAPL.US,2026-09-30,22:00:00,230.1,235.2,229.0,233.45,51234567',
-      'NOPE.US,N/D,N/D,N/D,N/D,N/D,N/D,N/D',
-      'VWCE.DE,2026-09-30,17:35:00,120,121,119.5,120.75,12345',
-    ].join('\n');
-    const quotes = parseStooqCsv(csv);
-    expect(quotes.get('AAPL.US')).toEqual({ close: 233.45, date: '2026-09-30' });
-    expect(quotes.get('VWCE.DE')?.close).toBe(120.75);
-    expect(quotes.has('NOPE.US')).toBe(false);
+describe('stock symbols', () => {
+  it('defaults a bare ticker to the US market', () => {
+    expect(normalizeStockSymbol('acme')).toBe('ACME.US');
+    expect(normalizeStockSymbol('acme.de')).toBe('ACME.DE');
   });
 
-  it('defaults a bare ticker to the US market and reads the currency off the suffix', () => {
-    expect(normalizeStockSymbol('aapl')).toBe('AAPL.US');
-    expect(normalizeStockSymbol('vwce.de')).toBe('VWCE.DE');
-    expect(currencyForSymbol('VWCE.DE')).toBe('EUR');
-    expect(currencyForSymbol('AAPL.US')).toBe('USD');
-    expect(currencyForSymbol('7203.JP')).toBe('JPY');
+  it('translates the market suffixes positions already hold', () => {
+    expect(yahooSymbol('ACME.US')).toBe('ACME');
+    expect(yahooSymbol('ACME.UK')).toBe('ACME.L');
+    expect(yahooSymbol('ACME.JP')).toBe('ACME.T');
+  });
+
+  it('passes through a suffix Yahoo uses itself', () => {
+    expect(yahooSymbol('ACME.DE')).toBe('ACME.DE');
+    expect(yahooSymbol('ACME.L')).toBe('ACME.L');
+    expect(yahooSymbol('ACME.TA')).toBe('ACME.TA');
   });
 });
 
 describe('StockPriceService.getPrices', () => {
-  const CLOSE = 233.45;
-  const CSV = `Symbol,Date,Time,Open,High,Low,Close,Volume\nACME.US,2026-09-30,22:00:00,230,235,229,${CLOSE},100\n`;
+  const PRICE = 233.45;
+  const chart = (price: number | null, currency: string) =>
+    JSON.stringify({
+      chart: { result: [{ meta: { regularMarketPrice: price, currency } }], error: null },
+    });
   let fetchMock: ReturnType<typeof vi.fn>;
   let service: StockPriceService;
 
@@ -45,29 +43,68 @@ describe('StockPriceService.getPrices', () => {
     service = new StockPriceService(new EffectRuntime());
   });
 
-  it('quotes the symbols from the CSV and caches them', async () => {
-    fetchMock.mockImplementation(async () => new Response(CSV, { status: 200 }));
+  it('quotes a symbol under its market name and caches it', async () => {
+    fetchMock.mockImplementation(async () => new Response(chart(PRICE, 'USD'), { status: 200 }));
 
     const first = await service.getPrices(['acme']);
     const second = await service.getPrices(['ACME.US']);
 
-    expect(first.get('ACME.US')).toMatchObject({ price: CLOSE, currency: 'USD' });
-    expect(second.get('ACME.US')?.price).toBe(CLOSE);
-    expect(String(fetchMock.mock.calls[0][0])).toContain('s=acme.us');
+    expect(first.get('ACME.US')).toMatchObject({ price: PRICE, currency: 'USD' });
+    expect(second.get('ACME.US')?.price).toBe(PRICE);
+    expect(String(fetchMock.mock.calls[0][0])).toContain('/chart/ACME?');
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('leaves the price out, asking once, when Stooq refuses', async () => {
-    fetchMock.mockImplementation(async () => new Response('busy', { status: 503 }));
+  it.each([
+    ['GBp', 'GBP'],
+    ['GBX', 'GBP'],
+    ['ILA', 'ILS'],
+    ['ZAc', 'ZAR'],
+  ])('reads a quote in %s as %s, not a hundred times too high', async (quoted, currency) => {
+    fetchMock.mockImplementation(async () => new Response(chart(250, quoted), { status: 200 }));
 
+    const prices = await service.getPrices(['ACME.UK']);
+
+    expect(prices.get('ACME.UK')).toMatchObject({ price: 2.5, currency });
+  });
+
+  it('asks for every symbol, past one batch of requests', async () => {
+    fetchMock.mockImplementation(async () => new Response(chart(PRICE, 'USD'), { status: 200 }));
+    const symbols = Array.from({ length: 7 }, (_, index) => `ACME${index}`);
+
+    const prices = await service.getPrices(symbols);
+
+    expect(prices.size).toBe(7);
+  });
+
+  it('leaves out a symbol Yahoo does not know and keeps the others', async () => {
+    fetchMock.mockImplementation(async (input: string) =>
+      String(input).includes('/chart/NOPE?')
+        ? new Response(JSON.stringify({ chart: { result: null, error: {} } }), { status: 404 })
+        : new Response(chart(PRICE, 'USD'), { status: 200 }),
+    );
+
+    const prices = await service.getPrices(['NOPE', 'ACME']);
+
+    expect([...prices.keys()]).toEqual(['ACME.US']);
+  });
+
+  it('leaves the price out when the answer has no price or no currency', async () => {
+    fetchMock.mockImplementation(async () => new Response(chart(null, 'USD'), { status: 200 }));
     await expect(service.getPrices(['ACME'])).resolves.toEqual(new Map());
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    fetchMock.mockImplementation(
+      async () =>
+        new Response(JSON.stringify({ chart: { result: [{ meta: { regularMarketPrice: PRICE } }] } }), {
+          status: 200,
+        }),
+    );
+    await expect(service.getPrices(['ACME'])).resolves.toEqual(new Map());
   });
 
-  it('leaves the price out when Stooq cannot be reached', async () => {
+  it('leaves the price out when Yahoo cannot be reached', async () => {
     fetchMock.mockRejectedValue(new TypeError('fetch failed'));
 
     await expect(service.getPrices(['ACME'])).resolves.toEqual(new Map());
-    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

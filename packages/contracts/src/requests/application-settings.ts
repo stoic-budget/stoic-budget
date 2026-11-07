@@ -42,6 +42,10 @@ export const SaveInstanceTelegramBotBody = Schema.Struct({
 });
 export type SaveInstanceTelegramBotBody = Wire<typeof SaveInstanceTelegramBotBody>;
 
+/** `PUT /settings/instance/registration`. */
+export const SaveRegistrationBody = Schema.Struct({ open: Schema.Boolean });
+export type SaveRegistrationBody = Wire<typeof SaveRegistrationBody>;
+
 export const SaveAppSettingsBody = Schema.Struct({
   publicUrl: Schema.String,
 });

@@ -280,6 +280,41 @@ describe('BankSyncPullService tolerant dedupe', () => {
     expect(h.imported()).toEqual(['ACT-1:B-4']);
   });
 
+  it('imports a repeat purchase from the same feed', async () => {
+    // A daily fare: same payee and price, the next day, under its own provider
+    // id, while yesterday's row is still in the answer under its own.
+    const h = harness({
+      config: connectionConfig({ accounts: [accountConfig({ walletId: 'wallet-1' })] }),
+      accounts: [
+        remoteAccount({
+          transactions: [
+            remoteRow(),
+            remoteRow({ id: 'TRN-2', posted: new Date('2026-09-21T00:00:00Z') }),
+          ],
+        }),
+      ],
+      knownIds: ['ACT-1:TRN-1'],
+      existingRows: [storedRow()],
+    });
+
+    const result = await h.pull.sync(user, workspaceId, 'c1');
+
+    expect(h.imported()).toEqual(['ACT-1:TRN-2']);
+    expect(result.accounts[0]).toMatchObject({ imported: 1, skipped: 1 });
+  });
+
+  it('still drops a row its own feed renumbered', async () => {
+    // The stored id is gone from the answer and a look-alike came in its place:
+    // the same purchase under a new number.
+    const h = harness({
+      config: connectionConfig({ accounts: [accountConfig({ walletId: 'wallet-1' })] }),
+      accounts: [remoteAccount({ transactions: [remoteRow({ id: 'TRN-9' })] })],
+      existingRows: [storedRow()],
+    });
+    await h.pull.sync(user, workspaceId, 'c1');
+    expect(h.statements.create).not.toHaveBeenCalled();
+  });
+
   it('keeps the tolerant pass off when the account feeds no wallet', async () => {
     // Without a wallet there is nothing to scope the comparison to, and matching
     // across the workspace would drop honest look-alikes from other accounts.

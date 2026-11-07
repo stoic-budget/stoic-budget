@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, type Repository } from 'typeorm';
 import { toEnum } from '../../common/effect/to-enum';
@@ -20,8 +20,8 @@ import { Transaction } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { BalanceService } from '../balance/balance.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { holdingValueIn } from './holding-value';
 import { InvestmentFlowsService } from './investment-flows.service';
-import { pricedUnits } from './metal-weight.util';
 import { normalizeStockSymbol, StockPriceService } from './stock-price.service';
 
 const INVESTMENTS_SECTION_CODE = 'ASSET_INVESTMENTS';
@@ -36,6 +36,8 @@ export type { HoldingView, InvestmentAccountView };
  */
 @Injectable()
 export class InvestmentsService {
+  private readonly logger = new Logger(InvestmentsService.name);
+
   constructor(
     @InjectRepository(BalanceAccount)
     private readonly accountRepository: Repository<BalanceAccount>,
@@ -222,7 +224,7 @@ export class InvestmentsService {
 
   /**
    * Fetches a price for every holding with a symbol (stocks and funds from
-   * Stooq) and rewrites the snapshots of the accounts that changed. Returns how
+   * Yahoo Finance) and rewrites the snapshots of the accounts that changed. Returns how
    * many holdings got a price. Coins are not here: they live in `crypto_wallets`.
    */
   async refreshPrices(
@@ -285,13 +287,7 @@ export class InvestmentsService {
   private async holdingView(holding: InvestmentHolding, currency: string): Promise<HoldingView> {
     const quantity = Number(holding.quantity);
     const price = Number(holding.price);
-    // A metal lot is priced per fine troy ounce, not per piece.
-    const value = await this.convert(
-      pricedUnits(holding) * price,
-      holding.priceCurrency,
-      currency,
-      holding.workspaceId,
-    );
+    const value = (await holdingValueIn(holding, currency, this.exchangeRatesService)) ?? 0;
     return {
       id: holding.id,
       symbol: holding.symbol,
@@ -319,7 +315,14 @@ export class InvestmentsService {
     const holdings = await this.holdingRepository.find({ where: { workspaceId, accountId } });
     let total = 0;
     for (const holding of holdings) {
-      total += (await this.holdingView(holding, currency)).value;
+      const value = await holdingValueIn(holding, currency, this.exchangeRatesService);
+      // A value we cannot state is not a zero: written down, it would read as
+      // the money having gone. The account keeps its last known value.
+      if (value === null) {
+        this.logger.warn(`No rate for account ${accountId}: keeping its last snapshot`);
+        return;
+      }
+      total += round2(value);
     }
     await this.balanceService.updateSnapshot(userId, workspaceId, {
       accountId,
@@ -354,19 +357,6 @@ export class InvestmentsService {
       .trim()
       .toUpperCase();
     return /^[A-Z]{3}$/.test(normalized) ? normalized : 'KZT';
-  }
-
-  private async convert(
-    amount: number,
-    from: string,
-    to: string,
-    workspaceId: string,
-  ): Promise<number> {
-    if (!Number.isFinite(amount) || amount === 0) return 0;
-    const source = (from || to).toUpperCase();
-    if (source === to) return amount;
-    const rate = await this.exchangeRatesService.getRateOrNull(source, to, undefined, workspaceId);
-    return rate === null ? 0 : amount * rate;
   }
 }
 

@@ -15,9 +15,9 @@ import {
 import {
   accountSettingOf,
   type BankSyncConnectionConfig,
-  linkSettingOf,
   linksOf,
   normalizeConfig,
+  withLink,
 } from './bank-sync.config';
 import {
   BANK_SYNC_PROVIDERS,
@@ -175,7 +175,7 @@ export class BankSyncService {
     const secrets = this.secretsOf(integration);
     const link = await provider.completeLink(secrets, code);
     config.pendingLink = null;
-    config.links = [...config.links.filter(item => item.id !== link.id), linkSettingOf(link)];
+    config.links = withLink(config.links, link);
     const accounts = await provider.fetchAccounts(
       { secrets, links: linksOf(config) },
       { balancesOnly: true },

@@ -1,8 +1,8 @@
-import { createSign } from 'node:crypto';
+import { createHash, createSign } from 'node:crypto';
 import { BadRequestException } from '@nestjs/common';
 import { Schema } from 'effect';
 import { appError } from '../../common/errors/app-error';
-import type { BankSyncTransaction } from './bank-sync-provider.interface';
+import type { BankSyncLinkAccount, BankSyncTransaction } from './bank-sync-provider.interface';
 
 // Every field is optional and nullable: bank data is uneven, and the mappers
 // decide what a usable row is.
@@ -26,6 +26,7 @@ export const EnableBankingTransaction = Schema.Struct({
 });
 export type EnableBankingTransaction = typeof EnableBankingTransaction.Type;
 
+/** POST /sessions: the only answer that describes the accounts, and it comes once. */
 export const EnableBankingSession = Schema.Struct({
   session_id: Text,
   accounts: Schema.optional(
@@ -33,6 +34,7 @@ export const EnableBankingSession = Schema.Struct({
       Schema.Array(
         Schema.Struct({
           uid: Text,
+          identification_hash: Text,
           name: Text,
           currency: Text,
           account_id: Schema.optional(Schema.NullOr(Schema.Struct({ iban: Text }))),
@@ -42,6 +44,39 @@ export const EnableBankingSession = Schema.Struct({
     ),
   ),
   aspsp: Schema.optional(Schema.NullOr(Schema.Struct({ name: Text, country: Text }))),
+  access: Schema.optional(Schema.NullOr(Schema.Struct({ valid_until: Text }))),
+});
+
+/**
+ * A session's uid dies with the session, and consent runs out every few months.
+ * The identification hash survives it. Hashed again because it holds `/` and
+ * `+`, and this id travels in URLs and into every row's document number.
+ */
+function stableAccountId(identificationHash: string | null | undefined, uid: string): string {
+  if (!identificationHash) return uid;
+  return `eb-${createHash('sha256').update(identificationHash).digest('hex').slice(0, 32)}`;
+}
+
+/** The accounts of a fresh session. No uid means the bank will not serve that one. */
+export function linkAccountsOf(session: typeof EnableBankingSession.Type): BankSyncLinkAccount[] {
+  return (session.accounts ?? []).flatMap(raw =>
+    raw.uid
+      ? [
+          {
+            id: stableAccountId(raw.identification_hash, raw.uid),
+            ref: raw.uid,
+            name: raw.name || raw.account_id?.iban || raw.uid,
+            currency: (raw.currency || '').toUpperCase(),
+          },
+        ]
+      : [],
+  );
+}
+
+/** GET /sessions/{id}: `accounts` here are bare uids, so the list is not read from it. */
+export const EnableBankingSessionState = Schema.Struct({
+  status: Text,
+  aspsp: Schema.optional(Schema.NullOr(Schema.Struct({ name: Text }))),
   access: Schema.optional(Schema.NullOr(Schema.Struct({ valid_until: Text }))),
 });
 

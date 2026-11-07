@@ -1,5 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
 import { IntegrationStatus } from '../../../../src/entities';
+import {
+  type BankSyncConnectionConfig,
+  withLink,
+} from '../../../../src/modules/bank-sync/bank-sync.config';
 import { BankSyncService } from '../../../../src/modules/bank-sync/bank-sync.service';
 import {
   accountConfig,
@@ -135,6 +139,89 @@ describe('BankSyncService connections', () => {
     expect(store.rows.get('c1')?.status).toBe(IntegrationStatus.DISCONNECTED);
     expect(await service.list(workspaceId)).toEqual([]);
     await expect(service.refreshAccounts(workspaceId, 'c1')).rejects.toThrow(BadRequestException);
+  });
+});
+
+describe('BankSyncService.completeLink', () => {
+  const stable = { id: 'stable-1', name: 'Main', currency: 'EUR' };
+  const oldLink = {
+    id: 'sess-old',
+    institution: 'Example Bank',
+    country: 'FI',
+    consentExpiresAt: '2020-01-01T00:00:00.000Z',
+    accounts: [{ ...stable, ref: 'uid-old' }],
+  };
+
+  it('keeps the wallet and the sync position when a bank is re-authorized', async () => {
+    const store = fakeStore([
+      {
+        id: 'c1',
+        provider: 'enablebanking',
+        status: IntegrationStatus.CONNECTED,
+        workspaceId,
+        config: connectionConfig({
+          provider: 'enablebanking',
+          links: [oldLink],
+          accounts: [
+            accountConfig({
+              id: 'stable-1',
+              enabled: true,
+              walletId: 'wallet-1',
+              linkId: 'sess-old',
+              lastSyncAt: '2026-09-01T00:00:00.000Z',
+            }),
+          ],
+          pendingLink: { state: 'state-1', institution: 'Example Bank', country: 'FI' },
+        }),
+      },
+    ]);
+    const fetchAccounts = vi.fn(async (context: { links: Array<{ id: string }> }) =>
+      context.links.map(link => remoteAccount({ ...stable, linkId: link.id })),
+    );
+    const provider = {
+      ...fakeTokenProvider(),
+      key: 'enablebanking',
+      linkStyle: 'redirect' as const,
+      fetchAccounts,
+      completeLink: vi.fn(async () => ({
+        id: 'sess-new',
+        institution: 'Example Bank',
+        country: 'FI',
+        consentExpiresAt: new Date('2027-01-01T00:00:00.000Z'),
+        accounts: [{ ...stable, ref: 'uid-new' }],
+      })),
+    };
+
+    await build(store, provider as never).completeLink(workspaceId, 'c1', 'code', 'state-1');
+
+    const saved = store.rows.get('c1')?.config as BankSyncConnectionConfig;
+    // The lapsed session is not asked again, and the account is listed once.
+    expect(fetchAccounts.mock.calls[0][0].links.map(link => link.id)).toEqual(['sess-new']);
+    expect(saved.links.map(link => link.id)).toEqual(['sess-new']);
+    expect(saved.accounts).toHaveLength(1);
+    expect(saved.accounts[0]).toMatchObject({
+      id: 'stable-1',
+      enabled: true,
+      walletId: 'wallet-1',
+      linkId: 'sess-new',
+      lastSyncAt: '2026-09-01T00:00:00.000Z',
+    });
+  });
+
+  it('keeps an older link that still holds other accounts', () => {
+    const other = { id: 'stable-2', ref: 'uid-2', name: 'Savings', currency: 'EUR' };
+    const links = withLink(
+      [{ ...oldLink, accounts: [...oldLink.accounts, other] }],
+      {
+        id: 'sess-new',
+        institution: 'Example Bank',
+        accounts: [{ ...stable, ref: 'uid-new' }],
+      },
+    );
+    expect(links.map(link => [link.id, link.accounts.map(account => account.id)])).toEqual([
+      ['sess-old', ['stable-2']],
+      ['sess-new', ['stable-1']],
+    ]);
   });
 });
 

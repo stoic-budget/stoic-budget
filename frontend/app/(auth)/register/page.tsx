@@ -8,6 +8,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { AuthLanguageSwitcher } from '@/app/components/AuthLanguageSwitcher';
 import { BrandLockup } from '@/app/components/BrandLockup';
 import { Eye, EyeOff } from '@/app/components/icons';
+import { useRegistrationStatus } from '@/app/hooks/useRegistrationStatus';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
 import { getApiErrorMessage } from '@/app/lib/api-error';
@@ -39,6 +40,7 @@ function RegisterPageContent(): React.JSX.Element {
   const [loading, setLoading] = useState(false);
   const [emailLocked, setEmailLocked] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);
+  const { open: registrationOpen } = useRegistrationStatus();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     if (e.target.name === 'email' && emailLocked) {
@@ -120,6 +122,27 @@ function RegisterPageContent(): React.JSX.Element {
   // A too-short password is told under its own field, in place of the hint.
   const passwordError = error !== '' && error === t.passwordHelper.value;
   const formError = error !== '' && !passwordError;
+
+  const loginHref = nextPath ? `/login?next=${encodeURIComponent(nextPath)}` : '/login';
+
+  // An invitation still gets through a closed server, so it keeps the form.
+  if (registrationOpen === false && !inviteToken) {
+    return (
+      <AuthLayout sideContent={sideContent} topRightAction={<AuthLanguageSwitcher />}>
+        <BrandLockup className="seneca-auth-logo" />
+        <Typography component="h1" className="seneca-auth-title seneca-auth-title--with-lead">
+          {t.closedTitle}
+        </Typography>
+        <p className="seneca-auth-lead">{t.closedBody}</p>
+        <p className="seneca-auth-footnote">
+          {t.haveAccountPrompt}{' '}
+          <NextLink href={loginHref} className="seneca-auth-link seneca-auth-link--accent">
+            {t.logIn}
+          </NextLink>
+        </p>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout sideContent={sideContent} topRightAction={<AuthLanguageSwitcher />}>
@@ -238,10 +261,7 @@ function RegisterPageContent(): React.JSX.Element {
         </Button>
         <p className="seneca-auth-footnote">
           {t.haveAccountPrompt}{' '}
-          <NextLink
-            href={nextPath ? `/login?next=${encodeURIComponent(nextPath)}` : '/login'}
-            className="seneca-auth-link seneca-auth-link--accent"
-          >
+          <NextLink href={loginHref} className="seneca-auth-link seneca-auth-link--accent">
             {t.logIn}
           </NextLink>
         </p>

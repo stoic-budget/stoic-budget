@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Effect } from 'effect';
+import { Effect, Schema } from 'effect';
 import { EffectRuntime } from '../../common/effect/effect-runtime';
-import { describeHttpFailure, getWith } from '../../common/effect/http-json';
+import { describeHttpFailure, getJson } from '../../common/effect/http-json';
 import { assertPublicEgressUrl } from '../../common/utils/egress-url.util';
 
 export interface QuotedPrice {
@@ -11,67 +11,72 @@ export interface QuotedPrice {
   at: Date;
 }
 
-/** Stooq's daily quote CSV: `Symbol,Date,Time,Open,High,Low,Close,Volume`, `N/D` when unknown. */
-export function parseStooqCsv(csv: string): Map<string, { close: number; date: string }> {
-  const result = new Map<string, { close: number; date: string }>();
-  const lines = csv.trim().split(/\r?\n/);
-  const header = lines[0]?.toLowerCase().split(',') ?? [];
-  const symbolIndex = header.indexOf('symbol');
-  const closeIndex = header.indexOf('close');
-  const dateIndex = header.indexOf('date');
-  if (symbolIndex < 0 || closeIndex < 0) return result;
-  for (const line of lines.slice(1)) {
-    const cells = line.split(',');
-    const close = Number.parseFloat(cells[closeIndex] ?? '');
-    const symbol = (cells[symbolIndex] ?? '').trim().toUpperCase();
-    if (!(symbol && Number.isFinite(close)) || close <= 0) continue;
-    result.set(symbol, { close, date: cells[dateIndex] ?? '' });
-  }
-  return result;
-}
-
 /** `AAPL` → `AAPL.US`; a symbol that already names its market is kept. */
 export function normalizeStockSymbol(symbol: string): string {
   const trimmed = symbol.trim().toUpperCase();
   return trimmed.includes('.') ? trimmed : `${trimmed}.US`;
 }
 
-/** The currency a market quotes in, by Stooq's suffix. */
-export function currencyForSymbol(symbol: string): string {
-  const suffix = symbol.split('.').pop()?.toUpperCase() ?? 'US';
-  return SUFFIX_CURRENCY[suffix] ?? 'USD';
-}
-
-const SUFFIX_CURRENCY: Record<string, string> = {
-  US: 'USD',
-  UK: 'GBP',
-  DE: 'EUR',
-  F: 'EUR',
-  FR: 'EUR',
-  NL: 'EUR',
-  IT: 'EUR',
-  ES: 'EUR',
-  PL: 'PLN',
-  JP: 'JPY',
-  HK: 'HKD',
-  CA: 'CAD',
-  AU: 'AUD',
-  CH: 'CHF',
-  SE: 'SEK',
-  NO: 'NOK',
-  DK: 'DKK',
-  TR: 'TRY',
-  KZ: 'KZT',
+/** Market suffixes people already hold in their positions, and what Yahoo calls those markets. */
+const YAHOO_SUFFIX: Record<string, string> = {
+  US: '',
+  UK: '.L',
+  FR: '.PA',
+  NL: '.AS',
+  IT: '.MI',
+  ES: '.MC',
+  PL: '.WA',
+  JP: '.T',
+  CA: '.TO',
+  AU: '.AX',
+  CH: '.SW',
+  SE: '.ST',
+  NO: '.OL',
+  DK: '.CO',
+  TR: '.IS',
 };
 
-const STOOQ_URL = 'https://stooq.com/q/l/';
+/** `AAPL.US` → `AAPL`, `VOD.UK` → `VOD.L`; a suffix Yahoo already uses passes through. */
+export function yahooSymbol(symbol: string): string {
+  const dot = symbol.lastIndexOf('.');
+  const suffix = YAHOO_SUFFIX[symbol.slice(dot + 1)];
+  return suffix === undefined ? symbol : `${symbol.slice(0, dot)}${suffix}`;
+}
+
+/** Quote currencies that are a hundredth of the real one: London in pence, Tel Aviv in agorot. */
+const HUNDREDTHS_OF: Record<string, string> = {
+  GBp: 'GBP',
+  GBX: 'GBP',
+  ZAc: 'ZAR',
+  ZAC: 'ZAR',
+  ILA: 'ILS',
+};
+
+const YahooChart = Schema.Struct({
+  chart: Schema.Struct({
+    result: Schema.NullOr(
+      Schema.Array(
+        Schema.Struct({
+          meta: Schema.Struct({
+            regularMarketPrice: Schema.optional(Schema.NullOr(Schema.Number)),
+            currency: Schema.optional(Schema.NullOr(Schema.String)),
+          }),
+        }),
+      ),
+    ),
+  }),
+});
+
+const YAHOO_CHART_URL = 'https://query1.finance.yahoo.com/v8/finance/chart/';
 const CACHE_TTL_MS = 15 * 60 * 1000;
+/** Yahoo quotes one symbol per request. */
+const CONCURRENT_QUOTES = 5;
 
 /**
- * Daily close prices from Stooq, a free source that needs no key. Quotes are
- * cached for fifteen minutes; the host is checked against the egress guard
- * like every other outbound call. A price that cannot be fetched is simply
- * absent, and the holding keeps the one it had.
+ * Prices from Yahoo Finance's public chart endpoint, a free source that needs no
+ * key. Quotes are cached for fifteen minutes; the host is checked against the
+ * egress guard like every other outbound call. A price that cannot be fetched is
+ * simply absent, and the holding keeps the one it had.
  */
 @Injectable()
 export class StockPriceService {
@@ -93,51 +98,49 @@ export class StockPriceService {
         stale.push(symbol);
       }
     }
-    if (stale.length === 0) return result;
-
-    const url = `${STOOQ_URL}?s=${stale.map(s => s.toLowerCase()).join('+')}&f=sd2t2ohlcv&h&e=csv`;
-    try {
-      await assertPublicEgressUrl(url);
-      const csv = await this.fetchCsv(url);
-      if (csv === null) {
-        return result;
+    for (let offset = 0; offset < stale.length; offset += CONCURRENT_QUOTES) {
+      const quotes = await Promise.all(
+        stale.slice(offset, offset + CONCURRENT_QUOTES).map(symbol => this.quote(symbol)),
+      );
+      for (const quote of quotes) {
+        if (!quote) continue;
+        this.cache.set(quote.symbol, quote);
+        result.set(quote.symbol, quote);
       }
-      const quotes = parseStooqCsv(csv);
-      for (const [symbol, quote] of quotes) {
-        const priced: QuotedPrice = {
-          symbol,
-          price: quote.close,
-          currency: currencyForSymbol(symbol),
-          at: new Date(),
-        };
-        this.cache.set(symbol, priced);
-        result.set(symbol, priced);
-      }
-    } catch (error) {
-      this.logger.warn(`Stooq quote failed: ${String(error)}`);
     }
     return result;
   }
 
-  /** The quote CSV, or null (logged) when Stooq refused or could not be reached. Asked once. */
-  private fetchCsv(url: string): Promise<string | null> {
+  /** One symbol's quote, or null (logged) when Yahoo refused, has no price or could not be reached. */
+  private async quote(symbol: string): Promise<QuotedPrice | null> {
+    const url = `${YAHOO_CHART_URL}${encodeURIComponent(yahooSymbol(symbol))}?range=1d&interval=1d`;
     const logger = this.logger;
-    return this.effects.run(
-      getWith(url, { timeout: '10 seconds' }, response =>
-        response.status >= 200 && response.status < 300
-          ? response.text
-          : Effect.sync(() => {
-              logger.warn(`Stooq returned ${response.status}`);
-              return null;
-            }),
-      ).pipe(
+    try {
+      await assertPublicEgressUrl(url);
+    } catch (error) {
+      logger.warn(`Yahoo quote failed: ${String(error)}`);
+      return null;
+    }
+    const chart = await this.effects.run(
+      getJson(url, YahooChart, { timeout: '10 seconds' }).pipe(
         Effect.catch(error =>
           Effect.sync(() => {
-            logger.warn(`Stooq quote failed: ${describeHttpFailure(error)}`);
+            logger.warn(`Yahoo quote for ${symbol} failed: ${describeHttpFailure(error)}`);
             return null;
           }),
         ),
       ),
     );
+    const meta = chart?.chart.result?.[0]?.meta;
+    const price = meta?.regularMarketPrice;
+    const currency = meta?.currency;
+    if (!(price && price > 0 && currency)) return null;
+    const whole = HUNDREDTHS_OF[currency];
+    return {
+      symbol,
+      price: whole ? price / 100 : price,
+      currency: whole ?? currency.toUpperCase(),
+      at: new Date(),
+    };
   }
 }
