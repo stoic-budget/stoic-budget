@@ -285,6 +285,75 @@ describe('Accounts (e2e)', () => {
     ).expect(404);
   });
 
+  it('books a row in another currency at the rate of its day, and leaves one without a rate out', async () => {
+    const travelOpening = 200;
+    const day = '2026-10-16';
+    const rate = 0.025;
+    const spentAbroad = 500;
+    // A code no provider knows, so the test never depends on the network.
+    const exotic = 'ZZX';
+    const travel = await as(
+      owner,
+      request(server())
+        .post('/wallets')
+        .send({ name: 'Travel', type: 'savings', currency: 'USD', initialBalance: travelOpening }),
+    ).expect(201);
+    await as(
+      owner,
+      request(server())
+        .post('/exchange-rates/manual')
+        .send({ from: 'UAH', to: 'USD', rate, date: day }),
+    ).expect(201);
+    const rows = dataSource.getRepository(Transaction);
+    const spend = (currency: string, date: string, amount: number) =>
+      rows.create({
+        workspaceId: owner.workspaceId,
+        walletId: travel.body.id,
+        transactionDate: new Date(date),
+        counterpartyName: 'ACME Pay',
+        paymentPurpose: 'Purchase',
+        currency,
+        transactionType: TransactionType.EXPENSE,
+        amount,
+        debit: amount,
+        credit: null,
+        isVerified: true,
+      });
+    const [abroad, unpriced] = await rows.save([
+      spend('UAH', day, spentAbroad),
+      spend(exotic, '2026-10-17', 40),
+    ]);
+    const expected = travelOpening - spentAbroad * rate;
+
+    const item = (await as(owner, request(server()).get(`/wallets/${travel.body.id}`)).expect(200))
+      .body;
+    expect(item.balance).toBe(expected);
+    expect(item.unconvertedCurrencies).toEqual([exotic]);
+
+    const series = (
+      await as(owner, request(server()).get(`/wallets/${travel.body.id}/series`)).expect(200)
+    ).body;
+    expect(series).toEqual([
+      { date: day, balance: expected },
+      { date: '2026-10-17', balance: expected },
+    ]);
+
+    const page = (
+      await as(
+        owner,
+        request(server()).get(`/transactions?walletId=${travel.body.id}&running_balance=1`),
+      ).expect(200)
+    ).body;
+    const running = Object.fromEntries(
+      page.data.map((row: { id: string; runningBalance: string | null }) => [
+        row.id,
+        row.runningBalance,
+      ]),
+    );
+    expect(running[abroad.id]).toBe(expected.toFixed(2));
+    expect(running[unpriced.id]).toBe(expected.toFixed(2));
+  });
+
   it('counts a card as a debt in net worth and starts the forecast from the accounts', async () => {
     const othersCurrency: string = (
       await as(other, request(server()).get('/wallets/summary')).expect(200)

@@ -107,6 +107,14 @@ export default function AccountPage(): React.JSX.Element {
           <div style={{ display: 'grid', gap: 6 }}>
             <AccountBalance account={account} size={32} />
             <AccountReconciliation account={account} />
+            {account.unconvertedCurrencies.length > 0 && (
+              <span style={mutedStyle}>
+                {t.unconvertedNote.value.replace(
+                  '{{list}}',
+                  account.unconvertedCurrencies.join(', '),
+                )}
+              </span>
+            )}
             {!account.isActive && (
               <ReadOnlyHint>
                 <Button

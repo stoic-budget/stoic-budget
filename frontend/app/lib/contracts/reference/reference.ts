@@ -95,8 +95,13 @@ export const WalletItem = Schema.Struct({
   initialBalance: DecimalString,
   isActive: Schema.Boolean,
   ownerMemberId: Schema.NullOr(Schema.String),
-  /** Opening balance plus the counted rows booked to it; below zero for a debt. */
+  /**
+   * Opening balance plus the counted rows booked to it, in the account's currency
+   * (a row in another one at the rate of its day); below zero for a debt.
+   */
   balance: Schema.Number,
+  /** Currencies of rows in another currency left out of `balance`: no rate on their day. */
+  unconvertedCurrencies: Schema.Array(Schema.String),
   transactionCount: Schema.Number,
   /** Rows of the account still waiting in Review: not in the balance until approved. */
   pendingReviewCount: Schema.Number,

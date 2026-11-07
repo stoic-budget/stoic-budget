@@ -71,6 +71,7 @@ export function walletItem(
     isActive: true,
     ownerMemberId: null,
     balance: 0,
+    unconvertedCurrencies: [],
     transactionCount: 0,
     pendingReviewCount: 0,
     lastActivityAt: null,
