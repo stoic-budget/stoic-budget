@@ -3,11 +3,12 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const apiPost = vi.hoisted(() => vi.fn());
+const apiGet = vi.hoisted(() => vi.fn());
 
 vi.mock('@/app/lib/api', () => ({
   __esModule: true,
   default: {
-    get: vi.fn(),
+    get: apiGet,
     post: apiPost,
   },
 }));
@@ -16,6 +17,8 @@ vi.mock('@/app/i18n', () => ({
   useLocale: () => ({ locale: 'en' }),
   useIntlayer: () => ({
     title: 'Create an account',
+    closedTitle: 'Registration is closed',
+    closedBody: 'By invitation only',
     // AuthHero reads its own `authHero` dictionary through the same mock.
     features: {},
     fullNameLabel: 'Full name',
@@ -65,6 +68,17 @@ describe('RegisterPage validation', () => {
       root.unmount();
     });
     container.remove();
+  });
+
+  it('says sign-up is closed instead of showing a form nobody can send', async () => {
+    apiGet.mockResolvedValueOnce({ data: { open: false } });
+    await act(async () => {
+      root.render(<RegisterPage />);
+    });
+
+    expect(apiGet).toHaveBeenCalledWith('/auth/registration', expect.anything());
+    expect(container.textContent).toContain('Registration is closed');
+    expect(container.querySelector('form')).toBeNull();
   });
 
   it('does not submit when password is shorter than 8 characters', async () => {

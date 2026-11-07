@@ -7,6 +7,7 @@ import type { StringValue } from 'ms';
 import { devDefault } from '../../common/utils/dev-defaults';
 import {
   AuthSession,
+  InstanceSetting,
   PasswordResetToken,
   User,
   Workspace,
@@ -20,6 +21,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthDevBootstrapService } from './auth-dev-bootstrap.service';
 import { PasswordResetService } from './password-reset.service';
+import { RegistrationController } from './registration.controller';
+import { RegistrationSettingsService } from './registration-settings.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { TwoFactorService } from './two-factor.service';
@@ -28,6 +31,7 @@ import { TwoFactorService } from './two-factor.service';
   imports: [
     TypeOrmModule.forFeature([
       User,
+      InstanceSetting,
       Workspace,
       WorkspaceInvitation,
       WorkspaceMember,
@@ -52,9 +56,10 @@ import { TwoFactorService } from './two-factor.service';
       inject: [ConfigService],
     }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, RegistrationController],
   providers: [
     AuthService,
+    RegistrationSettingsService,
     TwoFactorService,
     PasswordResetService,
     AuthDevBootstrapService,
