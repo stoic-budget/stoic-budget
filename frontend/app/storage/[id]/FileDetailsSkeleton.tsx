@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
-import { useRouter } from 'next/navigation';
 import type React from 'react';
-import { ArrowLeft, Download, RefreshCcw } from '@/app/components/icons';
+import { Download, RefreshCcw } from '@/app/components/icons';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { useIntlayer } from '@/app/i18n';
 import { tokens } from '@/lib/theme-tokens';
 
@@ -32,7 +32,6 @@ const TAB_SX = {
  * and tabs for real, placeholders where the file's own values go.
  */
 export function FileDetailsSkeleton(): React.JSX.Element {
-  const router = useRouter();
   const t = useIntlayer('storageDetailsPage');
   const cards = [t.cards.size, t.cards.transactions, t.cards.uploadedAt, t.cards.account];
   const tabs = [t.tabs.transactions, t.tabs.links, t.tabs.permissions];
@@ -43,6 +42,7 @@ export function FileDetailsSkeleton(): React.JSX.Element {
       aria-busy="true"
       sx={{ px: 2, py: 4, display: 'flex', flexDirection: 'column', gap: 3 }}
     >
+      <Breadcrumbs parent="/statements" current={<Skeleton variant="text" width={160} />} />
       <Box
         sx={{
           display: 'flex',
@@ -53,22 +53,6 @@ export function FileDetailsSkeleton(): React.JSX.Element {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-          <Box
-            component="button"
-            type="button"
-            onClick={() => router.push('/statements')}
-            aria-label={t.actions.backToStorage.value}
-            sx={{
-              borderRadius: tokens.radius.full,
-              border: '1px solid var(--border-color)',
-              bgcolor: 'background.paper',
-              p: 1,
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-            }}
-          >
-            <ArrowLeft style={{ width: 20, height: 20 }} />
-          </Box>
           <Box>
             <Skeleton variant="text" width={240} height={30} />
             <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>

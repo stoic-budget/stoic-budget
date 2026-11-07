@@ -411,7 +411,7 @@ describe('ReceiptDocumentPage', () => {
     expect(container.textContent).toContain('Document title receipt');
   });
 
-  it('navigates back to statements from the receipt page', async () => {
+  it('leads back to statements through the breadcrumbs', async () => {
     apiMocks.mockApiGet.mockImplementation((url: string) => {
       if (url === '/receipts/receipt-1') {
         return Promise.resolve({
@@ -464,17 +464,11 @@ describe('ReceiptDocumentPage', () => {
       await Promise.resolve();
     });
 
-    const backButton = Array.from(container.querySelectorAll('button')).find(button =>
-      button.textContent?.includes('Back'),
+    const crumbs = container.querySelector('nav.seneca-breadcrumbs');
+    expect(crumbs?.querySelector('a[href="/statements"]')).toBeTruthy();
+    expect(crumbs?.querySelector('[aria-current="page"]')?.textContent).toBe(
+      container.querySelector('h1')?.textContent,
     );
-
-    expect(backButton).toBeTruthy();
-
-    await act(async () => {
-      backButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    expect(routerMocks.back).toHaveBeenCalled();
   });
 
   it('uses shared detail action buttons in the receipt header', async () => {

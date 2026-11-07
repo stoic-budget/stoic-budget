@@ -7,13 +7,16 @@ import { TablePageHeader, type TablePageHeaderLabels } from './TablePageHeader';
 
 const appLocale = vi.hoisted(() => ({ current: 'en' }));
 
+vi.mock('@/app/components/ui/breadcrumbs', () => ({
+  Breadcrumbs: ({ current }: { current: string }) => <nav>{current}</nav>,
+}));
+
 vi.mock('@/app/i18n', async importOriginal => ({
   ...(await importOriginal<typeof import('@/app/i18n')>()),
   useLocale: () => ({ locale: appLocale.current }),
 }));
 
 const labels: TablePageHeaderLabels = {
-  back: 'Back',
   balanceMissingRates: 'Without {{currencies}}: no exchange rate',
   rename: 'Rename',
   rows: '{{count}} rows',
@@ -39,7 +42,6 @@ const renderHeader = (moneyTotal: TableMoneyTotal | null = null) =>
       table={table}
       total={3}
       moneyTotal={moneyTotal}
-      onBack={vi.fn()}
       onRename={vi.fn()}
       labels={labels}
     />,

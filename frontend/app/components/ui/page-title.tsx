@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import React from 'react';
 import { MoveLeft } from '@/app/components/icons';
 import { buildNavItems } from '@/app/components/navigation/helpers/navigation-config';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { useIntlayer } from '@/app/i18n';
 import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
 
@@ -24,7 +24,7 @@ export function PageTitle({
   icon?: React.ReactElement<{ size?: number }>;
   summary?: string;
 }): React.JSX.Element {
-  const { nav, breadcrumbs } = useIntlayer('navigation');
+  const { nav } = useIntlayer('navigation');
   const item = buildNavItems((nav ?? {}) as Parameters<typeof buildNavItems>[0]).find(
     candidate => candidate.path === path,
   );
@@ -52,11 +52,7 @@ export function PageTitle({
         ) : null}
       </div>
       {path === DEFAULT_APP_ROUTE ? null : (
-        <nav className="seneca-page-title__crumbs" aria-label={breadcrumbs?.label?.value}>
-          <Link href={DEFAULT_APP_ROUTE}>{breadcrumbs?.home}</Link>
-          <span aria-hidden="true">/</span>
-          <span aria-current="page">{item?.label}</span>
-        </nav>
+        <Breadcrumbs current={item?.label} className="seneca-page-title__crumbs" />
       )}
     </div>
   );

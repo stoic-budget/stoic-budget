@@ -16,22 +16,8 @@
 
   // Home / the page, on the right; a phone has the sidebar's back path instead.
   &__crumbs {
-    display: flex;
     flex-shrink: 0;
-    gap: 6px;
     margin-left: auto;
-    font-size: 14px;
-    color: var(--text-muted);
-    white-space: nowrap;
-
-    a {
-      color: var(--primary);
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
 
     @media (max-width: 767px) {
       display: none;

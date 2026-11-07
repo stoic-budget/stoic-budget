@@ -1,0 +1,28 @@
+// Home / a sidebar page / the page itself. On a page inside another one the
+// trail is the way back, so unlike the heading's it stays on phones.
+.seneca-breadcrumbs {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+  white-space: nowrap;
+
+  a {
+    flex-shrink: 0;
+    color: var(--primary);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  // A long file or payee name gives way, never the links before it.
+  &__current {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

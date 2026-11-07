@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import type React from 'react';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { LoadError } from '@/app/components/ui/load-error';
 import { fillTemplateNodes, PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer, useLocale } from '@/app/i18n';
@@ -60,6 +61,7 @@ export function ReconcileView(): React.JSX.Element {
         gap: 3,
       }}
     >
+      <Breadcrumbs parent="/statements/pay" current={t.title} />
       <Box>
         <Typography
           variant="h5"

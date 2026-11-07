@@ -19,8 +19,9 @@ import Alert from '@mui/material/Alert';
 import { useParams, useRouter } from 'next/navigation';
 import { buildSourceColumnTitles } from '@/app/(main)/custom-tables/labels';
 import CustomDatePicker from '@/app/components/CustomDatePicker';
-import { ArrowLeft, CheckCircle2, ChevronDown, Layers, Trash2 } from '@/app/components/icons';
+import { CheckCircle2, ChevronDown, Layers, Trash2 } from '@/app/components/icons';
 import { NotesPanel } from '@/app/components/notes/NotesPanel';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { DetailActionButton } from '@/app/components/ui/detail-action-button';
 import { Spinner } from '@/app/components/ui/spinner';
 import { useAuth } from '@/app/hooks/useAuth';
@@ -224,19 +225,9 @@ export default function EditStatementPage(): React.JSX.Element {
     >
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Button
-          startIcon={<ArrowLeft size={18} />}
-          onClick={() => router.back()}
-          sx={{
-            mb: 3,
-            color: 'text.secondary',
-            textTransform: 'none',
-            fontWeight: 500,
-            '&:hover': { bgcolor: 'action.hover' },
-          }}
-        >
-          {t.labels.back}
-        </Button>
+        <Box sx={{ mb: 3 }}>
+          <Breadcrumbs parent="/statements" current={statement?.fileName} />
+        </Box>
         <Box
           sx={{
             display: 'flex',

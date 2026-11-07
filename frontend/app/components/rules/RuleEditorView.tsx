@@ -5,7 +5,7 @@ import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { ChevronLeft } from '@/app/components/icons';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { LoadError } from '@/app/components/ui/load-error';
 import { usePermissions } from '@/app/hooks/usePermissions';
 import { useIntlayer } from '@/app/i18n';
@@ -117,18 +117,15 @@ export function RuleEditorView({ id }: { id: string }) {
     }
   };
 
+  const title = isNew ? t.dialog.createTitle : (draft?.name ?? t.dialog.editTitle);
+
   return (
     <Box
       component="main"
       sx={{ px: { xs: 2, md: 4 }, pt: 'var(--seneca-page-top, 24px)', pb: 3, width: '100%' }}
     >
-      <NextLink href="/rules" className="seneca-rule-editor__back">
-        <ChevronLeft size={18} aria-hidden />
-        {t.editor.back}
-      </NextLink>
-      <h1 className="seneca-rule-editor__title">
-        {isNew ? t.dialog.createTitle : (draft?.name ?? t.dialog.editTitle)}
-      </h1>
+      <Breadcrumbs parent="/rules" current={title} className="seneca-rule-editor__crumbs" />
+      <h1 className="seneca-rule-editor__title">{title}</h1>
 
       {draft && (
         <div className="seneca-rule-editor">
