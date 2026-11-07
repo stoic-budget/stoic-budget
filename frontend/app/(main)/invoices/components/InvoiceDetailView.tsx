@@ -8,8 +8,8 @@ import {
   type MarkPaidResult,
 } from '@/app/(main)/statements/components/payables/MarkPaidDialog';
 import CustomDatePicker from '@/app/components/CustomDatePicker';
-import { ChevronLeft } from '@/app/components/icons';
 import { Badge } from '@/app/components/ui/badge';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { Button } from '@/app/components/ui/button';
 import { FORM_CONTROL_SX, Input } from '@/app/components/ui/input';
 import { PRIVATE_CLASS, PrivateAmount } from '@/app/components/ui/private-amount';
@@ -298,20 +298,17 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
   };
 
   if (loading) {
-    return <InvoiceDetailSkeleton onBack={() => router.push('/invoices')} />;
+    return <InvoiceDetailSkeleton />;
   }
 
   return (
     <div className="container-shared seneca-invoice-detail">
       <div className="seneca-invoice-detail__header">
-        <button
-          type="button"
-          onClick={() => router.push('/invoices')}
-          aria-label={t.actions.back.value}
-          style={{ display: 'flex', border: 0, background: 'none', cursor: 'pointer' }}
-        >
-          <ChevronLeft size={20} />
-        </button>
+        <Breadcrumbs
+          parent="/invoices"
+          current={invoice?.invoiceNumber ?? t.detail.newTitle}
+          className="seneca-invoice-detail__crumbs"
+        />
         <h1 style={{ fontSize: 22, fontWeight: 600 }}>
           {invoice?.invoiceNumber ?? t.detail.newTitle}
         </h1>

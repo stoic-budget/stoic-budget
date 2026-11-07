@@ -2,11 +2,10 @@
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { LazyNetWorthArea } from '@/app/components/charts/lazy-charts';
-import { ArrowLeft } from '@/app/components/icons';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { LoadError } from '@/app/components/ui/load-error';
 import { ModalFooter, ModalShell } from '@/app/components/ui/modal-shell';
 import { ReadOnlyHint } from '@/app/components/versions/ReadOnlyHint';
@@ -33,7 +32,6 @@ export default function AccountPage(): React.JSX.Element {
   const id = params?.id ?? '';
   const router = useRouter();
   const t = useIntlayer('accountsPage');
-  const nav = useIntlayer('navigation');
   const { types } = useAccountLabels();
   const { locale } = useLocale();
   const { account, series, statements, transactions, isPending, error } = useAccount(id);
@@ -69,15 +67,7 @@ export default function AccountPage(): React.JSX.Element {
         alignContent: 'start',
       }}
     >
-      <Button
-        component={Link}
-        href="/accounts"
-        size="small"
-        startIcon={<ArrowLeft size={16} />}
-        sx={{ justifySelf: 'start' }}
-      >
-        {nav.nav.accounts}
-      </Button>
+      <Breadcrumbs parent="/accounts" current={account?.name} />
 
       {error && !isPending && <LoadError spacing={6}>{t.notFound}</LoadError>}
 

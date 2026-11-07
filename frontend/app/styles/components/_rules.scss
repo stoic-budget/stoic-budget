@@ -221,19 +221,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  &__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
+  &__crumbs {
     margin-bottom: 8px;
-    font-size: 14px;
-    color: var(--text-muted);
-    text-decoration: none;
-
-    &:hover,
-    &:focus-visible {
-      color: var(--foreground);
-    }
   }
 
   &__title {
