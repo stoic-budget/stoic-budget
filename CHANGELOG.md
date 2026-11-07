@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0](https://github.com/stoic-budget/stoic-budget/compare/v2.0.0...v2.1.0) (2026-11-07)
+
+
+### Features
+
+* **advice:** advice stays Stoic, covers rules and reads the right figures ([66ac5a7](https://github.com/stoic-budget/stoic-budget/commit/66ac5a7dd66bd7b741e3a6ed9007418112e5a41c))
+* **advice:** advice stays Stoic, covers rules and reads the right figures ([1400a81](https://github.com/stoic-budget/stoic-budget/commit/1400a817ceb0449c862ca9f96681fbc74d7bffa6))
+* **auth:** let an administrator open or close registration from the app ([df26663](https://github.com/stoic-budget/stoic-budget/commit/df266636ae03def052414b00014e9442d22a4e36))
+* **auth:** let an operator close registration ([f7ebb59](https://github.com/stoic-budget/stoic-budget/commit/f7ebb59d6858e428415408a94c148410cef5fe5e))
+* **auth:** open or close registration from the admin page ([343ac39](https://github.com/stoic-budget/stoic-budget/commit/343ac39cbe5f508c2e8570e902d4556850d10b13))
+* **dashboard:** open the cash flow card on the calendar on a phone ([6ce57f1](https://github.com/stoic-budget/stoic-budget/commit/6ce57f1bcc25027dc9724ade13fbcadee3ed24a9))
+* **dashboard:** open the cash flow card on the calendar on a phone ([238e4c0](https://github.com/stoic-budget/stoic-budget/commit/238e4c08f598eeda31286147611a2089458c7507))
+* **guide:** words only, centred and larger, opening at once ([b0e2c4c](https://github.com/stoic-budget/stoic-budget/commit/b0e2c4cad838cc6876214a74fb030ef3279acd0e))
+* **guide:** words only, centred and larger, opening at once ([70d2cd8](https://github.com/stoic-budget/stoic-budget/commit/70d2cd81d0904b8bd1ba980551a8b7f02650fe61))
+* **payables:** enter income or an expense straight onto an account ([1b9da1d](https://github.com/stoic-budget/stoic-budget/commit/1b9da1dfa92180c39f6b1826a4cce3c0f3949151))
+* **payables:** enter income or an expense straight onto an account ([17ed775](https://github.com/stoic-budget/stoic-budget/commit/17ed7752cd7068db9bb0421bc6b1937f38ceef81))
+* **plugins:** AI assistant on by default, with a dashboard button ([2579940](https://github.com/stoic-budget/stoic-budget/commit/2579940e2162eacb718bc8a1b720ccdc6d9e12d5))
+* **plugins:** AI assistant on by default, with a dashboard button ([e1df508](https://github.com/stoic-budget/stoic-budget/commit/e1df5081b7258ef95c375a0b4559a32442db8a2d))
+* **privacy:** confirm before showing amounts again ([da1bda4](https://github.com/stoic-budget/stoic-budget/commit/da1bda4815a9814c8f997d4b8bbd92cd68b7e675))
+* **privacy:** confirm before showing amounts again ([9be7ff5](https://github.com/stoic-budget/stoic-budget/commit/9be7ff598c1ebaff34ee5bc6a902aadf68f155f4))
+* **rules:** a rule can give a row a payee and a comment ([0399ef1](https://github.com/stoic-budget/stoic-budget/commit/0399ef1bda09cac44624fddb63a1b7511283eb18))
+* **rules:** a rule can give a row a payee and a comment ([f342b31](https://github.com/stoic-budget/stoic-budget/commit/f342b31e5bd902309ec331ccb869eb1a47342ec2))
+* **rules:** conditions with several values, negations, ranges and "any of these" ([7abe4a0](https://github.com/stoic-budget/stoic-budget/commit/7abe4a0dfcdedb923c2bd5389e49037ae59eca3f))
+* **rules:** conditions with several values, negations, ranges and "any of these" ([0c16afa](https://github.com/stoic-budget/stoic-budget/commit/0c16afa81f869fc05f48c0db1e62e98b01157813))
+* **rules:** every rule that matches a row adds to it ([67423b6](https://github.com/stoic-budget/stoic-budget/commit/67423b6e8a9135e2eb6ce2ecddc245b14eb900a5))
+* **rules:** every rule that matches a row adds to it ([dbae7db](https://github.com/stoic-budget/stoic-budget/commit/dbae7db3c3fec2e108676f67ab304b788c30a029))
+* **rules:** the account a rule names beats the statement's ([cb3dfa7](https://github.com/stoic-budget/stoic-budget/commit/cb3dfa71a97a11041678250613bb9ce348419aa9))
+* **rules:** the account a rule names beats the statement's ([3a44011](https://github.com/stoic-budget/stoic-budget/commit/3a440111ad1af2e9aa9c017319686ad2fc34207d))
+* **supported-banks:** show every bank with a parser of its own ([481d4c8](https://github.com/stoic-budget/stoic-budget/commit/481d4c8afa0c03253b99c9a4794f9ba935b03c7b))
+* **supported-banks:** show every bank with a parser of its own ([06fdbbd](https://github.com/stoic-budget/stoic-budget/commit/06fdbbd48e4e09c5ce577f060c0271c6291a467d))
+
+
+### Bug Fixes
+
+* **ai-assistant:** right figures in the ChatGPT prompts, and enough of them ([b6648bf](https://github.com/stoic-budget/stoic-budget/commit/b6648bf9617de8e2fa73c55fee4ead5db361f8bf))
+* **ai-assistant:** tell ChatGPT the right figures, and enough of them ([bdeb33c](https://github.com/stoic-budget/stoic-budget/commit/bdeb33cebdfda7af93667a305d0fec3804f420fe))
+* **auth:** a TOTP code works once ([4d772f6](https://github.com/stoic-budget/stoic-budget/commit/4d772f67e2c941e2c2771c4b2123b5f59622981c))
+* **bank-sync:** keep a repeat purchase from the same feed ([d324ec8](https://github.com/stoic-budget/stoic-budget/commit/d324ec810a0d8f62c590f3a026841539b9c1a5d2))
+* **bank-sync:** read the Enable Banking session the way the API sends it ([ace63f3](https://github.com/stoic-budget/stoic-budget/commit/ace63f32a77062c8fc9711e84e79253bd64de937))
+* **investments:** a missing rate no longer writes a zero into net worth ([30caec6](https://github.com/stoic-budget/stoic-budget/commit/30caec61e1601a50c88a9109b51998aac075c68c))
+* **investments:** quote stocks from Yahoo Finance and show a stale price ([b8bfe05](https://github.com/stoic-budget/stoic-budget/commit/b8bfe053d98a911906aa56620600cdee163bfa7f))
+* **payables:** line up the fields of the payable form ([a1f57a7](https://github.com/stoic-budget/stoic-budget/commit/a1f57a77086365aa85a262f4b00c15144f15715a))
+* repeat bank purchases, Enable Banking linking, stock prices and other audit bugs ([a926768](https://github.com/stoic-budget/stoic-budget/commit/a92676834a1612fbc9f332d1b668b14b42774a15))
+* **rules:** a rule that matches no longer fails the import, and the editor does what it offers ([4e2f7c5](https://github.com/stoic-budget/stoic-budget/commit/4e2f7c5936ebb75250e810179fba916b0a1c0128))
+* **rules:** a rule that matches no longer fails the import, and the editor does what it offers ([eb47fdb](https://github.com/stoic-budget/stoic-budget/commit/eb47fdbda995ed61518731a7a921b290a02f696c))
+* **search:** find transactions that have no statement ([876ffed](https://github.com/stoic-budget/stoic-budget/commit/876ffed56a9c63eaaf0d006aca3b258b175ace9c))
+* **subscriptions:** a dismissed detection stays dismissed ([235666e](https://github.com/stoic-budget/stoic-budget/commit/235666eab2494efd6dd7704c76e72f29a4554740))
+* **subscriptions:** detect after approval, not only at the next import ([721a1a4](https://github.com/stoic-budget/stoic-budget/commit/721a1a4f622ad1c99bd6bd42bf15725dbcda2d77))
+
 ## [Unreleased]
 
 ### Added
