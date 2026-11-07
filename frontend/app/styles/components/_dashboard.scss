@@ -1106,7 +1106,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    min-height: 36px; /* the assistant button appears once the workspace is known */
+    min-height: 36px; /* the plugin icons appear once the workspace is known */
     margin-bottom: 16px;
   }
 
@@ -1158,6 +1158,72 @@
     }
   }
 
+}
+
+// Dashboard, top right: one icon per switched-on plugin. Seven fit on a wide
+// screen; on a narrow one the strip takes at most 40% of the row so the title
+// keeps its room, and the rest scrolls (swipe, or the small arrows).
+.seneca-plugin-shortcuts {
+  --plugin-icon: 36px;
+  --plugin-gap: 4px;
+
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: min(calc(7 * var(--plugin-icon) + 6 * var(--plugin-gap) + 40px), 40%);
+
+  &__track {
+    display: flex;
+    gap: var(--plugin-gap);
+    min-width: 0;
+    max-width: calc(7 * var(--plugin-icon) + 6 * var(--plugin-gap));
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__item,
+  &__arrow {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      color: var(--foreground);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: -2px;
+    }
+  }
+
+  &__item {
+    width: var(--plugin-icon);
+    height: var(--plugin-icon);
+    scroll-snap-align: start;
+  }
+
+  &__arrow {
+    width: 20px;
+    height: var(--plugin-icon);
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+  }
 }
 
 /* ── Overview: sections moved by their grip ──

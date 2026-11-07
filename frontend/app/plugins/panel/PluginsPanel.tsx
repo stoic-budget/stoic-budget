@@ -1,13 +1,11 @@
 'use client';
 
-import SmartToyIcon from '@mui/icons-material/SmartToy';
-import WebhookIcon from '@mui/icons-material/Webhook';
 import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import type React from 'react';
-import { ChevronRight, Cpu } from '@/app/components/icons';
+import { ChevronRight } from '@/app/components/icons';
 import {
   closeAppPanel,
   closeAppPanelItem,
@@ -19,48 +17,9 @@ import { useIntlayer } from '@/app/i18n';
 import { tokens } from '@/lib/theme-tokens';
 import { AiAssistantDrawer } from '../ai-assistant/AiAssistantDrawer';
 import { usePluginState } from '../hooks/usePluginState';
+import { type PluginItem, usePlugins } from '../hooks/usePlugins';
 import { McpServerDrawer } from '../mcp-server/McpServerDrawer';
-import type { PluginKey } from '../types';
 import { WebhooksDrawer } from '../webhooks/WebhooksDrawer';
-
-type PluginRowItem = {
-  key: PluginKey;
-  name: string;
-  description: React.ReactNode;
-  icon: React.ReactNode;
-  /** Whether the plugin has settings of its own in the second layer. */
-  configurable: boolean;
-};
-
-function usePlugins(): PluginRowItem[] {
-  const t = useIntlayer('pluginsPage');
-  const webhooksText = useIntlayer('webhooksDrawer');
-  const mcpText = useIntlayer('mcpServerDrawer');
-
-  return [
-    {
-      key: 'ai-assistant',
-      name: t.cards.aiAssistant.name.value,
-      description: t.cards.aiAssistant.description,
-      icon: <SmartToyIcon sx={{ fontSize: 22 }} />,
-      configurable: true,
-    },
-    {
-      key: 'webhooks',
-      name: webhooksText.title.value,
-      description: t.cards.webhooks.description,
-      icon: <WebhookIcon sx={{ fontSize: 22 }} />,
-      configurable: true,
-    },
-    {
-      key: 'mcp-server',
-      name: mcpText.title.value,
-      description: t.cards.mcpServer.description,
-      icon: <Cpu size={22} />,
-      configurable: true,
-    },
-  ];
-}
 
 function PluginRow({
   plugin,
@@ -70,7 +29,7 @@ function PluginRow({
   onToggle,
   onOpen,
 }: {
-  plugin: PluginRowItem;
+  plugin: PluginItem;
   active: boolean;
   canToggle: boolean;
   pending: boolean;
