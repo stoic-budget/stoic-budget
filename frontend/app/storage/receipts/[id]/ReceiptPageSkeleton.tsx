@@ -1,9 +1,8 @@
 import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
-import { useRouter } from 'next/navigation';
 import type React from 'react';
-import { ArrowLeft } from '@/app/components/icons';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { DetailActionButton } from '@/app/components/ui/detail-action-button';
 import { useIntlayer } from '@/app/i18n';
 import { tokens } from '@/lib/theme-tokens';
@@ -11,12 +10,11 @@ import { tokens } from '@/lib/theme-tokens';
 const FIELD_KEYS = ['vendor', 'date', 'amount', 'currency', 'category', 'tax'];
 
 /**
- * The receipt page while the receipt loads: the back link, the buttons and
+ * The receipt page while the receipt loads: the breadcrumbs, the buttons and
  * the two columns with their titles, placeholders where the receipt's values go.
  * Theme variables throughout: the page's resolved palette is light until the theme resolves.
  */
 export function ReceiptPageSkeleton(): React.JSX.Element {
-  const router = useRouter();
   const t = useIntlayer('receiptDocumentPage');
   return (
     <Box
@@ -55,26 +53,7 @@ export function ReceiptPageSkeleton(): React.JSX.Element {
           }}
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Box
-              component="button"
-              type="button"
-              onClick={() => router.back()}
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 0.5,
-                fontSize: 13,
-                fontWeight: 500,
-                color: 'var(--text-muted)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                p: 0,
-              }}
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              {t.back}
-            </Box>
+            <Breadcrumbs parent="/statements" current={<Skeleton variant="text" width={160} />} />
             <Box>
               <Typography
                 style={{

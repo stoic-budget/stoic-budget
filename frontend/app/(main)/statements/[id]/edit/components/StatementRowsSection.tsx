@@ -3,13 +3,16 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { PRIVATE_CLASS } from '@/app/components/ui/private-amount';
 import { TextTabs } from '@/app/components/ui/text-tabs';
 import type { Transaction } from '../editHelpers';
 import { groupByPayee, needsCategory, unnamedRows } from '../helpers/payee-groups';
+import { useRowFixes } from '../hooks/useRowFixes';
 import { EditTransactionsTable, type EditTransactionsTableProps } from './EditTransactionsTable';
 import { PayeeGroupsTable } from './PayeeGroupsTable';
+import { RowEditDialog, type RowEditLabels } from './RowEditDialog';
 import { SuggestionsHint, useSuggestionsHint } from './SuggestionsHint';
 
 type View = 'rows' | 'payees';
@@ -17,10 +20,34 @@ type View = 'rows' | 'payees';
 type StatementRowsSectionProps = EditTransactionsTableProps & {
   /** Opens the category drawer for these rows. */
   onPickRows: (rows: Transaction[]) => void;
+  /**
+   * Given while the statement's rows do not add up: rows may then be edited,
+   * added and deleted by hand, and this reloads the page after each change.
+   */
+  fixRows?: () => Promise<void>;
 };
 
 function text(labels: EditTransactionsTableProps['labels'], key: string, fallback: string): string {
   return labels[key]?.value ?? fallback;
+}
+
+function rowEditLabels(
+  labels: EditTransactionsTableProps['labels'],
+  columns: EditTransactionsTableProps['columns'],
+): RowEditLabels {
+  const column = (key: string, fallback: string) => columns[key]?.value ?? fallback;
+  return {
+    editRow: text(labels, 'editRow', 'Edit row'),
+    addRow: text(labels, 'addRow', 'Add a missing row'),
+    date: column('date', 'Date'),
+    counterparty: column('counterparty', 'Counterparty'),
+    paymentPurpose: column('paymentPurposeShort', 'Payment purpose'),
+    amount: column('amount', 'Amount'),
+    moneyOut: text(labels, 'moneyOut', 'Money out'),
+    moneyIn: text(labels, 'moneyIn', 'Money in'),
+    save: text(labels, 'saveRow', 'Save'),
+    cancel: text(labels, 'cancel', 'Cancel'),
+  };
 }
 
 /**
@@ -30,9 +57,17 @@ function text(labels: EditTransactionsTableProps['labels'], key: string, fallbac
  */
 export function StatementRowsSection({
   onPickRows,
+  fixRows,
   ...tableProps
 }: StatementRowsSectionProps): React.ReactElement {
   const { transactions, labels, columns, locale, formatNumber } = tableProps;
+  const fixes = useRowFixes(
+    useParams<{ id: string }>().id,
+    fixRows ?? (async () => undefined),
+    text(labels, 'rowSaveFailed', 'Could not save the row'),
+  );
+  // The row open in the editor: a row, `null` for a new one, `undefined` for none.
+  const [editing, setEditing] = useState<Transaction | null | undefined>(undefined);
   const [picked, setPicked] = useState<View | null>(null);
   const groups = groupByPayee(transactions);
   const toFile = groups.filter(group => group.unfiled > 0).length;
@@ -105,6 +140,29 @@ export function StatementRowsSection({
           </Button>
         )}
       </Box>
+      {fixRows ? (
+        <Box sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+          <Typography variant="body2" sx={{ color: 'var(--text-muted)' }}>
+            {text(labels, 'rowFixHint', 'The rows do not add up to the statement’s balances.')}
+          </Typography>
+          <Button
+            size="small"
+            variant="text"
+            onClick={() => setEditing(null)}
+            sx={{ textTransform: 'none', fontWeight: 500 }}
+          >
+            {text(labels, 'addRow', 'Add a missing row')}
+          </Button>
+        </Box>
+      ) : null}
+      {editing !== undefined ? (
+        <RowEditDialog
+          row={editing}
+          labels={rowEditLabels(labels, columns)}
+          onClose={() => setEditing(undefined)}
+          onSave={values => fixes.saveRow(editing, values)}
+        />
+      ) : null}
       {view === 'payees' ? (
         <PayeeGroupsTable
           groups={groups}
@@ -126,7 +184,18 @@ export function StatementRowsSection({
           }}
         />
       ) : (
-        <EditTransactionsTable {...tableProps} />
+        <EditTransactionsTable
+          {...tableProps}
+          onEdit={fixRows ? setEditing : undefined}
+          onDelete={
+            fixRows
+              ? async id => {
+                  await tableProps.onDelete(id);
+                  await fixes.afterDelete();
+                }
+              : tableProps.onDelete
+          }
+        />
       )}
       {/* Rows the bank printed no payee for are different shops: filed one by one. */}
       {view === 'payees' && unnamed.length > 0 ? (

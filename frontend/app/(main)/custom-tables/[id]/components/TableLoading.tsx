@@ -2,8 +2,7 @@
 
 import Skeleton from '@mui/material/Skeleton';
 import { DataGridSkeleton } from '@/app/components/data-grid';
-import { ArrowLeft } from '@/app/components/icons';
-import { Button } from '@/app/components/ui/button';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import type { DetailLabels } from '../labels';
 import { FilterBar } from './FilterBar';
 import { ROW_HEIGHT } from './TableGrid';
@@ -15,32 +14,18 @@ const SKELETON_COLUMNS = 5;
 const noop = () => undefined;
 
 /**
- * The table page before the table arrives: the real back button and toolbar,
+ * The table page before the table arrives: the real trail and toolbar,
  * the title and its meta line waiting, and the grid as placeholder rows.
  */
-export function TableLoading({
-  rows,
-  labels,
-  onBack,
-}: {
-  rows: number;
-  labels: DetailLabels;
-  onBack: () => void;
-}) {
+export function TableLoading({ rows, labels }: { rows: number; labels: DetailLabels }) {
   return (
     <div className="seneca-ct seneca-ct--fill" aria-busy>
       <header className="seneca-ct__header">
-        <Button
-          variant="ghost"
-          size="icon"
-          type="button"
-          onClick={onBack}
-          className="seneca-ct__back"
-          aria-label={labels.header.back}
-          title={labels.header.back}
-        >
-          <ArrowLeft size={18} aria-hidden />
-        </Button>
+        <Breadcrumbs
+          parent="/custom-tables"
+          current={<Skeleton variant="text" width={80} sx={{ display: 'inline-block' }} />}
+          className="seneca-ct__crumbs"
+        />
         <div className="seneca-ct__title-row">
           <h1 className="seneca-ct__title">
             <Skeleton variant="text" width={160} />

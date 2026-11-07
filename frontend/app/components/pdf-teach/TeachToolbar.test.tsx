@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 const offer = vi.hoisted(() => ({ dismissed: false }));
+const router = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock('next/navigation', () => ({ useRouter: () => router }));
 vi.mock('./TeachShareDialog', () => ({
   shareOfferDismissed: () => offer.dismissed,
   TeachShareDialog: ({ onClose }: { onClose: () => void }) => (
@@ -91,5 +93,19 @@ describe('TeachToolbar', () => {
     expect(document.querySelector('.seneca-pdf-teach__warning')).not.toBeNull();
     fireEvent.keyDown(document.body, { key: '3' });
     expect(marks.setActiveTag).toHaveBeenCalledWith('debit');
+  });
+
+  it('keeps what reads and opens the rows to correct by hand when no marking adds up', async () => {
+    const marks = session({
+      preview: { ...preview, checks: [{ code: 'printed_totals', passed: false }] },
+    });
+    const onDone = vi.fn();
+    render(<TeachToolbar session={marks} onDone={onDone} />);
+    fireEvent.click(screen.getByRole('button', { name: /by hand/i }));
+    await vi.waitFor(() =>
+      expect(router.push).toHaveBeenCalledWith('/statements/statement-1/edit'),
+    );
+    expect(marks.save).toHaveBeenCalled();
+    expect(onDone).toHaveBeenCalled();
   });
 });

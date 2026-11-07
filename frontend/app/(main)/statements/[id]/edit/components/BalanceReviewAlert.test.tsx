@@ -60,8 +60,12 @@ describe('BalanceReviewAlert', () => {
     act(async () => {
       root.render(
         <BalanceReviewAlert
-          statement={{ id: 'stmt-1', fileName: 'statement.pdf', fileType: 'pdf' }}
-          status="needs_review"
+          statement={{
+            id: 'stmt-1',
+            fileName: 'statement.pdf',
+            fileType: 'pdf',
+            status: 'needs_review',
+          }}
           parsingDetails={parsingDetails}
           labels={labels}
           formatNumber={n => String(n ?? '—')}
@@ -110,7 +114,9 @@ describe('BalanceReviewAlert', () => {
   });
 
   it('renders nothing for a statement that is not awaiting review', async () => {
-    await render({ status: 'completed' });
+    await render({
+      statement: { id: 'stmt-1', fileName: 'statement.pdf', fileType: 'pdf', status: 'completed' },
+    });
 
     expect(container.textContent).toBe('');
   });

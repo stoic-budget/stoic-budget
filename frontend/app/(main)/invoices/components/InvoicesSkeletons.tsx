@@ -1,6 +1,6 @@
 import Skeleton from '@mui/material/Skeleton';
 import type React from 'react';
-import { ChevronLeft } from '@/app/components/icons';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { useIntlayer } from '@/app/i18n';
 
 const ROW_KEYS = ['row-0', 'row-1', 'row-2', 'row-3', 'row-4', 'row-5'];
@@ -104,23 +104,20 @@ function Field({ label, height }: { label: React.ReactNode; height: number }): R
 }
 
 /**
- * The invoice while it loads: the real back button and labels; the number, status,
+ * The invoice while it loads: the real trail and labels; the number, status,
  * actions and values wait. Shaped like a sent invoice, the form most invoices show.
  */
-export function InvoiceDetailSkeleton({ onBack }: { onBack: () => void }): React.JSX.Element {
+export function InvoiceDetailSkeleton(): React.JSX.Element {
   const t = useIntlayer('invoicesPage');
   const einvoice = useIntlayer('einvoiceFields');
   return (
     <div className="container-shared seneca-invoice-detail" aria-busy="true">
       <div className="seneca-invoice-detail__header">
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label={t.actions.back.value}
-          style={{ display: 'flex', border: 0, background: 'none', cursor: 'pointer' }}
-        >
-          <ChevronLeft size={20} />
-        </button>
+        <Breadcrumbs
+          parent="/invoices"
+          current={<Skeleton variant="text" width={64} sx={{ display: 'inline-block' }} />}
+          className="seneca-invoice-detail__crumbs"
+        />
         <Skeleton variant="text" width={86} sx={{ fontSize: 22 }} />
         <Skeleton variant="rounded" width={42} height={22} sx={{ borderRadius: '999px' }} />
         <div className="seneca-invoice-detail__actions">

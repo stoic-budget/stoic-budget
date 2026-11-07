@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { ArrowLeft } from '@/app/components/icons';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { LoadError } from '@/app/components/ui/load-error';
 import { fillTemplateNodes, PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer, useLocale } from '@/app/i18n';
@@ -90,15 +90,9 @@ export default function GoalDetailPage(): React.JSX.Element {
       component="main"
       sx={{ px: { xs: 2, md: 4 }, pt: 'var(--seneca-page-top, 24px)', pb: 3, width: '100%' }}
     >
-      <Button
-        component={Link}
-        href="/goals"
-        size="small"
-        startIcon={<ArrowLeft size={16} />}
-        sx={{ mb: 2 }}
-      >
-        {t.back}
-      </Button>
+      <Box sx={{ mb: 2 }}>
+        <Breadcrumbs parent="/goals" current={data?.goal.name} />
+      </Box>
 
       {error && !isPending && <LoadError spacing={6}>{t.error}</LoadError>}
 

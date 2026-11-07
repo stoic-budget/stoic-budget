@@ -1,14 +1,14 @@
 'use client';
 import { Box, Typography } from '@mui/material';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
-import { ArrowLeft } from '@/app/components/icons';
 import { EInvoicePanel } from '@/app/components/receipts/EInvoicePanel';
 import { ReceiptLocationSection } from '@/app/components/receipts/location/ReceiptLocationSection';
 import { ReceiptLinks } from '@/app/components/receipts/ReceiptLinks';
 import { ReceiptParsedDataForm } from '@/app/components/receipts/ReceiptParsedDataForm';
 import { ReceiptTransactionMatch } from '@/app/components/receipts/ReceiptTransactionMatch';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { useIntlayer } from '@/app/i18n';
 import { FALLBACK_CURRENCY } from '@/app/lib/currency';
 import { formatStoredDate } from '@/app/lib/user-format-store';
@@ -26,7 +26,6 @@ import { buildReceiptDisplayTitle } from './receipt-form';
 
 export default function ReceiptDocumentPage() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
   const receiptId = params.id;
   const { resolvedTheme } = useTheme();
   const c = resolvedTheme === 'dark' ? tokens.dark.color : tokens.color;
@@ -94,28 +93,8 @@ export default function ReceiptDocumentPage() {
             justifyContent: { sm: 'space-between' },
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Box
-              component="button"
-              type="button"
-              onClick={() => router.back()}
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 0.5,
-                fontSize: 13,
-                fontWeight: 500,
-                color: c.ink500,
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                p: 0,
-                '&:hover': { color: c.ink700 },
-              }}
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              {t.back}
-            </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, minWidth: 0 }}>
+            <Breadcrumbs parent="/statements" current={displayTitle} />
             <Box>
               <Typography
                 style={{

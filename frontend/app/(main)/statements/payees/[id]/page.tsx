@@ -9,7 +9,6 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { CategoryPickerField } from '@/app/components/categories/CategoryPickerField';
 import { merchantTones } from '@/app/components/charts/chart-theme';
-import { ArrowLeft } from '@/app/components/icons';
 import { offerAction } from '@/app/components/payees/offer-action-toast';
 import { PayeeDrawer } from '@/app/components/payees/PayeeDrawer';
 import { takenBy } from '@/app/components/payees/TransactionPayeeSection';
@@ -21,6 +20,7 @@ import {
   usePayeeSummary,
   useUpdatePayee,
 } from '@/app/components/payees/usePayees';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { LoadError } from '@/app/components/ui/load-error';
 import { Select } from '@/app/components/ui/select';
 import { VendorIcon } from '@/app/components/VendorIcon';
@@ -48,7 +48,6 @@ export default function PayeePage(): React.JSX.Element {
   const router = useRouter();
   const t = useIntlayer('payeesPage');
   const tPayees = useIntlayer('payees');
-  const nav = useIntlayer('navigation');
   const { locale } = useLocale();
   const workspaceId = useWorkspaceId();
 
@@ -121,15 +120,7 @@ export default function PayeePage(): React.JSX.Element {
 
   return (
     <div className="seneca-all-tx">
-      <Button
-        component={Link}
-        href="/statements/payees"
-        size="small"
-        startIcon={<ArrowLeft size={16} />}
-        sx={{ alignSelf: 'flex-start' }}
-      >
-        {nav.nav.payees}
-      </Button>
+      <Breadcrumbs parent="/statements/payees" current={data?.name} />
 
       {payee.isError && <LoadError>{t.notFound}</LoadError>}
       {payee.isPending && <PayeeDetailSkeleton payeeId={id} />}

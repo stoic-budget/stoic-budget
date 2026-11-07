@@ -42,10 +42,13 @@ const HIGH_DROP_RATIO_THRESHOLD = 0.5;
  * own currency (Hapoalim tracks the original via amountForeign instead)
  * already report one currency per row, so they're unaffected.
  */
-function findMixedCurrencies(transactions: ParsedTransaction[]): string[] | null {
+function findMixedCurrencies(transactions: MovedRow[]): string[] | null {
   const currencies = new Set(transactions.map(t => t.currency).filter((c): c is string => !!c));
   return currencies.size > 1 ? Array.from(currencies) : null;
 }
+
+/** What validation reads of a row: its money and currency. */
+type MovedRow = Pick<ParsedTransaction, 'debit' | 'credit' | 'currency'>;
 
 const money = (value: number | undefined) => (value ?? 0).toFixed(2);
 
@@ -114,7 +117,7 @@ function droppedRows(
  */
 export function validateParsedStatement(
   metadata: { balanceStart?: number | null; balanceEnd?: number | null },
-  transactions: ParsedTransaction[],
+  transactions: MovedRow[],
   options: {
     tolerance: number;
     dropInfo?: { rawCount: number; droppedCount: number };

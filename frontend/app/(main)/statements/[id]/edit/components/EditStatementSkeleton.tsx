@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Container,
   Paper,
   Skeleton,
@@ -12,9 +11,10 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, ChevronDown, Layers } from '@/app/components/icons';
+import { useParams } from 'next/navigation';
+import { CheckCircle2, ChevronDown, Layers } from '@/app/components/icons';
 import { StatementTagsField } from '@/app/components/tags/RecordTagsField';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { DetailActionButton } from '@/app/components/ui/detail-action-button';
 import { useIntlayer } from '@/app/i18n';
 import { getColumnLabels } from '../helpers/transactionDisplayHelpers';
@@ -29,7 +29,6 @@ const SHARES = [1, 0.7, 0.85, 0.6, 0.95, 0.75, 0.9];
  * column titles, with placeholders where the statement's values go.
  */
 export function EditStatementSkeleton(): React.JSX.Element {
-  const router = useRouter();
   const params = useParams();
   const t = useIntlayer('statementEditPage');
   const labels = t.labels as Record<string, { value: string }>;
@@ -44,13 +43,9 @@ export function EditStatementSkeleton(): React.JSX.Element {
       sx={{ py: 5, height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
     >
       <Box sx={{ mb: 4 }}>
-        <Button
-          startIcon={<ArrowLeft size={18} />}
-          onClick={() => router.back()}
-          sx={{ mb: 3, color: 'text.secondary', textTransform: 'none', fontWeight: 500 }}
-        >
-          {t.labels.back}
-        </Button>
+        <Box sx={{ mb: 3 }}>
+          <Breadcrumbs parent="/statements" current={<Skeleton variant="text" width={160} />} />
+        </Box>
         <Box
           sx={{
             display: 'flex',

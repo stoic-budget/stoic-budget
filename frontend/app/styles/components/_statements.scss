@@ -1692,6 +1692,11 @@
     margin-bottom: 24px;
   }
 
+  // Home / Invoices / this one, on a line of its own above the number.
+  &__crumbs {
+    flex-basis: 100%;
+  }
+
   &__actions {
     display: flex;
     flex-wrap: wrap;
@@ -3127,6 +3132,33 @@
 }
 
 /* ── TrashListView ───────────────────────────────────────── */
+.seneca-trash-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+
+  // Home / Statements / Trash, on the list's own side padding.
+  &__crumbs {
+    flex-shrink: 0;
+    padding: var(--seneca-page-top, 24px) 16px 0;
+
+    @media (min-width: 640px) {
+      padding: var(--seneca-page-top, 24px) 24px 0;
+    }
+
+    @media (min-width: 1024px) {
+      padding: var(--seneca-page-top, 24px) 32px 0;
+    }
+  }
+
+  // The trail already took the page's top space.
+  > .seneca-trash-list {
+    flex: 1;
+    padding-top: 12px;
+  }
+}
+
 .seneca-trash-list {
   display: flex;
   flex-direction: column;

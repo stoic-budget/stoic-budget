@@ -58,7 +58,6 @@ vi.mock('@/app/i18n', () => {
       assignCategory: token('Failed to assign'),
     },
     labels: {
-      back: 'Back',
       alsoFiledPayeeRows: token('Filed {count} more rows of {payee} the same way'),
       undo: token('Undo'),
       keep: token('Keep'),

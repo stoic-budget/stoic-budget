@@ -1,8 +1,8 @@
 'use client';
 
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Pencil } from '@/app/components/icons';
-import { Button } from '@/app/components/ui/button';
+import { Pencil } from '@/app/components/icons';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { PRIVATE_CLASS } from '@/app/components/ui/private-amount';
 import { useCategoryName } from '@/app/lib/use-category-name';
 import { formatStoredDate } from '@/app/lib/user-format-store';
@@ -11,7 +11,6 @@ import { formatCellNumber } from '../utils/numberFormat';
 import type { CustomTable } from '../utils/tableTypes';
 
 export interface TablePageHeaderLabels {
-  back: string;
   /** Under the balance when some rows have no exchange rate; `{{currencies}}` lists them. */
   balanceMissingRates: string;
   rename: string;
@@ -28,7 +27,6 @@ interface TablePageHeaderProps {
   total: number | null;
   /** The table's balance, drawn under the title; null until loaded or without a money column. */
   moneyTotal?: TableMoneyTotal | null;
-  onBack: () => void;
   onRename: (name: string) => Promise<void>;
   /** The toolbar, drawn on the title's line so the grid starts higher. */
   actions?: ReactNode;
@@ -65,12 +63,11 @@ function TableBalance({
   );
 }
 
-/** Back arrow and editable title with a short meta line under it; the toolbar sits to the right. */
+/** The trail back to the tables, and the editable title with a short meta line under it; the toolbar sits to the right. */
 export function TablePageHeader({
   table,
   total,
   moneyTotal,
-  onBack,
   onRename,
   actions,
   labels,
@@ -102,17 +99,11 @@ export function TablePageHeader({
 
   return (
     <header className="seneca-ct__header">
-      <Button
-        variant="ghost"
-        size="icon"
-        type="button"
-        onClick={onBack}
-        className="seneca-ct__back"
-        aria-label={labels.back}
-        title={labels.back}
-      >
-        <ArrowLeft size={18} aria-hidden />
-      </Button>
+      <Breadcrumbs
+        parent="/custom-tables"
+        current={table.name || labels.untitled}
+        className="seneca-ct__crumbs"
+      />
       <div className="seneca-ct__title-row">
         {editing ? (
           <input

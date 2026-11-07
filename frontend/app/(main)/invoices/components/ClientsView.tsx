@@ -1,10 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { ChevronLeft, Plus } from '@/app/components/icons';
+import { Plus } from '@/app/components/icons';
 import { useQuickActions } from '@/app/components/mobile/quick-actions-store';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { Button } from '@/app/components/ui/button';
 import { EmptyState } from '@/app/components/ui/EmptyState';
 import { PeopleLineIcon } from '@/app/components/ui/empty-state-icons';
@@ -22,7 +22,6 @@ import { ClientDrawer } from './ClientDrawer';
 import { ClientRowsSkeleton } from './InvoicesSkeletons';
 
 export function ClientsView(): React.JSX.Element {
-  const router = useRouter();
   const t = useIntlayer('invoicesPage');
   const invoiceSettings = useIntlayer('invoiceSettings');
   const { currentWorkspace } = useWorkspace();
@@ -97,14 +96,7 @@ export function ClientsView(): React.JSX.Element {
           gap: 12,
         }}
       >
-        <button
-          type="button"
-          onClick={() => router.push('/invoices')}
-          aria-label={t.actions.back.value}
-          style={{ display: 'flex', border: 0, background: 'none', cursor: 'pointer' }}
-        >
-          <ChevronLeft size={20} />
-        </button>
+        <Breadcrumbs parent="/invoices" current={t.clientsNav} />
         <div style={{ flex: 1 }} />
         {/* With no clients the empty state's button is the one action. */}
         {!loading && clients.length === 0 ? null : (

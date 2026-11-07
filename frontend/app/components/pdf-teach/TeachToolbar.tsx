@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useIntlayer, useLocale } from '@/app/i18n';
@@ -57,6 +58,7 @@ function chainLine(
 export function TeachToolbar({ session, onDone }: { session: TeachSession; onDone: () => void }) {
   const [sharing, setSharing] = useState(false);
   const t = useIntlayer('pdfTeach');
+  const router = useRouter();
   const { locale } = useLocale();
   useTeachKeys(session);
   const label = (tag: TeachTag) => t.tags[tag].value;
@@ -111,6 +113,16 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
     }
   };
 
+  // No marking makes it add up: keep what reads, then correct the rows on the statement page.
+  const fixByHand = async () => {
+    if (await session.save()) {
+      onDone();
+      router.push(`/statements/${session.statementId}/edit`);
+    } else {
+      toast.error(t.saveFailed.value);
+    }
+  };
+
   if (sharing && session.statementId) {
     return <TeachShareDialog statementId={session.statementId} onClose={onDone} />;
   }
@@ -139,7 +151,17 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
         <p className="seneca-pdf-teach__status" aria-live="polite">
           {status}
           {failed ? (
-            <span className="seneca-pdf-teach__warning">{t.status.checksFailed}</span>
+            <span className="seneca-pdf-teach__warning">
+              {t.status.checksFailed}{' '}
+              <button
+                type="button"
+                className="seneca-pdf-teach__fix-link"
+                disabled={session.saving || session.reading}
+                onClick={fixByHand}
+              >
+                {t.fixRowsByHand}
+              </button>
+            </span>
           ) : null}
           {warnings.map(warning => (
             <span key={warning} className="seneca-pdf-teach__warning">
