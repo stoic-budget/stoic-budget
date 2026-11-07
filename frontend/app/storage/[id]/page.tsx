@@ -12,6 +12,7 @@ import {
   Shield,
   ShieldCheck,
 } from '@/app/components/icons';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { SnapshotSkeleton } from '@/app/components/ui/snapshot-skeleton/SnapshotSkeleton';
 import { Spinner } from '@/app/components/ui/spinner';
 import { useIntlayer, useLocale } from '@/app/i18n';
@@ -369,6 +370,7 @@ export default function FileDetailsPage() {
       className="container-shared"
       sx={{ px: 2, py: 4, display: 'flex', flexDirection: 'column', gap: 3 }}
     >
+      <Breadcrumbs parent="/statements" current={statement.fileName} />
       <Box
         sx={{
           display: 'flex',
@@ -379,23 +381,6 @@ export default function FileDetailsPage() {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-          <Box
-            component="button"
-            type="button"
-            onClick={() => router.push('/statements')}
-            aria-label={t.actions.backToStorage.value}
-            sx={{
-              borderRadius: tokens.radius.full,
-              border: '1px solid var(--border-color)',
-              bgcolor: 'background.paper',
-              p: 1,
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              '&:hover': { bgcolor: 'var(--muted)' },
-            }}
-          >
-            <ArrowLeft style={{ width: 20, height: 20 }} />
-          </Box>
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
               <Typography

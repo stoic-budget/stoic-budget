@@ -201,7 +201,7 @@ export function ParsingWarningsPanel({
       {/* No frame and no icon per line: one ochre dot says "look here", the rows stay ink. */}
       <section className="seneca-parse-warnings" aria-label={title ?? t.panelTitle.value}>
         <h3 className="seneca-parse-warnings__title">{title ?? t.panelTitle}</h3>
-        <p className="seneca-parse-warnings__helper">{helperText ?? t.panelHelper}</p>
+        {helperText ? <p className="seneca-parse-warnings__helper">{helperText}</p> : null}
         <WarningsList
           warnings={warnings}
           editableEntryByReason={panel.editableEntryByReason}

@@ -58,7 +58,6 @@ vi.mock('@/app/i18n', () => {
       assignCategory: token('Failed to assign'),
     },
     labels: {
-      back: 'Back',
       alsoFiledPayeeRows: token('Filed {count} more rows of {payee} the same way'),
       undo: token('Undo'),
       keep: token('Keep'),
@@ -157,7 +156,6 @@ vi.mock('@/app/i18n', () => {
       createdTransactions: token('Transactions created'),
       enterManuallyHint: token('Enter manually if it was not detected'),
       errors: token('Errors'),
-      extractedMetadata: token('Extracted metadata'),
       fixDroppedRow: token('Fix'),
       format: token('Format'),
       foundTransactions: token('Transactions found'),

@@ -30,6 +30,9 @@ type RowActionsProps = {
   moreActionsLabel: string;
   cancelLabel: string;
   onDelete: (id: string) => Promise<void>;
+  /** Offered while the statement's rows do not add up (RowEditDialog). */
+  onEdit?: (transaction: Transaction) => void;
+  editLabel?: string;
 };
 
 /** Delete sits in the "…" menu behind a confirmation, shown on the row under the pointer. */
@@ -40,6 +43,8 @@ function RowActions({
   moreActionsLabel,
   cancelLabel,
   onDelete,
+  onEdit,
+  editLabel,
 }: RowActionsProps): React.ReactElement {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -57,6 +62,16 @@ function RowActions({
         </IconButton>
       </Box>
       <Menu anchorEl={menuAnchor} open={menuAnchor !== null} onClose={() => setMenuAnchor(null)}>
+        {onEdit ? (
+          <MenuItem
+            onClick={() => {
+              setMenuAnchor(null);
+              onEdit(transaction);
+            }}
+          >
+            {editLabel}
+          </MenuItem>
+        ) : null}
         <MenuItem
           onClick={() => {
             setMenuAnchor(null);
@@ -108,11 +123,14 @@ export type TransactionRowProps = {
   onRowSelect: (id: string) => void;
   onCategoryClick: (transaction: Transaction) => void;
   onDelete: (id: string) => Promise<void>;
+  onEdit?: (transaction: Transaction) => void;
+  editLabel?: string;
 };
 
 /**
  * Date, counterparty, purpose and amount are what the bank printed: they stay
- * as parsed. Only the category is a person's to set, with a click on it.
+ * as parsed. Only the category is a person's to set, with a click on it,
+ * unless the reading did not add up: then the row may be corrected (`onEdit`).
  */
 export function TransactionRow({
   transaction,
@@ -129,6 +147,8 @@ export function TransactionRow({
   onRowSelect,
   onCategoryClick,
   onDelete,
+  onEdit,
+  editLabel,
 }: TransactionRowProps): React.ReactElement {
   const payeeName = usePayeeName();
   const missingCategory = computeMissingCategory(transaction);
@@ -191,6 +211,8 @@ export function TransactionRow({
           moreActionsLabel={moreActionsLabel}
           cancelLabel={cancelLabel}
           onDelete={onDelete}
+          onEdit={onEdit}
+          editLabel={editLabel}
         />
       </TableCell>
     </TableRow>

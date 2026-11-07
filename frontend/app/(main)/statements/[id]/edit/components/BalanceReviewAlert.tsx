@@ -19,8 +19,7 @@ import type { StatementParsingDetails } from '../editHelpers';
 export const NEEDS_REVIEW_STATUS = 'needs_review';
 
 export type BalanceReviewAlertProps = {
-  statement: { id: string; fileName: string; fileType: string };
-  status: string;
+  statement: { id: string; fileName: string; fileType: string; status: string };
   parsingDetails?: StatementParsingDetails | null;
   labels: {
     title: string;
@@ -243,7 +242,6 @@ function ErrorLine({ error }: { error: string | null }): React.ReactElement | nu
  */
 export function BalanceReviewAlert({
   statement,
-  status,
   parsingDetails,
   labels,
   formatNumber,
@@ -256,6 +254,7 @@ export function BalanceReviewAlert({
     onConfirmed,
   });
 
+  const { status } = statement;
   if (status !== NEEDS_REVIEW_STATUS) {
     return null;
   }

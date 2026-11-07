@@ -18,6 +18,8 @@ import { ScanUploadService } from './services/scan-upload.service';
 import { StatementStageService } from './services/statement-stage.service';
 import { StatementFilesService } from './statement-files.service';
 import { StatementListService } from './statement-list.service';
+import { StatementRowsController } from './statement-rows.controller';
+import { StatementRowsService } from './statement-rows.service';
 import { StatementTeachController } from './statement-teach.controller';
 import { StatementTrashService } from './statement-trash.service';
 import { StatementUploadService } from './statement-upload.service';
@@ -43,9 +45,15 @@ import { StatementsService } from './statements.service';
     ReceiptsModule,
     WorkspaceCurrencyModule,
   ],
-  controllers: [StatementUploadsController, StatementsController, StatementTeachController],
+  controllers: [
+    StatementUploadsController,
+    StatementsController,
+    StatementTeachController,
+    StatementRowsController,
+  ],
   providers: [
     StatementsService,
+    StatementRowsService,
     StatementFilesService,
     StatementTrashService,
     ManualExpenseService,

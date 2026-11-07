@@ -37,9 +37,9 @@
     gap: $seneca-space-2 $seneca-space-3;
   }
 
-  &__back {
-    flex: none;
-    margin-left: -$seneca-space-2;
+  // Home / Custom tables / this one, on a line of its own above the title.
+  &__crumbs {
+    flex-basis: 100%;
   }
 
   &__title-row {

@@ -4,8 +4,8 @@ import type React from 'react';
 import { useMonthLabel } from '@/app/components/dashboard/use-month-label';
 import { PageTitle } from '@/app/components/ui/page-title';
 import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
-import { AiAssistantButton } from './AiAssistantButton';
 import { MonthStrip, type MonthStripLabels } from './MonthStrip';
+import { PluginShortcuts } from './PluginShortcuts';
 
 export type DashboardHeaderLabels = {
   monthStrip: MonthStripLabels;
@@ -32,7 +32,7 @@ export function DashboardHeader({
     <div className="seneca-dashboard-header">
       <div className="seneca-dashboard-header__title">
         <PageTitle path={DEFAULT_APP_ROUTE} summary={monthLabel} />
-        <AiAssistantButton />
+        <PluginShortcuts />
       </div>
       <div className="seneca-dashboard-header__controls">
         <MonthStrip

@@ -1692,6 +1692,11 @@
     margin-bottom: 24px;
   }
 
+  // Home / Invoices / this one, on a line of its own above the number.
+  &__crumbs {
+    flex-basis: 100%;
+  }
+
   &__actions {
     display: flex;
     flex-wrap: wrap;
@@ -3127,6 +3132,33 @@
 }
 
 /* ── TrashListView ───────────────────────────────────────── */
+.seneca-trash-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+
+  // Home / Statements / Trash, on the list's own side padding.
+  &__crumbs {
+    flex-shrink: 0;
+    padding: var(--seneca-page-top, 24px) 16px 0;
+
+    @media (min-width: 640px) {
+      padding: var(--seneca-page-top, 24px) 24px 0;
+    }
+
+    @media (min-width: 1024px) {
+      padding: var(--seneca-page-top, 24px) 32px 0;
+    }
+  }
+
+  // The trail already took the page's top space.
+  > .seneca-trash-list {
+    flex: 1;
+    padding-top: 12px;
+  }
+}
+
 .seneca-trash-list {
   display: flex;
   flex-direction: column;
@@ -5562,6 +5594,7 @@
 // Statement page: parsing warnings as a quiet list. One ochre dot by the title
 // is the only colour; each line is a row number and its reason in ink, and a
 // line that can be fixed shows its sage "Fix" on hover, like Review's rows.
+// The dot hangs left of the text, so title, hint and reasons share one edge.
 .seneca-parse-warnings {
   margin-top: 24px;
 
@@ -5569,8 +5602,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 0;
-    padding: 0 8px;
+    margin: 0 0 8px;
+    padding: 0;
     font-size: 15px;
     font-weight: 500;
     color: var(--foreground);
@@ -5586,8 +5619,8 @@
   }
 
   &__helper {
-    margin: 4px 0 12px;
-    padding: 0 8px 0 22px;
+    margin: -4px 0 12px;
+    padding-left: 14px;
     font-size: 13px;
     color: var(--text-muted);
   }
@@ -5596,7 +5629,10 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    border-top: 1px solid var(--border);
+
+    > li + li {
+      border-top: 1px solid var(--border);
+    }
   }
 
   &__item {
@@ -5604,9 +5640,9 @@
     align-items: baseline;
     gap: 16px;
     width: 100%;
-    padding: 8px;
+    padding: 8px 8px 8px 14px;
     border: 0;
-    border-bottom: 1px solid var(--border);
+    border-radius: 0;
     background: none;
     font: inherit;
     font-size: 13px;
@@ -5629,9 +5665,14 @@
   }
 
   &__row {
-    flex: 0 0 48px;
+    flex: 0 0 40px;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
+
+    // A list with no row numbers (balance checks only) keeps no empty column.
+    .seneca-parse-warnings__list--plain & {
+      display: none;
+    }
   }
 
   &__message {
@@ -5653,7 +5694,7 @@
 
   &__more {
     margin-top: 8px;
-    padding: 4px 8px;
+    padding: 4px 0 4px 14px;
     border: 0;
     background: none;
     font: inherit;

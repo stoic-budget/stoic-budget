@@ -2,7 +2,13 @@
 
 import * as Schema from 'effect/Schema';
 import * as Struct from 'effect/Struct';
-import { BooleanInput, IsoDateString, NumericInput, optionalNullable } from '../common/requests';
+import {
+  BooleanInput,
+  IsoDateString,
+  isAtMostTwoDecimals,
+  NumericInput,
+  optionalNullable,
+} from '../common/requests';
 import type { Wire } from '../common/wire';
 import { CaptureLocationFieldsInput } from './receipts';
 
@@ -83,6 +89,19 @@ export type ConvertDroppedSampleBody = Wire<typeof ConvertDroppedSampleBody>;
 /** `/statements/:id/...`, also its import preview and commit. */
 export const StatementParams = Schema.Struct({ id: Schema.String.check(Schema.isUUID()) });
 export type StatementParams = Wire<typeof StatementParams>;
+
+/** `POST /statements/:id/rows`: a row the reading missed, added by hand. */
+export const AddStatementRowBody = Schema.Struct({
+  transactionDate: IsoDateString,
+  counterpartyName: Schema.String.check(Schema.isMinLength(1)),
+  paymentPurpose: optionalNullable(Schema.String),
+  /** Signed: below zero is money out, above zero money in. */
+  amount: Schema.Finite.check(
+    isAtMostTwoDecimals,
+    Schema.makeFilter<number>(value => (value !== 0 ? undefined : 'Expected an amount')),
+  ),
+});
+export type AddStatementRowBody = Wire<typeof AddStatementRowBody>;
 
 /** `GET /statements/:id/thumbnail`: the width in pixels, clamped by the server. */
 export const StatementThumbnailQuery = Schema.Struct({ width: Schema.optional(NumericInput) });

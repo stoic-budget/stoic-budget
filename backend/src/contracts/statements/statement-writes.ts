@@ -11,6 +11,19 @@ import { StatementStage, StatementStatus } from './statement-list';
 const WrittenAmount = Schema.Union([DecimalString, Schema.Number]);
 
 /**
+ * `POST /statements/:id/recheck` and `POST /statements/:id/rows`: the
+ * statement's checks held against its rows as they are now. A statement held
+ * for review whose rows now add up is completed.
+ */
+export const StatementRecheck = Schema.Struct({
+  status: StatementStatus,
+  passed: Schema.Boolean,
+  /** Why it is still held: `balance_mismatch`, `printed_totals`, `balance_chain`… */
+  reasonCodes: Schema.Array(Schema.String),
+});
+export type StatementRecheck = Wire<typeof StatementRecheck>;
+
+/**
  * A statement as its writes answer it: the stored row without its
  * transactions. Money and dates come back as stored or as the write assigned
  * them, so they are looser than in `StatementDetail`; the page reads it back.

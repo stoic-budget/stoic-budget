@@ -156,7 +156,6 @@ function TablePage({ state, skeletonRows }: { state: CustomTablePageState; skele
         table={table}
         total={grid.total}
         moneyTotal={state.moneyTotal}
-        onBack={() => state.router.push('/custom-tables')}
         onRename={state.rename}
         labels={labels.header}
         actions={
@@ -263,13 +262,7 @@ export default function CustomTableDetailPage() {
   }, [params.id, total, unfiltered, loadingRows]);
 
   if (state.data.loading && !state.data.table) {
-    return (
-      <TableLoading
-        rows={skeletonRows}
-        labels={state.labels}
-        onBack={() => state.router.push('/custom-tables')}
-      />
-    );
+    return <TableLoading rows={skeletonRows} labels={state.labels} />;
   }
   if (!state.data.table) {
     return (

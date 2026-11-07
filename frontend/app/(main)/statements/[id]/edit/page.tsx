@@ -19,8 +19,9 @@ import Alert from '@mui/material/Alert';
 import { useParams, useRouter } from 'next/navigation';
 import { buildSourceColumnTitles } from '@/app/(main)/custom-tables/labels';
 import CustomDatePicker from '@/app/components/CustomDatePicker';
-import { ArrowLeft, CheckCircle2, ChevronDown, Layers, Trash2 } from '@/app/components/icons';
+import { CheckCircle2, ChevronDown, Layers, Trash2 } from '@/app/components/icons';
 import { NotesPanel } from '@/app/components/notes/NotesPanel';
+import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { DetailActionButton } from '@/app/components/ui/detail-action-button';
 import { Spinner } from '@/app/components/ui/spinner';
 import { useAuth } from '@/app/hooks/useAuth';
@@ -29,6 +30,7 @@ import { formatStoredDate } from '@/app/lib/user-format-store';
 import { tokens } from '@/lib/theme-tokens';
 import { BalanceReviewAlert, balanceReviewLabels } from './components/BalanceReviewAlert';
 import { EditStatementSkeleton } from './components/EditStatementSkeleton';
+import { ParsingFacts } from './components/ParsingFacts';
 import { StatementDetailsFields } from './components/StatementDetailsFields';
 import { StatementRowsSection } from './components/StatementRowsSection';
 import { StatementSummaryCards } from './components/StatementSummaryCards';
@@ -223,19 +225,9 @@ export default function EditStatementPage(): React.JSX.Element {
     >
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Button
-          startIcon={<ArrowLeft size={18} />}
-          onClick={() => router.back()}
-          sx={{
-            mb: 3,
-            color: 'text.secondary',
-            textTransform: 'none',
-            fontWeight: 500,
-            '&:hover': { bgcolor: 'action.hover' },
-          }}
-        >
-          {t.labels.back}
-        </Button>
+        <Box sx={{ mb: 3 }}>
+          <Breadcrumbs parent="/statements" current={statement?.fileName} />
+        </Box>
         <Box
           sx={{
             display: 'flex',
@@ -347,7 +339,6 @@ export default function EditStatementPage(): React.JSX.Element {
       {statement && (
         <BalanceReviewAlert
           statement={statement}
-          status={statement.status}
           parsingDetails={statement.parsingDetails}
           formatNumber={formatNumber}
           onConfirmed={LoadData}
@@ -505,137 +496,7 @@ export default function EditStatementPage(): React.JSX.Element {
           {statement?.parsingDetails && (
             <>
               <Divider sx={{ mb: 3 }} />
-              <Typography
-                variant="caption"
-                sx={{
-                  color: 'text.secondary',
-                  display: 'block',
-                  mb: 2,
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                }}
-              >
-                {labels.extractedMetadata?.value}
-              </Typography>
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: {
-                    xs: '1fr 1fr',
-                    sm: 'repeat(3, 1fr)',
-                    md: 'repeat(6, 1fr)',
-                  },
-                  gap: 2,
-                }}
-              >
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: 'text.secondary',
-                    }}
-                  >
-                    {labels.bank?.value}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {statement.parsingDetails.detectedBank || '—'}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: 'text.secondary',
-                    }}
-                  >
-                    {labels.bankDetectedBy?.value}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {statement.parsingDetails.detectedBy || '—'}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: 'text.secondary',
-                    }}
-                  >
-                    {labels.format?.value}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {statement.parsingDetails.detectedFormat?.toUpperCase() || '—'}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: 'text.secondary',
-                    }}
-                  >
-                    {labels.foundTransactions?.value}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {statement.parsingDetails.transactionsFound ?? '—'}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: 'text.secondary',
-                    }}
-                  >
-                    {labels.createdTransactions?.value}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {statement.parsingDetails.transactionsCreated ?? '—'}
-                  </Typography>
-                </Box>
-                {statement.parsingDetails.errors && statement.parsingDetails.errors.length > 0 && (
-                  <Box>
-                    <Typography variant="caption" color="error">
-                      {labels.errors?.value}
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'error.main' }}>
-                      {statement.parsingDetails.errors.length}
-                    </Typography>
-                  </Box>
-                )}
-                {statement.parsingDetails.warnings &&
-                  statement.parsingDetails.warnings.length > 0 && (
-                    <Box>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: 'warning.main',
-                        }}
-                      >
-                        {labels.warnings?.value}
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'warning.main' }}>
-                        {statement.parsingDetails.warnings.length}
-                      </Typography>
-                    </Box>
-                  )}
-                {statement.parsingDetails.otherBankMentions &&
-                  statement.parsingDetails.otherBankMentions.length > 0 && (
-                    <Box sx={{ gridColumn: { xs: '1 / -1', md: 'span 2' } }}>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: 'text.secondary',
-                        }}
-                      >
-                        {labels.otherBankMentions?.value}
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {statement.parsingDetails.otherBankMentions.join(', ')}
-                      </Typography>
-                    </Box>
-                  )}
-              </Box>
+              <ParsingFacts details={statement.parsingDetails} labels={labels} />
 
               {(statement.parsingDetails.warnings?.length || 0) > 0 ||
               (statement.parsingDetails.droppedSamples?.length || 0) > 0 ? (
@@ -649,10 +510,6 @@ export default function EditStatementPage(): React.JSX.Element {
                   fixTooltipLabel={labels.fixDroppedRow?.value}
                   resolveBalanceTooltipLabel={labels.balanceEnd?.value}
                   title={labels.warnings?.value}
-                  helperText={labels.alertParsingWarnings?.value?.replace(
-                    '{count}',
-                    String(statement.parsingDetails.warnings?.length || 0),
-                  )}
                 />
               ) : null}
             </>
@@ -804,6 +661,7 @@ export default function EditStatementPage(): React.JSX.Element {
         onCategoryClick={handleOpenRowCategory}
         onDelete={handleDelete}
         onPickRows={handleOpenRowsCategory}
+        fixRows={statement?.status === 'needs_review' ? LoadData : undefined}
       />
 
       {statement && (

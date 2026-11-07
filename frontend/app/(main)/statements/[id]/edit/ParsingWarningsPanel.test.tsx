@@ -51,6 +51,15 @@ describe('ParsingWarningsPanel', () => {
     expect(container.textContent).toContain('Row 27: ambiguous payment purpose detected');
   });
 
+  it('keeps no empty row-number column when no warning names a row', async () => {
+    await act(async () => {
+      renderPanel(<ParsingWarningsPanel warnings={['Balance mismatch: expected 10 got 4']} />);
+    });
+
+    expect(container.querySelector('.seneca-parse-warnings__list--plain')).not.toBeNull();
+    expect(container.querySelector('.seneca-parse-warnings__helper')).toBeNull();
+  });
+
   it('renders nothing when there are no warnings', async () => {
     await act(async () => {
       renderPanel(<ParsingWarningsPanel warnings={[]} />);

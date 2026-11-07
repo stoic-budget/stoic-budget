@@ -68,6 +68,8 @@ export type EditTransactionsTableProps = {
   onRowSelect: (id: string) => void;
   onCategoryClick: (transaction: Transaction) => void;
   onDelete: (id: string) => Promise<void>;
+  /** Rows may be corrected by hand: the statement's reading did not add up. */
+  onEdit?: (transaction: Transaction) => void;
 };
 
 export function EditTransactionsTable({
@@ -81,6 +83,7 @@ export function EditTransactionsTable({
   onRowSelect,
   onCategoryClick,
   onDelete,
+  onEdit,
 }: EditTransactionsTableProps): React.ReactElement {
   const colLabels = getColumnLabels(columns);
   const editLabels = getEditTableLabels(labels);
@@ -120,6 +123,8 @@ export function EditTransactionsTable({
               onRowSelect={onRowSelect}
               onCategoryClick={onCategoryClick}
               onDelete={onDelete}
+              onEdit={onEdit}
+              editLabel={labels.editRow?.value ?? 'Edit row'}
             />
           ))}
         </TableBody>
