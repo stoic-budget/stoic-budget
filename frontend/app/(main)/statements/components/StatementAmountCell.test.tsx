@@ -13,13 +13,14 @@ const statement = (over: Partial<StatementListItem> = {}): StatementListItem => 
   ...over,
 });
 
-const cell = (item: StatementListItem, onTeach = vi.fn()) =>
+const cell = (item: StatementListItem, onTeach = vi.fn(), reviewFlagged = false) =>
   render(
     <StatementAmountCell
       statement={item}
       amountLabel="-12.50 USD"
       isReceipt={false}
       isProcessing={false}
+      reviewFlagged={reviewFlagged}
       onTeach={onTeach}
     />,
   );
@@ -43,5 +44,20 @@ describe('StatementAmountCell', () => {
     expect(screen.queryByText('-12.50')).toBeNull();
     fireEvent.click(screen.getByTestId('statement-teach'));
     expect(onTeach).toHaveBeenCalled();
+  });
+
+  it('shows no badge while the statement is read', () => {
+    const { container } = cell(statement({ status: 'processing' }));
+    expect(container.querySelector('.seneca-stmt-badge')).toBeNull();
+  });
+
+  it('badges an unreconciled statement only when the row does not already say To review', () => {
+    const unreconciled = statement({ status: 'needs_review' });
+    const { container, unmount } = cell(unreconciled);
+    expect(container.querySelector('.seneca-stmt-badge--review')).toBeTruthy();
+    unmount();
+
+    const flagged = cell(unreconciled, vi.fn(), true);
+    expect(flagged.container.querySelector('.seneca-stmt-badge--review')).toBeNull();
   });
 });
