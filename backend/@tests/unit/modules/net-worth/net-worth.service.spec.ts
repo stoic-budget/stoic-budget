@@ -33,7 +33,7 @@ const ACCOUNTS: AccountSeed[] = [
 
 function daysAgo(days: number): string {
   const date = new Date();
-  date.setDate(date.getDate() - days);
+  date.setUTCDate(date.getUTCDate() - days);
   return date.toISOString().split('T')[0];
 }
 

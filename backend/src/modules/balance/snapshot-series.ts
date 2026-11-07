@@ -150,6 +150,7 @@ export function isoDate(date: Date): string {
 
 export function shiftDays(date: string, days: number): string {
   const shifted = new Date(date);
-  shifted.setDate(shifted.getDate() + days);
+  // A date-only string parses as UTC midnight: a local shift would lose an hour at a clock change.
+  shifted.setUTCDate(shifted.getUTCDate() + days);
   return isoDate(shifted);
 }
