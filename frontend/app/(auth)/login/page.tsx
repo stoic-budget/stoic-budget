@@ -8,6 +8,7 @@ import React, { Suspense, useState } from 'react';
 import { AuthLanguageSwitcher } from '@/app/components/AuthLanguageSwitcher';
 import { BrandLockup } from '@/app/components/BrandLockup';
 import { Eye, EyeOff } from '@/app/components/icons';
+import { useRegistrationStatus } from '@/app/hooks/useRegistrationStatus';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
 import { getApiErrorMessage } from '@/app/lib/api-error';
@@ -45,6 +46,7 @@ function LoginPageContent(): React.JSX.Element {
   const inviteTokenFromNext = extractInviteTokenFromNext(nextPath);
   const inviteToken = searchParams.get('invite') || inviteTokenFromNext;
   const t = useIntlayer('loginPage');
+  const { open: registrationOpen } = useRegistrationStatus();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -224,12 +226,14 @@ function LoginPageContent(): React.JSX.Element {
         >
           {loading ? <CircularProgress size={24} color="inherit" /> : t.submit}
         </Button>
-        <p className="seneca-auth-footnote">
-          {t.noAccountPrompt}{' '}
-          <NextLink href={registerHref} className="seneca-auth-link seneca-auth-link--accent">
-            {t.signUp}
-          </NextLink>
-        </p>
+        {registrationOpen !== false || inviteToken ? (
+          <p className="seneca-auth-footnote">
+            {t.noAccountPrompt}{' '}
+            <NextLink href={registerHref} className="seneca-auth-link seneca-auth-link--accent">
+              {t.signUp}
+            </NextLink>
+          </p>
+        ) : null}
       </Box>
     </AuthLayout>
   );

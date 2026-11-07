@@ -31,8 +31,15 @@ describe('Cash-flow map (e2e)', () => {
   const as = (account: E2eAccount, req: request.Test) =>
     req.set('Authorization', `Bearer ${account.token}`).set('x-workspace-id', account.workspaceId);
   const server = () => app.getHttpServer();
+  // Days around the 20th of last month, not today: a range that starts on the
+  // 1st is compared with the same days of the month before, so on the 7th of
+  // every month the last-period row fell outside the comparison.
+  const anchor = new Date();
+  anchor.setDate(1);
+  anchor.setMonth(anchor.getMonth() - 1);
+  anchor.setDate(20);
   const day = (offset: number) => {
-    const date = new Date();
+    const date = new Date(anchor);
     date.setDate(date.getDate() + offset);
     return date.toISOString().slice(0, 10);
   };

@@ -62,6 +62,13 @@ export const InstanceTelegramBotStatus = Schema.Struct({
 });
 export type InstanceTelegramBotStatus = Wire<typeof InstanceTelegramBotStatus>;
 
+/**
+ * `GET /auth/registration` (public) and `PUT /settings/instance/registration`
+ * (instance admins): whether someone without an invitation can create an account.
+ */
+export const RegistrationStatus = Schema.Struct({ open: Schema.Boolean });
+export type RegistrationStatus = Wire<typeof RegistrationStatus>;
+
 export const TelegramReport = Schema.Struct({
   id: Schema.String,
   chatId: Schema.String,
