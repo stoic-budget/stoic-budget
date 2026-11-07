@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, type Repository } from 'typeorm';
-import { countedSql, onlyFlows } from '../../../common/utils/counted-transactions.util';
+import { onlyFlows } from '../../../common/utils/counted-transactions.util';
 import { currencyCodeOrDefault } from '../../../common/utils/currency.util';
 import { applyOwnerFilter, type OwnerFilter } from '../../../common/utils/transaction-owner.util';
 import { PRIVATE_PLACEHOLDER } from '../../../common/utils/transaction-privacy.util';
@@ -9,6 +9,7 @@ import type { TransactionsOverview } from '../../../contracts';
 import { Transaction } from '../../../entities/transaction.entity';
 import { Wallet } from '../../../entities/wallet.entity';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
+import { runningBalances } from '../../wallets/wallet-ledger';
 
 /** Slice keys the page names itself: a row with no category, or with no wallet. */
 export const UNCATEGORIZED_SLICE = '__uncategorized__';
@@ -120,8 +121,7 @@ export class TransactionsOverviewService {
 
   /**
    * Adds each row's wallet balance right after it and a transfer's other
-   * wallet. The balance runs over every counted row of the wallet in the order
-   * the list shows them (date, then creation), from its opening balance.
+   * wallet (see `runningBalances`).
    */
   async withLedger<T extends Transaction>(
     workspaceId: string,
@@ -132,23 +132,16 @@ export class TransactionsOverviewService {
     >
   > {
     const walletIds = [...new Set(rows.map(row => row.walletId).filter(isPresent))];
-    const balances = new Map<string, string>();
-    if (walletIds.length > 0) {
-      const found: Array<{ id: string; running: string }> = await this.transactionRepository.query(
-        `SELECT ledger.id, ledger.running FROM (
-           SELECT t.id,
-             w.initial_balance + SUM(COALESCE(t.credit, 0) - COALESCE(t.debit, 0))
-               OVER (PARTITION BY t.wallet_id ORDER BY t.transaction_date, t.created_at, t.id) AS running
-           FROM transactions t
-           JOIN wallets w ON w.id = t.wallet_id AND w.workspace_id = t.workspace_id
-           WHERE t.workspace_id = $1 AND t.wallet_id = ANY($2) AND ${countedSql('t')}
-         ) ledger WHERE ledger.id = ANY($3)`,
-        [workspaceId, walletIds, rows.map(row => row.id)],
-      );
-      for (const row of found) {
-        balances.set(row.id, Number(row.running).toFixed(2));
-      }
-    }
+    const balances =
+      walletIds.length > 0
+        ? await runningBalances(
+            this.transactionRepository,
+            this.exchangeRatesService,
+            workspaceId,
+            walletIds,
+            rows.map(row => row.id),
+          )
+        : new Map<string, string>();
 
     const pairIds = rows.map(row => row.transferPairId).filter(isPresent);
     const pairLegs =
