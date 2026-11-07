@@ -348,7 +348,6 @@ export default function EditStatementPage(): React.JSX.Element {
       {statement && (
         <BalanceReviewAlert
           statement={statement}
-          status={statement.status}
           parsingDetails={statement.parsingDetails}
           formatNumber={formatNumber}
           onConfirmed={LoadData}
@@ -671,6 +670,7 @@ export default function EditStatementPage(): React.JSX.Element {
         onCategoryClick={handleOpenRowCategory}
         onDelete={handleDelete}
         onPickRows={handleOpenRowsCategory}
+        fixRows={statement?.status === 'needs_review' ? LoadData : undefined}
       />
 
       {statement && (

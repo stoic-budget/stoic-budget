@@ -175,6 +175,22 @@
     font-size: 13px;
   }
 
+  // The way out when no marking makes the reading add up.
+  &__fix-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--primary);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:disabled {
+      color: var(--text-muted);
+      cursor: default;
+    }
+  }
+
   &__teach-cell {
     display: inline-flex;
     align-items: center;
