@@ -146,6 +146,7 @@ export function StatementsListItem(props: StatementsListItemProps) {
           amountLabel={amountLabel}
           isReceipt={isReceipt}
           isProcessing={isProcessing}
+          reviewFlagged={pendingReview > 0 && !isProcessing}
           onTeach={() => onIconClick('teach')}
         />
       );

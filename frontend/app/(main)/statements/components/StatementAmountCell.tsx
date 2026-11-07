@@ -32,10 +32,13 @@ export function StatusBadge({
   status,
   isProcessing,
   errorMessage,
+  reviewFlagged = false,
 }: {
   status: string;
   isProcessing: boolean;
   errorMessage?: string | null;
+  /** The row already says "To review" beside its name: no second badge for it. */
+  reviewFlagged?: boolean;
 }) {
   const listText = useIntlayer('statementsListUi');
   if (errorMessage || status === 'error') {
@@ -43,14 +46,16 @@ export function StatusBadge({
       <span className="seneca-stmt-badge seneca-stmt-badge--error">{listText.statusError}</span>
     );
   }
+  // While it is read the amount column already spins: no badge on top of it.
   if (isProcessing || status === 'processing' || status === 'uploaded') {
-    return (
-      <span className="seneca-stmt-badge seneca-stmt-badge--pending">{listText.statusPending}</span>
-    );
+    return null;
   }
   // Parsed, but the balance did not reconcile: held out of analytics until a user
   // confirms it on the statement page.
   if (status === 'needs_review') {
+    if (reviewFlagged) {
+      return null;
+    }
     return (
       <span className="seneca-stmt-badge seneca-stmt-badge--review">
         {listText.statusNeedsReview}
@@ -97,12 +102,14 @@ export function StatementAmountCell({
   amountLabel,
   isReceipt,
   isProcessing,
+  reviewFlagged,
   onTeach,
 }: {
   statement: StatementListItem;
   amountLabel: string;
   isReceipt: boolean;
   isProcessing: boolean;
+  reviewFlagged?: boolean;
   onTeach: () => void;
 }): React.JSX.Element {
   const { resolvedTheme } = useTheme();
@@ -148,6 +155,7 @@ export function StatementAmountCell({
           status={statement.status}
           isProcessing={isProcessing}
           errorMessage={statement.errorMessage}
+          reviewFlagged={reviewFlagged}
         />
       </div>
     </div>
