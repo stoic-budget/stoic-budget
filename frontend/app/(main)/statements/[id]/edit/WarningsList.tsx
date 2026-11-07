@@ -119,9 +119,12 @@ export function WarningsList({
   }
   const folds = warnings.length > FOLDED_COUNT + 1;
   const shown = folds && !expanded ? warnings.slice(0, FOLDED_COUNT) : warnings;
+  const numbered = warnings.some(warning => splitWarning(warning).row !== null);
   return (
     <>
-      <ul className="seneca-parse-warnings__list">
+      <ul
+        className={`seneca-parse-warnings__list${numbered ? '' : ' seneca-parse-warnings__list--plain'}`}
+      >
         {shown.map((warning, index) => (
           <WarningItem
             key={`${index}-${warning}`}
