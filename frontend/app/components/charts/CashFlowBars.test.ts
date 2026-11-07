@@ -14,6 +14,7 @@ const entry = (
   kind,
   amount,
   budgeted,
+  href: null,
 });
 
 describe('entryRows', () => {

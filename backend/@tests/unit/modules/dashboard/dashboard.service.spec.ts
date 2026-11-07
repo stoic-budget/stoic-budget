@@ -803,6 +803,9 @@ describe('DashboardService', () => {
       currency: 'KZT',
       isPrivate: false,
       ownerMemberId: null,
+      statementId: `st-${id}`,
+      statementStatus: StatementStatus.COMPLETED,
+      parsingDetails: {},
     });
     transactionRepo.createQueryBuilder.mockReturnValue(
       createQueryBuilderMock([
@@ -818,6 +821,8 @@ describe('DashboardService', () => {
 
     const entriesService = new CashFlowEntriesService(
       transactionRepo as any,
+      receiptRepo,
+      payableRepo,
       service,
       budgetsService as any,
     );
@@ -825,6 +830,39 @@ describe('DashboardService', () => {
 
     const budgeted = Object.fromEntries(entries.map(entry => [entry.name, entry.budgeted]));
     expect(budgeted).toEqual({ 'ACME pay': 11, 'ACME market': 40, 'ACME sale': 0 });
+  });
+
+  it('links each cash-flow row to its document, and not when it is private to someone else', async () => {
+    const row = (id: string, isPrivate: boolean) => ({
+      id,
+      date: '2026-10-16',
+      counterpartyName: `ACME ${id}`,
+      fileName: null,
+      transactionType: TransactionType.EXPENSE,
+      debit: '10',
+      credit: null,
+      currency: 'KZT',
+      isPrivate,
+      ownerMemberId: isPrivate ? 'member-2' : null,
+      statementId: `st-${id}`,
+      statementStatus: StatementStatus.COMPLETED,
+      parsingDetails: {},
+    });
+    transactionRepo.createQueryBuilder.mockReturnValue(
+      createQueryBuilderMock([row('shared', false), row('hidden', true)]),
+    );
+    budgetsService.withinLimitSpending.mockResolvedValue([]);
+
+    const entriesService = new CashFlowEntriesService(
+      transactionRepo as any,
+      receiptRepo,
+      payableRepo,
+      service,
+      budgetsService as any,
+    );
+    const { entries } = await entriesService.getCashFlowEntries('ws-1', '2026-10', 'member-1');
+
+    expect(entries.map(entry => entry.href)).toEqual(['/statements/st-shared/edit', null]);
   });
 
   it('getCashFlow leaves weekly buckets without a budgeted share', async () => {

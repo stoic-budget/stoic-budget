@@ -164,6 +164,7 @@ export function CashFlowCalendar({
               // biome-ignore lint/suspicious/noArrayIndexKey: a day may hold two rows alike
               key={`${entry.name}-${index}`}
               primary={entry.name}
+              href={entry.href ?? undefined}
               trailing={
                 <PrivateAmount>
                   {`${entry.kind === 'income' ? '+' : '−'}${formatAmount(entry.amount)}`}

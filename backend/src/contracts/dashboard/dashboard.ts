@@ -161,6 +161,8 @@ export const DashboardCashFlowEntry = Schema.Struct({
   amount: Schema.Number,
   /** The part of `amount` a budget still had room for; 0 for income and unbudgeted spending. */
   budgeted: Schema.Number,
+  /** Its document, or the bill it settled, as the recent transactions open it; null with neither. */
+  href: Schema.NullOr(Schema.String),
 });
 export type DashboardCashFlowEntry = Wire<typeof DashboardCashFlowEntry>;
 

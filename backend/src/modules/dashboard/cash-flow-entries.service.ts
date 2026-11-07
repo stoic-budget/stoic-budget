@@ -3,9 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { canReadPrivate, PRIVATE_PLACEHOLDER } from '../../common/utils/transaction-privacy.util';
 import type { DashboardCashFlowEntriesResponse, DashboardCashFlowEntry } from '../../contracts';
+import { Payable } from '../../entities/payable.entity';
+import { Receipt } from '../../entities/receipt.entity';
+import type { Statement } from '../../entities/statement.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { BudgetWithinLimitService } from '../budgets/budget-within-limit.service';
 import type { WithinLimitAmount } from '../budgets/budget-within-limit.util';
+import { recentRowHrefs } from './bill-hrefs';
 import { DashboardService, round2 } from './dashboard.service';
 import { parseMonthWindow } from './dashboard-window.util';
 
@@ -15,6 +19,10 @@ export class CashFlowEntriesService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepo: Repository<Transaction>,
+    @InjectRepository(Receipt)
+    private readonly receiptRepo: Repository<Receipt>,
+    @InjectRepository(Payable)
+    private readonly payableRepo: Repository<Payable>,
     private readonly dashboard: DashboardService,
     @Inject(forwardRef(() => BudgetWithinLimitService))
     private readonly withinLimit: BudgetWithinLimitService,
@@ -54,6 +62,13 @@ export class CashFlowEntriesService {
         .addSelect('t.currency', 'currency')
         .addSelect('t.isPrivate', 'isPrivate')
         .addSelect('t.ownerMemberId', 'ownerMemberId')
+        .addSelect('s.id', 'statementId')
+        .addSelect('s.status', 'statementStatus')
+        // Only what tells a scan apart: a month has hundreds of rows, each would carry the whole parse.
+        .addSelect(
+          "jsonb_build_object('detectedBy', s.parsing_details->'detectedBy', 'importPreview', jsonb_build_object('source', s.parsing_details->'importPreview'->'source'))",
+          'parsingDetails',
+        )
         .andWhere('t.transactionType IN (:...sides)', {
           sides: [TransactionType.INCOME, TransactionType.EXPENSE],
         })
@@ -68,13 +83,17 @@ export class CashFlowEntriesService {
           currency: string;
           isPrivate: boolean;
           ownerMemberId: string | null;
+          statementId: string | null;
+          statementStatus: Statement['status'];
+          parsingDetails: Statement['parsingDetails'];
         }>(),
       this.withinLimit.withinLimitSpending(workspaceId, window.since, window.endDate),
     ]);
     const budgetedById = new Map(withinLimit.map(row => [row.transactionId, row]));
+    const hrefOf = await recentRowHrefs(this.receiptRepo, this.payableRepo, workspaceId, rows);
 
     const entries: DashboardCashFlowEntry[] = [];
-    for (const row of rows) {
+    for (const [index, row] of rows.entries()) {
       const kind = row.transactionType === TransactionType.INCOME ? 'income' : 'expense';
       const raw = kind === 'income' ? row.credit : row.debit;
       const amount = round2(
@@ -91,7 +110,9 @@ export class CashFlowEntriesService {
       const name = this.cashFlowEntryName(row, viewerMemberId);
       const within = kind === 'expense' ? budgetedById.get(row.id) : undefined;
       const budgeted = within ? await this.budgetedPart(amount, within, currency, workspaceId) : 0;
-      entries.push({ date: row.date, name, kind, amount, budgeted });
+      // Someone else's private row keeps its document to itself, as it keeps its name.
+      const href = canReadPrivate(row, viewerMemberId) ? hrefOf(index) : null;
+      entries.push({ date: row.date, name, kind, amount, budgeted, href });
     }
     entries.sort((a, b) => a.date.localeCompare(b.date) || b.amount - a.amount);
     return { entries };
