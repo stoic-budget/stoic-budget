@@ -34,7 +34,7 @@ export function DashboardHeader({
         <PageTitle path={DEFAULT_APP_ROUTE} summary={monthLabel} />
         <AiAssistantButton />
       </div>
-      <div className="seneca-dashboard-header__controls" data-tour-shot="dashboard-month">
+      <div className="seneca-dashboard-header__controls">
         <MonthStrip
           displayMonth={displayMonth}
           onChange={changeMonth}

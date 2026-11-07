@@ -1,8 +1,8 @@
 import { type Dictionary, t } from 'intlayer';
 import { APP_NAME } from '@/app/lib/brand';
 
-// One entry per tutorial step (keyed like `nav.*`): what the page is for, and a
-// caption for each screenshot fragment in welcome-tutorial-screens.ts.
+// One entry per tutorial step (keyed like `nav.*`): what the page is for, and what is
+// on it: the points listed in welcome-tutorial-steps.ts.
 
 const content = {
   key: 'welcomeTutorialSteps',
@@ -83,7 +83,7 @@ const content = {
           bs: 'Prihodi, troškovi i kamo je otišao novac — za bilo koji mjesec, čim vaši izvodi dođu unutra.',
           hsb: 'Dochody, wudawki a hdźež pjenjezy su šli — za kóždy měsac, tak bórze kaž waše wupisy nutřka su.',
         }),
-        fragments: {
+        points: {
           categories: {
             title: t({
               ru: 'Куда уходят деньги',
@@ -389,7 +389,7 @@ const content = {
           bs: `Učitajte bankovne izvode i račune. ${APP_NAME} ih pročita, svaki red stavi u kategoriju i označi ono što treba pogledati.`,
           hsb: `Nahrajće bankowe wupisy a kwitowanki. ${APP_NAME} je čita, kóždy rjad do kategorije staji a markuje to, což pohlad trjeba.`,
         }),
-        fragments: {
+        points: {
           list: {
             title: t({
               ru: 'Всё в одном списке',
@@ -619,7 +619,7 @@ const content = {
           bs: 'Vodite fakture, opremu ili lanac klijenata u tabelama — ispunjenim rukom, iz vaših izvoda ili iz datoteke.',
           hsb: 'Dźeržće fakturje, wuhotowanje abo rjad kupcow w tabelach — ručnje wupjelnjene, z wašich wupisow abo z dataje.',
         }),
-        fragments: {
+        points: {
           list: {
             title: t({
               ru: 'Все ваши таблицы',
@@ -849,7 +849,7 @@ const content = {
           bs: 'Držite svaki posao ili domaćinstvo odvojeno, s vlastitom valutom, kategorijama, poreskom državom i timom.',
           hsb: 'Dźeržće kóžde předewzaće abo hospodarstwo wosebje, ze swójskej walutu, kategorijemi, dawkowej krajinu a teamom.',
         }),
-        fragments: {
+        points: {
           list: {
             title: t({
               ru: 'Переключение в один клик',
@@ -1155,7 +1155,7 @@ const content = {
           bs: 'Bilans uspjeha, bilans stanja, novčani tok i više — kao PDF, Excel ili CSV, jednom ili po rasporedu.',
           hsb: 'Zličbowanje dobytka a zhubjenja, bilanca, pjenježny tok a wjace — jako PDF, Excel abo CSV, jedyn raz abo po planje.',
         }),
-        fragments: {
+        points: {
           templates: {
             title: t({
               ru: 'Готовые шаблоны',
@@ -1461,7 +1461,7 @@ const content = {
           bs: `${APP_NAME} razloži vašu godinu po redovima službenog obrasca vaše države, koristeći transakcije koje već imate. To je skica za pregled, a ne poreski savjet.`,
           hsb: `${APP_NAME} rozrjaduje waše lěto po rjadach oficialneho formulara wašeje krajiny, z transakcijemi, kotrež hižo maće. To je naćisk za přepruwowanje, nic dawkowa porada.`,
         }),
-        fragments: {
+        points: {
           gate: {
             title: t({
               ru: 'Прежде чем начать',
@@ -1691,7 +1691,7 @@ const content = {
           bs: 'Pratite svoju neto vrijednost kroz vrijeme i vidite kako je vaša imovina raspoređena i koliko je od nje izloženo riziku.',
           hsb: 'Slědujće swoje čiste wobsydstwo přez čas a wohladajće, kak su waše aktiwa rozdźělene a kelko z nich je w riziku.',
         }),
-        fragments: {
+        points: {
           chart: {
             title: t({
               ru: 'Капитал во времени',
@@ -1997,7 +1997,7 @@ const content = {
           bs: 'Postavite mjesečni limit po kategoriji i vidite koliko ostaje kako dolaze nove transakcije.',
           hsb: 'Postajće měsačny limit za kóždu kategoriju a hladajće, kelko wostawa, hdyž nowe transakcije přińdu.',
         }),
-        fragments: {
+        points: {
           cards: {
             title: t({
               ru: 'Лимиты по категориям',
@@ -2227,7 +2227,7 @@ const content = {
           bs: `${APP_NAME} prati vaše podatke i pokazuje šta vrijedi pogledati.`,
           hsb: `${APP_NAME} sćěhuje waše daty a pokazuje, na čo so wudanje pohladać.`,
         }),
-        fragments: {
+        points: {
           attention: {
             title: t({
               ru: 'Что требует внимания',
@@ -2457,7 +2457,7 @@ const content = {
           bs: 'Postavite cilj i datum, zapisujte šta odvajate i gledajte kako se traka napretka kreće.',
           hsb: 'Postajće cil a datum, zapisujće, což wotstajeće, a hladajće, kak so lajsta postupa hiba.',
         }),
-        fragments: {
+        points: {
           list: {
             title: t({
               ru: 'Все ваши цели',
@@ -2687,7 +2687,7 @@ const content = {
           bs: 'Upišite koliko biste uložili i šta bi to mjesečno donosilo da vidite povrat i vrijeme otplate. Ništa se ne čuva.',
           hsb: 'Zapodajće, kelko byšće włožił a što by to měsačnje přinjesło, zo byšće wunošk a čas wróćoplaćenja widźał. Ničo so njeskładuje.',
         }),
-        fragments: {
+        points: {
           chart: {
             title: t({
               ru: 'Прогноз на 30 лет',
@@ -2993,7 +2993,7 @@ const content = {
           bs: `${APP_NAME} nalazi pretplate u vašim transakcijama, predviđa sljedeća plaćanja i upozorava vas na promjene cijena.`,
           hsb: `${APP_NAME} namaka abonementy we wašich transakcijach, prognozuje přichodne zapłaćenja a warnuje was před změnami płaćiznow.`,
         }),
-        fragments: {
+        points: {
           calendar: {
             title: t({
               ru: 'Ближайшие списания',
@@ -3299,7 +3299,7 @@ const content = {
           bs: 'Povežite novčanik njegovom javnom adresom i njegovi prihodi i troškovi pridružuju se vašoj uobičajenoj statistici.',
           hsb: 'Zwjazajće portmonej přez jeje zjawnu adresu, a jeje dochody a wudawki so wašej normalnej statistice přidruža.',
         }),
-        fragments: {
+        points: {
           wallets: {
             title: t({
               ru: 'Начните с кошелька',

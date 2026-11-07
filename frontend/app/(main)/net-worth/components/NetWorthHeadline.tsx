@@ -59,7 +59,7 @@ export function NetWorthHeadline({
     : nextMilestone(data.current, data.change, daysBetween(data.from, data.to));
 
   return (
-    <Box data-tour-shot="net-worth-chart" sx={cardSx}>
+    <Box sx={cardSx}>
       <Typography variant="h3" sx={{ fontWeight: 500, lineHeight: 1.1 }}>
         {inMetal ? (
           <PrivateAmount>{formatOunces(headline.current)}</PrivateAmount>

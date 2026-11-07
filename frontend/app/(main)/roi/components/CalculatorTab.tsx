@@ -65,7 +65,6 @@ export function CalculatorTab() {
         </Typography>
 
         <Box
-          data-tour-shot="roi-inputs"
           sx={{
             border: '1px solid',
             borderColor: 'divider',
@@ -133,10 +132,7 @@ export function CalculatorTab() {
           </Box>
 
           {result !== null && result.annualIncome > 0 && (
-            <Box
-              data-tour-shot="roi-chart"
-              sx={{ borderTop: '1px solid', borderColor: 'divider', mt: 3, pt: 3 }}
-            >
+            <Box sx={{ borderTop: '1px solid', borderColor: 'divider', mt: 3, pt: 3 }}>
               <Typography sx={{ fontSize: 13, color: 'var(--text-muted)' }}>
                 {t.projectionTitle}
               </Typography>
@@ -148,10 +144,7 @@ export function CalculatorTab() {
                 currency={currency}
               />
 
-              <Box
-                data-tour-shot="roi-table"
-                sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}
-              >
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}>
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <Typography variant="caption" sx={{ color: 'text.secondary', flex: '0 0 60px' }}>
                     {t.yearColumn}

@@ -6,13 +6,12 @@ import type React from 'react';
 import { useEffect } from 'react';
 import { useIntlayer } from '@/app/i18n';
 import { TutorialFooter } from './TutorialFooter';
-import { TutorialPicture, TutorialPoints } from './TutorialFragments';
+import { TutorialPoints } from './TutorialPoints';
 import { useFocusTitleOnMount } from './useFocusTitleOnMount';
 import type { TutorialPager } from './useTutorialPager';
-import { enterSx, focusableTitleSx, TITLE_ID } from './welcome-tutorial.styles';
+import { blurInSx, focusableTitleSx, TITLE_ID } from './welcome-tutorial.styles';
 import {
   bodySx,
-  demoNoteSx,
   descriptionSx,
   eyebrowSx,
   taglineSx,
@@ -47,19 +46,24 @@ function StepText({ step }: { step: TutorialStep }): React.JSX.Element {
   useKeepFocusOnPageTurn();
   return (
     <>
-      <Box sx={eyebrowSx}>
+      <Box sx={[eyebrowSx, blurInSx(0)]}>
         {step.icon}
         {step.label}
       </Box>
-      <Typography id={TITLE_ID} component="h2" tabIndex={-1} sx={[taglineSx, focusableTitleSx]}>
+      <Typography
+        id={TITLE_ID}
+        component="h2"
+        tabIndex={-1}
+        sx={[taglineSx, focusableTitleSx, blurInSx(1)]}
+      >
         {text.tagline}
       </Typography>
-      <Typography sx={descriptionSx}>{text.description}</Typography>
+      <Typography sx={[descriptionSx, blurInSx(2)]}>{text.description}</Typography>
     </>
   );
 }
 
-/** One sidebar page: what it is for and what is on it, beside one picture of it. */
+/** One sidebar page: what it is for and what is on it. */
 export function TutorialStepView({
   steps,
   pager,
@@ -67,19 +71,17 @@ export function TutorialStepView({
   onWholeGuide,
   onClose,
 }: TutorialStepViewProps): React.JSX.Element {
-  const { controls } = useIntlayer('welcomeTutorial');
   // Once, when the guide opens; Next and the dots keep their own focus after that.
   useFocusTitleOnMount();
   const step = steps[pager.index];
   return (
     <>
-      <Box key={step.id} sx={[bodySx, enterSx]}>
+      {/* A new key per page: every page comes into focus anew. */}
+      <Box key={step.id} sx={bodySx}>
         <Box sx={textColumnSx}>
           <StepText step={step} />
-          <TutorialPoints step={step} />
-          <Typography sx={demoNoteSx}>{controls.demoNote}</Typography>
+          <TutorialPoints step={step} firstOrder={3} />
         </Box>
-        <TutorialPicture step={step} />
       </Box>
       <TutorialFooter
         single={single}

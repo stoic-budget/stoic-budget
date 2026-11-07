@@ -5,6 +5,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { useMarkPageHintsSeen } from '@/app/components/page-hints/useMarkPageHintsSeen';
 import { GUIDE_PAGE_VERSION } from './guide-pages';
+import { loadGuideDialog } from './load-guide-dialog';
 import { useGuidePageAutoOpen } from './useGuidePageAutoOpen';
 import { useMarkWelcomeTutorialSeen } from './useMarkWelcomeTutorialSeen';
 import { useWelcomeTutorialAutoOpen } from './useWelcomeTutorialAutoOpen';
@@ -18,7 +19,7 @@ import {
 const WelcomeWindow = dynamic(() => import('@/app/components/welcome-window/WelcomeWindow'), {
   ssr: false,
 });
-const WelcomeTutorialDialog = dynamic(() => import('./WelcomeTutorialDialog'), { ssr: false });
+const WelcomeTutorialDialog = dynamic(loadGuideDialog, { ssr: false });
 
 /**
  * Counts the openings. Each one starts a fresh window; after closing, the window

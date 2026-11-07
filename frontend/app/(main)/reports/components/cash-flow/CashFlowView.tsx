@@ -482,7 +482,6 @@ export function CashFlowView({
 
       {data && (
         <Box
-          data-tour-shot="reports-flow"
           sx={{
             display: 'grid',
             gridTemplateColumns: 'minmax(0, 1fr)',

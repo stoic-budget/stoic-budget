@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { User } from '@/app/contexts/AuthContext';
 
 const mocks = vi.hoisted(() => ({
+  loadDialog: vi.fn(),
   mounts: { welcome: 0, guide: 0 },
   pathname: '/dashboard',
   post: vi.fn(),
@@ -20,6 +21,7 @@ vi.mock('@/app/lib/api', () => ({ default: { post: mocks.post } }));
 vi.mock('./useTutorialSteps', () => ({
   useTutorialSteps: () => [{ id: 'dashboard' }, { id: 'budgets' }],
 }));
+vi.mock('./load-guide-dialog', () => ({ loadGuideDialog: mocks.loadDialog }));
 // Both windows are lazy-loaded and tested on their own (WelcomeWindow.test.tsx,
 // WelcomeTutorialDialog.test.tsx); stand-ins show which one is open.
 vi.mock('next/dynamic', async () => {
@@ -86,6 +88,8 @@ describe('WelcomeTutorialHost', () => {
     mocks.user = newAccount;
     mocks.post.mockReset().mockResolvedValue({ data: { welcomeTutorialSeenAt: '2026-09-25T12:00:00.000Z' } });
     mocks.setUser.mockReset();
+    mocks.loadDialog.mockReset().mockResolvedValue({});
+    window.history.replaceState(null, '', '/');
   });
 
   afterEach(() => {
@@ -159,6 +163,28 @@ describe('WelcomeTutorialHost', () => {
     expect(shown('welcome')).toBeNull();
   });
 
+  // Its buttons close it and then navigate: no guide page in between, over the page being left.
+  it('gives the page the welcome window closed on no guide page until it is left', async () => {
+    mocks.user = { ...newAccount, pageHintsSeen: {} };
+    const { view, WelcomeTutorialHost } = await renderHost();
+    expect(shown('welcome')).toBeTruthy();
+
+    mocks.user = { ...newAccount, welcomeTutorialSeenAt: '2026-09-25T12:00:00.000Z', pageHintsSeen: {} };
+    await close('welcome');
+    view.rerender(<WelcomeTutorialHost />);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+    expect(shown('guide')).toBeNull();
+
+    mocks.pathname = '/budgets';
+    view.rerender(<WelcomeTutorialHost />);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+    expect(shown('guide')?.getAttribute('data-page')).toBe('budgets');
+  });
+
   it('starts every opening from a fresh window', async () => {
     const { store } = await renderHost();
     await close('welcome');
@@ -188,6 +214,9 @@ describe('WelcomeTutorialHost', () => {
     });
 
     it('opens the guide on this page alone and records the close at the current version', async () => {
+      mocks.setUser.mockImplementation((update: (user: User | null) => User | null) => {
+        mocks.user = update(mocks.user);
+      });
       await renderHost();
 
       expect(shown('guide')?.getAttribute('data-page')).toBe('dashboard');
@@ -223,6 +252,55 @@ describe('WelcomeTutorialHost', () => {
       const modal = document.createElement('div');
       modal.className = 'MuiModal-root';
       document.body.append(modal);
+      await renderHost();
+      expect(shown('guide')).toBeNull();
+    });
+
+    it('opens with no wait once the code is there', async () => {
+      const { WelcomeTutorialHost } = await import('./WelcomeTutorialHost');
+      render(<WelcomeTutorialHost />);
+      // Promises only: not a single timer has moved.
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(shown('guide')?.getAttribute('data-page')).toBe('dashboard');
+    });
+
+    it('never shows a page the person has already left', async () => {
+      let codeArrives: (module: object) => void = () => undefined;
+      mocks.loadDialog.mockReturnValue(
+        new Promise(resolve => {
+          codeArrives = resolve;
+        }),
+      );
+      const { view, WelcomeTutorialHost } = await renderHost();
+
+      // Budgets was seen earlier, so nothing is due where the person ends up.
+      mocks.user = { ...welcomed, pageHintsSeen: { budgets: 2 } };
+      mocks.pathname = '/budgets';
+      view.rerender(<WelcomeTutorialHost />);
+      await act(async () => {
+        codeArrives({});
+        await vi.advanceTimersByTimeAsync(1000);
+      });
+
+      expect(shown('guide')).toBeNull();
+    });
+
+    it('waits for the next visit when a link asks for a window on arrival', async () => {
+      window.history.replaceState(null, '', '/statements?upload=1');
+      await renderHost();
+      expect(shown('guide')).toBeNull();
+    });
+
+    it('fetches its code ahead on a page without a guide page, while another is due', async () => {
+      mocks.pathname = '/settings';
+      await renderHost();
+      expect(mocks.loadDialog).toHaveBeenCalled();
+    });
+
+    it('stays closed when its code cannot be fetched', async () => {
+      mocks.loadDialog.mockRejectedValue(new Error('offline'));
       await renderHost();
       expect(shown('guide')).toBeNull();
     });
