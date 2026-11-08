@@ -7,6 +7,7 @@ import { Statement } from '../../entities/statement.entity';
 import { Tag } from '../../entities/tag.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { TransactionAttachment } from '../../entities/transaction-attachment.entity';
+import { TransferPairRejection } from '../../entities/transfer-pair-rejection.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { AuditModule } from '../audit/audit.module';
 import { ClassificationModule } from '../classification/classification.module';
@@ -39,6 +40,7 @@ import { TransactionsService } from './transactions.service';
       TransactionAttachment,
       Wallet,
       Payee,
+      TransferPairRejection,
     ]),
     AuditModule,
     ClassificationModule,

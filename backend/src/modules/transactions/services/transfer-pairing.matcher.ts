@@ -110,6 +110,11 @@ function isDifferentAccount(a: TransferLeg, b: TransferLeg): boolean {
   return keyA !== null && keyB !== null && keyA !== keyB;
 }
 
+/** The same key for two rows whichever way round they come: the lower id first. */
+export function pairKey(a: string, b: string): string {
+  return a < b ? `${a}|${b}` : `${b}|${a}`;
+}
+
 function sortKey(leg: TransferLeg): string {
   return `${new Date(leg.transactionDate).toISOString()}|${leg.id}`;
 }
@@ -122,11 +127,14 @@ function sortKey(leg: TransferLeg): string {
  * silently hides real spending, a missing one is visible and fixable by hand.
  *
  * `pool` may include the rows of `toCheck`; a row is used at most once.
+ * `rejected` holds the `pairKey`s of pairs the user unlinked: those two rows
+ * are never paired again, but each may still pair with another row.
  */
 export async function matchTransferPairs<T extends TransferLeg>(
   toCheck: T[],
   pool: T[],
   lookupRate: RateLookup,
+  rejected: ReadonlySet<string> = new Set(),
 ): Promise<TransferPair<T>[]> {
   const pairs: TransferPair<T>[] = [];
   const used = new Set<string>();
@@ -139,6 +147,7 @@ export async function matchTransferPairs<T extends TransferLeg>(
       other =>
         other.id !== row.id &&
         !used.has(other.id) &&
+        !rejected.has(pairKey(row.id, other.id)) &&
         isOppositeDirection(row, other) &&
         isDifferentAccount(row, other) &&
         daysBetween(row.transactionDate, other.transactionDate) <= TRANSFER_DATE_WINDOW_DAYS,
