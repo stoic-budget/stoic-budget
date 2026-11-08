@@ -79,6 +79,8 @@ export const TransactionListItem = Schema.Struct({
   isPrivate: Schema.Boolean,
   /** The owner's real category of a private row; null for everybody else. */
   privateCategoryId: Schema.NullOr(Schema.String),
+  /** Left out of every income and spending figure; balances and net worth still count it. */
+  excludedFromBudgets: Schema.Boolean,
   transferPairId: Schema.NullOr(Schema.String),
   transferPairSource: Schema.NullOr(Schema.Literals(['auto', 'manual', 'rejected'])),
   transferPairKind: Schema.NullOr(Schema.Literals(['transfer', 'reimbursement', 'investment'])),

@@ -38,6 +38,8 @@ export interface Transaction {
   ownerMemberId?: string | null;
   /** Hidden from the rest of the household: merchant and purpose read as "—". */
   isPrivate?: boolean;
+  /** Left out of budgets, reports and the forecast; balances and net worth still count it. */
+  excludedFromBudgets?: boolean;
   // Currency conversion (populated when convert_to query param is passed to the API)
   convertedAmount?: number;
   conversionRate?: number;
