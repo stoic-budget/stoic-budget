@@ -473,7 +473,7 @@ export class ClassificationService {
     return category?.id;
   }
 
-  private async invalidateWorkspaceCategoriesCache(workspaceId: string): Promise<void> {
+  async invalidateWorkspaceCategoriesCache(workspaceId: string): Promise<void> {
     await this.cacheManager.del(`categories:${workspaceId}:all`);
     await this.cacheManager.del(`categories:${workspaceId}:${CategoryType.INCOME}`);
     await this.cacheManager.del(`categories:${workspaceId}:${CategoryType.EXPENSE}`);

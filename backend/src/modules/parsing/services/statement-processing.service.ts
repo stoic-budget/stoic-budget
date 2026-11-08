@@ -21,7 +21,6 @@ import { Transaction, TransactionType } from '../../../entities/transaction.enti
 import { User } from '../../../entities/user.entity';
 import { countWithoutCategory } from '../../categories/uncategorized-category';
 import { extractTaxFromPurpose } from '../../classification/helpers/tax-extractor.util';
-import { ClassificationService } from '../../classification/services/classification.service';
 import { ImportSessionService } from '../../import/services/import-session.service';
 import type {
   ImportCommittedEvent,
@@ -50,6 +49,7 @@ import { LayoutTemplateService } from './layout-template.service';
 import { MetadataExtractionService } from './metadata-extraction.service';
 import { OcrService } from './ocr.service';
 import { ParserFactoryService } from './parser-factory.service';
+import { StatementRowHintsService, transferHint } from './statement-row-hints.service';
 
 interface StatementImportPreview {
   sessionId?: string;
@@ -104,7 +104,7 @@ export class StatementProcessingService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private parserFactory: ParserFactoryService,
-    private classificationService: ClassificationService,
+    private rowHints: StatementRowHintsService,
     private metadataExtractionService: MetadataExtractionService,
     private importSessionService: ImportSessionService,
     private transactionFingerprintService: TransactionFingerprintService,
@@ -944,16 +944,13 @@ export class StatementProcessingService {
         ...accountFields(account, {}),
       } as Transaction;
 
-      const classification = await this.classificationService.classifyTransaction(
+      // The file's own category where no rule decided one; none when the user picks by hand.
+      const classification = await this.rowHints.classify(
         tempTransaction,
         userId,
+        parsed,
+        manualCategorySelectionRequired,
       );
-
-      if (manualCategorySelectionRequired) {
-        classification.categoryId = undefined;
-        classification.categorySource = null;
-        classification.categoryReason = null;
-      }
 
       const taxDetected = extractTaxFromPurpose(paymentPurpose).taxMentioned;
 
@@ -979,7 +976,7 @@ export class StatementProcessingService {
         ...classification,
         ...accountFields(account, classification),
         vendorNormalized: null,
-        categoryHint: null,
+        categoryHint: transferHint(parsed),
         transactionNature: null,
         taxDetected,
         enrichmentConfidence: null,
@@ -1067,9 +1064,10 @@ export class StatementProcessingService {
 
     // Single atomic write. A half-imported statement marked COMPLETED is worse
     // than a failed one: totals and balance checks would silently be wrong.
-    const transactions = await this.dataSource.transaction(manager =>
+    const saved = await this.dataSource.transaction(manager =>
       manager.save(Transaction, drafts, { chunk: 200 }),
     );
+    const transactions = await this.rowHints.applySplits(statement, saved, deduped, log);
 
     log('info', `Successfully created ${transactions.length}/${deduped.length} transactions`);
     const duplicatesSkipped = parsedTransactions.length - deduped.length;
