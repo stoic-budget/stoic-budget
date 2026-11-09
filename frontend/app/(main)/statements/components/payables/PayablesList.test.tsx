@@ -11,6 +11,9 @@ vi.mock('@/app/i18n', () => ({
   useIntlayer: () => ({
     notInAccount: { value: 'not in an account yet' },
     title: { value: 'Tags' },
+    skipThis: { value: 'Skip this payment' },
+    moveThis: { value: 'Move this payment' },
+    amountThis: { value: 'Change this payment amount' },
   }),
 }));
 
@@ -26,7 +29,14 @@ const LABELS = {
   archive: 'Archive',
   delete: 'Delete',
   pageShown: 'Showing {from}–{to} of {count}',
-  statusLabels: { to_pay: 'To receive', paid: 'Received', overdue: 'Overdue', partially_paid: 'Partially received' },
+  statusLabels: {
+    to_pay: 'To receive',
+    paid: 'Received',
+    overdue: 'Overdue',
+    partially_paid: 'Partially received',
+    archived: 'Archived',
+    skipped: 'Skipped',
+  },
   sourceLabels: { manual: 'Manual', invoice: 'Invoice' },
   amountPaid: 'received',
 };
@@ -131,5 +141,43 @@ describe('PayablesList', () => {
     ]);
 
     expect(screen.getAllByText(/not in an account yet/)).toHaveLength(1);
+  });
+
+  it('offers the one-occurrence actions on an open repeating bill only', () => {
+    const onOccurrence = vi.fn();
+    render(
+      <PayablesList
+        items={[
+          payable({ id: 'p-1', vendor: 'ACME Rent', seriesId: 'p-1' }),
+          payable({ id: 'p-2', vendor: 'ACME Repairs', seriesId: null }),
+        ]}
+        labels={LABELS}
+        emptyTitle="Nothing"
+        emptyDescription="Nothing yet"
+        pagination={{ page: 1, totalPages: 1, totalItems: 2, pageSize: 20, onPageChange: vi.fn() }}
+        onEdit={vi.fn()}
+        onMarkPaid={vi.fn()}
+        onArchive={vi.fn()}
+        onDelete={vi.fn()}
+        onOccurrence={onOccurrence}
+      />,
+    );
+    const [repeating, oneOff] = screen.getAllByRole('button', { name: 'Actions' });
+    fireEvent.click(oneOff);
+    expect(screen.queryByText('Skip this payment')).toBeNull();
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+
+    fireEvent.click(repeating);
+    fireEvent.click(screen.getByText('Skip this payment'));
+    expect(onOccurrence).toHaveBeenCalledWith(expect.objectContaining({ id: 'p-1' }), 'skip');
+  });
+
+  it('says skipped, not archived, for an occurrence left out of its series', () => {
+    renderList([
+      payable({ id: 'p-1', vendor: 'ACME Rent', status: 'archived', skippedAt: '2026-05-01T08:00:00Z' }),
+      payable({ id: 'p-2', vendor: 'ACME Old', status: 'archived', skippedAt: null }),
+    ]);
+    expect(screen.getByText('Skipped')).toBeInTheDocument();
+    expect(screen.getByText('Archived')).toBeInTheDocument();
   });
 });

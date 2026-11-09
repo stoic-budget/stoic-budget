@@ -17,8 +17,10 @@ import { Workspace } from './workspace.entity';
 
 export enum SubscriptionFrequency {
   WEEKLY = 'weekly',
+  BIWEEKLY = 'biweekly',
   MONTHLY = 'monthly',
   QUARTERLY = 'quarterly',
+  SEMIANNUAL = 'semiannual',
   ANNUAL = 'annual',
 }
 

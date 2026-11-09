@@ -56,8 +56,9 @@ import {
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { ExportFormat, PayablesSortOption } from './dto/filter-payables.dto';
-import { assertOneSource, exactSubset } from './payable-payments.util';
+import { assertOneSource, exactSubset, notRejectedSql } from './payable-payments.util';
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
+import { PayableRecurrenceService } from './payable-recurrence.service';
 import { PayablesExportService } from './payables-export.service';
 import { UnbookedPaymentsService } from './unbooked-payments.service';
 
@@ -115,6 +116,8 @@ export class PayablesService {
     private readonly unbookedPayments?: UnbookedPaymentsService,
     @Optional()
     private readonly eventEmitter?: EventEmitter2,
+    @Optional()
+    private readonly recurrence?: PayableRecurrenceService,
   ) {}
 
   /** Events of a payment change, keyed by the manager of its transaction. */
@@ -188,6 +191,7 @@ export class PayablesService {
       paidAt: null,
       dueSoonNotifiedAt: null,
       tags,
+      ...(await this.recurrence?.fieldsForCreate(workspaceId, dto)),
     });
 
     if (!payment) {
@@ -268,6 +272,7 @@ export class PayablesService {
       dto.statementId === undefined ? undefined : (dto.statementId ?? null),
     );
     Object.assign(payable, this.normalizeUpdateDto(dto, payable));
+    await this.recurrence?.applyUpdate(payable, dto);
     // Left out keeps the tags; a list (empty or not) is the whole new set.
     if (dto.tagIds !== undefined) {
       payable.tags = await this.workspaceTags(workspaceId, dto.tagIds ?? []);
@@ -779,6 +784,7 @@ export class PayablesService {
             SELECT 1 FROM "payable_payments" pp
              WHERE pp."payable_id" = p."id" AND pp."transaction_id" = $4
           )
+          AND ${notRejectedSql('p."id"', '$4')}
         ORDER BY COALESCE(
                    p."vendor" <> '' AND position(lower(p."vendor") IN lower($5)) > 0,
                    false
@@ -1041,6 +1047,7 @@ export class PayablesService {
             SELECT 1 FROM "payable_payments" pp
              WHERE pp."transaction_id" = t."id" AND pp."payable_id" = $9
           )
+          AND ${notRejectedSql('$9', 't."id"')}
           AND COALESCE((
                 SELECT SUM(pp."amount") FROM "payable_payments" pp
                  WHERE pp."transaction_id" = t."id"
@@ -1281,11 +1288,10 @@ export class PayablesService {
    * and wording ("chase the customer", not "pay the vendor"); add a direction
    * argument here once those translations exist.
    */
-  async findDueSoonPayables(days = 7): Promise<Payable[]> {
+  async findDueSoonPayables(): Promise<Payable[]> {
     const today = this.startOfDay(new Date());
-    const targetDate = new Date(today);
-    targetDate.setUTCDate(targetDate.getUTCDate() + days);
-
+    // Each bill's own reminder lead: due within its `remindDaysBefore` days from today.
+    const due = 'payable.dueDate BETWEEN :from AND CAST(:from AS date) + payable.remindDaysBefore';
     return this.payableRepository
       .createQueryBuilder('payable')
       .where('payable.deletedAt IS NULL')
@@ -1295,10 +1301,8 @@ export class PayablesService {
         statuses: [PayableStatus.TO_PAY, PayableStatus.SCHEDULED],
       })
       .andWhere('payable.dueSoonNotifiedAt IS NULL')
-      .andWhere('payable.dueDate BETWEEN :from AND :to', {
-        from: today,
-        to: targetDate,
-      })
+      .andWhere(due)
+      .setParameter('from', this.toDateString(today))
       .getMany();
   }
 
@@ -1361,7 +1365,7 @@ export class PayablesService {
     const nextStatus = toEnum(PayableStatus, dto.status) ?? current.status;
     const willBePaid = nextStatus === PayableStatus.PAID;
 
-    const { tagIds: _tagIds, ...columns } = dto;
+    const { tagIds: _tagIds, recurrence: _rule, ...columns } = dto;
     const patch: Partial<Payable> = {
       ...withoutNulls(columns),
       direction: toEnum(PayableDirection, dto.direction) ?? undefined,
@@ -1439,9 +1443,7 @@ export class PayablesService {
 
     const transaction = await this.transactionRepository.findOne({
       where: { id: linkedTransactionId, workspaceId },
-      select: {
-        id: true,
-      },
+      select: { id: true },
     });
 
     if (!transaction) {
@@ -1459,9 +1461,7 @@ export class PayablesService {
 
     const statement = await this.statementRepository.findOne({
       where: { id: statementId, workspaceId },
-      select: {
-        id: true,
-      },
+      select: { id: true },
     });
 
     if (!statement) {

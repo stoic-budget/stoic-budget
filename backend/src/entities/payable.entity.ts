@@ -12,6 +12,7 @@ import {
   type Relation,
   UpdateDateColumn,
 } from 'typeorm';
+import type { RecurrenceRule } from '../contracts';
 import { Tag } from './tag.entity';
 import { Transaction } from './transaction.entity';
 import { User } from './user.entity';
@@ -42,6 +43,10 @@ export enum PayableDirection {
 @Entity('payables')
 @Index('IDX_payables_workspace_status', ['workspaceId', 'direction', 'status'])
 @Index('IDX_payables_workspace_due_date', ['workspaceId', 'dueDate'])
+@Index('UQ_payables_series_occurrence', ['workspaceId', 'seriesId', 'occurrenceDate'], {
+  unique: true,
+  where: '"series_id" IS NOT NULL',
+})
 export class Payable {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -101,8 +106,32 @@ export class Payable {
   })
   source: PayableSource;
 
+  /** Set with `recurrence`; on older rows (imports, sheets) a bare flag with no rule. */
   @Column({ name: 'is_recurring', type: 'boolean', default: false })
   isRecurring: boolean;
+
+  /** When the bill repeats; every occurrence of a series carries the rule. */
+  @Column({ type: 'jsonb', nullable: true })
+  recurrence: RecurrenceRule | null;
+
+  /** The series an occurrence belongs to: the id of its first bill. A grouping key, not a link. */
+  @Column({ name: 'series_id', type: 'uuid', nullable: true })
+  seriesId: string | null;
+
+  /** The day the rule put this occurrence on; moving the due date leaves it. */
+  @Column({ name: 'occurrence_date', type: 'date', nullable: true })
+  occurrenceDate: string | null;
+
+  /** The series amount, when this occurrence's amount was changed for it alone. */
+  @Column({ name: 'base_amount', type: 'decimal', precision: 15, scale: 2, nullable: true })
+  baseAmount: string | null;
+
+  @Column({ name: 'skipped_at', type: 'timestamptz', nullable: true })
+  skippedAt: Date | null;
+
+  /** How many days before the due date the reminder goes out. */
+  @Column({ name: 'remind_days_before', type: 'int', default: 3 })
+  remindDaysBefore: number;
 
   @Column({ type: 'text', nullable: true })
   comment: string | null;

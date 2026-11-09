@@ -5,6 +5,7 @@ export * from './auth/current-user';
 export * from './auth/security';
 export * from './budgets/budgets';
 export * from './classification/categorization-rules';
+export * from './common/recurrence';
 export * from './common/requests';
 export * from './common/wire';
 export * from './crypto/crypto';
