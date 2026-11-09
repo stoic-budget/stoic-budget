@@ -3,11 +3,13 @@
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { useEffect, useState } from 'react';
+import { Checkbox } from '@/app/components/ui/checkbox';
 import { Select } from '@/app/components/ui/select';
 import { TextTabs } from '@/app/components/ui/text-tabs';
 import { useIntlayer } from '@/app/i18n';
 import type { LoanDayCount, LoanExtraMode, LoanMethod, LoanTermsBody } from '@/app/lib/contracts';
 import { AccountSideDrawer, Field } from '../AccountSideDrawer';
+import { mutedStyle } from '../account-detail-styles';
 import { LoanRowsField } from './LoanRowsField';
 import { formToBody, type LoanForm } from './loan-form';
 
@@ -32,6 +34,7 @@ export function LoanTermsDrawer({
   onRemove,
 }: LoanTermsDrawerProps): React.JSX.Element {
   const t = useIntlayer('loanSchedule');
+  const tp = useIntlayer('loanPayments');
   const [form, setForm] = useState<LoanForm>(initial);
   const [tried, setTried] = useState(false);
 
@@ -186,6 +189,15 @@ export function LoanTermsDrawer({
           ]}
         />
       </Field>
+      <div style={{ display: 'grid', gap: 2 }}>
+        <Checkbox
+          id="loan-auto-split"
+          checked={form.autoSplit}
+          onCheckedChange={autoSplit => set({ autoSplit })}
+          label={tp.autoSplit}
+        />
+        <span style={mutedStyle}>{tp.autoSplitHint}</span>
+      </div>
       {tried && !body && (
         <span role="alert" style={{ fontSize: 13, color: 'var(--money-down)' }}>
           {t.invalid}

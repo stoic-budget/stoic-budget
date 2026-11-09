@@ -49,6 +49,7 @@ describe('loan form', () => {
       extraPayments: [{ date: '2026-09-15', amount: 500 }],
       recurringExtra: { amount: 50, from: '2026-04-15' },
       extraMode: 'reduce_payment',
+      autoSplit: false,
     });
   });
 
@@ -86,6 +87,7 @@ describe('loan form', () => {
       extraPayments: [],
       recurringExtra: { amount: 25, from: '2026-06-30' },
       extraMode: 'reduce_term',
+      autoSplit: true,
       createdAt: '2026-01-31T10:00:00.000Z',
       updatedAt: '2026-01-31T10:00:00.000Z',
     };
@@ -101,6 +103,7 @@ describe('loan form', () => {
       extraPayments: [],
       recurringExtra: { amount: 25, from: '2026-06-30' },
       extraMode: 'reduce_term',
+      autoSplit: true,
     });
   });
 });

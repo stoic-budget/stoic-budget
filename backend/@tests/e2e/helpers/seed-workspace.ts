@@ -102,6 +102,19 @@ export async function seedWorkspace(
     extraPayments: [{ date: today, amount: 10 }],
     recurringExtra: { amount: 5, from: today },
   });
+  // A payment into the loan with its interest split off: the interest row points at the payment.
+  const [loanPayment] = await dataSource.query(
+    `INSERT INTO transactions (workspace_id, wallet_id, transaction_date, counterparty_name,
+       payment_purpose, currency, transaction_type, amount, credit, is_verified)
+     VALUES ($1, $2, $3, $4, $5, 'USD', 'income', 100, 100, true) RETURNING id`,
+    [owner.workspaceId, loan.body.id, today, `${marker} loan payment`, `${marker} instalment`],
+  );
+  await send(
+    'loan payment split',
+    'post',
+    `/wallets/${loan.body.id}/loan-payments/${loanPayment.id}/split`,
+    { interest: 4 },
+  );
   await send('branch', 'post', '/branches', { name: `${marker} branch` });
   await send('rule', 'post', '/categorization-rules', {
     name: `${marker} rule`,

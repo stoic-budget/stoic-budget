@@ -38,6 +38,14 @@ export const ACCOUNTING_ERRORS = {
     'The account holds {{walletCurrency}}; the statement is in {{currency}}',
   WALLET_NOT_FOUND: 'Account not found in this workspace',
   LOAN_TERMS_DEBT_ONLY: 'Loan terms can be set only on a loan or credit card account',
+  LOAN_PAYMENT_NOT_FOUND: 'Payment not found on this loan account',
+  LOAN_PAYMENT_CURRENCY:
+    'The payment is in {{currency}} and the loan in {{loanCurrency}}; only a payment in the loan currency can be split',
+  LOAN_PAYMENT_BEFORE_START: 'The payment is dated before the loan starts on {{startDate}}',
+  LOAN_PAYMENT_SPLIT_PART:
+    'The payment is divided into parts; join them before splitting off the interest',
+  LOAN_PAYMENT_ALREADY_SPLIT: 'The payment is already split into principal and interest',
+  LOAN_PAYMENT_INTEREST_TOO_LARGE: 'The interest cannot be more than the payment, {{amount}}',
   TRANSFER_SAME_ACCOUNT: 'The transaction is already in this account',
   // Payables
   PAYABLE_PAYMENT_NOT_POSITIVE: 'A payment must be more than zero',

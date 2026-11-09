@@ -8,7 +8,14 @@ import { Schema } from 'effect';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
-import { LoanSchedule, LoanTermsState, LoanWhatIf, MessageResult } from '../../src/contracts';
+import {
+  LoanPaymentItem,
+  LoanPayments,
+  LoanSchedule,
+  LoanTermsState,
+  LoanWhatIf,
+  MessageResult,
+} from '../../src/contracts';
 import { Transaction, TransactionType } from '../../src/entities/transaction.entity';
 import {
   deleteUserByEmail,
@@ -129,6 +136,7 @@ describe('API contracts: loans (e2e)', () => {
       extraPayments: terms.extraPayments,
       recurringExtra: null,
       extraMode: 'reduce_term',
+      autoSplit: false,
     });
 
     const again = await call('put', `/wallets/${loanId}/loan-terms`, 200, {
@@ -195,6 +203,40 @@ describe('API contracts: loans (e2e)', () => {
 
     const stored = await call('get', `/wallets/${loanId}/loan-terms`, 200);
     expect(stored.body.terms.extraPayments).toEqual(terms.extraPayments);
+  });
+
+  it('lists the payments with the schedule’s split, splits one and joins it back', async () => {
+    const listed = await call('get', `/wallets/${loanId}/loan-payments`, 200);
+    matches(LoanPayments, listed.body);
+    expect(listed.body).toMatchObject({ currency: 'USD', autoSplit: false });
+    // The three counted instalments and the one still in Review; the duplicate is not a payment.
+    expect(listed.body.items).toHaveLength(4);
+    const first = listed.body.items.find(
+      (item: { isVerified: boolean; suggestion: { period: number | null } | null }) =>
+        item.isVerified && item.suggestion?.period === 1,
+    );
+    // Paid only the principal of the first instalment: the interest is capped at the payment.
+    const interest = first.suggestion.interest;
+    expect(interest).toBe(Math.min(60, first.amount));
+
+    const split = await call(
+      'post',
+      `/wallets/${loanId}/loan-payments/${first.transactionId}/split`,
+      200,
+      { interest },
+    );
+    matches(LoanPaymentItem, split.body);
+    expect(split.body.split).toMatchObject({ interest, principal: 0 });
+    const after = await call('get', `/wallets/${loanId}/loan-payments`, 200);
+    matches(LoanPayments, after.body);
+    expect(after.body.totals.interest).toBe(interest);
+
+    const joined = await call(
+      'delete',
+      `/wallets/${loanId}/loan-payments/${first.transactionId}/split`,
+      200,
+    );
+    matches(MessageResult, joined.body);
   });
 
   it('removes the terms', async () => {
