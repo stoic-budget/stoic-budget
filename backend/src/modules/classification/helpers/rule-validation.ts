@@ -7,14 +7,22 @@ import {
   assertWorkspaceRefs,
 } from '../../../common/utils/workspace-refs.util';
 import { PaymentType } from '../../../contracts';
+import { Category } from '../../../entities/category.entity';
 import { Payee } from '../../../entities/payee.entity';
 import { Tag } from '../../../entities/tag.entity';
 import { Wallet } from '../../../entities/wallet.entity';
 import type { WorkspaceMember } from '../../../entities/workspace-member.entity';
 import { findOrCreatePayeeByName } from '../../payees/payee-resolution';
+import {
+  conditionRefs,
+  conditionValues,
+  EMPTINESS_OPERATORS,
+  leafConditions,
+} from '../engine/rule-condition-tree';
 import type {
   ClassificationCondition,
   ClassificationResult,
+  RuleConditionNode,
 } from '../interfaces/classification-rule.interface';
 
 const DIRECTIONS = new Set(['income', 'expense']);
@@ -45,6 +53,10 @@ const TEXT_OPERATORS: Operator[] = [
 ];
 const NUMBER_OPERATORS: Operator[] = ['equals', 'greater_than', 'less_than', 'between'];
 const CHOICE_OPERATORS: Operator[] = ['equals', 'not_equals'];
+/** Text a row may also lack: a payee, a purpose, a reference, a comment. */
+const BLANKABLE_TEXT_OPERATORS: Operator[] = [...TEXT_OPERATORS, 'is_empty', 'is_not_empty'];
+/** A category, a payee, tags: one of these ids (tags: any of them), none of them, or nothing. */
+const REF_OPERATORS: Operator[] = ['equals', 'not_equals', 'is_empty', 'is_not_empty'];
 
 /** The checks each field takes. A field not listed here is free text. */
 const OPERATORS_OF: Partial<Record<ClassificationCondition['field'], Operator[]>> = {
@@ -52,12 +64,18 @@ const OPERATORS_OF: Partial<Record<ClassificationCondition['field'], Operator[]>
   day_of_month: NUMBER_OPERATORS,
   currency: CHOICE_OPERATORS,
   payment_type: CHOICE_OPERATORS,
+  counterparty_name: BLANKABLE_TEXT_OPERATORS,
+  payment_purpose: BLANKABLE_TEXT_OPERATORS,
+  counterparty_bin: BLANKABLE_TEXT_OPERATORS,
+  document_number: BLANKABLE_TEXT_OPERATORS,
+  comment: BLANKABLE_TEXT_OPERATORS,
+  category: REF_OPERATORS,
+  payee: REF_OPERATORS,
+  tags: REF_OPERATORS,
 };
 
-const valuesOf = (condition: ClassificationCondition): Array<string | number> =>
-  typeof condition.value === 'string' || typeof condition.value === 'number'
-    ? [condition.value]
-    : [...condition.value];
+const REF_FIELDS = new Set<ClassificationCondition['field']>(['category', 'payee', 'tags']);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Whether every value of a numeric condition is a number the field can hold, in order. */
 function numbersHold(condition: ClassificationCondition): boolean {
@@ -90,7 +108,14 @@ function conditionHolds(condition: ClassificationCondition): boolean {
   if (condition.valueTo !== undefined) {
     return false;
   }
-  const values = valuesOf(condition).map(String);
+  if (EMPTINESS_OPERATORS.has(condition.operator)) {
+    // Nothing to compare with: a value here would be a mistake read as a check.
+    return condition.value === '';
+  }
+  const values = conditionValues(condition).map(String);
+  if (REF_FIELDS.has(condition.field)) {
+    return values.every(value => UUID.test(value));
+  }
   switch (condition.field) {
     case 'direction':
       return values.every(value => DIRECTIONS.has(value));
@@ -110,8 +135,8 @@ function conditionHolds(condition: ClassificationCondition): boolean {
  * income or expense, an amount that is not a number, a range the wrong way
  * round, a check the field does not take.
  */
-export function assertConditionsValid(conditions: readonly ClassificationCondition[]): void {
-  for (const condition of conditions) {
+export function assertConditionsValid(nodes: readonly RuleConditionNode[]): void {
+  for (const condition of leafConditions(nodes)) {
     if (condition.operator === 'regex' && typeof condition.value === 'string') {
       try {
         new RegExp(condition.value, 'i');
@@ -136,17 +161,21 @@ export async function assertRuleRefs(
   members: Repository<WorkspaceMember>,
   workspaceId: string,
   rule: {
-    conditions?: readonly ClassificationCondition[] | null;
+    conditions?: readonly RuleConditionNode[] | null;
     result?: ClassificationResult | null;
   },
 ): Promise<void> {
-  const walletIds = (rule.conditions ?? [])
-    .filter(condition => condition.field === 'wallet')
-    .flatMap(condition => valuesOf(condition).map(String));
+  const asked = (field: ClassificationCondition['field']) => conditionRefs(rule.conditions, field);
   await Promise.all([
-    assertWorkspaceOwned(manager, Wallet, walletIds, workspaceId),
-    assertWorkspaceOwned(manager, Tag, rule.result?.tagIds ?? [], workspaceId),
-    assertWorkspaceOwned(manager, Payee, [rule.result?.payeeId], workspaceId),
+    assertWorkspaceOwned(manager, Wallet, asked('wallet'), workspaceId),
+    assertWorkspaceOwned(manager, Category, asked('category'), workspaceId),
+    assertWorkspaceOwned(
+      manager,
+      Tag,
+      [...asked('tags'), ...(rule.result?.tagIds ?? [])],
+      workspaceId,
+    ),
+    assertWorkspaceOwned(manager, Payee, [...asked('payee'), rule.result?.payeeId], workspaceId),
     assertWorkspaceRefs(manager, workspaceId, rule.result ?? {}),
     assertOwnerMemberInWorkspace(members, workspaceId, rule.result?.ownerMemberId),
   ]);

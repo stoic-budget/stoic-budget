@@ -1177,6 +1177,85 @@ describe('API contracts (e2e)', () => {
       }
     });
 
+    it('a rule with a group and conditions on the category, tags and comment, previewed below another and applied', async () => {
+      const categories = await get('/categories?type=expense');
+      // The category the coffee row was entered with, by hand.
+      const categoryId: string = categories.body[0].id;
+      const tag = await send('post', '/tags', { name: 'Filed coffee' }).expect(201);
+      const ids: string[] = [];
+      try {
+        const files = await send('post', '/categorization-rules', {
+          name: 'Coffee filed',
+          conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'contract coffee' }],
+          result: { categoryId: categories.body[1].id, comment: 'Filed by rule' },
+        }).expect(201);
+        ids.push(files.body.id);
+        const conditions = [
+          { field: 'category', operator: 'equals', value: categoryId },
+          {
+            matchMode: 'any',
+            conditions: [
+              { field: 'tags', operator: 'is_empty', value: '' },
+              { field: 'comment', operator: 'equals', value: 'filed by rule' },
+            ],
+          },
+        ];
+        const nested = await send('post', '/categorization-rules', {
+          name: 'Filed coffee is tagged',
+          conditions,
+          result: { tagIds: [tag.body.id] },
+        }).expect(201);
+        ids.push(nested.body.id);
+        matches(CategorizationRuleContract, nested.body);
+        expect(nested.body.conditions).toEqual(conditions);
+        // The filing rule first: the nested one reads the comment it sets, and the
+        // category a person picked, which no rule takes over.
+        await send('put', '/categorization-rules/order', { ids }).expect(200);
+        const list = await get('/categorization-rules');
+        matches(CategorizationRuleList, list.body);
+
+        const preview = await send('post', '/categorization-rules/test', {
+          conditions,
+          ruleId: nested.body.id,
+        }).expect(200);
+        matches(CategorizationRuleTestResult, preview.body);
+        expect(preview.body.matchedTransactions).toBeGreaterThan(0);
+        expect(
+          preview.body.matches.some((match: { matchReason: string }) =>
+            match.matchReason.includes('(set by "Coffee filed")'),
+          ),
+        ).toBe(true);
+
+        const applied = await send('post', `/categorization-rules/${nested.body.id}/apply`).expect(200);
+        matches(CategorizationRuleApplyResult, applied.body);
+        expect(applied.body.tagged).toBe(preview.body.matchedTransactions);
+        // Tagged now, none of those rows passes "no tags" any more.
+        const before = new Set(preview.body.matches.map((match: { id: string }) => match.id));
+        const untagged = await send('post', '/categorization-rules/test', {
+          conditions: [conditions[0], { field: 'tags', operator: 'is_empty', value: '' }],
+          ruleId: nested.body.id,
+        }).expect(200);
+        expect(untagged.body.matches.filter((match: { id: string }) => before.has(match.id))).toEqual([]);
+
+        // A blank check carries no value, and a category is named by its id.
+        await send('put', `/categorization-rules/${nested.body.id}`, {
+          conditions: [{ field: 'comment', operator: 'is_empty', value: 'x' }],
+        }).expect(400);
+        await send('put', `/categorization-rules/${nested.body.id}`, {
+          conditions: [{ field: 'category', operator: 'equals', value: 'Groceries' }],
+        }).expect(400);
+        // Groups go one level deep.
+        await send('put', `/categorization-rules/${nested.body.id}`, {
+          conditions: [{ matchMode: 'any', conditions: [{ matchMode: 'all', conditions }] }],
+        }).expect(400);
+      } finally {
+        for (const id of ids) {
+          await send('delete', `/categorization-rules/${id}`).expect(204);
+        }
+        await send('delete', `/tags/${tag.body.id}`);
+      }
+    });
+
     it('a rule that writes a comment and gives a payee by name, applied to existing rows', async () => {
       const conditions = [
         { field: 'counterparty_name', operator: 'contains', value: 'contract coffee' },

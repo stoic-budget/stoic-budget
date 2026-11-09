@@ -10,11 +10,14 @@ import type { ContractInput } from '@/app/lib/query-fn-schema';
 import { apiQueryDecoded, checkContract } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import {
+  isGroup,
   NUMBER_FIELDS,
   type Rule,
   type RuleCondition,
   type RuleDraftBody,
   type RuleMatchMode,
+  type RuleNode,
+  VALUELESS_OPERATORS,
   valuesOf,
 } from './types';
 
@@ -191,24 +194,36 @@ export function useApplyRule() {
 /**
  * Conditions the server would accept, as it stores them: a value in every row
  * (blank ones of a list dropped, one left alone a plain value), numbers as
- * numbers, and both ends of a range.
+ * numbers, both ends of a range, no value for a blank check, and no group left
+ * without a condition.
  */
-export function completeConditions(conditions: RuleCondition[]): RuleCondition[] {
-  return conditions.flatMap((condition): RuleCondition[] => {
-    const values = valuesOf(condition).filter(value => value.trim() !== '');
-    if (values.length === 0) {
+export function completeConditions(conditions: RuleNode[]): RuleNode[] {
+  return conditions.flatMap((node): RuleNode[] => {
+    if (!isGroup(node)) {
+      return completeCondition(node);
+    }
+    const inner = node.conditions.flatMap(completeCondition);
+    return inner.length > 0 ? [{ matchMode: node.matchMode, conditions: inner }] : [];
+  });
+}
+
+function completeCondition(condition: RuleCondition): RuleCondition[] {
+  if (VALUELESS_OPERATORS.includes(condition.operator)) {
+    return [{ field: condition.field, operator: condition.operator, value: '' }];
+  }
+  const values = valuesOf(condition).filter(value => value.trim() !== '');
+  if (values.length === 0) {
+    return [];
+  }
+  if (NUMBER_FIELDS.includes(condition.field)) {
+    const { valueTo, ...rest } = condition;
+    const range = condition.operator === 'between';
+    if (range && valueTo === undefined) {
       return [];
     }
-    if (NUMBER_FIELDS.includes(condition.field)) {
-      const { valueTo, ...rest } = condition;
-      const range = condition.operator === 'between';
-      if (range && valueTo === undefined) {
-        return [];
-      }
-      return [{ ...rest, value: Number(values[0]), ...(range ? { valueTo } : {}) }];
-    }
-    return [{ ...condition, value: values.length === 1 ? values[0] : values }];
-  });
+    return [{ ...rest, value: Number(values[0]), ...(range ? { valueTo } : {}) }];
+  }
+  return [{ ...condition, value: values.length === 1 ? values[0] : values }];
 }
 
 /** What a rule would match today: `POST /categorization-rules/test`. */
@@ -230,7 +245,7 @@ export function previewRule(
  * how many matches would move there. `matchMode` is how the conditions combine.
  */
 export function useRulePreview(
-  conditions: RuleCondition[],
+  conditions: RuleNode[],
   ruleId: string | null,
   walletId: string | null = null,
   matchMode: RuleMatchMode = 'all',
@@ -243,7 +258,7 @@ export function useRulePreview(
     const timer = setTimeout(() => setSettled(serialized), PREVIEW_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [serialized]);
-  const settledConditions = JSON.parse(settled) as RuleCondition[];
+  const settledConditions = JSON.parse(settled) as RuleNode[];
 
   return useQuery({
     queryKey: queryKeys.categorizationRulePreview(

@@ -61,3 +61,30 @@ export async function addTransactionTags(
     [workspaceId, [...transactionIds], [...tagIds]],
   );
 }
+
+/**
+ * The tags of saved rows of the workspace, by row id, for the rules that ask
+ * about tags. A row with none is left out of the map.
+ */
+export async function rowTagIds(
+  manager: EntityManager,
+  workspaceId: string,
+  transactionIds: readonly string[],
+): Promise<Map<string, string[]>> {
+  const byRow = new Map<string, string[]>();
+  if (transactionIds.length === 0) {
+    return byRow;
+  }
+  const pairs: Array<{ transaction_id: string; tag_id: string }> = await manager.query(
+    `SELECT tt.transaction_id, tt.tag_id
+       FROM transaction_tags tt
+       JOIN transactions tx ON tx.id = tt.transaction_id
+      WHERE tx.workspace_id = $1
+        AND tt.transaction_id = ANY($2::uuid[])`,
+    [workspaceId, [...transactionIds]],
+  );
+  for (const pair of pairs) {
+    byRow.set(pair.transaction_id, [...(byRow.get(pair.transaction_id) ?? []), pair.tag_id]);
+  }
+  return byRow;
+}

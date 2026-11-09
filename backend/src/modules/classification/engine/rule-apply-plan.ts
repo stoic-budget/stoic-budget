@@ -1,13 +1,51 @@
 import { canReadPrivate } from '../../../common/utils/transaction-privacy.util';
 import type { Transaction } from '../../../entities/transaction.entity';
 import type {
-  ClassificationCondition,
   ClassificationResult,
+  MatchMode,
+  RuleConditionNode,
 } from '../interfaces/classification-rule.interface';
 import { hasDecidedCategory } from './category-decision';
 import { matchesRule } from './rule-conditions';
-import { decides, type LayeredField } from './rule-layers';
+import { decides, type LayeredField, passRules } from './rule-layers';
 import { hasNoComment, pickedByHand } from './rule-result';
+import { type RuleRowState, storedState } from './rule-row-state';
+
+/** A rule as an apply or a preview tries it. */
+type TriedRule = {
+  name?: string;
+  conditions: RuleConditionNode[];
+  matchMode?: MatchMode;
+  result: ClassificationResult;
+};
+
+/**
+ * The rule's matches among rows the caller may read, each with the rules
+ * above it that match it too. Rules add up best first, so a condition on the
+ * category, payee, tags or comment reads the row as those rules above left it
+ * (rule-row-state). `tagIds` holds the rows' tags, by row id, when a rule asks about them.
+ */
+export function rowsMatching<Above extends TriedRule>(
+  rows: readonly Transaction[],
+  rule: Omit<TriedRule, 'result'>,
+  input: {
+    above?: readonly Above[];
+    viewerMemberId: string | null;
+    tagIds?: ReadonlyMap<string, readonly string[]>;
+  },
+): Array<{ row: Transaction; above: Above[]; state: RuleRowState }> {
+  return rows.flatMap(row => {
+    if (!canReadPrivate(row, input.viewerMemberId)) {
+      return [];
+    }
+    // A row missing from a loaded map has no tags; without a map, its relation counts.
+    const start = storedState(row, input.tagIds ? (input.tagIds.get(row.id) ?? []) : undefined);
+    const pass = passRules(input.above ?? [], row, start);
+    return matchesRule(row, rule, pass.state)
+      ? [{ row, above: pass.matching, state: pass.state }]
+      : [];
+  });
+}
 
 /** What applying a rule changes among a page of existing rows. */
 export interface RuleApplyPlan {
@@ -48,11 +86,13 @@ export function movesToWallet(
  */
 export function planRuleApply(
   rows: readonly Transaction[],
-  rule: { conditions: ClassificationCondition[] },
+  rule: Omit<TriedRule, 'result'>,
   input: {
     /** The active rules ranked above this one: what they set on a row, this one does not. */
-    above?: ReadonlyArray<{ conditions: ClassificationCondition[]; result: ClassificationResult }>;
+    above?: readonly TriedRule[];
     viewerMemberId: string | null;
+    /** The rows' tags by row id, when a rule asks about tags. */
+    tagIds?: ReadonlyMap<string, readonly string[]>;
     setsCategory: boolean;
     setsTags: boolean;
     walletId?: string;
@@ -60,11 +100,11 @@ export function planRuleApply(
     payeeId?: string;
   },
 ): RuleApplyPlan {
-  const matches = rows.filter(
-    row => canReadPrivate(row, input.viewerMemberId) && matchesRule(row, rule),
-  );
+  const matching = rowsMatching(rows, rule, input);
+  const matches = matching.map(({ row }) => row);
+  const aboveOf = new Map(matching.map(({ row, above }) => [row.id, above]));
   const wins = (row: Transaction, field: LayeredField) =>
-    !(input.above ?? []).some(higher => decides(higher.result, field) && matchesRule(row, higher));
+    !(aboveOf.get(row.id) ?? []).some(higher => decides(higher.result, field));
   return {
     matches,
     refiled: input.setsCategory
