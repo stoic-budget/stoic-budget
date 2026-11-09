@@ -22,6 +22,8 @@ const PREFERENCE_STALE_TIME = 30 * 60 * 1000;
 export interface UseViewPreferenceResult<T> {
   /** `undefined` until the saved state has loaded; `null` when nothing was saved or it failed to load. */
   state: T | null | undefined;
+  /** The load failed and nothing is cached: `null` above then does not mean "nothing saved". */
+  failed: boolean;
   save: (next: T) => void;
 }
 
@@ -85,5 +87,5 @@ export function useViewPreference<T extends Record<string, unknown>>(
     [data, isError, read],
   );
 
-  return { state, save };
+  return { state, failed: data === undefined && isError, save };
 }
