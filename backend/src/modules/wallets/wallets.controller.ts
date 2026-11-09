@@ -12,6 +12,7 @@ import {
   AttachStatementsResult,
   CreateWalletRequest,
   MessageResult,
+  StatementCoverage,
   UpdateWalletBody,
   WalletItem,
   WalletList,
@@ -22,6 +23,7 @@ import {
 } from '../../contracts';
 import type { User } from '../../entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { WalletCoverageService } from './wallet-coverage.service';
 import { WalletStatementsService } from './wallet-statements.service';
 import { WalletsService } from './wallets.service';
 
@@ -30,6 +32,7 @@ export class WalletsController {
   constructor(
     private readonly walletsService: WalletsService,
     private readonly walletStatements: WalletStatementsService,
+    private readonly walletCoverage: WalletCoverageService,
   ) {}
 
   @Post()
@@ -99,6 +102,16 @@ export class WalletsController {
     @WorkspaceId() workspaceId: string,
   ) {
     return this.walletStatements.of(id, workspaceId);
+  }
+
+  @Get(':id/statement-coverage')
+  @WorkspaceAuth(Permission.WALLET_VIEW)
+  @SchemaResponse(StatementCoverage)
+  async statementCoverage(
+    @SchemaParams(WalletParams) { id }: WalletParams,
+    @WorkspaceId() workspaceId: string,
+  ) {
+    return this.walletCoverage.coverage(id, workspaceId);
   }
 
   @Post(':id/statements')

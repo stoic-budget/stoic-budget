@@ -34,6 +34,12 @@ export interface BankSyncAccountSetting {
    * everything up to the wallet's last known row is already here.
    */
   syncFrom: string | null;
+  /**
+   * The first day the pulls since this account's last statement asked for, and
+   * the wallet they were for. A pull that brings nothing new makes no
+   * statement; the next one that does stands for those days too.
+   */
+  askedFrom: { walletId: string | null; from: string } | null;
   health: BankSyncHealth;
   lastError: string | null;
   /** Set when the provider's balance moved further than the rows that arrived explain. */
@@ -118,6 +124,7 @@ function normalizeAccount(raw: Partial<BankSyncAccountSetting>): BankSyncAccount
     balanceDate: raw.balanceDate ?? null,
     consentExpiresAt: raw.consentExpiresAt ?? null,
     syncFrom: raw.syncFrom ?? null,
+    askedFrom: typeof raw.askedFrom?.from === 'string' ? raw.askedFrom : null,
     health: raw.health ?? 'never_synced',
     lastError: raw.lastError ?? null,
     balanceDrift: raw.balanceDrift ?? null,

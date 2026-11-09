@@ -388,3 +388,89 @@ describe('BankSyncPullService health', () => {
     );
   });
 });
+
+describe('BankSyncPullService statement period', () => {
+  const DAY = 86_400_000;
+  const periodOf = (h: Harness, call = 0) => {
+    const file = h.statements.create.mock.calls[call][2] as { buffer: Buffer };
+    const text = file.buffer.toString('utf8');
+    return { from: text.match(/<DTSTART>(\d{8})/)?.[1], to: text.match(/<DTEND>(\d{8})/)?.[1] };
+  };
+  const storedAccount = (h: Harness) =>
+    (h.store.configOf('c1') as unknown as { accounts: Array<Record<string, unknown>> }).accounts[0];
+  const at = (iso: string) => vi.setSystemTime(new Date(iso));
+
+  beforeEach(() => vi.useFakeTimers({ toFake: ['Date'] }));
+  afterEach(() => vi.useRealTimers());
+
+  it('stands for every day asked since the last statement, quiet pulls included', async () => {
+    at('2026-09-10T12:00:00Z');
+    const quiet = harness({
+      config: connectionConfig({
+        accounts: [accountConfig({ walletId: 'wallet-1', lastSyncAt: '2026-09-01T12:00:00.000Z' })],
+      }),
+      accounts: [remoteAccount({ transactions: [] })],
+    });
+    await quiet.pull.sync(user, workspaceId, 'c1');
+    expect(quiet.statements.create).not.toHaveBeenCalled();
+    expect(storedAccount(quiet).askedFrom).toEqual({
+      walletId: 'wallet-1',
+      from: '2026-08-25T12:00:00.000Z',
+    });
+
+    at('2026-09-20T12:00:00Z');
+    const busy = harness({
+      config: quiet.store.configOf('c1') as unknown as Record<string, unknown>,
+      accounts: [
+        remoteAccount({ transactions: [remoteRow({ posted: new Date('2026-09-19T00:00:00Z') })] }),
+      ],
+    });
+    await busy.pull.sync(user, workspaceId, 'c1');
+    // From the quiet pull's first asked day, not the row's date nor this pull's own floor.
+    expect(periodOf(busy)).toEqual({ from: '20260825', to: '20260920' });
+    expect(storedAccount(busy).askedFrom).toBeNull();
+  });
+
+  it('starts over when the feed now lands in another wallet or has just been switched', async () => {
+    at('2026-09-20T12:00:00Z');
+    const asked = { walletId: 'wallet-1', from: '2026-08-25T12:00:00.000Z' };
+    const row = remoteRow({ posted: new Date('2026-09-19T00:00:00Z') });
+    const moved = harness({
+      config: connectionConfig({
+        accounts: [
+          accountConfig({ walletId: 'wallet-2', lastSyncAt: '2026-09-10T12:00:00.000Z', askedFrom: asked }),
+        ],
+      }),
+      accounts: [remoteAccount({ transactions: [row] })],
+    });
+    await moved.pull.sync(user, workspaceId, 'c1');
+    expect(periodOf(moved).from).toBe('20260903');
+
+    const switched = harness({
+      config: connectionConfig({
+        accounts: [
+          accountConfig({ walletId: 'wallet-1', syncFrom: '2026-09-15T00:00:00.000Z', askedFrom: asked }),
+        ],
+      }),
+      accounts: [remoteAccount({ transactions: [row] })],
+    });
+    await switched.pull.sync(user, workspaceId, 'c1');
+    expect(periodOf(switched).from).toBe('20260915');
+  });
+
+  it('stands for no more history than a provider keeps, however far back it asked', async () => {
+    at('2026-09-20T12:00:00Z');
+    const h = harness({
+      config: connectionConfig({
+        accounts: [accountConfig({ walletId: 'wallet-1', lastSyncAt: '2026-01-10T12:00:00.000Z' })],
+      }),
+      accounts: [
+        remoteAccount({ transactions: [remoteRow({ posted: new Date('2026-09-19T00:00:00Z') })] }),
+      ],
+    });
+    await h.pull.sync(user, workspaceId, 'c1');
+    expect(periodOf(h).from).toBe(
+      new Date(Date.parse('2026-09-20T12:00:00Z') - 90 * DAY).toISOString().slice(0, 10).replace(/-/g, ''),
+    );
+  });
+});
