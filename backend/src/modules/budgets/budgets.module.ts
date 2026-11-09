@@ -11,6 +11,7 @@ import { Workspace } from '../../entities/workspace.entity';
 import { AuditModule } from '../audit/audit.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { WorkspaceCurrencyModule } from '../workspaces/workspace-currency.module';
 import { BudgetEventsListener } from './budget-events.listener';
 import { BudgetWithinLimitService } from './budget-within-limit.service';
@@ -34,6 +35,7 @@ import { StoicLedgerService } from './stoic/stoic-ledger.service';
     ExchangeRatesModule,
     AuditModule,
     WorkspaceCurrencyModule,
+    PayPeriodModule,
   ],
   controllers: [BudgetsController],
   providers: [BudgetsService, BudgetWithinLimitService, BudgetEventsListener, StoicLedgerService],

@@ -65,6 +65,7 @@ import type { CreateAuditEventDto } from '../audit/interfaces/audit-event.interf
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { GoalsService } from '../goals/goals.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PayPeriodService } from '../pay-period/pay-period.service';
 import {
   applyAssignment,
   assignmentInputOf,
@@ -73,11 +74,11 @@ import {
 import { projectMonthlyCharges, splitMonthCharges } from './charge-calendar.util';
 import { CurrencyTotals } from './currency-totals';
 import {
-  type ConvertAt,
   chargesInMonth,
-  dayInMonth,
   isPastMonth,
+  monthInView,
   pastMonthStatus,
+  workspaceMoney,
 } from './month-status-history';
 import { payeeMatchesVendor } from './payee-match.util';
 import type { BusinessSubscriptionsReport } from './subscription-business-report';
@@ -140,6 +141,7 @@ export class SubscriptionsService {
     private readonly budgetRepository?: Repository<Budget>,
     @Optional()
     private readonly taxAssignmentService?: TaxAssignmentService,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
 
   async create(
@@ -693,15 +695,11 @@ export class SubscriptionsService {
    * still to come; a past `month` (`YYYY-MM`) is what was charged in it.
    */
   async getMonthStatus(workspaceId: string, month?: string): Promise<SubscriptionMonthStatus> {
-    if (isPastMonth(month, new Date())) {
+    const payPeriod = await this.payPeriods?.contextFor(workspaceId);
+    if (isPastMonth(month, new Date(), payPeriod)) {
       const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
-      const currency = workspace?.currency?.toUpperCase() ?? null;
-      const convert: ConvertAt = async (amount, from, day) =>
-        currency
-          ? (await this.exchangeRatesService.convert(amount, from, currency, day, workspaceId))
-              .converted
-          : amount;
-      return pastMonthStatus(this.chargeRepository, convert, workspaceId, month, currency);
+      const money = workspaceMoney(this.exchangeRatesService, workspaceId, workspace?.currency);
+      return pastMonthStatus(this.chargeRepository, money, workspaceId, month, payPeriod);
     }
     const [active, workspace] = await Promise.all([
       this.subscriptionRepository.find({
@@ -711,8 +709,8 @@ export class SubscriptionsService {
     ]);
 
     const workspaceCurrency = workspace?.currency?.toUpperCase() ?? null;
-    const today = dayInMonth(month, new Date());
-    const recordedThisMonth = await chargesInMonth(this.chargeRepository, workspaceId, today);
+    const { key, period, today } = monthInView(month, new Date(), payPeriod);
+    const recordedThisMonth = await chargesInMonth(this.chargeRepository, workspaceId, period);
     const status = { paidAmount: 0, paidCount: 0, unpaidAmount: 0, unpaidCount: 0 };
     const paidByCurrency = new CurrencyTotals();
     const unpaidByCurrency = new CurrencyTotals();
@@ -723,6 +721,7 @@ export class SubscriptionsService {
         sub.nextChargeDate ? new Date(sub.nextChargeDate) : null,
         sub.frequency,
         today,
+        period,
       );
       const total = byDate.paid + byDate.unpaid;
       if (total === 0) continue;
@@ -765,7 +764,7 @@ export class SubscriptionsService {
 
     return {
       currency: workspaceCurrency,
-      month: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`,
+      month: key,
       ...status,
       paidAmount: Math.round(status.paidAmount * 100) / 100,
       unpaidAmount: Math.round(status.unpaidAmount * 100) / 100,

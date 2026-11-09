@@ -1,0 +1,228 @@
+/**
+ * The workspace's own month: the day a "month" of money starts, which may be
+ * a payday rather than the 1st. One set of functions for both sides — the
+ * backend bounds its sums with them, the frontend labels and links with them —
+ * so a period never means two different ranges.
+ *
+ * Plain functions on purpose: no effect import, so the frontend may import
+ * this module as a value without pulling the schema runtime into its bundle.
+ *
+ * Dates are `YYYY-MM-DD` strings and months `YYYY-MM` keys throughout, worked
+ * out in UTC arithmetic, so no time zone can move a bound by a day.
+ *
+ * Naming: a period is named after the calendar month it mostly covers. One that
+ * starts on the 1st to the 15th is named after the month it starts in
+ * ("October" = 15 Oct – 14 Nov); one that starts on the 16th or later, on the
+ * last day or the last business day, after the next month ("November" =
+ * 25 Oct – 24 Nov). Day 1 is the calendar month, exactly as before.
+ *
+ * Salary: the period starts on the day the salary was actually booked when a
+ * booked payday lies within SALARY_MATCH_DAYS of the expected one (so a salary
+ * paid early because the 25th fell on a Sunday starts the period on the 23rd),
+ * otherwise on the expected day (the usual day of the month, clamped to the
+ * month's length). Without a detected salary the month starts on the 1st.
+ */
+
+export type MonthStart =
+  | { kind: 'day'; day: number }
+  | { kind: 'last_day' }
+  | { kind: 'last_business_day' }
+  | { kind: 'salary' };
+
+export type MonthStartKind = MonthStart['kind'];
+
+export interface DetectedSalary {
+  /** The usual day of the month the salary arrives on (1–31). */
+  dayOfMonth: number;
+  /** Days it was actually booked on, `YYYY-MM-DD`. */
+  paydays: readonly string[];
+}
+
+export interface PayPeriodContext {
+  monthStart: MonthStart;
+  /** The detected monthly salary, for `salary`; null when none was found. */
+  salary?: DetectedSalary | null;
+  /** Public holidays (`YYYY-MM-DD`), for `last_business_day`; weekends are always off. */
+  holidays?: readonly string[];
+}
+
+export interface PeriodBounds {
+  /** First day, inclusive. */
+  from: string;
+  /** Last day, inclusive. */
+  to: string;
+}
+
+export const DEFAULT_MONTH_START: MonthStart = { kind: 'day', day: 1 };
+
+/** How far a booked salary may be from its expected day and still start the period. */
+export const SALARY_MATCH_DAYS = 10;
+
+/** A period starting on this day of the month or later is named after the next month. */
+const NEXT_MONTH_FROM_DAY = 16;
+
+const MONTH_KEY = /^(\d{4})-(\d{2})$/;
+const DATE = /^(\d{4})-(\d{2})-(\d{2})/;
+
+const pad = (value: number): string => String(value).padStart(2, '0');
+
+const iso = (year: number, month: number, day: number): string =>
+  `${year}-${pad(month)}-${pad(day)}`;
+
+/** Days in a month (1–12). */
+const daysIn = (year: number, month: number): number =>
+  new Date(Date.UTC(year, month, 0)).getUTCDate();
+
+const utc = (date: string): Date => {
+  const [, year, month, day] = DATE.exec(date) ?? [];
+  return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+};
+
+const fromUtc = (date: Date): string =>
+  iso(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
+
+/** `date` moved by `days` days. */
+export function addDays(date: string, days: number): string {
+  const moved = utc(date);
+  moved.setUTCDate(moved.getUTCDate() + days);
+  return fromUtc(moved);
+}
+
+const parseKey = (key: string): { year: number; month: number } => {
+  const [, year, month] = MONTH_KEY.exec(key) ?? DATE.exec(key) ?? [];
+  return { year: Number(year), month: Number(month) };
+};
+
+/** `key` moved by `months` months. */
+export function shiftMonth(key: string, months: number): string {
+  const { year, month } = parseKey(key);
+  const index = year * 12 + (month - 1) + months;
+  return `${Math.floor(index / 12)}-${pad((index % 12) + 1)}`;
+}
+
+/** Whole months from `from` to `to` (`YYYY-MM`), negative when `to` is earlier. */
+export function monthsBetweenKeys(from: string, to: string): number {
+  const a = parseKey(from);
+  const b = parseKey(to);
+  return (b.year - a.year) * 12 + (b.month - a.month);
+}
+
+/** The setting as stored, or day 1 for anything that is not a valid one. */
+export function readMonthStart(raw: unknown): MonthStart {
+  if (!raw || typeof raw !== 'object') return DEFAULT_MONTH_START;
+  const value = raw as { kind?: unknown; day?: unknown };
+  if (value.kind === 'day') {
+    const day = value.day;
+    return typeof day === 'number' && Number.isInteger(day) && day >= 1 && day <= 31
+      ? { kind: 'day', day }
+      : DEFAULT_MONTH_START;
+  }
+  if (value.kind === 'last_day' || value.kind === 'last_business_day' || value.kind === 'salary') {
+    return { kind: value.kind };
+  }
+  return DEFAULT_MONTH_START;
+}
+
+/** The rule in force: `salary` without a detected salary falls back to day 1. */
+export function effectiveMonthStart(context: PayPeriodContext): MonthStart {
+  const { monthStart } = context;
+  if (monthStart.kind === 'salary' && !context.salary) return DEFAULT_MONTH_START;
+  return monthStart;
+}
+
+/** Whether periods are plain calendar months. */
+export function isCalendarMonth(context: PayPeriodContext): boolean {
+  const rule = effectiveMonthStart(context);
+  return rule.kind === 'day' && rule.day === 1;
+}
+
+/** Whether the period named `M` starts in the month before `M`. */
+function startsInPreviousMonth(context: PayPeriodContext): boolean {
+  const rule = effectiveMonthStart(context);
+  switch (rule.kind) {
+    case 'day':
+      return rule.day >= NEXT_MONTH_FROM_DAY;
+    case 'salary':
+      return (context.salary?.dayOfMonth ?? 1) >= NEXT_MONTH_FROM_DAY;
+    default:
+      return true;
+  }
+}
+
+function lastBusinessDay(year: number, month: number, holidays: ReadonlySet<string>): string {
+  for (let day = daysIn(year, month); day > 1; day -= 1) {
+    const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+    if (weekday !== 0 && weekday !== 6 && !holidays.has(iso(year, month, day))) {
+      return iso(year, month, day);
+    }
+  }
+  return iso(year, month, 1);
+}
+
+function salaryStart(salary: DetectedSalary, year: number, month: number): string {
+  const expected = iso(year, month, Math.min(salary.dayOfMonth, daysIn(year, month)));
+  const expectedTime = utc(expected).getTime();
+  let best: { date: string; distance: number } | null = null;
+  for (const payday of salary.paydays) {
+    const distance = Math.abs(utc(payday).getTime() - expectedTime) / 86_400_000;
+    if (distance <= SALARY_MATCH_DAYS && (!best || distance < best.distance)) {
+      best = { date: payday.slice(0, 10), distance };
+    }
+  }
+  return best?.date ?? expected;
+}
+
+/** The day the rule starts a period on within the calendar month `key`. */
+function startWithin(context: PayPeriodContext, key: string): string {
+  const { year, month } = parseKey(key);
+  const rule = effectiveMonthStart(context);
+  switch (rule.kind) {
+    case 'day':
+      return iso(year, month, Math.min(rule.day, daysIn(year, month)));
+    case 'last_day':
+      return iso(year, month, daysIn(year, month));
+    case 'last_business_day':
+      return lastBusinessDay(year, month, new Set(context.holidays ?? []));
+    case 'salary':
+      return context.salary ? salaryStart(context.salary, year, month) : iso(year, month, 1);
+  }
+}
+
+/** First and last day of the period named `monthKey` (`YYYY-MM`). */
+export function periodBounds(context: PayPeriodContext, monthKey: string): PeriodBounds {
+  const anchor = startsInPreviousMonth(context) ? shiftMonth(monthKey, -1) : monthKey;
+  return {
+    from: startWithin(context, anchor),
+    to: addDays(startWithin(context, shiftMonth(anchor, 1)), -1),
+  };
+}
+
+/** The `YYYY-MM` name of the period a day (`YYYY-MM-DD`) falls in. */
+export function periodOf(context: PayPeriodContext, date: string): string {
+  const day = date.slice(0, 10);
+  let key = day.slice(0, 7);
+  // Periods are contiguous and none is longer than about six weeks, so the
+  // calendar month or a neighbour of it holds the day.
+  for (let step = 0; step < 3; step += 1) {
+    const bounds = periodBounds(context, key);
+    if (day < bounds.from) key = shiftMonth(key, -1);
+    else if (day > bounds.to) key = shiftMonth(key, 1);
+    else return key;
+  }
+  return key;
+}
+
+/** Days in a period, both ends included. */
+export function periodLength(bounds: PeriodBounds): number {
+  return Math.round((utc(bounds.to).getTime() - utc(bounds.from).getTime()) / 86_400_000) + 1;
+}
+
+/** "15 Oct – 14 Nov" in the reader's language. */
+export function formatPeriodRange(bounds: PeriodBounds, locale: string): string {
+  const format = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  });
+  return format.formatRange(utc(bounds.from), utc(bounds.to));
+}

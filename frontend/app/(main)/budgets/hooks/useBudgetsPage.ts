@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { parseMonthParam } from '@/app/(main)/dashboard/helpers/dashboard-url-state';
-import { monthEndOrToday } from '@/app/components/dashboard/month-end';
+import { usePresentPeriod } from '@/app/components/dashboard/use-period-label';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer } from '@/app/i18n';
@@ -182,9 +182,11 @@ export function useBudgetsPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // `?month=` (from a past month of the dashboard): spending measured on its last day.
+  // `?month=` (from a past month of the dashboard): spending measured on its last
+  // day, by the workspace's month rule (the backend measures the period a day is in).
   const monthParam = searchParams.get('month');
-  const date = monthParam && parseMonthParam(monthParam) ? monthEndOrToday(monthParam) : null;
+  const { measuredOn } = usePresentPeriod();
+  const date = monthParam && parseMonthParam(monthParam) ? measuredOn(monthParam) : null;
   const query = useQuery({
     queryKey: date ? queryKeys.budgetsAt(workspaceId, date) : queryKeys.budgets(workspaceId),
     queryFn: ({ signal }) => fetchBudgets(signal, date ?? undefined),

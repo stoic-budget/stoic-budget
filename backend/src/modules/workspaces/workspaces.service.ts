@@ -19,12 +19,12 @@ import { toEnum } from '../../common/effect/to-enum';
 import { withoutNulls } from '../../common/effect/without-nulls';
 import { appError } from '../../common/errors/app-error';
 import { currencyCodeOrDefault } from '../../common/utils/currency.util';
-import { mergePluginSettings } from '../../common/utils/workspace-plugins.util';
 import { mergeProcessingSettings } from '../../common/utils/workspace-processing.util';
 import {
   mergeWorkspaceProfile,
   readWorkspaceProfile,
 } from '../../common/utils/workspace-profile.util';
+import { mergeSettingsPatch } from '../../common/utils/workspace-settings-patch.util';
 import type { CreateWorkspaceBody, InviteMemberBody, UpdateWorkspaceBody } from '../../contracts';
 import {
   invitationRoleKey,
@@ -1158,9 +1158,7 @@ export class WorkspacesService {
     if (dto.profile != null) {
       workspace.settings = mergeWorkspaceProfile(workspace.settings, dto.profile);
     }
-    if (dto.plugins != null) {
-      workspace.settings = mergePluginSettings(workspace.settings, withoutNulls(dto.plugins));
-    }
+    workspace.settings = mergeSettingsPatch(workspace.settings, dto);
 
     const updated = await this.workspaceRepository.save(workspace);
     // Turning a workspace into household money stops VAT being assessed on it.

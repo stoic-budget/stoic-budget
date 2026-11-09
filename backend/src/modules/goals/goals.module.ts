@@ -9,6 +9,7 @@ import { Workspace } from '../../entities/workspace.entity';
 import { AuditModule } from '../audit/audit.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
+import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { WorkspaceCurrencyModule } from '../workspaces/workspace-currency.module';
 import { GoalCoversService } from './goal-covers.service';
 import { GoalFlowService } from './goal-flow.service';
@@ -34,6 +35,7 @@ import { GoalsService } from './goals.service';
     ExchangeRatesModule,
     AuditModule,
     WorkspaceCurrencyModule,
+    PayPeriodModule,
   ],
   controllers: [GoalsController, GoalTransactionLinkController],
   providers: [

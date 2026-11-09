@@ -395,6 +395,64 @@ describe('SubscriptionsService', () => {
     });
   });
 
+  describe("getMonthStatus under the workspace's month", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('splits the running month by its own days, not the calendar month', async () => {
+      // 9 November under day 15: the running month is "October", 15 Oct – 14 Nov.
+      vi.useFakeTimers({ now: new Date(2026, 10, 9, 12), toFake: ['Date'] });
+      const payPeriods = {
+        contextFor: vi.fn(async () => ({
+          monthStart: { kind: 'day', day: 15 },
+          salary: null,
+          holidays: [],
+          holidayCountry: null,
+        })),
+      };
+      const shifted = new SubscriptionsService(
+        subscriptionRepository as any,
+        notificationsService as any,
+        workspaceMemberRepository as any,
+        decisionRepository as any,
+        transactionRepository as any,
+        chargeRepository as any,
+        workspaceRepository as any,
+        exchangeRatesService as any,
+        auditService as any,
+        categoryRepository as any,
+        undefined,
+        undefined,
+        undefined,
+        budgetRepository as any,
+        taxAssignmentService as any,
+        payPeriods as any,
+      );
+      chargeRepository.find.mockResolvedValue([]);
+      workspaceRepository.findOne.mockResolvedValue({ currency: 'USD' });
+      // Monthly on the 20th: 20 October falls in "October" and is paid; by the
+      // calendar it would be 20 November, still to pay.
+      subscriptionRepository.find.mockResolvedValue([
+        {
+          id: 'sub-1',
+          vendorName: 'ACME Cloud - Storage',
+          vendorDomain: null,
+          amount: 9,
+          currency: 'USD',
+          frequency: SubscriptionFrequency.MONTHLY,
+          nextChargeDate: new Date(2026, 10, 20),
+        },
+      ]);
+
+      const result = await shifted.getMonthStatus('workspace-1');
+
+      expect(result.month).toBe('2026-10');
+      expect(result.paidCount).toBe(1);
+      expect(result.unpaidCount).toBe(0);
+    });
+  });
+
   describe('recorded payments', () => {
     const subscription = (over: Record<string, unknown> = {}) => ({
       id: 'sub-1',

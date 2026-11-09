@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { assertFound } from '../../common/utils/assert-found.util';
@@ -7,6 +7,8 @@ import { Goal, GoalContribution } from '../../entities';
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
 import { AuditService } from '../audit/audit.service';
 import type { CreateAuditEventDto } from '../audit/interfaces/audit-event.interface';
+import { PayPeriodService } from '../pay-period/pay-period.service';
+import { periodDaysOfKey } from '../pay-period/pay-period-dates';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { round2, toNumber } from './goal-money.util';
 import {
@@ -63,6 +65,7 @@ export class GoalsService {
     private readonly auditService: AuditService,
     private readonly workspaceCurrency: WorkspaceCurrencyService,
     private readonly linkService: GoalTransactionLinkService,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
 
   async create(
@@ -94,8 +97,10 @@ export class GoalsService {
 
   async findAll(workspaceId: string, month?: string): Promise<GoalWithProgress[]> {
     // A month narrows the list to the goals that actually moved in it, so the
-    // filter has to be read before the goals themselves.
-    const monthly = month ? await this.sumContributionsInMonth(workspaceId, month) : null;
+    // filter has to be read before the goals themselves. The month is the
+    // workspace's own (Settings → Start of the month), as the card names it.
+    const period = month && periodDaysOfKey(await this.payPeriods?.contextFor(workspaceId), month);
+    const monthly = period ? await this.sumContributionsInMonth(workspaceId, period) : null;
 
     const all = await this.goalRepository.find({
       where: { workspaceId },
@@ -111,7 +116,7 @@ export class GoalsService {
     const totals = await this.sumContributions(
       workspaceId,
       goals.map(goal => goal.id),
-      month ? firstDayOfNextMonth(month) : undefined,
+      period ? period.until : undefined,
     );
 
     return goals.map(goal => {
@@ -302,31 +307,26 @@ export class GoalsService {
   }
 
   /**
-   * What each goal received inside one calendar month. A goal missing from the
-   * map had no movement that month, which is what makes it the filter too.
+   * What each goal received inside one month (`from` up to, not including,
+   * `until`). A goal missing from the map had no movement that month, which is
+   * what makes it the filter too.
    */
   private async sumContributionsInMonth(
     workspaceId: string,
-    month: string,
+    period: { from: string; until: string },
   ): Promise<Map<string, number>> {
     const rows = await this.contributionRepository
       .createQueryBuilder('contribution')
       .select('contribution.goal_id', 'goalId')
       .addSelect('COALESCE(SUM(contribution.amount), 0)', 'total')
       .where('contribution.workspace_id = :workspaceId', { workspaceId })
-      .andWhere('contribution.contribution_date >= :start', { start: `${month}-01` })
-      .andWhere('contribution.contribution_date < :end', { end: firstDayOfNextMonth(month) })
+      .andWhere('contribution.contribution_date >= :start', { start: period.from })
+      .andWhere('contribution.contribution_date < :end', { end: period.until })
       .groupBy('contribution.goal_id')
       .getRawMany<{ goalId: string; total: string }>();
 
     return new Map(rows.map(row => [row.goalId, toNumber(row.total)]));
   }
-}
-
-/** Half-open upper bound for a `YYYY-MM` month, so no day of it is missed. */
-function firstDayOfNextMonth(month: string): string {
-  const [year, index] = month.split('-').map(Number);
-  return index === 12 ? `${year + 1}-01-01` : `${year}-${String(index + 1).padStart(2, '0')}-01`;
 }
 
 function goalSnapshot(goal: Goal) {

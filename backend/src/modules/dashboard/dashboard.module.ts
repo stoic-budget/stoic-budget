@@ -15,6 +15,7 @@ import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { ApplicationSettingsModule } from '../application-settings/application-settings.module';
 import { BudgetsModule } from '../budgets/budgets.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
+import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { CashFlowEntriesService } from './cash-flow-entries.service';
 import { DashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
@@ -39,6 +40,7 @@ import { SetupProgressService } from './setup-progress.service';
     ]),
     ExchangeRatesModule,
     ApplicationSettingsModule,
+    PayPeriodModule,
     // Budgets → notifications → telegram → insights lead back here.
     forwardRef(() => BudgetsModule),
   ],

@@ -15,6 +15,7 @@ import { AuditModule } from '../audit/audit.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { GoalsModule } from '../goals/goals.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { TaxModule } from '../tax/tax.module';
 import { SubscriptionAutoLinkSubscriber } from './subscription-autolink.subscriber';
 import { SubscriptionDetectionScheduler } from './subscription-detection.scheduler';
@@ -43,6 +44,7 @@ import { SubscriptionsService } from './subscriptions.service';
     GoalsModule,
     AuditModule,
     TaxModule,
+    PayPeriodModule,
   ],
   controllers: [SubscriptionsController],
   providers: [

@@ -15,6 +15,10 @@ vi.mock('@/app/i18n', async importOriginal => ({
   useLocale: () => ({ locale: appLocale.current }),
 }));
 
+// The workspace's month rule (Settings → Start of the month): the calendar month here.
+vi.mock('@/app/hooks/usePayPeriods', () => ({
+  usePayPeriods: () => ({ data: undefined, context: undefined }),
+}));
 vi.mock('./SubscriptionFormDrawer', () => ({ SubscriptionFormDrawer: () => null }));
 vi.mock('./SubscriptionDetailsDrawer', () => ({ SubscriptionDetailsDrawer: () => null }));
 vi.mock('./SubscriptionChargeCalendar', () => ({

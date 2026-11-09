@@ -10,6 +10,7 @@ import { Workspace } from '@/entities/workspace.entity';
 import { AuditDescriptionService } from '@/modules/audit/description/audit-description.service';
 import { AuditService } from '@/modules/audit/audit.service';
 import type { RollbackService } from '@/modules/audit/rollback/rollback.service';
+import { periodDaysOfKey } from '@/modules/pay-period/pay-period-dates';
 import { BadRequestException } from '@nestjs/common';
 import type { Repository } from 'typeorm';
 
@@ -204,13 +205,25 @@ describe('AuditService', () => {
     };
     auditEventRepository.createQueryBuilder = vi.fn().mockReturnValue(qb);
 
-    await service.findWorkspaceActivity('w1', 16, '2026-03');
+    // Day 1, the default month: March as it always was.
+    await service.findWorkspaceActivity('w1', 16, periodDaysOfKey(undefined, '2026-03'));
 
     expect(qb.andWhere).toHaveBeenCalledWith('event.createdAt >= :monthStart', {
       monthStart: new Date(2026, 2, 1),
     });
     expect(qb.andWhere).toHaveBeenCalledWith('event.createdAt < :monthEnd', {
       monthEnd: new Date(2026, 3, 1),
+    });
+
+    // A month starting on the 25th: "2026-03" runs 25 Feb to 24 Mar.
+    qb.andWhere.mockClear();
+    const day25 = { monthStart: { kind: 'day' as const, day: 25 } };
+    await service.findWorkspaceActivity('w1', 16, periodDaysOfKey(day25, '2026-03'));
+    expect(qb.andWhere).toHaveBeenCalledWith('event.createdAt >= :monthStart', {
+      monthStart: new Date(2026, 1, 25),
+    });
+    expect(qb.andWhere).toHaveBeenCalledWith('event.createdAt < :monthEnd', {
+      monthEnd: new Date(2026, 2, 25),
     });
 
     qb.andWhere.mockClear();

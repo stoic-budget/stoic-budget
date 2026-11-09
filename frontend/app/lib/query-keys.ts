@@ -15,6 +15,7 @@ export const queryKeys = {
     ['dashboard', 'cash-flow-entries', o.workspaceId, o.month] as const,
   dashboardSetupProgress: (workspaceId: string | null) =>
     ['dashboard', 'setup-progress', workspaceId] as const,
+  payPeriods: (workspaceId: string | null) => ['pay-periods', workspaceId] as const,
   statements: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
     ['statements', o.workspaceId, o.params] as const,
   receiptDocuments: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>

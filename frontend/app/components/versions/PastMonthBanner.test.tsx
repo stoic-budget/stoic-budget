@@ -15,6 +15,9 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => nav.params,
   useRouter: () => ({ push: nav.push }),
 }));
+vi.mock('@/app/hooks/usePayPeriods', () => ({
+  usePayPeriods: () => ({ data: undefined, context: undefined }),
+}));
 vi.mock('@/app/i18n', () => ({
   useLocale: () => ({ locale: 'en' }),
   useIntlayer: () => ({

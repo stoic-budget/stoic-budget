@@ -2,10 +2,19 @@
 
 import Stack from '@mui/material/Stack';
 import type React from 'react';
-import { Cloud, DollarSign, Home, MapPin, Shield, SlidersHorizontal } from '@/app/components/icons';
+import {
+  CalendarRange,
+  Cloud,
+  DollarSign,
+  Home,
+  MapPin,
+  Shield,
+  SlidersHorizontal,
+} from '@/app/components/icons';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useIntlayer } from '@/app/i18n';
 import { ExchangeRatesSection } from '@/app/settings/profile/components/ExchangeRatesSection';
+import { MonthStartSection } from '@/app/settings/profile/components/MonthStartSection';
 import { MyDataSection } from '@/app/settings/profile/components/MyDataSection';
 import { ProcessingSection } from '@/app/settings/profile/components/ProcessingSection';
 import { ReceiptLocationCaptureSection } from '@/app/settings/profile/components/ReceiptLocationCaptureSection';
@@ -23,6 +32,7 @@ export function DataTab({ section, user, logout }: SettingsTabProps): React.JSX.
   const { currentWorkspace } = useWorkspace();
   const { tx } = useSettingsText();
   const receiptLocationText = useIntlayer('receiptLocationConsent');
+  const monthStartText = useIntlayer('monthStartSection');
   const openSection = resolveOpenSection('data', section);
 
   const processing = useProcessing(!!user, currentWorkspace?.id, {
@@ -55,6 +65,16 @@ export function DataTab({ section, user, logout }: SettingsTabProps): React.JSX.
         defaultExpanded={openSection === 'workspace-profile'}
       >
         <WorkspaceProfileSection tx={tx} />
+      </SettingsAccordion>
+
+      <SettingsAccordion
+        id="month-start"
+        title={monthStartText.title.value}
+        description={monthStartText.description.value}
+        icon={CalendarRange}
+        defaultExpanded={openSection === 'month-start'}
+      >
+        <MonthStartSection />
       </SettingsAccordion>
 
       <SettingsAccordion
