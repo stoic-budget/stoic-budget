@@ -1,5 +1,7 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   BadRequestException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -7,33 +9,27 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, type Repository } from 'typeorm';
+import { Cache } from 'cache-manager';
+import { DataSource, type Repository } from 'typeorm';
 import { assertApiKeyScopes, type PermissionSubject } from '../../common/authz/request-permissions';
 import { Permission } from '../../common/enums/permissions.enum';
 import { appError } from '../../common/errors/app-error';
 import { ensureCanEdit } from '../../common/utils/ensure-can-edit.util';
 import type { RunEntityImportBody } from '../../contracts';
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
-import { Budget } from '../../entities/budget.entity';
 import { Category, CategorySource, CategoryType } from '../../entities/category.entity';
-import { Client } from '../../entities/client.entity';
-import {
-  ImportBatch,
-  type ImportCreatedRef,
-  type ImportUpdatedRef,
-} from '../../entities/import-batch.entity';
-import { InvestmentHolding } from '../../entities/investment-holding.entity';
-import { Invoice } from '../../entities/invoice.entity';
-import { Payable } from '../../entities/payable.entity';
-import { Statement } from '../../entities/statement.entity';
-import { Subscription } from '../../entities/subscription.entity';
-import { Transaction } from '../../entities/transaction.entity';
+import { ImportBatch, type ImportCreatedRef } from '../../entities/import-batch.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
-import { writeClassification } from '../classification/engine/rule-row-write';
 import { ClassificationService } from '../classification/services/classification.service';
 import { MetalsService } from '../investments/metals.service';
-import type { TransactionsImportedEvent } from '../notifications/events/notification-events';
+import { ensureAppImportPermission } from './apps/app-import-permission';
+import {
+  announceImported,
+  categorizeImported,
+  invalidateCategoryCache,
+} from './helpers/import-follow-up';
+import { APP_IMPORT_TARGET, removeImportBatch } from './helpers/import-undo';
 import { nameKey } from './helpers/import-values';
 import { type ImportTargetKind, TARGET_FIELDS } from './target-aliases';
 import { BudgetsTarget } from './targets/budgets.target';
@@ -88,31 +84,8 @@ export class EntityImportService {
     @Optional() private readonly classificationService?: ClassificationService,
     @Optional() private readonly metalsService?: MetalsService,
     @Optional() private readonly eventEmitter?: EventEmitter2,
+    @Optional() @Inject(CACHE_MANAGER) private readonly cache?: Cache,
   ) {}
-
-  /** One `transactions.imported` per statement the import created, after the commit. */
-  private async announceImportedTransactions(
-    workspaceId: string,
-    created: ImportCreatedRef[],
-  ): Promise<void> {
-    if (!this.eventEmitter) {
-      return;
-    }
-    for (const ref of created.filter(item => item.kind === 'statement')) {
-      const rows = await this.dataSource.getRepository(Transaction).find({
-        select: { id: true },
-        where: { workspaceId, statementId: ref.id },
-      });
-      if (rows.length > 0) {
-        this.eventEmitter.emit('transactions.imported', {
-          workspaceId,
-          source: 'entity_import',
-          statementId: ref.id,
-          transactionIds: rows.map(row => row.id),
-        } satisfies TransactionsImportedEvent);
-      }
-    }
-  }
 
   /** Importing into `target` (and remembering a mapping for it) needs these rights. */
   async ensurePermission(
@@ -277,11 +250,18 @@ export class EntityImportService {
         target: dto.target,
         ...counts,
       });
+      const statementIds = ctx.created.filter(ref => ref.kind === 'statement').map(ref => ref.id);
       if (dto.target === 'transactions' && ctx.categorize) {
-        await this.categorize(userId, workspaceId, ctx.created);
+        const deps = { dataSource: this.dataSource, logger: this.logger };
+        await categorizeImported(
+          { ...deps, classification: this.classificationService },
+          userId,
+          workspaceId,
+          statementIds,
+        );
       }
       if (dto.target === 'transactions') {
-        await this.announceImportedTransactions(workspaceId, ctx.created);
+        await announceImported(this.dataSource, this.eventEmitter, workspaceId, statementIds);
       }
       // Imported lots land without a price; one pass quotes them all.
       if (dto.target === 'metals' && this.metalsService) {
@@ -312,33 +292,6 @@ export class EntityImportService {
               : 'statement';
   }
 
-  /**
-   * Rows without a category get one the same way an imported statement does:
-   * rules first, then what the user taught about the payee.
-   */
-  private async categorize(userId: string, workspaceId: string, created: ImportCreatedRef[]) {
-    const statementIds = created.filter(ref => ref.kind === 'statement').map(ref => ref.id);
-    if (!(this.classificationService && statementIds.length)) {
-      return;
-    }
-    try {
-      const repo = this.dataSource.getRepository(Transaction);
-      const pending = await repo.find({ where: { workspaceId, statementId: In(statementIds) } });
-      const uncategorized = pending.filter(tx => !tx.categoryId);
-      if (!uncategorized.length) {
-        return;
-      }
-      for (const tx of uncategorized) {
-        const result = await this.classificationService.classifyTransaction(tx, userId);
-        await writeClassification(this.dataSource.manager, tx, result);
-      }
-    } catch (error) {
-      this.logger.warn(
-        `Categorization after import failed: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-  }
-
   async undo(
     userId: string,
     workspaceId: string,
@@ -352,46 +305,28 @@ export class EntityImportService {
     if (batch.undoneAt) {
       throw new BadRequestException(appError('IMPORT_BATCH_ALREADY_UNDONE'));
     }
-    await this.ensurePermission(userId, workspaceId, batch.target as ImportTargetKind, apiKey);
+    if (batch.target === APP_IMPORT_TARGET) {
+      const withBudgets = [...batch.createdRefs, ...batch.updatedRefs].some(
+        ref => ref.kind === 'budget',
+      );
+      await ensureAppImportPermission(
+        this.workspaceMemberRepository,
+        userId,
+        workspaceId,
+        apiKey,
+        withBudgets,
+      );
+    } else {
+      await this.ensurePermission(userId, workspaceId, batch.target as ImportTargetKind, apiKey);
+    }
     const removed = await this.dataSource.transaction(async manager => {
-      let count = 0;
-      const byKind = (kind: ImportCreatedRef['kind']) =>
-        batch.createdRefs.filter(ref => ref.kind === kind).map(ref => ref.id);
-      const statements = byKind('statement');
-      if (statements.length) {
-        await manager
-          .getRepository(Transaction)
-          .delete({ workspaceId, statementId: In(statements) });
-        count +=
-          (await manager.getRepository(Statement).delete({ workspaceId, id: In(statements) }))
-            .affected ?? 0;
-      }
-      for (const [kind, entity] of [
-        ['invoice', Invoice],
-        ['payable', Payable],
-        ['subscription', Subscription],
-        ['budget', Budget],
-        ['client', Client],
-        ['metal_lot', InvestmentHolding],
-      ] as const) {
-        const ids = byKind(kind);
-        if (ids.length) {
-          count +=
-            (await manager.getRepository(entity).delete({ workspaceId, id: In(ids) })).affected ??
-            0;
-        }
-      }
-      // Categories created by the import may already be in use elsewhere; they stay.
-      for (const ref of batch.updatedRefs as ImportUpdatedRef[]) {
-        const entity =
-          ref.kind === 'subscription' ? Subscription : ref.kind === 'budget' ? Budget : Payable;
-        await manager
-          .getRepository(entity)
-          .update({ id: ref.id, workspaceId }, ref.before as never);
-      }
+      const count = await removeImportBatch(manager, batch);
       await manager.getRepository(ImportBatch).update(batch.id, { undoneAt: new Date() });
       return count;
     });
+    if (batch.target === APP_IMPORT_TARGET && this.cache) {
+      await invalidateCategoryCache(this.cache, workspaceId);
+    }
     await this.audit(
       userId,
       workspaceId,
@@ -413,7 +348,8 @@ export class EntityImportService {
       // No audit entity type for metal lots yet.
       metals: null,
     };
-    return types[target];
+    // An app import's batch books statements.
+    return target in types ? types[target] : EntityType.STATEMENT;
   }
 
   private async audit(

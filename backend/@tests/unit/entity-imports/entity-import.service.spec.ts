@@ -1,6 +1,7 @@
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Logger, NotFoundException } from '@nestjs/common';
 import { Transaction } from '../../../src/entities/transaction.entity';
 import { EntityImportService } from '../../../src/modules/entity-imports/entity-import.service';
+import { categorizeImported } from '../../../src/modules/entity-imports/helpers/import-follow-up';
 
 const WORKSPACE_ID = '11111111-1111-4111-8111-111111111111';
 const USER_ID = '22222222-2222-4222-8222-222222222222';
@@ -147,13 +148,6 @@ describe('EntityImportService categorising imported transactions', () => {
     for (const result of classified) {
       classification.classifyTransaction.mockResolvedValueOnce(result);
     }
-    const service = new EntityImportService(
-      dataSource as never,
-      repoMock() as never,
-      repoMock() as never,
-      { createEvent: vi.fn() } as never,
-      classification as never,
-    );
     const transactions = dataSource.getRepository({ name: 'Transaction' }) as ReturnType<typeof repoMock>;
     transactions.find.mockResolvedValue([
       { id: 't-1', workspaceId: WORKSPACE_ID, counterpartyName: 'ACME Store', paymentPurpose: '', transactionType: 'expense' },
@@ -165,10 +159,11 @@ describe('EntityImportService categorising imported transactions', () => {
       query: vi.fn(async () => undefined),
     });
     const run = () =>
-      (service as unknown as { categorize: (...args: unknown[]) => Promise<void> }).categorize(
+      categorizeImported(
+        { dataSource: dataSource as never, classification: classification as never, logger: new Logger('test') },
         USER_ID,
         WORKSPACE_ID,
-        [{ kind: 'statement', id: STATEMENT_ID }],
+        [STATEMENT_ID],
       );
     return { run, classification, transactions, manager };
   };

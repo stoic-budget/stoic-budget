@@ -7,6 +7,7 @@ import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer } from '@/app/i18n';
 import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
+import { AppImportButton } from './app-import/AppImportButton';
 
 /**
  * What an imported bank export also needs: the account it came from (picking
@@ -28,6 +29,7 @@ export function TransactionImportOptions({
   onCurrencyChange: (currency: string) => void;
 }): React.JSX.Element {
   const t = useIntlayer('importWizard');
+  const fromApp = useIntlayer('appImport');
   const expense = useIntlayer('statementsCreateExpenseDrawer');
   const workspaceId = useWorkspaceId();
   const accounts = useQuery({
@@ -70,6 +72,16 @@ export function TransactionImportOptions({
       <div className="seneca-iw__check">
         <Checkbox checked={categorize} onCheckedChange={onCategorizeChange} />
         <span>{t.categorize}</span>
+      </div>
+      <div className="seneca-iw__hint seneca-iw__banner">
+        <span>{fromApp.offer}</span>
+        <AppImportButton
+          renderTrigger={(open, label) => (
+            <button type="button" className="seneca-iw__banner-action" onClick={open}>
+              {label}
+            </button>
+          )}
+        />
       </div>
     </>
   );

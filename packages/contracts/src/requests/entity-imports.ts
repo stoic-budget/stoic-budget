@@ -1,5 +1,5 @@
 import * as Schema from 'effect/Schema';
-import { optionalNullable } from '../common/requests';
+import { BooleanInput, optionalNullable } from '../common/requests';
 import type { Wire } from '../common/wire';
 
 export const SuggestImportBody = Schema.Struct({
@@ -73,3 +73,26 @@ export const ImportMappingProfileParams = Schema.Struct({
   id: Schema.String.check(Schema.isUUID()),
 });
 export type ImportMappingProfileParams = Wire<typeof ImportMappingProfileParams>;
+
+/**
+ * `POST /entity-imports/apps` (multipart, beside the `files`): exports of
+ * another budgeting app, read and booked together.
+ */
+export const AppImportForm = Schema.Struct({
+  /** Count what would happen; nothing is written. */
+  dryRun: optionalNullable(BooleanInput),
+  /** Currency of new accounts whose rows name none, and of budgets. */
+  currency: optionalNullable(Schema.String.check(Schema.isBetweenLength(3, 3))),
+  /** Run the categorizer over rows the app left without a category. */
+  categorize: optionalNullable(BooleanInput),
+  /** JSON of `AppImportAccountChoices`. */
+  accounts: optionalNullable(Schema.String.check(Schema.isMaxLength(20000))),
+});
+export type AppImportForm = Wire<typeof AppImportForm>;
+
+/** The app's account name → a workspace account id, or null for a new account. Missing: by name. */
+export const AppImportAccountChoices = Schema.Record(
+  Schema.String.check(Schema.isMaxLength(255)),
+  Schema.NullOr(Schema.String.check(Schema.isUUID())),
+);
+export type AppImportAccountChoices = Wire<typeof AppImportAccountChoices>;
