@@ -489,6 +489,16 @@ export class Transaction {
   @Column({ name: 'investment_account_id', type: 'uuid', nullable: true })
   investmentAccountId: string | null;
 
+  /**
+   * On an interest row: the loan payment it was split from. The payment is
+   * left as it came (the whole amount, paired or not); the interest is an
+   * expense on the loan account, so the debt falls by the principal only.
+   * Counts only while the payment counts; deleted with the payment. Every
+   * part of a split interest row keeps the link.
+   */
+  @Column({ name: 'loan_interest_of_id', type: 'uuid', nullable: true })
+  loanInterestOfId: string | null;
+
   @Column({ type: 'varchar', name: 'fingerprint', length: 64, nullable: true })
   fingerprint: string | null;
 

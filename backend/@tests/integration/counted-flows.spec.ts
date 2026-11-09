@@ -4,7 +4,8 @@
  * Every figure of money in and out (dashboard, reports, forecast, budgets) must
  * count the same rows: confirmed ones of this workspace, from a statement or not
  * (a cash payment, an approved receipt), never a duplicate, a row on a trashed or
- * failed statement, or a transfer between own accounts. A crypto row counts only
+ * failed statement, or a transfer between own accounts. Interest split off a loan
+ * payment counts only while its payment does. A crypto row counts only
  * when it settles a bill or a receivable: a swap or a move between own wallets is
  * not money earned or spent. Seeding one set of rows and asking each service is
  * the only way to see that they agree; the decisions are made in SQL.
@@ -96,7 +97,7 @@ const DAY = isoDay(new Date(now.getFullYear(), now.getMonth() - 1, 15));
 
 /** What the seeded rows must add up to, wherever they are summed. */
 const INCOME = 1000 + 150 + 40;
-const EXPENSE = 200 + 60;
+const EXPENSE = 200 + 60 + 7;
 
 describe('one rule for income and spending (real Postgres)', () => {
   vi.setConfig({ testTimeout: 180_000 });
@@ -259,20 +260,27 @@ describe('one rule for income and spending (real Postgres)', () => {
     const failed = await statement(StatementStatus.ERROR);
 
     // Counted.
-    await income(1000, { statementId: bank });
+    const paid = await income(1000, { statementId: bank });
     await expense(200, { statementId: bank });
     await income(150, { walletId }); // a cash payment: no statement
     await expense(60, { walletId });
     const settling = await income(40, { cryptoWalletId, cryptoAsset: 'USDT' });
 
     // Not counted.
-    await expense(999, { statementId: bank, isVerified: false });
-    await income(500, { statementId: trashed });
-    await expense(300, { statementId: failed });
-    await expense(80, { statementId: bank, isDuplicate: true });
+    const waiting = await expense(999, { statementId: bank, isVerified: false });
+    const binned = await income(500, { statementId: trashed });
+    const unread = await expense(300, { statementId: failed });
+    const repeated = await expense(80, { statementId: bank, isDuplicate: true });
     await expense(500, { statementId: bank, transferPairId: randomUUID() });
     await income(70, { cryptoWalletId, cryptoAsset: 'ETH' }); // a swap leg
     await expense(25, { cryptoWalletId, cryptoAsset: 'USDT' });
+
+    // Interest split off a payment (no statement of its own): counted with the
+    // first payment, left out with each of the others.
+    await expense(7, { walletId, loanInterestOfId: paid.id });
+    for (const payment of [waiting, binned, unread, repeated]) {
+      await expense(11, { walletId, loanInterestOfId: payment.id });
+    }
     await txRepo.save(
       txRepo.create({
         workspaceId: otherWorkspaceId,

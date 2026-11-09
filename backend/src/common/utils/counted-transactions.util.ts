@@ -1,10 +1,15 @@
-import { IsNull } from 'typeorm';
+import { IsNull, Raw } from 'typeorm';
 
 /**
  * Which transactions count in any number Seneca shows (balances, totals,
  * budgets, goals, forecasts, reports, tax, insights): rows a person confirmed
  * (an imported, synced or scanned row waits in Review until approved), that
  * are not suspected duplicates and are not on a statement in the trash.
+ *
+ * Interest split off a loan payment (loans/loan-interest-row) has no statement
+ * of its own: it counts only while its payment does, whatever takes the
+ * payment out (Review, a duplicate flag, its statement in the trash or still
+ * being read). The check costs a NULL test on every other row.
  *
  * Transfers between the user's own accounts are NOT excluded here: a wallet
  * balance needs them, an income/expense figure does not, so each caller that
@@ -20,12 +25,17 @@ export function onlyCounted<T extends { andWhere(where: string): T }>(query: T, 
     .andWhere(`${alias}.isVerified = true`)
     .andWhere(`${alias}.isDuplicate = false`)
     .andWhere(
-      `NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = ${alias}.statementId AND trashed.deleted_at IS NOT NULL)`,
+      `NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = ${alias}.statementId AND trashed.deleted_at IS NOT NULL) AND ${whilePaymentCounts(`${alias}.loanInterestOfId`, rowCountedSql)}`,
     );
 }
 
 /** For raw SQL over the `transactions` table, by column name: `AND ${countedSql('t')}`. */
 export function countedSql(alias: string): string {
+  return `(${rowCountedSql(alias)} AND ${whilePaymentCounts(`${alias}.loan_interest_of_id`, rowCountedSql)})`;
+}
+
+/** The row's own checks, without the one an interest row adds for its payment. */
+function rowCountedSql(alias: string): string {
   return `(${alias}.is_verified = true AND ${alias}.is_duplicate = false AND NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = ${alias}.statement_id AND trashed.deleted_at IS NOT NULL))`;
 }
 
@@ -35,7 +45,12 @@ export function countedSql(alias: string): string {
  * an OR: rows without a statement, and rows whose statement is not trashed.
  */
 export function countedWhere<W extends object>(where: W) {
-  const base = { ...where, isVerified: true, isDuplicate: false };
+  const base = {
+    ...where,
+    isVerified: true,
+    isDuplicate: false,
+    loanInterestOfId: Raw(column => whilePaymentCounts(column, rowCountedSql)),
+  };
   return [
     { ...base, statementId: IsNull() },
     { ...base, statement: { deletedAt: IsNull() } },
@@ -44,6 +59,11 @@ export function countedWhere<W extends object>(where: W) {
 
 /** Statements whose rows are not yet (or never) real: still being read, or failed. */
 const UNREAD_STATEMENT_STATUSES = "'error', 'processing'";
+
+/** Raw SQL: the row (by column name) is not on a statement still being read or that failed. */
+function readSql(alias: string): string {
+  return `NOT EXISTS (SELECT 1 FROM statements unread WHERE unread.id = ${alias}.statement_id AND unread.status IN (${UNREAD_STATEMENT_STATUSES}))`;
+}
 
 /**
  * Which counted rows are money earned or spent, for every income and spending
@@ -70,19 +90,31 @@ export function onlyFlows<T extends { andWhere(where: string): T }>(
     ? query
         .andWhere(`${alias}.isDuplicate = false`)
         .andWhere(
-          `NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = ${alias}.statementId AND trashed.deleted_at IS NOT NULL)`,
+          `NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = ${alias}.statementId AND trashed.deleted_at IS NOT NULL) AND ${whilePaymentCounts(
+            `${alias}.loanInterestOfId`,
+            payment =>
+              `${payment}.is_duplicate = false AND NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = ${payment}.statement_id AND trashed.deleted_at IS NOT NULL)`,
+          )}`,
         )
     : onlyCounted(query, alias);
   return counted
     .andWhere(
-      `NOT EXISTS (SELECT 1 FROM statements unread WHERE unread.id = ${alias}.statementId AND unread.status IN (${UNREAD_STATEMENT_STATUSES}))`,
+      `NOT EXISTS (SELECT 1 FROM statements unread WHERE unread.id = ${alias}.statementId AND unread.status IN (${UNREAD_STATEMENT_STATUSES})) AND ${whilePaymentCounts(`${alias}.loanInterestOfId`, readSql)}`,
     )
     .andWhere(settlesIfCrypto(`${alias}.cryptoWalletId`, `${alias}.id`));
 }
 
 /** `onlyFlows` for raw SQL over the `transactions` table: `AND ${flowsSql('t')}`. */
 export function flowsSql(alias: string): string {
-  return `(${countedSql(alias)} AND NOT EXISTS (SELECT 1 FROM statements unread WHERE unread.id = ${alias}.statement_id AND unread.status IN (${UNREAD_STATEMENT_STATUSES})) AND ${settlesIfCrypto(`${alias}.crypto_wallet_id`, `${alias}.id`)})`;
+  return `(${countedSql(alias)} AND ${readSql(alias)} AND ${whilePaymentCounts(`${alias}.loan_interest_of_id`, readSql)} AND ${settlesIfCrypto(`${alias}.crypto_wallet_id`, `${alias}.id`)})`;
+}
+
+/**
+ * True for every row but interest split off a loan payment, and for that one
+ * while its payment (by column name) passes `paymentCheck`.
+ */
+function whilePaymentCounts(link: string, paymentCheck: (alias: string) => string): string {
+  return `(${link} IS NULL OR EXISTS (SELECT 1 FROM transactions interest_payment WHERE interest_payment.id = ${link} AND ${paymentCheck('interest_payment')}))`;
 }
 
 function settlesIfCrypto(cryptoWallet: string, id: string): string {
