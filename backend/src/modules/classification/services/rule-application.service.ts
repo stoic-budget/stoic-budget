@@ -9,15 +9,13 @@ import { Transaction, TransactionCategorySource } from '../../../entities/transa
 import { AuditService } from '../../audit/audit.service';
 import { TaxAssignmentService } from '../../tax/tax-assignment.service';
 import { hasDecidedCategory } from '../engine/category-decision';
-import { movesToWallet, planRuleApply } from '../engine/rule-apply-plan';
-import { explainMatch, matchesRule } from '../engine/rule-conditions';
+import { movesToWallet, planRuleApply, rowsMatching } from '../engine/rule-apply-plan';
+import { conditionsUse } from '../engine/rule-condition-tree';
+import { explainMatch } from '../engine/rule-conditions';
 import { ownsRuleRefs } from '../engine/rule-refs';
-import { addTransactionTags, ownedTagIds } from '../engine/rule-tags';
+import { addTransactionTags, ownedTagIds, rowTagIds } from '../engine/rule-tags';
 import { ruleApplyEvents } from '../helpers/rule-audit';
-import type {
-  ClassificationCondition,
-  MatchMode,
-} from '../interfaces/classification-rule.interface';
+import type { MatchMode, RuleConditionNode } from '../interfaces/classification-rule.interface';
 import { ClassificationService } from './classification.service';
 
 /** How many of a workspace's most recent rows a rule preview looks at. */
@@ -114,6 +112,22 @@ export class RuleApplicationService {
     return index < 0 ? [] : rules.slice(0, index).filter(rule => rule.isActive);
   }
 
+  /** The rows' tags by row id when one of the rules asks about tags; else nothing is read. */
+  private async tagsFor(
+    workspaceId: string,
+    rows: readonly Transaction[],
+    rules: ReadonlyArray<{ conditions: readonly RuleConditionNode[] }>,
+  ): Promise<Map<string, string[]> | undefined> {
+    if (!conditionsUse(rules, 'tags')) {
+      return undefined;
+    }
+    return rowTagIds(
+      this.transactionRepository.manager,
+      workspaceId,
+      rows.map(row => row.id),
+    );
+  }
+
   /**
    * What a rule would match, as the caller sees the rows: another member's
    * private row is left out entirely, since even its amount would answer a
@@ -123,7 +137,7 @@ export class RuleApplicationService {
   async previewRule(input: {
     workspaceId: string;
     viewerMemberId: string | null;
-    conditions: ClassificationCondition[];
+    conditions: RuleConditionNode[];
     matchMode?: MatchMode;
     transactionIds?: readonly string[];
     ruleId?: string;
@@ -133,13 +147,16 @@ export class RuleApplicationService {
     const { rows, truncated } = await this.rowsForRule(input.workspaceId, input.transactionIds);
     const above = await this.rulesAbove(input.workspaceId, input.ruleId);
     const readable = rows.filter(row => canReadPrivate(row, input.viewerMemberId));
-    const matches = readable
-      .filter(row => matchesRule(row, input))
-      .map(row => {
-        // Rules add up, so only a rule that sets a category takes that from this one.
-        const winner = above.find(rule => rule.result.categoryId && matchesRule(row, rule));
-        return { row, wonBy: winner ? { id: winner.id, name: winner.name } : null };
-      });
+    const tagIds = await this.tagsFor(input.workspaceId, readable, [input, ...above]);
+    const matches = rowsMatching(readable, input, {
+      above,
+      viewerMemberId: input.viewerMemberId,
+      tagIds,
+    }).map(({ row, above: matchingAbove, state }) => {
+      // Rules add up, so only a rule that sets a category takes that from this one.
+      const winner = matchingAbove.find(rule => rule.result.categoryId);
+      return { row, state, wonBy: winner ? { id: winner.id, name: winner.name } : null };
+    });
     return {
       totalTransactions: readable.length,
       matchedTransactions: matches.length,
@@ -147,13 +164,13 @@ export class RuleApplicationService {
       shadowed: matches.filter(({ wonBy }) => wonBy).length,
       movable: matches.filter(({ row }) => movesToWallet(row, input.walletId)).length,
       truncated,
-      matches: matches.slice(0, RULE_PREVIEW_MATCHES).map(({ row, wonBy }) => ({
+      matches: matches.slice(0, RULE_PREVIEW_MATCHES).map(({ row, state, wonBy }) => ({
         id: row.id,
         date: row.transactionDate ? String(row.transactionDate) : null,
         amount: row.debit || row.credit || row.amount,
         counterparty: row.counterpartyName,
         purpose: row.paymentPurpose,
-        matchReason: explainMatch(row, input.conditions, input.matchMode),
+        matchReason: explainMatch(row, input.conditions, input.matchMode, state),
         direction: row.transactionType ?? null,
         currency: row.currency,
         categoryId: row.categoryId ?? null,
@@ -194,6 +211,7 @@ export class RuleApplicationService {
       const plan = planRuleApply(rows, rule, {
         above,
         viewerMemberId,
+        tagIds: await this.tagsFor(workspaceId, rows, [rule, ...above]),
         setsCategory: Boolean(categoryId),
         setsTags: tagIds.length > 0,
         walletId,

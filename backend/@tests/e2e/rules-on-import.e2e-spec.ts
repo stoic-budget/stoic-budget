@@ -30,6 +30,7 @@ describe('Categorization rules on a statement import (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   const email = `rules-import-${Date.now()}@example.com`;
+  const otherEmail = `rules-import-other-${Date.now()}@example.com`;
   let owner: E2eAccount;
 
   const as = (req: request.Test) =>
@@ -51,6 +52,7 @@ describe('Categorization rules on a statement import (e2e)', () => {
   afterAll(async () => {
     if (dataSource) {
       await deleteUserByEmail(dataSource, email);
+      await deleteUserByEmail(dataSource, otherEmail);
     }
     await app.close();
   });
@@ -201,5 +203,137 @@ DATA:OFXSGML
       renamed: 0,
     });
     expect((await walletOf('CHARITY FUND')).wallet_id).toBe(giving);
+  });
+
+  it('lets a rule below read the category and tags the rules above set on the same import', async () => {
+    const categories = await as(request(server()).get('/categories?type=expense')).expect(200);
+    const categoryId: string = categories.body[3].id;
+    const pets = await as(request(server()).post('/tags')).send({ name: 'Pets' }).expect(201);
+    const checked = await as(request(server()).post('/tags')).send({ name: 'Checked' }).expect(201);
+    // Written first, so ranked below the rule that files the row.
+    await as(request(server()).post('/categorization-rules'))
+      .send({
+        name: 'Pet spending is checked',
+        conditions: [
+          { field: 'category', operator: 'equals', value: categoryId },
+          {
+            matchMode: 'any',
+            conditions: [
+              { field: 'tags', operator: 'equals', value: pets.body.id },
+              { field: 'amount', operator: 'greater_than', value: 1000 },
+            ],
+          },
+        ],
+        result: { tagIds: [checked.body.id] },
+      })
+      .expect(201);
+    await as(request(server()).post('/categorization-rules'))
+      .send({
+        name: 'Pet shop',
+        conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'pet shop' }],
+        result: { categoryId, tagIds: [pets.body.id] },
+      })
+      .expect(201);
+    const blank = await as(request(server()).post('/categorization-rules'))
+      .send({
+        name: 'Blank stays blank',
+        conditions: [
+          { field: 'counterparty_name', operator: 'contains', value: 'pet shop' },
+          { field: 'category', operator: 'is_empty', value: '' },
+        ],
+        result: { comment: 'Not filed' },
+      })
+      .expect(201);
+    // Moved to the bottom: by then the pet shop rule has filed the row.
+    const rules = await as(request(server()).get('/categorization-rules')).expect(200);
+    const order = rules.body.data
+      .map((rule: { id: string }) => rule.id)
+      .filter((id: string) => id !== blank.body.id);
+    await as(request(server()).put('/categorization-rules/order'))
+      .send({ ids: [...order, blank.body.id] })
+      .expect(200);
+
+    await importRows(ofx('555000111', 'P1', 'PET SHOP'));
+
+    const [row]: Array<{ id: string; category_id: string; comments: string | null }> =
+      await dataSource.query(
+        'SELECT id, category_id, comments FROM transactions WHERE workspace_id = $1 AND counterparty_name = $2',
+        [owner.workspaceId, 'PET SHOP'],
+      );
+    expect(row.category_id).toBe(categoryId);
+    expect(row.comments).toBeNull();
+    const tags: Array<{ tag_id: string }> = await dataSource.query(
+      'SELECT tag_id FROM transaction_tags WHERE transaction_id = $1',
+      [row.id],
+    );
+    expect(tags.map(tag => tag.tag_id).sort()).toEqual([pets.body.id, checked.body.id].sort());
+  });
+
+  it('keeps a row a "category is empty" rule filed when the rules re-run on it', async () => {
+    const categories = await as(request(server()).get('/categories?type=expense')).expect(200);
+    const categoryId: string = categories.body[4].id;
+    await as(request(server()).post('/categorization-rules'))
+      .send({
+        name: 'Fill blank',
+        conditions: [
+          { field: 'counterparty_name', operator: 'contains', value: 'flip shop' },
+          { field: 'category', operator: 'is_empty', value: '' },
+        ],
+        result: { categoryId },
+      })
+      .expect(201);
+    const [imported] = (await importRows(ofx('555000222', 'F1', 'FLIP SHOP'))) as Array<{
+      id: string;
+      categoryId: string | null;
+    }>;
+    expect(imported.categoryId).toBe(categoryId);
+
+    const bulk = await as(request(server()).post('/classification/bulk'))
+      .send({ transactionIds: [imported.id] })
+      .expect(200);
+    expect(bulk.body.successful).toBe(1);
+    const [row]: Array<{ category_id: string; category_source: string }> = await dataSource.query(
+      'SELECT category_id, category_source FROM transactions WHERE workspace_id = $1 AND id = $2',
+      [owner.workspaceId, imported.id],
+    );
+    expect(row).toEqual({ category_id: categoryId, category_source: 'rule' });
+  });
+
+  it("refuses a condition naming another workspace's category, tag or payee", async () => {
+    const other = await registerAccount(app, otherEmail, 'Member Two');
+    const theirs = (req: request.Test) =>
+      req.set('Authorization', `Bearer ${other.token}`).set('x-workspace-id', other.workspaceId);
+    const [category] = (await theirs(request(server()).get('/categories?type=expense')).expect(200))
+      .body;
+    const tag = await theirs(request(server()).post('/tags')).send({ name: 'Theirs' }).expect(201);
+    const [payee]: Array<{ id: string }> = await dataSource.query(
+      'INSERT INTO payees (workspace_id, name) VALUES ($1, $2) RETURNING id',
+      [other.workspaceId, 'ACME Store'],
+    );
+    const mine = await as(request(server()).post('/categorization-rules'))
+      .send({
+        name: 'Mine',
+        conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'acme' }],
+        result: { comment: 'Seen' },
+      })
+      .expect(201);
+
+    for (const condition of [
+      { field: 'category', operator: 'equals', value: category.id },
+      { field: 'tags', operator: 'not_equals', value: [tag.body.id] },
+      { field: 'payee', operator: 'equals', value: payee.id },
+    ]) {
+      const nested = [{ matchMode: 'any', conditions: [condition] }];
+      await as(request(server()).post('/categorization-rules'))
+        .send({ name: 'Theirs', conditions: nested, result: { comment: 'x' } })
+        .expect(404);
+      await as(request(server()).put(`/categorization-rules/${mine.body.id}`))
+        .send({ conditions: [condition] })
+        .expect(404);
+    }
+    const stored = await as(request(server()).get(`/categorization-rules/${mine.body.id}`)).expect(200);
+    expect(stored.body.conditions).toEqual([
+      { field: 'counterparty_name', operator: 'contains', value: 'acme' },
+    ]);
   });
 });
