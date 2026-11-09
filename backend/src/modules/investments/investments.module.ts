@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BalanceAccount } from '../../entities/balance-account.entity';
 import { InvestmentHolding } from '../../entities/investment-holding.entity';
+import { InvestmentTrade } from '../../entities/investment-trade.entity';
 import { MetalSale } from '../../entities/metal-sale.entity';
 import { Receipt } from '../../entities/receipt.entity';
 import { Transaction } from '../../entities/transaction.entity';
@@ -13,6 +14,9 @@ import { CryptoModule } from '../crypto/crypto.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { InvestmentFlowsService } from './investment-flows.service';
 import { InvestmentReturnsService } from './investment-returns.service';
+import { InvestmentSettingsService } from './investment-settings.service';
+import { InvestmentTradesController } from './investment-trades.controller';
+import { InvestmentTradesService } from './investment-trades.service';
 import { InvestmentsController } from './investments.controller';
 import { InvestmentsScheduler } from './investments.scheduler';
 import { InvestmentsService } from './investments.service';
@@ -25,6 +29,7 @@ import { StockPriceService } from './stock-price.service';
     TypeOrmModule.forFeature([
       BalanceAccount,
       InvestmentHolding,
+      InvestmentTrade,
       MetalSale,
       Receipt,
       Transaction,
@@ -36,15 +41,17 @@ import { StockPriceService } from './stock-price.service';
     CryptoModule,
     ExchangeRatesModule,
   ],
-  controllers: [InvestmentsController, MetalsController],
+  controllers: [InvestmentsController, InvestmentTradesController, MetalsController],
   providers: [
     InvestmentFlowsService,
     InvestmentReturnsService,
+    InvestmentSettingsService,
+    InvestmentTradesService,
     InvestmentsService,
     InvestmentsScheduler,
     MetalsService,
     StockPriceService,
   ],
-  exports: [InvestmentFlowsService, InvestmentsService, MetalsService],
+  exports: [InvestmentFlowsService, InvestmentTradesService, InvestmentsService, MetalsService],
 })
 export class InvestmentsModule {}

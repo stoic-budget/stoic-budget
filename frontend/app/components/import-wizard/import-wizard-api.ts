@@ -7,7 +7,8 @@ export type ImportTarget =
   | 'subscriptions'
   | 'invoices'
   | 'budgets'
-  | 'metals';
+  | 'metals'
+  | 'trades';
 
 export const IMPORT_TARGETS: ImportTarget[] = [
   'transactions',
@@ -16,6 +17,7 @@ export const IMPORT_TARGETS: ImportTarget[] = [
   'invoices',
   'budgets',
   'metals',
+  'trades',
 ];
 
 /** Mirror of the backend target fields: which roles a column can play and which are required. */
@@ -76,6 +78,20 @@ export const TARGET_FIELDS: Record<ImportTarget, Array<{ key: string; required: 
     { key: 'counterparty', required: false },
     { key: 'name', required: false },
   ],
+  trades: [
+    { key: 'date', required: true },
+    { key: 'kind', required: true },
+    { key: 'quantity', required: true },
+    { key: 'symbol', required: false },
+    { key: 'name', required: false },
+    { key: 'price', required: false },
+    { key: 'fee', required: false },
+    { key: 'amount', required: false },
+    { key: 'currency', required: false },
+    { key: 'ratio', required: false },
+    { key: 'acquiredOn', required: false },
+    { key: 'note', required: false },
+  ],
 };
 
 export interface ImportSuggestion {
@@ -117,7 +133,13 @@ export interface ImportRunPayload {
   headers?: string[];
   fileName?: string;
   dryRun?: boolean;
-  options?: { currency?: string; categorize?: boolean; walletId?: string | null };
+  options?: {
+    currency?: string;
+    categorize?: boolean;
+    walletId?: string | null;
+    investmentAccountId?: string | null;
+    createMissingHoldings?: boolean;
+  };
 }
 
 export const suggestImport = async (
@@ -183,7 +205,7 @@ export const forgetImportMapping = async (id: string): Promise<void> => {
   await api.delete(`/entity-imports/mapping-profiles/${id}`);
 };
 
-/** Import targets a custom table can be built from; metals have no table source. */
+/** Import targets a custom table can be built from; metals and trades have no table source. */
 export type TableSourceTarget = ContractInput<'CreateCustomTableFromSourceBody'>['kind'];
 
 const TABLE_SOURCE_TARGETS: readonly TableSourceTarget[] = [

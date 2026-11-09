@@ -9,7 +9,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { Plus, Trash2 } from '@/app/components/icons';
-import { ModalFooter, ModalShell } from '@/app/components/ui/modal-shell';
+import { ImportFromFileButton } from '@/app/components/import-wizard/ImportFromFileButton';
 import { PRIVATE_CLASS, PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
@@ -19,6 +19,8 @@ import {
   type InvestmentAssetClass,
   useInvestments,
 } from '../hooks/useInvestments';
+import { AddAccountDialog } from './AddAccountDialog';
+import { HoldingTradesDrawer } from './HoldingTradesDrawer';
 import { isStaleQuote } from './investment-price';
 import { CardTitle, cardSx } from './net-worth-ui';
 
@@ -45,68 +47,6 @@ interface InvestmentsCardProps {
   locale: string;
   /** Drawn inside the Holdings section, which supplies the frame and the title. */
   embedded?: boolean;
-}
-
-/** A new account: a name and its kind, in a dialog rather than a form on the page. */
-function AddAccountDialog({
-  open,
-  saving,
-  onClose,
-  onCreate,
-}: {
-  open: boolean;
-  saving: boolean;
-  onClose: () => void;
-  onCreate: (name: string, kind: 'investment' | 'retirement') => Promise<unknown>;
-}) {
-  const t = useIntlayer('netWorthPage');
-  const [name, setName] = useState('');
-  const [kind, setKind] = useState<'investment' | 'retirement'>('investment');
-  if (!open) {
-    return null;
-  }
-  return (
-    <ModalShell
-      isOpen
-      onClose={onClose}
-      title={t.addAccount.value}
-      size="sm"
-      footer={
-        <ModalFooter
-          onCancel={onClose}
-          onConfirm={async () => {
-            await onCreate(name.trim(), kind);
-            setName('');
-            onClose();
-          }}
-          confirmText={t.addAccount.value}
-          isConfirmLoading={saving}
-          isConfirmDisabled={!name.trim() || saving}
-        />
-      }
-    >
-      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, pt: 1 }}>
-        <TextField
-          size="small"
-          label={t.accountName.value}
-          value={name}
-          onChange={event => setName(event.target.value)}
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
-        <TextField
-          select
-          size="small"
-          label={t.assetClass.value}
-          value={kind}
-          onChange={event => setKind(event.target.value as 'investment' | 'retirement')}
-          slotProps={{ inputLabel: { shrink: true } }}
-        >
-          <MenuItem value="investment">{t.kindInvestment}</MenuItem>
-          <MenuItem value="retirement">{t.kindRetirement}</MenuItem>
-        </TextField>
-      </Box>
-    </ModalShell>
-  );
 }
 
 function AddHoldingRow({
@@ -207,6 +147,7 @@ function AddHoldingRow({
 /** Investment and retirement accounts with their holdings, right under the net worth they feed. */
 export function InvestmentsCard({ currency, locale, embedded = false }: InvestmentsCardProps) {
   const t = useIntlayer('netWorthPage');
+  const trades = useIntlayer('investmentTrades');
   const {
     accounts,
     saving,
@@ -215,8 +156,11 @@ export function InvestmentsCard({ currency, locale, embedded = false }: Investme
     addHolding,
     deleteHolding,
     refreshPrices,
+    reload,
   } = useInvestments();
   const [adding, setAdding] = useState(false);
+  const [tradesOf, setTradesOf] = useState<string | null>(null);
+  const opened = accounts.flatMap(account => account.holdings).find(item => item.id === tradesOf);
   const money = (value: number) => formatMoney(value, currency, locale);
   const hasSymbols = accounts.some(account => account.holdings.some(holding => holding.symbol));
 
@@ -244,7 +188,18 @@ export function InvestmentsCard({ currency, locale, embedded = false }: Investme
             {t.investmentsHint}
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+          {accounts.length > 0 && (
+            <ImportFromFileButton
+              target="trades"
+              onImported={() => void reload()}
+              renderTrigger={open => (
+                <Button size="small" variant="text" onClick={open}>
+                  {trades.importTrades}
+                </Button>
+              )}
+            />
+          )}
           {hasSymbols && (
             <Button
               size="small"
@@ -360,7 +315,26 @@ export function InvestmentsCard({ currency, locale, embedded = false }: Investme
                 {account.holdings.map(holding => (
                   <tr key={holding.id}>
                     <td>
-                      {holding.name}
+                      <Button
+                        variant="text"
+                        size="small"
+                        onClick={() => setTradesOf(holding.id)}
+                        sx={{
+                          p: 0,
+                          minWidth: 0,
+                          color: 'text.primary',
+                          font: 'inherit',
+                          textAlign: 'left',
+                          textTransform: 'none',
+                          // Inline, so a long name wraps like the text it replaced.
+                          display: 'inline',
+                          whiteSpace: 'normal',
+                          verticalAlign: 'baseline',
+                          '&:hover': { color: 'var(--primary)', background: 'none' },
+                        }}
+                      >
+                        {holding.name}
+                      </Button>
                       {holding.symbol && (
                         <Typography
                           component="span"
@@ -375,7 +349,17 @@ export function InvestmentsCard({ currency, locale, embedded = false }: Investme
                       )}
                     </td>
                     <td>{t[ASSET_CLASS_KEYS[holding.assetClass] as 'classStock']}</td>
-                    <td>{holding.quantity}</td>
+                    <td>
+                      {holding.quantity}
+                      {holding.hasTrades && (
+                        <Typography
+                          variant="caption"
+                          sx={{ display: 'block', color: 'text.secondary' }}
+                        >
+                          {trades.fromTrades}
+                        </Typography>
+                      )}
+                    </td>
                     <td>
                       <PrivateAmount>{holding.price}</PrivateAmount> {holding.priceCurrency}
                       {(holding.priceSource === 'manual' || isStaleQuote(holding)) && (
@@ -414,6 +398,9 @@ export function InvestmentsCard({ currency, locale, embedded = false }: Investme
         </Box>
       ))}
 
+      {opened && (
+        <HoldingTradesDrawer holding={opened} locale={locale} onClose={() => setTradesOf(null)} />
+      )}
       <AddAccountDialog
         open={adding}
         saving={saving}

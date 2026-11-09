@@ -21,6 +21,10 @@ export interface ImportContext {
   categorize: boolean;
   /** Transactions only: the account named for the rows, or null to find it. */
   walletId: string | null;
+  /** Trades only: the investment account holdings are matched in, or null for all of them. */
+  investmentAccountId: string | null;
+  /** Trades only: create a holding a row names that the account does not have. */
+  createMissingHoldings: boolean;
   /** The sheet's header row; empty when the client sent none. */
   headers: string[];
   /** Read a mapped cell of a row; '' when the field is not mapped. */

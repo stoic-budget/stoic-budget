@@ -179,6 +179,13 @@ export const queryKeys = {
   // Under investments, so a holding or contribution change refreshes the returns page too.
   investmentReturns: (o: { workspaceId: string | null; range: string }) =>
     ['investments', o.workspaceId, 'returns', o.range] as const,
+  // Under investments too: a trade moves the holding, its account and the returns.
+  investmentTrades: (o: { workspaceId: string | null; holdingId: string }) =>
+    ['investments', o.workspaceId, 'trades', o.holdingId] as const,
+  investmentLots: (o: { workspaceId: string | null; holdingId: string }) =>
+    ['investments', o.workspaceId, 'lots', o.holdingId] as const,
+  investmentSettings: (workspaceId: string | null) =>
+    ['investments', workspaceId, 'settings'] as const,
   metals: (workspaceId: string | null) => ['metals', workspaceId] as const,
   reconciliation: (workspaceId: string | null) => ['reconciliation', workspaceId] as const,
   cashFlowMap: (o: { workspaceId: string | null; params: string }) =>

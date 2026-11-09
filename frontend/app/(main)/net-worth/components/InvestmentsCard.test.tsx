@@ -25,6 +25,7 @@ vi.mock('../hooks/useInvestments', async importOriginal => ({
     updateHolding: hookMock.updateHolding,
     deleteHolding: hookMock.deleteHolding,
     refreshPrices: hookMock.refreshPrices,
+    reload: vi.fn(),
   }),
 }));
 
@@ -51,6 +52,7 @@ const pension: InvestmentAccount = {
       priceSource: 'auto',
       pricedAt: '2026-10-01T00:00:00Z',
       value: 1205,
+      hasTrades: false,
     },
   ],
 };
