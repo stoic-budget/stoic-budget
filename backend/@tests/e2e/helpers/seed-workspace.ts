@@ -256,6 +256,12 @@ export async function seedWorkspace(
     price: 10,
     priceCurrency: 'USD',
   });
+  await send('holding classification', 'patch', `/investments/holdings/${holding.body.id}/classification`, {
+    sector: 'financials',
+    region: 'europe',
+    country: 'DE',
+    lookThrough: { region: [{ key: 'europe', weight: 70 }, { key: 'other', weight: 30 }] },
+  });
   await send('investment trade', 'post', `/investments/holdings/${holding.body.id}/trades`, {
     kind: 'buy',
     date: `${taxYear}-02-01`,

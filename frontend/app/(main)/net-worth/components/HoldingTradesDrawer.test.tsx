@@ -13,6 +13,14 @@ const hookMock = vi.hoisted(() => ({
   setBasisMethod: vi.fn(async () => undefined),
 }));
 
+vi.mock('../hooks/useHoldingClassification', () => ({
+  useHoldingClassification: () => ({
+    save: vi.fn(async () => undefined),
+    saving: false,
+    suggestSector: vi.fn(async () => null),
+    looking: false,
+  }),
+}));
 vi.mock('../hooks/useInvestmentTrades', () => ({
   useInvestmentTrades: () => ({ ...hookMock, basisMethod: 'fifo', isPending: false, saving: false }),
 }));
@@ -29,6 +37,10 @@ const holding: InvestmentHolding = {
   pricedAt: '2025-03-01T00:00:00Z',
   value: 780,
   hasTrades: true,
+  sector: null,
+  region: null,
+  country: null,
+  lookThrough: null,
 };
 
 const trade = (overrides: Partial<InvestmentTrade>): InvestmentTrade => ({

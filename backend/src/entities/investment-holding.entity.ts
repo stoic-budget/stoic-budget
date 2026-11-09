@@ -39,6 +39,13 @@ export enum MetalWeightUnit {
   KILOGRAM = 'kg',
 }
 
+export type LookThroughDimension = 'sector' | 'region' | 'country';
+
+/** As stored in `look_through`: a dimension with no breakdown is null or absent. */
+export type HoldingLookThroughRecord = Partial<
+  Record<LookThroughDimension, Array<{ key: string; weight: number }> | null>
+>;
+
 export enum InvestmentPriceSource {
   MANUAL = 'manual',
   AUTO = 'auto',
@@ -182,6 +189,30 @@ export class InvestmentHolding {
    */
   @Column({ name: 'owner_user_id', type: 'uuid', nullable: true })
   ownerUserId: string | null;
+
+  // ---------------------------------------------------------------------------
+  // Where the money sits, typed in by hand. The allowed words are the API
+  // contract's lists (`allocation-keys.ts`); a value read back that is not on
+  // them counts as unclassified rather than breaking the read.
+  // ---------------------------------------------------------------------------
+
+  /** A GICS sector key: `information_technology`, `health_care`. */
+  @Column({ type: 'varchar', length: 40, nullable: true })
+  sector: string | null;
+
+  @Column({ type: 'varchar', length: 40, nullable: true })
+  region: string | null;
+
+  /** ISO 3166-1 alpha-2. */
+  @Column({ type: 'varchar', length: 2, nullable: true })
+  country: string | null;
+
+  /**
+   * A fund's breakdown: per dimension (`sector`, `region`, `country`) a list of
+   * `{ key, weight }` adding up to 100. Only an ETF or a fund has one.
+   */
+  @Column({ name: 'look_through', type: 'jsonb', nullable: true })
+  lookThrough: HoldingLookThroughRecord | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

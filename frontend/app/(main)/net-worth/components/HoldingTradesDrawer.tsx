@@ -13,6 +13,7 @@ import { useIntlayer } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import type { InvestmentHolding } from '../hooks/useInvestments';
 import { type InvestmentTrade, useInvestmentTrades } from '../hooks/useInvestmentTrades';
+import { classificationKey, HoldingClassificationSection } from './HoldingClassificationSection';
 import { HoldingLotsSummary } from './HoldingLotsSummary';
 import { SplitDialog } from './SplitDialog';
 import { TradeFormDrawer } from './TradeFormDrawer';
@@ -164,6 +165,7 @@ export function HoldingTradesDrawer({ holding, locale, onClose }: HoldingTradesD
               </Box>
             ))}
           </Box>
+          <HoldingClassificationSection key={classificationKey(holding)} holding={holding} />
         </Box>
       )}
 

@@ -176,6 +176,7 @@ export const ACCOUNTING_ERRORS = {
   INVESTMENTS_TRADE_CURRENCY_MISMATCH: 'All trades of a holding are in one currency ({{currency}})',
   INVESTMENTS_TRADES_NOT_FOR_METALS: 'Metal lots are bought and sold on the metals card',
   INVESTMENTS_QUANTITY_FROM_TRADES: 'This holding takes its quantity from its trades',
+  INVESTMENTS_LOOK_THROUGH_FUNDS_ONLY: 'Only an ETF or a fund can be split by weights',
   // ── metals ──────────────────────────────────────────────────────
   METALS_LOT_METAL_REQUIRED: 'A lot needs a metal',
   METALS_WEIGHT_REQUIRED: 'A lot needs the weight of one piece',

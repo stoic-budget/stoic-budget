@@ -45,3 +45,8 @@ export const LazyPayeeLines = dynamic(
   () => import('./PayeeLines').then(module => module.PayeeLines),
   { ssr: false, loading: ChartSkeleton },
 );
+
+export const LazyNestedDonut = dynamic(
+  () => import('./NestedDonut').then(module => module.NestedDonut),
+  { ssr: false, loading: ChartSkeleton },
+);

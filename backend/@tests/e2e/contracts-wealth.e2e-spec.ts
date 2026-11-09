@@ -22,7 +22,10 @@ import {
   GoalItemsResponse,
   GoalWithProgress,
   HoldingLots,
+  HoldingSectorSuggestion,
+  InvestmentAllocation,
   InvestmentAccount,
+  InvestmentAccountList,
   InvestmentContribution,
   InvestmentHolding,
   InvestmentSettings,
@@ -45,6 +48,7 @@ import {
   SubscriptionStatus,
 } from '../../src/entities/subscription.entity';
 import { CryptoSyncService } from '../../src/modules/crypto/crypto-sync.service';
+import { SecuritySectorService } from '../../src/modules/investments/security-sector.service';
 import {
   deleteUserByEmail,
   type E2eAccount,
@@ -222,6 +226,52 @@ describe('API contracts: wealth (e2e)', () => {
     const unlinked = await call('delete', `/investments/contributions/${expenseId}`, 200);
     matches(InvestmentContribution, unlinked.body);
     expect(unlinked.body.investmentAccountId).toBeNull();
+  });
+
+  it('allocation: a classified holding, a fund breakdown and the cuts', async () => {
+    const account = await call('post', '/investments/accounts', 201, { name: 'ACME Allocation' });
+    const fund = await call('post', `/investments/accounts/${account.body.id}/holdings`, 201, {
+      symbol: 'ACMEW',
+      name: 'ACME World ETF',
+      assetClass: 'etf',
+      quantity: 2,
+      price: 100,
+      priceCurrency: 'USD',
+    });
+    const classified = await call('patch', `/investments/holdings/${fund.body.id}/classification`, 200, {
+      sector: 'financials',
+      region: 'europe',
+      country: 'DE',
+      lookThrough: {
+        sector: null,
+        region: [
+          { key: 'north_america', weight: 62.5 },
+          { key: 'other', weight: 37.5 },
+        ],
+        country: [{ key: 'US', weight: 100 }],
+      },
+    });
+    matches(InvestmentHolding, classified.body);
+    expect(classified.body.lookThrough.region).toHaveLength(2);
+    matches(InvestmentAccountList, (await call('get', '/investments', 200)).body);
+
+    vi.spyOn(app.get(SecuritySectorService), 'sectorOf').mockResolvedValueOnce('financials');
+    const suggestion = await call('get', `/investments/holdings/${fund.body.id}/sector-suggestion`, 200);
+    matches(HoldingSectorSuggestion, suggestion.body);
+    expect(suggestion.body.sector).toBe('financials');
+
+    const allocation = await call('get', '/investments/allocation', 200);
+    matches(InvestmentAllocation, allocation.body);
+    expect(allocation.body.classes[0].subclasses.length).toBeGreaterThan(0);
+    expect(allocation.body.regions).toEqual(
+      expect.arrayContaining([expect.objectContaining({ key: 'north_america', amount: 125 })]),
+    );
+    expect(allocation.body.sectors).toEqual(
+      expect.arrayContaining([expect.objectContaining({ key: 'financials' })]),
+    );
+    expect(allocation.body.countries).toEqual(
+      expect.arrayContaining([expect.objectContaining({ key: 'US' })]),
+    );
   });
 
   it('investment trades: a buy, a sale, the lots and the basis setting', async () => {
