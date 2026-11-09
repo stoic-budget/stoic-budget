@@ -12,6 +12,10 @@ interface AccountSeed {
   position?: number;
   capitalRole?: CapitalRole | null;
   riskLevel?: RiskLevel | null;
+  debtWalletId?: string | null;
+  debtAccountId?: string | null;
+  depreciationRate?: string | null;
+  attributes?: Record<string, unknown> | null;
 }
 
 interface SnapshotSeed {
@@ -62,6 +66,8 @@ function createService(options: {
   rates?: Record<string, number | Array<{ date: string; rate: number }>>;
   /** Spot price of one ounce, by day; absent means that day has no quote. */
   metalRate?: number | ((date: string) => number | null);
+  /** What each linked loan account owes, by currency; null for a closed one. */
+  walletDebts?: Record<string, { name: string; owed: Record<string, number> | null }>;
 }) {
   const accounts = (options.accounts ?? ACCOUNTS).map(account => ({
     parentId: null,
@@ -70,6 +76,11 @@ function createService(options: {
     nameKk: null,
     capitalRole: null,
     riskLevel: null,
+    debtWalletId: null,
+    debtAccountId: null,
+    depreciationRate: null,
+    attributes: null,
+    isAutoComputed: false,
     workspaceId: WORKSPACE_ID,
     ...account,
   }));
@@ -161,18 +172,43 @@ function createService(options: {
     valueByAssetClass: vi.fn(async () => new Map()),
   } as any;
 
+  const propertyService = {
+    linkedWalletDebts: vi.fn(async (_workspaceId: string, ids: string[]) => {
+      const debts = options.walletDebts ?? {};
+      return new Map(
+        ids
+          .filter(id => debts[id])
+          .map(id => [
+            id,
+            {
+              name: debts[id].name,
+              owed: debts[id].owed ? new Map(Object.entries(debts[id].owed)) : null,
+            },
+          ]),
+      );
+    }),
+  } as any;
+
   const service = new NetWorthService(
     { find: vi.fn(async () => accounts) } as any,
     { createQueryBuilder: vi.fn(() => snapshotQueryBuilder) } as any,
     { createQueryBuilder: vi.fn(() => transactionQueryBuilder) } as any,
     { findOne: vi.fn(async () => ({ currency: 'KZT' })) } as any,
     balanceService,
+    propertyService,
     exchangeRates,
     investments,
     investments,
   );
 
-  return { service, balanceService, exchangeRates, investments, transactionQueryBuilder };
+  return {
+    service,
+    balanceService,
+    propertyService,
+    exchangeRates,
+    investments,
+    transactionQueryBuilder,
+  };
 }
 
 describe('NetWorthService', () => {
@@ -802,5 +838,166 @@ describe('NetWorthService', () => {
 
     const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
     expect(result.denominated).toBeNull();
+  });
+
+  describe('property and vehicles', () => {
+    const HOME: AccountSeed[] = [
+      { id: 'a-cash', code: 'ASSET_CASH', name: 'Cash', accountType: BalanceAccountType.ASSET },
+      { id: 'a-home', code: 'ASSET_REAL_ESTATE', name: 'Real estate', accountType: BalanceAccountType.ASSET },
+      { id: 'a-car', code: 'ASSET_VEHICLES', name: 'Vehicles', accountType: BalanceAccountType.ASSET },
+      { id: 'l-mortgage', code: 'LIABILITY_MORTGAGE', name: 'Mortgage', accountType: BalanceAccountType.LIABILITY },
+      { id: 'l-debts', code: 'LIABILITY_ACCOUNT_DEBTS', name: 'Accounts', accountType: BalanceAccountType.LIABILITY },
+    ];
+    const home = (patch: Partial<AccountSeed>, others: AccountSeed[] = HOME) =>
+      others.map(account => (account.id === 'a-home' ? { ...account, ...patch } : account));
+    const flat = 300_000;
+    const valued = { accountId: 'a-home', snapshotDate: daysAgo(100), amount: flat };
+
+    it('shows the whole value as equity while nothing is linked', async () => {
+      const { service } = createService({ accounts: HOME, snapshots: [valued] });
+
+      const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
+
+      const property = result.properties.find(line => line.accountId === 'a-home');
+      expect(property).toMatchObject({ kind: 'real_estate', value: flat, equity: flat, ltv: null, debt: null });
+      expect(property?.valuedOn).toBe(daysAgo(100));
+      expect(property?.estimated).toBe(false);
+    });
+
+    it('puts a linked mortgage line beside the flat without counting it twice', async () => {
+      const mortgage = 200_000;
+      const { service } = createService({
+        accounts: home({ debtAccountId: 'l-mortgage' }),
+        snapshots: [valued, { accountId: 'l-mortgage', snapshotDate: daysAgo(100), amount: mortgage }],
+      });
+
+      const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
+
+      const property = result.properties.find(line => line.accountId === 'a-home');
+      expect(property?.debt).toEqual({ kind: 'liability', id: 'l-mortgage', name: 'Mortgage', amount: mortgage });
+      expect(property?.equity).toBe(flat - mortgage);
+      expect(property?.ltv).toBe(0.6667);
+      // The flat is an asset and the mortgage a debt, once each: equity is a view.
+      expect(result.assetsTotal).toBe(flat);
+      expect(result.liabilitiesTotal).toBe(mortgage);
+      expect(result.current).toBe(flat - mortgage);
+    });
+
+    it('reads a linked loan account at what it owes, in the workspace currency', async () => {
+      const owed = 150_000;
+      const { service, propertyService } = createService({
+        accounts: home({ debtWalletId: 'w-loan' }),
+        snapshots: [valued],
+        debts: { KZT: owed },
+        walletDebts: { 'w-loan': { name: 'ACME Bank mortgage', owed: { KZT: owed } } },
+      });
+
+      const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
+
+      expect(propertyService.linkedWalletDebts).toHaveBeenCalledWith(WORKSPACE_ID, ['w-loan'], today());
+      const property = result.properties.find(line => line.accountId === 'a-home');
+      expect(property).toMatchObject({ equity: flat - owed, ltv: 0.5 });
+      expect(property?.debt).toMatchObject({ kind: 'wallet', id: 'w-loan', amount: owed });
+      expect(result.current).toBe(flat - owed);
+    });
+
+    it('owes nothing on a closed loan account', async () => {
+      const { service } = createService({
+        accounts: home({ debtWalletId: 'w-loan' }),
+        snapshots: [valued],
+        walletDebts: { 'w-loan': { name: 'ACME Bank mortgage', owed: null } },
+      });
+
+      const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
+
+      const property = result.properties.find(line => line.accountId === 'a-home');
+      expect(property).toMatchObject({ equity: flat, ltv: 0 });
+    });
+
+    it('shows negative equity when more is owed than the flat is worth', async () => {
+      const mortgage = 400_000;
+      const { service } = createService({
+        accounts: home({ debtAccountId: 'l-mortgage' }),
+        snapshots: [valued, { accountId: 'l-mortgage', snapshotDate: daysAgo(100), amount: mortgage }],
+      });
+
+      const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
+
+      const property = result.properties.find(line => line.accountId === 'a-home');
+      expect(property).toMatchObject({ equity: flat - mortgage, ltv: 1.3333 });
+    });
+
+    it('depreciates a vehicle from its last valuation and marks the value estimated', async () => {
+      const car = 10_000;
+      const accounts = HOME.map(account =>
+        account.id === 'a-car' ? { ...account, depreciationRate: '20.00' } : account,
+      );
+      const { service } = createService({
+        accounts,
+        snapshots: [{ accountId: 'a-car', snapshotDate: daysAgo(365), amount: car }],
+      });
+
+      const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
+
+      const vehicle = result.properties.find(line => line.accountId === 'a-car');
+      expect(vehicle).toMatchObject({ kind: 'vehicle', value: 8000, estimated: true, depreciationRate: 20 });
+      expect(vehicle?.valuedOn).toBe(daysAgo(365));
+      // The total counts the estimate, and so does every day of the curve.
+      expect(result.assetsTotal).toBe(8000);
+      expect(result.series[0].assets).toBe(Math.round(car * 0.8 ** (335 / 365) * 100) / 100);
+    });
+
+    it('starts again from a new valuation and leaves the days before it as they were', async () => {
+      const accounts = HOME.map(account =>
+        account.id === 'a-car' ? { ...account, depreciationRate: '20.00' } : account,
+      );
+      const { service } = createService({
+        accounts,
+        snapshots: [
+          { accountId: 'a-car', snapshotDate: daysAgo(365), amount: 10_000 },
+          { accountId: 'a-car', snapshotDate: daysAgo(10), amount: 9_000 },
+        ],
+      });
+
+      const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
+
+      const vehicle = result.properties.find(line => line.accountId === 'a-car');
+      expect(vehicle?.valuedOn).toBe(daysAgo(10));
+      expect(vehicle?.value).toBe(Math.round(9_000 * 0.8 ** (10 / 365) * 100) / 100);
+      expect(result.series[0].assets).toBe(Math.round(10_000 * 0.8 ** (335 / 365) * 100) / 100);
+    });
+
+    it('keeps the entered value of a vehicle that does not depreciate', async () => {
+      const { service } = createService({
+        accounts: HOME,
+        snapshots: [{ accountId: 'a-car', snapshotDate: daysAgo(365), amount: 10_000 }],
+      });
+
+      const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
+
+      const vehicle = result.properties.find(line => line.accountId === 'a-car');
+      expect(vehicle).toMatchObject({ value: 10_000, estimated: false });
+    });
+
+    it('leaves out a property taken off the page', async () => {
+      const { service } = createService({ accounts: HOME, snapshots: [valued] });
+
+      const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d', exclude: ['a-home'] });
+
+      expect(result.properties.map(line => line.accountId)).toEqual(['a-car']);
+    });
+
+    it('subtracts no linked mortgage line taken off the page', async () => {
+      const { service } = createService({
+        accounts: home({ debtAccountId: 'l-mortgage' }),
+        snapshots: [valued, { accountId: 'l-mortgage', snapshotDate: daysAgo(100), amount: 200_000 }],
+      });
+
+      const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d', exclude: ['l-mortgage'] });
+
+      const property = result.properties.find(line => line.accountId === 'a-home');
+      expect(result.liabilitiesTotal).toBe(0);
+      expect(property).toMatchObject({ debt: null, equity: flat, ltv: null });
+    });
   });
 });

@@ -15,6 +15,8 @@ import { BalanceController } from './balance.controller';
 import { BalanceService } from './balance.service';
 import { BalanceHistoryService } from './balance-history.service';
 import { BalancePersonalLayoutService } from './balance-personal-layout.service';
+import { BalancePropertyController } from './property/balance-property.controller';
+import { BalancePropertyService } from './property/balance-property.service';
 
 @Module({
   imports: [
@@ -30,8 +32,13 @@ import { BalancePersonalLayoutService } from './balance-personal-layout.service'
     AuditModule,
     ExchangeRatesModule,
   ],
-  controllers: [BalanceController],
-  providers: [BalanceService, BalanceHistoryService, BalancePersonalLayoutService],
-  exports: [BalanceService, BalanceHistoryService],
+  controllers: [BalanceController, BalancePropertyController],
+  providers: [
+    BalanceService,
+    BalanceHistoryService,
+    BalancePersonalLayoutService,
+    BalancePropertyService,
+  ],
+  exports: [BalanceService, BalanceHistoryService, BalancePropertyService],
 })
 export class BalanceModule {}

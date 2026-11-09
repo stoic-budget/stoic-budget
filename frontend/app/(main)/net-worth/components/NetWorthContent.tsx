@@ -16,6 +16,7 @@ import { NetWorthControls } from './NetWorthControls';
 import { NetWorthHeadline } from './NetWorthHeadline';
 import { NetWorthSkeleton } from './NetWorthSkeleton';
 import { CardTitle, cardSx } from './net-worth-ui';
+import { PropertyCard } from './property/PropertyCard';
 import { RiskCard } from './RiskCard';
 
 export function NetWorthContent() {
@@ -154,6 +155,8 @@ export function NetWorthContent() {
             }}
             onClassify={classify}
           />
+
+          <PropertyCard properties={data.properties} currency={currency} locale={locale} />
 
           <Box sx={cardSx}>
             <CardTitle>{t.holdingsTitle}</CardTitle>

@@ -290,6 +290,31 @@ export async function seedWorkspace(
     proceedsCurrency: 'USD',
     soldOn: today,
   });
+  // A flat linked to the loan and a car with its details: the household chart
+  // has the real estate and vehicle lines, so the workspace is moved onto it
+  // for the step and back to business afterwards.
+  await send('home profile', 'patch', `/workspaces/${owner.workspaceId}`, { profile: 'home' });
+  await send('personal layout', 'post', '/reports/balance/personal-layout');
+  const sheet = await ok('balance accounts', as('get', '/reports/balance/accounts'));
+  const sectionId = (code: string): string =>
+    (sheet.body.assets as Array<{ id: string; code: string }>).find(line => line.code === code)
+      ?.id as string;
+  await send('flat value', 'put', '/reports/balance/snapshot', {
+    accountId: sectionId('ASSET_REAL_ESTATE'),
+    amount: 1000,
+    currency: 'USD',
+  });
+  await send('flat details', 'put', `/reports/balance/accounts/${sectionId('ASSET_REAL_ESTATE')}/property`, {
+    attributes: { area: 50, areaUnit: 'm2', address: `${marker} street` },
+    debt: { kind: 'wallet', id: loan.body.id },
+  });
+  await send('car details', 'put', `/reports/balance/accounts/${sectionId('ASSET_VEHICLES')}/property`, {
+    attributes: { make: `${marker} make`, mileage: 1000, mileageUnit: 'km' },
+    depreciationRate: 10,
+  });
+  await send('business profile again', 'patch', `/workspaces/${owner.workspaceId}`, {
+    profile: 'business',
+  });
   await send('income tax profile', 'put', '/income-tax/profile', {
     taxYear,
     taxpayerType: 'self_employed',
