@@ -2,6 +2,8 @@ import { PayableDirection, PayableStatus } from '@/entities/payable.entity';
 import { PayablesScheduler } from '@/modules/payables/payables.scheduler';
 
 describe('PayablesScheduler', () => {
+  const recurrence = { generateDue: vi.fn(async () => 0) };
+
   it('notifies due-soon payables once and marks them notified', async () => {
     const payablesService = {
       markOverduePayables: vi.fn(async () => []),
@@ -21,7 +23,11 @@ describe('PayablesScheduler', () => {
       createForWorkspaceMembers: vi.fn(async () => 1),
     };
 
-    const scheduler = new PayablesScheduler(payablesService as any, notificationsService as any);
+    const scheduler = new PayablesScheduler(
+      payablesService as any,
+      notificationsService as any,
+      recurrence as any,
+    );
 
     await scheduler.processDailyPayables();
 
@@ -60,7 +66,11 @@ describe('PayablesScheduler', () => {
         .mockResolvedValueOnce(1),
     };
 
-    const scheduler = new PayablesScheduler(payablesService as any, notificationsService as any);
+    const scheduler = new PayablesScheduler(
+      payablesService as any,
+      notificationsService as any,
+      recurrence as any,
+    );
 
     await expect(scheduler.processDailyPayables()).resolves.not.toThrow();
 
@@ -85,10 +95,46 @@ describe('PayablesScheduler', () => {
       createForWorkspaceMembers: vi.fn(async () => 1),
     };
 
-    const scheduler = new PayablesScheduler(payablesService as any, notificationsService as any);
+    const scheduler = new PayablesScheduler(
+      payablesService as any,
+      notificationsService as any,
+      recurrence as any,
+    );
 
     await scheduler.processDailyPayables();
 
     expect(notificationsService.createForWorkspaceMembers).not.toHaveBeenCalled();
+  });
+
+  it('makes the next occurrences before reminding, and reminds even when that fails', async () => {
+    const order: string[] = [];
+    const failing = {
+      generateDue: vi.fn(async () => {
+        order.push('generate');
+        throw new Error('boom');
+      }),
+    };
+    const payablesService = {
+      markOverduePayables: vi.fn(async () => {
+        order.push('overdue');
+        return [];
+      }),
+      findDueSoonPayables: vi.fn(async () => {
+        order.push('due-soon');
+        return [{ id: 'due-1', workspaceId: 'workspace-1', vendor: 'ACME Power' }];
+      }),
+      markDueSoonNotified: vi.fn(async () => undefined),
+    };
+    const notificationsService = { createForWorkspaceMembers: vi.fn(async () => 1) };
+
+    const scheduler = new PayablesScheduler(
+      payablesService as any,
+      notificationsService as any,
+      failing as any,
+    );
+    await scheduler.processDailyPayables();
+
+    expect(order).toEqual(['generate', 'overdue', 'due-soon']);
+    expect(payablesService.markDueSoonNotified).toHaveBeenCalledWith('due-1');
   });
 });

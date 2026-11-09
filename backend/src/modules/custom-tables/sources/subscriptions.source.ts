@@ -22,8 +22,10 @@ export class SubscriptionsSource implements SourceAdapter {
       config: {
         options: [
           option(SubscriptionFrequency.WEEKLY, 'blue'),
+          option(SubscriptionFrequency.BIWEEKLY, 'blue'),
           option(SubscriptionFrequency.MONTHLY, 'teal'),
           option(SubscriptionFrequency.QUARTERLY, 'violet'),
+          option(SubscriptionFrequency.SEMIANNUAL, 'violet'),
           option(SubscriptionFrequency.ANNUAL, 'amber'),
         ],
       },

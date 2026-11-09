@@ -18,6 +18,7 @@ import {
   RELATED_COLLECTIONS,
   SENSITIVE_PROPERTIES,
 } from './backup-data.service';
+import { GROUP_KEY_COLUMNS } from './backup-group-keys';
 
 const RESTORE_ORDER = [
   'categories',
@@ -102,18 +103,6 @@ const GLOBAL_REFERENCE_TABLES = new Set(['tax_jurisdictions']);
 
 /** Keys inside JSON values that name such reference data. */
 const GLOBAL_REFERENCE_KEYS = new Set(['jurisdictionId', 'taxJurisdictionId']);
-
-/**
- * uuid columns that are not a reference to one row: a key the rows of a group
- * share, or the subject an audit event names (a member, an import, a row since
- * deleted). Mapped when they name a restored row and kept otherwise.
- */
-const GROUP_KEY_COLUMNS = new Set([
-  'transactions.splitGroupId',
-  'transactions.transferPairId',
-  'audit_events.batchId',
-  'audit_events.entityId',
-]);
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

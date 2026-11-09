@@ -24,6 +24,7 @@ import {
   Payable,
   PayableList,
   PayableListPage,
+  PayableOccurrenceBody,
   PayableParams,
   PayablePaymentList,
   PayablePaymentParams,
@@ -31,6 +32,7 @@ import {
   PayablesSummary,
   PayableTransactionParams,
   PaymentCandidateList,
+  RejectPayableMatchBody,
   UpdatePayableBody,
 } from '../../contracts';
 import { EntityType } from '../../entities/audit-event.entity';
@@ -38,6 +40,8 @@ import { PayableDirection } from '../../entities/payable.entity';
 import type { User } from '../../entities/user.entity';
 import { Audit } from '../audit/decorators/audit.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { PayableOccurrencesService } from './payable-occurrences.service';
+import { PayableRecurrenceService } from './payable-recurrence.service';
 import { PayablesService } from './payables.service';
 
 @Controller('payables')
@@ -45,6 +49,8 @@ export class PayablesController {
   constructor(
     private readonly payablesService: PayablesService,
     private readonly idempotencyService: IdempotencyService,
+    private readonly recurrence: PayableRecurrenceService,
+    private readonly occurrences: PayableOccurrencesService,
   ) {}
 
   /** Send `idempotency-key` to make a retried request return the first bill. */
@@ -67,6 +73,8 @@ export class PayablesController {
       }
     }
     const payable = await this.payablesService.create(workspaceId, user.id, createDto);
+    // A rule whose next dates are already near makes those occurrences now.
+    await this.recurrence.ensureSeriesOf(payable);
     if (key) {
       await this.idempotencyService.storeKey(key, user.id, workspaceId, payable);
     }
@@ -196,7 +204,36 @@ export class PayablesController {
     @CurrentUser() user: User,
     @WorkspaceId() workspaceId: string,
   ) {
-    return this.payablesService.update(id, workspaceId, user.id, updateDto);
+    const payable = await this.payablesService.update(id, workspaceId, user.id, updateDto);
+    await this.recurrence.ensureSeriesOf(payable);
+    return payable;
+  }
+
+  /** One occurrence of a repeating bill: skip it, move it or change its amount; the series stays. */
+  @Put(':id/occurrence')
+  @WorkspaceAuth(Permission.PAYABLE_EDIT)
+  @Audit({ entityType: EntityType.PAYABLE, includeDiff: true, isUndoable: false })
+  @SchemaResponse(Payable)
+  async changeOccurrence(
+    @SchemaParams(PayableParams) { id }: PayableParams,
+    @SchemaBody(PayableOccurrenceBody) body: PayableOccurrenceBody,
+    @WorkspaceId() workspaceId: string,
+  ) {
+    return this.occurrences.apply(id, workspaceId, body);
+  }
+
+  /** "Not this payment": this bank row is never proposed or linked to the bill again. */
+  @Post(':id/match-rejections')
+  @WorkspaceAuth(Permission.PAYABLE_EDIT)
+  @Audit({ entityType: EntityType.PAYABLE, includeDiff: true, isUndoable: false })
+  @SchemaResponse(Payable)
+  async rejectMatch(
+    @SchemaParams(PayableParams) { id }: PayableParams,
+    @SchemaBody(RejectPayableMatchBody) { transactionId }: RejectPayableMatchBody,
+    @CurrentUser() user: User,
+    @WorkspaceId() workspaceId: string,
+  ) {
+    return this.occurrences.reject(id, workspaceId, user.id, transactionId);
   }
 
   @Put(':id/mark-paid')

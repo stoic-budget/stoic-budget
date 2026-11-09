@@ -23,6 +23,7 @@ interface SubscriptionCardProps {
 /** What to put aside each month so a quarterly or annual charge does not land as a surprise. */
 export function monthlySetAsideOf(subscription: SubscriptionItem): number | null {
   if (subscription.frequency === 'annual') return subscription.amount / 12;
+  if (subscription.frequency === 'semiannual') return subscription.amount / 6;
   if (subscription.frequency === 'quarterly') return subscription.amount / 3;
   return null;
 }
@@ -36,8 +37,10 @@ const STATUS_COLORS: Record<string, 'warning' | 'success' | 'default' | 'error'>
 
 const FREQUENCY_LABELS = {
   weekly: 'freqWeek',
+  biweekly: 'freqTwoWeeks',
   monthly: 'freqMonth',
   quarterly: 'freqQuarter',
+  semiannual: 'freqHalfYear',
   annual: 'freqYear',
 } as const;
 

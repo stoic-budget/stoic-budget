@@ -11,11 +11,16 @@ const appLocale = vi.hoisted(() => ({ current: 'en' }));
 const apiMocks = vi.hoisted(() => ({
   paymentCandidates: vi.fn(),
   payments: vi.fn(),
+  rejectMatch: vi.fn(),
   apiQuery: vi.fn(),
 }));
 
 vi.mock('@/app/lib/payables-api', () => ({
-  payablesApi: { paymentCandidates: apiMocks.paymentCandidates, payments: apiMocks.payments },
+  payablesApi: {
+    paymentCandidates: apiMocks.paymentCandidates,
+    payments: apiMocks.payments,
+    rejectMatch: apiMocks.rejectMatch,
+  },
 }));
 
 vi.mock('@/app/lib/query-fn', () => ({
@@ -104,6 +109,26 @@ describe('MarkPaidDialog', () => {
     fireEvent.click(screen.getByLabelText(/Payee tx-2/));
     fireEvent.click(screen.getByRole('button', { name: 'confirm' }));
 
+    expect(onConfirm).toHaveBeenCalledWith(payable, {
+      kind: 'full',
+      payload: { linkedTransactionId: 'tx-2' },
+    });
+  });
+
+  it('refuses a proposed row for good: "not this payment" asks again without it', async () => {
+    apiMocks.paymentCandidates
+      .mockResolvedValueOnce([candidate('tx-1', true), candidate('tx-2')])
+      .mockResolvedValue([candidate('tx-2')]);
+    apiMocks.rejectMatch.mockResolvedValue(payable);
+    const { onConfirm } = renderDialog();
+
+    expect(await screen.findByText('Payee tx-1 — Invoice')).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: 'notThisPayment' })[0]);
+
+    await waitFor(() => expect(apiMocks.rejectMatch).toHaveBeenCalledWith('payable-1', 'tx-1'));
+    await waitFor(() => expect(screen.queryByText('Payee tx-1 — Invoice')).toBeNull());
+    // Refusing a row does not pick it.
+    fireEvent.click(screen.getByRole('button', { name: 'confirm' }));
     expect(onConfirm).toHaveBeenCalledWith(payable, {
       kind: 'full',
       payload: { linkedTransactionId: 'tx-2' },

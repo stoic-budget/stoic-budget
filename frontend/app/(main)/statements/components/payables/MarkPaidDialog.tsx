@@ -23,6 +23,7 @@ import {
 } from '@/app/lib/payables-api';
 import { queryKeys } from '@/app/lib/query-keys';
 import { useCashPaymentOptions } from './hooks/useCashPaymentOptions';
+import { usePayableMatchRejection } from './hooks/usePayableMatchRejection';
 import {
   AmountFields,
   type AmountState,
@@ -193,6 +194,7 @@ function MarkPaidForm({
 
   const [chosenMode, setMode] = useState<Mode | null>(null);
   const [transactionId, setTransactionId] = useState<string | null>(null);
+  const rejection = usePayableMatchRejection(payable.id);
   const [cash, setCash] = useState<CashState>({ walletId: null, paidOn: today(), categoryId: '' });
   const [amount, setAmount] = useState<AmountState | null>(null);
 
@@ -306,6 +308,10 @@ function MarkPaidForm({
             loading={options.candidatesLoading}
             selected={transactionId ?? defaultTransaction}
             onSelect={setTransactionId}
+            onReject={id => {
+              if (transactionId === id) setTransactionId(null);
+              rejection.reject(id);
+            }}
             locale={locale}
           />
         )}

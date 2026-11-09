@@ -9,6 +9,7 @@ import {
 import { type Payable, PayableDirection } from '../../entities/payable.entity';
 import type { NotificationParams } from '../notifications/notification-params';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PayableRecurrenceService } from './payable-recurrence.service';
 import { PayablesService } from './payables.service';
 
 /** What is still owed, to whom and by when — formatted in each recipient's locale. */
@@ -31,11 +32,19 @@ export class PayablesScheduler {
   constructor(
     private readonly payablesService: PayablesService,
     private readonly notificationsService: NotificationsService,
+    private readonly recurrence: PayableRecurrenceService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_8AM)
   async processDailyPayables(): Promise<void> {
     try {
+      // Next occurrences first, so one coming due within its reminder days is reminded today.
+      await this.recurrence.generateDue().catch((error: unknown) => {
+        this.logger.error(
+          'Failed to make the next occurrences of repeating bills',
+          error instanceof Error ? error.stack : undefined,
+        );
+      });
       const overduePayables = await this.payablesService.markOverduePayables();
       for (const payable of overduePayables) {
         // Receivables go overdue too, but 'payable.overdue' is the wrong thing to tell someone
@@ -63,7 +72,8 @@ export class PayablesScheduler {
         }
       }
 
-      const dueSoonPayables = await this.payablesService.findDueSoonPayables(3);
+      // Each bill says how many days ahead it wants its reminder.
+      const dueSoonPayables = await this.payablesService.findDueSoonPayables();
       for (const payable of dueSoonPayables) {
         try {
           await this.notificationsService.createForWorkspaceMembers({

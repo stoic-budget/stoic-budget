@@ -76,6 +76,8 @@ export type ChargeCalendarQuery = Wire<typeof ChargeCalendarQuery>;
 export const SubscriptionChargeCandidatesQuery = Schema.Struct({
   vendorName: Schema.optional(Schema.String.check(Schema.isMaxLength(255))),
   statementId: Schema.optional(Schema.String.check(Schema.isUUID())),
+  /** Leaves out the rows refused as this subscription's payment. */
+  subscriptionId: Schema.optional(Schema.String.check(Schema.isUUID())),
 });
 export type SubscriptionChargeCandidatesQuery = Wire<typeof SubscriptionChargeCandidatesQuery>;
 

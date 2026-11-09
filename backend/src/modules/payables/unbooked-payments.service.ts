@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { EntityManager, Repository } from 'typeorm';
 import { PayablePayment } from '../../entities/payable-payment.entity';
+import { notRejectedSql } from './payable-payments.util';
 
 /** A bank row may post up to a week either side of the day a payment was marked. */
 const DAYS_APART = 7;
@@ -31,7 +32,8 @@ export class UnbookedPaymentsService {
    * Links every unbooked payment of the workspace to a row of the same money:
    * same currency, income for a receivable and spending for a bill, the amount
    * the account received (the payment less the processor's fee), at most a
-   * week apart, and not already the payment of a bill. One row per payment,
+   * week apart, not already the payment of a bill and not refused for this
+   * one ("not this payment"). One row per payment,
    * the closest date first. Returns how many it linked.
    */
   async linkUnbooked(workspaceId: string, manager?: EntityManager): Promise<number> {
@@ -57,6 +59,8 @@ export class UnbookedPaymentsService {
          SELECT 1 FROM statements trashed
          WHERE trashed.id = t.statement_id AND trashed.deleted_at IS NOT NULL)
        AND NOT EXISTS (SELECT 1 FROM payable_payments used WHERE used.transaction_id = t.id)
+       -- "Not this payment": a row refused for the bill is never linked to it again.
+       AND ${notRejectedSql('pp.payable_id', 't.id')}
        AND NOT EXISTS (
          SELECT 1 FROM payables used_by
          WHERE used_by.linked_transaction_id = t.id AND used_by.deleted_at IS NULL)

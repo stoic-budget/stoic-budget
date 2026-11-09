@@ -362,6 +362,24 @@ describe('BackupRestoreService', () => {
       expect(inserted.tax_rates[0]).toMatchObject({ jurisdictionId: 'jurisdiction-de' });
     });
 
+    it('keeps the series of a repeating bill together when its first bill is not in the archive', async () => {
+      const series = '77777777-7777-4777-8777-777777777777';
+      const { result, inserted } = await restoreWith(
+        [workspaceTable('payables', column('seriesId', { type: 'uuid' }))],
+        [],
+        {
+          payables: [
+            { id: 'old-april', workspaceId: 'old-workspace', seriesId: series },
+            { id: 'old-may', workspaceId: 'old-workspace', seriesId: series },
+          ],
+        },
+      );
+
+      await result;
+      // The first bill was deleted, so it is not restored: the key is kept, not cut to null.
+      expect(inserted.payables.map(row => row.seriesId)).toEqual([series, series]);
+    });
+
     it('drops a row whose required reference leads outside the archive, and the rows that need it', async () => {
       const { result, inserted } = await restoreWith(
         [

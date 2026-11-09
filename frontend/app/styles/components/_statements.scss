@@ -2234,6 +2234,18 @@
     }
   }
 
+  // How a bill repeats and when to remind: a block of its own under the due date.
+  &__repeat {
+    display: grid;
+    gap: 16px;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
   &__2col {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -5707,5 +5719,29 @@
       text-decoration: underline;
       text-underline-offset: 3px;
     }
+  }
+}
+
+// "Not this payment" under a proposed bank row: a quiet text button, never a second choice.
+.seneca-payable-candidate__reject {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--foreground);
+    text-decoration: underline;
+  }
+
+  // Under a radio's label in the mark-paid dialog.
+  &--indented {
+    display: block;
+    margin: -6px 0 8px 30px;
   }
 }

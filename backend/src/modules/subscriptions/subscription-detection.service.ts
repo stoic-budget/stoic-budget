@@ -20,6 +20,7 @@ import {
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { NotificationsService } from '../notifications/notifications.service';
+import { chargeAt } from './charge-calendar.util';
 import { dismissedVendorsOf, subscriptionVendorKey } from './subscription-dismissals';
 import { describePriceChange, type PriceChange } from './subscription-insights.util';
 
@@ -247,8 +248,10 @@ export class SubscriptionDetectionService {
 
   private detectFrequency(medianDays: number): SubscriptionFrequency | null {
     if (medianDays >= 5 && medianDays <= 9) return SubscriptionFrequency.WEEKLY;
+    if (medianDays >= 12 && medianDays <= 16) return SubscriptionFrequency.BIWEEKLY;
     if (medianDays >= 25 && medianDays <= 35) return SubscriptionFrequency.MONTHLY;
     if (medianDays >= 80 && medianDays <= 100) return SubscriptionFrequency.QUARTERLY;
+    if (medianDays >= 170 && medianDays <= 195) return SubscriptionFrequency.SEMIANNUAL;
     if (medianDays >= 350 && medianDays <= 380) return SubscriptionFrequency.ANNUAL;
     return null;
   }
@@ -268,23 +271,9 @@ export class SubscriptionDetectionService {
     return Math.min(c, 1.0);
   }
 
+  /** One step on: a month-end clamps to a shorter month (31 Jan, 28 Feb) instead of overflowing. */
   private addInterval(date: Date, frequency: SubscriptionFrequency): Date {
-    const d = new Date(date);
-    switch (frequency) {
-      case SubscriptionFrequency.WEEKLY:
-        d.setDate(d.getDate() + 7);
-        break;
-      case SubscriptionFrequency.MONTHLY:
-        d.setMonth(d.getMonth() + 1);
-        break;
-      case SubscriptionFrequency.QUARTERLY:
-        d.setMonth(d.getMonth() + 3);
-        break;
-      case SubscriptionFrequency.ANNUAL:
-        d.setFullYear(d.getFullYear() + 1);
-        break;
-    }
-    return d;
+    return chargeAt(date, frequency, 1);
   }
 
   private median(arr: number[]): number {
