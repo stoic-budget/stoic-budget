@@ -57,23 +57,26 @@ export function projectSubscriptionCharges(
 }
 
 /**
- * The newest bill of each repeating series the workspace owes on, deleted
- * or not: as for the daily job, a series goes on while its newest occurrence
- * holds the rule, and only clearing the rule (on every occurrence) ends it.
+ * The newest bill of each repeating series the workspace owes on (or, with a
+ * null direction, is owed too), deleted or not: as for the daily job, a series
+ * goes on while its newest occurrence holds the rule, and only clearing the
+ * rule (on every occurrence) ends it.
  */
 export async function newestRecurringPayables(
   payables: Repository<Payable>,
   workspaceId: string,
+  direction: PayableDirection | null = PayableDirection.PAYABLE,
 ): Promise<Payable[]> {
   const rows: Array<{ id: string }> = await payables.query(
     `SELECT newest."id" FROM (
        SELECT DISTINCT ON (p."series_id") p."id", p."recurrence"
          FROM "payables" p
-        WHERE p."workspace_id" = $1 AND p."series_id" IS NOT NULL AND p."direction" = $2
+        WHERE p."workspace_id" = $1 AND p."series_id" IS NOT NULL
+          AND ($2::text IS NULL OR p."direction"::text = $2)
         ORDER BY p."series_id", p."occurrence_date" DESC
      ) newest
      WHERE newest."recurrence" IS NOT NULL`,
-    [workspaceId, PayableDirection.PAYABLE],
+    [workspaceId, direction],
   );
   if (rows.length === 0) return [];
   return payables
@@ -85,29 +88,32 @@ export async function newestRecurringPayables(
 }
 
 /**
+
  * The occurrences of a series not made yet, inside [today, horizonEnd]: the
  * dates the job will make (`nextToMake`), at the series amount, moved off
  * weekends as the rule says (public holidays are not looked up here; the bill
  * made later is). The one an upgraded series missed is owed already, so it
- * lands on today, overdue, like any overdue bill.
+ * lands on today, overdue, like any overdue bill. `occurrenceDate` is the day
+ * the rule gives, before the move.
  */
 export function projectedOccurrences(
   newest: Payable,
   today: Date,
   horizonEnd: Date,
-): Array<{ date: string; amount: number; isOverdue: boolean }> {
+): Array<{ date: string; occurrenceDate: string; amount: number; isOverdue: boolean }> {
   const rule = newest.recurrence as RecurrenceRule | null;
   if (!(rule && newest.occurrenceDate)) return [];
   const from = localDay(today);
   const to = localDay(horizonEnd);
   const amount = Number(newest.baseAmount ?? newest.amount);
-  const items: Array<{ date: string; amount: number; isOverdue: boolean }> = [];
+  const items: Array<{ date: string; occurrenceDate: string; amount: number; isOverdue: boolean }> =
+    [];
   const after = String(newest.occurrenceDate).slice(0, 10);
   let day = nextToMake(rule, after, from, newest.catchUpOnce);
   while (day) {
     const due = shiftOffNonWorkingDays(day, rule.shift);
     if (due > to) break;
-    items.push({ date: due < from ? from : due, amount, isOverdue: due < from });
+    items.push({ date: due < from ? from : due, occurrenceDate: day, amount, isOverdue: due < from });
     day = nextOccurrence(rule, day);
   }
   return items;
