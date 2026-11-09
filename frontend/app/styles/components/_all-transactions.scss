@@ -146,9 +146,14 @@
 
   &__bulk {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: 12px;
+    gap: 8px 12px;
+    // On a phone the actions wrap to a new line instead of each label breaking in three.
+    .seneca-all-tx__menu-button {
+      white-space: nowrap;
+    }
     padding: 8px 16px;
     border-bottom: 1px solid var(--border);
     background: var(--surface-soft);

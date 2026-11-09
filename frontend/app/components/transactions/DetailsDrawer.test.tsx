@@ -206,6 +206,20 @@ describe('DetailsDrawer', () => {
     );
   });
 
+  it('leaves the row out of budgets, or counts it again, from its switch', async () => {
+    renderDrawer(transaction({ excludedFromBudgets: true }));
+    const toggle = screen.getByRole('checkbox', { name: 'toggle' });
+    expect(toggle).toBeChecked();
+
+    fireEvent.click(toggle);
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/transactions/bulk-update', {
+        items: [{ id: 'tx-1', updates: { excludedFromBudgets: false } }],
+      }),
+    );
+  });
+
   it('shows the history of this row on its tab', () => {
     renderDrawer(transaction());
 

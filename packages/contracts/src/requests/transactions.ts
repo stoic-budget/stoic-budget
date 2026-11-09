@@ -43,6 +43,12 @@ export const UpdateTransactionBody = Schema.Struct({
    */
   isPrivate: optionalNullable(Schema.Boolean),
   /**
+   * Leaves the row out of budgets, reports, the dashboard and the forecast, or
+   * brings it back. Balances, net worth and tax keep counting it either way.
+   * Not nullable: the column always holds a decision, so there is nothing to clear.
+   */
+  excludedFromBudgets: Schema.optional(Schema.Boolean),
+  /**
    * Marks this one row as mattering for the tax return, or not, whatever its
    * category says. Null hands the decision back to the category.
    */
