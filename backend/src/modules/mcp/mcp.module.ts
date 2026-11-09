@@ -1,4 +1,8 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Category } from '../../entities/category.entity';
+import { Transaction } from '../../entities/transaction.entity';
+import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { BudgetsModule } from '../budgets/budgets.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { DashboardModule } from '../dashboard/dashboard.module';
@@ -19,6 +23,9 @@ import { TaxRemindersModule } from '../tax-reminders/tax-reminders.module';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { WalletsModule } from '../wallets/wallets.module';
 import { WorkspacePluginsModule } from '../workspaces/workspace-plugins.module';
+import { ConfirmReplayStore } from './confirm/confirm-replay.store';
+import { McpConfirmService } from './confirm/mcp-confirm.service';
+import { TransactionChangePlanner } from './confirm/transaction-change-planner.service';
 import { McpController } from './mcp.controller';
 import { McpAccessGuard } from './mcp-access.guard';
 import { McpServerFactory } from './mcp-server.factory';
@@ -27,6 +34,7 @@ import { McpToolRegistry } from './mcp-tool-registry.service';
 /** The MCP endpoint. Nothing imports it, so the domain modules it pulls in cannot loop back. */
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Transaction, Category, WorkspaceMember]),
     WorkspacePluginsModule,
     TransactionsModule,
     CategoriesModule,
@@ -49,6 +57,13 @@ import { McpToolRegistry } from './mcp-tool-registry.service';
     TaxPackModule,
   ],
   controllers: [McpController],
-  providers: [McpToolRegistry, McpServerFactory, McpAccessGuard],
+  providers: [
+    McpToolRegistry,
+    McpServerFactory,
+    McpAccessGuard,
+    McpConfirmService,
+    ConfirmReplayStore,
+    TransactionChangePlanner,
+  ],
 })
 export class McpModule {}

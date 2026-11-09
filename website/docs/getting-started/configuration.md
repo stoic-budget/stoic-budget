@@ -66,6 +66,7 @@ CSRF check.
 | `AUTH_COOKIE_DOMAIN` | unset | Share the cookies across subdomains, e.g. `.example.com`. |
 | `JWT_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` | `30m` / `30d` | Access and refresh token lifetimes; refresh tokens rotate on use. |
 | `PASSWORD_RESET_TOKEN_SECRET` | `JWT_SECRET` | A separate HMAC key for password reset tokens. |
+| `MCP_CONFIRM_SECRET` | `JWT_SECRET` | The secret MCP confirm tokens are signed with (a key derived from it). |
 | `BCRYPT_ROUNDS` | `12` | Work factor for new password hashes (10–15). |
 
 ## Receipt maps

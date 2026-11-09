@@ -301,14 +301,21 @@ describe('MCP endpoint (e2e)', () => {
 
     const page = JSON.parse((await callTool(readKey, 'list_transactions')).text);
     const ids = page.data.map((row: { id: string }) => row.id);
-    const moved = await callTool(writeKey, 'set_transactions_category', {
-      transactionIds: ids,
-      categoryId,
-    });
-    expect(JSON.parse(moved.text)).toEqual({ updated: ids.length });
+    // Bulk writes preview first and apply with the preview's token.
+    const confirmed = async (name: string, args: Record<string, unknown>) => {
+      const preview = JSON.parse((await callTool(writeKey, name, args)).text);
+      expect(preview.status).toBe('preview');
+      const applied = await callTool(writeKey, name, { ...args, confirmToken: preview.confirmToken });
+      expect(applied.isError).toBe(false);
+      return JSON.parse(applied.text);
+    };
+    const moved = await confirmed('set_transactions_category', { transactionIds: ids, categoryId });
+    expect(moved).toMatchObject({ status: 'applied', rows: ids.length });
 
-    const approved = await callTool(writeKey, 'approve_transactions', { ids });
-    expect(approved.isError).toBe(false);
+    // Entered by hand, they are confirmed already: nothing to approve, so no token.
+    const approved = JSON.parse((await callTool(writeKey, 'approve_transactions', { ids })).text);
+    expect(approved).toMatchObject({ status: 'preview', rows: 0, skipped: [{ reason: 'unchanged' }] });
+    expect(approved.confirmToken).toBeUndefined();
 
     const budget = await callTool(writeKey, 'create_budget', {
       name: 'MCP budget',

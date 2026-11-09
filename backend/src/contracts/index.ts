@@ -31,6 +31,7 @@ export * from './item-images/item-images';
 export * from './ledger/ledger';
 export * from './ledger/ledger-reports';
 export * from './ledger/reconciliation-parts';
+export * from './mcp/bulk-change';
 export * from './notes/notes';
 export * from './payables/payables';
 export * from './payees/payees';
