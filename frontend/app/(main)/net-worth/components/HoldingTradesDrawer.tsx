@@ -14,6 +14,7 @@ import { formatMoney } from '@/app/lib/format-money';
 import type { InvestmentHolding } from '../hooks/useInvestments';
 import { type InvestmentTrade, useInvestmentTrades } from '../hooks/useInvestmentTrades';
 import { HoldingLotsSummary } from './HoldingLotsSummary';
+import { HoldingPriceHistory } from './HoldingPriceHistory';
 import { SplitDialog } from './SplitDialog';
 import { TradeFormDrawer } from './TradeFormDrawer';
 import { formatUnits, KIND_KEYS, ratioText } from './trade-labels';
@@ -64,11 +65,13 @@ export function HoldingTradesDrawer({ holding, locale, onClose }: HoldingTradesD
             <HoldingLotsSummary lots={data.lots} locale={locale} />
           )}
           {/* Dividends alone leave the typed quantity: the first buy still replaces it. */}
-          {!data.trades.some(trade => trade.kind !== 'dividend') && !data.isPending && (
+          {!(data.trades.some(trade => trade.kind !== 'dividend') || data.isPending) && (
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               {holding.quantity > 0 ? t.fromTradesHint : t.noTrades}
             </Typography>
           )}
+
+          <HoldingPriceHistory holding={holding} locale={locale} />
 
           <Box>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>

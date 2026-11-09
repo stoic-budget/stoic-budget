@@ -7,11 +7,15 @@ describe('InvestmentsScheduler', () => {
       refreshPrices: vi.fn(async () => 2),
       ...overrides,
     } as any;
-    const scheduler = new InvestmentsScheduler(investments);
+    const securityPrices = {
+      recordDailyCloses: vi.fn(async () => ({ fetched: 3, failed: 0 })),
+      ...(overrides.securityPrices as object),
+    } as any;
+    const scheduler = new InvestmentsScheduler(investments, securityPrices);
     // The logger would print the caught error into the test output.
     vi.spyOn((scheduler as any).logger, 'error').mockImplementation(() => undefined);
     vi.spyOn((scheduler as any).logger, 'log').mockImplementation(() => undefined);
-    return { scheduler, investments };
+    return { scheduler, investments, securityPrices };
   }
 
   it('reprices every workspace that holds something with a price', async () => {
@@ -43,5 +47,14 @@ describe('InvestmentsScheduler', () => {
     await scheduler.refreshAllPrices();
 
     expect(investments.refreshPrices).not.toHaveBeenCalled();
+  });
+
+  it('records the daily closes, and a failing feed does not throw out of the job', async () => {
+    const { scheduler, securityPrices } = createScheduler({
+      securityPrices: { recordDailyCloses: vi.fn().mockRejectedValue(new Error('Feed down')) },
+    });
+
+    await expect(scheduler.recordDailyCloses()).resolves.toBeUndefined();
+    expect(securityPrices.recordDailyCloses).toHaveBeenCalledTimes(1);
   });
 });

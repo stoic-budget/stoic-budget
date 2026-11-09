@@ -2,6 +2,7 @@
 
 import * as Schema from 'effect/Schema';
 import { Timestamp, type Wire } from '../common/wire';
+import { PriceHealth } from './price-history';
 
 /** Crypto is deliberately absent: coins live in crypto wallets, nowhere else. */
 export const InvestmentAssetClass = Schema.Literals([
@@ -34,6 +35,8 @@ export const InvestmentHolding = Schema.Struct({
   value: Schema.Number,
   /** The quantity comes from the holding's trades and is not typed in. */
   hasTrades: Schema.Boolean,
+  /** How the symbol's daily closes are doing; null for a holding without a symbol. */
+  priceHealth: Schema.NullOr(PriceHealth),
 });
 export type InvestmentHolding = Wire<typeof InvestmentHolding>;
 

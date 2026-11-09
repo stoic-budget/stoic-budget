@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InvestmentsService } from './investments.service';
+import { SecurityPricesService } from './security-prices.service';
 
 /**
  * Prices used to move only when someone opened the page and pressed refresh,
@@ -12,7 +13,24 @@ import { InvestmentsService } from './investments.service';
 export class InvestmentsScheduler {
   private readonly logger = new Logger(InvestmentsScheduler.name);
 
-  constructor(private readonly investmentsService: InvestmentsService) {}
+  constructor(
+    private readonly investmentsService: InvestmentsService,
+    private readonly securityPrices: SecurityPricesService,
+  ) {}
+
+  /**
+   * Yesterday's closes of every held symbol, before the holdings are repriced:
+   * once per symbol for all workspaces, since a close is the same for everyone.
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_5AM)
+  async recordDailyCloses(): Promise<void> {
+    try {
+      const { fetched, failed } = await this.securityPrices.recordDailyCloses();
+      this.logger.log(`Daily closes: ${fetched} symbols fetched, ${failed} failed`);
+    } catch (error) {
+      this.logger.error('Daily closes failed', error instanceof Error ? error.stack : undefined);
+    }
+  }
 
   @Cron(CronExpression.EVERY_DAY_AT_6AM)
   async refreshAllPrices(): Promise<void> {

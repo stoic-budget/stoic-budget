@@ -22,6 +22,8 @@ import {
   GoalItemsResponse,
   GoalWithProgress,
   HoldingLots,
+  HoldingPriceHistory,
+  ImportClosesResult,
   InvestmentAccount,
   InvestmentContribution,
   InvestmentHolding,
@@ -29,6 +31,8 @@ import {
   InvestmentTrade,
   InvestmentTradeList,
   MessageResult,
+  SecurityClose,
+  SecurityCloseList,
   MetalLot,
   MetalSaleResult,
   MetalSettings,
@@ -45,6 +49,7 @@ import {
   SubscriptionStatus,
 } from '../../src/entities/subscription.entity';
 import { CryptoSyncService } from '../../src/modules/crypto/crypto-sync.service';
+import { StockPriceService } from '../../src/modules/investments/stock-price.service';
 import {
   deleteUserByEmail,
   type E2eAccount,
@@ -289,6 +294,65 @@ describe('API contracts: wealth (e2e)', () => {
     matches(InvestmentHolding, traded);
     expect(traded.hasTrades).toBe(true);
     await call('delete', `/investments/trades/${list.body[4].id}`, 204);
+  });
+
+  it('price history: the chart, the closes a workspace keeps, an import and the health', async () => {
+    const ticker = `CW${String(Date.now()).slice(-8)}`;
+    const day = (back: number) => new Date(Date.now() - back * 86_400_000).toISOString().slice(0, 10);
+    // Yahoo's answer, made up: ten days at 50.
+    const fetched = vi
+      .spyOn(app.get(StockPriceService, { strict: false }), 'fetchDailyCloses')
+      .mockImplementation(async () => ({
+        currency: 'USD',
+        closes: Array.from({ length: 10 }, (_, index) => ({ date: day(10 - index), close: 50 })),
+      }));
+    const account = await call('post', '/investments/accounts', 201, { name: 'ACME Brokerage' });
+    const holding = await call('post', `/investments/accounts/${account.body.id}/holdings`, 201, {
+      symbol: ticker,
+      name: 'ACME Corp',
+      assetClass: 'stock',
+      quantity: 1,
+      price: 52,
+      priceCurrency: 'USD',
+    });
+    await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'buy',
+      date: day(8),
+      quantity: 3,
+      price: 48,
+    });
+
+    const chart = await call('get', `/investments/holdings/${holding.body.id}/history`, 200);
+    matches(HoldingPriceHistory, chart.body);
+    expect(chart.body.basis).toBe('trades');
+    expect(chart.body.health.status).toBe('ok');
+    expect(chart.body.points.some((point: { value: number | null }) => (point.value ?? 0) > 0)).toBe(true);
+
+    const typed = await call('post', `/investments/holdings/${holding.body.id}/closes`, 201, {
+      date: day(3),
+      close: 51.5,
+    });
+    matches(SecurityClose, typed.body);
+    const imported = await call('post', `/investments/holdings/${holding.body.id}/closes/import`, 200, {
+      csv: `Date,Close\n${day(4)},49.75\nnot a day,1`,
+    });
+    matches(ImportClosesResult, imported.body);
+    expect(imported.body.skipped).toHaveLength(1);
+    const list = await call('get', `/investments/holdings/${holding.body.id}/closes`, 200);
+    matches(SecurityCloseList, list.body);
+    expect(list.body).toHaveLength(2);
+
+    const accounts = await call('get', '/investments', 200);
+    const row = accounts.body
+      .flatMap((entry: { holdings: Array<{ id: string }> }) => entry.holdings)
+      .find((entry: { id: string }) => entry.id === holding.body.id);
+    matches(InvestmentHolding, row);
+    expect(row.priceHealth).toMatchObject({ status: 'ok', failures: 0 });
+
+    await call('delete', `/investments/closes/${typed.body.id}`, 204);
+    fetched.mockRestore();
+    await dataSource.query('DELETE FROM security_prices WHERE symbol = $1', [`${ticker}.US`]);
+    await dataSource.query('DELETE FROM security_price_symbols WHERE symbol = $1', [`${ticker}.US`]);
   });
 
   it('metals: a lot, its photo, a sale, the settings and prices', async () => {

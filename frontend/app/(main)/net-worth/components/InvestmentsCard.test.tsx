@@ -53,6 +53,7 @@ const pension: InvestmentAccount = {
       pricedAt: '2026-10-01T00:00:00Z',
       value: 1205,
       hasTrades: false,
+      priceHealth: { status: 'ok', lastCloseOn: '2026-09-30', failures: 0 },
     },
   ],
 };
@@ -94,5 +95,20 @@ describe('InvestmentsCard', () => {
       'acc-1',
       expect.objectContaining({ symbol: 'aapl', quantity: 3, priceCurrency: 'USD' }),
     );
+  });
+
+  it('says since when the price feed has stopped for a holding', () => {
+    const [holding] = pension.holdings;
+    hookMock.accounts = [
+      {
+        ...pension,
+        holdings: [
+          { ...holding, priceHealth: { status: 'stale', lastCloseOn: '2026-09-30', failures: 6 } },
+        ],
+      },
+    ];
+    render(<InvestmentsCard currency="USD" locale="en" />);
+
+    expect(screen.getByTestId('price-feed-stale')).toHaveTextContent('no quotes since Sep 30, 2026');
   });
 });

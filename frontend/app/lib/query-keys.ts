@@ -186,6 +186,11 @@ export const queryKeys = {
     ['investments', o.workspaceId, 'lots', o.holdingId] as const,
   investmentSettings: (workspaceId: string | null) =>
     ['investments', workspaceId, 'settings'] as const,
+  // Under investments too: a trade or a close moves the chart and the returns.
+  holdingHistory: (o: { workspaceId: string | null; holdingId: string }) =>
+    ['investments', o.workspaceId, 'history', o.holdingId] as const,
+  holdingCloses: (o: { workspaceId: string | null; holdingId: string }) =>
+    ['investments', o.workspaceId, 'closes', o.holdingId] as const,
   metals: (workspaceId: string | null) => ['metals', workspaceId] as const,
   reconciliation: (workspaceId: string | null) => ['reconciliation', workspaceId] as const,
   cashFlowMap: (o: { workspaceId: string | null; params: string }) =>
