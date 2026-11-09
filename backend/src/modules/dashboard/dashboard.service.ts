@@ -1307,7 +1307,7 @@ export class DashboardService {
           newest.workspaceId,
         );
         items.push({
-          ...next,
+          date: next.date,
           amount,
           label: newest.vendor,
           source: 'payable',

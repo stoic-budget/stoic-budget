@@ -41,6 +41,8 @@ import {
   BankSyncResult,
   BrowseOptionList,
   BulkConversion,
+  CalendarFeedCreated,
+  CalendarFeedSettings,
   IntegrationConnection,
   IntegrationDisconnected,
   ManualExchangeRate,
@@ -271,6 +273,40 @@ describe('Integration contracts (e2e)', () => {
     const sent = await answer(TelegramReportSent, call('post', '/telegram/send-report', { reportType: 'daily' }));
     expect(sent).toMatchObject({ status: 'sent', report: { chatId: '4242', status: 'sent' } });
     expect(sent.report).not.toHaveProperty('userId');
+  });
+
+  it('the calendar feed: turned on, a new link, the choice of kinds, turned off', async () => {
+    const created = await answer(CalendarFeedCreated, call('post', '/calendar-feed', { invoices: false }));
+    expect(created).toMatchObject({ enabled: true, include: { invoices: false, payables: true } });
+    expect(created.token).toMatch(/^[A-Za-z0-9_-]{32}$/);
+    const read = await answer(CalendarFeedSettings, call('get', '/calendar-feed'));
+    expect(read).toEqual({
+      enabled: true,
+      include: { payables: true, subscriptions: true, taxDeadlines: true, invoices: false },
+      createdAt: expect.any(String),
+      lastFetchedAt: null,
+    });
+    expect(read).not.toHaveProperty('token');
+
+    await request(app.getHttpServer()).get(`/public/calendar/${created.token}.ics`).expect(200);
+    const fetched = await answer(CalendarFeedSettings, call('get', '/calendar-feed'));
+    expect(fetched.lastFetchedAt).toEqual(expect.any(String));
+
+    const renewed = await answer(CalendarFeedCreated, call('post', '/calendar-feed', {}));
+    expect(renewed.token).not.toBe(created.token);
+    expect(renewed.include.invoices).toBe(false);
+    const changed = await answer(
+      CalendarFeedSettings,
+      call('patch', '/calendar-feed', { taxDeadlines: false, invoices: true }),
+    );
+    expect(changed.include).toEqual({
+      payables: true,
+      subscriptions: true,
+      taxDeadlines: false,
+      invoices: true,
+    });
+    const off = await answer(CalendarFeedSettings, call('delete', '/calendar-feed'));
+    expect(off).toMatchObject({ enabled: false, createdAt: null, lastFetchedAt: null });
   });
 
   it('push subscriptions, a backup run and exchange rates', async () => {
