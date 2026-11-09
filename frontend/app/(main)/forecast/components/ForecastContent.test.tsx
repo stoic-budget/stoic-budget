@@ -15,6 +15,7 @@ vi.mock('../hooks/useForecast', async importOriginal => ({
   useForecast: () => hookMock.state,
 }));
 vi.mock('./ForecastChart', () => ({ ForecastChart: () => <div data-testid="forecast-chart" /> }));
+vi.mock('./PaycheckPlanner', () => ({ PaycheckPlanner: () => <div data-testid="paycheck-planner" /> }));
 
 const data: ForecastData = {
   currency: 'USD',

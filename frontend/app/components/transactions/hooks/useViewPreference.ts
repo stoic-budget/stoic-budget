@@ -14,7 +14,8 @@ export type ViewScope =
   | 'reports'
   | 'dashboard'
   | 'onboarding'
-  | 'rules';
+  | 'rules'
+  | 'forecast';
 
 /** Long: this is read once on mount and written by the page itself. */
 const PREFERENCE_STALE_TIME = 30 * 60 * 1000;

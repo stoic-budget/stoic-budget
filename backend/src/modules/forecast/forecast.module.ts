@@ -7,10 +7,12 @@ import { Workspace } from '../../entities/workspace.entity';
 import { DashboardModule } from '../dashboard/dashboard.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { GoalsModule } from '../goals/goals.module';
+import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { TaxModule } from '../tax/tax.module';
 import { ForecastController } from './forecast.controller';
 import { ForecastService } from './forecast.service';
+import { PaycheckPlannerService } from './paycheck-planner.service';
 
 @Module({
   imports: [
@@ -18,11 +20,12 @@ import { ForecastService } from './forecast.service';
     DashboardModule,
     ExchangeRatesModule,
     GoalsModule,
+    PayPeriodModule,
     SubscriptionsModule,
     TaxModule,
   ],
   controllers: [ForecastController],
-  providers: [ForecastService],
+  providers: [ForecastService, PaycheckPlannerService],
   exports: [ForecastService],
 })
 export class ForecastModule {}
