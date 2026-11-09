@@ -4,8 +4,8 @@ description: Let Claude Code, Claude Desktop or your own scripts work on a works
 ---
 
 Stoic Budget has an MCP endpoint built into the backend: `/api/v1/mcp` (Streamable HTTP, stateless).
-Any MCP client connects to it with an **API key**, so what an agent can do is exactly what the key's
-**scopes** allow, inside the one workspace the key belongs to.
+An MCP client connects to it with an **API key**, or signs in over **OAuth** and asks you in the
+browser. Either way what an agent can do is exactly what its **scopes** allow, inside one workspace.
 
 ## Switch MCP on
 
@@ -73,6 +73,33 @@ A client that only starts local (stdio) servers, such as Claude Desktop, reaches
 }
 ```
 
+## Connect over OAuth
+
+A client that supports MCP authorization (OAuth 2.1) needs only the endpoint URL; no key to paste.
+On the first call it gets `401` with a `WWW-Authenticate: Bearer resource_metadata="…"` header and
+finds the rest on its own:
+
+- `/.well-known/oauth-protected-resource/api/v1/mcp` (RFC 9728) and
+  `/.well-known/oauth-authorization-server` (RFC 8414), served at the origin root;
+- `POST /api/v1/oauth/register`: dynamic client registration (RFC 7591), public clients only, redirect
+  URIs on `https` or a loopback `http` address, matched exactly afterwards;
+- `/oauth/authorize`: the consent screen. You see the app's name and **where your answer goes**, pick
+  one workspace that has MCP on, and Read only, Read and change, or single permissions, never more
+  than your role there allows;
+- `POST /api/v1/oauth/token` and `POST /api/v1/oauth/revoke` (RFC 7009).
+
+Only the authorization code flow with PKCE `S256` is accepted (`plain` is refused); codes live one
+minute and work once. Tokens are bound to this endpoint (RFC 8707): an access token lasts an hour,
+a refresh token is replaced on every use, and presenting a used one again revokes the whole
+connection. Tokens are stored only as hashes and work nowhere but `/api/v1/mcp`.
+
+A connection stops working when you disconnect it (**Plugins → MCP Server → Connected apps**), when
+you leave the workspace or your role there changes, when the workspace is deleted, the account is
+deactivated, or MCP is switched off (until it is on again). Instance administrators can stop new
+apps from registering under **Admin → Users**; `MCP_OAUTH_REGISTRATION_ENABLED=false` sets that
+default. OAuth needs `APP_URL` (or `FRONTEND_URL`) set to the address people open, since every URL
+above is built from it.
+
 ## Tools
 
 `tools/list` shows a key only the tools its scopes and its owner's role allow; each asks for the
@@ -99,10 +126,11 @@ the filters. Uploads travel as base64 inside the JSON request, so a file can be 
 
 ## What an agent does is on the record
 
-Every write made through an API key is an audit event with the actor **Integration** and the key's
-name and prefix in the label (`API key "Claude Code" (ab12cd34)`), the user it acted for in
+Every write made through an API key or an OAuth connection is an audit event with the actor
+**Integration** and the key's name and prefix in the label (`API key "Claude Code" (ab12cd34)`), or
+the app's name (`Connected app "…"`), the user it acted for in
 `meta.onBehalfOfUserId`, and **Undo** available wherever rollback knows the entity (transactions,
 statements, categories, custom tables, workspace settings). Filter the activity log by actor
-**Integration** to review it.
+**Integration** to review it. Approving, revoking and a detected token replay are logged too.
 
 See also [Security posture](security-posture).

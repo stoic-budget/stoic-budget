@@ -19,7 +19,7 @@ import type { McpTool, McpToolContext } from './mcp-tool';
 import { McpToolRegistry } from './mcp-tool-registry.service';
 
 const INSTRUCTIONS =
-  `${APP_NAME} is a bookkeeping app. Every tool works inside the workspace the API key belongs to. ` +
+  `${APP_NAME} is a bookkeeping app. Every tool works inside the workspace the API key or the OAuth connection belongs to. ` +
   'List tools are paginated; narrow them with filters rather than paging through everything.';
 
 /** One MCP server per request: the endpoint is stateless and each request carries its key. */

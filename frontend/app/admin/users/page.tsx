@@ -37,7 +37,7 @@ import { formatStoredDate } from '@/app/lib/user-format-store';
 import { useWorkspaceId } from '../../hooks/useWorkspaceId';
 import apiClient from '../../lib/api';
 import { queryKeys } from '../../lib/query-keys';
-import { RegistrationCard } from './components/RegistrationCard';
+import { RegistrationCards } from './components/RegistrationCards';
 import { USER_ROW_SKELETON_KEYS, UserRowSkeleton } from './components/UserRowSkeleton';
 import { type AdminPermission, usePermissionOptions } from './hooks/usePermissionOptions';
 
@@ -185,7 +185,7 @@ export default function UsersManagementPage() {
         {t.title}
       </Typography>
 
-      <RegistrationCard />
+      <RegistrationCards />
 
       <Paper sx={{ mt: 3 }}>
         <Box sx={{ p: 3 }}>

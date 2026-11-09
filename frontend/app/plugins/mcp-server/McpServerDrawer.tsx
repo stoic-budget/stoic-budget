@@ -12,22 +12,24 @@ import {
 import { alpha } from '@mui/material/styles';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Copy, Lock, Plus, Trash2 } from '@/app/components/icons';
+import { Lock, Plus, Trash2 } from '@/app/components/icons';
 import { PanelBackTitle } from '@/app/components/panels/panel-ui';
 import { DrawerShell } from '@/app/components/ui/drawer-shell';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useIntlayer } from '@/app/i18n';
 import { apiBaseUrl } from '@/app/lib/api';
 import type { ApiKeyScope } from '@/app/lib/contracts';
-import { formatStoredDate } from '@/app/lib/user-format-store';
 import { tokens } from '@/lib/theme-tokens';
 import { PluginOffBanner } from '../components/PluginOffBanner';
+import { CopyButton } from './CopyButton';
+import { McpConnectedApps } from './McpConnectedApps';
 import {
   claudeCodeCommand,
   KEY_PLACEHOLDER,
   mcpEndpointUrl,
   mcpJsonConfig,
 } from './mcp-connection';
+import { timeAgo } from './time-ago';
 import { useApiKeys } from './useApiKeys';
 
 interface McpServerDrawerProps {
@@ -58,46 +60,6 @@ const codeBlockStyle = {
   whiteSpace: 'pre' as const,
   position: 'relative' as const,
 };
-
-type McpServerText = ReturnType<typeof useIntlayer<'mcpServerDrawer'>>;
-
-function CopyButton({ text }: { text: string }) {
-  const t = useIntlayer('mcpServerDrawer');
-  const handle = () => {
-    void navigator.clipboard.writeText(text).then(() => toast.success(t.copied.value));
-  };
-  return (
-    <button
-      type="button"
-      onClick={handle}
-      style={{
-        position: 'absolute',
-        top: 6,
-        right: 6,
-        background: 'transparent',
-        border: 'none',
-        cursor: 'pointer',
-        padding: 2,
-        color: 'var(--text-secondary)',
-        display: 'flex',
-        alignItems: 'center',
-      }}
-      title={t.copy.value}
-    >
-      <Copy size={14} />
-    </button>
-  );
-}
-
-function timeAgo(dateStr: string | null, t: McpServerText): string {
-  if (!dateStr) return t.neverUsed.value;
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const d = Math.floor(diff / 86400000);
-  if (d === 0) return t.today.value;
-  if (d === 1) return t.oneDayAgo.value;
-  if (d < 30) return t.daysAgo.value.replace('{count}', String(d));
-  return formatStoredDate(dateStr);
-}
 
 export function McpServerDrawer({ isOpen, onClose, onBack, zIndex }: McpServerDrawerProps) {
   const t = useIntlayer('mcpServerDrawer');
@@ -432,6 +394,7 @@ export function McpServerDrawer({ isOpen, onClose, onBack, zIndex }: McpServerDr
               </Box>
             )}
           </Box>
+          <McpConnectedApps />
         </Box>
       </DrawerShell>
 

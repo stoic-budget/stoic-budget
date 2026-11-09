@@ -100,6 +100,7 @@ export const queryKeys = {
   webhookSubscriptions: (workspaceId: string | null) =>
     ['webhook-subscriptions', workspaceId] as const,
   apiKeys: (workspaceId: string | null) => ['api-keys', workspaceId] as const,
+  mcpOAuthGrants: (workspaceId: string | null) => ['mcp-oauth-grants', workspaceId] as const,
   customTables: (workspaceId: string | null) => ['custom-tables', workspaceId] as const,
   adminUsers: (workspaceId: string | null) => ['admin-users', workspaceId] as const,
   budgets: (workspaceId: string | null) => ['budgets', workspaceId] as const,

@@ -3,6 +3,7 @@ import { Controller, Delete, Get, HttpStatus, Post, Req, Res, UseGuards } from '
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { ApiKeyAllowed } from '../../common/decorators/api-key-allowed.decorator';
+import { RouteAuthenticates } from '../../common/decorators/route-authenticates.decorator';
 import { WorkspaceContextGuard } from '../../common/guards/workspace-context.guard';
 import { resolveAuditActor } from '../../common/interceptors/audit-actor.interceptor';
 import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
@@ -11,18 +12,21 @@ import { McpAccessGuard } from './mcp-access.guard';
 import { McpServerFactory } from './mcp-server.factory';
 import type { McpToolContext } from './mcp-tool';
 
-/** Guards have run: the request carries a key, its workspace and the member behind it. */
+/**
+ * Guards have run: the request carries a key or an OAuth grant, its workspace
+ * and the member behind it. A grant's scopes limit it the way a key's do.
+ */
 const toolContextOf = (request: AuthenticatedRequest): McpToolContext => ({
   user: request.user as User,
-  workspaceId: request.apiKeyWorkspaceId as string,
+  workspaceId: (request.apiKeyWorkspaceId ?? request.mcpGrant?.workspaceId) as string,
   memberId: request.workspaceMemberId ?? null,
   subject: {
     user: request.user as User,
-    apiKey: request.apiKey,
+    apiKey: request.apiKey ?? request.mcpGrant,
     workspaceRole: request.workspaceRole,
     workspaceMemberPermissions: request.workspaceMemberPermissions,
   },
-  // biome-ignore lint/style/noNonNullAssertion: McpAccessGuard admits API-key requests only.
+  // biome-ignore lint/style/noNonNullAssertion: McpAccessGuard admits API keys and OAuth grants only.
   auditActor: resolveAuditActor(request)!,
 });
 
@@ -39,12 +43,14 @@ const methodNotAllowed = (response: Response): void => {
 
 /**
  * Model Context Protocol over Streamable HTTP, stateless: every POST carries
- * the API key and gets its own server, so there is no session to keep.
+ * an API key or an OAuth access token and gets its own server, so there is no
+ * session to keep.
  */
 @ApiTags('MCP')
 @Controller('mcp')
 // Each tool checks the key's scopes against what it needs (`McpTool.permissions`).
 @ApiKeyAllowed()
+@RouteAuthenticates()
 @UseGuards(McpAccessGuard, WorkspaceContextGuard)
 export class McpController {
   constructor(private readonly servers: McpServerFactory) {}

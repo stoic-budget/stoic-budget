@@ -9,4 +9,5 @@ export const AUTH_ROUTE_PREFIXES = [
   '/forgot-password',
   '/reset-password',
   '/verify-email',
+  '/oauth/authorize',
 ];

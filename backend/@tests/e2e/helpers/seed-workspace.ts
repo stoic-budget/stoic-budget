@@ -423,4 +423,37 @@ export async function seedWorkspace(
      VALUES ($1, $2, NULL, 'seed-item.png', $4, 'Q1'), ($1, NULL, $3, 'seed-bill.png', $4, 'Q2')`,
     [owner.workspaceId, transaction.id, payable.body.id, `${marker} item`],
   );
+  // An MCP app connected over OAuth: its grant, a live token pair and a spent code.
+  // The consent flow needs a configured public origin, so straight in.
+  const [membership] = await dataSource.query(
+    'SELECT id FROM workspace_members WHERE workspace_id = $1 AND user_id = $2',
+    [owner.workspaceId, owner.userId],
+  );
+  const [oauthClient] = await dataSource.query(
+    `INSERT INTO mcp_oauth_clients (client_name, redirect_uris)
+     VALUES ($1, '["http://127.0.0.1:33418/callback"]') RETURNING id`,
+    [`${marker} app`],
+  );
+  const [grant] = await dataSource.query(
+    `INSERT INTO mcp_oauth_grants
+       (client_id, workspace_id, workspace_member_id, user_id, granted_role, scopes, resource)
+     VALUES ($1, $2, $3, $4, 'owner', '["transaction.view"]', 'https://books.example.com/api/v1/mcp')
+     RETURNING id`,
+    [oauthClient.id, owner.workspaceId, membership.id, owner.userId],
+  );
+  await dataSource.query(
+    `INSERT INTO mcp_oauth_tokens (grant_id, kind, token_hash, expires_at) VALUES
+       ($1, 'access', md5($2 || 'a') || md5($2 || 'b'), now() + interval '1 hour'),
+       ($1, 'refresh', md5($2 || 'c') || md5($2 || 'd'), now() + interval '30 days')`,
+    [grant.id, marker],
+  );
+  await dataSource.query(
+    `INSERT INTO mcp_oauth_codes
+       (code_hash, client_id, workspace_id, workspace_member_id, user_id, granted_role, scopes,
+        redirect_uri, code_challenge, resource, expires_at, used_at, grant_id)
+     VALUES (md5($1 || 'e') || md5($1 || 'f'), $2, $3, $4, $5, 'owner', '["transaction.view"]',
+       'http://127.0.0.1:33418/callback', $6, 'https://books.example.com/api/v1/mcp',
+       now() - interval '1 minute', now() - interval '2 minutes', $7)`,
+    [marker, oauthClient.id, owner.workspaceId, membership.id, owner.userId, 'a'.repeat(43), grant.id],
+  );
 }

@@ -16,6 +16,8 @@ export enum InstanceSettingKey {
   TELEGRAM = 'telegram',
   /** Whether someone without an invitation can create an account. */
   REGISTRATION = 'registration',
+  /** Whether MCP clients may register themselves for OAuth (RFC 7591). */
+  MCP_CLIENT_REGISTRATION = 'mcp_client_registration',
 }
 
 /**
