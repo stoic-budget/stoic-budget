@@ -16,7 +16,7 @@ import type { BankSyncTransaction } from './bank-sync-provider.interface';
  * freshly parsed one. Skipping this is a silent failure: the comparison throws
  * on the date, or quietly scores every amount as different.
  */
-function asComparable(row: Transaction): ParsedTransaction {
+export function asComparable(row: Transaction): ParsedTransaction {
   const toNumber = (value: number | string | null): number | undefined => {
     if (value === null || value === '') return undefined;
     const parsed = Number(value);
@@ -33,7 +33,7 @@ function asComparable(row: Transaction): ParsedTransaction {
 }
 
 /** The provider's row in the shape the tolerant comparison expects. */
-function asParsedTransaction(row: BankSyncTransaction, currency: string): ParsedTransaction {
+export function asParsedTransaction(row: BankSyncTransaction, currency: string): ParsedTransaction {
   const name = row.payee || row.description || row.memo || '';
   return {
     transactionDate: row.posted,

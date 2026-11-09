@@ -1137,9 +1137,11 @@ describe('exportWorkspaceTransactions', () => {
     // Only confirmed rows are exported; a row waiting in Review is not.
     expect(qb.andWhere).toHaveBeenNthCalledWith(1, 'transaction.isVerified = true');
     expect(qb.andWhere).toHaveBeenNthCalledWith(2, 'transaction.isDuplicate = false');
+    // Nor is a row the bank has not booked yet: it goes out once booked.
+    expect(qb.andWhere).toHaveBeenNthCalledWith(3, 'transaction.isPending = false');
     // Trashed statements are left out through a subquery, not a join.
-    expect(qb.andWhere).toHaveBeenNthCalledWith(3, expect.stringContaining('deleted_at IS NOT NULL'));
-    expect(qb.andWhere).toHaveBeenNthCalledWith(4, 'transaction.transferPairId IS NULL');
+    expect(qb.andWhere).toHaveBeenNthCalledWith(4, expect.stringContaining('deleted_at IS NOT NULL'));
+    expect(qb.andWhere).toHaveBeenNthCalledWith(5, 'transaction.transferPairId IS NULL');
     expect(excelSpy).toHaveBeenCalledWith([{ id: 'tx-1' }], expect.stringContaining('workspace-transactions-'));
     expect(result.fileName).toMatch(/^workspace-transactions-.*\.xlsx$/);
     expect(result.mimeType).toBe(

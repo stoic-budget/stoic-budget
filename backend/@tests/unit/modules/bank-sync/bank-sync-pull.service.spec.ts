@@ -3,6 +3,7 @@ import { IntelligentDeduplicationService } from '../../../../src/modules/parsing
 import { BankSyncPullService } from '../../../../src/modules/bank-sync/bank-sync-pull.service';
 import { BankSyncService } from '../../../../src/modules/bank-sync/bank-sync.service';
 import { BankSyncDedupeService } from '../../../../src/modules/bank-sync/bank-sync-dedupe.service';
+import { BankSyncPendingService } from '../../../../src/modules/bank-sync/bank-sync-pending.service';
 import { BankSyncAuthError } from '../../../../src/modules/bank-sync/bank-sync-provider.interface';
 import {
   accountConfig,
@@ -50,6 +51,10 @@ interface Harness {
   provider: ReturnType<typeof fakeTokenProvider>;
   statements: { create: ReturnType<typeof vi.fn> };
   imported: () => string[];
+  /** What the pull wrote to stored rows inside its database transaction. */
+  writes: { update: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn> };
+  reassess: ReturnType<typeof vi.fn>;
+  emit: ReturnType<typeof vi.fn>;
 }
 
 function harness(options: {
@@ -57,6 +62,10 @@ function harness(options: {
   accounts?: Parameters<typeof fakeTokenProvider>[0];
   knownIds?: string[];
   existingRows?: Array<Record<string, unknown>>;
+  /** The workspace's stored pending rows. */
+  pendingRows?: Array<Record<string, unknown>>;
+  /** A booked row already holding the fingerprint a posted row would take. */
+  fingerprintTaken?: boolean;
   claim?: () => never;
 }): Harness {
   const store = fakeStore([
@@ -71,9 +80,18 @@ function harness(options: {
   const provider = fakeTokenProvider(options.accounts);
   if (options.claim) provider.fetchAccounts = vi.fn(options.claim) as never;
 
+  const writes = {
+    update: vi.fn(async () => ({ affected: 1 })),
+    delete: vi.fn(async () => ({ affected: 1 })),
+    findOne: vi.fn(async () => (options.fingerprintTaken ? { id: 'tx-uploaded' } : null)),
+  };
   const transactionRepository = {
     findOne: vi.fn(async () => null),
+    manager: { transaction: vi.fn(async (work: (manager: unknown) => unknown) => work(writes)) },
     find: vi.fn(async (query: { where: Record<string, unknown> }) => {
+      if (query.where.isPending === true) {
+        return options.pendingRows ?? [];
+      }
       if ('documentNumber' in query.where) {
         return (options.knownIds ?? []).map(documentNumber => ({ documentNumber }));
       }
@@ -90,14 +108,19 @@ function harness(options: {
   );
 
   const statements = { create: vi.fn(async () => ({ id: 'stmt-1' })) };
+  const deduplication = new IntelligentDeduplicationService(importConfigStub);
+  const reassess = vi.fn(async () => 0);
+  const emit = vi.fn();
   const pull = new BankSyncPullService(
     store.integrationRepository as never,
     connections,
     statements as never,
-    new BankSyncDedupeService(
+    new BankSyncDedupeService(transactionRepository as never, deduplication, importConfigStub),
+    new BankSyncPendingService(
       transactionRepository as never,
-      new IntelligentDeduplicationService(importConfigStub),
-      importConfigStub,
+      deduplication,
+      { reassess } as never,
+      { emit } as never,
     ),
   );
 
@@ -106,6 +129,9 @@ function harness(options: {
     store,
     provider,
     statements,
+    writes,
+    reassess,
+    emit,
     imported: () =>
       statements.create.mock.calls.flatMap(call => {
         const file = call[2] as { buffer: Buffer };
@@ -115,14 +141,15 @@ function harness(options: {
 }
 
 describe('BankSyncPullService', () => {
-  it('imports each enabled account once, skipping pending rows and rows already known by id', async () => {
+  it('imports each enabled account once, pending rows marked, skipping rows already known by id', async () => {
     const h = harness({
       accounts: [
         remoteAccount({
           transactions: [
             remoteRow({ id: 'TRN-1' }),
             remoteRow({ id: 'TRN-2', posted: new Date('2026-09-21T00:00:00Z'), amount: -9 }),
-            remoteRow({ id: 'TRN-3', pending: true }),
+            // Pending rows lapse after two weeks, so this one is from yesterday.
+            remoteRow({ id: 'TRN-3', pending: true, posted: new Date(Date.now() - 86_400_000) }),
           ],
         }),
       ],
@@ -132,9 +159,12 @@ describe('BankSyncPullService', () => {
     const result = await h.pull.sync(user, workspaceId, 'c1');
 
     expect(h.statements.create).toHaveBeenCalledTimes(1);
-    expect(h.imported()).toEqual(['ACT-1:TRN-2']);
-    expect(result).toMatchObject({ imported: 1, statements: 1 });
-    expect(result.accounts[0]).toMatchObject({ id: 'ACT-1', imported: 1, skipped: 1 });
+    expect(h.imported()).toEqual(['ACT-1:TRN-2', 'ACT-1:TRN-3']);
+    const ofx = (h.statements.create.mock.calls[0][2] as { buffer: Buffer }).buffer.toString();
+    expect(ofx.match(/<BANKSYNC\.PENDING>Y/g)).toHaveLength(1);
+    expect(ofx.split('<STMTTRN>')[2]).toContain('<BANKSYNC.PENDING>Y');
+    expect(result).toMatchObject({ imported: 2, statements: 1 });
+    expect(result.accounts[0]).toMatchObject({ id: 'ACT-1', imported: 2, skipped: 1 });
   });
 
   it('keeps a transaction id already seen on another account: ids are unique per account only', async () => {
@@ -386,5 +416,171 @@ describe('BankSyncPullService health', () => {
         where: expect.objectContaining({ workspace: { kind: WorkspaceKind.STANDARD } }),
       }),
     );
+  });
+});
+
+describe('BankSyncPullService pending rows', () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const recent = new Date(Date.now() - 2 * DAY);
+  const recentDay = recent.toISOString().slice(0, 10);
+  /** A pending row as the pull stored it, with what the user did to it since. */
+  const pendingRow = (overrides: Record<string, unknown> = {}) =>
+    storedRow({
+      id: 'tx-pending',
+      documentNumber: 'ACT-1:AUTH-1',
+      transactionDate: recentDay,
+      counterpartyName: 'ACME Store - Wireless Buds',
+      debit: '15.00',
+      amount: '15.00',
+      isPending: true,
+      categoryId: 'cat-gadgets',
+      comments: 'Gift for member one',
+      statement: { accountNumber: 'ACT-1' },
+      ...overrides,
+    });
+  const booked = (overrides: Partial<Parameters<typeof remoteRow>[0]> = {}) =>
+    remoteRow({
+      id: 'AUTH-1',
+      posted: recent,
+      amount: -15,
+      payee: 'ACME Store - Wireless Buds',
+      description: 'ACME STORE',
+      ...overrides,
+    });
+  const postWrite = (h: Harness) =>
+    h.writes.update.mock.calls.find(
+      ([, , values]) => (values as { isPending?: boolean }).isPending === false,
+    );
+
+  it('turns the pending row into its booked version by the provider id, and imports nothing', async () => {
+    const h = harness({
+      accounts: [remoteAccount({ transactions: [booked()] })],
+      pendingRows: [pendingRow()],
+    });
+
+    const result = await h.pull.sync(user, workspaceId, 'c1');
+
+    expect(h.statements.create).not.toHaveBeenCalled();
+    expect(result.accounts[0]).toMatchObject({ imported: 0 });
+    const [, where, values] = postWrite(h) ?? [];
+    expect(where).toEqual({ id: 'tx-pending', workspaceId, isPending: true });
+    expect(values).toMatchObject({
+      isPending: false,
+      documentNumber: 'ACT-1:AUTH-1',
+      amount: 15,
+      debit: 15,
+      credit: null,
+      transactionDate: recentDay,
+    });
+    expect(h.emit).toHaveBeenCalledWith('transactions.posted', {
+      workspaceId,
+      transactionIds: ['tx-pending'],
+    });
+    expect(h.reassess).toHaveBeenCalledWith(workspaceId, { ids: ['tx-pending'] });
+  });
+
+  it('keeps every edit made on the pending row: posting writes only what the bank says', async () => {
+    const h = harness({
+      accounts: [remoteAccount({ transactions: [booked()] })],
+      pendingRows: [pendingRow()],
+    });
+
+    await h.pull.sync(user, workspaceId, 'c1');
+
+    const [, , values] = postWrite(h) ?? [];
+    expect(Object.keys(values as object).sort()).toEqual(
+      [
+        'amount',
+        'credit',
+        'debit',
+        'documentNumber',
+        'fingerprint',
+        'isPending',
+        'transactionDate',
+        'transactionType',
+      ].sort(),
+    );
+  });
+
+  it('finds the pending row by resemblance when the bank booked it under a new id', async () => {
+    const h = harness({
+      config: connectionConfig({ accounts: [accountConfig({ walletId: 'wallet-1' })] }),
+      accounts: [remoteAccount({ transactions: [booked({ id: 'BOOKED-9' })] })],
+      pendingRows: [pendingRow()],
+    });
+
+    await h.pull.sync(user, workspaceId, 'c1');
+
+    expect(h.statements.create).not.toHaveBeenCalled();
+    expect(postWrite(h)?.[2]).toMatchObject({ documentNumber: 'ACT-1:BOOKED-9' });
+  });
+
+  it('sends the row back to Review when the booked amount differs from the held one', async () => {
+    const h = harness({
+      accounts: [remoteAccount({ transactions: [booked({ amount: -17.5 })] })],
+      pendingRows: [pendingRow({ isVerified: true })],
+    });
+
+    await h.pull.sync(user, workspaceId, 'c1');
+
+    expect(postWrite(h)?.[2]).toMatchObject({ amount: 17.5, isVerified: false });
+  });
+
+  it('flags the booked row a duplicate when a statement upload already brought it', async () => {
+    const h = harness({
+      accounts: [remoteAccount({ transactions: [booked()] })],
+      pendingRows: [pendingRow()],
+      fingerprintTaken: true,
+    });
+
+    await h.pull.sync(user, workspaceId, 'c1');
+
+    expect(postWrite(h)?.[2]).toMatchObject({ isDuplicate: true, duplicateOfId: 'tx-uploaded' });
+  });
+
+  it('takes the latest amount of a row still pending, without importing it again', async () => {
+    const h = harness({
+      accounts: [remoteAccount({ transactions: [booked({ pending: true, amount: -20 })] })],
+      pendingRows: [pendingRow()],
+    });
+
+    await h.pull.sync(user, workspaceId, 'c1');
+
+    expect(h.statements.create).not.toHaveBeenCalled();
+    expect(h.writes.update).toHaveBeenCalledWith(
+      expect.anything(),
+      { id: 'tx-pending', workspaceId, isPending: true },
+      expect.objectContaining({ amount: 20, debit: 20 }),
+    );
+    expect(postWrite(h)).toBeUndefined();
+    expect(h.emit).not.toHaveBeenCalled();
+  });
+
+  it('removes a pending row that never booked in two weeks, and only pending rows', async () => {
+    const lapsed = new Date(Date.now() - 20 * DAY).toISOString().slice(0, 10);
+    const h = harness({
+      accounts: [remoteAccount({ transactions: [] })],
+      pendingRows: [pendingRow({ transactionDate: lapsed })],
+    });
+
+    await h.pull.sync(user, workspaceId, 'c1');
+
+    expect(h.writes.delete).toHaveBeenCalledWith(expect.anything(), {
+      id: expect.objectContaining({ _value: ['tx-pending'] }),
+      workspaceId,
+      isPending: true,
+    });
+  });
+
+  it('leaves pending rows of another account of the same connection alone', async () => {
+    const h = harness({
+      accounts: [remoteAccount({ transactions: [booked()] })],
+      pendingRows: [pendingRow({ documentNumber: 'ACT-OTHER:AUTH-1' })],
+    });
+
+    await h.pull.sync(user, workspaceId, 'c1');
+
+    expect(postWrite(h)).toBeUndefined();
+    expect(h.imported()).toEqual(['ACT-1:AUTH-1']);
   });
 });

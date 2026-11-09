@@ -42,7 +42,7 @@ import { ensurePrivateCategory } from '../categories/private-category';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { DataDeletedEvent } from '../notifications/events/notification-events';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
-import { cloneForSplit } from './helpers/transaction-split-clone';
+import { assertSplitAllowed, cloneForSplit } from './helpers/transaction-split-clone';
 import { applyListFilters, type TransactionListFilters } from './transaction-list-filters';
 
 export type TransactionWithConversion = Transaction & {
@@ -426,23 +426,7 @@ export class TransactionsService {
    * on the locked row, which is the read the parts are actually derived from.
    */
   private assertSplittable(transaction: Transaction, dto: SplitTransactionBody): number {
-    if (transaction.splitGroupId) {
-      throw new BadRequestException(appError('TRANSACTION_ALREADY_SPLIT'));
-    }
-
-    // A duplicate-flagged row is excluded from dashboards and reports. Splitting it
-    // would produce siblings that default to isDuplicate=false, so the sibling
-    // amounts would reappear in those totals. Refuse instead.
-    if (transaction.isDuplicate) {
-      throw new BadRequestException(appError('TRANSACTION_SPLIT_DUPLICATE'));
-    }
-
-    // A locked row has already been reported on a filed return. Splitting it
-    // re-assesses the tax across the parts, which would change figures that
-    // have been submitted to a tax authority.
-    if (transaction.taxLocked) {
-      throw new BadRequestException(appError('TRANSACTION_SPLIT_TAX_LOCKED'));
-    }
+    assertSplitAllowed(transaction);
 
     const total = Number(
       transaction.amount ?? transaction.debit ?? transaction.credit ?? Number.NaN,

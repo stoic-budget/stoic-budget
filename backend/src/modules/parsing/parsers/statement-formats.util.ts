@@ -1,3 +1,4 @@
+import { decodeEntities } from '../helpers/markup-entities.helper';
 import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
 
 /**
@@ -44,20 +45,12 @@ function ofxTag(block: string, tag: string): string | undefined {
   return match ? decodeEntities(match[1].trim()) : undefined;
 }
 
-const NAMED_ENTITIES: Record<string, string> = {
-  amp: '&',
-  lt: '<',
-  gt: '>',
-  quot: '"',
-  apos: "'",
-};
-
-/** One pass, so '&amp;lt;' becomes the text '&lt;' rather than being decoded twice into '<'. */
-function decodeEntities(value: string): string {
-  return value.replace(/&(?:#(\d+)|(amp|lt|gt|quot|apos));/g, (_, code, name) =>
-    code ? String.fromCharCode(Number(code)) : NAMED_ENTITIES[name],
-  );
-}
+/**
+ * A row a bank-sync pull marks as pending (`bank-sync-ofx.util.ts`). OFX has
+ * no word for it, so the mark is a proprietary tag, which the OFX spec writes
+ * with a dotted prefix and other readers skip.
+ */
+const PENDING_MARK = /<BANKSYNC\.PENDING>\s*Y/i;
 
 export function parseOfx(text: string): ParsedStatement {
   const currency = ofxTag(text, 'CURDEF') ?? 'USD';
@@ -79,6 +72,7 @@ export function parseOfx(text: string): ParsedStatement {
       paymentPurpose: memo || name,
       ...(amount < 0 ? { debit: Math.abs(amount) } : { credit: amount }),
       currency,
+      ...(PENDING_MARK.test(block) ? { pending: true } : {}),
     });
   }
   const dates = transactions.map(t => t.transactionDate.getTime());

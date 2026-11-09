@@ -54,6 +54,7 @@ function TransactionSummary({
   source?: TransactionSource;
 }): React.JSX.Element {
   const t = useIntlayer('transactionsDrawer');
+  const tPending = useIntlayer('bankPending');
   const payeeName = usePayeeName();
   const { locale } = useLocale();
   const isIncome = transaction.credit > 0 && !(transaction.debit > 0);
@@ -69,11 +70,17 @@ function TransactionSummary({
           {
             label: t.sheet.status.value,
             // A status is text with a small dot; ochre only where attention is due.
+            // A row the bank still holds says so before anything about its approval.
             value: (
               <span
-                className={`seneca-tx-summary__status${transaction.isVerified ? '' : ' seneca-tx-summary__status--pending'}`}
+                className={`seneca-tx-summary__status${transaction.isVerified && !transaction.isPending ? '' : ' seneca-tx-summary__status--pending'}`}
+                title={transaction.isPending ? tPending.hint.value : undefined}
               >
-                {transaction.isVerified ? t.sheet.confirmed.value : t.sheet.unconfirmed.value}
+                {transaction.isPending
+                  ? tPending.badge.value
+                  : transaction.isVerified
+                    ? t.sheet.confirmed.value
+                    : t.sheet.unconfirmed.value}
               </span>
             ),
           },
@@ -249,7 +256,8 @@ export default function DetailsDrawer({
               categories={categories}
               onUpdateCategory={onUpdateCategory}
               onMarkIgnored={onMarkIgnored}
-              onSplitDone={onSplitDone}
+              // A pending row is neither split nor paired: its booked version is.
+              onSplitDone={transaction.isPending ? undefined : onSplitDone}
             />
             <BudgetExclusionToggle transaction={transaction} />
             {!transaction.isPrivate && (

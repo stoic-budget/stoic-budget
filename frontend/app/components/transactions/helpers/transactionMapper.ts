@@ -65,6 +65,7 @@ export function mapApiRecordToTransaction(tx: TransactionApiRecord): Transaction
     ownerMemberId: tx.ownerMemberId ?? null,
     isPrivate: tx.isPrivate ?? false,
     excludedFromBudgets: tx.excludedFromBudgets ?? false,
+    isPending: tx.isPending ?? false,
     splitGroupId: tx.splitGroupId,
     splitIndex: tx.splitIndex,
     categorySource: tx.categorySource,

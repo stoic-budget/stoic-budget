@@ -95,8 +95,10 @@ export class CrossStatementDeduplicationService {
     const duplicateGroups: DuplicateGroup[] = [];
     const processedIds = new Set<string>();
 
+    // A pending row is replaced by its booked version through the bank-sync
+    // pull; as a duplicate or an original here it would hide a booked row.
     for (const transaction of transactionsToCheck) {
-      if (processedIds.has(transaction.id)) {
+      if (processedIds.has(transaction.id) || transaction.isPending) {
         continue;
       }
 
@@ -105,7 +107,7 @@ export class CrossStatementDeduplicationService {
           t =>
             t.id !== transaction.id &&
             !processedIds.has(t.id) &&
-            !t.isDuplicate &&
+            !(t.isDuplicate || t.isPending) &&
             !this.isSameSplitGroup(transaction, t) &&
             !this.isDifferentAccount(transaction, t, accountByStatement),
         )

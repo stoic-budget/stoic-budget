@@ -87,6 +87,21 @@ describe('DetailsDrawer', () => {
     expect(screen.getByText('sheet.unconfirmed')).toBeInTheDocument();
   });
 
+  it('says a row the bank still holds is pending, whatever its approval', () => {
+    renderDrawer(transaction({ isPending: true, isVerified: true }));
+
+    expect(screen.getByText('badge')).toHaveClass('seneca-tx-summary__status--pending');
+    expect(screen.queryByText('sheet.confirmed')).not.toBeInTheDocument();
+  });
+
+  it('offers no split or pairing for a pending row, as the server refuses them', () => {
+    renderDrawer(transaction({ isPending: true }));
+    expect(screen.queryByText('split')).not.toBeInTheDocument();
+
+    renderDrawer(transaction({ id: 'tx-2' }));
+    expect(screen.getByText('split')).toBeInTheDocument();
+  });
+
   it('lists the actions with a line on what each means', () => {
     renderDrawer(transaction());
 

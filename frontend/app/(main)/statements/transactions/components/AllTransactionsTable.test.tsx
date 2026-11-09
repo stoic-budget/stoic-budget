@@ -59,3 +59,30 @@ describe('AllTransactionsTable budget exclusion', () => {
     expect(onSetExcluded).toHaveBeenCalledWith(['tx-counted', 'tx-left-out'], false);
   });
 });
+
+describe('AllTransactionsTable pending rows', () => {
+  const pendingRow = (id: string, isPending: boolean): ListedRow =>
+    transactionItem({ id, counterpartyName: 'ACME Store - Wireless Buds', isPending }) as ListedRow;
+
+  it('marks only the row the bank still holds, and dims it', () => {
+    renderWithQuery(
+      <AllTransactionsTable
+        rows={[pendingRow('tx-booked', false), pendingRow('tx-pending', true)]}
+        categories={[]}
+        budgetByCategory={new Map()}
+        selected={new Set()}
+        onToggle={vi.fn()}
+        onToggleAll={vi.fn()}
+        onSetCategory={vi.fn()}
+        onSetExcluded={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    const badges = screen.getAllByText('Pending');
+    expect(badges).toHaveLength(1);
+    expect(badges[0]).toHaveAttribute('title', expect.stringContaining('not booked it yet'));
+    const rows = screen.getAllByRole('row').slice(1);
+    expect(rows.map(row => row.classList.contains('is-pending-row'))).toEqual([false, true]);
+  });
+});

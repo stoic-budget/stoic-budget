@@ -1,4 +1,8 @@
 import { ForecastService } from '../../../../src/modules/forecast/forecast.service';
+import {
+  incomeHistory,
+  pendingEvents,
+} from '../../../../src/modules/forecast/forecast-transactions';
 
 /**
  * A query builder that keeps TypeORM's where semantics: `where()` replaces
@@ -71,9 +75,53 @@ describe('ForecastService history', () => {
   it('learns recurring income from confirmed transactions only', async () => {
     const { service, queries } = build();
 
-    await (service as any).incomeHistory('ws-1', new Date('2026-10-04'));
+    await incomeHistory((service as any).transactionRepository, 'ws-1', new Date('2026-10-04'), null);
 
     expect(queries[0].conditions).toContain('t.isVerified = true');
     expect(queries[0].conditions).toContain('t.workspaceId = :workspaceId');
+  });
+});
+
+describe('ForecastService pending rows', () => {
+  const repositoryWith = (rows: unknown[]) => {
+    const query = recordingQuery(rows);
+    return { query, repository: { createQueryBuilder: vi.fn(() => query) } as any };
+  };
+  const asIs = async (amount: number) => amount;
+
+  it('places each pending row on today as money already gone or come', async () => {
+    const { repository } = repositoryWith([
+      { id: 'p-1', label: 'ACME Store - Wireless Buds', currency: 'EUR', type: 'expense', amount: '15.00' },
+      { id: 'p-2', label: 'ACME Refunds', currency: 'EUR', type: 'income', amount: '4.50' },
+    ]);
+
+    const events = await pendingEvents(repository, 'ws-1', '2026-10-04', null, asIs);
+
+    expect(events).toEqual([
+      { date: '2026-10-04', label: 'ACME Store - Wireless Buds', amount: -15, kind: 'pending', sourceId: 'p-1' },
+      { date: '2026-10-04', label: 'ACME Refunds', amount: 4.5, kind: 'pending', sourceId: 'p-2' },
+    ]);
+  });
+
+  it('reads only pending rows of the workspace that are no duplicate and not trashed', async () => {
+    const { query, repository } = repositoryWith([]);
+
+    await pendingEvents(repository, 'ws-1', '2026-10-04', null, asIs);
+
+    expect(query.conditions).toContain('t.workspaceId = :workspaceId');
+    expect(query.conditions).toContain('t.isPending = true AND t.isDuplicate = false');
+    expect(query.conditions.join(' ')).toContain('trashed.deleted_at IS NOT NULL');
+  });
+
+  it('leaves out holds older than the bank keeps one, which only a pull would remove', async () => {
+    const { query, repository } = repositoryWith([]);
+
+    await pendingEvents(repository, 'ws-1', '2026-10-04', null, asIs);
+
+    expect(query.conditions).toContain('t.transactionDate >= :pendingSince');
+    const params = query.andWhere.mock.calls.find(
+      (call: unknown[]) => call[0] === 't.transactionDate >= :pendingSince',
+    )[1];
+    expect(params).toEqual({ pendingSince: '2026-09-20' });
   });
 });

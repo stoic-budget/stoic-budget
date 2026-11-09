@@ -35,6 +35,7 @@ describe('useTransferLink', () => {
             ownerMemberId: null,
             isPrivate: false,
             excludedFromBudgets: false,
+            isPending: false,
             privateCategoryId: null,
             transferPairId: null,
             transferPairSource: null,

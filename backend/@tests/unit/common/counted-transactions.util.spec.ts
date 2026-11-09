@@ -53,4 +53,36 @@ describe('counted transactions', () => {
       }
     });
   });
+
+  describe('pending bank rows', () => {
+    it('drop out of balances and net worth built with onlyCounted', () => {
+      const { query, clauses } = recorder();
+
+      onlyCounted(query, 't');
+
+      expect(clauses).toContain('t.isPending = false');
+    });
+
+    it('drop out of raw counted SQL and every income and spending figure in raw SQL', () => {
+      expect(countedSql('tx')).toContain('tx.is_pending = false');
+      expect(flowsSql('tx')).toContain('tx.is_pending = false');
+    });
+
+    it('drop out of both find() alternatives', () => {
+      for (const where of countedWhere({ workspaceId: 'ws-1' })) {
+        expect(where).toHaveProperty('isPending', false);
+      }
+    });
+
+    it('drop out of data-health counts too: a pending row waits for the bank, not for a person', () => {
+      const confirmed = recorder();
+      const waiting = recorder();
+
+      onlyFlows(confirmed.query, 't');
+      onlyFlows(waiting.query, 't', { includeUnconfirmed: true });
+
+      expect(confirmed.clauses).toContain('t.isPending = false');
+      expect(waiting.clauses).toContain('t.isPending = false');
+    });
+  });
 });

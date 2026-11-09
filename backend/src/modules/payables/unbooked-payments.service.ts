@@ -52,6 +52,7 @@ export class UnbookedPaymentsService {
        )
        AND ABS(t.transaction_date - pp.paid_on) <= ${DAYS_APART}
        AND t.is_duplicate = false
+       AND t.is_pending = false
        AND t.transfer_pair_id IS NULL
        AND NOT EXISTS (
          SELECT 1 FROM statements trashed

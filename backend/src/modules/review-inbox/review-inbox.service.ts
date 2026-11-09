@@ -384,7 +384,7 @@ export class ReviewInboxService {
       throw new NotFoundException(appError('STATEMENT_NOT_FOUND'));
     }
     const rows = await this.transactionRepository.find({
-      where: { workspaceId, statementId, isVerified: false, isDuplicate: false },
+      where: { workspaceId, statementId, isVerified: false, isDuplicate: false, isPending: false },
       relations: { category: true },
       select: { id: true, categoryId: true, category: { id: true, name: true } },
     });

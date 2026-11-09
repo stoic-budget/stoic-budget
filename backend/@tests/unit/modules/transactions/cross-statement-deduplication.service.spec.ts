@@ -155,6 +155,20 @@ describe('CrossStatementDeduplicationService', () => {
       expect(groups[0].duplicates[0].transaction.id).toBe('tx2');
     });
 
+    it('never pairs a pending row with its booked look-alike, either way round', async () => {
+      const date = new Date('2024-01-15');
+      const pending = {
+        ...createMockTransaction('pending', date, 1500, 'ACME Store', 'Wireless Buds', 'stmt1'),
+        isPending: true,
+      };
+      const booked = createMockTransaction('booked', date, 1500, 'ACME Store', 'Wireless Buds', 'stmt2');
+
+      mockRepository.find.mockResolvedValueOnce([pending, booked]);
+      mockRepository.find.mockResolvedValueOnce([pending, booked]);
+
+      expect(await service.findDuplicates('workspace-123')).toEqual([]);
+    });
+
     it('should find fuzzy duplicates with similar counterparty names', async () => {
       const date = new Date('2024-01-15');
       const transactions = [

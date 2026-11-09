@@ -4,7 +4,9 @@ import { IsNull } from 'typeorm';
  * Which transactions count in any number Seneca shows (balances, totals,
  * budgets, goals, forecasts, reports, tax, insights): rows a person confirmed
  * (an imported, synced or scanned row waits in Review until approved), that
- * are not suspected duplicates and are not on a statement in the trash.
+ * are not suspected duplicates, are not on a statement in the trash, and are
+ * not a bank-sync row the bank still holds as pending (`isPending`: shown in
+ * the list, but no money has moved yet, so no balance, total or queue has it).
  *
  * Transfers between the user's own accounts are NOT excluded here: a wallet
  * balance needs them, an income/expense figure does not, so each caller that
@@ -19,6 +21,7 @@ export function onlyCounted<T extends { andWhere(where: string): T }>(query: T, 
   return query
     .andWhere(`${alias}.isVerified = true`)
     .andWhere(`${alias}.isDuplicate = false`)
+    .andWhere(`${alias}.isPending = false`)
     .andWhere(
       `NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = ${alias}.statementId AND trashed.deleted_at IS NOT NULL)`,
     );
@@ -26,7 +29,7 @@ export function onlyCounted<T extends { andWhere(where: string): T }>(query: T, 
 
 /** For raw SQL over the `transactions` table, by column name: `AND ${countedSql('t')}`. */
 export function countedSql(alias: string): string {
-  return `(${alias}.is_verified = true AND ${alias}.is_duplicate = false AND NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = ${alias}.statement_id AND trashed.deleted_at IS NOT NULL))`;
+  return `(${alias}.is_verified = true AND ${alias}.is_duplicate = false AND ${alias}.is_pending = false AND NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = ${alias}.statement_id AND trashed.deleted_at IS NOT NULL))`;
 }
 
 /**
@@ -35,7 +38,7 @@ export function countedSql(alias: string): string {
  * an OR: rows without a statement, and rows whose statement is not trashed.
  */
 export function countedWhere<W extends object>(where: W) {
-  const base = { ...where, isVerified: true, isDuplicate: false };
+  const base = { ...where, isVerified: true, isDuplicate: false, isPending: false };
   return [
     { ...base, statementId: IsNull() },
     { ...base, statement: { deletedAt: IsNull() } },
@@ -66,12 +69,16 @@ const UNREAD_STATEMENT_STATUSES = "'error', 'processing'";
 export function onlyFlows<T extends { andWhere(where: string): T }>(
   query: T,
   alias: string,
-  /** Data-health counts look at what still waits too: everything but the confirmation check. */
+  /**
+   * Data-health counts look at what still waits too: everything but the
+   * confirmation check. A pending row does not wait for anyone, so it stays out.
+   */
   { includeUnconfirmed = false }: { includeUnconfirmed?: boolean } = {},
 ): T {
   const counted = includeUnconfirmed
     ? query
         .andWhere(`${alias}.isDuplicate = false`)
+        .andWhere(`${alias}.isPending = false`)
         .andWhere(
           `NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = ${alias}.statementId AND trashed.deleted_at IS NOT NULL)`,
         )
