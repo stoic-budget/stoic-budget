@@ -111,6 +111,35 @@ describe('transaction tools', () => {
       'member-1',
     );
   });
+
+  it('passes the search filters through to the list', async () => {
+    const tagId = '7d0f3a52-1c4e-4b8a-9f00-2a6c1b9d4e11';
+    await tool(tools, 'list_transactions').run(ctx, {
+      q: ' ACME ',
+      amountMin: 5,
+      amountMax: 50,
+      tagIds: [tagId],
+      categoryIds: [tagId],
+      uncategorized: true,
+      untagged: false,
+      noPayee: true,
+    });
+
+    expect(transactions.findAll).toHaveBeenLastCalledWith(
+      'ws-1',
+      expect.objectContaining({
+        q: 'ACME',
+        amountMin: 5,
+        amountMax: 50,
+        tagIds: [tagId],
+        categoryIds: [tagId],
+        uncategorized: true,
+        untagged: false,
+        noPayee: true,
+      }),
+      'member-1',
+    );
+  });
 });
 
 describe('review tools', () => {

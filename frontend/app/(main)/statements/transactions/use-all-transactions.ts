@@ -5,7 +5,8 @@ import apiClient from '@/app/lib/api';
 import { resolveCurrencyCode } from '@/app/lib/format-money';
 import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
-import { type FilterPaymentType, monthBounds, type Period } from './all-transactions';
+import { monthBounds, type Period } from './all-transactions';
+import { filtersToQuery, type TransactionFilters } from './transaction-filters';
 
 export const PAGE_SIZE = 50;
 
@@ -18,7 +19,7 @@ function periodParams(period: Period): { from?: string; to?: string } {
  * running wallet balance. Under the ['transactions'] prefix, so an edit
  * anywhere refreshes it.
  */
-export function useAllTransactions(period: Period, page: number, paymentType?: FilterPaymentType) {
+export function useAllTransactions(period: Period, page: number, filters: TransactionFilters) {
   const workspaceId = useWorkspaceId();
   const { from, to } = periodParams(period);
   const params = {
@@ -26,9 +27,9 @@ export function useAllTransactions(period: Period, page: number, paymentType?: F
     endDate: to,
     page,
     limit: PAGE_SIZE,
-    running_balance: 1,
-    paymentType,
-  };
+    running_balance: '1',
+    ...filtersToQuery(filters),
+  } satisfies ContractInput<'TransactionListQuery'>;
   return useQuery({
     queryKey: queryKeys.transactions({ workspaceId, params: { view: 'all', ...params } }),
     queryFn: async ({ signal }) => {
