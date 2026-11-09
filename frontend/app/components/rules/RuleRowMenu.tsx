@@ -16,10 +16,12 @@ interface RuleRowMenuProps {
   onEdit?: () => void;
   onApply?: () => void;
   onDelete?: () => void;
+  /** Where the rule can be moved: into another folder, or out of its own. */
+  moves?: Array<{ key: string; label: string; onSelect: () => void }>;
 }
 
 /** A rule row's actions; each one appears only when the member may do it. */
-export function RuleRowMenu({ rule, onEdit, onApply, onDelete }: RuleRowMenuProps) {
+export function RuleRowMenu({ rule, onEdit, onApply, onDelete, moves = [] }: RuleRowMenuProps) {
   const t = useIntlayer('categorizationRules');
   // MUI Menu walks its children for focus; a Fragment hides them, so give it an array.
   const items = [
@@ -33,6 +35,11 @@ export function RuleRowMenu({ rule, onEdit, onApply, onDelete }: RuleRowMenuProp
         {t.page.applyNow}
       </DropdownMenuItem>
     ),
+    ...moves.map(move => (
+      <DropdownMenuItem key={`move-${move.key}`} onClick={move.onSelect}>
+        {move.label}
+      </DropdownMenuItem>
+    )),
     onDelete && (
       <DropdownMenuItem key="delete" onClick={onDelete}>
         {t.page.delete}

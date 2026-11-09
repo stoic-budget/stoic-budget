@@ -1,0 +1,188 @@
+@use '../abstracts' as *;
+
+/* Rule folders on the rules page (RulesSections.tsx) and the rule pack dialogs. */
+.seneca-rule-folders {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.seneca-rule-folder {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 4px 6px 4px 2px;
+    border: 0;
+    border-radius: $seneca-radius-sm;
+    background: transparent;
+    font: inherit;
+    color: var(--foreground);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--surface-soft);
+    }
+
+    svg {
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+  }
+
+  &__name {
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: $seneca-font-weight-medium;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__count {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__unfiled {
+    margin: 0;
+    padding: 4px 0;
+    font-size: 15px;
+    font-weight: $seneca-font-weight-medium;
+    color: var(--foreground);
+  }
+
+  &__empty {
+    margin: 0;
+    padding: 12px;
+    border: 1px dashed var(--border);
+    border-radius: $seneca-radius-md;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+}
+
+.seneca-rule-pack {
+  &__picker {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 12px;
+  }
+
+  &__part {
+    padding-top: 4px;
+    border-top: 1px solid var(--border);
+  }
+
+  &__rules {
+    padding-left: 24px;
+  }
+
+  &__summary {
+    margin: 12px 0 8px;
+    font-size: 14px;
+    font-weight: $seneca-font-weight-medium;
+    color: var(--foreground);
+  }
+
+  &__error {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: var(--money-down);
+  }
+
+  &__list {
+    margin: 0 0 12px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: $seneca-radius-md;
+    background: var(--card);
+    list-style: none;
+  }
+
+  &__head,
+  &__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.6fr) 96px;
+    gap: 12px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--foreground);
+  }
+
+  &__head {
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: $seneca-font-weight-medium;
+    color: var(--text-muted);
+  }
+
+  &__item + &__item {
+    border-top: 1px solid var(--border);
+  }
+
+  &__item--skip {
+    color: var(--text-muted);
+  }
+
+  &__name {
+    overflow-wrap: anywhere;
+  }
+
+  &__folder,
+  &__why {
+    display: block;
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+  }
+
+  &__num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // A phone: the result and the count go under the rule's name.
+  @media (max-width: 600px) {
+    &__head {
+      display: none;
+    }
+
+    &__item {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 4px 12px;
+    }
+
+    &__item > :nth-child(2) {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    &__item > :nth-child(3) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    // The column header is hidden: the count says what it counts.
+    &__num[data-label]::before {
+      content: attr(data-label) ' ';
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+  }
+}

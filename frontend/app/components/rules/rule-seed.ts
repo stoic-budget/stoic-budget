@@ -29,6 +29,8 @@ export function seedOf(rule: Rule): RuleSeed {
       ...(rule.result.tagIds?.length ? { tagIds: [...rule.result.tagIds] } : {}),
       ...(rule.result.comment ? { comment: rule.result.comment } : {}),
       ...(rule.result.payeeId ? { payeeId: rule.result.payeeId } : {}),
+      ...(rule.result.excludeFromBudgets ? { excludeFromBudgets: true as const } : {}),
+      ...(rule.result.notify ? { notify: { memberId: rule.result.notify.memberId } } : {}),
     },
   };
 }

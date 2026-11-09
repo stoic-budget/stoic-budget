@@ -1,0 +1,101 @@
+import * as Schema from 'effect/Schema';
+import { Timestamp, type Wire } from '../common/wire';
+import { RuleConditionsInput, RuleMatchMode } from '../requests/classification';
+
+/**
+ * Something a rule points at, by name: as long as a name column holds. Empty
+ * when the record was deleted where the pack was made: no workspace has it and
+ * no import makes it, so the rule is left out.
+ */
+const Name = Schema.String.check(Schema.isMaxLength(255));
+
+/**
+ * What a rule of a pack sets, with everything it points at named, never by id:
+ * the pack is read in another workspace, where only the names mean anything.
+ */
+const RulePackResult = Schema.Struct({
+  category: Schema.optional(Name),
+  account: Schema.optional(Name),
+  /** A member by name, or the household with `null`. */
+  owner: Schema.optional(Schema.NullOr(Name)),
+  tags: Schema.optional(Schema.Array(Name).check(Schema.isMaxLength(20))),
+  payee: Schema.optional(Name),
+  comment: Schema.optional(Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(500))),
+  excludeFromBudgets: Schema.optional(Schema.Literal(true)),
+  /** A member by name, or every member with `null`. */
+  notify: Schema.optional(Schema.Struct({ member: Schema.NullOr(Name) })),
+});
+
+/**
+ * One rule of a pack. Its conditions have the stored shape, except that a
+ * condition on the category, payee, tags, account or owner holds names (the
+ * owner also `shared`) where a stored rule holds ids.
+ */
+const RulePackRule = Schema.Struct({
+  name: Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(255)),
+  description: Schema.optional(Schema.NullOr(Schema.String.check(Schema.isMaxLength(1000)))),
+  /** The folder it goes in, made on import when there is none of that name. */
+  folder: Schema.optional(Schema.NullOr(Schema.String.check(Schema.isMaxLength(100)))),
+  isActive: Schema.Boolean,
+  matchMode: RuleMatchMode,
+  conditions: RuleConditionsInput,
+  result: RulePackResult,
+});
+
+/**
+ * `POST /categorization-rule-packs/export`, and the file an import reads: a
+ * versioned list of rules, best first. Bounded, as the request body that
+ * carries it is (1 MB).
+ */
+export const RulePack = Schema.Struct({
+  kind: Schema.Literal('categorization-rules'),
+  version: Schema.Literal(1),
+  exportedAt: Timestamp,
+  rules: Schema.Array(RulePackRule).check(Schema.isMinLength(1), Schema.isMaxLength(200)),
+});
+export type RulePack = Wire<typeof RulePack>;
+
+/** A name a pack rule uses that the workspace has nothing of. */
+const RulePackMissing = Schema.Struct({
+  kind: Schema.Literals(['category', 'tag', 'payee', 'account', 'member']),
+  name: Schema.String,
+  /** A category, tag or payee can be made on import; an account or a member cannot. */
+  creatable: Schema.Boolean,
+});
+
+/**
+ * `POST /categorization-rule-packs/preview`: what importing the pack would do,
+ * rule by rule. Nothing is written.
+ */
+export const RulePackPreview = Schema.Struct({
+  rules: Schema.Array(
+    Schema.Struct({
+      name: Schema.String,
+      folder: Schema.NullOr(Schema.String),
+      /**
+       * `skip`: a name it uses is missing and will not be made, its conditions
+       * cannot hold, or a rule of its name is already here.
+       */
+      outcome: Schema.Literals(['create', 'skip']),
+      missing: Schema.Array(RulePackMissing),
+      /** Its conditions could never hold here (a pattern that does not compile, say). */
+      invalid: Schema.Boolean,
+      /** A rule of this name is already here: left out, so a pack imported twice adds nothing. */
+      exists: Schema.Boolean,
+      /** Existing rows it matches; nothing is applied to them on import. */
+      matches: Schema.Number,
+    }),
+  ),
+  /** Folders the import makes. */
+  newFolders: Schema.Array(Schema.String),
+  /** The workspace has more rows than were looked at: the matches are a lower bound. */
+  truncated: Schema.Boolean,
+});
+export type RulePackPreview = Wire<typeof RulePackPreview>;
+
+/** `POST /categorization-rule-packs/import`: rules made, and rules left out. */
+export const RulePackImportResult = Schema.Struct({
+  created: Schema.Number,
+  skipped: Schema.Number,
+});
+export type RulePackImportResult = Wire<typeof RulePackImportResult>;

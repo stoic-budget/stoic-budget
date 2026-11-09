@@ -139,6 +139,7 @@ describe('DetailsDrawer', () => {
                   result: { categoryId: 'cat-1' },
                   priority: 1,
                   isActive: true,
+                  groupId: null,
                   matchCount: 1,
                   lastMatchedAt: null,
                   createdAt: '2026-09-01T10:00:00.000Z',

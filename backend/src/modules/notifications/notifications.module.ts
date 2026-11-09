@@ -18,6 +18,7 @@ import { NotificationEventsListener } from './notification-events.listener';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsGateway } from './notifications.gateway';
 import { NotificationsService } from './notifications.service';
+import { RuleNotificationListener } from './rule-notification.listener';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { NotificationsService } from './notifications.service';
     NotificationDeliveryService,
     NotificationsGateway,
     NotificationEventsListener,
+    RuleNotificationListener,
   ],
   exports: [NotificationsService],
 })

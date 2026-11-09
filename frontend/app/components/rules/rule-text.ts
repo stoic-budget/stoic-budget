@@ -33,6 +33,10 @@ export interface RuleWords {
   tags: string;
   comment: string;
   payee: string;
+  /** `notify everyone`, `notify {name}`, `leave out of budgets`. */
+  notifyAll: string;
+  notifyMember: string;
+  exclude: string;
   shared: string;
   unknown: string;
 }
@@ -157,6 +161,17 @@ export function describeResult(
     const text = result.comment;
     parts.push(fill(words.comment, { text: text.length > 40 ? `${text.slice(0, 40)}…` : text }));
   }
+  if (result.excludeFromBudgets) {
+    parts.push(words.exclude);
+  }
+  if (result.notify) {
+    const { memberId } = result.notify;
+    parts.push(
+      memberId === null
+        ? words.notifyAll
+        : fill(words.notifyMember, { name: names.owner(memberId) ?? words.unknown }),
+    );
+  }
   return parts.join(' · ');
 }
 
@@ -167,16 +182,20 @@ export interface AppliedCounts {
   moved: number;
   commented: number;
   renamed: number;
+  excluded: number;
 }
 
 /** `2 rows refiled, 3 tagged · 1 rows moved to Cash`: what applying a rule did. */
 export function describeApplied(
   done: AppliedCounts,
-  texts: Record<'applied' | 'appliedAll' | 'movedPart' | 'commentedPart' | 'renamedPart', string>,
+  texts: Record<
+    'applied' | 'appliedAll' | 'movedPart' | 'commentedPart' | 'renamedPart' | 'excludedPart',
+    string
+  >,
   wallet: string,
 ): string {
   const parts: string[] = [];
-  const extra = done.moved + done.commented + done.renamed;
+  const extra = done.moved + done.commented + done.renamed + done.excluded;
   if (done.tagged > 0) {
     parts.push(fill(texts.appliedAll, { applied: done.applied, tagged: done.tagged }));
   } else if (done.applied > 0 || extra === 0) {
@@ -190,6 +209,9 @@ export function describeApplied(
   }
   if (done.commented > 0) {
     parts.push(fill(texts.commentedPart, { count: done.commented }));
+  }
+  if (done.excluded > 0) {
+    parts.push(fill(texts.excludedPart, { count: done.excluded }));
   }
   return parts.join(' · ');
 }

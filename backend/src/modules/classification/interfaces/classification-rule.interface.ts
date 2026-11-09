@@ -96,4 +96,15 @@ export interface ClassificationResult {
   comment?: string;
   /** The payee the row is given, unless a person picked one for it. */
   payeeId?: string;
+  /**
+   * Leaves the row out of budgets and every spending figure; it still counts
+   * in balances. Only `true` means anything.
+   */
+  excludeFromBudgets?: boolean;
+  /**
+   * Tells people when a new row matches (an import, a bank sync, a row typed
+   * in): one member, or every member with `null`. Not a field of the row, so
+   * every matching rule notifies, and applying a rule to old rows never does.
+   */
+  notify?: { memberId: string | null };
 }
