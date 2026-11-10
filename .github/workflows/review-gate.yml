@@ -4,11 +4,11 @@ name: Review gate
 # risk tier from the files it changes, and may not merge before the maintainer sets the
 # labels that tier needs. Runs again whenever a label, the base or the code changes.
 #
-# pull_request_target runs this file and scripts/review-gate.mjs as they are on the base
-# branch, so a pull request (a fork's too) cannot change the rules it is judged by. It never
-# checks out or runs the pull request's code: it reads the file list and labels from the API.
-# Its run belongs to the base commit, so the verdict is posted as the commit status
-# "review-gate" on the pull request's head, which is what the ruleset requires.
+# pull_request_target runs this file from the default branch, and the job checks out the
+# default branch for scripts/review-gate.mjs, so a pull request (a fork's, or a parent in a
+# stack) cannot change the rules it is judged by. It never checks out or runs pull request
+# code: it reads file lists and labels from the API. The verdict is the commit status
+# "review-gate" on the pull request's head, which the ruleset requires.
 "on":
   pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review, edited, labeled, unlabeled]
@@ -22,8 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Not named review-gate: this run's own check lands on the base commit, which in a stack is
-  # the parent pull request's head, and must not pass for it.
+  # Not named review-gate, so this job's own check run never stands in for the status.
   classify:
     name: review-gate (classify)
     if: github.event_name == 'pull_request_target'
@@ -34,10 +33,10 @@ jobs:
       pull-requests: write
       statuses: write
     steps:
-      - name: Checkout base
+      - name: Checkout the default branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ github.event.repository.default_branch }}
           persist-credentials: false
 
       - name: Decide tier and required labels
@@ -47,59 +46,85 @@ jobs:
             const path = require('node:path');
             const { owner, repo } = context.repo;
             const pr = context.payload.pull_request;
-            const { decide } = await import(
-              path.join(process.env.GITHUB_WORKSPACE, 'scripts/review-gate.mjs')
-            );
+            const sha = pr.head.sha;
             const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
             const post = (state, description) =>
               github.rest.repos.createCommitStatus({
-                owner, repo, sha: pr.head.sha, state, context: 'review-gate',
+                owner, repo, sha, state, context: 'review-gate',
                 description: description.slice(0, 140), target_url: runUrl,
               });
 
-            const files = await github.paginate(github.rest.pulls.listFiles, {
-              owner, repo, pull_number: pr.number, per_page: 100,
-            });
-            // The API lists at most 3000 files; past that a high-risk file could be missed.
-            if (files.length >= 3000) {
-              await post('failure', 'Too many files to classify: split the pull request.');
-              return;
-            }
-            const names = files.flatMap(file =>
-              file.previous_filename ? [file.filename, file.previous_filename] : [file.filename],
-            );
-            // Read now, not from the event: the payload is a snapshot from when it fired.
-            const current = await github.paginate(github.rest.issues.listLabelsOnIssue, {
-              owner, repo, issue_number: pr.number, per_page: 100,
-            });
-            const labels = current.map(label => label.name);
-            const result = decide(names, labels, { author: pr.user.login });
+            // First, so an older success on this commit never outlives a run that fails.
+            await post('pending', 'Checking the risk tier and labels');
 
-            if (!labels.includes(result.riskLabel)) {
+            const { decide } = await import(
+              path.join(process.env.GITHUB_WORKSPACE, 'scripts/review-gate.mjs')
+            );
+
+            // The status belongs to the commit, not the pull request: every open pull request
+            // with this head is judged, and the strictest verdict is posted.
+            const linked = await github.paginate(
+              github.rest.repos.listPullRequestsAssociatedWithCommit,
+              { owner, repo, commit_sha: sha, per_page: 100 },
+            );
+            const numbers = new Set([pr.number]);
+            for (const other of linked) {
+              if (other.state === 'open' && other.head.sha === sha) numbers.add(other.number);
+            }
+
+            const verdicts = [];
+            for (const number of numbers) {
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner, repo, pull_number: number, per_page: 100,
+              });
+              // The API lists at most 3000 files; past that a high-risk file could be missed.
+              if (files.length >= 3000) {
+                await post('failure', `#${number}: too many files to classify, split it.`);
+                return;
+              }
+              const names = files.flatMap(file =>
+                file.previous_filename ? [file.filename, file.previous_filename] : [file.filename],
+              );
+              const removed = files.filter(file => file.status === 'removed').map(file => file.filename);
+              // Read now, not from the event: the payload is a snapshot from when it fired.
+              const current = await github.paginate(github.rest.issues.listLabelsOnIssue, {
+                owner, repo, issue_number: number, per_page: 100,
+              });
+              const labels = current.map(label => label.name);
+              const author = number === pr.number ? pr.user.login : '';
+              verdicts.push({ number, labels, result: decide(names, labels, { author, removed }) });
+            }
+
+            const own = verdicts.find(verdict => verdict.number === pr.number);
+            if (!own.labels.includes(own.result.riskLabel)) {
               await github.rest.issues.addLabels({
-                owner, repo, issue_number: pr.number, labels: [result.riskLabel],
+                owner, repo, issue_number: pr.number, labels: [own.result.riskLabel],
               });
             }
-            for (const name of result.staleRiskLabels) {
+            for (const name of own.result.staleRiskLabels) {
               await github.rest.issues.removeLabel({ owner, repo, issue_number: pr.number, name });
             }
 
             await core.summary
-              .addHeading(`Risk tier: ${result.tier}`, 3)
+              .addHeading(`Risk tier: ${own.result.tier}`, 3)
               .addList([
-                `Areas: ${result.areas.join(', ') || 'none'}`,
-                `App code: ${result.code ? 'yes' : 'no'}, UI: ${result.ui ? 'yes' : 'no'}`,
-                `Labels needed: ${result.required.join(', ') || 'none'}`,
-                `Missing: ${result.missing.join(', ') || 'none'}`,
+                `Areas: ${own.result.areas.join(', ') || 'none'}`,
+                `App code: ${own.result.code ? 'yes' : 'no'}, UI: ${own.result.ui ? 'yes' : 'no'}`,
+                `Labels needed: ${own.result.required.join(', ') || 'none'}`,
+                `Missing: ${own.result.missing.join(', ') || 'none'}`,
+                `Pull requests on this commit: ${[...numbers].map(n => `#${n}`).join(', ')}`,
               ])
               .write();
 
-            if (result.missing.length) {
-              const message = `${result.tier}: waiting for ${result.missing.join(', ')}`;
+            const waiting = verdicts.filter(verdict => verdict.result.missing.length);
+            if (waiting.length) {
+              const message = waiting
+                .map(({ number, result }) => `#${number} ${result.tier}: waiting for ${result.missing.join(', ')}`)
+                .join('; ');
               await post('failure', message);
               core.notice(message);
             } else {
-              await post('success', `${result.tier}: every label it needs is set`);
+              await post('success', `${own.result.tier}: every label it needs is set`);
             }
 
   # The check the merge queue needs on its own commit: labels were checked on each pull

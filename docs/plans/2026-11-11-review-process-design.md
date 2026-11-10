@@ -14,8 +14,8 @@ never by an assistant or agent, even when asked in chat.
 ## Risk tiers
 
 A CI job assigns one tier from the changed paths (the highest wins) and sets a
-`risk:low`, `risk:feature` or `risk:high` label. The author may raise the tier; only the
-maintainer may lower it.
+`risk:low`, `risk:feature` or `risk:high` label. The author may raise the tier with the
+`risk-review` label; nothing lowers it below what the paths say.
 
 | Tier | Paths | Needed to merge |
 |---|---|---|
@@ -66,7 +66,7 @@ maintainer may lower it.
 - `.github/PULL_REQUEST_TEMPLATE.md`: short template with What, How to accept, Risk and
   Review (the risk brief goes inside Review).
 - `.github/workflows/review-gate.yml`: `pull_request_target` (workflow and rules from the
-  base branch, the pull request's code never run) on code, base and label changes; assigns
+  default branch, the pull request's code never run) on code, base and label changes; assigns
   the tier label and posts the `review-gate` commit status; a `review-gate` job passes in
   the merge queue. `sensitive-changes` moves here, so a label no longer needs a manual re-run.
 

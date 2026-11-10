@@ -1,7 +1,7 @@
 // Risk tier of a pull request from the files it changes, and the labels it needs before
-// it may merge. .github/workflows/review-gate.yml runs on pull_request_target, so both the
-// workflow and this file always come from the base branch: a pull request cannot change
-// the rules it is judged by. The process: website/docs/contributing/reviewing.md.
+// it may merge. .github/workflows/review-gate.yml runs on pull_request_target and checks out
+// the default branch, so the workflow and this file always come from main: a pull request
+// cannot change the rules it is judged by. The process: website/docs/contributing/reviewing.md.
 
 export const TIERS = ['low', 'feature', 'high'];
 
@@ -38,7 +38,7 @@ export const HIGH_AREAS = [
     area: 'process',
     label: LABELS.security,
     pattern:
-      /^(\.github\/(workflows|actions)\/|\.github\/CODEOWNERS$|scripts\/(review-gate|check-[^/]+)\.(test\.)?mjs$|infra\/policy\/|\.husky\/|\.gitleaksignore$|CLAUDE\.md$|AGENTS\.md$|\.claude\/(rules|agents)\/|\.claude\/settings[^/]*\.json$)/,
+      /^(\.github\/(workflows|actions)\/|\.github\/CODEOWNERS$|scripts\/(review-gate|check-[^/]+)\.(test\.)?mjs$|infra\/policy\/|\.husky\/|\.gitleaksignore$|CLAUDE\.md$|AGENTS\.md$|\.claude\/(rules|agents|skills|commands)\/|\.agents\/|\.claude\/settings[^/]*\.json$)/,
   },
   {
     // Where sums, currencies and counted rows are worked out once for the whole app.
@@ -50,8 +50,9 @@ export const HIGH_AREAS = [
 ];
 
 // Low is a whitelist: anything not listed here, and not high, is at least a feature.
+// The website's docs are low; its code, config and packages are built and deployed.
 const LOW =
-  /^(docs|website|\.agents|\.claude\/skills)\/|\.md$|^\.github\/(ISSUE_TEMPLATE\/|PULL_REQUEST_TEMPLATE\.md$|FUNDING\.yml$|dependabot\.yml$)|^(LICENSE|\.gitignore|\.env\.example|\.mcp\.json\.example|\.jscpd\.json|knip\.json|sonar-project\.properties)$/;
+  /^(docs|website\/docs|website\/static)\/|\.md$|^\.github\/(ISSUE_TEMPLATE\/|PULL_REQUEST_TEMPLATE\.md$|FUNDING\.yml$|dependabot\.yml$)|^(LICENSE|\.gitignore|\.env\.example|\.mcp\.json\.example|\.jscpd\.json|knip\.json|sonar-project\.properties)$/;
 
 // Dependency updates are low only from Dependabot (dependency-review checks them); a person
 // adding a package is a feature.
@@ -60,24 +61,27 @@ const DEPENDABOT = 'dependabot[bot]';
 
 const UI = /^frontend\/(app|components)\//;
 
-const isLow = (file, author) =>
-  TEST_FILE.test(file) || LOW.test(file) || (author === DEPENDABOT && MANIFEST.test(file));
+// Deleting a test takes a check away, so a removed test file is not low.
+const isLow = (file, author, removed) =>
+  (TEST_FILE.test(file) && !removed.includes(file)) ||
+  LOW.test(file) ||
+  (author === DEPENDABOT && MANIFEST.test(file));
 
 /**
  * The tier the paths alone call for, the high areas touched, whether app code beyond the
  * review process changes, and whether there is UI.
  */
-export function classify(files, { author = '' } = {}) {
+export function classify(files, { author = '', removed = [] } = {}) {
   const areas = HIGH_AREAS.filter(({ pattern }) => files.some(file => pattern.test(file))).map(
     ({ area }) => area,
   );
   const process = HIGH_AREAS.find(({ area }) => area === 'process').pattern;
-  const code = files.some(file => !(isLow(file, author) || process.test(file)));
+  const code = files.some(file => !(isLow(file, author, removed) || process.test(file)));
   const ui = files.some(file => UI.test(file) && !TEST_FILE.test(file));
   let tier = 'low';
   if (areas.length) {
     tier = 'high';
-  } else if (files.some(file => !isLow(file, author))) {
+  } else if (files.some(file => !isLow(file, author, removed))) {
     tier = 'feature';
   }
   return { tier, areas, code, ui };
@@ -102,8 +106,8 @@ export function requiredLabels(tier, areas, code) {
 }
 
 /** Everything the gate decides, from the changed files and the labels on the pull request. */
-export function decide(files, labels, { author = '' } = {}) {
-  const { tier: pathTier, areas, code, ui } = classify(files, { author });
+export function decide(files, labels, { author = '', removed = [] } = {}) {
+  const { tier: pathTier, areas, code, ui } = classify(files, { author, removed });
   const tier = labels.includes(RAISE_LABEL) ? 'high' : pathTier;
   const required = requiredLabels(tier, areas, code);
   const missing = required.filter(label => !labels.includes(label));

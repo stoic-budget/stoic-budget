@@ -36,9 +36,10 @@ status `review-gate`, which fails until the labels that tier needs are set:
 The ruleset requires `review-gate`; in the merge queue a job of that name passes, because each pull request was
 checked before it joined. The rules live in `scripts/review-gate.mjs`.
 
-The workflow runs on `pull_request_target`: the workflow and the rules always come from the base branch, so a
-pull request, a fork's included, cannot change the rules it is judged by. It never checks out or runs the pull
-request's code. What it does not stop: someone with write access to the repository can post a status of the same
+The workflow runs on `pull_request_target` and checks out the default branch: the workflow and the rules always
+come from `main`, so a pull request, a fork's or a parent in a stack included, cannot change the rules it is
+judged by. It never checks out or runs the pull request's code. A commit status belongs to a commit, so when
+several open pull requests share a head commit, each is judged and the strictest verdict is posted. What it does not stop: someone with write access to the repository can post a status of the same
 name from another workflow. The gate guards against mistakes and outside pull requests, not against people who
 can already push.
 

@@ -8,12 +8,10 @@ const SERVICE = 'backend/src/modules/goals/goals.service.ts';
 test('docs, tests and the low whitelist are low', () => {
   const files = [
     'website/docs/guides/mcp.md',
-    'website/sidebars.ts',
     'docs/plans/2026-11-11-review-process-design.md',
     'README.md',
     '.github/PULL_REQUEST_TEMPLATE.md',
     '.github/ISSUE_TEMPLATE/bug_report.yml',
-    '.claude/skills/brainstorm/SKILL.md',
     'backend/@tests/unit/modules/goals/goals.service.spec.ts',
     'frontend/app/lib/__tests__/receipt-merchant.test.ts',
     'backend/golden/expected/bank.json',
@@ -37,11 +35,22 @@ test('anything off the whitelist is at least a feature', () => {
     'docker-compose.dev.yml',
     'scripts/sync-contracts.mjs',
     '.entire/settings.json',
+    'website/sidebars.ts',
+    'website/docusaurus.config.ts',
+    'website/src/pages/index.tsx',
+    'website/package.json',
   ]) {
     const result = decide([file], []);
     assert.equal(result.tier, 'feature', file);
     assert.deepEqual(result.missing, ['accepted'], file);
   }
+});
+
+test('deleting a test is not low', () => {
+  const file = 'backend/@tests/e2e/auth.e2e-spec.ts';
+  assert.equal(classify([file]).tier, 'low');
+  assert.equal(classify([file], { removed: [file] }).tier, 'feature');
+  assert.deepEqual(decide([file], [], { removed: [file] }).missing, ['accepted']);
 });
 
 test('dependency manifests are low only from Dependabot', () => {
@@ -83,6 +92,9 @@ test('each high area asks for its own label', () => {
     ['.claude/rules/security.md', 'process', 'security-approved'],
     ['.claude/agents/risk-reviewer.md', 'process', 'security-approved'],
     ['.claude/settings.json', 'process', 'security-approved'],
+    ['.claude/skills/brainstorm/SKILL.md', 'process', 'security-approved'],
+    ['.claude/commands/ship.md', 'process', 'security-approved'],
+    ['.agents/skills/teach/SKILL.md', 'process', 'security-approved'],
     ['backend/src/common/utils/money.util.ts', 'money', 'accepted'],
     ['backend/src/modules/exchange-rates/exchange-rates.service.ts', 'money', 'accepted'],
     ['backend/src/modules/tax-pack/tax-pack.service.ts', 'money', 'accepted'],
