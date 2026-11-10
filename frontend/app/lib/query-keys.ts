@@ -37,6 +37,8 @@ export const queryKeys = {
   ) => ['categorization-rules', workspaceId, 'preview', conditions, ruleId, walletId] as const,
   categorizationRuleSuggestions: (workspaceId: string | null) =>
     ['categorization-rules', workspaceId, 'suggestions'] as const,
+  categorizationRuleGroups: (workspaceId: string | null) =>
+    ['categorization-rule-groups', workspaceId] as const,
   reviewInbox: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
     ['review-inbox', o.workspaceId, o.params] as const,
   reviewInboxCounts: (workspaceId: string | null, reviewer?: string) =>

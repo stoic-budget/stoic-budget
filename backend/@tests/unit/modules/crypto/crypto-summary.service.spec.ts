@@ -242,6 +242,16 @@ describe('CryptoService.getSummary for a calendar month', () => {
     expect(flowQuery(transactionRepo).andWhere).toHaveBeenCalledWith(countedSql('t'));
   });
 
+  it('leaves rows left out of budgets out of crypto income and spending', async () => {
+    const { service, transactionRepo } = build({});
+
+    await service.getSummary(WORKSPACE, 30, '2026-08');
+
+    expect(flowQuery(transactionRepo).andWhere).toHaveBeenCalledWith(
+      expect.stringContaining('t.excluded_from_budgets = false'),
+    );
+  });
+
   it('rolls December over into the next year', async () => {
     const { service, transactionRepo } = build({});
 

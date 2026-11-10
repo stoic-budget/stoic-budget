@@ -13,6 +13,7 @@ import type {
   MatchMode,
   RuleConditionNode,
 } from '../modules/classification/interfaces/classification-rule.interface';
+import { RuleGroup } from './rule-group.entity';
 import { User } from './user.entity';
 import { Workspace } from './workspace.entity';
 
@@ -56,6 +57,14 @@ export class CategorizationRule {
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
+
+  /** The folder the rule is shown in. Folders do not change which rule wins. */
+  @ManyToOne(() => RuleGroup, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'group_id' })
+  group: Relation<RuleGroup | null>;
+
+  @Column({ name: 'group_id', type: 'uuid', nullable: true })
+  groupId: string | null;
 
   @Column({ name: 'match_count', default: 0 })
   matchCount: number;

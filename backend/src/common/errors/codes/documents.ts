@@ -132,6 +132,7 @@ export const DOCUMENTS_ERRORS = {
   CATEGORIZATION_RULE_NO_CATEGORY: 'The rule sets nothing to apply to existing rows',
   CATEGORIZATION_RULE_CONDITION_INVALID: 'Invalid condition on {{field}}: {{value}}',
   CATEGORIZATION_RULE_ORDER_STALE: 'The rules changed meanwhile; reload the page and try again',
+  CATEGORIZATION_RULE_GROUP_NOT_FOUND: 'Rule folder not found',
   CLASSIFICATION_TRANSACTION_NOT_FOUND: 'Transaction not found',
   REVIEW_DUPLICATE_NOT_FOUND: 'Suspected duplicate not found',
   // ── dashboard, budgets, goals ───────────────────────────────────────────

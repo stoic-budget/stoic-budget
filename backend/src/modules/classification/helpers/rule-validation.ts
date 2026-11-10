@@ -178,17 +178,23 @@ export async function assertRuleRefs(
     assertWorkspaceOwned(manager, Payee, [...asked('payee'), rule.result?.payeeId], workspaceId),
     assertWorkspaceRefs(manager, workspaceId, rule.result ?? {}),
     assertOwnerMemberInWorkspace(members, workspaceId, rule.result?.ownerMemberId),
+    // The one member told about new matches; `null` is every member.
+    assertOwnerMemberInWorkspace(members, workspaceId, rule.result?.notify?.memberId),
   ]);
 }
 
-/** Whether the rule sets anything "apply to existing rows" can write. */
+/**
+ * Whether the rule sets anything "apply to existing rows" can write. Telling
+ * people is not one of them: applying a rule to old rows notifies nobody.
+ */
 export function hasApplicableAction(result: ClassificationResult): boolean {
   return Boolean(
     result.categoryId ||
       result.walletId ||
       result.tagIds?.length ||
       result.comment ||
-      result.payeeId,
+      result.payeeId ||
+      result.excludeFromBudgets,
   );
 }
 

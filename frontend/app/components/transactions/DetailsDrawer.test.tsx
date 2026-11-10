@@ -139,6 +139,7 @@ describe('DetailsDrawer', () => {
                   result: { categoryId: 'cat-1' },
                   priority: 1,
                   isActive: true,
+                  groupId: null,
                   matchCount: 1,
                   lastMatchedAt: null,
                   createdAt: '2026-09-01T10:00:00.000Z',
@@ -203,6 +204,20 @@ describe('DetailsDrawer', () => {
     expect(screen.getByText('sheet.openDocument').closest('a')).toHaveAttribute(
       'href',
       '/statements/st-1/edit',
+    );
+  });
+
+  it('leaves the row out of budgets, or counts it again, from its switch', async () => {
+    renderDrawer(transaction({ excludedFromBudgets: true }));
+    const toggle = screen.getByRole('checkbox', { name: 'toggle' });
+    expect(toggle).toBeChecked();
+
+    fireEvent.click(toggle);
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/transactions/bulk-update', {
+        items: [{ id: 'tx-1', updates: { excludedFromBudgets: false } }],
+      }),
     );
   });
 

@@ -69,3 +69,41 @@ describe('rules laid over each other', () => {
     expect(layerRules([])).toEqual({ setBy: {}, tagIds: [], contributors: [] });
   });
 });
+
+describe('a rule that leaves a new row out of budgets', () => {
+  it('writes the flag onto the row being imported, alongside what the other rules set', async () => {
+    const { applyRuleLayers } = await import('@/modules/classification/engine/rule-result');
+    const classification: Partial<Transaction> = {};
+
+    applyRuleLayers(
+      layerRules([
+        rule('files', { categoryId: 'cat-electronics' }),
+        rule('leaves out', { excludeFromBudgets: true }),
+      ]),
+      classification,
+      row,
+    );
+
+    expect(classification).toMatchObject({
+      categoryId: 'cat-electronics',
+      excludedFromBudgets: true,
+    });
+  });
+
+  it('counts the rule as one that added to the row, so its history names it', () => {
+    const leaving = rule('leaves out', { excludeFromBudgets: true });
+
+    expect(layerRules([leaving]).contributors).toEqual([leaving]);
+  });
+
+  it('leaves the flag alone when no rule asks for it, and a rule that only tells adds nothing', async () => {
+    const { applyRuleLayers } = await import('@/modules/classification/engine/rule-result');
+    const classification: Partial<Transaction> = {};
+    const telling = rule('tells', { notify: { memberId: null } });
+
+    applyRuleLayers(layerRules([telling]), classification, row);
+
+    expect(classification).not.toHaveProperty('excludedFromBudgets');
+    expect(layerRules([telling]).contributors).toEqual([]);
+  });
+});

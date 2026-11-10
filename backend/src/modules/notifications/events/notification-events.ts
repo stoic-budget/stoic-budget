@@ -182,6 +182,26 @@ export function transactionCreatedEvent(
   };
 }
 
+/**
+ * A new row matched a rule that tells people (`rule.matched`). Emitted once per
+ * rule and row: the same row imported again is never news twice.
+ */
+export interface RuleMatchedEvent {
+  workspaceId: string;
+  ruleId: string;
+  ruleName: string;
+  /** The one member to tell, or `null` for every member. */
+  memberId: string | null;
+  transactionId: string;
+  statementId: string | null;
+  /** The payee's name, else the row's own descriptor. */
+  payee: string;
+  amount: number;
+  currency: string;
+  /** The account the row is in, by name, when it is in one. */
+  account: string | null;
+}
+
 /** A bill or an invoice was paid in full (its status became paid). */
 export interface PayablePaidEvent {
   workspaceId: string;

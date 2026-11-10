@@ -65,6 +65,9 @@ export function applyRuleLayers(
     classification.payeeId = setBy.payeeId.result.payeeId;
     classification.payeeSource = 'rule';
   }
+  if (setBy.excludeFromBudgets) {
+    classification.excludedFromBudgets = true;
+  }
   if (!setBy.ownerMemberId) {
     return { ruleSetOwner: false };
   }

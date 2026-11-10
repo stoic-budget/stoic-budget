@@ -13,6 +13,7 @@ import { ItemImageBadge } from '../item-images/ItemImageBadge';
 import { DrawerShell } from '../ui/drawer-shell';
 import { PRIVATE_CLASS } from '../ui/private-amount';
 import { TextTabs } from '../ui/text-tabs';
+import { BudgetExclusionToggle } from './BudgetExclusionToggle';
 import { formatDate } from './helpers/transactionFormatters';
 import { useTransactionReviewActions } from './hooks/useTransactionReviewActions';
 import { TransactionCommentSection } from './TransactionCommentSection';
@@ -250,6 +251,7 @@ export default function DetailsDrawer({
               onMarkIgnored={onMarkIgnored}
               onSplitDone={onSplitDone}
             />
+            <BudgetExclusionToggle transaction={transaction} />
             {!transaction.isPrivate && (
               <TransactionCommentSection
                 key={transaction.id}

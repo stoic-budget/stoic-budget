@@ -33,6 +33,12 @@ import {
   ClassifiedTransaction,
   ClassifyBulkResult,
 } from '../../src/contracts/classification/categorization-rules';
+import { RuleGroup, RuleGroupList } from '../../src/contracts/classification/rule-groups';
+import {
+  RulePack,
+  RulePackImportResult,
+  RulePackPreview,
+} from '../../src/contracts/classification/rule-packs';
 import {
   CreditNoteDetail,
   CreditNoteListPage,
@@ -265,6 +271,90 @@ describe('API contracts: documents (e2e)', () => {
         transactionIds: [transactionId, sampleTransactionId],
       }).expect(200);
       expect(matches(CategorizationRuleTestResult, tested).matchedTransactions).toBe(2);
+    });
+
+    it('rule folders, a rule that tells and leaves rows out, and a rule pack', async () => {
+      const folder = matches(
+        RuleGroup,
+        await send('post', '/categorization-rule-groups', { name: 'Shops' }).expect(201),
+      );
+      const renamed = await send('put', `/categorization-rule-groups/${folder.id}`, {
+        name: 'Online shops',
+      }).expect(200);
+      expect(matches(RuleGroup, renamed).name).toBe('Online shops');
+      const tag = await send('post', '/tags', { name: 'Online' }).expect(201);
+      const created = await send('post', '/categorization-rules', {
+        name: 'ACME is online',
+        conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'ACME' }],
+        result: {
+          categoryId,
+          tagIds: [tag.body.id],
+          excludeFromBudgets: true,
+          notify: { memberId: null },
+        },
+        groupId: folder.id,
+      }).expect(201);
+      const rule = matches(CategorizationRule, created);
+      expect(rule).toMatchObject({
+        groupId: folder.id,
+        result: { excludeFromBudgets: true, notify: { memberId: null } },
+      });
+      const folders = matches(RuleGroupList, await call('get', '/categorization-rule-groups').expect(200));
+      expect(folders.data.map(group => group.id)).toContain(folder.id);
+
+      const exported = await send('post', '/categorization-rule-packs/export', {
+        ruleIds: [rule.id],
+      }).expect(200);
+      const pack = matches(RulePack, exported);
+      expect(pack.rules[0]).toMatchObject({
+        folder: 'Online shops',
+        result: { tags: ['Online'], excludeFromBudgets: true, notify: { member: null } },
+      });
+      // Back into the same workspace as it is: the rule is there already.
+      const again = matches(
+        RulePackPreview,
+        await send('post', '/categorization-rule-packs/preview', {
+          pack,
+          createMissing: true,
+        }).expect(200),
+      );
+      expect(again.rules[0]).toMatchObject({ outcome: 'skip', exists: true });
+      // Under another name, with a tag it lacks: listed, made only on confirm.
+      const renamedPack = {
+        ...pack,
+        rules: [
+          {
+            ...pack.rules[0],
+            name: 'Gift shops',
+            result: { ...pack.rules[0].result, tags: ['Gifts'] },
+          },
+        ],
+      };
+      const preview = matches(
+        RulePackPreview,
+        await send('post', '/categorization-rule-packs/preview', {
+          pack: renamedPack,
+          createMissing: true,
+        }).expect(200),
+      );
+      expect(preview.rules[0]).toMatchObject({
+        outcome: 'create',
+        exists: false,
+        missing: [{ kind: 'tag', name: 'Gifts', creatable: true }],
+      });
+      expect(preview.rules[0].matches).toBeGreaterThan(0);
+      const imported = matches(
+        RulePackImportResult,
+        await send('post', '/categorization-rule-packs/import', {
+          pack: renamedPack,
+          createMissing: true,
+        }).expect(200),
+      );
+      expect(imported).toEqual({ created: 1, skipped: 0 });
+
+      await call('delete', `/categorization-rule-groups/${folder.id}`).expect(204);
+      const after = await call('get', `/categorization-rules/${rule.id}`).expect(200);
+      expect(matches(CategorizationRule, after).groupId).toBeNull();
     });
 
     it('POST /classification/transaction/:id and /classification/bulk', async () => {

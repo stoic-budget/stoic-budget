@@ -51,3 +51,17 @@ describe('writing a classification onto a saved row', () => {
     expect(manager.query).not.toHaveBeenCalled();
   });
 });
+
+describe('writing a rule that leaves the row out of budgets', () => {
+  it('sets the flag on the saved row, inside the workspace', async () => {
+    const manager = build();
+
+    await writeClassification(manager as never, saved, { excludedFromBudgets: true });
+
+    expect(manager.update).toHaveBeenCalledWith(
+      Transaction,
+      { id: 'tx-1', workspaceId: WORKSPACE },
+      { excludedFromBudgets: true },
+    );
+  });
+});

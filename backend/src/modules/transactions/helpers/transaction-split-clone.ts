@@ -52,6 +52,9 @@ export function cloneForSplit(source: Transaction): Partial<Transaction> {
     transactionType: source.transactionType,
     comments: source.comments,
     isVerified: source.isVerified,
+    // A row left out of budgets stays out in every part, so a split never
+    // changes a budget or report total.
+    excludedFromBudgets: source.excludedFromBudgets,
     importSessionId: source.importSessionId,
   };
 }

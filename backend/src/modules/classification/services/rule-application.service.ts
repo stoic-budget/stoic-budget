@@ -22,7 +22,7 @@ import { ClassificationService } from './classification.service';
 const RULE_SCAN_LIMIT = 5000;
 /** What an apply did, by the kind of change. */
 type RuleApplyTotals = Record<
-  'applied' | 'skippedManual' | 'tagged' | 'moved' | 'commented' | 'renamed',
+  'applied' | 'skippedManual' | 'tagged' | 'moved' | 'commented' | 'renamed' | 'excluded',
   number
 >;
 
@@ -58,8 +58,8 @@ export class RuleApplicationService {
       );
   }
 
-  /** The newest of those rows for the preview, up to the scan limit. */
-  private async rowsForRule(
+  /** The newest of those rows for the preview (and a pack's), up to the scan limit. */
+  async rowsForRule(
     workspaceId: string,
     transactionIds?: readonly string[],
   ): Promise<{ rows: Transaction[]; truncated: boolean }> {
@@ -182,13 +182,14 @@ export class RuleApplicationService {
 
   /**
    * Files the workspace's existing matches under the rule's category, adds its
-   * tags and comment, moves them to its account and gives them its payee, a page
+   * tags and comment, moves them to its account, gives them its payee and
+   * leaves them out of budgets, a page
    * of rows at a time until every
    * row was looked at. Which rows change is `planRuleApply`'s call: a category
    * or an account a rule ranked above sets on a row is left to that rule. The owner
    * is not touched on old rows: nothing tells an owner somebody assigned from
    * one the row inherited. A rule naming what is not this workspace's applies
-   * nothing, as on import.
+   * nothing, as on import. Nobody is notified: that is for new rows only.
    */
   async applyRuleToExisting(input: {
     rule: CategorizationRule;
@@ -198,11 +199,21 @@ export class RuleApplicationService {
     const { rule, userId, viewerMemberId } = input;
     const { workspaceId } = rule;
     const { categoryId, walletId, comment, payeeId } = rule.result;
+    const excludes = rule.result.excludeFromBudgets === true;
     const manager = this.transactionRepository.manager;
     const tagIds = await ownedTagIds(manager, workspaceId, rule.result.tagIds);
-    const totals = { applied: 0, skippedManual: 0, tagged: 0, moved: 0, commented: 0, renamed: 0 };
+    const totals: RuleApplyTotals = {
+      applied: 0,
+      skippedManual: 0,
+      tagged: 0,
+      moved: 0,
+      commented: 0,
+      renamed: 0,
+      excluded: 0,
+    };
     const owned = await ownsRuleRefs(manager, workspaceId, rule.result);
-    if (!(owned && (categoryId || walletId || comment || payeeId || tagIds.length > 0))) {
+    const writes = categoryId || walletId || comment || payeeId || excludes || tagIds.length > 0;
+    if (!(owned && writes)) {
       return totals;
     }
     const above = await this.rulesAbove(workspaceId, rule.id);
@@ -217,6 +228,7 @@ export class RuleApplicationService {
         walletId,
         comment,
         payeeId,
+        excludesFromBudgets: excludes,
       });
       const idsOf = (rows: Transaction[]) => rows.map(row => row.id);
       const refiledIds = plan.refiled.map(row => row.id);
@@ -249,6 +261,12 @@ export class RuleApplicationService {
         // The payee decides the reverse charge, and the tax subscriber did not see it change.
         await this.taxAssignmentService.reassess(workspaceId, { ids: renamedIds });
       }
+      if (plan.excluded.length > 0) {
+        await this.transactionRepository.update(
+          { id: In(idsOf(plan.excluded)), workspaceId },
+          { excludedFromBudgets: true },
+        );
+      }
       await addTransactionTags(
         manager,
         workspaceId,
@@ -264,6 +282,7 @@ export class RuleApplicationService {
       totals.moved += plan.moved.length;
       totals.commented += plan.commented.length;
       totals.renamed += plan.renamed.length;
+      totals.excluded += plan.excluded.length;
     }
     if (touchedRows > 0) {
       await this.classificationService.recordRuleMatch(rule.id, workspaceId, touchedRows);

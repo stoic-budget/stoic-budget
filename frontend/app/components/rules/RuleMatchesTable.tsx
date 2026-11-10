@@ -15,6 +15,8 @@ interface RuleMatchesTableProps {
   preview: CategorizationRuleTestResult | undefined;
   /** The rule sets a category, so rows nobody filed by hand would be refiled. */
   setsCategory: boolean;
+  /** The rule tells people about new rows: these old ones would tell nobody. */
+  notifies?: boolean;
   categoryName: (id: string) => string | null;
 }
 
@@ -33,9 +35,11 @@ export function RuleMatchesTable({
   problem,
   preview,
   setsCategory,
+  notifies = false,
   categoryName,
 }: RuleMatchesTableProps) {
   const t = useIntlayer('categorizationRules');
+  const actions = useIntlayer('ruleActions');
   const { locale } = useLocale();
 
   if (problem || !preview) {
@@ -59,6 +63,9 @@ export function RuleMatchesTable({
           ? fill(t.dialog.previewMatches.value, { count: preview.matchedTransactions })
           : t.dialog.previewNone}
       </p>
+      {notifies && preview.matchedTransactions > 0 ? (
+        <p className="seneca-rule-matches__hint">{actions.previewNoNotify}</p>
+      ) : null}
       {setsCategory && preview.overridable > 0 ? (
         <p className="seneca-rule-matches__hint">
           {fill(t.dialog.previewOverridable.value, { count: preview.overridable })}

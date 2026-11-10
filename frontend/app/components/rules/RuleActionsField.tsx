@@ -6,6 +6,7 @@ import { OWNER_SHARED } from '@/app/components/transactions/OwnerFilterDropdown'
 import { Select } from '@/app/components/ui/select';
 import { useIntlayer } from '@/app/i18n';
 import type { CategoryList, StorageTag, WalletList } from '@/app/lib/contracts';
+import { RuleNotifyExcludeActions } from './RuleNotifyExcludeActions';
 import { RulePayeeAction } from './RulePayeeAction';
 import type { RuleDraftBody } from './types';
 
@@ -24,7 +25,11 @@ interface RuleActionsFieldProps {
   tags: readonly StorageTag[];
 }
 
-/** What a matching row gets: a category, an account, an owner, a payee, a comment, tags. Each is optional. */
+/**
+ * What a matching row gets: a category, an account, an owner, a payee, a
+ * comment, tags; and whether people are told and the row leaves budgets.
+ * Each is optional.
+ */
 export function RuleActionsField({
   result,
   onChange,
@@ -118,6 +123,11 @@ export function RuleActionsField({
         }}
       />
       <span className="seneca-rule-dialog__hint">{t.dialog.tagsHint}</span>
+      <RuleNotifyExcludeActions
+        result={result}
+        onChange={onChange}
+        members={ownerOptions.filter(option => option.value !== OWNER_SHARED)}
+      />
     </fieldset>
   );
 }

@@ -16,6 +16,7 @@ export const LAYERED_FIELDS = [
   'ownerMemberId',
   'comment',
   'payeeId',
+  'excludeFromBudgets',
 ] as const;
 export type LayeredField = (typeof LAYERED_FIELDS)[number];
 

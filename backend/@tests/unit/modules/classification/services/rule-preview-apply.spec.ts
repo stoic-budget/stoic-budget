@@ -240,7 +240,7 @@ describe('rule preview against the rules ranked above', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0, commented: 0, renamed: 0 });
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0, commented: 0, renamed: 0, excluded: 0 });
     expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
       'cable',
     ]);
@@ -308,7 +308,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0, commented: 0, renamed: 0 });
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 2, moved: 0, commented: 0, renamed: 0, excluded: 0 });
     expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
       'open',
     ]);
@@ -328,7 +328,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 1, moved: 0, commented: 0, renamed: 0 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 1, moved: 0, commented: 0, renamed: 0, excluded: 0 });
     expect(transactions.update).not.toHaveBeenCalled();
   });
 
@@ -347,7 +347,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 2, skippedManual: 2, tagged: 0, moved: 0, commented: 0, renamed: 0 });
+    expect(result).toEqual({ applied: 2, skippedManual: 2, tagged: 0, moved: 0, commented: 0, renamed: 0, excluded: 0 });
     const [where, values] = transactions.update.mock.calls[0] as unknown as [
       { id: { value: string[] }; workspaceId: string },
       Record<string, unknown>,
@@ -398,7 +398,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 0, moved: 0, commented: 0, renamed: 0 });
+    expect(result).toEqual({ applied: 1, skippedManual: 1, tagged: 0, moved: 0, commented: 0, renamed: 0, excluded: 0 });
     expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
       'open',
     ]);
@@ -416,7 +416,7 @@ describe('applying a rule to existing rows', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 0, commented: 0, renamed: 0 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 0, commented: 0, renamed: 0, excluded: 0 });
     expect(transactions.update).not.toHaveBeenCalled();
   });
 });
@@ -469,7 +469,7 @@ describe('a rule that names an account', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 2, commented: 0, renamed: 0 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 2, commented: 0, renamed: 0, excluded: 0 });
     const [where, values] = transactions.update.mock.calls[0] as unknown as [
       { id: { value: string[] }; workspaceId: string },
       Record<string, unknown>,
@@ -510,7 +510,7 @@ describe('a rule that writes a comment and gives a payee', () => {
       viewerMemberId: ME,
     });
 
-    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 0, commented: 2, renamed: 2 });
+    expect(result).toEqual({ applied: 0, skippedManual: 0, tagged: 0, moved: 0, commented: 2, renamed: 2, excluded: 0 });
     const writes = (transactions.update.mock.calls as unknown as Array<
       [{ id: { value: string[] } }, Record<string, unknown>]
     >).map(([where, values]) => [where.id.value, values]);
@@ -572,5 +572,60 @@ describe('rules on a receipt or an invoice', () => {
 
     await expect(suggest(service)).resolves.toBeNull();
     expect(rules.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('a rule that leaves rows out of budgets', () => {
+  const leaving = {
+    ...storeRule,
+    result: { excludeFromBudgets: true },
+  } as unknown as CategorizationRule;
+
+  it('leaves out every match still counted, and keeps what each was for an undo', async () => {
+    const { rulesService, transactions, audit } = build([
+      row('counted'),
+      row('already', { excludedFromBudgets: true }),
+      row('other', { counterpartyName: 'Corner Bakery' }),
+    ]);
+
+    const result = await rulesService.applyRuleToExisting({
+      rule: leaving,
+      userId: 'user-1',
+      viewerMemberId: ME,
+    });
+
+    expect(result).toEqual({
+      applied: 0,
+      skippedManual: 0,
+      tagged: 0,
+      moved: 0,
+      commented: 0,
+      renamed: 0,
+      excluded: 1,
+    });
+    const [[where, values]] = transactions.update.mock.calls as unknown as Array<
+      [{ id: { value: string[] }; workspaceId: string }, Record<string, unknown>]
+    >;
+    expect(where.id.value).toEqual(['counted']);
+    expect(where.workspaceId).toBe(WORKSPACE);
+    expect(values).toEqual({ excludedFromBudgets: true });
+    const events = audit.createBatchEvents.mock.calls[0][0] as Array<{
+      entityId: string;
+      diff: { before: unknown; after: unknown };
+    }>;
+    expect(events.map(event => event.entityId)).toEqual(['counted']);
+    expect(events[0].diff).toEqual({
+      before: { excludedFromBudgets: false },
+      after: { excludedFromBudgets: true },
+    });
+  });
+
+  it('is something to apply even with nothing else set', async () => {
+    const { hasApplicableAction } = await import(
+      '@/modules/classification/helpers/rule-validation'
+    );
+
+    expect(hasApplicableAction({ excludeFromBudgets: true })).toBe(true);
+    expect(hasApplicableAction({ notify: { memberId: null } })).toBe(false);
   });
 });

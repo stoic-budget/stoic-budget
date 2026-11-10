@@ -69,6 +69,7 @@ const saved: CategorizationRule = {
   result: { categoryId: ELECTRONICS.id },
   priority: 2,
   isActive: true,
+  groupId: null,
   matchCount: 0,
   lastMatchedAt: null,
   createdAt: '2026-09-01T10:00:00.000Z',
@@ -126,6 +127,7 @@ beforeEach(() => {
         moved: 0,
         commented: 0,
         renamed: 0,
+        excluded: 0,
       });
     throw new Error(`unexpected POST ${url}`);
   });
@@ -476,5 +478,61 @@ describe('RuleEditorView', () => {
     expect(await screen.findByText('Fill in at least one condition.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Save rule' })).toHaveProperty('disabled', true);
     expect(post).not.toHaveBeenCalled();
+  });
+});
+
+describe('the notify and leave-out-of-budgets actions', () => {
+  it('tells everyone about new rows, says old ones tell nobody, and leaves rows out of budgets', async () => {
+    search.params = new URLSearchParams({ payee: STORE });
+    renderWithQuery(<RuleEditorView id="new" />);
+    await screen.findByRole('table');
+
+    selectOption(screen.getByRole('combobox', { name: 'Notify' }), 'Everyone in the workspace');
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Leave out of budgets' }));
+
+    expect(screen.getByText(/Only new rows notify/)).toBeTruthy();
+    expect(screen.getByText(/Applying the rule to these rows notifies no one/)).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith('/categorization-rules', {
+        name: `Payee contains “${STORE}”`,
+        conditions: [{ field: 'counterparty_name', operator: 'contains', value: STORE }],
+        matchMode: 'all',
+        result: { notify: { memberId: null }, excludeFromBudgets: true },
+      }),
+    );
+    // Leaving rows out of budgets is offered on the matches already there; telling is not.
+    await waitFor(() => expect(offers.last?.message).toContain('2'));
+  });
+
+  it('keeps both actions when a saved rule is edited', async () => {
+    get.mockImplementation(async (url: string) => {
+      if (url === '/categorization-rules/rule-1')
+        return apiResponse({
+          ...saved,
+          result: { notify: { memberId: null }, excludeFromBudgets: true },
+        });
+      if (url === '/categories') return apiResponse([ELECTRONICS]);
+      if (url === '/wallets') return apiResponse([CARD]);
+      if (url === '/tags') return apiResponse([]);
+      if (url.startsWith('/workspaces/')) return apiResponse({ members: [] });
+      throw new Error(`unexpected GET ${url}`);
+    });
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+    const name = await screen.findByLabelText('Name');
+    await waitFor(() => expect((name as HTMLInputElement).value).toBe('ACME is electronics'));
+    fireEvent.change(name, { target: { value: 'ACME, noted' } });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({
+          result: expect.objectContaining({ notify: { memberId: null }, excludeFromBudgets: true }),
+        }),
+      ),
+    );
   });
 });

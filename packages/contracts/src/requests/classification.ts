@@ -81,9 +81,14 @@ export type ClassificationConditionGroupInput = Wire<typeof ClassificationCondit
  * level deep. A list of plain conditions, as every rule saved before groups
  * holds it, is a root without groups.
  */
-const RuleConditionsInput = Schema.Array(
+export const RuleConditionsInput = Schema.Array(
   Schema.Union([ClassificationConditionInput, ClassificationConditionGroupInput]),
 ).check(Schema.isMinLength(1), Schema.isMaxLength(50));
+
+/** Who hears about a new matching row: one member, or every member with `null`. */
+export const RuleNotifyInput = Schema.Struct({
+  memberId: Schema.NullOr(Schema.String.check(Schema.isUUID())),
+});
 
 /** What a matching rule sets on the transaction. */
 export const ClassificationResultInput = Schema.Struct({
@@ -104,6 +109,10 @@ export const ClassificationResultInput = Schema.Struct({
   payeeId: Schema.optional(Schema.String.check(Schema.isUUID())),
   /** Instead of `payeeId`: a payee by name, made on save when the workspace has none of it. */
   payeeName: Schema.optional(Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(200))),
+  /** Leaves a matching row out of budgets and every spending figure; it still counts in balances. */
+  excludeFromBudgets: Schema.optional(Schema.Literal(true)),
+  /** Tells people when a new row matches; applying the rule to old rows tells nobody. */
+  notify: Schema.optional(RuleNotifyInput),
 });
 export type ClassificationResultInput = Wire<typeof ClassificationResultInput>;
 
@@ -115,6 +124,8 @@ export const CreateCategorizationRuleBody = Schema.Struct({
   result: ClassificationResultInput,
   priority: optionalNullable(Schema.Int),
   isActive: optionalNullable(Schema.Boolean),
+  /** The folder the rule is shown in; folders never change which rule wins. */
+  groupId: optionalNullable(Schema.String.check(Schema.isUUID())),
 });
 export type CreateCategorizationRuleBody = Wire<typeof CreateCategorizationRuleBody>;
 
@@ -127,6 +138,8 @@ export const UpdateCategorizationRuleBody = Schema.Struct({
   result: optionalNullable(ClassificationResultInput),
   priority: optionalNullable(Schema.Int),
   isActive: optionalNullable(Schema.Boolean),
+  /** Moves the rule into a folder, or out of every folder with `null`. */
+  groupId: optionalNullable(Schema.String.check(Schema.isUUID())),
 });
 export type UpdateCategorizationRuleBody = Wire<typeof UpdateCategorizationRuleBody>;
 
