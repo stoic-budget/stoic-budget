@@ -417,6 +417,12 @@ export async function seedWorkspace(
   await send('receipt tag', 'put', `/receipts/${receipt.id}/tags`, { tagIds: [tag.body.id] });
   // A payable_tags row, for the same reason.
   await send('payable tag', 'put', `/payables/${payable.body.id}`, { tagIds: [tag.body.id] });
+  // A passkey of the owner's: per person, not per workspace, but the sweep reaches it through users.
+  await dataSource.query(
+    `INSERT INTO passkey_credentials (user_id, credential_id, public_key, device_type, name)
+     VALUES ($1, $2, $3, 'singleDevice', $4)`,
+    [owner.userId, `seed-${marker}`, Buffer.from('seed-key'), `${marker} passkey`],
+  );
   // Item pictures, one on a transaction and one on a bill: picking one needs Wikidata, so straight in.
   await dataSource.query(
     `INSERT INTO item_images (workspace_id, transaction_id, payable_id, file_name, label, wikidata_id)

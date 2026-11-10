@@ -1,3 +1,5 @@
+import type { PasskeyRequestOptions } from '../../../contracts';
+
 export class AuthResponseDto {
   user: {
     id: string;
@@ -23,6 +25,8 @@ export class AuthResponseDto {
  */
 export class TwoFactorChallengeDto {
   twoFactorRequired: true;
+  /** The passkey challenge to answer instead of a code, when the account has a passkey. */
+  passkeyOptions?: PasskeyRequestOptions;
 }
 
 export type LoginResultDto = AuthResponseDto | TwoFactorChallengeDto;

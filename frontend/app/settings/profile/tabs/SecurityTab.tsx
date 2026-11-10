@@ -1,22 +1,29 @@
 'use client';
 
+import FingerprintIcon from '@mui/icons-material/FingerprintOutlined';
 import Stack from '@mui/material/Stack';
 import type React from 'react';
 import { Lock, Mail, Shield, ShieldCheck } from '@/app/components/icons';
+import { wrap } from '@/app/components/icons/wrap';
+import { useIntlayer } from '@/app/i18n';
 import { useUserFormat } from '@/app/lib/user-format-store';
 import { EmailSection } from '@/app/settings/profile/components/EmailSection';
+import { PasskeysSection } from '@/app/settings/profile/components/PasskeysSection';
 import { PasswordSection } from '@/app/settings/profile/components/PasswordSection';
 import { SessionsSection } from '@/app/settings/profile/components/SessionsSection';
 import { SettingsAccordion } from '@/app/settings/profile/components/SettingsAccordion';
 import { TwoFactorSection } from '@/app/settings/profile/components/TwoFactorSection';
 import { resolveOpenSection } from '@/app/settings/profile/helpers/settings-url-state';
 import { useEmailForm } from '@/app/settings/profile/hooks/useEmailForm';
+import { usePasskeys } from '@/app/settings/profile/hooks/usePasskeys';
 import { usePasswordForm } from '@/app/settings/profile/hooks/usePasswordForm';
 import { useSessions } from '@/app/settings/profile/hooks/useSessions';
 import { useSettingsText } from '@/app/settings/profile/hooks/useSettingsText';
 import { useTwoFactor } from '@/app/settings/profile/hooks/useTwoFactor';
 
 import type { SettingsTabProps } from './types';
+
+const Fingerprint = wrap(FingerprintIcon);
 
 export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Element {
   const { t, tx } = useSettingsText();
@@ -58,6 +65,15 @@ export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Elem
     enabledMessage: tx(['securityCard', 'enabledMessage']),
     disabledMessage: tx(['securityCard', 'disabledMessage']),
     errorFallback: tx(['securityCard', 'errorFallback']),
+  });
+
+  const passkeyText = useIntlayer('settingsPasskeysSection');
+  const passkeys = usePasskeys(isAuthenticated, {
+    added: passkeyText.messages.added.value,
+    renamed: passkeyText.messages.renamed.value,
+    removed: passkeyText.messages.removed.value,
+    dismissed: passkeyText.messages.dismissed.value,
+    errorFallback: passkeyText.messages.errorFallback.value,
   });
 
   const {
@@ -129,6 +145,16 @@ export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Elem
           email={user.email}
           formatPreferences={formatPreferences}
         />
+      </SettingsAccordion>
+
+      <SettingsAccordion
+        id="passkeys"
+        title={passkeyText.title.value}
+        description={passkeyText.description.value}
+        icon={Fingerprint}
+        defaultExpanded={openSection === 'passkeys'}
+      >
+        <PasskeysSection tx={tx} passkeys={passkeys} formatPreferences={formatPreferences} />
       </SettingsAccordion>
 
       <SettingsAccordion

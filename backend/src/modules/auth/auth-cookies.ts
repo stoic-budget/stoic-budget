@@ -92,6 +92,34 @@ export function setCsrfCookie(res: Response, token: string): void {
   });
 }
 
+/**
+ * Binds a passkey sign-in challenge to the browser that asked for it: the
+ * challenge is stored under a hash of this value, and only a request carrying
+ * the cookie can answer it. Lives as long as the challenge.
+ */
+export const PASSKEY_FLOW_COOKIE = 'passkey_flow';
+
+/** The same for the second factor of a password login: the attempt that typed the password. */
+export const PASSKEY_2FA_COOKIE = 'passkey_2fa';
+
+type PasskeyCookie = typeof PASSKEY_FLOW_COOKIE | typeof PASSKEY_2FA_COOKIE;
+
+export function setPasskeyFlowCookie(
+  res: Response,
+  value: string,
+  maxAgeMs: number,
+  name: PasskeyCookie = PASSKEY_FLOW_COOKIE,
+): void {
+  res.cookie(name, value, { ...baseOptions(), maxAge: maxAgeMs });
+}
+
+export function clearPasskeyFlowCookie(
+  res: Response,
+  name: PasskeyCookie = PASSKEY_FLOW_COOKIE,
+): void {
+  res.clearCookie(name, baseOptions());
+}
+
 export function clearAuthCookies(res: Response): void {
   // Express only matches a cookie for clearing when path/domain/sameSite line
   // up with how it was set, so reuse the same options rather than the defaults.

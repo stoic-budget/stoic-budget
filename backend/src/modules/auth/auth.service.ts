@@ -36,9 +36,10 @@ import type { AuthResponseDto, LoginResultDto } from './dto/auth-response.dto';
 import { recordSecurityEvent } from './security-audit.util';
 import type { JwtPayload } from './strategies/jwt.strategy';
 import type { JwtRefreshPayload } from './strategies/jwt-refresh.strategy';
-import { TwoFactorService } from './two-factor.service';
+import { type SecondFactorContext, TwoFactorService } from './two-factor.service';
 
-export interface SessionContext {
+/** Where a login comes from, and the attempt a second-factor passkey challenge is bound to. */
+export interface SessionContext extends SecondFactorContext {
   userAgent?: string | null;
   ipAddress?: string | null;
 }
@@ -282,10 +283,10 @@ export class AuthService {
     }
 
     if (user.twoFactorEnabledAt) {
-      if (!loginDto.twoFactorCode) {
-        return { twoFactorRequired: true };
+      const challenge = await this.twoFactorService.checkLogin(user.id, loginDto, sessionContext);
+      if (challenge) {
+        return challenge;
       }
-      await this.twoFactorService.assertLoginCode(user.id, loginDto.twoFactorCode);
     }
 
     // Update last login
@@ -553,10 +554,7 @@ export class AuthService {
     });
   }
 
-  private async generateTokens(
-    user: User,
-    sessionContext?: SessionContext,
-  ): Promise<AuthResponseDto> {
+  async generateTokens(user: User, sessionContext?: SessionContext): Promise<AuthResponseDto> {
     const sessionId = randomUUID();
 
     const payload: JwtPayload = {
