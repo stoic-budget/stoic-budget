@@ -20,6 +20,8 @@ export interface LoanForm {
   monthlyExtra: string;
   monthlyExtraFrom: string;
   extraMode: LoanExtraMode;
+  /** Split new payments into principal and interest on import. */
+  autoSplit: boolean;
 }
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -70,6 +72,7 @@ export function emptyLoanForm(owed: number, today: string): LoanForm {
     monthlyExtra: '',
     monthlyExtraFrom: '',
     extraMode: 'reduce_term',
+    autoSplit: false,
   };
 }
 
@@ -93,6 +96,7 @@ export function termsToForm(terms: LoanTermsItem): LoanForm {
     monthlyExtra: terms.recurringExtra ? String(terms.recurringExtra.amount) : '',
     monthlyExtraFrom: terms.recurringExtra?.from ?? '',
     extraMode: terms.extraMode,
+    autoSplit: terms.autoSplit,
   };
 }
 
@@ -149,5 +153,6 @@ export function formToBody(form: LoanForm): LoanTermsBody | null {
     })),
     recurringExtra: monthly === null ? null : { amount: monthly, from: form.monthlyExtraFrom },
     extraMode: form.extraMode,
+    autoSplit: form.autoSplit,
   };
 }

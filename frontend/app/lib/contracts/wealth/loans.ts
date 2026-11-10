@@ -42,6 +42,8 @@ export const LoanTermsItem = Schema.Struct({
   extraPayments: Schema.Array(LoanExtraPayment),
   recurringExtra: Schema.NullOr(LoanRecurringExtra),
   extraMode: LoanExtraMode,
+  /** New payments into the account are split into principal and interest on import. */
+  autoSplit: Schema.Boolean,
   createdAt: Timestamp,
   updatedAt: Timestamp,
 });
@@ -127,3 +129,57 @@ export const LoanWhatIf = Schema.Struct({
   paymentAfter: Schema.NullOr(Schema.Number),
 });
 export type LoanWhatIf = Wire<typeof LoanWhatIf>;
+
+/** Why a payment cannot be split: in another currency, before the loan starts, or one part of a split row. */
+export const LoanPaymentBlock = Schema.Literals(['other_currency', 'before_start', 'split_part']);
+export type LoanPaymentBlock = Wire<typeof LoanPaymentBlock>;
+
+/**
+ * A payment into a loan account: the incoming row, one leg of a transfer from
+ * another account or a row on its own. Split, its interest is an expense row
+ * on the loan account and the debt falls by the principal only.
+ */
+export const LoanPaymentItem = Schema.Struct({
+  transactionId: Schema.String,
+  date: DateOnly,
+  amount: Schema.Number,
+  currency: Schema.String,
+  counterpartyName: Schema.String,
+  /** The account the money came from, when the row is one leg of a transfer. */
+  fromWallet: Schema.NullOr(Schema.Struct({ id: Schema.String, name: Schema.String })),
+  /** Still waiting in Review: the split counts once the payment is confirmed. */
+  isVerified: Schema.Boolean,
+  split: Schema.NullOr(
+    Schema.Struct({
+      interestTransactionId: Schema.String,
+      interest: Schema.Number,
+      principal: Schema.Number,
+    }),
+  ),
+  /** The schedule's division; period null for a payment no period took (all principal). */
+  suggestion: Schema.NullOr(
+    Schema.Struct({
+      period: Schema.NullOr(Schema.Number),
+      scheduledPayment: Schema.NullOr(Schema.Number),
+      interest: Schema.Number,
+      principal: Schema.Number,
+    }),
+  ),
+  blocked: Schema.NullOr(LoanPaymentBlock),
+});
+export type LoanPaymentItem = Wire<typeof LoanPaymentItem>;
+
+/** `GET /wallets/:id/loan-payments`: the payments into the account, newest first. */
+export const LoanPayments = Schema.Struct({
+  currency: Schema.String,
+  autoSplit: Schema.Boolean,
+  items: Schema.Array(LoanPaymentItem),
+  totals: Schema.Struct({
+    /** Interest and principal of the split payments. */
+    interest: Schema.Number,
+    principal: Schema.Number,
+    /** Payments that could be split and are not yet. */
+    unsplit: Schema.Number,
+  }),
+});
+export type LoanPayments = Wire<typeof LoanPayments>;

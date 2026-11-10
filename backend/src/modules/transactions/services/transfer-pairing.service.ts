@@ -71,7 +71,8 @@ export class TransferPairingService {
       // A dividend is linked to its investment account without a pair: it is
       // income, and pairing it with some transfer would make it vanish.
       .andWhere('t.transferPairId IS NULL AND t.investmentAccountId IS NULL')
-      .andWhere('t.reimbursementOfId IS NULL')
+      // Interest split off a loan payment is spending, never a leg of some transfer.
+      .andWhere('t.reimbursementOfId IS NULL AND t.loanInterestOfId IS NULL')
       .andWhere('(t.statementId IS NULL OR s.deletedAt IS NULL)');
     if (!options.includeRejected) {
       query.andWhere('(t.transferPairSource IS NULL OR t.transferPairSource != :rejected)', {

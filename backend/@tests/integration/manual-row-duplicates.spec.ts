@@ -212,6 +212,34 @@ describe('a statement row repeating a hand-booked one (real Postgres)', () => {
     expect(bankRow.isDuplicate).toBeFalsy();
   });
 
+  it('pairs interest split off a loan payment only with a row of that loan account', async () => {
+    const loanId = (
+      await dataSource.getRepository(Wallet).save({
+        userId: (await dataSource.getRepository(Wallet).findOneByOrFail({ id: walletId })).userId,
+        workspaceId,
+        name: 'ACME Bank - Car loan',
+        type: 'loan',
+        currency: 'EUR',
+      })
+    ).id;
+    const payment = await booked({
+      walletId: loanId,
+      transactionType: TransactionType.INCOME,
+      debit: null,
+      credit: 300,
+      amount: 300,
+    });
+    const interest = await booked({ walletId: loanId, loanInterestOfId: payment.id });
+    // The same price on the everyday account is a purchase, not the loan's charge.
+    const elsewhere = draft({ walletId });
+    const loanStatementRow = draft({ walletId: loanId });
+
+    await service.flagRepeats([elsewhere], workspaceId);
+    expect(elsewhere.isDuplicate).toBeFalsy();
+    await service.flagRepeats([loanStatementRow], workspaceId);
+    expect(loanStatementRow).toMatchObject({ isDuplicate: true, duplicateOfId: interest.id });
+  });
+
   it('keeps away from a draft already flagged by its fingerprint', async () => {
     const receiptRow = await booked({});
     const fingerprinted = draft({ isDuplicate: true, duplicateOfId: randomUUID() });

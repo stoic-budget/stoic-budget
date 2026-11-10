@@ -53,6 +53,8 @@ export const LoanTermsBody = Schema.Struct({
   extraPayments: Schema.optional(ExtraPayments),
   recurringExtra: optionalNullable(RecurringExtra),
   extraMode: optionalNullable(LoanExtraMode),
+  /** Split new payments into the account on import; off when left out. */
+  autoSplit: Schema.optional(Schema.Boolean),
 });
 export type LoanTermsBody = Wire<typeof LoanTermsBody>;
 
@@ -63,3 +65,17 @@ export const LoanWhatIfBody = Schema.Struct({
   mode: LoanExtraMode,
 });
 export type LoanWhatIfBody = Wire<typeof LoanWhatIfBody>;
+
+/** `/wallets/:id/loan-payments/:transactionId/split`: the loan account and one payment into it. */
+export const LoanPaymentParams = Schema.Struct({
+  id: Schema.String.check(Schema.isUUID()),
+  transactionId: Schema.String.check(Schema.isUUID()),
+});
+export type LoanPaymentParams = Wire<typeof LoanPaymentParams>;
+
+/**
+ * `POST /wallets/:id/loan-payments/:transactionId/split`: the interest part of
+ * the payment, at most the payment itself; the rest is principal.
+ */
+export const LoanPaymentSplitBody = Schema.Struct({ interest: LoanAmount });
+export type LoanPaymentSplitBody = Wire<typeof LoanPaymentSplitBody>;
