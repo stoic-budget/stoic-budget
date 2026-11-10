@@ -17,6 +17,9 @@ const ALLOWED = new Set([
   'modules/auth/current-user.view.ts',
   // ensureUserWorkspace and clearing it when the member is removed.
   'modules/workspaces/workspaces.service.ts',
+  // Creates the workspace of an account made by single sign-on when its first
+  // sign-in failed before the workspace was made.
+  'modules/auth/oidc/oidc-accounts.service.ts',
   // Onboarding edits the registration workspace.
   'modules/users/users.service.ts',
   // Settings read by mail and scheduled reports, which have no request.
@@ -26,8 +29,10 @@ const ALLOWED = new Set([
   'modules/telegram/telegram-connection.util.ts',
   'common/utils/seed-demo.util.ts',
   // Account security events (password, 2FA, email, data export, opening or
-  // closing sign-up) belong to the user rather than a workspace; the audit log
-  // files them under the home one.
+  // closing sign-up, single sign-on) belong to the user rather than a
+  // workspace; the audit log files them under the home one.
+  'modules/auth/oidc/oidc-audit.ts',
+  'modules/auth/oidc/oidc-settings.service.ts',
   'modules/auth/password-reset.service.ts',
   'modules/auth/two-factor.service.ts',
   'modules/auth/registration-settings.service.ts',

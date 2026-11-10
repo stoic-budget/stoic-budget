@@ -28,6 +28,8 @@ vi.mock('@/app/i18n', () => ({
     showPassword: { value: 'Show password' },
     hidePassword: { value: 'Hide password' },
     loginFailed: { value: 'Failed to log in. Please try again.' },
+    // The single sign-on block (`oidcSignIn`), hidden here: no provider answers.
+    failed: { value: 'Single sign-on did not work.' },
   }),
 }));
 

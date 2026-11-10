@@ -12,12 +12,13 @@ import { useRegistrationStatus } from '@/app/hooks/useRegistrationStatus';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
 import { getApiErrorMessage } from '@/app/lib/api-error';
-import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
-import { syncLocaleFromUser } from '@/app/lib/locale';
+import { finishSignIn } from '@/app/lib/finish-sign-in';
 import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { safeInternalPath } from '@/app/lib/safe-path';
 import { AuthHero } from '../AuthHero';
 import AuthLayout from '../AuthLayout';
+import { OidcCompletion } from './OidcCompletion';
+import { OidcSignInButton } from './OidcSignInButton';
 
 function extractInviteTokenFromNext(nextPath: string | null): string | null {
   if (!nextPath) {
@@ -74,29 +75,7 @@ function LoginPageContent(): React.JSX.Element {
         return;
       }
 
-      // Токены пришли httpOnly-куками и в теле ответа их больше нет —
-      // хранить тут нечего, кроме профиля для первого рендера.
-      const { user } = result;
-
-      localStorage.setItem('user', JSON.stringify(user));
-      syncLocaleFromUser(user);
-      if (user.workspaceId) {
-        localStorage.setItem('currentWorkspaceId', user.workspaceId);
-      }
-
-      if (!inviteToken && user.onboardingCompletedAt == null) {
-        window.location.href = '/onboarding';
-        return;
-      }
-
-      const activeWorkspaceId = user.lastWorkspaceId || user.workspaceId;
-
-      if (activeWorkspaceId) {
-        localStorage.setItem('currentWorkspaceId', activeWorkspaceId);
-        window.location.href = nextPath || DEFAULT_APP_ROUTE;
-      } else {
-        window.location.href = '/workspaces';
-      }
+      finishSignIn(result.user, { inviteToken, nextPath });
     })()
       .catch(async (error: unknown) => {
         setError(getApiErrorMessage(error, t.loginFailed.value));
@@ -123,118 +102,123 @@ function LoginPageContent(): React.JSX.Element {
         {t.title}
       </Typography>
 
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        className="seneca-auth-form"
-        sx={{ width: '100%' }}
-      >
-        <div className="seneca-auth-field">
-          <label htmlFor="email" className="seneca-auth-field__label">
-            {t.emailLabel}
-          </label>
-          <TextField
-            required
-            fullWidth
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            autoFocus
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            error={Boolean(error)}
-            slotProps={{ htmlInput: { 'aria-describedby': error ? 'login-error' : undefined } }}
-          />
-        </div>
-        <div className="seneca-auth-field">
-          <div className="seneca-auth-field__head">
-            <label htmlFor="password" className="seneca-auth-field__label">
-              {t.passwordLabel}
-            </label>
-            <NextLink href="/forgot-password" className="seneca-auth-link">
-              {t.forgotPassword}
-            </NextLink>
-          </div>
-          <TextField
-            required
-            fullWidth
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            error={Boolean(error)}
-            slotProps={{
-              htmlInput: { 'aria-describedby': error ? 'login-error' : undefined },
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      edge="end"
-                      size="small"
-                      aria-label={(showPassword ? t.hidePassword : t.showPassword).value}
-                      aria-pressed={showPassword}
-                      onClick={() => setShowPassword(prev => !prev)}
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
-          {error && !twoFactorRequired ? (
-            <p id="login-error" role="alert" className="seneca-auth-error">
-              {error}
-            </p>
-          ) : null}
-        </div>
-        {twoFactorRequired && (
+      {searchParams.get('oidc') === 'complete' ? (
+        <OidcCompletion nextPath={nextPath} inviteToken={inviteToken} />
+      ) : (
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          className="seneca-auth-form"
+          sx={{ width: '100%' }}
+        >
           <div className="seneca-auth-field">
-            <label htmlFor="twoFactorCode" className="seneca-auth-field__label">
-              {t.twoFactorLabel}
+            <label htmlFor="email" className="seneca-auth-field__label">
+              {t.emailLabel}
             </label>
             <TextField
               required
               fullWidth
-              id="twoFactorCode"
-              name="twoFactorCode"
-              autoComplete="one-time-code"
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
               autoFocus
-              value={twoFactorCode}
-              onChange={e => setTwoFactorCode(e.target.value)}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               error={Boolean(error)}
+              slotProps={{ htmlInput: { 'aria-describedby': error ? 'login-error' : undefined } }}
             />
-            {error ? (
+          </div>
+          <div className="seneca-auth-field">
+            <div className="seneca-auth-field__head">
+              <label htmlFor="password" className="seneca-auth-field__label">
+                {t.passwordLabel}
+              </label>
+              <NextLink href="/forgot-password" className="seneca-auth-link">
+                {t.forgotPassword}
+              </NextLink>
+            </div>
+            <TextField
+              required
+              fullWidth
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              error={Boolean(error)}
+              slotProps={{
+                htmlInput: { 'aria-describedby': error ? 'login-error' : undefined },
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        edge="end"
+                        size="small"
+                        aria-label={(showPassword ? t.hidePassword : t.showPassword).value}
+                        aria-pressed={showPassword}
+                        onClick={() => setShowPassword(prev => !prev)}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+            {error && !twoFactorRequired ? (
               <p id="login-error" role="alert" className="seneca-auth-error">
                 {error}
               </p>
-            ) : (
-              <p className="seneca-auth-field__hint">{t.twoFactorHint}</p>
-            )}
+            ) : null}
           </div>
-        )}
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          size="large"
-          className="seneca-auth-submit"
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={24} color="inherit" /> : t.submit}
-        </Button>
-        {registrationOpen !== false || inviteToken ? (
-          <p className="seneca-auth-footnote">
-            {t.noAccountPrompt}{' '}
-            <NextLink href={registerHref} className="seneca-auth-link seneca-auth-link--accent">
-              {t.signUp}
-            </NextLink>
-          </p>
-        ) : null}
-      </Box>
+          {twoFactorRequired && (
+            <div className="seneca-auth-field">
+              <label htmlFor="twoFactorCode" className="seneca-auth-field__label">
+                {t.twoFactorLabel}
+              </label>
+              <TextField
+                required
+                fullWidth
+                id="twoFactorCode"
+                name="twoFactorCode"
+                autoComplete="one-time-code"
+                autoFocus
+                value={twoFactorCode}
+                onChange={e => setTwoFactorCode(e.target.value)}
+                error={Boolean(error)}
+              />
+              {error ? (
+                <p id="login-error" role="alert" className="seneca-auth-error">
+                  {error}
+                </p>
+              ) : (
+                <p className="seneca-auth-field__hint">{t.twoFactorHint}</p>
+              )}
+            </div>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            size="large"
+            className="seneca-auth-submit"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : t.submit}
+          </Button>
+          <OidcSignInButton nextPath={nextPath} />
+          {registrationOpen !== false || inviteToken ? (
+            <p className="seneca-auth-footnote">
+              {t.noAccountPrompt}{' '}
+              <NextLink href={registerHref} className="seneca-auth-link seneca-auth-link--accent">
+                {t.signUp}
+              </NextLink>
+            </p>
+          ) : null}
+        </Box>
+      )}
     </AuthLayout>
   );
 }

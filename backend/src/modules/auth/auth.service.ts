@@ -324,7 +324,7 @@ export class AuthService {
     return invitation;
   }
 
-  private async createOwnedWorkspaceForUser(user: User, workspaceName: string) {
+  async createOwnedWorkspaceForUser(user: User, workspaceName: string) {
     const workspace = this.workspaceRepository.create({
       name: workspaceName,
       ownerId: user.id,
@@ -553,10 +553,7 @@ export class AuthService {
     });
   }
 
-  private async generateTokens(
-    user: User,
-    sessionContext?: SessionContext,
-  ): Promise<AuthResponseDto> {
+  async generateTokens(user: User, sessionContext?: SessionContext): Promise<AuthResponseDto> {
     const sessionId = randomUUID();
 
     const payload: JwtPayload = {
