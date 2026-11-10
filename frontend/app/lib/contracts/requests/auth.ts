@@ -39,11 +39,32 @@ export const ForgotPasswordBody = Schema.Struct({
 });
 export type ForgotPasswordBody = Wire<typeof ForgotPasswordBody>;
 
+/** Passkeys a cleanup removes: the ids the page listed. More than an account has is refused. */
+const PasskeyIdsToRemove = Schema.Array(Schema.String.check(Schema.isUUID())).check(
+  Schema.isMaxLength(50),
+);
+
 export const ResetPasswordBody = Schema.Struct({
   token: Schema.String,
   newPassword: Schema.String.check(Schema.isMinLength(8)),
+  /** Passkeys removed together with the password change, in the same transaction. */
+  removePasskeyIds: Schema.optional(PasskeyIdsToRemove),
 });
 export type ResetPasswordBody = Wire<typeof ResetPasswordBody>;
+
+/** `POST /auth/reset-password/passkeys`: the reset link's token, which the listing does not spend. */
+export const ResetTokenBody = Schema.Struct({ token: Schema.String });
+export type ResetTokenBody = Wire<typeof ResetTokenBody>;
+
+/**
+ * `POST /auth/logout-all`. Without a body it logs out everywhere as before;
+ * with passkeys to remove it first checks the password, as a single remove does.
+ */
+export const LogoutAllBody = Schema.Struct({
+  removePasskeyIds: Schema.optional(PasskeyIdsToRemove),
+  password: Schema.optional(Schema.String),
+});
+export type LogoutAllBody = Wire<typeof LogoutAllBody>;
 
 /** `POST /auth/sessions/:sessionId/logout`: a session's uuid. */
 export const AuthSessionParams = Schema.Struct({ sessionId: Schema.String.check(Schema.isUUID()) });

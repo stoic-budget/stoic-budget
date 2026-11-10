@@ -252,6 +252,88 @@ describe('ProfileSettingsPage', { timeout: 15_000 }, () => {
     expect(apiPost).not.toHaveBeenCalledWith('/auth/logout-all');
   });
 
+  it('with passkeys, logs out everywhere through the passkey step, not a plain confirm', async () => {
+    searchParams.current = new URLSearchParams('tab=security&section=sessions');
+    const laptop = {
+      id: '11111111-1111-4111-8111-111111111111',
+      name: 'Work laptop',
+      deviceType: 'multiDevice',
+      backedUp: true,
+      createdAt: '2026-10-01T09:00:00.000Z',
+      lastUsedAt: null,
+    };
+    apiGet.mockImplementation(async (url: string) => ({
+      data: url === '/auth/passkeys' ? [laptop] : (SETTINGS_RESPONSES[url] ?? []),
+    }));
+    apiPost.mockResolvedValue({ data: { message: 'ok' } });
+
+    const container = await renderPage();
+    await act(async () => {
+      findButton(container, 'sessionsCard.logoutAllButton')?.click();
+    });
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(window.confirm).not.toHaveBeenCalled();
+    const dialog = document.body.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog.textContent).toContain('Work laptop');
+    // Nothing ticked: the same request as before, without a body.
+    await act(async () => {
+      findButton(dialog, 'sessionsCard.logoutAllButton')?.click();
+    });
+    await act(async () => {
+      await flushPromises();
+    });
+    expect(apiPost).toHaveBeenCalledWith('/auth/logout-all');
+    expect(routerPush).toHaveBeenCalledWith('/login');
+  });
+
+  it('sends the shown passkeys and the password when removal is ticked', async () => {
+    searchParams.current = new URLSearchParams('tab=security&section=sessions');
+    const laptop = {
+      id: '11111111-1111-4111-8111-111111111111',
+      name: 'Work laptop',
+      deviceType: 'singleDevice',
+      backedUp: false,
+      createdAt: '2026-10-01T09:00:00.000Z',
+      lastUsedAt: null,
+    };
+    apiGet.mockImplementation(async (url: string) => ({
+      data: url === '/auth/passkeys' ? [laptop] : (SETTINGS_RESPONSES[url] ?? []),
+    }));
+    apiPost.mockResolvedValue({ data: { message: 'ok' } });
+
+    const container = await renderPage();
+    await act(async () => {
+      findButton(container, 'sessionsCard.logoutAllButton')?.click();
+    });
+    const dialog = document.body.querySelector('[role="dialog"]') as HTMLElement;
+    await act(async () => {
+      (dialog.querySelector('#remove-passkeys') as HTMLInputElement).click();
+    });
+    const password = dialog.querySelector('#logout-all-password') as HTMLInputElement;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set?.call(
+        password,
+        'secret',
+      );
+      password.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await act(async () => {
+      findButton(dialog, 'sessionsCard.logoutAllButton')?.click();
+    });
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(apiPost).toHaveBeenCalledWith('/auth/logout-all', {
+      removePasskeyIds: [laptop.id],
+      password: 'secret',
+    });
+    expect(routerPush).toHaveBeenCalledWith('/login');
+  });
+
   it('asks confirmation before password update', async () => {
     searchParams.current = new URLSearchParams('tab=security&section=password');
     (window.confirm as unknown as ReturnType<typeof vi.fn>).mockReturnValue(false);

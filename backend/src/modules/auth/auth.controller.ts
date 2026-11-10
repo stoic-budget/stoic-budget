@@ -15,11 +15,14 @@ import {
   ForgotPasswordBody,
   LoginBody,
   LoginResponse,
+  LogoutAllBody,
   MessageResult,
+  PasskeyList,
   RecoveryCodes,
   RegisterBody,
   RegisterResponse,
   ResetPasswordBody,
+  ResetTokenBody,
   TwoFactorCodeBody,
   TwoFactorPasswordBody,
   TwoFactorSetup,
@@ -44,6 +47,7 @@ import type { AuthResponseDto, TwoFactorChallengeDto } from './dto/auth-response
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { RegistrationOpenGuard } from './guards/registration-open.guard';
 import { PASSKEY_CHALLENGE_TTL_MS } from './passkeys/passkey-challenge.store';
+import { PasskeysService } from './passkeys/passkeys.service';
 import { PasswordResetService } from './password-reset.service';
 import type { TwoFactorSetupDto, TwoFactorStatusDto } from './two-factor.service';
 import { TwoFactorService } from './two-factor.service';
@@ -54,6 +58,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly twoFactorService: TwoFactorService,
     private readonly passwordResetService: PasswordResetService,
+    private readonly passkeysService: PasskeysService,
   ) {}
 
   /**
@@ -213,11 +218,22 @@ export class AuthController {
     @SchemaBody(ResetPasswordBody) dto: ResetPasswordBody,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ message: string }> {
-    await this.passwordResetService.resetPassword(dto.token, dto.newPassword);
+    await this.passwordResetService.resetPassword(dto.token, dto.newPassword, dto.removePasskeyIds);
     // The reset revoked every session; drop this browser's cookies too so it
     // is not left holding credentials the server no longer honours.
     clearAuthCookies(res);
     return { message: 'Password updated. Please sign in with your new password.' };
+  }
+
+  /** The reset link's account passkeys; the link stays unspent. POST keeps the token out of URLs. */
+  @Public()
+  @SkipCsrf()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('reset-password/passkeys')
+  @HttpCode(HttpStatus.OK)
+  @SchemaResponse(PasskeyList)
+  async resetPasswordPasskeys(@SchemaBody(ResetTokenBody) dto: ResetTokenBody) {
+    return this.passwordResetService.listPasskeys(dto.token);
   }
 
   @Public()
@@ -256,13 +272,26 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  // Checks the password when passkeys are removed with it: as tight as a single remove.
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('logout-all')
   @HttpCode(HttpStatus.OK)
   @SchemaResponse(MessageResult)
   async logoutAll(
     @CurrentUser() user: User,
+    @SchemaBody(LogoutAllBody) dto: LogoutAllBody,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ message: string }> {
+    // Passkeys chosen for removal need the password, as a single remove does;
+    // a wrong one stops here, before any session is touched.
+    if (dto.removePasskeyIds?.length) {
+      await this.passkeysService.removeMany(
+        user.id,
+        dto.removePasskeyIds,
+        dto.password ?? '',
+        'logout-all',
+      );
+    }
     const result = await this.authService.logoutAll(user.id);
     clearAuthCookies(res);
     return result;

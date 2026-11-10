@@ -22,11 +22,15 @@ import { PasskeyCredential, User } from '../../../entities';
 import { AuditService } from '../../audit/audit.service';
 import { PasskeyChallengeStore } from './passkey-challenge.store';
 import {
+  deleteOwnPasskeys,
   knownTransports,
   PASSKEY_TIMEOUT_MS,
+  type PasskeyCleanup,
+  type RemovedPasskey,
   recordPasskeyEvent,
   toPasskey,
 } from './passkey-helpers';
+import { type PasskeyNoticeRecipient, PasskeyNoticeService } from './passkey-notice.service';
 import { relyingParty } from './passkey-relying-party';
 
 /** ES256 and RS256: what platform authenticators and security keys sign with. */
@@ -47,6 +51,7 @@ export class PasskeysService {
     private readonly users: Repository<User>,
     private readonly challenges: PasskeyChallengeStore,
     private readonly auditService: AuditService,
+    private readonly notices: PasskeyNoticeService,
   ) {}
 
   async list(userId: string): Promise<Passkey[]> {
@@ -147,6 +152,7 @@ export class PasskeysService {
       'added',
       saved.id,
     );
+    await this.notices.send(user, 'added', [saved]);
 
     return toPasskey(saved);
   }
@@ -169,18 +175,50 @@ export class PasskeysService {
     const user = await this.loadUser(userId);
     await this.assertPassword(user, password);
 
-    const result = await this.credentials.delete({ id: passkeyId, userId: user.id });
-    if (!result.affected) {
+    const removed = await deleteOwnPasskeys(this.users.manager, user.id, [passkeyId]);
+    if (removed.length === 0) {
       throw new NotFoundException(appError('AUTH_PASSKEY_NOT_FOUND'));
     }
-    await recordPasskeyEvent(
-      this.auditService,
-      this.logger,
-      this.users.manager,
+    await this.reportRemoved(user, removed);
+  }
+
+  /**
+   * Removes several of the person's own passkeys after a password check, as
+   * a cleanup ("log out everywhere"). Ids that are not theirs match nothing.
+   */
+  async removeMany(
+    userId: string,
+    passkeyIds: readonly string[],
+    password: string,
+    via: PasskeyCleanup,
+  ): Promise<void> {
+    const user = await this.loadUser(userId);
+    await this.assertPassword(user, password);
+    await this.reportRemoved(
       user,
-      'removed',
-      passkeyId,
+      await deleteOwnPasskeys(this.users.manager, user.id, passkeyIds),
+      via,
     );
+  }
+
+  /** Audits each removed passkey and sends the owner one mail about all of them. */
+  async reportRemoved(
+    user: PasskeyNoticeRecipient,
+    removed: readonly RemovedPasskey[],
+    via?: PasskeyCleanup,
+  ): Promise<void> {
+    for (const passkey of removed) {
+      await recordPasskeyEvent(
+        this.auditService,
+        this.logger,
+        this.users.manager,
+        user,
+        'removed',
+        passkey.id,
+        via,
+      );
+    }
+    await this.notices.send(user, 'removed', removed);
   }
 
   private async verifyRegistration(
@@ -216,7 +254,15 @@ export class PasskeysService {
   private async loadUser(userId: string): Promise<User> {
     const user = await this.users.findOne({
       where: { id: userId },
-      select: { id: true, email: true, name: true, workspaceId: true, passwordHash: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        workspaceId: true,
+        passwordHash: true,
+        locale: true,
+        timeZone: true,
+      },
     });
     if (!user) {
       throw new UnauthorizedException(appError('USER_NOT_FOUND'));
