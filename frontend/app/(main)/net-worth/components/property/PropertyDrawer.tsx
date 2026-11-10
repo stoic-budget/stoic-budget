@@ -68,7 +68,7 @@ export function PropertyDrawer({
     );
   };
   const unit = (key: 'areaUnit' | 'mileageUnit', values: Array<[string, string]>) => (
-    <Field id={`property-${key}`} label={<span aria-hidden>&nbsp;</span>}>
+    <Field id={`property-${key}`} label={<span aria-hidden>{'\u00a0'}</span>}>
       <Select
         id={`property-${key}`}
         size="small"
