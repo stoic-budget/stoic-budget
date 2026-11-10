@@ -76,6 +76,9 @@ const TABLES_WITHOUT_WORKSPACE: Record<string, string> = {
   exchange_rates: 'global reference data',
   parsing_rules: 'global reference data',
   reference_data: 'global reference data',
+  // Market data from the price feed; a workspace's own closes are in workspace_security_prices.
+  security_price_symbols: 'global market data',
+  security_prices: 'global market data',
   tax_jurisdiction_rates: 'global reference data',
   tax_jurisdictions: 'global reference data',
   // Instance-wide settings (the shared Telegram bot), owned by the server admin.

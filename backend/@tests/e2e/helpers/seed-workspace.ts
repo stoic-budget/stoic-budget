@@ -263,6 +263,10 @@ export async function seedWorkspace(
     price: 10,
     note: `${marker} trade`,
   });
+  await send('security close', 'post', `/investments/holdings/${holding.body.id}/closes`, {
+    date: `${taxYear}-02-01`,
+    close: 11,
+  });
   await send('investment settings', 'patch', '/investments/settings', { basisMethod: 'average' });
   const lot = await send('metal lot', 'post', '/metals/lots', {
     metal: 'XAU',

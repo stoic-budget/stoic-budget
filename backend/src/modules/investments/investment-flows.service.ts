@@ -246,10 +246,7 @@ export class InvestmentFlowsService {
    * put in (fee included), a sale or a transfer out money taken out (a sale's
    * fee off), a dividend income net of what was held back. A split moves no money.
    */
-  private async tradeFlows(
-    workspaceId: string,
-    accountIds: string[] | null,
-  ): Promise<InvestmentFlow[]> {
+  async tradeFlows(workspaceId: string, accountIds: string[] | null): Promise<InvestmentFlow[]> {
     if (!this.tradeRepository || accountIds?.length === 0) {
       return [];
     }

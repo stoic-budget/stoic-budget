@@ -1,0 +1,27 @@
+import * as Schema from 'effect/Schema';
+import { DateOnlyInput, NumericInput, optionalNullable } from '../common/requests';
+import type { Wire } from '../common/wire';
+
+/** A three-letter code; defaults to the holding's price currency. */
+const Currency = Schema.String.check(Schema.isPattern(/^\s*[A-Za-z]{3}\s*$/));
+
+/** As the column stores it: numeric(20,8), so at least one hundred-millionth. */
+const Close = NumericInput.check(Schema.isGreaterThanOrEqualTo(1e-8), Schema.isLessThan(1e12));
+
+/** `POST /investments/holdings/:id/closes`: one day's close, replacing the workspace's own. */
+export const UpsertSecurityCloseBody = Schema.Struct({
+  date: DateOnlyInput,
+  close: Close,
+  currency: optionalNullable(Currency),
+});
+export type UpsertSecurityCloseBody = Wire<typeof UpsertSecurityCloseBody>;
+
+/**
+ * `POST /investments/holdings/:id/closes/import`: the text of a CSV file with
+ * a date and a close on each line (a header naming them is optional).
+ */
+export const ImportSecurityClosesBody = Schema.Struct({
+  csv: Schema.String.check(Schema.isBetweenLength(1, 500_000)),
+  currency: optionalNullable(Currency),
+});
+export type ImportSecurityClosesBody = Wire<typeof ImportSecurityClosesBody>;
