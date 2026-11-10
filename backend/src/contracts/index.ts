@@ -19,6 +19,7 @@ export * from './data-entry/data-entry';
 export * from './feed/feed';
 export * from './feed/feed-answers';
 export * from './forecast/forecast';
+export * from './forecast/paycheck-plan';
 export * from './goals/goal-items';
 export * from './goals/goals';
 export * from './imports/import-sessions';

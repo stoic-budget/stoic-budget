@@ -182,7 +182,7 @@ export class ForecastService {
    * in, less what was already paid; an overdue one is expected "now". Undated
    * ones have no day to land on and are left out.
    */
-  private async receivableEvents(
+  async receivableEvents(
     workspaceId: string,
     currency: string,
     today: string,
@@ -271,7 +271,7 @@ export class ForecastService {
    * first of every month until its target date. Money set aside is money not
    * available, so it leaves the curve.
    */
-  private async goalEvents(
+  async goalEvents(
     workspaceId: string,
     currency: string,
     today: string,
