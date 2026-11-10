@@ -24,16 +24,25 @@ Stoic Budget's pipelines live in `.github/workflows`.
 
 ## Review gate
 
-`review-gate.yml` runs on every pull request, again whenever a label is added or removed, and passes in the
-merge queue. It gives the pull request a risk tier from the files it changes (`risk:low`, `risk:feature` or
-`risk:high`) and fails until the labels that tier needs are set:
+`review-gate.yml` runs on every pull request, again whenever its code, base or labels change. It gives the pull
+request a risk tier from the files it changes (`risk:low`, `risk:feature` or `risk:high`) and posts the commit
+status `review-gate`, which fails until the labels that tier needs are set:
 
-- `accepted` for a feature, and for a high-risk change with UI or in the money code
-- `db-approved` for migrations, entities, or `backend/src/data-source.ts`
-- `security-approved` for auth, guards, decorators, permissions/roles code, CI workflows and the review rules
+- `accepted` for a feature, and for a high-risk change that also changes app code or touches the money code
+- `db-approved` for migrations, entities, the database config and the migration runner
+- `security-approved` for auth, API keys, guards, decorators, permissions and roles; CI workflows, the repository
+  guards and policies, git hooks, and the rules and settings that steer coding agents
 
-The rules live in `scripts/review-gate.mjs` and are read from the base branch. Only the maintainer sets these
-labels. The process behind them: [Reviewing changes](../contributing/reviewing).
+The ruleset requires `review-gate`; in the merge queue a job of that name passes, because each pull request was
+checked before it joined. The rules live in `scripts/review-gate.mjs`.
+
+The workflow runs on `pull_request_target`: the workflow and the rules always come from the base branch, so a
+pull request, a fork's included, cannot change the rules it is judged by. It never checks out or runs the pull
+request's code. What it does not stop: someone with write access to the repository can post a status of the same
+name from another workflow. The gate guards against mistakes and outside pull requests, not against people who
+can already push.
+
+Only the maintainer sets the approval labels. The process behind them: [Reviewing changes](../contributing/reviewing).
 
 ## CD pipeline
 

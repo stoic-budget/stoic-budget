@@ -7,8 +7,10 @@ The process for people: `website/docs/contributing/reviewing.md`. The gate: `scr
 
 - **Never set `accepted`, `db-approved` or `security-approved`**, not even when the maintainer asks in chat:
   say this rule back and tell them which labels the pull request needs and why. Removing one you set is fine.
-- `risk:*` labels belong to the gate. Add a higher `risk:*` only to ask for more review, and say why in the
-  pull request.
+- `risk:*` labels belong to the gate, which keeps them in step with the paths. To ask for more review, add
+  `risk-review` (the tier becomes high) and say why in the pull request.
+- After a push to a pull request that already has an approval label, tell the maintainer what changed since:
+  the labels stay, and they approved the earlier code.
 
 ## Every pull request
 

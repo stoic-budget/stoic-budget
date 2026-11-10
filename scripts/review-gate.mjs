@@ -1,7 +1,7 @@
 // Risk tier of a pull request from the files it changes, and the labels it needs before
-// it may merge. The review gate (.github/workflows/review-gate.yml) runs this file from
-// the base branch, so a pull request cannot loosen its own gate.
-// The process: website/docs/contributing/reviewing.md.
+// it may merge. .github/workflows/review-gate.yml runs on pull_request_target, so both the
+// workflow and this file always come from the base branch: a pull request cannot change
+// the rules it is judged by. The process: website/docs/contributing/reviewing.md.
 
 export const TIERS = ['low', 'feature', 'high'];
 
@@ -12,28 +12,33 @@ export const LABELS = {
   security: 'security-approved',
 };
 
-const TEST_FILE = /(^|\/)(@tests|__tests__|e2e)\/|\.(test|spec|e2e-spec)\.[cm]?[jt]sx?$/;
+// The author asks for the risk reviewer: the tier becomes high whatever the paths say.
+export const RAISE_LABEL = 'risk-review';
 
-// Areas where a mistake costs data, money or access. Each names the label it needs.
+const TEST_FILE =
+  /(^|\/)(@tests|__tests__)\/|\.(test|spec|e2e-spec)\.[cm]?[jt]sx?$|^backend\/golden\//;
+
+// Areas where a mistake costs data, money or access. Each names the label it needs. A test
+// file inside one still counts: a migration named *.spec.ts is compiled and run like any other.
 export const HIGH_AREAS = [
   {
     area: 'db',
     label: LABELS.db,
     pattern:
-      /^backend\/(src\/migrations\/|migrations\/|src\/entities\/|src\/modules\/.+\/entities\/|src\/data-source\.ts$)/,
+      /^backend\/(src\/migrations\/|migrations\/|src\/entities\/|src\/modules\/(.+\/)?entities\/|src\/data-source\.ts$|src\/config\/database\.config\.ts$|scripts\/run-migrations)/,
   },
   {
     area: 'auth',
     label: LABELS.security,
     pattern:
-      /^backend\/src\/(modules\/auth\/|common\/(guards|decorators|authz|workspaces)\/|common\/utils\/transaction-privacy\.util\.ts$|.*\/(permissions|roles)\/)/,
+      /^backend\/src\/(modules\/(auth|api-keys)\/|common\/(guards|decorators|authz|workspaces)\/|common\/utils\/(transaction-privacy|password-hash)\.util\.ts$|common\/enums\/permissions\.enum\.ts$|modules\/users\/services\/permissions\.|(.+\/)?(permissions|roles)\/|.+\.guard\.ts$)|^frontend\/proxy\.ts$/,
   },
   {
-    // Whoever changes CI or the review rules can switch the checks off.
+    // What switches checks off or steers the agents that write and review code.
     area: 'process',
     label: LABELS.security,
     pattern:
-      /^(\.github\/(workflows|actions)\/|scripts\/review-gate\.mjs$|\.claude\/rules\/review\.md$|\.claude\/agents\/)/,
+      /^(\.github\/(workflows|actions)\/|\.github\/CODEOWNERS$|scripts\/(review-gate|check-[^/]+)\.(test\.)?mjs$|infra\/policy\/|\.husky\/|\.gitleaksignore$|CLAUDE\.md$|AGENTS\.md$|\.claude\/(rules|agents)\/|\.claude\/settings[^/]*\.json$)/,
   },
   {
     // Where sums, currencies and counted rows are worked out once for the whole app.
@@ -44,43 +49,42 @@ export const HIGH_AREAS = [
   },
 ];
 
-const FEATURE =
-  /^(frontend\/app\/|backend\/src\/|packages\/contracts\/src\/|scripts\/(start|docker-start)\.sh$)|(^|\/)Dockerfile$|^docker-compose[^/]*\.ya?ml$/;
+// Low is a whitelist: anything not listed here, and not high, is at least a feature.
+const LOW =
+  /^(docs|website|\.agents|\.claude\/skills)\/|\.md$|^\.github\/(ISSUE_TEMPLATE\/|PULL_REQUEST_TEMPLATE\.md$|FUNDING\.yml$|dependabot\.yml$)|^(LICENSE|\.gitignore|\.env\.example|\.mcp\.json\.example|\.jscpd\.json|knip\.json|sonar-project\.properties)$/;
 
-const UI = /^frontend\/app\//;
+// Dependency updates are low only from Dependabot (dependency-review checks them); a person
+// adding a package is a feature.
+const MANIFEST = /(^|\/)package(-lock)?\.json$/;
+const DEPENDABOT = 'dependabot[bot]';
 
-const isTest = file => TEST_FILE.test(file) && !/^\.github\//.test(file);
+const UI = /^frontend\/(app|components)\//;
 
-/** The tier the paths alone call for, the high areas touched, and whether there is UI. */
-export function classify(files) {
-  const code = files.filter(file => !isTest(file));
-  const areas = HIGH_AREAS.filter(({ pattern }) => code.some(file => pattern.test(file))).map(
+const isLow = (file, author) =>
+  TEST_FILE.test(file) || LOW.test(file) || (author === DEPENDABOT && MANIFEST.test(file));
+
+/**
+ * The tier the paths alone call for, the high areas touched, whether app code beyond the
+ * review process changes, and whether there is UI.
+ */
+export function classify(files, { author = '' } = {}) {
+  const areas = HIGH_AREAS.filter(({ pattern }) => files.some(file => pattern.test(file))).map(
     ({ area }) => area,
   );
-  const feature = code.some(file => FEATURE.test(file));
-  const ui = code.some(file => UI.test(file));
+  const process = HIGH_AREAS.find(({ area }) => area === 'process').pattern;
+  const code = files.some(file => !(isLow(file, author) || process.test(file)));
+  const ui = files.some(file => UI.test(file) && !TEST_FILE.test(file));
   let tier = 'low';
   if (areas.length) {
     tier = 'high';
-  } else if (feature) {
+  } else if (files.some(file => !isLow(file, author))) {
     tier = 'feature';
   }
-  return { tier, areas, ui };
-}
-
-const rank = tier => TIERS.indexOf(tier);
-
-/**
- * The tier that applies: the paths set the floor, a `risk:*` label already on the pull
- * request may raise it. Removing that label is how a raised tier comes back down.
- */
-export function effectiveTier(pathTier, labels) {
-  const raised = labels.filter(label => label.startsWith('risk:')).map(label => label.slice(5));
-  return [pathTier, ...raised].reduce((top, tier) => (rank(tier) > rank(top) ? tier : top));
+  return { tier, areas, code, ui };
 }
 
 /** Labels the pull request needs for its tier and areas. */
-export function requiredLabels(tier, areas, ui) {
+export function requiredLabels(tier, areas, code) {
   const required = new Set();
   if (tier === 'feature') {
     required.add(LABELS.accepted);
@@ -89,7 +93,8 @@ export function requiredLabels(tier, areas, ui) {
     for (const { label } of HIGH_AREAS.filter(({ area }) => areas.includes(area))) {
       required.add(label);
     }
-    if (ui || !areas.length) {
+    // A migration or an auth change never takes away the acceptance a behaviour change needs.
+    if (code || !areas.length) {
       required.add(LABELS.accepted);
     }
   }
@@ -97,12 +102,12 @@ export function requiredLabels(tier, areas, ui) {
 }
 
 /** Everything the gate decides, from the changed files and the labels on the pull request. */
-export function decide(files, labels) {
-  const { tier: pathTier, areas, ui } = classify(files);
-  const tier = effectiveTier(pathTier, labels);
-  const required = requiredLabels(tier, areas, ui);
+export function decide(files, labels, { author = '' } = {}) {
+  const { tier: pathTier, areas, code, ui } = classify(files, { author });
+  const tier = labels.includes(RAISE_LABEL) ? 'high' : pathTier;
+  const required = requiredLabels(tier, areas, code);
   const missing = required.filter(label => !labels.includes(label));
   const riskLabel = `risk:${tier}`;
   const staleRiskLabels = labels.filter(label => label.startsWith('risk:') && label !== riskLabel);
-  return { tier, pathTier, areas, ui, required, missing, riskLabel, staleRiskLabels };
+  return { tier, pathTier, areas, code, ui, required, missing, riskLabel, staleRiskLabels };
 }

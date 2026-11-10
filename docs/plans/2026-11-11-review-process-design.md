@@ -63,12 +63,17 @@ maintainer may lower it.
 - `.claude/rules/review.md`: rules for agents.
 - `.claude/agents/risk-reviewer.md`: new agent; `code-reviewer.md` gains the "Review"
   section output.
-- `.github/PULL_REQUEST_TEMPLATE.md`: short template with What, Risk tier, How to accept,
-  Review, Risk brief.
-- `.github/workflows/review-gate.yml`: runs on opened, synchronize, reopened, labeled and
-  unlabeled; assigns the tier label, requires `accepted` / `db-approved` /
-  `security-approved` per tier, passes on `merge_group`. `sensitive-changes` moves here, so
-  a label no longer needs a manual re-run.
+- `.github/PULL_REQUEST_TEMPLATE.md`: short template with What, How to accept, Risk and
+  Review (the risk brief goes inside Review).
+- `.github/workflows/review-gate.yml`: `pull_request_target` (workflow and rules from the
+  base branch, the pull request's code never run) on code, base and label changes; assigns
+  the tier label and posts the `review-gate` commit status; a `review-gate` job passes in
+  the merge queue. `sensitive-changes` moves here, so a label no longer needs a manual re-run.
+
+Changed after review (both reviewers): low became a whitelist; tests inside a high area
+count; `accepted` is needed on a high pull request whenever app code changes (a migration
+no longer removes it); the author raises the tier with `risk-review` instead of a `risk:*`
+label, so the gate's own label never holds the tier up.
 - Maintainer, in GitHub settings: add `review-gate` to the required checks; require
   resolved review threads.
 

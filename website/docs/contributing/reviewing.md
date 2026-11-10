@@ -9,14 +9,14 @@ Every pull request is reviewed in proportion to what it can break. The maintaine
 ## Risk tiers
 
 The [review gate](../deployment/ci-cd#review-gate) gives each pull request a tier from the files it changes.
-The highest match wins. A `risk:*` label can raise the tier; the paths set the floor, and a wrong path rule is
-fixed in `scripts/review-gate.mjs`, which is itself high risk.
+The highest match wins. The `risk-review` label makes any pull request high; nothing lowers a tier, and a wrong
+path rule is fixed in `scripts/review-gate.mjs`, which is itself high risk.
 
 | Tier | What falls in it | Needed before merge |
 |---|---|---|
-| `risk:low` | docs, the website, tests only, dev tooling, dependency updates | green CI, a code review |
-| `risk:feature` | any other code in `frontend/app`, `backend/src` or `packages/contracts/src`; Dockerfiles and Compose files | + a "How to accept" scenario, a recorded walk-through, `accepted` |
-| `risk:high` | migrations and entities; auth, guards, permissions and roles; CI workflows and the review rules; the shared money code (sums, currencies, counted rows, balances, ledger, tax) | + a risk brief; `db-approved` or `security-approved`; `accepted` when there is UI or money code |
+| `risk:low` | only a fixed list: docs and the website, Markdown, tests, agent skills, issue templates, Dependabot's dependency updates | green CI, a code review |
+| `risk:feature` | everything not on that list and not high: app code, contracts, build and Docker files, scripts, a dependency a person adds | + a "How to accept" scenario, a recorded walk-through, `accepted` |
+| `risk:high` | migrations, entities and the migration runner (`db-approved`); auth, API keys, guards, permissions and roles (`security-approved`); CI workflows, repository guards, git hooks and the rules that steer coding agents (`security-approved`); the shared money code: sums, currencies, counted rows, balances, ledger, tax (`accepted`) | + a risk brief and the area's label; `accepted` too whenever app code changes |
 
 Only the maintainer sets `accepted`, `db-approved` and `security-approved`. Assistants and agents never do,
 even when asked: a label set by whoever wrote the code checks nothing.
