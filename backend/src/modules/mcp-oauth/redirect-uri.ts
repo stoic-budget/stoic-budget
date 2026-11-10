@@ -38,7 +38,7 @@ export function redirectUriProblem(uri: string): string | null {
 
 /** Exact string comparison: no normalising, no prefix or port wildcards. */
 export const isRegisteredRedirect = (registered: readonly string[], requested: string): boolean =>
-  registered.includes(requested);
+  registered.some(uri => uri === requested);
 
 /** `uri` with `params` added to its query, the ones left undefined skipped. */
 export function redirectWith(uri: string, params: Record<string, string | undefined>): string {

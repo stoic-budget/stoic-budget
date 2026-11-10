@@ -94,6 +94,9 @@ const TABLES_WITHOUT_WORKSPACE: Record<string, string> = {
   // Access grants and public links: a copy must not inherit them.
   file_permissions: 'access grant',
   shared_links: 'public link',
+  // MCP apps registered on the instance, and the tokens of grants (excluded): a restore asks again.
+  mcp_oauth_clients: 'instance-wide app registration',
+  mcp_oauth_tokens: 'access grant',
 };
 
 const PASSWORD = 'correct horse battery staple';
