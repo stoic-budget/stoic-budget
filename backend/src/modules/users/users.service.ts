@@ -33,6 +33,7 @@ import { recordSecurityEvent } from '../auth/security-audit.util';
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { CURRENT_DISCLAIMER_VERSION } from './disclaimer.constant';
 import { EmailChangeService } from './services/email-change.service';
+import { USER_PROFILE_SELECT, USER_WITH_PASSWORD_SELECT } from './user-selects';
 
 /** How many pages the page-hint map may name; see markPageHintsSeen. */
 export const PAGE_HINTS_MAX_KEYS = 100;
@@ -62,39 +63,7 @@ export class UsersService {
   private async findOneWithPassword(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
-      select: {
-        id: true,
-        email: true,
-        passwordHash: true,
-        name: true,
-        company: true,
-        role: true,
-        workspaceId: true,
-        telegramId: true,
-        telegramChatId: true,
-        createdAt: true,
-        updatedAt: true,
-        lastLogin: true,
-        isActive: true,
-        permissions: true,
-        locale: true,
-        timeZone: true,
-        dateFormat: true,
-        firstDayOfWeek: true,
-        uiDensity: true,
-        reduceMotion: true,
-        showDailyQuote: true,
-        roundAmounts: true,
-        themePreference: true,
-        mapStylePreference: true,
-        avatarUrl: true,
-        onboardingCompletedAt: true,
-        disclaimerAcceptedAt: true,
-        disclaimerVersion: true,
-        welcomeTutorialSeenAt: true,
-        pageHintsSeen: true,
-        tokenVersion: true,
-      },
+      select: USER_WITH_PASSWORD_SELECT,
     });
 
     if (!user) {
@@ -131,30 +100,7 @@ export class UsersService {
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        company: true,
-        role: true,
-        workspaceId: true,
-        telegramId: true,
-        telegramChatId: true,
-        createdAt: true,
-        updatedAt: true,
-        lastLogin: true,
-        isActive: true,
-        permissions: true,
-        locale: true,
-        timeZone: true,
-        themePreference: true,
-        mapStylePreference: true,
-        onboardingCompletedAt: true,
-        disclaimerAcceptedAt: true,
-        disclaimerVersion: true,
-        welcomeTutorialSeenAt: true,
-        pageHintsSeen: true,
-      },
+      select: USER_PROFILE_SELECT,
     });
 
     if (!user) {

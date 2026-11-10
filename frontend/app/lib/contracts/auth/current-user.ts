@@ -47,6 +47,8 @@ export const CurrentUser = Schema.Struct({
   welcomeTutorialSeenAt: Schema.NullOr(Timestamp),
   /** Page hints closed so far: page id → the highest hint version seen there. */
   pageHintsSeen: Schema.Record(Schema.String, Schema.Number),
+  /** False for an account made by single sign-on until its owner sets a password. */
+  passwordSet: Schema.Boolean,
 });
 export type CurrentUser = Wire<typeof CurrentUser>;
 

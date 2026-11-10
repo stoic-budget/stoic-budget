@@ -49,8 +49,13 @@ export const ACCOUNTS_ERRORS = {
   OIDC_IDENTITY_LINKED_ELSEWHERE: 'This provider account is already linked to another user',
   OIDC_IDENTITY_NOT_FOUND: 'Linked account not found',
   OIDC_LAST_SIGN_IN_METHOD:
-    'This is your only way to sign in. Set a password first with "Forgot password"',
+    'This is your only way to sign in. Set a password first in the Password section of your security settings',
   OIDC_SIGN_IN_EXPIRED: 'The sign-in took too long. Start again',
+  OIDC_REAUTH_NOT_FRESH: 'The sign-in provider did not confirm a fresh sign-in. Start again',
+  OIDC_REAUTH_WRONG_ACCOUNT: 'Sign in with the provider account that is linked to you',
+  AUTH_STEP_UP_REQUIRED: 'Sign in with your provider again before setting a password',
+  AUTH_PASSWORD_ALREADY_SET:
+    'This account already has a password. Change it with your current password',
   AUTHZ_PERMISSIONS_REQUIRED: 'Insufficient permissions. Required: {{permissions}}',
   AUTHZ_API_KEY_SCOPE_MISSING: 'API key scope missing: {{scopes}}',
   // ── api keys ────────────────────────────────────────────────────────────

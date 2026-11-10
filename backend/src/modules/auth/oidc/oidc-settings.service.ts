@@ -112,6 +112,7 @@ export class OidcSettingsService {
   async save(user: User, body: SaveOidcSettingsBody): Promise<OidcSettingsStatus> {
     const issuer = body.issuer.trim();
     if (!isAllowedProviderUrl(issuer)) throw new OidcRefusal('OIDC_ISSUER_INSECURE');
+    this.provider.warnIfHttp(issuer);
     this.provider.forget();
     if (body.enabled) await this.provider.discover(issuer);
 

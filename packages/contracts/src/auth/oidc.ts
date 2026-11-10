@@ -1,6 +1,7 @@
 import * as Schema from 'effect/Schema';
 import { optionalNullable } from '../common/requests';
 import { Timestamp, type Wire } from '../common/wire';
+import { ChangePasswordBody } from '../requests/users';
 
 /**
  * Sign-in through one OpenID Connect provider (Authentik, Keycloak, Google…)
@@ -93,7 +94,10 @@ export const OidcIdentityList = Schema.Struct({
 });
 export type OidcIdentityList = Wire<typeof OidcIdentityList>;
 
-/** `POST /auth/oidc/start` and `/auth/oidc/link`: the provider's page the browser goes to. */
+/**
+ * `POST /auth/oidc/start`, `/auth/oidc/link` and `/auth/oidc/reauth`: the
+ * provider's page the browser goes to.
+ */
 export const OidcAuthorization = Schema.Struct({ url: Schema.String });
 export type OidcAuthorization = Wire<typeof OidcAuthorization>;
 
@@ -123,3 +127,13 @@ export const OidcStartBody = Schema.Struct({
   next: optionalNullable(Schema.String.check(Schema.isMaxLength(512))),
 });
 export type OidcStartBody = Wire<typeof OidcStartBody>;
+
+/**
+ * `POST /auth/password/set`: the first password of an account made by single
+ * sign-on, after a fresh sign-in at the provider (`POST /auth/oidc/reauth`).
+ * The same rule as a password change. Answers the user as `GET /auth/me` does.
+ */
+export const SetPasswordBody = Schema.Struct({
+  newPassword: ChangePasswordBody.fields.newPassword,
+});
+export type SetPasswordBody = Wire<typeof SetPasswordBody>;

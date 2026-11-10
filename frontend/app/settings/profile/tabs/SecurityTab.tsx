@@ -7,6 +7,7 @@ import { useUserFormat } from '@/app/lib/user-format-store';
 import { EmailSection } from '@/app/settings/profile/components/EmailSection';
 import { PasswordSection } from '@/app/settings/profile/components/PasswordSection';
 import { SessionsSection } from '@/app/settings/profile/components/SessionsSection';
+import { SetPasswordSection } from '@/app/settings/profile/components/SetPasswordSection';
 import { SettingsAccordion } from '@/app/settings/profile/components/SettingsAccordion';
 import { SingleSignOnSection } from '@/app/settings/profile/components/SingleSignOnSection';
 import { TwoFactorSection } from '@/app/settings/profile/components/TwoFactorSection';
@@ -14,12 +15,13 @@ import { resolveOpenSection } from '@/app/settings/profile/helpers/settings-url-
 import { useEmailForm } from '@/app/settings/profile/hooks/useEmailForm';
 import { usePasswordForm } from '@/app/settings/profile/hooks/usePasswordForm';
 import { useSessions } from '@/app/settings/profile/hooks/useSessions';
+import { useSetPassword } from '@/app/settings/profile/hooks/useSetPassword';
 import { useSettingsText } from '@/app/settings/profile/hooks/useSettingsText';
 import { useTwoFactor } from '@/app/settings/profile/hooks/useTwoFactor';
 
 import type { SettingsTabProps } from './types';
 
-export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Element {
+export function SecurityTab({ section, user, setUser }: SettingsTabProps): React.JSX.Element {
   const { t, tx } = useSettingsText();
   const { preferences: formatPreferences } = useUserFormat();
   const isAuthenticated = !!user;
@@ -53,6 +55,12 @@ export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Elem
     successFallback: t.passwordCard.successFallback.value,
     errorFallback: t.passwordCard.errorFallback.value,
   });
+
+  // An account made by single sign-on has no password until it sets one here.
+  const setPassword = useSetPassword(next => setUser({ ...user, ...next }), {
+    errorFallback: t.passwordCard.errorFallback.value,
+  });
+  const choosesFirstPassword = user.passwordSet === false || setPassword.done;
 
   const twoFactor = useTwoFactor(isAuthenticated, {
     loadError: tx(['securityCard', 'loadError']),
@@ -105,16 +113,20 @@ export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Elem
         icon={Lock}
         defaultExpanded={openSection === 'password'}
       >
-        <PasswordSection
-          t={t}
-          tx={tx}
-          passwordMessage={passwordMessage}
-          passwordError={passwordError}
-          passwordLoading={passwordLoading}
-          passwords={passwords}
-          setPasswords={setPasswords}
-          handlePasswordSubmit={handlePasswordSubmit}
-        />
+        {choosesFirstPassword ? (
+          <SetPasswordSection tx={tx} setPassword={setPassword} />
+        ) : (
+          <PasswordSection
+            t={t}
+            tx={tx}
+            passwordMessage={passwordMessage}
+            passwordError={passwordError}
+            passwordLoading={passwordLoading}
+            passwords={passwords}
+            setPasswords={setPasswords}
+            handlePasswordSubmit={handlePasswordSubmit}
+          />
+        )}
       </SettingsAccordion>
 
       <SettingsAccordion

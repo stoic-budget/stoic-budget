@@ -70,7 +70,19 @@ describe('verifyIdToken', () => {
       email: 'member-1@example.com',
       emailVerified: true,
       name: null,
+      authTime: null,
     });
+  });
+
+  it('answers auth_time only when it is a number', async () => {
+    const { value } = expectations([{ keys: [rsaJwk] }]);
+    const signedIn = now() - 30;
+    const fresh = await verifyIdToken(rs256(claims({ auth_time: signedIn })), value);
+    expect(fresh.authTime).toBe(signedIn);
+    for (const authTime of [String(signedIn), null, true]) {
+      const result = await verifyIdToken(rs256(claims({ auth_time: authTime })), value);
+      expect(result.authTime).toBeNull();
+    }
   });
 
   it('refuses an HMAC token even when the key set holds the symmetric key', async () => {
