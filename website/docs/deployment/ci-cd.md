@@ -9,7 +9,6 @@ Stoic Budget's pipelines live in `.github/workflows`.
 
 `ci.yml` runs on pull requests and on pushes to `main` and `develop`:
 
-- `sensitive-changes` - label gate on pull requests (see below)
 - `policy-as-code` - Conftest policies for the Compose files and workflows
 - `shellcheck`, `hadolint`, `trivy-config` - shell script, Dockerfile, and config scanning
 - `lint` - Biome for both apps
@@ -23,12 +22,18 @@ Stoic Budget's pipelines live in `.github/workflows`.
 - `secrets-scan` - Gitleaks
 - `docker` - image build with a Trivy scan and SBOM
 
-## Sensitive change protection
+## Review gate
 
-On pull requests, the `sensitive-changes` job requires labels:
+`review-gate.yml` runs on every pull request, again whenever a label is added or removed, and passes in the
+merge queue. It gives the pull request a risk tier from the files it changes (`risk:low`, `risk:feature` or
+`risk:high`) and fails until the labels that tier needs are set:
 
+- `accepted` for a feature, and for a high-risk change with UI or in the money code
 - `db-approved` for migrations, entities, or `backend/src/data-source.ts`
-- `security-approved` for the auth module, `common/guards`, `common/decorators`, or permissions/roles code
+- `security-approved` for auth, guards, decorators, permissions/roles code, CI workflows and the review rules
+
+The rules live in `scripts/review-gate.mjs` and are read from the base branch. Only the maintainer sets these
+labels. The process behind them: [Reviewing changes](../contributing/reviewing).
 
 ## CD pipeline
 

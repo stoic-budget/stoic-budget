@@ -47,6 +47,7 @@ const sidebars: SidebarsConfig = {
         'contributing/development-workflow',
         'contributing/testing',
         'contributing/coding-standards',
+        'contributing/reviewing',
         'contributing/adding-a-bank-parser',
       ],
     },

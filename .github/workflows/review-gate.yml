@@ -1,0 +1,103 @@
+name: Review gate
+
+# The review process (website/docs/contributing/reviewing.md): every pull request gets a
+# risk tier from the files it changes, and may not merge before the maintainer sets the
+# labels that tier needs. Runs again whenever a label changes, so setting one is enough.
+"on":
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: review-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review-gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Writes the risk:* label. Read-only on pull requests from forks: the gate still decides.
+      issues: write
+      pull-requests: write
+    steps:
+      # Labels were checked on each pull request before it could join the queue.
+      - name: Merge queue
+        if: github.event_name == 'merge_group'
+        run: echo "Labels were checked on the pull request."
+
+      # The rules come from the base branch, so a pull request cannot loosen its own gate.
+      - name: Checkout base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Decide tier and required labels
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            let gate = path.join(process.env.GITHUB_WORKSPACE, 'scripts/review-gate.mjs');
+            if (!fs.existsSync(gate)) {
+              // Only the pull request that adds the gate has no copy on its base.
+              core.warning('The base branch has no review gate yet; using the pull request copy.');
+              const { data } = await github.rest.repos.getContent({
+                owner, repo, path: 'scripts/review-gate.mjs', ref: pr.head.sha,
+              });
+              gate = path.join(process.env.RUNNER_TEMP, 'review-gate.mjs');
+              fs.writeFileSync(gate, Buffer.from(data.content, 'base64'));
+            }
+            const { decide } = await import(gate);
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner, repo, pull_number: pr.number, per_page: 100,
+            });
+            const names = files.flatMap(file =>
+              file.previous_filename ? [file.filename, file.previous_filename] : [file.filename],
+            );
+            // Read now, not from the event: the payload is a snapshot from when it fired.
+            const { data: current } = await github.rest.issues.listLabelsOnIssue({
+              owner, repo, issue_number: pr.number,
+            });
+            const labels = current.map(label => label.name);
+            const result = decide(names, labels);
+
+            try {
+              if (!labels.includes(result.riskLabel)) {
+                await github.rest.issues.addLabels({
+                  owner, repo, issue_number: pr.number, labels: [result.riskLabel],
+                });
+              }
+              for (const name of result.staleRiskLabels) {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number: pr.number, name });
+              }
+            } catch (error) {
+              core.warning(`Could not update the risk label: ${error.message}`);
+            }
+
+            await core.summary
+              .addHeading(`Risk tier: ${result.tier}`, 3)
+              .addList([
+                `Areas: ${result.areas.join(', ') || 'none'}`,
+                `UI changed: ${result.ui ? 'yes' : 'no'}`,
+                `Labels needed: ${result.required.join(', ') || 'none'}`,
+                `Missing: ${result.missing.join(', ') || 'none'}`,
+              ])
+              .write();
+
+            if (result.missing.length) {
+              core.setFailed(
+                `Tier ${result.tier} (${result.areas.join(', ') || 'no high areas'}) needs the maintainer's labels: ${result.missing.join(', ')}.`,
+              );
+            } else {
+              core.info(`Tier ${result.tier}: every label it needs is set.`);
+            }
