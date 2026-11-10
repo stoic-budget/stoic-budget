@@ -228,6 +228,27 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
       rate_changes: JSON.stringify([{ from: '2027-01-15', annualRate: 3.9 }]),
       extra_payments: JSON.stringify([{ date: '2026-06-15', amount: 500 }]),
     });
+    // A flat bought with a mortgage line and a car bought with the loan: the
+    // links are references and must follow their rows into the copy.
+    const balanceLine = (code: string, accountType: string, extra: Record<string, unknown> = {}) =>
+      insert('balance_accounts', {
+        workspace_id: workspaceId,
+        code,
+        name: code,
+        account_type: accountType,
+        sub_type: accountType === 'asset' ? 'non_current_asset' : 'borrowed_capital',
+        ...extra,
+      });
+    const mortgageLine = await balanceLine('LIABILITY_MORTGAGE', 'liability');
+    await balanceLine('ASSET_REAL_ESTATE', 'asset', {
+      attributes: JSON.stringify({ area: 64, areaUnit: 'm2' }),
+      debt_account_id: mortgageLine,
+    });
+    await balanceLine('ASSET_VEHICLES', 'asset', {
+      attributes: JSON.stringify({ make: 'ACME', mileage: 1000 }),
+      debt_wallet_id: loan,
+      depreciation_rate: 12.5,
+    });
 
     // A statement with its file on disk, two tagged rows on it.
     const statementFile = writeDocument('bank.pdf', '%PDF-1.4 bank statement');

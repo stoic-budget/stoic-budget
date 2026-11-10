@@ -150,4 +150,8 @@ export const DOCUMENTS_ERRORS = {
   BALANCE_HISTORY_EMPTY: 'No dated amounts were found in the file',
   BALANCE_HISTORY_COLUMNS_MISSING:
     'The file needs a date column and an amount column (date, amount)',
+  BALANCE_NOT_PROPERTY: 'Only a real estate or vehicle line has property details',
+  BALANCE_PROPERTY_DETAILS_INVALID: 'These details do not fit this kind of property',
+  BALANCE_PROPERTY_DEBT_INVALID: 'Only a loan account or a debt line can be linked',
+  BALANCE_PROPERTY_DEBT_TAKEN: 'This debt is already linked to another property',
 } as const;

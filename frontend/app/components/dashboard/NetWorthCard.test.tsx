@@ -79,6 +79,7 @@ function netWorth(overrides: Partial<NetWorthData> = {}): NetWorthData {
     allTimeHigh: null,
     byAssetClass: [],
     groups: [],
+    properties: [],
     ...overrides,
   };
 }

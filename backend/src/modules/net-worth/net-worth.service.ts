@@ -24,12 +24,12 @@ import {
 import type { InvestmentMetal } from '../../entities/investment-holding.entity';
 import { BalanceService, CASH_ACCOUNT_CODE } from '../balance/balance.service';
 import { balanceAccountName } from '../balance/balance-account-name';
+import { BalancePropertyService } from '../balance/property/balance-property.service';
 import {
   decimate,
   everyDay,
   groupSnapshots,
   isoDate,
-  latestOnOrBefore,
   maxDate,
   minDate,
   presetWindowStart,
@@ -39,11 +39,14 @@ import { CurrencyConverter, normalizeCurrencyCode } from '../exchange-rates/curr
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { InvestmentFlowsService } from '../investments/investment-flows.service';
 import { InvestmentsService } from '../investments/investments.service';
-import { computedCurrencyCodes, computedValue, loadComputedLines } from './computed-lines';
+import { computedCurrencyCodes, loadComputedLines } from './computed-lines';
 import type { NetWorthRange } from './dto/net-worth-query.dto';
 import { buildAttribution, buildSavings } from './net-worth-attribution';
 import { buildBreakdown, buildGroups } from './net-worth-groups';
-import { round2, round4, toNumber } from './net-worth-math';
+import { round2, round4 } from './net-worth-math';
+import { buildProperties, linkedWalletIds } from './net-worth-properties';
+import { findLeaves, groupBy, highestPoint } from './net-worth-summary';
+import { valueReaders } from './net-worth-values';
 
 export type {
   NetWorthAssetLine,
@@ -102,6 +105,7 @@ export class NetWorthService {
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
     private readonly balanceService: BalanceService,
+    private readonly propertyService: BalancePropertyService,
     private readonly exchangeRatesService: ExchangeRatesService,
     @Optional()
     private readonly investmentsService?: InvestmentsService,
@@ -162,30 +166,13 @@ export class NetWorthService {
       workspaceId,
     );
 
-    const valueAt = (accountId: string, code: string, date: string): number => {
-      const computed = computedValue(computedByCode, converter, code, date);
-      if (computed !== null) return computed;
-      const snapshot = latestOnOrBefore(snapshotsByAccount.get(accountId), date);
-      return snapshot
-        ? converter.convert(
-            toNumber(snapshot.amount),
-            normalizeCurrencyCode(snapshot.currency || currency),
-            date,
-          )
-        : 0;
-    };
-
-    /** What the line holds on a day, in the currency it is held in. */
-    const nativeAt = (leaf: BalanceAccount, date: string): Map<string, number> => {
-      const computed = computedByCode.get(leaf.code);
-      if (computed) return computed.get(date) ?? new Map();
-      const snapshot = latestOnOrBefore(snapshotsByAccount.get(leaf.id), date);
-      return snapshot
-        ? new Map([
-            [normalizeCurrencyCode(snapshot.currency || currency), toNumber(snapshot.amount)],
-          ])
-        : new Map();
-    };
+    const { valuation, valueAt, nativeAt } = valueReaders({
+      accounts,
+      snapshotsByAccount,
+      computedByCode,
+      converter,
+      currency,
+    });
 
     const daily = dates.map(date => {
       let assets = 0;
@@ -315,6 +302,20 @@ export class NetWorthService {
         to,
         locale,
       ),
+      properties: buildProperties({
+        accounts,
+        leaves,
+        valueAt,
+        valuation,
+        walletDebts: await this.propertyService.linkedWalletDebts(
+          workspaceId,
+          linkedWalletIds(leaves),
+          to,
+        ),
+        converter,
+        to,
+        locale,
+      }),
     };
   }
 
@@ -469,46 +470,4 @@ export class NetWorthService {
       .addOrderBy('snapshot.updatedAt', 'ASC')
       .getMany();
   }
-}
-
-/**
- * Totals per classification bucket, with unlabelled lines kept as their own
- * `null` bucket rather than dropped — how much is still unclassified is worth
- * seeing, not hiding.
- */
-function groupBy(
-  lines: NetWorthAssetLine[],
-  pick: (line: NetWorthAssetLine) => string | null,
-  total: number,
-): NetWorthClassificationItem[] {
-  const totals = new Map<string | null, number>();
-  for (const line of lines) {
-    const key = pick(line);
-    totals.set(key, (totals.get(key) ?? 0) + line.amount);
-  }
-
-  return [...totals.entries()]
-    .map(([key, amount]) => ({
-      key,
-      amount: round2(amount),
-      percent: total > 0 ? round2((amount / total) * 100) : 0,
-    }))
-    .filter(item => item.amount !== 0)
-    .sort((a, b) => b.amount - a.amount);
-}
-
-function findLeaves(accounts: BalanceAccount[]): BalanceAccount[] {
-  const parentIds = new Set(
-    accounts.map(account => account.parentId).filter((id): id is string => Boolean(id)),
-  );
-  return accounts.filter(account => !parentIds.has(account.id));
-}
-
-/** The peak of a series, or null when it never rose above zero. */
-function highestPoint(points: NetWorthPoint[]): { value: number; date: string } | null {
-  let best: NetWorthPoint | null = null;
-  for (const point of points) {
-    if (!best || point.value > best.value) best = point;
-  }
-  return best && best.value > 0 ? { value: best.value, date: best.date } : null;
 }

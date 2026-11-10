@@ -126,5 +126,6 @@ export * from './wealth/investments';
 export * from './wealth/loans';
 export * from './wealth/metals';
 export * from './wealth/net-worth';
+export * from './wealth/properties';
 export * from './webhooks/webhooks';
 export * from './workspaces/workspaces';
