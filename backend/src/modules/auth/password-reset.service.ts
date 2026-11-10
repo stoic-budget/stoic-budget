@@ -7,12 +7,16 @@ import { APP_NAME } from '../../common/brand';
 import { appError } from '../../common/errors/app-error';
 import { hashPassword } from '../../common/utils/password-hash.util';
 import { requireSecret } from '../../common/utils/required-secret.util';
+import type { Passkey } from '../../contracts';
 import { AuditAction, EntityType, Severity } from '../../entities/audit-event.entity';
 import { AuthSession } from '../../entities/auth-session.entity';
+import { PasskeyCredential } from '../../entities/passkey-credential.entity';
 import { PasswordResetToken } from '../../entities/password-reset-token.entity';
 import { User } from '../../entities/user.entity';
 import { AuditService } from '../audit/audit.service';
 import { MailerService } from '../mailer/mailer.service';
+import { deleteOwnPasskeys, toPasskey } from './passkeys/passkey-helpers';
+import { PasskeysService } from './passkeys/passkeys.service';
 import { recordSecurityEvent } from './security-audit.util';
 
 const TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -26,11 +30,12 @@ export class PasswordResetService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(PasswordResetToken)
     private readonly tokenRepository: Repository<PasswordResetToken>,
-    @InjectRepository(AuthSession)
-    private readonly authSessionRepository: Repository<AuthSession>,
+    @InjectRepository(PasskeyCredential)
+    private readonly passkeyRepository: Repository<PasskeyCredential>,
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
     private readonly auditService: AuditService,
+    private readonly passkeysService: PasskeysService,
   ) {}
 
   /**
@@ -106,37 +111,54 @@ export class PasswordResetService {
     }
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<void> {
-    const record = await this.tokenRepository.findOne({
-      where: { tokenHash: this.hashToken(token) },
+  /**
+   * The passkeys of the account a reset link belongs to, so the person can see
+   * and drop any they did not add. Reading does not spend the link, and a bad
+   * link gets exactly the answer the reset itself gives.
+   */
+  async listPasskeys(token: string): Promise<Passkey[]> {
+    const { user } = await this.redeemable(token);
+    const rows = await this.passkeyRepository.find({
+      where: { userId: user.id },
+      order: { createdAt: 'ASC' },
     });
+    return rows.map(toPasskey);
+  }
 
-    // One message for every failure mode: expired, already used, never existed.
-    // Distinguishing them tells an attacker which guesses were closer.
-    if (!record || record.usedAt || record.expiresAt.getTime() < Date.now()) {
-      throw new BadRequestException(appError('AUTH_RESET_LINK_INVALID'));
-    }
+  async resetPassword(
+    token: string,
+    newPassword: string,
+    removePasskeyIds: readonly string[] = [],
+  ): Promise<void> {
+    const { record, user } = await this.redeemable(token);
+    const passwordHash = await hashPassword(newPassword);
 
-    const user = await this.userRepository.findOne({ where: { id: record.userId } });
-    if (!(user && user.isActive !== false)) {
-      throw new BadRequestException(appError('AUTH_RESET_LINK_INVALID'));
-    }
-
-    user.passwordHash = await hashPassword(newPassword);
-    // Bump the token version and revoke sessions: whoever forced the reset —
-    // the owner recovering, or someone kicking out an intruder — expects every
-    // existing login to stop working.
-    user.tokenVersion = (user.tokenVersion ?? 0) + 1;
-    await this.userRepository.save(user);
-    // IsNull(), not `revokedAt: null` — TypeORM renders a literal null
-    // comparison for the latter, which never matches, so nothing was revoked.
-    await this.authSessionRepository.update(
-      { userId: user.id, revokedAt: IsNull() },
-      { revokedAt: new Date() },
-    );
-
-    record.usedAt = new Date();
-    await this.tokenRepository.save(record);
+    // One transaction: the link is spent, the password changed, every session
+    // revoked and the chosen passkeys removed, or none of it happens.
+    const removed = await this.userRepository.manager.transaction(async manager => {
+      // Claimed with a conditional update, so two submits of one link cannot both pass.
+      const claimed = await manager.update(
+        PasswordResetToken,
+        { id: record.id, usedAt: IsNull() },
+        { usedAt: new Date() },
+      );
+      if (!claimed.affected) {
+        throw new BadRequestException(appError('AUTH_RESET_LINK_INVALID'));
+      }
+      // Bump the token version and revoke sessions: whoever forced the reset —
+      // the owner recovering, or someone kicking out an intruder — expects every
+      // existing login to stop working.
+      await manager.update(User, { id: user.id }, { passwordHash });
+      await manager.increment(User, { id: user.id }, 'tokenVersion', 1);
+      // IsNull(), not `revokedAt: null` — TypeORM renders a literal null
+      // comparison for the latter, which never matches, so nothing was revoked.
+      await manager.update(
+        AuthSession,
+        { userId: user.id, revokedAt: IsNull() },
+        { revokedAt: new Date() },
+      );
+      return deleteOwnPasskeys(manager, user.id, removePasskeyIds);
+    });
 
     await recordSecurityEvent(this.auditService, this.logger, {
       workspaceId: user.workspaceId,
@@ -147,6 +169,29 @@ export class PasswordResetService {
       severity: Severity.WARN,
       meta: { password: 'reset', sessions: 'all-revoked' },
     });
+    if (removed.length > 0) {
+      await this.passkeysService.reportRemoved(user, removed, 'password-reset');
+    }
+  }
+
+  /**
+   * The live grant behind a reset link and its active user. One message for
+   * every failure mode: expired, already used, never existed. Distinguishing
+   * them tells an attacker which guesses were closer.
+   */
+  private async redeemable(token: string): Promise<{ record: PasswordResetToken; user: User }> {
+    const record = await this.tokenRepository.findOne({
+      where: { tokenHash: this.hashToken(token) },
+    });
+    if (!record || record.usedAt || record.expiresAt.getTime() < Date.now()) {
+      throw new BadRequestException(appError('AUTH_RESET_LINK_INVALID'));
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: record.userId } });
+    if (!(user && user.isActive !== false)) {
+      throw new BadRequestException(appError('AUTH_RESET_LINK_INVALID'));
+    }
+    return { record, user };
   }
 
   /** Housekeeping so spent and stale grants do not accumulate forever. */

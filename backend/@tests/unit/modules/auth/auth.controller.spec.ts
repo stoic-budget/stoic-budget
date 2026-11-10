@@ -1,4 +1,6 @@
+import { THROTTLER_LIMIT, THROTTLER_TTL } from '@nestjs/throttler/dist/throttler.constants';
 import { AuthController } from '@/modules/auth/auth.controller';
+import { PasskeysController } from '@/modules/auth/passkeys/passkeys.controller';
 
 describe('AuthController', () => {
   it('proxies register/login/logout operations', async () => {
@@ -76,7 +78,7 @@ describe('AuthController', () => {
     expect(cookies.access_token).toBeUndefined();
     expect(cookies.refresh_token).toBeUndefined();
 
-    await expect(controller.logoutAll({ id: 'u1' } as any, res as any)).resolves.toEqual({
+    await expect(controller.logoutAll({ id: 'u1' } as any, {}, res as any)).resolves.toEqual({
       message: 'ok-all',
     });
     await expect(controller.getSessions({ id: 'u1' } as any, req)).resolves.toEqual([{ id: 's1' }]);
@@ -96,5 +98,16 @@ describe('AuthController', () => {
 
     expect(authService.logout).toHaveBeenCalledWith('u1', 's1');
     expect(authService.getSessions).toHaveBeenCalledWith('u1', 's1');
+  });
+
+  it('limits log-out-everywhere as tightly as a passkey remove, since both check the password', () => {
+    const limitOf = (handler: object) => ({
+      limit: Reflect.getMetadata(`${THROTTLER_LIMIT}default`, handler),
+      ttl: Reflect.getMetadata(`${THROTTLER_TTL}default`, handler),
+    });
+    expect(limitOf(PasskeysController.prototype.remove)).toEqual({ limit: 5, ttl: 60000 });
+    expect(limitOf(AuthController.prototype.logoutAll)).toEqual(
+      limitOf(PasskeysController.prototype.remove),
+    );
   });
 });

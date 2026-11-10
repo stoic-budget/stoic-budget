@@ -49,6 +49,16 @@ export const passkeysApi = {
     });
   },
 
+  /**
+   * The passkeys of the account a reset link belongs to, read with the link's
+   * token (POST, so the token stays out of URLs); reading does not spend it.
+   */
+  async listForReset(token: string): Promise<Passkey[]> {
+    const url = '/auth/reset-password/passkeys';
+    const { data } = await apiClient.post(url, { token } satisfies ContractInput<'ResetTokenBody'>);
+    return checkContract('PasskeyList', data, url);
+  },
+
   async signInOptions(): Promise<PasskeyRequestOptions> {
     const url = '/auth/passkey-login/options';
     const { data } = await apiClient.post(url);

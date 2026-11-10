@@ -53,6 +53,12 @@ export class MailerService {
     return Boolean((smtp?.host || process.env.SMTP_HOST) && (smtp?.from || process.env.SMTP_FROM));
   }
 
+  /** Whether mail about the account itself would go out, so a notice can skip quietly. */
+  async isAccountMailConfigured(accountOf: Pick<User, 'id' | 'workspaceId'>): Promise<boolean> {
+    const smtp = await this.applicationSettingsService.getAccountSmtpSettings(accountOf);
+    return Boolean((smtp?.host || process.env.SMTP_HOST) && (smtp?.from || process.env.SMTP_FROM));
+  }
+
   async send(params: SendMailParams): Promise<boolean> {
     const smtp = await this.smtpFor(params);
     const host = smtp?.host || process.env.SMTP_HOST;
