@@ -11,6 +11,7 @@ import { AppModule } from '../../src/app.module';
 import {
   BranchItem,
   CategoryItem,
+  ForecastResponse,
   MessageResult,
   PayeeMerge,
   PayeeRecord,
@@ -19,6 +20,7 @@ import {
   StorageTag,
   StorageViewItem,
   TransactionAttachment,
+  TransactionListPage,
   WalletItem,
 } from '../../src/contracts';
 import {
@@ -255,6 +257,42 @@ describe('API contracts: ledger book (e2e)', () => {
       const merged = await call('post', `/transactions/${id}/unsplit`).expect(200);
       matches(TransactionRecord, merged.body);
       expect(merged.body.splitGroupId).toBeNull();
+    });
+
+    it('a pending bank row: listed as pending, in the forecast as spent, never split', async () => {
+      const pendingId = await cloneRow(transactionId, {
+        counterpartyName: 'ACME Store - Wireless Buds',
+        documentNumber: 'ACT-1:AUTH-1',
+        // A hold the bank still keeps: the forecast drops older ones.
+        transactionDate: new Date(),
+        isPending: true,
+        isVerified: false,
+      });
+
+      const one = await call('get', `/transactions/${pendingId}`).expect(200);
+      matches(TransactionRecord, one.body);
+      expect(one.body.isPending).toBe(true);
+      const page = await call('get', '/transactions?limit=100').expect(200);
+      matches(TransactionListPage, page.body);
+      const listed = page.body.data.find((row: { id: string }) => row.id === pendingId);
+      expect(listed.isPending).toBe(true);
+      expect(page.body.data.find((row: { id: string }) => row.id === transactionId).isPending).toBe(
+        false,
+      );
+
+      const forecast = await call('get', '/forecast?days=30').expect(200);
+      matches(ForecastResponse, forecast.body);
+      const spent = forecast.body.events.find(
+        (event: { sourceId: string }) => event.sourceId === pendingId,
+      );
+      expect(spent).toMatchObject({ kind: 'pending', label: 'ACME Store - Wireless Buds' });
+      expect(spent.amount).toBeLessThan(0);
+
+      const split = await call('post', `/transactions/${pendingId}/split`, {
+        parts: [{ amount: 20 }, { amount: 22.5 }],
+      }).expect(400);
+      expect(split.body.error.code).toBe('TRANSACTION_SPLIT_PENDING');
+      await dataSource.getRepository(Transaction).delete({ id: pendingId });
     });
 
     it('merge duplicates and unmark one', async () => {

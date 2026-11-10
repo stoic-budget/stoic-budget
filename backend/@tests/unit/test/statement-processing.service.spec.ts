@@ -337,6 +337,21 @@ describe('StatementProcessingService', () => {
     expect(savedTransactions.map(tx => tx.fingerprint)).toEqual(['fp-DOC-1', 'fp-DOC-2']);
   });
 
+  it('stores a line the bank-sync feed marks pending as a pending row, without a fingerprint', async () => {
+    const [first] = parsedStatement.transactions;
+    parsedStatement.transactions[0] = { ...first, pending: true } as typeof first;
+    try {
+      await service.processStatement(statement.id);
+    } finally {
+      parsedStatement.transactions[0] = first;
+    }
+
+    expect(savedTransactions.map(tx => tx.isPending)).toEqual([true, false]);
+    // Its booked version replaces it by the provider's id; a fingerprint would
+    // only flag that booked version a duplicate of a row about to go.
+    expect(savedTransactions.map(tx => tx.fingerprint)).toEqual([null, 'fp-DOC-2']);
+  });
+
   it('flags transactions whose fingerprint already exists in the workspace', async () => {
     transactionFingerprintService.findByFingerprints.mockResolvedValueOnce([
       { id: 'tx-existing', fingerprint: 'fp-DOC-1' } as Transaction,

@@ -27,11 +27,11 @@ import {
 } from './forecast.engine';
 import { firstOfNextMonth, monthsUntil } from './forecast-calendar';
 import { forecastCaveats } from './forecast-caveats';
+import { incomeHistory, pendingEvents } from './forecast-transactions';
 
 export type { ForecastResponse };
 
 const HISTORY_MONTHS = 3;
-const INCOME_LOOKBACK_MONTHS = 12;
 /** Dated items are read a year ahead whatever the horizon: the runway is read over a year. */
 const PROJECTION_DAYS = 365;
 const OPEN_PAYABLE_STATUSES = [
@@ -81,15 +81,18 @@ export class ForecastService {
     const currency = normalizeCurrency(workspace?.currency);
     const profile = readWorkspaceProfile(workspace);
 
-    const [commitments, receivables, invoices, goals, history, incomeRows, hasWallet] =
+    const convert = (amount: number, from: string) =>
+      this.convert(amount, from, currency, workspaceId);
+    const [commitments, receivables, invoices, goals, history, incomeRows, hasWallet, pending] =
       await Promise.all([
         this.dashboardService.getCommitments(workspaceId, projectionDays),
         this.receivableEvents(workspaceId, currency, todayKey, projectionEnd),
         this.invoiceEvents(workspaceId, currency, todayKey, projectionEnd),
         this.goalEvents(workspaceId, currency, todayKey, projectionEnd),
         this.monthlyHistory(workspaceId, currency, today, viewerMemberId),
-        this.incomeHistory(workspaceId, today, viewerMemberId),
+        incomeHistory(this.transactionRepository, workspaceId, today, viewerMemberId),
         hasActiveAccounts(this.transactionRepository, workspaceId),
+        pendingEvents(this.transactionRepository, workspaceId, todayKey, viewerMemberId, convert),
       ]);
 
     const recurring = detectRecurringIncome(
@@ -134,7 +137,7 @@ export class ForecastService {
       today: todayKey,
       horizonDays,
       openingBalance: commitments.openingBalance,
-      events: [...committed, ...receivables, ...invoices, ...goals, ...incomeEvents],
+      events: [...pending, ...committed, ...receivables, ...invoices, ...goals, ...incomeEvents],
       everydayMonthly,
       irregularIncomeMonthly,
       averagedParties: { expense: expenseParties, income: incomeParties },
@@ -411,32 +414,6 @@ export class ForecastService {
       incomeByParty: perMonth('income'),
       expenseByParty: perMonth('expense'),
     };
-  }
-
-  private async incomeHistory(workspaceId: string, today: Date, viewerMemberId: string | null) {
-    const since = new Date(today.getFullYear(), today.getMonth() - INCOME_LOOKBACK_MONTHS, 1);
-    const incomeQuery = this.transactionRepository
-      .createQueryBuilder('t')
-      .select([
-        `${redactedSql('t', 't.counterparty_name')} AS "counterpartyName"`,
-        't.credit AS amount',
-        't.transactionDate AS "transactionDate"',
-      ])
-      .where('t.workspaceId = :workspaceId', {
-        workspaceId,
-        [PRIVACY_VIEWER_PARAM]: viewerMemberId,
-      });
-    return onlyFlows(incomeQuery, 't')
-      .andWhere('t.transactionType = :income', { income: TransactionType.INCOME })
-      .andWhere('t.isDuplicate = false')
-      .andWhere('t.transferPairId IS NULL')
-      .andWhere('t.transactionDate >= :since', { since })
-      .orderBy('t.transactionDate', 'ASC')
-      .getRawMany<{
-        counterpartyName: string | null;
-        amount: string;
-        transactionDate: string | Date;
-      }>();
   }
 
   private async subscriptionsMonthly(workspaceId: string, _currency: string): Promise<number> {

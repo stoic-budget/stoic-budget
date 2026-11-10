@@ -3,6 +3,10 @@
 import * as Schema from 'effect/Schema';
 import { DateOnly, type Wire } from '../common/wire';
 
+/**
+ * `pending`: a row the bank still holds as pending, as money already gone (or
+ * come) today. It counts in no balance yet, so the opening balance lacks it.
+ */
 export const ForecastEventKind = Schema.Literals([
   'payable',
   'subscription',
@@ -10,6 +14,7 @@ export const ForecastEventKind = Schema.Literals([
   'goal',
   'income',
   'scenario',
+  'pending',
 ]);
 export type ForecastEventKind = Wire<typeof ForecastEventKind>;
 

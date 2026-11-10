@@ -14,6 +14,11 @@ export interface ParsedTransaction {
   currency?: string;
   exchangeRate?: number;
   amountForeign?: number;
+  /**
+   * The bank still holds the row as pending (a bank-sync feed says so). It is
+   * stored, shown and counted nowhere until the booked version replaces it.
+   */
+  pending?: boolean;
 }
 
 export interface ParsedStatementMetadata {

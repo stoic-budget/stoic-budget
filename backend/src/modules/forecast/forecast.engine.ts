@@ -20,13 +20,9 @@
  * what they may spend.
  */
 
-export type ForecastEventKind =
-  | 'payable'
-  | 'subscription'
-  | 'invoice'
-  | 'goal'
-  | 'income'
-  | 'scenario';
+import type { ForecastEventKind } from '../../contracts';
+
+export type { ForecastEventKind };
 
 export interface ForecastEvent {
   /** YYYY-MM-DD */

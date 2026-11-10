@@ -81,6 +81,11 @@ export const TransactionListItem = Schema.Struct({
   privateCategoryId: Schema.NullOr(Schema.String),
   /** Left out of every income and spending figure; balances and net worth still count it. */
   excludedFromBudgets: Schema.Boolean,
+  /**
+   * The bank still holds the row as pending: shown, dimmed, but counted nowhere
+   * (no balance, budget, report or Review) until the booked version replaces it.
+   */
+  isPending: Schema.Boolean,
   transferPairId: Schema.NullOr(Schema.String),
   transferPairSource: Schema.NullOr(Schema.Literals(['auto', 'manual', 'rejected'])),
   transferPairKind: Schema.NullOr(Schema.Literals(['transfer', 'reimbursement', 'investment'])),

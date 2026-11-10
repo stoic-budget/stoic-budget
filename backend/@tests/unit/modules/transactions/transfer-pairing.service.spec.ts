@@ -168,6 +168,26 @@ describe('TransferPairingService', () => {
       expect(repository.update).not.toHaveBeenCalled();
     });
 
+    it('refuses a row the bank has not booked yet', async () => {
+      repository.findOne
+        .mockResolvedValueOnce(row({ id: 'a', isPending: true }))
+        .mockResolvedValueOnce(row({ id: 'b', transactionType: TransactionType.INCOME }));
+
+      await expect(service.link(WORKSPACE, 'a', 'b')).rejects.toMatchObject({
+        response: expect.objectContaining({ code: 'TRANSACTION_LEG_PENDING' }),
+      });
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+
+    it('leaves pending rows out of automatic pairing and the manual picker', async () => {
+      queueQueries([]);
+
+      await service.detect(WORKSPACE, 'stmt-a');
+
+      const qb = repository.createQueryBuilder.mock.results[0].value;
+      expect(qb.andWhere).toHaveBeenCalledWith('t.isDuplicate = false AND t.isPending = false');
+    });
+
     it('does not see rows of another workspace', async () => {
       repository.findOne.mockResolvedValue(null);
       await expect(service.link(WORKSPACE, 'a', 'b')).rejects.toBeInstanceOf(NotFoundException);
@@ -307,6 +327,22 @@ describe('TransferPairingService reimbursements', () => {
     await expect(service.linkReimbursement(WORKSPACE, 'inc', 'exp')).rejects.toBeInstanceOf(
       ConflictException,
     );
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('refuses a pending leg and never offers a pending expense as one', async () => {
+    repository.findOne.mockResolvedValueOnce(income()).mockResolvedValueOnce(expense({ isPending: true }));
+    await expect(service.linkReimbursement(WORKSPACE, 'inc', 'exp')).rejects.toMatchObject({
+      response: expect.objectContaining({ code: 'TRANSACTION_LEG_PENDING' }),
+    });
+
+    const qb: Record<string, Mock> = {};
+    for (const method of ['leftJoin', 'where', 'andWhere']) qb[method] = vi.fn(() => qb);
+    qb.getMany = vi.fn(async () => []);
+    repository.createQueryBuilder.mockReturnValueOnce(qb);
+    repository.findOne.mockResolvedValueOnce(income());
+    await service.reimbursementCandidates(WORKSPACE, 'inc');
+    expect(qb.andWhere).toHaveBeenCalledWith('t.isDuplicate = false AND t.isPending = false');
     expect(repository.update).not.toHaveBeenCalled();
   });
 

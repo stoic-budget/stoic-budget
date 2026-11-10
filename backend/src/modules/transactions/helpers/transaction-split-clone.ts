@@ -1,3 +1,5 @@
+import { BadRequestException } from '@nestjs/common';
+import { appError } from '../../../common/errors/app-error';
 import type { Transaction } from '../../../entities/transaction.entity';
 
 /**
@@ -10,7 +12,8 @@ import type { Transaction } from '../../../entities/transaction.entity';
  * cascades into them; the per-part money columns (amount/debit/credit/
  * amountForeign) and the split markers, which `split()` assigns itself;
  * `fingerprint`, which backfill recomputes from the post-split amount; and the
- * duplicate-flag columns, unreachable because a flagged row cannot be split.
+ * duplicate-flag columns and `isPending`, unreachable because a flagged or a
+ * pending row cannot be split (`assertSplitAllowed`).
  */
 export function cloneForSplit(source: Transaction): Partial<Transaction> {
   return {
@@ -57,4 +60,31 @@ export function cloneForSplit(source: Transaction): Partial<Transaction> {
     excludedFromBudgets: source.excludedFromBudgets,
     importSessionId: source.importSessionId,
   };
+}
+
+/** Refuses a row that may not be split, whatever the parts would be. */
+export function assertSplitAllowed(transaction: Transaction): void {
+  if (transaction.splitGroupId) {
+    throw new BadRequestException(appError('TRANSACTION_ALREADY_SPLIT'));
+  }
+
+  // A duplicate-flagged row is excluded from dashboards and reports. Splitting it
+  // would produce siblings that default to isDuplicate=false, so the sibling
+  // amounts would reappear in those totals. Refuse instead.
+  if (transaction.isDuplicate) {
+    throw new BadRequestException(appError('TRANSACTION_SPLIT_DUPLICATE'));
+  }
+
+  // A pending row counts nowhere, and its parts would default to booked rows
+  // that count. Its booked version replaces it in place; split that one.
+  if (transaction.isPending) {
+    throw new BadRequestException(appError('TRANSACTION_SPLIT_PENDING'));
+  }
+
+  // A locked row has already been reported on a filed return. Splitting it
+  // re-assesses the tax across the parts, which would change figures that
+  // have been submitted to a tax authority.
+  if (transaction.taxLocked) {
+    throw new BadRequestException(appError('TRANSACTION_SPLIT_TAX_LOCKED'));
+  }
 }

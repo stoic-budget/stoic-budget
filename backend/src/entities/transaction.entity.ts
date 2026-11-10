@@ -74,6 +74,8 @@ const TRIGGER_WRITTEN = { select: false, insert: false, update: false } as const
 @Index('IDX_transactions_workspace_transfer_pair', ['workspaceId', 'transferPairId'], {
   where: '"transfer_pair_id" IS NOT NULL',
 })
+// Partial, matching the migration: the bank-sync pull looks up the few pending rows.
+@Index('IDX_transactions_workspace_pending', ['workspaceId'], { where: '"is_pending" = true' })
 // Makes a crypto sync idempotent: re-reading the chain re-offers rows we already
 // have, and the insert simply loses the race with itself. One on-chain transaction
 // can legitimately produce several rows (a native transfer plus a token transfer,
@@ -232,6 +234,14 @@ export class Transaction {
    */
   @Column({ name: 'excluded_from_budgets', type: 'boolean', default: false })
   excludedFromBudgets: boolean;
+
+  /**
+   * A bank-sync row the bank still holds as pending. Shown, but counted
+   * nowhere: `onlyCounted`/`countedSql`/`countedWhere` (and so `onlyFlows`)
+   * leave it out until the pull replaces it with the booked version.
+   */
+  @Column({ name: 'is_pending', type: 'boolean', default: false })
+  isPending: boolean;
 
   @ManyToOne(() => CryptoWallet, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'crypto_wallet_id' })

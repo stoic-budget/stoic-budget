@@ -16,6 +16,7 @@ const KIND_KEYS: Record<ForecastEventKind, string> = {
   goal: 'kindGoal',
   income: 'kindIncome',
   scenario: 'kindScenario',
+  pending: 'kindPending',
 };
 
 const DAY_MS = 86_400_000;

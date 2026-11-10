@@ -16,7 +16,7 @@ import {
   TransferPairSource,
 } from '../../../entities/transaction.entity';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
-import { writeTransferPairs } from './transfer-pair-writer';
+import { assertFreeLeg, writeTransferPairs } from './transfer-pair-writer';
 import {
   absAmount,
   accountKey,
@@ -66,7 +66,8 @@ export class TransferPairingService {
       .leftJoin('t.statement', 's')
       .addSelect(['s.id', 's.accountNumber', 's.walletId'])
       .where('t.workspaceId = :workspaceId', { workspaceId })
-      .andWhere('t.isDuplicate = false')
+      // A pending row may never book; its booked version is the one to pair.
+      .andWhere('t.isDuplicate = false AND t.isPending = false')
       .andWhere('t.splitGroupId IS NULL')
       // A dividend is linked to its investment account without a pair: it is
       // income, and pairing it with some transfer would make it vanish.
@@ -170,17 +171,7 @@ export class TransferPairingService {
     if (a.transactionType === b.transactionType) {
       throw new BadRequestException(appError('TRANSACTION_TRANSFER_SAME_DIRECTION'));
     }
-    for (const leg of [a, b]) {
-      if (leg.isDuplicate) {
-        throw new BadRequestException(appError('TRANSACTION_LEG_DUPLICATE', { id: leg.id }));
-      }
-      if (leg.splitGroupId) {
-        throw new BadRequestException(appError('TRANSACTION_LEG_SPLIT', { id: leg.id }));
-      }
-      if (leg.transferPairId) {
-        throw new ConflictException(appError('TRANSACTION_LEG_TRANSFERRED', { id: leg.id }));
-      }
-    }
+    [a, b].forEach(assertFreeLeg);
 
     const transferPairId = randomUUID();
     const result = await this.transactionRepository.update(
@@ -231,7 +222,7 @@ export class TransferPairingService {
       .where('t.workspaceId = :workspaceId', { workspaceId })
       .andWhere('t.id != :id', { id: income.id })
       .andWhere('t.transactionType = :expense', { expense: TransactionType.EXPENSE })
-      .andWhere('t.isDuplicate = false')
+      .andWhere('t.isDuplicate = false AND t.isPending = false')
       .andWhere('t.splitGroupId IS NULL')
       .andWhere('t.transferPairId IS NULL')
       .andWhere('t.transactionDate BETWEEN :since AND :until', {
@@ -276,17 +267,7 @@ export class TransferPairingService {
     if (expense.transactionType !== TransactionType.EXPENSE) {
       throw new BadRequestException(appError('TRANSACTION_REIMBURSEMENT_NOT_EXPENSE'));
     }
-    for (const leg of [income, expense]) {
-      if (leg.isDuplicate) {
-        throw new BadRequestException(appError('TRANSACTION_LEG_DUPLICATE', { id: leg.id }));
-      }
-      if (leg.splitGroupId) {
-        throw new BadRequestException(appError('TRANSACTION_LEG_SPLIT', { id: leg.id }));
-      }
-      if (leg.transferPairId) {
-        throw new ConflictException(appError('TRANSACTION_LEG_TRANSFERRED', { id: leg.id }));
-      }
-    }
+    [income, expense].forEach(assertFreeLeg);
     if (income.reimbursementOfId) {
       throw new ConflictException(appError('TRANSACTION_ALREADY_REIMBURSES'));
     }

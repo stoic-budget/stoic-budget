@@ -7,6 +7,7 @@ import StatementCategoryDrawer from '@/app/(main)/statements/[id]/edit/Statement
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, ChevronDown } from '@/app/components/icons';
 import { ItemImageBadge } from '@/app/components/item-images/ItemImageBadge';
 import { PaymentTypeLabel } from '@/app/components/transactions/PaymentTypeLabel';
+import { PendingBadge } from '@/app/components/transactions/PendingBadge';
 import { Checkbox } from '@/app/components/ui/checkbox';
 import {
   DropdownMenu,
@@ -172,7 +173,13 @@ export function AllTransactionsTable({
               const description = row.paymentPurpose?.trim() || payeeName(row.counterpartyName);
               const budget = row.categoryId ? budgetByCategory.get(row.categoryId) : undefined;
               return (
-                <tr key={row.id} className={clsx(selected.has(row.id) && 'is-selected')}>
+                <tr
+                  key={row.id}
+                  className={clsx(
+                    selected.has(row.id) && 'is-selected',
+                    row.isPending && 'is-pending-row',
+                  )}
+                >
                   <td className="seneca-all-tx__col-direction">
                     {/* The vendor's mark or the item's picture, where there is one; the sign of the amount
                         still says which way the money went. */}
@@ -189,6 +196,7 @@ export function AllTransactionsTable({
                       {description}
                     </button>
                     <PaymentTypeLabel type={row.paymentType} />
+                    {row.isPending ? <PendingBadge /> : null}
                   </td>
                   <td
                     className={clsx(

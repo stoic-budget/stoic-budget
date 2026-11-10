@@ -204,7 +204,8 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       .where('transaction.workspaceId = :workspaceId', { workspaceId })
       .andWhere('transaction.walletId IN (:...walletIds)', { walletIds })
       .andWhere('transaction.isVerified = false')
-      .andWhere('transaction.isDuplicate = false')
+      // A pending row is not in Review: it waits for the bank.
+      .andWhere('transaction.isDuplicate = false AND transaction.isPending = false')
       .groupBy('transaction.walletId')
       .getRawMany<{ walletId: string; count: string }>();
     return new Map(rows.map(row => [row.walletId, Number(row.count) || 0]));

@@ -41,6 +41,16 @@ export interface TransactionsImportedEvent {
   transactionIds: string[];
 }
 
+/**
+ * Bank-sync rows the bank booked this pull, each turned from its pending row
+ * in place: what an import does for a new row (a subscription's payment, a
+ * bill's money) is owed to these now.
+ */
+export interface TransactionsPostedEvent {
+  workspaceId: string;
+  transactionIds: string[];
+}
+
 export interface CategoryChangedEvent extends WorkspaceActorEvent {
   action: 'created' | 'updated' | 'deleted';
   categoryId: string;

@@ -40,6 +40,8 @@ export interface Transaction {
   isPrivate?: boolean;
   /** Left out of budgets, reports and the forecast; balances and net worth still count it. */
   excludedFromBudgets?: boolean;
+  /** The bank still holds it as pending: shown, dimmed, but counted nowhere until it books. */
+  isPending?: boolean;
   // Currency conversion (populated when convert_to query param is passed to the API)
   convertedAmount?: number;
   conversionRate?: number;
