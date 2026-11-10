@@ -43,7 +43,12 @@ can be matched to its log lines.
 ## Health checks
 
 - `GET /api/v1/health` — liveness; answers without touching dependencies
-- `GET /api/v1/health/ready` — readiness; checks the database and returns 503 when it is unreachable
+- `GET /api/v1/health/ready` — readiness; checks the database and Redis and returns 503 when either is unreachable.
+  It answers only `ok`/`error` per dependency: a slow background queue does not fail it.
+- `GET /api/v1/system/health` — instance admins only; the database, Redis, each background queue (worker
+  heartbeat, waiting jobs, how long the oldest has waited) and a setup checklist (SMTP and its last send, push
+  keys, backup folder, `APP_URL`, encryption key). Secrets are reported as set or not, never shown. The app
+  shows admins a banner when one of these fails, and the page at `/admin/health`.
 
 The backend image's Docker health check calls `/api/v1/health`.
 

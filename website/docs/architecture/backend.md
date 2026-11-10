@@ -65,6 +65,7 @@ The Socket.IO gateway lives in the `notifications` module: clients join a worksp
 ## Health checks
 
 - `GET /api/v1/health` — liveness
-- `GET /api/v1/health/ready` — checks the database and returns 503 when it fails
+- `GET /api/v1/health/ready` — checks the database and Redis and returns 503 when either fails
+- `GET /api/v1/system/health` — instance admins: queues, worker heartbeats and the setup checklist
 
 Next: [Frontend Architecture](frontend)
