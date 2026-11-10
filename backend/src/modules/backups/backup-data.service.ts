@@ -35,6 +35,8 @@ export const EXCLUDED_TABLES = new Set([
   'workspace_versions',
   // Useless without the token this backup strips: recreated, not restored.
   'custom_table_shares',
+  // A member's feed link (its hash): per member, and the restored copy has its own members.
+  'calendar_feeds',
 ]);
 
 export const SENSITIVE_PROPERTIES = new Set([

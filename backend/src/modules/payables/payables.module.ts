@@ -12,6 +12,7 @@ import { Transaction } from '../../entities/transaction.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { AuditModule } from '../audit/audit.module';
+import { CalendarFeedModule } from '../calendar-feed/calendar-feed.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { ItemImagesModule } from '../item-images/item-images.module';
 import { NotificationsModule } from '../notifications/notifications.module';
@@ -41,6 +42,8 @@ import { UnbookedPaymentsService } from './unbooked-payments.service';
       IdempotencyKey,
     ]),
     AuditModule,
+    // The ICS feed of bills and other money dates; app.module is at its size limit.
+    CalendarFeedModule,
     ExchangeRatesModule,
     // Pictures of what a bill or its payment was for; app.module is at its size limit.
     ItemImagesModule,

@@ -263,4 +263,6 @@ export const queryKeys = {
   /** Instance-wide too: every workspace's statements, as counts per bank and layout. */
   parserHealth: () => ['parser-health'] as const,
   workspaceVersions: (workspaceId: string | null) => ['workspace-versions', workspaceId] as const,
+  /** The caller's own calendar feed in this workspace. */
+  calendarFeed: (workspaceId: string | null) => ['calendar-feed', workspaceId] as const,
 } as const;

@@ -438,6 +438,8 @@ export async function seedWorkspace(
     `/subscriptions/${subscription.body.id}/match-rejections`,
     { transactionId: transaction.id },
   );
+  // The owner's calendar feed (its token hash and choice of kinds).
+  await send('calendar feed', 'post', '/calendar-feed', { invoices: false });
   // Item pictures, one on a transaction and one on a bill: picking one needs Wikidata, so straight in.
   await dataSource.query(
     `INSERT INTO item_images (workspace_id, transaction_id, payable_id, file_name, label, wikidata_id)

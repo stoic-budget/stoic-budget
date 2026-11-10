@@ -55,20 +55,22 @@ export function projectSubscriptionCharges(
   return charges;
 }
 
-/** The newest bill of each live repeating series the workspace owes on. */
+/** The newest bill of each live repeating series the workspace owes on (or, with null, is owed too). */
 export async function newestRecurringPayables(
   payables: Repository<Payable>,
   workspaceId: string,
+  direction: PayableDirection | null = PayableDirection.PAYABLE,
 ): Promise<Payable[]> {
   const rows: Array<{ id: string }> = await payables.query(
     `SELECT newest."id" FROM (
        SELECT DISTINCT ON (p."series_id") p."id", p."deleted_at", p."recurrence"
          FROM "payables" p
-        WHERE p."workspace_id" = $1 AND p."series_id" IS NOT NULL AND p."direction" = $2
+        WHERE p."workspace_id" = $1 AND p."series_id" IS NOT NULL
+          AND ($2::text IS NULL OR p."direction"::text = $2)
         ORDER BY p."series_id", p."occurrence_date" DESC
      ) newest
      WHERE newest."deleted_at" IS NULL AND newest."recurrence" IS NOT NULL`,
-    [workspaceId, PayableDirection.PAYABLE],
+    [workspaceId, direction],
   );
   if (rows.length === 0) return [];
   return payables
@@ -82,23 +84,24 @@ export async function newestRecurringPayables(
  * The occurrences of a series not made yet, inside [today, horizonEnd]: after
  * the newest bill's own day, at the series amount, moved off weekends as the
  * rule says (public holidays are not looked up here; the bill made later is).
+ * `occurrenceDate` is the day the rule gives, before the move.
  */
 export function projectedOccurrences(
   newest: Payable,
   today: Date,
   horizonEnd: Date,
-): Array<{ date: string; amount: number }> {
+): Array<{ date: string; occurrenceDate: string; amount: number }> {
   const rule = newest.recurrence as RecurrenceRule | null;
   if (!(rule && newest.occurrenceDate)) return [];
   const from = localDay(today);
   const to = localDay(horizonEnd);
   const amount = Number(newest.baseAmount ?? newest.amount);
-  const items: Array<{ date: string; amount: number }> = [];
+  const items: Array<{ date: string; occurrenceDate: string; amount: number }> = [];
   for (const day of occurrencesFrom(rule, String(newest.occurrenceDate).slice(0, 10))) {
     if (day <= String(newest.occurrenceDate).slice(0, 10)) continue;
     const due = shiftOffNonWorkingDays(day, rule.shift);
     if (due > to) break;
-    if (due >= from) items.push({ date: due, amount });
+    if (due >= from) items.push({ date: due, occurrenceDate: day, amount });
   }
   return items;
 }
