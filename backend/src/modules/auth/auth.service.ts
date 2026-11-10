@@ -665,7 +665,7 @@ export class AuthService {
     const os = this.detectOs(userAgent);
     const lowerUa = userAgent.toLowerCase();
     const isTablet = /(ipad|tablet)/i.test(userAgent);
-    const isMobile = /(iphone|ipod|android.*mobile|mobile)/i.test(userAgent);
+    const isMobile = /(iphone|ipod|mobile)/i.test(userAgent);
 
     let device = 'Desktop';
     if (isTablet) {
