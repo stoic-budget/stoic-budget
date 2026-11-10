@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { ChangelogEntry } from '@/app/components/ChangelogModal';
+import { useMarkChangelogSeen } from '@/app/components/whats-new/useWhatsNew';
 import type { ChangelogPayload } from '@/app/settings/profile/profileHelpers';
 
 export type UseChangelogReturn = {
@@ -18,6 +19,7 @@ export function useChangelog(
   const [changelogEntries, setChangelogEntries] = useState<ChangelogEntry[]>([]);
   const [changelogLoading, setChangelogLoading] = useState(false);
   const [changelogSelectedEntry, setChangelogSelectedEntry] = useState<ChangelogEntry | null>(null);
+  const markSeen = useMarkChangelogSeen();
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -58,10 +60,18 @@ export function useChangelog(
     };
   }, [isAuthenticated, workspaceReady]);
 
+  // Opening an entry by hand counts as seeing it; an older one than the marker sends nothing.
+  const selectEntry = (entry: ChangelogEntry | null): void => {
+    setChangelogSelectedEntry(entry);
+    if (entry) {
+      markSeen(entry);
+    }
+  };
+
   return {
     changelogEntries,
     changelogLoading,
     changelogSelectedEntry,
-    setChangelogSelectedEntry,
+    setChangelogSelectedEntry: selectEntry,
   };
 }

@@ -91,6 +91,8 @@ export const queryKeys = {
   // The date is part of the key: a new day is a new quote without waiting for staleness.
   dailyQuote: (workspaceId: string | null, date: string, locale: string) =>
     ['daily-quote', workspaceId, date, locale] as const,
+  // The app's own release notes: the same for every workspace.
+  changelogLatest: () => ['changelog-latest'] as const,
   integrationCatalogStatuses: (workspaceId: string | null) =>
     ['integration-status', workspaceId, 'catalog'] as const,
   webhookEndpoints: (workspaceId: string | null) => ['webhook-endpoints', workspaceId] as const,

@@ -48,6 +48,7 @@ export const NON_FINANCIAL_QUERY_ROOTS = [
   'api-keys',
   'audit-events',
   'branches',
+  'changelog-latest',
   'clients',
   'crypto',
   'custom-tables',

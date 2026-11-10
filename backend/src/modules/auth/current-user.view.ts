@@ -27,5 +27,7 @@ export function toCurrentUser(user: User): CurrentUser {
     onboardingCompletedAt: user.onboardingCompletedAt?.toISOString() ?? null,
     welcomeTutorialSeenAt: user.welcomeTutorialSeenAt?.toISOString() ?? null,
     pageHintsSeen: user.pageHintsSeen ?? {},
+    changelogSeenId: user.changelogSeenId ?? null,
+    changelogSeenAt: user.changelogSeenAt?.toISOString() ?? null,
   };
 }

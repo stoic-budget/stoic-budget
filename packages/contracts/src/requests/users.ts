@@ -227,6 +227,15 @@ export const PageHintsSeenBody = Schema.Struct({
 });
 export type PageHintsSeenBody = Wire<typeof PageHintsSeenBody>;
 
+/** `POST /users/me/changelog-seen`: a changelog entry the user has seen, by id and date. */
+export const ChangelogSeenBody = Schema.Struct({
+  id: Schema.String.check(Schema.isPattern(/^[a-z0-9][a-z0-9-]{0,79}$/)),
+  date: Schema.String.check(
+    Schema.isPattern(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|[+-]\d{2}:\d{2})$/),
+  ),
+});
+export type ChangelogSeenBody = Wire<typeof ChangelogSeenBody>;
+
 /** `GET /users`: how many accounts of the workspace to list (20 when absent). */
 export const UsersQuery = Schema.Struct({
   limit: Schema.optional(NumericInput.check(Schema.isInt())),

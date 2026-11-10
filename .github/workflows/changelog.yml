@@ -42,7 +42,7 @@ jobs:
       - name: Detect generated changes
         id: diff
         run: |
-          if git diff --quiet -- frontend/public/changelog.json; then
+          if git diff --quiet -- frontend/public/changelog.json frontend/public/changelog-latest.json; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -53,7 +53,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git add frontend/public/changelog.json
+          git add frontend/public/changelog.json frontend/public/changelog-latest.json
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
             commit -m "chore(changelog): update generated changelog [skip ci]"
           git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"

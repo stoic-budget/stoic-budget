@@ -233,6 +233,7 @@ import {
   BranchList,
   BusinessProfileLogo,
   CategoryUsageCounts,
+  ChangelogSeen,
   CustomTableRowBatch,
   CustomTablesReport,
   CustomTablesReportDrillDown,
@@ -2750,7 +2751,7 @@ describe('API contracts (e2e)', () => {
       expect(await status('/view-preferences/nonsense')).toBe(400);
     });
 
-    it('the setup progress, view preferences, the welcome tutorial and page hints', async () => {
+    it('the setup progress, view preferences, the welcome tutorial, page hints and the changelog marker', async () => {
       matches(SetupProgress, (await get('/dashboard/setup-progress')).body);
       matches(ViewPreferenceState, (await get('/view-preferences/transactions')).body);
       await call('put', '/view-preferences/transactions', { state: { owner: 'me' } }).expect(
@@ -2770,6 +2771,18 @@ describe('API contracts (e2e)', () => {
       const reset = await call('delete', '/users/me/page-hints').expect(succeeded);
       matches(PageHintsSeen, reset.body);
       expect(reset.body.pageHintsSeen).toEqual({});
+      const changelog = await call('post', '/users/me/changelog-seen', {
+        id: 'changelog-2099-01-01-abc1234',
+        date: '2099-01-01T00:00:00.000Z',
+      }).expect(succeeded);
+      matches(ChangelogSeen, changelog.body);
+      expect(changelog.body).toEqual({
+        changelogSeenId: 'changelog-2099-01-01-abc1234',
+        changelogSeenAt: '2099-01-01T00:00:00.000Z',
+      });
+      const me = await get('/auth/me');
+      matches(CurrentUser, me.body);
+      expect(me.body.changelogSeenId).toBe('changelog-2099-01-01-abc1234');
     });
 
     it('branches, category usage, an uploaded icon and a file category', async () => {

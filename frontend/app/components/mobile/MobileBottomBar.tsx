@@ -12,6 +12,7 @@ import {
   ScanLine,
   Upload,
 } from '@/app/components/icons';
+import { useWhatsNew } from '@/app/components/whats-new/useWhatsNew';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useIntlayer } from '@/app/i18n';
 import { AUTH_ROUTE_PREFIXES } from '@/app/lib/auth-routes';
@@ -53,6 +54,8 @@ export default function MobileBottomBar() {
   const [fabOpen, setFabOpen] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   const pageActions = usePageQuickActions();
+  const whatsNew = useWhatsNew();
+  const { newBadge } = useIntlayer('whatsNew');
 
   const closeFab = useCallback(() => setFabOpen(false), []);
 
@@ -165,23 +168,31 @@ export default function MobileBottomBar() {
           type="button"
           className="seneca-bottom-bar__tab"
           onClick={() => setDrawerOpen(true)}
-          aria-label={shell.openMenu.value}
+          // The label replaces the tab's content, so the dot's text has to be in it.
+          aria-label={
+            whatsNew.unseen ? `${shell.openMenu.value}, ${newBadge.value}` : shell.openMenu.value
+          }
         >
-          <span
-            className="seneca-account__avatar seneca-account__avatar--tab"
-            style={{ background: avatarTone(user?.email) }}
-          >
-            {avatarUrl && !avatarError ? (
-              <img
-                src={avatarUrl}
-                alt=""
-                onError={() => {
-                  setAvatarError(true);
-                }}
-              />
-            ) : (
-              avatarInitial(user?.name || user?.email)
-            )}
+          <span className="seneca-account__avatar-slot">
+            <span
+              className="seneca-account__avatar seneca-account__avatar--tab"
+              style={{ background: avatarTone(user?.email) }}
+            >
+              {avatarUrl && !avatarError ? (
+                <img
+                  src={avatarUrl}
+                  alt=""
+                  onError={() => {
+                    setAvatarError(true);
+                  }}
+                />
+              ) : (
+                avatarInitial(user?.name || user?.email)
+              )}
+            </span>
+            {whatsNew.unseen ? (
+              <span className="seneca-account__dot" role="img" aria-label={newBadge.value} />
+            ) : null}
           </span>
         </button>
       </nav>
