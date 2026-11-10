@@ -24,7 +24,8 @@ Three global guards run on every HTTP request:
 
 1. **`CsrfGuard`** — double-submit check on cookie-authenticated `POST`/`PUT`/`PATCH`/`DELETE`: the readable
    `csrf_token` cookie must be echoed in the `x-csrf-token` header. Requests carrying `Authorization` or
-   `X-Api-Key` are exempt, and `@SkipCsrf()` opts out routes that start a session.
+   `X-Api-Key` are exempt, and `@SkipCsrf()` opts out routes that start a session and the public,
+   body-only OAuth registration, token and revocation endpoints.
 2. **`JwtAuthGuard`** — authenticates with the HttpOnly `access_token` cookie, a Bearer token, or an `X-Api-Key`
    API key. `@Public()` opts a route out.
 3. **`ThrottlerGuard`** — 500 requests per minute by default, counted in Redis when `REDIS_URL` is set. Auth routes
@@ -36,13 +37,18 @@ Workspace-scoped controllers add `@WorkspaceAuth(Permission.X)`, which applies `
 
 `main.ts` also applies helmet (including a Content-Security-Policy), a CORS allowlist from `CORS_ORIGINS`
 (falling back to `FRONTEND_URL`), a global validation pipe, and `trust proxy`, so rate limits key on the client IP
-behind a reverse proxy.
+behind a reverse proxy. The exact OAuth paths `/api/v1/oauth/protected-resource` and
+`/api/v1/oauth/authorization-server` allow `GET` from any origin; `/api/v1/oauth/register`,
+`/api/v1/oauth/token` and `/api/v1/oauth/revoke` allow `POST` from any origin, all without credentials.
+Every other path keeps the credentialed allowlist.
 
 ## Sessions
 
 Login sets `access_token` (30 minutes by default) and `refresh_token` (30 days) as HttpOnly cookies, plus a
 readable `csrf_token` cookie; the response body carries no token. Refresh tokens rotate on every use. A password
-reset invalidates every existing session.
+reset invalidates every existing session, voids pending MCP OAuth authorization codes and revokes the user's
+OAuth grants across all workspaces. Logging out of all devices also voids pending codes but leaves existing
+grants untouched.
 
 ## Audit logging
 

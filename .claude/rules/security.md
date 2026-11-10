@@ -8,7 +8,7 @@ paths:
 ## 1. Authentication & Session Management
 - **JWT Storage**: Store access and refresh tokens in `HttpOnly` cookies (`auth-cookies.ts`), `Secure` in production. Never return them in response bodies or store them in `localStorage`.
 - **SameSite**: The default is `Lax`, not `Strict` — OAuth callbacks come back as a cross-site top-level redirect, and `Strict` would drop the session on it. `AUTH_COOKIE_SAMESITE=none` is for split-domain HTTPS deployments. Don't "tighten" this to `Strict`.
-- **CSRF**: `CsrfGuard` is global. Cookie-authenticated `POST`/`PUT`/`PATCH`/`DELETE` must echo the `csrf_token` cookie in `x-csrf-token`; `Authorization`/`X-Api-Key` callers are exempt. Mark only session-establishing routes `@SkipCsrf()`.
+- **CSRF**: `CsrfGuard` is global. Cookie-authenticated `POST`/`PUT`/`PATCH`/`DELETE` must echo the `csrf_token` cookie in `x-csrf-token`; `Authorization`/`X-Api-Key` callers are exempt. Use `@SkipCsrf()` only for session-establishing routes and the public, body-only OAuth registration, token and revocation endpoints.
 - **Token Rotation**: Refresh tokens rotate on every use.
 - **Session Expiry**: Access tokens default to 30 minutes, refresh tokens to 30 days.
 - **Secrets & Hashing**: Read secrets through `requireSecret` (no literal fallbacks); hash passwords through `hashPassword` (`BCRYPT_ROUNDS`).
@@ -24,7 +24,7 @@ paths:
 - **Tenant Isolation**: Every query must include a `workspaceId` or `ownerId` check to ensure the user cannot access data from other tenants. That includes ids from a request body (a category, a tag, a tax rate): look them up with the caller's `workspaceId`. The isolation sweep (`@tests/e2e/workspace-isolation-sweep.e2e-spec.ts`) checks every route; give a new kind of record a seed step in `@tests/e2e/helpers/seed-workspace.ts`.
 
 ## 4. API Security
-- **CORS**: Only the `CORS_ORIGINS` allowlist (falling back to `FRONTEND_URL`) may make credentialed requests.
+- **CORS**: Only the `CORS_ORIGINS` allowlist (falling back to `FRONTEND_URL`) may make credentialed requests. The exact paths `/api/v1/oauth/protected-resource` and `/api/v1/oauth/authorization-server` allow `GET` from any origin; `/api/v1/oauth/register`, `/api/v1/oauth/token` and `/api/v1/oauth/revoke` allow `POST` from any origin, all without credentials and with only `Content-Type` and `MCP-Protocol-Version` as allowed headers. Every other path keeps the credentialed allowlist.
 - **Rate Limiting**: Add a tighter `@Throttle()` to sensitive endpoints (login, register, forgot/reset password, 2FA) on top of the global Redis-backed limit.
 - **Outbound Requests**: Fetch user-supplied URLs only through the egress guard (`egress-url.util.ts`).
 - **Security Headers**: Use `Helmet.js` to set `Content-Security-Policy`, `X-Frame-Options`, etc.

@@ -9,7 +9,6 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Lock, Plus, Trash2 } from '@/app/components/icons';
@@ -23,6 +22,7 @@ import { tokens } from '@/lib/theme-tokens';
 import { PluginOffBanner } from '../components/PluginOffBanner';
 import { CopyButton } from './CopyButton';
 import { McpConnectedApps } from './McpConnectedApps';
+import { McpStatus } from './McpStatus';
 import {
   claudeCodeCommand,
   KEY_PLACEHOLDER,
@@ -65,7 +65,7 @@ export function McpServerDrawer({ isOpen, onClose, onBack, zIndex }: McpServerDr
   const t = useIntlayer('mcpServerDrawer');
   const pluginsText = useIntlayer('pluginsPage');
   const { user } = useAuth();
-  const { keys, loading, newKey, isActive, scopes, create, revoke, clearNewKey } = useApiKeys();
+  const { keys, loading, newKey, scopes, create, revoke, clearNewKey } = useApiKeys();
   // Creating keys needs api_key.manage, which only the instance admin role carries.
   const canCreateKeys = user?.role === 'admin';
   const endpoint = useMemo(
@@ -106,45 +106,7 @@ export function McpServerDrawer({ isOpen, onClose, onBack, zIndex }: McpServerDr
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, overflowY: 'auto', flex: 1 }}>
           <PluginOffBanner plugin="mcp-server" message={pluginsText.offBanner.mcp} />
-          {/* ── Status ── */}
-          <Box>
-            <Typography sx={sectionLabelStyle}>{t.status}</Typography>
-            <Box
-              sx={theme => ({
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                p: 1.5,
-                borderRadius: tokens.radius.md,
-                background: alpha(
-                  isActive ? theme.palette.success.main : theme.palette.error.main,
-                  0.08,
-                ),
-                border: `1px solid ${alpha(isActive ? theme.palette.success.main : theme.palette.error.main, 0.2)}`,
-              })}
-            >
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: tokens.radius.full,
-                  bgcolor: isActive ? 'success.main' : 'error.main',
-                  flexShrink: 0,
-                }}
-              />
-              <Typography
-                sx={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: isActive ? 'success.main' : 'error.main',
-                }}
-              >
-                {isActive
-                  ? t.connectedKeys.value.replace('{count}', String(keys.length))
-                  : t.notConfigured}
-              </Typography>
-            </Box>
-          </Box>
+          <McpStatus keyCount={keys.length} />
 
           {/* ── Setup ── */}
           <Box>

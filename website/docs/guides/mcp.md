@@ -82,11 +82,17 @@ finds the rest on its own:
 - `/.well-known/oauth-protected-resource/api/v1/mcp` (RFC 9728) and
   `/.well-known/oauth-authorization-server` (RFC 8414), served at the origin root;
 - `POST /api/v1/oauth/register`: dynamic client registration (RFC 7591), public clients only, redirect
-  URIs on `https` or a loopback `http` address, matched exactly afterwards;
+  URIs on `https` or a loopback `http` address, matched exactly afterwards except for the port of a
+  loopback address (`127.0.0.1`, `[::1]`, `localhost`), which a native app may change from run to
+  run (RFC 8252 §7.3);
 - `/oauth/authorize`: the consent screen. You see the app's name and **where your answer goes**, pick
   one workspace that has MCP on, and Read only, Read and change, or single permissions, never more
   than your role there allows;
 - `POST /api/v1/oauth/token` and `POST /api/v1/oauth/revoke` (RFC 7009).
+
+The discovery documents, registration, token and revocation endpoints answer browser-based clients
+on any origin (MCP Inspector, for one) with CORS but without credentials; the rest of the API keeps
+its allowlist.
 
 Only the authorization code flow with PKCE `S256` is accepted (`plain` is refused); codes live one
 minute and work once. Tokens are bound to this endpoint (RFC 8707): an access token lasts an hour,
@@ -95,7 +101,10 @@ connection. Tokens are stored only as hashes and work nowhere but `/api/v1/mcp`.
 
 A connection stops working when you disconnect it (**Plugins → MCP Server → Connected apps**), when
 you leave the workspace or your role there changes, when the workspace is deleted, the account is
-deactivated, or MCP is switched off (until it is on again). Instance administrators can stop new
+deactivated, its password is reset (every app in every workspace), or MCP is switched off (until it
+is on again). A password reset or **log out everywhere** also voids any code approved before it
+that has not been exchanged yet. Workspace owners and admins, and whoever manages API keys, see every member's
+connected apps in that list and can disconnect any of them; the audit log records who did. Instance administrators can stop new
 apps from registering under **Admin → Users**; `MCP_OAUTH_REGISTRATION_ENABLED=false` sets that
 default. OAuth needs `APP_URL` (or `FRONTEND_URL`) set to the address people open, since every URL
 above is built from it.

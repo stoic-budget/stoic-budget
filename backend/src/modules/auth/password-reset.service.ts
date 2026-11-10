@@ -13,6 +13,7 @@ import { PasswordResetToken } from '../../entities/password-reset-token.entity';
 import { User } from '../../entities/user.entity';
 import { AuditService } from '../audit/audit.service';
 import { MailerService } from '../mailer/mailer.service';
+import { McpOAuthGrantsService } from '../mcp-oauth/mcp-oauth-grants.service';
 import { recordSecurityEvent } from './security-audit.util';
 
 const TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -31,6 +32,7 @@ export class PasswordResetService {
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
     private readonly auditService: AuditService,
+    private readonly mcpOAuthGrants: McpOAuthGrantsService,
   ) {}
 
   /**
@@ -134,6 +136,9 @@ export class PasswordResetService {
       { userId: user.id, revokedAt: IsNull() },
       { revokedAt: new Date() },
     );
+    // The same goes for apps connected over OAuth: their tokens are not tied to
+    // the token version, so each grant is revoked, in every workspace, and logged.
+    await this.mcpOAuthGrants.revokeAllOfUser(user.id, 'password_reset');
 
     record.usedAt = new Date();
     await this.tokenRepository.save(record);

@@ -81,7 +81,7 @@ When deploying Stoic Budget, please follow these security best practices:
 ### API Security
 
 - Always use HTTPS in production — the auth cookies are `Secure` there
-- Set `CORS_ORIGINS` (or `FRONTEND_URL`) to exactly the origins that serve the frontend; the backend refuses to start in production without one
+- Set `CORS_ORIGINS` (or `FRONTEND_URL`) to exactly the origins that serve the frontend; the backend refuses to start in production without one. The exact OAuth discovery paths `/api/v1/oauth/protected-resource` and `/api/v1/oauth/authorization-server`, plus `/api/v1/oauth/register`, `/api/v1/oauth/token` and `/api/v1/oauth/revoke`, allow any origin without credentials. All other paths, including `/api/v1/mcp`, keep the credentialed allowlist
 - If the frontend and the API sit on different registrable domains, set `AUTH_COOKIE_SAMESITE=none` (HTTPS only)
 - Behind a reverse proxy, forward `X-Forwarded-For` and `X-Forwarded-Proto`: the backend trusts one proxy hop, and rate limits are counted per client IP
 - Set `METRICS_AUTH_TOKEN` if you scrape `/api/v1/metrics` — without it the endpoint refuses every request in production
@@ -114,7 +114,7 @@ When deploying Stoic Budget, please follow these security best practices:
 - Access tokens expire after 30 minutes and refresh tokens after 30 days by default; a refresh token is rotated on every use
 - Cookies default to `SameSite=lax`, so OAuth callback redirects keep the session. They are `Secure` in production or whenever `SameSite=none`
 - Cookie-authenticated `POST`/`PUT`/`PATCH`/`DELETE` requests need the double-submit CSRF token: the readable `csrf_token` cookie echoed in the `x-csrf-token` header. Requests authenticated with `Authorization` or `X-Api-Key` are exempt
-- Logging out of all devices and resetting a password invalidate every existing session
+- Logging out of all devices and resetting a password invalidate every existing session and any unexchanged MCP OAuth authorization codes. A password reset also revokes the user's OAuth grants in every workspace; logging out of all devices does not revoke existing grants
 - Password reset tokens are single-use, valid for 1 hour and stored only as an HMAC (`PASSWORD_RESET_TOKEN_SECRET`, falling back to `JWT_SECRET`). The endpoint answers the same way for unknown addresses
 - An email change takes effect only after the link sent to the new address (valid for 24 hours) is opened
 - Passwords are hashed with bcrypt (`BCRYPT_ROUNDS`, default 12)

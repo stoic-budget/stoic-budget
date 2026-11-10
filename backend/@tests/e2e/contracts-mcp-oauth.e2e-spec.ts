@@ -8,6 +8,7 @@ import {
   McpOAuthConsent,
   McpOAuthGrantList,
   McpOAuthRedirect,
+  McpOAuthWorkspaceGrantList,
   RegistrationStatus,
 } from '../../src/contracts';
 import { type ContractApp, startContractApp } from './helpers/contract-app';
@@ -15,7 +16,7 @@ import { deleteUserByEmail } from './helpers/e2e-app';
 
 const REDIRECT = 'http://127.0.0.1:33418/callback';
 
-/** The consent screen, Connected apps and the registration switch: answers checked with data. */
+/** The consent screen, Connected apps (own and workspace-wide) and the registration switch: answers checked with data. */
 describe('API contracts: MCP OAuth (e2e)', () => {
   const email = `contracts-mcp-oauth-${Date.now()}@example.com`;
   const savedFrontendUrl = process.env.FRONTEND_URL;
@@ -102,6 +103,13 @@ describe('API contracts: MCP OAuth (e2e)', () => {
     expect(apps).toHaveLength(1);
     expect(apps[0].clientName).toBe('ACME Assistant');
     expect(apps[0].lastUsedAt).toBeNull();
+
+    const everyone = await ctx.answer(
+      McpOAuthWorkspaceGrantList,
+      ctx.call('get', '/mcp-oauth/workspace/grants'),
+    );
+    expect(everyone).toHaveLength(1);
+    expect(everyone[0]).toMatchObject({ clientName: 'ACME Assistant', memberName: 'Member Owner' });
   });
 
   it('registration switch', async () => {
