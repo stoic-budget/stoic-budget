@@ -8,10 +8,10 @@ import { Transaction, TransactionType } from '../../../entities/transaction.enti
 import { Workspace } from '../../../entities/workspace.entity';
 import { UNCATEGORIZED_CATEGORY_NAME } from '../../categories/uncategorized-category';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
-import { buildRateMap, convertWith, normalizeCurrency } from '../../goals/goal-money.util';
 import { NetWorthService } from '../../net-worth/net-worth.service';
 import type { AnalysisContext, InsightAnalyzer, InsightCandidate } from './analyzer.interface';
 import { endOfMonth, monthBounds, monthKey, monthsBetween, round2 } from './month-bounds';
+import { workspaceMoney } from './workspace-money';
 
 /** How many fully-elapsed months a category is compared against. */
 const TRAILING_MONTHS = 3;
@@ -72,21 +72,13 @@ export class FinancialAnalyzer implements InsightAnalyzer {
     workspaceId: string,
     rows: T[],
   ): Promise<(row: T, amount: string | number) => number> {
-    const workspace = await this.workspaceRepository.findOne({
-      where: { id: workspaceId },
-      select: {
-        id: true,
-        currency: true,
-      },
-    });
-    const currency = normalizeCurrency(workspace?.currency);
-    const rates = await buildRateMap(
+    const money = await workspaceMoney(
+      this.workspaceRepository,
       this.exchangeRatesService,
-      rows.map(row => row.currency ?? currency),
-      currency,
       workspaceId,
+      rows,
     );
-    return (row, amount) => convertWith(rates, amount, row.currency ?? currency);
+    return money.convert;
   }
 
   async analyze(context: AnalysisContext): Promise<InsightCandidate[]> {

@@ -44,4 +44,21 @@ describe('chooseAdviceCards', () => {
     ).toEqual(['stoic.unbudgeted_share']);
     expect(chooseAdviceCards([top], [])).toEqual([top]);
   });
+
+  it('drops the rising card for a category the unusual card already names', () => {
+    const about = (
+      messageKey: InsightCandidate['messageKey'],
+      priority: number,
+      categoryId: string,
+    ) => ({ ...candidate(messageKey, priority), data: { priority, categoryId } });
+    const anomaly = about('trend.category_anomaly', 60, 'category-1');
+    const sameRising = about('trend.category_rising', 58, 'category-1');
+    const otherRising = about('trend.category_rising', 57, 'category-2');
+
+    expect(chooseAdviceCards([anomaly, sameRising, otherRising], [])).toEqual([
+      anomaly,
+      otherRising,
+    ]);
+    expect(chooseAdviceCards([sameRising], [])).toEqual([sameRising]);
+  });
 });
