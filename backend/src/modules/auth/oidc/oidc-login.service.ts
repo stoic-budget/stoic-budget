@@ -21,13 +21,14 @@ import { OidcProviderClient } from './oidc-provider.client';
 import { OidcCallbackFailure, OidcRefusal, refusalCode } from './oidc-refusal';
 import { OidcSettingsService, oidcRedirectUri } from './oidc-settings.service';
 import { OidcStateStore } from './oidc-state.store';
+import { OidcStepUpService } from './oidc-step-up.service';
 
 /** A sign-in or a link in flight: 10 minutes, then the state is gone. */
 const FLOW_TTL_SECONDS = 600;
 /** Wrong second-factor codes a finished sign-in survives before it is dropped. */
 const MAX_CODE_FAILURES = 5;
 
-export type OidcMode = 'login' | 'link';
+export type OidcMode = 'login' | 'link' | 'reauth';
 
 interface FlowRecord {
   mode: OidcMode;
@@ -39,6 +40,10 @@ interface FlowRecord {
   redirectUri: string;
   next: string | null;
   userId: string | null;
+  /** The session a re-authentication grants its step-up to. */
+  sessionId?: string | null;
+  /** Seconds; a re-authentication's sign-in must not be older than this. */
+  startedAt?: number;
 }
 
 interface TicketRecord {
@@ -85,6 +90,7 @@ export class OidcLoginService {
     private readonly authService: AuthService,
     private readonly twoFactor: TwoFactorService,
     private readonly auditService: AuditService,
+    private readonly stepUp: OidcStepUpService,
     @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(UserIdentity) private readonly identities: Repository<UserIdentity>,
   ) {}
@@ -92,7 +98,7 @@ export class OidcLoginService {
   /** The provider's authorization URL, and the browser binding for the cookie. */
   async start(
     mode: OidcMode,
-    options: { next?: string | null; userId?: string | null },
+    options: { next?: string | null; userId?: string | null; sessionId?: string | null },
   ): Promise<{ url: string; binding: string }> {
     const config = await this.settings.active();
     const redirectUri = oidcRedirectUri();
@@ -111,6 +117,8 @@ export class OidcLoginService {
       redirectUri,
       next: safeNextPath(options.next),
       userId: options.userId ?? null,
+      sessionId: options.sessionId ?? null,
+      startedAt: Math.floor(Date.now() / 1000),
     };
     await this.store.put('flow', state, record, FLOW_TTL_SECONDS);
 
@@ -129,6 +137,12 @@ export class OidcLoginService {
     url.searchParams.set('nonce', record.nonce);
     url.searchParams.set('code_challenge', sha256(record.verifier));
     url.searchParams.set('code_challenge_method', 'S256');
+    if (mode === 'reauth') {
+      // A new sign-in, not the provider's remembered one; the ID token's
+      // auth_time must fall after startedAt when the browser comes back.
+      url.searchParams.set('prompt', 'login');
+      url.searchParams.set('max_age', '0');
+    }
     return { url: url.toString(), binding };
   }
 
@@ -141,7 +155,12 @@ export class OidcLoginService {
   async callback(
     query: Record<string, unknown>,
     binding: string | undefined,
-  ): Promise<{ mode: OidcMode; ticket: string | null; next: string | null }> {
+  ): Promise<{
+    mode: OidcMode;
+    ticket: string | null;
+    next: string | null;
+    stepUp: string | null;
+  }> {
     const state = typeof query.state === 'string' ? query.state : null;
     const flow = state && binding ? await this.store.take<FlowRecord>('flow', state) : null;
     if (!(flow && binding && sameHash(flow.bindingHash, sha256(binding)))) {
@@ -205,7 +224,15 @@ export class OidcLoginService {
 
     if (flow.mode === 'link') {
       await this.accounts.link(flow.userId as string, claims, config.issuer);
-      return { ticket: null, next: null };
+      return { ticket: null, next: null, stepUp: null };
+    }
+    if (flow.mode === 'reauth') {
+      if (!(flow.userId && flow.sessionId && typeof flow.startedAt === 'number')) {
+        throw new OidcRefusal('OIDC_STATE_INVALID');
+      }
+      const owner = { userId: flow.userId, sessionId: flow.sessionId, startedAt: flow.startedAt };
+      const stepUp = await this.stepUp.grant(owner, claims, config.issuer);
+      return { ticket: null, next: null, stepUp };
     }
     const signedIn = await this.accounts.signIn(claims, config);
     const ticket = random();
@@ -215,7 +242,7 @@ export class OidcLoginService {
       issuer: config.issuer,
     };
     await this.store.put('ticket', ticket, record, FLOW_TTL_SECONDS);
-    return { ticket, next: flow.next };
+    return { ticket, next: flow.next, stepUp: null };
   }
 
   /**

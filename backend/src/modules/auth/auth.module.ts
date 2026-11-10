@@ -29,6 +29,9 @@ import { OidcProviderClient } from './oidc/oidc-provider.client';
 import { OidcSettingsController } from './oidc/oidc-settings.controller';
 import { OidcSettingsService } from './oidc/oidc-settings.service';
 import { OidcStateStore } from './oidc/oidc-state.store';
+import { OidcStepUpService } from './oidc/oidc-step-up.service';
+import { PasswordSetController } from './oidc/password-set.controller';
+import { PasswordSetService } from './oidc/password-set.service';
 import { PasswordResetService } from './password-reset.service';
 import { RegistrationController } from './registration.controller';
 import { RegistrationSettingsService } from './registration-settings.service';
@@ -66,7 +69,13 @@ import { TwoFactorService } from './two-factor.service';
       inject: [ConfigService],
     }),
   ],
-  controllers: [AuthController, RegistrationController, OidcController, OidcSettingsController],
+  controllers: [
+    AuthController,
+    RegistrationController,
+    OidcController,
+    OidcSettingsController,
+    PasswordSetController,
+  ],
   providers: [
     AuthService,
     RegistrationSettingsService,
@@ -81,6 +90,8 @@ import { TwoFactorService } from './two-factor.service';
     OidcAccountsService,
     OidcIdentitiesService,
     OidcLoginService,
+    OidcStepUpService,
+    PasswordSetService,
   ],
   exports: [AuthService],
 })

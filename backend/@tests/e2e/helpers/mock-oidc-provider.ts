@@ -95,6 +95,8 @@ export class MockOidcProvider {
       email: `${subject}@example.com`,
       email_verified: true,
       name: 'Member One',
+      // A provider asked for a new sign-in (max_age) says when it happened.
+      ...(params.has('max_age') ? { auth_time: now } : {}),
       ...shape.claims,
     };
     for (const key of shape.omit ?? []) delete claims[key];

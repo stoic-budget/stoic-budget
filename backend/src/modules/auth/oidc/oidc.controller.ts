@@ -32,9 +32,11 @@ import type { User } from '../../../entities';
 import { setAuthCookies, setCsrfCookie } from '../auth-cookies';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { Public } from '../decorators/public.decorator';
+import type { AuthenticatedUser } from '../strategies/jwt.strategy';
 import {
   clearOidcCookie,
   OIDC_FLOW_COOKIE,
+  OIDC_STEP_UP_COOKIE,
   OIDC_TICKET_COOKIE,
   readOidcCookie,
   setOidcCookie,
@@ -43,8 +45,10 @@ import { OidcIdentitiesService } from './oidc-identities.service';
 import { OidcLoginService } from './oidc-login.service';
 import { OidcCallbackFailure, refusalCode } from './oidc-refusal';
 import { appOrigin, OidcSettingsService } from './oidc-settings.service';
+import { OidcStepUpService, STEP_UP_TTL_SECONDS } from './oidc-step-up.service';
 
 const SETTINGS_PAGE = '/settings/profile?tab=security&section=single-sign-on';
+const PASSWORD_PAGE = '/settings/profile?tab=security&section=password';
 
 /** A page of this app: only our own origin and our own path, never one from the request. */
 const page = (path: string, params: Record<string, string>): string => {
@@ -59,6 +63,7 @@ export class OidcController {
     private readonly login: OidcLoginService,
     private readonly settings: OidcSettingsService,
     private readonly identities: OidcIdentitiesService,
+    private readonly stepUp: OidcStepUpService,
   ) {}
 
   /** Public: the login page shows the button only when this says so. */
@@ -101,6 +106,12 @@ export class OidcController {
     clearOidcCookie(res, OIDC_FLOW_COOKIE);
     try {
       const result = await this.login.callback(req.query, binding);
+      if (result.mode === 'reauth') {
+        const maxAge = STEP_UP_TTL_SECONDS * 1000;
+        setOidcCookie(res, OIDC_STEP_UP_COOKIE, result.stepUp as string, maxAge);
+        res.redirect(HttpStatus.FOUND, page(PASSWORD_PAGE, { reauth: 'ok' }));
+        return;
+      }
       if (result.mode === 'link') {
         res.redirect(HttpStatus.FOUND, page(SETTINGS_PAGE, { oidc: 'linked' }));
         return;
@@ -112,6 +123,10 @@ export class OidcController {
     } catch (error) {
       const failure: { mode: string; code: ErrorCode } =
         error instanceof OidcCallbackFailure ? error : { mode: 'login', code: refusalCode(error) };
+      if (failure.mode === 'reauth') {
+        res.redirect(HttpStatus.FOUND, page(PASSWORD_PAGE, { reauthError: failure.code }));
+        return;
+      }
       const target = failure.mode === 'link' ? SETTINGS_PAGE : '/login';
       res.redirect(HttpStatus.FOUND, page(target, { oidcError: failure.code }));
     }
@@ -158,6 +173,24 @@ export class OidcController {
   ) {
     await this.identities.confirmPassword(user.id, body.password);
     const { url, binding } = await this.login.start('link', { userId: user.id });
+    setOidcCookie(res, OIDC_FLOW_COOKIE, binding);
+    return { url };
+  }
+
+  /**
+   * Starts a fresh sign-in at the provider for an account made by single
+   * sign-on, which has no password to confirm: the step-up it ends with lets
+   * this session, and only this one, set a first password.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('reauth')
+  @HttpCode(HttpStatus.OK)
+  @SchemaResponse(OidcAuthorization)
+  async reauth(@CurrentUser() user: AuthenticatedUser, @Res({ passthrough: true }) res: Response) {
+    const sessionId = user.currentSessionId ?? null;
+    await this.stepUp.assertCanStart(user, sessionId);
+    const { url, binding } = await this.login.start('reauth', { userId: user.id, sessionId });
     setOidcCookie(res, OIDC_FLOW_COOKIE, binding);
     return { url };
   }

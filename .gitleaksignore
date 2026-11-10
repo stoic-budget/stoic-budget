@@ -12,3 +12,6 @@ acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/Ban
 acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/BankSyncPanel.content.ts:private-key:1170
 acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/BankSyncPanel.content.ts:private-key:1173
 acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/BankSyncPanel.content.ts:private-key:1176
+
+# "authentik:9000" in a test URL is a host and port, not a user and password.
+a55e73ce1c14b8ef09908d31446ce48fd302f33e:backend/@tests/unit/modules/auth/oidc-allow-http.spec.ts:generic-api-key:34

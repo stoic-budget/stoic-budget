@@ -27,7 +27,10 @@ in clear, or a browser extension reading the page.
 - Integration secrets (SMTP, S3, WebDAV, IMAP, Telegram): encrypted at rest with
   the server's `INTEGRATIONS_ENCRYPTION_KEY`.
 - 2FA secrets and recovery codes: encrypted / hashed.
-- Transport: run behind TLS; the cookie is `Secure` in production.
+- Transport: run behind TLS; the cookie is `Secure` in production. `OIDC_ALLOW_HTTP=true` allows
+  plain HTTP to an OIDC provider in production; use it only on a private network because tokens and
+  the client secret travel unencrypted. Keep the browser-facing authorization endpoint on HTTPS:
+  the setting also allows HTTP there, exposing the provider password in transit.
 - Statements and receipts on disk are not encrypted by the app; use disk encryption and encrypted
   backups on the host.
 

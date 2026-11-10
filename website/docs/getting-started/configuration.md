@@ -67,6 +67,22 @@ CSRF check.
 | `JWT_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` | `30m` / `30d` | Access and refresh token lifetimes; refresh tokens rotate on use. |
 | `PASSWORD_RESET_TOKEN_SECRET` | `JWT_SECRET` | A separate HMAC key for password reset tokens. |
 | `BCRYPT_ROUNDS` | `12` | Work factor for new password hashes (10–15). |
+| `OIDC_ALLOW_HTTP` | `false` | `true` lets a single sign-on provider use plain `http` in production. Private networks only, see below. |
+
+### Single sign-on over http on a private network
+
+Single sign-on (OpenID Connect) is set up by an instance admin in **Admin → Users**. In production
+the provider's issuer and every endpoint its discovery document names must be `https`. If the
+provider runs on a private network next to the API, for example Authentik or Keycloak on the same
+Docker network, set `OIDC_ALLOW_HTTP=true` to allow plain `http` for it.
+
+Only do this when the traffic between the API and the provider never leaves that private network:
+the ID token and the client secret travel unencrypted. That covers the addresses the API calls
+itself (discovery, token and keys). The sign-in page (the authorization endpoint) is different: the
+person's browser opens it, so it must be reachable from the browser, and it should stay `https`.
+The setting also allows it to be `http`, and then the person's provider password crosses the
+network unencrypted. Addresses with a user name or password in them are refused either way. The
+server logs one warning per provider when such a configuration is saved or first used.
 
 ## Receipt maps
 
