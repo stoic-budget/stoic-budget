@@ -17,6 +17,7 @@ import {
 import { AuditModule } from '../audit/audit.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { MailerModule } from '../mailer/mailer.module';
+import { McpOAuthModule } from '../mcp-oauth/mcp-oauth.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthDevBootstrapService } from './auth-dev-bootstrap.service';
@@ -41,6 +42,7 @@ import { TwoFactorService } from './two-factor.service';
     AuditModule,
     CategoriesModule,
     MailerModule,
+    McpOAuthModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

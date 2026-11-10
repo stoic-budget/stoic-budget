@@ -4,6 +4,7 @@ import { type EntityManager, IsNull, type Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { AuditAction, EntityType, Severity } from '../../entities/audit-event.entity';
 import type { McpOAuthClient } from '../../entities/mcp-oauth-client.entity';
+import { McpOAuthCode } from '../../entities/mcp-oauth-code.entity';
 import { McpOAuthGrant, type McpOAuthRevokeReason } from '../../entities/mcp-oauth-grant.entity';
 import { McpOAuthToken } from '../../entities/mcp-oauth-token.entity';
 import { AuditService } from '../audit/audit.service';
@@ -19,9 +20,22 @@ export interface ConnectedApp {
   lastUsedAt: Date | null;
 }
 
+export interface WorkspaceConnectedApp extends ConnectedApp {
+  memberName: string;
+}
+
 const hostsOf = (client: McpOAuthClient): string[] => [
   ...new Set(client.redirectUris.map(redirectHost)),
 ];
+
+const toConnectedApp = (grant: McpOAuthGrant): ConnectedApp => ({
+  id: grant.id,
+  clientName: grant.client.clientName,
+  redirectHosts: hostsOf(grant.client),
+  scopes: grant.scopes,
+  createdAt: grant.createdAt,
+  lastUsedAt: grant.lastUsedAt,
+});
 
 /**
  * Grants as people see them ("Connected apps") and the one way they end:
@@ -45,14 +59,17 @@ export class McpOAuthGrantsService {
       relations: { client: true },
       order: { createdAt: 'DESC' },
     });
-    return rows.map(grant => ({
-      id: grant.id,
-      clientName: grant.client.clientName,
-      redirectHosts: hostsOf(grant.client),
-      scopes: grant.scopes,
-      createdAt: grant.createdAt,
-      lastUsedAt: grant.lastUsedAt,
-    }));
+    return rows.map(toConnectedApp);
+  }
+
+  /** Every member's live grants in the workspace, for whoever manages its MCP access. */
+  async listWorkspace(workspaceId: string): Promise<WorkspaceConnectedApp[]> {
+    const rows = await this.grants.find({
+      where: { workspaceId, revokedAt: IsNull() },
+      relations: { client: true, user: true },
+      order: { createdAt: 'DESC' },
+    });
+    return rows.map(grant => ({ ...toConnectedApp(grant), memberName: grant.user.name }));
   }
 
   /** Revokes one of the caller's own grants in the workspace; anything else is not found. */
@@ -66,6 +83,50 @@ export class McpOAuthGrantsService {
     }
     await this.grants.manager.transaction(manager => this.revoke(manager, grant.id, 'user'));
     await this.audit(grant, AuditAction.DELETE, { reason: 'user' });
+  }
+
+  /**
+   * Revokes any member's grant in the workspace on behalf of `actorId`, who
+   * manages its MCP access: `admin` in the log, or `user` for their own. A grant
+   * of another workspace is not found.
+   */
+  async revokeInWorkspace(id: string, workspaceId: string, actorId: string): Promise<void> {
+    const grant = await this.grants.findOne({
+      where: { id, workspaceId, revokedAt: IsNull() },
+      relations: { client: true },
+    });
+    if (!grant) {
+      throw new NotFoundException(appError('MCP_OAUTH_GRANT_NOT_FOUND'));
+    }
+    const reason: McpOAuthRevokeReason = grant.userId === actorId ? 'user' : 'admin';
+    const live = await this.grants.manager.transaction(manager =>
+      this.revoke(manager, grant.id, reason),
+    );
+    if (live) {
+      await this.audit(grant, AuditAction.DELETE, { reason, memberUserId: grant.userId }, actorId);
+    }
+  }
+
+  /**
+   * Revokes every live grant of the account, in every workspace, each logged
+   * in its own workspace, and burns its unexchanged codes: after a password
+   * reset no app keeps or gains the access the old password let someone approve.
+   */
+  async revokeAllOfUser(userId: string, reason: McpOAuthRevokeReason): Promise<void> {
+    // Unexchanged codes first: one an exchange holds locked makes this wait
+    // until its grant is committed, so the search below finds that grant too.
+    await this.grants.manager.update(
+      McpOAuthCode,
+      { userId, usedAt: IsNull() },
+      { usedAt: new Date() },
+    );
+    const live = await this.grants.find({
+      where: { userId, revokedAt: IsNull() },
+      relations: { client: true },
+    });
+    for (const grant of live) {
+      await this.revokeAndAudit(grant, reason);
+    }
   }
 
   /**
@@ -100,13 +161,14 @@ export class McpOAuthGrantsService {
     grant: McpOAuthGrant,
     action: AuditAction,
     extra: Record<string, unknown> = {},
+    actorId: string = grant.userId,
   ): Promise<void> {
     const client =
       grant.client ??
       (await this.grants.findOne({ where: { id: grant.id }, relations: { client: true } }))?.client;
     await recordSecurityEvent(this.auditService, this.logger, {
       workspaceId: grant.workspaceId,
-      actorId: grant.userId,
+      actorId,
       entityType: EntityType.INTEGRATION,
       entityId: grant.id,
       action,
