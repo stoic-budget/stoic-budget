@@ -1,5 +1,5 @@
-import { Injectable, type OnModuleDestroy } from '@nestjs/common';
-import type { ThrottlerStorage } from '@nestjs/throttler';
+import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
+import { type ThrottlerStorage, ThrottlerStorageService } from '@nestjs/throttler';
 import Redis from 'ioredis';
 
 type ThrottlerStorageRecord = Awaited<ReturnType<ThrottlerStorage['increment']>>;
@@ -46,19 +46,40 @@ end
 return { totalHits, timeToExpire, 0, 0 }
 `;
 
+/** How long a request may wait on Redis before the in-process counters answer. */
+export const THROTTLER_REDIS_TIMEOUT_MS = 500;
+
 /**
  * Throttler counters in Redis, shared by every instance of the API (the
  * default in-memory store counts per process).
+ *
+ * The guard runs on nearly every route, so a Redis that is down or not
+ * answering must not hang them all. Our own connection fails at once while
+ * Redis is unreachable (no offline queue) and gives up on a command after
+ * THROTTLER_REDIS_TIMEOUT_MS; until Redis answers again the limits are counted
+ * in this process instead, so they still hold, per instance.
  */
 @Injectable()
 export class RedisThrottlerStorage implements ThrottlerStorage, OnModuleDestroy {
+  private readonly logger = new Logger(RedisThrottlerStorage.name);
   private readonly redis: Redis;
   // A connection opened from a URL is ours to close; one handed in is not.
   private readonly ownsConnection: boolean;
+  private usingFallback = false;
 
-  constructor(redisOrUrl: Redis | string) {
+  constructor(
+    redisOrUrl: Redis | string,
+    private readonly fallback: ThrottlerStorageService = new ThrottlerStorageService(),
+  ) {
     this.ownsConnection = typeof redisOrUrl === 'string';
-    this.redis = typeof redisOrUrl === 'string' ? new Redis(redisOrUrl) : redisOrUrl;
+    this.redis =
+      typeof redisOrUrl === 'string'
+        ? new Redis(redisOrUrl, {
+            enableOfflineQueue: false,
+            maxRetriesPerRequest: 1,
+            commandTimeout: THROTTLER_REDIS_TIMEOUT_MS,
+          })
+        : redisOrUrl;
   }
 
   async increment(
@@ -70,15 +91,32 @@ export class RedisThrottlerStorage implements ThrottlerStorage, OnModuleDestroy 
   ): Promise<ThrottlerStorageRecord> {
     // One hash tag for both keys, so they land on the same Redis Cluster slot.
     const prefix = `{${key}:${throttlerName}}`;
-    const result = await this.redis.eval(
-      INCREMENT_SCRIPT,
-      2,
-      `${prefix}:hits`,
-      `${prefix}:blocked`,
-      ttl,
-      limit,
-      blockDuration,
-    );
+    let result: unknown;
+    try {
+      result = await this.redis.eval(
+        INCREMENT_SCRIPT,
+        2,
+        `${prefix}:hits`,
+        `${prefix}:blocked`,
+        ttl,
+        limit,
+        blockDuration,
+      );
+    } catch (error) {
+      if (!this.usingFallback) {
+        this.usingFallback = true;
+        this.logger.warn(
+          `Redis did not answer the throttler (${error instanceof Error ? error.message : String(error)}); counting limits in this process until it does`,
+        );
+      }
+      return this.fallback.increment(key, ttl, limit, blockDuration, throttlerName);
+    }
+    if (this.usingFallback) {
+      this.usingFallback = false;
+      this.logger.log(
+        'Redis answers the throttler again; limits are shared across instances again',
+      );
+    }
     if (!Array.isArray(result) || result.length !== 4 || !result.every(Number.isFinite)) {
       throw new TypeError(`Unexpected throttler script result: ${JSON.stringify(result)}`);
     }
@@ -93,6 +131,7 @@ export class RedisThrottlerStorage implements ThrottlerStorage, OnModuleDestroy 
   }
 
   onModuleDestroy(): void {
+    this.fallback.onApplicationShutdown();
     if (this.ownsConnection) {
       this.redis.disconnect(false);
     }
