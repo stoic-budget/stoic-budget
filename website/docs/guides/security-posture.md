@@ -13,7 +13,7 @@ turn the outbound parts off.
 |---|---|
 | Another workspace's member reading your data | Every query filters by `workspaceId`; tenant isolation is tested end to end |
 | Strangers signing up on a server open to the internet | Close sign-up under Admin > Users, or with `REGISTRATION_ENABLED=false`: only people with an invitation get in |
-| A stolen session cookie | Short-lived JWT in an `HttpOnly` cookie, refresh rotation, CSRF guard on every mutating route, 2FA with recovery codes |
+| A stolen session cookie | Short-lived JWT in an `HttpOnly` cookie, refresh rotation, CSRF guard on every mutating route, 2FA with recovery codes; changing the password, the email address or the SMTP server that sends your reset links asks for the current password |
 | An over-reaching script or AI agent | API keys carry scopes; a key never exceeds its owner's role; every write is audited as the key and is undoable |
 | The server being used to reach your network | The egress guard rejects private, loopback and link-local hosts for every outbound URL (SMTP, S3, WebDAV, IMAP, prices, maps) |
 | Uploaded files executing anything | Files are stored, never served as scripts; parsers run on text extracted from them |

@@ -61,6 +61,19 @@ export class WorkspaceServiceSettings {
   @Column({ name: 'updated_by_user_id', type: 'uuid', nullable: true })
   updatedByUserId: string | null;
 
+  /**
+   * SMTP only: the person whose own account mail (password reset, e-mail
+   * change) this server may send. Set only by a save that confirmed that
+   * person's password; a restore, an import or a row saved before it existed
+   * leaves it null, and their account mail goes through SMTP_*.
+   */
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'account_mail_user_id' })
+  accountMailUser: Relation<User | null>;
+
+  @Column({ name: 'account_mail_user_id', type: 'uuid', nullable: true })
+  accountMailUserId: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

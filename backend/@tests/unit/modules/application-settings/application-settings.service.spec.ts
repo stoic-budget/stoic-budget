@@ -293,6 +293,62 @@ describe('ApplicationSettingsService', () => {
     expect(assertPublicEgressHost).toHaveBeenCalledWith('mail.example.com');
   });
 
+  describe('stored SMTP password', () => {
+    const server = {
+      host: 'mail.example.com',
+      port: 587,
+      user: 'member-1@example.com',
+      from: 'Member One <member-1@example.com>',
+    };
+    const storedPass = 'stored-smtp-secret';
+    const nodemailer = vi.mocked(nodemailerModule);
+    const checkedWith = () =>
+      (nodemailer.createTransport as Mock).mock.calls.map(([options]) => options.auth);
+
+    beforeEach(async () => {
+      process.env.INTEGRATIONS_ENCRYPTION_KEY = 'unit-test-key';
+      delete process.env.SMTP_PASS;
+      await createService().saveSmtpSettings(user, { ...server, pass: storedPass });
+      (nodemailer.createTransport as Mock).mockClear();
+    });
+
+    it('keeps it for the same host, port and user', async () => {
+      const result = await createService().saveSmtpSettings(user, {
+        ...server,
+        host: 'MAIL.example.com',
+        pass: '',
+      });
+
+      expect(checkedWith()).toEqual([{ user: server.user, pass: storedPass }]);
+      expect(result.settings.passConfigured).toBe(true);
+    });
+
+    // The connection check authenticates with it: kept, it would go to the new server.
+    it.each([
+      ['host', { host: 'mail.elsewhere.example' }],
+      ['port', { port: 2525 }],
+      ['user', { user: 'member-2@example.com' }],
+      ['user (to none)', { user: undefined }],
+    ])('drops it when the %s changes and no new password comes', async (_, change) => {
+      const result = await createService().saveSmtpSettings(user, { ...server, ...change });
+
+      expect(checkedWith()).toEqual([undefined]);
+      expect(JSON.stringify(checkedWith())).not.toContain(storedPass);
+      expect(saved[WorkspaceServiceSettingsKey.SMTP]).toMatchObject({ encryptedSecrets: {} });
+      expect(result.settings.passConfigured).toBe(false);
+    });
+
+    it('uses the new password for a new server', async () => {
+      await createService().saveSmtpSettings(user, {
+        ...server,
+        host: 'mail.elsewhere.example',
+        pass: 'new-smtp-secret',
+      });
+
+      expect(checkedWith()).toEqual([{ user: server.user, pass: 'new-smtp-secret' }]);
+    });
+  });
+
   it('tests a workspace SMTP server on the address that passed the egress check', async () => {
     const nodemailer = vi.mocked(nodemailerModule);
     (nodemailer.createTransport as Mock).mockClear();
@@ -309,16 +365,25 @@ describe('ApplicationSettingsService', () => {
   });
 
   describe('SMTP server choice', () => {
-    const smtpRow = (workspaceId: string, host: string, updatedByUserId: string) => ({
+    const smtpRow = (
+      workspaceId: string,
+      host: string,
+      updatedByUserId: string,
+      accountMailUserId: string | null = updatedByUserId,
+    ) => ({
       workspaceId,
       key: WorkspaceServiceSettingsKey.SMTP,
       config: { host, port: 587, from: `noreply@${host}` },
       encryptedSecrets: {},
       updatedByUserId,
+      accountMailUserId,
     });
     const rows = [
       smtpRow('workspace-1', 'smtp.home.example', 'user-1'),
       smtpRow('workspace-2', 'smtp.other.example', 'admin-2'),
+      // Restored from a backup (or saved before the grant existed): the restore
+      // names the restorer as its saver, but no password was ever checked.
+      smtpRow('workspace-3', 'smtp.restored.example', 'user-1', null),
     ];
 
     beforeEach(() => {
@@ -366,6 +431,32 @@ describe('ApplicationSettingsService', () => {
       });
 
       expect(smtp).toMatchObject({ host: null, source: 'disabled' });
+    });
+
+    it('does not send account mail through a server the user only restored', async () => {
+      const smtp = await createService().getAccountSmtpSettings({
+        id: 'user-1',
+        workspaceId: 'workspace-3',
+      });
+
+      expect(smtp).toMatchObject({ host: null, source: 'disabled' });
+    });
+
+    it('grants account mail to whoever saves the server, and only on a save', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await createService().saveSmtpSettings(user, {
+        host: 'mail.example.com',
+        port: 587,
+        from: 'Member One <member-1@example.com>',
+      });
+      await createService().saveAppSettings(user, { publicUrl: 'https://a.example.com' });
+
+      expect(saved[WorkspaceServiceSettingsKey.SMTP]).toMatchObject({
+        updatedByUserId: 'user-1',
+        accountMailUserId: 'user-1',
+      });
+      expect(saved[WorkspaceServiceSettingsKey.APP]).toMatchObject({ accountMailUserId: null });
     });
   });
 

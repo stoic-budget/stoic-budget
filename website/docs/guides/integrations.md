@@ -25,6 +25,16 @@ encrypted. Env variables with the same purpose are only temporary fallback defau
   SMTP relay on a private network goes in `SMTP_HOST`/`SMTP_FROM` on the server instead.
 - Without SMTP, invitation links are still returned by the API, but password reset and email
   change cannot complete — their links travel only by email.
+- Saving SMTP asks for your account password. The SMTP server you save in your own workspace also
+  sends your password reset and email change links, so a stolen session alone must not be able to
+  point it at a server someone else reads. Removing SMTP needs no password: mail then goes through
+  the server's `SMTP_*` settings.
+- Only a save with your password makes a workspace's SMTP server send your own reset and email
+  change links. A server restored from a backup, or saved before this check existed, does not:
+  those links go through the server's `SMTP_*` settings until you save the SMTP form again.
+- The saved SMTP password is kept only while the host, port and user stay the same. Change any of
+  them and enter the SMTP password again: a stored password is never sent to a server it was not
+  saved for.
 - The Telegram webhook needs `TELEGRAM_WEBHOOK_SECRET` on the backend.
 - There is no Gmail, Google Drive or Dropbox integration: mail receipts come in over IMAP, files through
   S3-compatible storage or WebDAV.

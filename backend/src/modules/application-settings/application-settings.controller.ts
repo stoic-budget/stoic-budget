@@ -1,4 +1,5 @@
 import { Controller, Delete, Get, Put, UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { WorkspaceId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
@@ -16,10 +17,14 @@ import {
 import { User, WorkspaceServiceSettingsKey } from '../../entities';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ApplicationSettingsService } from './application-settings.service';
+import { SmtpSettingsService } from './smtp-settings.service';
 
 @Controller('settings')
 export class ApplicationSettingsController {
-  constructor(private readonly applicationSettingsService: ApplicationSettingsService) {}
+  constructor(
+    private readonly applicationSettingsService: ApplicationSettingsService,
+    private readonly smtpSettingsService: SmtpSettingsService,
+  ) {}
 
   @Get('email/smtp')
   @WorkspaceAuth(Permission.WORKSPACE_SETTINGS_MANAGE)
@@ -28,6 +33,8 @@ export class ApplicationSettingsController {
     return this.applicationSettingsService.getSmtpStatus(user, workspaceId);
   }
 
+  // Checks the caller's password (bcrypt): an online guessing oracle for a stolen session.
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Put('email/smtp')
   @WorkspaceAuth(Permission.WORKSPACE_SETTINGS_MANAGE)
   @SchemaResponse(IntegrationConnection)
@@ -36,18 +43,14 @@ export class ApplicationSettingsController {
     @WorkspaceId() workspaceId: string,
     @SchemaBody(SaveSmtpSettingsBody) body: SaveSmtpSettingsBody,
   ) {
-    return this.applicationSettingsService.saveSmtpSettings(user, body, workspaceId);
+    return this.smtpSettingsService.save(user, body, workspaceId);
   }
 
   @Delete('email/smtp')
   @WorkspaceAuth(Permission.WORKSPACE_SETTINGS_MANAGE)
   @SchemaResponse(IntegrationDisconnected)
   disconnectSmtp(@CurrentUser() user: User, @WorkspaceId() workspaceId: string) {
-    return this.applicationSettingsService.disconnect(
-      user,
-      WorkspaceServiceSettingsKey.SMTP,
-      workspaceId,
-    );
+    return this.smtpSettingsService.remove(user, workspaceId);
   }
 
   @Get('notifications/telegram')
