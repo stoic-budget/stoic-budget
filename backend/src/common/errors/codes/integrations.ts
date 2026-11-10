@@ -53,6 +53,8 @@ export const INTEGRATIONS_ERRORS = {
     'That wallet already has a bank feed: switch it instead of adding a second one',
   BANK_SYNC_NEEDS_REAUTH: 'The provider no longer accepts this connection: link it again',
   BANK_SYNC_UNAVAILABLE: 'The provider asked to try again later; the connection itself is fine',
+  BANK_SYNC_TOO_SOON:
+    'This connection is being pulled now or was pulled moments ago: try again in {{seconds}} s',
   BANK_SYNC_SIMPLEFIN_TOKEN_REJECTED:
     'SimpleFIN did not accept the setup token: it may have been used already (a token works once)',
   BANK_SYNC_SIMPLEFIN_CLAIM_FAILED: 'SimpleFIN claim failed with HTTP {{status}}',

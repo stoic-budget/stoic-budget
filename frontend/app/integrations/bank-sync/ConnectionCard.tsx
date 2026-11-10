@@ -9,6 +9,7 @@ import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { AccountRow } from './AccountRow';
 import { AddBankForm } from './AddBankForm';
 import { Panel } from './Panel';
+import { SyncSchedule } from './SyncSchedule';
 import {
   BANK_SYNC_BASE,
   type BankSyncAccount,
@@ -48,9 +49,9 @@ export function ConnectionCard({
     onRun(
       `sync:${connection.id}`,
       async () => {
-        const response = await apiClient.post(`${base}/sync`);
+        // Reloaded either way: a failed pull moves the schedule too (paused until …).
+        const response = await apiClient.post(`${base}/sync`).finally(onReload);
         const result = await checkContract('BankSyncResult', response.data, `${base}/sync`);
-        await onReload();
         const failed = result.accounts.find(account => account.error);
         if (failed) return { tone: 'error', text: `${t.syncFailed.value}: ${failed.error}` };
         if (result.imported === 0) return { tone: 'ok', text: t.nothingNew.value };
@@ -206,6 +207,8 @@ export function ConnectionCard({
         )}
 
         <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{t.newAccountsOff}</Typography>
+
+        <SyncSchedule connection={connection} busy={busy} onRun={onRun} onReload={onReload} />
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap' }}>
           <FormControlLabel

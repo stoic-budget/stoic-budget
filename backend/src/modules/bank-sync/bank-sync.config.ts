@@ -12,6 +12,14 @@ import type {
  */
 export type BankSyncHealth = 'ok' | 'never_synced' | 'stale' | 'incomplete' | 'needs_reauth';
 
+/**
+ * How often auto-sync pulls a connection, in hours: the user picks within these
+ * bounds per connection, and six is the cadence every connection had before.
+ * Kept in its own column, not in the config below: a pull saves the config it
+ * read when it started and would put back an interval changed meanwhile.
+ */
+export const SYNC_INTERVAL_HOURS = { min: 1, max: 24, default: 6 } as const;
+
 export interface BankSyncAccountSetting {
   /** The provider's account id. */
   id: string;

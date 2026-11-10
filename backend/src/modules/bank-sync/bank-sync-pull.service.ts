@@ -2,11 +2,9 @@ import { randomUUID } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, type Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { resolveUploadsDir } from '../../common/utils/uploads.util';
-import { STANDARD_WORKSPACE } from '../../common/workspaces/version-workspaces';
 import { Integration, IntegrationStatus, User } from '../../entities';
 import { StatementsService } from '../statements/statements.service';
 import type { BankSyncAccountSetting, BankSyncHealth } from './bank-sync.config';
@@ -90,41 +88,6 @@ export class BankSyncPullService {
     settings.lastSyncAt = now;
     await this.connections.saveConfig(settings, config);
     return result;
-  }
-
-  /** Pulls every connected workspace that left auto-sync on, as the user who connected it. */
-  @Cron(CronExpression.EVERY_6_HOURS)
-  async autoSync(): Promise<void> {
-    const keys = this.connections.catalogue().map(item => item.key);
-    const integrations = await this.integrationRepository.find({
-      // A past version pulls nothing new, whatever its copied settings say.
-      where: {
-        provider: In(keys),
-        status: IntegrationStatus.CONNECTED,
-        workspace: STANDARD_WORKSPACE,
-      },
-      relations: { openProtocolSettings: true, connectedByUser: true },
-    });
-    for (const integration of integrations) {
-      const config = this.connections.configOf(integration);
-      if (!(config.autoSync && integration.connectedByUser)) continue;
-      try {
-        const result = await this.sync(
-          integration.connectedByUser,
-          integration.workspaceId,
-          integration.id,
-        );
-        if (result.imported > 0) {
-          this.logger.log(
-            `Bank sync: connection ${integration.id} pulled ${result.imported} rows into ${result.statements} statements`,
-          );
-        }
-      } catch (error) {
-        this.logger.warn(
-          `Bank sync: connection ${integration.id} failed: ${this.messageOf(error)}`,
-        );
-      }
-    }
   }
 
   private async pullAccount(
