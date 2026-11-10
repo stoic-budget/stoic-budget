@@ -20,10 +20,16 @@ The Stoic Budget API is served from the backend at `/api/v1`.
 - **Scripts and integrations**: send an access token as `Authorization: Bearer <token>` or an API key in
   `X-Api-Key` (keys are managed under `/api-keys`). Header-authenticated requests skip the CSRF check.
 - Routes marked `@Public()` — health checks, login, registration, password reset — need no credentials.
+- **First password after single sign-on**: signed-in accounts without a password call `POST /auth/oidc/reauth`
+  to obtain a provider sign-in URL. A fresh sign-in with a linked provider identity grants a single-use,
+  five-minute `oidc_step_up` cookie bound to the user and session. `POST /auth/password/set` with
+  `{newPassword}` and that cookie returns `{user}`, revokes existing sessions and sets fresh session cookies
+  for the current device. `GET /auth/me` includes `passwordSet`.
 
 ## Core API domains
 
-- `/auth` — register, login, refresh, logout, logout-all, sessions, me, 2FA, forgot/reset password
+- `/auth` — register, login, refresh, logout, logout-all, sessions, me, 2FA, forgot/reset password,
+  OIDC reauthentication (`POST /auth/oidc/reauth`) and first password (`POST /auth/password/set`)
 - `/users` — profile, preferences, avatar and content background, email change (`PATCH /users/me/email`, then
   `POST /users/me/email/confirm`)
 - `/workspaces` — workspace management, members, invitations
@@ -73,7 +79,8 @@ logs.
 ## Rate limiting
 
 `ThrottlerGuard` applies globally: 500 requests per minute by default, counted in Redis when `REDIS_URL` is set.
-Login, registration, and reset-password allow 5 requests per minute, forgot-password 3. Responses also carry
+Login, registration, reset-password, OIDC reauthentication, and first-password setting allow 5 requests per minute,
+forgot-password 3. Responses also carry
 helmet security headers.
 
 For the full endpoint reference, use Swagger.
