@@ -1,0 +1,96 @@
+/**
+ * The words a holding is classified with. Plain lists without effect, so the
+ * frontend can read them as values without pulling the schemas into a page.
+ */
+
+/** The eleven GICS sectors. */
+export const HOLDING_SECTORS = [
+  'energy',
+  'materials',
+  'industrials',
+  'consumer_discretionary',
+  'consumer_staples',
+  'health_care',
+  'financials',
+  'information_technology',
+  'communication_services',
+  'utilities',
+  'real_estate',
+] as const;
+
+/** Continents as fund factsheets split them: Latin America apart from North America. */
+export const HOLDING_REGIONS = [
+  'north_america',
+  'latin_america',
+  'europe',
+  'middle_east',
+  'africa',
+  'asia',
+  'oceania',
+] as const;
+
+/** ISO 3166-1 alpha-2: the 249 officially assigned codes. */
+// biome-ignore format: one row per first letter reads better than 249 lines
+export const ISO_COUNTRIES = [
+  'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ',
+  'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ',
+  'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ',
+  'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ',
+  'EC', 'EE', 'EG', 'EH', 'ER', 'ES', 'ET',
+  'FI', 'FJ', 'FK', 'FM', 'FO', 'FR',
+  'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY',
+  'HK', 'HM', 'HN', 'HR', 'HT', 'HU',
+  'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT',
+  'JE', 'JM', 'JO', 'JP',
+  'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ',
+  'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'LY',
+  'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ',
+  'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ',
+  'OM',
+  'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY',
+  'QA',
+  'RE', 'RO', 'RS', 'RU', 'RW',
+  'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS', 'ST', 'SV', 'SX', 'SY', 'SZ',
+  'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO', 'TR', 'TT', 'TV', 'TW', 'TZ',
+  'UA', 'UG', 'UM', 'US', 'UY', 'UZ',
+  'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU',
+  'WF', 'WS',
+  'YE', 'YT',
+  'ZA', 'ZM', 'ZW',
+] as const;
+
+/**
+ * The top ring of the allocation: what kind of asset it is. An ETF or a fund
+ * counts as equity; a bond fund is entered with the class "bond".
+ */
+export const ALLOCATION_CLASSES = [
+  'equity',
+  'fixed_income',
+  'cash',
+  'real_estate',
+  'commodities',
+  'other',
+] as const;
+
+/** The outer ring: the holding's own class, and for a metal lot the metal. */
+export const ALLOCATION_SUBCLASSES = [
+  'stock',
+  'etf',
+  'fund',
+  'bond',
+  'cash',
+  'real_estate',
+  'gold',
+  'silver',
+  'platinum',
+  'palladium',
+  'other',
+] as const;
+
+/** A fund's weights may leave a part unnamed: it is said out loud as "other". */
+export const OTHER_SHARE = 'other';
+/** Value with nothing said about it: no breakdown and no single value either. */
+export const UNCLASSIFIED = 'unclassified';
+
+/** The asset classes a breakdown can be given to: things that hold other things. */
+export const LOOK_THROUGH_CLASSES = ['etf', 'fund'] as const;

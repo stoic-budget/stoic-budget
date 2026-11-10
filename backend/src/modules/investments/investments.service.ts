@@ -21,10 +21,12 @@ import { Transaction } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { BalanceService } from '../balance/balance.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { setAssetClass } from './holding-classification';
 import { holdingValueIn, holdingView } from './holding-value';
 import { InvestmentFlowsService } from './investment-flows.service';
 import { round2 } from './returns-sources';
 import { normalizeStockSymbol, StockPriceService } from './stock-price.service';
+import { tradedHoldingIds } from './traded-holdings';
 
 const INVESTMENTS_SECTION_CODE = 'ASSET_INVESTMENTS';
 
@@ -202,7 +204,9 @@ export class InvestmentsService {
       holding.symbol = dto.symbol ? normalizeStockSymbol(dto.symbol) : null;
     }
     if (dto.name != null) holding.name = dto.name;
-    if (dto.assetClass != null) holding.assetClass = toEnum(InvestmentAssetClass, dto.assetClass);
+    // A breakdown belongs to a fund: another class drops it.
+    if (dto.assetClass != null)
+      setAssetClass(holding, toEnum(InvestmentAssetClass, dto.assetClass));
     if (dto.quantity != null) holding.quantity = dto.quantity;
     if (dto.price != null) {
       holding.price = dto.price;
@@ -295,17 +299,8 @@ export class InvestmentsService {
     return holdingView(holding, currency, this.exchangeRatesService, hasTrades);
   }
 
-  /** Holdings of the workspace (or the one asked about) whose quantity their trades give. */
-  private async tradedHoldingIds(workspaceId: string, holdingId?: string): Promise<Set<string>> {
-    if (!this.tradeRepository) return new Set();
-    const rows = await this.tradeRepository
-      .createQueryBuilder('trade')
-      .select('DISTINCT trade.holdingId', 'holdingId')
-      .where('trade.workspaceId = :workspaceId', { workspaceId })
-      .andWhere("trade.kind <> 'dividend'") // a dividend says nothing about how much is held
-      .andWhere(holdingId ? 'trade.holdingId = :holdingId' : '1=1', { holdingId })
-      .getRawMany<{ holdingId: string }>();
-    return new Set(rows.map(row => row.holdingId));
+  private tradedHoldingIds(workspaceId: string, holdingId?: string): Promise<Set<string>> {
+    return tradedHoldingIds(this.tradeRepository, workspaceId, holdingId);
   }
 
   /**

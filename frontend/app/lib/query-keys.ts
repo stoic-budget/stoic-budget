@@ -186,6 +186,9 @@ export const queryKeys = {
     ['investments', o.workspaceId, 'lots', o.holdingId] as const,
   investmentSettings: (workspaceId: string | null) =>
     ['investments', workspaceId, 'settings'] as const,
+  // Under net worth: holdings, trades and metal lots all re-read net worth, and this with it.
+  investmentAllocation: (workspaceId: string | null) =>
+    ['net-worth', workspaceId, 'investment-allocation'] as const,
   metals: (workspaceId: string | null) => ['metals', workspaceId] as const,
   reconciliation: (workspaceId: string | null) => ['reconciliation', workspaceId] as const,
   cashFlowMap: (o: { workspaceId: string | null; params: string }) =>

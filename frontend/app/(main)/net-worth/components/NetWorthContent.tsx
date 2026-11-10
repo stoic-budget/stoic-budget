@@ -8,6 +8,7 @@ import { FALLBACK_CURRENCY } from '@/app/lib/currency';
 import { formatMoney } from '@/app/lib/format-money';
 import { useNetWorth } from '../hooks/useNetWorth';
 import { AllocationCard } from './AllocationCard';
+import { AllocationMixCard } from './AllocationMixCard';
 import { AttributionCard } from './AttributionCard';
 import { HoldingsSection } from './HoldingsSection';
 import { ASSET_CLASS_KEYS, InvestmentsCard } from './InvestmentsCard';
@@ -126,6 +127,8 @@ export function NetWorthContent() {
             currency={currency}
             locale={locale}
           />
+
+          <AllocationMixCard locale={locale} excluded={excluded} />
 
           <RiskCard
             byRisk={data.byRisk}
