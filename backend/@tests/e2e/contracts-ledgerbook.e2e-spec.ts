@@ -263,6 +263,8 @@ describe('API contracts: ledger book (e2e)', () => {
       const pendingId = await cloneRow(transactionId, {
         counterpartyName: 'ACME Store - Wireless Buds',
         documentNumber: 'ACT-1:AUTH-1',
+        // A hold the bank still keeps: the forecast drops older ones.
+        transactionDate: new Date(),
         isPending: true,
         isVerified: false,
       });
