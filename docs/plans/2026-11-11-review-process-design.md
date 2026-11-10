@@ -74,6 +74,11 @@ Changed after review (both reviewers): low became a whitelist; tests inside a hi
 count; `accepted` is needed on a high pull request whenever app code changes (a migration
 no longer removes it); the author raises the tier with `risk-review` instead of a `risk:*`
 label, so the gate's own label never holds the tier up.
+
+Decided by the maintainer after review: coding agents get their own GitHub account without
+admin rights, and the gate counts an approval label only when someone on `APPROVERS` added
+it last. Approval labels are not reset on new pushes (Dosu pushes documentation commits to
+pull requests); the agent that pushes after an approval says what changed.
 - Maintainer, in GitHub settings: add `review-gate` to the required checks; require
   resolved review threads.
 

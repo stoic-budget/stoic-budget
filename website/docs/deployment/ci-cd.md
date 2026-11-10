@@ -39,9 +39,11 @@ checked before it joined. The rules live in `scripts/review-gate.mjs`.
 The workflow runs on `pull_request_target` and checks out the default branch: the workflow and the rules always
 come from `main`, so a pull request, a fork's or a parent in a stack included, cannot change the rules it is
 judged by. It never checks out or runs the pull request's code. A commit status belongs to a commit, so when
-several open pull requests share a head commit, each is judged and the strictest verdict is posted. What it does not stop: someone with write access to the repository can post a status of the same
-name from another workflow. The gate guards against mistakes and outside pull requests, not against people who
-can already push.
+several open pull requests share a head commit, each is judged and the strictest verdict is posted. An approval label counts only when the last person to add it is on the `APPROVERS` list in the rules (the
+maintainer); coding agents use their own account, so a label they add is ignored and named in the status. What it
+does not stop: someone with write access to the repository can post a status of the same name from another
+workflow. The gate guards against mistakes, agents and outside pull requests, not against people who can already
+push.
 
 Only the maintainer sets the approval labels. The process behind them: [Reviewing changes](../contributing/reviewing).
 

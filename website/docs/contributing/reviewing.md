@@ -18,8 +18,10 @@ path rule is fixed in `scripts/review-gate.mjs`, which is itself high risk.
 | `risk:feature` | everything not on that list and not high: app code, contracts, build and Docker files, scripts, a dependency a person adds | + a "How to accept" scenario, a recorded walk-through, `accepted` |
 | `risk:high` | migrations, entities and the migration runner (`db-approved`); auth, API keys, guards, permissions and roles (`security-approved`); CI workflows, repository guards, git hooks and the rules that steer coding agents (`security-approved`); the shared money code: sums, currencies, counted rows, balances, ledger, tax (`accepted`) | + a risk brief and the area's label; `accepted` too whenever app code changes |
 
-Only the maintainer sets `accepted`, `db-approved` and `security-approved`. Assistants and agents never do,
-even when asked: a label set by whoever wrote the code checks nothing.
+Only the maintainer sets `accepted`, `db-approved` and `security-approved`. Coding agents work under their own
+GitHub account without admin rights, and the gate counts an approval label only when the maintainer was the last to
+add it: a label set by whoever wrote the code checks nothing. Approval labels stay when new commits arrive (bots
+push documentation updates to pull requests); whoever pushes after an approval says what changed.
 
 ## Who reviews
 

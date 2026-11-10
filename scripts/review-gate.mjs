@@ -15,6 +15,31 @@ export const LABELS = {
 // The author asks for the risk reviewer: the tier becomes high whatever the paths say.
 export const RAISE_LABEL = 'risk-review';
 
+// Who may approve. Coding agents work under their own account, which can set labels too, so
+// an approval label counts only when an approver was the last to add it.
+export const APPROVERS = ['symonbaikov'];
+
+/**
+ * The labels the gate may trust: approval labels last added by an approver, and every other
+ * label. `events` are the pull request's issue events (`labeled` ones carry label and actor).
+ */
+export function trustedLabels(labels, events, approvers = APPROVERS) {
+  const approvals = Object.values(LABELS);
+  const lastAdder = new Map();
+  for (const event of events) {
+    if (event.event === 'labeled' && event.label) {
+      lastAdder.set(event.label.name, event.actor?.login ?? '');
+    }
+  }
+  const ignored = labels.filter(
+    label => approvals.includes(label) && !approvers.includes(lastAdder.get(label)),
+  );
+  return {
+    trusted: labels.filter(label => !ignored.includes(label)),
+    ignored: ignored.map(label => ({ label, by: lastAdder.get(label) ?? 'unknown' })),
+  };
+}
+
 const TEST_FILE =
   /(^|\/)(@tests|__tests__)\/|\.(test|spec|e2e-spec)\.[cm]?[jt]sx?$|^backend\/golden\//;
 

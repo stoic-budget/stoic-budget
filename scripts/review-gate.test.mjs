@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { classify, decide, RAISE_LABEL, requiredLabels } from './review-gate.mjs';
+import { classify, decide, RAISE_LABEL, requiredLabels, trustedLabels } from './review-gate.mjs';
 
 const MIGRATION = 'backend/src/migrations/1788440000000-AddSmtpAccountMailUser.ts';
 const SERVICE = 'backend/src/modules/goals/goals.service.ts';
@@ -174,4 +174,33 @@ test('requiredLabels has no duplicates', () => {
   assert.deepEqual(requiredLabels('high', ['auth', 'process'], false), ['security-approved']);
   assert.deepEqual(requiredLabels('high', ['money'], true), ['accepted']);
   assert.deepEqual(requiredLabels('low', [], true), []);
+});
+
+test('an approval label counts only when an approver added it last', () => {
+  const labeled = (name, login) => ({ event: 'labeled', label: { name }, actor: { login } });
+  const labels = ['accepted', 'db-approved', 'risk:high', 'enhancement'];
+  const events = [
+    labeled('accepted', 'symonbaikov'),
+    labeled('db-approved', 'symonbaikov'),
+    { event: 'unlabeled', label: { name: 'db-approved' }, actor: { login: 'symonbaikov' } },
+    labeled('db-approved', 'agent-account'),
+    labeled('risk:high', 'github-actions[bot]'),
+  ];
+  const { trusted, ignored } = trustedLabels(labels, events, ['symonbaikov']);
+  assert.deepEqual(trusted, ['accepted', 'risk:high', 'enhancement']);
+  assert.deepEqual(ignored, [{ label: 'db-approved', by: 'agent-account' }]);
+
+  // No event at all (e.g. events not readable): the label is not trusted.
+  assert.deepEqual(trustedLabels(['security-approved'], [], ['symonbaikov']).trusted, []);
+  assert.deepEqual(
+    decide(
+      [MIGRATION],
+      trustedLabels(
+        ['accepted', 'db-approved'],
+        [labeled('accepted', 'symonbaikov'), labeled('db-approved', 'agent-account')],
+        ['symonbaikov'],
+      ).trusted,
+    ).missing,
+    ['db-approved'],
+  );
 });

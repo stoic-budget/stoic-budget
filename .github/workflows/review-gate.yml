@@ -57,7 +57,7 @@ jobs:
             // First, so an older success on this commit never outlives a run that fails.
             await post('pending', 'Checking the risk tier and labels');
 
-            const { decide } = await import(
+            const { decide, trustedLabels } = await import(
               path.join(process.env.GITHUB_WORKSPACE, 'scripts/review-gate.mjs')
             );
 
@@ -90,9 +90,16 @@ jobs:
               const current = await github.paginate(github.rest.issues.listLabelsOnIssue, {
                 owner, repo, issue_number: number, per_page: 100,
               });
+              // An approval label counts only when the maintainer was the last to add it.
+              const events = await github.paginate(github.rest.issues.listEvents, {
+                owner, repo, issue_number: number, per_page: 100,
+              });
               const labels = current.map(label => label.name);
+              const { trusted, ignored } = trustedLabels(labels, events);
               const author = number === pr.number ? pr.user.login : '';
-              verdicts.push({ number, labels, result: decide(names, labels, { author, removed }) });
+              verdicts.push({
+                number, labels, ignored, result: decide(names, trusted, { author, removed }),
+              });
             }
 
             const own = verdicts.find(verdict => verdict.number === pr.number);
@@ -113,13 +120,17 @@ jobs:
                 `Labels needed: ${own.result.required.join(', ') || 'none'}`,
                 `Missing: ${own.result.missing.join(', ') || 'none'}`,
                 `Pull requests on this commit: ${[...numbers].map(n => `#${n}`).join(', ')}`,
+                `Approval labels not counted: ${own.ignored.map(i => `${i.label} (added by ${i.by})`).join(', ') || 'none'}`,
               ])
               .write();
 
             const waiting = verdicts.filter(verdict => verdict.result.missing.length);
             if (waiting.length) {
               const message = waiting
-                .map(({ number, result }) => `#${number} ${result.tier}: waiting for ${result.missing.join(', ')}`)
+                .map(({ number, result, ignored }) => {
+                  const note = ignored.length ? ` (not counted: ${ignored.map(i => `${i.label} by ${i.by}`).join(', ')})` : '';
+                  return `#${number} ${result.tier}: waiting for ${result.missing.join(', ')}${note}`;
+                })
                 .join('; ');
               await post('failure', message);
               core.notice(message);
