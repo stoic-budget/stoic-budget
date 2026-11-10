@@ -12,3 +12,6 @@ acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/Ban
 acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/BankSyncPanel.content.ts:private-key:1170
 acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/BankSyncPanel.content.ts:private-key:1173
 acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/BankSyncPanel.content.ts:private-key:1176
+
+# A made-up wrong account password in the SMTP settings e2e test; no secret.
+27137d79cd0e37190832a7b9c7bb734c6a7036f9:backend/@tests/e2e/smtp-settings-password.e2e-spec.ts:generic-api-key:45
