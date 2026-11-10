@@ -13,7 +13,7 @@ turn the outbound parts off.
 |---|---|
 | Another workspace's member reading your data | Every query filters by `workspaceId`; tenant isolation is tested end to end |
 | Strangers signing up on a server open to the internet | Close sign-up under Admin > Users, or with `REGISTRATION_ENABLED=false`: only people with an invitation get in |
-| A stolen session cookie | Short-lived JWT in an `HttpOnly` cookie, refresh rotation, CSRF guard on every mutating route, 2FA with recovery codes |
+| A stolen session cookie | Short-lived JWT in an `HttpOnly` cookie, refresh rotation, CSRF guard on cookie-authenticated writes, 2FA with recovery codes |
 | An over-reaching script or AI agent | API keys carry scopes; a key never exceeds its owner's role; every write is audited as the key and is undoable |
 | The server being used to reach your network | The egress guard rejects private, loopback and link-local hosts for every outbound URL (SMTP, S3, WebDAV, IMAP, prices, maps) |
 | Uploaded files executing anything | Files are stored, never served as scripts; parsers run on text extracted from them |
@@ -37,12 +37,16 @@ in clear, or a browser extension reading the page.
   response body carries no token.
 - Refresh tokens rotate on every use and old tokens are invalidated.
 - Double-submit CSRF protection for cookie-authenticated writes; header-authenticated clients (`Authorization`,
-  `X-Api-Key`) are exempt.
+  `X-Api-Key`) are exempt, as are the public, body-only OAuth registration, token and revocation endpoints.
 - Optional TOTP two-factor authentication with recovery codes.
 - Single-use password reset (1 h) and email change (24 h) tokens; the reset endpoint answers the same way for known
-  and unknown addresses.
+  and unknown addresses. A password reset ends every session, voids pending MCP OAuth authorization codes and
+  revokes the user's OAuth grants in every workspace. Logging out of all devices voids pending codes but
+  leaves existing grants untouched.
 - Bcrypt password hashing (12 rounds by default, `BCRYPT_ROUNDS`).
-- helmet security headers, a CORS allowlist and Redis-backed rate limits.
+- helmet security headers, a CORS allowlist and Redis-backed rate limits. Only the exact OAuth discovery,
+  registration, token and revocation paths allow any origin without credentials; the rest of the API,
+  including `/api/v1/mcp`, keeps the credentialed allowlist.
 - Workspace roles are enforced on every request by guards at the controller level.
 - The audit log records most mutating operations, with rollback for critical changes.
 
