@@ -330,7 +330,7 @@ describe('Calendar feed (e2e)', () => {
         prop(lines, 'UID')?.startsWith(`UID:tax-${deadline.kind}-${deadline.periodEnd}.`),
       );
       expect(event).toBeDefined();
-      expect(summaryOf(event ?? [])).toContain(deadline.returnName.replace(/,/g, '\\,'));
+      expect(summaryOf(event ?? [])).toContain(deadline.returnName.replace(/[\\;,]/g, char => `\\${char}`));
       expect(prop(event ?? [], 'DTSTART')).toBe(`DTSTART;VALUE=DATE:${icsDay(deadline.dueDate)}`);
     }
     const invoice = eventWith(text, 'Client Beta');
