@@ -12,3 +12,6 @@ acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/Ban
 acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/BankSyncPanel.content.ts:private-key:1170
 acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/BankSyncPanel.content.ts:private-key:1173
 acf6672641026017513a4a7778520f8b3f0741f0:frontend/app/integrations/bank-sync/BankSyncPanel.content.ts:private-key:1176
+
+# A made-up base64 credential id in the passkey notice test, checked to stay out of the e-mail; no secret.
+2093fde11c0e05036c66a0de78a959522b1dccdd:backend/@tests/unit/modules/auth/passkey-notice.service.spec.ts:generic-api-key:119
