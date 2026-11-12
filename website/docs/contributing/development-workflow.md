@@ -41,8 +41,8 @@ CI runs policy-as-code, shell/Dockerfile/config scans, Biome, type checks, backe
 tests, builds, dependency audits and license checks, a secrets scan, and a Docker image build. See
 [CI/CD](../deployment/ci-cd).
 
-On pull requests, changes to migrations, entities, or `data-source.ts` need the `db-approved` label; changes to the
-auth module, `common/guards`, `common/decorators`, or permissions/roles code need `security-approved`.
+On pull requests, the review gate gives each change a risk tier and waits for the maintainer's `accepted`,
+`db-approved` or `security-approved` labels that tier needs. See [Reviewing changes](reviewing).
 
 ## Local workflow
 

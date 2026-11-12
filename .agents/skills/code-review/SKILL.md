@@ -10,6 +10,12 @@ Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
 
+For pull requests in this repository, follow `.claude/rules/review.md` as well. This two-axis review does not
+replace the required fresh-context `code-reviewer` review, or the `risk-reviewer` brief for `risk:high`.
+Give those reviewers the branch or worktree, the task and the pull request's **What**, not the author's
+verdict or test results. Put their reports in the pull request's **Review** section, with each code-review
+finding fixed (with the commit) or rejected with a reason.
+
 The issue tracker should have been provided to you. If not, tell the user to run `/setup-matt-pocock-skills`.
 
 ## Process

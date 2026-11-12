@@ -9,7 +9,6 @@ Stoic Budget's pipelines live in `.github/workflows`.
 
 `ci.yml` runs on pull requests and on pushes to `main` and `develop`:
 
-- `sensitive-changes` - label gate on pull requests (see below)
 - `policy-as-code` - Conftest policies for the Compose files and workflows
 - `shellcheck`, `hadolint`, `trivy-config` - shell script, Dockerfile, and config scanning
 - `lint` - Biome for both apps
@@ -23,12 +22,30 @@ Stoic Budget's pipelines live in `.github/workflows`.
 - `secrets-scan` - Gitleaks
 - `docker` - image build with a Trivy scan and SBOM
 
-## Sensitive change protection
+## Review gate
 
-On pull requests, the `sensitive-changes` job requires labels:
+`review-gate.yml` runs on every pull request, again whenever its code, base or labels change. It gives the pull
+request a risk tier from the files it changes (`risk:low`, `risk:feature` or `risk:high`) and posts the commit
+status `review-gate`, which fails until the labels that tier needs are set:
 
-- `db-approved` for migrations, entities, or `backend/src/data-source.ts`
-- `security-approved` for the auth module, `common/guards`, `common/decorators`, or permissions/roles code
+- `accepted` for a feature, and for a high-risk change that also changes app code or touches the money code
+- `db-approved` for migrations, entities, the database config and the migration runner
+- `security-approved` for auth, API keys, guards, decorators, permissions and roles; CI workflows, the repository
+  guards and policies, git hooks, and the rules and settings that steer coding agents
+
+The ruleset requires `review-gate`; in the merge queue a job of that name passes, because each pull request was
+checked before it joined. The rules live in `scripts/review-gate.mjs`.
+
+The workflow runs on `pull_request_target` and checks out the default branch: the workflow and the rules always
+come from `main`, so a pull request, a fork's or a parent in a stack included, cannot change the rules it is
+judged by. It never checks out or runs the pull request's code. A commit status belongs to a commit, so when
+several open pull requests share a head commit, each is judged and the strictest verdict is posted. An approval label counts only when the last person to add it is on the `APPROVERS` list in the rules (the
+maintainer); coding agents use their own account, so a label they add is ignored and named in the status. What it
+does not stop: someone with write access to the repository can post a status of the same name from another
+workflow. The gate guards against mistakes, agents and outside pull requests, not against people who can already
+push.
+
+Only the maintainer sets the approval labels. The process behind them: [Reviewing changes](../contributing/reviewing).
 
 ## CD pipeline
 

@@ -12,6 +12,8 @@ failing probe) is a guess, not a finding. Style nits are out of scope unless the
 The caller tells you what to review: a worktree path, a branch/commit range, or files. If it does
 not, review `git diff` of the current working tree against `HEAD` in the directory you were started in.
 Ask for nothing — pick the obvious default and state it in the report.
+If the caller also hands you the author's conclusions ("all tests pass", "verified"), ignore them and check
+for yourself: you are the review, the author's checks are not.
 
 ## Hard rules (this repository)
 
@@ -82,7 +84,8 @@ not at `RELEASE SAVEPOINT` — a probe that rolls back proves nothing; commit, o
 
 ## Report
 
-Return, most severe first:
+The caller pastes this into the pull request's **Review** section (`.claude/rules/review.md`), so write it in
+English. Return, most severe first:
 
 - **Findings** — for each: file:line, one-sentence defect, the concrete failure scenario (input/state →
   wrong result), the evidence (command + relevant output or the failing probe), and a verdict:
