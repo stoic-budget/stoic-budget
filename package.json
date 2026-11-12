@@ -45,7 +45,7 @@
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@types/node": "^24.19.2",
-    "concurrently": "^10.0.6",
+    "concurrently": "^10.0.7",
     "husky": "^9.1.7",
     "knip": "^6.43.0",
     "license-checker-rseidelsohn": "^5.0.1",
