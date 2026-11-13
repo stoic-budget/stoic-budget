@@ -91,6 +91,9 @@ describe('BudgetsService', () => {
         spentAmount: 30,
         percentUsed: 30,
         currency: 'USD',
+        // The client counts the days left in the period from these.
+        periodStart: '2026-05-01',
+        periodEnd: '2026-05-31',
       }),
     );
   });
@@ -117,7 +120,15 @@ describe('BudgetsService', () => {
     const end = query.andWhere.mock.calls.find(([sql]) => String(sql).includes(':end'));
     expect(start?.[1].start).toEqual(new Date(2026, 2, 1));
     expect(end?.[1].end.getMonth()).toBe(2);
-    expect(budget).toEqual(expect.objectContaining({ spentAmount: 80, percentUsed: 80 }));
+    expect(budget).toEqual(
+      expect.objectContaining({
+        spentAmount: 80,
+        percentUsed: 80,
+        // The bounds are of the day asked for too, not of today (May).
+        periodStart: '2026-03-01',
+        periodEnd: '2026-03-31',
+      }),
+    );
   });
 
   it('creates a budget with correct fields', async () => {
@@ -418,6 +429,7 @@ describe('BudgetsService', () => {
       expect(budget.spentAmount).toBe(0);
       expect(budget.percentUsed).toBe(0);
       expect(budget.isActive).toBe(false);
+      expect(budget.periodEnd).toBeNull();
       expect(transactionRepository.createQueryBuilder).not.toHaveBeenCalled();
     });
 
