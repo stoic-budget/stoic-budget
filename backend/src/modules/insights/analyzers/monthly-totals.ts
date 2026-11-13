@@ -1,16 +1,18 @@
 import type { Repository } from 'typeorm';
 import { flowsSql } from '../../../common/utils/counted-transactions.util';
 import { type Transaction, TransactionType } from '../../../entities/transaction.entity';
+import { DAY_SQL, type DayRow } from '../../exchange-rates/day-converter';
 
-/** Income and spending of a workspace between two days, per currency as booked. */
+/** Income and spending of a workspace between two days, per currency and day as booked. */
 export function monthlyTotalsByCurrency(
   transactions: Repository<Transaction>,
   workspaceId: string,
   { start, end }: { start: Date; end: Date },
-): Promise<Array<{ currency: string | null; income: string; spent: string }>> {
+): Promise<Array<DayRow<'income' | 'spent'>>> {
   return transactions
     .createQueryBuilder('t')
     .select('t.currency', 'currency')
+    .addSelect(DAY_SQL, 'day')
     .addSelect(
       'COALESCE(SUM(CASE WHEN t.transaction_type = :income THEN ABS(t.amount) ELSE 0 END), 0)',
       'income',
@@ -27,5 +29,6 @@ export function monthlyTotalsByCurrency(
     .andWhere(flowsSql('t'))
     .setParameters({ income: TransactionType.INCOME, expense: TransactionType.EXPENSE })
     .groupBy('t.currency')
-    .getRawMany<{ currency: string | null; income: string; spent: string }>();
+    .addGroupBy(DAY_SQL)
+    .getRawMany<DayRow<'income' | 'spent'>>();
 }

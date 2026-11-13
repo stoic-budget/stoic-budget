@@ -9,11 +9,11 @@ export const DAY_SQL = daySql('t');
 /** Sums read back per currency and day, as Postgres returns them (strings). */
 export type DayRow<K extends string> = { currency: string; day: string } & Record<K, string>;
 
-/** An amount (a number or Postgres' string) in the target currency at `day`'s rate. */
+/** An amount (a number or Postgres' string) in the target currency at `day`'s rate (today's without one). */
 export type DayConvert = ((
   amount: number | string | null | undefined,
   currency: string | null | undefined,
-  day: string,
+  day: string | undefined,
 ) => number) & {
   /** Currencies left out for want of a rate, sorted. */
   readonly missing: string[];
@@ -28,23 +28,24 @@ export type DayConvert = ((
 export async function loadDayConverter(
   exchangeRates: ExchangeRatesService,
   target: string,
-  rows: Array<{ currency: string | null | undefined; day: string }>,
+  rows: Array<{ currency: string | null | undefined; day?: string }>,
   workspaceId: string,
 ): Promise<DayConvert> {
+  const today = new Date().toISOString().slice(0, 10);
   const converter = await CurrencyConverter.load(
     exchangeRates,
     target,
-    rows.map(row => ({ currency: currencyCodeOrDefault(row.currency), date: row.day })),
+    rows.map(row => ({ currency: currencyCodeOrDefault(row.currency), date: row.day ?? today })),
     workspaceId,
   );
   const convert = (
     amount: number | string | null | undefined,
     currency: string | null | undefined,
-    day: string,
+    day: string | undefined,
   ) => {
     const value = typeof amount === 'number' ? amount : Number.parseFloat(amount ?? '');
     return Number.isFinite(value)
-      ? converter.convert(value, currencyCodeOrDefault(currency), day)
+      ? converter.convert(value, currencyCodeOrDefault(currency), day ?? today)
       : 0;
   };
   return Object.defineProperty(convert, 'missing', { get: () => converter.missing }) as DayConvert;
