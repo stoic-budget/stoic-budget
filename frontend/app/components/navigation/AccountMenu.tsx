@@ -22,12 +22,17 @@ import {
   Settings,
 } from '@/app/components/icons';
 import { openAppPanel } from '@/app/components/panels/app-panels-store';
+import { useWhatsNew } from '@/app/components/whats-new/useWhatsNew';
 import { useAuth } from '@/app/hooks/useAuth';
 import { usePermissions } from '@/app/hooks/usePermissions';
 import { useIntlayer } from '@/app/i18n';
 import { normalizeAvatarUrl } from '@/app/lib/avatar-url';
 import { avatarInitial, avatarTone } from '@/app/lib/initial-avatar';
 import { togglePrivacyMode, usePrivacyMode } from '@/app/lib/privacy-mode';
+import {
+  buildSettingsHref,
+  SETTINGS_PATH,
+} from '@/app/settings/profile/helpers/settings-url-state';
 import { useThemePreference } from './hooks/useThemePreference';
 
 /**
@@ -49,6 +54,8 @@ export function AccountMenu({
   const { hasPermission } = usePermissions();
   const { setTheme, resolvedTheme } = useTheme();
   const { userMenu, nav } = useIntlayer('navigation');
+  const whatsNewText = useIntlayer('whatsNew');
+  const whatsNew = useWhatsNew();
   // Placed by coordinates rather than by the trigger: opening the menu widens a
   // collapsed rail under it, and an anchor element would be measured mid-slide.
   const [anchor, setAnchor] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -126,18 +133,27 @@ export function AccountMenu({
         aria-expanded={Boolean(anchor)}
         data-tour-id={variant === 'sidebar' ? 'user-menu-trigger' : undefined}
       >
-        <span className="seneca-account__avatar" style={{ background: avatarTone(user.email) }}>
-          {avatarUrl && !avatarError ? (
-            <img
-              src={avatarUrl}
-              alt=""
-              onError={() => {
-                setAvatarError(true);
-              }}
+        <span className="seneca-account__avatar-slot">
+          <span className="seneca-account__avatar" style={{ background: avatarTone(user.email) }}>
+            {avatarUrl && !avatarError ? (
+              <img
+                src={avatarUrl}
+                alt=""
+                onError={() => {
+                  setAvatarError(true);
+                }}
+              />
+            ) : (
+              avatarInitial(user.name || user.email)
+            )}
+          </span>
+          {whatsNew.unseen ? (
+            <span
+              className="seneca-account__dot"
+              role="img"
+              aria-label={whatsNewText.newBadge.value}
             />
-          ) : (
-            avatarInitial(user.name || user.email)
-          )}
+          ) : null}
         </span>
         <span className="seneca-account__name">{user.name}</span>
         <ChevronUp size={14} className="seneca-account__caret" />
@@ -230,16 +246,28 @@ export function AccountMenu({
           </MenuItem>
         ) : null}
 
+        {/* With a release not seen yet, Settings leads to the changelog, where it lives. */}
         <MenuItem
           onClick={() => {
             pick();
-            router.push('/settings/profile');
+            router.push(
+              whatsNew.unseen ? buildSettingsHref('advanced', 'changelog') : SETTINGS_PATH,
+            );
           }}
         >
           <ListItemIcon>
             <Settings size={18} />
           </ListItemIcon>
-          <ListItemText>{userMenu.settings}</ListItemText>
+          <ListItemText>
+            {userMenu.settings}
+            {whatsNew.unseen ? (
+              <span
+                className="seneca-account__dot seneca-account__dot--inline"
+                role="img"
+                aria-label={whatsNewText.newBadge.value}
+              />
+            ) : null}
+          </ListItemText>
         </MenuItem>
 
         <Divider />

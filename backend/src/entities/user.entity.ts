@@ -172,6 +172,36 @@ export class User {
   })
   pageHintsSeen: Record<string, number>;
 
+  /**
+   * The newest changelog entry the user has seen: its stable id from changelog.json.
+   * The What's new badge and dialog show only entries dated after changelogSeenAt.
+   * Both written only by ChangelogSeenService's forward-only UPDATE, for the same
+   * reason as welcomeTutorialSeenAt.
+   */
+  @Column({
+    name: 'changelog_seen_id',
+    type: 'varchar',
+    length: 80,
+    nullable: true,
+    default: null,
+    update: false,
+  })
+  changelogSeenId: string | null;
+
+  /**
+   * The date of that entry, which orders entries. A new account starts at its
+   * sign-up time, so it is not greeted with older releases; accounts older than
+   * the column are NULL and see the latest release once.
+   */
+  @Column({
+    name: 'changelog_seen_at',
+    type: 'timestamptz',
+    nullable: true,
+    default: () => 'now()',
+    update: false,
+  })
+  changelogSeenAt: Date | null;
+
   /** Base32 TOTP secret, encrypted at rest. Set during setup, before 2FA is confirmed. */
   @Column({ name: 'two_factor_secret', type: 'text', nullable: true, select: false })
   twoFactorSecret: string | null;

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { buildReleaseNotes } from './changelog-lib.mjs';
+import { buildReleaseNotes, latestEntry } from './changelog-lib.mjs';
 
 test('buildReleaseNotes groups commits into user-facing sections', () => {
   const releaseDate = '2026-04-01T12:00:00.000Z';
@@ -160,4 +160,19 @@ test('buildReleaseNotes skips merge and docs-only commits from user-facing outpu
   assert.match(entry.markdown, /- \*\*auth\*\*: Resolve session refresh race/);
   assert.doesNotMatch(entry.markdown, /README/);
   assert.doesNotMatch(entry.markdown, /Merge branch/);
+});
+
+test('latestEntry picks the newest entry by date and leaves its commits out', () => {
+  const entry = (id, date) => ({ id, date, title: id, markdown: '', commits: [{ sha: id }] });
+  const entries = [
+    entry('changelog-2026-04-01-1111111', '2026-04-01T12:00:00.000Z'),
+    entry('changelog-2026-04-03-3333333', '2026-04-03T08:00:00.000Z'),
+    entry('changelog-2026-04-02-2222222', '2026-04-02T12:00:00.000Z'),
+  ];
+
+  const latest = latestEntry(entries);
+
+  assert.equal(latest.id, 'changelog-2026-04-03-3333333');
+  assert.equal('commits' in latest, false);
+  assert.equal(latestEntry([]), null);
 });

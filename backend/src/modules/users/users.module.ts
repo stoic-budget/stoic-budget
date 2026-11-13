@@ -12,7 +12,9 @@ import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditModule } from '../audit/audit.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { WorkspacesModule } from '../workspaces/workspaces.module';
+import { ChangelogSeenController } from './changelog-seen.controller';
 import { AccountDataService } from './services/account-data.service';
+import { ChangelogSeenService } from './services/changelog-seen.service';
 import { EmailChangeService } from './services/email-change.service';
 import { PermissionsService } from './services/permissions.service';
 import { UsersController } from './users.controller';
@@ -34,13 +36,14 @@ import { UsersService } from './users.service';
     MailerModule,
     AuditModule,
   ],
-  controllers: [UsersController],
+  controllers: [UsersController, ChangelogSeenController],
   providers: [
     UsersService,
     PermissionsService,
     TimezonesService,
     AccountDataService,
     EmailChangeService,
+    ChangelogSeenService,
   ],
   exports: [UsersService, PermissionsService, TimezonesService],
 })

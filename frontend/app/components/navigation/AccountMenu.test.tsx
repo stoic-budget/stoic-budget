@@ -26,13 +26,19 @@ vi.mock('@/app/i18n', () => ({
   useIntlayer: () => ({
     userMenu: new Proxy({}, { get: (_target, name) => String(name) }),
     nav: new Proxy({}, { get: (_target, name) => String(name) }),
+    newBadge: { value: 'newBadge' },
   }),
+}));
+const whatsNew = vi.hoisted(() => ({ unseen: false }));
+vi.mock('@/app/components/whats-new/useWhatsNew', () => ({
+  useWhatsNew: () => ({ latest: null, unseen: whatsNew.unseen }),
 }));
 
 afterEach(() => {
   act(() => setPrivacyMode(false));
   permissions.granted = [];
   push.mockReset();
+  whatsNew.unseen = false;
 });
 
 describe('AccountMenu', () => {
@@ -83,5 +89,30 @@ describe('AccountMenu', () => {
     fireEvent.click(screen.getByRole('button', { name: /Administrator/ }));
 
     expect(screen.queryByRole('menuitem', { name: 'admin' })).toBeNull();
+  });
+
+  it('opens Settings as before while nothing is new, with no dot', () => {
+    render(<AccountMenu />);
+    expect(screen.queryByRole('img', { name: 'newBadge' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Administrator/ }));
+
+    fireEvent.click(screen.getByRole('menuitem', { name: 'settings' }));
+
+    expect(push).toHaveBeenCalledWith('/settings/profile');
+  });
+
+  it('dots the avatar and Settings for a new release, and Settings leads to the changelog', () => {
+    whatsNew.unseen = true;
+    render(<AccountMenu />);
+    expect(screen.getByRole('img', { name: 'newBadge' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Administrator/ }));
+
+    const settings = screen.getByRole('menuitem', { name: /settings/ });
+    expect(settings.querySelector('[role="img"][aria-label="newBadge"]')).not.toBeNull();
+    // What's new stays out of the menu: the changelog lives in Settings.
+    expect(screen.getAllByRole('menuitem').map(item => item.textContent)).not.toContain('whatsNew');
+    fireEvent.click(settings);
+
+    expect(push).toHaveBeenCalledWith('/settings/profile?tab=advanced&section=changelog');
   });
 });

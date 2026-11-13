@@ -1,0 +1,11 @@
+{
+  "entry": {
+    "id": "changelog-2026-10-26-d0a5165",
+    "version": "main-d0a5165",
+    "branch": "main",
+    "date": "2026-10-26T10:14:40.008Z",
+    "title": "Release update - October 26, 2026",
+    "summary": "This release includes 1 feature.",
+    "markdown": "## Features\n- **backend**: Every JSON answer has a response contract"
+  }
+}

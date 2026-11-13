@@ -17,7 +17,27 @@ vi.mock('@/app/hooks/useAuth', () => ({
   useAuth: () => ({ user: { name: 'Symon', avatarUrl: null } }),
 }));
 
+const whatsNew = vi.hoisted(() => ({ unseen: false }));
+vi.mock('@/app/components/whats-new/useWhatsNew', () => ({
+  useWhatsNew: () => ({ latest: null, unseen: whatsNew.unseen }),
+}));
+
 describe('MobileBottomBar', () => {
+  it('marks the account tab while a release is new to the person', () => {
+    const { unmount } = render(<MobileBottomBar />);
+    expect(screen.queryByRole('img', { name: 'New update' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open menu' })).toBeInTheDocument();
+    unmount();
+
+    whatsNew.unseen = true;
+    render(<MobileBottomBar />);
+    whatsNew.unseen = false;
+
+    expect(screen.getByRole('img', { name: 'New update' })).toBeInTheDocument();
+    // The tab's aria-label hides its content, so the dot's text has to be in the tab's name.
+    expect(screen.getByRole('button', { name: 'Open menu, New update' })).toBeInTheDocument();
+  });
+
   it('keeps the quick actions out of the Tab order until the FAB opens them', () => {
     const { container } = render(<MobileBottomBar />);
     const menu = container.querySelector('.seneca-bottom-bar__fab-menu');
