@@ -2,7 +2,7 @@
 
 import Box from '@mui/material/Box';
 import { visuallyHidden } from '@mui/utils';
-import React, { type ComponentType, Suspense, useEffect, useState } from 'react';
+import React, { type ComponentType, Suspense, startTransition, useEffect, useState } from 'react';
 import { Alert } from '@/app/components/ui/alert';
 import { SnapshotSkeleton } from '@/app/components/ui/snapshot-skeleton/SnapshotSkeleton';
 import { useAuth } from '@/app/hooks/useAuth';
@@ -43,6 +43,10 @@ const TAB_COMPONENT: Record<SettingsTabId, ComponentType<SettingsTabProps>> = {
  * only the active one refetched and re-laid-out on every switch — the lag users
  * saw. The open tab mounts first; the rest mount once the browser is idle, and
  * from then on a switch only toggles `hidden`.
+ *
+ * The rest mount one per idle moment, each as a transition: React renders it in
+ * slices and handles a click between them. Mounting them all in one update froze
+ * the page for seconds (hundreds of sessions and the whole changelog at once).
  */
 function useMountedTabs({
   activeTab,
@@ -59,13 +63,19 @@ function useMountedTabs({
 
   useEffect(() => {
     if (!ready) return;
-    const mountAll = (): void => setMounted(new Set(SETTINGS_TABS));
-    if (typeof window.requestIdleCallback === 'function') {
-      const handle = window.requestIdleCallback(mountAll, { timeout: 2000 });
-      return () => window.cancelIdleCallback(handle);
-    }
-    const timer = window.setTimeout(mountAll, 300);
-    return () => window.clearTimeout(timer);
+    const idle = typeof window.requestIdleCallback === 'function';
+    const later = (run: () => void): number =>
+      idle ? window.requestIdleCallback(run, { timeout: 2000 }) : window.setTimeout(run, 300);
+    const queue = [...SETTINGS_TABS];
+    let handle = 0;
+    const mountNext = (): void => {
+      const tab = queue.shift();
+      if (!tab) return;
+      startTransition(() => setMounted(prev => (prev.has(tab) ? prev : new Set([...prev, tab]))));
+      handle = later(mountNext);
+    };
+    handle = later(mountNext);
+    return () => (idle ? window.cancelIdleCallback(handle) : window.clearTimeout(handle));
   }, [ready]);
 
   return mounted;

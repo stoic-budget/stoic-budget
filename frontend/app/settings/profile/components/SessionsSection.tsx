@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { useState } from 'react';
 import { LogOut } from '@/app/components/icons';
 import { Alert } from '@/app/components/ui/alert';
 import { EmptyStateIllustration } from '@/app/components/ui/EmptyStateIllustration';
@@ -13,6 +14,17 @@ import { Spinner } from '@/app/components/ui/spinner';
 import { formatDateTime, type UserFormatPreferences } from '@/app/lib/user-format';
 import { getSessionIcon, type UserSession } from '@/app/settings/profile/profileHelpers';
 import { tokens } from '@/lib/theme-tokens';
+
+/** Sessions listed before "Show all": a long-lived account gathers hundreds, each a card. */
+const SESSIONS_SHOWN = 5;
+
+/** The most recent sessions, the current one always among them. */
+export function sessionsShown(sessions: UserSession[], showAll: boolean): UserSession[] {
+  if (showAll || sessions.length <= SESSIONS_SHOWN) return sessions;
+  const recent = sessions.slice(0, SESSIONS_SHOWN);
+  const current = sessions.find(session => session.isCurrent);
+  return current && !recent.includes(current) ? [current, ...recent.slice(0, -1)] : recent;
+}
 
 type Props = {
   t: {
@@ -46,6 +58,8 @@ export function SessionsSection({
   handleLogoutAll,
   formatPreferences,
 }: Props) {
+  const [showAll, setShowAll] = useState(false);
+  const shown = sessionsShown(sessions, showAll);
   return (
     <Stack spacing={2.5}>
       <EmptyStateIllustration name="sessions" size="sm" />
@@ -81,7 +95,7 @@ export function SessionsSection({
         ) : sessions.length ? (
           <SnapshotSkeleton id="settings-sessions" loading={false}>
             <Stack spacing={1}>
-              {sessions.map(session => {
+              {shown.map(session => {
                 const SessionIcon = getSessionIcon(session.device);
                 const isLogoutLoading = logoutSessionLoadingId === session.id;
 
@@ -176,6 +190,16 @@ export function SessionsSection({
                   </Box>
                 );
               })}
+              {shown.length < sessions.length && (
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => setShowAll(true)}
+                  sx={{ alignSelf: 'flex-start' }}
+                >
+                  {tx(['sessionsCard', 'showAll']).replace('{{count}}', String(sessions.length))}
+                </Button>
+              )}
             </Stack>
           </SnapshotSkeleton>
         ) : (

@@ -1,13 +1,18 @@
 'use client';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useTheme } from 'next-themes';
+import { useState } from 'react';
 import { type ChangelogEntry, ChangelogModal } from '@/app/components/ChangelogModal';
 import { CalendarDays, Clock3, FileText } from '@/app/components/icons';
 import { formatStoredDateWithOptions } from '@/app/lib/user-format-store';
 import { tokens } from '@/lib/theme-tokens';
+
+/** Releases listed before "Show earlier": the stream grows with every release, each a card. */
+const RELEASES_SHOWN = 10;
 
 type Props = {
   tx: (path: string[]) => string;
@@ -27,6 +32,7 @@ export function ChangelogSection({
   setChangelogSelectedEntry,
 }: Props) {
   const { resolvedTheme } = useTheme();
+  const [showAll, setShowAll] = useState(false);
   const c = resolvedTheme === 'dark' ? tokens.dark.color : tokens.color;
   const releaseLabelText = tx(['changelogCard', 'releaseLabel']);
   const closeLabelText = tx(['changelogCard', 'closeLabel']);
@@ -34,7 +40,8 @@ export function ChangelogSection({
   const loadingText = tx(['changelogCard', 'loading']);
   const openDetailsText = tx(['changelogCard', 'openDetails']);
 
-  const formattedEntries = changelogEntries.map(entry => {
+  const shownEntries = showAll ? changelogEntries : changelogEntries.slice(0, RELEASES_SHOWN);
+  const formattedEntries = shownEntries.map(entry => {
     const date = new Date(entry.date);
     const formattedDate = Number.isNaN(date.getTime())
       ? entry.date
@@ -188,6 +195,16 @@ export function ChangelogSection({
               </Box>
             </Box>
           ))}
+          {shownEntries.length < changelogEntries.length && (
+            <Button
+              variant="text"
+              size="small"
+              onClick={() => setShowAll(true)}
+              sx={{ alignSelf: 'flex-start' }}
+            >
+              {tx(['changelogCard', 'showOlder'])}
+            </Button>
+          )}
         </Stack>
       )}
 
