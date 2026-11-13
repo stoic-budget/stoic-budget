@@ -33,6 +33,14 @@ export const accountGroupOf = (type: WalletType): AccountGroup =>
 
 export const accountIconOf = (type: WalletType): LucideIcon => BY_TYPE.get(type)?.icon ?? Landmark;
 
+/**
+ * Whether the account counts in net worth. Only an explicit `false` leaves it
+ * out: a list cached from before the setting existed has no field, and those
+ * accounts all counted.
+ */
+export const countsInNetWorth = (account: { includeInNetWorth?: boolean }): boolean =>
+  account.includeInNetWorth !== false;
+
 /** A debt's balance is what is owed, kept below zero; it is shown as a positive "owed". */
 export const isDebtType = (type: WalletType): boolean => accountGroupOf(type) === 'debts';
 

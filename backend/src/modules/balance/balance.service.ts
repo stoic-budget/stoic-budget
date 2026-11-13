@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, type Repository } from 'typeorm';
+import { In, type Repository } from 'typeorm';
 import { toEnum } from '../../common/effect/to-enum';
 import { appError } from '../../common/errors/app-error';
 import { onlyCounted } from '../../common/utils/counted-transactions.util';
@@ -44,9 +44,13 @@ import {
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { balanceAccountName } from './balance-account-name';
 import {
+  cashWallets,
+  walletsLeftOutOfNetWorth as leftOutWallets,
   negateSeries,
+  seriesWallets,
   statementCashSeries,
   sumSeries,
+  type WalletScope,
   walletCashSeries,
 } from './balance-cash-series';
 import { defaultAccountsFor } from './balance-default-accounts';
@@ -217,36 +221,20 @@ export class BalanceService {
    * Both together, so creating the first account moves money between the two
    * parts instead of dropping every other bank from the total. Debts (cards,
    * loans) are liabilities, not negative cash. Statements in the trash, and
-   * their rows, are left out.
+   * their rows, are left out. Net worth asks with `NET_WORTH_SCOPE`, which
+   * leaves out the accounts set not to count in it; the sheet keeps them all.
    */
-  async getCashSeries(workspaceId: string, dates: string[]): Promise<Map<string, CurrencyAmounts>> {
-    const members = await this.workspaceMemberRepository.find({
-      where: { workspaceId },
-      select: {
-        userId: true,
-      },
-    });
-
-    const memberIds = [...new Set(members.map(member => member.userId))];
-
-    // Обязательно фильтруем по workspaceId: участник может состоять в нескольких
-    // воркспейсах, и без фильтра сюда утекали бы кошельки чужого тенанта.
-    const wallets =
-      memberIds.length > 0
-        ? await this.walletRepository.find({
-            where: {
-              workspaceId,
-              userId: In(memberIds),
-              isActive: true,
-              type: Not(In([...DEBT_WALLET_TYPES])),
-            },
-            select: {
-              id: true,
-              initialBalance: true,
-              currency: true,
-            },
-          })
-        : [];
+  async getCashSeries(
+    workspaceId: string,
+    dates: string[],
+    scope: WalletScope = {},
+  ): Promise<Map<string, CurrencyAmounts>> {
+    const wallets = await cashWallets(
+      this.walletRepository,
+      this.workspaceMemberRepository,
+      workspaceId,
+      scope,
+    );
 
     const [walletSeries, statementSeries] = await Promise.all([
       wallets.length > 0
@@ -257,15 +245,23 @@ export class BalanceService {
     return walletSeries ? sumSeries(dates, walletSeries, statementSeries) : statementSeries;
   }
 
+  /** Ids of the accounts net worth would read but that are set not to count in it. */
+  walletsLeftOutOfNetWorth(workspaceId: string): Promise<string[]> {
+    return leftOutWallets(this.walletRepository, this.workspaceMemberRepository, workspaceId);
+  }
+
   /**
    * What the active credit cards and loans owe at each of `dates`, per
    * currency, as positive amounts: the liability side of what cash leaves out.
    */
-  async getDebtSeries(workspaceId: string, dates: string[], types = DEBT_WALLET_TYPES) {
-    const debts = await this.walletRepository.find({
-      where: { workspaceId, isActive: true, type: In([...types]) },
-      select: { id: true, initialBalance: true, currency: true },
-    });
+  async getDebtSeries(
+    workspaceId: string,
+    dates: string[],
+    types = DEBT_WALLET_TYPES,
+    scope: WalletScope = {},
+  ) {
+    const where = { type: In([...types]) };
+    const debts = await seriesWallets(this.walletRepository, workspaceId, where, scope);
     if (debts.length === 0) {
       return new Map(dates.map(date => [date, new Map()]));
     }

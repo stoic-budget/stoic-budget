@@ -2,6 +2,7 @@ import { In, Not } from 'typeorm';
 import * as XLSX from 'xlsx';
 import { BalanceAccountSubType, BalanceAccountType, type BalanceSnapshot } from '@/entities';
 import { BalanceService } from '@/modules/balance/balance.service';
+import { NET_WORTH_SCOPE } from '@/modules/balance/balance-cash-series';
 import { DEFAULT_BALANCE_ACCOUNTS } from '@/modules/balance/balance-default-accounts';
 import { BalanceHistoryService } from '@/modules/balance/balance-history.service';
 import { PERSONAL_BALANCE_ACCOUNTS } from '@/modules/balance/balance-personal-accounts';
@@ -447,6 +448,52 @@ describe('BalanceService', () => {
 
       expect(series.get('2026-01-31')).toEqual(new Map([['EUR', 80]]));
       expect(walletRepository.find.mock.calls[0][0].where.type).toEqual(In(['credit_card', 'loan']));
+    });
+
+    it('reads only the accounts that count when net worth asks, and every account otherwise', async () => {
+      walletRepository.find.mockResolvedValue([]);
+      statementRepository.createQueryBuilder.mockReturnValue(queryBuilderReturning([]));
+
+      await service.getCashSeries('ws-1', ['2026-01-31']);
+      await service.getCashSeries('ws-1', ['2026-01-31'], NET_WORTH_SCOPE);
+      await service.getDebtSeries('ws-1', ['2026-01-31']);
+      await service.getDebtSeries('ws-1', ['2026-01-31'], ['credit_card'], NET_WORTH_SCOPE);
+
+      const wheres = walletRepository.find.mock.calls.map(call => call[0].where);
+      expect(wheres.map(where => where.includeInNetWorth)).toEqual([undefined, true, undefined, true]);
+      // The scope narrows the accounts; it never widens them past the workspace or the archive.
+      for (const where of wheres) {
+        expect(where).toMatchObject({ workspaceId: 'ws-1', isActive: true });
+      }
+    });
+
+    it('counts as left out only the accounts net worth would otherwise read', async () => {
+      // Cash reads current members' accounts only (a former member's is in no figure); debts read every active one.
+      walletRepository.find.mockImplementation(async ({ where }: { where: { type: unknown } }) =>
+        JSON.stringify(where.type) === JSON.stringify(Not(In(['credit_card', 'loan'])))
+          ? [{ id: 'w-held' }]
+          : [{ id: 'w-loan' }],
+      );
+
+      await expect(service.walletsLeftOutOfNetWorth('ws-1')).resolves.toEqual(['w-held', 'w-loan']);
+
+      const wheres = walletRepository.find.mock.calls.map(call => call[0].where);
+      const cash = wheres.find(where => 'userId' in where);
+      const debts = wheres.find(where => !('userId' in where));
+      expect(wheres).toHaveLength(2);
+      expect(cash).toEqual({
+        userId: In(['user-1']),
+        type: Not(In(['credit_card', 'loan'])),
+        workspaceId: 'ws-1',
+        isActive: true,
+        includeInNetWorth: false,
+      });
+      expect(debts).toEqual({
+        type: In(['credit_card', 'loan']),
+        workspaceId: 'ws-1',
+        isActive: true,
+        includeInNetWorth: false,
+      });
     });
 
     it('holds a transfer whose legs post on different days at one date', async () => {

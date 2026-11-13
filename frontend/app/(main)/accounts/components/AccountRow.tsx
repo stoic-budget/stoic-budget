@@ -5,7 +5,7 @@ import { fillTemplateNodes, PrivateAmount } from '@/app/components/ui/private-am
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import { tokens } from '@/lib/theme-tokens';
-import { accountIconOf, accountSubtitle, isDebtType } from '../account-types';
+import { accountIconOf, accountSubtitle, countsInNetWorth, isDebtType } from '../account-types';
 import type { Account } from '../hooks/useAccounts';
 
 const formatDay = (date: string, locale: string) =>
@@ -122,7 +122,11 @@ export function AccountBadge({
 }
 
 export function AccountRow({ account }: { account: Account }): React.JSX.Element {
-  const subtitle = accountSubtitle(account);
+  const t = useIntlayer('accountsPage');
+  // A quiet word, not a badge: the account is fine, it only stays off the net worth.
+  const subtitle = [accountSubtitle(account), !countsInNetWorth(account) && t.notInNetWorth.value]
+    .filter(Boolean)
+    .join(' · ');
   return (
     <Link
       href={`/accounts/${account.id}`}

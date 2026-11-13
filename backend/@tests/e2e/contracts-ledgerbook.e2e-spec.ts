@@ -165,9 +165,14 @@ describe('API contracts: ledger book (e2e)', () => {
       expect(created.body.initialBalance).toBe('12.50');
       const id = created.body.id;
       matches(WalletItem, (await call('get', `/wallets/${id}`).expect(200)).body);
-      const updated = await call('put', `/wallets/${id}`, { initialBalance: 20 }).expect(200);
+      expect(created.body.includeInNetWorth).toBe(true);
+      const updated = await call('put', `/wallets/${id}`, {
+        initialBalance: 20,
+        includeInNetWorth: false,
+      }).expect(200);
       matches(WalletItem, updated.body);
       expect(updated.body.initialBalance).toBe('20.00');
+      expect(updated.body.includeInNetWorth).toBe(false);
       matches(MessageResult, (await call('delete', `/wallets/${id}`).expect(200)).body);
     });
 

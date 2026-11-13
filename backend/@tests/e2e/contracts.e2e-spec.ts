@@ -411,11 +411,17 @@ describe('API contracts (e2e)', () => {
         .post('/wallets')
         .set('Authorization', `Bearer ${owner.token}`)
         .set('x-workspace-id', owner.workspaceId)
-        .send({ name: 'Contract Wallet', currency: 'USD', initialBalance: 12.5 })
+        .send({
+          name: 'Contract Wallet',
+          currency: 'USD',
+          initialBalance: 12.5,
+          includeInNetWorth: false,
+        })
         .expect(201);
       const res = await get('/wallets');
       matches(WalletList, res.body);
       expect(res.body[0].initialBalance).toBe('12.50');
+      expect(res.body[0].includeInNetWorth).toBe(false);
     });
   });
 
@@ -581,6 +587,8 @@ describe('API contracts (e2e)', () => {
       const res = await get('/reports/net-worth?range=30d');
       matches(NetWorthResponse, res.body);
       expect(res.body.assetLines.length).toBeGreaterThan(0);
+      // The wallet made under reference data is set not to count.
+      expect(res.body.accountsLeftOut).toBe(1);
     });
 
     it('GET /reports/balance/sheet', async () => {

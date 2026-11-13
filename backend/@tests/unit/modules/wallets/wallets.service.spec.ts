@@ -136,6 +136,23 @@ describe('WalletsService', () => {
       );
     });
 
+    it('counts a new account in net worth unless told otherwise, even when sent null', async () => {
+      const createSpy = vi
+        .spyOn(walletRepository, 'create')
+        .mockReturnValue(mockWallet as Wallet);
+      vi.spyOn(walletRepository, 'save').mockResolvedValue(mockWallet as Wallet);
+
+      await service.create('ws-1', 'user-1', createDto);
+      await service.create('ws-1', 'user-1', { ...createDto, includeInNetWorth: null });
+      await service.create('ws-1', 'user-1', { ...createDto, includeInNetWorth: false });
+
+      expect(createSpy.mock.calls.map(call => call[0]?.includeInNetWorth)).toEqual([
+        true,
+        true,
+        false,
+      ]);
+    });
+
     it('should associate wallet with workspace', async () => {
       const createSpy = vi
         .spyOn(walletRepository, 'create')

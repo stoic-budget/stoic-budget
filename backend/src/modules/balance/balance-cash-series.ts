@@ -1,6 +1,13 @@
-import type { Repository } from 'typeorm';
+import { type FindOptionsWhere, In, Not, type Repository } from 'typeorm';
 import { onlyCounted } from '../../common/utils/counted-transactions.util';
-import { type Statement, StatementStatus, type Transaction, type Wallet } from '../../entities';
+import {
+  type Statement,
+  StatementStatus,
+  type Transaction,
+  type Wallet,
+  type WorkspaceMember,
+} from '../../entities';
+import { DEBT_WALLET_TYPES } from '../../entities/wallet.entity';
 import {
   addAmount,
   type CurrencyAmounts,
@@ -48,6 +55,77 @@ export function negateSeries(series: Map<string, CurrencyAmounts>): Map<string, 
       new Map([...amounts].map(([currency, amount]) => [currency, -amount])),
     ]),
   );
+}
+
+/**
+ * Which accounts a series walks: every active one, or, with `includeInNetWorth`
+ * set, only those whose setting matches it.
+ */
+export type WalletScope = { includeInNetWorth?: boolean };
+
+/** The scope net worth reads with: an account set not to count is left out of its whole history. */
+export const NET_WORTH_SCOPE: WalletScope = { includeInNetWorth: true };
+
+/** The accounts net worth would have read but leaves out. */
+const LEFT_OUT_SCOPE: WalletScope = { includeInNetWorth: false };
+
+/** The active accounts of the workspace matching `where`, as a series reads them. */
+export function seriesWallets(
+  walletRepository: Repository<Wallet>,
+  workspaceId: string,
+  where: FindOptionsWhere<Wallet>,
+  scope: WalletScope,
+) {
+  return walletRepository.find({
+    where: {
+      ...where,
+      workspaceId,
+      isActive: true,
+      ...(scope.includeInNetWorth === undefined
+        ? {}
+        : { includeInNetWorth: scope.includeInNetWorth }),
+    },
+    select: { id: true, initialBalance: true, currency: true },
+  });
+}
+
+/** The accounts the cash line walks: every active one that is not a debt, of a current member. */
+export async function cashWallets(
+  walletRepository: Repository<Wallet>,
+  memberRepository: Repository<WorkspaceMember>,
+  workspaceId: string,
+  scope: WalletScope,
+) {
+  const members = await memberRepository.find({ where: { workspaceId }, select: { userId: true } });
+  const memberIds = [...new Set(members.map(member => member.userId))];
+  // Обязательно фильтруем по workspaceId: участник может состоять в нескольких
+  // воркспейсах, и без фильтра сюда утекали бы кошельки чужого тенанта.
+  return memberIds.length > 0
+    ? seriesWallets(
+        walletRepository,
+        workspaceId,
+        { userId: In(memberIds), type: Not(In([...DEBT_WALLET_TYPES])) },
+        scope,
+      )
+    : [];
+}
+
+/**
+ * Ids of the accounts set not to count that net worth would otherwise read:
+ * the same selection as its cash line and its debts, so the count the page
+ * shows is the number of accounts actually missing from its figures.
+ */
+export async function walletsLeftOutOfNetWorth(
+  walletRepository: Repository<Wallet>,
+  memberRepository: Repository<WorkspaceMember>,
+  workspaceId: string,
+): Promise<string[]> {
+  const debts = { type: In([...DEBT_WALLET_TYPES]) };
+  const wallets = await Promise.all([
+    cashWallets(walletRepository, memberRepository, workspaceId, LEFT_OUT_SCOPE),
+    seriesWallets(walletRepository, workspaceId, debts, LEFT_OUT_SCOPE),
+  ]);
+  return wallets.flat().map(wallet => wallet.id);
 }
 
 export async function walletCashSeries(

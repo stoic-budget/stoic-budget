@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import type React from 'react';
 import { useId, useState } from 'react';
-import { isDebtType } from '@/app/(main)/accounts/account-types';
+import { countsInNetWorth, isDebtType } from '@/app/(main)/accounts/account-types';
 import { ChevronRight } from '@/app/components/icons';
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
@@ -69,6 +69,8 @@ export function BalanceGroupRow({
     (wallets ?? []).filter(
       wallet =>
         wallet.isActive &&
+        // The group's total leaves these out; listing them would not add up to it.
+        countsInNetWorth(wallet) &&
         wallet.balance !== 0 &&
         (code === DEBTS_LINE
           ? wallet.type === (group.key === 'credit_cards' ? 'credit_card' : 'loan')

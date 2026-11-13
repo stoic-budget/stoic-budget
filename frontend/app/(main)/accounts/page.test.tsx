@@ -59,6 +59,8 @@ vi.mock('@/app/i18n', async () => {
         newAccount: value('New account'),
         nameLabel: value('Name'),
         accountWithNumber: value('Account {{number}}'),
+        countInNetWorth: value('Count in net worth'),
+        notInNetWorth: value('Not in net worth'),
       }),
   };
 });
@@ -198,6 +200,48 @@ describe('AccountsPage', () => {
           initialBalance: 100,
           statementIds: ['s-jan', 's-feb'],
         }),
+      ),
+    );
+  });
+
+  it('marks quietly an account set not to count in net worth, and only that one', async () => {
+    serve([
+      walletItem({ id: 'w-everyday', name: 'Everyday', currency: 'EUR' }),
+      walletItem({
+        id: 'w-held',
+        name: 'Held for a friend',
+        type: 'savings',
+        currency: 'EUR',
+        includeInNetWorth: false,
+      }),
+    ]);
+
+    renderWithQuery(<AccountsPage />);
+
+    const held = await screen.findByRole('link', { name: /Held for a friend/ });
+    expect(held).toHaveTextContent('Not in net worth');
+    expect(screen.getByRole('link', { name: /Everyday/ })).not.toHaveTextContent('Not in net worth');
+  });
+
+  it('counts a new account in net worth unless the switch is turned off', async () => {
+    serve([walletItem({ id: 'w-everyday', name: 'Everyday', currency: 'EUR' })]);
+
+    renderWithQuery(<AccountsPage />);
+
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Add account' }))[0]);
+    const drawer = await screen.findByRole('dialog');
+    const counted = within(drawer).getByLabelText('Count in net worth');
+    expect(counted).toBeChecked();
+
+    fireEvent.change(within(drawer).getByLabelText('Name'), { target: { value: 'Business float' } });
+    fireEvent.click(counted);
+    expect(counted).not.toBeChecked();
+    fireEvent.click(within(drawer).getByRole('button', { name: 'save' }));
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith(
+        '/wallets',
+        expect.objectContaining({ name: 'Business float', includeInNetWorth: false }),
       ),
     );
   });

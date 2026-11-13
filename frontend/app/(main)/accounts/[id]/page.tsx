@@ -11,7 +11,7 @@ import { ModalFooter, ModalShell } from '@/app/components/ui/modal-shell';
 import { ReadOnlyHint } from '@/app/components/versions/ReadOnlyHint';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
-import { accountSubtitle } from '../account-types';
+import { accountSubtitle, countsInNetWorth } from '../account-types';
 import { AccountDetailSkeleton } from '../components/AccountDetailSkeleton';
 import { AccountFormDrawer } from '../components/AccountFormDrawer';
 import { AccountReconciliation } from '../components/AccountReconciliation';
@@ -82,7 +82,12 @@ export default function AccountPage(): React.JSX.Element {
                 {account.name}
               </h1>
               <span style={mutedStyle}>
-                {[types[account.type], accountSubtitle(account), account.currency]
+                {[
+                  types[account.type],
+                  accountSubtitle(account),
+                  account.currency,
+                  !countsInNetWorth(account) && t.notInNetWorth.value,
+                ]
                   .filter(Boolean)
                   .join(' · ')}
               </span>
