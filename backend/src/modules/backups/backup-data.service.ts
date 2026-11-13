@@ -15,6 +15,9 @@ export const EXCLUDED_TABLES = new Set([
   'import_sessions',
   'integration_tokens',
   'integrations',
+  // Connected MCP apps and their one-minute codes: access, not books. A restore asks again.
+  'mcp_oauth_codes',
+  'mcp_oauth_grants',
   'open_protocol_settings',
   // The access point's API key and secret: reconnected after a restore, like the other integrations.
   'peppol_connections',

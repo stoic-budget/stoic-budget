@@ -82,7 +82,14 @@ export const INTEGRATIONS_ERRORS = {
   MAPS_TILE_UNKNOWN: 'Unknown map style or tile',
   MAPS_TILES_UNAVAILABLE: 'Map tiles are unavailable',
   // ── mcp ─────────────────────────────────────────────────────────
-  MCP_API_KEY_REQUIRED: 'The MCP endpoint takes an API key in the X-Api-Key header',
+  MCP_CREDENTIALS_REQUIRED:
+    'The MCP endpoint takes an API key in the X-Api-Key header or an OAuth access token',
+  MCP_ACCESS_TOKEN_INVALID: 'The access token is invalid, expired or revoked',
+  MCP_OAUTH_REQUEST_INVALID:
+    'This connection request is not valid: the app is unknown or its return address does not match',
+  MCP_OAUTH_SCOPES_INVALID: 'Choose at least one permission your role in this workspace allows',
+  MCP_OAUTH_GRANT_NOT_FOUND: 'Connected app not found',
+  MCP_OAUTH_UNAVAILABLE: 'Connecting apps needs APP_URL or FRONTEND_URL set on the server',
   MCP_RECEIPT_NOT_FOUND: 'Receipt not found',
   // ── observability ───────────────────────────────────────────────
   OBSERVABILITY_METRICS_TOKEN_REQUIRED: 'Metrics token is required',
