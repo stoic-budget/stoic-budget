@@ -16,6 +16,7 @@ import {
   TransferPairSource,
 } from '../../../entities/transaction.entity';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
+import { assertUnlinkAllowed } from '../helpers/pair-guards';
 import { writeTransferPairs } from './transfer-pair-writer';
 import {
   absAmount,
@@ -200,11 +201,9 @@ export class TransferPairingService {
   /** Separates both legs and remembers the choice so auto-pairing does not redo it. */
   async unlink(workspaceId: string, id: string): Promise<void> {
     const row = await this.findOwned(workspaceId, id);
-    if (!row.transferPairId) {
-      throw new BadRequestException(appError('TRANSACTION_NOT_TRANSFER'));
-    }
+    assertUnlinkAllowed(row);
     await this.transactionRepository.update(
-      { workspaceId, transferPairId: row.transferPairId },
+      { workspaceId, transferPairId: row.transferPairId as string },
       {
         transferPairId: null,
         transferPairSource: TransferPairSource.REJECTED,

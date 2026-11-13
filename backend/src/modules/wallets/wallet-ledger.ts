@@ -7,8 +7,22 @@ import type { ExchangeRatesService } from '../exchange-rates/exchange-rates.serv
 /** A row booked in its account's own currency, by column name over `t` and `w`. */
 const SAME_CURRENCY_SQL = (row: string) => `UPPER(TRIM(${row}.currency)) = UPPER(TRIM(w.currency))`;
 
-export const toDateOnly = (value: string | Date | null): string | null =>
-  value ? new Date(value).toISOString().slice(0, 10) : null;
+/**
+ * A `date` column as `YYYY-MM-DD`. An entity hands it over as that string; a
+ * raw query as a Date at local midnight, read back by local parts, since
+ * toISOString would move it to the day before east of UTC.
+ */
+export const toDateOnly = (value: string | Date | null): string | null => {
+  if (!value) {
+    return null;
+  }
+  if (typeof value === 'string') {
+    return /^\d{4}-\d{2}-\d{2}/.test(value) ? value.slice(0, 10) : null;
+  }
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${value.getFullYear()}-${month}-${day}`;
+};
 
 /** One account's counted rows, in the account's own currency. */
 export interface WalletLedger {

@@ -23,6 +23,7 @@ import {
 } from '../exchange-rates/currency-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
+import { balanceAtEndOf, CENT } from './balance-check-reasons';
 import { toDateOnly, type WalletLedger, walletLedgers } from './wallet-ledger';
 
 /** Statements whose rows are read and real; the same set the balance sheet trusts. */
@@ -186,6 +187,7 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
         pendingReviewCount: pending.get(wallet.id) ?? 0,
         lastActivityAt: ledger?.lastDate ?? null,
         reconciliation: reconciliations.get(wallet.id) ?? null,
+        balanceCheck: balanceCheckOf(wallet, ledger?.days ?? []),
         createdAt: wallet.createdAt.toISOString(),
         updatedAt: wallet.updatedAt.toISOString(),
       };
@@ -260,4 +262,15 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
     }
     return result;
   }
+}
+
+/** The last matching check, and whether a row edited or removed since has undone it. */
+function balanceCheckOf(wallet: Wallet, days: WalletLedger['days']): WalletItem['balanceCheck'] {
+  const date = toDateOnly(wallet.balanceCheckedAt);
+  if (!date || wallet.balanceCheckedAmount === null) {
+    return null;
+  }
+  const bankBalance = round2(Number(wallet.balanceCheckedAmount));
+  const ours = balanceAtEndOf(Number(wallet.initialBalance) || 0, days, date);
+  return { date, bankBalance, stillMatches: Math.abs(ours - bankBalance) < CENT };
 }
