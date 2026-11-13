@@ -273,11 +273,12 @@
   }
 }
 
-// Twelve quiet bars, one a month (MonthBars): the payee and category pages.
-// As buttons, a picked month stays full and the others step back.
+// Quiet bars, one a month (MonthBars): twelve on the payee and category pages,
+// a tag's own span (up to 24) on the tag page. As buttons, a picked month
+// stays full and the others step back.
 .seneca-month-bars {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--month-bars-count, 12), minmax(0, 1fr));
   align-items: end;
   gap: 6px;
   height: 120px;
@@ -324,6 +325,15 @@
   &__label {
     font-size: 11px;
     color: var(--text-muted);
+  }
+
+  // More than twelve: closer together, every other month named, the latest always.
+  &--dense {
+    gap: 3px;
+
+    .seneca-month-bars__bar:nth-last-child(even) .seneca-month-bars__label {
+      visibility: hidden;
+    }
   }
 
   &--picked .seneca-month-bars__bar:not(.seneca-month-bars__bar--selected) .seneca-month-bars__fill {

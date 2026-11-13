@@ -1,13 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository, SelectQueryBuilder } from 'typeorm';
-import { onlyFlows } from '../../common/utils/counted-transactions.util';
 import { applyOwnerFilter, parseOwnerFilter } from '../../common/utils/transaction-owner.util';
-import {
-  PRIVACY_VIEWER_PARAM,
-  readablePrivateSql,
-  redactedSql,
-} from '../../common/utils/transaction-privacy.util';
+import { redactedSql } from '../../common/utils/transaction-privacy.util';
 import type { SpendFlowQuery } from '../../contracts';
 import { Category } from '../../entities/category.entity';
 import { FileType } from '../../entities/statement.entity';
@@ -15,8 +10,8 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { Workspace } from '../../entities/workspace.entity';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { buildRateMap, convertWith, normalizeCurrency } from '../goals/goal-money.util';
-import { TRANSACTION_TAG_PAIRS_SQL } from '../tags/transaction-tag-pairs.util';
 import { buildSpendFlow, buildTagFlow, type SpendFlow } from './spend-flow.util';
+import { countedFlowsQuery, perTag } from './tag-flows.util';
 
 const DEFAULT_MERCHANTS_PER_CATEGORY = 3;
 const MAX_CATEGORIES = 6;
@@ -90,19 +85,10 @@ export class SpendFlowService {
     type: 'income' | 'expense',
     selfMemberId: string | null,
   ): SelectQueryBuilder<Transaction> {
-    const qb = this.transactionRepository
-      .createQueryBuilder('t')
-      .leftJoin('t.statement', 'statement')
-      .where('t.workspace_id = :workspaceId', { workspaceId })
-      .andWhere('t.transaction_type = :type', {
-        type: type === 'income' ? TransactionType.INCOME : TransactionType.EXPENSE,
-      })
-      .andWhere('t.is_duplicate = false')
-      .andWhere('(t.statement_id IS NULL OR statement.deleted_at IS NULL)')
-      // Money moved between the user's own accounts is neither spending nor income.
-      .andWhere('t.transfer_pair_id IS NULL')
-      .setParameter(PRIVACY_VIEWER_PARAM, selfMemberId);
-    onlyFlows(qb, 't');
+    const qb = countedFlowsQuery(this.transactionRepository, workspaceId, selfMemberId).andWhere(
+      't.transaction_type = :type',
+      { type: type === 'income' ? TransactionType.INCOME : TransactionType.EXPENSE },
+    );
     applyOwnerFilter(qb, 't', parseOwnerFilter(query.owner, selfMemberId));
 
     // No date means all time, the way the top-spenders table reads it.
@@ -213,10 +199,8 @@ export class SpendFlowService {
     selfMemberId: string | null,
     currency: string,
   ): Promise<SpendFlow> {
-    const rows = await this.countedTransactions(workspaceId, query, type, selfMemberId)
-      .innerJoin(`(${TRANSACTION_TAG_PAIRS_SQL})`, 'tp', 'tp.transaction_id = t.id')
+    const rows = await perTag(this.countedTransactions(workspaceId, query, type, selfMemberId))
       .innerJoin('tags', 'tag', 'tag.id = tp.tag_id')
-      .andWhere(readablePrivateSql('t'))
       .select('tp.tag_id', 'tagId')
       .addSelect('MAX(tag.name)', 'name')
       .addSelect('t.currency', 'currency')

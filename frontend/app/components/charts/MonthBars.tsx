@@ -10,8 +10,9 @@ export interface MonthBar {
 }
 
 /**
- * Twelve quiet bars, one a month, oldest first. With `onSelect` each bar is a
- * button: pressing one picks its month, pressing it again lets go.
+ * Quiet bars, one a month, oldest first: as many columns as months (twelve on
+ * most pages). With `onSelect` each bar is a button: pressing one picks its
+ * month, pressing it again lets go.
  */
 export function MonthBars({
   months,
@@ -35,7 +36,14 @@ export function MonthBars({
     timeZone: 'UTC',
   });
   return (
-    <div className={clsx('seneca-month-bars', selected && 'seneca-month-bars--picked')}>
+    <div
+      className={clsx(
+        'seneca-month-bars',
+        months.length > 12 && 'seneca-month-bars--dense',
+        selected && 'seneca-month-bars--picked',
+      )}
+      style={{ '--month-bars-count': months.length } as React.CSSProperties}
+    >
       {months.map(({ month, value }) => {
         const date = new Date(`${month}-01T00:00:00Z`);
         const content = (
@@ -71,6 +79,24 @@ export function MonthBars({
       })}
     </div>
   );
+}
+
+/** A picked bar's month as the transaction list's date bounds, both days included. */
+export function monthBounds(month: string): { date_from: string; date_to: string } {
+  const [year, index] = month.split('-').map(Number);
+  return {
+    date_from: `${month}-01`,
+    date_to: new Date(Date.UTC(year, index, 0)).toISOString().slice(0, 10),
+  };
+}
+
+/** `YYYY-MM` as the reader says it: "March 2026". */
+export function monthLabel(month: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${month}-01T00:00:00Z`));
 }
 
 const MONTH_KEYS = Array.from({ length: 12 }, (_, index) => `m${index}`);

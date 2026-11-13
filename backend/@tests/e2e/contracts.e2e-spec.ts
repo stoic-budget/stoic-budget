@@ -183,6 +183,7 @@ import {
   SubscriptionSummary,
   SystemUpdateStatus,
   TagList,
+  TagSummary,
   TransactionTagLinks,
   TaxJurisdictionList,
   TaxRateItem,
@@ -415,6 +416,34 @@ describe('API contracts (e2e)', () => {
       expect(res.body.topPayees).toEqual([
         expect.objectContaining({ name: 'Contract Coffee', amount: 42.5, count: 1 }),
       ]);
+    });
+
+    it('GET /tags/:id/summary, with the row booked in beforeAll tagged', async () => {
+      const send = (method: 'post' | 'put', url: string, body: object) =>
+        request(app.getHttpServer())
+          [method](url)
+          .set('Authorization', `Bearer ${owner.token}`)
+          .set('x-workspace-id', owner.workspaceId)
+          .send(body);
+      const tag = await send('post', '/tags', { name: 'Contract Trip' }).expect(201);
+      const rows = await get('/transactions?limit=100');
+      const coffee = rows.body.data.find(
+        (row: { counterpartyName: string }) => row.counterpartyName === 'Contract Coffee',
+      );
+      await send('put', `/transactions/${coffee.id}/tags`, { tagIds: [tag.body.id] }).expect(200);
+      const res = await get(`/tags/${tag.body.id}/summary`);
+      matches(TagSummary, res.body);
+      expect(res.body).toMatchObject({ spent: 42.5, received: 0, direction: 'expense' });
+      expect(res.body.months).toHaveLength(1);
+      expect(res.body.categories).toHaveLength(1);
+      expect(res.body.topPayees).toEqual([
+        expect.objectContaining({ name: 'Contract Coffee', amount: 42.5, count: 1 }),
+      ]);
+      await request(app.getHttpServer())
+        .delete(`/tags/${tag.body.id}`)
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('x-workspace-id', owner.workspaceId)
+        .expect(200);
     });
 
     it('GET /wallets', async () => {

@@ -132,10 +132,15 @@ export function SpendFlowChart({
   }, []);
   const router = useRouter();
   const range = useSpendFlowRange(month);
-  // A node, or the band flowing into it, opens the documents behind it.
+  // A node, or the band flowing into it, opens the documents behind it; a tag
+  // opens its own page, which counts it the same way.
   const chartEvents = {
     click: (params: { dataType?: string; name?: string; data?: { target?: string } }) => {
       const id = params.dataType === 'edge' ? params.data?.target : params.name;
+      if (id?.startsWith('tag:')) {
+        router.push(`/tags/${id.slice('tag:'.length)}`);
+        return;
+      }
       const target = id ? spendFlowTarget(id, groupBy) : null;
       if (!target) return;
       void resolveDocumentsHref(target, range.dateFrom, range.dateTo).then(href =>
