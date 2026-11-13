@@ -11,6 +11,7 @@ import { formatMoney } from '@/app/lib/format-money';
 import { localizeStatementCategoryName } from '@/app/lib/statement-categories';
 import { formatStoredDateWithOptions } from '@/app/lib/user-format-store';
 import { tokens } from '@/lib/theme-tokens';
+import { dayKeyIn, leftPerDay, pluralForm } from '../helpers/left-per-day';
 import type { BudgetItem } from '../hooks/useBudgetsPage';
 import type { StoicClass } from '../hooks/useStoicBalance';
 import { StoicClassChip } from './StoicBalance';
@@ -20,6 +21,13 @@ const PERIOD_LABEL_KEYS = {
   monthly: 'periodMonthly',
   quarterly: 'periodQuarterly',
   annual: 'periodAnnual',
+} as const;
+
+const PER_DAY_KEYS = {
+  one: 'leftPerDayOne',
+  two: 'leftPerDayTwo',
+  few: 'leftPerDayFew',
+  many: 'leftPerDayMany',
 } as const;
 
 /**
@@ -35,13 +43,25 @@ const TONE_FILL: Record<ReturnType<typeof budgetTone>, string> = {
 
 interface BudgetCardProps {
   budget: BudgetItem;
+  /**
+   * Whether the page shows the periods we are in. A past `?month=` is measured
+   * on its last day, and a quarter or year that day falls in still contains
+   * today, so the card cannot tell on its own.
+   */
+  showPerDay: boolean;
   /** How the budget's category is judged; null while nobody has decided. */
   stoicClass?: StoicClass | null;
   onEdit: (budget: BudgetItem) => void;
   onDelete: (id: string) => void;
 }
 
-export function BudgetCard({ budget, stoicClass = null, onEdit, onDelete }: BudgetCardProps) {
+export function BudgetCard({
+  budget,
+  showPerDay,
+  stoicClass = null,
+  onEdit,
+  onDelete,
+}: BudgetCardProps) {
   const t = useIntlayer('budgetsPage');
   const { locale } = useLocale();
   const formatAmount = (amount: number, currency: string) =>
@@ -52,6 +72,16 @@ export function BudgetCard({ budget, stoicClass = null, onEdit, onDelete }: Budg
   const carriedAmount = budget.carriedAmount ?? 0;
   const formatDay = (date: string): string =>
     formatStoredDateWithOptions(`${date}T00:00:00`, { day: 'numeric', month: 'short' }, locale);
+  // Only for the period we are in, on the reader's own calendar; none when over.
+  const perDay =
+    showPerDay &&
+    leftPerDay({
+      remaining: availableAmount - budget.spentAmount,
+      currency: budget.currency,
+      periodStart: budget.periodStart,
+      periodEnd: budget.periodEnd,
+      today: dayKeyIn(new Date()),
+    });
 
   return (
     <Box
@@ -157,6 +187,21 @@ export function BudgetCard({ budget, stoicClass = null, onEdit, onDelete }: Budg
           {Math.round(budget.percentUsed)}%
         </Typography>
       </Box>
+      {perDay && (
+        <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'text.secondary' }}>
+          {fillTemplateNodes(
+            (perDay.days === 1
+              ? t.leftForToday
+              : t[PER_DAY_KEYS[pluralForm(locale, perDay.days)]]
+            ).value.replace('{{count}}', () => String(perDay.days)),
+            {
+              amount: formatMoney(perDay.amount, budget.currency, locale, {
+                fractionDigits: perDay.fractionDigits,
+              }),
+            },
+          )}
+        </Typography>
+      )}
       {carriedAmount !== 0 && (
         <Typography
           variant="caption"

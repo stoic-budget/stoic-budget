@@ -42,17 +42,16 @@ import {
   overlapsWindow,
   parseDateOnly,
 } from './budget-period.util';
+import { type PeriodPosition, periodPosition } from './budget-period-position.util';
 import { percentOf, resolveAvailable } from './budget-rollover.util';
 
-export interface BudgetWithSpending extends Budget {
+export interface BudgetWithSpending extends Budget, PeriodPosition {
   spentAmount: number;
   percentUsed: number;
   /** What the period has to spend once rollover is settled; equals the limit without rollover. */
   availableAmount: number;
   /** availableAmount minus the limit: positive = leftover carried in, negative = overspend carried in. */
   carriedAmount: number;
-  /** Whether today falls inside the budget's window. Always true for open-ended ones. */
-  isActive: boolean;
   /** Spending in currencies with no rate to the budget's, left out of spentAmount. */
   unconvertedSpending: UnconvertedSpending[];
   /**
@@ -413,7 +412,7 @@ export class BudgetsService {
     const measured = await this.measure(budget, now);
     return Object.assign(budget, {
       ...measured,
-      isActive: overlapsWindow({ start: now, end: now }, budget),
+      ...periodPosition(budget, now),
       subscriptionReserve: await this.subscriptionReserve(budget, now, linked),
     });
   }

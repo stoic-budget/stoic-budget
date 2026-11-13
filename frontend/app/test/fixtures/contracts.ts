@@ -106,6 +106,8 @@ export function budgetItem(
     availableAmount: 100,
     carriedAmount: 0,
     isActive: true,
+    periodStart: '2026-01-01',
+    periodEnd: '2026-01-31',
     unconvertedSpending: [],
     beforeStartSpending: [],
     subscriptionReserve: { amount: 0, items: [] },

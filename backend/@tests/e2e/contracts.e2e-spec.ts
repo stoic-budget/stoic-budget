@@ -457,6 +457,12 @@ describe('API contracts (e2e)', () => {
       const res = await get('/budgets');
       matches(BudgetList, res.body);
       expect(res.body[0].limitAmount).toBe('250.50');
+      // The monthly budget's own period, which the card counts the days left in.
+      const now = new Date();
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      expect(res.body[0].periodStart).toBe(`${monthKey}-01`);
+      expect(res.body[0].periodEnd).toBe(`${monthKey}-${lastDay}`);
     });
 
     it('GET /goals and /goals?month=', async () => {

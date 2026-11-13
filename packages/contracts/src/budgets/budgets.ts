@@ -37,6 +37,13 @@ export const BudgetItem = Schema.Struct({
   /** Whether today falls inside the budget's window. */
   isActive: Schema.Boolean,
   /**
+   * First and last day of the period the figures cover, cut to the budget's
+   * window; null when the window misses that period. The card counts the days
+   * left from these rather than assuming a calendar month.
+   */
+  periodStart: Schema.NullOr(DateOnly),
+  periodEnd: Schema.NullOr(DateOnly),
+  /**
    * Spending in currencies with no rate to the budget's on its day: left out
    * of spentAmount rather than counted one to one, and shown as a note.
    */
