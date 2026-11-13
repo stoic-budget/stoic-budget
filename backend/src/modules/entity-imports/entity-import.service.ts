@@ -9,11 +9,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, type Repository } from 'typeorm';
 import { assertApiKeyScopes, type PermissionSubject } from '../../common/authz/request-permissions';
-import { Permission } from '../../common/enums/permissions.enum';
 import { appError } from '../../common/errors/app-error';
 import { ensureCanEdit } from '../../common/utils/ensure-can-edit.util';
 import type { RunEntityImportBody } from '../../contracts';
-import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
+import { ActorType, AuditAction } from '../../entities/audit-event.entity';
 import { Budget } from '../../entities/budget.entity';
 import { Category, CategorySource, CategoryType } from '../../entities/category.entity';
 import { Client } from '../../entities/client.entity';
@@ -23,6 +22,7 @@ import {
   type ImportUpdatedRef,
 } from '../../entities/import-batch.entity';
 import { InvestmentHolding } from '../../entities/investment-holding.entity';
+import { InvestmentTrade } from '../../entities/investment-trade.entity';
 import { Invoice } from '../../entities/invoice.entity';
 import { Payable } from '../../entities/payable.entity';
 import { Statement } from '../../entities/statement.entity';
@@ -32,9 +32,11 @@ import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
 import { writeClassification } from '../classification/engine/rule-row-write';
 import { ClassificationService } from '../classification/services/classification.service';
+import { InvestmentTradesService } from '../investments/investment-trades.service';
 import { MetalsService } from '../investments/metals.service';
 import type { TransactionsImportedEvent } from '../notifications/events/notification-events';
 import { nameKey } from './helpers/import-values';
+import { removeImportedHoldings } from './helpers/undo-holdings';
 import { type ImportTargetKind, TARGET_FIELDS } from './target-aliases';
 import { BudgetsTarget } from './targets/budgets.target';
 import { InvoicesTarget } from './targets/invoices.target';
@@ -42,20 +44,9 @@ import { MetalsTarget } from './targets/metals.target';
 import { PayablesTarget } from './targets/payables.target';
 import { SubscriptionsTarget } from './targets/subscriptions.target';
 import type { ImportContext, ImportTarget, RowResult } from './targets/target.types';
+import { AUDIT_ENTITY, CREATED_KIND, IMPORT_SCOPES } from './targets/target-registry';
+import { TradesTarget } from './targets/trades.target';
 import { TransactionsTarget } from './targets/transactions.target';
-
-/**
- * The scope an API key needs to import (or undo) each target: the permission
- * the matching create route asks for. Roles are checked by the toggles below.
- */
-const IMPORT_SCOPES: Record<ImportTargetKind, Permission> = {
-  transactions: Permission.STATEMENT_UPLOAD,
-  payables: Permission.PAYABLE_CREATE,
-  subscriptions: Permission.SUBSCRIPTION_CREATE,
-  invoices: Permission.INVOICE_CREATE,
-  budgets: Permission.BUDGET_CREATE,
-  metals: Permission.WALLET_CREATE,
-};
 
 export interface EntityImportResult {
   batchId: string | null;
@@ -77,6 +68,7 @@ export class EntityImportService {
     invoices: new InvoicesTarget(),
     budgets: new BudgetsTarget(),
     metals: new MetalsTarget(),
+    trades: new TradesTarget(),
   };
 
   constructor(
@@ -88,6 +80,7 @@ export class EntityImportService {
     @Optional() private readonly classificationService?: ClassificationService,
     @Optional() private readonly metalsService?: MetalsService,
     @Optional() private readonly eventEmitter?: EventEmitter2,
+    @Optional() private readonly tradesService?: InvestmentTradesService,
   ) {}
 
   /** One `transactions.imported` per statement the import created, after the commit. */
@@ -189,6 +182,8 @@ export class EntityImportService {
         fileName: dto.fileName ?? null,
         categorize: dto.options?.categorize !== false,
         walletId: dto.options?.walletId ?? null,
+        investmentAccountId: dto.options?.investmentAccountId ?? null,
+        createMissingHoldings: dto.options?.createMissingHoldings === true,
         headers: [...(dto.headers ?? [])],
         cell: (row, field) => {
           const index = dto.mapping[field];
@@ -287,29 +282,13 @@ export class EntityImportService {
       if (dto.target === 'metals' && this.metalsService) {
         await this.metalsService.refreshPrices(userId, workspaceId);
       }
+      // Trades move quantities: the accounts' values follow, new holdings get a price.
+      await this.tradesService?.syncHoldings(userId, workspaceId, holdingRefs(ctx));
     }
     const createdIds = ctx.created
-      .filter(ref =>
-        dto.target === 'transactions'
-          ? ref.kind === 'statement'
-          : ref.kind === this.refKind(dto.target),
-      )
+      .filter(ref => ref.kind === CREATED_KIND[dto.target])
       .map(ref => ref.id);
     return { batchId, target: dto.target, dryRun, counts, rows: results, createdIds };
-  }
-
-  private refKind(target: ImportTargetKind): ImportCreatedRef['kind'] {
-    return target === 'payables'
-      ? 'payable'
-      : target === 'subscriptions'
-        ? 'subscription'
-        : target === 'invoices'
-          ? 'invoice'
-          : target === 'budgets'
-            ? 'budget'
-            : target === 'metals'
-              ? 'metal_lot'
-              : 'statement';
   }
 
   /**
@@ -353,7 +332,9 @@ export class EntityImportService {
       throw new BadRequestException(appError('IMPORT_BATCH_ALREADY_UNDONE'));
     }
     await this.ensurePermission(userId, workspaceId, batch.target as ImportTargetKind, apiKey);
-    const removed = await this.dataSource.transaction(async manager => {
+    const tradeIds = batch.createdRefs.filter(r => r.kind === 'investment_trade').map(r => r.id);
+    await this.tradesService?.assertRemovable(workspaceId, tradeIds);
+    const { removed, holdings } = await this.dataSource.transaction(async manager => {
       let count = 0;
       const byKind = (kind: ImportCreatedRef['kind']) =>
         batch.createdRefs.filter(ref => ref.kind === kind).map(ref => ref.id);
@@ -373,6 +354,7 @@ export class EntityImportService {
         ['budget', Budget],
         ['client', Client],
         ['metal_lot', InvestmentHolding],
+        ['investment_trade', InvestmentTrade],
       ] as const) {
         const ids = byKind(kind);
         if (ids.length) {
@@ -381,16 +363,24 @@ export class EntityImportService {
             0;
         }
       }
+      // Its trades gone, a holding it created goes too unless traded on since.
+      const holdings = await removeImportedHoldings(
+        manager,
+        workspaceId,
+        byKind('investment_holding'),
+      );
+      count += holdings.removed;
       // Categories created by the import may already be in use elsewhere; they stay.
       for (const ref of batch.updatedRefs as ImportUpdatedRef[]) {
         const entity =
-          ref.kind === 'subscription' ? Subscription : ref.kind === 'budget' ? Budget : Payable;
+          { subscription: Subscription, budget: Budget, payable: Payable }[ref.kind as 'payable'] ??
+          InvestmentHolding;
         await manager
           .getRepository(entity)
           .update({ id: ref.id, workspaceId }, ref.before as never);
       }
       await manager.getRepository(ImportBatch).update(batch.id, { undoneAt: new Date() });
-      return count;
+      return { removed: count, holdings };
     });
     await this.audit(
       userId,
@@ -400,20 +390,13 @@ export class EntityImportService {
       AuditAction.DELETE,
       { target: batch.target, removed },
     );
+    await this.tradesService?.syncHoldings(
+      userId,
+      workspaceId,
+      [...holdingRefs(batch.updatedRefs), ...holdings.kept],
+      holdings.accountIds,
+    );
     return { undone: true, removed, restored: batch.updatedRefs.length };
-  }
-
-  private entityTypeOf(target: ImportTargetKind): EntityType | null {
-    const types: Record<ImportTargetKind, EntityType | null> = {
-      transactions: EntityType.STATEMENT,
-      payables: EntityType.PAYABLE,
-      subscriptions: EntityType.SUBSCRIPTION,
-      invoices: EntityType.INVOICE,
-      budgets: EntityType.BUDGET,
-      // No audit entity type for metal lots yet.
-      metals: null,
-    };
-    return types[target];
   }
 
   private async audit(
@@ -424,7 +407,7 @@ export class EntityImportService {
     action: AuditAction,
     meta: Record<string, unknown>,
   ) {
-    const entityType = this.entityTypeOf(target);
+    const entityType = AUDIT_ENTITY[target];
     if (!entityType) {
       return;
     }
@@ -445,4 +428,12 @@ export class EntityImportService {
       );
     }
   }
+}
+
+/** Holdings an import touched: the ones it created and the ones whose trades it added to. */
+function holdingRefs(
+  refs: Pick<ImportContext, 'created' | 'updated'> | ImportUpdatedRef[],
+): string[] {
+  const all = Array.isArray(refs) ? refs : [...refs.created, ...refs.updated];
+  return all.filter(ref => ref.kind === 'investment_holding').map(ref => ref.id);
 }

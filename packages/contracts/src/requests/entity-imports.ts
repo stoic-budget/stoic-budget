@@ -17,6 +17,10 @@ export const EntityImportOptionsInput = Schema.Struct({
   categorize: optionalNullable(Schema.Boolean),
   /** Transactions only: the account the rows came from. */
   walletId: optionalNullable(Schema.String.check(Schema.isUUID())),
+  /** Trades only: the investment account rows are matched in, and new holdings go to. */
+  investmentAccountId: optionalNullable(Schema.String.check(Schema.isUUID())),
+  /** Trades only: create a holding a row names but the account does not have. */
+  createMissingHoldings: optionalNullable(Schema.Boolean),
 });
 export type EntityImportOptionsInput = Wire<typeof EntityImportOptionsInput>;
 
@@ -27,6 +31,7 @@ const EntityImportTarget = Schema.Literals([
   'invoices',
   'budgets',
   'metals',
+  'trades',
 ]);
 
 export const RunEntityImportBody = Schema.Struct({

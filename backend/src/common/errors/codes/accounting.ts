@@ -167,6 +167,15 @@ export const ACCOUNTING_ERRORS = {
   INVESTMENTS_EXPENSE_ONLY_CONTRIBUTION: 'An expense can only be a contribution',
   INVESTMENTS_INCOME_ROLE_REQUIRED: 'Say whether this income is a withdrawal or a dividend',
   INVESTMENTS_HOLDING_NOT_FOUND: 'Holding not found',
+  INVESTMENTS_TRADE_NOT_FOUND: 'Trade not found',
+  INVESTMENTS_TRADE_QUANTITY_REQUIRED: 'This trade needs a quantity above zero',
+  INVESTMENTS_TRADE_AMOUNT_REQUIRED: 'A dividend needs the amount it paid',
+  INVESTMENTS_TRADE_RATIO_REQUIRED: 'A split needs both sides of its ratio',
+  INVESTMENTS_TRADE_EXCEEDS_HOLDING:
+    'This would sell or move out more than the holding has on that day',
+  INVESTMENTS_TRADE_CURRENCY_MISMATCH: 'All trades of a holding are in one currency ({{currency}})',
+  INVESTMENTS_TRADES_NOT_FOR_METALS: 'Metal lots are bought and sold on the metals card',
+  INVESTMENTS_QUANTITY_FROM_TRADES: 'This holding takes its quantity from its trades',
   // ── metals ──────────────────────────────────────────────────────
   METALS_LOT_METAL_REQUIRED: 'A lot needs a metal',
   METALS_WEIGHT_REQUIRED: 'A lot needs the weight of one piece',

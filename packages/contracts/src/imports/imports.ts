@@ -8,6 +8,7 @@ const ImportTarget = Schema.Literals([
   'invoices',
   'budgets',
   'metals',
+  'trades',
 ]);
 
 /** `POST /entity-imports/suggest`: what a pasted sheet most likely is, by column roles. */

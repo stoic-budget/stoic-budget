@@ -21,9 +21,13 @@ import {
   GoalDetail,
   GoalItemsResponse,
   GoalWithProgress,
+  HoldingLots,
   InvestmentAccount,
   InvestmentContribution,
   InvestmentHolding,
+  InvestmentSettings,
+  InvestmentTrade,
+  InvestmentTradeList,
   MessageResult,
   MetalLot,
   MetalSaleResult,
@@ -218,6 +222,73 @@ describe('API contracts: wealth (e2e)', () => {
     const unlinked = await call('delete', `/investments/contributions/${expenseId}`, 200);
     matches(InvestmentContribution, unlinked.body);
     expect(unlinked.body.investmentAccountId).toBeNull();
+  });
+
+  it('investment trades: a buy, a sale, the lots and the basis setting', async () => {
+    const account = await call('post', '/investments/accounts', 201, { name: 'ACME Brokerage' });
+    const holding = await call('post', `/investments/accounts/${account.body.id}/holdings`, 201, {
+      name: 'ACME World ETF',
+      assetClass: 'etf',
+      price: 110,
+      priceCurrency: 'USD',
+    });
+    const buy = await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'buy',
+      date: '2025-01-10',
+      quantity: 5,
+      price: 100,
+      fee: 1,
+      note: 'First lot',
+    });
+    matches(InvestmentTrade, buy.body);
+    const sale = await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'sell',
+      date: '2025-03-10',
+      quantity: 2,
+      price: 120,
+    });
+    const edited = await call('patch', `/investments/trades/${sale.body.id}`, 200, { fee: 1 });
+    matches(InvestmentTrade, edited.body);
+    expect(edited.body.fee).toBe(1);
+    await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'transfer_in',
+      date: '2025-04-01',
+      quantity: 1,
+      price: 50,
+      acquiredOn: '2020-01-02',
+    });
+    await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'split',
+      date: '2025-05-01',
+      splitFrom: 1,
+      splitTo: 2,
+    });
+    await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'dividend',
+      date: '2025-06-01',
+      amount: 4,
+    });
+
+    const list = await call('get', `/investments/holdings/${holding.body.id}/trades`, 200);
+    matches(InvestmentTradeList, list.body);
+    expect(list.body).toHaveLength(5);
+    const lots = await call('get', `/investments/holdings/${holding.body.id}/lots`, 200);
+    matches(HoldingLots, lots.body);
+    expect(lots.body.openLots.length).toBeGreaterThan(0);
+    expect(lots.body.sales).toHaveLength(1);
+    expect(lots.body.years).toHaveLength(1);
+
+    matches(InvestmentSettings, (await call('get', '/investments/settings', 200)).body);
+    const settings = await call('patch', '/investments/settings', 200, { basisMethod: 'average' });
+    matches(InvestmentSettings, settings.body);
+    expect(settings.body.basisMethod).toBe('average');
+    const accounts = await call('get', '/investments', 200);
+    const traded = accounts.body
+      .flatMap((row: { holdings: Array<{ id: string }> }) => row.holdings)
+      .find((row: { id: string }) => row.id === holding.body.id);
+    matches(InvestmentHolding, traded);
+    expect(traded.hasTrades).toBe(true);
+    await call('delete', `/investments/trades/${list.body[4].id}`, 204);
   });
 
   it('metals: a lot, its photo, a sale, the settings and prices', async () => {

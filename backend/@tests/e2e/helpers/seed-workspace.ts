@@ -268,7 +268,7 @@ export async function seedWorkspace(
   const investments = await send('investment account', 'post', '/investments/accounts', {
     name: `${marker} broker`,
   });
-  await send('holding', 'post', `/investments/accounts/${investments.body.id}/holdings`, {
+  const holding = await send('holding', 'post', `/investments/accounts/${investments.body.id}/holdings`, {
     symbol: 'SEED',
     name: `${marker} fund`,
     assetClass: 'fund',
@@ -276,6 +276,14 @@ export async function seedWorkspace(
     price: 10,
     priceCurrency: 'USD',
   });
+  await send('investment trade', 'post', `/investments/holdings/${holding.body.id}/trades`, {
+    kind: 'buy',
+    date: `${taxYear}-02-01`,
+    quantity: 2,
+    price: 10,
+    note: `${marker} trade`,
+  });
+  await send('investment settings', 'patch', '/investments/settings', { basisMethod: 'average' });
   const lot = await send('metal lot', 'post', '/metals/lots', {
     metal: 'XAU',
     quantity: 2,

@@ -5,6 +5,7 @@ import { appError } from '../../common/errors/app-error';
 import { countedSql } from '../../common/utils/counted-transactions.util';
 import type { LinkContributionBody } from '../../contracts';
 import { BalanceAccount } from '../../entities/balance-account.entity';
+import { InvestmentTrade } from '../../entities/investment-trade.entity';
 import {
   Transaction,
   TransactionType,
@@ -30,6 +31,8 @@ export interface InvestmentFlow {
   amount: number;
   currency: string;
   kind: InvestmentFlowKind;
+  /** Read from the holdings' trades rather than from a linked bank row. */
+  fromTrades?: boolean;
 }
 
 /** A flow with its amount in the workspace currency, at the rate of its own day. */
@@ -50,6 +53,9 @@ export class InvestmentFlowsService {
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
     private readonly exchangeRatesService: ExchangeRatesService,
+    // Last and optional so a test that builds the service by hand needs no trades.
+    @InjectRepository(InvestmentTrade)
+    private readonly tradeRepository?: Repository<InvestmentTrade>,
   ) {}
 
   /**
@@ -161,6 +167,20 @@ export class InvestmentFlowsService {
       perCurrency.set(code, (perCurrency.get(code) ?? 0) + amount);
       byAccount.set(row.accountId, perCurrency);
     }
+    // Accounts kept by their trades alone: the buys and sales are the money in and out.
+    const traded = await this.tradeFlows(workspaceId, null);
+    const linked = await this.loadFlows(workspaceId, [
+      ...new Set(traded.map(flow => flow.accountId)),
+    ]);
+    for (const flow of linked) {
+      if (!flow.fromTrades || flow.kind === 'income' || flow.date <= from || flow.date > to) {
+        continue;
+      }
+      const perCurrency = byAccount.get(flow.accountId) ?? new Map<string, number>();
+      const signed = flow.kind === 'contribution' ? flow.amount : -flow.amount;
+      perCurrency.set(flow.currency, (perCurrency.get(flow.currency) ?? 0) + signed);
+      byAccount.set(flow.accountId, perCurrency);
+    }
     return byAccount;
   }
 
@@ -216,7 +236,74 @@ export class InvestmentFlowsService {
         kind,
       });
     }
-    return flows;
+    const traded = withoutLinked(await this.tradeFlows(workspaceId, accountIds), flows);
+    // Stable: with no trades the rows keep the order the query gave them.
+    return [...flows, ...traded].sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  /**
+   * The flows the holdings' trades describe: a buy or a transfer in is money
+   * put in (fee included), a sale or a transfer out money taken out (a sale's
+   * fee off), a dividend income net of what was held back. A split moves no money.
+   */
+  private async tradeFlows(
+    workspaceId: string,
+    accountIds: string[] | null,
+  ): Promise<InvestmentFlow[]> {
+    if (!this.tradeRepository || accountIds?.length === 0) {
+      return [];
+    }
+    const query = this.tradeRepository
+      .createQueryBuilder('trade')
+      .innerJoin('trade.holding', 'holding')
+      .select('holding.account_id', 'accountId')
+      .addSelect('trade.kind', 'kind')
+      .addSelect('trade.trade_date', 'date')
+      .addSelect('trade.currency', 'currency')
+      .addSelect('trade.quantity * trade.price', 'gross')
+      .addSelect('trade.fee', 'fee')
+      .addSelect('trade.amount', 'amount')
+      .where('trade.workspace_id = :workspaceId', { workspaceId })
+      .andWhere('holding.workspace_id = :workspaceId', { workspaceId });
+    if (accountIds) {
+      query.andWhere('holding.account_id IN (:...accountIds)', { accountIds });
+    }
+    const rows = await query.getRawMany<{
+      accountId: string;
+      kind: InvestmentTrade['kind'];
+      date: string | Date;
+      currency: string;
+      gross: string;
+      fee: string;
+      amount: string | null;
+    }>();
+    const flows: InvestmentFlow[] = [];
+    for (const row of rows) {
+      const gross = Number(row.gross) || 0;
+      const fee = Number(row.fee) || 0;
+      const [kind, amount]: [InvestmentFlowKind | null, number] =
+        row.kind === 'buy' || row.kind === 'transfer_in'
+          ? ['contribution', gross + fee]
+          : row.kind === 'sell'
+            ? ['withdrawal', gross - fee]
+            : row.kind === 'transfer_out'
+              ? ['withdrawal', gross]
+              : row.kind === 'dividend'
+                ? ['income', (Number(row.amount) || 0) - fee]
+                : [null, 0];
+      if (!kind || !(amount > 0)) {
+        continue;
+      }
+      flows.push({
+        accountId: row.accountId,
+        date: toDateOnly(row.date),
+        amount,
+        currency: normalizeCurrencyCode(row.currency) || 'USD',
+        kind,
+        fromTrades: true,
+      });
+    }
+    return flows.sort((a, b) => a.date.localeCompare(b.date));
   }
 
   /**
@@ -262,6 +349,22 @@ function flowKind(
     return 'income';
   }
   return null;
+}
+
+/**
+ * Trade flows of a kind the account's linked bank rows do not already speak
+ * for. A buy whose cash leg is also linked as a contribution would otherwise
+ * count twice; an account whose contributions are linked keeps them, and its
+ * trades only say how much of what it holds.
+ */
+function withoutLinked(trades: InvestmentFlow[], linked: InvestmentFlow[]): InvestmentFlow[] {
+  const spoken = new Set(linked.map(flow => `${flow.accountId}|${movement(flow.kind)}`));
+  return trades.filter(flow => !spoken.has(`${flow.accountId}|${movement(flow.kind)}`));
+}
+
+/** Contributions and withdrawals are one question (money moved), income another. */
+function movement(kind: InvestmentFlowKind): 'moved' | 'income' {
+  return kind === 'income' ? 'income' : 'moved';
 }
 
 function toDateOnly(value: string | Date): string {

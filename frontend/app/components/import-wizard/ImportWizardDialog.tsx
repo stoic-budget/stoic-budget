@@ -21,6 +21,7 @@ import { getApiErrorMessage } from '@/app/lib/api-error';
 import { resolveCurrencyCode } from '@/app/lib/format-money';
 import { formatDate } from '@/app/lib/user-format';
 import { ImportProblems } from './ImportProblems';
+import { ImportTargetOptions } from './ImportTargetOptions';
 import {
   createTableFromImport,
   IMPORT_TARGETS,
@@ -44,7 +45,7 @@ import {
   prepareSheet,
   roleByColumn,
 } from './import-wizard-utils';
-import { TransactionImportOptions } from './TransactionImportOptions';
+import { useImportOptions } from './useImportOptions';
 import { useImportRequest } from './useImportRequest';
 import { useSavedMapping } from './useSavedMapping';
 
@@ -90,8 +91,7 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
   const [target, setTarget] = useState<ImportTarget>(fixedTarget ?? 'transactions');
   const [mapping, setMapping] = useState<Record<string, number>>({});
   const [currency, setCurrency] = useState(props.account?.currency ?? workspaceCurrency);
-  const [walletId, setWalletId] = useState(props.account?.id ?? '');
-  const [categorize, setCategorize] = useState(true);
+  const importOptions = useImportOptions(props.account);
   const [dryRun, setDryRun] = useState<ImportRunResult | null>(null);
   const [dryRunPending, setDryRunPending] = useState(false);
   const [running, setRunning] = useState(false);
@@ -156,7 +156,7 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
     setResult(null);
     setUndone(false);
     setCurrency(workspaceCurrency);
-    setCategorize(true);
+    importOptions.set('categorize', true);
     if (presetRows) {
       void loadRows(presetRows);
       return;
@@ -212,8 +212,7 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
 
   const request = useImportRequest(sheet, target, mapping, fileName ?? file?.name, {
     currency,
-    categorize,
-    walletId,
+    ...importOptions.values,
   });
 
   // A dry run after every mapping change shows what the import would do before it does it.
@@ -456,15 +455,11 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
               </tbody>
             </table>
 
-            {target === 'transactions' && (
-              <TransactionImportOptions
-                categorize={categorize}
-                onCategorizeChange={setCategorize}
-                walletId={walletId}
-                onWalletChange={setWalletId}
-                onCurrencyChange={setCurrency}
-              />
-            )}
+            <ImportTargetOptions
+              target={target}
+              options={importOptions}
+              onCurrencyChange={setCurrency}
+            />
 
             {missing.length > 0 ? (
               <p className="seneca-iw__hint seneca-iw__hint--warning">
