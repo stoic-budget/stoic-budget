@@ -194,6 +194,7 @@ import {
   TelegramReportPage,
   TransactionAttachmentList,
   TransactionCandidates,
+  TransactionCommentEdit,
   TransactionGoalLink,
   TransactionList,
   TrialBalance,
@@ -2149,6 +2150,13 @@ describe('API contracts (e2e)', () => {
         AllocationSuggestion,
         (await get(`/payables/allocation-suggestion/${transactionId}`)).body,
       );
+    });
+
+    it('GET who last edited a comment, after an edit', async () => {
+      await send('put', `/transactions/${transactionId}`, { comments: 'Contract comment' }).expect(200);
+      const edit = await get(`/transactions/${transactionId}/comment-edit`);
+      matches(TransactionCommentEdit, edit.body);
+      expect(edit.body.edit).toMatchObject({ by: 'you', name: null });
     });
 
     it('GET the report history and schedules, webhooks and a subscription', async () => {

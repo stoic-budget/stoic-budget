@@ -15,9 +15,7 @@ import {
   TransferPairKind,
   TransferPairSource,
 } from '../../../entities/transaction.entity';
-import { TransferPairRejection } from '../../../entities/transfer-pair-rejection.entity';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
-import { forgetRejection, rejectedPairKeys, unlinkAndRemember } from './transfer-pair-rejections';
 import { writeTransferPairs } from './transfer-pair-writer';
 import {
   absAmount,
@@ -50,8 +48,6 @@ export class TransferPairingService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
-    @InjectRepository(TransferPairRejection)
-    private readonly rejections: Repository<TransferPairRejection>,
     private readonly exchangeRatesService: ExchangeRatesService,
   ) {}
 
@@ -61,10 +57,8 @@ export class TransferPairingService {
 
   /**
    * Rows that may still take part in a pair, with the account their statement
-   * came from. Rows marked `rejected` (unlinked before refusals were kept per
-   * pair, so their partner is unknown) stay out of automatic runs but remain
-   * available to the manual picker. A pair unlinked since then is skipped by
-   * the matcher instead; see `transfer_pair_rejections`.
+   * came from. Rows the user unlinked stay out of automatic runs but remain
+   * available to the manual picker: that is the one place they belong.
    */
   unpairedQuery(workspaceId: string, options: { includeRejected?: boolean } = {}) {
     const query = this.transactionRepository
@@ -108,8 +102,7 @@ export class TransferPairingService {
       .andWhere('t.transactionDate BETWEEN :since AND :until', { since, until })
       .getMany();
 
-    const rejected = await rejectedPairKeys(this.rejections, workspaceId);
-    return matchTransferPairs(toCheck, pool, this.lookupRateIn(workspaceId), rejected);
+    return matchTransferPairs(toCheck, pool, this.lookupRateIn(workspaceId));
   }
 
   /** Writes the pairs; see writeTransferPairs. */
@@ -201,17 +194,24 @@ export class TransferPairingService {
       );
       throw new ConflictException(appError('TRANSACTION_PAIRED_MEANWHILE'));
     }
-    await forgetRejection(this.rejections, workspaceId, a.id, b.id);
     return transferPairId;
   }
 
-  /** Separates both legs and remembers that this pair is wrong, so auto-pairing does not redo it. */
+  /** Separates both legs and remembers the choice so auto-pairing does not redo it. */
   async unlink(workspaceId: string, id: string): Promise<void> {
     const row = await this.findOwned(workspaceId, id);
     if (!row.transferPairId) {
       throw new BadRequestException(appError('TRANSACTION_NOT_TRANSFER'));
     }
-    await unlinkAndRemember(this.transactionRepository.manager, workspaceId, row.transferPairId);
+    await this.transactionRepository.update(
+      { workspaceId, transferPairId: row.transferPairId },
+      {
+        transferPairId: null,
+        transferPairSource: TransferPairSource.REJECTED,
+        transferPairKind: null,
+        reimbursementOfId: null,
+      },
+    );
   }
 
   /**

@@ -2,10 +2,11 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useIntlayer } from '@/app/i18n';
+import { useIntlayer, useLocale } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
 import { invalidateFinancialData } from '@/app/lib/invalidate-document-lists';
 import type { ContractInput } from '@/app/lib/query-fn-schema';
+import { useTransactionCommentEdit } from './hooks/useTransactionHistory';
 
 interface TransactionCommentSectionProps {
   transactionId: string;
@@ -15,7 +16,8 @@ interface TransactionCommentSectionProps {
 /**
  * The row's own comment: a short remark that goes to exports and that a rule
  * can fill in. Saved when the field is left. The Notes tab is something else:
- * what the household says to each other about the row.
+ * what the household says to each other about the row. Anyone in the
+ * household may rewrite it, so a quiet line under it says who did last.
  */
 export function TransactionCommentSection({
   transactionId,
@@ -56,6 +58,33 @@ export function TransactionCommentSection({
           }
         }}
       />
+      <CommentEditedLine transactionId={transactionId} />
     </div>
+  );
+}
+
+/** "Edited · Member Two · 12 May": who last changed the comment, and when, in full on hover. */
+function CommentEditedLine({ transactionId }: { transactionId: string }) {
+  const t = useIntlayer('transactionsDrawer');
+  const { locale } = useLocale();
+  const edit = useTransactionCommentEdit(transactionId).data?.edit;
+  if (!edit) {
+    return null;
+  }
+  const at = new Date(edit.at);
+  const sameYear = at.getFullYear() === new Date().getFullYear();
+  const day = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  }).format(at);
+  const full = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
+    at,
+  );
+  const who = edit.by === 'you' ? [t.commentEditedByYou.value] : [t.commentEdited.value, edit.name];
+  return (
+    <span title={full} style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+      {[...who, day].filter(Boolean).join(' · ')}
+    </span>
   );
 }

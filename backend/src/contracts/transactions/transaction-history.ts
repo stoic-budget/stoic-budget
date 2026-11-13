@@ -57,3 +57,21 @@ export const TransactionHistory = Schema.Struct({
   ),
 });
 export type TransactionHistory = Wire<typeof TransactionHistory>;
+
+/**
+ * `GET /transactions/:id/comment-edit`: who last changed the row's comment, for
+ * a quiet line under it. `edit` is null when no person did (the comment came
+ * with the import or from a rule) and when the comment is not the viewer's to
+ * read. `name` is the member's display name, never an e-mail: null for the
+ * viewer, and for someone without a name or no longer in the workspace.
+ */
+export const TransactionCommentEdit = Schema.Struct({
+  edit: Schema.NullOr(
+    Schema.Struct({
+      at: Timestamp,
+      by: Schema.Literals(['you', 'member']),
+      name: Schema.NullOr(Schema.String),
+    }),
+  ),
+});
+export type TransactionCommentEdit = Wire<typeof TransactionCommentEdit>;
