@@ -261,52 +261,95 @@ describe('WalletsService', () => {
       initialBalance: 15000,
     };
 
+    /**
+     * The update runs in a transaction on a locked row: the transaction's
+     * repository reads the row `FOR UPDATE`, writes only the named columns and
+     * reads the row back. `stored` stands in for the row in the database.
+     */
+    let stored: Wallet | null;
+    let locked: {
+      findOne: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
+      findOneByOrFail: ReturnType<typeof vi.fn>;
+      metadata: { findColumnWithPropertyName: () => undefined };
+    };
+
     beforeEach(() => {
-      vi.spyOn(walletRepository, 'findOne').mockResolvedValue(mockWallet as Wallet);
+      stored = { ...mockWallet, type: 'checking', creditLimit: null } as Wallet;
+      locked = {
+        findOne: vi.fn(async () => (stored ? { ...stored } : null)),
+        update: vi.fn(async (_where: unknown, columns: Partial<Wallet>) => {
+          stored = { ...(stored as Wallet), ...columns };
+        }),
+        findOneByOrFail: vi.fn(async () => ({ ...(stored as Wallet) })),
+        metadata: { findColumnWithPropertyName: () => undefined },
+      };
+      Object.assign(walletRepository, {
+        manager: {
+          transaction: vi.fn(async (work: (manager: unknown) => unknown) =>
+            work({ getRepository: () => locked }),
+          ),
+        },
+      });
     });
 
     it('should update wallet', async () => {
-      vi.spyOn(walletRepository, 'save').mockResolvedValue({
-        ...mockWallet,
-        ...updateDto,
-      } as Wallet);
-
       const result = await service.update('wallet-1', 'ws-1', updateDto);
 
       expect(result.name).toBe(updateDto.name);
-      expect(walletRepository.save).toHaveBeenCalled();
+      expect(result.initialBalance).toBe(updateDto.initialBalance);
+      expect(locked.update).toHaveBeenCalledWith(
+        { id: 'wallet-1', workspaceId: 'ws-1' },
+        expect.objectContaining(updateDto),
+      );
+    });
+
+    it('reads the row under a lock, within its workspace', async () => {
+      await service.update('wallet-1', 'ws-1', updateDto);
+
+      expect(walletRepository.manager.transaction).toHaveBeenCalledTimes(1);
+      expect(locked.findOne).toHaveBeenCalledWith({
+        where: { id: 'wallet-1', workspaceId: 'ws-1' },
+        lock: { mode: 'pessimistic_write' },
+      });
     });
 
     it('should throw NotFoundException if wallet not found', async () => {
-      vi.spyOn(walletRepository, 'findOne').mockResolvedValue(null);
+      stored = null;
 
       await expect(service.update('invalid', 'ws-1', updateDto)).rejects.toThrow(NotFoundException);
+      expect(locked.update).not.toHaveBeenCalled();
     });
 
     it('should preserve workspaceId on update', async () => {
-      const saveSpy = vi.spyOn(walletRepository, 'save').mockResolvedValue(mockWallet as Wallet);
+      const result = await service.update('wallet-1', 'ws-1', updateDto);
 
-      await service.update('wallet-1', 'ws-1', updateDto);
-
-      const savedWallet = saveSpy.mock.calls[0][0];
-      expect(savedWallet.workspaceId).toBe('ws-1');
+      const [where, columns] = locked.update.mock.calls[0];
+      expect(where).toEqual({ id: 'wallet-1', workspaceId: 'ws-1' });
+      expect(columns).not.toHaveProperty('workspaceId');
+      expect(result.workspaceId).toBe('ws-1');
     });
 
     it('should allow partial updates', async () => {
       const partialUpdate = { name: 'New Name Only' };
-      vi.spyOn(walletRepository, 'save').mockResolvedValue(mockWallet as Wallet);
 
-      await service.update('wallet-1', 'ws-1', partialUpdate);
+      const result = await service.update('wallet-1', 'ws-1', partialUpdate);
 
-      expect(walletRepository.save).toHaveBeenCalled();
+      // Only the named column, plus the limit an account that is not a card never holds.
+      expect(locked.update).toHaveBeenCalledWith(
+        { id: 'wallet-1', workspaceId: 'ws-1' },
+        { name: 'New Name Only', creditLimit: null },
+      );
+      expect(result).toMatchObject({
+        name: 'New Name Only',
+        currency: mockWallet.currency,
+        bankName: mockWallet.bankName,
+        initialBalance: mockWallet.initialBalance,
+      });
     });
 
     it('should allow toggling isActive status', async () => {
       const toggleDto = { isActive: false };
-      vi.spyOn(walletRepository, 'save').mockResolvedValue({
-        ...mockWallet,
-        isActive: false,
-      } as Wallet);
 
       const result = await service.update('wallet-1', 'ws-1', toggleDto);
 
@@ -315,10 +358,6 @@ describe('WalletsService', () => {
 
     it('should update currency', async () => {
       const currencyUpdate = { currency: 'USD' };
-      vi.spyOn(walletRepository, 'save').mockResolvedValue({
-        ...mockWallet,
-        currency: 'USD',
-      } as Wallet);
 
       const result = await service.update('wallet-1', 'ws-1', currencyUpdate);
 

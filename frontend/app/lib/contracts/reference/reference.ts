@@ -96,6 +96,11 @@ export const WalletItem = Schema.Struct({
   isActive: Schema.Boolean,
   ownerMemberId: Schema.NullOr(Schema.String),
   /**
+   * A credit card's limit in the account's currency, or null when none is set.
+   * Information only: no total, balance or net worth counts it.
+   */
+  creditLimit: Schema.NullOr(DecimalString),
+  /**
    * Opening balance plus the counted rows booked to it, in the account's currency
    * (a row in another one at the rate of its day); below zero for a debt.
    */
