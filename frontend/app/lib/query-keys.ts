@@ -66,6 +66,8 @@ export const queryKeys = {
     ['tags', workspaceId, 'receipt', receiptId] as const,
   statementTags: (workspaceId: string | null, statementId: string) =>
     ['tags', workspaceId, 'statement', statementId] as const,
+  tagSummary: (workspaceId: string | null, id: string) =>
+    ['tags', workspaceId, 'summary', id] as const,
   // Under the tags prefix: a tag saved anywhere refreshes the By tag figures too.
   transactionTagLinks: (workspaceId: string | null) =>
     ['tags', workspaceId, 'transaction-links'] as const,

@@ -114,6 +114,19 @@ describe('SpendFlowChart', () => {
     );
   });
 
+  it('opens a tag’s own page from its node or band, and nothing from the rolled-up rest', () => {
+    useSpendFlow.mockReturnValue({ data: flow, isError: false });
+    render(<SpendFlowChart {...props} groupBy="tag" />);
+
+    drawn.events.click({ dataType: 'node', name: 'tag:t-trip' });
+    expect(router.push).toHaveBeenLastCalledWith('/tags/t-trip');
+    drawn.events.click({ dataType: 'edge', data: { source: 'total', target: 'tag:t-work' } });
+    expect(router.push).toHaveBeenLastCalledWith('/tags/t-work');
+    drawn.events.click({ dataType: 'node', name: 'other:tags' });
+    expect(router.push).toHaveBeenCalledTimes(2);
+    expect(resolveDocumentsHref).not.toHaveBeenCalled();
+  });
+
   it('blinks only the band a deep link names, never dimming the others', () => {
     vi.useFakeTimers();
     useSpendFlow.mockReturnValue({ data: flow, isError: false });

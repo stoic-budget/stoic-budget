@@ -179,6 +179,8 @@ export const TransactionListQuery = Schema.Struct({
   walletId: Schema.optional(Uuid),
   /** Only the rows of this payee. */
   payeeId: Schema.optional(Uuid),
+  /** Only the rows carrying this tag, their own or their statement's or receipt's. */
+  tagId: Schema.optional(Uuid),
   /** Only the rows paid this way. */
   paymentType: Schema.optional(PaymentType),
 });
