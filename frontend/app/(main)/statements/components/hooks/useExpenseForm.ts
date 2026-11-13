@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { getApiErrorMessage } from '@/app/lib/api-error';
 import { type DeviceLocation, getDeviceLocation } from '@/app/lib/device-location';
+import { peekManualPrefill } from '@/app/lib/manual-expense-prefill';
 import { getReceiptLocationCapture } from '@/app/lib/receipt-location-capture';
 import {
   flattenStatementCategories,
@@ -218,14 +219,14 @@ export function useExpenseForm({
       return;
     }
 
-    const resolvedMode = resolveExpenseDrawerMode(initialMode);
-    setMode(resolvedMode);
+    setMode(resolveExpenseDrawerMode(initialMode));
     setManualStep('amount');
     setCurrencyPickerOpen(false);
     setCategoryDrawerOpen(false);
     setTaxRateDrawerOpen(false);
     setCurrencySearch('');
-    setManualDraft(createDefaultManualDraft(resolvedDefaultCurrency));
+    // A duplicated row opens filled in; it is saved only by pressing Save.
+    setManualDraft(peekManualPrefill() ?? createDefaultManualDraft(resolvedDefaultCurrency));
   }, [open, initialMode, resolvedDefaultCurrency]);
 
   const pushRecentCurrency = (currencyCode: string): void => {

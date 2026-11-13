@@ -82,6 +82,12 @@ export const TransactionListItem = Schema.Struct({
   transferPairKind: Schema.NullOr(Schema.Literals(['transfer', 'reimbursement', 'investment'])),
   /** The expense this income pays back. */
   reimbursementOfId: Schema.NullOr(Schema.String),
+  /**
+   * Set on each part of a split row (the parts share it): the drawer offers
+   * "Undo split" and no "Duplicate" on a part. Optional: not every answer
+   * built from these fields reads it from a stored row.
+   */
+  splitGroupId: Schema.optional(Schema.NullOr(Schema.String)),
   createdAt: Timestamp,
   updatedAt: Timestamp,
 });

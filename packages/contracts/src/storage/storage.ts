@@ -1,4 +1,5 @@
 import * as Schema from 'effect/Schema';
+import * as Struct from 'effect/Struct';
 import { DateOnly, DecimalString, Timestamp, type Wire } from '../common/wire';
 import { StatementStatus } from '../statements/statement-list';
 import { TransactionListItem } from '../transactions/transaction-list';
@@ -192,7 +193,8 @@ export const SharedFileAccess = Schema.Struct({
     fileSize: Schema.Number,
     accountNumber: Schema.NullOr(Schema.String),
   }),
-  transactions: Schema.Array(StatementTransaction),
+  /** No split markers: an anonymous reader has no use for how the owner filed the rows. */
+  transactions: Schema.Array(StatementTransaction.mapFields(Struct.omit(['splitGroupId']))),
   permission: SharePermissionLevel,
   canDownload: Schema.Boolean,
 });

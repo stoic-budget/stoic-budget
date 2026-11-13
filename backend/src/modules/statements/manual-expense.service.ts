@@ -29,7 +29,7 @@ import { TaxAssignmentService } from '../tax/tax-assignment.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { readManualExpenseInput } from './manual-expense-input';
 import { ensureCanEditStatements } from './statement-access';
-import { accountOfUpload, walletOwnerMemberId } from './statement-accounts';
+import { accountOfUpload, assertAccountCurrency, walletOwnerMemberId } from './statement-accounts';
 
 function escapeCsvValue(value: string): string {
   if (value.includes(',') || value.includes('"') || value.includes('\n')) {
@@ -88,6 +88,7 @@ export class ManualExpenseService {
       categories: this.categoryRepository,
       taxRates: this.taxRateRepository,
     });
+    await assertAccountCurrency(this.walletRepository, payload.walletId, workspaceId, currency);
 
     // Array.isArray, not `files || []`: `files` comes from a multipart
     // upload field decorated with @UploadedFiles(), and although Multer's

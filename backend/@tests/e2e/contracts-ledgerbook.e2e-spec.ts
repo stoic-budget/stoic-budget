@@ -19,6 +19,7 @@ import {
   StorageTag,
   StorageViewItem,
   TransactionAttachment,
+  TransactionListPage,
   WalletItem,
 } from '../../src/contracts';
 import {
@@ -249,6 +250,16 @@ describe('API contracts: ledger book (e2e)', () => {
       expect(parts.body[1].amount).toBe('22.50');
       const listed = await call('get', `/transactions/${id}/split`).expect(200);
       matches(TransactionRecordList, listed.body);
+      // The list names the group too: the drawer reads it off a listed row.
+      const statementId = parts.body[0].statementId;
+      const page = await call('get', `/transactions?statement_id=${statementId}&limit=100`).expect(
+        200,
+      );
+      matches(TransactionListPage, page.body);
+      const listedParts = page.body.data.filter(
+        (row: { splitGroupId?: string | null }) => row.splitGroupId === parts.body[0].splitGroupId,
+      );
+      expect(listedParts).toHaveLength(2);
       const merged = await call('post', `/transactions/${id}/unsplit`).expect(200);
       matches(TransactionRecord, merged.body);
       expect(merged.body.splitGroupId).toBeNull();

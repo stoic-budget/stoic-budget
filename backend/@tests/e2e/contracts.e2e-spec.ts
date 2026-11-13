@@ -1752,6 +1752,9 @@ describe('API contracts (e2e)', () => {
         .expect(200);
       matches(SharedFileAccess, res.body);
       expect(res.body.transactions.length).toBeGreaterThan(0);
+      // The owner's own answer names the split group; the anonymous one leaves it out.
+      expect(details.body.transactions[0]).toHaveProperty('splitGroupId');
+      for (const row of res.body.transactions) expect(row).not.toHaveProperty('splitGroupId');
     });
 
     it('GET /statements/:id', async () => {
