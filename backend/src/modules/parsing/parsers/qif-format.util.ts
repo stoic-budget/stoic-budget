@@ -1,10 +1,10 @@
 import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import {
-  cutPartKey,
   parseAmount,
   type RawSplit,
   readQifCategory,
   readSplits,
+  transferRowKey,
 } from './qif-splits.util';
 
 /**
@@ -189,7 +189,17 @@ function readAccount(
 ): Pick<ParsedStatement, 'metadata' | 'transactions' | 'warnings'> {
   const transactions: ParsedTransaction[] = [];
   const warnings: string[] = [];
-  const cutParts = new Map<string, number>();
+  const transferRows = new Map<string, number>();
+  // A row sent to another account, keyed so that identical ones do not take
+  // each other for repeats (see `transferRowKey`).
+  const transferRow = (row: ParsedTransaction, transferAccount: string): ParsedTransaction => {
+    const money = row.debit ? -row.debit : (row.credit ?? 0);
+    const same = `${row.transactionDate.toISOString()}|${row.counterpartyName}|${transferAccount}|${money}`;
+    const ordinal = (transferRows.get(same) ?? 0) + 1;
+    transferRows.set(same, ordinal);
+    const fingerprintMerchant = transferRowKey(row.counterpartyName, transferAccount, ordinal);
+    return { ...row, transferAccount, fingerprintMerchant };
+  };
   let balanceStart: number | undefined;
   for (const [index, { fields, splits }] of account.records.entries()) {
     const date = fields.D ? parseDate(fields.D) : null;
@@ -205,27 +215,20 @@ function readAccount(
     // A part sent to another account is a row of its own under the row's payee.
     for (const transfer of split?.transfers ?? []) {
       const row = qifRow(fields, date, transfer.amount, currency);
-      const same = `${row.transactionDate.toISOString()}|${row.counterpartyName}|${transfer.transferAccount}|${transfer.amount}`;
-      const ordinal = (cutParts.get(same) ?? 0) + 1;
-      cutParts.set(same, ordinal);
-      transactions.push({
-        ...row,
-        paymentPurpose: transfer.memo || fields.M || fields.P || '',
-        transferAccount: transfer.transferAccount,
-        fingerprintMerchant: cutPartKey(row.counterpartyName, transfer.transferAccount, ordinal),
-      });
+      row.paymentPurpose = transfer.memo || fields.M || fields.P || '';
+      transactions.push(transferRow(row, transfer.transferAccount));
     }
     const parts = split?.parts;
     if (parts?.length === 0) continue;
     const single = parts?.length === 1 ? parts[0] : undefined;
     const own: { categoryName?: string; transferAccount?: string } =
       category.categoryName || category.transferAccount ? category : (single ?? {});
-    transactions.push({
+    const row: ParsedTransaction = {
       ...qifRow(fields, date, split?.rest ?? amount, currency),
       ...(own.categoryName ? { categoryName: own.categoryName } : {}),
-      ...(own.transferAccount ? { transferAccount: own.transferAccount } : {}),
       ...(parts && parts.length > 1 ? { splits: parts } : {}),
-    });
+    };
+    transactions.push(own.transferAccount ? transferRow(row, own.transferAccount) : row);
   }
   const dates = transactions.map(t => t.transactionDate.getTime());
   return {

@@ -257,35 +257,6 @@ describe('transfer-pairing matcher', () => {
         const c = inc('c', { statementId: 'stmt-c', statement: savings });
         expect(await matchTransferPairs([a], [a, b, c], noRates)).toEqual([]);
       });
-
-      it('pairs equal transfers both sides of which name each other, nearest first', async () => {
-        const everyday = { accountNumber: 'Everyday Account', walletId: null };
-        const [a1, a2] = ['a1', 'a2'].map(id =>
-          out(id, { statement: everyday, categoryHint: '[Rainy Day Savings]' }),
-        );
-        const [b1, b2] = [
-          ['b1', '2026-03-10'],
-          ['b2', '2026-03-11'],
-        ].map(([id, day]) =>
-          inc(id, {
-            statement: savings,
-            categoryHint: '[Everyday Account]',
-            transactionDate: new Date(day),
-          }),
-        );
-        const pool = [a1, a2, b1, b2];
-        expect(await matchTransferPairs(pool, pool, noRates)).toEqual([
-          { outgoing: a1, incoming: b1 },
-          { outgoing: a2, incoming: b2 },
-        ]);
-      });
-
-      it('leaves equal counterparts alone when they do not name the row’s account', async () => {
-        const a = out('a', { categoryHint: '[Rainy Day Savings]' });
-        const b = inc('b', { statement: savings, categoryHint: '[Holiday Fund]' });
-        const c = inc('c', { statementId: 'stmt-c', statement: savings, categoryHint: '[Holiday Fund]' });
-        expect(await matchTransferPairs([a], [a, b, c], noRates)).toEqual([]);
-      });
     });
   });
 });

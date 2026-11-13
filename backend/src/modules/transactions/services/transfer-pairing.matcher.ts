@@ -134,34 +134,12 @@ function sortKey(leg: TransferLeg): string {
 }
 
 /**
- * Of several counterparts that each name `row`'s account themselves, the
- * nearest in date when they are interchangeable: one account, one currency,
- * the same money. Each says it is the other leg of a transfer from `row`'s
- * account, so which one pairs changes no figure (two equal transfers a file
- * cut out of splits). A counterpart only `row` names may be real income.
- */
-function interchangeable<T extends TransferLeg>(row: TransferLeg, matches: T[]): T | undefined {
-  const named = matches.filter(candidate => namesAccountOf(candidate, row));
-  const [first, ...others] = named;
-  const same = (leg: T) =>
-    accountKey(leg) === accountKey(first) &&
-    normalizeCurrency(leg.currency) === normalizeCurrency(first.currency) &&
-    Math.abs(absAmount(leg) - absAmount(first)) < 0.005;
-  if (!first || others.length === 0 || !others.every(same)) return undefined;
-  const distance = (leg: T) => daysBetween(row.transactionDate, leg.transactionDate);
-  return [...named].sort(
-    (a, b) => distance(a) - distance(b) || sortKey(a).localeCompare(sortKey(b)),
-  )[0];
-}
-
-/**
  * Pairs each row in `toCheck` with its counterpart in `pool` when, and only
  * when, exactly one row qualifies: opposite direction, a different account,
  * within the date window, same money. Two qualifying rows mean the matcher
  * cannot tell which one is the transfer, so it pairs neither — a wrong pair
  * silently hides real spending, a missing one is visible and fixable by hand —
- * unless the file named the account of exactly one of them (`categoryHint`),
- * or of several that are interchangeable.
+ * unless the file named the account of exactly one of them (`categoryHint`).
  *
  * `pool` may include the rows of `toCheck`; a row is used at most once.
  * `rejected` holds the `pairKey`s of pairs the user unlinked: those two rows
@@ -202,12 +180,7 @@ export async function matchTransferPairs<T extends TransferLeg>(
     const named = matches.filter(
       candidate => namesAccountOf(row, candidate) || namesAccountOf(candidate, row),
     );
-    const match =
-      matches.length === 1
-        ? matches[0]
-        : named.length === 1
-          ? named[0]
-          : interchangeable(row, matches);
+    const match = matches.length === 1 ? matches[0] : named.length === 1 ? named[0] : undefined;
     if (!match) continue;
 
     const outgoing = row.transactionType === TransactionType.EXPENSE ? row : match;

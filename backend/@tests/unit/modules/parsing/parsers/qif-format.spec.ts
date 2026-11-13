@@ -224,6 +224,22 @@ describe('QIF splits (S/E/$)', () => {
     expect(rest.every(row => row.fingerprintMerchant === undefined)).toBe(true);
   });
 
+  it('keys whole transfer rows too, so equal ones of one day are not repeats; plain rows get no key', () => {
+    const row = (category: string) => ['D10/12/2026', 'T100.00', 'PZeta Market', `L${category}`, '^'];
+    const parsed = parseQif(
+      qif('!Type:Bank', ...row('[Pay Checking]'), ...row('[Pay Checking]'), ...row('Refunds'), ...row('Refunds')),
+    );
+    const [first, second, ...plain] = parsed.transactions;
+    expect([first, second].map(item => item.transferAccount)).toEqual(['Pay Checking', 'Pay Checking']);
+    expect(first.fingerprintMerchant).toBeTruthy();
+    expect(second.fingerprintMerchant).toBeTruthy();
+    expect(second.fingerprintMerchant).not.toBe(first.fingerprintMerchant);
+    expect(parseQif(qif('!Type:Bank', ...row('[Pay Checking]'))).transactions[0].fingerprintMerchant).toBe(
+      first.fingerprintMerchant,
+    );
+    expect(plain.map(item => item.fingerprintMerchant)).toEqual([undefined, undefined]);
+  });
+
   it('says what is left after a transfer that goes the other way, as the rows show it', () => {
     const parsed = split('-100.00', 'SFood', '$-50.00', 'S[Rainy Day Savings]', '$20.00');
     expect(parsed.transactions).toEqual([

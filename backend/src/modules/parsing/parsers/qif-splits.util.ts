@@ -35,16 +35,17 @@ const sumOf = (parts: { amount: number }[]) =>
   round2(parts.reduce((acc, part) => acc + part.amount, 0));
 
 /**
- * What the dedup fingerprint reads in place of the payee for a part cut out of
- * a split: the payee, the account the part went to and which of the file's
- * identical parts it is (same day, payee, account and amount). The rest of the
- * row, the other row's parts and the second of two equal parts each get their
- * own fingerprint, and the same file read again gets the same ones. Hashed, as
- * the fingerprint keeps only 50 characters of a name.
+ * What the dedup fingerprint reads in place of the payee for a row the file
+ * sent to another account (`L[Account]`, or a part cut out of a split): the
+ * payee, that account and which of the file's identical transfer rows it is
+ * (same day, payee, account and amount). Two equal transfers of one day, or a
+ * cut-out part and the rest of its row, each get a fingerprint of their own,
+ * and the same file read again gets the same ones. Hashed, as the fingerprint
+ * keeps only 50 characters of a name.
  */
-export function cutPartKey(payee: string, account: string, ordinal: number): string {
+export function transferRowKey(payee: string, account: string, ordinal: number): string {
   const digest = createHash('sha256').update(JSON.stringify([payee, account, ordinal]));
-  return `split transfer ${digest.digest('hex').slice(0, 32)}`;
+  return `transfer ${digest.digest('hex').slice(0, 32)}`;
 }
 
 /**

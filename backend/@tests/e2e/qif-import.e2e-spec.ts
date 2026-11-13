@@ -33,8 +33,11 @@ const PAY_CHECKING = 'Pay Checking';
 const PAY_SAVINGS = 'Pay Savings';
 
 /**
- * Cut-out parts that share a day, an amount and an account: two paychecks each
- * sending 100 to savings, and one purchase split with two equal 100 parts.
+ * Transfer rows that share a day, an amount and an account: two paychecks each
+ * sending 100 to savings, a purchase split with two equal 100 parts, and on
+ * the savings side the two equal legs of that purchase, as Quicken writes
+ * them. One rent payment's 30 put aside is the only transfer with one
+ * counterpart.
  */
 const EQUAL_PARTS_QIF = [
   '!Account',
@@ -65,6 +68,14 @@ const EQUAL_PARTS_QIF = [
   `S[${PAY_SAVINGS}]`,
   '$-100.00',
   '^',
+  'D10/20/2026',
+  'T-300.00',
+  'PExample Landlord',
+  'SRent',
+  '$-270.00',
+  `S[${PAY_SAVINGS}]`,
+  '$-30.00',
+  '^',
   '!Account',
   `N${PAY_SAVINGS}`,
   'TBank',
@@ -73,9 +84,9 @@ const EQUAL_PARTS_QIF = [
   ...[
     ['10/10/2026', '-100.00', 'Employer One'],
     ['10/10/2026', '-100.00', 'Employer Two'],
-    // A plain row repeated on one day is taken for a repeat, so the bank's two legs come a day apart.
     ['10/12/2026', '100.00', 'Zeta Market'],
-    ['10/13/2026', '100.00', 'Zeta Market'],
+    ['10/12/2026', '100.00', 'Zeta Market'],
+    ['10/20/2026', '30.00', 'Example Landlord'],
   ].flatMap(([date, amount, payee]) => [
     `D${date}`,
     `T${amount}`,
@@ -465,28 +476,31 @@ describe('QIF import (e2e)', () => {
     expect(await flowsOf([checking.id, savings.id, again.id])).toEqual({ expense: 60 });
   });
 
-  it('keeps each cut-out part of equal ones, pairs every leg and catches them all again', async () => {
-    const checking = await processing.processStatement(
-      (await qifStatement('equal-parts', EQUAL_PARTS_QIF)).id,
-    );
-    const [sibling] = await siblings.importOtherAccounts(checking.id);
-    const savings = await processing.processStatement(sibling.id);
+  it('keeps every equal transfer row of a file, pairs the unique one and catches them all again', async () => {
+    const importBoth = async (name: string) => {
+      const first = await processing.processStatement((await qifStatement(name, EQUAL_PARTS_QIF)).id);
+      const [sibling] = await siblings.importOtherAccounts(first.id);
+      const second = await processing.processStatement(sibling.id);
+      return [await rowsOf(first.id), await rowsOf(second.id)];
+    };
 
-    const rows = await dataSource.getRepository(Transaction).find({
-      where: [{ statementId: checking.id }, { statementId: savings.id }],
-    });
+    const [checking, savings] = await importBoth('equal-parts');
+    expect(checking).toHaveLength(9);
+    expect(savings).toHaveLength(5);
+    const rows = [...checking, ...savings];
     expect(rows.filter(row => row.isDuplicate)).toEqual([]);
-    const legs = rows.filter(row => Number(row.amount) === 100);
-    expect(legs).toHaveLength(8);
-    expect(legs.every(row => row.transferPairId !== null)).toBe(true);
-    expect(await flowsOf([checking.id, savings.id])).toEqual({ income: 1300, expense: 50 });
+    // The matcher pairs a transfer only when one counterpart qualifies: the
+    // 30 does; equal 100s on one day stay unpaired, to be linked by hand.
+    const legs = (amount: number) => rows.filter(row => Number(row.amount) === amount);
+    expect(legs(30)).toHaveLength(2);
+    expect(new Set(legs(30).map(row => row.transferPairId)).size).toBe(1);
+    expect(legs(30)[0].transferPairId).not.toBeNull();
+    expect(legs(100)).toHaveLength(8);
+    expect(legs(100).every(row => row.transferPairId === null)).toBe(true);
 
-    const again = await processing.processStatement(
-      (await qifStatement('equal-parts-again', EQUAL_PARTS_QIF)).id,
-    );
-    const repeats = await rowsOf(again.id);
-    expect(repeats).toHaveLength(7);
-    expect(repeats.every(row => row.isDuplicate)).toBe(true);
+    const again = (await importBoth('equal-parts-again')).flat();
+    expect(again).toHaveLength(14);
+    expect(again.every(row => row.isDuplicate)).toBe(true);
   });
 
   it('finds the rows of a header-less export again whether or not it opens with a balance', async () => {
