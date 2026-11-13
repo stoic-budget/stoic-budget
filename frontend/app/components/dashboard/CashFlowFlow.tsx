@@ -58,16 +58,18 @@ export function CashFlowFlow({ month, formatAmount }: CashFlowFlowProps): React.
       previousQuery?.queryKey[1] === workspaceId ? previous : undefined,
     enabled: Boolean(workspaceId),
   });
-  // The first flow drawn opens with the full animation; once another month's data replaces it,
-  // the lines draw in a short take. Keyed to the data, not the month: the placeholder kept on
-  // screen while the next month loads is the same object, so it is not drawn twice.
-  const [firstData, setFirstData] = useState(query.data);
-  const [switched, setSwitched] = useState(false);
-  if (query.data && !firstData) {
-    setFirstData(query.data);
-  } else if (query.data && firstData && query.data !== firstData && !switched) {
-    setSwitched(true);
+  // The first flow drawn opens with the full animation; each month's data that replaces it is
+  // drawn on a fresh chart in a short take. ECharts plays a sankey's line reveal only on a
+  // chart's first draw, so the chart is remounted (keyed by `redraws`) rather than updated.
+  // Keyed to the data, not the month: the placeholder kept on screen while the next month
+  // loads is the same object, so it is not drawn twice.
+  const [drawnData, setDrawnData] = useState(query.data);
+  const [redraws, setRedraws] = useState(0);
+  if (query.data && query.data !== drawnData) {
+    if (drawnData) setRedraws(redraws + 1);
+    setDrawnData(query.data);
   }
+  const switched = redraws > 0;
   const sankey = useMemo(
     () => (query.data ? foldSmallest(withoutSubcategories(query.data.sankey), otherName) : null),
     [query.data, otherName],
@@ -110,6 +112,7 @@ export function CashFlowFlow({ month, formatAmount }: CashFlowFlowProps): React.
         </p>
       ) : null}
       <LazyECharts
+        key={redraws}
         option={option}
         style={{ height: cashFlowChartHeight({ sankey }), width: '100%' }}
         notMerge

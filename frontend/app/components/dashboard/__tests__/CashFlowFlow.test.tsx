@@ -6,11 +6,16 @@ import { describe, expect, it, vi } from 'vitest';
 import { createTestQueryClient } from '@/app/test/query-wrapper';
 
 const options = vi.hoisted(() => [] as Array<Record<string, unknown>>);
+/** Charts created: ECharts plays a sankey's line reveal only on a chart's first draw. */
+const mounts = vi.hoisted(() => ({ count: 0 }));
 const fetchMap = vi.hoisted(() => vi.fn());
 
 vi.mock('@/app/components/ui/lazy-echarts', () => ({
   LazyECharts: ({ option }: { option: Record<string, unknown> }) => {
     options.push(option);
+    React.useEffect(() => {
+      mounts.count += 1;
+    }, []);
     return <div data-testid="flow-chart" />;
   },
 }));
@@ -80,9 +85,12 @@ describe('CashFlowFlow', () => {
     expect(screen.queryByTestId('flow-skeleton')).toBeNull();
     expect(screen.getByTestId('flow-chart')).toBeInTheDocument();
     expect(options.at(-1)).toBe(drawnFirst);
+    expect(mounts.count).toBe(1);
 
     finishNext(flowOf(1200));
     await waitFor(() => expect(options.at(-1)).not.toBe(drawnFirst));
+    // A fresh chart, so the reveal plays, and a short one.
+    expect(mounts.count).toBe(2);
     expect(options.at(-1)).toMatchObject({ animationDuration: 400 });
   });
 });
