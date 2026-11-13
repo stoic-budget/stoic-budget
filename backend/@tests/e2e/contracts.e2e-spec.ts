@@ -204,6 +204,7 @@ import {
   UserPermissions,
   UserSessionList,
   UserUpdateResponse,
+  WalletItem,
   WalletList,
   WebhookEndpointList,
   WebhookSubscriptionList,
@@ -413,9 +414,18 @@ describe('API contracts (e2e)', () => {
         .set('x-workspace-id', owner.workspaceId)
         .send({ name: 'Contract Wallet', currency: 'USD', initialBalance: 12.5 })
         .expect(201);
+      const card = await request(app.getHttpServer())
+        .post('/wallets')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('x-workspace-id', owner.workspaceId)
+        .send({ name: 'Contract Wallet Card', type: 'credit_card', currency: 'USD', creditLimit: 5000 })
+        .expect(201);
+      matches(WalletItem, card.body);
       const res = await get('/wallets');
       matches(WalletList, res.body);
       expect(res.body[0].initialBalance).toBe('12.50');
+      expect(res.body[0].creditLimit).toBeNull();
+      expect(res.body.find((row: { name: string }) => row.name === 'Contract Wallet Card').creditLimit).toBe('5000.00');
     });
   });
 

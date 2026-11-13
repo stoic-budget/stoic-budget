@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
+import { withoutNullsOnRequired } from '../../common/effect/without-nulls';
 import { WorkspaceCrudBaseService } from '../../common/services/workspace-crud-base.service';
+import { assertFound } from '../../common/utils/assert-found.util';
 import { assertOwnerMemberInWorkspace } from '../../common/utils/transaction-owner.util';
 import type {
   CreateWalletBody,
@@ -23,6 +25,7 @@ import {
 } from '../exchange-rates/currency-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
+import { creditLimitPatch, refuseCardOnlyViolation } from './wallet-credit-limit';
 import { toDateOnly, type WalletLedger, walletLedgers } from './wallet-ledger';
 
 /** Statements whose rows are read and real; the same set the balance sheet trusts. */
@@ -61,12 +64,15 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       createDto.ownerMemberId,
     );
 
+    const { creditLimit, ...fields } = createDto;
+    const type = fields.type ?? 'checking';
     // wallets.user_id is NOT NULL: without it every create failed with a 500.
     const wallet = this.repository.create({
       workspaceId,
       userId,
-      ...createDto,
-      type: createDto.type ?? 'checking',
+      ...fields,
+      type,
+      ...creditLimitPatch(type, creditLimit),
       currency: await this.workspaceCurrency.resolveFor(workspaceId, createDto.currency),
       initialBalance: createDto.initialBalance || 0,
       isActive: true,
@@ -81,7 +87,31 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       workspaceId,
       dto.ownerMemberId,
     );
-    return super.update(id, workspaceId, dto);
+    const { creditLimit, ...fields } = dto;
+    // Read, decide and write under a row lock: a type change and a new limit sent
+    // at once are applied one after the other, and each writes only the columns
+    // it names, so a stale copy never puts the old type back.
+    return this.repository.manager
+      .transaction(async manager => {
+        const wallets = manager.getRepository(Wallet);
+        const wallet = await wallets.findOne({
+          where: { id, workspaceId },
+          lock: { mode: 'pessimistic_write' },
+        });
+        assertFound(wallet, this.entityName);
+        const patch = withoutNullsOnRequired(wallets.metadata, {
+          ...fields,
+          ...creditLimitPatch(fields.type ?? wallet.type, creditLimit),
+        });
+        const columns = Object.fromEntries(
+          Object.entries(patch).filter(([, value]) => value !== undefined),
+        );
+        if (Object.keys(columns).length > 0) {
+          await wallets.update({ id, workspaceId }, columns);
+        }
+        return wallets.findOneByOrFail({ id, workspaceId });
+      })
+      .catch(refuseCardOnlyViolation);
   }
 
   /** Every account of the workspace with its balance, for `GET /wallets`. */
@@ -180,6 +210,7 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
         initialBalance: String(wallet.initialBalance ?? '0'),
         isActive: wallet.isActive,
         ownerMemberId: wallet.ownerMemberId,
+        creditLimit: wallet.creditLimit == null ? null : String(wallet.creditLimit),
         balance: round2((Number(wallet.initialBalance) || 0) + (ledger?.net ?? 0)),
         unconvertedCurrencies: ledger?.unconverted ?? [],
         transactionCount: ledger?.count ?? 0,

@@ -7,6 +7,7 @@ import { formatMoney } from '@/app/lib/format-money';
 import { tokens } from '@/lib/theme-tokens';
 import { accountIconOf, accountSubtitle, isDebtType } from '../account-types';
 import type { Account } from '../hooks/useAccounts';
+import { AccountCreditLimit } from './AccountCreditLimit';
 
 const formatDay = (date: string, locale: string) =>
   new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).format(new Date(date));
@@ -153,6 +154,7 @@ export function AccountRow({ account }: { account: Account }): React.JSX.Element
           {account.name}
         </span>
         {subtitle && <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{subtitle}</span>}
+        <AccountCreditLimit account={account} barWidth={240} flagUnconverted />
       </span>
       <span style={{ display: 'grid', gap: 2, justifyItems: 'end', textAlign: 'right' }}>
         <AccountBalance account={account} />

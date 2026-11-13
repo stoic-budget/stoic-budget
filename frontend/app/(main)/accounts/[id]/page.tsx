@@ -12,6 +12,7 @@ import { ReadOnlyHint } from '@/app/components/versions/ReadOnlyHint';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import { accountSubtitle } from '../account-types';
+import { AccountCreditLimit } from '../components/AccountCreditLimit';
 import { AccountDetailSkeleton } from '../components/AccountDetailSkeleton';
 import { AccountFormDrawer } from '../components/AccountFormDrawer';
 import { AccountReconciliation } from '../components/AccountReconciliation';
@@ -96,6 +97,7 @@ export default function AccountPage(): React.JSX.Element {
 
           <div style={{ display: 'grid', gap: 6 }}>
             <AccountBalance account={account} size={32} />
+            <AccountCreditLimit account={account} barWidth={360} />
             <AccountReconciliation account={account} />
             {account.unconvertedCurrencies.length > 0 && (
               <span style={mutedStyle}>

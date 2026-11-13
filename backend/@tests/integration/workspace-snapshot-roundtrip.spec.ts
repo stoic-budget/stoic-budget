@@ -206,6 +206,15 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     });
     const tag = await insert('tags', { workspace_id: workspaceId, name: 'tax' });
     const wallet = await insert('wallets', { workspace_id: workspaceId, user_id: userId, name: 'Cash', currency: 'EUR' });
+    await insert('wallets', {
+      workspace_id: workspaceId,
+      user_id: userId,
+      name: 'ACME Card',
+      type: 'credit_card',
+      currency: 'EUR',
+      initial_balance: -1200,
+      credit_limit: 5000,
+    });
 
     // A statement with its file on disk, two tagged rows on it.
     const statementFile = writeDocument('bank.pdf', '%PDF-1.4 bank statement');
@@ -469,6 +478,15 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     expect(invoice.share_token).toBeNull();
     const [creditNote] = await sql('SELECT file_data FROM credit_notes WHERE workspace_id = $1', [copy.id]);
     expect(creditNote.file_data?.toString()).toBe('%PDF-1.4 credit note');
+  });
+
+  it("brings back a card's credit limit", async () => {
+    const copy = await roundTrip(workspaceId, 'Card copy');
+    const cards = await sql(
+      "SELECT name, credit_limit FROM wallets WHERE workspace_id = $1 AND type = 'credit_card'",
+      [copy.id],
+    );
+    expect(cards).toEqual([{ name: 'ACME Card', credit_limit: '5000.00' }]);
   });
 
   it('accounts for every table that has no workspace column', () => {

@@ -37,6 +37,7 @@ export const ACCOUNTING_ERRORS = {
   WALLET_STATEMENT_CURRENCY_MISMATCH:
     'The account holds {{walletCurrency}}; the statement is in {{currency}}',
   WALLET_NOT_FOUND: 'Account not found in this workspace',
+  WALLET_CREDIT_LIMIT_CARD_ONLY: 'Only a credit card account can have a credit limit',
   TRANSFER_SAME_ACCOUNT: 'The transaction is already in this account',
   // Payables
   PAYABLE_PAYMENT_NOT_POSITIVE: 'A payment must be more than zero',
