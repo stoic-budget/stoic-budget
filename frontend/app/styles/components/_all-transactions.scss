@@ -156,6 +156,22 @@
     color: var(--foreground);
   }
 
+  // Tags and a comment fold into "More" on a phone, so the bar stays one line.
+  // Nested under the bar: __menu-button below sets display at the same weight.
+  &__bulk &__bulk-narrow {
+    display: none;
+  }
+
+  @media (max-width: 639px) {
+    &__bulk &__bulk-wide {
+      display: none;
+    }
+
+    &__bulk &__bulk-narrow {
+      display: inline-flex;
+    }
+  }
+
   // The table never scrolls sideways: fixed columns wrap inside the card, and
   // when the card itself is narrow the rows turn into cards (below).
   &__table-wrap {

@@ -51,6 +51,7 @@ const FIELD_ICONS: Record<TransactionHistoryField, LucideIcon> = {
   private: EyeOff,
   confirmed: CheckCircleOutline,
   comment: MessageCircle,
+  tags: Tag,
 };
 const KIND_ICONS: Record<Exclude<Entry['kind'], 'changed'>, LucideIcon> = {
   created: Plus,
@@ -118,6 +119,7 @@ export function TransactionHistoryTab({
     private: t.fieldPrivate.value,
     confirmed: t.fieldConfirmed.value,
     comment: t.fieldComment.value,
+    tags: t.fieldTags.value,
   };
 
   const show = (field: TransactionHistoryField, value: string | null): string => {

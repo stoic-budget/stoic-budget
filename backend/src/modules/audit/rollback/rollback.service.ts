@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { DeepPartial, Repository } from 'typeorm';
 import type { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { ERR } from '../../../common/errors/app-error';
+import { appError, ERR } from '../../../common/errors/app-error';
 import {
   AuditAction,
   AuditEvent,
@@ -16,6 +16,7 @@ import { CustomTableRow } from '../../../entities/custom-table-row.entity';
 import { Statement } from '../../../entities/statement.entity';
 import { Transaction } from '../../../entities/transaction.entity';
 import { Workspace } from '../../../entities/workspace.entity';
+import { restoreTagSet, touchesTags } from '../../transactions/helpers/tag-set-restore';
 import type { RollbackResult } from '../interfaces/audit-event.interface';
 
 type SnapshotRecord = Record<string, unknown>;
@@ -54,6 +55,8 @@ export class RollbackService {
     private readonly customTableColumnRepository: Repository<CustomTableColumn>,
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
+    @InjectRepository(AuditEvent)
+    private readonly auditEventRepository: Repository<AuditEvent>,
   ) {}
 
   static supports(entityType: EntityType): boolean {
@@ -87,7 +90,72 @@ export class RollbackService {
   }
 
   async rollbackTransaction(event: AuditEvent): Promise<RollbackResult> {
+    if (event.action === AuditAction.UPDATE && event.meta?.bulk === 'annotate') {
+      return this.rollbackBulkAnnotate(event);
+    }
     return this.applyRollback(event, this.transactionRepository);
+  }
+
+  /**
+   * A bulk tags/comment entry. `tagIds` is a relation, not a column, so the
+   * plain update cannot put it back. Like the row's History, it is undone only
+   * while the row still holds what the entry wrote: a comment typed since, or
+   * tags changed since (by hand or by another bulk add), refuse the undo rather
+   * than being overwritten.
+   */
+  private async rollbackBulkAnnotate(event: AuditEvent): Promise<RollbackResult> {
+    const snapshot = this.extractSnapshots(event.diff);
+    const before = snapshot?.before ?? {};
+    const after = snapshot?.after ?? {};
+    const refuse = () => new ConflictException(appError('TRANSACTION_CHANGE_NOT_UNDOABLE'));
+    if (Array.isArray(after.tagIds) && (await this.tagsTouchedSince(event))) {
+      throw refuse();
+    }
+    await this.transactionRepository.manager.transaction(async manager => {
+      const row = await manager.findOne(Transaction, {
+        where: { id: event.entityId, workspaceId: event.workspaceId ?? undefined },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!row) {
+        throw refuse();
+      }
+      if ('comments' in after && (row.comments ?? null) !== (after.comments ?? null)) {
+        throw refuse();
+      }
+      if (Array.isArray(after.tagIds)) {
+        const restored = await restoreTagSet(
+          manager,
+          row.id,
+          row.workspaceId,
+          (before.tagIds as string[]) ?? [],
+          after.tagIds as string[],
+        );
+        if (!restored) {
+          throw refuse();
+        }
+      }
+      if ('comments' in before) {
+        await manager.update(Transaction, row.id, { comments: before.comments as string | null });
+      }
+    });
+    return { success: true, message: 'Update rolled back' };
+  }
+
+  /** Any later entry of the row that changed its tags. */
+  private async tagsTouchedSince(event: AuditEvent): Promise<boolean> {
+    // Compared in SQL: a JS Date drops the microseconds, so the event would count as its own successor.
+    const later = await this.auditEventRepository
+      .createQueryBuilder('event')
+      .select(['event.id', 'event.meta', 'event.diff'])
+      .where('event.entityType = :type AND event.entityId = :id', {
+        type: EntityType.TRANSACTION,
+        id: event.entityId,
+      })
+      .andWhere('event.createdAt > (SELECT created_at FROM audit_events WHERE id = :eventId)', {
+        eventId: event.id,
+      })
+      .getMany();
+    return later.some(touchesTags);
   }
 
   async rollbackStatement(event: AuditEvent): Promise<RollbackResult> {
