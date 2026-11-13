@@ -6,12 +6,16 @@ import {
 } from '../../common/utils/transaction-privacy.util';
 import type { Category } from '../../entities/category.entity';
 import type { Transaction } from '../../entities/transaction.entity';
+import { daySql } from '../exchange-rates/day-converter';
 
 const MONTHS_LISTED = 12;
 
 /** The money of a row, whichever side it is on. */
 export const AMOUNT_SQL =
   'ABS(COALESCE(transaction.amount, COALESCE(transaction.credit, 0) - COALESCE(transaction.debit, 0)))';
+
+/** A row's day, the date its amount converts at (each day at its own rate, as Reports). */
+export const TX_DAY = daySql('transaction');
 
 export const round2 = (value: number) => Math.round(value * 100) / 100;
 export const toDateOnly = (value: string | Date | null) =>

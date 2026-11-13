@@ -16,9 +16,9 @@ import { ClassificationService } from '../classification/services/classification
 import {
   addAmount,
   type CurrencyAmounts,
-  CurrencyConverter,
   normalizeCurrencyCode,
 } from '../exchange-rates/currency-converter';
+import { type DayRow, loadDayConverter } from '../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { payeeDomains } from './payee-domains';
@@ -30,6 +30,7 @@ import {
   monthsTo,
   payeeFlows,
   round2,
+  TX_DAY,
   toDateOnly,
 } from './payee-flows';
 import { UNDECIDED_CATEGORY_SOURCES } from './payee-undecided';
@@ -73,6 +74,7 @@ export class PayeesOverviewService {
       .innerJoin(Payee, 'payee', 'payee.id = transaction.payeeId')
       .select('transaction.payeeId', 'payeeId')
       .addSelect('transaction.currency', 'currency')
+      .addSelect(TX_DAY, 'day')
       .addSelect('COUNT(*)', 'count')
       .addSelect(`SUM(${AMOUNT_SQL})`, 'amount')
       .addSelect('MAX(transaction.transactionDate)', 'lastSeen')
@@ -98,35 +100,22 @@ export class PayeesOverviewService {
       .andWhere('transaction.transactionDate <= :end', { end });
 
     const [rows, monthRows] = await Promise.all([
-      grouped.groupBy('transaction.payeeId').addGroupBy('transaction.currency').getRawMany<{
-        payeeId: string;
-        currency: string;
-        count: string;
-        amount: string;
-        lastSeen: string | Date;
-      }>(),
+      grouped
+        .groupBy('transaction.payeeId')
+        .addGroupBy('transaction.currency')
+        .addGroupBy(TX_DAY)
+        .getRawMany<DayRow<'payeeId' | 'count' | 'amount'> & { lastSeen: string | Date }>(),
       monthQuery.groupBy('1').getRawMany<{ month: string; count: string }>(),
     ]);
 
-    const converter = await CurrencyConverter.load(
-      this.exchangeRates,
-      target,
-      [...new Set(rows.map(row => normalizeCurrencyCode(row.currency)))].map(currency => ({
-        currency,
-        date: end,
-      })),
-      workspaceId,
-    );
+    // Each day at its own rate, as Reports and the dashboard count a payee.
+    const convert = await loadDayConverter(this.exchangeRates, target, rows, workspaceId);
 
     const byPayee = new Map<string, { count: number; amount: number; lastSeen: string | null }>();
     for (const row of rows) {
       const entry = byPayee.get(row.payeeId) ?? { count: 0, amount: 0, lastSeen: null };
       entry.count += Number(row.count);
-      entry.amount += converter.convert(
-        Number(row.amount),
-        normalizeCurrencyCode(row.currency),
-        end,
-      );
+      entry.amount += convert(row.amount, row.currency, row.day);
       const seen = toDateOnly(row.lastSeen);
       if (seen && (!entry.lastSeen || seen > entry.lastSeen)) {
         entry.lastSeen = seen;
@@ -179,7 +168,7 @@ export class PayeesOverviewService {
       totalPayees: byPayee.size,
       totalAmount: round2(ranked.reduce((sum, [, totals]) => sum + totals.amount, 0)),
       months: monthsTo(new Date(end)).map(month => ({ month, count: counts.get(month) ?? 0 })),
-      missingRates: converter.missing,
+      missingRates: convert.missing,
     };
   }
 
@@ -201,6 +190,7 @@ export class PayeesOverviewService {
         .select(`to_char(transaction.transactionDate, 'YYYY-MM')`, 'month')
         .addSelect('transaction.transactionType', 'type')
         .addSelect('transaction.currency', 'currency')
+        .addSelect(TX_DAY, 'day')
         .addSelect('COUNT(*)', 'count')
         .addSelect(`SUM(${AMOUNT_SQL})`, 'amount')
         .andWhere('transaction.payeeId = :payeeId', { payeeId })
@@ -208,13 +198,8 @@ export class PayeesOverviewService {
         .groupBy('1')
         .addGroupBy('2')
         .addGroupBy('3')
-        .getRawMany<{
-          month: string;
-          type: TransactionType;
-          currency: string;
-          count: string;
-          amount: string;
-        }>(),
+        .addGroupBy('4')
+        .getRawMany<DayRow<'month' | 'count' | 'amount'> & { type: TransactionType }>(),
       payeeFlows(this.transactionRepository, workspaceId, viewerMemberId)
         .select('COUNT(*)', 'count')
         .addSelect('MIN(transaction.transactionDate)', 'firstSeen')
@@ -254,24 +239,12 @@ export class PayeesOverviewService {
       payeeDomains(this.payeeRepository.manager, workspaceId, [payee]),
     ]);
 
-    const converter = await CurrencyConverter.load(
-      this.exchangeRates,
-      target,
-      byMonth.map(row => ({
-        currency: normalizeCurrencyCode(row.currency),
-        date: lastDayOf(row.month),
-      })),
-      workspaceId,
-    );
+    const convert = await loadDayConverter(this.exchangeRates, target, byMonth, workspaceId);
     const spent: CurrencyAmounts = new Map();
     const received: CurrencyAmounts = new Map();
     let spentCount = 0;
     for (const row of byMonth) {
-      const value = converter.convert(
-        Number(row.amount),
-        normalizeCurrencyCode(row.currency),
-        lastDayOf(row.month),
-      );
+      const value = convert(row.amount, row.currency, row.day);
       if (row.type === TransactionType.EXPENSE) {
         addAmount(spent, row.month, value);
         spentCount += Number(row.count);
@@ -298,7 +271,7 @@ export class PayeesOverviewService {
       subscriptions,
       vendorDomain: domains.get(payee.id) ?? null,
       undecidedCount: undecided,
-      missingRates: converter.missing,
+      missingRates: convert.missing,
     };
   }
 
