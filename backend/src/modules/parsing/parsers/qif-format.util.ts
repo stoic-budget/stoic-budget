@@ -1,5 +1,11 @@
 import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
-import { parseAmount, type RawSplit, readQifCategory, readSplits } from './qif-splits.util';
+import {
+  cutPartKey,
+  parseAmount,
+  type RawSplit,
+  readQifCategory,
+  readSplits,
+} from './qif-splits.util';
 
 /**
  * QIF, the Quicken interchange format desktop money programs still export. A
@@ -145,8 +151,9 @@ function qifDateParser(rows: string[]): (value: string) => Date | null {
 
 /**
  * Whether the first record is the account's opening balance: Quicken opens an
- * account with a transfer to itself, which names the account when no
- * `!Account` header did.
+ * account with a transfer to itself. Without an `!Account` header the name it
+ * gives is not taken as the account's: an export of the same account without
+ * that row would be another account, and its rows would not be found again.
  */
 function isOpeningBalance(
   account: QifAccount,
@@ -182,7 +189,7 @@ function readAccount(
 ): Pick<ParsedStatement, 'metadata' | 'transactions' | 'warnings'> {
   const transactions: ParsedTransaction[] = [];
   const warnings: string[] = [];
-  let name = account.name;
+  const cutParts = new Map<string, number>();
   let balanceStart: number | undefined;
   for (const [index, { fields, splits }] of account.records.entries()) {
     const date = fields.D ? parseDate(fields.D) : null;
@@ -190,20 +197,22 @@ function readAccount(
     if (!(date && Number.isFinite(amount))) continue;
     const category = readQifCategory(fields.L);
     if (index === 0 && isOpeningBalance(account, fields, category.transferAccount)) {
-      name ??= category.transferAccount;
       balanceStart = amount;
       continue;
     }
     const label = `Row ${index + 1} (${date.toISOString().slice(0, 10)})`;
     const split = splits.length ? readSplits(splits, amount, label, warnings) : undefined;
-    // A part sent to another account is a row of its own, named after that
-    // account, which also keeps its fingerprint apart from the rest of the row.
+    // A part sent to another account is a row of its own under the row's payee.
     for (const transfer of split?.transfers ?? []) {
+      const row = qifRow(fields, date, transfer.amount, currency);
+      const same = `${row.transactionDate.toISOString()}|${row.counterpartyName}|${transfer.transferAccount}|${transfer.amount}`;
+      const ordinal = (cutParts.get(same) ?? 0) + 1;
+      cutParts.set(same, ordinal);
       transactions.push({
-        ...qifRow(fields, date, transfer.amount, currency),
-        counterpartyName: transfer.transferAccount,
+        ...row,
         paymentPurpose: transfer.memo || fields.M || fields.P || '',
         transferAccount: transfer.transferAccount,
+        fingerprintMerchant: cutPartKey(row.counterpartyName, transfer.transferAccount, ordinal),
       });
     }
     const parts = split?.parts;
@@ -221,7 +230,7 @@ function readAccount(
   const dates = transactions.map(t => t.transactionDate.getTime());
   return {
     metadata: {
-      accountNumber: name || 'Unknown',
+      accountNumber: account.name || 'Unknown',
       currency,
       dateFrom: new Date(dates.length ? Math.min(...dates) : Date.now()),
       dateTo: new Date(dates.length ? Math.max(...dates) : Date.now()),

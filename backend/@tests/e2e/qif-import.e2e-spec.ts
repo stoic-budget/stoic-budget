@@ -29,6 +29,62 @@ const RULE_PAYEE = 'ACME Store';
 const PROBE_CHECKING = 'Probe Checking';
 const PROBE_SAVINGS = 'Probe Savings';
 
+const PAY_CHECKING = 'Pay Checking';
+const PAY_SAVINGS = 'Pay Savings';
+
+/**
+ * Cut-out parts that share a day, an amount and an account: two paychecks each
+ * sending 100 to savings, and one purchase split with two equal 100 parts.
+ */
+const EQUAL_PARTS_QIF = [
+  '!Account',
+  `N${PAY_CHECKING}`,
+  'TBank',
+  '^',
+  '!Type:Bank',
+  ...[
+    ['Employer One', '1000.00', '900.00'],
+    ['Employer Two', '500.00', '400.00'],
+  ].flatMap(([payee, total, salary]) => [
+    'D10/10/2026',
+    `T${total}`,
+    `P${payee}`,
+    'SSalary',
+    `$${salary}`,
+    `S[${PAY_SAVINGS}]`,
+    '$100.00',
+    '^',
+  ]),
+  'D10/12/2026',
+  'T-250.00',
+  'PZeta Market',
+  'SProbe Food',
+  '$-50.00',
+  `S[${PAY_SAVINGS}]`,
+  '$-100.00',
+  `S[${PAY_SAVINGS}]`,
+  '$-100.00',
+  '^',
+  '!Account',
+  `N${PAY_SAVINGS}`,
+  'TBank',
+  '^',
+  '!Type:Bank',
+  ...[
+    ['10/10/2026', '-100.00', 'Employer One'],
+    ['10/10/2026', '-100.00', 'Employer Two'],
+    // A plain row repeated on one day is taken for a repeat, so the bank's two legs come a day apart.
+    ['10/12/2026', '100.00', 'Zeta Market'],
+    ['10/13/2026', '100.00', 'Zeta Market'],
+  ].flatMap(([date, amount, payee]) => [
+    `D${date}`,
+    `T${amount}`,
+    `P${payee}`,
+    `L[${PAY_CHECKING}]`,
+    '^',
+  ]),
+].join('\n');
+
 /** A split whose second part went to the other account, and that account's leg of it. */
 const SPLIT_TRANSFER_QIF = [
   '!Account',
@@ -407,5 +463,50 @@ describe('QIF import (e2e)', () => {
     );
     expect(repeats).toHaveLength(2);
     expect(await flowsOf([checking.id, savings.id, again.id])).toEqual({ expense: 60 });
+  });
+
+  it('keeps each cut-out part of equal ones, pairs every leg and catches them all again', async () => {
+    const checking = await processing.processStatement(
+      (await qifStatement('equal-parts', EQUAL_PARTS_QIF)).id,
+    );
+    const [sibling] = await siblings.importOtherAccounts(checking.id);
+    const savings = await processing.processStatement(sibling.id);
+
+    const rows = await dataSource.getRepository(Transaction).find({
+      where: [{ statementId: checking.id }, { statementId: savings.id }],
+    });
+    expect(rows.filter(row => row.isDuplicate)).toEqual([]);
+    const legs = rows.filter(row => Number(row.amount) === 100);
+    expect(legs).toHaveLength(8);
+    expect(legs.every(row => row.transferPairId !== null)).toBe(true);
+    expect(await flowsOf([checking.id, savings.id])).toEqual({ income: 1300, expense: 50 });
+
+    const again = await processing.processStatement(
+      (await qifStatement('equal-parts-again', EQUAL_PARTS_QIF)).id,
+    );
+    const repeats = await rowsOf(again.id);
+    expect(repeats).toHaveLength(7);
+    expect(repeats.every(row => row.isDuplicate)).toBe(true);
+  });
+
+  it('finds the rows of a header-less export again whether or not it opens with a balance', async () => {
+    const rows = ['D12/05/2026', 'T-10.00', 'PExample Kiosk', '^', 'D12/06/2026', 'T-11.00', 'PExample Bakery', '^'];
+    const opening = ['D12/01/2026', 'T500.00', 'POpening Balance', 'L[Headerless Account]', '^'];
+    const later = ['D12/08/2026', 'T-12.00', 'PExample Florist', '^'];
+    const first = await processing.processStatement(
+      (await qifStatement('headerless-opening', ['!Type:Bank', ...opening, ...rows].join('\n'))).id,
+    );
+    const second = await processing.processStatement(
+      (await qifStatement('headerless-later', ['!Type:Bank', ...rows, ...later].join('\n'))).id,
+    );
+
+    expect(Number(first.balanceStart)).toBe(500);
+    expect(second.accountNumber).toBe(first.accountNumber);
+    const repeats = await rowsOf(second.id);
+    expect(repeats.map(row => [row.counterpartyName, row.isDuplicate])).toEqual([
+      ['Example Kiosk', true],
+      ['Example Bakery', true],
+      ['Example Florist', false],
+    ]);
   });
 });

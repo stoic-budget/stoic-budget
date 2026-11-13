@@ -23,9 +23,10 @@ function loadCandidates(repository: Repository<Category>, workspaceId: string) {
 }
 
 /**
- * The stored name first; then a system category by any name it goes by, since
- * older migrations stored those in Russian while a file may say `Utilities`.
- * In each pass the row's kind wins over another kind.
+ * The stored name first, the row's kind before another kind. Then a system
+ * category of the row's kind by any name it goes by, since older migrations
+ * stored those in Russian while a file may say `Utilities`. Only of its kind:
+ * an income row named `Other` must not land on the expense `Other expenses`.
  */
 function pick(
   all: Candidate[],
@@ -35,14 +36,14 @@ function pick(
 ): Candidate | undefined {
   const candidates = parentId === undefined ? all : all.filter(item => item.parentId === parentId);
   const byStoredName = (item: Candidate) => nameKey(item.name) === key;
-  const bySystemName = (item: Candidate) =>
-    Boolean(item.systemKey && SYSTEM_NAMES.get(item.systemKey)?.has(key));
-  for (const matches of [byStoredName, bySystemName]) {
-    const found =
-      candidates.find(item => item.type === type && matches(item)) ?? candidates.find(matches);
-    if (found) return found;
-  }
-  return undefined;
+  return (
+    candidates.find(item => item.type === type && byStoredName(item)) ??
+    candidates.find(byStoredName) ??
+    candidates.find(
+      item =>
+        item.type === type && Boolean(item.systemKey && SYSTEM_NAMES.get(item.systemKey)?.has(key)),
+    )
+  );
 }
 
 /**

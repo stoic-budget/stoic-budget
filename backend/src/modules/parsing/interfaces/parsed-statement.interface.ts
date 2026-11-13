@@ -23,6 +23,11 @@ export interface ParsedTransaction {
   splits?: ParsedSplit[];
   /** The account the file says the money moved to or from, by its name in the file. */
   transferAccount?: string;
+  /**
+   * What the dedup fingerprint reads in place of the counterparty, for a row
+   * whose payee, date and amount do not tell it apart (a part cut out of a split).
+   */
+  fingerprintMerchant?: string;
 }
 
 export interface ParsedSplit {

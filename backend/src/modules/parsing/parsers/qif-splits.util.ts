@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import type { ParsedSplit } from '../interfaces/parsed-statement.interface';
 
 /** One S/E/$ group of a QIF record, as written. */
@@ -32,6 +33,19 @@ const money = (value: number) => Math.abs(value).toFixed(2);
 
 const sumOf = (parts: { amount: number }[]) =>
   round2(parts.reduce((acc, part) => acc + part.amount, 0));
+
+/**
+ * What the dedup fingerprint reads in place of the payee for a part cut out of
+ * a split: the payee, the account the part went to and which of the file's
+ * identical parts it is (same day, payee, account and amount). The rest of the
+ * row, the other row's parts and the second of two equal parts each get their
+ * own fingerprint, and the same file read again gets the same ones. Hashed, as
+ * the fingerprint keeps only 50 characters of a name.
+ */
+export function cutPartKey(payee: string, account: string, ordinal: number): string {
+  const digest = createHash('sha256').update(JSON.stringify([payee, account, ordinal]));
+  return `split transfer ${digest.digest('hex').slice(0, 32)}`;
+}
 
 /**
  * An `L` or `S` value: `[Savings]` is a transfer to that account, anything else
@@ -102,8 +116,10 @@ export function readSplits(
     return undefined;
   }
   if (Math.abs(left) >= 0.005) {
+    // Said of what is left once transfers are cut out: those are the figures the rows show.
+    const of = transfers.length ? `the ${money(rest)} left after its transfers` : money(total);
     warnings.push(
-      `${label}: its split parts add up to ${money(sumOf(parts))} of ${money(total)}; the remaining ${money(left)} is kept as a part without a category`,
+      `${label}: its split parts add up to ${money(sumOf(others))} of ${of}; the remaining ${money(left)} is kept as a part without a category`,
     );
     others.push({ amount: left });
   }

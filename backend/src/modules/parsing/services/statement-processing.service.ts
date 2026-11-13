@@ -39,6 +39,7 @@ import {
   takeStatementAccount,
 } from '../helpers/statement-account.helper';
 import { fileExtensionOf } from '../helpers/statement-file.helper';
+import { statementRowFingerprint } from '../helpers/statement-row-fingerprint.helper';
 import { pairStatementTransfers } from '../helpers/statement-transfer-pairing.helper';
 import {
   type ValidationReasonCode,
@@ -1009,7 +1010,12 @@ export class StatementProcessingService {
       transaction.taxReverseCharge = taxAssignment.taxReverseCharge;
       transaction.taxNotionalAmount = taxAssignment.taxNotionalAmount;
 
-      transaction.fingerprint = this.buildFingerprint(transaction, statement, log, i);
+      transaction.fingerprint = statementRowFingerprint(
+        this.transactionFingerprintService,
+        { transaction, parsed, index: i },
+        statement.accountNumber || '',
+        log,
+      );
       drafts.push(transaction);
 
       const missing: string[] = [];
@@ -1072,32 +1078,6 @@ export class StatementProcessingService {
     log('info', `Successfully created ${transactions.length}/${deduped.length} transactions`);
     const duplicatesSkipped = parsedTransactions.length - deduped.length;
     return { transactions, duplicatesSkipped, duplicatesFlagged };
-  }
-
-  /**
-   * Fingerprints feed the partial unique index
-   * `(workspace_id, fingerprint) WHERE is_duplicate = false`, which is what makes
-   * re-uploading an overlapping period idempotent.
-   */
-  private buildFingerprint(
-    transaction: Transaction,
-    statement: Statement,
-    log: (level: string, message: string) => void,
-    index: number,
-  ): string | null {
-    try {
-      return this.transactionFingerprintService.generateFingerprint(
-        transaction,
-        statement.accountNumber || '',
-      );
-    } catch (error) {
-      // A missing fingerprint only costs dedup, so never fail the import over it.
-      log(
-        'warn',
-        `Fingerprint generation failed for transaction ${index + 1}: ${this.getErrorMessage(error)}`,
-      );
-      return null;
-    }
   }
 
   /**

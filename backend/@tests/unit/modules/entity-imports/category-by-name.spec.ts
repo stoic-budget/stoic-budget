@@ -88,6 +88,20 @@ describe('categoryByName', () => {
     expect(await look('Water', 'cat-utilities')).toBeNull();
   });
 
+  it('matches a system name only for a category of the row\'s kind', async () => {
+    const stored: Stored[] = [
+      { id: 'cat-other-expenses', name: 'Прочие расходы', type: CategoryType.EXPENSE, parentId: null, systemKey: 'other_expenses' },
+      { id: 'cat-fees', name: 'Комиссии и сборы', type: CategoryType.EXPENSE, parentId: null, systemKey: 'fees' },
+    ];
+    const { repository } = repositoryOver(stored);
+    const look = (name: string, type: 'income' | 'expense') =>
+      categoryByName(repository as never, scope, name, type, { create: false });
+
+    expect(await look('Other', 'income')).toBeNull();
+    expect(await look('Fees', 'income')).toBeNull();
+    expect(await look('Other', 'expense')).toEqual({ id: 'cat-other-expenses', created: false });
+  });
+
   it('prefers a stored name over a system name', async () => {
     const stored: Stored[] = [
       { id: 'cat-system', name: 'Коммунальные услуги', type: CategoryType.EXPENSE, parentId: null, systemKey: 'utilities' },

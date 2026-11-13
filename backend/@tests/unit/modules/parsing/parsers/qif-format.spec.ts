@@ -139,7 +139,7 @@ describe('QIF splits (S/E/$)', () => {
     expect(parsed.transactions).toEqual([
       expect.objectContaining({
         debit: 40,
-        counterpartyName: 'Rainy Day Savings',
+        counterpartyName: 'Example Grocer',
         paymentPurpose: 'Put aside',
         transferAccount: 'Rainy Day Savings',
       }),
@@ -174,6 +174,64 @@ describe('QIF splits (S/E/$)', () => {
     expect(parsed.transactions).toEqual([
       expect.objectContaining({ debit: 20, transferAccount: 'Rainy Day Savings' }),
       expect.objectContaining({ debit: 30, transferAccount: 'Holiday Fund' }),
+    ]);
+  });
+
+  it('gives each cut-out part its own fingerprint name, the same on every read', () => {
+    const file = qif(
+      '!Type:Bank',
+      'D09/05/2026',
+      'T1000.00',
+      'PEmployer One',
+      'SSalary',
+      '$900.00',
+      'S[Rainy Day Savings]',
+      '$100.00',
+      '^',
+      'D09/05/2026',
+      'T500.00',
+      'PEmployer Two',
+      'SSalary',
+      '$400.00',
+      'S[Rainy Day Savings]',
+      '$100.00',
+      '^',
+      'D09/05/2026',
+      'T-250.00',
+      'PZeta Market',
+      'SFood',
+      '$-50.00',
+      'S[Rainy Day Savings]',
+      '$-100.00',
+      'S[Rainy Day Savings]',
+      '$-100.00',
+      '^',
+    );
+    const cut = (text: string) =>
+      parseQif(text).transactions.filter(row => row.transferAccount === 'Rainy Day Savings');
+    const names = cut(file).map(row => row.fingerprintMerchant);
+    expect(cut(file).map(row => row.counterpartyName)).toEqual([
+      'Employer One',
+      'Employer Two',
+      'Zeta Market',
+      'Zeta Market',
+    ]);
+    expect(new Set(names).size).toBe(4);
+    expect(names.every(name => name && name.length <= 50)).toBe(true);
+    expect(cut(file).map(row => row.fingerprintMerchant)).toEqual(names);
+    const rest = parseQif(file).transactions.filter(row => !row.transferAccount);
+    expect(rest).toHaveLength(3);
+    expect(rest.every(row => row.fingerprintMerchant === undefined)).toBe(true);
+  });
+
+  it('says what is left after a transfer that goes the other way, as the rows show it', () => {
+    const parsed = split('-100.00', 'SFood', '$-50.00', 'S[Rainy Day Savings]', '$20.00');
+    expect(parsed.transactions).toEqual([
+      expect.objectContaining({ credit: 20, transferAccount: 'Rainy Day Savings' }),
+      expect.objectContaining({ debit: 120, splits: [{ amount: 50, categoryName: 'Food' }, { amount: 70 }] }),
+    ]);
+    expect(parsed.warnings).toEqual([
+      'Row 1 (2026-09-05): its split parts add up to 50.00 of the 120.00 left after its transfers; the remaining 70.00 is kept as a part without a category',
     ]);
   });
 
@@ -253,7 +311,7 @@ describe('QIF accounts (!Account)', () => {
     expect(parsed.transactions.some(row => row.counterpartyName === 'Opening Balance')).toBe(false);
   });
 
-  it('reads the opening balance of a file without !Account, which names the account', () => {
+  it('reads the opening balance of a file without !Account', () => {
     const parsed = parseQif(
       qif(
         '!Type:Bank',
@@ -268,7 +326,8 @@ describe('QIF accounts (!Account)', () => {
         '^',
       ),
     );
-    expect(parsed.metadata).toMatchObject({ balanceStart: 1000, accountNumber: 'Everyday Account' });
+    // Not named after the opening row: an export without it must be the same account.
+    expect(parsed.metadata).toMatchObject({ balanceStart: 1000, accountNumber: 'Unknown' });
     expect(parsed.transactions).toEqual([expect.objectContaining({ debit: 9.99 })]);
   });
 
