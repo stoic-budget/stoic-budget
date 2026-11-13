@@ -45,6 +45,7 @@ export const DOCUMENTS_ERRORS = {
   TRANSACTION_MERGE_TOO_FEW: 'At least 2 transactions required for merge',
   TRANSACTION_ATTACHMENT_FILE_MISSING: 'Attachment file is missing from storage',
   TRANSACTION_ATTACHMENT_NOT_FOUND: 'Attachment not found',
+  TRANSACTION_ATTACHMENT_TYPE_UNSUPPORTED: 'Only photos and PDF files can be attached',
   TRANSACTION_TAGS_NOT_FOUND: 'One or more tags do not exist in this workspace',
   TRANSACTION_BULK_UPDATE_FORMAT: 'Invalid bulk update format. Expected {items} or {ids, updates}',
   TRANSACTION_TAX_LOCKED_FIELDS:
@@ -59,6 +60,10 @@ export const DOCUMENTS_ERRORS = {
     'Cannot unsplit a transaction whose parts are part of a filed tax return',
   TRANSACTION_UNSPLIT_DUPLICATE:
     'Cannot unsplit a group containing a transaction marked as a duplicate',
+  TRANSACTION_UNSPLIT_PRIVATE_FILES:
+    'A private part has files of its own that the merged row would show to others; its owner can remove them first',
+  TRANSACTION_UNSPLIT_HIDES_FILES:
+    'A part has files that the merged row, private to one member, would hide from everyone else; remove them or share that row first',
   TRANSACTION_TRANSFER_SAME_LEG: 'A transfer needs two different transactions',
   TRANSACTION_TRANSFER_SAME_DIRECTION: 'The two legs of a transfer must go in opposite directions',
   TRANSACTION_LEG_DUPLICATE: 'Transaction {{id}} is marked as a duplicate',

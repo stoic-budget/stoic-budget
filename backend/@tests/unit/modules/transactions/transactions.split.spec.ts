@@ -518,6 +518,13 @@ describe('TransactionsService.unsplit', () => {
           return { affected: 0 };
         }),
       },
+      TransactionAttachment: {
+        find: vi.fn(async () => []),
+        update: vi.fn(async () => {
+          opsLog.push('update:TransactionAttachment');
+          return { affected: 0 };
+        }),
+      },
     };
     return {
       transaction: vi.fn(async (cb: any) =>
@@ -776,6 +783,66 @@ describe('TransactionsService.unsplit', () => {
 
     expect(opsLog.indexOf('update:Receipt')).toBeLessThan(opsLog.indexOf('remove'));
     expect(opsLog.indexOf('update:Payable')).toBeLessThan(opsLog.indexOf('remove'));
+  });
+
+  it('moves the files pinned to a deleted part onto the survivor before deleting it', async () => {
+    // transaction_attachments cascades on delete: without the move, the files go with the part.
+    await service.unsplit('tx-1', 'ws-1', 'u-1');
+
+    const [where, patch] = repos.TransactionAttachment.update.mock.calls[0];
+    expect(where.workspaceId).toBe('ws-1');
+    expect(where.transactionId.value).toEqual(['tx-2']);
+    expect(patch).toEqual({ transactionId: 'tx-1' });
+    expect(opsLog.indexOf('update:TransactionAttachment')).toBeLessThan(opsLog.indexOf('remove'));
+  });
+
+  it("refuses to merge a part private to another member when it has files, and deletes nothing", async () => {
+    lockedParts = [
+      { ...PART_0, isPrivate: false, ownerMemberId: 'm-owner' },
+      { ...PART_1, isPrivate: true, ownerMemberId: 'm-partner' },
+    ];
+    repos.TransactionAttachment.find.mockResolvedValue([{ id: 'att-1', transactionId: 'tx-2' }]);
+
+    await expect(service.unsplit('tx-1', 'ws-1', 'u-1')).rejects.toMatchObject({
+      response: expect.objectContaining({ code: 'TRANSACTION_UNSPLIT_PRIVATE_FILES' }),
+    });
+    expect(repos.TransactionAttachment.find.mock.calls[0][0].where.transactionId.value).toEqual([
+      'tx-2',
+    ]);
+    expect(removedBatches).toEqual([]);
+    expect(repos.TransactionAttachment.update).not.toHaveBeenCalled();
+  });
+
+  it('merges a private part without files, and one private to the survivor\'s own owner', async () => {
+    lockedParts = [
+      { ...PART_0, isPrivate: true, ownerMemberId: 'm-partner' },
+      { ...PART_1, isPrivate: true, ownerMemberId: 'm-partner' },
+    ];
+    repos.TransactionAttachment.find.mockResolvedValue([{ id: 'att-1', transactionId: 'tx-2' }]);
+    await service.unsplit('tx-1', 'ws-1', 'u-1');
+    expect(repos.TransactionAttachment.find).not.toHaveBeenCalled();
+
+    store.set('tx-1', { ...PART_0 });
+    store.set('tx-2', { ...PART_1 });
+    lockedParts = [
+      { ...PART_0, isPrivate: false, ownerMemberId: null },
+      { ...PART_1, isPrivate: true, ownerMemberId: 'm-partner' },
+    ];
+    repos.TransactionAttachment.find.mockResolvedValue([]);
+    await expect(service.unsplit('tx-1', 'ws-1', 'u-1')).resolves.toBeDefined();
+  });
+
+  it("refuses to hide a shared part's files on a survivor private to one member", async () => {
+    lockedParts = [
+      { ...PART_0, isPrivate: true, ownerMemberId: 'm-owner' },
+      { ...PART_1, isPrivate: false, ownerMemberId: 'm-partner' },
+    ];
+    repos.TransactionAttachment.find.mockResolvedValue([{ id: 'att-1', transactionId: 'tx-2' }]);
+
+    await expect(service.unsplit('tx-1', 'ws-1', 'u-1')).rejects.toMatchObject({
+      response: expect.objectContaining({ code: 'TRANSACTION_UNSPLIT_HIDES_FILES' }),
+    });
+    expect(removedBatches).toEqual([]);
   });
 
   it('records the repointed counts in the audit meta so the relinking is traceable', async () => {

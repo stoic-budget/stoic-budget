@@ -5,6 +5,10 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { type DataSource, type EntityMetadata, In } from 'typeorm';
 import { FileStorageService } from '../../common/services/file-storage.service';
 import type { Statement } from '../../entities';
+import {
+  collectTransactionAttachmentFiles,
+  shareIdenticalAttachmentFiles,
+} from './backup-attachment-files';
 
 export const EXCLUDED_TABLES = new Set([
   'api_keys',
@@ -115,8 +119,12 @@ export class BackupDataService {
       if (metadata.tableName === 'receipts') {
         await this.collectReceiptAttachments(records, files);
       }
+      if (metadata.tableName === 'transaction_attachments') {
+        collections[metadata.tableName] = await collectTransactionAttachmentFiles(records, files);
+      }
     }
     await this.collectRelatedCollections(collections);
+    shareIdenticalAttachmentFiles(collections, files);
     return { collections, files };
   }
 
