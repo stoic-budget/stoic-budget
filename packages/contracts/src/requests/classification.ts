@@ -25,6 +25,17 @@ export const ClassificationConditionInput = Schema.Struct({
     'currency',
     /** The day number, 1 to 31, of the row's date. */
     'day_of_month',
+    /**
+     * The row's category, payee, tags and comment, by id (the comment as text).
+     * They read the row as stored with what the rules ranked above this one
+     * set on it in the same pass: their category, payee and comment, and their
+     * tags added to the row's own.
+     */
+    'category',
+    'payee',
+    /** `equals` is "has any of", `not_equals` "has none of". */
+    'tags',
+    'comment',
   ]),
   operator: Schema.Literals([
     'contains',
@@ -38,6 +49,9 @@ export const ClassificationConditionInput = Schema.Struct({
     'not_equals',
     /** From `value` to `valueTo`, both included. */
     'between',
+    /** No value at all (blank text, no category, no tags); `value` is ''. */
+    'is_empty',
+    'is_not_empty',
   ]),
   // Bounded: a rule runs against every imported row, and a long pattern is
   // where a pathological regex hides. Several values mean "any of them" (with
@@ -51,6 +65,25 @@ export const ClassificationConditionInput = Schema.Struct({
   valueTo: Schema.optional(Schema.Finite),
 });
 export type ClassificationConditionInput = Wire<typeof ClassificationConditionInput>;
+
+/** Conditions that hold together, all of them or any one, as one condition of the rule. */
+export const ClassificationConditionGroupInput = Schema.Struct({
+  matchMode: RuleMatchMode,
+  conditions: Schema.Array(ClassificationConditionInput).check(
+    Schema.isMinLength(1),
+    Schema.isMaxLength(20),
+  ),
+});
+export type ClassificationConditionGroupInput = Wire<typeof ClassificationConditionGroupInput>;
+
+/**
+ * What a rule's list of conditions holds: conditions, and groups of them one
+ * level deep. A list of plain conditions, as every rule saved before groups
+ * holds it, is a root without groups.
+ */
+const RuleConditionsInput = Schema.Array(
+  Schema.Union([ClassificationConditionInput, ClassificationConditionGroupInput]),
+).check(Schema.isMinLength(1), Schema.isMaxLength(50));
 
 /** What a matching rule sets on the transaction. */
 export const ClassificationResultInput = Schema.Struct({
@@ -77,7 +110,7 @@ export type ClassificationResultInput = Wire<typeof ClassificationResultInput>;
 export const CreateCategorizationRuleBody = Schema.Struct({
   name: Schema.String.check(Schema.isMinLength(1)),
   description: optionalNullable(Schema.String),
-  conditions: Schema.Array(ClassificationConditionInput).check(Schema.isMinLength(1)),
+  conditions: RuleConditionsInput,
   matchMode: optionalNullable(RuleMatchMode),
   result: ClassificationResultInput,
   priority: optionalNullable(Schema.Int),
@@ -89,9 +122,7 @@ export const UpdateCategorizationRuleBody = Schema.Struct({
   name: optionalNullable(Schema.String),
   description: optionalNullable(Schema.String),
   // Never empty: a rule with no condition would otherwise be one about every row.
-  conditions: optionalNullable(
-    Schema.Array(ClassificationConditionInput).check(Schema.isMinLength(1)),
-  ),
+  conditions: optionalNullable(RuleConditionsInput),
   matchMode: optionalNullable(RuleMatchMode),
   result: optionalNullable(ClassificationResultInput),
   priority: optionalNullable(Schema.Int),
@@ -100,7 +131,7 @@ export const UpdateCategorizationRuleBody = Schema.Struct({
 export type UpdateCategorizationRuleBody = Wire<typeof UpdateCategorizationRuleBody>;
 
 export const TestCategorizationRuleBody = Schema.Struct({
-  conditions: Schema.Array(ClassificationConditionInput).check(Schema.isMinLength(1)),
+  conditions: RuleConditionsInput,
   matchMode: optionalNullable(RuleMatchMode),
   /** Rows to test against; without them the workspace's most recent rows are used. */
   transactionIds: Schema.optional(Schema.Array(Schema.String).check(Schema.isMinLength(1))),

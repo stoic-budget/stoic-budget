@@ -6,8 +6,11 @@ import { canReadPrivate } from '../../../common/utils/transaction-privacy.util';
 import { CategorizationRule } from '../../../entities/categorization-rule.entity';
 import { Transaction, TransactionCategorySource } from '../../../entities/transaction.entity';
 import { ViewPreference } from '../../../entities/view-preference.entity';
+import { conditionsUse } from '../engine/rule-condition-tree';
 import { decides, matchingRules } from '../engine/rule-layers';
 import { ownsRuleRefs } from '../engine/rule-refs';
+import { storedState } from '../engine/rule-row-state';
+import { rowTagIds } from '../engine/rule-tags';
 import { RuleSuggestionsService } from './rule-suggestions.service';
 
 /** Hand corrections against one rule before they say something about it. */
@@ -88,7 +91,9 @@ export class RuleHealthService {
   /**
    * Rows a person filed by hand against the rule that would file them: only rows
    * that arrived after the rule, since the rule never had a say over older ones.
-   * Advice is the workspace's, so nobody's private rows feed it.
+   * Advice is the workspace's, so nobody's private rows feed it. The rules run
+   * as on import, every one of them in order, on the row without the category
+   * the person gave it later.
    */
   private async contradictedRules(
     workspaceId: string,
@@ -113,9 +118,23 @@ export class RuleHealthService {
       .take(CONTRADICTION_ROWS_READ)
       .getMany();
 
+    const tagIds = conditionsUse(rules, 'tags')
+      ? await rowTagIds(
+          this.transactionRepository.manager,
+          workspaceId,
+          rows.map(row => row.id),
+        )
+      : undefined;
     const counts = new Map<string, number>();
     for (const row of rows) {
-      const winner = matchingRules(categoryRules, row)[0];
+      const arrived = {
+        ...storedState(row, tagIds ? (tagIds.get(row.id) ?? []) : undefined),
+        categoryId: null,
+        categorySource: null,
+      };
+      const winner = matchingRules(rules, row, arrived).find(rule =>
+        decides(rule.result, 'categoryId'),
+      );
       if (
         winner &&
         canReadPrivate(row, null) &&

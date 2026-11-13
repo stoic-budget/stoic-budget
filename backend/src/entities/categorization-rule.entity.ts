@@ -9,9 +9,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import type {
-  ClassificationCondition,
   ClassificationResult,
   MatchMode,
+  RuleConditionNode,
 } from '../modules/classification/interfaces/classification-rule.interface';
 import { User } from './user.entity';
 import { Workspace } from './workspace.entity';
@@ -42,7 +42,7 @@ export class CategorizationRule {
   description: string | null;
 
   @Column({ type: 'jsonb' })
-  conditions: ClassificationCondition[];
+  conditions: RuleConditionNode[];
 
   /** Whether a row has to pass all of the conditions or any one of them. */
   @Column({ name: 'match_mode', type: 'varchar', length: 8, default: 'all' })

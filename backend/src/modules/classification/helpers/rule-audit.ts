@@ -4,7 +4,7 @@ import { type Transaction, TransactionCategorySource } from '../../../entities/t
 import type { CreateAuditEventDto } from '../../audit/interfaces/audit-event.interface';
 import type { RuleApplyPlan } from '../engine/rule-apply-plan';
 import type { RuleLayers } from '../engine/rule-layers';
-import type { ClassificationCondition } from '../interfaces/classification-rule.interface';
+import type { RuleConditionNode } from '../interfaces/classification-rule.interface';
 
 export type CategorizationRuleAuditSnapshot = {
   id: string;
@@ -12,7 +12,7 @@ export type CategorizationRuleAuditSnapshot = {
   workspaceId: string;
   name: string;
   description: string | null;
-  conditions: ClassificationCondition[];
+  conditions: RuleConditionNode[];
   matchMode: CategorizationRule['matchMode'];
   result: CategorizationRule['result'];
   priority: number;

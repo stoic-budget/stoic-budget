@@ -4,6 +4,7 @@ import type {
   ClassificationRule,
 } from '../interfaces/classification-rule.interface';
 import { matchesRule } from './rule-conditions';
+import { layOver, type RuleRowState, storedState } from './rule-row-state';
 
 /** What only one rule can decide for a row. Tags are not here: every matching rule adds its own. */
 export const LAYERED_FIELDS = [
@@ -18,7 +19,8 @@ export const LAYERED_FIELDS = [
 ] as const;
 export type LayeredField = (typeof LAYERED_FIELDS)[number];
 
-type LayerRule = Pick<ClassificationRule, 'conditions' | 'result'>;
+type LayerRule = Pick<ClassificationRule, 'conditions' | 'result'> &
+  Partial<Pick<ClassificationRule, 'name' | 'matchMode'>>;
 
 /** What the rules that match a row do to it together. */
 export interface RuleLayers<R extends LayerRule = ClassificationRule> {
@@ -35,12 +37,34 @@ export function decides(result: ClassificationResult, field: LayeredField): bool
   return field === 'ownerMemberId' ? result.ownerMemberId !== undefined : Boolean(result[field]);
 }
 
+/**
+ * One pass of the rules over the row, in the order given (best first): each
+ * rule is tried on the row as the matching rules above it left it
+ * (rule-row-state). `start` is the row as stored, tags included.
+ */
+export function passRules<R extends LayerRule>(
+  rules: readonly R[],
+  transaction: Transaction,
+  start: RuleRowState = storedState(transaction),
+): { matching: R[]; state: RuleRowState } {
+  let state = start;
+  const matching: R[] = [];
+  for (const rule of rules) {
+    if (matchesRule(transaction, rule, state)) {
+      matching.push(rule);
+      state = layOver(state, rule, transaction);
+    }
+  }
+  return { matching, state };
+}
+
 /** The rules that match the row, in the order given (best first). */
 export function matchingRules<R extends LayerRule>(
   rules: readonly R[],
   transaction: Transaction,
+  start?: RuleRowState,
 ): R[] {
-  return rules.filter(rule => matchesRule(transaction, rule));
+  return passRules(rules, transaction, start).matching;
 }
 
 /**

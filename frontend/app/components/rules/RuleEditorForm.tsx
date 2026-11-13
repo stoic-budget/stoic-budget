@@ -58,6 +58,7 @@ export function RuleEditorForm({ draft, onChange, targets, onSubmit }: RuleEdito
         ownerOptions={ownerOptions}
         hasMembers={members.length > 0}
         walletOptions={wallets.map(wallet => ({ value: wallet.id, label: wallet.name }))}
+        categories={categories}
       />
 
       <RuleActionsField
