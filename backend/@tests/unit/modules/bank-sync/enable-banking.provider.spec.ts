@@ -196,6 +196,22 @@ describe('EnableBankingProvider linking', () => {
       ),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
+
+  it('passes a 429’s Retry-After on, in seconds or as an HTTP date', async () => {
+    const limited = (retryAfter: string) =>
+      providerWith(
+        async () => new Response('', { status: 429, headers: { 'retry-after': retryAfter } }),
+      )
+        .verifyCredentials(secrets)
+        .catch((error: unknown) => error as BankSyncTemporaryError);
+
+    expect((await limited('900')).retryAfterSeconds).toBe(900);
+    const inTwoHours = new Date(Date.now() + 2 * 3600_000).toUTCString();
+    const seconds = (await limited(inTwoHours)).retryAfterSeconds ?? 0;
+    expect(seconds).toBeGreaterThan(2 * 3600 - 5);
+    expect(seconds).toBeLessThanOrEqual(2 * 3600);
+    expect((await limited('soon')).retryAfterSeconds).toBeUndefined();
+  });
 });
 
 describe('EnableBankingProvider pulling', () => {

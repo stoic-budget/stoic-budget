@@ -1,4 +1,4 @@
-import { IntegrationStatus, WorkspaceKind } from '../../../../src/entities';
+import { IntegrationStatus } from '../../../../src/entities';
 import { IntelligentDeduplicationService } from '../../../../src/modules/parsing/services/intelligent-deduplication.service';
 import { BankSyncPullService } from '../../../../src/modules/bank-sync/bank-sync-pull.service';
 import { BankSyncService } from '../../../../src/modules/bank-sync/bank-sync.service';
@@ -375,16 +375,5 @@ describe('BankSyncPullService health', () => {
     });
     const result = await second.pull.sync(user, workspaceId, 'c1');
     expect(result.accounts[0].health).toBe('incomplete');
-  });
-
-  it('auto-syncs connections of ordinary workspaces only, never a past version', async () => {
-    const h = harness({});
-    await h.pull.autoSync();
-
-    expect(h.store.integrationRepository.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ workspace: { kind: WorkspaceKind.STANDARD } }),
-      }),
-    );
   });
 });

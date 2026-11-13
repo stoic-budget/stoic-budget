@@ -20,6 +20,7 @@ import {
   type BankSyncTransaction,
   type TokenBankSyncProvider,
 } from './bank-sync-provider.interface';
+import { parseRetryAfter } from './bank-sync-schedule';
 
 /** SimpleFIN answers a claim with an access URL that carries the credentials: `https://user:pass@host/simplefin`. */
 const REQUEST_TIMEOUT_MS = 20_000;
@@ -61,7 +62,10 @@ const SimpleFinResponse = Schema.Struct({
 });
 
 /** SimpleFIN answered, but not with the accounts. */
-class SimpleFinRefused extends Data.TaggedError('SimpleFinRefused')<{ readonly status: number }> {}
+class SimpleFinRefused extends Data.TaggedError('SimpleFinRefused')<{
+  readonly status: number;
+  readonly retryAfterSeconds?: number;
+}> {}
 
 const decodeAccount = Schema.decodeUnknownOption(SimpleFinAccount);
 const decodeTransaction = Schema.decodeUnknownOption(SimpleFinTransaction);
@@ -119,18 +123,32 @@ export class SimpleFinProvider implements TokenBankSyncProvider {
     const request = HttpClientRequest.get(target).pipe(
       HttpClientRequest.setHeaders({ authorization, accept: 'application/json' }),
     );
-    // The listing is a read: a network error, 429 or 5xx is retried. The
-    // one-time claim above never is — a retry could burn the token.
+    // The listing is a read: a network error or 5xx is retried. A 429 is not:
+    // the bridge said when to come back, and the scheduler waits that long.
+    // The one-time claim above is never retried — a retry could burn the token.
     const listing = Effect.gen(function* () {
       const client = (yield* HttpClient.HttpClient).pipe(
+        HttpClient.filterOrFail(
+          response => response.status < 500,
+          response =>
+            new SimpleFinRefused({
+              status: response.status,
+              retryAfterSeconds: parseRetryAfter(response.headers['retry-after']),
+            }),
+        ),
         HttpClient.retryTransient({
+          retryOn: 'errors-only',
+          while: error => error._tag === 'SimpleFinRefused',
           schedule: Schedule.exponential('500 millis').pipe(Schedule.jittered),
           times: 2,
         }),
       );
       const response = yield* client.execute(request).pipe(Effect.timeout(LISTING_TIMEOUT_MS));
       if (response.status < 200 || response.status >= 300) {
-        return yield* Effect.fail(new SimpleFinRefused({ status: response.status }));
+        const retryAfterSeconds = parseRetryAfter(response.headers['retry-after']);
+        return yield* Effect.fail(
+          new SimpleFinRefused({ status: response.status, retryAfterSeconds }),
+        );
       }
       return yield* HttpClientResponse.schemaBodyJson(SimpleFinResponse)(response);
     }).pipe(
@@ -171,7 +189,10 @@ function toListingException(
       if (error.status === 401 || error.status === 403) return new BankSyncAuthError();
       // Still refused after the retries: the bridge's own rate limit or outage, not the credential.
       if (error.status === 429 || error.status >= 500) {
-        return new BankSyncTemporaryError(`SimpleFIN answered HTTP ${error.status}`);
+        return new BankSyncTemporaryError(
+          `SimpleFIN answered HTTP ${error.status}`,
+          error.retryAfterSeconds,
+        );
       }
       return new BadRequestException(
         appError('BANK_SYNC_SIMPLEFIN_HTTP_ERROR', { status: error.status }),

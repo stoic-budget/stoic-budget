@@ -65,6 +65,22 @@ export const BankSyncConnection = Schema.Struct({
     lastSyncAt: Schema.NullOr(Schema.String),
     lastError: Schema.NullOr(Schema.String),
   }),
+  /** When auto-sync pulls this connection, and whether failed pulls are holding it back. */
+  schedule: Schema.Struct({
+    /** How often auto-sync pulls it, 1 to 24 hours. */
+    intervalHours: Schema.Number,
+    /** The next automatic pull; null is "at the next check", every 15 minutes. */
+    nextPullAt: Schema.NullOr(Schema.String),
+    lastAttemptAt: Schema.NullOr(Schema.String),
+    /** Failed pulls in a row; a good pull or a manual one starts it over. */
+    consecutiveFailures: Schema.Number,
+    /** No automatic pull before this: failed pulls back off, and a provider's Retry-After is kept. */
+    backoffUntil: Schema.NullOr(Schema.String),
+    /** Why: the provider asked to wait or is down, the credential was refused, or the pull failed. */
+    backoffReason: Schema.NullOr(
+      Schema.Literals(['provider_busy', 'credential_refused', 'pull_failed']),
+    ),
+  }),
 });
 export type BankSyncConnection = Wire<typeof BankSyncConnection>;
 

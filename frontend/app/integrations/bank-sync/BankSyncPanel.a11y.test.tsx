@@ -35,6 +35,14 @@ const connections = [
       lastSyncAt: null,
       lastError: null,
     },
+    schedule: {
+      intervalHours: 6,
+      nextPullAt: null,
+      lastAttemptAt: null,
+      consecutiveFailures: 0,
+      backoffUntil: null,
+      backoffReason: null,
+    },
   },
 ];
 

@@ -22,6 +22,7 @@ import {
   type BankSyncTransaction,
   type RedirectBankSyncProvider,
 } from './bank-sync-provider.interface';
+import { parseRetryAfter } from './bank-sync-schedule';
 import {
   EnableBankingBalances,
   EnableBankingInstitution,
@@ -285,12 +286,10 @@ export class EnableBankingProvider implements RedirectBankSyncProvider {
     const exchange = Effect.gen(function* () {
       const response = yield* (yield* HttpClient.HttpClient).execute(request);
       if (response.status < 200 || response.status >= 300) {
-        const retryAfter = Number(response.headers['retry-after']);
         return yield* Effect.fail(
           new EnableBankingRefused({
             status: response.status,
-            retryAfterSeconds:
-              Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined,
+            retryAfterSeconds: parseRetryAfter(response.headers['retry-after']),
           }),
         );
       }
