@@ -97,7 +97,7 @@
     "typescript": "^6.0.3",
     "vite": "^8.3.5",
     "vite-intlayer": "^9.7.0",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "engines": {
     "node": ">=22.18"
