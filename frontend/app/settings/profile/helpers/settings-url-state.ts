@@ -17,7 +17,7 @@ export const DEFAULT_SETTINGS_TAB: SettingsTabId = 'general';
 /** Accordion panels per tab, in display order. */
 export const SETTINGS_SECTIONS = {
   general: ['profile', 'appearance'],
-  security: ['email', 'password', 'two-factor', 'sessions'],
+  security: ['email', 'password', 'two-factor', 'passkeys', 'sessions'],
   notifications: ['telegram', 'push'],
   data: [
     'workspace-profile',

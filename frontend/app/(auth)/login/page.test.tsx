@@ -4,6 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { authUser } from '@/app/test/fixtures/contracts';
 
 const apiPost = vi.hoisted(() => vi.fn());
+const getPasskey = vi.hoisted(() => vi.fn());
+
+vi.mock('@/app/lib/webauthn', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/app/lib/webauthn')>()),
+  passkeysSupported: () => true,
+  getPasskey,
+}));
 
 vi.mock('@/app/lib/api', () => ({
   __esModule: true,
@@ -28,6 +35,12 @@ vi.mock('@/app/i18n', () => ({
     showPassword: { value: 'Show password' },
     hidePassword: { value: 'Hide password' },
     loginFailed: { value: 'Failed to log in. Please try again.' },
+    twoFactorLabel: 'Verification code',
+    twoFactorHint: 'Enter the code',
+    orDivider: 'or',
+    passkeySignIn: { value: 'Sign in with a passkey' },
+    usePasskey: { value: 'Use your passkey' },
+    passkeyDismissed: { value: 'The passkey prompt was closed.' },
   }),
 }));
 
@@ -237,5 +250,146 @@ describe('LoginPage locale persistence', () => {
     expect(error?.getAttribute('role')).toBe('alert');
     expect(passwordInput.getAttribute('aria-describedby')).toBe('login-error');
     expect(container.querySelector('.MuiAlert-root')).toBeNull();
+  });
+
+  describe('passkeys', () => {
+    const options = {
+      challenge: 'challenge-1',
+      rpId: 'budget.example.co.il',
+      timeout: 300000,
+      userVerification: 'required' as const,
+      allowCredentials: [],
+    };
+    const assertion = {
+      id: 'credential-1',
+      rawId: 'credential-1',
+      type: 'public-key' as const,
+      response: {
+        clientDataJSON: 'Y2xpZW50',
+        authenticatorData: 'YXV0aA',
+        signature: 'c2ln',
+        userHandle: null,
+      },
+      authenticatorAttachment: 'platform' as const,
+      clientExtensionResults: {},
+    };
+    const signedIn = {
+      user: authUser({
+        onboardingCompletedAt: '2026-01-01T00:00:00.000Z',
+        workspaceId: 'workspace-1',
+      }),
+    };
+    const buttonNamed = (label: string) =>
+      Array.from(container.querySelectorAll('button')).find(button =>
+        button.textContent?.includes(label),
+      ) as HTMLButtonElement | undefined;
+    const click = async (button: HTMLButtonElement | undefined) => {
+      if (!button) throw new Error('Button not rendered');
+      await act(async () => {
+        button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        for (let i = 0; i < 6; i++) await Promise.resolve();
+      });
+    };
+    const render = async () => {
+      await act(async () => {
+        root.render(<LoginPage />);
+        await Promise.resolve();
+      });
+    };
+
+    beforeEach(() => {
+      getPasskey.mockReset();
+    });
+
+    it('signs in with a passkey alone, without an e-mail', async () => {
+      apiPost.mockImplementation(async (url: string) => ({
+        data: url === '/auth/passkey-login/options' ? options : signedIn,
+      }));
+      getPasskey.mockResolvedValue(assertion);
+      await render();
+
+      await click(buttonNamed('Sign in with a passkey'));
+
+      expect(getPasskey).toHaveBeenCalledWith(options);
+      expect(apiPost).toHaveBeenNthCalledWith(1, '/auth/passkey-login/options');
+      expect(apiPost).toHaveBeenNthCalledWith(2, '/auth/passkey-login', { credential: assertion });
+      expect(locationHref).toBe('/dashboard');
+    });
+
+    it('says so quietly when the browser prompt is closed', async () => {
+      apiPost.mockResolvedValue({ data: options });
+      getPasskey.mockRejectedValue(new DOMException('closed', 'NotAllowedError'));
+      await render();
+
+      await click(buttonNamed('Sign in with a passkey'));
+
+      expect(container.querySelector('#login-error')?.textContent).toBe(
+        'The passkey prompt was closed.',
+      );
+      expect(locationHref).toBe('');
+    });
+
+    it('answers the second-factor challenge with a passkey instead of a code', async () => {
+      const passkeyOptions = { ...options, userVerification: 'preferred' as const };
+      apiPost
+        .mockResolvedValueOnce({ data: { twoFactorRequired: true, passkeyOptions } })
+        .mockResolvedValueOnce({ data: signedIn });
+      getPasskey.mockResolvedValue(assertion);
+      await render();
+      const form = container.querySelector('form') as HTMLFormElement;
+      await act(async () => {
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        for (let i = 0; i < 6; i++) await Promise.resolve();
+      });
+      // The passwordless button gives way to the second-factor one.
+      expect(buttonNamed('Sign in with a passkey')).toBeUndefined();
+
+      await click(buttonNamed('Use your passkey'));
+
+      expect(getPasskey).toHaveBeenCalledWith(passkeyOptions);
+      expect(apiPost).toHaveBeenLastCalledWith('/auth/login', {
+        email: '',
+        password: '',
+        twoFactorPasskey: assertion,
+      });
+      expect(locationHref).toBe('/dashboard');
+    });
+
+    it('asks for a fresh challenge after a failed passkey answer', async () => {
+      const passkeyOptions = { ...options, userVerification: 'preferred' as const };
+      const fresh = { ...passkeyOptions, challenge: 'challenge-2' };
+      apiPost
+        .mockResolvedValueOnce({ data: { twoFactorRequired: true, passkeyOptions } })
+        .mockResolvedValueOnce({ data: { twoFactorRequired: true, passkeyOptions: fresh } })
+        .mockResolvedValueOnce({ data: signedIn });
+      getPasskey
+        .mockRejectedValueOnce(new DOMException('closed', 'NotAllowedError'))
+        .mockResolvedValueOnce(assertion);
+      await render();
+      const form = container.querySelector('form') as HTMLFormElement;
+      await act(async () => {
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        for (let i = 0; i < 6; i++) await Promise.resolve();
+      });
+
+      await click(buttonNamed('Use your passkey'));
+      await click(buttonNamed('Use your passkey'));
+
+      expect(getPasskey).toHaveBeenNthCalledWith(1, passkeyOptions);
+      expect(getPasskey).toHaveBeenNthCalledWith(2, fresh);
+      expect(locationHref).toBe('/dashboard');
+    });
+
+    it('offers no passkey on the second step to an account without one', async () => {
+      apiPost.mockResolvedValueOnce({ data: { twoFactorRequired: true } });
+      await render();
+      const form = container.querySelector('form') as HTMLFormElement;
+      await act(async () => {
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        for (let i = 0; i < 6; i++) await Promise.resolve();
+      });
+      expect(buttonNamed('Use your passkey')).toBeUndefined();
+      expect(container.querySelector('input[name="twoFactorCode"]')).toBeTruthy();
+    });
   });
 });

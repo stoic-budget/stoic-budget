@@ -55,6 +55,7 @@ export * from './notification.entity';
 export * from './notification-preference.entity';
 export * from './open-protocol-settings.entity';
 export * from './parsing-rule.entity';
+export * from './passkey-credential.entity';
 export * from './password-reset-token.entity';
 export * from './payable.entity';
 export * from './payable-payment.entity';

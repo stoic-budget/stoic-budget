@@ -31,6 +31,14 @@ export const ACCOUNTS_ERRORS = {
   AUTH_2FA_SETUP_NOT_STARTED: 'Start the setup before confirming a code',
   AUTH_2FA_VERIFICATION_CODE_INVALID: 'Invalid verification code',
   AUTH_2FA_CODE_INVALID: 'Invalid two-factor code',
+  AUTH_PASSKEYS_UNAVAILABLE: 'Passkeys need APP_URL to be set on this server',
+  AUTH_PASSKEY_INVALID: 'The passkey could not be verified',
+  AUTH_PASSKEY_COUNTER_REGRESSION:
+    'This passkey reported an older use count than before and was refused',
+  AUTH_PASSKEY_REGISTRATION_INVALID: 'The new passkey could not be verified. Try again',
+  AUTH_PASSKEY_ALREADY_REGISTERED: 'This passkey is already registered',
+  AUTH_PASSKEY_NOT_FOUND: 'Passkey not found',
+  AUTH_PASSKEY_NAME_REQUIRED: 'Give the passkey a name',
   AUTHZ_PERMISSIONS_REQUIRED: 'Insufficient permissions. Required: {{permissions}}',
   AUTHZ_API_KEY_SCOPE_MISSING: 'API key scope missing: {{scopes}}',
   // ── api keys ────────────────────────────────────────────────────────────

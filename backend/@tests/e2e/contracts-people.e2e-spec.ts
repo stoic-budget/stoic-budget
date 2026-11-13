@@ -4,6 +4,7 @@ vi.mock('franc', () => ({
 
 import { randomUUID } from 'node:crypto';
 import { type INestApplication, ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 import { Schema } from 'effect';
 import { generateSync } from 'otplib';
 import request from 'supertest';
@@ -15,9 +16,14 @@ import {
   EmailChangeConfirmed,
   InvitationAccepted,
   InvitationSent,
+  LoginResponse,
   MemberPermissionsUpdated,
   MemberRoleUpdated,
   MessageResult,
+  Passkey,
+  PasskeyCreationOptions,
+  PasskeyList,
+  PasskeyRequestOptions,
   TimeZoneList,
   UserPermissionsUpdate,
   UserProfile,
@@ -34,6 +40,7 @@ import {
   registerAccount,
   responseCookie,
 } from './helpers/e2e-app';
+import { SoftAuthenticator } from './helpers/soft-authenticator';
 
 const PASSWORD = 'Test123!@#';
 const PNG = Buffer.from(
@@ -77,6 +84,7 @@ describe('API contracts: people (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture = await e2eTestingModule({ imports: [AppModule] }).compile();
     app = moduleFixture.createNestApplication();
+    app.use(cookieParser());
     app.useGlobalPipes(
       new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
     );
@@ -175,6 +183,66 @@ describe('API contracts: people (e2e)', () => {
       code: generateSync({ secret: setup.body.secret }),
     }).expect(ok);
     await answer(MessageResult, as(guarded, 'post', '/auth/2fa/disable', { password: PASSWORD }));
+  });
+
+  it('passkeys: add, list, rename, sign in, second factor, remove', async () => {
+    const previousAppUrl = process.env.APP_URL;
+    process.env.APP_URL = 'https://budget.example.co.il';
+    try {
+      const holder = await register('passkey');
+      const authenticator = new SoftAuthenticator('budget.example.co.il', process.env.APP_URL);
+      const options = await answer(
+        PasskeyCreationOptions,
+        as(holder, 'post', '/auth/passkeys/registration-options', { password: PASSWORD }),
+      );
+      const created = await answer(
+        Passkey,
+        as(holder, 'post', '/auth/passkeys', {
+          name: 'Laptop',
+          credential: authenticator.attest(options.challenge),
+        }),
+      );
+      expect(await answer(PasskeyList, as(holder, 'get', '/auth/passkeys'))).toHaveLength(1);
+      await answer(Passkey, as(holder, 'patch', `/auth/passkeys/${created.id}`, { name: 'Phone' }));
+
+      const browser = request.agent(app.getHttpServer());
+      const signIn = await answer(PasskeyRequestOptions, browser.post('/auth/passkey-login/options'));
+      const signedIn = await answer(
+        LoginResponse,
+        browser
+          .post('/auth/passkey-login')
+          .send({ credential: authenticator.assert(signIn.challenge) }),
+      );
+      expect(signedIn.user.id).toBe(holder.userId);
+
+      const setup = await as(holder, 'post', '/auth/2fa/setup', { password: PASSWORD }).expect(ok);
+      await as(holder, 'post', '/auth/2fa/enable', {
+        code: generateSync({ secret: setup.body.secret }),
+      }).expect(ok);
+      // The same browser: the passkey answer must carry the cookie of the login that asked.
+      const login = () => browser.post('/auth/login');
+      const challenge = await answer(
+        LoginResponse,
+        login().send({ email: holder.email, password: PASSWORD }),
+      );
+      expect(challenge.passkeyOptions.allowCredentials).toHaveLength(1);
+      await answer(
+        LoginResponse,
+        login().send({
+          email: holder.email,
+          password: PASSWORD,
+          twoFactorPasskey: authenticator.assert(challenge.passkeyOptions.challenge),
+        }),
+      );
+      await answer(
+        MessageResult,
+        as(holder, 'delete', `/auth/passkeys/${created.id}`, { password: PASSWORD }),
+      );
+    } finally {
+      // Assigning undefined would store the string "undefined".
+      if (previousAppUrl === undefined) delete process.env.APP_URL;
+      else process.env.APP_URL = previousAppUrl;
+    }
   });
 
   it('members, invitations and user permissions', async () => {

@@ -30,9 +30,12 @@ import type { User } from '../../entities/user.entity';
 import { AuthService, type SessionContext } from './auth.service';
 import {
   clearAuthCookies,
+  clearPasskeyFlowCookie,
+  PASSKEY_2FA_COOKIE,
   REFRESH_TOKEN_COOKIE,
   setAuthCookies,
   setCsrfCookie,
+  setPasskeyFlowCookie,
 } from './auth-cookies';
 import { toCurrentUser } from './current-user.view';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -40,6 +43,7 @@ import { Public } from './decorators/public.decorator';
 import type { AuthResponseDto, TwoFactorChallengeDto } from './dto/auth-response.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { RegistrationOpenGuard } from './guards/registration-open.guard';
+import { PASSKEY_CHALLENGE_TTL_MS } from './passkeys/passkey-challenge.store';
 import { PasswordResetService } from './password-reset.service';
 import type { TwoFactorSetupDto, TwoFactorStatusDto } from './two-factor.service';
 import { TwoFactorService } from './two-factor.service';
@@ -105,13 +109,25 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ user: AuthResponseDto['user'] } | TwoFactorChallengeDto> {
-    const result = await this.authService.login(loginDto, this.extractSessionContext(req));
+    // A passkey answer must come from the browser its challenge was issued to.
+    const passkeyFlow = {
+      presented: req.cookies?.[PASSKEY_2FA_COOKIE] as string | undefined,
+      issued: randomBytes(32).toString('base64url'),
+    };
+    const result = await this.authService.login(loginDto, {
+      ...this.extractSessionContext(req),
+      passkeyFlow,
+    });
 
     // The 2FA challenge carries no tokens — no session to issue yet.
     if ('twoFactorRequired' in result) {
+      if (result.passkeyOptions) {
+        setPasskeyFlowCookie(res, passkeyFlow.issued, PASSKEY_CHALLENGE_TTL_MS, PASSKEY_2FA_COOKIE);
+      }
       return result;
     }
 
+    clearPasskeyFlowCookie(res, PASSKEY_2FA_COOKIE);
     this.setSession(res, result);
     return { user: result.user };
   }

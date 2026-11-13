@@ -6,6 +6,7 @@ import { AuthSession } from '../../entities/auth-session.entity';
 import { EmailChangeToken } from '../../entities/email-change-token.entity';
 import { Notification } from '../../entities/notification.entity';
 import { NotificationPreference } from '../../entities/notification-preference.entity';
+import { PasskeyCredential } from '../../entities/passkey-credential.entity';
 import { User } from '../../entities/user.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
@@ -29,6 +30,7 @@ import { UsersService } from './users.service';
       Notification,
       AuditEvent,
       EmailChangeToken,
+      PasskeyCredential,
     ]),
     WorkspacesModule,
     MailerModule,

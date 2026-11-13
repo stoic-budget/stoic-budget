@@ -2,6 +2,7 @@ import type { Mock, Mocked } from 'vitest';
 import { User } from '@/entities';
 import { AuditAction, EntityType, Severity } from '@/entities/audit-event.entity';
 import { AuditService } from '@/modules/audit/audit.service';
+import { PasskeyAuthService } from '@/modules/auth/passkeys/passkey-auth.service';
 import { TwoFactorService } from '@/modules/auth/two-factor.service';
 import { BadRequestException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -17,6 +18,7 @@ describe('TwoFactorService', () => {
   let userRepository: Mocked<Repository<User>>;
   let stored: Partial<User>;
   let auditService: { createEvent: Mock };
+  let passkeyAuth: { secondFactorOptions: Mock; assertSecondFactor: Mock };
 
   beforeEach(async () => {
     stored = {
@@ -30,6 +32,10 @@ describe('TwoFactorService', () => {
     };
 
     auditService = { createEvent: vi.fn().mockResolvedValue({}) };
+    passkeyAuth = {
+      secondFactorOptions: vi.fn().mockResolvedValue(undefined),
+      assertSecondFactor: vi.fn().mockResolvedValue(undefined),
+    };
 
     const testingModule: TestingModule = await Test.createTestingModule({
       providers: [
@@ -49,6 +55,7 @@ describe('TwoFactorService', () => {
           useValue: { get: vi.fn(() => 'session-salt') },
         },
         { provide: AuditService, useValue: auditService },
+        { provide: PasskeyAuthService, useValue: passkeyAuth },
       ],
     }).compile();
 
@@ -248,6 +255,88 @@ describe('TwoFactorService', () => {
       await enable();
 
       expect(auditService.createEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('checkLogin', () => {
+    const passkeyOptions = {
+      challenge: 'challenge-1',
+      rpId: 'app.example.co.il',
+      timeout: 300000,
+      userVerification: 'preferred' as const,
+      allowCredentials: [{ id: 'credential-1', type: 'public-key' as const }],
+    };
+    const assertion = {
+      id: 'credential-1',
+      rawId: 'credential-1',
+      type: 'public-key' as const,
+      response: { clientDataJSON: 'a', authenticatorData: 'b', signature: 'c' },
+      clientExtensionResults: {},
+    };
+    const context = { passkeyFlow: { presented: 'flow-earlier', issued: 'flow-new' } };
+
+    it('asks for the second factor, with the passkey challenge when there is a passkey', async () => {
+      passkeyAuth.secondFactorOptions.mockResolvedValue(passkeyOptions);
+      await expect(
+        service.checkLogin('u1', { email: 'member-1@example.com', password: 'x' }, context),
+      ).resolves.toEqual({ twoFactorRequired: true, passkeyOptions });
+      // Bound to the fresh secret of this attempt, not the cookie it came with.
+      expect(passkeyAuth.secondFactorOptions).toHaveBeenCalledWith('u1', 'flow-new');
+    });
+
+    it('asks for a code only when there is no passkey', async () => {
+      await expect(
+        service.checkLogin('u1', { email: 'member-1@example.com', password: 'x' }, context),
+      ).resolves.toEqual({ twoFactorRequired: true });
+    });
+
+    it('offers no passkey challenge without a login flow to bind it to', async () => {
+      passkeyAuth.secondFactorOptions.mockResolvedValue(passkeyOptions);
+      await expect(
+        service.checkLogin('u1', { email: 'member-1@example.com', password: 'x' }),
+      ).resolves.toEqual({ twoFactorRequired: true });
+      expect(passkeyAuth.secondFactorOptions).not.toHaveBeenCalled();
+    });
+
+    it('lets a passkey answer stand for the code', async () => {
+      await expect(
+        service.checkLogin(
+          'u1',
+          { email: 'member-1@example.com', password: 'x', twoFactorPasskey: assertion },
+          context,
+        ),
+      ).resolves.toBeNull();
+      // Answered with the cookie the browser presented.
+      expect(passkeyAuth.assertSecondFactor).toHaveBeenCalledWith('u1', 'flow-earlier', assertion);
+    });
+
+    it('refuses the login when the passkey answer is refused', async () => {
+      passkeyAuth.assertSecondFactor.mockRejectedValue(new UnauthorizedException());
+      await expect(
+        service.checkLogin('u1', {
+          email: 'member-1@example.com',
+          password: 'x',
+          twoFactorPasskey: assertion,
+        }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('still checks a code when one is sent', async () => {
+      const { secret } = await enable();
+      await expect(
+        service.checkLogin('u1', {
+          email: 'member-1@example.com',
+          password: 'x',
+          twoFactorCode: '000000',
+        }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      await expect(
+        service.checkLogin('u1', {
+          email: 'member-1@example.com',
+          password: 'x',
+          twoFactorCode: nextCode(secret),
+        }),
+      ).resolves.toBeNull();
     });
   });
 });
