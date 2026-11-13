@@ -181,6 +181,7 @@ const goal = (id: string, name: string) => ({
   isReached: false,
   createdAt: TIMESTAMP,
   cover: null,
+  account: null,
 });
 
 const netWorth = (assetsTotal: number) => ({
