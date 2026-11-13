@@ -2,11 +2,14 @@ vi.mock('franc', () => ({
   franc: () => 'und',
 }));
 
+import { getQueueToken } from '@nestjs/bullmq';
 import { type INestApplication, ValidationPipe } from '@nestjs/common';
 import type { TestingModule } from '@nestjs/testing';
+import type { Queue } from 'bullmq';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
+import { STATEMENT_PARSING_QUEUE } from '../../src/modules/parsing/queue/statement-parsing.queue';
 import {
   deleteUserByEmail,
   type E2eAccount,
@@ -44,6 +47,7 @@ const unbalancedMt940 = (account: string, amount: string, date: string) => `:20:
 describe('Transfer pairing on a statement upload (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
+  let parsingQueue: Queue;
   const email = `transfer-upload-${Date.now()}@example.com`;
   let owner: E2eAccount;
 
@@ -60,7 +64,8 @@ describe('Transfer pairing on a statement upload (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
     await app.init();
     dataSource = moduleFixture.get<DataSource>(DataSource);
-    owner = await registerAccount(app, email, 'Transfer Owner');
+    parsingQueue = moduleFixture.get(getQueueToken(STATEMENT_PARSING_QUEUE));
+    owner =await registerAccount(app, email, 'Transfer Owner');
   });
 
   afterAll(async () => {
@@ -86,13 +91,21 @@ describe('Transfer pairing on a statement upload (e2e)', () => {
     return { id: uploaded.body.id as string, status: await settled(uploaded.body.id) };
   }
 
+  /**
+   * Waits for the parse job itself, not only the status: pairing runs after the
+   * final status is saved, so a pair read on the status alone may not be there yet.
+   */
   async function settled(statementId: string): Promise<string> {
     for (let attempt = 0; attempt < 60; attempt += 1) {
       const [row]: Array<{ status: string }> = await dataSource.query(
         'SELECT status FROM statements WHERE id = $1',
         [statementId],
       );
-      if (['completed', 'needs_review', 'error'].includes(row.status)) {
+      const job = await parsingQueue.getJobState(statementId);
+      if (
+        ['completed', 'needs_review', 'error'].includes(row.status) &&
+        ['completed', 'failed', 'unknown'].includes(job)
+      ) {
         return row.status;
       }
       await new Promise(resolve => setTimeout(resolve, 250));
