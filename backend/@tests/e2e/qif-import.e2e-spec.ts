@@ -256,10 +256,18 @@ describe('QIF import (e2e)', () => {
     expect(incoming).toHaveLength(1);
     expect(incoming[0].categoryHint).toBe(`[${EVERYDAY}]`);
 
+    // Parsing the second account pairs the legs by itself; a later detect keeps that pair.
+    const pairedIds = async () =>
+      (
+        await dataSource.getRepository(Transaction).find({
+          where: { workspaceId: owner.workspaceId, transferPairId: Not(IsNull()) },
+        })
+      )
+        .map(row => row.id)
+        .sort();
+    const legs = [outgoing?.id, incoming[0].id].sort();
+    expect(await pairedIds()).toEqual(legs);
     await as(request(server()).post('/transactions/transfers/detect')).send({}).expect(200);
-    const paired = await dataSource.getRepository(Transaction).find({
-      where: { workspaceId: owner.workspaceId, transferPairId: Not(IsNull()) },
-    });
-    expect(paired.map(row => row.id).sort()).toEqual([outgoing?.id, incoming[0].id].sort());
+    expect(await pairedIds()).toEqual(legs);
   });
 });
