@@ -117,6 +117,7 @@ export function PayeeTransactions({ payeeId }: { payeeId: string }): React.JSX.E
           onSetCategory={(ids, categoryId) => {
             void setCategory(ids, categoryId).then(done => done && setSelected(new Set()));
           }}
+          onBulkDone={() => setSelected(new Set())}
           onOpen={openRow}
         />
       )}

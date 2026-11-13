@@ -1,6 +1,7 @@
 import type { TransactionHistoryField, UpdateTransactionBody } from '../../../contracts';
 import type { AuditEvent } from '../../../entities/audit-event.entity';
 import type { Transaction } from '../../../entities/transaction.entity';
+import { tagSetKey } from '../helpers/tag-set-restore';
 
 type Snapshot = Record<string, unknown>;
 
@@ -75,6 +76,14 @@ export function changesOf(event: AuditEvent): RawChange[] {
       continue;
     }
     changes.push({ field, before: was, after: now });
+  }
+  // A relation, not a column: written as `tagIds` by the bulk add and its undo.
+  if (Array.isArray(before.tagIds) && Array.isArray(after.tagIds)) {
+    const was = tagSetKey(before.tagIds as string[]);
+    const now = tagSetKey(after.tagIds as string[]);
+    if (was !== now) {
+      changes.push({ field: 'tags', before: was, after: now });
+    }
   }
   return changes;
 }

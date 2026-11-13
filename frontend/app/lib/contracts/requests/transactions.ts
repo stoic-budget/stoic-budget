@@ -139,6 +139,30 @@ export const SetTransactionTagsBody = Schema.Struct({
 });
 export type SetTransactionTagsBody = Wire<typeof SetTransactionTagsBody>;
 
+/**
+ * `POST /transactions/bulk-annotate`: adds tags and/or a comment to the ticked
+ * rows of a list. Additive only: tags a row has stay, and the comment goes
+ * after the one it already carries. The caps match the single-row routes
+ * (50 tags, a 1000-character comment) and the Review approve batch (500 rows).
+ */
+export const BulkAnnotateTransactionsBody = Schema.Struct({
+  ids: Schema.Array(Schema.String.check(Schema.isUUID())).check(
+    Schema.isMinLength(1),
+    Schema.isMaxLength(500),
+  ),
+  addTagIds: optionalNullable(
+    Schema.Array(Schema.String.check(Schema.isUUID())).check(Schema.isMaxLength(50)),
+  ),
+  note: optionalNullable(Schema.String.check(Schema.isMaxLength(1000))),
+}).check(
+  Schema.makeFilter(body =>
+    (body.addTagIds?.length ?? 0) > 0 || (body.note?.trim() ?? '') !== ''
+      ? undefined
+      : 'addTagIds or note is required',
+  ),
+);
+export type BulkAnnotateTransactionsBody = Wire<typeof BulkAnnotateTransactionsBody>;
+
 const Uuid = Schema.String.check(Schema.isUUID());
 
 /** `/transactions/:id…`: a transaction's uuid. */

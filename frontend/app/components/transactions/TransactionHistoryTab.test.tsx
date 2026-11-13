@@ -24,6 +24,7 @@ vi.mock('@/app/i18n', async () => {
         rule: value('Rule “{{name}}”'),
         fieldCategory: value('Category'),
         fieldPrivate: value('Visibility'),
+        fieldTags: value('Tags'),
         noCategory: value('No category'),
         private: value('Private'),
         visible: value('Visible to everyone'),
@@ -114,6 +115,26 @@ describe('TransactionHistoryTab', () => {
     expect(screen.getByText('Category')).toBeInTheDocument();
     expect(screen.getByText(groceries)).toBeInTheDocument();
     expect(screen.getByText(cafe)).toBeInTheDocument();
+  });
+
+  it('tells a bulk tag add by its names and offers to put it back', async () => {
+    api.get.mockResolvedValue({
+      data: {
+        ...answer,
+        entries: [
+          entry('ev-tags', {
+            changes: [{ field: 'tags', before: 'Kept', after: 'Kept, Trip' }],
+            canUndo: true,
+          }),
+        ],
+      },
+    });
+    renderWithQuery(<TransactionHistoryTab transactionId="tx-1" />);
+
+    expect(await screen.findByText('Tags')).toBeInTheDocument();
+    expect(screen.getByText('Kept')).toBeInTheDocument();
+    expect(screen.getByText('Kept, Trip')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Put back' })).toBeInTheDocument();
   });
 
   it('puts a change back and says so', async () => {

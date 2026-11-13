@@ -22,6 +22,7 @@ import { Wallet } from '../../../entities/wallet.entity';
 import { WorkspaceMember } from '../../../entities/workspace-member.entity';
 import { AuditService } from '../../audit/audit.service';
 import { PayeesService } from '../../payees/payees.service';
+import { tagSetIds, touchesTags } from '../helpers/tag-set-restore';
 import { TransactionsService } from '../transactions.service';
 import {
   asSnapshot,
@@ -30,6 +31,7 @@ import {
   normalize,
   type RawChange,
 } from './transaction-history-changes';
+import { TransactionTagHistoryService } from './transaction-tag-history.service';
 
 type Entry = TransactionHistory['entries'][number];
 
@@ -50,6 +52,7 @@ export class TransactionHistoryService {
     @InjectRepository(WorkspaceMember)
     private readonly memberRepository: Repository<WorkspaceMember>,
     @InjectRepository(Statement) private readonly statementRepository: Repository<Statement>,
+    private readonly tagHistory: TransactionTagHistoryService,
   ) {}
 
   async history(
@@ -74,10 +77,12 @@ export class TransactionHistoryService {
         )
       : [];
 
-    const raw = events
-      .map(event => ({ event, kind: this.kindOf(event), changes: changesOf(event) }))
-      .filter(item => item.kind !== null && (item.kind !== 'changed' || item.changes.length > 0));
-    const undoable = this.undoable(raw, transaction);
+    // Unfiltered for undoable(): a hand edit of the tags shows no change but still counts.
+    const all = this.itemsOf(events);
+    const raw = all.filter(
+      item => item.kind !== null && (item.kind !== 'changed' || item.changes.length > 0),
+    );
+    const undoable = this.undoable(all, transaction, await this.tagHistory.tagKey(transactionId));
     const names = await this.namesFor(
       workspaceId,
       raw.flatMap(item => item.changes),
@@ -124,16 +129,17 @@ export class TransactionHistoryService {
           workspaceId,
         )
       : [];
-    const raw = events.map(event => ({
-      event,
-      kind: this.kindOf(event),
-      changes: changesOf(event),
-    }));
+    const raw = this.itemsOf(events);
     const target = raw.find(item => item.event.id === eventId);
-    if (!(target && this.undoable(raw, transaction).has(eventId))) {
+    const tags = await this.tagHistory.tagKey(transactionId);
+    if (!(target && this.undoable(raw, transaction, tags).has(eventId))) {
       throw new ConflictException(appError('TRANSACTION_CHANGE_NOT_UNDOABLE'));
     }
     const { changes } = target;
+    const tagChange = changes.find(change => change.field === 'tags');
+    if (tagChange) {
+      await this.tagHistory.undo(workspaceId, userId, transactionId, tagChange);
+    }
 
     const before = asSnapshot(asSnapshot(target.event.diff)?.before) ?? {};
     const payee = changes.find(change => change.field === 'payee');
@@ -161,6 +167,10 @@ export class TransactionHistoryService {
       );
     }
     return this.history(workspaceId, userId, transactionId, viewerMemberId);
+  }
+
+  private itemsOf(events: AuditEvent[]) {
+    return events.map(event => ({ event, kind: this.kindOf(event), changes: changesOf(event) }));
   }
 
   private kindOf(event: AuditEvent): Entry['kind'] | null {
@@ -203,16 +213,21 @@ export class TransactionHistoryService {
   private undoable(
     items: Array<{ event: AuditEvent; kind: Entry['kind'] | null; changes: RawChange[] }>,
     transaction: Transaction,
+    tags: string | null,
   ): Set<string> {
     const ids = new Set<string>();
     const touched = new Set<TransactionHistoryField>();
     // Newest first, as the audit log hands them over.
     for (const { event, kind, changes } of items) {
+      // A hand edit of the tags (PUT /:id/tags) shows no change but makes older tag changes final.
+      if (changes.length === 0 && touchesTags(event)) {
+        touched.add('tags');
+      }
       if (kind !== 'changed' || changes.length === 0) {
         continue;
       }
       const latest = changes.every(change => !touched.has(change.field));
-      if (latest && this.canUndo(changes, transaction)) {
+      if (latest && this.canUndo(changes, transaction, tags)) {
         ids.add(event.id);
       }
       for (const change of changes) {
@@ -223,8 +238,11 @@ export class TransactionHistoryService {
   }
 
   /** Every field has a way back and still holds what the change wrote. */
-  private canUndo(changes: RawChange[], transaction: Transaction): boolean {
+  private canUndo(changes: RawChange[], transaction: Transaction, tags: string | null): boolean {
     return changes.every(change => {
+      if (change.field === 'tags') {
+        return tags === change.after;
+      }
       const spec = FIELDS.find(item => item.field === change.field);
       const back = spec?.undo !== undefined || (change.field === 'payee' && change.before !== null);
       return (
@@ -249,11 +267,12 @@ export class TransactionHistoryService {
     const payeeIds = ids('payee');
     const walletIds = ids('account');
     const memberIds = ids('owner');
+    const tagIds = [...new Set(ids('tags').flatMap(tagSetIds))];
     const actorIds = [
       ...new Set(events.map(event => event.actorId).filter((id): id is string => Boolean(id))),
     ];
 
-    const [categories, payees, wallets, members, actors] = await Promise.all([
+    const [categories, payees, wallets, members, actors, tags] = await Promise.all([
       categoryIds.length
         ? this.categoryRepository.find({ where: { id: In(categoryIds), workspaceId } })
         : [],
@@ -275,6 +294,7 @@ export class TransactionHistoryService {
             relations: { user: true },
           })
         : [],
+      this.tagHistory.names(workspaceId, tagIds),
     ]);
 
     const byId = new Map<string, string>([
@@ -287,8 +307,14 @@ export class TransactionHistoryService {
     return {
       users: new Map(actors.map(row => [row.userId, row.user?.name || row.user?.email || ''])),
       // A name that is gone (a deleted category) reads as nothing rather than an id.
-      show: (field: TransactionHistoryField, value: string | null) =>
-        value !== null && refFields.has(field) ? (byId.get(value) ?? null) : value,
+      show: (field: TransactionHistoryField, value: string | null) => {
+        if (field === 'tags') {
+          // A deleted tag drops out; no tags at all reads as nothing.
+          const named = tagSetIds(value).flatMap(id => tags.get(id) ?? []);
+          return named.length > 0 ? named.sort().join(', ') : null;
+        }
+        return value !== null && refFields.has(field) ? (byId.get(value) ?? null) : value;
+      },
     };
   }
 }

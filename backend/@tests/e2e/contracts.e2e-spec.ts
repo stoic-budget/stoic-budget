@@ -38,6 +38,7 @@ import {
   BalanceHistoryImported,
   BalanceHistoryPointDeleted,
   BalanceSheetResponse,
+  BulkAnnotateResult,
   BankSyncConnectionList,
   BudgetImpact,
   BudgetItem,
@@ -2295,6 +2296,15 @@ describe('API contracts (e2e)', () => {
         StorageTagList,
         (await call('put', `/transactions/${transactionId}/tags`, { tagIds: [tag.body.id] }).expect(200)).body,
       );
+      // The selection bar: a second tag and a comment, added to what the row has.
+      const second = await call('post', '/storage/tags', { name: 'Bulk tag' }).expect(201);
+      const annotated = await call('post', '/transactions/bulk-annotate', {
+        ids: [transactionId],
+        addTagIds: [second.body.id],
+        note: 'Checked by Member One',
+      }).expect(200);
+      matches(BulkAnnotateResult, annotated.body);
+      expect(annotated.body).toEqual({ updated: 1, skippedPrivate: 0, skippedTooLong: 0 });
     });
 
     it('the Tags page: create, edit and delete a tag, and tag a receipt', async () => {
