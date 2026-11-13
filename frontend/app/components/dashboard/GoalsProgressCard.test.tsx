@@ -50,6 +50,7 @@ function goal(overrides: Partial<MonthGoal> = {}): MonthGoal {
     isReached: false,
     createdAt: '2026-01-10T09:00:00.000Z',
     cover: null,
+    account: null,
     contributedInMonth: 450,
     ...overrides,
   };

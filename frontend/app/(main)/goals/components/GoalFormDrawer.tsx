@@ -7,6 +7,8 @@ import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import CustomDatePicker from '@/app/components/CustomDatePicker';
 import type { GoalCover, GoalFormData } from '../hooks/useGoals';
+import type { FollowableAccount } from '../lib/goal-account';
+import { GoalAccountField } from './GoalAccountField';
 import { GoalCoverPicker, type GoalCoverPickerLabels } from './GoalCoverPicker';
 import { GoalCoverThumb } from './GoalCoverThumb';
 import { GoalSideDrawer } from './GoalSideDrawer';
@@ -18,6 +20,8 @@ interface GoalFormDrawerProps {
   saving: boolean;
   /** The cover the goal already has, shown until the picker changes it. */
   currentCover: GoalCover | null;
+  /** Accounts the goal may follow. */
+  accounts: readonly FollowableAccount[];
   labels: {
     name: string;
     target: string;
@@ -39,6 +43,7 @@ export function GoalFormDrawer({
   form,
   saving,
   currentCover,
+  accounts,
   labels,
   onChange,
   onClose,
@@ -88,6 +93,11 @@ export function GoalFormDrawer({
         size="medium"
         value={form.targetDate}
         onChange={targetDate => onChange({ ...form, targetDate })}
+      />
+      <GoalAccountField
+        value={form.walletId}
+        accounts={accounts}
+        onChange={walletId => onChange({ ...form, walletId })}
       />
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

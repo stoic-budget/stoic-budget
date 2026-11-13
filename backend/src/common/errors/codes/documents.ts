@@ -139,6 +139,10 @@ export const DOCUMENTS_ERRORS = {
   BUDGET_ALREADY_EXISTS: 'Budget for this category with period "{{period}}" already exists',
   BUDGET_WINDOW_INVALID: 'Budget "endsOn" must not be earlier than "startsOn"',
   GOAL_COVER_ONE_SOURCE: 'Send exactly one of preset or photoId',
+  GOAL_ACCOUNT_UNAVAILABLE:
+    'A goal can follow only an active account of this workspace that is shared or yours',
+  GOAL_FOLLOWS_ACCOUNT:
+    "This goal follows an account: its progress is the account's balance, so it takes no contributions",
   // ── balance sheet ───────────────────────────────────────────────────────
   BALANCE_DATE_INVALID: 'Invalid date format',
   BALANCE_ACCOUNT_NOT_FOUND: 'Balance account not found',

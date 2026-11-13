@@ -1,4 +1,4 @@
-import { NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { ConflictException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import type { Goal, GoalContribution } from '@/entities';
 import { GoalItem, GoalItemStatus } from '@/entities/goal-item.entity';
 import { type Transaction, TransactionType } from '@/entities/transaction.entity';
@@ -39,6 +39,8 @@ function createService({
   contribution = null as Partial<GoalContribution> | null,
   items = [] as Array<Partial<GoalItem>>,
   rate = 1 as number | null,
+  /** Goals whose progress is an account's balance. */
+  following = [] as string[],
 } = {}) {
   const byIdAndWorkspace =
     <T extends { id: string; workspaceId: string }>(rows: T[]) =>
@@ -71,6 +73,13 @@ function createService({
   } as any;
   const exchangeRates = { getRateOrNull: vi.fn(async () => rate) } as any;
   const auditService = { createEvent: vi.fn(async () => ({})) } as any;
+  const progressService = {
+    assertCountsContributions: vi.fn(async (_workspaceId: string, target: Goal) => {
+      if (following.includes(target.id)) {
+        throw new ConflictException({ code: 'GOAL_FOLLOWS_ACCOUNT' });
+      }
+    }),
+  } as any;
 
   return {
     service: new GoalTransactionLinkService(
@@ -79,6 +88,7 @@ function createService({
       transactionRepository,
       exchangeRates,
       auditService,
+      progressService,
     ),
     manager,
     contributions,
@@ -262,5 +272,27 @@ describe('GoalTransactionLinkService', () => {
     await expect(service.set(WORKSPACE_ID, USER_ID, 'tx-1', 'goal-1', 'item-2')).rejects.toBeInstanceOf(
       NotFoundException,
     );
+  });
+
+  describe('a goal that follows an account', () => {
+    it('takes no new transaction: its progress is the balance', async () => {
+      const { service, manager } = createService({ following: ['goal-1'] });
+
+      await expect(service.set(WORKSPACE_ID, USER_ID, 'tx-1', 'goal-1')).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+      expect(manager.query).not.toHaveBeenCalled();
+    });
+
+    it('still recomputes a transaction linked before the goal began to follow', async () => {
+      const { service, manager } = createService({
+        following: ['goal-1'],
+        contribution: { goalId: 'goal-1', transactionId: 'tx-1', amount: -40 },
+      });
+
+      await service.set(WORKSPACE_ID, USER_ID, 'tx-1', 'goal-1');
+
+      expect(manager.query).toHaveBeenCalled();
+    });
   });
 });

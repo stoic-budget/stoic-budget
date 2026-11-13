@@ -12,6 +12,7 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { AuditService } from '../audit/audit.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { normalizeCurrency, round2, toDateOnly, toNumber } from './goal-money.util';
+import { GoalProgressService } from './goal-progress.service';
 
 export interface LinkedTransaction {
   id: string;
@@ -41,6 +42,7 @@ export class GoalTransactionLinkService {
     private readonly transactionRepository: Repository<Transaction>,
     private readonly exchangeRates: ExchangeRatesService,
     private readonly auditService: AuditService,
+    private readonly progressService: GoalProgressService,
   ) {}
 
   async get(workspaceId: string, transactionId: string): Promise<TransactionGoalLink> {
@@ -91,6 +93,14 @@ export class GoalTransactionLinkService {
 
     const goal = await this.goalRepository.findOne({ where: { id: goalId, workspaceId } });
     assertFound(goal, 'Goal');
+    // A goal following an account takes no new movements; one already linked
+    // may still be recomputed after its transaction was edited.
+    const current = await this.contributionRepository.findOne({
+      where: { workspaceId, transactionId },
+    });
+    if (current?.goalId !== goal.id) {
+      await this.progressService.assertCountsContributions(workspaceId, goal);
+    }
     const sign = transaction.transactionType === TransactionType.INCOME ? 1 : -1;
     const amount = sign * (await this.magnitudeIn(transaction, goal.currency));
 

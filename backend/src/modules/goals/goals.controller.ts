@@ -1,7 +1,19 @@
-import { Controller, Delete, Get, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  Put,
+  Req,
+  Res,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import type { Response } from 'express';
+import { assertApiKeyScopes } from '../../common/authz/request-permissions';
 import { WorkspaceId, WorkspaceMemberId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
@@ -9,6 +21,7 @@ import { SchemaParams, SchemaQuery } from '../../common/effect/schema-query';
 import { SchemaResponse } from '../../common/effect/schema-response';
 import { Permission } from '../../common/enums/permissions.enum';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { deletedResponse } from '../../common/utils/responses.util';
 import {
   CreateContributionBody,
@@ -35,6 +48,7 @@ import {
 } from '../../contracts';
 import type { User } from '../../entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { GoalAccountVisibilityInterceptor } from './goal-account-visibility';
 import { GOAL_COVER_PRESETS } from './goal-cover.constants';
 import { GoalCoversService } from './goal-covers.service';
 import { GoalFlowService } from './goal-flow.service';
@@ -42,6 +56,8 @@ import { GoalItemsService } from './goal-items.service';
 import { GoalPlanService } from './goal-plan.service';
 import { GoalsService } from './goals.service';
 
+// A key without `wallet.view` sees no followed account's name or balance.
+@UseInterceptors(GoalAccountVisibilityInterceptor)
 @Controller('goals')
 export class GoalsController {
   constructor(
@@ -110,8 +126,11 @@ export class GoalsController {
     @SchemaBody(CreateGoalBody) createDto: CreateGoalBody,
     @CurrentUser() user: User,
     @WorkspaceId() workspaceId: string,
+    @WorkspaceMemberId() selfMemberId: string | null,
+    @Req() req: AuthenticatedRequest,
   ) {
-    return this.goalsService.create(workspaceId, user.id, createDto);
+    assertMayLink(createDto.walletId, req);
+    return this.goalsService.create(workspaceId, user.id, createDto, selfMemberId);
   }
 
   @Get()
@@ -243,8 +262,11 @@ export class GoalsController {
     @SchemaBody(UpdateGoalBody) updateDto: UpdateGoalBody,
     @CurrentUser() user: User,
     @WorkspaceId() workspaceId: string,
+    @WorkspaceMemberId() selfMemberId: string | null,
+    @Req() req: AuthenticatedRequest,
   ) {
-    return this.goalsService.update(id, workspaceId, user.id, updateDto);
+    assertMayLink(updateDto.walletId, req);
+    return this.goalsService.update(id, workspaceId, user.id, updateDto, selfMemberId);
   }
 
   @Delete(':id')
@@ -280,5 +302,12 @@ export class GoalsController {
     @WorkspaceId() workspaceId: string,
   ) {
     return this.goalsService.removeContribution(id, contributionId, workspaceId, user.id);
+  }
+}
+
+/** Following an account reads it, so a scoped key needs `wallet.view` to set one. */
+function assertMayLink(walletId: string | null | undefined, req: AuthenticatedRequest): void {
+  if (walletId) {
+    assertApiKeyScopes([Permission.WALLET_VIEW], req.apiKey);
   }
 }
