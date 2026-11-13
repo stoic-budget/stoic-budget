@@ -176,6 +176,8 @@ export function DrawerShell({
               width: drawerWidth,
               maxWidth: '100%',
               borderRadius: tokens.radius.xl,
+              // The page's colour, so cards inside stand out as they do on a page.
+              bgcolor: 'var(--background)',
               display: 'flex',
               flexDirection: 'column',
             },

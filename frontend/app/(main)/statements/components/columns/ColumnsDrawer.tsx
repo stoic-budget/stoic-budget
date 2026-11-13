@@ -121,7 +121,7 @@ export function ColumnsDrawer({
       position="right"
       width="sm"
       showCloseButton={false}
-      sx={{ borderLeft: 0, bgcolor: 'background.paper' }}
+      sx={{ borderLeft: 0 }}
       title={
         <div className="seneca-payable-drawer__title-wrap">
           <button
