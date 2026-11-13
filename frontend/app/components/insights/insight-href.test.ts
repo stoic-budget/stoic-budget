@@ -51,6 +51,27 @@ describe('insightHref', () => {
     ).toBe('/reports?tab=cash-flow&focus=category%3Atravel');
   });
 
+  it('sends an unusual category to its row on the leaderboard of the judged month', () => {
+    expect(
+      insightHref(
+        makeInsight({
+          type: 'trend.category_anomaly',
+          data: { month: '2026-11', categoryId: 'cat-1', categoryName: 'Home Repairs' },
+        }),
+      ),
+    ).toBe('/reports?tab=cash-flow&month=2026-11&focus=category%3Ahome%20repairs');
+    expect(insightHref(makeInsight({ type: 'trend.category_anomaly', data: null }))).toBeNull();
+  });
+
+  it('sends idle cash to goals and a net worth milestone to the net worth page', () => {
+    expect(insightHref(makeInsight({ type: 'pattern.idle_cash', data: { months: 9 } }))).toBe(
+      '/goals',
+    );
+    expect(insightHref(makeInsight({ type: 'pattern.net_worth_milestone', data: null }))).toBe(
+      '/net-worth',
+    );
+  });
+
   it('leaves a rising category unlinked when the name is missing', () => {
     expect(
       insightHref(makeInsight({ type: 'trend.spending_up', data: { categoryId: 'cat-1' } })),

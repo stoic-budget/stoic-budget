@@ -22,6 +22,9 @@ const STATIC_ROUTES: Record<string, string> = {
   'operational.uncategorized_count': '/statements/submit?missingCategory=true',
   'operational.duplicate_detected': '/review?kind=duplicate',
   'pattern.risky_allocation': '/net-worth?focus=card:risk',
+  // Money resting beyond a reserve: give it a task.
+  'pattern.idle_cash': '/goals',
+  'pattern.net_worth_milestone': '/net-worth',
   'stoic.unclassified': '/budgets?focus=stoic:unclassified',
   'stoic.subscriptions': '/subscriptions',
   // The balance below zero is the Forecast page's own line.
@@ -96,6 +99,17 @@ const habitRoute = (data: InsightData): string => {
   });
 };
 
+/** One category's row on the leaderboard of the month the advice judged. */
+const categoryRoute = (data: InsightData): string | null => {
+  const name = readString(data, 'categoryName');
+  return name === null
+    ? null
+    : withQuery(CASH_FLOW, {
+        month: readMonth(data),
+        focus: `category:${name.trim().toLowerCase()}`,
+      });
+};
+
 const goalRoute = (data: InsightData): string | null => {
   const goalId = readString(data, 'goalId');
   return goalId === null ? null : `/goals/${encodeURIComponent(goalId)}`;
@@ -108,15 +122,8 @@ const goalRoute = (data: InsightData): string | null => {
  */
 const DATA_ROUTES: Record<string, (data: InsightData) => string | null> = {
   // The leaderboard has no category ids: a row is keyed by category name.
-  'trend.spending_up': data => {
-    const name = readString(data, 'categoryName');
-    return name === null
-      ? null
-      : withQuery(CASH_FLOW, {
-          month: readMonth(data),
-          focus: `category:${name.trim().toLowerCase()}`,
-        });
-  },
+  'trend.spending_up': data => categoryRoute(data),
+  'trend.category_anomaly': data => categoryRoute(data),
   // The point of this insight is that no budget exists yet, so there is
   // nothing to highlight — open the form that creates one instead.
   'category.dominance': data => {
