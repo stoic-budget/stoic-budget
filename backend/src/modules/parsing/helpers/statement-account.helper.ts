@@ -91,7 +91,8 @@ export function accountFields(
  * Narrows a parse to the one account this statement holds. A file can print
  * several: the upload holds the first and lists the others in its parsing
  * details, and each other account is a statement of its own that knows its
- * place among the file's accounts. An account no longer found in the file
+ * place among the file's accounts. What the parser warned about that account
+ * joins the statement's warnings. An account no longer found in the file
  * leaves the statement without rows, which validation then reports.
  */
 export function takeStatementAccount(
@@ -103,6 +104,9 @@ export function takeStatementAccount(
   const index = statement.sourceAccountIndex ?? 0;
   const own = accounts[index];
   parsed.otherAccounts = undefined;
+  if (own?.warnings?.length) {
+    details.warnings = [...(details.warnings ?? []), ...own.warnings];
+  }
   if (index > 0) {
     parsed.metadata = own?.metadata ?? parsed.metadata;
     parsed.transactions = own?.transactions ?? [];
