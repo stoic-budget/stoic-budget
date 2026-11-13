@@ -29,7 +29,6 @@ export interface ParsedSplit {
   /** Positive, in the row's currency. */
   amount: number;
   categoryName?: string;
-  transferAccount?: string;
   memo?: string;
 }
 

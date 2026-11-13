@@ -1,8 +1,5 @@
-import type {
-  ParsedSplit,
-  ParsedStatement,
-  ParsedTransaction,
-} from '../interfaces/parsed-statement.interface';
+import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
+import { parseAmount, type RawSplit, readQifCategory, readSplits } from './qif-splits.util';
 
 /**
  * QIF, the Quicken interchange format desktop money programs still export. A
@@ -12,12 +9,6 @@ import type {
  * (`!Type:Cat`, `!Type:Class`, `!Type:Memorized`, ...) are read past. Records
  * end with `^`; every line starts with a one-letter code.
  */
-
-interface RawSplit {
-  category?: string;
-  memo?: string;
-  amount?: string;
-}
 
 interface QifRecord {
   fields: Record<string, string>;
@@ -152,75 +143,36 @@ function qifDateParser(rows: string[]): (value: string) => Date | null {
   };
 }
 
-const parseAmount = (value: string | undefined) =>
-  Number.parseFloat((value ?? '').replace(/,/g, ''));
-
-const round2 = (value: number) => Math.round(value * 100) / 100;
-
-const money = (value: number) => Math.abs(value).toFixed(2);
-
 /**
- * An `L` or `S` value: `[Savings]` is a transfer to that account, anything else
- * a category whose levels are joined by ':'. A `/Class` suffix is dropped, and
- * so is the `--Split--` placeholder some programs write on a split row.
+ * Whether the first record is the account's opening balance: Quicken opens an
+ * account with a transfer to itself, which names the account when no
+ * `!Account` header did.
  */
-export function readQifCategory(value: string | undefined): {
-  categoryName?: string;
-  transferAccount?: string;
-} {
-  const transfer = /^\s*\[([^\]]*)\]/.exec(value ?? '');
-  if (transfer) {
-    const account = transfer[1].trim();
-    return account ? { transferAccount: account } : {};
-  }
-  const levels = (value ?? '')
-    .split('/')[0]
-    .split(':')
-    .map(level => level.trim())
-    .filter(Boolean);
-  const name = levels.join(':');
-  return name && name !== '--Split--' ? { categoryName: name } : {};
+function isOpeningBalance(
+  account: QifAccount,
+  fields: Record<string, string>,
+  transferAccount: string | undefined,
+): boolean {
+  if (!transferAccount) return false;
+  if (account.name) return transferAccount.toLowerCase() === account.name.toLowerCase();
+  return /^opening balance$/i.test(fields.P?.trim() ?? '');
 }
 
-/**
- * The split parts of a row whose amount is `total`. Parts must go the row's
- * way; when they fall short of it, the rest becomes a part without a category.
- * Parts that cannot make up the row (they go both ways, or add up to more)
- * leave it whole. Either case is said in `warnings`.
- */
-function readSplits(
-  raw: RawSplit[],
-  total: number,
-  label: string,
-  warnings: string[],
-): ParsedSplit[] | undefined {
-  const parts: ParsedSplit[] = raw
-    .map(split => ({
-      amount: parseAmount(split.amount),
-      ...readQifCategory(split.category),
-      ...(split.memo ? { memo: split.memo } : {}),
-    }))
-    .filter(part => Number.isFinite(part.amount) && Math.abs(part.amount) >= 0.005);
-  if (parts.length === 0) return undefined;
-  if (parts.some(part => Math.sign(part.amount) !== Math.sign(total))) {
-    warnings.push(`${label}: its split parts go both in and out; the row is kept whole`);
-    return undefined;
-  }
-  const sum = round2(parts.reduce((acc, part) => acc + part.amount, 0));
-  const rest = round2(total - sum);
-  if (Math.abs(rest) >= 0.005) {
-    if (Math.sign(rest) !== Math.sign(total)) {
-      warnings.push(
-        `${label}: its split parts add up to ${money(sum)}, more than the row's ${money(total)}; the row is kept whole`,
-      );
-      return undefined;
-    }
-    warnings.push(
-      `${label}: its split parts add up to ${money(sum)} of ${money(total)}; the remaining ${money(rest)} is kept as a part without a category`,
-    );
-    parts.push({ amount: rest });
-  }
-  return parts.map(part => ({ ...part, amount: Math.abs(part.amount) }));
+/** A row as the file wrote it, `amount` signed: money out below zero. */
+function qifRow(
+  fields: Record<string, string>,
+  date: Date,
+  amount: number,
+  currency: string,
+): ParsedTransaction {
+  return {
+    transactionDate: date,
+    documentNumber: fields.N,
+    counterpartyName: fields.P || fields.M || '',
+    paymentPurpose: fields.M || fields.P || '',
+    ...(amount < 0 ? { debit: Math.abs(amount) } : { credit: amount }),
+    currency,
+  };
 }
 
 function readAccount(
@@ -230,29 +182,37 @@ function readAccount(
 ): Pick<ParsedStatement, 'metadata' | 'transactions' | 'warnings'> {
   const transactions: ParsedTransaction[] = [];
   const warnings: string[] = [];
+  let name = account.name;
   let balanceStart: number | undefined;
   for (const [index, { fields, splits }] of account.records.entries()) {
     const date = fields.D ? parseDate(fields.D) : null;
     const amount = parseAmount(fields.T ?? fields.U);
     if (!(date && Number.isFinite(amount))) continue;
     const category = readQifCategory(fields.L);
-    // Quicken opens an account with a transfer to itself: its opening balance, not a row.
-    const ownName = account.name?.toLowerCase();
-    if (index === 0 && ownName && category.transferAccount?.toLowerCase() === ownName) {
+    if (index === 0 && isOpeningBalance(account, fields, category.transferAccount)) {
+      name ??= category.transferAccount;
       balanceStart = amount;
       continue;
     }
     const label = `Row ${index + 1} (${date.toISOString().slice(0, 10)})`;
-    const parts = splits.length ? readSplits(splits, amount, label, warnings) : undefined;
+    const split = splits.length ? readSplits(splits, amount, label, warnings) : undefined;
+    // A part sent to another account is a row of its own, named after that
+    // account, which also keeps its fingerprint apart from the rest of the row.
+    for (const transfer of split?.transfers ?? []) {
+      transactions.push({
+        ...qifRow(fields, date, transfer.amount, currency),
+        counterpartyName: transfer.transferAccount,
+        paymentPurpose: transfer.memo || fields.M || fields.P || '',
+        transferAccount: transfer.transferAccount,
+      });
+    }
+    const parts = split?.parts;
+    if (parts?.length === 0) continue;
     const single = parts?.length === 1 ? parts[0] : undefined;
-    const own = category.categoryName || category.transferAccount ? category : (single ?? {});
+    const own: { categoryName?: string; transferAccount?: string } =
+      category.categoryName || category.transferAccount ? category : (single ?? {});
     transactions.push({
-      transactionDate: date,
-      documentNumber: fields.N,
-      counterpartyName: fields.P || fields.M || '',
-      paymentPurpose: fields.M || fields.P || '',
-      ...(amount < 0 ? { debit: Math.abs(amount) } : { credit: amount }),
-      currency,
+      ...qifRow(fields, date, split?.rest ?? amount, currency),
       ...(own.categoryName ? { categoryName: own.categoryName } : {}),
       ...(own.transferAccount ? { transferAccount: own.transferAccount } : {}),
       ...(parts && parts.length > 1 ? { splits: parts } : {}),
@@ -261,7 +221,7 @@ function readAccount(
   const dates = transactions.map(t => t.transactionDate.getTime());
   return {
     metadata: {
-      accountNumber: account.name || 'Unknown',
+      accountNumber: name || 'Unknown',
       currency,
       dateFrom: new Date(dates.length ? Math.min(...dates) : Date.now()),
       dateTo: new Date(dates.length ? Math.max(...dates) : Date.now()),

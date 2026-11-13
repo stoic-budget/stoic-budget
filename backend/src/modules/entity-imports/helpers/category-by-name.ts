@@ -1,8 +1,49 @@
 import type { Repository } from 'typeorm';
 import { Category, CategorySource, CategoryType } from '../../../entities/category.entity';
+import { DEFAULT_SYSTEM_CATEGORIES } from '../../categories/system-categories';
 import { nameKey } from './import-values';
 
 export type CategoryKind = 'income' | 'expense';
+
+type Candidate = Pick<Category, 'id' | 'name' | 'type' | 'parentId' | 'systemKey'>;
+
+/** Every name a system category goes by, its English one and older ones, by `systemKey`. */
+const SYSTEM_NAMES = new Map<string, Set<string>>(
+  DEFAULT_SYSTEM_CATEGORIES.map(item => [
+    item.key,
+    new Set([item.name, ...(item.aliases ?? [])].map(nameKey)),
+  ]),
+);
+
+function loadCandidates(repository: Repository<Category>, workspaceId: string) {
+  return repository.find({
+    where: { workspaceId },
+    select: { id: true, name: true, type: true, parentId: true, systemKey: true },
+  });
+}
+
+/**
+ * The stored name first; then a system category by any name it goes by, since
+ * older migrations stored those in Russian while a file may say `Utilities`.
+ * In each pass the row's kind wins over another kind.
+ */
+function pick(
+  all: Candidate[],
+  key: string,
+  type: CategoryKind,
+  parentId: string | undefined,
+): Candidate | undefined {
+  const candidates = parentId === undefined ? all : all.filter(item => item.parentId === parentId);
+  const byStoredName = (item: Candidate) => nameKey(item.name) === key;
+  const bySystemName = (item: Candidate) =>
+    Boolean(item.systemKey && SYSTEM_NAMES.get(item.systemKey)?.has(key));
+  for (const matches of [byStoredName, bySystemName]) {
+    const found =
+      candidates.find(item => item.type === type && matches(item)) ?? candidates.find(matches);
+    if (found) return found;
+  }
+  return undefined;
+}
 
 /**
  * The workspace category a file names, by name: the one of the row's kind
@@ -22,31 +63,47 @@ export async function categoryByName(
   if (!key) {
     return null;
   }
-  const all = await repository.find({
-    where: { workspaceId: scope.workspaceId },
-    select: { id: true, name: true, type: true, parentId: true },
-  });
-  const candidates =
-    options.parentId === undefined ? all : all.filter(item => item.parentId === options.parentId);
-  const found =
-    candidates.find(item => item.type === type && nameKey(item.name) === key) ??
-    candidates.find(item => nameKey(item.name) === key);
+  const found = pick(
+    await loadCandidates(repository, scope.workspaceId),
+    key,
+    type,
+    options.parentId,
+  );
   if (found) {
     return { id: found.id, created: false };
   }
   if (!options.create) {
     return null;
   }
-  const created = await repository.save(
-    repository.create({
-      workspaceId: scope.workspaceId,
-      userId: scope.userId,
-      name: name.trim(),
-      type: type === 'income' ? CategoryType.INCOME : CategoryType.EXPENSE,
-      parentId: options.parentId ?? null,
-      source: CategorySource.USER,
-      isSystem: false,
-    }),
-  );
-  return { id: created.id, created: true };
+  // The statements of one multi-account file are parsed at once and name the
+  // same new categories; nothing unique stops two copies, so a workspace makes
+  // its categories one at a time and looks again under the lock. Inside a
+  // caller's transaction this is a savepoint and the lock lasts until it ends.
+  return repository.manager.transaction(async manager => {
+    await manager.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [
+      `category-by-name:${scope.workspaceId}`,
+    ]);
+    const locked = manager.getRepository(Category);
+    const again = pick(
+      await loadCandidates(locked, scope.workspaceId),
+      key,
+      type,
+      options.parentId,
+    );
+    if (again) {
+      return { id: again.id, created: false };
+    }
+    const created = await locked.save(
+      locked.create({
+        workspaceId: scope.workspaceId,
+        userId: scope.userId,
+        name: name.trim(),
+        type: type === 'income' ? CategoryType.INCOME : CategoryType.EXPENSE,
+        parentId: options.parentId ?? null,
+        source: CategorySource.USER,
+        isSystem: false,
+      }),
+    );
+    return { id: created.id, created: true };
+  });
 }

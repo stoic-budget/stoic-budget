@@ -21,6 +21,7 @@ interface StoredCategory {
   type: CategoryType;
   parentId: string | null;
   workspaceId: string;
+  systemKey?: string | null;
 }
 
 function setup(existing: StoredCategory[] = []) {
@@ -35,6 +36,11 @@ function setup(existing: StoredCategory[] = []) {
       categories.push(saved);
       return saved;
     }),
+    // categoryByName makes a category inside a transaction holding a workspace lock.
+    manager: {
+      transaction: async (work: (manager: unknown) => unknown) =>
+        work({ query: vi.fn(async () => []), getRepository: () => repository }),
+    },
   };
   const classificationService = {
     classifyTransaction: vi.fn(async (): Promise<Partial<Transaction>> => ({})),
@@ -122,6 +128,29 @@ describe('StatementRowHintsService.classify', () => {
     expect(classificationService.invalidateWorkspaceCategoriesCache).not.toHaveBeenCalled();
   });
 
+  it('finds a system category stored under another name by its English name', async () => {
+    const { service, categories } = setup([
+      {
+        id: 'cat-utilities',
+        name: 'Коммунальные услуги',
+        type: CategoryType.EXPENSE,
+        parentId: null,
+        workspaceId: WORKSPACE,
+        systemKey: 'utilities',
+      },
+    ]);
+
+    const top = await service.classify(row(), USER, parsedRow({ categoryName: 'Utilities' }), false);
+    const nested = await service.classify(row(), USER, parsedRow({ categoryName: 'Utilities:Water' }), false);
+
+    expect(top.categoryId).toBe('cat-utilities');
+    expect(categories.filter(category => /utilities/i.test(category.name))).toHaveLength(0);
+    expect(categories.find(category => category.name === 'Water')).toMatchObject({
+      parentId: 'cat-utilities',
+    });
+    expect(nested.categoryId).toBe(categories.find(category => category.name === 'Water')?.id);
+  });
+
   it('leaves the category a rule decided', async () => {
     const { service, categories, classificationService } = setup();
     classificationService.classifyTransaction.mockResolvedValue({
@@ -199,29 +228,6 @@ describe('StatementRowHintsService.applySplits', () => {
       { fingerprint },
     );
     expect(rows.map(item => item.fingerprint)).toEqual([fingerprint, undefined, undefined]);
-  });
-
-  it('keeps the [Account] of a part the file sent to another account', async () => {
-    const { service, transactionsService, transactionRepository } = setup();
-    const savings = 'Rainy Day Savings';
-
-    const rows = await service.applySplits(
-      statement(),
-      [row({ fingerprint: null })],
-      [parsedRow({ splits: [{ amount: 20, transferAccount: savings }, { amount: 80, categoryName: 'Food' }] })],
-      vi.fn(),
-    );
-
-    expect(transactionsService.split.mock.calls[0][3].parts[0]).toEqual({
-      amount: 20,
-      categoryId: UNCATEGORIZED_ID,
-    });
-    expect(transactionRepository.update).toHaveBeenCalledTimes(1);
-    expect(transactionRepository.update).toHaveBeenCalledWith(
-      { id: 'tx-1-part-0', workspaceId: WORKSPACE },
-      { categoryHint: `[${savings}]` },
-    );
-    expect(rows[0].categoryHint).toBe(`[${savings}]`);
   });
 
   it("keeps the rule's category on every part of a row a rule categorised", async () => {

@@ -22,10 +22,12 @@ const isLatinLetter = (byte: number) => (byte | 0x20) >= 0x61 && (byte | 0x20) <
 
 /**
  * Whether the high-byte runs read as Cyrillic words rather than accents inside
- * Latin ones. A run counts as Cyrillic when it is three bytes or longer, or
- * when no Latin letter touches it ("на", "і", "Ям"); otherwise it is an accent
- * in a Latin word ("Café", "Grüße"). A run without any А..я byte ("¥", "²")
- * counts for neither.
+ * Latin ones. A run counts as Cyrillic when it is three bytes or longer, or two
+ * with no Latin letter touching it ("на", "Ям"); a run a Latin letter touches
+ * is an accent in a Latin word ("Café", "Grüße"). A lone byte on its own is
+ * either "і" or "à" ("Livraison à domicile", "Pagato è ok"), so it counts for
+ * neither, and neither does a run without any А..я byte ("¥", "²"). Without
+ * evidence either way the text is read as Windows-1252.
  */
 function looksCyrillic(bytes: Uint8Array): boolean {
   let cyrillic = 0;
@@ -44,8 +46,9 @@ function looksCyrillic(bytes: Uint8Array): boolean {
     }
     if (!letters) continue;
     const length = index - start;
-    if (length >= 3 || !touchesLatinLetter(bytes, start, index)) cyrillic += length;
-    else latin += length;
+    const touchesLatin = touchesLatinLetter(bytes, start, index);
+    if (length >= 3 || (length === 2 && !touchesLatin)) cyrillic += length;
+    else if (touchesLatin) latin += length;
   }
   return cyrillic > latin;
 }

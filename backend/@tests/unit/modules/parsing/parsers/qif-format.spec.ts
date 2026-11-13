@@ -2,7 +2,8 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { QifParser } from '@/modules/parsing/parsers/qif.parser';
-import { parseQif, readQifCategory } from '@/modules/parsing/parsers/qif-format.util';
+import { parseQif } from '@/modules/parsing/parsers/qif-format.util';
+import { readQifCategory } from '@/modules/parsing/parsers/qif-splits.util';
 
 const qif = (...lines: string[]) => lines.join('\n');
 
@@ -107,12 +108,92 @@ describe('QIF splits (S/E/$)', () => {
     expect(parsed.transactions[0].categoryName).toBe('Food:Dining');
   });
 
-  it('reads a transfer part and a part without a category line', () => {
-    const parsed = split('-50.00', 'S[Rainy Day Savings]', '$-20.00', 'ETip jar', '$-30.00');
+  it('reads unsigned parts the way the row goes', () => {
+    const parsed = split('-100.00', 'SFood', '$60.00', 'SHousehold', '$40.00');
+    expect(parsed.transactions[0]).toMatchObject({ debit: 100 });
     expect(parsed.transactions[0].splits).toEqual([
-      { amount: 20, transferAccount: 'Rainy Day Savings' },
-      { amount: 30, memo: 'Tip jar' },
+      { amount: 60, categoryName: 'Food' },
+      { amount: 40, categoryName: 'Household' },
     ]);
+    expect(parsed.warnings).toBeUndefined();
+  });
+
+  it('says the parts add up to more, not that they go both ways, when they all go one way', () => {
+    const parsed = split('-100.00', 'SFood', '$80.00', 'SHousehold', '$40.00');
+    expect(parsed.transactions[0].splits).toBeUndefined();
+    expect(parsed.warnings).toEqual([
+      "Row 1 (2026-09-05): its split parts add up to 120.00, more than the row's 100.00; the row is kept whole",
+    ]);
+  });
+
+  it('cuts a part sent to another account out into a row of its own, the rest a row of the reduced amount', () => {
+    const parsed = split(
+      '-100.00',
+      'L--Split--',
+      'SZeta Market',
+      '$-60.00',
+      'S[Rainy Day Savings]',
+      'EPut aside',
+      '$-40.00',
+    );
+    expect(parsed.transactions).toEqual([
+      expect.objectContaining({
+        debit: 40,
+        counterpartyName: 'Rainy Day Savings',
+        paymentPurpose: 'Put aside',
+        transferAccount: 'Rainy Day Savings',
+      }),
+      expect.objectContaining({ debit: 60, counterpartyName: 'Example Grocer', categoryName: 'Zeta Market' }),
+    ]);
+    expect(parsed.transactions.every(row => row.splits === undefined)).toBe(true);
+    expect(parsed.transactions[1].transferAccount).toBeUndefined();
+    expect(parsed.warnings).toBeUndefined();
+  });
+
+  it('keeps the other parts a split of what is left, to the cent', () => {
+    const parsed = split(
+      '-100.01',
+      'SFood',
+      '$-33.34',
+      'S[Rainy Day Savings]',
+      '$-33.33',
+      'SHousehold',
+      '$-33.34',
+    );
+    const [transfer, rest] = parsed.transactions;
+    expect(transfer).toMatchObject({ debit: 33.33, transferAccount: 'Rainy Day Savings' });
+    expect(rest.debit).toBe(66.68);
+    expect(rest.splits).toEqual([
+      { amount: 33.34, categoryName: 'Food' },
+      { amount: 33.34, categoryName: 'Household' },
+    ]);
+  });
+
+  it('turns a split made only of transfers into transfer rows', () => {
+    const parsed = split('-50.00', 'S[Rainy Day Savings]', '$-20.00', 'S[Holiday Fund]', '$-30.00');
+    expect(parsed.transactions).toEqual([
+      expect.objectContaining({ debit: 20, transferAccount: 'Rainy Day Savings' }),
+      expect.objectContaining({ debit: 30, transferAccount: 'Holiday Fund' }),
+    ]);
+  });
+
+  it('cuts out a transfer that goes the other way and keeps the rest', () => {
+    const parsed = split('-100.00', 'SFood', '$-140.00', 'S[Rainy Day Savings]', '$40.00');
+    expect(parsed.transactions).toEqual([
+      expect.objectContaining({ credit: 40, transferAccount: 'Rainy Day Savings' }),
+      expect.objectContaining({ debit: 140, categoryName: 'Food' }),
+    ]);
+    expect(parsed.warnings).toBeUndefined();
+  });
+
+  it('makes the part a transfer leaves short a part without a category', () => {
+    const parsed = split('-50.00', 'S[Rainy Day Savings]', '$-20.00', 'ETip jar', '$-30.00');
+    expect(parsed.transactions).toEqual([
+      expect.objectContaining({ debit: 20, transferAccount: 'Rainy Day Savings' }),
+      expect.objectContaining({ debit: 30 }),
+    ]);
+    expect(parsed.transactions[1].categoryName).toBeUndefined();
+    expect(parsed.transactions[1].transferAccount).toBeUndefined();
   });
 });
 
@@ -170,6 +251,25 @@ describe('QIF accounts (!Account)', () => {
     const parsed = parseQif(file);
     expect(parsed.metadata.balanceStart).toBe(500);
     expect(parsed.transactions.some(row => row.counterpartyName === 'Opening Balance')).toBe(false);
+  });
+
+  it('reads the opening balance of a file without !Account, which names the account', () => {
+    const parsed = parseQif(
+      qif(
+        '!Type:Bank',
+        'D09/01/2026',
+        'T1000.00',
+        'POpening Balance',
+        'L[Everyday Account]',
+        '^',
+        'D09/03/2026',
+        'T-9.99',
+        'PACME Store',
+        '^',
+      ),
+    );
+    expect(parsed.metadata).toMatchObject({ balanceStart: 1000, accountNumber: 'Everyday Account' });
+    expect(parsed.transactions).toEqual([expect.objectContaining({ debit: 9.99 })]);
   });
 
   it('keeps a file without !Account as one statement of an unknown account', () => {

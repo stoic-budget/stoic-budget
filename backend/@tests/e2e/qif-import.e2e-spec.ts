@@ -8,8 +8,9 @@ import * as path from 'path';
 import { type INestApplication, ValidationPipe } from '@nestjs/common';
 import type { TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import { DataSource, IsNull, Not } from 'typeorm';
+import { DataSource, IsNull, Like, Not } from 'typeorm';
 import { AppModule } from '../../src/app.module';
+import { onlyFlows } from '../../src/common/utils/counted-transactions.util';
 import { Category } from '../../src/entities/category.entity';
 import { BankName, FileType, Statement, StatementStatus } from '../../src/entities/statement.entity';
 import { Transaction } from '../../src/entities/transaction.entity';
@@ -25,6 +26,36 @@ import {
 const EVERYDAY = 'Everyday Account';
 const SAVINGS = 'Rainy Day Savings';
 const RULE_PAYEE = 'ACME Store';
+const PROBE_CHECKING = 'Probe Checking';
+const PROBE_SAVINGS = 'Probe Savings';
+
+/** A split whose second part went to the other account, and that account's leg of it. */
+const SPLIT_TRANSFER_QIF = [
+  '!Account',
+  `N${PROBE_CHECKING}`,
+  'TBank',
+  '^',
+  '!Type:Bank',
+  'D10/01/2026',
+  'T-100.00',
+  'PZeta Market',
+  'L--Split--',
+  'SProbe Food',
+  '$-60.00',
+  `S[${PROBE_SAVINGS}]`,
+  '$-40.00',
+  '^',
+  '!Account',
+  `N${PROBE_SAVINGS}`,
+  'TBank',
+  '^',
+  '!Type:Bank',
+  'D10/01/2026',
+  'T40.00',
+  'PZeta Market',
+  `L[${PROBE_CHECKING}]`,
+  '^',
+].join('\n');
 
 /** Two accounts, a transfer between them, a category, a split that falls short and a rule's payee. */
 const QIF = [
@@ -115,6 +146,40 @@ describe('QIF import (e2e)', () => {
       order: { transactionDate: 'ASC', splitIndex: 'ASC' },
     });
 
+  /** Saves `text` as a QIF statement of the owner's, not yet parsed. */
+  const qifStatement = async (name: string, text: string) => {
+    const file = `${filePath}.${name}.qif`;
+    await fs.promises.writeFile(file, text, 'utf-8');
+    return dataSource.getRepository(Statement).save({
+      userId: owner.userId,
+      workspaceId: owner.workspaceId,
+      fileName: `${name}.qif`,
+      filePath: file,
+      fileType: FileType.QIF,
+      fileSize: text.length,
+      fileHash: `qif-${name}-${stamp}`,
+      bankName: BankName.OTHER,
+      status: StatementStatus.UPLOADED,
+      currency: 'USD',
+    });
+  };
+
+  /** Income and spending of these statements as every figure counts them: pairs are neither. */
+  const flowsOf = async (statementIds: string[]) => {
+    const query = dataSource
+      .getRepository(Transaction)
+      .createQueryBuilder('t')
+      .select('t.transactionType', 'type')
+      .addSelect('SUM(t.amount)', 'total')
+      .where('t.workspaceId = :workspaceId', { workspaceId: owner.workspaceId })
+      .andWhere('t.statementId IN (:...statementIds)', { statementIds })
+      .andWhere('t.transferPairId IS NULL');
+    const rows = await onlyFlows(query, 't', { includeUnconfirmed: true })
+      .groupBy('t.transactionType')
+      .getRawMany<{ type: string; total: string }>();
+    return Object.fromEntries(rows.map(row => [row.type, Number(row.total)]));
+  };
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await e2eTestingModule({ imports: [AppModule] }).compile();
     app = moduleFixture.createNestApplication();
@@ -155,7 +220,12 @@ describe('QIF import (e2e)', () => {
     if (dataSource) {
       await deleteUserByEmail(dataSource, email);
     }
-    await fs.promises.rm(filePath, { force: true });
+    const dir = path.dirname(filePath);
+    for (const name of await fs.promises.readdir(dir)) {
+      if (name.startsWith(path.basename(filePath))) {
+        await fs.promises.rm(path.join(dir, name), { force: true });
+      }
+    }
     await app.close();
   });
 
@@ -269,5 +339,73 @@ describe('QIF import (e2e)', () => {
     expect(await pairedIds()).toEqual(legs);
     await as(request(server()).post('/transactions/transfers/detect')).send({}).expect(200);
     expect(await pairedIds()).toEqual(legs);
+  });
+
+  it('makes each new category once when sibling statements of one file are parsed at once', async () => {
+    const rows = (account: number) =>
+      Array.from({ length: 40 }, (_, row) => [
+        `D11/${String((row % 28) + 1).padStart(2, '0')}/2026`,
+        `T-${account}${row}.25`,
+        `PProbe Shop ${row}`,
+        `LProbe Area ${row % 5}:Probe Topic ${row}`,
+        '^',
+      ]).flat();
+    const statements = await Promise.all(
+      [1, 2, 3].map(account =>
+        qifStatement(
+          `race-${account}`,
+          ['!Account', `NRace Account ${account}`, 'TBank', '^', '!Type:Bank', ...rows(account)].join('\n'),
+        ),
+      ),
+    );
+
+    await Promise.all(statements.map(statement => processing.processStatement(statement.id)));
+
+    const repeated = await dataSource.query(
+      `SELECT parent_id, type, lower(name) AS name, count(*)::int AS copies
+         FROM categories
+        WHERE workspace_id = $1
+        GROUP BY parent_id, type, lower(name)
+       HAVING count(*) > 1`,
+      [owner.workspaceId],
+    );
+    expect(repeated).toEqual([]);
+    const topics = await dataSource
+      .getRepository(Category)
+      .countBy({ workspaceId: owner.workspaceId, parentId: Not(IsNull()), name: Like('Probe Topic %') });
+    expect(topics).toBe(40);
+  });
+
+  it('cuts a transfer out of a split, so it pairs with its other leg and nothing counts twice', async () => {
+    const checking = await processing.processStatement(
+      (await qifStatement('split-transfer', SPLIT_TRANSFER_QIF)).id,
+    );
+    const [sibling] = await siblings.importOtherAccounts(checking.id);
+    const savings = await processing.processStatement(sibling.id);
+    expect(savings.accountNumber).toBe(PROBE_SAVINGS);
+
+    const rows = await dataSource.getRepository(Transaction).find({
+      where: [{ statementId: checking.id }, { statementId: savings.id }],
+    });
+    const legs = rows.filter(row => Number(row.amount) === 40);
+    expect(legs).toHaveLength(2);
+    expect(legs.every(row => row.splitGroupId === null && row.transferPairId !== null)).toBe(true);
+    expect(new Set(legs.map(row => row.transferPairId)).size).toBe(1);
+    expect(legs.find(row => row.statementId === checking.id)?.categoryHint).toBe(`[${PROBE_SAVINGS}]`);
+    expect(await flowsOf([checking.id, savings.id])).toEqual({ expense: 60 });
+
+    // The same file again: the reduced row and the cut-out transfer are both repeats.
+    const again = await processing.processStatement(
+      (await qifStatement('split-transfer-again', SPLIT_TRANSFER_QIF)).id,
+    );
+    const repeats = await rowsOf(again.id);
+    expect(repeats.map(row => [Number(row.amount), row.isDuplicate])).toEqual(
+      expect.arrayContaining([
+        [40, true],
+        [60, true],
+      ]),
+    );
+    expect(repeats).toHaveLength(2);
+    expect(await flowsOf([checking.id, savings.id, again.id])).toEqual({ expense: 60 });
   });
 });

@@ -106,9 +106,9 @@ export class StatementRowHintsService {
         continue;
       }
       try {
-        await this.keepFileFacts(row, made, splits);
+        await this.keepFingerprint(row, made);
       } catch (error) {
-        log('warn', `Row ${index + 1}: its parts lost the file's details (${reason(error)})`);
+        log('warn', `Row ${index + 1}: its parts lost the row's fingerprint (${reason(error)})`);
       }
       rows.push(...made);
     }
@@ -116,32 +116,24 @@ export class StatementRowHintsService {
   }
 
   /**
-   * What `split()` clears or copies but the file still says: part 0 takes back
-   * the whole row's fingerprint, so importing an overlapping file again marks
-   * that row a duplicate instead of adding its parts a second time, and a part
-   * the file sent to another account keeps that `[Account]`.
+   * Part 0 takes back the whole row's fingerprint, which `split()` clears, so
+   * importing an overlapping file again marks that row a duplicate instead of
+   * adding its parts a second time.
    */
-  private async keepFileFacts(
-    row: Transaction,
-    made: Transaction[],
-    splits: ParsedSplit[],
-  ): Promise<void> {
-    const repository = this.dataSource.getRepository(Transaction);
-    for (const [index, part] of made.entries()) {
-      const patch: Partial<Pick<Transaction, 'fingerprint' | 'categoryHint'>> = {};
-      if (index === 0 && row.fingerprint) patch.fingerprint = row.fingerprint;
-      const hint = splits[index] ? transferHint(splits[index]) : null;
-      if (hint) patch.categoryHint = hint;
-      if (Object.keys(patch).length === 0) continue;
-      await repository.update({ id: part.id, workspaceId: row.workspaceId }, patch);
-      Object.assign(part, patch);
-    }
+  private async keepFingerprint(row: Transaction, made: Transaction[]): Promise<void> {
+    const [first] = made;
+    if (!(first && row.fingerprint)) return;
+    await this.dataSource
+      .getRepository(Transaction)
+      .update({ id: first.id, workspaceId: row.workspaceId }, { fingerprint: row.fingerprint });
+    first.fingerprint = row.fingerprint;
   }
 
   /**
    * Each part keeps its own category from the file, and a part without one
-   * (a transfer part too: split parts are never paired) goes to Uncategorized, unless a rule categorised the row (or the user
-   * picks categories by hand): then every part keeps the row's category.
+   * goes to Uncategorized, unless a rule categorised the row (or the user
+   * picks categories by hand): then every part keeps the row's category. The
+   * parser has already cut transfer parts out into rows of their own.
    */
   private async splitParts(
     statement: Statement,

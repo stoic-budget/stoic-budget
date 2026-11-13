@@ -43,4 +43,16 @@ describe('decodeUnlabelledText', () => {
     const text = 'PCafé Exemple\nMRoom 12 m², ¥500\n';
     expect(decodeUnlabelledText(cp1252(text))).toBe(text);
   });
+
+  it('reads a lone accented word between Latin ones as Windows-1252', () => {
+    for (const text of ['Livraison à domicile', 'Pagato è ok', 'PLivraison à domicile\nMPagato è ok\n']) {
+      expect(decodeUnlabelledText(cp1252(text))).toBe(text);
+    }
+  });
+
+  it('reads a single short Cyrillic word as Windows-1251', () => {
+    for (const text of ['Еда', 'PЕда\n', 'MЎсё\n', 'Ям']) {
+      expect(decodeUnlabelledText(cp1251(text))).toBe(text);
+    }
+  });
 });
