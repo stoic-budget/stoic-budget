@@ -6,12 +6,15 @@ import type { TransactionsService } from '../../transactions/transactions.servic
 import { defineTool, type McpTool } from '../mcp-tool';
 import { Day, described, Limit, Page, Uuid } from './inputs';
 
+const IdList = Schema.Array(Uuid).check(Schema.isMinLength(1), Schema.isMaxLength(100));
+const AmountBound = Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0));
+
 export function transactionTools(transactions: TransactionsService): McpTool[] {
   return [
     defineTool({
       name: 'list_transactions',
       description:
-        'List transactions, newest first, filtered by statement, period, direction, category or currency. Amounts are in the transaction currency. Paginated: `total` is the number of matches.',
+        'List transactions, newest first, filtered by statement, period, direction, categories, tags, text, amount or currency. Amounts are in the transaction currency. Paginated: `total` is the number of matches.',
       input: Schema.Struct({
         statementId: Schema.optionalKey(described(Uuid, 'Only rows of this statement')),
         dateFrom: Schema.optionalKey(described(Day, 'First day, inclusive (YYYY-MM-DD)')),
@@ -23,6 +26,27 @@ export function transactionTools(transactions: TransactionsService): McpTool[] {
           ),
         ),
         categoryId: Schema.optionalKey(Uuid),
+        categoryIds: Schema.optionalKey(
+          described(IdList, 'Rows in any of these categories (from list_categories)'),
+        ),
+        tagIds: Schema.optionalKey(described(IdList, 'Rows carrying any of these tags')),
+        q: Schema.optionalKey(
+          described(
+            Schema.String.check(Schema.isMaxLength(200)),
+            'Text in the payee, counterparty, purpose or comment, any case',
+          ),
+        ),
+        amountMin: Schema.optionalKey(
+          described(AmountBound, 'Absolute amount at least this, in the row currency'),
+        ),
+        amountMax: Schema.optionalKey(
+          described(AmountBound, 'Absolute amount at most this, in the row currency'),
+        ),
+        uncategorized: Schema.optionalKey(
+          described(Schema.Boolean, 'true: only rows still waiting for a category'),
+        ),
+        untagged: Schema.optionalKey(described(Schema.Boolean, 'true: only rows without tags')),
+        noPayee: Schema.optionalKey(described(Schema.Boolean, 'true: only rows without a payee')),
         currency: Schema.optionalKey(described(Schema.String, 'ISO 4217 code, e.g. EUR')),
         page: Schema.optionalKey(Page),
         limit: Schema.optionalKey(described(Limit(100), 'Rows per page, 1–100 (default 50)')),
@@ -39,6 +63,14 @@ export function transactionTools(transactions: TransactionsService): McpTool[] {
             dateTo: args.dateTo ? new Date(args.dateTo) : undefined,
             type: args.type,
             categoryId: args.categoryId,
+            categoryIds: args.categoryIds ? [...args.categoryIds] : undefined,
+            tagIds: args.tagIds ? [...args.tagIds] : undefined,
+            q: args.q?.trim() || undefined,
+            amountMin: args.amountMin,
+            amountMax: args.amountMax,
+            uncategorized: args.uncategorized,
+            untagged: args.untagged,
+            noPayee: args.noPayee,
             currency: args.currency,
             page: args.page ?? 1,
             limit: args.limit ?? 50,

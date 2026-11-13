@@ -286,6 +286,145 @@
     border-top: 1px solid var(--border);
   }
 
+  // The search filters above the table: they wrap, the search box takes the slack.
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+  }
+
+  &__filters-search {
+    flex: 1 1 240px;
+    min-width: 0;
+  }
+
+  &__filters-amounts,
+  &__filters-toggles,
+  &__filters-end {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__filters-picker {
+    width: 180px;
+  }
+
+  &__filters-end {
+    margin-left: auto;
+    gap: 12px;
+  }
+
+  @media (max-width: 639px) {
+    &__filters-search,
+    &__filters-amounts,
+    &__filters-picker {
+      flex: 1 1 100%;
+      width: 100%;
+    }
+
+    &__filters-amounts > .MuiInputBase-root {
+      flex: 1 1 0;
+      width: auto;
+    }
+
+    &__filters-toggles {
+      flex-wrap: wrap;
+    }
+  }
+
+  // The saved views popover (rendered outside the page, so the classes stand alone).
+  &__views {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 340px;
+    max-width: calc(100vw - 32px);
+    margin-top: 8px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card);
+    background-image: none;
+  }
+
+  &__views-empty {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  &__views-list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__views-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__views-name {
+    flex: 1;
+    min-width: 0;
+    padding: 8px;
+    overflow: hidden;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    font: inherit;
+    font-size: 14px;
+    color: var(--foreground);
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--surface-soft);
+    }
+
+    &[aria-current='true'] {
+      font-weight: 500;
+      color: var(--primary);
+    }
+  }
+
+  &__views-form {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__views-save {
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  &__icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--surface-soft);
+      color: var(--foreground);
+    }
+  }
+
   &__months {
     display: flex;
     flex-direction: column;

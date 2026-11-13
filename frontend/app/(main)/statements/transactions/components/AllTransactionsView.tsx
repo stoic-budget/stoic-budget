@@ -30,14 +30,21 @@ import {
   type ListedRow,
   monthBounds,
   type Period,
-  paymentTypeFromParams,
   periodFromParams,
 } from '../all-transactions';
+import {
+  filtersFromParams,
+  filtersKey,
+  hasFilters,
+  type TransactionFilters,
+  withFilters,
+} from '../transaction-filters';
 import { PAGE_SIZE, useAllTransactions, useTransactionsOverview } from '../use-all-transactions';
 import { AllTransactionsTable } from './AllTransactionsTable';
 import { MonthsColumn } from './MonthsColumn';
 import { OverviewPies } from './OverviewPies';
 import { PaymentTypeFilter } from './PaymentTypeFilter';
+import { TransactionFiltersBar } from './TransactionFiltersBar';
 
 function spanOf(period: Period): FilterSpan {
   if (period.kind === 'all') {
@@ -55,6 +62,7 @@ function spanOf(period: Period): FilterSpan {
 export function AllTransactionsView(): React.JSX.Element {
   const t = useIntlayer('allTransactionsPage');
   const tPage = useIntlayer('transactionsPageView');
+  const tFilters = useIntlayer('allTransactionsFilters');
   const { locale } = useLocale();
   const summarize = useFilterSummary();
   const router = useRouter();
@@ -64,8 +72,8 @@ export function AllTransactionsView(): React.JSX.Element {
   const { currentWorkspace } = useWorkspace();
   const currency = resolveCurrencyCode(currentWorkspace?.currency);
   const period = periodFromParams(searchParams);
-  const paymentType = paymentTypeFromParams(searchParams);
-  const periodKey = `${period.kind === 'all' ? 'all' : period.month}:${paymentType ?? ''}`;
+  const filters = filtersFromParams(searchParams);
+  const periodKey = `${period.kind === 'all' ? 'all' : period.month}:${filtersKey(filters)}`;
 
   // The page and the ticked rows belong to one period and filter; a new one starts afresh.
   const [paging, setPaging] = useState({ periodKey, page: 1 });
@@ -78,7 +86,7 @@ export function AllTransactionsView(): React.JSX.Element {
   const [opened, setOpened] = useState<Transaction | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const list = useAllTransactions(period, page, paymentType);
+  const list = useAllTransactions(period, page, filters);
   const overview = useTransactionsOverview(period);
   const categoriesQuery = useQuery({
     queryKey: queryKeys.categories(workspaceId),
@@ -116,16 +124,12 @@ export function AllTransactionsView(): React.JSX.Element {
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
 
-  const setPaymentType = (next: FilterPaymentType | undefined) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (next) {
-      params.set('paymentType', next);
-    } else {
-      params.delete('paymentType');
-    }
-    const query = params.toString();
+  const setFilters = (next: TransactionFilters) => {
+    const query = withFilters(new URLSearchParams(searchParams.toString()), next).toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
+  const setPaymentType = (next: FilterPaymentType | undefined) =>
+    setFilters({ ...filters, paymentType: next });
 
   const setSelected = (ids: Set<string>) => setSelection({ key: selectionKey, ids });
   const toggle = (id: string) => {
@@ -191,8 +195,13 @@ export function AllTransactionsView(): React.JSX.Element {
             {t.showEverything}
           </button>
         )}
-        <PaymentTypeFilter value={paymentType} onChange={setPaymentType} />
+        <PaymentTypeFilter value={filters.paymentType} onChange={setPaymentType} />
       </div>
+      <TransactionFiltersBar
+        filters={filters}
+        categories={categoriesQuery.data ?? []}
+        onChange={setFilters}
+      />
 
       <div className="seneca-all-tx__body">
         <section className="seneca-all-tx__card seneca-all-tx__list">
@@ -215,7 +224,9 @@ export function AllTransactionsView(): React.JSX.Element {
           {list.isError ? (
             <LoadError>{t.loadFailed}</LoadError>
           ) : !list.isPending && rows.length === 0 ? (
-            <p className="seneca-all-tx__state seneca-all-tx__muted">{t.empty}</p>
+            <p className="seneca-all-tx__state seneca-all-tx__muted">
+              {hasFilters(filters) ? tFilters.noMatches : t.empty}
+            </p>
           ) : (
             <AllTransactionsTable
               loading={list.isPending}
