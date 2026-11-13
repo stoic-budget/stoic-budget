@@ -8,6 +8,7 @@ import { PRIVATE_PLACEHOLDER } from '../../../common/utils/transaction-privacy.u
 import type { TransactionsOverview } from '../../../contracts';
 import { Transaction } from '../../../entities/transaction.entity';
 import { Wallet } from '../../../entities/wallet.entity';
+import { daySql, loadDayConverter } from '../../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
 import { runningBalances } from '../../wallets/wallet-ledger';
 
@@ -33,6 +34,7 @@ interface FlowGroup {
   pairWalletId: string | null;
   party: string | null;
   currency: string;
+  day: string;
   total: string;
 }
 
@@ -75,18 +77,13 @@ export class TransactionsOverviewService {
       workspaceId,
       groups.flatMap(group => [group.walletId, group.pairWalletId]),
     );
-    const rateDay = filters.dateTo ?? new Date();
-    const rates = new Map<string, number>();
-    for (const code of new Set(groups.map(group => currencyCodeOrDefault(group.currency)))) {
-      const { rate } = await this.exchangeRatesService.convert(
-        1,
-        code,
-        currency,
-        rateDay,
-        workspaceId,
-      );
-      rates.set(code, rate);
-    }
+    // Each day at its own rate, as the rows' converted amounts in the list; no rate, left out.
+    const convert = await loadDayConverter(
+      this.exchangeRatesService,
+      currency,
+      groups,
+      workspaceId,
+    );
 
     const categories = new Slices();
     const sources = new Slices();
@@ -96,7 +93,7 @@ export class TransactionsOverviewService {
       if (group.transfer && group.type === 'income') {
         continue;
       }
-      const value = Number(group.total) * (rates.get(currencyCodeOrDefault(group.currency)) ?? 1);
+      const value = convert(group.total, group.currency, group.day);
       if (!group.transfer) {
         categories.add(group.categoryId ?? UNCATEGORIZED_SLICE, group.categoryName ?? '', value);
       }
@@ -194,6 +191,7 @@ export class TransactionsOverviewService {
         'party',
       )
       .addSelect('transaction.currency', 'currency')
+      .addSelect(daySql('transaction'), 'day')
       .addSelect(
         'SUM(ABS(COALESCE(transaction.amount, COALESCE(transaction.credit, 0) - COALESCE(transaction.debit, 0))))',
         'total',
@@ -204,7 +202,7 @@ export class TransactionsOverviewService {
     applyOwnerFilter(query, 'transaction', filters.owner);
     this.applyPeriod(query, filters);
     // By position: an output name such as "type" would bind to a joined column first.
-    return query.groupBy('1, 2, 3, 4, 5, 6, 7, 8').getRawMany<FlowGroup>();
+    return query.groupBy('1, 2, 3, 4, 5, 6, 7, 8, 9').getRawMany<FlowGroup>();
   }
 
   /** Rows per month, counted the way the list counts them, for the twelve months to the period's end. */

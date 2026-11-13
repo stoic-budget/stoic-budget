@@ -26,13 +26,19 @@ export interface WorkspaceMoney {
 }
 
 export function workspaceMoney(
-  rates: ExchangeRatesService,
+  rates: Pick<ExchangeRatesService, 'getRateOrNull'>,
   workspaceId: string,
   workspaceCurrency: string | null | undefined,
 ): WorkspaceMoney {
   const currency = workspaceCurrency?.toUpperCase() ?? null;
-  const convert: ConvertAt = async (amount, from, day) =>
-    currency ? (await rates.convert(amount, from, currency, day, workspaceId)).converted : amount;
+  // Each charge at its own day's rate; a currency with no rate that day is left out, as in Reports.
+  const convert: ConvertAt = async (amount, from, day) => {
+    if (!currency) {
+      return amount;
+    }
+    const rate = await rates.getRateOrNull(from, currency, day, workspaceId);
+    return rate === null ? 0 : amount * rate;
+  };
   return { currency, convert };
 }
 

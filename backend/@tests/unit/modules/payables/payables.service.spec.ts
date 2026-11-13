@@ -676,7 +676,10 @@ describe('PayablesService', () => {
       expect(result.dueThisWeek).toBe(10);
       expect(result.paidThisMonth).toBe(2);
       expect(result.paidTotal).toBe(2);
-      expect(exchangeRatesService.getRate).toHaveBeenCalledWith('KZT', 'USD', undefined, 'workspace-1');
+      // What came in converts at the rate of the day it was paid, as the dashboard counts it.
+      const [from, to, day, workspaceId] = exchangeRatesService.getRate.mock.calls[0];
+      expect([from, to, workspaceId]).toEqual(['KZT', 'USD', 'workspace-1']);
+      expect((day as Date).toISOString().slice(0, 10)).toBe('2026-03-05');
       vi.useRealTimers();
     });
 
