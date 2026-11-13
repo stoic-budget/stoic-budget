@@ -202,6 +202,7 @@ const netWorth = (assetsTotal: number) => ({
   assetLines: [],
   missingRates: [],
   excluded: [],
+  accountsLeftOut: 0,
   attribution: { byAccount: [], byKind: [] },
   savings: { income: 0, kept: 0, rate: null },
   allTimeHigh: null,

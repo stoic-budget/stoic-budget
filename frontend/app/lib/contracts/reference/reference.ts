@@ -95,6 +95,8 @@ export const WalletItem = Schema.Struct({
   initialBalance: DecimalString,
   isActive: Schema.Boolean,
   ownerMemberId: Schema.NullOr(Schema.String),
+  /** Whether the account counts in net worth; it counts everywhere else either way. */
+  includeInNetWorth: Schema.Boolean,
   /**
    * Opening balance plus the counted rows booked to it, in the account's currency
    * (a row in another one at the rate of its day); below zero for a debt.

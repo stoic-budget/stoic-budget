@@ -129,7 +129,10 @@ export function buildAttribution(input: {
  * the one number the whole early-retirement literature is about.
  *
  * Income is counted on the day it arrived, at that day's rate, and a leg of
- * a transfer or a reimbursement is not income however it is booked.
+ * a transfer or a reimbursement is not income however it is booked. Income
+ * into an account left out of net worth is not counted either: what it keeps
+ * is not in `kept`, so its income would only drag the rate down. Once moved
+ * on into a counted account it is counted, as it is then part of `kept`.
  */
 export async function buildSavings(input: {
   transactionRepository: Repository<Transaction>;
@@ -138,8 +141,10 @@ export async function buildSavings(input: {
   from: string;
   to: string;
   kept: number;
+  /** Ids of the accounts set not to count in net worth. */
+  leftOut: readonly string[];
 }): Promise<NetWorthSavings> {
-  const { transactionRepository, workspaceId, converter, from, to, kept } = input;
+  const { transactionRepository, workspaceId, converter, from, to, kept, leftOut } = input;
   // Income a person confirmed, the same rows the cash line counts.
   const rows = await onlyCounted(
     transactionRepository
@@ -153,7 +158,21 @@ export async function buildSavings(input: {
   )
     .andWhere('transaction.transactionDate > :from', { from })
     .andWhere('transaction.transactionDate <= :to', { to })
-    .andWhere('transaction.transferPairId IS NULL')
+    .andWhere('(transaction.walletId IS NULL OR transaction.walletId <> ALL(:leftOut))', {
+      leftOut: [...leftOut],
+    })
+    // A move between two counted accounts is not income. A move in from an
+    // account left out of net worth is: the money came from outside what is
+    // counted, and it raises `kept`. The other way round only lowers `kept`.
+    .andWhere(
+      `("transaction"."transfer_pair_id" IS NULL OR EXISTS (
+        SELECT 1 FROM transactions partner
+         WHERE partner.workspace_id = "transaction"."workspace_id"
+           AND partner.transfer_pair_id = "transaction"."transfer_pair_id"
+           AND partner.id <> "transaction"."id"
+           AND partner.wallet_id = ANY(:leftOut)))`,
+      { leftOut: [...leftOut] },
+    )
     .groupBy('transaction.transactionDate')
     .addGroupBy('transaction.currency')
     .getRawMany<{ date: string; currency: string; credit: string }>();

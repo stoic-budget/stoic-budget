@@ -9,7 +9,7 @@ import type { WalletItem, WalletType } from '@/app/lib/contracts';
 import { invalidateFinancialData } from '@/app/lib/invalidate-document-lists';
 import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
-import { isDebtType } from '../account-types';
+import { countsInNetWorth, isDebtType } from '../account-types';
 
 export type Account = WalletItem;
 
@@ -25,6 +25,8 @@ export interface AccountForm {
    */
   openingBalance: string;
   ownerMemberId: string | null;
+  /** Whether the account counts in net worth; it counts everywhere else either way. */
+  includeInNetWorth: boolean;
   /** Statements to move into a new account (creating one from found statements). */
   statementIds?: string[];
 }
@@ -37,6 +39,7 @@ export const emptyAccountForm = (currency: string): AccountForm => ({
   currency,
   openingBalance: '',
   ownerMemberId: null,
+  includeInNetWorth: true,
 });
 
 export function accountToForm(account: Account): AccountForm {
@@ -49,6 +52,7 @@ export function accountToForm(account: Account): AccountForm {
     currency: account.currency,
     openingBalance: opening === 0 ? '' : String(isDebtType(account.type) ? -opening : opening),
     ownerMemberId: account.ownerMemberId,
+    includeInNetWorth: countsInNetWorth(account),
   };
 }
 
@@ -63,6 +67,7 @@ function toPayload(form: AccountForm) {
     currency: form.currency || null,
     initialBalance: isDebtType(form.type) ? -Math.abs(typed) : typed,
     ownerMemberId: form.ownerMemberId,
+    includeInNetWorth: form.includeInNetWorth,
   };
 }
 

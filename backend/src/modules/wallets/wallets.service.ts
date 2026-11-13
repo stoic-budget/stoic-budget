@@ -69,6 +69,7 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       type: createDto.type ?? 'checking',
       currency: await this.workspaceCurrency.resolveFor(workspaceId, createDto.currency),
       initialBalance: createDto.initialBalance || 0,
+      includeInNetWorth: createDto.includeInNetWorth ?? true,
       isActive: true,
     });
 
@@ -180,6 +181,7 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
         initialBalance: String(wallet.initialBalance ?? '0'),
         isActive: wallet.isActive,
         ownerMemberId: wallet.ownerMemberId,
+        includeInNetWorth: wallet.includeInNetWorth,
         balance: round2((Number(wallet.initialBalance) || 0) + (ledger?.net ?? 0)),
         unconvertedCurrencies: ledger?.unconverted ?? [],
         transactionCount: ledger?.count ?? 0,

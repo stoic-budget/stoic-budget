@@ -18,6 +18,8 @@ export const CreateWalletBody = Schema.Struct({
    * imported into it start on the same person.
    */
   ownerMemberId: optionalNullable(Schema.String.check(Schema.isUUID())),
+  /** Whether the account counts in net worth; on when left out. */
+  includeInNetWorth: optionalNullable(Schema.Boolean),
 });
 export type CreateWalletBody = Wire<typeof CreateWalletBody>;
 

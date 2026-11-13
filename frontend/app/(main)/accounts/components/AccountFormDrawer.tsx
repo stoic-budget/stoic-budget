@@ -1,6 +1,8 @@
 'use client';
 
 import Button from '@mui/material/Button';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import { useEffect, useState } from 'react';
 import { CurrencyDrawer } from '@/app/components/receipts/components/CurrencyDrawer';
@@ -227,6 +229,23 @@ export function AccountFormDrawer({
             />
           </Field>
         )}
+
+        {/* Money held for someone else is still cash flow, only not wealth. */}
+        <div style={{ display: 'grid', gap: 2 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.includeInNetWorth}
+                onChange={event => set({ includeInNetWorth: event.target.checked })}
+                slotProps={{ input: { 'aria-describedby': 'account-net-worth-hint' } }}
+              />
+            }
+            label={t.countInNetWorth.value}
+          />
+          <span id="account-net-worth-hint" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+            {t.countInNetWorthHint}
+          </span>
+        </div>
       </AccountSideDrawer>
 
       <CurrencyDrawer

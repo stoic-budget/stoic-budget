@@ -86,6 +86,14 @@ export class Wallet {
   isActive: boolean;
 
   /**
+   * Whether the account counts in net worth. Off for money that is not the
+   * household's wealth (held for someone else, a child's account, a business
+   * float): it still counts in cash flow, budgets, reports and the forecast.
+   */
+  @Column({ name: 'include_in_net_worth', default: true })
+  includeInNetWorth: boolean;
+
+  /**
    * Whose account this is in the household; NULL means shared. Transactions
    * imported into the wallet start with the same owner.
    */
