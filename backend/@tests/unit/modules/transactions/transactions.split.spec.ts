@@ -599,14 +599,28 @@ describe('TransactionsService.unsplit', () => {
     expect(removedBatches).toHaveLength(0);
   });
 
-  it('takes the group lock scoped to the workspace and ordered by splitIndex', async () => {
+  // Id order, as a delete locks rows: the two then queue instead of deadlocking.
+  it('takes the group lock scoped to the workspace and ordered by id', async () => {
     await service.unsplit('tx-1', 'ws-1', 'u-1');
 
     expect(lockedFind).toHaveBeenCalledWith({
       where: { workspaceId: 'ws-1', splitGroupId: 'grp-1' },
-      order: { splitIndex: 'ASC' },
+      order: { id: 'ASC' },
       lock: { mode: 'pessimistic_write' },
     });
+  });
+
+  it('keeps part 0 as the survivor when the id order puts another part first', async () => {
+    // Locked by id: part 1 can come back before part 0.
+    lockedParts = [
+      { ...PART_1, id: 'tx-0' },
+      { ...PART_0, id: 'tx-9' },
+    ];
+
+    const merged = await service.unsplit('tx-1', 'ws-1', 'u-1');
+
+    expect(merged.id).toBe('tx-9');
+    expect(removedBatches[0].map((row: any) => row.id)).toEqual(['tx-0']);
   });
 
   it('rejects when a concurrent unsplit already merged the group', async () => {
