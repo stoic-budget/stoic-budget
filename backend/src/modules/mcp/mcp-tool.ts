@@ -8,6 +8,8 @@ import type { User } from '../../entities/user.entity';
 export interface McpToolContext {
   user: User;
   workspaceId: string;
+  /** The key the call came with: a confirm token works only for the key it was issued to. */
+  apiKeyId: string;
   /** The caller's membership, which decides whose private rows they see. */
   memberId: string | null;
   /** What `PermissionsGuard` would check for the same request. */
@@ -27,6 +29,11 @@ export interface McpTool<S extends Schema.Top = Schema.Top> {
   permissions: readonly Permission[];
   /** The REST route's response contract: the answer is reduced to what it declares. */
   output?: Schema.Top;
+  /**
+   * The output is an object contract clients may rely on: it is listed as the
+   * tool's `outputSchema` and the answer carries it as `structuredContent`.
+   */
+  structured?: boolean;
   readOnly: boolean;
   run(ctx: McpToolContext, args: S['Type']): Promise<unknown>;
 }

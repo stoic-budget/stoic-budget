@@ -97,6 +97,35 @@ subscription. Arguments a tool does not take are refused rather than ignored. An
 paths, hashes and account details, as REST answers do, and a long answer is cut with a hint to narrow
 the filters. Uploads travel as base64 inside the JSON request, so a file can be about 700 KB at most.
 
+## Bulk changes: preview, then confirm
+
+A tool that takes a list of rows (`set_transactions_category`, `approve_transactions`) works in two
+steps, even for a single id:
+
+1. **Preview.** Call it without `confirmToken`. Nothing changes. The answer says how many rows would
+   change (`rows`), shows up to five of them before and after, lists the ids it leaves alone by reason
+   (`not_found`, `unchanged`, `private` for another member's private row it would move to a category,
+   `tax_locked` for a row a filed return froze), and hands out a `confirmToken`.
+2. **Confirm.** Call it again with **the same arguments** plus that `confirmToken`. Only the previewed
+   rows change.
+
+The token works once and for ten minutes, only with the key and workspace that asked for the preview,
+and only while those rows still look as they did: if someone edited or approved one of them in
+between, the confirm is refused (`409 MCP_CONFIRM_ROWS_CHANGED`) and the agent previews again. Other
+refusals name the problem the same way (`MCP_CONFIRM_TOKEN_EXPIRED`, `MCP_CONFIRM_TOKEN_USED`,
+`MCP_CONFIRM_TOKEN_MISMATCH` for other arguments, `MCP_CONFIRM_TOKEN_INVALID`), each telling the agent
+to call the tool again without the token. When every row is skipped the preview carries no token.
+
+Tools that change one record at a time (`update_transaction`, `approve_receipt`, `create_category`,
+`update_category`, `create_budget`) and the uploads apply at once; every write is still undoable.
+
+The bulk tools list an `outputSchema`, and their answers carry `structuredContent` in that shape
+(`status`, `tool`, `rows`, `skipped`, `examples`, `confirmToken`, `expiresAt`, `next`) next to the
+same JSON as text. Another member's private row shows its date and amount but never its merchant.
+
+Tokens are signed with a key derived from `MCP_CONFIRM_SECRET`, or from `JWT_SECRET` when that is
+not set; spent tokens are remembered in Redis until they would have expired.
+
 ## What an agent does is on the record
 
 Every write made through an API key is an audit event with the actor **Integration** and the key's

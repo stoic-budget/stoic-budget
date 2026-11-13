@@ -15,6 +15,8 @@ import type { McpToolContext } from './mcp-tool';
 const toolContextOf = (request: AuthenticatedRequest): McpToolContext => ({
   user: request.user as User,
   workspaceId: request.apiKeyWorkspaceId as string,
+  // biome-ignore lint/style/noNonNullAssertion: McpAccessGuard admits API-key requests only.
+  apiKeyId: request.apiKey!.id,
   memberId: request.workspaceMemberId ?? null,
   subject: {
     user: request.user as User,

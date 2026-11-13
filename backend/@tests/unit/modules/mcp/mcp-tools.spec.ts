@@ -37,6 +37,17 @@ const ctx = {
   auditActor: { actorType: 'integration', actorLabel: 'key' },
 } as unknown as McpToolContext;
 
+/** Stands in for the confirm step: the preview skipped the last id, the rest is applied. */
+const bulk = {
+  confirm: {
+    run: vi.fn(async (_ctx: McpToolContext, call: { apply(ids: string[]): Promise<number>; args: Record<string, unknown> }) => {
+      const ids = (call.args.transactionIds ?? call.args.ids) as string[];
+      return { status: 'applied', rows: await call.apply(ids.slice(0, -1)) };
+    }),
+  },
+  planner: { plan: vi.fn() },
+};
+
 const tool = (tools: McpTool[], name: string): McpTool => {
   const found = tools.find(candidate => candidate.name === name);
   if (!found) throw new Error(`no tool ${name}`);
@@ -47,7 +58,7 @@ afterAll(() => fs.rmSync(uploadsDir, { recursive: true, force: true }));
 
 describe('transaction tools', () => {
   const transactions = { update: vi.fn(), bulkUpdate: vi.fn(), findAll: vi.fn() };
-  const tools = transactionTools(transactions as never);
+  const tools = transactionTools(transactions as never, bulk as never);
 
   beforeEach(() => vi.clearAllMocks());
 
@@ -77,14 +88,25 @@ describe('transaction tools', () => {
     expect(result).toMatchObject({ id: 't1', counterpartyName: '—' });
   });
 
-  it('puts many transactions into one category and answers how many changed', async () => {
+  it('puts the previewed transactions into one category through the confirm step', async () => {
     transactions.bulkUpdate.mockResolvedValue([{ id: 'a' }, { id: 'b' }]);
 
     const result = await tool(tools, 'set_transactions_category').run(ctx, {
-      transactionIds: ['a', 'b'],
+      transactionIds: ['a', 'b', 'c'],
       categoryId: 'c1',
+      confirmToken: 'token',
     });
 
+    const call = bulk.confirm.run.mock.calls[0][1];
+    expect(call).toMatchObject({
+      tool: 'set_transactions_category',
+      args: { transactionIds: ['a', 'b', 'c'], categoryId: 'c1' },
+      confirmToken: 'token',
+    });
+    expect(call.args).not.toHaveProperty('confirmToken');
+    await call.plan();
+    expect(bulk.planner.plan).toHaveBeenCalledWith(ctx, ['a', 'b', 'c'], { categoryId: 'c1' });
+    // Only the rows the preview showed are written.
     expect(transactions.bulkUpdate).toHaveBeenCalledWith(
       'ws-1',
       'user-1',
@@ -94,7 +116,7 @@ describe('transaction tools', () => {
       ],
       'member-1',
     );
-    expect(result).toEqual({ updated: 2 });
+    expect(result).toEqual({ status: 'applied', rows: 2 });
   });
 
   it('lists with day filters turned into dates and the default page size', async () => {
@@ -115,7 +137,24 @@ describe('transaction tools', () => {
 
 describe('review tools', () => {
   const review = { counts: vi.fn(), list: vi.fn(), approveTransactions: vi.fn() };
-  const tools = reviewTools(review as never);
+  const tools = reviewTools(review as never, bulk as never);
+
+  beforeEach(() => vi.clearAllMocks());
+
+  it('approves only the previewed rows, with the category asked for', async () => {
+    review.approveTransactions.mockResolvedValue({ approved: 1 });
+
+    await tool(tools, 'approve_transactions').run(ctx, { ids: ['a', 'b'], categoryId: 'c1' });
+
+    const call = bulk.confirm.run.mock.calls[0][1];
+    expect(call).toMatchObject({ tool: 'approve_transactions', confirmToken: undefined });
+    await call.plan();
+    expect(bulk.planner.plan).toHaveBeenCalledWith(ctx, ['a', 'b'], {
+      categoryId: 'c1',
+      approve: true,
+    });
+    expect(review.approveTransactions).toHaveBeenCalledWith('ws-1', 'user-1', ['a'], 'c1');
+  });
 
   it('counts the caller’s own queue when asked for “me”', async () => {
     await tool(tools, 'get_review_counts').run(ctx, { reviewer: 'me' });

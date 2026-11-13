@@ -21,15 +21,26 @@ const text = (value: string, isError = false): CallToolResult => ({
  * not declare. The controller writes MCP answers itself, so the response
  * interceptors that do this for REST never see them.
  */
-export function toToolResult(value: unknown, output?: Schema.Top): CallToolResult {
+export function toToolResult(
+  value: unknown,
+  output?: Schema.Top,
+  structured = false,
+): CallToolResult {
   // Entity instances first: hideInternalColumns reduces a joined User to the person.
   const internalHidden = hideInternalColumns(value);
   const wire: unknown =
     internalHidden === undefined ? null : JSON.parse(JSON.stringify(internalHidden));
   const declared = output ? projectToContract(SchemaAST.toEncoded(output.ast), wire) : wire;
-  const body = JSON.stringify(withoutKeys(declared, ACCOUNT_KEYS), null, 2);
-  return body.length > MAX_RESULT_CHARS
-    ? text(`${body.slice(0, MAX_RESULT_CHARS)}\n… truncated: narrow the filters or lower the limit`)
+  const safe = withoutKeys(declared, ACCOUNT_KEYS);
+  const body = JSON.stringify(safe, null, 2);
+  if (body.length > MAX_RESULT_CHARS) {
+    return text(
+      `${body.slice(0, MAX_RESULT_CHARS)}\n… truncated: narrow the filters or lower the limit`,
+    );
+  }
+  // The text stays for clients that read only `content`.
+  return structured
+    ? { ...text(body), structuredContent: safe as Record<string, unknown> }
     : text(body);
 }
 

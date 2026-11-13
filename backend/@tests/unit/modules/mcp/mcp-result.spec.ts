@@ -27,6 +27,17 @@ describe('MCP tool results', () => {
     expect(parsed).toEqual({ id: 'a', amount: 3 });
   });
 
+  it('answers a structured tool with the same projected object as structuredContent', () => {
+    const contract = Schema.Struct({ id: Schema.String, amount: Schema.Number });
+
+    const result = toToolResult({ id: 'a', amount: 3, secretColumn: 'x' }, contract, true);
+    const plain = toToolResult({ id: 'a', amount: 3 }, contract);
+
+    expect(result.structuredContent).toEqual({ id: 'a', amount: 3 });
+    expect(JSON.parse(textOf(result))).toEqual(result.structuredContent);
+    expect(plain.structuredContent).toBeUndefined();
+  });
+
   it('writes dates as ISO strings', () => {
     const parsed = JSON.parse(textOf(toToolResult({ at: new Date('2026-01-02T03:04:05.000Z') })));
 

@@ -84,6 +84,16 @@ export const INTEGRATIONS_ERRORS = {
   // ── mcp ─────────────────────────────────────────────────────────
   MCP_API_KEY_REQUIRED: 'The MCP endpoint takes an API key in the X-Api-Key header',
   MCP_RECEIPT_NOT_FOUND: 'Receipt not found',
+  MCP_CONFIRM_TOKEN_INVALID:
+    'This confirmToken is not valid for this workspace and API key. Call {{tool}} again without confirmToken for a new preview',
+  MCP_CONFIRM_TOKEN_EXPIRED:
+    'This confirmToken has expired: it lasts 10 minutes. Call {{tool}} again without confirmToken for a new preview',
+  MCP_CONFIRM_TOKEN_MISMATCH:
+    'This confirmToken was issued for another tool or other arguments. Repeat the previewed {{tool}} call with exactly the same arguments, or call it without confirmToken for a new preview',
+  MCP_CONFIRM_TOKEN_USED:
+    'This confirmToken has been used already. Call {{tool}} again without confirmToken for a new preview',
+  MCP_CONFIRM_ROWS_CHANGED:
+    'The rows {{tool}} would change are no longer the ones the preview showed. Call it again without confirmToken and check the new preview',
   // ── observability ───────────────────────────────────────────────
   OBSERVABILITY_METRICS_TOKEN_REQUIRED: 'Metrics token is required',
   OBSERVABILITY_METRICS_TOKEN_INVALID: 'Invalid metrics token',

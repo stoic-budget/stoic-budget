@@ -13,7 +13,7 @@ import { runWithAuditActor } from '../../common/audit-actor.context';
 import { assertPermissions, hasPermissions } from '../../common/authz/request-permissions';
 import { APP_NAME, APP_SLUG } from '../../common/brand';
 import { describeSchemaFailure, describeUnstorableText } from '../../common/effect/schema-issues';
-import { toToolInputSchema } from './mcp-json-schema';
+import { toToolInputSchema, toToolObjectSchema } from './mcp-json-schema';
 import { toArgumentError, toToolError, toToolResult } from './mcp-result';
 import type { McpTool, McpToolContext } from './mcp-tool';
 import { McpToolRegistry } from './mcp-tool-registry.service';
@@ -35,6 +35,9 @@ export class McpServerFactory {
         name: tool.name,
         description: tool.description,
         inputSchema: toToolInputSchema(tool.input),
+        ...(tool.structured && tool.output
+          ? { outputSchema: toToolObjectSchema(tool.output) }
+          : {}),
         annotations: tool.readOnly
           ? { readOnlyHint: true }
           : { readOnlyHint: false, destructiveHint: false },
@@ -85,7 +88,7 @@ export class McpServerFactory {
         meta: { ...ctx.auditActor.meta, mcpTool: tool.name },
       };
       const value = await runWithAuditActor(actor, () => tool.run(ctx, exit.value));
-      return toToolResult(value, tool.output);
+      return toToolResult(value, tool.output, tool.structured);
     } catch (error) {
       return toToolError(error, tool.name);
     }

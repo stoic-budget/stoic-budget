@@ -1,12 +1,16 @@
 import { Schema } from 'effect';
 import { Permission } from '../../../common/enums/permissions.enum';
 import { redactPrivate } from '../../../common/utils/transaction-privacy.util';
-import { TransactionListPage, type UpdateTransactionBody } from '../../../contracts';
+import { McpBulkChange, TransactionListPage, type UpdateTransactionBody } from '../../../contracts';
 import type { TransactionsService } from '../../transactions/transactions.service';
+import type { BulkChangeDeps } from '../confirm/mcp-confirm.service';
 import { defineTool, type McpTool } from '../mcp-tool';
-import { Day, described, Limit, Page, Uuid } from './inputs';
+import { ConfirmToken, Day, described, Limit, Page, Uuid } from './inputs';
 
-export function transactionTools(transactions: TransactionsService): McpTool[] {
+export function transactionTools(
+  transactions: TransactionsService,
+  bulk: BulkChangeDeps,
+): McpTool[] {
   return [
     defineTool({
       name: 'list_transactions',
@@ -91,22 +95,32 @@ export function transactionTools(transactions: TransactionsService): McpTool[] {
     defineTool({
       name: 'set_transactions_category',
       description:
-        'Put up to 200 transactions into one category (or clear it with null). Logged as this API key and undoable from the activity log.',
+        'Put up to 200 transactions into one category (or clear it with null). Two steps: without confirmToken it changes nothing and previews which rows would change and which are skipped; the same call with the preview’s confirmToken applies it. Logged as this API key and undoable from the activity log.',
       input: Schema.Struct({
         transactionIds: Schema.Array(Uuid).check(Schema.isMinLength(1), Schema.isMaxLength(200)),
         categoryId: described(Schema.NullOr(Uuid), 'Category id from list_categories, or null'),
+        confirmToken: ConfirmToken,
       }),
       permissions: [Permission.TRANSACTION_BULK_UPDATE],
+      output: McpBulkChange,
+      structured: true,
       readOnly: false,
-      run: async (ctx, args) => {
-        const updated = await transactions.bulkUpdate(
-          ctx.workspaceId,
-          ctx.user.id,
-          args.transactionIds.map(id => ({ id, updates: { categoryId: args.categoryId } })),
-          ctx.memberId,
-        );
-        return { updated: updated.length };
-      },
+      run: (ctx, { confirmToken, ...args }) =>
+        bulk.confirm.run(ctx, {
+          tool: 'set_transactions_category',
+          args,
+          confirmToken,
+          plan: () => bulk.planner.plan(ctx, args.transactionIds, { categoryId: args.categoryId }),
+          apply: async ids => {
+            const updated = await transactions.bulkUpdate(
+              ctx.workspaceId,
+              ctx.user.id,
+              ids.map(id => ({ id, updates: { categoryId: args.categoryId } })),
+              ctx.memberId,
+            );
+            return updated.length;
+          },
+        }),
     }),
   ];
 }
