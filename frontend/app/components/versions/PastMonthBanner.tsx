@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type React from 'react';
 import { resolveLocale } from '@/app/(main)/dashboard/helpers/dashboard-helpers';
 import { parseMonthParam } from '@/app/(main)/dashboard/helpers/dashboard-url-state';
+import { usePresentPeriod } from '@/app/components/dashboard/use-period-label';
 import { Button } from '@/app/components/ui/button';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { AS_OF_PARAM, readAsOf } from '@/app/lib/as-of-month';
@@ -16,7 +17,7 @@ import { BAR_STYLE } from './VersionBanner';
  */
 export function PastMonthBanner(): React.JSX.Element | null {
   const pathname = usePathname();
-  const asOf = readAsOf(useSearchParams()?.get(AS_OF_PARAM));
+  const asOf = readAsOf(useSearchParams()?.get(AS_OF_PARAM), usePresentPeriod().current);
   if (!asOf || pathname === '/dashboard') {
     return null;
   }

@@ -1,3 +1,11 @@
+import {
+  isCalendarMonth,
+  type PayPeriodContext,
+  periodBounds,
+  periodLength,
+  periodOf,
+  shiftMonth,
+} from '../../contracts';
 import type { BudgetPeriodType } from '../../entities/budget.entity';
 import { normalizeLimitToMonth } from '../budgets/budget-period.util';
 
@@ -13,9 +21,16 @@ function daysInMonth(year: number, month: number): number {
  * Measured per calendar month rather than as days / 30.44, so a quarter of
  * whole months never comes out as 2.96 and nobody has to explain the remainder.
  */
-export function monthsCovered(from: string, to: string): number {
+export function monthsCovered(
+  from: string,
+  to: string,
+  payPeriod?: PayPeriodContext | null,
+): number {
   if (to < from) {
     return 0;
+  }
+  if (payPeriod && !isCalendarMonth(payPeriod)) {
+    return periodsCovered(from, to, payPeriod);
   }
   const [fromYear, fromMonth, fromDay] = from.split('-').map(Number);
   const [toYear, toMonth, toDay] = to.split('-').map(Number);
@@ -33,6 +48,22 @@ export function monthsCovered(from: string, to: string): number {
       month = 1;
       year += 1;
     }
+  }
+  return months;
+}
+
+/**
+ * monthsCovered over the workspace's own months: each month the window touches
+ * counts the share of its days the window covers, so one whole month of
+ * 15 Oct – 14 Nov is exactly 1.
+ */
+function periodsCovered(from: string, to: string, payPeriod: PayPeriodContext): number {
+  let months = 0;
+  for (let key = periodOf(payPeriod, from); ; key = shiftMonth(key, 1)) {
+    const bounds = periodBounds(payPeriod, key);
+    if (bounds.from > to) break;
+    const part = overlap(bounds, { from, to });
+    if (part) months += periodLength(part) / periodLength(bounds);
   }
   return months;
 }
@@ -59,8 +90,10 @@ export function plannedForWindow(
   limitAmount: number,
   periodType: BudgetPeriodType,
   window: { from: string; to: string },
+  payPeriod?: PayPeriodContext | null,
 ): number {
-  return normalizeLimitToMonth(limitAmount, periodType) * monthsCovered(window.from, window.to);
+  const months = monthsCovered(window.from, window.to, payPeriod);
+  return normalizeLimitToMonth(limitAmount, periodType) * months;
 }
 
 /** A category and every category under it, however deep. */

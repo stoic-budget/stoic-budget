@@ -21,6 +21,7 @@ export const SETTINGS_SECTIONS = {
   notifications: ['telegram', 'push'],
   data: [
     'workspace-profile',
+    'month-start',
     'processing',
     'exchange-rates',
     'receipt-location',

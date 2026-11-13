@@ -33,6 +33,7 @@ import type { CreateAuditEventDto } from '../audit/interfaces/audit-event.interf
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { BudgetExceededEvent } from '../notifications/events/notification-events';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PayPeriodService } from '../pay-period/pay-period.service';
 import { countChargesBetween } from '../subscriptions/charge-calendar.util';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import {
@@ -41,6 +42,7 @@ import {
   localDay,
   overlapsWindow,
   parseDateOnly,
+  previousPeriods,
 } from './budget-period.util';
 import { percentOf, resolveAvailable } from './budget-rollover.util';
 
@@ -118,7 +120,14 @@ export class BudgetsService {
     @Optional()
     @InjectRepository(SubscriptionCharge)
     private readonly subscriptionChargeRepository?: Repository<SubscriptionCharge>,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
+
+  /** The budget's period that `at` falls in; a monthly one runs over the workspace's month. */
+  async periodRange(budget: Pick<Budget, 'periodType' | 'workspaceId'>, at: Date) {
+    const payPeriod = await this.payPeriods?.contextFor(budget.workspaceId);
+    return computePeriodRange(budget.periodType, at, payPeriod);
+  }
 
   async create(workspaceId: string, userId: string, dto: CreateBudgetBody): Promise<Budget> {
     const goalId = dto.goalId ?? null;
@@ -144,7 +153,7 @@ export class BudgetsService {
     await this.assertCategoryInWorkspace(dto.categoryId, workspaceId);
     await this.assertGoalInWorkspace(dto.goalId, workspaceId);
 
-    const { start } = computePeriodRange(periodType, new Date());
+    const { start } = await this.periodRange({ periodType, workspaceId }, new Date());
 
     const budget = this.budgetRepository.create({
       workspaceId,
@@ -273,7 +282,7 @@ export class BudgetsService {
       // A budget outside its window governs nothing right now, so it must not
       // warn: a project budget that ended in August should go quiet, not fire
       // every month afterwards on spending it no longer covers.
-      const period = clampToWindow(computePeriodRange(budget.periodType, new Date()), budget);
+      const period = clampToWindow(await this.periodRange(budget, new Date()), budget);
       if (!period) {
         continue;
       }
@@ -348,7 +357,7 @@ export class BudgetsService {
     let resetCount = 0;
 
     for (const budget of budgets) {
-      const { start } = computePeriodRange(budget.periodType, now);
+      const { start } = await this.periodRange(budget, now);
       const currentStart = new Date(budget.currentPeriodStart);
 
       if (start.getTime() > currentStart.getTime()) {
@@ -481,7 +490,7 @@ export class BudgetsService {
     const subscriptions = linked.subscriptions.filter(
       subscription => subscription.budgetId === budget.id,
     );
-    const period = clampToWindow(computePeriodRange(budget.periodType, now), budget);
+    const period = clampToWindow(await this.periodRange(budget, now), budget);
     if (!period || subscriptions.length === 0) return reserve;
     const today = new Date();
     const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -540,7 +549,7 @@ export class BudgetsService {
     >
   > {
     const limitAmount = Number(budget.limitAmount);
-    const range = computePeriodRange(budget.periodType, now);
+    const range = await this.periodRange(budget, now);
     const period = clampToWindow(range, budget);
     if (!period) {
       return {
@@ -626,23 +635,9 @@ export class BudgetsService {
       : budget.createdAt
         ? new Date(budget.createdAt)
         : currentStart;
-    const periods: Array<{ start: Date; end: Date }> = [];
-    let cursor = new Date(
-      currentStart.getFullYear(),
-      currentStart.getMonth(),
-      currentStart.getDate() - 1,
-    );
-    while (periods.length < BudgetsService.ROLLOVER_LOOKBACK) {
-      const range = computePeriodRange(budget.periodType, cursor);
-      if (range.end.getTime() < began.getTime()) break;
-      const clamped = clampToWindow(range, budget);
-      if (clamped) periods.unshift(clamped);
-      cursor = new Date(
-        range.start.getFullYear(),
-        range.start.getMonth(),
-        range.start.getDate() - 1,
-      );
-    }
+    const payPeriod = await this.payPeriods?.contextFor(budget.workspaceId);
+    const lookback = BudgetsService.ROLLOVER_LOOKBACK;
+    const periods = previousPeriods(budget, currentStart, began, lookback, payPeriod);
     if (periods.length === 0) return [];
     const rows = await this.spendingRows(
       budget.workspaceId,

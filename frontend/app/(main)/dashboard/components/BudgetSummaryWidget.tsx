@@ -5,10 +5,10 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import type React from 'react';
-import { monthEndOrToday } from '@/app/components/dashboard/month-end';
 import { useIsWideSection } from '@/app/components/dashboard/section-span';
 import { CardEmpty, CardLink, DashboardCard } from '@/app/components/dashboard/ui';
 import { BudgetRowsSkeleton } from '@/app/components/dashboard/ui/card-skeletons';
+import { usePresentPeriod } from '@/app/components/dashboard/use-period-label';
 import { fillTemplateNodes } from '@/app/components/ui/private-amount';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer, useLocale } from '@/app/i18n';
@@ -43,9 +43,12 @@ const TONE_FILL: Record<ReturnType<typeof budgetTone>, string> = {
   over: 'var(--money-down)',
 };
 
-/** The budgets page measured on the card's month; the current one needs no month. */
-function budgetsHref(month: string, toList: boolean): string {
-  const query = monthEndOrToday(month) ? `?month=${month}` : '';
+/**
+ * The budgets page measured on the card's month; the current one (`present`,
+ * by the workspace's month rule) needs no month.
+ */
+function budgetsHref(month: string, present: string, toList: boolean): string {
+  const query = month !== present ? `?month=${month}` : '';
   return `/budgets${query}${toList ? '#budget-list' : ''}`;
 }
 
@@ -57,10 +60,11 @@ function mostUsed(budgets: BudgetSummary[]): BudgetSummary[] {
  * The month in view: the current one shares the budgets page's cache entry, so the
  * widget is drawn at once and is fresh after a budget is edited there; any other
  * month is measured on its last day, so its spending is that month's, not this one's.
+ * Both by the workspace's month rule: under day 25, "December" ends on 24 December.
  */
 export function useBudgets(month: string): { budgets: BudgetSummary[]; loaded: boolean } {
   const workspaceId = useWorkspaceId();
-  const date = monthEndOrToday(month);
+  const date = usePresentPeriod().measuredOn(month);
   const { data, isPending } = useQuery({
     queryKey: date ? queryKeys.budgetsAt(workspaceId, date) : queryKeys.budgets(workspaceId),
     queryFn: ({ signal }) => fetchBudgets(signal, date ?? undefined),
@@ -88,6 +92,7 @@ export function BudgetSummaryWidget({
   const wideText = useIntlayer('dashboardWideView');
   const { locale } = useLocale();
   const { budgets, loaded } = useBudgets(month);
+  const present = usePresentPeriod().current;
   const wide = useIsWideSection();
   const categoryName = useCategoryName();
 
@@ -97,7 +102,7 @@ export function BudgetSummaryWidget({
       <DashboardCard
         title={t.title}
         subtitle={monthLabel}
-        action={<CardLink href={budgetsHref(month, true)}>{t.viewAll}</CardLink>}
+        action={<CardLink href={budgetsHref(month, present, true)}>{t.viewAll}</CardLink>}
       >
         <BudgetRowsSkeleton rows={LOADING_BUDGETS} wide={wide} />
       </DashboardCard>
@@ -133,7 +138,7 @@ export function BudgetSummaryWidget({
       title={t.title}
       subtitle={monthLabel}
       action={
-        <CardLink href={budgetsHref(month, hasBudgets)}>
+        <CardLink href={budgetsHref(month, present, hasBudgets)}>
           {hasBudgets ? t.viewAll : t.setUpBudgets}
         </CardLink>
       }

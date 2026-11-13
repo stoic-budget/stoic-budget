@@ -30,7 +30,7 @@ import { SpentTile } from './SpentTile';
 import { TaxesCard } from './TaxesCard';
 import { TopCategoriesCard } from './TopCategoriesCard';
 import { CardLink, DashboardCard, KpiCard } from './ui';
-import { useMonthLabel } from './use-month-label';
+import { useShownMonth } from './use-period-label';
 import { WorkspaceActivityCard } from './WorkspaceActivityCard';
 import { wealthSections } from './wealth-sections';
 
@@ -248,7 +248,7 @@ export function OverviewTab({
   const t = useIntlayer('overviewTab');
   const wideText = useIntlayer('dashboardWideView');
   const { locale } = useLocale();
-  const monthLabel = useMonthLabel(displayMonth);
+  const { label: monthLabel, inProgress } = useShownMonth(displayMonth);
   const formatDay = useMemo(() => {
     const format = new Intl.DateTimeFormat(resolveLocale(locale), {
       day: 'numeric',
@@ -285,7 +285,7 @@ export function OverviewTab({
             formatAmount,
             monthLabel,
             shownMonth: monthKey(displayMonth),
-            monthInProgress: monthKey(displayMonth) === monthKey(new Date()),
+            monthInProgress: inProgress,
             isLoading,
             labels: {
               income: t.income.value,

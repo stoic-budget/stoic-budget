@@ -2,6 +2,7 @@ import * as Schema from 'effect/Schema';
 import * as Struct from 'effect/Struct';
 import { Email, optionalNullable } from '../common/requests';
 import type { Wire } from '../common/wire';
+import { MonthStartSetting } from '../workspaces/pay-periods';
 
 export const CreateWorkspaceBody = Schema.Struct({
   name: Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(255)),
@@ -53,6 +54,8 @@ export const UpdateWorkspaceBody = CreateWorkspaceBody.mapFields(
     processing: optionalNullable(WorkspaceProcessingInput),
     /** Owners and admins switch plugins on and off for the whole workspace. */
     plugins: optionalNullable(WorkspacePluginsInput),
+    /** The day the workspace's month starts on. */
+    monthStart: optionalNullable(MonthStartSetting),
   }),
 );
 export type UpdateWorkspaceBody = Wire<typeof UpdateWorkspaceBody>;

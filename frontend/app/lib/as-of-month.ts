@@ -9,14 +9,21 @@ import { currentMonthKey } from '@/app/components/dashboard/month-end';
  */
 export const AS_OF_PARAM = 'asOf';
 
-/** The marked month, when it is a valid one other than the month we are in. */
-export function readAsOf(value: string | null | undefined, now: Date = new Date()): string | null {
-  return value && parseMonthParam(value) && value !== currentMonthKey(now) ? value : null;
+/**
+ * The marked month, when it is a valid one other than the month we are in
+ * (`present`: by default the calendar month; pages pass the workspace's, see
+ * `usePresentPeriod`).
+ */
+export function readAsOf(
+  value: string | null | undefined,
+  present: string = currentMonthKey(),
+): string | null {
+  return value && parseMonthParam(value) && value !== present ? value : null;
 }
 
-/** `href` marked with the dashboard's month; unchanged for the current month. */
-export function withAsOf(href: string, month: string | null | undefined): string {
-  const asOf = readAsOf(month);
+/** `href` marked with the dashboard's month; unchanged for the current month (`present`). */
+export function withAsOf(href: string, month: string | null | undefined, present?: string): string {
+  const asOf = readAsOf(month, present);
   if (!asOf) {
     return href;
   }

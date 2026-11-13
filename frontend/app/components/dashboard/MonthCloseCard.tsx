@@ -15,7 +15,7 @@ import {
   type CloseStepId,
 } from './month-close-model';
 import { DashboardCard, ListRow } from './ui';
-import { useMonthLabel } from './use-month-label';
+import { useShownMonth } from './use-period-label';
 
 type MonthCloseCardProps = {
   data: DashboardData;
@@ -117,7 +117,7 @@ export function MonthCloseCard({
 }: MonthCloseCardProps): React.JSX.Element {
   const t = useIntlayer('monthCloseCard');
   const names = useIntlayer('overviewWidgets').sections;
-  const month = capitalize(useMonthLabel(displayMonth));
+  const month = capitalize(useShownMonth(displayMonth).label);
   const model = buildMonthCloseModel(data, displayMonth);
   const total = model.steps.length;
   // Only the amount is redacted in privacy mode; the counts stay readable.

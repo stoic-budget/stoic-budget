@@ -213,14 +213,15 @@ export class AuditService {
    *
    * Narrower than `findEvents` on purpose — it answers "did you change this?",
    * not "what happened on this account", so it never reaches the events that
-   * only the owner should see. With `month` (`YYYY-MM`), only that month's.
+   * only the owner should see. With `period` (the workspace's month, as days),
+   * only that month's.
    */
   async findWorkspaceActivity(
     workspaceId: string,
     limit = 20,
-    month?: string,
+    period?: { from: string; until: string },
   ): Promise<WorkspaceActivityEntry[]> {
-    return queryWorkspaceActivity(this.auditEventRepository, workspaceId, limit, month);
+    return queryWorkspaceActivity(this.auditEventRepository, workspaceId, limit, period);
   }
 
   async findEventById(id: string, workspaceId?: string): Promise<AuditEvent | null> {

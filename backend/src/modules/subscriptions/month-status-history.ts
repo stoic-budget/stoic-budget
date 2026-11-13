@@ -1,45 +1,83 @@
 import { Between, type FindOperator, type Repository } from 'typeorm';
-import type { SubscriptionMonthStatus } from '../../contracts';
+import type { PayPeriodContext, SubscriptionMonthStatus } from '../../contracts';
 import type { SubscriptionCharge } from '../../entities/subscription-charge.entity';
+import type { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import {
+  type DateRange,
+  dayKey,
+  periodKeyAt,
+  periodRangeAt,
+  periodRangeOfKey,
+} from '../pay-period/pay-period-dates';
 import { CurrencyTotals } from './currency-totals';
+
+/**
+ * A month here is the workspace's own (`settings.monthStart`): the calendar
+ * month unless it starts on another day.
+ */
 
 /** Turns an amount into the workspace currency at the rate of a given day. */
 export type ConvertAt = (amount: number, currency: string, day: Date) => Promise<number>;
 
-const monthKey = (day: Date): string =>
-  `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}`;
+/** The workspace currency (upper case, null when unset) and a converter into it. */
+export interface WorkspaceMoney {
+  currency: string | null;
+  convert: ConvertAt;
+}
 
-const localDay = (day: Date): string =>
-  `${monthKey(day)}-${String(day.getDate()).padStart(2, '0')}`;
+export function workspaceMoney(
+  rates: ExchangeRatesService,
+  workspaceId: string,
+  workspaceCurrency: string | null | undefined,
+): WorkspaceMoney {
+  const currency = workspaceCurrency?.toUpperCase() ?? null;
+  const convert: ConvertAt = async (amount, from, day) =>
+    currency ? (await rates.convert(amount, from, currency, day, workspaceId)).converted : amount;
+  return { currency, convert };
+}
+
+const localDay = dayKey;
 
 /** The days of a month as a `date` column filter, first to last. */
-const monthDays = (year: number, monthNumber: number): FindOperator<Date> =>
-  Between(
-    localDay(new Date(year, monthNumber - 1, 1)),
-    localDay(new Date(year, monthNumber, 0)),
-  ) as unknown as FindOperator<Date>;
+const monthDays = ({ start, end }: DateRange): FindOperator<Date> =>
+  Between(localDay(start), localDay(end)) as unknown as FindOperator<Date>;
 
 /** `month` (`YYYY-MM`) is over: it is before the month `today` is in. */
-export function isPastMonth(month: string | undefined, today: Date): month is string {
-  return month !== undefined && month < monthKey(today);
+export function isPastMonth(
+  month: string | undefined,
+  today: Date,
+  payPeriod?: PayPeriodContext | null,
+): month is string {
+  return month !== undefined && month < periodKeyAt(payPeriod, today);
 }
 
-/** Today, or the first day of `month` (`YYYY-MM`) when that month is still ahead. */
-export function dayInMonth(month: string | undefined, today: Date): Date {
-  if (!month || month <= monthKey(today)) return today;
-  const [year, monthNumber] = month.split('-').map(Number);
-  return new Date(year, monthNumber - 1, 1);
+/**
+ * The month a status is for (`month`, or the one `today` is in) with its name,
+ * its range, and the day that splits paid from still to pay: today, or the
+ * month's first day when it is still ahead.
+ */
+export function monthInView(
+  month: string | undefined,
+  today: Date,
+  payPeriod?: PayPeriodContext | null,
+): { key: string; period: DateRange; today: Date } {
+  const current = periodKeyAt(payPeriod, today);
+  if (!month || month <= current) {
+    return { key: current, period: periodRangeAt(payPeriod, today), today };
+  }
+  const period = periodRangeOfKey(payPeriod, month);
+  return { key: month, period, today: period.start };
 }
 
-/** How many payments each subscription of the workspace has recorded in the month of `day`. */
+/** How many payments each subscription of the workspace has recorded in a month. */
 export async function chargesInMonth(
   charges: Repository<SubscriptionCharge>,
   workspaceId: string,
-  day: Date,
+  month: DateRange,
 ): Promise<Map<string, number>> {
   const rows = await charges.find({
     select: { subscriptionId: true },
-    where: { workspaceId, chargeDate: monthDays(day.getFullYear(), day.getMonth() + 1) },
+    where: { workspaceId, chargeDate: monthDays(month) },
   });
   const counts = new Map<string, number>();
   for (const row of rows) {
@@ -55,14 +93,13 @@ export async function chargesInMonth(
  */
 export async function pastMonthStatus(
   charges: Repository<SubscriptionCharge>,
-  convert: ConvertAt,
+  { currency, convert }: WorkspaceMoney,
   workspaceId: string,
   month: string,
-  currency: string | null,
+  payPeriod?: PayPeriodContext | null,
 ): Promise<SubscriptionMonthStatus> {
-  const [year, monthNumber] = month.split('-').map(Number);
   const rows = await charges.find({
-    where: { workspaceId, chargeDate: monthDays(year, monthNumber) },
+    where: { workspaceId, chargeDate: monthDays(periodRangeOfKey(payPeriod, month)) },
     relations: { subscription: true },
     order: { chargeDate: 'ASC' },
   });

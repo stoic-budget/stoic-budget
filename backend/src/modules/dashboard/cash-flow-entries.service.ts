@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { canReadPrivate, PRIVATE_PLACEHOLDER } from '../../common/utils/transaction-privacy.util';
@@ -9,6 +9,7 @@ import type { Statement } from '../../entities/statement.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { BudgetWithinLimitService } from '../budgets/budget-within-limit.service';
 import type { WithinLimitAmount } from '../budgets/budget-within-limit.util';
+import { PayPeriodService } from '../pay-period/pay-period.service';
 import { recentRowHrefs } from './bill-hrefs';
 import { DashboardService, round2 } from './dashboard.service';
 import { parseMonthWindow } from './dashboard-window.util';
@@ -26,6 +27,7 @@ export class CashFlowEntriesService {
     private readonly dashboard: DashboardService,
     @Inject(forwardRef(() => BudgetWithinLimitService))
     private readonly withinLimit: BudgetWithinLimitService,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
 
   /**
@@ -37,7 +39,8 @@ export class CashFlowEntriesService {
     month: string,
     viewerMemberId: string | null,
   ): Promise<DashboardCashFlowEntriesResponse> {
-    const window = parseMonthWindow(month);
+    // The month the dashboard shows: the workspace's own when it starts on another day.
+    const window = parseMonthWindow(month, await this.payPeriods?.contextFor(workspaceId));
     if (!window) {
       return { entries: [] };
     }

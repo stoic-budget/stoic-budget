@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Between,
@@ -39,6 +39,7 @@ import { Workspace } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { BudgetWithinLimitService } from '../budgets/budget-within-limit.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { PayPeriodService } from '../pay-period/pay-period.service';
 import {
   pendingReceiptsQuery,
   QUEUE_DATE_COLUMN,
@@ -51,9 +52,10 @@ import { recentRowHrefs } from './bill-hrefs';
 import {
   type CashFlowRange,
   type DashboardWindow,
+  dashboardWindow,
   daysInMonth,
+  daysInWindow,
   getCashFlowRangeBounds,
-  getMonthWindowBounds,
   getWindowBounds,
   parseMonthWindow,
 } from './dashboard-window.util';
@@ -124,6 +126,7 @@ export class DashboardService {
     private readonly exchangeRatesService: ExchangeRatesService,
     @Inject(forwardRef(() => BudgetWithinLimitService))
     private readonly withinLimit: BudgetWithinLimitService,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
 
   async getDashboard(
@@ -137,9 +140,8 @@ export class DashboardService {
     const days = range === '7d' ? 7 : range === '90d' ? 90 : 30;
     const anchorDate = endDateParam ? new Date(endDateParam) : new Date();
 
-    const requestedWindow = isMonth
-      ? getMonthWindowBounds(anchorDate)
-      : getWindowBounds(days, anchorDate);
+    const payPeriod = await this.payPeriods?.contextFor(workspaceId);
+    const requestedWindow = dashboardWindow(isMonth, days, anchorDate, payPeriod, !!endDateParam);
 
     const [initialSnapshot, memberRole] = await Promise.all([
       this.getSnapshot(workspaceId, requestedWindow.since, requestedWindow.endDate),
@@ -154,9 +156,7 @@ export class DashboardService {
       const latestTransactionDate = await this.getLatestTransactionDate(workspaceId);
 
       if (latestTransactionDate) {
-        effectiveWindow = isMonth
-          ? getMonthWindowBounds(latestTransactionDate)
-          : getWindowBounds(days, latestTransactionDate);
+        effectiveWindow = dashboardWindow(isMonth, days, latestTransactionDate, payPeriod);
         snapshot = await this.getSnapshot(
           workspaceId,
           effectiveWindow.since,
@@ -168,7 +168,7 @@ export class DashboardService {
 
     // A calendar month is always under 90 days, so this naturally keeps
     // cash-flow buckets daily (see getTransactionGroupFormat) for month mode.
-    const bucketDays = isMonth ? daysInMonth(effectiveWindow.since) : days;
+    const bucketDays = isMonth ? daysInWindow(effectiveWindow) : days;
 
     // The month dashboard counts its queues (the month close) for that month too;
     // the rolling 7d/30d/90d ranges keep the live, all-time queue totals.
@@ -1076,7 +1076,7 @@ export class DashboardService {
     month?: string,
     viewerMemberId: string | null = null,
   ): Promise<DashboardTrendsResponse> {
-    const monthWindow = parseMonthWindow(month);
+    const monthWindow = parseMonthWindow(month, await this.payPeriods?.contextFor(workspaceId));
     if (monthWindow) {
       return this.getMonthTrends(workspaceId, monthWindow, viewerMemberId);
     }
@@ -1134,7 +1134,7 @@ export class DashboardService {
     const endOfToday = new Date(now);
     endOfToday.setHours(23, 59, 59, 999);
     const window = isCurrentMonth ? { since: month.since, endDate: endOfToday } : month;
-    const days = daysInMonth(month.since);
+    const days = daysInWindow(month);
 
     const trendData = await this.getTrendData(
       workspaceId,

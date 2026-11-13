@@ -1,0 +1,44 @@
+import * as Schema from 'effect/Schema';
+import { DateOnly, type Wire } from '../common/wire';
+
+/**
+ * When the workspace's month starts (`settings.monthStart`): a day of the
+ * month (a day the month lacks is its last day), the last day, the last
+ * business day, or the day the salary arrives. See `pay-period.ts`.
+ */
+export const MonthStartSetting = Schema.Union([
+  Schema.Struct({
+    kind: Schema.Literal('day'),
+    day: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1), Schema.isLessThanOrEqualTo(31)),
+  }),
+  Schema.Struct({ kind: Schema.Literals(['last_day', 'last_business_day', 'salary']) }),
+]);
+export type MonthStartSetting = Wire<typeof MonthStartSetting>;
+
+export const PayPeriod = Schema.Struct({
+  /** The `YYYY-MM` the period is named after. */
+  month: Schema.String,
+  from: DateOnly,
+  to: DateOnly,
+});
+export type PayPeriod = Wire<typeof PayPeriod>;
+
+/**
+ * `GET /pay-periods`: the workspace's month rule with what it needs to be
+ * worked out on the client (`periodBounds`), and the current and next period.
+ */
+export const PayPeriodsResponse = Schema.Struct({
+  /** As set. */
+  monthStart: MonthStartSetting,
+  /** The detected monthly salary; null when none was found (the month then starts on the 1st). */
+  salary: Schema.NullOr(
+    Schema.Struct({ dayOfMonth: Schema.Number, paydays: Schema.Array(DateOnly) }),
+  ),
+  /** Public holidays the last business day skips, for the years around today. */
+  holidays: Schema.Array(DateOnly),
+  /** The tax country those holidays are of; null when none is set (weekends only). */
+  holidayCountry: Schema.NullOr(Schema.String),
+  current: PayPeriod,
+  next: PayPeriod,
+});
+export type PayPeriodsResponse = Wire<typeof PayPeriodsResponse>;

@@ -2,7 +2,12 @@ import { addDays, format, isValid, parseISO } from 'date-fns';
 import { monthDeepLinkFilters } from '@/app/(main)/statements/components/filters/month-deep-link';
 import { getPresetRange } from '@/app/(main)/statements/components/filters/statement-filter-internals';
 import type { StatementFilterDate } from '@/app/(main)/statements/components/filters/statement-filters';
-import type { ReviewInboxDocument, ReviewInboxItem, ReviewInboxKind } from '@/app/lib/contracts';
+import type {
+  PayPeriodContext,
+  ReviewInboxDocument,
+  ReviewInboxItem,
+  ReviewInboxKind,
+} from '@/app/lib/contracts';
 
 /** The queue's rows, one union narrowed by `kind`. */
 export type {
@@ -172,8 +177,11 @@ const isoDay = (date: Date): string => format(date, 'yyyy-MM-dd');
  * The date filter a link naming a month (`?month=YYYY-MM`, from the dashboard's
  * month close) opens Review with: that whole month, as the dropdown names it.
  */
-export function monthDateFilter(month: string | null): StatementFilterDate | null {
-  return monthDeepLinkFilters(month)?.date ?? null;
+export function monthDateFilter(
+  month: string | null,
+  payPeriod?: PayPeriodContext,
+): StatementFilterDate | null {
+  return monthDeepLinkFilters(month, new Date(), payPeriod)?.date ?? null;
 }
 
 /**

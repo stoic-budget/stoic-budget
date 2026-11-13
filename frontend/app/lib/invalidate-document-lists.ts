@@ -36,6 +36,8 @@ export const FINANCIAL_QUERY_ROOTS = [
   'datev',
   // How each bank's statements parsed (the instance admin's parser health page).
   'parser-health',
+  // The month rule: a month starting on payday moves with the salary rows.
+  'pay-periods',
 ] as const;
 
 /**

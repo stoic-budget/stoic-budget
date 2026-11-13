@@ -1,6 +1,7 @@
 import { flowsSql } from '@/common/utils/counted-transactions.util';
 import { NotFoundException } from '@nestjs/common';
 import { BudgetPeriodType } from '@/entities/budget.entity';
+import type { PayPeriodContext } from '@/contracts';
 import { GoalPlanService } from '@/modules/goals/goal-plan.service';
 
 const WORKSPACE_ID = 'workspace-1';
@@ -20,6 +21,10 @@ interface Options {
   rate?: number;
   /** Collects the conditions the income query was given. */
   incomeClauses?: string[];
+  /** The workspace's month rule (Settings → Start of the month). */
+  payPeriod?: PayPeriodContext;
+  /** Collects the date bounds the contribution queries were given. */
+  contributionBounds?: Array<Record<string, unknown>>;
 }
 
 function createService(options: Options) {
@@ -35,9 +40,10 @@ function createService(options: Options) {
       const builder: Record<string, unknown> = {
         select: vi.fn(() => builder),
         where: vi.fn(() => builder),
-        andWhere: vi.fn((clause: string) => {
+        andWhere: vi.fn((clause: string, params?: Record<string, unknown>) => {
           if (clause.includes('contribution_date')) {
             windowed = true;
+            options.contributionBounds?.push(params ?? {});
           }
           return builder;
         }),
@@ -90,6 +96,9 @@ function createService(options: Options) {
     workspaceRepository,
     goalItemsService,
     exchangeRatesService,
+    options.payPeriod
+      ? ({ contextFor: vi.fn(async () => options.payPeriod) } as never)
+      : undefined,
   );
 }
 
@@ -135,6 +144,26 @@ describe('GoalPlanService', () => {
 
     expect(plan.monthsLeft).toBe(0);
     expect(plan.requiredPerMonth).toBe(2000000);
+  });
+
+  it("reads the history over the workspace's last three months", async () => {
+    const calendar: Array<Record<string, unknown>> = [];
+    await createService({ goal: relocation, contributionBounds: calendar }).getPlan(
+      GOAL_ID,
+      WORKSPACE_ID,
+      NOW,
+    );
+    expect(calendar).toEqual([{ start: '2026-02-01' }, { end: '2026-04-30' }]);
+
+    // Day 15: 8 May is in "April" (15 Apr – 14 May), so the three before it
+    // run from 15 January to 14 April.
+    const shifted: Array<Record<string, unknown>> = [];
+    await createService({
+      goal: relocation,
+      contributionBounds: shifted,
+      payPeriod: { monthStart: { kind: 'day', day: 15 } },
+    }).getPlan(GOAL_ID, WORKSPACE_ID, NOW);
+    expect(shifted).toEqual([{ start: '2026-01-15' }, { end: '2026-04-14' }]);
   });
 
   it('averages the pace over the completed history months', async () => {

@@ -9,6 +9,7 @@ import { Statement } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { User } from '../../entities/user.entity';
 import { Workspace } from '../../entities/workspace.entity';
+import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { AuditController } from './audit.controller';
 import { AuditService } from './audit.service';
 import { AuditDescriptionService } from './description/audit-description.service';
@@ -28,6 +29,7 @@ import { RollbackService } from './rollback/rollback.service';
       CustomTable,
       CustomTableColumn,
     ]),
+    PayPeriodModule,
   ],
   controllers: [AuditController],
   providers: [AuditService, AuditDescriptionService, RollbackService, AuditInterceptor],

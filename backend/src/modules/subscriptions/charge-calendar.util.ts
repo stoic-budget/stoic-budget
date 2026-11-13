@@ -77,8 +77,10 @@ export function projectMonthlyCharges(
 }
 
 /**
- * The charges of one subscription in the calendar month `today` falls in, split
- * by date: on or before today counts as paid, after it as still to pay.
+ * The charges of one subscription in a month (the calendar month `today` falls
+ * in unless `month` names the workspace's own), split by date: on or before
+ * today counts as paid, after it as still to pay. `month` runs from the local
+ * midnight of its first day to that of its last.
  *
  * Walks back from the next charge as well as forward, because the daily cron
  * has already rolled `nextChargeDate` past the charges made earlier this month.
@@ -87,6 +89,10 @@ export function splitMonthCharges(
   nextChargeDate: Date | null,
   frequency: SubscriptionFrequency,
   today: Date,
+  month: { start: Date; end: Date } = {
+    start: new Date(today.getFullYear(), today.getMonth(), 1),
+    end: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+  },
 ): { paid: number; unpaid: number } {
   const split = { paid: 0, unpaid: 0 };
   if (!nextChargeDate) return split;
@@ -94,7 +100,12 @@ export function splitMonthCharges(
   const anchor = new Date(nextChargeDate);
   if (Number.isNaN(anchor.getTime())) return split;
 
-  const month = bucketOf(today);
+  const first = new Date(month.start.getFullYear(), month.start.getMonth(), month.start.getDate());
+  const afterLast = new Date(
+    month.end.getFullYear(),
+    month.end.getMonth(),
+    month.end.getDate() + 1,
+  );
   const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
   const count = (charge: Date): void => {
     if (charge < endOfToday) split.paid += 1;
@@ -103,14 +114,14 @@ export function splitMonthCharges(
 
   for (let index = -1; index > -MAX_STEPS; index -= 1) {
     const charge = chargeAt(anchor, frequency, index);
-    if (bucketOf(charge) < month) break;
-    if (bucketOf(charge) === month) count(charge);
+    if (charge < first) break;
+    if (charge < afterLast) count(charge);
   }
   // Forward from the anchor itself; a stale one in an earlier month is caught up.
   for (let index = 0; index < MAX_STEPS; index += 1) {
     const charge = chargeAt(anchor, frequency, index);
-    if (bucketOf(charge) > month) break;
-    if (bucketOf(charge) === month) count(charge);
+    if (charge >= afterLast) break;
+    if (charge >= first) count(charge);
   }
 
   return split;

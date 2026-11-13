@@ -59,6 +59,11 @@ vi.mock('@/app/components/dashboard/OverviewTab', () => ({
   OverviewTab: () => <div>Overview tab</div>,
 }));
 
+// The workspace's month rule is a request of its own; a calendar month here.
+vi.mock('@/app/hooks/usePayPeriods', () => ({
+  usePayPeriods: () => ({ data: undefined, context: undefined }),
+}));
+
 vi.mock('@/app/contexts/WorkspaceContext', () => ({
   useWorkspace: () => ({
     currentWorkspace: { id: 'workspace-1' },

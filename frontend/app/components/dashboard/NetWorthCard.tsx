@@ -12,9 +12,9 @@ import { TextTabs } from '@/app/components/ui/text-tabs';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import { formatStoredDateWithOptions } from '@/app/lib/user-format-store';
-import { monthEndOrToday } from './month-end';
 import { useIsWideSection } from './section-span';
 import { CardEmpty, CardLink, DashboardCard, Figure } from './ui';
+import { usePresentPeriod } from './use-period-label';
 
 /**
  * The periods the tabs offer, shortest first. A fixed span is labelled short
@@ -48,7 +48,8 @@ export function NetWorthCard({ month, monthLabel }: NetWorthCardProps): React.JS
   const t = useIntlayer('overviewTab');
   const netWorthText = useIntlayer('netWorthPage');
   const { locale } = useLocale();
-  const asOf = monthEndOrToday(month);
+  // The last day of the shown month by the workspace's month rule; null for the present one.
+  const asOf = usePresentPeriod().measuredOn(month);
   const { data, isFetching, range, setRange } = useNetWorthPreset('30d', asOf);
   const wide = useIsWideSection();
 

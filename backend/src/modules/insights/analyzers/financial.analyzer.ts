@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { flowsSql } from '../../../common/utils/counted-transactions.util';
@@ -10,8 +10,10 @@ import { UNCATEGORIZED_CATEGORY_NAME } from '../../categories/uncategorized-cate
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
 import { buildRateMap, convertWith, normalizeCurrency } from '../../goals/goal-money.util';
 import { NetWorthService } from '../../net-worth/net-worth.service';
+import { PayPeriodService, type ResolvedPayPeriod } from '../../pay-period/pay-period.service';
 import type { AnalysisContext, InsightAnalyzer, InsightCandidate } from './analyzer.interface';
-import { endOfMonth, monthBounds, monthKey, monthsBetween, round2 } from './month-bounds';
+import { dayOfRow, endOfMonth, monthBounds, monthKey, monthsBetween, round2 } from './month-bounds';
+import { monthlyTotalsByCurrency } from './monthly-totals';
 
 /** How many fully-elapsed months a category is compared against. */
 const TRAILING_MONTHS = 3;
@@ -61,6 +63,7 @@ export class FinancialAnalyzer implements InsightAnalyzer {
     private readonly exchangeRatesService: ExchangeRatesService,
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
 
   /**
@@ -97,14 +100,16 @@ export class FinancialAnalyzer implements InsightAnalyzer {
     }
 
     const now = new Date();
+    // Months are the workspace's own when it starts them on another day than the 1st.
+    const payPeriod = await this.payPeriods?.contextFor(context.workspaceId);
     const [categoryTotals, savingsRate, riskyAllocation] = await Promise.all([
-      this.loadCategoryTotals(context.workspaceId, now),
-      this.savingsRateAdvice(context.workspaceId, now),
+      this.loadCategoryTotals(context.workspaceId, now, payPeriod),
+      this.savingsRateAdvice(context.workspaceId, now, payPeriod),
       this.riskyAllocationAdvice(context.workspaceId),
     ]);
 
     const candidates = await Promise.all([
-      this.risingCategoryAdvice(context.workspaceId, categoryTotals, now),
+      this.risingCategoryAdvice(context.workspaceId, categoryTotals, monthKey(now, payPeriod)),
       this.unbudgetedTopCategoryAdvice(context.workspaceId, categoryTotals),
     ]);
 
@@ -154,16 +159,21 @@ export class FinancialAnalyzer implements InsightAnalyzer {
    * three months before it, in one pass — the rising-category and
    * unbudgeted-category signals both read from this.
    */
-  private async loadCategoryTotals(workspaceId: string, now: Date): Promise<CategoryMonthTotal[]> {
-    const { start } = monthBounds(now, TRAILING_MONTHS);
-    const { end } = monthBounds(now, 0);
+  private async loadCategoryTotals(
+    workspaceId: string,
+    now: Date,
+    payPeriod?: ResolvedPayPeriod,
+  ): Promise<CategoryMonthTotal[]> {
+    const { start } = monthBounds(now, TRAILING_MONTHS, payPeriod);
+    const { end } = monthBounds(now, 0, payPeriod);
 
     const rows = await this.transactionRepository
       .createQueryBuilder('t')
       .innerJoin('t.category', 'category')
       .select('t.category_id', 'categoryId')
       .addSelect('category.name', 'categoryName')
-      .addSelect("date_trunc('month', t.transaction_date)", 'month')
+      // Per day, not date_trunc('month'): a month may start on another day than the 1st.
+      .addSelect("TO_CHAR(t.transaction_date, 'YYYY-MM-DD')", 'month')
       .addSelect('t.currency', 'currency')
       .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
       .where('t.workspace_id = :workspaceId', { workspaceId })
@@ -179,7 +189,7 @@ export class FinancialAnalyzer implements InsightAnalyzer {
       })
       .groupBy('t.category_id')
       .addGroupBy('category.name')
-      .addGroupBy("date_trunc('month', t.transaction_date)")
+      .addGroupBy('t.transaction_date')
       .addGroupBy('t.currency')
       .getRawMany<{
         categoryId: string;
@@ -192,7 +202,7 @@ export class FinancialAnalyzer implements InsightAnalyzer {
     const convert = await this.inWorkspaceCurrency(workspaceId, rows);
     const totals = new Map<string, CategoryMonthTotal>();
     for (const row of rows) {
-      const monthIndex = monthsBetween(new Date(row.month), now);
+      const monthIndex = monthsBetween(dayOfRow(row.month), now, payPeriod);
       const key = `${row.categoryId}:${monthIndex}`;
       const entry = totals.get(key) ?? {
         categoryId: row.categoryId,
@@ -214,7 +224,7 @@ export class FinancialAnalyzer implements InsightAnalyzer {
   private async risingCategoryAdvice(
     workspaceId: string,
     totals: CategoryMonthTotal[],
-    now: Date,
+    month: string,
   ): Promise<InsightCandidate | null> {
     const trailingByCategory = new Map<string, number>();
     for (const row of totals.filter(item => item.monthIndex !== 0)) {
@@ -260,7 +270,7 @@ export class FinancialAnalyzer implements InsightAnalyzer {
         priority: 58,
         // The month the comparison is about: the link carries it so the
         // leaderboard it opens shows this month's total, not an all-time one.
-        month: monthKey(now),
+        month,
         categoryId: best.row.categoryId,
         categoryName: best.row.categoryName,
         current: round2(best.row.total),
@@ -341,10 +351,11 @@ export class FinancialAnalyzer implements InsightAnalyzer {
   private async savingsRateAdvice(
     workspaceId: string,
     now: Date,
+    payPeriod?: ResolvedPayPeriod,
   ): Promise<InsightCandidate | null> {
     const [current, previous] = await Promise.all([
-      this.monthlyTotals(workspaceId, now, 1),
-      this.monthlyTotals(workspaceId, now, 2),
+      this.monthlyTotals(workspaceId, monthBounds(now, 1, payPeriod)),
+      this.monthlyTotals(workspaceId, monthBounds(now, 2, payPeriod)),
     ]);
 
     if (current.income <= 0 || previous.income <= 0) {
@@ -360,7 +371,7 @@ export class FinancialAnalyzer implements InsightAnalyzer {
     }
 
     const isUp = diff > 0;
-    const judged = monthKey(monthBounds(now, 1).start);
+    const judged = monthBounds(now, 1, payPeriod).key;
     return {
       type: InsightType.SAVINGS_RATE_TREND,
       category: InsightCategory.TREND,
@@ -380,38 +391,15 @@ export class FinancialAnalyzer implements InsightAnalyzer {
         income: round2(current.income),
         spent: round2(current.spent),
       },
-      expiresAt: endOfMonth(now),
+      expiresAt: endOfMonth(now, payPeriod),
     };
   }
 
   private async monthlyTotals(
     workspaceId: string,
-    now: Date,
-    monthsAgo: number,
+    range: { start: Date; end: Date },
   ): Promise<{ income: number; spent: number }> {
-    const { start, end } = monthBounds(now, monthsAgo);
-
-    const rows = await this.transactionRepository
-      .createQueryBuilder('t')
-      .select('t.currency', 'currency')
-      .addSelect(
-        'COALESCE(SUM(CASE WHEN t.transaction_type = :income THEN ABS(t.amount) ELSE 0 END), 0)',
-        'income',
-      )
-      .addSelect(
-        'COALESCE(SUM(CASE WHEN t.transaction_type = :expense THEN ABS(t.amount) ELSE 0 END), 0)',
-        'spent',
-      )
-      .where('t.workspace_id = :workspaceId', { workspaceId })
-      .andWhere('t.transaction_date >= :start', { start })
-      .andWhere('t.transaction_date <= :end', { end })
-      .andWhere('t.is_duplicate = false')
-      .andWhere('t.transfer_pair_id IS NULL')
-      .andWhere(flowsSql('t'))
-      .setParameters({ income: TransactionType.INCOME, expense: TransactionType.EXPENSE })
-      .groupBy('t.currency')
-      .getRawMany<{ currency: string | null; income: string; spent: string }>();
-
+    const rows = await monthlyTotalsByCurrency(this.transactionRepository, workspaceId, range);
     const convert = await this.inWorkspaceCurrency(workspaceId, rows);
     return rows.reduce(
       (sum, row) => ({
