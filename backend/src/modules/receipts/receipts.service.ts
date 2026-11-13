@@ -1085,12 +1085,12 @@ export class ReceiptsService {
     try {
       const buffer = await fs.readFile(filePath);
       const originalname = path.basename(filePath);
-      await this.attachmentsService.create(transactionId, receipt.workspaceId, userId, {
+      await this.attachmentsService.attachFromServer(transactionId, receipt.workspaceId, userId, {
         originalname,
         mimetype: mimeTypeOf(originalname),
         size: buffer.length,
         buffer,
-      } as Express.Multer.File);
+      });
     } catch (error) {
       this.logger.warn(
         `Could not attach receipt ${receipt.id} file to transaction ${transactionId}: ${
