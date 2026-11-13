@@ -80,6 +80,17 @@ export const WalletReconciliation = Schema.Struct({
 });
 export type WalletReconciliation = Wire<typeof WalletReconciliation>;
 
+/**
+ * The bank's balance the person last confirmed, and whether the books still
+ * agree with it on that day (a row edited or removed since can undo a match).
+ */
+export const WalletBalanceCheck = Schema.Struct({
+  date: DateOnly,
+  bankBalance: Schema.Number,
+  stillMatches: Schema.Boolean,
+});
+export type WalletBalanceCheck = Wire<typeof WalletBalanceCheck>;
+
 /** One row of `GET /wallets`. */
 export const WalletItem = Schema.Struct({
   id: Schema.String,
@@ -106,6 +117,8 @@ export const WalletItem = Schema.Struct({
   /** Date of the latest counted row, or null when there is none yet. */
   lastActivityAt: Schema.NullOr(DateOnly),
   reconciliation: Schema.NullOr(WalletReconciliation),
+  /** The last time the person held the balance against the bank's figure and it matched. */
+  balanceCheck: Schema.NullOr(WalletBalanceCheck),
   createdAt: Timestamp,
   updatedAt: Timestamp,
 });

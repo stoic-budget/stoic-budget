@@ -53,7 +53,7 @@ export interface Transaction {
   // Transfer between the user's own accounts (both legs share the id)
   transferPairId?: string | null;
   transferPairSource?: 'auto' | 'manual' | 'rejected' | null;
-  transferPairKind?: 'transfer' | 'reimbursement' | 'investment' | null;
+  transferPairKind?: 'transfer' | 'reimbursement' | 'investment' | 'adjustment' | null;
   // The investment account the row is linked to: an expense moved into it or income taken
   // out of it (a one-leg transfer of kind `investment`), or a dividend it paid (no pair)
   investmentAccountId?: string | null;

@@ -65,6 +65,8 @@ export const InvestmentContribution = Schema.Struct({
   id: Schema.String,
   investmentAccountId: Schema.NullOr(Schema.String),
   transferPairId: Schema.NullOr(Schema.String),
-  transferPairKind: Schema.NullOr(Schema.Literals(['transfer', 'reimbursement', 'investment'])),
+  transferPairKind: Schema.NullOr(
+    Schema.Literals(['transfer', 'reimbursement', 'investment', 'adjustment']),
+  ),
 });
 export type InvestmentContribution = Wire<typeof InvestmentContribution>;

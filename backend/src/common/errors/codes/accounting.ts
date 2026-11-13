@@ -37,6 +37,13 @@ export const ACCOUNTING_ERRORS = {
   WALLET_STATEMENT_CURRENCY_MISMATCH:
     'The account holds {{walletCurrency}}; the statement is in {{currency}}',
   WALLET_NOT_FOUND: 'Account not found in this workspace',
+  BALANCE_CHECK_FUTURE_DATE: 'A balance can be checked for today or an earlier day',
+  BALANCE_CHECK_UNCONVERTED:
+    'Rows in {{currencies}} have no exchange rate for their day yet; add the rate before booking the difference',
+  BALANCE_CHECK_PENDING_REVIEW:
+    'Rows of this account up to that day still wait in Review or are set aside as duplicates; settle them before booking the difference',
+  BALANCE_CHECK_MISMATCH:
+    'The balance does not match the bank; book the difference or check again later',
   TRANSFER_SAME_ACCOUNT: 'The transaction is already in this account',
   // Payables
   PAYABLE_PAYMENT_NOT_POSITIVE: 'A payment must be more than zero',
