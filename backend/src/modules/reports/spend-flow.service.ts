@@ -8,8 +8,9 @@ import { Category } from '../../entities/category.entity';
 import { FileType } from '../../entities/statement.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
+import { DAY_SQL, loadDayConverter } from '../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
-import { buildRateMap, convertWith, normalizeCurrency } from '../goals/goal-money.util';
+import { normalizeCurrency } from '../goals/goal-money.util';
 import { buildSpendFlow, buildTagFlow, type SpendFlow } from './spend-flow.util';
 import { countedFlowsQuery, perTag } from './tag-flows.util';
 
@@ -23,6 +24,7 @@ interface MerchantTotalRow {
   merchantKey: string | null;
   merchantName: string | null;
   currency: string | null;
+  day: string;
   total: string;
 }
 
@@ -30,6 +32,7 @@ interface TagTotalRow {
   tagId: string;
   name: string;
   currency: string | null;
+  day: string;
   total: string;
 }
 
@@ -139,6 +142,7 @@ export class SpendFlowService {
         'merchantName',
       )
       .addSelect('t.currency', 'currency')
+      .addSelect(DAY_SQL, 'day')
       .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total');
 
     const [rows, categories] = await Promise.all([
@@ -146,6 +150,7 @@ export class SpendFlowService {
         .groupBy('t.category_id')
         .addGroupBy(merchant)
         .addGroupBy('t.currency')
+        .addGroupBy(DAY_SQL)
         .getRawMany<MerchantTotalRow>(),
       this.categoryRepository.find({
         where: { workspaceId },
@@ -158,19 +163,14 @@ export class SpendFlowService {
       }),
     ]);
 
-    const rates = await buildRateMap(
-      this.exchangeRatesService,
-      rows.map(row => normalizeCurrency(row.currency ?? currency)),
-      currency,
-      workspaceId,
-    );
-
+    // Each day at its own rate, as the cash-flow map beside it.
+    const convert = await this.dayConverter(rows, currency, workspaceId);
     return buildSpendFlow(
       rows.map(row => ({
         categoryId: row.categoryId,
         merchantKey: row.merchantKey,
         merchantName: row.merchantName,
-        amount: convertWith(rates, row.total, row.currency ?? currency),
+        amount: convert(row.total, row.currency ?? currency, row.day),
       })),
       categories.map(category => ({
         id: category.id,
@@ -204,22 +204,19 @@ export class SpendFlowService {
       .select('tp.tag_id', 'tagId')
       .addSelect('MAX(tag.name)', 'name')
       .addSelect('t.currency', 'currency')
+      .addSelect(DAY_SQL, 'day')
       .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
       .groupBy('tp.tag_id')
       .addGroupBy('t.currency')
+      .addGroupBy(DAY_SQL)
       .getRawMany<TagTotalRow>();
 
-    const rates = await buildRateMap(
-      this.exchangeRatesService,
-      rows.map(row => normalizeCurrency(row.currency ?? currency)),
-      currency,
-      workspaceId,
-    );
+    const convert = await this.dayConverter(rows, currency, workspaceId);
     return buildTagFlow(
       rows.map(row => ({
         tagId: row.tagId,
         name: row.name,
-        amount: convertWith(rates, row.total, row.currency ?? currency),
+        amount: convert(row.total, row.currency ?? currency, row.day),
       })),
       {
         groupBy: 'tag',
@@ -229,6 +226,16 @@ export class SpendFlowService {
         minMerchantShare: MIN_MERCHANT_SHARE,
       },
     );
+  }
+
+  /** A row without a currency is in the workspace's. */
+  private dayConverter(
+    rows: Array<{ currency: string | null; day: string }>,
+    currency: string,
+    workspaceId: string,
+  ) {
+    const days = rows.map(row => ({ currency: row.currency ?? currency, day: row.day }));
+    return loadDayConverter(this.exchangeRatesService, currency, days, workspaceId);
   }
 
   private async getWorkspaceCurrency(workspaceId: string): Promise<string> {

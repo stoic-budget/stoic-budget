@@ -1,71 +1,102 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { fetchExchangeRate } from '@/app/lib/exchange-rate';
+import apiClient from '@/app/lib/api';
+import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 
-type RecordWithCurrency = { currencyValue?: string | null };
+type RecordWithCurrency = { currencyValue?: string | null; dateValue?: string | null };
+
+const dayOf = (date: string | null | undefined): string => (date ?? '').slice(0, 10);
+const keyOf = (currency: string, day: string): string => `${currency}:${day}`;
 
 /**
- * Fetches conversion rates for every distinct currency present in `records` and
- * returns a `convert` helper that turns an amount into `targetCurrency`.
- * Amounts in unrecognized/not-yet-loaded currencies pass through unconverted.
+ * Converts amounts into `targetCurrency` at the rate of each record's own day,
+ * as Reports do, so a leaderboard and the cash-flow map beside it agree. The
+ * rates for every (currency, day) in `records` come in one request. An amount
+ * whose currency has no rate that day is left out (0), not counted 1:1; one
+ * whose rate has not arrived yet passes through until it does.
  */
 export function useCurrencyConversion(
   records: RecordWithCurrency[],
   targetCurrency: string,
-): { convert: (amount: number, currency: string | null | undefined) => number } {
-  const [rates, setRates] = useState<Record<string, number>>({});
+): {
+  convert: (
+    amount: number,
+    currency: string | null | undefined,
+    date: string | null | undefined,
+  ) => number;
+} {
+  const [rates, setRates] = useState<Record<string, number | null>>({});
 
-  const currenciesKey = useMemo(() => {
+  const pairsKey = useMemo(() => {
     const set = new Set(
-      records
-        .map(r => (r.currencyValue || '').toUpperCase())
-        .filter(c => c && c !== targetCurrency),
+      records.flatMap(record => {
+        const currency = (record.currencyValue || '').toUpperCase();
+        return currency && currency !== targetCurrency
+          ? [keyOf(currency, dayOf(record.dateValue))]
+          : [];
+      }),
     );
     return Array.from(set).sort().join(',');
   }, [records, targetCurrency]);
 
   useEffect(() => {
-    const currencies = currenciesKey ? currenciesKey.split(',') : [];
-    if (currencies.length === 0) {
+    const pairs = pairsKey ? pairsKey.split(',') : [];
+    if (pairs.length === 0) {
       return;
     }
     let cancelled = false;
 
     const loadRates = async (): Promise<void> => {
-      const entries = await Promise.all(
-        currencies.map(
-          async from => [from, await fetchExchangeRate(from, targetCurrency)] as const,
-        ),
-      );
-      if (cancelled) {
-        return;
-      }
-      setRates(prev => {
-        const next = { ...prev };
-        for (const [from, rate] of entries) {
-          if (rate !== null) {
-            next[from] = rate;
-          }
-        }
-        return next;
+      const items = pairs.map(pair => {
+        const [currency, day] = pair.split(':');
+        return { amount: 1, currency, date: day || null };
       });
+      try {
+        const body = { items, targetCurrency } satisfies ContractInput<'BulkConvertBody'>;
+        const response = await apiClient.post('/exchange-rates/convert', body);
+        const { results } = await checkContract(
+          'BulkConversion',
+          response.data,
+          '/exchange-rates/convert',
+        );
+        if (cancelled) {
+          return;
+        }
+        setRates(prev => {
+          const next = { ...prev };
+          pairs.forEach((pair, index) => {
+            const result = results[index];
+            next[pair] = !result || result.missing ? null : result.rate;
+          });
+          return next;
+        });
+      } catch {
+        // Rates unavailable for now: amounts pass through until they load.
+      }
     };
 
     void loadRates();
     return () => {
       cancelled = true;
     };
-  }, [currenciesKey, targetCurrency]);
+  }, [pairsKey, targetCurrency]);
 
   const convert = useCallback(
-    (amount: number, currency: string | null | undefined): number => {
+    (
+      amount: number,
+      currency: string | null | undefined,
+      date: string | null | undefined,
+    ): number => {
       const source = (currency || '').toUpperCase();
       if (!source || source === targetCurrency) {
         return amount;
       }
-      const rate = rates[source];
-      return rate !== undefined ? amount * rate : amount;
+      const rate = rates[keyOf(source, dayOf(date))];
+      if (rate === undefined) {
+        return amount;
+      }
+      return rate === null ? 0 : amount * rate;
     },
     [rates, targetCurrency],
   );
