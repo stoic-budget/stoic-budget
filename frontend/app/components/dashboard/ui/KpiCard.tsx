@@ -2,7 +2,6 @@ import LinearProgress from '@mui/material/LinearProgress';
 import clsx from 'clsx';
 import Link from 'next/link';
 import type React from 'react';
-import type { LucideIcon } from '@/app/components/icons';
 import { PRIVATE_CLASS } from '@/app/components/ui/private-amount';
 import { GRID_COLUMNS } from '../overview-layout';
 import { useSectionSpan } from '../section-span';
@@ -35,11 +34,6 @@ export interface KpiCardProps {
   details?: Array<{ label: string; value: React.ReactNode; plain?: boolean }>;
   /** With half a row or more: a full chart in place of the sparkline. */
   wideChart?: React.ReactNode;
-  /**
-   * A line icon of what the figure is, drawn faintly in the top-right corner
-   * behind the content and cut by the card's edge. Decorative: the label says it.
-   */
-  icon?: LucideIcon;
   /** The figure the Overview leads with: it takes its tone's colour, not only the dot. */
   lead?: boolean;
   /** A share used, in percent: a bar at the foot of the tile in place of the sparkline. */
@@ -87,7 +81,6 @@ export function KpiCard({
   wideSpark,
   details,
   wideChart,
-  icon: Icon,
   lead = false,
   meter,
 }: KpiCardProps): React.JSX.Element {
@@ -97,12 +90,6 @@ export function KpiCard({
   const line = chart || meter ? undefined : roomy && wideSpark ? wideSpark : spark;
   const body = (
     <>
-      {Icon && (
-        // The wrapper carries the mark: line icons do not pass extra attributes on.
-        <span data-skeleton-skip="">
-          <Icon className="seneca-dashboard__stat-icon" aria-hidden="true" />
-        </span>
-      )}
       <div className="seneca-dashboard__stat-label">
         {/* Unless it leads, the figure stays ink; the tone shows as this dot and the sparkline. */}
         {tone !== 'neutral' && (
