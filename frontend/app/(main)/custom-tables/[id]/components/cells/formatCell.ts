@@ -131,6 +131,10 @@ export const isCurrencyCodeColumn = (column: CustomTableColumn): boolean =>
 export const isCategoryColumn = (column: CustomTableColumn): boolean =>
   column.type === 'text' && sourceField(column) === 'category';
 
+/** A text column holding tag names ("A, B"), tagged the same way; it gets the tag drawer. */
+export const isTagsColumn = (column: CustomTableColumn): boolean =>
+  column.type === 'text' && sourceField(column) === 'tags';
+
 /**
  * A cell that shows an app record field the app keeps itself (a statement's
  * file name, an invoice total): the table can't change it. Only on rows that
