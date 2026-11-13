@@ -88,7 +88,10 @@ export function applyListFilters(
   }
 
   if (filters.type === 'transfer') {
-    query.andWhere('transaction.transferPairId IS NOT NULL');
+    // A balance adjustment is paired with itself to stay out of spending; it moved no money.
+    query
+      .andWhere('transaction.transferPairId IS NOT NULL')
+      .andWhere("COALESCE(transaction.transferPairKind, '') <> 'adjustment'");
   } else if (filters.type) {
     query.andWhere('transaction.transactionType = :type', { type: filters.type });
   }

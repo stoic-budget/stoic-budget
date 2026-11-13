@@ -96,6 +96,22 @@ export class Wallet {
   @Column({ name: 'owner_member_id', type: 'uuid', nullable: true })
   ownerMemberId: string | null;
 
+  /**
+   * The last day the person held the balance against the bank's and it
+   * matched, with the bank's figure: "Checked against the bank on …".
+   */
+  @Column({ name: 'balance_checked_at', type: 'date', nullable: true })
+  balanceCheckedAt: string | null;
+
+  @Column({
+    name: 'balance_checked_amount',
+    type: 'decimal',
+    precision: 15,
+    scale: 2,
+    nullable: true,
+  })
+  balanceCheckedAmount: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

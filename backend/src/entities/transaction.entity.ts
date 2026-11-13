@@ -52,6 +52,11 @@ export enum TransferPairKind {
   REIMBURSEMENT = 'reimbursement',
   /** Money moved into an investment or retirement account: a one-leg transfer. */
   INVESTMENT = 'investment',
+  /**
+   * A one-leg row booked to bring an account in line with the balance the bank
+   * shows: it moves the balance and net worth, never spending or income.
+   */
+  ADJUSTMENT = 'adjustment',
 }
 
 /** How the two legs of a transfer came to be linked. */

@@ -81,7 +81,9 @@ export const TransactionListItem = Schema.Struct({
   privateCategoryId: Schema.NullOr(Schema.String),
   transferPairId: Schema.NullOr(Schema.String),
   transferPairSource: Schema.NullOr(Schema.Literals(['auto', 'manual', 'rejected'])),
-  transferPairKind: Schema.NullOr(Schema.Literals(['transfer', 'reimbursement', 'investment'])),
+  transferPairKind: Schema.NullOr(
+    Schema.Literals(['transfer', 'reimbursement', 'investment', 'adjustment']),
+  ),
   /** The expense this income pays back. */
   reimbursementOfId: Schema.NullOr(Schema.String),
   createdAt: Timestamp,

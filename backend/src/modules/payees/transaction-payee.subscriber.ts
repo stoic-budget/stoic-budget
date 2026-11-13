@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type { DataSource, EntitySubscriberInterface, InsertEvent, UpdateEvent } from 'typeorm';
 import { payeeKeyOf } from '../../common/utils/payee-key.util';
-import { Transaction } from '../../entities/transaction.entity';
+import { Transaction, TransferPairKind } from '../../entities/transaction.entity';
 import { resolvePayeeId } from './payee-resolution';
 
 /**
@@ -11,6 +11,10 @@ import { resolvePayeeId } from './payee-resolution';
  * Telegram). Only `save()` reaches a subscriber: a path that writes with
  * `update()` or a raw insert has to call `resolvePayeeId` itself.
  */
+/** A balance adjustment is a bookkeeping row, not a merchant: it never gets a payee. */
+const isAdjustment = (row: Pick<Transaction, 'transferPairKind'>) =>
+  row.transferPairKind === TransferPairKind.ADJUSTMENT;
+
 @Injectable()
 export class TransactionPayeeSubscriber implements EntitySubscriberInterface<Transaction> {
   constructor(@InjectDataSource() dataSource: DataSource) {
@@ -23,7 +27,7 @@ export class TransactionPayeeSubscriber implements EntitySubscriberInterface<Tra
 
   async beforeInsert(event: InsertEvent<Transaction>): Promise<void> {
     const transaction = event.entity;
-    if (!transaction?.workspaceId || transaction.payeeId) {
+    if (!transaction?.workspaceId || transaction.payeeId || isAdjustment(transaction)) {
       return;
     }
     transaction.payeeId = await resolvePayeeId(event.manager, transaction.workspaceId, transaction);
@@ -34,6 +38,9 @@ export class TransactionPayeeSubscriber implements EntitySubscriberInterface<Tra
     const transaction = event.entity as Transaction | undefined;
     const before = event.databaseEntity;
     if (!(transaction?.workspaceId && before) || transaction.counterpartyName === undefined) {
+      return;
+    }
+    if (isAdjustment(transaction) || isAdjustment(before)) {
       return;
     }
     if (transaction.payeeId !== before.payeeId) {

@@ -1182,7 +1182,7 @@ export class SubscriptionsService {
       .where('tx.workspaceId = :workspaceId', { workspaceId })
       .andWhere('(tx.statementId IS NULL OR statement.deletedAt IS NULL)')
       .andWhere('tx.transactionType = :type', { type: TransactionType.EXPENSE })
-      .andWhere('tx.amount IS NOT NULL')
+      .andWhere("tx.amount IS NOT NULL AND COALESCE(tx.transferPairKind, '') <> 'adjustment'")
       .andWhere('tx.transactionDate >= :since', { since: localDay(since) })
       .andWhere(
         'NOT EXISTS (SELECT 1 FROM subscription_charges charge WHERE charge.transaction_id = tx.id)',
