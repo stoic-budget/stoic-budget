@@ -1,4 +1,5 @@
 import type {
+  AdminSystemHealth,
   AuthUser,
   BudgetItem,
   CategoryItem,
@@ -12,6 +13,8 @@ import type {
   StorageFileDetails,
   StorageTag,
   SubscriptionItem,
+  SystemHealthCheck,
+  SystemHealthQueue,
   TaxJurisdictionItem,
   TransactionListItem,
   WalletItem,
@@ -421,5 +424,45 @@ export function storageFileDetails(id: string, tags: StorageTag[] = []): Storage
     tags,
     isOwner: true,
     fileAvailability: { onDisk: true, inDb: false, status: 'disk' },
+  };
+}
+
+export function healthCheck(
+  overrides: Partial<SystemHealthCheck> & Pick<SystemHealthCheck, 'key'>,
+): SystemHealthCheck {
+  return { level: 'ok', reason: 'ok', since: null, freeBytes: null, url: null, ...overrides };
+}
+
+export function healthQueue(
+  overrides: Partial<SystemHealthQueue> & Pick<SystemHealthQueue, 'name'>,
+): SystemHealthQueue {
+  return {
+    level: 'ok',
+    reason: 'ok',
+    workerSeenAt: TIMESTAMP,
+    waiting: 0,
+    delayed: 0,
+    active: 0,
+    failed: 0,
+    oldestWaitingSeconds: null,
+    ...overrides,
+  };
+}
+
+/** A healthy server; override the part a test is about. */
+export function systemHealth(overrides: Partial<AdminSystemHealth> = {}): AdminSystemHealth {
+  return {
+    level: 'ok',
+    checkedAt: TIMESTAMP,
+    services: [healthCheck({ key: 'database' }), healthCheck({ key: 'redis' })],
+    queues: [healthQueue({ name: 'ledger-sync' }), healthQueue({ name: 'statement-parsing' })],
+    config: [
+      healthCheck({ key: 'smtp', level: 'off', reason: 'not_configured' }),
+      healthCheck({ key: 'push' }),
+      healthCheck({ key: 'backups', level: 'off', reason: 'not_configured' }),
+      healthCheck({ key: 'app_url', url: 'https://budget.example.co.il' }),
+      healthCheck({ key: 'encryption_key' }),
+    ],
+    ...overrides,
   };
 }

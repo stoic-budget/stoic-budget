@@ -252,5 +252,7 @@ export const queryKeys = {
   systemUpdate: () => ['system-update'] as const,
   /** Instance-wide too: every workspace's statements, as counts per bank and layout. */
   parserHealth: () => ['parser-health'] as const,
+  /** Instance-wide: the server's services, queues and setup, for its admins. */
+  systemHealth: () => ['system-health'] as const,
   workspaceVersions: (workspaceId: string | null) => ['workspace-versions', workspaceId] as const,
 } as const;
