@@ -17,6 +17,7 @@ import { TaxModule } from '../tax/tax.module';
 import { CrossStatementDeduplicationService } from './services/cross-statement-deduplication.service';
 import { ManualRowDuplicateService } from './services/manual-row-duplicate.service';
 import { TransactionAttachmentsService } from './services/transaction-attachments.service';
+import { TransactionCommentEditService } from './services/transaction-comment-edit.service';
 import { TransactionFingerprintService } from './services/transaction-fingerprint.service';
 import { TransactionHistoryService } from './services/transaction-history.service';
 import { TransactionTagsService } from './services/transaction-tags.service';
@@ -60,6 +61,7 @@ import { TransactionsService } from './transactions.service';
     TransferToAccountService,
     TransactionsOverviewService,
     TransactionHistoryService,
+    TransactionCommentEditService,
   ],
   exports: [
     TransactionsService,
