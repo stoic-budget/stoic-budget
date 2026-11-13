@@ -13,6 +13,8 @@ export interface TransactionListFilters {
   dateTo?: Date;
   type?: string;
   categoryId?: string;
+  /** Widens `categoryId` to its subcategories, at any depth. */
+  subcategories?: boolean;
   currency?: string;
   convertTo?: string;
   owner?: OwnerFilter;
@@ -36,6 +38,7 @@ export function listFiltersFromQuery(
     dateTo: dateTo ? new Date(dateTo) : undefined,
     type: query.type,
     categoryId: query.category_id || query.categoryId,
+    subcategories: query.subcategories === '1' ? true : undefined,
     currency: query.currency,
     convertTo: query.convert_to,
     owner: parseOwnerFilter(query.owner, selfMemberId),
@@ -93,7 +96,18 @@ export function applyListFilters(
     query.andWhere('transaction.transactionType = :type', { type: filters.type });
   }
 
-  if (filters.categoryId) {
+  if (filters.categoryId && filters.subcategories) {
+    // The category and everything under it, in the caller's workspace (`:workspaceId`
+    // is the list's own filter); UNION stops on a loop of parents.
+    query.andWhere(
+      `transaction.categoryId IN (WITH RECURSIVE tree(id) AS (
+        SELECT id FROM categories WHERE id = :categoryId AND workspace_id = :workspaceId
+        UNION SELECT child.id FROM categories child JOIN tree ON child.parent_id = tree.id
+          WHERE child.workspace_id = :workspaceId
+      ) SELECT id FROM tree)`,
+      { categoryId: filters.categoryId },
+    );
+  } else if (filters.categoryId) {
     query.andWhere('transaction.categoryId = :categoryId', {
       categoryId: filters.categoryId,
     });

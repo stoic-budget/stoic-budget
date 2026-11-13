@@ -41,7 +41,7 @@ import { presetRangeValues, QUICK_PERIOD_PRESETS } from '../report-period-preset
 import { CashFlowSkeleton } from './CashFlowSkeleton';
 import { CashFlowTab } from './CashFlowTab';
 import { CashFlowTile } from './CashFlowTile';
-import { CashFlowTreemap } from './CashFlowTreemap';
+import { CashFlowTreemap, CategoryNameLink } from './CashFlowTreemap';
 import { buildCashFlowSankey, cashFlowChartHeight } from './cash-flow.chart';
 import { useCashFlowMap } from './useCashFlowMap';
 
@@ -112,7 +112,7 @@ function CategoryTable({
   ) => (
     <tr key={key}>
       <td style={child ? { paddingLeft: 24, color: 'var(--text-muted)' } : { fontWeight: 500 }}>
-        {name}
+        <CategoryNameLink id={key.split(':').at(-1) ?? key} name={name} />
       </td>
       <td className={`num ${PRIVATE_CLASS}`}>{formatTile(amount)}</td>
       {compare && <td className={`num muted ${PRIVATE_CLASS}`}>{formatTile(previous ?? 0)}</td>}

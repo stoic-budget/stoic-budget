@@ -272,3 +272,66 @@
     outline: none;
   }
 }
+
+// Twelve quiet bars, one a month (MonthBars): the payee and category pages.
+// As buttons, a picked month stays full and the others step back.
+.seneca-month-bars {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: end;
+  gap: 6px;
+  height: 120px;
+
+  &__bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    font: inherit;
+    color: inherit;
+  }
+
+  button.seneca-month-bars__bar {
+    cursor: pointer;
+
+    &:hover .seneca-month-bars__fill {
+      opacity: 1;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+  }
+
+  &__fill {
+    width: 100%;
+    max-width: 28px;
+    min-height: 2px;
+    border-radius: 4px 4px 0 0;
+    background: var(--primary);
+    opacity: 0.85;
+    transition: opacity 0.15s ease;
+  }
+
+  &__label {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  &--picked .seneca-month-bars__bar:not(.seneca-month-bars__bar--selected) .seneca-month-bars__fill {
+    opacity: 0.35;
+  }
+
+  .seneca-month-bars__bar--selected .seneca-month-bars__label {
+    color: var(--foreground);
+    font-weight: 500;
+  }
+}
