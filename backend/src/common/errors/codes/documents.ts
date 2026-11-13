@@ -97,6 +97,8 @@ export const DOCUMENTS_ERRORS = {
   EXPENSE_CATEGORY_DISABLED: 'Category is disabled',
   EXPENSE_CATEGORY_NOT_EXPENSE: 'Category must be an expense category',
   EXPENSE_TAX_RATE_NOT_FOUND: 'Tax rate not found',
+  EXPENSE_WALLET_CURRENCY_MISMATCH:
+    'The account holds {{walletCurrency}}; the expense is in {{currency}}',
   // ── receipts ────────────────────────────────────────────────────────────
   RECEIPT_NOT_FOUND: 'Receipt not found',
   RECEIPT_ORIGINAL_NOT_FOUND: 'Original receipt not found',
