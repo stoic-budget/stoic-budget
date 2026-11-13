@@ -25,9 +25,18 @@ type MetaForm = {
 const payloadOf = (response: UncheckedResponse): unknown => unwrapEnvelope(response.data);
 
 /** The statement as the editor reads it. */
-async function readStatement(statementId: string): Promise<Statement> {
+export async function readStatement(statementId: string): Promise<Statement> {
   const response = await apiClient.get(`/statements/${statementId}`);
   return checkContract('StatementDetail', payloadOf(response), '/statements/:id');
+}
+
+/** The statement's rows as the editor holds them. */
+export async function readStatementRows(statementId: string): Promise<Transaction[]> {
+  const url = `/transactions?statement_id=${statementId}&limit=1000`;
+  const response = await apiClient.get(url);
+  return (await checkContract('ListedTransactions', payloadOf(response), url)).map(
+    toEditableTransaction,
+  );
 }
 
 function extractMeta(statementData: Statement | null): Record<string, unknown> {
@@ -81,10 +90,9 @@ export async function loadStatementData(
   try {
     set.setLoading(true);
     set.setOptionsLoading(true);
-    const transactionsUrl = `/transactions?statement_id=${statementId}&limit=1000`;
-    const [statementData, tRes, cRes] = await Promise.all([
+    const [statementData, rows, cRes] = await Promise.all([
       readStatement(statementId),
-      apiClient.get(transactionsUrl),
+      readStatementRows(statementId),
       apiClient.get('/categories'),
     ]);
     // A scan's statement is the receipt's internal twin, hidden in every list:
@@ -100,8 +108,7 @@ export async function loadStatementData(
       }
     }
     set.setStatement(statementData);
-    const rows = await checkContract('ListedTransactions', payloadOf(tRes), transactionsUrl);
-    set.setTransactions(rows.map(toEditableTransaction));
+    set.setTransactions(rows);
     set.setCategories(await checkContract('CategoryList', payloadOf(cRes), '/categories'));
     set.setMetadataForm(buildMetadataForm(statementData, extractMeta(statementData)));
   } catch (err: unknown) {

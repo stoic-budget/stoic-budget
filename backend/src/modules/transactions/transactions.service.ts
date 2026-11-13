@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
 import { In, type Repository } from 'typeorm';
@@ -9,7 +8,6 @@ import { appError } from '../../common/errors/app-error';
 import { currencyCodeOrDefault } from '../../common/utils/currency.util';
 import { ensureCanEdit } from '../../common/utils/ensure-can-edit.util';
 import { toMinor } from '../../common/utils/money.util';
-import { taxLockedConflict } from '../../common/utils/tax-lock.util';
 import {
   applyOwnerFilter,
   assertOwnerMemberInWorkspace,
@@ -40,8 +38,8 @@ import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
 import { ensurePrivateCategory } from '../categories/private-category';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
-import type { DataDeletedEvent } from '../notifications/events/notification-events';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
+import { lockSplitGroup } from './helpers/split-group-lock';
 import { cloneForSplit } from './helpers/transaction-split-clone';
 import { applyListFilters, type TransactionListFilters } from './transaction-list-filters';
 
@@ -59,7 +57,7 @@ export class TransactionsService {
     @InjectRepository(Statement)
     statementRepository: Repository<Statement>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    userRepository: Repository<User>,
     @InjectRepository(WorkspaceMember)
     private readonly workspaceMemberRepository: Repository<WorkspaceMember>,
     @InjectRepository(Category)
@@ -68,19 +66,7 @@ export class TransactionsService {
     private readonly auditService: AuditService,
     private readonly exchangeRatesService: ExchangeRatesService,
     private readonly taxAssignmentService: TaxAssignmentService,
-    private readonly eventEmitter?: EventEmitter2,
   ) {}
-
-  private async resolveActorName(userId: string): Promise<string> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      select: {
-        name: true,
-        email: true,
-      },
-    });
-    return user?.name || user?.email || 'User';
-  }
 
   /** Bumps the version the cached reports are keyed by; they are keyed by workspace. */
   private async invalidateReports(workspaceId: string): Promise<void> {
@@ -672,15 +658,9 @@ export class TransactionsService {
       const repo = manager.getRepository(Transaction);
 
       // Lock the whole group in one ordered statement. A concurrent unsplit of the
-      // same group queues here instead of double-counting the total or deleting
-      // rows this one already folded in, and the shared ORDER BY gives both
-      // statements the same lock order, so they queue rather than deadlock.
-      // No relations: Postgres cannot lock the nullable side of an outer join.
-      const parts = await repo.find({
-        where: { workspaceId, splitGroupId },
-        order: { splitIndex: 'ASC' },
-        lock: { mode: 'pessimistic_write' },
-      });
+      // same group, or a delete of one of its parts, queues here instead of
+      // double-counting the total or deleting rows this one already folded in.
+      const parts = await lockSplitGroup(repo, workspaceId, splitGroupId);
 
       // Empty means the group is gone — another request unsplit it while this one
       // waited for the lock. A single part is a group that lost its siblings some
@@ -802,41 +782,5 @@ export class TransactionsService {
     });
 
     return merged;
-  }
-
-  async remove(id: string, workspaceId: string, userId: string): Promise<void> {
-    await this.ensureCanEditStatements(userId, workspaceId);
-    const transaction = await this.findOne(id, workspaceId);
-    if (transaction.taxLocked) {
-      throw taxLockedConflict(1);
-    }
-    // Use delete for simplicity; entity already validated for ownership.
-
-    await this.transactionRepository.delete(transaction.id);
-    await this.invalidateReports(workspaceId);
-
-    // Audit: record deletion for potential rollback.
-    await this.auditService.createEvent({
-      workspaceId,
-      actorType: ActorType.USER,
-      actorId: userId,
-      entityType: EntityType.TRANSACTION,
-      entityId: transaction.id,
-      action: AuditAction.DELETE,
-      diff: { before: transaction, after: null },
-      meta: {
-        statementId: transaction.statementId,
-      },
-      isUndoable: true,
-    });
-
-    this.eventEmitter?.emit('data.deleted', {
-      workspaceId,
-      actorId: userId,
-      actorName: await this.resolveActorName(userId),
-      entityType: 'transaction',
-      entityLabel: transaction.documentNumber || transaction.counterpartyName,
-      count: 1,
-    } satisfies DataDeletedEvent);
   }
 }

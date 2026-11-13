@@ -146,19 +146,4 @@ describe('TransactionsService', () => {
     expect(consoleSpy).toHaveBeenCalled();
     consoleSpy.mockRestore();
   });
-
-  it('remove deletes transaction after ownership check', async () => {
-    userRepository.findOne = vi.fn(async () => ({
-      id: 'u1',
-      workspaceId: null,
-    }));
-    transactionRepository.findOne = vi.fn(async () => ({
-      id: 't1',
-      statement: { userId: 'u1' },
-    }));
-
-    await service.remove('t1', 'w1', 'u1');
-
-    expect(transactionRepository.delete).toHaveBeenCalledWith('t1');
-  });
 });

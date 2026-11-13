@@ -457,49 +457,4 @@ describe('TransactionsService', () => {
       );
     });
   });
-
-  describe('remove', () => {
-    beforeEach(() => {
-      vi.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser as User);
-      vi.spyOn(workspaceMemberRepository, 'findOne').mockResolvedValue({
-        role: WorkspaceRole.ADMIN,
-      } as WorkspaceMember);
-      vi
-        .spyOn(transactionRepository, 'findOne')
-        .mockResolvedValue(mockTransaction as Transaction);
-    });
-
-    it('should delete transaction', async () => {
-      const deleteSpy = vi
-        .spyOn(transactionRepository, 'delete')
-        .mockResolvedValue({ affected: 1, raw: [] });
-
-      await service.remove('1', 'ws-1', '1');
-
-      expect(deleteSpy).toHaveBeenCalledWith('1');
-      expect(auditService.createEvent).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: AuditAction.DELETE,
-          entityType: EntityType.TRANSACTION,
-          entityId: '1',
-        }),
-      );
-    });
-
-    it('should check permissions before delete', async () => {
-      const restrictedMember = {
-        role: WorkspaceRole.MEMBER,
-        permissions: { canEditStatements: false },
-      } as WorkspaceMember;
-      vi.spyOn(workspaceMemberRepository, 'findOne').mockResolvedValue(restrictedMember);
-
-      await expect(service.remove('1', 'ws-1', '1')).rejects.toThrow(ForbiddenException);
-    });
-
-    it('should throw NotFoundException if transaction not found', async () => {
-      vi.spyOn(transactionRepository, 'findOne').mockResolvedValue(null);
-
-      await expect(service.remove('999', 'ws-1', '1')).rejects.toThrow(NotFoundException);
-    });
-  });
 });

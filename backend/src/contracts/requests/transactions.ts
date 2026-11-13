@@ -85,6 +85,18 @@ export const BulkUpdateRequestBody = Schema.Struct({
 export type BulkUpdateRequestBody = Wire<typeof BulkUpdateRequestBody>;
 
 /**
+ * `POST /transactions/bulk-delete`. Capped at the 1000 rows the statement edit
+ * page loads at once, so "select all" there always fits in one request.
+ */
+export const BulkDeleteTransactionsBody = Schema.Struct({
+  ids: Schema.Array(Schema.String.check(Schema.isUUID())).check(
+    Schema.isMinLength(1),
+    Schema.isMaxLength(1000),
+  ),
+});
+export type BulkDeleteTransactionsBody = Wire<typeof BulkDeleteTransactionsBody>;
+
+/**
  * Inline structural types on a `@Body()` give the global ValidationPipe an
  * `Object` metatype, which makes it a no-op — these ids reached the service
  * unchecked.
