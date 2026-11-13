@@ -70,7 +70,7 @@ import {
   assignmentInputOf,
   TaxAssignmentService,
 } from '../tax/tax-assignment.service';
-import { projectMonthlyCharges, splitMonthCharges } from './charge-calendar.util';
+import { projectMonthlyCharges, settledDateOf, splitMonthCharges } from './charge-calendar.util';
 import { CurrencyTotals } from './currency-totals';
 import {
   type ConvertAt,
@@ -1252,7 +1252,7 @@ export class SubscriptionsService {
             transactionId: null,
             chargeDate: body.chargeDate,
             amount: body.amount ?? Number(subscription.amount),
-            currency: subscription.currency,
+            currency: body.currency?.trim().toUpperCase() || subscription.currency,
           };
         }
         const charge = await this.bookCharge(manager, subscription, paid);
@@ -1399,7 +1399,7 @@ export class SubscriptionsService {
         ...paid,
         chargeDate: paid.chargeDate as unknown as Date,
         expectedAmount: subscription.amount,
-        expectedDate: subscription.nextChargeDate,
+        expectedDate: settledDateOf(subscription, paid.chargeDate),
         matchStatus,
       }),
     );

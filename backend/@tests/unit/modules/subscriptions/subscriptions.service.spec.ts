@@ -477,6 +477,30 @@ describe('SubscriptionsService', () => {
       );
     });
 
+    it("books a receipt from a period back at its own date and currency, leaving the next charge owed", async () => {
+      subscriptionRepository.findOne.mockResolvedValue(subscription());
+
+      const row = await service.recordCharge('sub-1', 'workspace-1', 'user-1', {
+        chargeDate: '2026-09-04',
+        amount: 42,
+        currency: 'ils',
+      });
+
+      expect(row).toEqual(
+        expect.objectContaining({
+          amount: '42.00',
+          currency: 'ILS',
+          chargeDate: '2026-09-04',
+          // The September charge it paid, not October's: that one is still to come.
+          expectedDate: '2026-09-05',
+          matchStatus: 'matched',
+        }),
+      );
+      expect(subscriptionRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ lastChargeDate: '2026-09-05', nextChargeDate: '2026-10-05' }),
+      );
+    });
+
     it('needs a date when no bank row is given', async () => {
       subscriptionRepository.findOne.mockResolvedValue(subscription());
 
