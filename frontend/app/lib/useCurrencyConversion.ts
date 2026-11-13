@@ -6,7 +6,11 @@ import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 
 type RecordWithCurrency = { currencyValue?: string | null; dateValue?: string | null };
 
-const dayOf = (date: string | null | undefined): string => (date ?? '').slice(0, 10);
+/** The record's ISO day, or '' (today's rate) for a date typed in another shape. */
+const dayOf = (date: string | null | undefined): string => {
+  const day = (date ?? '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : '';
+};
 const keyOf = (currency: string, day: string): string => `${currency}:${day}`;
 
 /**

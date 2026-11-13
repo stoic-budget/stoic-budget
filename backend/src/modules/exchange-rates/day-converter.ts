@@ -32,8 +32,13 @@ export async function loadDayConverter(
   workspaceId: string,
 ): Promise<DayConvert> {
   const today = new Date().toISOString().slice(0, 10);
+  // A failed lookup counts as no rate, not as a failed page.
+  const rates = {
+    getRateOrNull: (...args: Parameters<ExchangeRatesService['getRateOrNull']>) =>
+      exchangeRates.getRateOrNull(...args).catch(() => null),
+  } as ExchangeRatesService;
   const converter = await CurrencyConverter.load(
-    exchangeRates,
+    rates,
     target,
     rows.map(row => ({ currency: currencyCodeOrDefault(row.currency), date: row.day ?? today })),
     workspaceId,

@@ -638,6 +638,53 @@ describe('DashboardService', () => {
     expect(result.expense30d).toBe(1 * rateOn['2026-02-03'] + 2 * rateOn['2026-02-20']);
   });
 
+  it("getTopMerchants and getRecentTransactions convert each row at its own day's rate", async () => {
+    const rateOn: Record<string, number> = { '2026-02-03': 400, '2026-02-20': 500 };
+    exchangeRatesService.getRateOrNull.mockImplementation(
+      async (_from: string, _to: string, date: string) => rateOn[date] ?? null,
+    );
+    const merchant = { name: 'ACME Store', currency: 'USD' };
+    transactionRepo.createQueryBuilder.mockReturnValueOnce(
+      createQueryBuilderMock([
+        { ...merchant, day: '2026-02-03', amount: '10', count: '1' },
+        { ...merchant, day: '2026-02-20', amount: '20', count: '1' },
+      ]),
+    );
+    const [top] = await (service as any).getTopMerchants(
+      'ws-1',
+      new Date('2026-02-01'),
+      new Date('2026-03-01'),
+      null,
+    );
+    expect(top.amount).toBe(10 * rateOn['2026-02-03'] + 20 * rateOn['2026-02-20']);
+
+    // From a statement, so the row links to its document and asks no bill for a link.
+    const row = {
+      transactionType: TransactionType.EXPENSE,
+      currency: 'USD',
+      credit: null,
+      statementId: 'statement-1',
+      statementStatus: 'completed',
+      parsingDetails: null,
+    };
+    transactionRepo.createQueryBuilder.mockReturnValueOnce(
+      createQueryBuilderMock([
+        { ...row, id: 'tx-1', date: '2026-02-20', debit: '20' },
+        { ...row, id: 'tx-2', date: '2026-02-03', debit: '10' },
+      ]),
+    );
+    const recent = await (service as any).getRecentTransactions(
+      'ws-1',
+      new Date('2026-02-01'),
+      new Date('2026-03-01'),
+      null,
+    );
+    expect(recent.map((tx: { amount: number }) => tx.amount)).toEqual([
+      -20 * rateOn['2026-02-20'],
+      -10 * rateOn['2026-02-03'],
+    ]);
+  });
+
   it("getTopCategories adds one category's days each at its own rate, as Reports do", async () => {
     const rateOn: Record<string, number> = { '2026-02-03': 400, '2026-02-20': 500 };
     const row = { id: 'cat-1', name: 'Groceries', color: null, icon: null, currency: 'USD' };

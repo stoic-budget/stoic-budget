@@ -142,6 +142,7 @@ export class StoicBehaviorService {
         .groupBy('t.category_id')
         .addGroupBy('t.currency')
         .addGroupBy(DAY_SQL)
+        .addGroupBy('EXTRACT(ISODOW FROM t.transaction_date) IN (6, 7)')
         .getRawMany<WeekdayRow>(),
       this.transactionRepository
         .createQueryBuilder('t')

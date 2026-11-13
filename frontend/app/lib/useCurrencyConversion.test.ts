@@ -42,4 +42,23 @@ describe('useCurrencyConversion', () => {
       ],
     });
   });
+
+  it('asks for the latest rate for a date typed in another shape, so one bad date breaks nothing', async () => {
+    const typed = { currencyValue: 'EUR', dateValue: '13/10/2026' };
+    const rate = 1.1;
+    api.post.mockResolvedValue(
+      apiResponse({
+        targetCurrency: 'USD',
+        results: [{ converted: rate, rate, source: 'test', missing: false }],
+      }),
+    );
+
+    const { result } = renderHook(() => useCurrencyConversion([typed], 'USD'));
+
+    await waitFor(() => expect(result.current.convert(10, 'EUR', typed.dateValue)).toBe(10 * rate));
+    expect(api.post).toHaveBeenLastCalledWith('/exchange-rates/convert', {
+      targetCurrency: 'USD',
+      items: [{ amount: 1, currency: 'EUR', date: null }],
+    });
+  });
 });
