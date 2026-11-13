@@ -4,7 +4,7 @@ import BarChartOutlined from '@mui/icons-material/BarChartOutlined';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from 'next-themes';
 import type React from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   buildCashFlowSankey,
   cashFlowChartHeight,
@@ -20,6 +20,9 @@ import { queryKeys } from '@/app/lib/query-keys';
 import { useCategoryName } from '@/app/lib/use-category-name';
 import { foldSmallest, monthRange, withoutSubcategories } from './cash-flow-flow';
 import { CardEmpty } from './ui';
+
+/** The lines drawing in again after a month switch: the first draw's animation, shortened. */
+const SWITCH_ANIMATION = { animationDuration: 400, animationEasing: 'cubicOut' } as const;
 
 interface CashFlowFlowProps {
   /** The dashboard's picked month (YYYY-MM). */
@@ -49,8 +52,22 @@ export function CashFlowFlow({ month, formatAmount }: CashFlowFlowProps): React.
     queryKey: queryKeys.cashFlowMap({ workspaceId, params: JSON.stringify(params) }),
     queryFn: ({ signal }) =>
       apiQueryDecoded({ url: '/reports/cash-flow-map', params, signal, contract: 'CashFlowMap' }),
+    // Switching months keeps the last month's flow on screen until the next one is in,
+    // never another workspace's.
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[1] === workspaceId ? previous : undefined,
     enabled: Boolean(workspaceId),
   });
+  // The first flow drawn opens with the full animation; once another month's data replaces it,
+  // the lines draw in a short take. Keyed to the data, not the month: the placeholder kept on
+  // screen while the next month loads is the same object, so it is not drawn twice.
+  const [firstData, setFirstData] = useState(query.data);
+  const [switched, setSwitched] = useState(false);
+  if (query.data && !firstData) {
+    setFirstData(query.data);
+  } else if (query.data && firstData && query.data !== firstData && !switched) {
+    setSwitched(true);
+  }
   const sankey = useMemo(
     () => (query.data ? foldSmallest(withoutSubcategories(query.data.sankey), otherName) : null),
     [query.data, otherName],
@@ -58,18 +75,21 @@ export function CashFlowFlow({ month, formatAmount }: CashFlowFlowProps): React.
   const option = useMemo(
     () =>
       sankey
-        ? buildCashFlowSankey(
-            { sankey },
-            resolvedTheme,
-            formatAmount,
-            isMobile,
-            categoryName,
-            privacy,
-          )
+        ? {
+            ...buildCashFlowSankey(
+              { sankey },
+              resolvedTheme,
+              formatAmount,
+              isMobile,
+              categoryName,
+              privacy,
+            ),
+            ...(switched ? SWITCH_ANIMATION : {}),
+          }
         : null,
     // formatAmount is rebuilt every render; the chart only needs to follow the data and theme.
     // biome-ignore lint/correctness/useExhaustiveDependencies: see above
-    [sankey, resolvedTheme, isMobile, categoryName, privacy],
+    [sankey, resolvedTheme, isMobile, categoryName, privacy, switched],
   );
 
   if (query.isPending) {
