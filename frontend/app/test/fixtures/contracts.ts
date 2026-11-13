@@ -380,6 +380,7 @@ export function transactionItem(
     amount: '-10.00',
     ownerMemberId: null,
     isPrivate: false,
+    excludedFromBudgets: false,
     privateCategoryId: null,
     transferPairId: null,
     transferPairSource: null,
