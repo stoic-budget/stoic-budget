@@ -104,6 +104,24 @@ export async function seedWorkspace(
     currency: 'USD',
     initialBalance: 1,
   });
+  const loan = await send('loan wallet', 'post', '/wallets', {
+    name: `${marker} loan`,
+    type: 'loan',
+    currency: 'USD',
+    initialBalance: -1000,
+  });
+  await send('loan terms', 'put', `/wallets/${loan.body.id}/loan-terms`, {
+    principal: 1000,
+    startDate: today,
+    termMonths: 12,
+    paymentDay: 1,
+    method: 'annuity',
+    dayCount: '30/360',
+    annualRate: 5,
+    rateChanges: [{ from: today, annualRate: 4 }],
+    extraPayments: [{ date: today, amount: 10 }],
+    recurringExtra: { amount: 5, from: today },
+  });
   await send('branch', 'post', '/branches', { name: `${marker} branch` });
   await send('rule', 'post', '/categorization-rules', {
     name: `${marker} rule`,

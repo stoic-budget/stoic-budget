@@ -41,6 +41,11 @@ export const LazyRoiLines = dynamic(() => import('./RoiLines').then(module => mo
   loading: ChartSkeleton,
 });
 
+export const LazyLoanBalanceLines = dynamic(
+  () => import('./LoanBalanceLines').then(module => module.LoanBalanceLines),
+  { ssr: false, loading: ChartSkeleton },
+);
+
 export const LazyPayeeLines = dynamic(
   () => import('./PayeeLines').then(module => module.PayeeLines),
   { ssr: false, loading: ChartSkeleton },
