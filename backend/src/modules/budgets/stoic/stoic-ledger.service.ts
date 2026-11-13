@@ -6,6 +6,7 @@ import { Budget } from '../../../entities/budget.entity';
 import { Category, CategoryType, StoicClass } from '../../../entities/category.entity';
 import { Transaction, TransactionType } from '../../../entities/transaction.entity';
 import { Workspace } from '../../../entities/workspace.entity';
+import { DAY_SQL, type DayRow, loadDayConverter } from '../../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
 import { buildRateMap, convertWith, normalizeCurrency } from '../../goals/goal-money.util';
 import {
@@ -270,6 +271,7 @@ export class StoicLedgerService {
       .select('t.category_id', 'categoryId')
       .addSelect("to_char(t.transaction_date, 'YYYY-MM')", 'month')
       .addSelect('t.currency', 'currency')
+      .addSelect(DAY_SQL, 'day')
       .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
       .where('t.workspace_id = :workspaceId', { workspaceId })
       .andWhere('t.transaction_type = :type', { type: TransactionType.EXPENSE })
@@ -282,20 +284,17 @@ export class StoicLedgerService {
       .groupBy('t.category_id')
       .addGroupBy("to_char(t.transaction_date, 'YYYY-MM')")
       .addGroupBy('t.currency')
-      .getRawMany<{ categoryId: string; month: string; currency: string; total: string }>();
-    const rates = await buildRateMap(
-      this.exchangeRatesService,
-      rows.map(row => row.currency),
-      currency,
-      workspaceId,
-    );
+      .addGroupBy(DAY_SQL)
+      .getRawMany<DayRow<'categoryId' | 'month' | 'total'>>();
+    // Each day at its own rate, as the budget cards on the same page.
+    const convert = await loadDayConverter(this.exchangeRatesService, currency, rows, workspaceId);
 
     const byMonth = new Map<string, Map<string, number>>();
     for (const row of rows) {
       const month = byMonth.get(row.month) ?? new Map<string, number>();
       month.set(
         row.categoryId,
-        (month.get(row.categoryId) ?? 0) + convertWith(rates, row.total, row.currency),
+        (month.get(row.categoryId) ?? 0) + convert(row.total, row.currency, row.day),
       );
       byMonth.set(row.month, month);
     }

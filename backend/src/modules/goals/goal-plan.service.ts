@@ -20,6 +20,7 @@ import {
   normalizeLimitToMonth,
   overlapsWindow,
 } from '../budgets/budget-period.util';
+import { DAY_SQL, type DayRow, loadDayConverter } from '../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { PayPeriodService } from '../pay-period/pay-period.service';
 import { orCalendar, periodBefore, periodKeyAt } from '../pay-period/pay-period-dates';
@@ -97,7 +98,7 @@ export class GoalPlanService {
 
     const rates = await buildRateMap(
       this.exchangeRatesService,
-      [goalCurrency, ...budgets.map(budget => budget.currency), ...incomeRows.map(r => r.currency)],
+      [goalCurrency, ...budgets.map(budget => budget.currency)],
       currency,
       workspaceId,
     );
@@ -152,8 +153,15 @@ export class GoalPlanService {
           ),
         0,
       );
+    // Income already received: each day at its own rate, as the dashboard counts it.
+    const received = await loadDayConverter(
+      this.exchangeRatesService,
+      currency,
+      incomeRows,
+      workspaceId,
+    );
     const income =
-      incomeRows.reduce((sum, row) => sum + convertWith(rates, row.total, row.currency), 0) /
+      incomeRows.reduce((sum, row) => sum + received(row.total, row.currency, row.day), 0) /
       HISTORY_MONTHS;
     const free = income - committed;
 
@@ -186,10 +194,11 @@ export class GoalPlanService {
   private async loadIncome(
     workspaceId: string,
     window: { start: Date; end: Date },
-  ): Promise<Array<{ currency: string; total: string }>> {
+  ): Promise<DayRow<'total'>[]> {
     return this.transactionRepository
       .createQueryBuilder('t')
       .select('t.currency', 'currency')
+      .addSelect(DAY_SQL, 'day')
       .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
       .where('t.workspace_id = :workspaceId', { workspaceId })
       .andWhere('t.transaction_type = :type', { type: TransactionType.INCOME })
@@ -199,7 +208,8 @@ export class GoalPlanService {
       .andWhere('t.transfer_pair_id IS NULL')
       .andWhere(flowsSql('t'))
       .groupBy('t.currency')
-      .getRawMany<{ currency: string; total: string }>();
+      .addGroupBy(DAY_SQL)
+      .getRawMany<DayRow<'total'>>();
   }
 
   private async getWorkspaceCurrency(workspaceId: string): Promise<string> {

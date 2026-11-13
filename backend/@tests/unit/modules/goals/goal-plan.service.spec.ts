@@ -62,6 +62,7 @@ function createService(options: Options) {
           return builder;
         }),
         groupBy: vi.fn(() => builder),
+        addGroupBy: vi.fn(() => builder),
         getRawMany: vi.fn(async () => options.income ?? []),
       };
       return builder;

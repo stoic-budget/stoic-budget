@@ -25,10 +25,15 @@ import {
   resolveMonth,
 } from '../budgets/budget-period.util';
 import { CategoriesService } from '../categories/categories.service';
+import {
+  DAY_SQL,
+  type DayConvert,
+  type DayRow,
+  loadDayConverter,
+} from '../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { PayPeriodService, type ResolvedPayPeriod } from '../pay-period/pay-period.service';
 import {
-  addMissingRates,
   buildRateMap,
   convertWith,
   normalizeCurrency,
@@ -46,18 +51,8 @@ const MERCHANTS_PER_CATEGORY = 5;
 
 export type { GoalFlowBudget, GoalFlowLink, GoalFlowNode, GoalFlowNodeKind, GoalFlowResponse };
 
-interface CategoryTotalRow {
-  categoryId: string;
-  currency: string;
-  total: string;
-}
-
-interface MerchantTotalRow {
-  categoryId: string;
-  merchant: string | null;
-  currency: string;
-  total: string;
-}
+type CategoryTotalRow = DayRow<'categoryId' | 'total'>;
+type MerchantTotalRow = DayRow<'categoryId' | 'total'> & { merchant: string | null };
 
 /**
  * Reads a goal as a plan-versus-actual tree: the goal, the budgets declared for
@@ -138,26 +133,27 @@ export class GoalFlowService {
       this.loadCashTotal(workspaceId, window),
     ]);
 
+    // Limits are a plan, at today's rate; what was spent converts at each day's rate, as /budgets.
     const rates = await buildRateMap(
       this.exchangeRatesService,
-      [
-        ...categoryRows.map(row => row.currency),
-        ...merchantRows.map(row => row.currency),
-        ...cash.currencies,
-        ...budgets.map(budget => budget.currency),
-      ],
+      budgets.map(budget => budget.currency),
       currency,
       workspaceId,
     );
     const convert = (amount: string | number, from: string): number =>
       convertWith(rates, amount, from);
+    const spent = await loadDayConverter(
+      this.exchangeRatesService,
+      currency,
+      [...categoryRows, ...merchantRows, ...cash.rows],
+      workspaceId,
+    );
 
     const nativeActuals = await this.loadNativeActuals(
       workspaceId,
       budgets,
       descendants,
       { anchor, payPeriod },
-      rates,
       currency,
     );
 
@@ -183,7 +179,7 @@ export class GoalFlowService {
         categoryNames,
         categoryRows,
         merchantRows,
-        convert,
+        spent,
       );
       const budgetActual = categoryNodes.reduce((sum, entry) => sum + entry.node.actual, 0);
 
@@ -271,7 +267,7 @@ export class GoalFlowService {
       budgets: flowBudgets,
       excluded: {
         cashAmount: round2(
-          cash.rows.reduce((sum, row) => sum + convert(row.total, row.currency), 0),
+          cash.rows.reduce((sum, row) => sum + spent(row.total, row.currency, row.day), 0),
         ),
         cashEntryCount: cash.count,
       },
@@ -289,7 +285,7 @@ export class GoalFlowService {
     categoryNames: Map<string, string>,
     categoryRows: CategoryTotalRow[],
     merchantRows: MerchantTotalRow[],
-    convert: (amount: string | number, from: string) => number,
+    convert: DayConvert,
   ): Array<{ node: GoalFlowNode; merchants: GoalFlowNode[] }> {
     const wanted = new Set(categoryIds);
     const totals = new Map<string, number>();
@@ -299,7 +295,7 @@ export class GoalFlowService {
       }
       totals.set(
         row.categoryId,
-        (totals.get(row.categoryId) ?? 0) + convert(row.total, row.currency),
+        (totals.get(row.categoryId) ?? 0) + convert(row.total, row.currency, row.day),
       );
     }
 
@@ -309,7 +305,8 @@ export class GoalFlowService {
         continue;
       }
       const bucket = merchantsByCategory.get(row.categoryId) ?? new Map<string, number>();
-      bucket.set(row.merchant, (bucket.get(row.merchant) ?? 0) + convert(row.total, row.currency));
+      const amount = convert(row.total, row.currency, row.day);
+      bucket.set(row.merchant, (bucket.get(row.merchant) ?? 0) + amount);
       merchantsByCategory.set(row.categoryId, bucket);
     }
 
@@ -434,9 +431,11 @@ export class GoalFlowService {
     return this.expenseQuery(workspaceId, categoryIds, window)
       .select('t.category_id', 'categoryId')
       .addSelect('t.currency', 'currency')
+      .addSelect(DAY_SQL, 'day')
       .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
       .groupBy('t.category_id')
       .addGroupBy('t.currency')
+      .addGroupBy(DAY_SQL)
       .getRawMany<CategoryTotalRow>();
   }
 
@@ -462,10 +461,12 @@ export class GoalFlowService {
       .select('t.category_id', 'categoryId')
       .addSelect(merchant, 'merchant')
       .addSelect('t.currency', 'currency')
+      .addSelect(DAY_SQL, 'day')
       .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
       .groupBy('t.category_id')
       .addGroupBy(merchant)
       .addGroupBy('t.currency')
+      .addGroupBy(DAY_SQL)
       .setParameter(PRIVACY_VIEWER_PARAM, viewerMemberId)
       .getRawMany<MerchantTotalRow>();
   }
@@ -483,7 +484,6 @@ export class GoalFlowService {
     budgets: Budget[],
     descendants: Map<string, string[]>,
     { anchor, payPeriod: pay }: { anchor: Date; payPeriod?: ResolvedPayPeriod },
-    rates: Map<string, number>,
     currency: string,
   ): Promise<Map<string, { start: Date; end: Date; actual: number }>> {
     const result = new Map<string, { start: Date; end: Date; actual: number }>();
@@ -511,12 +511,10 @@ export class GoalFlowService {
           ),
         ];
         const rows = await this.loadCategoryTotals(workspaceId, categoryIds, period);
-        // A budget's own period can reach rows in currencies the goal's window had none of.
-        await addMissingRates(
+        const convert = await loadDayConverter(
           this.exchangeRatesService,
-          rates,
-          rows.map(row => row.currency),
           currency,
+          rows,
           workspaceId,
         );
 
@@ -524,7 +522,7 @@ export class GoalFlowService {
           const wanted = new Set(descendants.get(budget.categoryId) ?? [budget.categoryId]);
           const actual = rows
             .filter(row => wanted.has(row.categoryId))
-            .reduce((sum, row) => sum + convertWith(rates, row.total, row.currency), 0);
+            .reduce((sum, row) => sum + convert(row.total, row.currency, row.day), 0);
           result.set(budget.id, { ...period, actual });
         }
       }),
@@ -536,14 +534,11 @@ export class GoalFlowService {
   private async loadCashTotal(
     workspaceId: string,
     window: { start: Date; end: Date },
-  ): Promise<{
-    rows: Array<{ currency: string; total: string }>;
-    count: number;
-    currencies: string[];
-  }> {
+  ): Promise<{ rows: DayRow<'total'>[]; count: number }> {
     const rows = await this.dataEntryRepository
       .createQueryBuilder('e')
       .select('e.currency', 'currency')
+      .addSelect("TO_CHAR(e.date, 'YYYY-MM-DD')", 'day')
       .addSelect('COALESCE(SUM(ABS(e.amount)), 0)', 'total')
       .addSelect('COUNT(e.id)', 'count')
       .where('e.workspace_id = :workspaceId', { workspaceId })
@@ -551,12 +546,12 @@ export class GoalFlowService {
       .andWhere('e.date >= :start', { start: toDateOnly(window.start) })
       .andWhere('e.date <= :end', { end: toDateOnly(window.end) })
       .groupBy('e.currency')
-      .getRawMany<{ currency: string; total: string; count: string }>();
+      .addGroupBy("TO_CHAR(e.date, 'YYYY-MM-DD')")
+      .getRawMany<DayRow<'total' | 'count'>>();
 
     return {
       rows,
       count: rows.reduce((sum, row) => sum + (Number.parseInt(row.count, 10) || 0), 0),
-      currencies: rows.map(row => row.currency),
     };
   }
 

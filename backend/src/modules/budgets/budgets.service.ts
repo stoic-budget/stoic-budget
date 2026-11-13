@@ -707,7 +707,8 @@ export class BudgetsService {
     const affected: BudgetImpactRow[] = [];
     for (const budget of budgets) {
       if (!overlapsWindow({ start: now, end: now }, budget)) continue;
-      const amount = await this.inCurrency(dto.amount, currency, budget.currency, workspaceId);
+      // At the entry's own day, the rate its spending will be counted at.
+      const amount = await this.inCurrency(dto.amount, currency, budget.currency, now, workspaceId);
       if (amount === null) continue;
       const { spentAmount, availableAmount } = await this.measure(budget, now);
       const remainingAfter = Math.round((availableAmount - spentAmount - amount) * 100) / 100;
@@ -740,7 +741,13 @@ export class BudgetsService {
       where: { id: walletId, workspaceId, isActive: true },
     });
     if (!wallet) return null;
-    const converted = await this.inCurrency(amount, currency, wallet.currency, workspaceId);
+    const converted = await this.inCurrency(
+      amount,
+      currency,
+      wallet.currency,
+      new Date(),
+      workspaceId,
+    );
     if (converted === null) return null;
     const sums = await this.transactionRepository
       .createQueryBuilder('t')
@@ -780,28 +787,16 @@ export class BudgetsService {
       .catch(() => null);
   }
 
-  /** `amount` in `to`; null when the two currencies differ and no rate is at hand. */
+  /** `amount` in `to` at `day`'s rate; null when the two currencies differ and no rate is known. */
   private async inCurrency(
     amount: number,
     from: string,
     to: string,
+    day: Date,
     workspaceId: string,
   ): Promise<number | null> {
-    const source = from || to;
-    if (source.toUpperCase() === to.toUpperCase()) return amount;
-    if (!this.exchangeRatesService) return null;
-    try {
-      const result = await this.exchangeRatesService.convert(
-        amount,
-        source,
-        to,
-        new Date(),
-        workspaceId,
-      );
-      return result.converted;
-    } catch {
-      return null;
-    }
+    const rate = await this.rateOrNull(from || to, to, day, workspaceId);
+    return rate === null ? null : amount * rate;
   }
 
   /**
