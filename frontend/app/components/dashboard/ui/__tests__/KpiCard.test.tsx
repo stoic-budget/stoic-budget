@@ -59,18 +59,19 @@ describe('KpiCard', () => {
     expect(container.querySelector('svg')).not.toBeNull();
   });
 
-  it('shows its details only when given half a row or more', () => {
-    const tile = (
-      <KpiCard
-        label="Income"
-        value="$100"
-        details={[{ label: 'Average per day', value: '$10' }]}
-      />
+  it('draws no sparkline when every point is zero', () => {
+    const { container } = render(
+      <KpiCard label="Income" value="$0" spark={{ points: [0, 0, 0] }} />,
     );
-    const { rerender } = render(<SectionSpanProvider value={3}>{tile}</SectionSpanProvider>);
-    expect(screen.queryByText('Average per day')).not.toBeInTheDocument();
+    expect(container.querySelector('svg')).toBeNull();
+  });
 
-    rerender(<SectionSpanProvider value={6}>{tile}</SectionSpanProvider>);
+  it('shows its details in a narrow tile too', () => {
+    render(
+      <SectionSpanProvider value={3}>
+        <KpiCard label="Income" value="$100" details={[{ label: 'Average per day', value: '$10' }]} />
+      </SectionSpanProvider>,
+    );
     expect(screen.getByText('Average per day')).toBeInTheDocument();
     expect(screen.getByText('$10')).toBeInTheDocument();
   });

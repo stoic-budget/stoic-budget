@@ -28,8 +28,8 @@ export interface KpiCardProps {
   /** With half a row or more: a longer sparkline in place of `spark`. */
   wideSpark?: { points: number[] };
   /**
-   * With half a row or more: label–value lines under the figure. A value is an
-   * amount, redacted in privacy mode, unless `plain` (it marks its own amounts).
+   * Label–value lines under the figure. A value is an amount, redacted in
+   * privacy mode, unless `plain` (it marks its own amounts).
    */
   details?: Array<{ label: string; value: React.ReactNode; plain?: boolean }>;
   /** With half a row or more: a full chart in place of the sparkline. */
@@ -115,7 +115,7 @@ export function KpiCard({
         </div>
       )}
       {note && <div className="seneca-dashboard__stat-note">{note}</div>}
-      {roomy && details && details.length > 0 && (
+      {details && details.length > 0 && (
         <dl className="seneca-dashboard__stat-details">
           {details.map(detail => (
             <div key={detail.label}>
@@ -127,7 +127,8 @@ export function KpiCard({
       )}
       {chart && <div className="seneca-dashboard__stat-chart">{chart}</div>}
       {meter && <KpiMeter percent={meter.percent} tone={tone} />}
-      {line && line.points.length >= 2 && (
+      {/* A line along zero says nothing and reads as an empty axis. */}
+      {line && line.points.length >= 2 && line.points.some(point => point !== 0) && (
         <div
           className={clsx(
             'seneca-dashboard__stat-spark',
