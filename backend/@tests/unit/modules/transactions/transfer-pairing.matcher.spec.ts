@@ -3,7 +3,6 @@ import {
   accountKey,
   amountsMatch,
   matchTransferPairs,
-  pairKey,
   type RateLookup,
   type TransferLeg,
 } from '../../../../src/modules/transactions/services/transfer-pairing.matcher';
@@ -194,39 +193,6 @@ describe('transfer-pairing matcher', () => {
       const d = inc('d', { statementId: 'stmt-d', transactionDate: new Date('2026-03-12') });
       // a/b and c/d both qualify for each other, so every row sees two counterparts.
       expect(await matchTransferPairs([d, c, b, a], [a, b, c, d], noRates)).toEqual([]);
-    });
-
-    describe('pairs the user unlinked', () => {
-      it('never pairs the two rows again', async () => {
-        const a = out('a');
-        const b = inc('b');
-        const rejected = new Set([pairKey('a', 'b')]);
-        expect(await matchTransferPairs([a], [a, b], noRates, rejected)).toEqual([]);
-        expect(await matchTransferPairs([b], [a, b], noRates, rejected)).toEqual([]);
-      });
-
-      it('pairs each row with its real counterpart, which would otherwise be ambiguous', async () => {
-        const a = out('a');
-        const b = inc('b');
-        const c = inc('c', { statementId: 'stmt-c' });
-        // Without the refusal a sees two counterparts and pairs neither.
-        expect(await matchTransferPairs([a], [a, b, c], noRates)).toEqual([]);
-        const rejected = new Set([pairKey('b', 'a')]);
-        expect(await matchTransferPairs([a], [a, b, c], noRates, rejected)).toEqual([
-          { outgoing: a, incoming: c },
-        ]);
-      });
-
-      it('lets the other leg of a refused pair pair too', async () => {
-        const a = out('a');
-        const b = inc('b');
-        const d = out('d', { statementId: 'stmt-d' });
-        const rejected = new Set([pairKey('a', 'b')]);
-        // d on its own still sees only b; a has nobody left.
-        expect(await matchTransferPairs([a, b, d], [a, b, d], noRates, rejected)).toEqual([
-          { outgoing: d, incoming: b },
-        ]);
-      });
     });
   });
 });

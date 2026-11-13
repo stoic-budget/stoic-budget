@@ -3,10 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { appError } from '../../../common/errors/app-error';
 import { Transaction, TransactionType } from '../../../entities/transaction.entity';
-import { TransferPairRejection } from '../../../entities/transfer-pair-rejection.entity';
 import { Wallet } from '../../../entities/wallet.entity';
-import { rejectedPairKeys } from './transfer-pair-rejections';
-import { absAmount, daysBetween, pairKey } from './transfer-pairing.matcher';
+import { absAmount, daysBetween } from './transfer-pairing.matcher';
 import { CANDIDATE_WINDOW_DAYS, DAY_MS, TransferPairingService } from './transfer-pairing.service';
 
 /** A row moved to (or from) another of the user's own accounts, from the transaction drawer. */
@@ -15,17 +13,14 @@ export class TransferToAccountService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
-    @InjectRepository(TransferPairRejection)
-    private readonly rejections: Repository<TransferPairRejection>,
     private readonly pairing: TransferPairingService,
   ) {}
 
   /**
    * Marks a row as money moved to (or from) another of the user's accounts.
    * The other leg already in that account (same amount and currency, opposite
-   * direction, within a week) is linked, unless the user unlinked those two
-   * before; when there is none, as for cash out of an ATM into the Cash
-   * account, it is booked there, confirmed, and linked.
+   * direction, within a week) is linked; when there is none, as for cash out
+   * of an ATM into the Cash account, it is booked there, confirmed, and linked.
    */
   async transferToAccount(
     workspaceId: string,
@@ -49,7 +44,6 @@ export class TransferToAccountService {
         : TransactionType.EXPENSE;
     const at = new Date(row.transactionDate).getTime();
     const amount = absAmount(row);
-    const rejected = await rejectedPairKeys(this.rejections, workspaceId);
     const existing = (
       await this.pairing
         .unpairedQuery(workspaceId)
@@ -62,11 +56,7 @@ export class TransferToAccountService {
         })
         .getMany()
     )
-      .filter(
-        candidate =>
-          Math.abs(absAmount(candidate) - amount) < 0.005 &&
-          !rejected.has(pairKey(row.id, candidate.id)),
-      )
+      .filter(candidate => Math.abs(absAmount(candidate) - amount) < 0.005)
       .sort(
         (a, b) =>
           daysBetween(a.transactionDate, row.transactionDate) -

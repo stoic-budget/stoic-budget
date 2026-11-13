@@ -79,26 +79,6 @@ export async function seedWorkspace(
     'SELECT id FROM transactions WHERE workspace_id = $1 ORDER BY created_at DESC LIMIT 1',
     [owner.workspaceId],
   );
-  // A refused transfer pair: unlinking needs an auto-paired pair first, so straight in.
-  // Booked early so the ledger sync it starts is done before the sweep looks at the rows.
-  await ok(
-    'second manual expense',
-    as('post', '/statements/manual-expense')
-      .field('amount', '7.25')
-      .field('currency', 'USD')
-      .field('merchant', `${marker} second merchant`)
-      .field('categoryId', category.body.id)
-      .field('date', today),
-  );
-  const [second] = await dataSource.query(
-    'SELECT id FROM transactions WHERE workspace_id = $1 AND id <> $2 ORDER BY created_at DESC LIMIT 1',
-    [owner.workspaceId, transaction.id],
-  );
-  const [txLowId, txHighId] = [transaction.id, second.id].sort();
-  await dataSource.query(
-    `INSERT INTO transfer_pair_rejections (workspace_id, tx_low_id, tx_high_id) VALUES ($1, $2, $3)`,
-    [owner.workspaceId, txLowId, txHighId],
-  );
   await send('wallet', 'post', '/wallets', {
     name: `${marker} wallet`,
     currency: 'USD',
