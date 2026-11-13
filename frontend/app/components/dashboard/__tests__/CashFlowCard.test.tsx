@@ -3,10 +3,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '../test-setup';
-import { CashFlowCard, typicalSpend } from '../CashFlowCard';
+import { CashFlowCard } from '../CashFlowCard';
 import { wholeLine } from './whole-line';
 
-const chartProps = vi.hoisted(() => vi.fn<(props: Record<string, unknown>) => void>());
+const accountsProps = vi.hoisted(() => vi.fn<(props: Record<string, unknown>) => void>());
 const entriesMock = vi.hoisted(() => vi.fn());
 
 vi.mock('@/app/hooks/useDashboard', () => ({ useCashFlowEntries: entriesMock }));
@@ -18,10 +18,10 @@ vi.mock('../CashFlowFlow', () => ({
   },
 }));
 
-vi.mock('next/dynamic', () => ({
-  default: () => (props: Record<string, unknown>) => {
-    chartProps(props);
-    return React.createElement('div', { 'data-testid': 'mock-chart' });
+vi.mock('../AccountBalancesView', () => ({
+  AccountBalancesView: (props: Record<string, unknown>) => {
+    accountsProps(props);
+    return React.createElement('div', { 'data-testid': 'accounts-view' });
   },
 }));
 
@@ -42,8 +42,7 @@ vi.mock('@/app/i18n', () => ({
     income: value('Income'),
     expense: value('Expense'),
     budgeted: value('Budgeted'),
-    noData: value('No data'),
-    viewChart: value('Chart'),
+    viewChart: value('Accounts'),
     viewCalendar: value('Calendar'),
     viewLabel: value('View'),
     viewFlow: value('Flow'),
@@ -61,116 +60,44 @@ const day = (date: string, income: number, expense: number, budgeted = 0) => ({
 
 describe('CashFlowCard', () => {
   beforeEach(() => {
-    chartProps.mockClear();
+    accountsProps.mockClear();
     entriesMock.mockReset();
     entriesMock.mockReturnValue(undefined);
+    window.localStorage.clear();
   });
 
-  it("hands the chart the month's named rows grouped by day", () => {
-    const coffee = { date: '2026-07-01', name: 'ACME Coffee', kind: 'expense', amount: 4.5, budgeted: 0 };
-    const salary = { date: '2026-07-01', name: 'Member One', kind: 'income', amount: 900, budgeted: 0 };
-    const rent = { date: '2026-07-03', name: 'Example Rentals', kind: 'expense', amount: 468, budgeted: 0 };
-    entriesMock.mockReturnValue([salary, coffee, rent]);
-
+  it("opens on the accounts' balances for the picked month, linking to Accounts", () => {
     render(
       <CashFlowCard
         formatAmount={String}
         activeMonth="2026-07"
-        days={[day('2026-07-01', 900, 4.5), day('2026-07-03', 0, 468)]}
+        days={[day('2026-07-01', 900, 100)]}
       />,
     );
 
-    expect(entriesMock).toHaveBeenCalledWith('2026-07');
-    const [props] = chartProps.mock.calls.at(-1) ?? [];
-    const byDay = props?.entriesByDay as Map<string, unknown[]>;
-    expect(byDay.get('2026-07-01')).toEqual([salary, coffee]);
-    expect(byDay.get('2026-07-03')).toEqual([rent]);
+    expect(screen.getByTestId('accounts-view')).toBeInTheDocument();
+    expect(accountsProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ month: '2026-07' }),
+    );
+    expect(screen.getByText('View all').closest('a')).toHaveAttribute('href', '/accounts');
+    // The month's income and spending belong to the other views.
+    expect(screen.queryByText(/Income/)).toBeNull();
   });
 
-  it("charts the picked month day by day and sums its days in the headline", () => {
-    const days = [day('2026-07-01', 900, 100), day('2026-07-02', 0, 0), day('2026-07-03', 80, 468)];
-
-    render(<CashFlowCard formatAmount={v => `$${v}`} activeMonth="2026-07" days={days} />);
-
-    expect(screen.getByText('Jul 2026')).toBeInTheDocument();
-    expect(screen.getByText('$412')).toBeInTheDocument();
-    expect(screen.getByText(wholeLine('Income $980'))).toBeInTheDocument();
-    expect(screen.getByText(wholeLine('Expense $568'))).toBeInTheDocument();
-    const [props] = chartProps.mock.calls.at(-1) ?? [];
-    expect(props?.points).toEqual(days);
-  });
-
-  it("sums the month's budgeted spending in the legend and names it for the chart", () => {
-    const days = [day('2026-10-03', 0, 60, 60), day('2026-10-09', 0, 70, 40), day('2026-10-12', 0, 20)];
-
-    render(<CashFlowCard formatAmount={v => `$${v}`} activeMonth="2026-10" days={days} />);
-
-    expect(screen.getByText(wholeLine('Expense $150'))).toBeInTheDocument();
-    expect(screen.getByText(wholeLine('Budgeted $100'))).toBeInTheDocument();
-    const [props] = chartProps.mock.calls.at(-1) ?? [];
-    expect(props?.labels).toMatchObject({ budgeted: 'Budgeted' });
-  });
-
-  it('leaves Budgeted out of the legend when no budget covered any spending', () => {
+  it('shows the accounts even in a month with no money in or out', () => {
     render(
       <CashFlowCard
-        formatAmount={v => `$${v}`}
-        activeMonth="2026-10"
-        days={[day('2026-10-03', 0, 60)]}
+        formatAmount={String}
+        activeMonth="2026-07"
+        days={[day('2026-07-01', 0, 0)]}
       />,
     );
 
-    expect(screen.queryByText(/Budgeted/)).not.toBeInTheDocument();
+    expect(screen.getByTestId('accounts-view')).toBeInTheDocument();
+    expect(screen.queryByText('No cash flow data yet')).toBeNull();
   });
 
-  it('on a phone charts the days so far as wide bars to swipe through', () => {
-    vi.useFakeTimers({ toFake: ['Date'] });
-    vi.setSystemTime(new Date(2026, 6, 2, 12));
-    const matchMedia = vi.fn(() => ({
-      matches: true,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }));
-    vi.stubGlobal('matchMedia', matchMedia);
-    window.localStorage.setItem('seneca.cashFlowView', 'chart');
-    const soFar = [day('2026-07-01', 900, 100), day('2026-07-02', 80, 0)];
-
-    try {
-      render(
-        <CashFlowCard
-          formatAmount={String}
-          activeMonth="2026-07"
-          days={[...soFar, day('2026-07-03', 0, 0)]}
-        />,
-      );
-
-      const [props] = chartProps.mock.calls.at(-1) ?? [];
-      expect(props).toMatchObject({ points: soFar, everyDay: true });
-    } finally {
-      vi.unstubAllGlobals();
-      vi.useRealTimers();
-    }
-  });
-
-  it("tops the scale at the month's income rounded up, from the typical day's spend", () => {
-    const days = [
-      day('2026-10-02', 810, 0),
-      day('2026-10-12', 0, 4),
-      day('2026-10-16', 1132, 11),
-    ];
-
-    render(<CashFlowCard formatAmount={String} activeMonth="2026-10" days={days} />);
-
-    const [props] = chartProps.mock.calls.at(-1) ?? [];
-    expect(props).toMatchObject({ ceiling: 2000, typical: 7.5 });
-  });
-
-  it('takes the middle of the days with spending as the typical spend', () => {
-    expect(typicalSpend([day('2026-10-01', 0, 3), day('2026-10-02', 500, 0), day('2026-10-03', 0, 40), day('2026-10-04', 0, 15)])).toBe(15);
-    expect(typicalSpend([day('2026-10-01', 500, 0)])).toBe(0);
-  });
-
-  it('offers no period switch, only the chart, calendar and flow views', () => {
+  it('offers no period switch, only the accounts, calendar and flow views', () => {
     render(
       <CashFlowCard
         formatAmount={String}
@@ -180,36 +107,71 @@ describe('CashFlowCard', () => {
     );
 
     expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual([
-      'Chart',
+      'Accounts',
       'Calendar',
       'Flow',
     ]);
   });
 
-  it('shows a loss with a typographic minus', () => {
-    render(
-      <CashFlowCard
-        formatAmount={v => `$${v}`}
-        activeMonth="2026-07"
-        days={[day('2026-07-05', 100, 250)]}
-      />,
-    );
+  describe('headline of the calendar and flow', () => {
+    beforeEach(() => window.localStorage.setItem('seneca.cashFlowView', 'calendar'));
 
-    expect(screen.getByText('−$150')).toBeInTheDocument();
-  });
+    it("sums the picked month's days", () => {
+      const days = [day('2026-07-01', 900, 100), day('2026-07-02', 0, 0), day('2026-07-03', 80, 468)];
 
-  it('shows the empty state instead of a chart when the month has no money in or out', () => {
-    const { container } = render(
-      <CashFlowCard
-        formatAmount={v => `$${v}`}
-        activeMonth="2026-07"
-        days={[day('2026-07-01', 0, 0), day('2026-07-02', 0, 0)]}
-      />,
-    );
+      render(<CashFlowCard formatAmount={v => `$${v}`} activeMonth="2026-07" days={days} />);
 
-    expect(container.querySelector('.seneca-chart__total')?.textContent).toBe('$0');
-    expect(screen.getByText('No cash flow data yet')).toBeInTheDocument();
-    expect(screen.queryByTestId('mock-chart')).not.toBeInTheDocument();
+      expect(screen.getByText('Jul 2026')).toBeInTheDocument();
+      expect(screen.getByText('$412')).toBeInTheDocument();
+      expect(screen.getByText(wholeLine('Income $980'))).toBeInTheDocument();
+      expect(screen.getByText(wholeLine('Expense $568'))).toBeInTheDocument();
+    });
+
+    it("sums the month's budgeted spending", () => {
+      const days = [day('2026-10-03', 0, 60, 60), day('2026-10-09', 0, 70, 40), day('2026-10-12', 0, 20)];
+
+      render(<CashFlowCard formatAmount={v => `$${v}`} activeMonth="2026-10" days={days} />);
+
+      expect(screen.getByText(wholeLine('Expense $150'))).toBeInTheDocument();
+      expect(screen.getByText(wholeLine('Budgeted $100'))).toBeInTheDocument();
+    });
+
+    it('leaves Budgeted out when no budget covered any spending', () => {
+      render(
+        <CashFlowCard
+          formatAmount={v => `$${v}`}
+          activeMonth="2026-10"
+          days={[day('2026-10-03', 0, 60)]}
+        />,
+      );
+
+      expect(screen.queryByText(/Budgeted/)).not.toBeInTheDocument();
+    });
+
+    it('shows a loss with a typographic minus', () => {
+      render(
+        <CashFlowCard
+          formatAmount={v => `$${v}`}
+          activeMonth="2026-07"
+          days={[day('2026-07-05', 100, 250)]}
+        />,
+      );
+
+      expect(screen.getByText('−$150')).toBeInTheDocument();
+    });
+
+    it('shows the empty state when the month has no money in or out', () => {
+      const { container } = render(
+        <CashFlowCard
+          formatAmount={v => `$${v}`}
+          activeMonth="2026-07"
+          days={[day('2026-07-01', 0, 0), day('2026-07-02', 0, 0)]}
+        />,
+      );
+
+      expect(container.querySelector('.seneca-chart__total')?.textContent).toBe('$0');
+      expect(screen.getByText('No cash flow data yet')).toBeInTheDocument();
+    });
   });
 
   describe('calendar view', () => {
@@ -222,7 +184,7 @@ describe('CashFlowCard', () => {
 
       fireEvent.click(screen.getByRole('tab', { name: 'Calendar' }));
 
-      expect(screen.queryByTestId('mock-chart')).toBeNull();
+      expect(screen.queryByTestId('accounts-view')).toBeNull();
       const first = screen.getByRole('button', { name: 'July 1, −4.5, +900' });
       expect(first).toHaveTextContent('4.5');
       expect(first).toHaveTextContent('+900');
@@ -277,7 +239,7 @@ describe('CashFlowCard', () => {
       unmount();
 
       render(<CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />);
-      expect(screen.queryByTestId('mock-chart')).toBeNull();
+      expect(screen.queryByTestId('accounts-view')).toBeNull();
     });
 
     describe('on a phone', () => {
@@ -300,22 +262,28 @@ describe('CashFlowCard', () => {
           'aria-selected',
           'true',
         );
-        expect(screen.queryByTestId('mock-chart')).toBeNull();
+        expect(screen.queryByTestId('accounts-view')).toBeNull();
       });
 
       it('keeps the view the reader picked', () => {
         window.localStorage.setItem('seneca.cashFlowView', 'chart');
         render(<CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />);
 
-        expect(screen.getByRole('tab', { name: 'Chart' })).toHaveAttribute('aria-selected', 'true');
-        expect(screen.getByTestId('mock-chart')).toBeInTheDocument();
+        expect(screen.getByRole('tab', { name: 'Accounts' })).toHaveAttribute(
+          'aria-selected',
+          'true',
+        );
+        expect(screen.getByTestId('accounts-view')).toBeInTheDocument();
       });
     });
 
-    it('opens on the chart on a wider screen when no view was picked', () => {
+    it('opens on the accounts on a wider screen when no view was picked', () => {
       render(<CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />);
 
-      expect(screen.getByRole('tab', { name: 'Chart' })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByRole('tab', { name: 'Accounts' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
     });
   });
 
@@ -330,12 +298,11 @@ describe('CashFlowCard', () => {
     it('asks for the flow only once picked, and links to the same month in Reports', () => {
       render(<CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />);
       expect(flowProps).not.toHaveBeenCalled();
-      expect(screen.queryByText('View all')).toBeNull();
 
       fireEvent.click(screen.getByRole('tab', { name: 'Flow' }));
 
       expect(screen.getByTestId('flow')).toBeInTheDocument();
-      expect(screen.queryByTestId('mock-chart')).toBeNull();
+      expect(screen.queryByTestId('accounts-view')).toBeNull();
       expect(flowProps).toHaveBeenLastCalledWith(expect.objectContaining({ month: '2026-07' }));
       expect(screen.getByText('View all').closest('a')).toHaveAttribute(
         'href',

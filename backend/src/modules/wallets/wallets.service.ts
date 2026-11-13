@@ -6,6 +6,7 @@ import { assertOwnerMemberInWorkspace } from '../../common/utils/transaction-own
 import type {
   CreateWalletBody,
   UpdateWalletBody,
+  WalletBalanceDays,
   WalletItem,
   WalletReconciliation,
   WalletSeries,
@@ -13,7 +14,7 @@ import type {
 } from '../../contracts';
 import { Statement, StatementStatus } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
-import { DEBT_WALLET_TYPES, Wallet } from '../../entities/wallet.entity';
+import { DEBT_WALLET_TYPES, SPENDABLE_WALLET_TYPES, Wallet } from '../../entities/wallet.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import {
   addAmount,
@@ -23,6 +24,7 @@ import {
 } from '../exchange-rates/currency-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
+import { balanceDays, monthDates } from './wallet-balance-days';
 import { toDateOnly, type WalletLedger, walletLedgers } from './wallet-ledger';
 
 /** Statements whose rows are read and real; the same set the balance sheet trusts. */
@@ -151,6 +153,60 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       balance += day.net;
       return { date: day.date, balance: round2(balance) };
     });
+  }
+
+  /**
+   * What each active everyday account (checking, cash, card) held at the end of
+   * every day of `month`, converted to the workspace currency at that day's rate.
+   */
+  async balanceDays(workspaceId: string, month: string): Promise<WalletBalanceDays> {
+    const currency = normalizeCurrencyCode(await this.workspaceCurrency.resolve(workspaceId));
+    const wallets = (await this.findAll(workspaceId)).filter(
+      wallet => wallet.isActive && SPENDABLE_WALLET_TYPES.includes(wallet.type),
+    );
+    const dates = monthDates(month);
+    const ledgers = await walletLedgers(
+      this.transactionRepository,
+      this.exchangeRates,
+      workspaceId,
+      wallets,
+    );
+    const converter = await CurrencyConverter.loadRange(
+      this.exchangeRates,
+      currency,
+      wallets.map(wallet => normalizeCurrencyCode(wallet.currency)),
+      dates,
+      workspaceId,
+    );
+
+    const series = wallets.map(wallet => {
+      const own = normalizeCurrencyCode(wallet.currency);
+      const balances = balanceDays(
+        Number(wallet.initialBalance) || 0,
+        ledgers.get(wallet.id)?.days ?? [],
+        dates,
+      );
+      return balances.map((balance, index) => {
+        // A rate is never 0, so one unit converting to 0 means the day has none.
+        const rate = converter.convert(1, own, dates[index]);
+        return rate === 0 ? null : round2(balance * rate);
+      });
+    });
+
+    return {
+      currency,
+      accounts: wallets.map(wallet => ({
+        id: wallet.id,
+        name: wallet.name,
+        type: wallet.type,
+        currency: wallet.currency,
+      })),
+      days: dates.map((date, index) => ({
+        date,
+        balances: Object.fromEntries(wallets.map((wallet, at) => [wallet.id, series[at][index]])),
+      })),
+      unconverted: converter.missing,
+    };
   }
 
   private async withBalances(workspaceId: string, wallets: Wallet[]): Promise<WalletItem[]> {
