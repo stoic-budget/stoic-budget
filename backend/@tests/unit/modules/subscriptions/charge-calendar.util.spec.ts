@@ -3,6 +3,7 @@ import {
   chargeAt,
   countChargesBetween,
   projectMonthlyCharges,
+  settledDateOf,
   splitMonthCharges,
 } from '@/modules/subscriptions/charge-calendar.util';
 
@@ -186,5 +187,35 @@ describe('countChargesBetween', () => {
 
   it('counts nothing without a next charge', () => {
     expect(countChargesBetween(null, SubscriptionFrequency.MONTHLY, from, to)).toBe(0);
+  });
+});
+
+describe('settledDateOf', () => {
+  const monthly = (nextChargeDate: string | null) => ({
+    nextChargeDate,
+    frequency: SubscriptionFrequency.MONTHLY,
+  });
+
+  it('settles the next charge with a payment a few days early or late', () => {
+    expect(settledDateOf(monthly('2026-11-21'), '2026-11-18')).toBe('2026-11-21');
+    expect(settledDateOf(monthly('2026-11-21'), '2026-11-23')).toBe('2026-11-21');
+  });
+
+  it("settles the period's own charge with a receipt dated a period back", () => {
+    expect(settledDateOf(monthly('2026-11-21'), '2026-10-21')).toBe('2026-10-21');
+    expect(settledDateOf(monthly('2026-11-21'), '2026-08-20')).toBe('2026-08-21');
+  });
+
+  it('keeps the day clamped to short months, as the calendar does', () => {
+    expect(settledDateOf(monthly('2026-03-31'), '2026-02-27')).toBe('2026-02-28');
+  });
+
+  it('steps by weeks for a weekly subscription', () => {
+    const weekly = { nextChargeDate: '2026-11-20', frequency: SubscriptionFrequency.WEEKLY };
+    expect(settledDateOf(weekly, '2026-11-06')).toBe('2026-11-06');
+  });
+
+  it('is the payment day itself without a next charge', () => {
+    expect(settledDateOf(monthly(null), '2026-10-21')).toBe('2026-10-21');
   });
 });
