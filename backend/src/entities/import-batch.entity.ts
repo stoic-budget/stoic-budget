@@ -23,13 +23,16 @@ export interface ImportCreatedRef {
     | 'invoice'
     | 'client'
     | 'category'
-    | 'metal_lot';
+    | 'metal_lot'
+    | 'wallet'
+    | 'payee';
   id: string;
 }
 
 /** An entity the import changed, with the values it had before. */
 export interface ImportUpdatedRef {
-  kind: 'payable' | 'subscription' | 'budget';
+  /** `transaction`: an existing row an app import made a transfer leg; `wallet`: its opening balance. */
+  kind: 'payable' | 'subscription' | 'budget' | 'transaction' | 'wallet';
   id: string;
   before: JsonObject;
 }

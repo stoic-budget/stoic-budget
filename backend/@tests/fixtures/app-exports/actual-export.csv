@@ -1,0 +1,10 @@
+﻿Account,Date,Payee,Notes,Category_Group,Category,Amount,Split_Amount,Cleared
+Everyday Account,2026-02-01,Starting Balance,,Income,Starting Balances,800,0,Reconciled
+Everyday Account,2026-02-03,Employer One,February pay,Income,Income,1900.5,0,Cleared
+Everyday Account,2026-02-04,ACME Store - Wireless Buds,,Usual Expenses,Food,-61.2,0,Cleared
+Everyday Account,2026-02-05,Corner Market,(SPLIT INTO 2) Weekly shop,,,0,-55,Cleared
+Everyday Account,2026-02-05,Corner Market,(SPLIT 1 OF 2) ,Usual Expenses,Food,-40,0,Cleared
+Everyday Account,2026-02-05,Corner Market,(SPLIT 2 OF 2) Light bulbs,Usual Expenses,General,-15,0,Cleared
+Everyday Account,2026-02-06,Rainy Day,Top up,,,-150,0,Cleared
+Rainy Day,2026-02-06,Everyday Account,Top up,,,150,0,Cleared
+Everyday Account,2026-02-07,'+Plus Pharmacy,,Usual Expenses,Medical,-9.99,0,Not cleared

@@ -6,6 +6,7 @@ import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditModule } from '../audit/audit.module';
 import { ClassificationModule } from '../classification/classification.module';
 import { InvestmentsModule } from '../investments/investments.module';
+import { AppImportService } from './apps/app-import.service';
 import { EntityImportService } from './entity-import.service';
 import { EntityImportsController } from './entity-imports.controller';
 import { ImportMappingProfilesController } from './import-mapping-profiles.controller';
@@ -21,6 +22,11 @@ import { ImportSuggestService } from './import-suggest.service';
     InvestmentsModule,
   ],
   controllers: [EntityImportsController, ImportMappingProfilesController],
-  providers: [EntityImportService, ImportMappingProfilesService, ImportSuggestService],
+  providers: [
+    EntityImportService,
+    AppImportService,
+    ImportMappingProfilesService,
+    ImportSuggestService,
+  ],
 })
 export class EntityImportsModule {}

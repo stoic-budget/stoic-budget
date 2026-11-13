@@ -2,7 +2,10 @@ vi.mock('franc', () => ({
   franc: () => 'und',
 }));
 
+import { readFileSync } from 'node:fs';
+import * as path from 'node:path';
 import {
+  AppImportResult,
   CreatedFromSource,
   EntityImportResult,
   EntityImportUndone,
@@ -134,6 +137,33 @@ describe('API contracts: data entry and imports (e2e)', () => {
       call('put', '/view-preferences/transactions', { state: { owner: 'me' } }),
     );
     expect(saved.state).toEqual({ owner: 'me' });
+  });
+
+  it('an import from another app, previewed, booked and undone', async () => {
+    const fixtures = path.join(__dirname, '../fixtures/app-exports');
+    // One unreadable row, so the problems list carries one.
+    const register = Buffer.concat([
+      readFileSync(path.join(fixtures, 'ynab-register.csv')),
+      Buffer.from('"Checking","","not a date","Example Shop","","","","",$1.00,$0.00,""\n'),
+    ]);
+    const plan = readFileSync(path.join(fixtures, 'ynab-plan.csv'));
+    const send = (dryRun: boolean) =>
+      call('post', '/entity-imports/apps')
+        .field('dryRun', String(dryRun))
+        .field('currency', 'USD')
+        .field('categorize', 'false')
+        .attach('files', register, 'ynab-register.csv')
+        .attach('files', plan, 'ynab-plan.csv');
+    const preview = await answer(AppImportResult, send(true));
+    expect(preview.accounts.length).toBeGreaterThan(0);
+    expect(preview.categories.items.length).toBeGreaterThan(0);
+    expect(preview.problems).toEqual([{ fileName: 'ynab-register.csv', row: 16, reason: 'date' }]);
+    const run = await answer(AppImportResult, send(false));
+    expect(run.batchId).toBeTruthy();
+    expect(run.transactions.created).toBeGreaterThan(0);
+    expect(run.budgets.month).toBe('2026-10');
+    const undone = await answer(EntityImportUndone, call('delete', `/entity-imports/${run.batchId}`));
+    expect(undone.removed).toBeGreaterThan(0);
   });
 
   it('statement import preview, commit and session', async () => {
