@@ -38,6 +38,7 @@ export * from './peppol/peppol';
 export * from './receipts/receipt-documents';
 export * from './receipts/receipts';
 export * from './reference/reference';
+export * from './reference/statement-coverage';
 export * from './reports/report-summaries';
 export * from './reports/reports';
 export * from './requests/api-keys';

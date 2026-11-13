@@ -13,7 +13,7 @@ import type { BankSyncAccountSetting, BankSyncHealth } from './bank-sync.config'
 import { linksOf } from './bank-sync.config';
 import { BankSyncService } from './bank-sync.service';
 import { BankSyncDedupeService } from './bank-sync-dedupe.service';
-import { healthOf, recordDrift, sinceOf } from './bank-sync-health';
+import { askedSince, healthOf, recordDrift, sinceOf } from './bank-sync-health';
 import { buildOfxStatement, ofxFileName } from './bank-sync-ofx.util';
 import {
   type BankSyncAccount,
@@ -150,6 +150,8 @@ export class BankSyncPullService {
     }
 
     const floor = sinceOf(account, now).getTime();
+    // Read before this pull moves `lastSyncAt`: the days the statement stands for.
+    const since = askedSince(account, new Date(floor), now);
     const candidates = remote.transactions.filter(
       item => !item.pending && item.posted.getTime() >= floor,
     );
@@ -169,6 +171,7 @@ export class BankSyncPullService {
           remote,
           fresh,
           account.walletId,
+          { since, now },
         );
         totals.imported += fresh.length;
         totals.statements += 1;
@@ -189,6 +192,9 @@ export class BankSyncPullService {
       account.health = healthOf(account, drift, now);
       // The floor only ever applies to the pull right after a switch.
       account.syncFrom = null;
+      account.askedFrom = statementId
+        ? null
+        : { walletId: account.walletId, from: since.toISOString() };
     } else {
       account.lastError = error;
     }
@@ -209,10 +215,14 @@ export class BankSyncPullService {
     account: BankSyncAccount,
     transactions: BankSyncTransaction[],
     walletId: string | null,
+    asked: { since: Date; now: Date },
   ): Promise<string> {
     const uploadsDir = resolveUploadsDir();
     await fs.promises.mkdir(uploadsDir, { recursive: true });
-    const content = Buffer.from(buildOfxStatement(account, transactions), 'utf8');
+    const content = Buffer.from(
+      buildOfxStatement(account, transactions, asked.now, asked.since),
+      'utf8',
+    );
     const filePath = path.join(uploadsDir, `${randomUUID()}.ofx`);
     await fs.promises.writeFile(filePath, content);
     const file = {

@@ -15,6 +15,7 @@ import {
   PayeeMerge,
   PayeeRecord,
   SharedLinkItem,
+  StatementCoverage,
   StorageFolder,
   StorageTag,
   StorageViewItem,
@@ -50,6 +51,7 @@ import {
   TransferLinked,
   TransfersDetected,
 } from '../../src/contracts/transactions/transaction-record';
+import { BankName, FileType, Statement, StatementStatus } from '../../src/entities/statement.entity';
 import { Transaction, TransactionType } from '../../src/entities/transaction.entity';
 import {
   deleteUserByEmail,
@@ -169,6 +171,71 @@ describe('API contracts: ledger book (e2e)', () => {
       matches(WalletItem, updated.body);
       expect(updated.body.initialBalance).toBe('20.00');
       matches(MessageResult, (await call('delete', `/wallets/${id}`).expect(200)).body);
+    });
+
+    it('reads which days a wallet’s statements cover, every kind of finding in it', async () => {
+      const walletId = (
+        await call('post', '/wallets', { name: 'Everyday', currency: 'EUR' }).expect(201)
+      ).body.id as string;
+      const statements = dataSource.getRepository(Statement);
+      const seed = async (from: string, to: string, start: number, end: number, rows: number[]) => {
+        const statement = await statements.save(
+          statements.create({
+            userId: owner.userId,
+            workspaceId: owner.workspaceId,
+            walletId,
+            fileName: `statement-${from}.pdf`,
+            filePath: '/dev/null',
+            fileType: FileType.PDF,
+            fileSize: 1,
+            fileHash: `coverage-${stamp}-${Math.random()}`,
+            bankName: BankName.OTHER,
+            currency: 'EUR',
+            status: StatementStatus.COMPLETED,
+            statementDateFrom: new Date(from),
+            statementDateTo: new Date(to),
+            balanceStart: start,
+            balanceEnd: end,
+          }),
+        );
+        const repository = dataSource.getRepository(Transaction);
+        await repository.save(
+          rows.map(amount =>
+            repository.create({
+              workspaceId: owner.workspaceId,
+              statementId: statement.id,
+              walletId,
+              transactionDate: new Date(from),
+              counterpartyName: 'ACME Store - Wireless Buds',
+              paymentPurpose: 'Purchase',
+              currency: 'EUR',
+              transactionType: amount > 0 ? TransactionType.INCOME : TransactionType.EXPENSE,
+              amount: Math.abs(amount),
+              credit: amount > 0 ? amount : null,
+              debit: amount < 0 ? -amount : null,
+              isVerified: true,
+            }),
+          ),
+        );
+      };
+      // A movement 10 short, then a gap and an opening 5 above the close, a copy and an overlap.
+      await seed('2026-01-01', '2026-01-31', 0, 100, [90]);
+      await seed('2026-03-01', '2026-03-31', 105, 105, []);
+      await seed('2026-03-01', '2026-03-31', 105, 105, []);
+      await seed('2026-03-20', '2026-04-10', 105, 105, []);
+
+      const coverage = (await call('get', `/wallets/${walletId}/statement-coverage`).expect(200))
+        .body;
+      matches(StatementCoverage, coverage);
+      expect(coverage.periods).toHaveLength(4);
+      expect(coverage.periods.filter((p: { duplicateOf: unknown }) => p.duplicateOf)).toHaveLength(1);
+      expect(coverage.gaps).toHaveLength(1);
+      expect(coverage.sinceLast).not.toBeNull();
+      expect(coverage.overlaps).toHaveLength(1);
+      expect(coverage.chainBreaks).toHaveLength(1);
+      expect(coverage.movementMismatches).toHaveLength(1);
+      expect(coverage.months.length).toBeGreaterThan(3);
+      expect(coverage.unexplained).toBe(15);
     });
 
     it('create, read, update and delete a category, with its parent', async () => {

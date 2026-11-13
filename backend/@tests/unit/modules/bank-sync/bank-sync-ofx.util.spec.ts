@@ -61,6 +61,18 @@ describe('buildOfxStatement', () => {
     expect(parsed.metadata.balanceEnd).toBeUndefined();
   });
 
+  it('takes the days the feed asked for as its period when told, quiet days included', () => {
+    const text = buildOfxStatement(
+      account,
+      [{ id: 'TRN-1', posted: new Date('2026-09-20T00:00:00Z'), amount: -1, description: 'Corner Cafe', pending: false }],
+      new Date('2026-09-25T09:00:00Z'),
+      new Date('2026-09-01T09:00:00Z'),
+    );
+    const parsed = parseOfx(text);
+    expect(parsed.metadata.dateFrom?.toISOString().slice(0, 10)).toBe('2026-09-01');
+    expect(parsed.metadata.dateTo?.toISOString().slice(0, 10)).toBe('2026-09-25');
+  });
+
   it('names the file after the institution and account, safely', () => {
     expect(ofxFileName(account, new Date('2026-10-01T00:00:00Z'))).toBe(
       'demo-bank-everyday-checking-more-20261001.ofx',

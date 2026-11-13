@@ -1,4 +1,4 @@
-import { detectDateOrder, parseImportDate } from '../../../src/modules/entity-imports/helpers/import-values';
+import { detectDateOrder, importPeriod, parseImportDate } from '../../../src/modules/entity-imports/helpers/import-values';
 
 describe('detectDateOrder', () => {
   it('settles the order from one value that reads only one way', () => {
@@ -26,5 +26,17 @@ describe('parseImportDate with a known order', () => {
 
   it('leaves ISO dates alone', () => {
     expect(parseImportDate('2026-12-31', 'mdy')).toBe('2026-12-31');
+  });
+});
+
+describe('importPeriod', () => {
+  it('is null without either end, keeps a lone end and swaps reversed ends', () => {
+    expect(importPeriod(undefined)).toBeNull();
+    expect(importPeriod({ dateFrom: null, dateTo: '' })).toBeNull();
+    expect(importPeriod({ dateFrom: '2026-03-03' })).toEqual({ from: '2026-03-03', to: null });
+    expect(importPeriod({ dateFrom: '2026-04-17', dateTo: '2026-03-03' })).toEqual({
+      from: '2026-03-03',
+      to: '2026-04-17',
+    });
   });
 });

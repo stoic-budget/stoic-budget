@@ -12,6 +12,7 @@ import { ReadOnlyHint } from '@/app/components/versions/ReadOnlyHint';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import { accountSubtitle } from '../account-types';
+import { AccountCoverageCard } from '../components/AccountCoverageCard';
 import { AccountDetailSkeleton } from '../components/AccountDetailSkeleton';
 import { AccountFormDrawer } from '../components/AccountFormDrawer';
 import { AccountReconciliation } from '../components/AccountReconciliation';
@@ -117,6 +118,8 @@ export default function AccountPage(): React.JSX.Element {
               </ReadOnlyHint>
             )}
           </div>
+
+          <AccountCoverageCard account={account} money={money} />
 
           {series.length > 1 && (
             <section style={cardStyle}>

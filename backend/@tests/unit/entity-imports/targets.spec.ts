@@ -54,6 +54,7 @@ const buildContext = (
   fileName: 'sheet.xlsx',
   categorize: false,
   walletId: null,
+  period: null,
   headers: [],
   cell: (row, field) => (Number.isInteger(mapping[field]) ? String(row[mapping[field]] ?? '') : ''),
   category: vi.fn(async (name: string) => `cat-${name.toLowerCase()}`),
@@ -261,5 +262,86 @@ describe('TransactionsTarget', () => {
     );
     const saved = transactions.save.mock.calls[0][0] as Array<{ transactionDate: Date }>;
     expect(saved.map(tx => tx.transactionDate.toISOString().slice(0, 10))).toEqual(['2026-01-02', '2026-12-31']);
+  });
+
+  describe('held to a period (filling a gap between statements)', () => {
+    const period = { from: '2026-03-03', to: '2026-04-17' };
+    const sheet = [
+      ['2026-03-01', 'ACME Store - Wireless Buds', '-19.99'],
+      ['2026-03-05', 'Corner Cafe', '-4.50'],
+      ['2026-04-15', 'Employer One', '1500'],
+      ['2026-04-20', 'Corner Cafe', '-5.00'],
+    ];
+
+    it('imports only the rows dated in it and skips the rest as outside_period', async () => {
+      const ctx = { ...buildContext({ date: 0, merchant: 1, amount: 2 }, { Transaction: repoMock() }), period };
+      const results = await new TransactionsTarget().run(sheet, ctx, true);
+      expect(results.map(r => r.status)).toEqual(['skipped', 'created', 'created', 'skipped']);
+      expect(results[0].reason).toBe('outside_period');
+      expect(results[3].reason).toBe('outside_period');
+    });
+
+    it('takes the period as the statement dates at the ends the sheet reaches past', async () => {
+      const statements = repoMock();
+      const ctx = {
+        ...buildContext({ date: 0, merchant: 1, amount: 2 }, { Transaction: repoMock(), Statement: statements }),
+        period,
+      };
+      vi.spyOn(nodeFs.promises, 'writeFile').mockResolvedValue(undefined);
+      await new TransactionsTarget().run(sheet.slice(0, 3), ctx, false);
+      const statement = statements.save.mock.calls[0][0] as { statementDateFrom: Date; statementDateTo: Date };
+      // Rows before the period: the sheet covers its start. None after: it ends at its last row.
+      expect(statement.statementDateFrom.toISOString().slice(0, 10)).toBe(period.from);
+      expect(statement.statementDateTo.toISOString().slice(0, 10)).toBe('2026-04-15');
+    });
+
+    it('records a quiet period as an empty statement when the sheet reaches past both ends', async () => {
+      const statements = repoMock();
+      const ctx = {
+        ...buildContext({ date: 0, merchant: 1, amount: 2 }, { Transaction: repoMock(), Statement: statements }),
+        period: { from: '2026-03-10', to: '2026-04-10' },
+      };
+      vi.spyOn(nodeFs.promises, 'writeFile').mockResolvedValue(undefined);
+      const results = await new TransactionsTarget().run([sheet[1], sheet[3]], ctx, false);
+      expect(results.map(r => r.reason)).toEqual(['outside_period', 'outside_period']);
+      const statement = statements.save.mock.calls[0][0] as {
+        statementDateFrom: Date;
+        statementDateTo: Date;
+        totalTransactions: number;
+      };
+      expect(statement.statementDateFrom.toISOString().slice(0, 10)).toBe('2026-03-10');
+      expect(statement.statementDateTo.toISOString().slice(0, 10)).toBe('2026-04-10');
+      expect(statement.totalTransactions).toBe(0);
+      expect(ctx.created).toEqual([{ kind: 'statement', id: expect.any(String) }]);
+    });
+
+    it('records no quiet period when the sheet stops short of one end or a row inside could not be read', async () => {
+      const period = { from: '2026-03-10', to: '2026-04-10' };
+      for (const rows of [
+        [sheet[0], sheet[1]],
+        [sheet[1], ['2026-03-20', 'Corner Cafe', 'n/a'], sheet[3]],
+      ]) {
+        const statements = repoMock();
+        const ctx = {
+          ...buildContext({ date: 0, merchant: 1, amount: 2 }, { Transaction: repoMock(), Statement: statements }),
+          period,
+        };
+        await new TransactionsTarget().run(rows, ctx, false);
+        expect(statements.save).not.toHaveBeenCalled();
+        expect(ctx.created).toEqual([]);
+      }
+    });
+
+    it('reads signs over the whole sheet, so income inside stays income when only spending lies outside', async () => {
+      const transactions = repoMock();
+      const ctx = {
+        ...buildContext({ date: 0, merchant: 1, amount: 2 }, { Transaction: transactions, Statement: repoMock() }),
+        period: { from: '2026-04-01', to: '2026-04-30' },
+      };
+      vi.spyOn(nodeFs.promises, 'writeFile').mockResolvedValue(undefined);
+      await new TransactionsTarget().run(sheet.slice(0, 3), ctx, false);
+      const [row] = transactions.save.mock.calls[0][0] as Array<{ transactionType: TransactionType }>;
+      expect(row.transactionType).toBe(TransactionType.INCOME);
+    });
   });
 });
