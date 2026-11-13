@@ -422,6 +422,7 @@ describe('API contracts (e2e)', () => {
   describe('budgets and goals', () => {
     const month = new Date().toISOString().slice(0, 7);
     let goalId: string;
+    let followingGoalId: string;
 
     beforeAll(async () => {
       const post = (url: string, body: object) =>
@@ -434,6 +435,21 @@ describe('API contracts (e2e)', () => {
       const goal = await post('/goals', { name: 'Move', targetAmount: 1000, currency: 'USD' });
       goalId = goal.body.id;
       await post(`/goals/${goalId}/contributions`, { amount: 100 });
+      // A goal whose progress is an account's balance, so `account` is exercised with data.
+      const savings = await post('/wallets', {
+        name: 'Goal Savings',
+        type: 'savings',
+        currency: 'USD',
+        initialBalance: 640,
+      });
+      const following = await post('/goals', {
+        name: 'Follows savings',
+        targetAmount: 2000,
+        currency: 'USD',
+        walletId: savings.body.id,
+      });
+      matches(GoalWithProgress, following.body);
+      followingGoalId = following.body.id;
       const categories = await get('/categories?type=expense');
       await post('/budgets', {
         name: 'Food for the move',
@@ -460,7 +476,16 @@ describe('API contracts (e2e)', () => {
     });
 
     it('GET /goals and /goals?month=', async () => {
-      matches(GoalList, (await get('/goals')).body);
+      const list = (await get('/goals')).body;
+      matches(GoalList, list);
+      expect(list.find((goal: { id: string }) => goal.id === followingGoalId)).toMatchObject({
+        currentAmount: 640,
+        account: { name: 'Goal Savings', currency: 'USD', balance: 640, status: 'following' },
+      });
+      const following = await get(`/goals/${followingGoalId}`);
+      matches(GoalDetail, following.body);
+      expect(following.body.account).toMatchObject({ status: 'following' });
+      matches(GoalPlanResponse, (await get(`/goals/${followingGoalId}/plan`)).body);
       const monthly = await get(`/goals?month=${month}`);
       matches(MonthGoalList, monthly.body);
       expect(monthly.body.length).toBeGreaterThan(0);

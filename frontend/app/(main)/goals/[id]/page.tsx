@@ -16,6 +16,8 @@ import { formatMoney } from '@/app/lib/format-money';
 import type { GoalItem, GoalItemPayload } from '@/app/lib/goals-api';
 import { MonthStrip } from '../../dashboard/components/MonthStrip';
 import { formatMonthParam } from '../../dashboard/helpers/dashboard-url-state';
+import { followsAccount } from '../lib/goal-account';
+import { GoalAccountCard } from './components/GoalAccountCard';
 import { GoalBudgetList } from './components/GoalBudgetList';
 import {
   GoalFlowSkeleton,
@@ -182,6 +184,15 @@ export default function GoalDetailPage(): React.JSX.Element {
       )}
 
       {!showSkeleton && detail.data && (
+        <GoalAccountCard
+          account={detail.data.account}
+          goalCurrency={detail.data.currency}
+          contributionCount={detail.data.contributions.length}
+        />
+      )}
+
+      {/* A goal following an account keeps its movements but does not count them. */}
+      {!showSkeleton && detail.data && !followsAccount(detail.data) && (
         <GoalMovementsCard
           contributions={detail.data.contributions}
           formatAmount={money}

@@ -17,6 +17,26 @@ export const GoalCover = Schema.Union([
 ]);
 export type GoalCover = Wire<typeof GoalCover>;
 
+/**
+ * How a goal that follows an account stands. `following`: its progress is the
+ * account's balance in the goal's currency (never below zero). `archived`: the
+ * account was archived, so the goal counts its contributions again.
+ * `no_rate`: no exchange rate from the account's currency to the goal's, so the
+ * balance cannot count and the progress reads zero rather than 1:1.
+ */
+export const GoalAccountStatus = Schema.Literals(['following', 'archived', 'no_rate']);
+export type GoalAccountStatus = Wire<typeof GoalAccountStatus>;
+
+export const GoalAccount = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  currency: Schema.String,
+  /** The account's balance in its own currency, on the date the progress is read for. */
+  balance: Schema.Number,
+  status: GoalAccountStatus,
+});
+export type GoalAccount = Wire<typeof GoalAccount>;
+
 /** One goal of `GET /goals` (and `?month=`). */
 export const GoalWithProgress = Schema.Struct({
   id: Schema.String,
@@ -30,6 +50,11 @@ export const GoalWithProgress = Schema.Struct({
   isReached: Schema.Boolean,
   createdAt: Timestamp,
   cover: Schema.NullOr(GoalCover),
+  /**
+   * The account the goal follows; null when it counts its contributions, and
+   * also for a caller that may not read accounts (an API key without `wallet.view`).
+   */
+  account: Schema.NullOr(GoalAccount),
   /** Only set when the list was asked for one month: what was put aside in it. */
   contributedInMonth: Schema.optional(Schema.Number),
 });

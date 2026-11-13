@@ -358,7 +358,14 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
       period_type: 'monthly',
       current_period_start: '2026-10-01',
     });
-    await insert('goals', { workspace_id: workspaceId, name: 'Laptop', target_amount: 2000, currency: 'EUR' });
+    // A goal following an account: the restored copy must follow the restored account.
+    await insert('goals', {
+      workspace_id: workspaceId,
+      name: 'Laptop',
+      target_amount: 2000,
+      currency: 'EUR',
+      wallet_id: wallet,
+    });
     const table = await insert('custom_tables', { workspace_id: workspaceId, user_id: userId, name: 'Projects' });
     await insert('custom_table_columns', { table_id: table, key: 'client', title: 'Client' });
     await insert('custom_table_rows', { table_id: table, row_number: 1, data: { client: 'Client GmbH' } });
@@ -438,6 +445,16 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
       if (count > 0) leaks.push(`${key.source}.${key.column} -> ${key.target}: ${count}`);
     }
     expect(leaks).toEqual([]);
+  });
+
+  it('brings back a goal following the restored account, not the source one', async () => {
+    const copy = await roundTrip(workspaceId, 'Goal account copy');
+    const [goal] = await sql(
+      `SELECT w.workspace_id, w.name FROM goals g JOIN wallets w ON w.id = g.wallet_id
+        WHERE g.workspace_id = $1`,
+      [copy.id],
+    );
+    expect(goal).toEqual({ workspace_id: copy.id, name: 'Cash' });
   });
 
   it('brings back the ledger as it was booked: numbered, posted and reversed', async () => {

@@ -29,6 +29,7 @@ vi.mock('@/app/components/versions/ReadOnlyHint', () => ({ ReadOnlyHint: () => n
 vi.mock('@/app/components/mobile/quick-actions-store', () => ({ useQuickActions: () => {} }));
 vi.mock('./components/GoalFormDrawer', () => ({ GoalFormDrawer: () => null }));
 vi.mock('./components/ContributionDrawer', () => ({ ContributionDrawer: () => null }));
+vi.mock('./hooks/useFollowableAccounts', () => ({ useFollowableAccounts: () => [] }));
 
 afterEach(() => {
   document.body.innerHTML = '';

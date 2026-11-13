@@ -78,16 +78,12 @@ function createService(options: {
     findOne: vi.fn(async () => options.goal ?? null),
   } as never;
 
-  const contributionRepository = {
-    createQueryBuilder: vi.fn(() => {
-      const builder: Record<string, unknown> = {
-        select: vi.fn(() => builder),
-        where: vi.fn(() => builder),
-        andWhere: vi.fn(() => builder),
-        getRawOne: vi.fn(async () => ({ total: options.contributed ?? '0' })),
-      };
-      return builder;
-    }),
+  // What the goal has: its contributions, or the followed account's balance.
+  const progressService = {
+    progress: vi.fn(
+      async () =>
+        new Map([[GOAL_ID, { amount: Number(options.contributed ?? 0), account: null, since: null }]]),
+    ),
   } as never;
 
   const budgetRepository = {
@@ -123,7 +119,7 @@ function createService(options: {
   return {
     service: new GoalFlowService(
       goalRepository,
-      contributionRepository,
+      progressService,
       budgetRepository,
       transactionRepository,
       dataEntryRepository,

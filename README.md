@@ -127,7 +127,7 @@ Stoic Budget is a full-stack platform for importing, categorizing and analyzing 
 - **Budgets** — monthly limits per category in any currency, plus the Stoic balance: planned versus actual spending across necessity, work, virtue and leisure.
 - **Subscriptions and bills** — recurring charges found automatically, what is paid and still due this month, bills to pay and money to receive.
 - **Forecast** — the next 90 days from paydays, bills, subscriptions and receivables: runway, lowest point and safe-to-spend, with a note when history is too short to trust it.
-- **Goals and net worth** — savings goals fed by real transactions, and net worth across accounts, investments, precious metals and crypto.
+- **Goals and net worth** — savings goals fed by real transactions or following an account's balance, and net worth across accounts, investments, precious metals and crypto.
 - **Crypto and investments** — wallets on Ethereum, Base, Arbitrum, Optimism, Polygon, Tron, Bitcoin and Solana kept in sync, investment accounts, metal lots and a returns page.
 - **Advice** — observations and suggestions computed from your own numbers.
 

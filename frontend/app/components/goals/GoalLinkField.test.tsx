@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GoalItemsResponse, GoalWithProgress, TransactionGoalLink } from '@/app/lib/contracts';
 import { apiResponse } from '@/app/test/api-response';
@@ -28,6 +28,7 @@ const goal: GoalWithProgress = {
   isReached: false,
   createdAt: '2026-10-01T10:00:00.000Z',
   cover: null,
+  account: null,
 };
 
 const unlinked: TransactionGoalLink = { goal: null, amount: null, itemId: null };
@@ -82,6 +83,35 @@ describe('GoalLinkField', () => {
   beforeEach(() => {
     apiGet.mockReset();
     apiPut.mockReset();
+  });
+
+  it('does not offer a goal that follows an account: its progress is the balance', async () => {
+    const following: GoalWithProgress = {
+      ...goal,
+      id: 'goal-2',
+      name: 'ACME Savings goal',
+      account: { id: 'w1', name: 'ACME Savings', currency: 'USD', balance: 50, status: 'following' },
+    };
+    const archived: GoalWithProgress = {
+      ...following,
+      id: 'goal-3',
+      name: 'Old savings goal',
+      account: { id: 'w2', name: 'ACME Old', currency: 'USD', balance: 0, status: 'archived' },
+    };
+    apiGet.mockImplementation(async (url: string) =>
+      url === '/goals' ? apiResponse([goal, following, archived]) : apiResponse(unlinked),
+    );
+    renderWithQuery(<GoalLinkField transactionId="tx-1" />);
+    await waitFor(() =>
+      expect(screen.getByRole('combobox', { name: 'Goal' })).not.toHaveAttribute('aria-disabled'),
+    );
+
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Goal' }));
+    const list = within(await screen.findByRole('listbox'));
+    expect(list.getByText(GOAL_NAME)).toBeInTheDocument();
+    // An archived account hands the goal back to its contributions.
+    expect(list.getByText('Old savings goal')).toBeInTheDocument();
+    expect(list.queryByText('ACME Savings goal')).toBeNull();
   });
 
   it('says to approve first while there is no transaction to count', async () => {
