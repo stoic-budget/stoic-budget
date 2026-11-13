@@ -1,6 +1,6 @@
 import type { DashboardData } from '@/app/hooks/useDashboard';
 // @vitest-environment jsdom
-import { fireEvent, type render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, type render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { formatMoney } from '@/app/lib/format-money';
@@ -13,12 +13,15 @@ const apiGet = vi.hoisted(() => vi.fn());
 
 // The card has its own test; here only what the Overview hands it matters.
 vi.mock('../CashFlowCard', () => ({
-  reportsHref: (month: string) => `/reports?tab=cash-flow&month=${month}`,
   CashFlowCard: ({ activeMonth, days }: { activeMonth: string; days: unknown[] }) => (
     <div data-testid="cash-flow" data-days={days.length}>
       {activeMonth}
     </div>
   ),
+}));
+
+vi.mock('../TopPayeesCard', () => ({
+  TopPayeesCard: ({ month }: { month: string }) => <div data-testid="top-payees">{month}</div>,
 }));
 
 // `apiBaseUrl` is read at module load by the goal cover thumbnail.
@@ -58,11 +61,10 @@ vi.mock('@/app/i18n', async () => {
         netLabel: value('Net'),
         savingsRateLabel: value('Savings rate'),
         monthInProgress: value('Month in progress'),
-        topCategoriesTitle: value('Spending by category'),
+        topPayeesTitle: value('Top payees'),
         viewAll: value('View all'),
         title: value('Recent transactions'),
         empty: value('No transactions this period'),
-        noCategoryData: value('No category data'),
         emptyDescription: value('Nothing here yet'),
       }),
     useLocale: () => ({ locale: 'en' }),
@@ -140,8 +142,18 @@ describe('OverviewTab', () => {
     expect(document.body.textContent).toContain('KZT 1,025,215');
     expect(document.body.textContent).not.toContain('KZT KZT 1,025,215');
     expect(screen.queryByRole('link', { name: /parse statement/i })).not.toBeInTheDocument();
-    expect(screen.getByText('No category data')).toBeInTheDocument();
     expect(screen.getByText('No transactions this period')).toBeInTheDocument();
+  });
+
+  it("puts the month's top payees where the top categories were, opening Payees on that month", () => {
+    renderTab(baseData);
+
+    expect(screen.getByTestId('top-payees')).toHaveTextContent('2026-02');
+    const card = screen.getByText('Top payees').closest('.seneca-dashboard__card') as HTMLElement;
+    expect(within(card).getByRole('link', { name: /View all/ })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/statements/payees?month=2026-02'),
+    );
   });
 
   it('marks the net by sign with a dot, keeping the figure ink, and gives its savings rate', () => {
