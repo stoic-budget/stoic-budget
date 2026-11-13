@@ -56,6 +56,10 @@ export const queryKeys = {
   // Tile-server configuration is the same in every workspace, hence no workspace segment.
   mapStyles: () => ['map-styles'] as const,
   categoryUsage: (workspaceId: string | null) => ['categories', workspaceId, 'usage'] as const,
+  category: (workspaceId: string | null, id: string) =>
+    ['categories', workspaceId, 'one', id] as const,
+  categorySummary: (workspaceId: string | null, id: string) =>
+    ['categories', workspaceId, 'summary', id] as const,
   // The Tags page list with usage counts; the tag pickers read it too.
   tags: (workspaceId: string | null) => ['tags', workspaceId] as const,
   receiptTags: (workspaceId: string | null, receiptId: string) =>

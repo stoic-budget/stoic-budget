@@ -167,6 +167,8 @@ export const TransactionListQuery = Schema.Struct({
   type: Schema.optional(Schema.Literals(['income', 'expense', 'transfer'])),
   category_id: Schema.optional(Uuid),
   categoryId: Schema.optional(Uuid),
+  /** `1` widens the category filter to its subcategories, at any depth. */
+  subcategories: Schema.optional(Schema.Literals(['0', '1'])),
   page: Schema.optional(PageInput),
   limit: Schema.optional(PageInput),
   currency: Schema.optional(Schema.String),

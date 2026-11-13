@@ -3,6 +3,7 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
+import Link from 'next/link';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { slicePercent } from '@/app/components/charts/CategoryDonut';
@@ -236,5 +237,16 @@ export function CashFlowTreemap({
         })}
       </svg>
     </Box>
+  );
+}
+
+/** A category's name in a report row, linking to its page; "Uncategorised" stays text. */
+export function CategoryNameLink({ id, name }: { id: string; name: string }): React.ReactNode {
+  return id === '__none__' ? (
+    name
+  ) : (
+    <Link href={`/categories/${id}`} className="seneca-all-tx__link">
+      {name}
+    </Link>
   );
 }

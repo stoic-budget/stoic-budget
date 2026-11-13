@@ -46,38 +46,6 @@
     color: var(--foreground);
   }
 
-  &__bars {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    align-items: end;
-    gap: 6px;
-    height: 120px;
-  }
-
-  &__bar {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 6px;
-    height: 100%;
-    min-width: 0;
-  }
-
-  &__bar-fill {
-    width: 100%;
-    max-width: 28px;
-    min-height: 2px;
-    border-radius: 4px 4px 0 0;
-    background: var(--primary);
-    opacity: 0.85;
-  }
-
-  &__bar-label {
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-
   &__section {
     display: grid;
     gap: 12px;

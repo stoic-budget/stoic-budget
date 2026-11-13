@@ -45,6 +45,7 @@ import {
   BusinessProfileResponse,
   CashFlowMap,
   CategoryList,
+  CategorySummary,
   CategoryUsageCount,
   Client,
   ClientList,
@@ -404,6 +405,16 @@ describe('API contracts (e2e)', () => {
       const res = await get('/categories');
       matches(CategoryList, res.body);
       expect(res.body.length).toBeGreaterThan(0);
+    });
+
+    it('GET /categories/:id/summary, with the row booked in beforeAll', async () => {
+      const categories = await get('/categories?type=expense');
+      const res = await get(`/categories/${categories.body[0].id}/summary`);
+      matches(CategorySummary, res.body);
+      expect(res.body.thisMonth).toBe(42.5);
+      expect(res.body.topPayees).toEqual([
+        expect.objectContaining({ name: 'Contract Coffee', amount: 42.5, count: 1 }),
+      ]);
     });
 
     it('GET /wallets', async () => {

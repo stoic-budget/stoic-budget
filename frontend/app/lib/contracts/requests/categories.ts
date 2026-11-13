@@ -2,7 +2,7 @@
 
 import * as Schema from 'effect/Schema';
 import * as Struct from 'effect/Struct';
-import { optionalNullable } from '../common/requests';
+import { BooleanInput, optionalNullable } from '../common/requests';
 import type { Wire } from '../common/wire';
 
 export const CreateCategoryBody = Schema.Struct({
@@ -28,6 +28,12 @@ export type UpdateCategoryBody = Wire<typeof UpdateCategoryBody>;
 /** `/categories/:id…`: a category's uuid. */
 export const CategoryParams = Schema.Struct({ id: Schema.String.check(Schema.isUUID()) });
 export type CategoryParams = Wire<typeof CategoryParams>;
+
+/** `GET /categories/:id/summary`: the Reports switch that nets refunds, so both agree. */
+export const CategorySummaryQuery = Schema.Struct({
+  netRefunds: Schema.optional(BooleanInput),
+});
+export type CategorySummaryQuery = Wire<typeof CategorySummaryQuery>;
 
 /** `GET /categories`. */
 export const CategoriesQuery = Schema.Struct({
