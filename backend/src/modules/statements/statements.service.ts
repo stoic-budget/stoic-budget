@@ -18,6 +18,7 @@ import { User } from '../../entities/user.entity';
 import { AuditService } from '../audit/audit.service';
 import { StatementParsingQueue } from '../parsing/queue/statement-parsing.queue';
 import { StatementProcessingService } from '../parsing/services/statement-processing.service';
+import { transactionIdsWithAttachments } from '../transactions/helpers/repoint-split-parts';
 import { DroppedSampleService } from './dropped-sample.service';
 import { ManualExpenseService } from './manual-expense.service';
 import { ReceiptStatementService } from './services/receipt-statement.service';
@@ -221,6 +222,12 @@ export class StatementsService {
         where: { statementId: statement.id },
       });
 
+      // A file pinned to a row is the person's work too, though it leaves updatedAt alone.
+      const withFiles = await transactionIdsWithAttachments(
+        this.transactionRepository.manager,
+        workspaceId,
+        existingTransactions.map(tx => tx.id),
+      );
       // Identify user-modified transactions (where updatedAt > createdAt + 1 second)
       const userModified: string[] = [];
       const toDelete: string[] = [];
@@ -228,7 +235,7 @@ export class StatementsService {
       for (const tx of existingTransactions) {
         const timeDiff = tx.updatedAt.getTime() - tx.createdAt.getTime();
         // A row on a filed tax return stays whatever its timestamps say.
-        if (timeDiff > 1000 || tx.taxLocked) {
+        if (timeDiff > 1000 || tx.taxLocked || withFiles.has(tx.id)) {
           // Modified more than 1 second after creation
           userModified.push(tx.id);
         } else {

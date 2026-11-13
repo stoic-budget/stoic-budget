@@ -793,6 +793,26 @@ describe('StatementsService', () => {
       );
     });
 
+    it('keeps an untouched row that has a file pinned to it on a merge reprocess', async () => {
+      vi.spyOn(statementRepository, 'findOne').mockResolvedValue(mockStatement as Statement);
+      vi.spyOn(statementParsingQueue, 'enqueue').mockResolvedValue(undefined);
+      const at = new Date('2026-03-01T10:00:00Z');
+      vi.spyOn(transactionRepository, 'find').mockResolvedValue([
+        { id: 'tx-plain', createdAt: at, updatedAt: at, taxLocked: false },
+        { id: 'tx-with-file', createdAt: at, updatedAt: at, taxLocked: false },
+      ] as Transaction[]);
+      const attachmentFind = vi.fn().mockResolvedValue([{ id: 'att-1', transactionId: 'tx-with-file' }]);
+      (transactionRepository as any).manager = { getRepository: () => ({ find: attachmentFind }) };
+      const deleteSpy = vi
+        .spyOn(transactionRepository, 'delete')
+        .mockResolvedValue({ affected: 1, raw: [] });
+
+      await service.reprocess('1', '1', 'ws-1');
+
+      expect(attachmentFind.mock.calls[0][0].where.workspaceId).toBe('ws-1');
+      expect(deleteSpy).toHaveBeenCalledWith(['tx-plain']);
+    });
+
     it('should skip reprocess when already processing', async () => {
       vi.spyOn(statementRepository, 'findOne').mockResolvedValue({
         ...mockStatement,
