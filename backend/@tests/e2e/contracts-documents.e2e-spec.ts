@@ -58,6 +58,7 @@ import {
   StatementUploadResult,
   StatementWritten,
 } from '../../src/contracts/statements/statement-writes';
+import { TransactionsDeleted } from '../../src/contracts/transactions/transaction-record';
 import { Receipt, ReceiptSource, ReceiptStatus } from '../../src/entities/receipt.entity';
 import { PEPPOL_DOCTYPES } from '../../src/modules/e-invoices/peppol-ubl-writer';
 import { MailerService } from '../../src/modules/mailer/mailer.service';
@@ -285,6 +286,26 @@ describe('API contracts: documents (e2e)', () => {
         decision: 'keep',
       }).expect(200);
       expect(matches(DuplicateResolved, res)).toEqual({ id: sampleTransactionId, isDuplicate: false });
+    });
+
+    it('POST /transactions/bulk-delete', async () => {
+      const ids: string[] = [];
+      for (const merchant of ['ACME Store - Desk lamp', 'ACME Store - Desk chair']) {
+        const created = await call('post', '/statements/manual-expense')
+          .field('amount', '7.50')
+          .field('currency', 'USD')
+          .field('merchant', merchant)
+          .field('categoryId', categoryId)
+          .field('date', '2026-09-04')
+          .expect(201);
+        const [{ id }] = await dataSource.query(
+          'SELECT id FROM transactions WHERE statement_id = $1',
+          [matches(ManualExpenseCreated, created).id],
+        );
+        ids.push(id);
+      }
+      const res = await send('post', '/transactions/bulk-delete', { ids }).expect(200);
+      expect(matches(TransactionsDeleted, res)).toEqual({ deleted: 2 });
     });
   });
 
