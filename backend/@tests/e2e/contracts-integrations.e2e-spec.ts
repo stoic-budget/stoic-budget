@@ -247,7 +247,13 @@ describe('Integration contracts (e2e)', () => {
   it('workspace service settings: SMTP, app URL, Telegram bot', async () => {
     const smtp = await answer(
       IntegrationConnection,
-      call('put', '/settings/email/smtp', { host: '1.1.1.1', port: 587, from: 'member-1@example.com', pass: 'smtp-pass' }),
+      call('put', '/settings/email/smtp', {
+        host: '1.1.1.1',
+        port: 587,
+        from: 'member-1@example.com',
+        pass: 'smtp-pass',
+        currentPassword: 'Test123!@#',
+      }),
     );
     expect(smtp.settings).toMatchObject({ host: '1.1.1.1', passConfigured: true });
     await answer(IntegrationConnection, call('get', '/settings/email/smtp'));

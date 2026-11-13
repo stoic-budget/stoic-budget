@@ -39,6 +39,10 @@ export const EXCLUDED_TABLES = new Set([
 
 export const SENSITIVE_PROPERTIES = new Set([
   'accessToken',
+  // Whose account mail a workspace SMTP server sends: granted only by a save
+  // that checked that person's password, never by an archive (the restore
+  // would hand it to the restorer, as it does every user reference).
+  'accountMailUserId',
   'encryptedSecrets',
   'passwordHash',
   'refreshToken',

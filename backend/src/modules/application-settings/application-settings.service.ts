@@ -12,8 +12,8 @@ import { decryptText, encryptText } from '../../common/utils/encryption.util';
 import type {
   SaveAppSettingsBody,
   SaveInstanceTelegramBotBody,
-  SaveSmtpSettingsBody,
   SaveTelegramSettingsBody,
+  SmtpServerSettings,
 } from '../../contracts';
 import {
   InstanceSetting,
@@ -22,6 +22,7 @@ import {
   WorkspaceServiceSettings,
   WorkspaceServiceSettingsKey,
 } from '../../entities';
+import { storedSmtpForSameServer } from './smtp-stored-secret';
 
 /** Telegram's `getMe`: `ok` false with a description for a bad token. */
 const TelegramGetMeResponse = Schema.Struct({
@@ -102,12 +103,10 @@ export class ApplicationSettingsService {
     };
   }
 
-  async saveSmtpSettings(user: User, input: SaveSmtpSettingsBody, requestWorkspaceId?: string) {
-    const existing = await this.findSettings(
-      user,
-      WorkspaceServiceSettingsKey.SMTP,
-      requestWorkspaceId,
-    );
+  /** Callers check the saver's password first (SmtpSettingsService): see getAccountSmtpSettings. */
+  async saveSmtpSettings(user: User, input: SmtpServerSettings, requestWorkspaceId?: string) {
+    const key = WorkspaceServiceSettingsKey.SMTP;
+    const existing = await this.findSettings(user, key, requestWorkspaceId);
     const config = {
       host: this.requiredString(input.host, 'host'),
       port: this.positiveNumber(input.port, 587),
@@ -117,17 +116,12 @@ export class ApplicationSettingsService {
       replyTo: this.stringValue(input.replyTo),
       timeoutMs: this.positiveNumber(input.timeoutMs, 10000),
     };
-    const secrets = this.mergeSecrets(existing, ['pass'], input);
+    const sameServer = storedSmtpForSameServer(existing, config);
+    const secrets = this.mergeSecrets(sameServer, ['pass'], input);
     const runtime = this.smtpRuntimeFromParts(config, secrets, 'workspace');
     await assertPublicEgressHost(runtime.host ?? '');
     await this.assertSmtpConnection(runtime);
-    await this.saveSettings(
-      user,
-      WorkspaceServiceSettingsKey.SMTP,
-      config,
-      secrets,
-      requestWorkspaceId,
-    );
+    await this.saveSettings(user, key, config, secrets, requestWorkspaceId, user.id);
     return this.getSmtpStatus(user, requestWorkspaceId);
   }
 
@@ -257,9 +251,9 @@ export class ApplicationSettingsService {
 
   /**
    * SMTP for mail about the account itself (password reset, e-mail change): the
-   * server of the user's home workspace only when the user saved it, else the
-   * SMTP_* env vars. Any other admin of that workspace could point its SMTP at
-   * a server they read and collect the user's password-reset link.
+   * server of the user's home workspace only when the user saved it with their
+   * password (accountMailUserId), else the SMTP_* env vars. Not updatedByUserId:
+   * a backup restore sets that to the restorer without asking for anything.
    */
   async getAccountSmtpSettings(
     user: Pick<User, 'id' | 'workspaceId'>,
@@ -269,7 +263,7 @@ export class ApplicationSettingsService {
           where: { workspaceId: user.workspaceId, key: WorkspaceServiceSettingsKey.SMTP },
         })
       : null;
-    return this.smtpRuntimeOf(workspace?.updatedByUserId === user.id ? workspace : null);
+    return this.smtpRuntimeOf(workspace?.accountMailUserId === user.id ? workspace : null);
   }
 
   private smtpRuntimeOf(workspace: WorkspaceServiceSettings | null): SmtpRuntimeSettings {
@@ -406,18 +400,15 @@ export class ApplicationSettingsService {
     config: Record<string, unknown>,
     secrets: Record<string, string>,
     requestWorkspaceId?: string,
+    accountMailUserId: string | null = null,
   ) {
     const workspaceId = this.requireWorkspaceId(user, requestWorkspaceId);
     const existing = await this.settingsRepository.findOne({ where: { workspaceId, key } });
-    const entity =
-      existing ||
-      this.settingsRepository.create({
-        workspaceId,
-        key,
-      });
+    const entity = existing || this.settingsRepository.create({ workspaceId, key });
     entity.config = config;
     entity.encryptedSecrets = this.encryptSecrets(secrets);
     entity.updatedByUserId = user.id;
+    entity.accountMailUserId = accountMailUserId;
     await this.settingsRepository.save(entity);
   }
 
