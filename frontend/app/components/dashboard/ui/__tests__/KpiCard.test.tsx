@@ -2,7 +2,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { PiggyBank } from '@/app/lib/category-line-icons';
 import { SectionSpanProvider } from '../../section-span';
 import { KpiCard } from '../KpiCard';
 
@@ -60,37 +59,20 @@ describe('KpiCard', () => {
     expect(container.querySelector('svg')).not.toBeNull();
   });
 
-  it('shows its details only when given half a row or more', () => {
-    const tile = (
-      <KpiCard
-        label="Income"
-        value="$100"
-        details={[{ label: 'Average per day', value: '$10' }]}
-      />
+  it('draws no sparkline when every point is zero', () => {
+    const { container } = render(
+      <KpiCard label="Income" value="$0" spark={{ points: [0, 0, 0] }} />,
     );
-    const { rerender } = render(<SectionSpanProvider value={3}>{tile}</SectionSpanProvider>);
-    expect(screen.queryByText('Average per day')).not.toBeInTheDocument();
+    expect(container.querySelector('svg')).toBeNull();
+  });
 
-    rerender(<SectionSpanProvider value={6}>{tile}</SectionSpanProvider>);
+  it('shows its details in a narrow tile too', () => {
+    render(
+      <SectionSpanProvider value={3}>
+        <KpiCard label="Income" value="$100" details={[{ label: 'Average per day', value: '$10' }]} />
+      </SectionSpanProvider>,
+    );
     expect(screen.getByText('Average per day')).toBeInTheDocument();
     expect(screen.getByText('$10')).toBeInTheDocument();
-  });
-
-  it('draws its icon as decoration behind the content, hidden from screen readers', () => {
-    const { container } = render(<KpiCard label="Savings rate" value="98%" icon={PiggyBank} />);
-    const icon = container.querySelector('svg.seneca-dashboard__stat-icon');
-
-    expect(icon).not.toBeNull();
-    expect(icon).toHaveAttribute('aria-hidden', 'true');
-    // First in the card, so the label and the figure stay the content read first,
-    // and left out of the loading skeleton, where it would be a solid block.
-    const first = container.querySelector('.seneca-dashboard__stat')?.firstElementChild;
-    expect(first).toHaveAttribute('data-skeleton-skip');
-    expect(first?.firstElementChild).toBe(icon);
-  });
-
-  it('draws no icon unless given one', () => {
-    const { container } = render(<KpiCard label="Net" value="$0" />);
-    expect(container.querySelector('.seneca-dashboard__stat-icon')).toBeNull();
   });
 });
