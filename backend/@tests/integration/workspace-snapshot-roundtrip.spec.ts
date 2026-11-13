@@ -87,6 +87,7 @@ const TABLES_WITHOUT_WORKSPACE: Record<string, string> = {
   password_reset_tokens: 'per user',
   push_subscriptions: 'per user',
   telegram_reports: 'per user',
+  user_identities: 'per user',
   // Connections to outside services: reconnected, never copied.
   integration_tokens: 'integration',
   open_protocol_settings: 'integration',

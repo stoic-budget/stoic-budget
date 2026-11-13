@@ -10,6 +10,7 @@ import {
   InstanceSetting,
   PasswordResetToken,
   User,
+  UserIdentity,
   Workspace,
   WorkspaceInvitation,
   WorkspaceMember,
@@ -20,6 +21,14 @@ import { MailerModule } from '../mailer/mailer.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthDevBootstrapService } from './auth-dev-bootstrap.service';
+import { OidcController } from './oidc/oidc.controller';
+import { OidcAccountsService } from './oidc/oidc-accounts.service';
+import { OidcIdentitiesService } from './oidc/oidc-identities.service';
+import { OidcLoginService } from './oidc/oidc-login.service';
+import { OidcProviderClient } from './oidc/oidc-provider.client';
+import { OidcSettingsController } from './oidc/oidc-settings.controller';
+import { OidcSettingsService } from './oidc/oidc-settings.service';
+import { OidcStateStore } from './oidc/oidc-state.store';
 import { PasswordResetService } from './password-reset.service';
 import { RegistrationController } from './registration.controller';
 import { RegistrationSettingsService } from './registration-settings.service';
@@ -37,6 +46,7 @@ import { TwoFactorService } from './two-factor.service';
       WorkspaceMember,
       AuthSession,
       PasswordResetToken,
+      UserIdentity,
     ]),
     AuditModule,
     CategoriesModule,
@@ -56,7 +66,7 @@ import { TwoFactorService } from './two-factor.service';
       inject: [ConfigService],
     }),
   ],
-  controllers: [AuthController, RegistrationController],
+  controllers: [AuthController, RegistrationController, OidcController, OidcSettingsController],
   providers: [
     AuthService,
     RegistrationSettingsService,
@@ -65,6 +75,12 @@ import { TwoFactorService } from './two-factor.service';
     AuthDevBootstrapService,
     JwtStrategy,
     JwtRefreshStrategy,
+    OidcStateStore,
+    OidcProviderClient,
+    OidcSettingsService,
+    OidcAccountsService,
+    OidcIdentitiesService,
+    OidcLoginService,
   ],
   exports: [AuthService],
 })

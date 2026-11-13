@@ -87,6 +87,7 @@ export * from './transaction.entity';
 export * from './transaction-attachment.entity';
 export * from './transfer-pair-rejection.entity';
 export * from './user.entity';
+export * from './user-identity.entity';
 export * from './view-preference.entity';
 export * from './wallet.entity';
 export * from './webhook-delivery.entity';

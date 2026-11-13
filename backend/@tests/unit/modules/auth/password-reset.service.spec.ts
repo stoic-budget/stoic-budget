@@ -20,6 +20,7 @@ describe('PasswordResetService', () => {
   let authSessionRepository: { update: Mock };
   let mailerService: { send: Mock };
   let auditService: { createEvent: Mock };
+  let identityRepository: { find: Mock; delete: Mock };
   let service: PasswordResetService;
 
   const activeUser = {
@@ -42,6 +43,7 @@ describe('PasswordResetService', () => {
     authSessionRepository = { update: vi.fn() };
     mailerService = { send: vi.fn().mockResolvedValue(true) };
     auditService = { createEvent: vi.fn().mockResolvedValue({}) };
+    identityRepository = { find: vi.fn().mockResolvedValue([]), delete: vi.fn() };
 
     service = new PasswordResetService(
       userRepository as never,
@@ -50,6 +52,7 @@ describe('PasswordResetService', () => {
       mailerService as never,
       { get: (key: string) => (key === 'JWT_SECRET' ? SECRET : undefined) } as never,
       auditService as never,
+      identityRepository as never,
     );
   });
 
@@ -140,6 +143,52 @@ describe('PasswordResetService', () => {
         expect.objectContaining({ revokedAt: expect.any(Date) }),
       );
       expect(tokenRepository.save.mock.calls[0][0].usedAt).toBeInstanceOf(Date);
+    });
+
+    it('marks an account made by single sign-on as having a password', async () => {
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser, passwordSet: false });
+
+      await service.resetPassword('plain-token', 'BrandNewPass1');
+
+      // Its last linked identity may be unlinked from now on.
+      expect(userRepository.save.mock.calls[0][0].passwordSet).toBe(true);
+    });
+
+    it('unlinks the provider accounts of an account that had a password', async () => {
+      const linked = [
+        { id: 'identity-1', userId: 'user-1', issuer: 'https://login.example.com' },
+        { id: 'identity-2', userId: 'user-1', issuer: 'https://login.example.com' },
+      ];
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser, passwordSet: true });
+      identityRepository.find.mockResolvedValue(linked);
+
+      await service.resetPassword('plain-token', 'BrandNewPass1');
+
+      // One may be an intruder's, linked while they knew the old password.
+      expect(identityRepository.delete).toHaveBeenCalledWith({ userId: 'user-1' });
+      const metas = auditService.createEvent.mock.calls.map(([event]) => event.meta);
+      expect(metas).toContainEqual({
+        password: 'reset',
+        sessions: 'all-revoked',
+        singleSignOn: 'all-unlinked',
+      });
+      expect(metas.filter(meta => meta.oidcEvent === 'unlinked')).toEqual([
+        { oidcEvent: 'unlinked', provider: 'https://login.example.com', identityId: 'identity-1' },
+        { oidcEvent: 'unlinked', provider: 'https://login.example.com', identityId: 'identity-2' },
+      ]);
+    });
+
+    it('keeps the identity of an account made by single sign-on', async () => {
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser, passwordSet: false });
+
+      await service.resetPassword('plain-token', 'BrandNewPass1');
+
+      // Without a password it could link nothing: what it has is its owner's.
+      expect(identityRepository.find).not.toHaveBeenCalled();
+      expect(identityRepository.delete).not.toHaveBeenCalled();
     });
 
     it('logs the completed reset without the password, hash or token', async () => {

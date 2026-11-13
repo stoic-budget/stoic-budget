@@ -31,6 +31,26 @@ export const ACCOUNTS_ERRORS = {
   AUTH_2FA_SETUP_NOT_STARTED: 'Start the setup before confirming a code',
   AUTH_2FA_VERIFICATION_CODE_INVALID: 'Invalid verification code',
   AUTH_2FA_CODE_INVALID: 'Invalid two-factor code',
+  // ── single sign-on (OpenID Connect) ─────────────────────────────────────
+  OIDC_DISABLED: 'Single sign-on is not set up on this server',
+  OIDC_ISSUER_INSECURE: 'The provider address must use https',
+  OIDC_PROVIDER_UNAVAILABLE: 'The sign-in provider did not answer. Try again later',
+  OIDC_ISSUER_MISMATCH: 'The provider answered for a different issuer than the one configured',
+  OIDC_STATE_INVALID: 'This sign-in has expired or was already used. Start again',
+  OIDC_PROVIDER_DENIED: 'The sign-in provider did not sign you in',
+  OIDC_TOKEN_INVALID: 'The answer from the sign-in provider could not be verified',
+  OIDC_EMAIL_NOT_VERIFIED:
+    'The sign-in provider has not verified the e-mail address of this account',
+  OIDC_ACCOUNT_EXISTS:
+    'An account with this e-mail already exists. Sign in with your password, then link single sign-on in your security settings',
+  OIDC_SIGNUP_NOT_ALLOWED:
+    'No account is linked to this sign-in, and new accounts cannot be made with it',
+  OIDC_DOMAIN_NOT_ALLOWED: 'Accounts with this e-mail domain cannot be made here',
+  OIDC_IDENTITY_LINKED_ELSEWHERE: 'This provider account is already linked to another user',
+  OIDC_IDENTITY_NOT_FOUND: 'Linked account not found',
+  OIDC_LAST_SIGN_IN_METHOD:
+    'This is your only way to sign in. Set a password first with "Forgot password"',
+  OIDC_SIGN_IN_EXPIRED: 'The sign-in took too long. Start again',
   AUTHZ_PERMISSIONS_REQUIRED: 'Insufficient permissions. Required: {{permissions}}',
   AUTHZ_API_KEY_SCOPE_MISSING: 'API key scope missing: {{scopes}}',
   // ── api keys ────────────────────────────────────────────────────────────

@@ -8,6 +8,7 @@ import { EmailSection } from '@/app/settings/profile/components/EmailSection';
 import { PasswordSection } from '@/app/settings/profile/components/PasswordSection';
 import { SessionsSection } from '@/app/settings/profile/components/SessionsSection';
 import { SettingsAccordion } from '@/app/settings/profile/components/SettingsAccordion';
+import { SingleSignOnSection } from '@/app/settings/profile/components/SingleSignOnSection';
 import { TwoFactorSection } from '@/app/settings/profile/components/TwoFactorSection';
 import { resolveOpenSection } from '@/app/settings/profile/helpers/settings-url-state';
 import { useEmailForm } from '@/app/settings/profile/hooks/useEmailForm';
@@ -130,6 +131,12 @@ export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Elem
           formatPreferences={formatPreferences}
         />
       </SettingsAccordion>
+
+      <SingleSignOnSection
+        openSection={openSection}
+        formatPreferences={formatPreferences}
+        tx={tx}
+      />
 
       <SettingsAccordion
         id="sessions"
