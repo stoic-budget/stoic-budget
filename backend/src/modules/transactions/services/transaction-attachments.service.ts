@@ -12,6 +12,7 @@ import {
   assertAttachmentFile,
   attachmentsDir,
   displayFileName,
+  insideUploads,
   newStoredFileName,
   servedMimeType,
   sha256Of,
@@ -132,7 +133,7 @@ export class TransactionAttachmentsService {
       // After the insert: a failed write rolls the row back instead of leaving it fileless.
       fs.mkdirSync(attachmentsDir(), { recursive: true });
       const target = storedAttachmentPath(storedFileName);
-      if (file.path) fs.renameSync(file.path, target);
+      if (file.path) fs.renameSync(insideUploads(file.path), target);
       else fs.writeFileSync(target, file.buffer, { flag: 'wx' });
       return this.asStored(saved);
     });

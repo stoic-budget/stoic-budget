@@ -32,6 +32,16 @@ export function attachmentsDir(): string {
   return path.join(resolveUploadsDir(), ATTACHMENTS_SUBDIR);
 }
 
+/** An upload's temp path, resolved and refused unless it sits inside the uploads directory. */
+export function insideUploads(filePath: string): string {
+  const root = path.resolve(resolveUploadsDir());
+  const resolved = path.resolve(filePath);
+  if (!resolved.startsWith(`${root}${path.sep}`)) {
+    throw new Error('File is outside the uploads directory');
+  }
+  return resolved;
+}
+
 /** The path of a stored file. basename(): a stored name is generated, but never trusted. */
 export function storedAttachmentPath(storedFileName: string): string {
   return path.join(attachmentsDir(), path.basename(storedFileName));
@@ -96,7 +106,7 @@ export function servedMimeType(mimeType: string): string {
 /** sha256 of bytes in memory, or of a file on disk; null when the file cannot be read. */
 export function sha256Of(source: Buffer | string): string | null {
   try {
-    const bytes = typeof source === 'string' ? fs.readFileSync(source) : source;
+    const bytes = typeof source === 'string' ? fs.readFileSync(insideUploads(source)) : source;
     return createHash('sha256').update(bytes).digest('hex');
   } catch {
     return null;
