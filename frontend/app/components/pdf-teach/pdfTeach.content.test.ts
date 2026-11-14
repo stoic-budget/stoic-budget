@@ -12,7 +12,8 @@ describe('pdfTeach content', () => {
     );
     expect(Object.keys(translation).sort()).toEqual(locales.sort());
     for (const locale of locales) {
-      expect(translation[locale], locale).toContain('{tag}');
+      // Filled once with `replace`: one {tag}, and no other placeholder.
+      expect(translation[locale].match(/\{\w+\}/g), locale).toEqual(['{tag}']);
     }
   });
 });
