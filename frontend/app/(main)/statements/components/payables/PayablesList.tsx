@@ -19,6 +19,7 @@ import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIsMobile } from '@/app/hooks/useIsMobile';
 import { useIntlayer } from '@/app/i18n';
 import type { Payable } from '@/app/lib/payables-api';
+import { OccurrenceMenuItems } from './OccurrenceMenuItems';
 import {
   daysOverdue,
   formatMoney,
@@ -67,6 +68,7 @@ interface PayablesListProps {
   onMarkPaid: (payable: Payable) => void;
   onArchive: (payable: Payable) => void;
   onDelete: (payable: Payable) => void;
+  onOccurrence?: React.ComponentProps<typeof OccurrenceMenuItems>['onAction'];
 }
 
 const fillTemplate = (template: string, values: Record<string, string | number>): string =>
@@ -88,6 +90,7 @@ function PayablesList({
   onMarkPaid,
   onArchive,
   onDelete,
+  onOccurrence,
 }: PayablesListProps): React.JSX.Element {
   const isMobile = useIsMobile();
   const unbookedText = useIntlayer('payablesUnbooked');
@@ -117,7 +120,8 @@ function PayablesList({
   const renderStatus = (payable: Payable): React.JSX.Element => {
     const overdue = isPayableOverdue(payable);
     const tone = toneOf(payable, overdue);
-    const label = labels.statusLabels[overdue ? 'overdue' : payable.status] || payable.status;
+    const key = overdue ? 'overdue' : payable.skippedAt ? 'skipped' : payable.status;
+    const label = labels.statusLabels[key] || payable.status;
     return (
       <span className={`seneca-payable-status seneca-payable-status--${tone}`}>
         {label}
@@ -176,6 +180,7 @@ function PayablesList({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" style={{ minWidth: 180 }}>
             <DropdownMenuItem onClick={() => onEdit(payable)}>{labels.edit}</DropdownMenuItem>
+            <OccurrenceMenuItems payable={payable} onAction={onOccurrence} />
             <DropdownMenuItem onClick={() => onArchive(payable)}>{labels.archive}</DropdownMenuItem>
             <DropdownMenuItem onClick={() => onDelete(payable)}>{labels.delete}</DropdownMenuItem>
           </DropdownMenuContent>

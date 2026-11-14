@@ -1492,6 +1492,66 @@ describe('API contracts (e2e)', () => {
       expect(payments.body).toHaveLength(1);
       matches(PaymentCandidateList, (await get(`/payables/${payableId}/payment-candidates`)).body);
     });
+
+    it('a repeating bill, its occurrence actions and "not this payment"', async () => {
+      const send = (method: 'post' | 'put', url: string, body: object) =>
+        request(app.getHttpServer())
+          [method](url)
+          .set('Authorization', `Bearer ${owner.token}`)
+          .set('x-workspace-id', owner.workspaceId)
+          .send(body)
+          .expect(method === 'post' ? 201 : 200);
+      const rule = {
+        frequency: 'monthly',
+        interval: 1,
+        startDate: '2027-03-31',
+        monthDay: 'last',
+        shift: 'next',
+        count: 12,
+      };
+      const created = await send('post', '/payables', {
+        vendor: 'Contract Rent',
+        amount: 800,
+        currency: 'USD',
+        remindDaysBefore: 5,
+        recurrence: rule,
+      });
+      matches(Payable, created.body);
+      expect(created.body).toMatchObject({
+        recurrence: rule,
+        seriesId: created.body.id,
+        occurrenceDate: '2027-03-31',
+        baseAmount: null,
+        skippedAt: null,
+        remindDaysBefore: 5,
+      });
+      const id = created.body.id;
+      const moved = await send('put', `/payables/${id}/occurrence`, {
+        action: 'move',
+        dueDate: '2027-04-02',
+      });
+      matches(Payable, moved.body);
+      expect(moved.body).toMatchObject({ dueDate: '2027-04-02', occurrenceDate: '2027-03-31' });
+      const changed = await send('put', `/payables/${id}/occurrence`, {
+        action: 'amount',
+        amount: 850,
+      });
+      matches(Payable, changed.body);
+      expect(changed.body).toMatchObject({ amount: '850.00', baseAmount: '800.00' });
+      const skipped = await send('put', `/payables/${id}/occurrence`, { action: 'skip' });
+      matches(Payable, skipped.body);
+      expect(skipped.body.skippedAt).toEqual(expect.any(String));
+
+      const [row] = await dataSource.query(
+        'SELECT id FROM transactions WHERE workspace_id = $1 LIMIT 1',
+        [owner.workspaceId],
+      );
+      const rejected = await send('post', `/payables/${payableId}/match-rejections`, {
+        transactionId: row.id,
+      });
+      matches(Payable, rejected.body);
+      expect(rejected.body.id).toBe(payableId);
+    });
   });
 
   describe('settings and account', () => {

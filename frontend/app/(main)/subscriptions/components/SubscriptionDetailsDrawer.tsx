@@ -155,6 +155,7 @@ export function SubscriptionDetailsDrawer({
             linked: Boolean(charge.transactionId),
           }))}
           vendorName={subscription.vendorName}
+          subscriptionId={subscription.id}
           defaultAmount={subscription.amount}
           autoLinkPayees={detail.data?.autoLinkPayees}
           onAddManual={(chargeDate, amount) =>

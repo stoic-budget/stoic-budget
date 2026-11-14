@@ -28,9 +28,11 @@ import {
   MetalLot,
   MetalSaleResult,
   MetalSettings,
+  OkResult,
   PriceRefreshResult,
   SinkingFundList,
   SinkingFundResult,
+  SubscriptionChargeCandidates,
   SubscriptionItem,
   SubscriptionRecord,
   UpcomingSubscriptionList,
@@ -40,6 +42,7 @@ import {
   SubscriptionFrequency,
   SubscriptionStatus,
 } from '../../src/entities/subscription.entity';
+import { Transaction, TransactionType } from '../../src/entities/transaction.entity';
 import { CryptoSyncService } from '../../src/modules/crypto/crypto-sync.service';
 import {
   deleteUserByEmail,
@@ -363,5 +366,45 @@ describe('API contracts: wealth (e2e)', () => {
     const confirmed = await call('post', `/subscriptions/${detected.id}/confirm`, 201);
     matches(SubscriptionRecord, confirmed.body);
     expect(confirmed.body.status).toBe('active');
+  });
+
+  it('subscriptions: fortnightly charges and "not this payment"', async () => {
+    const next = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
+    const created = await call('post', '/subscriptions', 201, {
+      vendorName: 'ACME Gym - Club',
+      amount: 15,
+      frequency: 'biweekly',
+      currency: 'USD',
+      nextChargeDate: next,
+    });
+    matches(SubscriptionRecord, created.body);
+    expect(created.body.frequency).toBe('biweekly');
+    const row = await dataSource.getRepository(Transaction).save({
+      workspaceId: owner.workspaceId,
+      statementId: null,
+      transactionDate: new Date(),
+      counterpartyName: 'ACME Gym - Club',
+      paymentPurpose: 'ACME Gym - Club',
+      amount: 15,
+      debit: 15,
+      currency: 'USD',
+      transactionType: TransactionType.EXPENSE,
+      isVerified: true,
+    });
+    const url = `/subscriptions/charge-candidates?vendorName=ACME%20Gym&subscriptionId=${created.body.id}`;
+    const offered = await call('get', url, 200);
+    matches(SubscriptionChargeCandidates, offered.body);
+    expect(offered.body.map((item: { transactionId: string }) => item.transactionId)).toContain(
+      row.id,
+    );
+    const refused = await call('post', `/subscriptions/${created.body.id}/match-rejections`, 201, {
+      transactionId: row.id,
+    });
+    matches(OkResult, refused.body);
+    const after = await call('get', url, 200);
+    matches(SubscriptionChargeCandidates, after.body);
+    expect(after.body.map((item: { transactionId: string }) => item.transactionId)).not.toContain(
+      row.id,
+    );
   });
 });

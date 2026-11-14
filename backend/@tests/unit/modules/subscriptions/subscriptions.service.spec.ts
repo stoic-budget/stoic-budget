@@ -35,6 +35,8 @@ describe('SubscriptionsService', () => {
     find: vi.fn(),
     findOne: vi.fn(),
     createQueryBuilder: vi.fn(),
+    // Rows refused as a subscription's payment: none unless a test says so.
+    manager: { query: vi.fn(async () => []) },
   };
   const chargeRepository = {
     create: vi.fn(),

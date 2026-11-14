@@ -9,14 +9,14 @@ import {
   TrimmedLowercase,
 } from '../common/requests';
 import type { Wire } from '../common/wire';
-import { SubscriptionStatus } from '../subscriptions/subscriptions';
+import { SubscriptionFrequency, SubscriptionStatus } from '../subscriptions/subscriptions';
 
 const Uuid = Schema.String.check(Schema.isUUID());
 
 export const CreateSubscriptionBody = Schema.Struct({
   vendorName: Schema.String,
   amount: Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0)),
-  frequency: Schema.Literals(['weekly', 'monthly', 'quarterly', 'annual']),
+  frequency: SubscriptionFrequency,
   currency: optionalNullable(Schema.String),
   categoryId: optionalNullable(Schema.String.check(Schema.isUUID())),
   /** The budget its money comes out of; null unlinks it. */
@@ -36,7 +36,7 @@ export type CreateSubscriptionBody = Wire<typeof CreateSubscriptionBody>;
 export const UpdateSubscriptionBody = Schema.Struct({
   vendorName: optionalNullable(Schema.String),
   amount: optionalNullable(Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0))),
-  frequency: optionalNullable(Schema.Literals(['weekly', 'monthly', 'quarterly', 'annual'])),
+  frequency: optionalNullable(SubscriptionFrequency),
   status: optionalNullable(Schema.Literals(['detected', 'active', 'paused', 'cancelled'])),
   currency: optionalNullable(Schema.String),
   categoryId: optionalNullable(Schema.String.check(Schema.isUUID())),
@@ -84,6 +84,16 @@ export const LinkSubscriptionChargeBody = Schema.Struct({
   transactionId: Schema.String.check(Schema.isUUID()),
 });
 export type LinkSubscriptionChargeBody = Wire<typeof LinkSubscriptionChargeBody>;
+
+/**
+ * `POST /subscriptions/:id/match-rejections`: "not this payment". The row is
+ * unlinked if it is a payment of the subscription, and never proposed or
+ * linked to it again.
+ */
+export const RejectSubscriptionMatchBody = Schema.Struct({
+  transactionId: Schema.String.check(Schema.isUUID()),
+});
+export type RejectSubscriptionMatchBody = Wire<typeof RejectSubscriptionMatchBody>;
 
 export const SubscriptionParams = Schema.Struct({ id: Uuid });
 export type SubscriptionParams = Wire<typeof SubscriptionParams>;

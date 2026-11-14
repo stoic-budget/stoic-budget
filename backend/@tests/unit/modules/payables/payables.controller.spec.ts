@@ -14,6 +14,8 @@ vi.mock('fs', async () => {
 });
 
 describe('PayablesController', () => {
+  const recurrence = { ensureSeriesOf: vi.fn(async () => 0) };
+
   it('answers a repeated idempotency key with the first bill, without creating another', async () => {
     const first = { id: 'p1' };
     const payablesService = { create: vi.fn(async () => first) };
@@ -26,7 +28,12 @@ describe('PayablesController', () => {
         stored.set(key, data);
       }),
     };
-    const controller = new PayablesController(payablesService as any, idempotency as any);
+    const controller = new PayablesController(
+      payablesService as any,
+      idempotency as any,
+      recurrence as any,
+      {} as any,
+    );
     const body = { vendor: 'Acme', amount: 10 } as any;
     const user = { id: 'user-1' } as any;
 
@@ -57,7 +64,7 @@ describe('PayablesController', () => {
       remove: vi.fn(async () => undefined),
       exportData: vi.fn(async () => ({ filePath: '/tmp/p.csv', fileName: 'p.csv', contentType: 'text/csv' })),
     };
-    const controller = new PayablesController(payablesService as any, {} as any);
+    const controller = new PayablesController(payablesService as any, {} as any, recurrence as any, {} as any);
     const user = { id: 'user-1' } as any;
     const workspaceId = 'workspace-1';
     const res = new PassThrough() as any;

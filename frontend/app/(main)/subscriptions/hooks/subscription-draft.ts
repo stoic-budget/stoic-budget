@@ -9,12 +9,16 @@ const MAX_COOKIE_LENGTH = 3800;
 // Only the subscriptions page reads it, so API requests never carry it.
 const COOKIE_ATTRIBUTES = `path=/subscriptions; max-age=${MAX_AGE_SECONDS}; samesite=lax`;
 
-const FREQUENCIES = new Set<SubscriptionFormData['frequency']>([
+/** Every frequency a subscription can have, in the order the form offers them. */
+export const SUBSCRIPTION_FREQUENCIES: ReadonlyArray<SubscriptionFormData['frequency']> = [
   'weekly',
+  'biweekly',
   'monthly',
   'quarterly',
+  'semiannual',
   'annual',
-]);
+];
+const FREQUENCIES = new Set(SUBSCRIPTION_FREQUENCIES);
 
 const isFrequency = (value: unknown): value is SubscriptionFormData['frequency'] =>
   typeof value === 'string' && FREQUENCIES.has(value as SubscriptionFormData['frequency']);

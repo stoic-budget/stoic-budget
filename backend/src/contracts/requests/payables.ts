@@ -2,7 +2,14 @@
 
 import * as Schema from 'effect/Schema';
 import * as Struct from 'effect/Struct';
-import { BooleanInput, IsoDateString, NumericInput, optionalNullable } from '../common/requests';
+import { RecurrenceRule } from '../common/recurrence';
+import {
+  BooleanInput,
+  DateOnlyInput,
+  IsoDateString,
+  NumericInput,
+  optionalNullable,
+} from '../common/requests';
 import type { Wire } from '../common/wire';
 import { PayableDirection, PayableSource, PayableStatus } from '../payables/payables';
 
@@ -18,6 +25,16 @@ export const CreatePayableBody = Schema.Struct({
   linkedTransactionId: optionalNullable(Schema.String.check(Schema.isUUID())),
   source: optionalNullable(Schema.Literals(['statement', 'invoice', 'manual'])),
   isRecurring: optionalNullable(Schema.Boolean),
+  /** Repeats: the first occurrence is the rule's first date; null on update ends the series. */
+  recurrence: optionalNullable(RecurrenceRule),
+  /** Days before the due date the reminder goes out; 3 when left out. */
+  remindDaysBefore: optionalNullable(
+    Schema.Number.check(
+      Schema.isInt(),
+      Schema.isGreaterThanOrEqualTo(0),
+      Schema.isLessThanOrEqualTo(60),
+    ),
+  ),
   comment: optionalNullable(Schema.String),
   statementId: optionalNullable(Schema.String.check(Schema.isUUID())),
   /** The whole tag set, from the workspace's tags; on update it replaces the old one. */
@@ -104,6 +121,23 @@ export const UpdatePayableBody = CreatePayableBody.mapFields(
     }),
   );
 export type UpdatePayableBody = Wire<typeof UpdatePayableBody>;
+
+/**
+ * `PUT /payables/:id/occurrence`: one occurrence of a repeating bill, the
+ * series left as it is. `skip` it, `move` it to `dueDate`, or change its `amount`.
+ */
+export const PayableOccurrenceBody = Schema.Struct({
+  action: Schema.Literals(['skip', 'move', 'amount']),
+  dueDate: optionalNullable(DateOnlyInput),
+  amount: optionalNullable(Schema.Finite.check(Schema.isGreaterThan(0))),
+});
+export type PayableOccurrenceBody = Wire<typeof PayableOccurrenceBody>;
+
+/** `POST /payables/:id/match-rejections`: "not this payment" for one bank row. */
+export const RejectPayableMatchBody = Schema.Struct({
+  transactionId: Schema.String.check(Schema.isUUID()),
+});
+export type RejectPayableMatchBody = Wire<typeof RejectPayableMatchBody>;
 
 export const MarkPayablePaidBody = Schema.Struct({
   /** An existing transaction that settled the bill. */

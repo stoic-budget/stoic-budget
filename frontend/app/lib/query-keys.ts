@@ -170,7 +170,17 @@ export const queryKeys = {
     workspaceId: string | null;
     vendorName: string;
     statementId: string | null;
-  }) => ['subscriptions', o.workspaceId, 'charge-candidates', o.vendorName, o.statementId] as const,
+    /** A saved subscription's refused rows are left out, so its answer differs. */
+    subscriptionId?: string;
+  }) =>
+    [
+      'subscriptions',
+      o.workspaceId,
+      'charge-candidates',
+      o.vendorName,
+      o.statementId,
+      o.subscriptionId ?? null,
+    ] as const,
   auditEvents: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
     ['audit-events', o.workspaceId, o.params] as const,
   forecast: (o: { workspaceId: string | null; days: number; scenario: string }) =>

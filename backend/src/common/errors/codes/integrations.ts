@@ -114,7 +114,8 @@ export const INTEGRATIONS_ERRORS = {
   SUBSCRIPTION_BUDGET_NOT_FOUND: 'Budget not found',
   SUBSCRIPTION_NOT_FOUND: 'Subscription not found',
   SUBSCRIPTION_OWNER_NOT_MEMBER: 'Subscription owner must be a workspace member',
-  SUBSCRIPTION_SINKING_FUND_CADENCE: 'Only quarterly and annual subscriptions need a sinking fund',
+  SUBSCRIPTION_SINKING_FUND_CADENCE:
+    'Only quarterly, half-yearly and annual subscriptions need a sinking fund',
   SUBSCRIPTION_GOALS_UNAVAILABLE: 'Goals are not available',
   SUBSCRIPTION_CHARGE_DATE_REQUIRED: 'chargeDate is required without a transactionId',
   SUBSCRIPTION_PAYMENT_NOT_FOUND: 'Subscription payment not found',
