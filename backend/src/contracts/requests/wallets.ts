@@ -6,6 +6,25 @@ import { optionalNullable } from '../common/requests';
 import type { Wire } from '../common/wire';
 import { WalletType } from '../reference/reference';
 
+/**
+ * Cents at most, judged on the number as written: the shared
+ * `isAtMostTwoDecimals` compares `value * 100` with a fixed tolerance, which
+ * refuses some valid amounts above about 10^8 (149257142.61).
+ */
+const isCents = Schema.makeFilter<number>(value =>
+  Number(value.toFixed(2)) === value ? undefined : 'Expected at most 2 decimal places',
+);
+
+/**
+ * A credit card's limit in the account's currency: above zero, cents at most,
+ * and below what a `decimal(15,2)` column holds.
+ */
+export const CreditLimit = Schema.Finite.check(
+  isCents,
+  Schema.isGreaterThan(0),
+  Schema.isLessThan(10_000_000_000_000),
+);
+
 export const CreateWalletBody = Schema.Struct({
   name: Schema.String,
   type: optionalNullable(WalletType),
@@ -18,6 +37,11 @@ export const CreateWalletBody = Schema.Struct({
    * imported into it start on the same person.
    */
   ownerMemberId: optionalNullable(Schema.String.check(Schema.isUUID())),
+  /**
+   * Credit cards only: any other type is refused with `WALLET_CREDIT_LIMIT_CARD_ONLY`,
+   * and moving a card to another type clears it. `null` clears it.
+   */
+  creditLimit: optionalNullable(CreditLimit),
 });
 export type CreateWalletBody = Wire<typeof CreateWalletBody>;
 
