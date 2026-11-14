@@ -108,6 +108,12 @@ $seneca-sidebar-brand-height: 44px;
     padding: 0;
   }
 
+  // The rail stays at 24px: it has no spare height for a bigger emblem.
+  .seneca-sidebar__brand-emblem {
+    width: 24px;
+    height: 24px;
+  }
+
   // Inset like the nav below (8px from the rail's edges, less the brand's own
   // focus-ring margin), so the search pill lines up with the nav pills.
   .seneca-sidebar__brand-actions {
@@ -242,10 +248,12 @@ $seneca-sidebar-brand-height: 44px;
     text-decoration: none;
   }
 
+  // Scales with the row like the rest of the sidebar: 32px at the full 40px row, down
+  // to 24px on short screens, so the brand row (44px at most) keeps its air.
   &-emblem {
     display: block;
-    width: 24px;
-    height: 24px;
+    width: clamp(24px, calc(var(--seneca-sidebar-row, 40px) * 0.8), 32px);
+    height: clamp(24px, calc(var(--seneca-sidebar-row, 40px) * 0.8), 32px);
     background: url('/images/logo-mark.svg') no-repeat center / contain;
 
     @include dark {
