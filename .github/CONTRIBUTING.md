@@ -77,11 +77,14 @@ The process described here has several goals:
 **Pull Request Guidelines:**
 
 - Use a clear and descriptive title
-- Follow the pull request template
+- Follow the pull request template, including the "How to accept" steps for a change people can see
 - Link related issues (e.g., "Fixes #123")
 - Include screenshots/GIFs for UI changes
 - Keep PRs focused on a single concern
 - Respond to review feedback promptly
+
+How a pull request is reviewed and accepted, and which labels it needs, is in
+[Reviewing changes](https://stoic-budget.github.io/stoic-budget/docs/contributing/reviewing).
 
 ## Development Setup
 
