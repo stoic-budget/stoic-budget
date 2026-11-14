@@ -27,7 +27,13 @@ export interface TeachSession {
   textUnderText: boolean;
   regions: TeachRegion[];
   activeTag: TeachTag;
+  /** Takes a tag in hand and arms drawing with it; the armed tag again disarms. */
   setActiveTag: (tag: TeachTag) => void;
+  /**
+   * Whether a finger or a pen draws: it scrolls the page until a tag is
+   * tapped, and one area drawn it scrolls again. A mouse always draws.
+   */
+  armed: boolean;
   addRegion: (region: Omit<TeachRegion, 'tag'>) => void;
   removeRegion: (index: number) => void;
   missing: TeachTag[][];
@@ -62,6 +68,7 @@ export function useTeachSession(statementId: string | null): TeachSession {
   const words = useLayoutWords(statementId);
   const [regions, setRegions] = useState<TeachRegion[]>([]);
   const [activeTag, setActiveTag] = useState<TeachTag>('date');
+  const [armed, setArmed] = useState(false);
   const [preview, setPreview] = useState<TeachPreview | null>(null);
   const [reading, setReading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -104,6 +111,7 @@ export function useTeachSession(statementId: string | null): TeachSession {
     const next = withRegion(regions, { ...area, tag: activeTag });
     setRegions(next);
     setActiveTag(nextTag(next, activeTag));
+    setArmed(false);
   };
 
   const removeRegion = (index: number) => {
@@ -136,7 +144,12 @@ export function useTeachSession(statementId: string | null): TeachSession {
     textUnderText: hasTextUnderText(words.data ?? []),
     regions,
     activeTag,
-    setActiveTag,
+    setActiveTag: tag => {
+      setActiveTag(tag);
+      // The tag in hand taken again lets the finger scroll instead.
+      setArmed(!(armed && tag === activeTag));
+    },
+    armed,
     addRegion,
     removeRegion,
     missing,

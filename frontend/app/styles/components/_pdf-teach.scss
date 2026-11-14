@@ -11,8 +11,13 @@
     left: 50%;
     transform: translateX(-50%);
     cursor: crosshair;
-    touch-action: none;
+    // A finger or a pen pans the page until a tag is tapped (`--armed`); a mouse always draws.
+    touch-action: pan-x pan-y;
     user-select: none;
+  }
+
+  &__layer--armed {
+    touch-action: none;
   }
 
   &__layer--drawing &__region-label {
@@ -155,6 +160,61 @@
     font-size: 13px;
   }
 
+  // On a touch screen, until a tag is tapped, the hint says how to start drawing.
+  &__hint-touch {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    &__hint-touch {
+      display: inline;
+    }
+
+    &__hint-pointer,
+    &__tag-key {
+      display: none;
+    }
+  }
+
+  // A phone keeps the page in sight: the tags in one row that scrolls sideways,
+  // the hint in at most two lines.
+  @include respond-to('md') {
+    &__toolbar {
+      gap: 8px;
+      padding: 10px 12px 12px;
+    }
+
+    &__tags {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    &__tag {
+      flex-shrink: 0;
+    }
+
+    &__hint {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    &__footer {
+      gap: 12px;
+
+      > button {
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+    }
+
+    &__status {
+      font-size: 13px;
+    }
+  }
+
   &__footer {
     display: flex;
     align-items: center;
@@ -195,6 +255,9 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    // The phone row of the statements list takes no taps but its checkbox and
+    // icon (the rest opens the statement): Teach and its help take their own.
+    pointer-events: auto;
   }
 
   &__help {

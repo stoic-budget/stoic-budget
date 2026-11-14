@@ -103,7 +103,7 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
     return [
       t.status.found.value.replace('{count}', String(preview.transactions)),
       chainLine(preview, {
-        chainUnknown: t.status.chainUnknown.value,
+        chainUnknown: t.status.chainUnknown.value.replace('{tag}', label('balance')),
         chainOk: t.status.chainOk.value,
         chainBroken: t.status.chainBroken.value,
       }),
@@ -166,7 +166,12 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
           </button>
         ))}
       </div>
-      <p className="seneca-pdf-teach__hint">{t.hints[session.activeTag]}</p>
+      <p className="seneca-pdf-teach__hint">
+        {session.armed ? null : <span className="seneca-pdf-teach__hint-touch">{t.touchHint}</span>}
+        <span className={session.armed ? undefined : 'seneca-pdf-teach__hint-pointer'}>
+          {t.hints[session.activeTag]}
+        </span>
+      </p>
       <div className="seneca-pdf-teach__footer">
         <p className="seneca-pdf-teach__status" aria-live="polite">
           {status}
