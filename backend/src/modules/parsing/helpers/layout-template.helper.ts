@@ -250,8 +250,7 @@ export function templateFromRegions(
   marked: readonly TeachRegion[],
   rows: PdfTextRow[],
 ): LayoutTemplate {
-  const dates = marked.filter(region => region.tag === 'date');
-  const dated = (row: PdfTextRow) => datedRow(row, dates);
+  const dated = (row: PdfTextRow) => datedRow(row, marked);
   // A column area crosses a transaction row; one over a title or a summary
   // line ("Brought forward 1,000.00") is no column and teaches nothing.
   const regions = oneOfSingleTags(marked).filter(

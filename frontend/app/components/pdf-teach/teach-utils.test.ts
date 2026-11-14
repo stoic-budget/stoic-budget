@@ -126,6 +126,19 @@ describe('teach-utils', () => {
     expect(regionWarning(description, dateRight, false, [misplaced, description])).toBe(
       'notColumn',
     );
+    // A Date area over a date in a summary line, with no description left of it, is no column.
+    const period = [word('Period', 40, 40), word('01-10-2025', 120, 40, true)];
+    const overPeriod = on('date', 115, 35, 175, 48);
+    expect(regionWarning(overPeriod, period, false, [overPeriod])).toBe('notColumn');
+    // The Date area counts on its own lines: a heading above it is no transaction row.
+    const heading = [word('Period', 40, 40), word('31', 200, 40, true)];
+    const overHeading = on('description', 35, 35, 80, 48);
+    expect(
+      regionWarning(overHeading, [...heading, ...dateRight], false, [overHeading, date]),
+    ).toBe('notColumn');
+    // The first word under the Date area decides: a description reaching into it opens no date.
+    const reaching = [word('ACME', 40, 100), word('Storefront', 180, 100), word('02', 205, 100, true)];
+    expect(regionWarning(date, reaching, false, [description, date])).toBe('notColumn');
   });
 
   it('finds old text under the visible one, not a word printed twice for bold', () => {
