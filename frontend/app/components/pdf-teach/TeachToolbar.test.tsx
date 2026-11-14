@@ -52,6 +52,13 @@ describe('TeachToolbar', () => {
     expect(screen.getByRole('button', { name: /save/i })).toHaveProperty('disabled', true);
   });
 
+  it('names the running balance tag as the tags do, while none is marked', () => {
+    render(<TeachToolbar session={session({ preview: { ...preview, checks: [] } })} onDone={vi.fn()} />);
+    expect(screen.getByTestId('teach-toolbar').textContent).toContain(
+      'mark “Running balance” to check that the balances follow',
+    );
+  });
+
   it('offers to share the layout after saving, and closes after the offer', async () => {
     offer.dismissed = false;
     const onDone = vi.fn();

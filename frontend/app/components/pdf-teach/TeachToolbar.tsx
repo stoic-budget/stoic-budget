@@ -103,7 +103,7 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
     return [
       t.status.found.value.replace('{count}', String(preview.transactions)),
       chainLine(preview, {
-        chainUnknown: t.status.chainUnknown.value,
+        chainUnknown: t.status.chainUnknown.value.replace('{tag}', label('balance')),
         chainOk: t.status.chainOk.value,
         chainBroken: t.status.chainBroken.value,
       }),
