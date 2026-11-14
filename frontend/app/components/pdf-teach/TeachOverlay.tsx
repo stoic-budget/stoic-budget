@@ -28,7 +28,8 @@ const box = (rect: { x0: number; y0: number; x1: number; y1: number }, scale: nu
 });
 
 /**
- * The marking layer over one page: drag to draw an area with the tag in hand;
+ * The marking layer over one page: drag to draw an area with the tag in hand
+ * (a finger only once a tag is tapped, `armed`; until then it scrolls);
  * the words inside light up as the parser will take them, and each row the
  * preview read gets a dot at the page's edge (attention where the running
  * balance breaks).
@@ -70,11 +71,15 @@ export function TeachOverlay({ page, width, session }: TeachOverlayProps) {
     <div
       ref={layerRef}
       // While an area is drawn the labels step aside: they would cover what is being marked.
-      className={`seneca-pdf-teach__layer${start ? ' seneca-pdf-teach__layer--drawing' : ''}`}
+      className={`seneca-pdf-teach__layer${session.armed ? ' seneca-pdf-teach__layer--armed' : ''}${start ? ' seneca-pdf-teach__layer--drawing' : ''}`}
       style={{ width }}
       data-testid={`teach-layer-${page}`}
       onPointerDown={event => {
-        if (event.button !== 0 || (event.target as HTMLElement).closest('button')) {
+        if (
+          event.button !== 0 ||
+          (event.target as HTMLElement).closest('button') ||
+          (event.pointerType === 'touch' && !session.armed)
+        ) {
           return;
         }
         event.currentTarget.setPointerCapture?.(event.pointerId);

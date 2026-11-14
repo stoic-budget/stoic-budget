@@ -20,4 +20,10 @@ describe('TeachHelp', () => {
     fireEvent.click(help);
     expect(onRowClick).not.toHaveBeenCalled();
   });
+
+  it('opens on a tap or a click, with no pointer resting on it', async () => {
+    render(<TeachHelp />);
+    fireEvent.click(screen.getByTestId('teach-help'));
+    expect((await screen.findByRole('tooltip')).textContent).toContain('⋮');
+  });
 });

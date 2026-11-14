@@ -166,7 +166,12 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
           </button>
         ))}
       </div>
-      <p className="seneca-pdf-teach__hint">{t.hints[session.activeTag]}</p>
+      <p className="seneca-pdf-teach__hint">
+        {session.armed ? null : <span className="seneca-pdf-teach__hint-touch">{t.touchHint}</span>}
+        <span className={session.armed ? undefined : 'seneca-pdf-teach__hint-pointer'}>
+          {t.hints[session.activeTag]}
+        </span>
+      </p>
       <div className="seneca-pdf-teach__footer">
         <p className="seneca-pdf-teach__status" aria-live="polite">
           {status}

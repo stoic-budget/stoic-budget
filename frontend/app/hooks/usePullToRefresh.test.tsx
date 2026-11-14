@@ -73,4 +73,28 @@ describe('usePullToRefresh', () => {
 
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
+
+  it('takes no pull from a touch in a portal, such as a modal over the page', async () => {
+    const onRefresh = vi.fn(async () => undefined);
+    const root = createRoot(document.createElement('div'));
+    await act(async () => {
+      root.render(<HookProbe onRefresh={onRefresh} />);
+    });
+    const page = document.createElement('div');
+    const modal = document.createElement('div');
+    const inModal = (y: number) =>
+      ({ ...createTouchEvent(y), currentTarget: page, target: modal }) as unknown as React.TouchEvent<Element>;
+
+    await act(async () => {
+      latestHook?.handlers.onTouchStart(inModal(0));
+      latestHook?.handlers.onTouchMove(inModal(60));
+    });
+    await act(async () => {
+      latestHook?.handlers.onTouchEnd();
+      await Promise.resolve();
+    });
+
+    expect(latestHook?.pullDistance).toBe(0);
+    expect(onRefresh).not.toHaveBeenCalled();
+  });
 });

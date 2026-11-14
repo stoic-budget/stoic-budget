@@ -20,6 +20,7 @@ const session = (over: Partial<TeachSession> = {}): TeachSession => ({
   regions: [],
   activeTag: 'date',
   setActiveTag: vi.fn(),
+  armed: false,
   addRegion: vi.fn(),
   removeRegion: vi.fn(),
   missing: [],
