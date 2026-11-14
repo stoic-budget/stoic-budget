@@ -95,6 +95,45 @@ describe('TeachToolbar', () => {
     expect(marks.setActiveTag).toHaveBeenCalledWith('debit');
   });
 
+  it('says one line per kind of misplaced area, naming every tag in it', () => {
+    const heading = { text: 'Northwind', page: 1, x: 40, y: 20, width: 60, height: 6 };
+    const off = (tag: TeachSession['activeTag']) => ({
+      tag,
+      page: 1,
+      x0: 30,
+      y0: 10,
+      x1: 110,
+      y1: 40,
+    });
+    render(
+      <TeachToolbar
+        session={session({
+          words: [{ ...heading, line: 0, opensDate: false }],
+          regions: [off('date'), off('description'), off('amount')],
+        })}
+        onDone={vi.fn()}
+      />,
+    );
+    const warnings = [...document.querySelectorAll('.seneca-pdf-teach__warning')];
+    expect(warnings.map(warning => warning.textContent)).toEqual([
+      'Date, Description, and Amount ± are not on a column of transactions: no line in their areas starts with a date',
+    ]);
+  });
+
+  it('at no rows says what to change and leaves for the rows by hand without saving', async () => {
+    const marks = session({ preview: { ...preview, transactions: 0, totalDebit: 0, totalCredit: 0 } });
+    const onDone = vi.fn();
+    render(<TeachToolbar session={marks} onDone={onDone} />);
+    const toolbar = screen.getByTestId('teach-toolbar');
+    expect(toolbar.textContent).toContain('No rows read with these marks');
+    expect(toolbar.textContent).not.toContain('Rows: 0');
+    expect(screen.getByRole('button', { name: /save/i })).toHaveProperty('disabled', true);
+    fireEvent.click(screen.getByRole('button', { name: /enter the rows by hand/i }));
+    expect(router.push).toHaveBeenCalledWith('/statements/statement-1/edit');
+    expect(onDone).toHaveBeenCalled();
+    expect(marks.save).not.toHaveBeenCalled();
+  });
+
   it('keeps what reads and opens the rows to correct by hand when no marking adds up', async () => {
     const marks = session({
       preview: { ...preview, checks: [{ code: 'printed_totals', passed: false }] },
