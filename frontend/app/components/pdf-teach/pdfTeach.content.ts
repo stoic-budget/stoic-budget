@@ -2191,7 +2191,7 @@ const content = {
         mk: '{tags} се по еден износ, а во областите ги има повеќе. За колоната со салда изберете „Салдо по трансакцијата“',
         be: '{tags} — гэта па адной суме, а ў абласцях іх па некалькі. Для калонкі рэшты абярыце «Рэшта пасля аперацыі»',
         bs: '{tags} su po jedan iznos, a u područjima ih je više. Za kolonu stanja izaberite „Stanje nakon transakcije”',
-        hsb: '{tags} stej kóždy jedna suma, we wobłukach je jich wjacore. Za stołp salda wubjerće „Saldo po transakciji“',
+        hsb: '{tags} su kóždy jedna suma, we wobłukach je jich wjacore. Za stołp salda wubjerće „Saldo po transakciji“',
       }),
       textUnderText: t({
         ru: 'В файле под видимым текстом лежит старый: его правили. Парсер читает оба слоя, поэтому даты и суммы могут не совпасть с видимыми. Лучше взять исходный файл из банка',

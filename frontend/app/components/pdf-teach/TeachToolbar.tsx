@@ -66,8 +66,13 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
     value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const { preview } = session;
   const failed = preview?.checks.some(check => !check.passed && FORMAT_CHECKS.includes(check.code));
-  // Nothing reads with complete marks: say what to change, and offer the rows by hand instead.
-  const noRows = preview?.transactions === 0 && !session.reading;
+  // Nothing reads with complete marks: say what to change, and offer the rows by hand instead
+  // where the statement's page takes them.
+  const noRows =
+    Boolean(session.words) &&
+    session.missing.length === 0 &&
+    preview?.transactions === 0 &&
+    !session.reading;
   const tagList = new Intl.ListFormat(locale, { type: 'conjunction' });
   // Areas that do not look like what their tag stands for, said as the parser will judge them,
   // one line per kind.
@@ -165,7 +170,7 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
       <div className="seneca-pdf-teach__footer">
         <p className="seneca-pdf-teach__status" aria-live="polite">
           {status}
-          {noRows ? (
+          {noRows && preview?.rowsByHand ? (
             <>
               {' '}
               <button type="button" className="seneca-pdf-teach__fix-link" onClick={enterByHand}>

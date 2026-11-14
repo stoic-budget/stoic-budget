@@ -11,7 +11,7 @@ import {
 } from '../../../common/utils/pdf-parser.util';
 import type { StatementLayoutWords, TeachLayoutPreview } from '../../../contracts';
 import { ParsingLayoutTemplate } from '../../../entities/parsing-layout-template.entity';
-import { FileType, Statement } from '../../../entities/statement.entity';
+import { FileType, Statement, StatementStatus } from '../../../entities/statement.entity';
 import {
   GOOD_READING,
   type LayoutTemplate,
@@ -190,8 +190,17 @@ export class LayoutTemplateService {
   async preview(id: string, workspaceId: string, regions: readonly TeachRegion[]) {
     const statement = await this.pdfStatement(id, workspaceId);
     const missing = missingTags(regions);
+    const rowsByHand = statement.status === StatementStatus.NEEDS_REVIEW;
     if (missing.length > 0) {
-      return { missing, transactions: 0, totalDebit: 0, totalCredit: 0, checks: [], rows: [] };
+      return {
+        missing,
+        transactions: 0,
+        totalDebit: 0,
+        totalCredit: 0,
+        rowsByHand,
+        checks: [],
+        rows: [],
+      };
     }
     return this.withFile(statement, async (filePath): Promise<TeachLayoutPreview> => {
       const { rows } = await extractTextAndLayoutFromPdf(filePath);
@@ -209,6 +218,7 @@ export class LayoutTemplateService {
         transactions: parsed.transactions.length,
         totalDebit: sum(parsed.transactions.map(row => row.debit)),
         totalCredit: sum(parsed.transactions.map(row => row.credit)),
+        rowsByHand,
         checks,
         rows: read.flatMap((row, index) =>
           row.at ? [{ ...row.at, broken: index + 1 === broken }] : [],

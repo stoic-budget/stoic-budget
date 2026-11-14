@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 const offer = vi.hoisted(() => ({ dismissed: false }));
 const router = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => router }));
@@ -37,11 +37,14 @@ const preview = {
   transactions: 42,
   totalDebit: 5289.63,
   totalCredit: 6100,
+  rowsByHand: true,
   checks: [{ code: 'balance_chain', passed: true }],
   rows: [],
 };
 
 describe('TeachToolbar', () => {
+  beforeEach(() => router.push.mockClear());
+
   it('names what is still to mark and keeps saving off', () => {
     render(<TeachToolbar session={session({ missing: [['description']] })} onDone={vi.fn()} />);
     expect(screen.getByTestId('teach-toolbar').textContent).toContain('Description');
@@ -118,6 +121,43 @@ describe('TeachToolbar', () => {
     expect(warnings.map(warning => warning.textContent)).toEqual([
       'Date, Description, and Amount ± are not on a column of transactions: no line in their areas starts with a date',
     ]);
+  });
+
+  it('names a single misplaced tag in its own words', () => {
+    const heading = { text: 'Northwind', page: 1, x: 40, y: 20, width: 60, height: 6 };
+    const off = { tag: 'date' as const, page: 1, x0: 30, y0: 10, x1: 110, y1: 40 };
+    render(
+      <TeachToolbar
+        session={session({ words: [{ ...heading, line: 0, opensDate: false }], regions: [off] })}
+        onDone={vi.fn()}
+      />,
+    );
+    const warnings = [...document.querySelectorAll('.seneca-pdf-teach__warning')];
+    expect(warnings.map(warning => warning.textContent)).toEqual([
+      '“Date” is not on a column of transactions: no line in the area starts with a date',
+    ]);
+  });
+
+  it('offers the rows by hand only once complete marks read nothing, on a page that takes them', () => {
+    const empty = { ...preview, transactions: 0, totalDebit: 0, totalCredit: 0 };
+    const failed = { ...empty, checks: [{ code: 'printed_totals', passed: false }] };
+    const wayOut = (over: Partial<TeachSession>) => {
+      const { unmount } = render(<TeachToolbar session={session(over)} onDone={vi.fn()} />);
+      const buttons = screen.queryAllByRole('button', { name: /by hand/i }).map(b => b.textContent);
+      const text = screen.getByTestId('teach-toolbar').textContent ?? '';
+      unmount();
+      return { buttons, text };
+    };
+    // A failed check at no rows: only the way out, nothing to keep and correct.
+    expect(wayOut({ preview: failed }).buttons).toEqual(['Enter the rows by hand']);
+    // A statement whose page takes no rows by hand: the instruction alone.
+    const elsewhere = wayOut({ preview: { ...empty, rowsByHand: false } });
+    expect(elsewhere.buttons).toEqual([]);
+    expect(elsewhere.text).toContain('No rows read with these marks');
+    // While the marks are read again, or a tag is missing, an old empty reading says nothing.
+    expect(wayOut({ preview: empty, reading: true }).buttons).toEqual([]);
+    expect(wayOut({ preview: empty, missing: [['amount']] }).buttons).toEqual([]);
+    expect(wayOut({ preview: empty, words: undefined }).buttons).toEqual([]);
   });
 
   it('at no rows says what to change and leaves for the rows by hand without saving', async () => {

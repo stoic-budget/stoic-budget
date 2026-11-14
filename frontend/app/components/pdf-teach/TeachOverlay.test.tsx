@@ -50,6 +50,7 @@ describe('TeachOverlay', () => {
         transactions: 2,
         totalDebit: 0,
         totalCredit: 0,
+        rowsByHand: false,
         checks: [],
         rows: [
           { page: 1, y: 120, broken: false },
