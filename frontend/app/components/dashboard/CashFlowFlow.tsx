@@ -18,7 +18,7 @@ import { usePrivacyMode } from '@/app/lib/privacy-mode';
 import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { useCategoryName } from '@/app/lib/use-category-name';
-import { monthRange, withoutSubcategories } from './cash-flow-flow';
+import { foldSmallest, monthRange, withoutSubcategories } from './cash-flow-flow';
 import { CardEmpty } from './ui';
 
 interface CashFlowFlowProps {
@@ -29,12 +29,14 @@ interface CashFlowFlowProps {
 
 /**
  * The card's month as the Reports sankey, one level shallower: where the
- * income came from and which categories it went to. Same endpoint and the
- * same default switches as the card's own figures (no transfers, refunds as
- * income); filters, subcategories and comparisons stay in Reports.
+ * income came from and which categories it went to, the smallest of each
+ * folded into "Other". Same endpoint and the same default switches as the
+ * card's own figures (no transfers, refunds as income); filters,
+ * subcategories and comparisons stay in Reports.
  */
 export function CashFlowFlow({ month, formatAmount }: CashFlowFlowProps): React.JSX.Element {
   const t = useIntlayer('cashFlowCard');
+  const otherName = useIntlayer('topCategoriesCard').other.value;
   const workspaceId = useWorkspaceId();
   const { resolvedTheme } = useTheme();
   const isMobile = useIsMobile();
@@ -50,8 +52,8 @@ export function CashFlowFlow({ month, formatAmount }: CashFlowFlowProps): React.
     enabled: Boolean(workspaceId),
   });
   const sankey = useMemo(
-    () => (query.data ? withoutSubcategories(query.data.sankey) : null),
-    [query.data],
+    () => (query.data ? foldSmallest(withoutSubcategories(query.data.sankey), otherName) : null),
+    [query.data, otherName],
   );
   const option = useMemo(
     () =>

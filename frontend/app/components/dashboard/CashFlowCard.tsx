@@ -56,9 +56,9 @@ const VIEWS: CashFlowView[] = ['chart', 'calendar', 'flow'];
 /** Which view this reader left the card in; a convenience of this browser only. */
 const VIEW_KEY = 'seneca.cashFlowView';
 
-/** The saved view, else what fits the screen: a phone opens on the calendar. */
+/** The saved view, else what fits the screen: a phone opens on the calendar, a wider screen on the flow. */
 function readView(): CashFlowView {
-  const fallback: CashFlowView = isPhoneNow() ? 'calendar' : 'chart';
+  const fallback: CashFlowView = isPhoneNow() ? 'calendar' : 'flow';
   try {
     const saved = window.localStorage.getItem(VIEW_KEY);
     return VIEWS.find(view => view === saved) ?? fallback;

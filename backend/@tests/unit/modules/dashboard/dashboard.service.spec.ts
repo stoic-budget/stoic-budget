@@ -80,6 +80,7 @@ describe('DashboardService', () => {
   const subscriptionRepo = createRepoMock();
   const exchangeRatesService = {
     getRate: vi.fn(),
+    getRateOrNull: vi.fn(),
     coverageForWorkspace: vi.fn(async () => []),
   };
   const budgetsService = { withinLimitSpending: vi.fn() };
@@ -88,6 +89,7 @@ describe('DashboardService', () => {
     vi.resetAllMocks();
     workspaceRepo.findOne.mockResolvedValue({ currency: 'KZT' });
     exchangeRatesService.getRate.mockResolvedValue(1);
+    exchangeRatesService.getRateOrNull.mockResolvedValue(1);
     (transactionRepo as any).query.mockResolvedValue([{ count: 0 }]);
     budgetsService.withinLimitSpending.mockResolvedValue([]);
     service = new DashboardService(
@@ -587,6 +589,7 @@ describe('DashboardService', () => {
     payableRepo.createQueryBuilder.mockReturnValue(payableQb);
     workspaceRepo.findOne.mockResolvedValue({ currency: 'KZT' });
     exchangeRatesService.getRate.mockResolvedValue(500);
+    exchangeRatesService.getRateOrNull.mockResolvedValue(500);
 
     const result = await (service as any).getSnapshot(
       'ws-1',
@@ -605,6 +608,31 @@ describe('DashboardService', () => {
       currency: 'KZT',
     });
     expect(exchangeRatesService.getRate).toHaveBeenCalledWith('USD', 'KZT', undefined, 'ws-1');
+  });
+
+  it("getSnapshot converts each day's income and spending at that day's rate", async () => {
+    const rateOn: Record<string, number> = { '2026-02-03': 400, '2026-02-20': 500 };
+    transactionRepo.createQueryBuilder
+      .mockReturnValueOnce(
+        createQueryBuilderMock([
+          { currency: 'USD', day: '2026-02-03', income: '10', expense: '1', unapprovedCash: '0' },
+          { currency: 'USD', day: '2026-02-20', income: '10', expense: '2', unapprovedCash: '0' },
+        ]),
+      )
+      .mockReturnValueOnce(createQueryBuilderMock([]));
+    payableRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock([]));
+    exchangeRatesService.getRateOrNull.mockImplementation(
+      async (_from: string, _to: string, date: string) => rateOn[date] ?? null,
+    );
+
+    const result = await (service as any).getSnapshot(
+      'ws-1',
+      new Date('2026-02-01'),
+      new Date('2026-03-01'),
+    );
+
+    expect(result.income30d).toBe(10 * rateOn['2026-02-03'] + 10 * rateOn['2026-02-20']);
+    expect(result.expense30d).toBe(1 * rateOn['2026-02-03'] + 2 * rateOn['2026-02-20']);
   });
 
   it('getSnapshot excludes error and processing statements from period totals', async () => {
@@ -1419,7 +1447,7 @@ describe('DashboardService', () => {
         { date: '2025-06', currency: 'KZT', income: '0', expense: '250.5' },
       ]);
       transactionRepo.createQueryBuilder.mockReturnValue(qb);
-      exchangeRatesService.getRate.mockResolvedValue(500);
+      exchangeRatesService.getRateOrNull.mockResolvedValue(500);
 
       const result = await service.getMonthlyCashFlow('ws-1', '12m');
 

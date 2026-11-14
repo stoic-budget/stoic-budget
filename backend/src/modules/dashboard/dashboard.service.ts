@@ -57,6 +57,7 @@ import {
   getWindowBounds,
   parseMonthWindow,
 } from './dashboard-window.util';
+import { DAY_SQL, type DayRow, loadDayConverter } from './day-converter';
 import { spendableBalance, sumConverted } from './opening-balance';
 
 /** How many individual categories the donut shows before folding the rest into "Other". */
@@ -227,13 +228,14 @@ export class DashboardService {
     });
     const targetCurrency = this.normalizeCurrency(workspace?.currency);
 
-    // Group income/expense by currency so we can convert each group
+    // Grouped by currency and day, so each sum converts at its own day's rate.
     const txRows = await this.transactionRepo
       .createQueryBuilder('t')
       // Rows without a statement (a cash payment, an approved receipt) count too.
       .leftJoin('t.statement', 's')
       .select([
         't.currency AS currency',
+        `${DAY_SQL} AS day`,
         // Income and expense count confirmed rows only; unapproved cash below is
         // what still waits, so it keeps the unconfirmed ones on purpose.
         `COALESCE(SUM(CASE WHEN t.transactionType = :income AND ${flowsSql('t')} THEN t.credit ELSE 0 END), 0) AS income`,
@@ -258,30 +260,23 @@ export class DashboardService {
         StatementStatus.VALIDATED,
       ])
       .groupBy('t.currency')
-      .getRawMany<{ currency: string; income: string; expense: string; unapprovedCash: string }>();
+      .addGroupBy(DAY_SQL)
+      .getRawMany<DayRow<'income' | 'expense' | 'unapprovedCash'>>();
 
+    const rows = txRows.map(row => ({ ...row, currency: this.normalizeCurrency(row.currency) }));
+    const day = await loadDayConverter(
+      this.exchangeRatesService,
+      targetCurrency,
+      rows,
+      workspaceId,
+    );
     let income = 0;
     let expense = 0;
     let unapprovedCash = 0;
-    for (const row of txRows) {
-      income += await this.convertDashboardAmount(
-        row.income,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
-      expense += await this.convertDashboardAmount(
-        row.expense,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
-      unapprovedCash += await this.convertDashboardAmount(
-        row.unapprovedCash,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
+    for (const row of rows) {
+      income += day.convert(Number(row.income), row.currency, row.day);
+      expense += day.convert(Number(row.expense), row.currency, row.day);
+      unapprovedCash += day.convert(Number(row.unapprovedCash), row.currency, row.day);
     }
 
     const totalBalance = await this.getAllTimeBalance(workspaceId, targetCurrency);
@@ -607,6 +602,7 @@ export class DashboardService {
 
     const result = await query
       .select(`TO_CHAR(t.transactionDate, ${groupFormat})`, 'date')
+      .addSelect(DAY_SQL, 'day')
       .addSelect('t.currency', 'currency')
       .addSelect(
         'COALESCE(SUM(CASE WHEN t.transactionType = :income THEN t.credit ELSE 0 END), 0)',
@@ -617,27 +613,26 @@ export class DashboardService {
         'expense',
       )
       .groupBy(`TO_CHAR(t.transactionDate, ${groupFormat})`)
+      .addGroupBy(DAY_SQL)
       .addGroupBy('t.currency')
       .orderBy(`TO_CHAR(t.transactionDate, ${groupFormat})`, 'ASC')
       .setParameter('income', TransactionType.INCOME)
       .setParameter('expense', TransactionType.EXPENSE)
-      .getRawMany<{ date: string; currency: string; income: string; expense: string }>();
+      .getRawMany<DayRow<'date' | 'income' | 'expense'>>();
 
+    // Each day's sums convert at that day's rate, as the Reports flow does.
+    const rows = result.map(row => ({ ...row, currency: this.normalizeCurrency(row.currency) }));
+    const day = await loadDayConverter(
+      this.exchangeRatesService,
+      targetCurrency,
+      rows,
+      workspaceId,
+    );
     const points = new Map<string, DashboardCashFlowPoint>();
-    for (const row of result) {
+    for (const row of rows) {
       const point = points.get(row.date) ?? { date: row.date, income: 0, expense: 0, budgeted: 0 };
-      point.income += await this.convertDashboardAmount(
-        row.income,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
-      point.expense += await this.convertDashboardAmount(
-        row.expense,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
+      point.income += day.convert(Number(row.income), row.currency, row.day);
+      point.expense += day.convert(Number(row.expense), row.currency, row.day);
       points.set(row.date, point);
     }
 
