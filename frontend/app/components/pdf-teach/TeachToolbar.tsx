@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { shareOfferDismissed, TeachShareDialog } from './TeachShareDialog';
 import {
-  regionWarning,
+  regionWarnings,
   TAG_TONE,
   TEACH_TAGS,
   type TeachPreview,
@@ -66,16 +66,22 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
     value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const { preview } = session;
   const failed = preview?.checks.some(check => !check.passed && FORMAT_CHECKS.includes(check.code));
-  // Areas that do not look like what their tag stands for, said as the parser will judge them.
-  const warnings = session.regions.flatMap(region => {
-    const warning = regionWarning(
-      region,
-      session.words ?? [],
-      session.textUnderText,
-      session.regions,
-    );
-    return warning ? [t.warnings[warning].value.replace('{tag}', label(region.tag))] : [];
-  });
+  // Nothing reads with complete marks: say what to change, and offer the rows by hand instead
+  // where the statement's page takes them.
+  const noRows =
+    Boolean(session.words) &&
+    session.missing.length === 0 &&
+    preview?.transactions === 0 &&
+    !session.reading;
+  const tagList = new Intl.ListFormat(locale, { type: 'conjunction' });
+  // Areas that do not look like what their tag stands for, said as the parser will judge them,
+  // one line per kind.
+  const warnings = regionWarnings(session.regions, session.words ?? [], session.textUnderText).map(
+    ({ kind, tags }) =>
+      tags.length === 1
+        ? t.warnings[kind].value.replace('{tag}', label(tags[0]))
+        : t.warnings[`${kind}Many`].value.replace('{tags}', tagList.format(tags.map(label))),
+  );
   if (session.textUnderText) {
     warnings.unshift(t.warnings.textUnderText.value);
   }
@@ -91,10 +97,13 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
     if (session.reading || !preview) {
       return t.status.reading.value;
     }
+    if (noRows) {
+      return t.status.noRows.value;
+    }
     return [
       t.status.found.value.replace('{count}', String(preview.transactions)),
       chainLine(preview, {
-        chainUnknown: t.status.chainUnknown.value,
+        chainUnknown: t.status.chainUnknown.value.replace('{tag}', label('balance')),
         chainOk: t.status.chainOk.value,
         chainBroken: t.status.chainBroken.value,
       }),
@@ -128,6 +137,12 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
     }
   };
 
+  // Nothing saved: the statement waits for review, and its page takes rows typed by hand.
+  const enterByHand = () => {
+    onDone();
+    router.push(`/statements/${session.statementId}/edit`);
+  };
+
   if (sharing && session.statementId) {
     return <TeachShareDialog statementId={session.statementId} onClose={onDone} />;
   }
@@ -151,11 +166,24 @@ export function TeachToolbar({ session, onDone }: { session: TeachSession; onDon
           </button>
         ))}
       </div>
-      <p className="seneca-pdf-teach__hint">{t.hints[session.activeTag]}</p>
+      <p className="seneca-pdf-teach__hint">
+        {session.armed ? null : <span className="seneca-pdf-teach__hint-touch">{t.touchHint}</span>}
+        <span className={session.armed ? undefined : 'seneca-pdf-teach__hint-pointer'}>
+          {t.hints[session.activeTag]}
+        </span>
+      </p>
       <div className="seneca-pdf-teach__footer">
         <p className="seneca-pdf-teach__status" aria-live="polite">
           {status}
-          {failed ? (
+          {noRows && preview?.rowsByHand ? (
+            <>
+              {' '}
+              <button type="button" className="seneca-pdf-teach__fix-link" onClick={enterByHand}>
+                {t.enterRowsByHand}
+              </button>
+            </>
+          ) : null}
+          {failed && !noRows ? (
             <span className="seneca-pdf-teach__warning">
               {t.status.checksFailed}{' '}
               <button

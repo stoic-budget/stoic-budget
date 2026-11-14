@@ -188,7 +188,12 @@ describe('Teaching a statement layout (e2e)', () => {
     )
       .send({ regions: REGIONS.slice(0, 2) })
       .expect(200);
-    expect(incomplete.body).toMatchObject({ missing: ['debit|credit|amount'], transactions: 0 });
+    // A statement nothing was read from waits for review: its page takes rows typed by hand.
+    expect(incomplete.body).toMatchObject({
+      missing: ['debit|credit|amount'],
+      transactions: 0,
+      rowsByHand: true,
+    });
 
     const preview = await as(
       owner,
@@ -283,6 +288,14 @@ describe('Teaching a statement layout (e2e)', () => {
     expect((await processing.processStatement(statement.id)).status).toBe(
       StatementStatus.COMPLETED,
     );
+    // Taught again, a statement that reads offers no rows by hand: it has them.
+    const again = await as(
+      dater,
+      request(server()).post(`/statements/${statement.id}/teach/preview`),
+    )
+      .send({ regions: DATE_RIGHT_REGIONS })
+      .expect(200);
+    expect(again.body).toMatchObject({ transactions: 2, rowsByHand: false });
     expect((await rowsOf(statement.id)).map(row => Number(row.amount)).sort((a, b) => a - b)).toEqual([
       12.5, 100,
     ]);

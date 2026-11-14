@@ -7,6 +7,7 @@ import {
   nextTag,
   rectBetween,
   regionWarning,
+  regionWarnings,
   type TeachRegion,
   withRegion,
   wordsInRegion,
@@ -139,6 +140,37 @@ describe('teach-utils', () => {
     // The first word under the Date area decides: a description reaching into it opens no date.
     const reaching = [word('ACME', 40, 100), word('Storefront', 180, 100), word('02', 205, 100, true)];
     expect(regionWarning(date, reaching, false, [description, date])).toBe('notColumn');
+  });
+
+  it('gathers the warnings of all areas into one per kind, each tag named once', () => {
+    const word = { text: 'Northwind', page: 1, x: 40, y: 20, width: 60, height: 6 };
+    const words = [
+      { ...word, line: 0, opensDate: false },
+      { ...word, text: '1,000.00', x: 300, line: 0, opensDate: false },
+      { ...word, text: '1,087.50', x: 300, y: 40, line: 1, opensDate: false },
+    ];
+    const heading = (tag: TeachRegion['tag'], x0: number, x1: number) => ({
+      tag,
+      page: 1,
+      x0,
+      y0: 10,
+      x1,
+      y1: 50,
+    });
+    const regions = [
+      heading('date', 30, 110),
+      heading('description', 30, 110),
+      heading('date', 30, 110),
+      heading('closingBalance', 290, 370),
+      heading('amount', 290, 370),
+    ];
+    expect(regionWarnings(regions, words)).toEqual([
+      { kind: 'notColumn', tags: ['date', 'description', 'amount'] },
+      { kind: 'notOneFigure', tags: ['closingBalance'] },
+    ]);
+    expect(regionWarnings(regions, words, true)).toEqual([
+      { kind: 'notOneFigure', tags: ['closingBalance'] },
+    ]);
   });
 
   it('finds old text under the visible one, not a word printed twice for bold', () => {

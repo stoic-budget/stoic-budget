@@ -204,6 +204,22 @@ export function regionWarning(
   return null;
 }
 
+/** The warnings of all the areas, one per kind, naming each tag once. */
+export function regionWarnings(
+  regions: readonly TeachRegion[],
+  words: readonly LayoutWord[],
+  textUnderText = false,
+): { kind: RegionWarning; tags: TeachTag[] }[] {
+  const byKind = new Map<RegionWarning, Set<TeachTag>>();
+  for (const region of regions) {
+    const kind = regionWarning(region, words, textUnderText, regions);
+    if (kind) {
+      byKind.set(kind, (byKind.get(kind) ?? new Set()).add(region.tag));
+    }
+  }
+  return [...byKind].map(([kind, tags]) => ({ kind, tags: [...tags] }));
+}
+
 /** Required groups no area is tagged with yet. */
 export function missingGroups(regions: readonly TeachRegion[]): TeachTag[][] {
   const tags = new Set(regions.map(region => region.tag));
