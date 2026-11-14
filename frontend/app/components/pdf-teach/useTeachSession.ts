@@ -27,11 +27,11 @@ export interface TeachSession {
   textUnderText: boolean;
   regions: TeachRegion[];
   activeTag: TeachTag;
-  /** Takes a tag in hand and arms drawing with it. */
+  /** Takes a tag in hand and arms drawing with it; the armed tag again disarms. */
   setActiveTag: (tag: TeachTag) => void;
   /**
-   * Whether a finger draws: on a touch screen it scrolls the page until a tag
-   * is tapped, and one area drawn it scrolls again. A mouse always draws.
+   * Whether a finger or a pen draws: it scrolls the page until a tag is
+   * tapped, and one area drawn it scrolls again. A mouse always draws.
    */
   armed: boolean;
   addRegion: (region: Omit<TeachRegion, 'tag'>) => void;
@@ -146,7 +146,8 @@ export function useTeachSession(statementId: string | null): TeachSession {
     activeTag,
     setActiveTag: tag => {
       setActiveTag(tag);
-      setArmed(true);
+      // The tag in hand taken again lets the finger scroll instead.
+      setArmed(!(armed && tag === activeTag));
     },
     armed,
     addRegion,

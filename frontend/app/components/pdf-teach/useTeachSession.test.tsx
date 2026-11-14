@@ -20,4 +20,14 @@ describe('useTeachSession', () => {
     expect(result.current.armed).toBe(false);
     expect(result.current.regions).toEqual([{ ...area, tag: 'description' }]);
   });
+
+  it('lets the finger scroll again when the armed tag is taken again', () => {
+    const { result } = renderHookWithQuery(() => useTeachSession(null));
+    act(() => result.current.setActiveTag('date'));
+    expect(result.current.armed).toBe(true);
+    act(() => result.current.setActiveTag('date'));
+    expect(result.current).toMatchObject({ armed: false, activeTag: 'date' });
+    act(() => result.current.setActiveTag('credit'));
+    expect(result.current).toMatchObject({ armed: true, activeTag: 'credit' });
+  });
 });

@@ -31,8 +31,9 @@ describe('TeachOverlay', () => {
     render(<TeachOverlay page={1} width={1200} session={marks} />);
     const layer = screen.getByTestId('teach-layer-1');
     layer.getBoundingClientRect = () => ({ left: 100, top: 50 }) as DOMRect;
-    fireEvent.pointerDown(layer, { button: 0, clientX: 180, clientY: 250 });
-    fireEvent.pointerMove(layer, { clientX: 300, clientY: 350 });
+    // A mouse draws with the tag in hand, armed or not.
+    fireEvent.pointerDown(layer, { button: 0, pointerType: 'mouse', clientX: 180, clientY: 250 });
+    fireEvent.pointerMove(layer, { pointerType: 'mouse', clientX: 300, clientY: 350 });
     // The labels hide while an area is drawn, and come back after.
     expect(layer.className).toContain('seneca-pdf-teach__layer--drawing');
     fireEvent.pointerUp(layer, { clientX: 300, clientY: 350 });
@@ -41,17 +42,19 @@ describe('TeachOverlay', () => {
   });
 
   it('lets a finger scroll the page until a tag is tapped, then draw with it', () => {
-    const touch = (layer: HTMLElement) => {
+    const touch = (layer: HTMLElement, pointerType = 'touch') => {
       layer.getBoundingClientRect = () => ({ left: 0, top: 0 }) as DOMRect;
-      fireEvent.pointerDown(layer, { button: 0, pointerType: 'touch', clientX: 40, clientY: 100 });
-      fireEvent.pointerMove(layer, { pointerType: 'touch', clientX: 160, clientY: 300 });
-      fireEvent.pointerUp(layer, { pointerType: 'touch', clientX: 160, clientY: 300 });
+      fireEvent.pointerDown(layer, { button: 0, pointerType, clientX: 40, clientY: 100 });
+      fireEvent.pointerMove(layer, { pointerType, clientX: 160, clientY: 300 });
+      fireEvent.pointerUp(layer, { pointerType, clientX: 160, clientY: 300 });
     };
     const idle = session();
     const { unmount } = render(<TeachOverlay page={1} width={600} session={idle} />);
     const scrolling = screen.getByTestId('teach-layer-1');
     expect(scrolling.className).not.toContain('seneca-pdf-teach__layer--armed');
     touch(scrolling);
+    // A pen pans the page as a finger does (touch-action), so it waits for a tag too.
+    touch(scrolling, 'pen');
     expect(idle.addRegion).not.toHaveBeenCalled();
     unmount();
 

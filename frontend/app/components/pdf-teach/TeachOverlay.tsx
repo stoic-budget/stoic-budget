@@ -78,7 +78,8 @@ export function TeachOverlay({ page, width, session }: TeachOverlayProps) {
         if (
           event.button !== 0 ||
           (event.target as HTMLElement).closest('button') ||
-          (event.pointerType === 'touch' && !session.armed)
+          // A finger or a pen pans the page (touch-action) until a tag arms it.
+          (event.pointerType !== 'mouse' && !session.armed)
         ) {
           return;
         }

@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { act } from 'react';
+import { createPortal } from 'react-dom';
 import { createRoot } from 'react-dom/client';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { usePullToRefresh } from './usePullToRefresh';
 
@@ -72,6 +74,36 @@ describe('usePullToRefresh', () => {
     });
 
     expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('pulls from a touch on the page, and not from one in a portal over it', async () => {
+    const Page = ({ onRefresh, portal }: { onRefresh: () => Promise<void>; portal: boolean }) => {
+      const { handlers } = usePullToRefresh({
+        enabled: true,
+        threshold: 40,
+        maxPull: 100,
+        resistance: 1,
+        isAtTop: () => true,
+        onRefresh,
+      });
+      const child = <span data-testid="pull-child">x</span>;
+      return <div {...handlers}>{portal ? createPortal(child, document.body) : child}</div>;
+    };
+    const pull = async (portal: boolean) => {
+      const onRefresh = vi.fn(async () => undefined);
+      const { unmount } = render(<Page onRefresh={onRefresh} portal={portal} />);
+      const child = screen.getByTestId('pull-child');
+      fireEvent.touchStart(child, { touches: [{ clientX: 0, clientY: 0 }] });
+      fireEvent.touchMove(child, { touches: [{ clientX: 0, clientY: 80 }] });
+      fireEvent.touchEnd(child);
+      await act(async () => {
+        await Promise.resolve();
+      });
+      unmount();
+      return onRefresh.mock.calls.length;
+    };
+    expect(await pull(false)).toBe(1);
+    expect(await pull(true)).toBe(0);
   });
 
   it('takes no pull from a touch in a portal, such as a modal over the page', async () => {

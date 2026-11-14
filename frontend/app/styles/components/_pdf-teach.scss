@@ -11,7 +11,7 @@
     left: 50%;
     transform: translateX(-50%);
     cursor: crosshair;
-    // A finger scrolls the page until a tag is tapped (`--armed`); a mouse always draws.
+    // A finger or a pen pans the page until a tag is tapped (`--armed`); a mouse always draws.
     touch-action: pan-x pan-y;
     user-select: none;
   }

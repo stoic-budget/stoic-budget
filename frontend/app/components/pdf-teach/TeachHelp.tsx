@@ -21,8 +21,16 @@ export function TeachHelp(): React.JSX.Element {
       <MuiTooltip
         open={pointed || pinned}
         onOpen={() => setPointed(true)}
-        onClose={() => setPointed(false)}
+        onClose={event => {
+          setPointed(false);
+          // Escape closes it however it was opened.
+          if (event.type === 'keydown') {
+            setPinned(false);
+          }
+        }}
         disableTouchListener
+        // The help floats over the row: a tap on it must not open the statement.
+        slotProps={{ popper: { onClick: event => event.stopPropagation() } }}
         title={
           <span className="seneca-pdf-teach__help-text">
             <span>{t.teachExplain}</span>
