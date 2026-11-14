@@ -48,7 +48,7 @@ describe('teach-utils', () => {
   });
 
   it('takes the words whose middle lies inside an area on its page', () => {
-    const word = { text: 'Date', page: 1, x: 2, y: 2, width: 6, height: 4, dated: false };
+    const word = { text: 'Date', page: 1, x: 2, y: 2, width: 6, height: 4, line: 0, opensDate: false };
     expect(wordsInRegion([word], area('date', 0, 10))).toEqual([word]);
     expect(wordsInRegion([word], area('date', 0, 4))).toEqual([]);
     expect(wordsInRegion([{ ...word, page: 2 }], area('date', 0, 10))).toEqual([]);
@@ -72,23 +72,24 @@ describe('teach-utils', () => {
   });
 
   it('warns of a column tag off the table and a one-figure tag over a column', () => {
-    const word = (text: string, x: number, y: number, dated = y >= 100) => ({
+    const word = (text: string, x: number, y: number, opensDate = false) => ({
       text,
       page: 1,
       x,
       y,
       width: 20,
       height: 6,
-      dated,
+      line: y,
+      opensDate,
     });
     const words = [
       word('Northwind', 40, 20),
       // "02 Sep": the parser's reading of the line decides, not the word's shape.
-      word('02', 40, 100),
+      word('02', 40, 100, true),
       word('Sep', 55, 100),
       word('ACME', 120, 100),
       word('987.50', 300, 100),
-      word('03', 40, 120),
+      word('03', 40, 120, true),
       word('Sep', 55, 120),
       word('1,087.50', 300, 120),
     ];
@@ -106,6 +107,25 @@ describe('teach-utils', () => {
     expect(regionWarning(on('description', 110, 95, 150, 108), words)).toBeNull();
     expect(regionWarning(on('closingBalance', 290, 95, 330, 130), words)).toBe('notOneFigure');
     expect(regionWarning(on('closingBalance', 290, 115, 330, 130), words)).toBeNull();
+
+    // The date printed right of the text: the lines start with the description.
+    const dateRight = [
+      word('ACME', 40, 100),
+      word('02', 200, 100, true),
+      word('Sep', 215, 100),
+      word('987.50', 300, 100),
+    ];
+    const date = on('date', 195, 95, 240, 108);
+    const description = on('description', 35, 95, 80, 108);
+    expect(regionWarning(date, dateRight, false, [date, description])).toBeNull();
+    expect(regionWarning(description, dateRight, false, [date, description])).toBeNull();
+    // Until the Date area is drawn, a line counts only when it starts with a date.
+    expect(regionWarning(description, dateRight, false, [description])).toBe('notColumn');
+    // A Date area over a word that opens no date makes no line a transaction row.
+    const misplaced = on('date', 35, 95, 80, 108);
+    expect(regionWarning(description, dateRight, false, [misplaced, description])).toBe(
+      'notColumn',
+    );
   });
 
   it('finds old text under the visible one, not a word printed twice for bold', () => {
@@ -116,7 +136,8 @@ describe('teach-utils', () => {
       y,
       width: 20,
       height: 8,
-      dated: false,
+      line: y,
+      opensDate: false,
     });
     // An edited row: "05 Mar … 300.00" printed over "05 Aug … 125.40".
     const edited = [
@@ -144,7 +165,9 @@ describe('teach-utils', () => {
   });
 
   it('judges no column once the file has text under its text', () => {
-    const words = [{ text: 'ACME', page: 1, x: 40, y: 20, width: 20, height: 6, dated: false }];
+    const words = [
+      { text: 'ACME', page: 1, x: 40, y: 20, width: 20, height: 6, line: 0, opensDate: false },
+    ];
     const off = { tag: 'date' as const, page: 1, x0: 30, y0: 10, x1: 80, y1: 30 };
     expect(regionWarning(off, words)).toBe('notColumn');
     expect(regionWarning(off, words, true)).toBeNull();

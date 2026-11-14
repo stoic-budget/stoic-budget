@@ -112,7 +112,7 @@ export function TeachOverlay({ page, width, session }: TeachOverlayProps) {
       {regions.map(({ region, index }) => (
         <div
           key={index}
-          className={`seneca-pdf-teach__region${regionWarning(region, session.words ?? [], session.textUnderText) ? ' seneca-pdf-teach__region--warning' : ''}`}
+          className={`seneca-pdf-teach__region${regionWarning(region, session.words ?? [], session.textUnderText, session.regions) ? ' seneca-pdf-teach__region--warning' : ''}`}
           style={
             { ...box(region, scale), '--teach-tone': TAG_TONE[region.tag] } as React.CSSProperties
           }

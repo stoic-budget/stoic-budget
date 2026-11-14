@@ -171,6 +171,40 @@ describe('layout-template.helper', () => {
     ]);
   });
 
+  it('takes a date printed right of the description for a transaction row', () => {
+    const dateRight = [
+      row(60, [['Brought', 40], ['forward', 80], ['1,000.00', 200]]),
+      row(100, [['What', 40], ['When', 200], ['Went', 300], ['Out', 322], ['Came', 375], ['In', 400], ['Left', 475]]),
+      row(120, [['ACME', 40], ['Store', 65], ['02', 200], ['Sep', 212], ['12.50', 317], ['987.50', 470]]),
+      row(140, [['Member', 40], ['One', 75], ['03', 200], ['Sep', 212], ['100.00', 382], ['1,087.50', 460]]),
+    ];
+    const marked: TeachRegion[] = [
+      { tag: 'description', page: 1, x0: 35, y0: 118, x1: 180, y1: 150 },
+      { tag: 'date', page: 1, x0: 195, y0: 118, x1: 240, y1: 150 },
+      ...regions.filter(region => ['debit', 'credit', 'balance'].includes(region.tag)),
+      { tag: 'openingBalance', page: 1, x0: 195, y0: 58, x1: 250, y1: 70 },
+    ];
+    const template = templateFromRegions(marked, dateRight);
+    expect(template.columns.map(column => column.role)).toEqual([
+      'description',
+      'date',
+      'debit',
+      'credit',
+      'balance',
+    ]);
+    expect(template.balances.start).toBe('brought forward');
+    const read = readLayoutTable(dateRight, layoutReading(template)).transactions;
+    expect(read.map(t => [t.dateText, t.description, t.debit, t.credit, t.balance])).toEqual([
+      ['02 Sep', 'ACME Store', 12.5, undefined, 987.5],
+      ['03 Sep', 'Member One', undefined, 100, 1087.5],
+    ]);
+    // Without a Date area over the dates, no line is a transaction row and no column is learnt.
+    const misplaced = marked.map(region =>
+      region.tag === 'date' ? { ...region, x0: 35, x1: 100 } : region,
+    );
+    expect(templateFromRegions(misplaced, dateRight).columns).toEqual([]);
+  });
+
   it('leaves out lines like the one marked to skip', () => {
     const template = templateFromRegions(regions, rows);
     expect(template.skip).toEqual(['page of statement']);
