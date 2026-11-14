@@ -72,7 +72,7 @@
     "adm-zip": "^0.6.1",
     "archiver": "^8.0.0",
     "bcrypt": "^6.0.0",
-    "bullmq": "^6.4.2",
+    "bullmq": "^6.5.4",
     "cache-manager": "^7.2.8",
     "cache-manager-redis-store": "^3.0.1",
     "class-transformer": "^0.5.1",
