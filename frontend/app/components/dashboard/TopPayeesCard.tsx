@@ -62,7 +62,9 @@ export function TopPayeesCard({ month, formatAmount }: TopPayeesCardProps): Reac
           <ListRow
             key={payee.id}
             href={`/statements/payees/${payee.id}`}
-            leading={<VendorIcon vendorName={payee.name} size={36} />}
+            leading={
+              <VendorIcon vendorName={payee.name} vendorDomain={payee.vendorDomain} size={36} />
+            }
             primary={payee.name}
             secondary={`${wideText.operations.value}: ${payee.count}`}
             trailing={

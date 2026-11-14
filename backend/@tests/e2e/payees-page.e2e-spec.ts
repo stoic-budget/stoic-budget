@@ -139,6 +139,41 @@ describe('Payees page (e2e)', () => {
     expect(listed.every(row => row.counterpartyName === store)).toBe(true);
   });
 
+  it("marks a payee by its subscription's website, or by its name when that is one, never by a guess", async () => {
+    // A month of its own, so the totals the other tests read stay as they are.
+    const later = '2026-06';
+    const site = 'acme-sms.example';
+    const streaming = 'ACME Streaming';
+    const streamingDomain = 'acme-streaming.example';
+    const person = 'Member Three';
+    await book(site, 3, { transactionDate: new Date(`${later}-10`) });
+    const streamed = await book(streaming, 9, { transactionDate: new Date(`${later}-11`) });
+    await book(person, 7, { transactionDate: new Date(`${later}-12`) });
+    const [{ id: subscriptionId }] = await dataSource.query(
+      `INSERT INTO subscriptions (workspace_id, vendor_name, vendor_domain, amount, currency, frequency)
+       VALUES ($1, $2, $3, 9, $4, 'monthly') RETURNING id`,
+      [owner.workspaceId, streaming, streamingDomain, currency],
+    );
+    await dataSource.query(
+      'INSERT INTO subscription_payees (workspace_id, subscription_id, payee_id) VALUES ($1, $2, $3)',
+      [owner.workspaceId, subscriptionId, streamed.payeeId],
+    );
+
+    const rows = (await overview(`month=${later}`)).rows as Array<{
+      name: string;
+      vendorDomain: string | null;
+    }>;
+    const domainOf = (name: string) => rows.find(row => row.name === name)?.vendorDomain;
+    expect(domainOf(streaming)).toBe(streamingDomain);
+    expect(domainOf(site)).toBe(site);
+    expect(domainOf(person)).toBeNull();
+
+    const summary = (
+      await as(owner, request(server()).get(`/payees/${streamed.payeeId}/summary`)).expect(200)
+    ).body;
+    expect(summary.vendorDomain).toBe(streamingDomain);
+  });
+
   it('files past rows under the pinned category, leaving a hand-picked one alone', async () => {
     const [storeRow] = (await overview(`month=${month}`)).rows;
     const [pinned, handPicked] = categoryIds;

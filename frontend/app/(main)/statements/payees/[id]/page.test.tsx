@@ -69,6 +69,7 @@ const payee: Payee = {
   lastSeen: '2026-05-10',
 };
 const summary: PayeeSummary = {
+  vendorDomain: null,
   currency: 'EUR',
   months: Array.from({ length: 12 }, (_, index) => ({
     month: `2025-${String(index + 1).padStart(2, '0')}`,
