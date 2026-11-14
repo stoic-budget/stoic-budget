@@ -21,6 +21,10 @@ vi.mock('../CashFlowCard', () => ({
   ),
 }));
 
+vi.mock('../DataCoverageCard', () => ({
+  DataCoverageCard: () => <div data-testid="data-coverage" />,
+}));
+
 // `apiBaseUrl` is read at module load by the goal cover thumbnail.
 vi.mock('@/app/lib/api', () => ({ default: { get: apiGet }, apiBaseUrl: 'http://api.test/api/v1' }));
 

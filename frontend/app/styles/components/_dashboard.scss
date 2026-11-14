@@ -116,6 +116,11 @@
         background: $seneca-color-info-dk;
       }
     }
+
+    // A status that asks for nothing: the stone grey of "Other".
+    &--quiet {
+      background: var(--cat-tone-other);
+    }
   }
 
   /* Ties a category row to its slice: the only colour the list carries. */

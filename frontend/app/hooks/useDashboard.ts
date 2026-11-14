@@ -119,3 +119,14 @@ export function useCashFlowEntries(month: string): DashboardCashFlowEntry[] | un
   });
   return query.data?.entries;
 }
+
+/** How far each bank account's statements reach, for the dashboard's data freshness card. */
+export function useWalletCoverage() {
+  const workspaceId = useWorkspaceId();
+  return useQuery({
+    queryKey: queryKeys.dashboardWalletCoverage(workspaceId),
+    queryFn: ({ signal }) =>
+      apiQueryDecoded({ contract: 'WalletCoverage', url: '/wallets/coverage', signal }),
+    enabled: Boolean(workspaceId),
+  });
+}

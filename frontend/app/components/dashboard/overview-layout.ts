@@ -32,6 +32,7 @@ export const OVERVIEW_SECTION_IDS = [
   'goals',
   'net-worth',
   'balances',
+  'data-sources',
   'budgets',
   // This month's subscriptions; the id is the old cash runway card's, so saved layouts keep the slot.
   'cash-runway',
@@ -72,10 +73,10 @@ export const DEFAULT_OVERVIEW_ROWS: OverviewRows = [
   [...KPI_SECTION_IDS],
   ['cash-flow'],
   ['top-categories', 'recent-transactions'],
-  ['balances', 'safe-to-spend'],
+  ['balances', 'data-sources'],
   ['goals', 'cash-runway'],
   ['budgets', 'month-close'],
-  ['net-worth'],
+  ['net-worth', 'safe-to-spend'],
   ['activity'],
   ['advice'],
 ];
@@ -85,7 +86,13 @@ export const DEFAULT_OVERVIEW_ROWS: OverviewRows = [
  * is owed, taxes, advice), whatever month is picked: in
  * another month they stay in place, muted, under their "Today" note.
  */
-const PRESENT_SECTION_IDS = new Set<string>(['safe-to-spend', 'money-owed', 'taxes', 'advice']);
+const PRESENT_SECTION_IDS = new Set<string>([
+  'safe-to-spend',
+  'data-sources',
+  'money-owed',
+  'taxes',
+  'advice',
+]);
 
 export const tellsThePresent = (id: string): boolean => PRESENT_SECTION_IDS.has(id);
 

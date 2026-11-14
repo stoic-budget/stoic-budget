@@ -22,6 +22,7 @@ type SectionNameKey =
   | 'goals'
   | 'netWorth'
   | 'balances'
+  | 'dataSources'
   | 'budgets'
   | 'subscriptionsMonth'
   | 'activity'
@@ -42,6 +43,7 @@ const NAME_KEYS: Record<Exclude<OverviewSectionId, 'getting-started'>, SectionNa
   goals: 'goals',
   'net-worth': 'netWorth',
   balances: 'balances',
+  'data-sources': 'dataSources',
   budgets: 'budgets',
   'cash-runway': 'subscriptionsMonth',
   activity: 'activity',
