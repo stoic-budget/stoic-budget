@@ -24,6 +24,10 @@ vi.mock('@/app/i18n', () => ({
     waitingFew: value('{{count}} rows in Review'),
     waitingMany: value('{{count}} rows in Review'),
     upToDate: value('Up to date'),
+    lastStatement: value('Last statement: {{month}}'),
+    inactiveOne: value('{{count}} inactive account'),
+    inactiveFew: value('{{count}} inactive accounts'),
+    inactiveMany: value('{{count}} inactive accounts'),
     viewAll: value('View all'),
   }),
   useLocale: () => ({ locale: 'en' }),
@@ -61,12 +65,15 @@ describe('DataCoverageCard', () => {
   });
   afterEach(() => vi.useRealTimers());
 
-  it('lists each account with how far its data reaches and what it needs, the one behind first', () => {
+  const listed = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll('.seneca-dashboard__list a'));
+
+  it('says one thing of each account, what it needs or else how far it reaches, the one behind first', () => {
     coverageMock.mockReturnValue({ data: { rows: [EVERYDAY, BANK, CARD] }, isPending: false });
 
     const { container } = render(<DataCoverageCard />);
 
-    const rows = Array.from(container.querySelectorAll('.seneca-dashboard__list a'));
+    const rows = listed(container);
     expect(rows.map(link => link.getAttribute('href'))).toEqual([
       `/accounts/${CARD.walletId}`,
       '/accounts',
@@ -74,10 +81,62 @@ describe('DataCoverageCard', () => {
     ]);
     expect(rows[0]).toHaveTextContent('Card One');
     expect(rows[0]).toHaveTextContent('No statement for October');
+    expect(rows[0]).not.toHaveTextContent('Data to');
     expect(rows[1]).toHaveTextContent(`••${BANK.accountTail}`);
     expect(rows[1]).toHaveTextContent('3 rows in Review');
+    expect(rows[1]).not.toHaveTextContent('Data to');
     expect(rows[2]).toHaveTextContent('Data to Nov 11');
-    expect(rows[2]).toHaveTextContent('Up to date');
+    expect(container.querySelectorAll('.seneca-dashboard__stat-dot')).toHaveLength(1);
+  });
+
+  it('counts the accounts silent for months instead of listing them', () => {
+    const closed: CoverageRow = {
+      ...EVERYDAY,
+      walletId: 'w-closed',
+      name: 'Closed Account',
+      dataTo: '2026-03-31',
+    };
+    const oldBank: CoverageRow = { ...BANK, accountTail: '0099', dataTo: '2017-09-07' };
+    coverageMock.mockReturnValue({
+      data: { rows: [EVERYDAY, closed, oldBank] },
+      isPending: false,
+    });
+
+    const { container } = render(<DataCoverageCard />);
+
+    const rows = listed(container);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toHaveTextContent(EVERYDAY.name ?? '');
+    expect(rows[1]).toHaveAttribute('href', '/accounts');
+    expect(rows[1]).toHaveTextContent('2 inactive accounts');
+    expect(screen.queryByText(closed.name ?? '')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Last statement/)).not.toBeInTheDocument();
+  });
+
+  it('says how far the data reaches when every account is inactive', () => {
+    const lastKept: CoverageRow = { ...EVERYDAY, dataTo: '2025-02-28' };
+    const older: CoverageRow = { ...BANK, dataTo: '2017-09-07' };
+    coverageMock.mockReturnValue({ data: { rows: [older, lastKept] }, isPending: false });
+
+    const { container } = render(<DataCoverageCard />);
+
+    expect(screen.getByText('Last statement: February 2025')).toBeInTheDocument();
+    expect(listed(container).map(link => link.textContent)).toEqual(['2 inactive accounts']);
+  });
+
+  it('lists five accounts at most, the ones that need something first', () => {
+    const fine = Array.from({ length: 6 }, (_, index) => ({
+      ...EVERYDAY,
+      walletId: `w-${index}`,
+      name: `Account ${index}`,
+    }));
+    coverageMock.mockReturnValue({ data: { rows: [...fine, CARD] }, isPending: false });
+
+    const { container } = render(<DataCoverageCard />);
+
+    const rows = listed(container);
+    expect(rows).toHaveLength(5);
+    expect(rows[0]).toHaveTextContent(CARD.name ?? '');
   });
 
   it('names how far a balance is off its statement', () => {

@@ -1,10 +1,12 @@
 'use client';
 
 import { resolveBankLogo } from '@bank-logos';
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined';
 import clsx from 'clsx';
 import type React from 'react';
 import { parseDateOnly } from '@/app/(main)/dashboard/helpers/dashboard-helpers';
 import { BankLogoAvatar } from '@/app/components/BankLogoAvatar';
+import { ChevronRight } from '@/app/components/icons';
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useWalletCoverage } from '@/app/hooks/useDashboard';
 import { useIntlayer, useLocale } from '@/app/i18n';
@@ -14,11 +16,16 @@ import {
   byAttention,
   type CoverageRow,
   type CoverageStatus,
+  isInactive,
   needsAttention,
 } from './data-coverage';
 import { useTodayNote } from './overview-month';
-import { CardLink, DashboardCard, ListRow } from './ui';
+import { CardEmpty, CardLink, DashboardCard, ListRow } from './ui';
 import { ListRowsSkeleton } from './ui/card-skeletons';
+
+/** Accounts listed at once; Accounts has the rest. */
+const VISIBLE_ROWS = 5;
+const LOGO_SIZE = 28;
 
 /** An account by its name; a bank by its name and the end of its number. */
 function nameOf(row: CoverageRow): string {
@@ -36,9 +43,10 @@ function nameOf(row: CoverageRow): string {
 
 /**
  * How far each bank account's statements reach, today: one line per account
- * with its bank's logo, the day its data runs to, and the one thing to do about
- * it, if anything. A row opens the account, or Accounts for a bank no account
- * holds yet, where its statements are offered.
+ * with its bank's logo and one fact, the thing to do about it if there is one,
+ * else the day its data runs to. Accounts silent for months are only counted.
+ * A row opens the account, or Accounts for a bank no account holds yet, where
+ * its statements are offered.
  */
 export function DataCoverageCard(): React.JSX.Element | null {
   const t = useIntlayer('dataCoverageCard');
@@ -90,9 +98,20 @@ export function DataCoverageCard(): React.JSX.Element | null {
           many: t.waitingMany.value,
         });
       default:
-        return t.upToDate.value;
+        return row.dataTo
+          ? t.dataTo.value.replace('{{date}}', dayOf(row.dataTo))
+          : t.upToDate.value;
     }
   };
+
+  const rows = data?.rows ?? [];
+  const active = rows.filter(row => !isInactive(row, now));
+  const inactive = rows.length - active.length;
+  // With every account inactive, the card still says how far the data reaches.
+  const latest = rows.reduce<string | null>(
+    (last, row) => (row.dataTo && (!last || row.dataTo > last) ? row.dataTo : last),
+    null,
+  );
 
   return (
     <DashboardCard
@@ -100,36 +119,51 @@ export function DataCoverageCard(): React.JSX.Element | null {
       subtitle={today ?? undefined}
       action={<CardLink href="/accounts">{overview.viewAll}</CardLink>}
     >
-      {isPending ? (
-        <ListRowsSkeleton rows={3} leading={36} />
-      ) : (
+      {isPending && <ListRowsSkeleton rows={3} leading={LOGO_SIZE} />}
+      {!isPending && active.length === 0 && latest && (
+        <CardEmpty icon={DescriptionOutlined}>
+          {t.lastStatement.value.replace('{{month}}', monthOf(latest.slice(0, 7)))}
+        </CardEmpty>
+      )}
+      {!isPending && (
         <div className="seneca-dashboard__list">
-          {byAttention(data?.rows ?? [], now, nameOf).map(({ row, status }) => (
-            <ListRow
-              key={row.walletId ?? `${row.bankName}-${row.accountTail}`}
-              href={row.walletId ? `/accounts/${row.walletId}` : '/accounts'}
-              className="seneca-dashboard__row--status"
-              leading={<BankLogoAvatar bankName={row.bankName} size={36} />}
-              primary={nameOf(row)}
-              secondary={
-                row.dataTo ? t.dataTo.value.replace('{{date}}', dayOf(row.dataTo)) : undefined
-              }
-              trailing={
-                <span className={clsx(!needsAttention(status) && 'seneca-dashboard__muted')}>
-                  <span
-                    className={clsx(
-                      'seneca-dashboard__stat-dot',
-                      needsAttention(status)
-                        ? 'seneca-dashboard__stat-dot--warning'
-                        : 'seneca-dashboard__stat-dot--quiet',
+          {byAttention(active, now, nameOf)
+            .slice(0, VISIBLE_ROWS)
+            .map(({ row, status }) => (
+              <ListRow
+                key={row.walletId ?? `${row.bankName}-${row.accountTail}`}
+                href={row.walletId ? `/accounts/${row.walletId}` : '/accounts'}
+                className="seneca-dashboard__row--status"
+                leading={<BankLogoAvatar bankName={row.bankName} size={LOGO_SIZE} />}
+                primary={nameOf(row)}
+                trailing={
+                  <span className={clsx(!needsAttention(status) && 'seneca-dashboard__muted')}>
+                    {needsAttention(status) && (
+                      <span
+                        className="seneca-dashboard__stat-dot seneca-dashboard__stat-dot--warning"
+                        aria-hidden="true"
+                      />
                     )}
-                    aria-hidden="true"
-                  />
-                  {statusText(row, status)}
+                    {statusText(row, status)}
+                  </span>
+                }
+              />
+            ))}
+          {inactive > 0 && (
+            <ListRow
+              href="/accounts"
+              primary={
+                <span className="seneca-dashboard__muted">
+                  {plural(locale, inactive, {
+                    one: t.inactiveOne.value,
+                    few: t.inactiveFew.value,
+                    many: t.inactiveMany.value,
+                  })}
                 </span>
               }
+              trailing={<ChevronRight size={16} className="seneca-dashboard__muted" aria-hidden />}
             />
-          ))}
+          )}
         </div>
       )}
     </DashboardCard>

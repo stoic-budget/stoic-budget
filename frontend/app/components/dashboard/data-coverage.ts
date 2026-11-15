@@ -5,6 +5,9 @@ export type CoverageRow = WalletCoverage['rows'][number];
 /** Days into a month a bank is given to issue the statement of the month before. */
 export const STATEMENT_GRACE_DAYS = 5;
 
+/** Months of statements an account may miss before it counts as inactive, not behind. */
+export const INACTIVE_AFTER_MONTHS = 3;
+
 export type CoverageStatus =
   /** The data stops before `expected`; `month` (YYYY-MM) is the first one missing. */
   | { kind: 'behind'; month: string }
@@ -22,13 +25,26 @@ function monthEnd(today: Date, back: number): string {
   return `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}`;
 }
 
+/** How many months back from `today`'s the last statement due falls. */
+const monthsDue = (today: Date): number => (today.getDate() > STATEMENT_GRACE_DAYS ? 1 : 2);
+
 /**
  * The day a bank account's data should reach by `today`, in the reader's own
  * calendar: the end of last month, once a bank has had a few days to issue its
  * statement; before that, the end of the month before.
  */
 export function expectedThrough(today: Date): string {
-  return monthEnd(today, today.getDate() > STATEMENT_GRACE_DAYS ? 1 : 2);
+  return monthEnd(today, monthsDue(today));
+}
+
+/**
+ * Whether an account's statements stopped so long ago that it is most likely
+ * closed or left: more than `INACTIVE_AFTER_MONTHS` months missing. A gap that
+ * old is no longer news, so the account is counted, not listed.
+ */
+export function isInactive(row: CoverageRow, today: Date): boolean {
+  const lastKept = monthEnd(today, monthsDue(today) + INACTIVE_AFTER_MONTHS).slice(0, 7);
+  return row.dataTo !== null && row.dataTo.slice(0, 7) < lastKept;
 }
 
 /** The month (YYYY-MM) after the one `day` (YYYY-MM-DD) falls in. */

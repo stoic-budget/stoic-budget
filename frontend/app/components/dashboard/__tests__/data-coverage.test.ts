@@ -4,6 +4,8 @@ import {
   type CoverageRow,
   coverageStatus,
   expectedThrough,
+  INACTIVE_AFTER_MONTHS,
+  isInactive,
   STATEMENT_GRACE_DAYS,
 } from '../data-coverage';
 
@@ -76,6 +78,25 @@ describe('coverageStatus', () => {
 
   it('says nothing of a day it does not know', () => {
     expect(coverageStatus(row({ dataTo: null }), AFTER_GRACE).kind).toBe('ok');
+  });
+});
+
+describe('isInactive', () => {
+  // Due through October: three months missing (Aug–Oct) is still behind, four is inactive.
+  const lastBehind = '2026-07-15';
+  const firstInactive = '2026-06-30';
+
+  it(`keeps an account behind for ${INACTIVE_AFTER_MONTHS} missing months, then lets it go`, () => {
+    expect(isInactive(row({ dataTo: lastBehind }), AFTER_GRACE)).toBe(false);
+    expect(isInactive(row({ dataTo: firstInactive }), AFTER_GRACE)).toBe(true);
+  });
+
+  it('gives the same grace as a statement due: one month more in the first days', () => {
+    expect(isInactive(row({ dataTo: firstInactive }), WITHIN_GRACE)).toBe(false);
+  });
+
+  it('never calls an account with no known day inactive', () => {
+    expect(isInactive(row({ dataTo: null }), AFTER_GRACE)).toBe(false);
   });
 });
 
