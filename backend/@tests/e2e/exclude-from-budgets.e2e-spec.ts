@@ -28,6 +28,7 @@ describe('Exclude a transaction from budgets (e2e)', () => {
   let budgetId: string;
   let walletId: string;
   let oneOffId: string;
+  let categoryId: string;
 
   const opening = 500;
   const everyday = 30;
@@ -99,6 +100,7 @@ describe('Exclude a transaction from budgets (e2e)', () => {
       })
       .expect(201);
     budgetId = budget.body.id;
+    categoryId = category.body.id;
     const wallet = await as(request(server()).post('/wallets'))
       .send({ name: 'Everyday account', currency: 'USD', initialBalance: opening })
       .expect(201);
@@ -154,5 +156,51 @@ describe('Exclude a transaction from budgets (e2e)', () => {
     await as(request(server()).put(`/transactions/${oneOffId}`))
       .send({ excludedFromBudgets: null })
       .expect(400);
+  });
+
+  it("tells the row's history who left it out of budgets, and lets that be put back", async () => {
+    await setExcluded(true);
+
+    const history = await as(request(server()).get(`/transactions/${oneOffId}/history`)).expect(200);
+    const left = history.body.entries.find((entry: { changes: Array<{ field: string }> }) =>
+      entry.changes.some(change => change.field === 'budgets'),
+    );
+    expect(left.changes).toContainEqual(
+      expect.objectContaining({ field: 'budgets', before: 'false', after: 'true' }),
+    );
+    expect(left.canUndo).toBe(true);
+    await setExcluded(false);
+  });
+
+  it('keeps an uncategorised row left out of budgets in the categorise step: tax still reads it', async () => {
+    const uncategorised = await bookExpense(categoryId, 'ACME Garage - Repair', 40);
+    await dataSource.query('UPDATE transactions SET category_id = NULL WHERE id = $1', [uncategorised]);
+    await as(request(server()).put(`/transactions/${uncategorised}`))
+      .send({ excludedFromBudgets: true })
+      .expect(200);
+
+    const queue = await as(
+      request(server()).get('/review-inbox?kind=transaction&uncategorized=true'),
+    ).expect(200);
+    expect(queue.body.items.map((item: { id: string }) => item.id)).toContain(uncategorised);
+  });
+
+  it('refuses to unsplit parts the budgets count differently, until they agree', async () => {
+    const charge = await bookExpense(categoryId, 'ACME Hardware - Tools', 100);
+    const parts = await as(request(server()).post(`/transactions/${charge}/split`))
+      .send({ parts: [{ amount: 60 }, { amount: 40 }] })
+      .expect(200);
+    const leftOut = parts.body[1].id as string;
+    await as(request(server()).put(`/transactions/${leftOut}`))
+      .send({ excludedFromBudgets: true })
+      .expect(200);
+
+    const refused = await as(request(server()).post(`/transactions/${charge}/unsplit`)).expect(400);
+    expect(refused.body.error?.code ?? refused.body.code).toBe('TRANSACTION_UNSPLIT_MIXED_BUDGETS');
+
+    await as(request(server()).put(`/transactions/${leftOut}`))
+      .send({ excludedFromBudgets: false })
+      .expect(200);
+    await as(request(server()).post(`/transactions/${charge}/unsplit`)).expect(200);
   });
 });
