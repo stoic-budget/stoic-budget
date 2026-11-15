@@ -2,6 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '../test-setup';
+import { SectionSpanProvider } from '../section-span';
 import { TopPayeesCard } from '../TopPayeesCard';
 import { value } from './intlayer-mock';
 
@@ -68,6 +69,52 @@ describe('TopPayeesCard', () => {
     expect(links[0]).toHaveTextContent(`$${RENT.amount}`);
     // A sliver of the month reads as under one percent, not as nothing.
     expect(links[2]).toHaveTextContent('<1%');
+  });
+
+  it('shows a placeholder list while the month loads', () => {
+    overviewMock.mockReturnValue({ isPending: true, isError: false, data: undefined });
+
+    const { container } = render(<TopPayeesCard month={MONTH} formatAmount={String} />);
+
+    expect(container.querySelectorAll('.MuiSkeleton-root').length).toBeGreaterThan(0);
+    expect(screen.queryByText('No payments to payees this month')).toBeNull();
+  });
+
+  it('keeps the list it has when a refetch fails', () => {
+    overviewMock.mockReturnValue({ ...overview([RENT]), isError: true });
+
+    render(<TopPayeesCard month={MONTH} formatAmount={String} />);
+
+    expect(screen.getByText(RENT.name)).toBeInTheDocument();
+    expect(screen.queryByText('No payments to payees this month')).toBeNull();
+  });
+
+  it('says nothing was paid when the first load fails', () => {
+    overviewMock.mockReturnValue({ isPending: false, isError: true, data: undefined });
+
+    render(<TopPayeesCard month={MONTH} formatAmount={String} />);
+
+    expect(screen.getByText('No payments to payees this month')).toBeInTheDocument();
+  });
+
+  it('runs the list in two columns with the row to itself, in one otherwise', () => {
+    overviewMock.mockReturnValue(overview([RENT, GROCER]));
+    const columns = () => document.querySelector('.seneca-dashboard__list--columns');
+
+    const { unmount } = render(
+      <SectionSpanProvider value={12}>
+        <TopPayeesCard month={MONTH} formatAmount={String} />
+      </SectionSpanProvider>,
+    );
+    expect(columns()).not.toBeNull();
+    unmount();
+
+    render(
+      <SectionSpanProvider value={6}>
+        <TopPayeesCard month={MONTH} formatAmount={String} />
+      </SectionSpanProvider>,
+    );
+    expect(columns()).toBeNull();
   });
 
   it('says so when nothing was paid to a payee this month', () => {

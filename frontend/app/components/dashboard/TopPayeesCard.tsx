@@ -37,7 +37,7 @@ export function TopPayeesCard({ month, formatAmount }: TopPayeesCardProps): Reac
   const { locale } = useLocale();
   // With the row to itself the list runs in two columns.
   const wide = useIsWideSection();
-  const { data, isPending, isError } = usePayeesOverview({
+  const { data, isPending } = usePayeesOverview({
     month,
     direction: 'expense',
     search: '',
@@ -48,7 +48,9 @@ export function TopPayeesCard({ month, formatAmount }: TopPayeesCardProps): Reac
   if (isPending) {
     return <ListRowsSkeleton rows={SHOWN} leading={36} />;
   }
-  if (isError || !data?.rows.length) {
+  // A failed refetch keeps the list it had; only no list at all (or a first load
+  // that failed) reads as a month without payments.
+  if (!data?.rows.length) {
     return <CardEmpty icon={StorefrontOutlined}>{t.empty}</CardEmpty>;
   }
 
