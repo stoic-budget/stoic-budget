@@ -134,6 +134,33 @@ export const WalletSeries = Schema.Array(Schema.Struct({ date: DateOnly, balance
 export type WalletSeries = Wire<typeof WalletSeries>;
 
 /**
+ * `GET /wallets/coverage`: how far each bank account's statements reach. An
+ * account (`kind: 'account'`) is an active one fed by bank statements; a bank
+ * (`kind: 'bank'`) is a bank whose statements no account holds yet, named by
+ * its bank and the last four characters of its number, never the whole number.
+ */
+export const WalletCoverage = Schema.Struct({
+  rows: Schema.Array(
+    Schema.Struct({
+      kind: Schema.Literals(['account', 'bank']),
+      walletId: Schema.NullOr(Schema.String),
+      /** The account's name; null for a bank, which the page names by `bankName`. */
+      name: Schema.NullOr(Schema.String),
+      bankName: Schema.NullOr(Schema.String),
+      accountTail: Schema.NullOr(Schema.String),
+      /** The last day its statements cover. */
+      dataTo: Schema.NullOr(DateOnly),
+      /** Its rows still waiting in Review. */
+      pendingReview: Schema.Number,
+      /** The account's currency, which `reconciliation` is in; null for a bank. */
+      currency: Schema.NullOr(Schema.String),
+      reconciliation: Schema.NullOr(WalletReconciliation),
+    }),
+  ),
+});
+export type WalletCoverage = Wire<typeof WalletCoverage>;
+
+/**
  * A bank statement as the Accounts pages list it: one no account holds yet
  * (`GET /wallets/unlinked-statements`) or one of an account (`GET /wallets/:id/statements`).
  */

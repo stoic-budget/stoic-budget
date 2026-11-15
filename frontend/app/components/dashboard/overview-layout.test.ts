@@ -10,6 +10,7 @@ import {
   type OverviewRows,
   rowSpans,
   showSection,
+  tellsThePresent,
 } from './overview-layout';
 
 const ROWS: OverviewRows = [['a'], ['b', 'c'], ['d']];
@@ -257,9 +258,15 @@ describe('the shipped layout', () => {
   };
 
   it('is the Administrator layout, its KPI row led by what is left to spend', () => {
-    // The savings rate went into the net tile.
+    // The savings rate went into the net tile; data freshness sits beside the
+    // balances, and safe to spend moved beside net worth to make room.
+    const shipped: Record<string, string[]> = {
+      'kpi-spent': [...KPI_SECTION_IDS],
+      balances: ['balances', 'data-sources'],
+      'net-worth': ['net-worth', 'safe-to-spend'],
+    };
     expect(DEFAULT_OVERVIEW_ROWS).toEqual(
-      administrator.map(row => (row.includes('kpi-spent') ? [...KPI_SECTION_IDS] : row)),
+      administrator.map(row => shipped[row.find(id => id in shipped) ?? ''] ?? row),
     );
     expect(DEFAULT_OVERVIEW_ROWS.flat()).not.toContain('money-owed');
     expect(DEFAULT_OVERVIEW_ROWS.flat()).not.toContain('taxes');
@@ -273,7 +280,11 @@ describe('the shipped layout', () => {
       ...older.rows
         .filter(row => !row.includes('spend-calendar'))
         .map(row => row.filter(id => id !== 'upcoming-charges' && id !== 'kpi-savings')),
-      ['balances'],
+      ['balances', 'data-sources'],
     ]);
+  });
+
+  it('tells the present with data freshness, whichever month is shown', () => {
+    expect(tellsThePresent('data-sources')).toBe(true);
   });
 });

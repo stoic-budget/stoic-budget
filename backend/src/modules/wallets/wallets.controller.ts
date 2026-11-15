@@ -13,6 +13,7 @@ import {
   CreateWalletRequest,
   MessageResult,
   UpdateWalletBody,
+  WalletCoverage,
   WalletItem,
   WalletList,
   WalletParams,
@@ -22,6 +23,7 @@ import {
 } from '../../contracts';
 import type { User } from '../../entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { WalletCoverageService } from './wallet-coverage.service';
 import { WalletStatementsService } from './wallet-statements.service';
 import { WalletsService } from './wallets.service';
 
@@ -30,6 +32,7 @@ export class WalletsController {
   constructor(
     private readonly walletsService: WalletsService,
     private readonly walletStatements: WalletStatementsService,
+    private readonly walletCoverage: WalletCoverageService,
   ) {}
 
   @Post()
@@ -61,6 +64,14 @@ export class WalletsController {
   @SchemaResponse(WalletSummary)
   async summary(@WorkspaceId() workspaceId: string) {
     return this.walletsService.summary(workspaceId);
+  }
+
+  /** Declared before `:id`, so the literal path is not read as an account id. */
+  @Get('coverage')
+  @WorkspaceAuth(Permission.WALLET_VIEW)
+  @SchemaResponse(WalletCoverage)
+  async coverage(@WorkspaceId() workspaceId: string) {
+    return this.walletCoverage.coverage(workspaceId);
   }
 
   @Get('unlinked-statements')
