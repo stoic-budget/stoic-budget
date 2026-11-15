@@ -85,6 +85,7 @@ export * from './tax-rule.entity';
 export * from './telegram-report.entity';
 export * from './transaction.entity';
 export * from './transaction-attachment.entity';
+export * from './transfer-pair-rejection.entity';
 export * from './user.entity';
 export * from './view-preference.entity';
 export * from './wallet.entity';

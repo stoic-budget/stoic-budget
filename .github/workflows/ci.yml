@@ -67,76 +67,6 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           echo "backend=$backend frontend=$frontend docker=$docker"
 
-  sensitive-changes:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    permissions:
-      pull-requests: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Detect sensitive paths
-        id: changes
-        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
-        with:
-          filters: |
-            db:
-              - 'backend/src/migrations/**'
-              - 'backend/migrations/**'
-              - 'backend/src/entities/**'
-              - 'backend/src/modules/**/entities/**'
-              - 'backend/src/data-source.ts'
-            auth:
-              - 'backend/src/modules/auth/**'
-              - 'backend/src/common/guards/**'
-              - 'backend/src/common/decorators/**'
-              - 'backend/src/**/permissions/**'
-              - 'backend/src/**/roles/**'
-
-      - name: Require approvals for sensitive changes
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
-        env:
-          DB_CHANGED: ${{ steps.changes.outputs.db }}
-          AUTH_CHANGED: ${{ steps.changes.outputs.auth }}
-        with:
-          script: |
-            const dbChanged = process.env.DB_CHANGED === 'true';
-            const authChanged = process.env.AUTH_CHANGED === 'true';
-
-            if (!dbChanged && !authChanged) {
-              core.info('No sensitive changes detected.');
-              return;
-            }
-
-            // Лейблы читаем через API, а не из context.payload: payload — это
-            // снимок на момент события, поэтому после навешивания лейбла
-            // перезапуск джобы видел бы устаревший список и падал снова.
-            const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-            });
-            const labels = currentLabels.map(label => label.name);
-            const missing = [];
-
-            if (dbChanged && !labels.includes('db-approved')) {
-              missing.push('db-approved (schema/migrations)');
-            }
-
-            if (authChanged && !labels.includes('security-approved')) {
-              missing.push('security-approved (auth/permissions)');
-            }
-
-            if (missing.length) {
-              core.setFailed(`Sensitive changes detected. Add labels: ${missing.join(', ')}.`);
-            } else {
-              core.info('Required approvals present for sensitive changes.');
-            }
-
   policy-as-code:
     runs-on: ubuntu-latest
     steps:
@@ -296,6 +226,10 @@ jobs:
           if [ "$EVENT_NAME" = "pull_request" ]; then
             node scripts/check-component-requests.mjs --base "origin/$BASE_REF"
           fi
+
+      # The rules review-gate.yml applies: which paths are which risk tier.
+      - name: Review gate rules
+        run: node --test scripts/review-gate.test.mjs
 
       # The Worker that receives shared statement layouts (infra/parser-submissions).
       - name: Parser submissions worker
@@ -857,7 +791,6 @@ jobs:
   ci-ok:
     runs-on: ubuntu-latest
     needs:
-      - sensitive-changes
       - policy-as-code
       - shellcheck
       - hadolint
