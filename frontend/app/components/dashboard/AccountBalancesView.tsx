@@ -89,9 +89,14 @@ export function AccountBalancesView({
             onClick={() => toggle(line.key)}
           >
             {line.name}{' '}
-            <PrivateAmount>
-              {formatNetAmount(latest.get(line.key) ?? 0, formatAmount)}
-            </PrivateAmount>
+            {/* No rate all month: no figure rather than a made-up zero; the note says why. */}
+            {latest.has(line.key) ? (
+              <PrivateAmount>
+                {formatNetAmount(latest.get(line.key) ?? 0, formatAmount)}
+              </PrivateAmount>
+            ) : (
+              '—'
+            )}
           </button>
         ))}
       </div>

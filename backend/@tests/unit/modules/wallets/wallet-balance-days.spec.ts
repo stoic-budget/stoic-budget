@@ -90,7 +90,12 @@ describe('WalletsService.balanceDays', () => {
   const spent = { date: '2026-11-02', net: -120 };
   const cardSpend = { date: '2026-11-01', net: -40 };
 
+  // The last day of the month, so every day of it has happened.
+  const MONTH_END = new Date('2026-11-30T12:00:00Z');
+
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(MONTH_END);
     vi.mocked(walletLedgers).mockResolvedValue(
       new Map([
         [everyday.id, { days: [spent], net: spent.net, count: 1, lastDate: spent.date, unconverted: [] }],
@@ -119,6 +124,8 @@ describe('WalletsService.balanceDays', () => {
     expect(result.unconverted).toEqual([]);
   });
 
+  afterEach(() => vi.useRealTimers());
+
   it('leaves a day without a rate empty and names its currency', async () => {
     const { service } = setup([{ date: '2026-11-15', rate: USD_RATE }]);
 
@@ -127,5 +134,30 @@ describe('WalletsService.balanceDays', () => {
     expect(result.days[0].balances[card.id]).toBeNull();
     expect(result.days[14].balances[card.id]).toBe(cardSpend.net * USD_RATE);
     expect(result.unconverted).toEqual(['USD']);
+  });
+
+  it('asks for no rate past today, and gives the days still to come the latest one', async () => {
+    const today = '2026-11-14';
+    vi.setSystemTime(new Date(`${today}T12:00:00Z`));
+    const { service, exchangeRates } = setup([{ date: '2026-10-31', rate: USD_RATE }]);
+
+    const result = await service.balanceDays(WORKSPACE, MONTH);
+
+    for (const call of exchangeRates.getRateCurve.mock.calls) {
+      expect(call[3]).toBe(today);
+    }
+    expect(result.days[29].balances[card.id]).toBe(cardSpend.net * USD_RATE);
+    expect(result.unconverted).toEqual([]);
+  });
+
+  it("names the currency of an account's own rows the ledger left out for want of a rate", async () => {
+    vi.mocked(walletLedgers).mockResolvedValue(
+      new Map([
+        [everyday.id, { days: [spent], net: spent.net, count: 1, lastDate: spent.date, unconverted: ['GBP'] }],
+      ]),
+    );
+    const { service } = setup([{ date: '2026-10-31', rate: USD_RATE }]);
+
+    expect((await service.balanceDays(WORKSPACE, MONTH)).unconverted).toEqual(['GBP']);
   });
 });

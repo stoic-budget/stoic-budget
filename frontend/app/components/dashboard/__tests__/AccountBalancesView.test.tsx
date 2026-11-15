@@ -31,8 +31,8 @@ vi.mock('@/app/i18n', () => ({
   useLocale: () => ({ locale: 'en' }),
 }));
 
-const EVERYDAY = { id: 'everyday', name: 'Everyday Account', type: 'checking', currency: 'EUR' };
-const CARD = { id: 'card', name: 'Card One', type: 'credit_card', currency: 'EUR' };
+const EVERYDAY = { id: 'everyday', name: 'Everyday Account', type: 'checking' as const, currency: 'EUR' };
+const CARD = { id: 'card', name: 'Card One', type: 'credit_card' as const, currency: 'EUR' };
 const EVERYDAY_BALANCE = 500;
 const CARD_BALANCE = -120;
 
@@ -114,6 +114,21 @@ describe('AccountBalancesView', () => {
 
     expect(screen.getByText('Add an account to see its balance day by day')).toBeInTheDocument();
     expect(screen.queryByTestId('lines')).toBeNull();
+  });
+
+  it('gives an account with no rate all month no figure rather than a zero', () => {
+    const DOLLAR = { id: 'dollar', name: 'Dollar Account', type: 'checking' as const, currency: 'ZZX' };
+    const days = july().days.map(day => ({ ...day, balances: { ...day.balances, [DOLLAR.id]: null } }));
+    balancesMock.mockReturnValue({
+      data: july({ accounts: [EVERYDAY, CARD, DOLLAR], days, unconverted: ['ZZX'] }),
+      isError: false,
+    });
+
+    render(<AccountBalancesView month="2026-07" formatAmount={v => `€${v}`} />);
+
+    expect(screen.getByRole('button', { name: /Dollar Account/ })).toHaveTextContent(
+      'Dollar Account —',
+    );
   });
 
   it('names the currencies it had no rate for', () => {

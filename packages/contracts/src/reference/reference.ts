@@ -145,7 +145,7 @@ export const WalletBalanceDays = Schema.Struct({
     Schema.Struct({
       id: Schema.String,
       name: Schema.String,
-      type: Schema.String,
+      type: WalletType,
       currency: Schema.String,
     }),
   ),

@@ -171,11 +171,17 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       workspaceId,
       wallets,
     );
+    // Rates exist up to today; a later day of this month takes today's, never a fetch for the future.
+    const today = new Date().toISOString().slice(0, 10);
+    const rateDates = dates.some(date => date <= today)
+      ? dates.filter(date => date <= today)
+      : dates;
+    const lastRateDate = rateDates[rateDates.length - 1];
     const converter = await CurrencyConverter.loadRange(
       this.exchangeRates,
       currency,
       wallets.map(wallet => normalizeCurrencyCode(wallet.currency)),
-      dates,
+      rateDates,
       workspaceId,
     );
 
@@ -188,7 +194,11 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       );
       return balances.map((balance, index) => {
         // A rate is never 0, so one unit converting to 0 means the day has none.
-        const rate = converter.convert(1, own, dates[index]);
+        const rate = converter.convert(
+          1,
+          own,
+          dates[index] > lastRateDate ? lastRateDate : dates[index],
+        );
         return rate === 0 ? null : round2(balance * rate);
       });
     });
@@ -205,7 +215,13 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
         date,
         balances: Object.fromEntries(wallets.map((wallet, at) => [wallet.id, series[at][index]])),
       })),
-      unconverted: converter.missing,
+      // Both the account's own rows in another currency and the account itself, when either had no rate.
+      unconverted: [
+        ...new Set([
+          ...converter.missing,
+          ...wallets.flatMap(wallet => ledgers.get(wallet.id)?.unconverted ?? []),
+        ]),
+      ].sort(),
     };
   }
 
