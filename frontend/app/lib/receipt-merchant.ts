@@ -19,6 +19,9 @@ const SENTENCE_START_PATTERN = /^(we|your|thanks?|dear|hello|hi|please|this)\b/i
 
 const EMAIL_PATTERN = /[A-Z0-9._%+-]+@([A-Z0-9.-]+\.[A-Z]{2,})/i;
 
+// What the backend records as the sender of a file it was handed: how it came, not who sold it.
+const PLACEHOLDER_SENDERS = new Set(['camera-scan', 'telegram', 'manual-upload']);
+
 const SUPPORT_SUFFIX_PATTERN =
   /\s+(support|billing|payments?|service|team|notifications?|no[-\s]?reply)$/i;
 
@@ -89,7 +92,7 @@ const isBrandLikeVendor = (value: string) => {
 };
 
 const extractBrandFromSender = (sender?: string | null): string | undefined => {
-  if (!sender) {
+  if (!sender || PLACEHOLDER_SENDERS.has(sender.trim())) {
     return undefined;
   }
 
@@ -157,18 +160,20 @@ export const resolveReceiptMerchantLabel = ({
     return senderBrand;
   }
 
+  // A long vendor name still beats the subject: on a scan the subject is the
+  // file name. Kept whole, the list column cuts it where it ends.
+  if (normalizedVendor && !isLikelyJunkVendor(normalizedVendor)) {
+    return normalizedVendor;
+  }
+
   const subjectBrand = extractBrandFromSubject(subject);
   if (subjectBrand) {
     return subjectBrand;
   }
 
-  if (normalizedVendor && !isLikelyJunkVendor(normalizedVendor)) {
-    return normalizedVendor.slice(0, 28);
-  }
-
   const normalizedFallback = fallback ? normalizeWhitespace(fallback) : '';
   if (normalizedFallback && !isLikelySentence(normalizedFallback)) {
-    return normalizedFallback.slice(0, 28);
+    return normalizedFallback;
   }
 
   return 'Receipt';
