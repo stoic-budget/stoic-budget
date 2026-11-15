@@ -36,6 +36,11 @@ describe('expectedThrough', () => {
     expect(expectedThrough(WITHIN_GRACE)).toBe('2026-09-30');
   });
 
+  it(`gives a bank the first ${STATEMENT_GRACE_DAYS} days of a month, not one more`, () => {
+    expect(expectedThrough(new Date(2026, 10, STATEMENT_GRACE_DAYS))).toBe('2026-09-30');
+    expect(expectedThrough(new Date(2026, 10, STATEMENT_GRACE_DAYS + 1))).toBe('2026-10-31');
+  });
+
   it('reaches back across a new year', () => {
     expect(expectedThrough(new Date(2027, 0, 20))).toBe('2026-12-31');
     expect(expectedThrough(new Date(2027, 0, 2))).toBe('2026-11-30');
@@ -60,6 +65,17 @@ describe('coverageStatus', () => {
 
   it("is not behind on last month's statement in the first days of a month", () => {
     expect(coverageStatus(row({ dataTo: '2026-09-30' }), WITHIN_GRACE).kind).toBe('ok');
+  });
+
+  it("takes a statement that closes before the month's last day as that month's", () => {
+    // A card cycle closing on the 25th, a statement closing on the last weekday.
+    expect(coverageStatus(row({ dataTo: '2026-10-25' }), AFTER_GRACE).kind).toBe('ok');
+    expect(coverageStatus(row({ dataTo: '2026-10-30' }), AFTER_GRACE).kind).toBe('ok');
+    expect(coverageStatus(row({ dataTo: '2026-09-15' }), WITHIN_GRACE).kind).toBe('ok');
+    expect(coverageStatus(row({ dataTo: '2026-08-20' }), WITHIN_GRACE)).toEqual({
+      kind: 'behind',
+      month: '2026-09',
+    });
   });
 
   it('puts behind before a balance that differs, and that before rows in Review', () => {

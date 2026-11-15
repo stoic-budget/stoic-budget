@@ -9,7 +9,7 @@ export const STATEMENT_GRACE_DAYS = 5;
 export const INACTIVE_AFTER_MONTHS = 3;
 
 export type CoverageStatus =
-  /** The data stops before `expected`; `month` (YYYY-MM) is the first one missing. */
+  /** The data stops in a month before the one due; `month` (YYYY-MM) is the first one missing. */
   | { kind: 'behind'; month: string }
   /** The booked balance differs from the statement's closing one by `amount`. */
   | { kind: 'differs'; amount: number }
@@ -54,9 +54,13 @@ function monthAfter(day: string): string {
   return `${next.getFullYear()}-${pad(next.getMonth() + 1)}`;
 }
 
-/** The one thing to say of a row: the first that applies of behind, differs, waiting. */
+/**
+ * The one thing to say of a row: the first that applies of behind, differs, waiting.
+ * Months, not days, decide "behind": a statement may close on the 25th or on the
+ * last weekday and still be the month's.
+ */
 export function coverageStatus(row: CoverageRow, today: Date): CoverageStatus {
-  if (row.dataTo && row.dataTo < expectedThrough(today)) {
+  if (row.dataTo && row.dataTo.slice(0, 7) < expectedThrough(today).slice(0, 7)) {
     return { kind: 'behind', month: monthAfter(row.dataTo) };
   }
   if (row.reconciliation && !row.reconciliation.matches) {

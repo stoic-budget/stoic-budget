@@ -5,7 +5,7 @@ import type { WalletCoverage } from '../../contracts';
 import { Statement } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { onlyBankStatements } from './bank-statements';
-import { normalizeAccountNumber, realAccountNumber } from './wallet-account-match';
+import { normalizeAccountNumber } from './wallet-account-match';
 import { toDateOnly } from './wallet-ledger';
 import { WalletsService } from './wallets.service';
 
@@ -13,6 +13,9 @@ type CoverageRow = WalletCoverage['rows'][number];
 
 /** Characters of an account number a page may show. */
 const TAIL_LENGTH = 4;
+
+/** Rows that arrive as a statement without coming from a bank: a converted table, another app's export. */
+const NOT_FROM_A_BANK = ['custom-table-conversion', 'entity-import'];
 
 const laterOf = (a: string | null, b: string | null): string | null =>
   a && b ? (a > b ? a : b) : (a ?? b);
@@ -48,6 +51,11 @@ export class WalletCoverageService {
           .addSelect('COUNT(waiting.id)', 'pendingReview')
           .where('statement.workspaceId = :workspaceId', { workspaceId }),
       )
+        // Put on an account, they are that account's data; on their own, no bank's.
+        .andWhere(
+          "(statement.walletId IS NOT NULL OR COALESCE(statement.parsingDetails ->> 'detectedBy', '') NOT IN (:...notFromABank))",
+          { notFromABank: NOT_FROM_A_BANK },
+        )
         .groupBy('statement.walletId')
         .addGroupBy('statement.bankName')
         .addGroupBy('statement.accountNumber')
@@ -77,13 +85,13 @@ export class WalletCoverageService {
       }
       // "DE00 0000 01" and "de00000001" are one account of one bank.
       const key = `${group.bankName ?? ''}|${normalizeAccountNumber(group.accountNumber)}`;
-      const number = realAccountNumber(group.accountNumber);
+      const number = normalizeAccountNumber(group.accountNumber);
       const bank = banks.get(key) ?? {
         kind: 'bank' as const,
         walletId: null,
         name: null,
         bankName: group.bankName,
-        accountTail: number ? number.replace(/\s+/g, '').slice(-TAIL_LENGTH) : null,
+        accountTail: number ? number.slice(-TAIL_LENGTH) : null,
         dataTo: null,
         pendingReview: 0,
         currency: null,

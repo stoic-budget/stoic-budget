@@ -162,4 +162,16 @@ describe('WalletCoverageService', () => {
     expect(rows[1]).toMatchObject({ bankName: 'other', accountTail: null, dataTo: '2026-10-15' });
     expect(JSON.stringify(rows)).not.toContain('DE00');
   });
+
+  it('shows the last four letters and digits of a number written with dashes', async () => {
+    const DASHED = 'GB12-ABCD-1234-56';
+    const { service } = setup(
+      [{ walletId: null, bankName: 'acme', accountNumber: DASHED, dataTo: '2026-10-31', pendingReview: '0' }],
+      [],
+    );
+
+    const { rows } = await service.coverage(WORKSPACE);
+
+    expect(rows[0].accountTail).toBe(DASHED.replace(/-/g, '').slice(-4));
+  });
 });

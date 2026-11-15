@@ -27,17 +27,22 @@ import { ListRowsSkeleton } from './ui/card-skeletons';
 const VISIBLE_ROWS = 5;
 const LOGO_SIZE = 28;
 
-/** An account by its name; a bank by its name and the end of its number. */
-function nameOf(row: CoverageRow): string {
+/**
+ * An account by its name; a bank by its name and the end of its number, or by
+ * `unnamed` when its statements do not say which bank.
+ */
+function nameOf(row: CoverageRow, unnamed: string): string {
   if (row.name) {
     return row.name;
   }
   const resolved = resolveBankLogo(row.bankName);
   // A bank with no logo of its own keeps the name it came with.
   const bank =
-    resolved.key === 'other' && row.bankName && row.bankName !== 'other'
-      ? row.bankName
-      : resolved.displayName;
+    resolved.key !== 'other'
+      ? resolved.displayName
+      : row.bankName && row.bankName !== 'other'
+        ? row.bankName
+        : unnamed;
   return row.accountTail ? `${bank} ••${row.accountTail}` : bank;
 }
 
@@ -51,6 +56,7 @@ function nameOf(row: CoverageRow): string {
 export function DataCoverageCard(): React.JSX.Element | null {
   const t = useIntlayer('dataCoverageCard');
   const overview = useIntlayer('overviewTab');
+  const unnamedBank = useIntlayer('imageAlt').bank.value;
   const { locale } = useLocale();
   const today = useTodayNote();
   const { data, isPending } = useWalletCoverage();
@@ -127,15 +133,16 @@ export function DataCoverageCard(): React.JSX.Element | null {
       )}
       {!isPending && (
         <div className="seneca-dashboard__list">
-          {byAttention(active, now, nameOf)
+          {byAttention(active, now, row => nameOf(row, unnamedBank))
             .slice(0, VISIBLE_ROWS)
-            .map(({ row, status }) => (
+            .map(({ row, status }, index) => (
               <ListRow
-                key={row.walletId ?? `${row.bankName}-${row.accountTail}`}
+                // Two numbers of one bank may end alike; the backend tells them apart, the tail does not.
+                key={row.walletId ?? `${row.bankName}-${row.accountTail}-${index}`}
                 href={row.walletId ? `/accounts/${row.walletId}` : '/accounts'}
                 className="seneca-dashboard__row--status"
                 leading={<BankLogoAvatar bankName={row.bankName} size={LOGO_SIZE} />}
-                primary={nameOf(row)}
+                primary={nameOf(row, unnamedBank)}
                 trailing={
                   <span className={clsx(!needsAttention(status) && 'seneca-dashboard__muted')}>
                     {needsAttention(status) && (

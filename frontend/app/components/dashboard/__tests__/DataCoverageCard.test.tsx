@@ -8,6 +8,7 @@ import { value } from './intlayer-mock';
 
 const coverageMock = vi.hoisted(() => vi.fn());
 const todayNote = vi.hoisted(() => ({ current: null as string | null }));
+const UNNAMED_BANK = vi.hoisted(() => 'Some bank');
 
 vi.mock('@/app/hooks/useDashboard', () => ({ useWalletCoverage: coverageMock }));
 vi.mock('../overview-month', async importOriginal => ({
@@ -29,6 +30,7 @@ vi.mock('@/app/i18n', () => ({
     inactiveFew: value('{{count}} inactive accounts'),
     inactiveMany: value('{{count}} inactive accounts'),
     viewAll: value('View all'),
+    bank: value(UNNAMED_BANK),
   }),
   useLocale: () => ({ locale: 'en' }),
 }));
@@ -137,6 +139,15 @@ describe('DataCoverageCard', () => {
     const rows = listed(container);
     expect(rows).toHaveLength(5);
     expect(rows[0]).toHaveTextContent(CARD.name ?? '');
+  });
+
+  it("names a bank its statements do not name in the reader's language", () => {
+    const unnamed: CoverageRow = { ...BANK, bankName: 'other', accountTail: '0001', pendingReview: 0 };
+    coverageMock.mockReturnValue({ data: { rows: [unnamed] }, isPending: false });
+
+    const { container } = render(<DataCoverageCard />);
+
+    expect(listed(container)[0]).toHaveTextContent(`${UNNAMED_BANK} ••${unnamed.accountTail}`);
   });
 
   it('names how far a balance is off its statement', () => {

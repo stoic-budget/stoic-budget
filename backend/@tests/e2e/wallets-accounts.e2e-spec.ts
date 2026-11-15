@@ -401,13 +401,35 @@ describe('Accounts (e2e)', () => {
         .post(`/wallets/${everyday.body.id}/statements`)
         .send({ statementIds: [attached] }),
     ).expect(201);
-    await seedStatement(reader, currency, {
+    const unheld = await seedStatement(reader, currency, {
       statementDateTo: new Date('2026-02-28'),
       accountNumber: 'DE00 0000 0000 0000 0042',
     });
+    // One row of it still waits in Review; the two seeded with it are confirmed.
+    await dataSource.getRepository(Transaction).save(
+      dataSource.getRepository(Transaction).create({
+        workspaceId: reader.workspaceId,
+        statementId: unheld,
+        transactionDate: new Date('2026-02-10'),
+        counterpartyName: 'ACME Store',
+        paymentPurpose: 'Purchase',
+        currency,
+        transactionType: TransactionType.EXPENSE,
+        amount: 5,
+        debit: 5,
+        isVerified: false,
+      }),
+    );
     await seedStatement(reader, currency, {
       fileName: 'manual-expense-1.csv',
       accountNumber: 'DE00 0000 0000 0000 0099',
+    });
+    // A converted table no account holds is no bank's statement.
+    await seedStatement(reader, currency, {
+      fileName: 'table-1.csv',
+      accountNumber: null,
+      balanceEnd: null,
+      parsingDetails: { detectedBy: 'custom-table-conversion' },
     });
 
     const rows = await coverage(reader);
@@ -425,6 +447,7 @@ describe('Accounts (e2e)', () => {
       walletId: null,
       accountTail: '0042',
       dataTo: '2026-02-28',
+      pendingReview: 1,
     });
     expect(JSON.stringify(rows)).not.toContain(accountNumber);
     expect(JSON.stringify(rows)).not.toContain('0099');
