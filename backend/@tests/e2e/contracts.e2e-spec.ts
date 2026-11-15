@@ -204,6 +204,7 @@ import {
   UserPermissions,
   UserSessionList,
   UserUpdateResponse,
+  WalletBalanceDays,
   WalletList,
   WebhookEndpointList,
   WebhookSubscriptionList,
@@ -416,6 +417,13 @@ describe('API contracts (e2e)', () => {
       const res = await get('/wallets');
       matches(WalletList, res.body);
       expect(res.body[0].initialBalance).toBe('12.50');
+    });
+
+    it('GET /wallets/balance-days', async () => {
+      const res = await get(`/wallets/balance-days?month=${new Date().toISOString().slice(0, 7)}`);
+      matches(WalletBalanceDays, res.body);
+      expect(res.body.accounts.length).toBeGreaterThan(0);
+      expect(res.body.days.length).toBeGreaterThanOrEqual(28);
     });
   });
 
