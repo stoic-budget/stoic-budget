@@ -64,6 +64,8 @@ describe('Exclude a transaction from budgets (e2e)', () => {
   const netWorth = async () =>
     (await as(request(server()).get('/reports/net-worth?range=30d')).expect(200)).body
       .current as number;
+  const dashboardBalance = async () =>
+    (await as(request(server()).get('/dashboard')).expect(200)).body.snapshot.totalBalance as number;
   const setExcluded = (excludedFromBudgets: boolean) =>
     as(request(server()).put(`/transactions/${oneOffId}`))
       .send({ excludedFromBudgets })
@@ -124,6 +126,7 @@ describe('Exclude a transaction from budgets (e2e)', () => {
   it('drops the excluded row from budget spending and the report total, not from the money', async () => {
     const balanceBefore = await walletBalance();
     const netWorthBefore = await netWorth();
+    const dashboardBalanceBefore = await dashboardBalance();
 
     const updated = await setExcluded(true);
 
@@ -134,6 +137,8 @@ describe('Exclude a transaction from budgets (e2e)', () => {
     expect(balanceBefore).toBe(opening - everyday - oneOff);
     expect(await walletBalance()).toBe(balanceBefore);
     expect(await netWorth()).toBe(netWorthBefore);
+    // The dashboard's all-time balance (and the forecast's opening one without accounts) too.
+    expect(await dashboardBalance()).toBe(dashboardBalanceBefore);
   });
 
   it('brings the row back through the bulk update', async () => {
