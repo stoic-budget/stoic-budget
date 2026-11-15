@@ -145,15 +145,6 @@ export const queryKeys = {
   taxJurisdictions: () => ['tax-jurisdictions'] as const,
   taxJurisdictionRates: (o: { code: string | null; date: string }) =>
     ['tax-jurisdictions', o.code, 'rates', o.date] as const,
-  // Prefix ['income-tax', workspaceId] invalidates every part of the declaration at once.
-  incomeTaxDisclaimer: (workspaceId: string | null) =>
-    ['income-tax', workspaceId, 'disclaimer'] as const,
-  incomeTaxProfile: (o: { workspaceId: string | null; taxYear: number }) =>
-    ['income-tax', o.workspaceId, 'profile', o.taxYear] as const,
-  incomeTaxMappings: (o: { workspaceId: string | null; taxYear: number }) =>
-    ['income-tax', o.workspaceId, 'mappings', o.taxYear] as const,
-  incomeTaxDraft: (o: { workspaceId: string | null; taxYear: number }) =>
-    ['income-tax', o.workspaceId, 'draft', o.taxYear] as const,
   subscriptions: (o: { workspaceId: string | null; status: string }) =>
     ['subscriptions', o.workspaceId, 'list', o.status] as const,
   subscriptionsSummary: (workspaceId: string | null) =>

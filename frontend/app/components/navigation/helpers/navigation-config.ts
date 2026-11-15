@@ -12,7 +12,6 @@ import {
   FileText,
   Flag,
   Inbox,
-  Landmark,
   LayoutDashboard,
   Lightbulb,
   PiggyBank,
@@ -26,6 +25,7 @@ import {
   Workflow,
 } from '@/app/components/icons';
 import { WalletCards } from '@/app/components/icons/wallet-cards';
+import { extensionNavItems } from '@/app/extensions/nav-items';
 import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
 import type { NavGroupId } from './nav-groups';
 export const MOBILE_MENU_VISIBILITY_EVENT = 'seneca-mobile-menu-visibility';
@@ -82,7 +82,6 @@ export function buildNavItems(nav: {
   tables: unknown;
   workspaces: unknown;
   reports: unknown;
-  taxDeclaration: unknown;
   netWorth: unknown;
   forecast: unknown;
   advice: unknown;
@@ -251,15 +250,6 @@ export function buildNavItems(nav: {
       businessOnly: true,
     },
     {
-      label: nav.taxDeclaration as ReactNode,
-      path: '/tax-declaration',
-      group: 'business',
-      icon: React.createElement(Landmark, { size: 18 }),
-      // Matches the draft endpoints' read guard (Permission.REPORT_VIEW).
-      permission: 'report.view',
-      businessOnly: true,
-    },
-    {
       label: nav.ledger as ReactNode,
       path: '/ledger',
       group: 'business',
@@ -283,5 +273,6 @@ export function buildNavItems(nav: {
       icon: React.createElement(Building2, { size: 18 }),
       permission: 'workspaces.view',
     },
+    ...extensionNavItems(nav),
   ];
 }
