@@ -1,12 +1,34 @@
 import type { EntityManager } from 'typeorm';
 
-/** A name that is itself a website: "grizzlysms.com", "shop.example.co.il". */
-const DOMAIN_NAME = /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/;
+/** A name shaped like a website: dot-separated labels of letters, digits and dashes. */
+const DOMAIN_SHAPE = /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/;
+
+/**
+ * The zones a payee's website is likely to end in. A name ending in anything
+ * else is not taken for a website: bank exports write people as "J.DOE" or
+ * "MR.SMITH", and ".doe" or ".smith" must never reach the icon service.
+ */
+const KNOWN_ZONES = new Set([
+  ...['com', 'net', 'org', 'io', 'co', 'app', 'dev', 'ai', 'me', 'info', 'biz', 'shop', 'store'],
+  ...['online', 'site', 'tech', 'xyz', 'cloud', 'pro', 'tv', 'gg', 'fm', 'eu', 'uk', 'de', 'fr'],
+  ...['es', 'it', 'nl', 'pl', 'pt', 'ie', 'be', 'at', 'ch', 'cz', 'sk', 'se', 'no', 'fi', 'dk'],
+  ...['ru', 'ua', 'by', 'kz', 'uz', 'ge', 'am', 'tr', 'il', 'us', 'ca', 'au', 'nz', 'in', 'jp'],
+  ...['cn', 'kr', 'br', 'mx', 'ar'],
+]);
+
+/** Characters the first label needs, so an initial ("J.", "I.") never makes a website. */
+const MIN_FIRST_LABEL = 3;
 
 /** The payee's name as a domain, when that is what it is; never a guess from a word. */
 export function domainOfName(name: string): string | null {
   const candidate = name.trim().toLowerCase();
-  return DOMAIN_NAME.test(candidate) ? candidate : null;
+  if (!DOMAIN_SHAPE.test(candidate)) {
+    return null;
+  }
+  const labels = candidate.split('.');
+  return labels[0].length >= MIN_FIRST_LABEL && KNOWN_ZONES.has(labels[labels.length - 1])
+    ? candidate
+    : null;
 }
 
 /**

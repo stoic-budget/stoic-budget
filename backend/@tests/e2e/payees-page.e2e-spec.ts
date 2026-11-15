@@ -142,36 +142,55 @@ describe('Payees page (e2e)', () => {
   it("marks a payee by its subscription's website, or by its name when that is one, never by a guess", async () => {
     // A month of its own, so the totals the other tests read stay as they are.
     const later = '2026-06';
-    const site = 'acme-sms.example';
+    const on = (day: number) => ({ transactionDate: new Date(`${later}-${String(day).padStart(2, '0')}`) });
+    const site = 'acme-sms.example.de';
     const streaming = 'ACME Streaming';
-    const streamingDomain = 'acme-streaming.example';
-    const person = 'Member Three';
-    await book(site, 3, { transactionDate: new Date(`${later}-10`) });
-    const streamed = await book(streaming, 9, { transactionDate: new Date(`${later}-11`) });
-    await book(person, 7, { transactionDate: new Date(`${later}-12`) });
-    const [{ id: subscriptionId }] = await dataSource.query(
-      `INSERT INTO subscriptions (workspace_id, vendor_name, vendor_domain, amount, currency, frequency)
-       VALUES ($1, $2, $3, 9, $4, 'monthly') RETURNING id`,
-      [owner.workspaceId, streaming, streamingDomain, currency],
-    );
-    await dataSource.query(
-      'INSERT INTO subscription_payees (workspace_id, subscription_id, payee_id) VALUES ($1, $2, $3)',
-      [owner.workspaceId, subscriptionId, streamed.payeeId],
-    );
+    const activeDomain = 'acme-streaming.example';
+    const cancelledDomain = 'acme-streaming-old.example';
+    const leaked = 'ACME Leak';
+    const people = ['Member Three', 'J.Doe'];
+    await book(site, 3, on(10));
+    const streamed = await book(streaming, 9, on(11));
+    const leaky = await book(leaked, 2, on(13));
+    for (const person of people) {
+      await book(person, 7, on(12));
+    }
+    const subscription = async (workspaceId: string, domain: string, status: string, updatedAt: string) => {
+      // One vendor name per subscription: a workspace keeps one subscription per vendor and frequency.
+      const [{ id }] = await dataSource.query(
+        `INSERT INTO subscriptions (workspace_id, vendor_name, vendor_domain, amount, currency, frequency, status, updated_at)
+         VALUES ($1, $2, $3, 9, $4, 'monthly', $5, $6) RETURNING id`,
+        [workspaceId, `${streaming} ${domain}`, domain, currency, status, updatedAt],
+      );
+      return id as string;
+    };
+    const link = (subscriptionId: string, payeeId: string) =>
+      dataSource.query(
+        'INSERT INTO subscription_payees (workspace_id, subscription_id, payee_id) VALUES ($1, $2, $3)',
+        [owner.workspaceId, subscriptionId, payeeId],
+      );
+    // The active subscription wins over a cancelled one edited later.
+    await link(await subscription(owner.workspaceId, activeDomain, 'active', '2020-01-01'), streamed.payeeId as string);
+    await link(await subscription(owner.workspaceId, cancelledDomain, 'cancelled', '2026-11-01'), streamed.payeeId as string);
+    // A link of this workspace pointing at another workspace's subscription gives nothing away.
+    await link(await subscription(other.workspaceId, 'other-workspace.example', 'active', '2026-11-01'), leaky.payeeId as string);
 
     const rows = (await overview(`month=${later}`)).rows as Array<{
       name: string;
       vendorDomain: string | null;
     }>;
     const domainOf = (name: string) => rows.find(row => row.name === name)?.vendorDomain;
-    expect(domainOf(streaming)).toBe(streamingDomain);
+    expect(domainOf(streaming)).toBe(activeDomain);
     expect(domainOf(site)).toBe(site);
-    expect(domainOf(person)).toBeNull();
+    expect(domainOf(leaked)).toBeNull();
+    for (const person of people) {
+      expect(domainOf(person)).toBeNull();
+    }
 
     const summary = (
       await as(owner, request(server()).get(`/payees/${streamed.payeeId}/summary`)).expect(200)
     ).body;
-    expect(summary.vendorDomain).toBe(streamingDomain);
+    expect(summary.vendorDomain).toBe(activeDomain);
   });
 
   it('files past rows under the pinned category, leaving a hand-picked one alone', async () => {

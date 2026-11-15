@@ -5,7 +5,7 @@ const WORKSPACE = 'ws-1';
 
 describe('domainOfName', () => {
   it('takes a name that is a website as its domain', () => {
-    expect(domainOfName('ACME-SMS.example')).toBe('acme-sms.example');
+    expect(domainOfName('ACME-SMS.example.de')).toBe('acme-sms.example.de');
     expect(domainOfName(' shop.example.co.il ')).toBe('shop.example.co.il');
   });
 
@@ -16,11 +16,23 @@ describe('domainOfName', () => {
     expect(domainOfName('1.5')).toBeNull();
     expect(domainOfName('ACME Store - Wireless Buds')).toBeNull();
   });
+
+  it('never takes a person written with a dot for a website', () => {
+    // Bank exports write people as an initial and a name, or a title and a name.
+    for (const person of ['J.Doe', 'I.Ivanov', 'MR.SMITH', 'Member.One', 'Dr.Oetker', 'ACME.MKTP']) {
+      expect(domainOfName(person)).toBeNull();
+    }
+  });
+
+  it('takes a website in a country zone, and leaves an initial before one alone', () => {
+    expect(domainOfName('acme-shop.example.de')).toBe('acme-shop.example.de');
+    expect(domainOfName('J.DE')).toBeNull();
+  });
 });
 
 describe('payeeDomains', () => {
   const STREAMING = { id: 'p-streaming', name: 'ACME Streaming' };
-  const SMS = { id: 'p-sms', name: 'acme-sms.example' };
+  const SMS = { id: 'p-sms', name: 'acme-sms.example.de' };
   const FRIEND = { id: 'p-friend', name: 'Member Two' };
   const STREAMING_DOMAIN = 'acme-streaming.example';
 

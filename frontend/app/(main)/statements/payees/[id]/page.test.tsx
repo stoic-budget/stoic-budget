@@ -129,6 +129,21 @@ describe('PayeePage', () => {
     offers.offerAction.mockReset();
   });
 
+  it("shows the payee's own website mark in its header", async () => {
+    const domain = 'acme-store.example';
+    const answer = api.get.getMockImplementation();
+    api.get.mockImplementation((url: string) =>
+      url.endsWith('/summary')
+        ? Promise.resolve({ data: { ...summary, vendorDomain: domain } })
+        : answer?.(url),
+    );
+    renderWithQuery(<PayeePage />);
+
+    await waitFor(() =>
+      expect(document.querySelector(`img[src*="/vendor-icons/${domain}"]`)).not.toBeNull(),
+    );
+  });
+
   it('draws the payee against the others of its category', async () => {
     renderWithQuery(<PayeePage />);
     expect(await screen.findByText('Against others in Groceries')).toBeInTheDocument();

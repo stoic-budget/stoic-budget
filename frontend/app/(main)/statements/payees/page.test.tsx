@@ -96,6 +96,24 @@ describe('PayeesPage', () => {
     );
   });
 
+  it("marks a payee by its own website when it has one", async () => {
+    const domain = 'acme-store.example';
+    api.get.mockImplementation((url: string) =>
+      Promise.resolve({
+        data:
+          url === '/payees/overview'
+            ? { ...overview, rows: overview.rows.map(row => (row.name === store ? { ...row, vendorDomain: domain } : row)) }
+            : duplicates,
+      }),
+    );
+    renderWithQuery(<PayeesPage />);
+
+    await screen.findByRole('link', { name: store });
+    await waitFor(() =>
+      expect(document.querySelector(`img[src*="/vendor-icons/${domain}"]`)).not.toBeNull(),
+    );
+  });
+
   it('switches to money received through the address', async () => {
     renderWithQuery(<PayeesPage />);
     fireEvent.click(await screen.findByRole('tab', { name: 'Received' }));
