@@ -24,13 +24,22 @@ const GROCER = { id: 'payee-grocer', name: 'ACME Grocer', count: 6, amount: 410 
 const KIOSK = { id: 'payee-kiosk', name: 'ACME Kiosk', count: 1, amount: 4 };
 const TOTAL = 2000;
 
-function overview(rows: Array<typeof RENT>, missingRates: string[] = []) {
+function overview(
+  rows: Array<typeof RENT & { vendorDomain?: string | null }>,
+  missingRates: string[] = [],
+) {
   return {
     isPending: false,
     isError: false,
     data: {
       currency: 'USD',
-      rows: rows.map(row => ({ ...row, mode: 'auto', category: null, lastSeen: `${MONTH}-03` })),
+      rows: rows.map(row => ({
+        vendorDomain: null,
+        ...row,
+        mode: 'auto',
+        category: null,
+        lastSeen: `${MONTH}-03`,
+      })),
       totalPayees: rows.length,
       totalAmount: TOTAL,
       months: [],
@@ -115,6 +124,15 @@ describe('TopPayeesCard', () => {
       </SectionSpanProvider>,
     );
     expect(columns()).toBeNull();
+  });
+
+  it("shows a payee's own website mark when it has one", () => {
+    const domain = 'acme-rentals.example';
+    overviewMock.mockReturnValue(overview([{ ...RENT, vendorDomain: domain }]));
+
+    const { container } = render(<TopPayeesCard month={MONTH} formatAmount={String} />);
+
+    expect(container.querySelector('img')?.getAttribute('src')).toContain(`/vendor-icons/${domain}`);
   });
 
   it('says so when nothing was paid to a payee this month', () => {
