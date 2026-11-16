@@ -6,11 +6,12 @@ import { useIntlayer } from '@/app/i18n';
 import { getApiErrorMessage } from '@/app/lib/api-error';
 import { type Payable, payablesApi } from '@/app/lib/payables-api';
 
-export type OccurrenceAction = 'skip' | 'move' | 'amount';
+export type OccurrenceAction = 'skip' | 'move' | 'amount' | 'stop';
 
 /**
  * One occurrence of a repeating bill: skipped at once, or moved or given an
- * amount of its own through a small dialog. The list is read again after.
+ * amount of its own through a small dialog; or the whole series stopped, once
+ * confirmed. The list is read again after.
  */
 export function usePayableOccurrence(reload: () => Promise<unknown>) {
   const t = useIntlayer('payableRecurrence');
@@ -26,7 +27,13 @@ export function usePayableOccurrence(reload: () => Promise<unknown>) {
     setSaving(true);
     try {
       await payablesApi.changeOccurrence(payable.id, body);
-      toast.success(body.action === 'skip' ? t.skippedToast.value : t.savedToast.value);
+      const done =
+        body.action === 'skip'
+          ? t.skippedToast
+          : body.action === 'stop'
+            ? t.stoppedToast
+            : t.savedToast;
+      toast.success(done.value);
       setEditing(null);
       await reload();
     } catch (error) {
@@ -37,6 +44,12 @@ export function usePayableOccurrence(reload: () => Promise<unknown>) {
   };
 
   const start = (payable: Payable, action: OccurrenceAction): void => {
+    if (action === 'stop') {
+      if (window.confirm(t.stopConfirm.value.replace('{vendor}', payable.vendor))) {
+        void send(payable, { action: 'stop' });
+      }
+      return;
+    }
     if (action === 'skip') {
       void send(payable, { action: 'skip' });
       return;

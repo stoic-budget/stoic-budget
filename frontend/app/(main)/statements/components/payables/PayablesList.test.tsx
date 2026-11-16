@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { Payable } from '@/app/lib/payables-api';
 import PayablesList from './PayablesList';
@@ -14,6 +14,7 @@ vi.mock('@/app/i18n', () => ({
     skipThis: { value: 'Skip this payment' },
     moveThis: { value: 'Move this payment' },
     amountThis: { value: 'Change this payment amount' },
+    stopRepeating: { value: 'Stop repeating' },
   }),
 }));
 
@@ -170,6 +171,41 @@ describe('PayablesList', () => {
     fireEvent.click(repeating);
     fireEvent.click(screen.getByText('Skip this payment'));
     expect(onOccurrence).toHaveBeenCalledWith(expect.objectContaining({ id: 'p-1' }), 'skip');
+  });
+
+  it('offers to stop the series on any occurrence while it repeats, paid ones too', () => {
+    const onOccurrence = vi.fn();
+    const rule = { frequency: 'monthly' as const, interval: 1, startDate: '2099-01-01' };
+    const openMenuOf = (item: Payable) => {
+      render(
+        <PayablesList
+          items={[item]}
+          labels={LABELS}
+          emptyTitle="Nothing"
+          emptyDescription="Nothing yet"
+          pagination={{ page: 1, totalPages: 1, totalItems: 1, pageSize: 20, onPageChange: vi.fn() }}
+          onEdit={vi.fn()}
+          onMarkPaid={vi.fn()}
+          onArchive={vi.fn()}
+          onDelete={vi.fn()}
+          onOccurrence={onOccurrence}
+        />,
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    };
+
+    // Stopped already: nothing to stop, and its own actions are still there.
+    openMenuOf(payable({ id: 'p-2', vendor: 'ACME Rent', seriesId: 'p-1', recurrence: null }));
+    expect(screen.getByText('Skip this payment')).toBeInTheDocument();
+    expect(screen.queryByText('Stop repeating')).toBeNull();
+    cleanup();
+
+    openMenuOf(
+      payable({ id: 'p-1', vendor: 'ACME Rent', seriesId: 'p-1', status: 'paid', recurrence: rule }),
+    );
+    expect(screen.queryByText('Skip this payment')).toBeNull();
+    fireEvent.click(screen.getByText('Stop repeating'));
+    expect(onOccurrence).toHaveBeenCalledWith(expect.objectContaining({ id: 'p-1' }), 'stop');
   });
 
   it('says skipped, not archived, for an occurrence left out of its series', () => {

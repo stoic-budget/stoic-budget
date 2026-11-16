@@ -96,6 +96,19 @@ describe('toRecurrenceRule', () => {
       toRecurrenceRule({ ...toRepeatDraft(original), monthMode: 'last' }, '2026-04-30'),
     ).toMatchObject({ startDate: '2026-01-31', monthDay: 'last' });
   });
+
+  it('starts another frequency from the occurrence the form shows, not from the old start', () => {
+    // A weekly series begun on Thursday 8 January, edited on its 16 April occurrence.
+    const weekly = { frequency: 'weekly' as const, interval: 1, startDate: '2026-01-08' };
+    expect(
+      toRecurrenceRule({ ...toRepeatDraft(weekly), frequency: 'monthly' }, '2026-04-16'),
+    ).toEqual({ frequency: 'monthly', interval: 1, startDate: '2026-04-16', monthDay: 16 });
+    // A monthly one begun on 31 January, made yearly on its 30 April occurrence: every 30 April.
+    const original = { frequency: 'monthly' as const, interval: 1, startDate: '2026-01-31' };
+    expect(
+      toRecurrenceRule({ ...toRepeatDraft(original), frequency: 'yearly' }, '2026-04-30'),
+    ).toEqual({ frequency: 'yearly', interval: 1, startDate: '2026-04-30', monthDay: 30 });
+  });
 });
 
 describe('repeatPayload', () => {

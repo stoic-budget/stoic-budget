@@ -76,7 +76,10 @@ export function toRecurrenceRule(draft: RepeatDraft, dueDate: string): Recurrenc
   if (draft.end === 'until' && !draft.until) return null;
   const { dayOfMonth, weekday, week } = dayParts(dueDate);
   const byMonth = draft.frequency === 'monthly' || draft.frequency === 'yearly';
-  const { original } = draft;
+  // Another frequency starts from this occurrence, the day the form shows; the
+  // same one keeps the series' own start (a weekly series made monthly would
+  // otherwise fall on its first week's day of the month).
+  const original = draft.original?.frequency === draft.frequency ? draft.original : null;
   // The mode the form shows: one the due date no longer offers reads as "on day N".
   const monthMode = shownMonthMode(draft.monthMode, dueDate);
   // The same kind of day as before keeps the series' own day (a 31st stays a 31st).
