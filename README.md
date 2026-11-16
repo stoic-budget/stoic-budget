@@ -99,7 +99,7 @@ Stoic Budget is a full-stack platform for importing, categorizing and analyzing 
 
 ### Understand your money
 
-- **Dashboard** — this month's budgets, income, spending, net and savings rate, top categories, cash flow as each account's balance day by day, a calendar or a flow, recent transactions and upcoming charges; pick which sections show.
+- **Dashboard** — this month's budgets, income, spending, net and savings rate, top payees, cash flow as each account's balance day by day, a calendar or a flow, recent transactions and upcoming charges; pick which sections show.
 - **Reports** — cash flow, trends, spend flow, tax year and your own report templates, on a schedule if you like; export to CSV, XLSX or PDF.
 - **Budgets** — monthly limits per category in any currency, plus the Stoic balance: planned versus actual spending across necessity, work, virtue and leisure.
 - **Subscriptions and bills** — recurring charges found automatically, what is paid and still due this month, bills to pay and money to receive.
