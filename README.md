@@ -6,7 +6,7 @@
 <h1>Stoic Budget</h1>
 
 <p align="center">
-  :globe_with_meridians: <a href="https://github.com/stoic-budget/stoic-budget/releases/latest">Download</a> · :book: <a href="https://stoic-budget.github.io/stoic-budget/">Documentation</a>
+  :globe_with_meridians: <a href="https://github.com/stoic-budget/stoic-budget/releases/latest">Download</a> · :eyes: <a href="https://demo-stoic-budget.org">Demo</a> · :book: <a href="https://stoic-budget.github.io/stoic-budget/">Documentation</a>
 </p>
 
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
