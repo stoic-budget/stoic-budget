@@ -6,7 +6,9 @@ import { DailyReportGenerator } from '@/modules/reports/daily-report.report';
 import { MonthlyReportGenerator } from '@/modules/reports/monthly-report.report';
 import { ReportHistoryService } from '@/modules/reports/report-history.service';
 import { ReportsService } from '@/modules/reports/reports.service';
+import { SpendOverTimeReport } from '@/modules/reports/spend-over-time.report';
 import { StatementsSummaryReport } from '@/modules/reports/statements-summary.report';
+import { TopCategoriesReport } from '@/modules/reports/top-categories.report';
 import { WorkspaceExportReport } from '@/modules/reports/workspace-export.report';
 
 /**
@@ -67,5 +69,7 @@ export function buildReportsService(overrides: Partial<ReportsServiceDeps> = {})
     new StatementsSummaryReport(transactions),
     new ReportHistoryService(deps.reportHistoryRepo as any),
     new WorkspaceExportReport(transactions, audit),
+    new TopCategoriesReport(transactions),
+    new SpendOverTimeReport(transactions),
   );
 }

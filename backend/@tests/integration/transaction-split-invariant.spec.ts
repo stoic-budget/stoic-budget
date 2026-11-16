@@ -63,7 +63,9 @@ import { HoldingsSnapshotReport } from '../../src/modules/reports/holdings-snaps
 import { MonthlyReportGenerator } from '../../src/modules/reports/monthly-report.report';
 import { ReportHistoryService } from '../../src/modules/reports/report-history.service';
 import { ReportsService } from '../../src/modules/reports/reports.service';
+import { SpendOverTimeReport } from '../../src/modules/reports/spend-over-time.report';
 import { StatementsSummaryReport } from '../../src/modules/reports/statements-summary.report';
+import { TopCategoriesReport } from '../../src/modules/reports/top-categories.report';
 import { WorkspaceExportReport } from '../../src/modules/reports/workspace-export.report';
 import { TransactionsService } from '../../src/modules/transactions/transactions.service';
 import { TaxAssignmentService } from '@/modules/tax/tax-assignment.service';
@@ -229,6 +231,7 @@ describe('split() preserves every money aggregate (real Postgres)', () => {
         BudgetWithinLimitService,
         WorkspaceCurrencyService,
         ReportsService,
+        TopCategoriesReport,
         { provide: TaxAssignmentService, useValue: { resolve: vi.fn(async () => ({ taxRateId: null, taxRuleId: null, taxSource: null, taxAmount: null, taxNetAmount: null, taxReverseCharge: false })) } },
         { provide: AuditService, useValue: auditStub },
         { provide: CACHE_MANAGER, useValue: cacheStub },
@@ -240,13 +243,14 @@ describe('split() preserves every money aggregate (real Postgres)', () => {
         { provide: CustomTablesSummaryReport, useValue: {} },
         { provide: CustomTablesReport, useValue: {} },
         { provide: CustomTablesDrillDownReport, useValue: {} },
-        // Periodic reports, report history and exports, which this suite does not call.
+        // Periodic reports, report history, exports and spend over time, which this suite does not call.
         { provide: DailyReportGenerator, useValue: {} },
         { provide: MonthlyReportGenerator, useValue: {} },
         { provide: CustomReportGenerator, useValue: {} },
         { provide: StatementsSummaryReport, useValue: {} },
         { provide: ReportHistoryService, useValue: {} },
         { provide: WorkspaceExportReport, useValue: {} },
+        { provide: SpendOverTimeReport, useValue: {} },
         { provide: ClassificationService, useValue: {} },
         { provide: NotificationsService, useValue: { create: vi.fn() } },
         { provide: EventEmitter2, useValue: { emit: vi.fn() } },
