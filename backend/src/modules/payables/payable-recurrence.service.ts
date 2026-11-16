@@ -6,7 +6,7 @@ import { appError } from '../../common/errors/app-error';
 import { addDays, formatDay, toDay } from '../../common/recurrence/date-only';
 import {
   firstOccurrence,
-  nextOccurrence,
+  occurrencesFrom,
   type RecurrenceRule,
   shiftOffNonWorkingDays,
   yearsBetween,
@@ -19,7 +19,11 @@ import { PublicHolidaysService } from '../reference-data/public-holidays.service
 
 /** A repeating bill shows up this many days before it is due, or earlier if its reminder does. */
 export const UPCOMING_WINDOW_DAYS = 14;
-/** At most this many occurrences of one series per run: a stale daily rule catches up over days. */
+/**
+ * A bound on one run for one series. Nothing is made before today, so a run
+ * makes at most what falls in the window (a daily rule: about 15); this only
+ * stops a loop on a corrupt rule.
+ */
 const MAX_CREATED_PER_RUN = 31;
 const DEFAULT_REMIND_DAYS = 3;
 
@@ -96,8 +100,18 @@ export class PayableRecurrenceService {
    * series on its due date; null ends the series. The rule and the reminder
    * days carry to the occurrences already made after this one, so ending the
    * series here is not undone by a later copy that still has the old rule.
+   * A new amount typed into the form becomes the series amount again, over
+   * one set for this occurrence alone.
    */
   async applyUpdate(payable: Payable, dto: UpdatePayableBody): Promise<void> {
+    if (dto.amount != null && payable.baseAmount != null) {
+      // The edit is already on the entity: what is stored says whether the amount changed.
+      const [stored]: Array<{ amount: string }> = await this.payableRepository.query(
+        'SELECT "amount" FROM "payables" WHERE "id" = $1 AND "workspace_id" = $2',
+        [payable.id, payable.workspaceId],
+      );
+      if (stored && Number(stored.amount) !== Number(dto.amount)) payable.baseAmount = null;
+    }
     const ruleChanged = dto.recurrence !== undefined;
     if (ruleChanged) {
       payable.recurrence = dto.recurrence ? normalizeRule(dto.recurrence) : null;
@@ -136,17 +150,19 @@ export class PayableRecurrenceService {
 
   /** Daily: every live series across workspaces gets the occurrences now due to exist. */
   async generateDue(today = formatDay(new Date())): Promise<number> {
+    // Live: the newest occurrence still on the books carries a rule ("stop repeating" clears it).
     const series: Array<{ workspace_id: string; series_id: string }> =
       await this.payableRepository.query(
         `SELECT newest."workspace_id", newest."series_id"
            FROM (
              SELECT DISTINCT ON (p."workspace_id", p."series_id") p."workspace_id", p."series_id",
-                    p."deleted_at", p."recurrence"
+                    p."recurrence"
                FROM "payables" p
-              WHERE p."series_id" IS NOT NULL AND ${notInVersionWorkspace('p."workspace_id"')}
+              WHERE p."series_id" IS NOT NULL AND p."deleted_at" IS NULL
+                AND ${notInVersionWorkspace('p."workspace_id"')}
               ORDER BY p."workspace_id", p."series_id", p."occurrence_date" DESC
            ) newest
-          WHERE newest."deleted_at" IS NULL AND newest."recurrence" IS NOT NULL`,
+          WHERE newest."recurrence" IS NOT NULL`,
       );
     let created = 0;
     for (const row of series) {
@@ -162,11 +178,12 @@ export class PayableRecurrenceService {
     return created;
   }
 
-  /** `ensureSeries` for the bill with this id, looked up in its workspace. */
+  /** `ensureSeries` for the bill with this id, looked up in its workspace; deleted ones too. */
   async ensureSeriesFor(workspaceId: string, payableId: string): Promise<number> {
     const payable = await this.payableRepository.findOne({
       where: { id: payableId, workspaceId },
       select: { id: true, workspaceId: true, seriesId: true },
+      withDeleted: true,
     });
     return payable ? this.ensureSeriesOf(payable) : 0;
   }
@@ -178,9 +195,13 @@ export class PayableRecurrenceService {
 
   /**
    * Makes the occurrences of one series that are due to exist: after the
-   * newest (deleted ones count, so a removed occurrence is never made again,
-   * and a deleted newest one stops the series), while the newest is settled or
-   * the next date is within its window. Returns how many it made.
+   * newest (deleted ones count, so a removed occurrence is never made again),
+   * while the newest is settled (paid, skipped, archived or deleted: only that
+   * payment is gone) or the next due date is within its window. Never one
+   * before today: the grid's dates already past are passed over (they still
+   * count towards the rule's `count`), so a series left alone for months makes
+   * one occurrence, not a run of overdue ones. The rule is the newest live
+   * occurrence's: "stop repeating" clears it there. Returns how many it made.
    */
   async ensureSeries(
     workspaceId: string,
@@ -197,35 +218,52 @@ export class PayableRecurrenceService {
         order: { occurrenceDate: 'DESC' },
         withDeleted: true,
       });
-      const rule = newest?.recurrence;
-      if (!(newest && rule && newest.occurrenceDate) || newest.deletedAt) break;
-      const next = nextOccurrence(rule, toDay(newest.occurrenceDate));
+      if (!newest?.occurrenceDate) break;
+      // A deleted newest one gives the day to go on from; the rule and the rest come
+      // from the newest live one (none left: the deleted one's own).
+      const template = newest.deletedAt
+        ? ((await payables.findOne({
+            where: { workspaceId, seriesId },
+            order: { occurrenceDate: 'DESC' },
+          })) ?? newest)
+        : newest;
+      const rule = template.recurrence;
+      if (!rule) break;
+      const after = addDays(toDay(newest.occurrenceDate), 1);
+      const next = occurrencesFrom(rule, after > today ? after : today).next().value;
       if (!next) break;
       const settled =
-        newest.status === PayableStatus.PAID || newest.status === PayableStatus.ARCHIVED;
-      const window = Math.max(UPCOMING_WINDOW_DAYS, newest.remindDaysBefore ?? 0);
-      if (!settled && next > addDays(today, window)) break;
-      const holidays = await this.holidaysFor(workspaceId, rule, next);
+        Boolean(newest.deletedAt) ||
+        newest.status === PayableStatus.PAID ||
+        newest.status === PayableStatus.ARCHIVED;
+      // Gated on the day it is due, the one its reminder counts back from.
+      const dueDate = shiftOffNonWorkingDays(
+        next,
+        rule.shift,
+        await this.holidaysFor(workspaceId, rule, next),
+      );
+      const window = Math.max(UPCOMING_WINDOW_DAYS, template.remindDaysBefore ?? 0);
+      if (!settled && dueDate > addDays(today, window)) break;
       const inserted = await payables
         .createQueryBuilder()
         .insert()
         .into(Payable)
         .values({
           workspaceId,
-          createdById: newest.createdById,
-          direction: newest.direction,
-          vendor: newest.vendor,
-          amount: Number(newest.baseAmount ?? newest.amount),
-          currency: newest.currency,
-          dueDate: shiftOffNonWorkingDays(next, rule.shift, holidays) as unknown as Date,
+          createdById: template.createdById,
+          direction: template.direction,
+          vendor: template.vendor,
+          amount: Number(template.baseAmount ?? template.amount),
+          currency: template.currency,
+          dueDate: dueDate as unknown as Date,
           status: PayableStatus.TO_PAY,
           source: PayableSource.MANUAL,
           isRecurring: true,
           recurrence: rule,
           seriesId,
           occurrenceDate: next,
-          remindDaysBefore: newest.remindDaysBefore,
-          comment: newest.comment,
+          remindDaysBefore: template.remindDaysBefore,
+          comment: template.comment,
         })
         .orIgnore()
         .returning(['id'])
@@ -243,7 +281,7 @@ export class PayableRecurrenceService {
         `INSERT INTO "payable_tags" ("payable_id", "tag_id")
          SELECT $1, "tag_id" FROM "payable_tags" WHERE "payable_id" = $2
          ON CONFLICT DO NOTHING`,
-        [newId, newest.id],
+        [newId, template.id],
       );
     }
     return created;

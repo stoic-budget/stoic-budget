@@ -14,7 +14,7 @@ vi.mock('fs', async () => {
 });
 
 describe('PayablesController', () => {
-  const recurrence = { ensureSeriesOf: vi.fn(async () => 0) };
+  const recurrence = { ensureSeriesOf: vi.fn(async () => 0), ensureSeriesFor: vi.fn(async () => 0) };
 
   it('answers a repeated idempotency key with the first bill, without creating another', async () => {
     const first = { id: 'p1' };
@@ -114,6 +114,9 @@ describe('PayablesController', () => {
     });
     expect(payablesService.archive).toHaveBeenCalledWith('p1', workspaceId, 'user-1');
     expect(payablesService.remove).toHaveBeenCalledWith('p1', workspaceId, 'user-1');
+    // Withdrawing or deleting one occurrence makes the series' next one at once.
+    expect(recurrence.ensureSeriesOf).toHaveBeenCalledWith({ id: 'p1', status: PayableStatus.ARCHIVED });
+    expect(recurrence.ensureSeriesFor).toHaveBeenCalledWith(workspaceId, 'p1');
     expect(payablesService.exportData).toHaveBeenCalledWith(workspaceId, { format: ExportFormat.CSV });
     expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv');
     expect(fs.createReadStream).toHaveBeenCalledWith('/tmp/p.csv');

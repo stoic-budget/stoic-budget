@@ -7,8 +7,12 @@ import { type INestApplication, ValidationPipe } from '@nestjs/common';
 import type { TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
-import { addDays, formatDay } from '../../src/common/recurrence/date-only';
-import { nextOccurrence } from '../../src/common/recurrence/recurrence';
+import { addDays, formatDay, weekdayOf } from '../../src/common/recurrence/date-only';
+import {
+  nextOccurrence,
+  occurrencesFrom,
+  type RecurrenceRule,
+} from '../../src/common/recurrence/recurrence';
 import { AppModule } from '../../src/app.module';
 import { Payable } from '../../src/entities/payable.entity';
 import { AddPayableRecurrence1788210000000 } from '../../src/migrations/1788210000000-AddPayableRecurrence';
@@ -264,13 +268,55 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
       ).rejects.toThrow(/UQ_payables_series_occurrence/);
     });
 
-    it('does not make again an occurrence a person deleted', async () => {
+    it('deletes only that payment: the series goes on, and the deleted day is never made again', async () => {
       const rows = await series(seriesId);
       await as(owner, request(server()).delete(`/payables/${rows[1].id}`)).expect(200);
-      await recurrence().ensureSeries(owner.workspaceId, seriesId);
       const after = await series(seriesId);
-      expect(after).toHaveLength(2);
+      expect(after.map(row => String(row.occurrenceDate))).toEqual(
+        [1, 8, 15].map(offset => addDays(today, offset)),
+      );
       expect(after[1].deletedAt).not.toBeNull();
+      await recurrence().ensureSeries(owner.workspaceId, seriesId);
+      await recurrence().generateDue();
+      expect(await series(seriesId)).toHaveLength(3);
+      // The unique index holds the deleted row's day too: not even a direct write makes it again.
+      await expect(
+        dataSource.query(
+          `INSERT INTO payables (workspace_id, vendor, amount, currency, series_id, occurrence_date)
+           VALUES ($1, 'ACME Cleaning', 25, 'KZT', $2, $3)`,
+          [owner.workspaceId, seriesId, addDays(today, 8)],
+        ),
+      ).rejects.toThrow(/UQ_payables_series_occurrence/);
+    });
+
+    it('archives only that payment and makes the next occurrence at once', async () => {
+      const newest = (await series(seriesId)).at(-1) as Payable;
+      await put(`/payables/${newest.id}/archive`, {}).expect(200);
+      const after = await series(seriesId);
+      expect(after.map(row => String(row.occurrenceDate)).at(-1)).toBe(addDays(today, 22));
+    });
+
+    it('stops repeating from any occurrence, for the job and for a restored backup alike', async () => {
+      const [first] = await series(seriesId);
+      await put(`/payables/${first.id}/occurrence`, { action: 'stop' }, other).expect(404);
+      const res = await put(`/payables/${first.id}/occurrence`, { action: 'stop' }).expect(200);
+      expect(res.body).toMatchObject({ recurrence: null, isRecurring: false, seriesId });
+      // Withdrawing the newest would make the next one of a live series at once.
+      await put(`/payables/${(await series(seriesId)).at(-1)?.id}/archive`, {}).expect(200);
+      const rows = await series(seriesId);
+      expect(rows.map(row => row.recurrence)).toEqual(rows.map(() => null));
+      await recurrence().generateDue();
+      await recurrence().ensureSeries(owner.workspaceId, seriesId);
+      expect(await series(seriesId)).toHaveLength(rows.length);
+      // A backup carries the live rows only: without the deleted one it stays stopped.
+      await dataSource.query(
+        'DELETE FROM payables WHERE series_id = $1 AND deleted_at IS NOT NULL',
+        [seriesId],
+      );
+      await recurrence().ensureSeries(owner.workspaceId, seriesId);
+      expect(await series(seriesId)).toHaveLength(rows.length - 1);
+      // Stopping again answers the same bill.
+      await put(`/payables/${first.id}/occurrence`, { action: 'stop' }).expect(200);
     });
   });
 
@@ -298,33 +344,268 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
     expect(counts).toEqual([2, 2]);
   });
 
-  it('turns only current old repeating flags into a series, open ones included', async () => {
+  /** A series written straight to the table: one occurrence of `rule` on `day`. */
+  async function seriesRow(
+    vendor: string,
+    rule: Record<string, unknown>,
+    day: string,
+    columns: { status?: string; dueDate?: string; remindDaysBefore?: number } = {},
+  ): Promise<string> {
+    const id = randomUUID();
+    await dataSource.query(
+      `INSERT INTO payables (id, workspace_id, vendor, amount, currency, status, due_date,
+                             is_recurring, recurrence, series_id, occurrence_date, remind_days_before)
+       VALUES ($1, $2, $3, 20, 'KZT', $4, $5, true, $6, $1, $7, $8)`,
+      [
+        id,
+        owner.workspaceId,
+        vendor,
+        columns.status ?? 'to_pay',
+        columns.dueDate ?? day,
+        JSON.stringify(rule),
+        day,
+        columns.remindDaysBefore ?? 3,
+      ],
+    );
+    return id;
+  }
+
+  describe('no catch-up', () => {
+    const days = async (seriesId: string) =>
+      (await series(seriesId)).map(row => String(row.occurrenceDate));
+
+    it('makes only the next date on or after today for a series left alone for months', async () => {
+      const start = addDays(today, -100);
+      const rule = { frequency: 'monthly', interval: 1, startDate: start };
+      const id = await seriesRow('ACME Gym', rule, start, { status: 'paid' });
+      await recurrence().generateDue();
+      const next = occurrencesFrom(rule as RecurrenceRule, today).next().value as string;
+      expect(await days(id)).toEqual([start, next]);
+    });
+
+    it('counts the passed-over dates towards the number of occurrences', async () => {
+      const start = addDays(today, -100);
+      // Three in all: the 2nd and 3rd fell while nobody looked, so the series is over.
+      const rule = { frequency: 'monthly', interval: 1, startDate: start, count: 3 };
+      const id = await seriesRow('ACME Lessons', rule, start, { status: 'paid' });
+      expect(await recurrence().ensureSeries(owner.workspaceId, id)).toBe(0);
+      expect(await days(id)).toEqual([start]);
+    });
+
+    it('keeps the past due date a bill was created with and goes on from today', async () => {
+      const start = addDays(today, -20);
+      const res = await post('/payables', {
+        vendor: 'ACME Laundry',
+        amount: 15,
+        currency: 'KZT',
+        recurrence: { frequency: 'weekly', interval: 1, startDate: start },
+      }).expect(201);
+      expect(res.body.dueDate).toBe(start);
+      expect(await days(res.body.seriesId)).toEqual([start, addDays(today, 1), addDays(today, 8)]);
+    });
+  });
+
+  it('makes the next occurrence by the day it is due, so a long reminder after a shift is on time', async () => {
+    // A Sunday three weeks after the run, moved back to its Friday: due 19 days after the run.
+    let sunday = addDays(today, 30);
+    while (weekdayOf(sunday) !== 0) sunday = addDays(sunday, 1);
+    const runDay = addDays(sunday, -21);
+    const rule = {
+      frequency: 'weekly',
+      interval: 1,
+      startDate: addDays(sunday, -7),
+      shift: 'previous',
+    };
+    const id = await seriesRow('ACME Storage', rule, addDays(sunday, -7), {
+      dueDate: addDays(sunday, -9),
+      remindDaysBefore: 20,
+    });
+    expect(await recurrence().ensureSeries(owner.workspaceId, id, runDay)).toBe(1);
+    const [, next] = await series(id);
+    expect(String(next.occurrenceDate)).toBe(sunday);
+    expect(String(next.dueDate) <= addDays(sunday, -2)).toBe(true);
+  });
+
+  it('refuses a repeat rule on a day that does not exist', async () => {
+    const body = (rule: Record<string, unknown>) => ({
+      vendor: 'ACME Calendar',
+      amount: 5,
+      currency: 'KZT',
+      recurrence: { frequency: 'monthly', interval: 1, ...rule },
+    });
+    await post('/payables', body({ startDate: '2026-13-01' })).expect(400);
+    await post('/payables', body({ startDate: '2027-02-30' })).expect(400);
+    await post('/payables', body({ startDate: '2027-01-30', until: '2027-02-30' })).expect(400);
+    const [{ count }] = await dataSource.query(
+      `SELECT COUNT(*)::int AS count FROM payables WHERE vendor = 'ACME Calendar'`,
+    );
+    expect(count).toBe(0);
+  });
+
+  it('carries an amount typed into the bill form to the next occurrence, over a one-off one', async () => {
+    const start = addDays(today, 20);
+    const res = await post('/payables', {
+      vendor: 'ACME Heating',
+      amount: 100,
+      currency: 'KZT',
+      recurrence: { frequency: 'monthly', interval: 1, startDate: start },
+    }).expect(201);
+    const id = res.body.id;
+    await put(`/payables/${id}/occurrence`, { action: 'amount', amount: 140 }).expect(200);
+    // The form sends the amount it shows: unchanged, the one-off amount stays one-off.
+    const same = await put(`/payables/${id}`, { amount: 140, comment: 'Winter' }).expect(200);
+    expect(same.body).toMatchObject({ amount: '140.00', baseAmount: '100.00' });
+    const typed = await put(`/payables/${id}`, { amount: 160 }).expect(200);
+    expect(typed.body).toMatchObject({ amount: '160.00', baseAmount: null });
+    await put(`/payables/${id}/mark-paid`, { inHand: true }).expect(200);
+    const rows = await waitForCount(id, 2);
+    expect(Number(rows[1].amount)).toBe(160);
+  });
+
+  it('waits for a payment in progress, then refuses to skip the occurrence it paid', async () => {
+    const res = await post('/payables', {
+      vendor: 'ACME Alarm',
+      amount: 30,
+      currency: 'KZT',
+      recurrence: { frequency: 'monthly', interval: 1, startDate: addDays(today, 20) },
+    }).expect(201);
+    const id = res.body.id;
+    // A payment holding the bill, as mark-paid does, while the skip comes in.
+    const payment = dataSource.createQueryRunner();
+    await payment.connect();
+    await payment.startTransaction();
+    await payment.query('SELECT id FROM payables WHERE id = $1 FOR UPDATE', [id]);
+    const skipping = put(`/payables/${id}/occurrence`, { action: 'skip' }).then(answer => answer);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    await payment.query(
+      `UPDATE payables SET status = 'paid', paid_amount = amount, paid_at = now() WHERE id = $1`,
+      [id],
+    );
+    await payment.commitTransaction();
+    await payment.release();
+    expect((await skipping).status).toBe(409);
+    const [row] = await series(id);
+    expect(row).toMatchObject({ status: 'paid', skippedAt: null });
+  });
+
+  it('turns only current old repeating flags into a series, its step read off the gaps', async () => {
     const runner = dataSource.createQueryRunner();
     await runner.startTransaction();
     try {
-      const insert = async (vendor: string, status: string, due: string): Promise<string> => {
+      const insert = async (
+        vendor: string,
+        status: string,
+        offset: number,
+        { deleted = false, flagged = true } = {},
+      ): Promise<string> => {
         const rows: Array<{ id: string }> = await runner.query(
-          `INSERT INTO payables (workspace_id, vendor, amount, currency, status, due_date, is_recurring)
-           VALUES ($1, $2, 10, 'KZT', $3, $4, true) RETURNING id`,
-          [owner.workspaceId, vendor, status, due],
+          `INSERT INTO payables (workspace_id, vendor, amount, currency, status, due_date,
+                                 is_recurring, deleted_at)
+           VALUES ($1, $2, 10, 'KZT', $3, $4, $5, CASE WHEN $6 THEN now() END) RETURNING id`,
+          [owner.workspaceId, vendor, status, addDays(today, offset), flagged, deleted],
         );
         return rows[0].id;
       };
+      /** Earlier paid copies `gap` days apart, then the newest open one 3 days ago. */
+      const history = async (vendor: string, gap: number): Promise<string> => {
+        await insert(vendor, 'paid', -3 - 2 * gap);
+        await insert(vendor, 'paid', -3 - gap);
+        return insert(vendor, 'to_pay', -3);
+      };
       // Overdue for two years: a monthly rule would make 23 overdue bills on the first run.
-      const forgotten = await insert('ACME Old Gym', 'overdue', addDays(today, -700));
-      const current = await insert('ACME Internet', 'to_pay', addDays(today, -10));
-      await new AddPayableRecurrence1788210000000().up(runner);
-      const rows: Array<{ id: string; recurrence: unknown; series_id: string | null }> =
-        await runner.query(
-          'SELECT id, recurrence, series_id FROM payables WHERE id = ANY($1::uuid[])',
-          [[forgotten, current]],
-        );
-      const byId = new Map(rows.map(row => [row.id, row]));
-      expect(byId.get(forgotten)).toMatchObject({ recurrence: null, series_id: null });
-      expect(byId.get(current)).toMatchObject({
-        recurrence: { frequency: 'monthly', interval: 1, startDate: addDays(today, -10) },
-        series_id: current,
+      const forgotten = await insert('ACME Old Gym', 'overdue', -700);
+      const single = await insert('ACME Fibre', 'to_pay', -10);
+      const weekly = await history('ACME Window Cleaning', 7);
+      const fortnightly = await history('ACME Garden', 14);
+      const monthly = await history('ACME Phone Plan', 31);
+      const quarterly = await history('ACME Water Board', 91);
+      const halfYearly = await history('ACME Car Service', 182);
+      const yearly = await history('ACME Domain', 365);
+      const odd = await history('ACME Odd Jobs', 50);
+      // A deleted copy still counts for the gaps: 7 and 7, not 14.
+      await insert('ACME Dog Walk', 'paid', -17);
+      await insert('ACME Dog Walk', 'paid', -10, { deleted: true });
+      const walked = await insert('ACME Dog Walk', 'to_pay', -3);
+      // Withdrawn, dropped, or already followed by a bill entered by hand: left as they are.
+      const archivedOld = await insert('ACME Archived', 'paid', -35);
+      const archived = await insert('ACME Archived', 'archived', -5);
+      const droppedOld = await insert('ACME Dropped', 'to_pay', -35);
+      const dropped = await insert('ACME Dropped', 'to_pay', -5, { deleted: true });
+      const followed = await insert('ACME Followed', 'to_pay', -10);
+      const byHand = await insert('ACME Followed', 'to_pay', 20, { flagged: false });
+
+      const migration = new AddPayableRecurrence1788210000000();
+      await migration.up(runner);
+      const read = async (): Promise<Map<string, { recurrence: unknown; series_id: string | null }>> => {
+        const rows: Array<{ id: string; recurrence: unknown; series_id: string | null }> =
+          await runner.query(
+            `SELECT id, recurrence, series_id FROM payables
+              WHERE workspace_id = $1 AND vendor LIKE 'ACME %'`,
+            [owner.workspaceId],
+          );
+        return new Map(rows.map(row => [row.id, { recurrence: row.recurrence, series_id: row.series_id }]));
+      };
+      const byId = await read();
+      const rule = (frequency: string, interval: number, offset: number) => ({
+        recurrence: { frequency, interval, startDate: addDays(today, offset) },
       });
+      expect(byId.get(single)).toMatchObject({ ...rule('monthly', 1, -10), series_id: single });
+      expect(byId.get(weekly)).toMatchObject({ ...rule('weekly', 1, -3), series_id: weekly });
+      expect(byId.get(fortnightly)).toMatchObject(rule('weekly', 2, -3));
+      expect(byId.get(monthly)).toMatchObject(rule('monthly', 1, -3));
+      expect(byId.get(quarterly)).toMatchObject(rule('monthly', 3, -3));
+      expect(byId.get(halfYearly)).toMatchObject(rule('monthly', 6, -3));
+      expect(byId.get(yearly)).toMatchObject(rule('yearly', 1, -3));
+      expect(byId.get(odd)).toMatchObject(rule('monthly', 1, -3));
+      expect(byId.get(walked)).toMatchObject(rule('weekly', 1, -3));
+      for (const id of [forgotten, archivedOld, archived, droppedOld, dropped, followed, byHand]) {
+        expect(byId.get(id)).toMatchObject({ recurrence: null, series_id: null });
+      }
+
+      // A second run changes nothing.
+      await migration.up(runner);
+      expect(await read()).toEqual(byId);
+    } finally {
+      await runner.rollbackTransaction();
+      await runner.release();
+    }
+  });
+
+  it('marks the payment a bill recorded itself, earlier ones included, but not a bank row', async () => {
+    const runner = dataSource.createQueryRunner();
+    await runner.startTransaction();
+    try {
+      const bill = await post('/payables', {
+        vendor: 'ACME Locksmith',
+        amount: 12,
+        currency: 'KZT',
+        dueDate: today,
+      }).expect(201);
+      await put(`/payables/${bill.body.id}/mark-paid`, { inHand: true }).expect(200);
+      const linked = await post('/payables', {
+        vendor: 'ACME Plumber',
+        amount: 13,
+        currency: 'KZT',
+        dueDate: today,
+      }).expect(201);
+      const rowId = await bankRow('ACME Plumber Ltd', 13);
+      await put(`/payables/${linked.body.id}/mark-paid`, { linkedTransactionId: rowId }).expect(200);
+      // As before the upgrade: no payment marked.
+      await runner.query(
+        'UPDATE payable_payments SET own_transaction = false WHERE payable_id = ANY($1::uuid[])',
+        [[bill.body.id, linked.body.id]],
+      );
+      await new AddPayableRecurrence1788210000000().up(runner);
+      const rows: Array<{ payable_id: string; own_transaction: boolean }> = await runner.query(
+        'SELECT payable_id, own_transaction FROM payable_payments WHERE payable_id = ANY($1::uuid[])',
+        [[bill.body.id, linked.body.id]],
+      );
+      expect(new Map(rows.map(row => [row.payable_id, row.own_transaction]))).toEqual(
+        new Map([
+          [bill.body.id, true],
+          [linked.body.id, false],
+        ]),
+      );
     } finally {
       await runner.rollbackTransaction();
       await runner.release();
@@ -408,6 +689,33 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
       expect(payments.body.map((payment: { transactionId: string | null }) => payment.transactionId))
         .toEqual([null]);
       expect(await unbooked.linkUnbooked(owner.workspaceId)).toBe(0);
+    });
+
+    it("is refused for the bill's own cash payment, which stays as it is", async () => {
+      const bill = await post('/payables', {
+        vendor: 'ACME Bakery',
+        amount: 8,
+        currency: 'KZT',
+        dueDate: today,
+      }).expect(201);
+      const paid = await put(`/payables/${bill.body.id}/mark-paid`, { inHand: true }).expect(200);
+      const cashId = paid.body.linkedTransactionId as string;
+      expect(cashId).toEqual(expect.any(String));
+      await post(`/payables/${bill.body.id}/match-rejections`, { transactionId: cashId }).expect(409);
+      const after = await as(owner, request(server()).get(`/payables/${bill.body.id}`)).expect(200);
+      expect(after.body).toMatchObject({ status: 'paid', linkedTransactionId: cashId });
+      const payments = await as(
+        owner,
+        request(server()).get(`/payables/${bill.body.id}/payments`),
+      ).expect(200);
+      expect(payments.body.map((payment: { transactionId: string }) => payment.transactionId)).toEqual([
+        cashId,
+      ]);
+      const [{ count }] = await dataSource.query(
+        'SELECT COUNT(*)::int AS count FROM payable_match_rejections WHERE transaction_id = $1',
+        [cashId],
+      );
+      expect(count).toBe(0);
     });
 
     it('is refused for another workspace', async () => {

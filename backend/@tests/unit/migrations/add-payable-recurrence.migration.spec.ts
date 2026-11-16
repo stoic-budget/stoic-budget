@@ -39,16 +39,26 @@ describe('AddPayableRecurrence migration', () => {
     expect(index).not.toContain('deleted_at');
   });
 
-  it('turns old recurring flags into a monthly rule for the newest current bill of a vendor only', () => {
+  it('turns old recurring flags into a rule for the newest current bill of a vendor only', () => {
     const text = up();
-    expect(text).toContain('SELECT DISTINCT ON ("workspace_id", "direction", lower("vendor"), "currency")');
+    expect(text).toContain('SELECT DISTINCT ON ("workspace_id", "direction", "vendor_key", "currency") *');
     expect(text).toContain('"due_date" DESC');
-    expect(text).toContain("'frequency', 'monthly'");
+    // The step comes from the median gap of every flagged copy, deleted ones included.
+    expect(text).toContain('percentile_cont(0.5) WITHIN GROUP (ORDER BY "gap")');
+    expect(text).toContain('WHERE "is_recurring" AND "due_date" IS NOT NULL\n');
     expect(text).toContain('"series_id" = p."id"');
     expect(text).toContain('"occurrence_date" = p."due_date"');
-    // The cut-off holds for open bills too: an old overdue one would come back as a run.
-    expect(text).toContain('AND p."due_date" >= current_date - 45');
-    expect(text).not.toContain(`p."status" NOT IN`);
+    // Not deleted, not archived, not followed by a live bill, at most 45 days old, not run before.
+    expect(text).toContain('n."deleted_at" IS NULL');
+    expect(text).toContain(`n."status" <> 'archived'`);
+    expect(text).toContain('later."deleted_at" IS NULL');
+    expect(text).toContain('AND n."due_date" >= current_date - 45');
+    expect(text).toContain('n."recurrence" IS NULL AND n."series_id" IS NULL');
+  });
+
+  it(`marks a payment's own transaction, so "not this payment" cannot unlink it`, () => {
+    expect(up()).toContain('ADD COLUMN IF NOT EXISTS "own_transaction" boolean NOT NULL DEFAULT false');
+    expect(down()).toContain('DROP COLUMN IF EXISTS "own_transaction"');
   });
 
   it('creates both rejection tables with a unique pair and cascading keys', () => {

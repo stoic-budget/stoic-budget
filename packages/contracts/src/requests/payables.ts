@@ -122,10 +122,11 @@ export type UpdatePayableBody = Wire<typeof UpdatePayableBody>;
 
 /**
  * `PUT /payables/:id/occurrence`: one occurrence of a repeating bill, the
- * series left as it is. `skip` it, `move` it to `dueDate`, or change its `amount`.
+ * series left as it is. `skip` it, `move` it to `dueDate`, or change its
+ * `amount`; or `stop` the whole series: no occurrence is made after it.
  */
 export const PayableOccurrenceBody = Schema.Struct({
-  action: Schema.Literals(['skip', 'move', 'amount']),
+  action: Schema.Literals(['skip', 'move', 'amount', 'stop']),
   dueDate: optionalNullable(DateOnlyInput),
   amount: optionalNullable(Schema.Finite.check(Schema.isGreaterThan(0))),
 });

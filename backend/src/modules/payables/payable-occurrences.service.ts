@@ -11,6 +11,7 @@ import { formatDay, toDay } from '../../common/recurrence/date-only';
 import type { PayableOccurrenceBody } from '../../contracts';
 import { Payable, PayableStatus } from '../../entities/payable.entity';
 import { PayableMatchRejection } from '../../entities/payable-match-rejection.entity';
+import { PayablePayment } from '../../entities/payable-payment.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { PayableRecurrenceService } from './payable-recurrence.service';
 
@@ -32,51 +33,81 @@ export class PayableOccurrencesService {
    * Skip: not owed, the series goes on (the next occurrence is made now).
    * Move: due another day; the series keeps the day its rule gave it.
    * Amount: this occurrence only; the next one is made with the series amount.
-   * A bill with money against it is past all three.
+   * A bill with money against it is past all three. Stop: no occurrence is
+   * made after this series' last one; the rule is cleared on every occurrence,
+   * so neither the daily job nor a restored backup takes it up again.
+   * The bill is locked as a payment locks it, so a payment arriving at the
+   * same time is either seen here or waits for this to finish.
    */
   async apply(id: string, workspaceId: string, body: PayableOccurrenceBody): Promise<Payable> {
-    const payable = await this.load(id, workspaceId);
-    if (!payable.seriesId) throw new BadRequestException(appError('PAYABLE_NOT_RECURRING'));
-    if (payable.skippedAt && body.action === 'skip') return this.asStored(payable);
     if (
-      payable.status === PayableStatus.PAID ||
-      payable.status === PayableStatus.ARCHIVED ||
-      Number(payable.paidAmount) > 0
+      (body.action === 'move' && !body.dueDate) ||
+      (body.action === 'amount' && body.amount == null)
     ) {
-      throw new ConflictException(appError('PAYABLE_OCCURRENCE_SETTLED'));
+      throw new BadRequestException(appError('REQUEST_INVALID'));
     }
-    const today = formatDay(new Date());
+    const payable = await this.payableRepository.manager.transaction(async manager => {
+      const payables = manager.getRepository(Payable);
+      const locked = await payables.findOne({
+        where: { id, workspaceId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!locked) throw new NotFoundException(appError('PAYABLE_NOT_FOUND'));
+      if (!locked.seriesId) throw new BadRequestException(appError('PAYABLE_NOT_RECURRING'));
+      if (body.action === 'stop') {
+        await manager.query(
+          `UPDATE "payables" SET "recurrence" = NULL, "is_recurring" = false
+            WHERE "workspace_id" = $1 AND "series_id" = $2`,
+          [workspaceId, locked.seriesId],
+        );
+        return locked;
+      }
+      if (locked.skippedAt && body.action === 'skip') return locked;
+      if (
+        locked.status === PayableStatus.PAID ||
+        locked.status === PayableStatus.ARCHIVED ||
+        Number(locked.paidAmount) > 0
+      ) {
+        throw new ConflictException(appError('PAYABLE_OCCURRENCE_SETTLED'));
+      }
+      this.change(locked, body);
+      return payables.save(locked);
+    });
+    if (body.action === 'skip') await this.recurrence.ensureSeriesOf(payable);
+    return this.asStored(await this.load(id, workspaceId));
+  }
+
+  private change(payable: Payable, body: PayableOccurrenceBody): void {
     switch (body.action) {
       case 'skip':
         payable.status = PayableStatus.ARCHIVED;
         payable.skippedAt = new Date();
         break;
       case 'move': {
-        if (!body.dueDate) throw new BadRequestException(appError('REQUEST_INVALID'));
-        payable.dueDate = body.dueDate as unknown as Date;
+        const dueDate = body.dueDate as string;
+        payable.dueDate = dueDate as unknown as Date;
         // A new day earns a new reminder.
         payable.dueSoonNotifiedAt = null;
         if (payable.status !== PayableStatus.SCHEDULED) {
-          payable.status = body.dueDate < today ? PayableStatus.OVERDUE : PayableStatus.TO_PAY;
+          payable.status =
+            dueDate < formatDay(new Date()) ? PayableStatus.OVERDUE : PayableStatus.TO_PAY;
         }
         break;
       }
       case 'amount':
-        if (body.amount == null) throw new BadRequestException(appError('REQUEST_INVALID'));
         payable.baseAmount ??= String(payable.amount);
-        payable.amount = body.amount;
+        payable.amount = body.amount as number;
         break;
     }
-    const saved = this.asStored(await this.payableRepository.save(payable));
-    if (body.action === 'skip') await this.recurrence.ensureSeriesOf(saved);
-    return saved;
   }
 
   /**
    * "Not this payment": this bank row is never proposed or linked to this
    * bill again. Linked already (by hand or by the automatic match of a payment
    * marked without its money), the payment stays and goes back to waiting for
-   * its bank row; the row itself is left alone.
+   * its bank row; the row itself is left alone. The transaction the bill
+   * recorded for its own payment (cash, a wallet) is not a match and is refused:
+   * unlinked, it would stay in the books while the payment waited for another.
    */
   async reject(
     id: string,
@@ -90,6 +121,10 @@ export class PayableOccurrencesService {
       select: { id: true },
     });
     if (!transaction) throw new NotFoundException(appError('PAYABLE_TRANSACTION_NOT_FOUND'));
+    const own = await this.payableRepository.manager.getRepository(PayablePayment).exists({
+      where: { payableId: id, workspaceId, transactionId, ownTransaction: true },
+    });
+    if (own) throw new ConflictException(appError('PAYABLE_REJECT_OWN_PAYMENT'));
     await this.payableRepository.manager.transaction(async manager => {
       await manager
         .createQueryBuilder()

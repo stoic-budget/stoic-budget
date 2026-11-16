@@ -237,10 +237,7 @@ export class PayablesService {
 
   async findOne(id: string, workspaceId: string): Promise<Payable> {
     const payable = await this.payableRepository.findOne({
-      where: {
-        id,
-        workspaceId,
-      },
+      where: { id, workspaceId },
       relations: { tags: true },
     });
 
@@ -350,6 +347,7 @@ export class PayablesService {
       amount: this.outstandingOf(payable),
       paidOn: payload.paidOn ?? this.toDateString(new Date()),
       transactionId: payable.linkedTransactionId,
+      ownTransaction: Boolean(payload.payFromWalletId || payload.inHand),
       createdById: userId,
     });
     return this.linkIfUnbooked(
@@ -429,10 +427,7 @@ export class PayablesService {
     const wallet = walletId
       ? await manager.getRepository(Wallet).findOne({
           where: { id: walletId, workspaceId },
-          select: {
-            id: true,
-            currency: true,
-          },
+          select: { id: true, currency: true },
         })
       : null;
     if (walletId && !wallet) {
@@ -551,6 +546,7 @@ export class PayablesService {
         feeAmount: dto.feeAmount ? this.round2(dto.feeAmount) : 0,
         paidOn: dto.paidOn ?? this.toDateString(new Date()),
         transactionId,
+        ownTransaction: Boolean(dto.payFromWalletId || dto.inHand),
         comment: dto.comment ?? null,
         createdById: userId,
       });
@@ -619,7 +615,8 @@ export class PayablesService {
         await this.assertRowHasRoomFor(manager, payable, transactionId, net);
       }
 
-      await payments.update({ id: payment.id }, { transactionId });
+      const ownTransaction = !dto.linkedTransactionId;
+      await payments.update({ id: payment.id }, { transactionId, ownTransaction });
       if (!payable.linkedTransactionId) {
         await manager
           .getRepository(Payable)
@@ -857,6 +854,8 @@ export class PayablesService {
       feeAmount?: number;
       paidOn: string;
       transactionId: string | null;
+      /** Recorded here with the payment (cash, a wallet), not found among the rows. */
+      ownTransaction?: boolean;
       comment?: string | null;
       createdById: string | null;
     },
@@ -880,6 +879,7 @@ export class PayablesService {
         feeAmount: input.feeAmount ?? 0,
         paidOn: input.paidOn,
         transactionId: input.transactionId,
+        ownTransaction: input.ownTransaction ?? false,
         comment: input.comment ?? null,
         createdById: input.createdById,
       }),

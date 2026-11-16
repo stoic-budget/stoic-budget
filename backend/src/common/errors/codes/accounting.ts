@@ -58,6 +58,8 @@ export const ACCOUNTING_ERRORS = {
   PAYABLE_OCCURRENCE_SETTLED:
     'This payment is already paid, skipped or partly paid; change it as a whole bill instead',
   PAYABLE_RECURRENCE_NEVER_FIRES: 'This repeat rule has no date on or after its start',
+  PAYABLE_REJECT_OWN_PAYMENT:
+    'This transaction was recorded as the payment of this bill; remove the payment instead',
   // ── invoices ─────────────────────────────────────────────────────────────
   INVOICE_NOT_DRAFT: 'Only a draft invoice can be edited',
   INVOICE_ALREADY_SENT: 'This invoice was already sent',

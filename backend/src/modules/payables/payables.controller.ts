@@ -209,7 +209,10 @@ export class PayablesController {
     return payable;
   }
 
-  /** One occurrence of a repeating bill: skip it, move it or change its amount; the series stays. */
+  /**
+   * One occurrence of a repeating bill: skip it, move it or change its amount;
+   * the series stays. Or stop the series: nothing is made after it.
+   */
   @Put(':id/occurrence')
   @WorkspaceAuth(Permission.PAYABLE_EDIT)
   @Audit({ entityType: EntityType.PAYABLE, includeDiff: true, isUndoable: false })
@@ -258,7 +261,10 @@ export class PayablesController {
     @CurrentUser() user: User,
     @WorkspaceId() workspaceId: string,
   ) {
-    return this.payablesService.archive(id, workspaceId, user.id);
+    const payable = await this.payablesService.archive(id, workspaceId, user.id);
+    // Only this payment is withdrawn: a series goes on with its next occurrence, as after a skip.
+    await this.recurrence.ensureSeriesOf(payable);
+    return payable;
   }
 
   @Delete(':id')
@@ -271,6 +277,8 @@ export class PayablesController {
     @WorkspaceId() workspaceId: string,
   ) {
     await this.payablesService.remove(id, workspaceId, user.id);
+    // Only this payment is gone; its day is never made again ("stop repeating" ends a series).
+    await this.recurrence.ensureSeriesFor(workspaceId, id);
     return deletedResponse('Payable');
   }
 

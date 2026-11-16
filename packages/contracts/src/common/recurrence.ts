@@ -1,5 +1,6 @@
 import * as Schema from 'effect/Schema';
-import { DateOnly, type Wire } from './wire';
+import { DateOnlyInput } from './requests';
+import type { Wire } from './wire';
 
 const WholeNumber = (min: number, max: number) =>
   Schema.Number.check(
@@ -25,8 +26,8 @@ export type RecurrenceShift = Wire<typeof RecurrenceShift>;
 export const RecurrenceRule = Schema.Struct({
   frequency: RecurrenceFrequency,
   interval: WholeNumber(1, 366),
-  /** The first occurrence; nothing falls before it. */
-  startDate: DateOnly,
+  /** The first occurrence; nothing falls before it. A day that exists: 2027-02-30 is a 400. */
+  startDate: DateOnlyInput,
   /** Day of the month, or `last`; 31 falls on the 30th, 29th or 28th in a shorter month. */
   monthDay: Schema.optional(Schema.Union([WholeNumber(1, 31), Schema.Literal('last')])),
   /** The Nth weekday of the month (`week` -1 is the last one); `weekday` 0 is Sunday. */
@@ -38,7 +39,7 @@ export const RecurrenceRule = Schema.Struct({
   ),
   shift: Schema.optional(RecurrenceShift),
   /** The last day an occurrence may fall on. */
-  until: Schema.optional(Schema.NullOr(DateOnly)),
+  until: Schema.optional(Schema.NullOr(DateOnlyInput)),
   /** How many occurrences there are in all. */
   count: Schema.optional(Schema.NullOr(WholeNumber(1, 1000))),
 });
