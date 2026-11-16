@@ -1,7 +1,5 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Cache } from 'cache-manager';
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -18,7 +16,6 @@ import {
   redactedSql,
   redactPrivateRows,
 } from '../../common/utils/transaction-privacy.util';
-import { resolveInUploadsDir, resolveUploadsDir } from '../../common/utils/uploads.util';
 import type {
   CustomReportBody,
   CustomTablesReportBody,
@@ -39,17 +36,14 @@ import { UNCATEGORIZED_CATEGORY_NAME } from '../categories/uncategorized-categor
 import { CurrencyConverter, normalizeCurrencyCode } from '../exchange-rates/currency-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { BudgetVsActualReport } from './budget-vs-actual.report';
+import { CustomReportGenerator } from './custom-report.report';
 import { CustomTablesDrillDownReport } from './custom-tables-drilldown.report';
 import { CustomTablesReport } from './custom-tables-report.report';
 import { CustomTablesSummaryReport } from './custom-tables-summary.report';
-import { ReportGroupBy } from './dto/custom-report.dto';
+import { DailyReportGenerator } from './daily-report.report';
 import { ExportFormat } from './dto/export-report.dto';
 import { WorkspaceExportFormat } from './dto/workspace-export.dto';
-import {
-  countedTransactions,
-  getReportsVersion,
-  logReportGeneration,
-} from './helpers/report-query.util';
+import { countedTransactions, logReportGeneration } from './helpers/report-query.util';
 import {
   formatMonthLabel,
   formatMonthPeriod,
@@ -59,8 +53,9 @@ import {
   toEndOfUtcDay,
   toStartOfUtcDay,
 } from './helpers/report-values.util';
+import { resolveReportsDir } from './helpers/reports-dir.util';
 import { HoldingsSnapshotReport } from './holdings-snapshot.report';
-import type { CustomReport, CustomReportGroup } from './interfaces/custom-report.interface';
+import type { CustomReport } from './interfaces/custom-report.interface';
 import type {
   AvailableCustomTable,
   CustomTablesReportDrillDownResponse,
@@ -71,6 +66,7 @@ import type { DailyReport } from './interfaces/daily-report.interface';
 import type { MonthlyReport } from './interfaces/monthly-report.interface';
 import type { StatementsSummaryResponse } from './interfaces/statements-summary.interface';
 import type { TopCategoriesReport } from './interfaces/top-categories-report.interface';
+import { MonthlyReportGenerator } from './monthly-report.report';
 import {
   loadPdfMake,
   type ReportCell,
@@ -80,8 +76,10 @@ import {
   writeReportFile,
 } from './report-document.util';
 import { renderReportLabels } from './report-export.translations';
+import { ReportHistoryService } from './report-history.service';
 import { fillLabel, renderTemplateLabels } from './report-template.translations';
 import type { TemplateLabels, TemplateReportRow } from './report-template.types';
+import { StatementsSummaryReport } from './statements-summary.report';
 
 interface WorkspaceTransactionExportRow {
   index: number;
@@ -155,7 +153,6 @@ export class ReportsService {
   constructor(
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly auditService: AuditService,
     @InjectRepository(ReportHistory)
     private readonly reportHistoryRepo: Repository<ReportHistory>,
@@ -168,6 +165,11 @@ export class ReportsService {
     private readonly customTablesSummaryReport: CustomTablesSummaryReport,
     private readonly customTablesReport: CustomTablesReport,
     private readonly customTablesDrillDownReport: CustomTablesDrillDownReport,
+    private readonly dailyReportGenerator: DailyReportGenerator,
+    private readonly monthlyReportGenerator: MonthlyReportGenerator,
+    private readonly customReportGenerator: CustomReportGenerator,
+    private readonly statementsSummaryReport: StatementsSummaryReport,
+    private readonly reportHistoryService: ReportHistoryService,
   ) {}
 
   getCustomTablesSummary(
@@ -195,441 +197,44 @@ export class ReportsService {
     return this.customTablesSummaryReport.getAvailableCustomTables(workspaceId);
   }
 
-  /**
-   */
-  async generateDailyReport(
+  generateDailyReport(
     workspaceId: string,
     date: string,
     viewerMemberId: string | null = null,
   ): Promise<DailyReport> {
-    const version = await getReportsVersion(this.cacheManager, workspaceId);
-    // Per viewer: the report names the merchants of the viewer's own private rows.
-    const cacheKey = `reports:daily:${workspaceId}:${version}:${viewerMemberId ?? '-'}:${date || 'latest'}`;
-    const cached = await this.cacheManager.get<DailyReport>(cacheKey);
-    if (cached) {
-      return cached;
-    }
-
-    const resolvedDate = date || (await this.getLatestTransactionDate(workspaceId));
-    const reportDate = resolvedDate ? new Date(resolvedDate) : new Date();
-    const startOfDay = new Date(reportDate);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(reportDate);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    // Get income transactions
-    const incomeTransactions = await countedTransactions(this.transactionRepository, workspaceId)
-      .leftJoinAndSelect('transaction.category', 'category')
-      .andWhere('transaction.transactionType = :type', { type: TransactionType.INCOME })
-      .andWhere('transaction.transactionDate >= :start', { start: startOfDay })
-      .andWhere('transaction.transactionDate <= :end', { end: endOfDay })
-      .getMany();
-
-    // Get expense transactions
-    const expenseTransactions = await countedTransactions(this.transactionRepository, workspaceId)
-      .leftJoinAndSelect('transaction.category', 'category')
-      .andWhere('transaction.transactionType = :type', { type: TransactionType.EXPENSE })
-      .andWhere('transaction.transactionDate >= :start', { start: startOfDay })
-      .andWhere('transaction.transactionDate <= :end', { end: endOfDay })
-      .getMany();
-    redactPrivateRows(incomeTransactions, viewerMemberId);
-    redactPrivateRows(expenseTransactions, viewerMemberId);
-
-    // Calculate income block
-    const incomeTotal = incomeTransactions.reduce((sum, t) => sum + Number(t.amount ?? 0), 0);
-    const counterpartyMap = new Map<string, { amount: number; count: number }>();
-    incomeTransactions.forEach(t => {
-      const existing = counterpartyMap.get(t.counterpartyName) || { amount: 0, count: 0 };
-      counterpartyMap.set(t.counterpartyName, {
-        amount: existing.amount + Number(t.amount ?? 0),
-        count: existing.count + 1,
-      });
-    });
-
-    const topCounterparties = Array.from(counterpartyMap.entries())
-      .map(([name, data]) => ({ name, ...data }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 10);
-
-    // Calculate expense block
-    const expenseTotal = expenseTransactions.reduce((sum, t) => sum + Number(t.amount ?? 0), 0);
-    const categoryMap = new Map<string, { name: string; amount: number; count: number }>();
-    expenseTransactions.forEach(t => {
-      const categoryId = t.categoryId || 'uncategorized';
-      const categoryName = t.category?.name || UNCATEGORIZED_CATEGORY_NAME;
-      const existing = categoryMap.get(categoryId) || { name: categoryName, amount: 0, count: 0 };
-      categoryMap.set(categoryId, {
-        name: categoryName,
-        amount: existing.amount + Number(t.amount ?? 0),
-        count: existing.count + 1,
-      });
-    });
-
-    const topCategories = Array.from(categoryMap.entries())
-      .map(([categoryId, data]) => ({
-        categoryId,
-        categoryName: data.name,
-        amount: data.amount,
-        count: data.count,
-      }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 10);
-
-    const report: DailyReport = {
-      date: date,
-      income: {
-        totalAmount: incomeTotal,
-        transactionCount: incomeTransactions.length,
-        topCounterparties,
-      },
-      expense: {
-        totalAmount: expenseTotal,
-        transactionCount: expenseTransactions.length,
-        topCategories,
-      },
-      summary: {
-        incomeTotal,
-        expenseTotal,
-        difference: incomeTotal - expenseTotal,
-      },
-    };
-
-    // Log to audit
-    await logReportGeneration(this.auditService, workspaceId, 'daily', date);
-
-    return report;
+    return this.dailyReportGenerator.generateDailyReport(workspaceId, date, viewerMemberId);
   }
 
-  /**
-   * Generate monthly report
-   */
-  async generateMonthlyReport(
+  generateMonthlyReport(
     workspaceId: string,
     year: number,
     month: number,
     viewerMemberId: string | null = null,
   ): Promise<MonthlyReport> {
-    const version = await getReportsVersion(this.cacheManager, workspaceId);
-    // Per viewer: the report names the merchants of the viewer's own private rows.
-    const cacheKey = `reports:monthly:${workspaceId}:${version}:${viewerMemberId ?? '-'}:${year}:${month}`;
-    const cached = await this.cacheManager.get<MonthlyReport>(cacheKey);
-    if (cached) {
-      return cached;
-    }
-
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
-
-    // Get all transactions for the month
-    const transactions = await countedTransactions(this.transactionRepository, workspaceId)
-      .leftJoinAndSelect('transaction.category', 'category')
-      .leftJoinAndSelect('transaction.branch', 'branch')
-      .leftJoinAndSelect('transaction.wallet', 'wallet')
-      .andWhere('transaction.transactionDate >= :start', { start: startDate })
-      .andWhere('transaction.transactionDate <= :end', { end: endDate })
-      .getMany();
-    redactPrivateRows(transactions, viewerMemberId);
-
-    // Calculate daily trends
-    const dailyMap = new Map<string, { income: number; expense: number }>();
-    transactions.forEach(t => {
-      const dateKey = dayOf(t.transactionDate);
-      const existing = dailyMap.get(dateKey) || { income: 0, expense: 0 };
-      if (t.transactionType === TransactionType.INCOME) {
-        existing.income += Number(t.amount ?? 0);
-      } else {
-        existing.expense += Number(t.amount ?? 0);
-      }
-      dailyMap.set(dateKey, existing);
-    });
-
-    const dailyTrends = Array.from(dailyMap.entries())
-      .map(([date, data]) => ({ date, ...data }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    // Calculate category distribution
-    const categoryMap = new Map<string, { name: string; amount: number; count: number }>();
-    transactions
-      .filter(t => t.transactionType === TransactionType.EXPENSE)
-      .forEach(t => {
-        const categoryId = t.categoryId || 'uncategorized';
-        const categoryName = t.category?.name || UNCATEGORIZED_CATEGORY_NAME;
-        const existing = categoryMap.get(categoryId) || { name: categoryName, amount: 0, count: 0 };
-        categoryMap.set(categoryId, {
-          name: categoryName,
-          amount: existing.amount + Number(t.amount ?? 0),
-          count: existing.count + 1,
-        });
-      });
-
-    const totalExpense = Array.from(categoryMap.values()).reduce((sum, c) => sum + c.amount, 0);
-    const categoryDistribution = Array.from(categoryMap.entries())
-      .map(([categoryId, data]) => ({
-        categoryId,
-        categoryName: data.name,
-        amount: data.amount,
-        percentage: totalExpense > 0 ? (data.amount / totalExpense) * 100 : 0,
-        transactionCount: data.count,
-      }))
-      .sort((a, b) => b.amount - a.amount);
-
-    // Calculate counterparty distribution
-    const counterpartyMap = new Map<string, { amount: number; count: number }>();
-    transactions.forEach(t => {
-      const existing = counterpartyMap.get(t.counterpartyName) || { amount: 0, count: 0 };
-      counterpartyMap.set(t.counterpartyName, {
-        amount: existing.amount + Number(t.amount ?? 0),
-        count: existing.count + 1,
-      });
-    });
-
-    const totalAmount = Array.from(counterpartyMap.values()).reduce((sum, c) => sum + c.amount, 0);
-    const counterpartyDistribution = Array.from(counterpartyMap.entries())
-      .map(([counterpartyName, data]) => ({
-        counterpartyName,
-        amount: data.amount,
-        percentage: totalAmount > 0 ? (data.amount / totalAmount) * 100 : 0,
-        transactionCount: data.count,
-      }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 20);
-
-    // Calculate comparison with previous period
-    const previousStartDate = new Date(year, month - 2, 1);
-    const previousEndDate = new Date(year, month - 1, 0, 23, 59, 59, 999);
-
-    const previousTransactions = await countedTransactions(this.transactionRepository, workspaceId)
-      .andWhere('transaction.transactionDate >= :start', { start: previousStartDate })
-      .andWhere('transaction.transactionDate <= :end', { end: previousEndDate })
-      .getMany();
-
-    const currentIncome = transactions
-      .filter(t => t.transactionType === TransactionType.INCOME)
-      .reduce((sum, t) => sum + Number(t.amount ?? 0), 0);
-    const currentExpense = transactions
-      .filter(t => t.transactionType === TransactionType.EXPENSE)
-      .reduce((sum, t) => sum + Number(t.amount ?? 0), 0);
-    const currentDifference = currentIncome - currentExpense;
-
-    const previousIncome = previousTransactions
-      .filter(t => t.transactionType === TransactionType.INCOME)
-      .reduce((sum, t) => sum + Number(t.amount ?? 0), 0);
-    const previousExpense = previousTransactions
-      .filter(t => t.transactionType === TransactionType.EXPENSE)
-      .reduce((sum, t) => sum + Number(t.amount ?? 0), 0);
-    const previousDifference = previousIncome - previousExpense;
-
-    const incomeChange = currentIncome - previousIncome;
-    const expenseChange = currentExpense - previousExpense;
-    const differenceChange = currentDifference - previousDifference;
-
-    const report: MonthlyReport = {
-      month: month.toString(),
-      year,
-      dailyTrends,
-      categoryDistribution,
-      counterpartyDistribution,
-      comparison: {
-        currentPeriod: {
-          income: currentIncome,
-          expense: currentExpense,
-          difference: currentDifference,
-        },
-        previousPeriod: {
-          income: previousIncome,
-          expense: previousExpense,
-          difference: previousDifference,
-        },
-        change: {
-          incomeChange,
-          expenseChange,
-          differenceChange,
-          incomeChangePercent: previousIncome > 0 ? (incomeChange / previousIncome) * 100 : 0,
-          expenseChangePercent: previousExpense > 0 ? (expenseChange / previousExpense) * 100 : 0,
-          differenceChangePercent:
-            previousDifference !== 0 ? (differenceChange / Math.abs(previousDifference)) * 100 : 0,
-        },
-      },
-      summary: {
-        totalIncome: currentIncome,
-        totalExpense: currentExpense,
-        difference: currentDifference,
-        transactionCount: transactions.length,
-      },
-    };
-
-    // Log to audit
-    await logReportGeneration(
-      this.auditService,
+    return this.monthlyReportGenerator.generateMonthlyReport(
       workspaceId,
-      'monthly',
-      `${year}-${month.toString().padStart(2, '0')}`,
+      year,
+      month,
+      viewerMemberId,
     );
-
-    return report;
   }
 
-  /**
-   * Returns latest transaction date for user (YYYY-MM-DD) and month/year pair
-   */
-  async getLatestTransactionPeriod(
+  getLatestTransactionPeriod(
     workspaceId: string,
   ): Promise<{ date: string | null; year: number | null; month: number | null }> {
-    const latest = await this.getLatestTransactionDate(workspaceId);
-    if (!latest) {
-      return { date: null, year: null, month: null };
-    }
-    const dt = new Date(latest);
-    return {
-      date: latest,
-      year: dt.getFullYear(),
-      month: dt.getMonth() + 1,
-    };
+    return this.dailyReportGenerator.getLatestTransactionPeriod(workspaceId);
   }
 
-  /**
-   * Latest transaction date in ISO (YYYY-MM-DD) or null
-   */
-  async getLatestTransactionDate(workspaceId: string): Promise<string | null> {
-    const latest = await countedTransactions(this.transactionRepository, workspaceId)
-      .orderBy('transaction.transactionDate', 'DESC')
-      .select('transaction.transactionDate', 'transactionDate')
-      .getRawOne<{ transactionDate: Date | string }>();
-
-    if (!latest?.transactionDate) {
-      return null;
-    }
-    return dayOf(latest.transactionDate);
+  getLatestTransactionDate(workspaceId: string): Promise<string | null> {
+    return this.dailyReportGenerator.getLatestTransactionDate(workspaceId);
   }
 
-  /**
-   * Generate custom report
-   */
-  async generateCustomReport(
+  generateCustomReport(
     workspaceId: string,
     dto: CustomReportBody,
     viewerMemberId: string | null = null,
   ): Promise<CustomReport> {
-    const dateFrom = new Date(dto.dateFrom);
-    const dateTo = new Date(dto.dateTo);
-
-    // Build query
-    const queryBuilder = countedTransactions(this.transactionRepository, workspaceId)
-      .leftJoinAndSelect('transaction.category', 'category')
-      .leftJoinAndSelect('transaction.branch', 'branch')
-      .leftJoinAndSelect('transaction.wallet', 'wallet')
-      .andWhere('transaction.transactionDate >= :dateFrom', { dateFrom })
-      .andWhere('transaction.transactionDate <= :dateTo', { dateTo });
-
-    // Apply filters
-    if (dto.categoryId) {
-      queryBuilder.andWhere('transaction.categoryId = :categoryId', { categoryId: dto.categoryId });
-    }
-    if (dto.branchId) {
-      queryBuilder.andWhere('transaction.branchId = :branchId', { branchId: dto.branchId });
-    }
-    if (dto.walletId) {
-      queryBuilder.andWhere('transaction.walletId = :walletId', { walletId: dto.walletId });
-    }
-
-    const transactions = redactPrivateRows(await queryBuilder.getMany(), viewerMemberId);
-
-    // Group transactions
-    const groupMap = new Map<string, CustomReportGroup>();
-    const groupBy = dto.groupBy || ReportGroupBy.DAY;
-
-    transactions.forEach(t => {
-      let key: string;
-      let label: string;
-
-      switch (groupBy) {
-        case ReportGroupBy.CATEGORY:
-          key = t.categoryId || 'uncategorized';
-          label = t.category?.name || UNCATEGORIZED_CATEGORY_NAME;
-          break;
-        case ReportGroupBy.COUNTERPARTY:
-          key = t.counterpartyName;
-          label = t.counterpartyName;
-          break;
-        case ReportGroupBy.BRANCH:
-          key = t.branchId || 'unassigned';
-          label = t.branch?.name || 'Не назначен';
-          break;
-        case ReportGroupBy.WALLET:
-          key = t.walletId || 'unassigned';
-          label = t.wallet?.name || 'Не назначен';
-          break;
-        case ReportGroupBy.DAY: {
-          key = dayOf(t.transactionDate);
-          const [year, month, day] = key.split('-');
-          label = `${day}.${month}.${year}`;
-          break;
-        }
-        case ReportGroupBy.MONTH: {
-          const [year, month] = dayOf(t.transactionDate).split('-');
-          key = `${year}-${month}`;
-          label = `${month}.${year}`;
-          break;
-        }
-        default:
-          key = 'all';
-          label = 'Все';
-      }
-
-      const existing = groupMap.get(key) || {
-        key,
-        label,
-        totalAmount: 0,
-        transactionCount: 0,
-        transactions: [],
-      };
-
-      existing.totalAmount += Number(t.amount ?? 0);
-      existing.transactionCount += 1;
-      existing.transactions.push({
-        id: t.id,
-        date: dayOf(t.transactionDate),
-        counterparty: t.counterpartyName,
-        amount: Number(t.amount ?? 0),
-        category: t.category?.name,
-        branch: t.branch?.name,
-        wallet: t.wallet?.name,
-      });
-
-      groupMap.set(key, existing);
-    });
-
-    const groups = Array.from(groupMap.values()).sort((a, b) => b.totalAmount - a.totalAmount);
-
-    const totalIncome = transactions
-      .filter(t => t.transactionType === TransactionType.INCOME)
-      .reduce((sum, t) => sum + Number(t.amount ?? 0), 0);
-    const totalExpense = transactions
-      .filter(t => t.transactionType === TransactionType.EXPENSE)
-      .reduce((sum, t) => sum + Number(t.amount ?? 0), 0);
-
-    const report: CustomReport = {
-      dateFrom: dto.dateFrom,
-      dateTo: dto.dateTo,
-      groupBy,
-      groups,
-      summary: {
-        totalIncome,
-        totalExpense,
-        difference: totalIncome - totalExpense,
-        transactionCount: transactions.length,
-      },
-    };
-
-    // Log to audit
-    await logReportGeneration(
-      this.auditService,
-      workspaceId,
-      'custom',
-      `${dto.dateFrom}_${dto.dateTo}`,
-    );
-
-    return report;
+    return this.customReportGenerator.generateCustomReport(workspaceId, dto, viewerMemberId);
   }
 
   /**
@@ -643,7 +248,7 @@ export class ReportsService {
   ): Promise<{ filePath: string; fileName: string }> {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const fileName = `report-${timestamp}.${dto.format === ExportFormat.EXCEL ? 'xlsx' : 'csv'}`;
-    const filePath = path.join(this.resolveReportsDir(workspaceId), `${randomUUID()}-${fileName}`);
+    const filePath = path.join(resolveReportsDir(workspaceId), `${randomUUID()}-${fileName}`);
 
     if (dto.format === ExportFormat.EXCEL) {
       await this.exportToExcel(reportData, filePath, locale);
@@ -693,7 +298,7 @@ export class ReportsService {
     };
     const normalizedFormat = format || WorkspaceExportFormat.EXCEL;
     const fileName = `workspace-transactions-${timestamp}.${extensionMap[normalizedFormat]}`;
-    const filePath = path.join(this.resolveReportsDir(workspaceId), `${randomUUID()}-${fileName}`);
+    const filePath = path.join(resolveReportsDir(workspaceId), `${randomUUID()}-${fileName}`);
 
     if (normalizedFormat === WorkspaceExportFormat.EXCEL) {
       await this.generateWorkspaceExcel(transactions, filePath);
@@ -1134,89 +739,12 @@ export class ReportsService {
     fs.writeFileSync(filePath, csvContent, 'utf-8');
   }
 
-  async getStatementsSummary(
+  getStatementsSummary(
     workspaceId: string,
     days = 30,
     viewerMemberId: string | null = null,
   ): Promise<StatementsSummaryResponse> {
-    const safeDays = Number.isFinite(days) && days > 0 ? Math.min(days, 3650) : 30;
-    const since = new Date();
-    since.setDate(since.getDate() - safeDays);
-    since.setHours(0, 0, 0, 0);
-
-    const transactions = await countedTransactions(this.transactionRepository, workspaceId)
-      .leftJoinAndSelect('transaction.category', 'category')
-      .andWhere('transaction.transactionDate >= :since', { since })
-      .orderBy('transaction.updatedAt', 'DESC')
-      .take(2000)
-      .getMany();
-    redactPrivateRows(transactions, viewerMemberId);
-
-    const totals = { income: 0, expense: 0, net: 0, rows: transactions.length };
-    const timeseriesMap = new Map<string, { income: number; expense: number }>();
-    const categoryMap = new Map<string, { amount: number; rows: number }>();
-    const counterpartyMap = new Map<string, { amount: number; rows: number }>();
-
-    const recent = transactions
-      .slice(0, 50)
-      .map(t => {
-        const amount = Number(t.amount || 0);
-        const abs = Math.abs(amount);
-        const signedAmount = t.transactionType === TransactionType.INCOME ? abs : -abs;
-        return {
-          id: t.id,
-          amount: signedAmount,
-          category: t.category?.name || null,
-          counterparty: t.counterpartyName || null,
-          updatedAt: (t.updatedAt || t.createdAt).toISOString(),
-        };
-      })
-      .slice(0, 20);
-
-    transactions.forEach(t => {
-      const amount = Number(t.amount || 0);
-      const abs = Math.abs(amount);
-      const dateKey = toDateKey(t.transactionDate);
-      const ts = timeseriesMap.get(dateKey) || { income: 0, expense: 0 };
-
-      if (t.transactionType === TransactionType.INCOME) {
-        ts.income += abs;
-        const counterparty = (t.counterpartyName || 'Без названия').trim() || 'Без названия';
-        const existing = counterpartyMap.get(counterparty) || { amount: 0, rows: 0 };
-        counterpartyMap.set(counterparty, {
-          amount: existing.amount + abs,
-          rows: existing.rows + 1,
-        });
-        totals.income += abs;
-      } else {
-        ts.expense += abs;
-        const category =
-          (t.category?.name || UNCATEGORIZED_CATEGORY_NAME).trim() || UNCATEGORIZED_CATEGORY_NAME;
-        const existing = categoryMap.get(category) || { amount: 0, rows: 0 };
-        categoryMap.set(category, { amount: existing.amount + abs, rows: existing.rows + 1 });
-        totals.expense += abs;
-      }
-
-      timeseriesMap.set(dateKey, ts);
-    });
-
-    totals.net = totals.income - totals.expense;
-
-    const timeseries = Array.from(timeseriesMap.entries())
-      .map(([date, values]) => ({ date, ...values }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    const categories = Array.from(categoryMap.entries())
-      .map(([name, data]) => ({ name, amount: data.amount, rows: data.rows }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 10);
-
-    const counterparties = Array.from(counterpartyMap.entries())
-      .map(([name, data]) => ({ name, amount: data.amount, rows: data.rows }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 10);
-
-    return { totals, timeseries, categories, counterparties, recent };
+    return this.statementsSummaryReport.getStatementsSummary(workspaceId, days, viewerMemberId);
   }
 
   async getTopCategoriesReport(
@@ -1797,23 +1325,6 @@ export class ReportsService {
     }
   }
 
-  /**
-   * Generated reports live under uploads/ rather than the OS temp dir, because
-   * report history rows keep pointing at them long after the download stream ends.
-   * One directory per workspace, and every writer adds a random prefix to the
-   * file: a name built from a template id and dates alone was shared by every
-   * workspace, so one workspace's run overwrote the file another's history served.
-   */
-  private reportsDirOf(workspaceId: string): string {
-    return path.join(resolveUploadsDir(), 'reports', workspaceId);
-  }
-
-  private resolveReportsDir(workspaceId: string): string {
-    const dir = this.reportsDirOf(workspaceId);
-    fs.mkdirSync(dir, { recursive: true });
-    return dir;
-  }
-
   async generateFromTemplate(
     workspaceId: string,
     userId: string,
@@ -1830,7 +1341,7 @@ export class ReportsService {
             await this.buildTemplateDocument(workspaceId, dto),
             dto.format as ReportFileFormat,
             baseName,
-            this.resolveReportsDir(workspaceId),
+            resolveReportsDir(workspaceId),
           );
 
     await this.reportHistoryRepo.save({
@@ -1897,7 +1408,7 @@ export class ReportsService {
     );
 
     const fileName = `${baseName}.${dto.format === 'pdf' ? 'pdf' : 'xlsx'}`;
-    const filePath = path.join(this.resolveReportsDir(workspaceId), `${randomUUID()}-${fileName}`);
+    const filePath = path.join(resolveReportsDir(workspaceId), `${randomUUID()}-${fileName}`);
     fs.writeFileSync(filePath, payload.buffer);
 
     return { filePath, fileName, contentType: payload.contentType };
@@ -2477,53 +1988,11 @@ export class ReportsService {
     return entries.map(entry => [entry.groupName, entry.categoryName, round2(entry.total)]);
   }
 
-  async getReportHistory(workspaceId: string): Promise<ReportHistory[]> {
-    return this.reportHistoryRepo.find({
-      where: { workspaceId },
-      order: { generatedAt: 'DESC' },
-      take: 50,
-      relations: {
-        user: true,
-      },
-    });
+  getReportHistory(workspaceId: string): Promise<ReportHistory[]> {
+    return this.reportHistoryService.getReportHistory(workspaceId);
   }
 
-  async downloadHistoryReport(workspaceId: string, reportId: string): Promise<ReportFile> {
-    const report = await this.reportHistoryRepo.findOne({
-      where: { id: reportId, workspaceId },
-    });
-
-    // Only a file in this workspace's own directory is served. Rows written
-    // before reports moved there point at a shared path that another workspace
-    // may have overwritten since, so they read as missing.
-    const filePath =
-      report?.filePath &&
-      resolveInUploadsDir(report.filePath, path.resolve(this.reportsDirOf(workspaceId)));
-    if (!(filePath && report.fileName && fs.existsSync(filePath))) {
-      throw new NotFoundException(appError('REPORT_FILE_NOT_FOUND'));
-    }
-
-    const format = String(report.format || '').toLowerCase();
-    const contentType =
-      format === 'excel'
-        ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        : format === 'csv'
-          ? 'text/csv'
-          : 'application/pdf';
-
-    return {
-      filePath,
-      fileName: report.fileName,
-      contentType,
-    };
+  downloadHistoryReport(workspaceId: string, reportId: string): Promise<ReportFile> {
+    return this.reportHistoryService.downloadHistoryReport(workspaceId, reportId);
   }
-}
-
-/**
- * The calendar day of a `date` column as YYYY-MM-DD. Postgres hands such a
- * column back as that string, not as the `Date` the entity declares, so
- * calling Date methods on it throws.
- */
-function dayOf(value: Date | string): string {
-  return typeof value === 'string' ? value.slice(0, 10) : value.toISOString().slice(0, 10);
 }

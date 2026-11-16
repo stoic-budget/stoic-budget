@@ -156,3 +156,12 @@ export function toDateKey(value: unknown): string {
 export function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
+
+/**
+ * The calendar day of a `date` column as YYYY-MM-DD. Postgres hands such a
+ * column back as that string, not as the `Date` the entity declares, so
+ * calling Date methods on it throws.
+ */
+export function dayOf(value: Date | string): string {
+  return typeof value === 'string' ? value.slice(0, 10) : value.toISOString().slice(0, 10);
+}
