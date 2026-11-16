@@ -21,6 +21,8 @@ echo "Stopping the backend"
 compose stop backend
 
 echo "Recreating the database"
+# Single quotes on purpose: the variables are the postgres container's own.
+# shellcheck disable=SC2016
 compose exec -T postgres sh -c '
   db="${POSTGRES_DB:-finflow}"
   psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d postgres \
