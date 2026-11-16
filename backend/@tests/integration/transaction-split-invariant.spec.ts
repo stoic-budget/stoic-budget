@@ -64,6 +64,7 @@ import { MonthlyReportGenerator } from '../../src/modules/reports/monthly-report
 import { ReportHistoryService } from '../../src/modules/reports/report-history.service';
 import { ReportsService } from '../../src/modules/reports/reports.service';
 import { StatementsSummaryReport } from '../../src/modules/reports/statements-summary.report';
+import { WorkspaceExportReport } from '../../src/modules/reports/workspace-export.report';
 import { TransactionsService } from '../../src/modules/transactions/transactions.service';
 import { TaxAssignmentService } from '@/modules/tax/tax-assignment.service';
 import { WorkspaceCurrencyService } from '../../src/modules/workspaces/workspace-currency.service';
@@ -239,12 +240,13 @@ describe('split() preserves every money aggregate (real Postgres)', () => {
         { provide: CustomTablesSummaryReport, useValue: {} },
         { provide: CustomTablesReport, useValue: {} },
         { provide: CustomTablesDrillDownReport, useValue: {} },
-        // Periodic reports and report history, which this suite does not call.
+        // Periodic reports, report history and exports, which this suite does not call.
         { provide: DailyReportGenerator, useValue: {} },
         { provide: MonthlyReportGenerator, useValue: {} },
         { provide: CustomReportGenerator, useValue: {} },
         { provide: StatementsSummaryReport, useValue: {} },
         { provide: ReportHistoryService, useValue: {} },
+        { provide: WorkspaceExportReport, useValue: {} },
         { provide: ClassificationService, useValue: {} },
         { provide: NotificationsService, useValue: { create: vi.fn() } },
         { provide: EventEmitter2, useValue: { emit: vi.fn() } },

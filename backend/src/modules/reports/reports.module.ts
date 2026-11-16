@@ -37,6 +37,7 @@ import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 import { SpendFlowService } from './spend-flow.service';
 import { StatementsSummaryReport } from './statements-summary.report';
+import { WorkspaceExportReport } from './workspace-export.report';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { StatementsSummaryReport } from './statements-summary.report';
     CustomReportGenerator,
     StatementsSummaryReport,
     ReportHistoryService,
+    WorkspaceExportReport,
   ],
   exports: [ReportsService, ReportSchedulesService],
 })
