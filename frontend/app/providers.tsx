@@ -26,6 +26,7 @@ import {
   resolveThemePreference,
   THEME_STORAGE_EVENT,
 } from '@/app/lib/theme-preference';
+import { DemoBanner } from './components/demo/DemoBanner';
 import { KeyboardShortcutsProvider } from './components/keyboard-shortcuts-provider';
 import { OfflineBanner } from './components/pwa/OfflineBanner';
 import { ServiceWorkerRegistrar } from './components/pwa/ServiceWorkerRegistrar';
@@ -113,6 +114,7 @@ function WorkspaceScopedProviders({
             <>
               <ServiceWorkerRegistrar />
               <OfflineBanner />
+              <DemoBanner />
               <VersionBanner />
               {/* Reads the address; under Suspense so it never holds the page's render. */}
               <React.Suspense fallback={null}>
