@@ -269,6 +269,23 @@ describe('applying a rule whose conditions read what rules above set', () => {
     expect(plan.refiled.map(one => one.id)).toEqual(['suggested']);
   });
 
+  it('reads a category with no recorded source as there, as apply keeps it', () => {
+    const empty = rule('no category', {
+      conditions: [{ field: 'category', operator: 'is_empty', value: '' }],
+      result: { tagIds: [TAG_WORK] },
+    });
+    const older = row('older', { categoryId: GADGETS, categorySource: null });
+
+    const plan = planRuleApply([older], empty, {
+      viewerMemberId: null,
+      setsCategory: false,
+      setsTags: true,
+      written: [empty],
+    });
+
+    expect(plan.matches).toEqual([]);
+  });
+
   it('counts a row missing from the loaded tags as having none, not its relation', () => {
     const work = rule('work', {
       conditions: [{ field: 'tags', operator: 'is_empty', value: '' }],
@@ -342,6 +359,24 @@ describe('the preview of a rule below others', () => {
     expect(fresh.matchedTransactions).toBe(1);
   });
 
+  it('does not read a tag a rule below adds as the row’s own', async () => {
+    const draft = rule('draft', {
+      conditions: [{ field: 'tags', operator: 'is_empty', value: '' }],
+      result: { categoryId: GADGETS },
+    });
+    const tagsBelow = rule('tags below', { result: { tagIds: [TAG_WORK] } });
+    const service = previewService([row('tagged')], [draft, tagsBelow], { tagged: [TAG_WORK] });
+
+    const preview = await service.previewRule({
+      workspaceId: WORKSPACE,
+      viewerMemberId: null,
+      conditions: draft.conditions,
+      ruleId: 'draft',
+    });
+
+    expect(preview.matchedTransactions).toBe(1);
+  });
+
   it('does not see a category a rule below wrote on the row, as on import', async () => {
     const early = rule('early', {
       conditions: [{ field: 'category', operator: 'equals', value: GROCERIES }],
@@ -387,6 +422,42 @@ describe('rule health on rules that ask about the category', () => {
     ).contradictedRules(WORKSPACE, [blankOnly], new Date(2026, 10, 1));
 
     expect(contradicted).toEqual([{ id: 'blank is gadgets', name: 'blank is gadgets', count: 3 }]);
+  });
+
+  it('reads a comment a rule wrote as not there, as an import would', async () => {
+    const NOTE = 'Weekly shop';
+    // It wrote the note on these rows once; it no longer matches them.
+    const writes = rule('writes note', {
+      priority: 2,
+      conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'bakery' }],
+      result: { comment: NOTE },
+    });
+    const noNote = rule('no note is gadgets', {
+      priority: 1,
+      conditions: [{ field: 'comment', operator: 'is_empty', value: '' }],
+      result: { categoryId: GADGETS },
+    });
+    const qb: Record<string, unknown> = {};
+    for (const method of ['where', 'andWhere', 'orderBy', 'take']) {
+      qb[method] = vi.fn(() => qb);
+    }
+    const filedByHand = (id: string) =>
+      row(id, { categoryId: 'fun', categorySource: TransactionCategorySource.MANUAL, comments: NOTE });
+    qb.getMany = vi.fn(async () => [filedByHand('a'), filedByHand('b'), filedByHand('c')]);
+    const service = new RuleHealthService(
+      { manager: managerWith() } as never,
+      { createQueryBuilder: () => qb, manager: managerWith() } as never,
+      {} as never,
+      {} as never,
+    );
+
+    const contradicted = await (
+      service as unknown as {
+        contradictedRules: (ws: string, rules: unknown[], now: Date) => Promise<unknown[]>;
+      }
+    ).contradictedRules(WORKSPACE, [writes, noNote], new Date(2026, 10, 1));
+
+    expect(contradicted).toEqual([{ id: 'no note is gadgets', name: 'no note is gadgets', count: 3 }]);
   });
 });
 

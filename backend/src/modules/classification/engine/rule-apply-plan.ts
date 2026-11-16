@@ -25,7 +25,7 @@ type TriedRule = {
  * category, payee, tags or comment reads the row as those rules above left it
  * (rule-row-state). It starts, as an import or a re-run does, from the row as
  * it arrived: without what `written` (the workspace's active rules) put on it,
- * and without a category nobody decided. `tagIds` holds the rows' tags, by row
+ * and without a category a rule or a suggestion put there. `tagIds` holds the rows' tags, by row
  * id, when a rule asks about them.
  */
 export function rowsMatching<Above extends TriedRule>(
@@ -48,6 +48,7 @@ export function rowsMatching<Above extends TriedRule>(
       row,
       input.written ?? input.above ?? [],
       input.tagIds ? (input.tagIds.get(row.id) ?? []) : undefined,
+      { keepUnsourced: true },
     );
     const pass = passRules(input.above ?? [], row, start);
     return matchesRule(row, rule, pass.state)

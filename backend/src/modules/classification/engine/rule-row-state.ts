@@ -66,11 +66,19 @@ export function passStartState(
   row: StoredRow,
   rules: readonly { result: ClassificationResult }[],
   tagIds?: readonly string[],
+  /**
+   * Preview and apply: a category with no recorded source (older rows, a table
+   * conversion) stays too, as apply keeps it; only a re-run replaces it.
+   */
+  options: { keepUnsourced?: boolean } = {},
 ): RuleRowState {
   const state = storedState(row, tagIds);
   const ruleTags = new Set(rules.flatMap(rule => rule.result.tagIds ?? []));
   const ruleComments = new Set(rules.map(rule => rule.result.comment?.trim()).filter(Boolean));
-  const keepsCategory = row.categorySource === TransactionCategorySource.MANUAL || row.taxLocked;
+  const keepsCategory =
+    row.categorySource === TransactionCategorySource.MANUAL ||
+    row.taxLocked ||
+    (options.keepUnsourced && row.categorySource == null);
   return {
     ...state,
     categoryId: keepsCategory ? state.categoryId : null,
