@@ -57,6 +57,8 @@ export class SubscriptionDetectionService {
       .andWhere('t.is_duplicate = false')
       .andWhere('t.transfer_pair_id IS NULL')
       .andWhere(countedSql('t'))
+      // A row left out of budgets is a one-off by the user's own word, not a charge that repeats.
+      .andWhere('t.excluded_from_budgets = false')
       .andWhere('t.transaction_date >= :since', { since })
       .andWhere('t.counterparty_name IS NOT NULL')
       // A detected subscription is named after its merchant and shown to the

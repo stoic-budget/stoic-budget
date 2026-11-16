@@ -229,14 +229,17 @@ describe('API contracts: ledger book (e2e)', () => {
       const updated = await call('put', `/transactions/${transactionId}`, {
         comments: 'For the office',
         debit: 42.5,
+        excludedFromBudgets: true,
       }).expect(200);
       matches(TransactionRecord, updated.body);
       expect(updated.body.debit).toBe('42.50');
+      expect(updated.body.excludedFromBudgets).toBe(true);
       const bulk = await call('post', '/transactions/bulk-update', {
-        items: [{ id: transactionId, updates: { comments: 'Checked' } }],
+        items: [{ id: transactionId, updates: { comments: 'Checked', excludedFromBudgets: false } }],
       }).expect(200);
       matches(TransactionRecordList, bulk.body);
       expect(bulk.body[0].comments).toBe('Checked');
+      expect(bulk.body[0].excludedFromBudgets).toBe(false);
     });
 
     it('split, its parts and unsplit', async () => {

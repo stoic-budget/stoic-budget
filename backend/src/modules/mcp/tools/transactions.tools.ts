@@ -57,7 +57,7 @@ export function transactionTools(transactions: TransactionsService): McpTool[] {
     defineTool({
       name: 'update_transaction',
       description:
-        'Change what a transaction says: its category, counterparty, purpose, comments, tax relevance or privacy. Amounts and dates are left alone. The change is logged as this API key and can be undone from the activity log.',
+        'Change what a transaction says: its category, counterparty, purpose, comments, tax relevance, privacy, or whether it counts in budgets. Amounts and dates are left alone. The change is logged as this API key and can be undone from the activity log.',
       input: Schema.Struct({
         id: Uuid,
         categoryId: Schema.optionalKey(
@@ -71,6 +71,12 @@ export function transactionTools(transactions: TransactionsService): McpTool[] {
         ),
         isPrivate: Schema.optionalKey(
           described(Schema.Boolean, 'Hide the row from the rest of the household (own rows only)'),
+        ),
+        excludedFromBudgets: Schema.optionalKey(
+          described(
+            Schema.Boolean,
+            'Leave the row out of budgets, reports and the forecast; balances, net worth and tax still count it',
+          ),
         ),
       }),
       permissions: [Permission.TRANSACTION_EDIT],
