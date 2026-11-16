@@ -43,7 +43,7 @@ import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { DataDeletedEvent } from '../notifications/events/notification-events';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
 import { assertMayReshape, assertSplittable, memberIdOf } from './helpers/split-guards';
-import { cloneForSplit } from './helpers/transaction-split-clone';
+import { applyPartCategory, cloneForSplit } from './helpers/transaction-split-clone';
 import { applyListFilters, type TransactionListFilters } from './transaction-list-filters';
 
 export type TransactionWithConversion = Transaction & {
@@ -521,12 +521,7 @@ export class TransactionsService {
         // amount. Null on every part so backfillFingerprints recomputes them all.
         row.fingerprint = null;
 
-        // Per-part override, else keep what the row already inherited.
-        if (part.categoryId && part.categoryId !== row.categoryId) {
-          row.categoryId = part.categoryId;
-          row.categorySource = TransactionCategorySource.MANUAL;
-          row.categoryReason = null;
-        }
+        applyPartCategory(row, part.categoryId, locked.isPrivate);
         row.paymentPurpose = part.paymentPurpose ?? row.paymentPurpose;
         row.comments = part.comments ?? row.comments;
 

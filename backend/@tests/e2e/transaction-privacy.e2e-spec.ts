@@ -625,6 +625,32 @@ describe('Private transactions (e2e)', () => {
       expect(theirs.map(tx => tx.counterpartyName)).toEqual(['—', '—']);
     });
 
+    it('files a part’s own category behind Private, where only the owner reads it', async () => {
+      const id = await privateRow('Example Pharmacy - Vitamins');
+      const categories = await as(owner, request(server()).get('/categories?type=expense')).expect(
+        200,
+      );
+      const other = categories.body.find((c: { id: string }) => c.id !== giftsCategoryId).id;
+      const before = (await listFor(owner)).find(tx => tx.id === id);
+
+      const parts = (
+        await as(owner, request(server()).post(`/transactions/${id}/split`))
+          .send({ parts: [{ amount: 25, categoryId: other }, { amount: 15 }] })
+          .expect(200)
+      ).body as Array<{ id: string }>;
+      const partIds = parts.map(part => part.id);
+
+      const inSplitOrder = (rows: ListedTransaction[]) =>
+        partIds.map(partId => rows.find(tx => tx.id === partId));
+      const mine = inSplitOrder(await listFor(owner));
+      expect(mine.map(tx => [tx?.categoryId, tx?.privateCategoryId])).toEqual([
+        [before?.categoryId, other],
+        [before?.categoryId, giftsCategoryId],
+      ]);
+      const theirs = inSplitOrder(await listFor(partner));
+      expect(theirs.map(tx => tx?.categoryId)).toEqual([before?.categoryId, before?.categoryId]);
+    });
+
     it('lets nobody else put a group back together while one part is private', async () => {
       const id = await bookExpense('Example Hardware - Nails', '40');
       await as(owner, request(server()).put(`/transactions/${id}`))
