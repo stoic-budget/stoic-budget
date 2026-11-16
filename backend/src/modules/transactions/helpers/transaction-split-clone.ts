@@ -42,6 +42,9 @@ export function cloneForSplit(source: Transaction): Partial<Transaction> {
     // Each part starts on the same person as the whole; splitting a shared
     // purchase between two people is done by reassigning the parts afterwards.
     ownerMemberId: source.ownerMemberId,
+    // A private row's parts stay private, each keeping the real category behind the Private one.
+    isPrivate: source.isPrivate,
+    privateCategoryId: source.privateCategoryId,
     article: source.article,
     activityType: source.activityType,
     vendorNormalized: source.vendorNormalized,

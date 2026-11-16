@@ -42,6 +42,7 @@ import { ensurePrivateCategory } from '../categories/private-category';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { DataDeletedEvent } from '../notifications/events/notification-events';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
+import { assertMayReshape, assertSplittable, memberIdOf } from './helpers/split-guards';
 import { cloneForSplit } from './helpers/transaction-split-clone';
 import { applyListFilters, type TransactionListFilters } from './transaction-list-filters';
 
@@ -420,50 +421,6 @@ export class TransactionsService {
   }
 
   /**
-   * Guards that a transaction may be split, and returns its authoritative amount.
-   *
-   * Called twice: once outside the DB transaction as a cheap fast path, and again
-   * on the locked row, which is the read the parts are actually derived from.
-   */
-  private assertSplittable(transaction: Transaction, dto: SplitTransactionBody): number {
-    if (transaction.splitGroupId) {
-      throw new BadRequestException(appError('TRANSACTION_ALREADY_SPLIT'));
-    }
-
-    // A duplicate-flagged row is excluded from dashboards and reports. Splitting it
-    // would produce siblings that default to isDuplicate=false, so the sibling
-    // amounts would reappear in those totals. Refuse instead.
-    if (transaction.isDuplicate) {
-      throw new BadRequestException(appError('TRANSACTION_SPLIT_DUPLICATE'));
-    }
-
-    // A locked row has already been reported on a filed return. Splitting it
-    // re-assesses the tax across the parts, which would change figures that
-    // have been submitted to a tax authority.
-    if (transaction.taxLocked) {
-      throw new BadRequestException(appError('TRANSACTION_SPLIT_TAX_LOCKED'));
-    }
-
-    const total = Number(
-      transaction.amount ?? transaction.debit ?? transaction.credit ?? Number.NaN,
-    );
-    if (!Number.isFinite(total) || total <= 0) {
-      throw new BadRequestException(appError('TRANSACTION_SPLIT_NOT_POSITIVE'));
-    }
-
-    const partsTotal = this.round2(dto.parts.reduce((sum, part) => sum + Number(part.amount), 0));
-    // Round the drift too: |99.99 - 100| is 0.010000000000005 in binary floating
-    // point, which would reject the very boundary the tolerance exists to accept.
-    if (this.round2(Math.abs(partsTotal - total)) > 0.01) {
-      throw new BadRequestException(
-        appError('TRANSACTION_SPLIT_SUM_MISMATCH', { total, received: partsTotal }),
-      );
-    }
-
-    return total;
-  }
-
-  /**
    * Divides a transaction's money across its parts.
    *
    * The requested amounts are rounded to cents and the LAST part absorbs the
@@ -508,6 +465,7 @@ export class TransactionsService {
     dto: SplitTransactionBody,
   ): Promise<Transaction[]> {
     await this.ensureCanEditStatements(userId, workspaceId);
+    const viewerMemberId = await memberIdOf(this.workspaceMemberRepository, workspaceId, userId);
     const original = await this.findOne(id, workspaceId);
     await assertWorkspaceOwned(
       this.transactionRepository.manager,
@@ -517,7 +475,7 @@ export class TransactionsService {
     );
     // Fast path only: reject an obviously invalid request before opening a DB
     // transaction and taking a row lock. The authoritative check is the one below.
-    this.assertSplittable(original, dto);
+    assertSplittable(original, dto, viewerMemberId);
 
     const before = { ...original };
     const splitGroupId = randomUUID();
@@ -537,7 +495,7 @@ export class TransactionsService {
         throw new NotFoundException(appError('TRANSACTION_NOT_FOUND'));
       }
 
-      const total = this.assertSplittable(locked, dto);
+      const total = assertSplittable(locked, dto, viewerMemberId);
       const isExpense = locked.transactionType === TransactionType.EXPENSE;
       const rawForeign = locked.amountForeign ?? null;
       const { amounts, foreignAmounts } = this.allocateParts(
@@ -654,6 +612,7 @@ export class TransactionsService {
    */
   async unsplit(id: string, workspaceId: string, userId: string): Promise<Transaction> {
     await this.ensureCanEditStatements(userId, workspaceId);
+    const viewerMemberId = await memberIdOf(this.workspaceMemberRepository, workspaceId, userId);
 
     // Fast path only: reject an obviously invalid request before opening a DB
     // transaction and taking row locks. The authoritative read is the locked one.
@@ -694,6 +653,8 @@ export class TransactionsService {
       if (parts.some(part => part.taxLocked)) {
         throw new BadRequestException(appError('TRANSACTION_UNSPLIT_TAX_LOCKED'));
       }
+      // Every part, not only the one asked about: another may be someone's private row.
+      assertMayReshape(parts, viewerMemberId);
 
       before = parts.map(part => ({ ...part }));
 
