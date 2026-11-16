@@ -1,4 +1,5 @@
 import * as Schema from 'effect/Schema';
+import * as Struct from 'effect/Struct';
 import { DateOnly, DecimalString, Timestamp, type Wire } from '../common/wire';
 import { StatementStatus } from '../statements/statement-list';
 import { TransactionListItem } from '../transactions/transaction-list';
@@ -195,7 +196,10 @@ export const SharedFileAccess = Schema.Struct({
     fileSize: Schema.Number,
     accountNumber: Schema.NullOr(Schema.String),
   }),
-  transactions: Schema.Array(StatementTransaction),
+  /** Without the split: the shared page cannot undo one. */
+  transactions: Schema.Array(
+    StatementTransaction.mapFields(Struct.omit(['splitGroupId', 'splitIndex'])),
+  ),
   permission: SharePermissionLevel,
   canDownload: Schema.Boolean,
 });

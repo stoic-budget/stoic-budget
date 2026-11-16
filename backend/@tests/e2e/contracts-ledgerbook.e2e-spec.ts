@@ -261,6 +261,18 @@ describe('API contracts: ledger book (e2e)', () => {
         );
         expect(inGroup.map((row: { splitIndex: number }) => row.splitIndex).sort()).toEqual([0, 1]);
       }
+      // A public link's page cannot undo a split: its rows leave without the group.
+      const link = await call('post', `/storage/files/${statementId}/share`, {
+        permission: 'download',
+      }).expect(201);
+      const shared = await request(app.getHttpServer())
+        .get(`/storage/shared/${link.body.token}`)
+        .expect(200);
+      expect(shared.body.transactions.length).toBeGreaterThan(0);
+      for (const row of shared.body.transactions) {
+        expect(row).not.toHaveProperty('splitGroupId');
+        expect(row).not.toHaveProperty('splitIndex');
+      }
       const listed = await call('get', `/transactions/${id}/split`).expect(200);
       matches(TransactionRecordList, listed.body);
       const merged = await call('post', `/transactions/${id}/unsplit`).expect(200);
