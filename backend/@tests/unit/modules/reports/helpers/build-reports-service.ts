@@ -1,3 +1,6 @@
+import { CustomTablesReport } from '@/modules/reports/custom-tables-report.report';
+import { CustomTablesDrillDownReport } from '@/modules/reports/custom-tables-drilldown.report';
+import { CustomTablesSummaryReport } from '@/modules/reports/custom-tables-summary.report';
 import { ReportsService } from '@/modules/reports/reports.service';
 
 /**
@@ -35,11 +38,11 @@ export function buildReportsService(overrides: Partial<ReportsServiceDeps> = {})
     holdingsSnapshotReport: {},
     ...overrides,
   };
+  const tables = deps.customTableRepository as any;
+  const columns = deps.customTableColumnRepository as any;
+  const rows = deps.customTableRowRepository as any;
   return new ReportsService(
     deps.transactionRepository as any,
-    deps.customTableRepository as any,
-    deps.customTableColumnRepository as any,
-    deps.customTableRowRepository as any,
     deps.cacheManager as any,
     deps.auditService as any,
     deps.reportHistoryRepo as any,
@@ -48,5 +51,8 @@ export function buildReportsService(overrides: Partial<ReportsServiceDeps> = {})
     deps.balanceService as any,
     deps.budgetVsActualReport as any,
     deps.holdingsSnapshotReport as any,
+    new CustomTablesSummaryReport(deps.cacheManager as any, tables, columns, rows),
+    new CustomTablesReport(deps.cacheManager as any, tables, columns, rows),
+    new CustomTablesDrillDownReport(tables, columns, rows),
   );
 }

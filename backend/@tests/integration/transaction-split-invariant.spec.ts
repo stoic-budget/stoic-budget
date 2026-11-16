@@ -54,6 +54,9 @@ import { DashboardService } from '../../src/modules/dashboard/dashboard.service'
 import { ExchangeRatesService } from '../../src/modules/exchange-rates/exchange-rates.service';
 import { NotificationsService } from '../../src/modules/notifications/notifications.service';
 import { BudgetVsActualReport } from '../../src/modules/reports/budget-vs-actual.report';
+import { CustomTablesReport } from '../../src/modules/reports/custom-tables-report.report';
+import { CustomTablesDrillDownReport } from '../../src/modules/reports/custom-tables-drilldown.report';
+import { CustomTablesSummaryReport } from '../../src/modules/reports/custom-tables-summary.report';
 import { HoldingsSnapshotReport } from '../../src/modules/reports/holdings-snapshot.report';
 import { ReportsService } from '../../src/modules/reports/reports.service';
 import { TransactionsService } from '../../src/modules/transactions/transactions.service';
@@ -227,6 +230,10 @@ describe('split() preserves every money aggregate (real Postgres)', () => {
         // The P&L totals compared here never reach these two templates.
         { provide: BudgetVsActualReport, useValue: {} },
         { provide: HoldingsSnapshotReport, useValue: {} },
+        // Custom-table reports read their own tables, not transactions.
+        { provide: CustomTablesSummaryReport, useValue: {} },
+        { provide: CustomTablesReport, useValue: {} },
+        { provide: CustomTablesDrillDownReport, useValue: {} },
         { provide: ClassificationService, useValue: {} },
         { provide: NotificationsService, useValue: { create: vi.fn() } },
         { provide: EventEmitter2, useValue: { emit: vi.fn() } },

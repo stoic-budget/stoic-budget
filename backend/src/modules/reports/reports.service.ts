@@ -5,7 +5,7 @@ import { Cache } from 'cache-manager';
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { In, MoreThanOrEqual, type Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import * as xlsx from 'xlsx';
 import { appError } from '../../common/errors/app-error';
 import { onlyCounted } from '../../common/utils/counted-transactions.util';
@@ -29,9 +29,6 @@ import type {
   SpendOverTimeQuery,
   TopCategoriesQuery,
 } from '../../contracts';
-import { CustomTable } from '../../entities/custom-table.entity';
-import { CustomTableColumn } from '../../entities/custom-table-column.entity';
-import { CustomTableRow } from '../../entities/custom-table-row.entity';
 import { ReportHistory } from '../../entities/report-history.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
@@ -42,14 +39,12 @@ import { UNCATEGORIZED_CATEGORY_NAME } from '../categories/uncategorized-categor
 import { CurrencyConverter, normalizeCurrencyCode } from '../exchange-rates/currency-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { BudgetVsActualReport } from './budget-vs-actual.report';
+import { CustomTablesDrillDownReport } from './custom-tables-drilldown.report';
+import { CustomTablesReport } from './custom-tables-report.report';
+import { CustomTablesSummaryReport } from './custom-tables-summary.report';
 import { ReportGroupBy } from './dto/custom-report.dto';
-import {
-  CustomTableReportFlowType,
-  CustomTableReportSortKey,
-} from './dto/custom-tables-report.dto';
 import { ExportFormat } from './dto/export-report.dto';
 import { WorkspaceExportFormat } from './dto/workspace-export.dto';
-import { type ColumnMapping, columnMappingOf } from './helpers/custom-table-columns.util';
 import {
   countedTransactions,
   getReportsVersion,
@@ -59,9 +54,6 @@ import {
   formatMonthLabel,
   formatMonthPeriod,
   getIsoWeekInfo,
-  normalizeText,
-  parseDate,
-  parseNumber,
   round2,
   toDateKey,
   toEndOfUtcDay,
@@ -70,9 +62,9 @@ import {
 import { HoldingsSnapshotReport } from './holdings-snapshot.report';
 import type { CustomReport, CustomReportGroup } from './interfaces/custom-report.interface';
 import type {
+  AvailableCustomTable,
   CustomTablesReportDrillDownResponse,
   CustomTablesReportResponse,
-  CustomTablesReportRow,
   CustomTablesSummaryResponse,
 } from './interfaces/custom-tables-report.interface';
 import type { DailyReport } from './interfaces/daily-report.interface';
@@ -160,36 +152,9 @@ const neutralize = (value: string | null | undefined): string =>
 
 @Injectable()
 export class ReportsService {
-  private emptyCustomTablesReportResponse(): CustomTablesReportResponse {
-    return {
-      totals: { total: 0, manualTotal: 0, operations: 0 },
-      comparison: {
-        totalDelta: 0,
-        totalPercentage: 0,
-        totalTrend: 'flat',
-        manualDelta: 0,
-        manualPercentage: 0,
-        manualTrend: 'flat',
-        operationsDelta: 0,
-        operationsPercentage: 0,
-        operationsTrend: 'flat',
-      },
-      timeseries: [],
-      sourceSplit: { manual: 0 },
-      aggregatedRows: [],
-      tables: [],
-    };
-  }
-
   constructor(
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
-    @InjectRepository(CustomTable)
-    private customTableRepository: Repository<CustomTable>,
-    @InjectRepository(CustomTableColumn)
-    private customTableColumnRepository: Repository<CustomTableColumn>,
-    @InjectRepository(CustomTableRow)
-    private customTableRowRepository: Repository<CustomTableRow>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly auditService: AuditService,
     @InjectRepository(ReportHistory)
@@ -200,665 +165,34 @@ export class ReportsService {
     private readonly balanceService: BalanceService,
     private readonly budgetVsActualReport: BudgetVsActualReport,
     private readonly holdingsSnapshotReport: HoldingsSnapshotReport,
+    private readonly customTablesSummaryReport: CustomTablesSummaryReport,
+    private readonly customTablesReport: CustomTablesReport,
+    private readonly customTablesDrillDownReport: CustomTablesDrillDownReport,
   ) {}
 
-  /** Cached reports are keyed by this version; TransactionsService bumps it on every edit. */
-  async getCustomTablesSummary(
+  getCustomTablesSummary(
     workspaceId: string,
     dto: CustomTablesSummaryBody,
   ): Promise<CustomTablesSummaryResponse> {
-    const version = await getReportsVersion(this.cacheManager, workspaceId);
-    const cacheKey = `reports:custom-tables:${workspaceId}:${version}:${JSON.stringify(dto)}`;
-    const cached = await this.cacheManager.get<CustomTablesSummaryResponse>(cacheKey);
-    if (cached) {
-      return cached;
-    }
-
-    const safeDays =
-      Number.isFinite(dto.days) && (dto.days as number) > 0
-        ? Math.min(dto.days as number, 3650)
-        : 30;
-    const since = new Date();
-    since.setDate(since.getDate() - safeDays);
-    since.setHours(0, 0, 0, 0);
-
-    const requestedIds = (dto.tableIds || []).filter(id => typeof id === 'string' && id.length);
-
-    const tables = await this.customTableRepository.find({
-      where: {
-        workspaceId,
-        ...(requestedIds.length ? { id: In(requestedIds) } : {}),
-      },
-      relations: { category: true },
-      order: { updatedAt: 'DESC' },
-    });
-
-    if (requestedIds.length && tables.length !== requestedIds.length) {
-      throw new BadRequestException(appError('TABLES_NOT_FOUND'));
-    }
-
-    if (!tables.length) {
-      return {
-        totals: { income: 0, expense: 0, net: 0, rows: 0 },
-        timeseries: [],
-        categories: [],
-        counterparties: [],
-        recent: [],
-        tables: [],
-      };
-    }
-
-    const tableById = new Map<string, CustomTable>();
-    for (const t of tables) {
-      tableById.set(t.id, t);
-    }
-    const tableIds = tables.map(t => t.id);
-
-    const columns = await this.customTableColumnRepository.find({
-      where: { tableId: In(tableIds) },
-      order: { tableId: 'ASC', position: 'ASC' },
-    });
-
-    const columnsByTableId = new Map<string, CustomTableColumn[]>();
-    for (const col of columns) {
-      const list = columnsByTableId.get(col.tableId) || [];
-      list.push(col);
-      columnsByTableId.set(col.tableId, list);
-    }
-
-    const mappingByTableId = new Map<string, ColumnMapping>();
-
-    for (const tableId of tableIds) {
-      const cols = columnsByTableId.get(tableId) || [];
-      mappingByTableId.set(tableId, columnMappingOf(cols));
-    }
-
-    const rows = await this.customTableRowRepository.find({
-      where: { tableId: In(tableIds), updatedAt: MoreThanOrEqual(since) },
-      order: { updatedAt: 'DESC' },
-    });
-
-    const totals = { income: 0, expense: 0, net: 0, rows: 0 };
-    const timeseriesMap = new Map<string, { income: number; expense: number }>();
-    const categoryMap = new Map<string, { amount: number; rows: number }>();
-    const counterpartyMap = new Map<string, { amount: number; rows: number }>();
-    const perTableMap = new Map<string, { income: number; expense: number; rows: number }>();
-    const recent: CustomTablesSummaryResponse['recent'] = [];
-
-    for (const row of rows) {
-      const table = tableById.get(row.tableId);
-      if (!table) {
-        continue;
-      }
-      const mapping = mappingByTableId.get(row.tableId);
-      const dateValue = mapping?.dateKey ? row.data?.[mapping.dateKey] : null;
-      const parsedDate = parseDate(dateValue) || row.updatedAt || row.createdAt;
-      if (parsedDate < since) {
-        continue;
-      }
-
-      const amountValue = mapping?.amountKey ? row.data?.[mapping.amountKey] : null;
-      const amountRaw = parseNumber(amountValue);
-      if (amountRaw === null) {
-        continue;
-      }
-
-      const abs = Math.abs(amountRaw);
-      const isIncome = amountRaw >= 0;
-      const dateKey = toDateKey(parsedDate);
-      const ts = timeseriesMap.get(dateKey) || { income: 0, expense: 0 };
-      if (isIncome) {
-        ts.income += abs;
-        totals.income += abs;
-      } else {
-        ts.expense += abs;
-        totals.expense += abs;
-      }
-      timeseriesMap.set(dateKey, ts);
-      totals.rows += 1;
-
-      const perTable = perTableMap.get(row.tableId) || { income: 0, expense: 0, rows: 0 };
-      if (isIncome) {
-        perTable.income += abs;
-      } else {
-        perTable.expense += abs;
-      }
-      perTable.rows += 1;
-      perTableMap.set(row.tableId, perTable);
-
-      const categoryValue = mapping?.categoryKey ? row.data?.[mapping.categoryKey] : null;
-      const counterpartyValue = mapping?.counterpartyKey
-        ? row.data?.[mapping.counterpartyKey]
-        : null;
-      const categoryName = normalizeText(categoryValue) || table.category?.name || null;
-      const counterpartyName = normalizeText(counterpartyValue) || null;
-
-      if (isIncome) {
-        const key = (counterpartyName || 'Без названия').trim() || 'Без названия';
-        const existing = counterpartyMap.get(key) || { amount: 0, rows: 0 };
-        counterpartyMap.set(key, { amount: existing.amount + abs, rows: existing.rows + 1 });
-      } else {
-        const key =
-          (categoryName || UNCATEGORIZED_CATEGORY_NAME).trim() || UNCATEGORIZED_CATEGORY_NAME;
-        const existing = categoryMap.get(key) || { amount: 0, rows: 0 };
-        categoryMap.set(key, { amount: existing.amount + abs, rows: existing.rows + 1 });
-      }
-
-      if (recent.length < 20) {
-        recent.push({
-          id: row.id,
-          tableId: table.id,
-          tableName: table.name,
-          rowNumber: row.rowNumber,
-          amount: isIncome ? abs : -abs,
-          category: categoryName,
-          counterparty: counterpartyName,
-          updatedAt: (row.updatedAt || row.createdAt).toISOString(),
-        });
-      }
-    }
-
-    totals.net = totals.income - totals.expense;
-
-    const timeseries = Array.from(timeseriesMap.entries())
-      .map(([date, values]) => ({ date, ...values }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    const categories = Array.from(categoryMap.entries())
-      .map(([name, data]) => ({ name, amount: data.amount, rows: data.rows }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 10);
-
-    const counterparties = Array.from(counterpartyMap.entries())
-      .map(([name, data]) => ({ name, amount: data.amount, rows: data.rows }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 10);
-
-    const tablesBreakdown = tables
-      .map(t => {
-        const metrics = perTableMap.get(t.id) || { income: 0, expense: 0, rows: 0 };
-        return {
-          id: t.id,
-          name: t.name,
-          income: metrics.income,
-          expense: metrics.expense,
-          net: metrics.income - metrics.expense,
-          rows: metrics.rows,
-        };
-      })
-      .sort((a, b) => b.rows - a.rows);
-
-    const response: CustomTablesSummaryResponse = {
-      totals,
-      timeseries,
-      categories,
-      counterparties,
-      recent,
-      tables: tablesBreakdown,
-    };
-
-    await this.cacheManager.set(cacheKey, response, 300000); // 5 minutes
-    return response;
+    return this.customTablesSummaryReport.getCustomTablesSummary(workspaceId, dto);
   }
 
-  async getCustomTablesReport(
+  getCustomTablesReport(
     workspaceId: string,
     dto: CustomTablesReportBody,
   ): Promise<CustomTablesReportResponse> {
-    const version = await getReportsVersion(this.cacheManager, workspaceId);
-    const cacheKey = `reports:custom-tables-report:${workspaceId}:${version}:${JSON.stringify(dto)}`;
-    const cached = await this.cacheManager.get<CustomTablesReportResponse>(cacheKey);
-    if (cached) {
-      return cached;
-    }
-
-    const safeDays =
-      Number.isFinite(dto.days) && (dto.days as number) > 0
-        ? Math.min(dto.days as number, 3650)
-        : 30;
-    const flowType = dto.flowType || CustomTableReportFlowType.ALL;
-    const sortBy = dto.sortBy || CustomTableReportSortKey.AMOUNT;
-    const limit =
-      Number.isFinite(dto.limit) && (dto.limit as number) > 0
-        ? Math.min(dto.limit as number, 500)
-        : 60;
-    const search = normalizeText(dto.search)?.toLowerCase() || null;
-
-    const since = new Date();
-    since.setDate(since.getDate() - safeDays);
-    since.setHours(0, 0, 0, 0);
-
-    const previousSince = new Date(since);
-    previousSince.setDate(previousSince.getDate() - safeDays);
-
-    const requestedIds = (dto.tableIds || []).filter(id => typeof id === 'string' && id.length);
-    const tables = await this.customTableRepository.find({
-      where: {
-        workspaceId,
-        ...(requestedIds.length ? { id: In(requestedIds) } : {}),
-      },
-      relations: { category: true },
-      order: { updatedAt: 'DESC' },
-    });
-
-    if (requestedIds.length && tables.length !== requestedIds.length) {
-      throw new BadRequestException(appError('TABLES_NOT_FOUND'));
-    }
-
-    if (!tables.length) {
-      return this.emptyCustomTablesReportResponse();
-    }
-
-    const tableById = new Map<string, CustomTable>();
-    for (const table of tables) {
-      tableById.set(table.id, table);
-    }
-    const tableIds = tables.map(table => table.id);
-
-    const columns = await this.customTableColumnRepository.find({
-      where: { tableId: In(tableIds) },
-      order: { tableId: 'ASC', position: 'ASC' },
-    });
-
-    const columnsByTableId = new Map<string, CustomTableColumn[]>();
-    for (const col of columns) {
-      const list = columnsByTableId.get(col.tableId) || [];
-      list.push(col);
-      columnsByTableId.set(col.tableId, list);
-    }
-
-    const mappingByTableId = new Map<string, ColumnMapping>();
-
-    for (const tableId of tableIds) {
-      const cols = columnsByTableId.get(tableId) || [];
-      mappingByTableId.set(tableId, columnMappingOf(cols));
-    }
-
-    const currentRows = await this.customTableRowRepository
-      .createQueryBuilder('row')
-      .where('row.tableId IN (:...tableIds)', { tableIds })
-      .andWhere('row.updatedAt >= :since', { since })
-      .getMany();
-
-    const previousRows = await this.customTableRowRepository
-      .createQueryBuilder('row')
-      .where('row.tableId IN (:...tableIds)', { tableIds })
-      .andWhere('row.updatedAt >= :previousSince', { previousSince })
-      .andWhere('row.updatedAt < :since', { since })
-      .getMany();
-
-    type ReportRecord = {
-      rowId: string;
-      tableId: string;
-      tableName: string;
-      source: 'manual';
-      counterparty: string;
-      amount: number;
-      date: string | null;
-      category: string | null;
-      currency: string | null;
-      flow: 'expense' | 'income';
-    };
-
-    const resolveCurrency = (tableId: string, row: CustomTableRow): string | null => {
-      const cols = columnsByTableId.get(tableId) || [];
-      for (const col of cols) {
-        const title = (col.title || '').toLowerCase();
-        if (title.includes('валют') || title.includes('currency')) {
-          return normalizeText(row.data?.[col.key]);
-        }
-      }
-      return null;
-    };
-
-    const toRecord = (row: CustomTableRow): ReportRecord | null => {
-      const table = tableById.get(row.tableId);
-      const mapping = mappingByTableId.get(row.tableId);
-      if (!(table && mapping?.amountKey)) {
-        return null;
-      }
-
-      const rawAmount = parseNumber(row.data?.[mapping.amountKey]);
-      if (rawAmount === null) {
-        return null;
-      }
-
-      const flow: 'expense' | 'income' = rawAmount < 0 ? 'expense' : 'income';
-      if (flowType === CustomTableReportFlowType.EXPENSE && flow !== 'expense') {
-        return null;
-      }
-      if (flowType === CustomTableReportFlowType.INCOME && flow !== 'income') {
-        return null;
-      }
-
-      const counterparty =
-        normalizeText(mapping.counterpartyKey ? row.data?.[mapping.counterpartyKey] : null) ||
-        'Unknown';
-      const category = normalizeText(mapping.categoryKey ? row.data?.[mapping.categoryKey] : null);
-      const parsedDate = mapping.dateKey
-        ? parseDate(row.data?.[mapping.dateKey]) || row.updatedAt || row.createdAt
-        : row.updatedAt || row.createdAt;
-      const date = parsedDate ? toDateKey(parsedDate) : null;
-      const currency = resolveCurrency(row.tableId, row);
-
-      if (
-        search &&
-        !counterparty.toLowerCase().includes(search) &&
-        !(category || '').toLowerCase().includes(search) &&
-        !table.name.toLowerCase().includes(search)
-      ) {
-        return null;
-      }
-
-      return {
-        rowId: row.id,
-        tableId: row.tableId,
-        tableName: table.name,
-        source: table.source,
-        counterparty,
-        amount: Math.abs(rawAmount),
-        date,
-        category,
-        currency,
-        flow,
-      };
-    };
-
-    const records = currentRows.map(toRecord).filter(Boolean) as ReportRecord[];
-    const previousRecords = previousRows.map(toRecord).filter(Boolean) as ReportRecord[];
-
-    const totals = { total: 0, manualTotal: 0, operations: 0 };
-    const previousTotals = { total: 0, manualTotal: 0, operations: 0 };
-    const timeseriesMap = new Map<string, number>();
-    const aggregateMap = new Map<
-      string,
-      {
-        counterparty: string;
-        source: 'manual';
-        tableId: string;
-        tableName: string;
-        count: number;
-        total: number;
-        lastDate: string | null;
-        currency: string | null;
-      }
-    >();
-    const tableTotalsMap = new Map<string, { total: number; rows: number }>();
-
-    for (const record of records) {
-      totals.total += record.amount;
-      totals.operations += 1;
-      totals.manualTotal += record.amount;
-
-      if (record.date) {
-        timeseriesMap.set(record.date, (timeseriesMap.get(record.date) || 0) + record.amount);
-      }
-
-      const aggregateKey = `${record.source}:${record.currency || ''}:${record.counterparty.toLowerCase()}`;
-      const current = aggregateMap.get(aggregateKey);
-      if (current) {
-        current.count += 1;
-        current.total += record.amount;
-        if (record.date && (!current.lastDate || record.date > current.lastDate)) {
-          current.lastDate = record.date;
-        }
-      } else {
-        aggregateMap.set(aggregateKey, {
-          counterparty: record.counterparty,
-          source: record.source,
-          tableId: record.tableId,
-          tableName: record.tableName,
-          count: 1,
-          total: record.amount,
-          lastDate: record.date,
-          currency: record.currency,
-        });
-      }
-
-      const tableMetrics = tableTotalsMap.get(record.tableId) || { total: 0, rows: 0 };
-      tableMetrics.total += record.amount;
-      tableMetrics.rows += 1;
-      tableTotalsMap.set(record.tableId, tableMetrics);
-    }
-
-    for (const record of previousRecords) {
-      previousTotals.total += record.amount;
-      previousTotals.operations += 1;
-      previousTotals.manualTotal += record.amount;
-    }
-
-    const toComparison = (current: number, previous: number) => {
-      const delta = current - previous;
-      const percentage =
-        previous === 0 ? (current > 0 ? 100 : 0) : Math.round((delta / previous) * 100);
-      const trend: 'up' | 'down' | 'flat' = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
-      return { delta, percentage, trend };
-    };
-
-    const totalCmp = toComparison(totals.total, previousTotals.total);
-    const manualCmp = toComparison(totals.manualTotal, previousTotals.manualTotal);
-    const operationsCmp = toComparison(totals.operations, previousTotals.operations);
-
-    let aggregatedRows: CustomTablesReportRow[] = Array.from(aggregateMap.values()).map(item => ({
-      counterparty: item.counterparty,
-      source: item.source,
-      tableId: item.tableId,
-      tableName: item.tableName,
-      count: item.count,
-      total: item.total,
-      average: item.count > 0 ? item.total / item.count : 0,
-      lastDate: item.lastDate,
-      currency: item.currency,
-    }));
-
-    if (sortBy === CustomTableReportSortKey.AVERAGE) {
-      aggregatedRows.sort((a, b) => b.average - a.average);
-    } else if (sortBy === CustomTableReportSortKey.OPERATIONS) {
-      aggregatedRows.sort((a, b) => b.count - a.count);
-    } else {
-      aggregatedRows.sort((a, b) => b.total - a.total);
-    }
-    aggregatedRows = aggregatedRows.slice(0, limit);
-
-    const timeseries = Array.from(timeseriesMap.entries())
-      .map(([date, amount]) => ({ date, amount }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    const response: CustomTablesReportResponse = {
-      totals,
-      comparison: {
-        totalDelta: totalCmp.delta,
-        totalPercentage: totalCmp.percentage,
-        totalTrend: totalCmp.trend,
-        manualDelta: manualCmp.delta,
-        manualPercentage: manualCmp.percentage,
-        manualTrend: manualCmp.trend,
-        operationsDelta: operationsCmp.delta,
-        operationsPercentage: operationsCmp.percentage,
-        operationsTrend: operationsCmp.trend,
-      },
-      timeseries,
-      sourceSplit: {
-        manual: totals.manualTotal,
-      },
-      aggregatedRows,
-      tables: tables
-        .map(table => {
-          const metrics = tableTotalsMap.get(table.id) || { total: 0, rows: 0 };
-          return {
-            id: table.id,
-            name: table.name,
-            source: table.source,
-            total: metrics.total,
-            rows: metrics.rows,
-          };
-        })
-        .filter(table => table.rows > 0)
-        .sort((a, b) => b.total - a.total),
-    };
-
-    await this.cacheManager.set(cacheKey, response, 300000);
-    return response;
+    return this.customTablesReport.getCustomTablesReport(workspaceId, dto);
   }
 
-  async getCustomTablesReportDrillDown(
+  getCustomTablesReportDrillDown(
     workspaceId: string,
     dto: CustomTablesReportDrillDownBody,
   ): Promise<CustomTablesReportDrillDownResponse> {
-    const safeDays =
-      Number.isFinite(dto.days) && (dto.days as number) > 0
-        ? Math.min(dto.days as number, 3650)
-        : 30;
-    const flowType = dto.flowType || CustomTableReportFlowType.ALL;
-    const limit =
-      Number.isFinite(dto.limit) && (dto.limit as number) > 0
-        ? Math.min(dto.limit as number, 200)
-        : 120;
-
-    const since = new Date();
-    since.setDate(since.getDate() - safeDays);
-    since.setHours(0, 0, 0, 0);
-
-    const requestedIds = (dto.tableIds || []).filter(id => typeof id === 'string' && id.length);
-    const tables = await this.customTableRepository.find({
-      where: {
-        workspaceId,
-        ...(requestedIds.length ? { id: In(requestedIds) } : {}),
-      },
-      order: { updatedAt: 'DESC' },
-    });
-
-    if (!tables.length) {
-      return { counterparty: dto.counterparty, items: [] };
-    }
-
-    const tableIds = tables.map(table => table.id);
-    const tableById = new Map(tables.map(table => [table.id, table]));
-    const columns = await this.customTableColumnRepository.find({
-      where: { tableId: In(tableIds) },
-      order: { tableId: 'ASC', position: 'ASC' },
-    });
-
-    const columnsByTableId = new Map<string, CustomTableColumn[]>();
-    for (const col of columns) {
-      const list = columnsByTableId.get(col.tableId) || [];
-      list.push(col);
-      columnsByTableId.set(col.tableId, list);
-    }
-
-    const mappingByTableId = new Map<string, ColumnMapping>();
-
-    for (const tableId of tableIds) {
-      const cols = columnsByTableId.get(tableId) || [];
-      mappingByTableId.set(tableId, columnMappingOf(cols));
-    }
-
-    const rows = await this.customTableRowRepository
-      .createQueryBuilder('row')
-      .where('row.tableId IN (:...tableIds)', { tableIds })
-      .andWhere('row.updatedAt >= :since', { since })
-      .getMany();
-
-    const items: CustomTablesReportDrillDownResponse['items'] = [];
-    const needle = dto.counterparty.trim().toLowerCase();
-
-    for (const row of rows) {
-      const table = tableById.get(row.tableId);
-      const mapping = mappingByTableId.get(row.tableId);
-      if (!(table && mapping?.amountKey)) {
-        continue;
-      }
-
-      const rawAmount = parseNumber(row.data?.[mapping.amountKey]);
-      if (rawAmount === null) {
-        continue;
-      }
-
-      const flow: 'expense' | 'income' = rawAmount < 0 ? 'expense' : 'income';
-      if (flowType === CustomTableReportFlowType.EXPENSE && flow !== 'expense') {
-        continue;
-      }
-      if (flowType === CustomTableReportFlowType.INCOME && flow !== 'income') {
-        continue;
-      }
-
-      const counterparty =
-        normalizeText(mapping.counterpartyKey ? row.data?.[mapping.counterpartyKey] : null) ||
-        'Unknown';
-      if (counterparty.toLowerCase() !== needle) {
-        continue;
-      }
-
-      const category = normalizeText(mapping.categoryKey ? row.data?.[mapping.categoryKey] : null);
-      const parsedDate = mapping.dateKey
-        ? parseDate(row.data?.[mapping.dateKey]) || row.updatedAt || row.createdAt
-        : row.updatedAt || row.createdAt;
-
-      let currency: string | null = null;
-      const cols = columnsByTableId.get(row.tableId) || [];
-      for (const col of cols) {
-        const title = (col.title || '').toLowerCase();
-        if (title.includes('валют') || title.includes('currency')) {
-          currency = normalizeText(row.data?.[col.key]);
-          break;
-        }
-      }
-
-      items.push({
-        rowId: row.id,
-        tableId: row.tableId,
-        tableName: table.name,
-        source: table.source,
-        date: parsedDate ? toDateKey(parsedDate) : null,
-        amount: Math.abs(rawAmount),
-        category,
-        currency,
-      });
-    }
-
-    items.sort((a, b) => {
-      const left = a.date || '';
-      const right = b.date || '';
-      return right.localeCompare(left);
-    });
-
-    return {
-      counterparty: dto.counterparty,
-      items: items.slice(0, limit),
-    };
+    return this.customTablesDrillDownReport.getCustomTablesReportDrillDown(workspaceId, dto);
   }
 
-  async getAvailableCustomTables(workspaceId: string): Promise<
-    Array<{
-      id: string;
-      name: string;
-      source: 'manual';
-      rowCount: number;
-    }>
-  > {
-    const tables = await this.customTableRepository.find({
-      where: { workspaceId },
-      order: { updatedAt: 'DESC' },
-    });
-
-    const results = [] as Array<{
-      id: string;
-      name: string;
-      source: 'manual';
-      rowCount: number;
-    }>;
-
-    for (const table of tables) {
-      const rowCount = await this.customTableRowRepository.count({ where: { tableId: table.id } });
-      results.push({
-        id: table.id,
-        name: table.name,
-        source: table.source,
-        rowCount,
-      });
-    }
-
-    return results;
+  getAvailableCustomTables(workspaceId: string): Promise<AvailableCustomTable[]> {
+    return this.customTablesSummaryReport.getAvailableCustomTables(workspaceId);
   }
 
   /**

@@ -2,6 +2,8 @@ import {
   type CustomTableColumn,
   CustomTableColumnType,
 } from '../../../entities/custom-table-column.entity';
+import type { CustomTableRow } from '../../../entities/custom-table-row.entity';
+import { normalizeText } from './report-values.util';
 
 // Custom tables have no fixed schema: a report guesses which column is the
 // date, amount, category and counterparty from each column's type and title.
@@ -129,4 +131,15 @@ export function columnMappingOf(cols: CustomTableColumn[]): ColumnMapping {
     categoryKey: pickBestColumnKey(cols, c => scoreCategoryColumn(c)),
     counterpartyKey: pickBestColumnKey(cols, c => scoreCounterpartyColumn(c)),
   };
+}
+
+/** The row's value in the first column titled as a currency. */
+export function rowCurrency(cols: CustomTableColumn[], row: CustomTableRow): string | null {
+  for (const col of cols) {
+    const title = (col.title || '').toLowerCase();
+    if (title.includes('валют') || title.includes('currency')) {
+      return normalizeText(row.data?.[col.key]);
+    }
+  }
+  return null;
 }

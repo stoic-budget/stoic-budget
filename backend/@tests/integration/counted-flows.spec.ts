@@ -48,6 +48,9 @@ import { GoalsService } from '../../src/modules/goals/goals.service';
 import { NotificationsService } from '../../src/modules/notifications/notifications.service';
 import { CashFlowMapService } from '../../src/modules/reports/cash-flow-map.service';
 import { BudgetVsActualReport } from '../../src/modules/reports/budget-vs-actual.report';
+import { CustomTablesReport } from '../../src/modules/reports/custom-tables-report.report';
+import { CustomTablesDrillDownReport } from '../../src/modules/reports/custom-tables-drilldown.report';
+import { CustomTablesSummaryReport } from '../../src/modules/reports/custom-tables-summary.report';
 import { HoldingsSnapshotReport } from '../../src/modules/reports/holdings-snapshot.report';
 import { ReportsService } from '../../src/modules/reports/reports.service';
 import { SpendFlowService } from '../../src/modules/reports/spend-flow.service';
@@ -206,6 +209,10 @@ describe('one rule for income and spending (real Postgres)', () => {
         // Template reports this suite does not read.
         { provide: BudgetVsActualReport, useValue: {} },
         { provide: HoldingsSnapshotReport, useValue: {} },
+        // Custom-table reports read their own tables, not transactions.
+        { provide: CustomTablesSummaryReport, useValue: {} },
+        { provide: CustomTablesReport, useValue: {} },
+        { provide: CustomTablesDrillDownReport, useValue: {} },
         { provide: AuditService, useValue: { createEvent: vi.fn() } },
         { provide: NotificationsService, useValue: { createForWorkspaceMembers: vi.fn() } },
         { provide: CACHE_MANAGER, useValue: { get: vi.fn(), set: vi.fn(), del: vi.fn() } },
