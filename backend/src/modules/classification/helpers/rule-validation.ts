@@ -75,7 +75,8 @@ const OPERATORS_OF: Partial<Record<ClassificationCondition['field'], Operator[]>
 };
 
 const REF_FIELDS = new Set<ClassificationCondition['field']>(['category', 'payee', 'tags']);
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Lower case only, as Postgres hands ids out: conditions compare them as text.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 /** Whether every value of a numeric condition is a number the field can hold, in order. */
 function numbersHold(condition: ClassificationCondition): boolean {

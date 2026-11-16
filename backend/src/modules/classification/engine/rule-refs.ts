@@ -1,6 +1,8 @@
 import type { EntityManager } from 'typeorm';
+import { payeeKeyOf } from '../../../common/utils/payee-key.util';
 import { workspaceOwnsAll, workspaceOwnsRefs } from '../../../common/utils/workspace-refs.util';
 import { Payee } from '../../../entities/payee.entity';
+import { PayeeAlias } from '../../../entities/payee-alias.entity';
 import type { Transaction } from '../../../entities/transaction.entity';
 import type {
   ClassificationResult,
@@ -46,6 +48,27 @@ async function storedTagIds(
 }
 
 /**
+ * The row with the payee it will be given on save when it has none yet: a row
+ * being imported gets its payee from the alias of its descriptor only as it is
+ * inserted, after the rules ran. Looked up only when a rule asks about the payee.
+ */
+async function withArrivingPayee(
+  manager: EntityManager,
+  workspaceId: string | null,
+  rules: readonly ClassificationRule[],
+  transaction: Transaction,
+): Promise<Transaction> {
+  const payeeKey = payeeKeyOf(transaction);
+  if (transaction.payeeId || !workspaceId || !payeeKey || !conditionsUse(rules, 'payee')) {
+    return transaction;
+  }
+  const alias = await manager
+    .getRepository(PayeeAlias)
+    .findOne({ where: { workspaceId, payeeKey } });
+  return alias ? ({ ...transaction, payeeId: alias.payeeId } as Transaction) : transaction;
+}
+
+/**
  * The rules that match the row and name only what is this workspace's, best
  * first. A rule saved before its targets were checked may still name another
  * workspace's: it is passed over whole, not applied, and sets nothing the
@@ -62,7 +85,8 @@ export async function applicableRules(
   // Best first whatever order the caller holds them in; equal priorities keep theirs.
   const ranked = [...rules].sort((a, b) => b.priority - a.priority);
   const tagIds = await storedTagIds(manager, workspaceId, ranked, transaction);
-  let state = passStartState(transaction, ranked, tagIds);
+  const arrived = await withArrivingPayee(manager, workspaceId, ranked, transaction);
+  let state = passStartState(arrived, ranked, tagIds);
   for (const rule of ranked) {
     if (!matchesRule(transaction, rule, state)) {
       continue;

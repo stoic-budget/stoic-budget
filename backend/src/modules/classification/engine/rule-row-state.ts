@@ -1,6 +1,6 @@
 import { type Transaction, TransactionCategorySource } from '../../../entities/transaction.entity';
 import type { ClassificationResult } from '../interfaces/classification-rule.interface';
-import { hasNoComment, pickedByHand } from './rule-result';
+import { pickedByHand } from './rule-result';
 
 /**
  * What a condition on the category, the payee, the tags or the comment reads.
@@ -100,7 +100,9 @@ export function layOver(
     next.payeeId = payeeId;
     next.setBy.payee = name;
   }
-  if (comment && !('comment' in state.setBy) && hasNoComment(row)) {
+  // The pass's own comment, not the stored one: on a re-run the stored comment
+  // is the one this rule wrote last time, which the pass starts without.
+  if (comment && !('comment' in state.setBy) && !state.comments?.trim()) {
     next.comments = comment;
     next.setBy.comment = name;
   }

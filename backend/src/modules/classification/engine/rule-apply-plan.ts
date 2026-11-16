@@ -9,7 +9,7 @@ import { hasDecidedCategory } from './category-decision';
 import { matchesRule } from './rule-conditions';
 import { decides, type LayeredField, passRules } from './rule-layers';
 import { hasNoComment, pickedByHand } from './rule-result';
-import { type RuleRowState, storedState } from './rule-row-state';
+import { passStartState, type RuleRowState } from './rule-row-state';
 
 /** A rule as an apply or a preview tries it. */
 type TriedRule = {
@@ -23,13 +23,18 @@ type TriedRule = {
  * The rule's matches among rows the caller may read, each with the rules
  * above it that match it too. Rules add up best first, so a condition on the
  * category, payee, tags or comment reads the row as those rules above left it
- * (rule-row-state). `tagIds` holds the rows' tags, by row id, when a rule asks about them.
+ * (rule-row-state). It starts, as an import or a re-run does, from the row as
+ * it arrived: without what `written` (the workspace's active rules) put on it,
+ * and without a category nobody decided. `tagIds` holds the rows' tags, by row
+ * id, when a rule asks about them.
  */
 export function rowsMatching<Above extends TriedRule>(
   rows: readonly Transaction[],
   rule: Omit<TriedRule, 'result'>,
   input: {
     above?: readonly Above[];
+    /** Every active rule: what they wrote on a row is theirs to write again, not read. */
+    written?: readonly { result: ClassificationResult }[];
     viewerMemberId: string | null;
     tagIds?: ReadonlyMap<string, readonly string[]>;
   },
@@ -39,7 +44,11 @@ export function rowsMatching<Above extends TriedRule>(
       return [];
     }
     // A row missing from a loaded map has no tags; without a map, its relation counts.
-    const start = storedState(row, input.tagIds ? (input.tagIds.get(row.id) ?? []) : undefined);
+    const start = passStartState(
+      row,
+      input.written ?? input.above ?? [],
+      input.tagIds ? (input.tagIds.get(row.id) ?? []) : undefined,
+    );
     const pass = passRules(input.above ?? [], row, start);
     return matchesRule(row, rule, pass.state)
       ? [{ row, above: pass.matching, state: pass.state }]
@@ -90,6 +99,8 @@ export function planRuleApply(
   input: {
     /** The active rules ranked above this one: what they set on a row, this one does not. */
     above?: readonly TriedRule[];
+    /** Every active rule, as for `rowsMatching`. */
+    written?: readonly { result: ClassificationResult }[];
     viewerMemberId: string | null;
     /** The rows' tags by row id, when a rule asks about tags. */
     tagIds?: ReadonlyMap<string, readonly string[]>;

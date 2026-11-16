@@ -100,16 +100,20 @@ export class RuleApplicationService {
    * The active rules tried before `ruleId`, best first. A rule not saved yet
    * goes on top, so nothing is tried before it.
    */
-  private async rulesAbove(workspaceId: string, ruleId?: string): Promise<CategorizationRule[]> {
-    if (!ruleId) {
-      return [];
-    }
+  /** The active rules ranked above `ruleId` (none for a rule not saved yet), and every active rule. */
+  private async rulesAround(
+    workspaceId: string,
+    ruleId?: string,
+  ): Promise<{ above: CategorizationRule[]; active: CategorizationRule[] }> {
     const rules = await this.transactionRepository.manager.getRepository(CategorizationRule).find({
       where: { workspaceId },
       order: { priority: 'DESC', createdAt: 'DESC' },
     });
-    const index = rules.findIndex(rule => rule.id === ruleId);
-    return index < 0 ? [] : rules.slice(0, index).filter(rule => rule.isActive);
+    const index = ruleId ? rules.findIndex(rule => rule.id === ruleId) : -1;
+    return {
+      above: index < 0 ? [] : rules.slice(0, index).filter(rule => rule.isActive),
+      active: rules.filter(rule => rule.isActive),
+    };
   }
 
   /** The rows' tags by row id when one of the rules asks about tags; else nothing is read. */
@@ -145,11 +149,12 @@ export class RuleApplicationService {
     walletId?: string;
   }) {
     const { rows, truncated } = await this.rowsForRule(input.workspaceId, input.transactionIds);
-    const above = await this.rulesAbove(input.workspaceId, input.ruleId);
+    const { above, active } = await this.rulesAround(input.workspaceId, input.ruleId);
     const readable = rows.filter(row => canReadPrivate(row, input.viewerMemberId));
     const tagIds = await this.tagsFor(input.workspaceId, readable, [input, ...above]);
     const matches = rowsMatching(readable, input, {
       above,
+      written: active,
       viewerMemberId: input.viewerMemberId,
       tagIds,
     }).map(({ row, above: matchingAbove, state }) => {
@@ -205,11 +210,12 @@ export class RuleApplicationService {
     if (!(owned && (categoryId || walletId || comment || payeeId || tagIds.length > 0))) {
       return totals;
     }
-    const above = await this.rulesAbove(workspaceId, rule.id);
+    const { above, active } = await this.rulesAround(workspaceId, rule.id);
     let touchedRows = 0;
     for await (const rows of this.pagesForRule(workspaceId)) {
       const plan = planRuleApply(rows, rule, {
         above,
+        written: [rule, ...active],
         viewerMemberId,
         tagIds: await this.tagsFor(workspaceId, rows, [rule, ...above]),
         setsCategory: Boolean(categoryId),

@@ -9,7 +9,7 @@ import { ViewPreference } from '../../../entities/view-preference.entity';
 import { conditionsUse } from '../engine/rule-condition-tree';
 import { decides, matchingRules } from '../engine/rule-layers';
 import { ownsRuleRefs } from '../engine/rule-refs';
-import { storedState } from '../engine/rule-row-state';
+import { passStartState } from '../engine/rule-row-state';
 import { rowTagIds } from '../engine/rule-tags';
 import { RuleSuggestionsService } from './rule-suggestions.service';
 
@@ -127,8 +127,9 @@ export class RuleHealthService {
       : undefined;
     const counts = new Map<string, number>();
     for (const row of rows) {
+      // As an import read it: before the person filed it, without what rules wrote.
       const arrived = {
-        ...storedState(row, tagIds ? (tagIds.get(row.id) ?? []) : undefined),
+        ...passStartState(row, rules, tagIds ? (tagIds.get(row.id) ?? []) : undefined),
         categoryId: null,
         categorySource: null,
       };
