@@ -57,6 +57,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'deployment/docker',
         'deployment/ci-cd',
+        'deployment/demo',
       ],
     },
     {
