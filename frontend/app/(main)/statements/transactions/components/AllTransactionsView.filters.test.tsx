@@ -119,16 +119,62 @@ describe('All transactions filters and the URL', () => {
     await vi.waitFor(() => expect(save).toHaveProperty('disabled', false));
     fireEvent.click(save);
 
-    expect(apiPut).toHaveBeenCalledWith('/view-preferences/transactions', {
-      state: {
-        owner: 'me',
-        savedViews: [{ id: expect.any(String), name: 'Coffee', filters: 'q=ACME&noPayee=1' }],
-      },
-    });
+    await vi.waitFor(() =>
+      expect(apiPut).toHaveBeenCalledWith('/view-preferences/transactions', {
+        state: {
+          owner: 'me',
+          savedViews: [{ id: expect.any(String), name: 'Coffee', filters: 'q=ACME&noPayee=1' }],
+        },
+      }),
+    );
 
     search.value = 'month=2026-06';
-    fireEvent.click(screen.getByRole('button', { name: 'Coffee' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Coffee' }));
     expect(Object.fromEntries(lastUrl())).toEqual({ month: '2026-06', q: 'ACME', noPayee: '1' });
+  });
+
+  it('keeps the views another tab saved since this one loaded', async () => {
+    search.value = 'month=2026-06&q=ACME';
+    const rent = { id: 'view-rent', name: 'Rent', filters: 'q=rent' };
+    preference
+      .mockResolvedValueOnce({ state: { owner: 'me' } })
+      .mockResolvedValue({ state: { owner: 'me', savedViews: [rent] } });
+    renderWithQuery(<AllTransactionsView />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Saved views' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'View name' }), {
+      target: { value: 'Coffee' },
+    });
+    const save = screen.getByRole('button', { name: 'Save current filters' });
+    await vi.waitFor(() => expect(save).toHaveProperty('disabled', false));
+    fireEvent.click(save);
+
+    await vi.waitFor(() =>
+      expect(apiPut).toHaveBeenCalledWith('/view-preferences/transactions', {
+        state: {
+          owner: 'me',
+          savedViews: [rent, { id: expect.any(String), name: 'Coffee', filters: 'q=ACME' }],
+        },
+      }),
+    );
+  });
+
+  it('drops a search still being typed when Clear all replaces the filters', () => {
+    vi.useFakeTimers();
+    search.value = 'month=2026-06&noPayee=1';
+    preference.mockReturnValue(new Promise(() => undefined));
+    renderWithQuery(<AllTransactionsView />);
+
+    fireEvent.change(screen.getByRole('searchbox', { name: /Search payee/ }), {
+      target: { value: 'ACME' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Clear all' }));
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(Object.fromEntries(lastUrl())).toEqual({ month: '2026-06' });
+    expect(screen.getByRole('searchbox', { name: /Search payee/ })).toHaveProperty('value', '');
   });
 
   it('will not save a view when the stored ones failed to load, so none are overwritten', async () => {

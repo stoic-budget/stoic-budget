@@ -34,6 +34,17 @@ describe('applyListFilters paymentType', () => {
     expect(clauses[1].sql).toContain('transaction.isPrivate = false');
     expect(clauses[1].params).toEqual({ viewerMemberId: 'member-1' });
   });
+
+  it('filters by the payee and hides other members private rows', () => {
+    const { query, clauses } = fakeQuery();
+    applyListFilters(query, { payeeId: 'payee-1' }, 'member-1');
+    expect(clauses[0]).toEqual({
+      sql: 'transaction.payeeId = :payeeId',
+      params: { payeeId: 'payee-1' },
+    });
+    expect(clauses[1].sql).toContain('transaction.isPrivate = false');
+    expect(clauses[1].params).toEqual({ viewerMemberId: 'member-1' });
+  });
 });
 
 describe('escapeLikePattern', () => {

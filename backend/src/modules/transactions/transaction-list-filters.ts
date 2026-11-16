@@ -97,6 +97,8 @@ export function applyListFilters(
 
   if (filters.payeeId) {
     query.andWhere('transaction.payeeId = :payeeId', { payeeId: filters.payeeId });
+    // Another member's private row hides its payee, so the filter must not reveal it either.
+    query.andWhere(READABLE_SQL, { viewerMemberId });
   }
 
   if (filters.paymentType) {

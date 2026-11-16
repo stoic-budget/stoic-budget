@@ -13,21 +13,35 @@ import type { TransactionFilters } from './transaction-filters';
  * `transactions` view preference beside whatever else that scope stores.
  */
 export function useSavedViews() {
-  const { state, failed, save } = useViewPreference('transactions', readTransactionsPreference);
+  const { state, failed, save, latest } = useViewPreference(
+    'transactions',
+    readTransactionsPreference,
+  );
   const views = state?.savedViews ?? [];
   // Writing before the stored views are known would replace them with this one.
   const ready = state !== undefined && !failed;
-  const write = (next: SavedView[]) => {
-    if (ready) {
-      save({ ...(state ?? {}), savedViews: next });
+  // Another tab may have saved views since this one loaded: change the stored
+  // list, not this tab's copy. If it cannot be read, nothing is written.
+  const write = (change: (views: SavedView[]) => SavedView[]) => {
+    if (!ready) {
+      return;
     }
+    latest()
+      .then(fresh => {
+        const stored = fresh ?? { savedViews: [] };
+        save({ ...stored, savedViews: change(stored.savedViews) });
+      })
+      .catch(() => {
+        // Same as a failed save: the view is simply not kept.
+      });
   };
   return {
     views,
     ready,
     failed,
-    saveView: (name: string, filters: TransactionFilters) => write(addView(views, name, filters)),
-    renameView: (id: string, name: string) => write(renameView(views, id, name)),
-    removeView: (id: string) => write(removeView(views, id)),
+    saveView: (name: string, filters: TransactionFilters) =>
+      write(stored => addView(stored, name, filters)),
+    renameView: (id: string, name: string) => write(stored => renameView(stored, id, name)),
+    removeView: (id: string) => write(stored => removeView(stored, id)),
   };
 }

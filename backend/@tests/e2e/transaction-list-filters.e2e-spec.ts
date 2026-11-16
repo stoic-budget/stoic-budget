@@ -271,6 +271,25 @@ describe('Transaction list filters (e2e)', () => {
     expect(await names('noPayee=true', partner)).toEqual(['bakery', 'garden', 'secret']);
   });
 
+  it('does not reveal the payee of another member’s private row', async () => {
+    const [{ payee_id: payeeId }] = await dataSource.query(
+      'SELECT payee_id FROM transactions WHERE id = $1',
+      [ids.buds],
+    );
+    await dataSource.query('UPDATE transactions SET payee_id = $1 WHERE id = $2', [
+      payeeId,
+      ids.secret,
+    ]);
+    try {
+      expect(await names(`payeeId=${payeeId}`)).toEqual(['buds', 'sale']);
+      expect(await names(`payeeId=${payeeId}`, partner)).toEqual(['buds', 'sale', 'secret']);
+    } finally {
+      await dataSource.query('UPDATE transactions SET payee_id = NULL WHERE id = $1', [
+        ids.secret,
+      ]);
+    }
+  });
+
   it('combines the filters, each one narrowing', async () => {
     expect(await names(`q=a&amountMin=40&categoryIds=${categoryOne}&tagIds=${tagA}`)).toEqual([
       'buds',

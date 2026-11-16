@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { CategoriesFilterField } from '@/app/(main)/custom-tables/components/filter-picker-fields';
 import { Search } from '@/app/components/icons';
 import { FilterChipButton } from '@/app/components/ui/filter-chip-button';
@@ -40,11 +41,19 @@ export function TransactionFiltersBar({
   const t = useIntlayer('allTransactionsFilters');
   const tags = useTags();
   const set = (patch: Partial<TransactionFilters>) => onChange({ ...filters, ...patch });
+  // Clear all and a saved view replace every filter: the typed fields start
+  // over, so a draft still waiting to be sent cannot come back on top.
+  const [generation, setGeneration] = useState(0);
+  const replace = (next: TransactionFilters) => {
+    setGeneration(count => count + 1);
+    onChange(next);
+  };
 
   return (
     <div className="seneca-all-tx__filters">
       <div className="seneca-all-tx__filters-search">
         <DebouncedField
+          key={`q-${generation}`}
           type="search"
           value={filters.q ?? ''}
           normalize={trimmed}
@@ -56,6 +65,7 @@ export function TransactionFiltersBar({
       </div>
       <div className="seneca-all-tx__filters-amounts">
         <DebouncedField
+          key={`min-${generation}`}
           value={filters.amountMin === undefined ? '' : String(filters.amountMin)}
           normalize={amountText}
           onCommit={value => set({ amountMin: amountOf(value) })}
@@ -67,6 +77,7 @@ export function TransactionFiltersBar({
           –
         </span>
         <DebouncedField
+          key={`max-${generation}`}
           value={filters.amountMax === undefined ? '' : String(filters.amountMax)}
           normalize={amountText}
           onCommit={value => set({ amountMax: amountOf(value) })}
@@ -113,12 +124,12 @@ export function TransactionFiltersBar({
           <button
             type="button"
             className="seneca-all-tx__text-link"
-            onClick={() => onChange(EMPTY_FILTERS)}
+            onClick={() => replace(EMPTY_FILTERS)}
           >
             {t.clearAll}
           </button>
         ) : null}
-        <SavedViewsMenu filters={filters} onApply={onChange} />
+        <SavedViewsMenu filters={filters} onApply={replace} />
       </div>
     </div>
   );
