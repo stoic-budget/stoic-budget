@@ -21,6 +21,9 @@ import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { InvestmentsModule } from '../investments/investments.module';
 import { BudgetVsActualReport } from './budget-vs-actual.report';
 import { CashFlowMapService } from './cash-flow-map.service';
+import { CustomTablesDrillDownReport } from './custom-tables-drilldown.report';
+import { CustomTablesReport } from './custom-tables-report.report';
+import { CustomTablesSummaryReport } from './custom-tables-summary.report';
 import { HoldingsSnapshotReport } from './holdings-snapshot.report';
 import { ReportRetentionService } from './report-retention.service';
 import { ReportSchedulesController } from './report-schedules.controller';
@@ -64,6 +67,9 @@ import { SpendFlowService } from './spend-flow.service';
     CashFlowMapService,
     BudgetVsActualReport,
     HoldingsSnapshotReport,
+    CustomTablesSummaryReport,
+    CustomTablesReport,
+    CustomTablesDrillDownReport,
   ],
   exports: [ReportsService, ReportSchedulesService],
 })
