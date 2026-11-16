@@ -24,33 +24,9 @@
 
 <div align="center">
 
-<img width="1890" height="887" alt="Overview dashboard: month budgets, income, spending, net and savings rate, top categories and recent transactions" src="https://github.com/user-attachments/assets/2f7fec9e-83da-4ebd-b80d-c6f2c8ae3c46" />
-
-
-<br /><br />
-
-<table>
-<tr>
-<td width="50%"><img width="1892" height="886" alt="Documents list: receipts with merchant, category, amount and approval status" src="https://github.com/user-attachments/assets/256ae873-93b5-47e8-bdbc-eb2f53f0799e" />
-</td>
-<td width="50%"><img width="1889" height="888" alt="Crypto portfolio: balance chart, holdings with profit and connected Ethereum and Tron wallets" src="https://github.com/user-attachments/assets/6d1130c6-b33e-4326-ac12-1eaf7408230c" />
-</td>
-</tr>
-<tr>
-<td width="50%"><img width="1891" height="882" alt="Cash-flow forecast: runway, lowest point and shortfall over the next 90 days" src="https://github.com/user-attachments/assets/b655215b-989f-483d-91bc-72ac457658c9" />
-</td>
-<td width="50%"><img width="1887" height="884" alt="Custom table of invoices with typed columns, paid checkboxes and statuses" src="https://github.com/user-attachments/assets/746cca0a-4c0e-43c5-8003-10cf251d13b2" />
-</td>
-</tr>
-<tr>
-<td colspan="2" align="center"><img width="1893" height="886" alt="Budgets with the Stoic balance: planned versus actual spending across necessity, work, virtue and leisure" src="https://github.com/user-attachments/assets/6b834d00-8a9b-43e3-b144-fb1262696984" />
-
-</td>
-</tr>
-</table>
+<img width="1739" height="1022" alt="image" src="https://github.com/user-attachments/assets/3f46dbc3-2fd7-4aad-9e78-31e05b44ffba" />
 
 </div>
-
 
 ---
 
