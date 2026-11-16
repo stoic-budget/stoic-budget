@@ -7,7 +7,15 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-compose() { docker compose -f docker-compose.yml -f docker-compose.demo.yml "$@"; }
+# COMPOSE_FILE (in the environment or .env) names the files when a host adds
+# its own override, e.g. other container names on a machine that runs more.
+compose() {
+  if [ -n "${COMPOSE_FILE:-}" ] || grep -qs '^COMPOSE_FILE=' .env; then
+    docker compose "$@"
+  else
+    docker compose -f docker-compose.yml -f docker-compose.demo.yml "$@"
+  fi
+}
 
 echo "Stopping the backend"
 compose stop backend
