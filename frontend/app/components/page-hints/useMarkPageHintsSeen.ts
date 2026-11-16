@@ -2,6 +2,7 @@
 
 import type { User } from '@/app/contexts/AuthContext';
 import { useAuth } from '@/app/hooks/useAuth';
+import { isDemoInstance } from '@/app/hooks/useDemoStatus';
 import apiClient from '@/app/lib/api';
 import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 
@@ -31,6 +32,10 @@ export function useMarkPageHintsSeen(): (page: string, version: number) => void 
 
   return (page, version) => {
     setUser(withSeen({ [page]: version }));
+    // A demo account is shared: closed hints stay closed for this visitor only.
+    if (isDemoInstance()) {
+      return;
+    }
     apiClient
       .post('/users/me/page-hints', { page, version } satisfies ContractInput<'PageHintsSeenBody'>)
       .then(response => checkContract('PageHintsSeen', response.data, '/users/me/page-hints'))
