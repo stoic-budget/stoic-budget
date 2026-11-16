@@ -167,6 +167,9 @@ export type FilePermissionItem = Wire<typeof FilePermissionItem>;
 export const StatementTransaction = Schema.Struct({
   ...TransactionListItem.fields,
   amount: Schema.NullOr(DecimalString),
+  /** The parts of one split share the group: the drawer offers to undo it. */
+  splitGroupId: Schema.optional(Schema.NullOr(Schema.String)),
+  splitIndex: Schema.optional(Schema.NullOr(Schema.Number)),
 });
 export type StatementTransaction = Wire<typeof StatementTransaction>;
 

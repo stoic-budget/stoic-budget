@@ -15,10 +15,12 @@ import {
   PayeeMerge,
   PayeeRecord,
   SharedLinkItem,
+  StorageFileDetails,
   StorageFolder,
   StorageTag,
   StorageViewItem,
   TransactionAttachment,
+  TransactionListPage,
   WalletItem,
 } from '../../src/contracts';
 import {
@@ -247,6 +249,18 @@ describe('API contracts: ledger book (e2e)', () => {
       matches(TransactionRecordList, parts.body);
       expect(parts.body).toHaveLength(2);
       expect(parts.body[1].amount).toBe('22.50');
+      // The lists the drawer opens a row from carry its group, so it can offer to undo the split.
+      const { statementId, splitGroupId } = parts.body[0];
+      const page = await call('get', `/transactions?statementId=${statementId}`).expect(200);
+      matches(TransactionListPage, page.body);
+      const file = await call('get', `/storage/files/${statementId}`).expect(200);
+      matches(StorageFileDetails, file.body);
+      for (const rows of [page.body.data, file.body.transactions]) {
+        const inGroup = rows.filter(
+          (row: { splitGroupId: string | null }) => row.splitGroupId === splitGroupId,
+        );
+        expect(inGroup.map((row: { splitIndex: number }) => row.splitIndex).sort()).toEqual([0, 1]);
+      }
       const listed = await call('get', `/transactions/${id}/split`).expect(200);
       matches(TransactionRecordList, listed.body);
       const merged = await call('post', `/transactions/${id}/unsplit`).expect(200);
