@@ -292,11 +292,6 @@ export async function seedWorkspace(
     proceedsCurrency: 'USD',
     soldOn: today,
   });
-  await send('income tax profile', 'put', '/income-tax/profile', {
-    taxYear,
-    taxpayerType: 'self_employed',
-  });
-  await send('income tax disclaimer', 'post', '/income-tax/disclaimer');
   await send('jurisdiction', 'put', '/tax/settings/jurisdiction', {
     code: 'DE',
     effectiveFrom: `${taxYear}-01-01`,

@@ -17,8 +17,7 @@ exports into reliable, queryable financial data.
 - Collect receipts by upload or from an IMAP inbox and see where each was bought on a self-hosted map
   ([Receipt Maps](guides/receipt-maps)).
 - Manage multi-tenant workspaces with RBAC and full audit history.
-- Build dashboards, reports, budgets, and goals; draft VAT returns and year-end income tax declarations
-  ([Income Tax Declaration](guides/income-tax-declaration)).
+- Build dashboards, reports, budgets, and goals; draft VAT returns.
 
 ## Who Stoic Budget is for
 
