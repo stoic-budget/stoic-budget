@@ -116,6 +116,7 @@ export function ColumnsDrawer({
 
   return (
     <DrawerShell
+      demoNotice={false}
       isOpen={open}
       onClose={onClose}
       position="right"
