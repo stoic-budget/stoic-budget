@@ -57,8 +57,13 @@ import { BudgetVsActualReport } from '../../src/modules/reports/budget-vs-actual
 import { CustomTablesReport } from '../../src/modules/reports/custom-tables-report.report';
 import { CustomTablesDrillDownReport } from '../../src/modules/reports/custom-tables-drilldown.report';
 import { CustomTablesSummaryReport } from '../../src/modules/reports/custom-tables-summary.report';
+import { CustomReportGenerator } from '../../src/modules/reports/custom-report.report';
+import { DailyReportGenerator } from '../../src/modules/reports/daily-report.report';
 import { HoldingsSnapshotReport } from '../../src/modules/reports/holdings-snapshot.report';
+import { MonthlyReportGenerator } from '../../src/modules/reports/monthly-report.report';
+import { ReportHistoryService } from '../../src/modules/reports/report-history.service';
 import { ReportsService } from '../../src/modules/reports/reports.service';
+import { StatementsSummaryReport } from '../../src/modules/reports/statements-summary.report';
 import { TransactionsService } from '../../src/modules/transactions/transactions.service';
 import { TaxAssignmentService } from '@/modules/tax/tax-assignment.service';
 import { WorkspaceCurrencyService } from '../../src/modules/workspaces/workspace-currency.service';
@@ -234,6 +239,12 @@ describe('split() preserves every money aggregate (real Postgres)', () => {
         { provide: CustomTablesSummaryReport, useValue: {} },
         { provide: CustomTablesReport, useValue: {} },
         { provide: CustomTablesDrillDownReport, useValue: {} },
+        // Periodic reports and report history, which this suite does not call.
+        { provide: DailyReportGenerator, useValue: {} },
+        { provide: MonthlyReportGenerator, useValue: {} },
+        { provide: CustomReportGenerator, useValue: {} },
+        { provide: StatementsSummaryReport, useValue: {} },
+        { provide: ReportHistoryService, useValue: {} },
         { provide: ClassificationService, useValue: {} },
         { provide: NotificationsService, useValue: { create: vi.fn() } },
         { provide: EventEmitter2, useValue: { emit: vi.fn() } },

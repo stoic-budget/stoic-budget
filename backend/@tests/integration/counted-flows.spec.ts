@@ -51,8 +51,13 @@ import { BudgetVsActualReport } from '../../src/modules/reports/budget-vs-actual
 import { CustomTablesReport } from '../../src/modules/reports/custom-tables-report.report';
 import { CustomTablesDrillDownReport } from '../../src/modules/reports/custom-tables-drilldown.report';
 import { CustomTablesSummaryReport } from '../../src/modules/reports/custom-tables-summary.report';
+import { CustomReportGenerator } from '../../src/modules/reports/custom-report.report';
+import { DailyReportGenerator } from '../../src/modules/reports/daily-report.report';
 import { HoldingsSnapshotReport } from '../../src/modules/reports/holdings-snapshot.report';
+import { MonthlyReportGenerator } from '../../src/modules/reports/monthly-report.report';
+import { ReportHistoryService } from '../../src/modules/reports/report-history.service';
 import { ReportsService } from '../../src/modules/reports/reports.service';
+import { StatementsSummaryReport } from '../../src/modules/reports/statements-summary.report';
 import { SpendFlowService } from '../../src/modules/reports/spend-flow.service';
 import { SubscriptionsService } from '../../src/modules/subscriptions/subscriptions.service';
 import { TaxReserveService } from '../../src/modules/tax/tax-reserve.service';
@@ -213,6 +218,12 @@ describe('one rule for income and spending (real Postgres)', () => {
         { provide: CustomTablesSummaryReport, useValue: {} },
         { provide: CustomTablesReport, useValue: {} },
         { provide: CustomTablesDrillDownReport, useValue: {} },
+        // Periodic reports and report history, which this suite does not call.
+        { provide: DailyReportGenerator, useValue: {} },
+        { provide: MonthlyReportGenerator, useValue: {} },
+        { provide: CustomReportGenerator, useValue: {} },
+        { provide: StatementsSummaryReport, useValue: {} },
+        { provide: ReportHistoryService, useValue: {} },
         { provide: AuditService, useValue: { createEvent: vi.fn() } },
         { provide: NotificationsService, useValue: { createForWorkspaceMembers: vi.fn() } },
         { provide: CACHE_MANAGER, useValue: { get: vi.fn(), set: vi.fn(), del: vi.fn() } },

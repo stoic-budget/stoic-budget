@@ -1,7 +1,12 @@
 import { CustomTablesReport } from '@/modules/reports/custom-tables-report.report';
 import { CustomTablesDrillDownReport } from '@/modules/reports/custom-tables-drilldown.report';
 import { CustomTablesSummaryReport } from '@/modules/reports/custom-tables-summary.report';
+import { CustomReportGenerator } from '@/modules/reports/custom-report.report';
+import { DailyReportGenerator } from '@/modules/reports/daily-report.report';
+import { MonthlyReportGenerator } from '@/modules/reports/monthly-report.report';
+import { ReportHistoryService } from '@/modules/reports/report-history.service';
 import { ReportsService } from '@/modules/reports/reports.service';
+import { StatementsSummaryReport } from '@/modules/reports/statements-summary.report';
 
 /**
  * ReportsService with every collaborator stubbed; a spec passes only the ones
@@ -41,18 +46,25 @@ export function buildReportsService(overrides: Partial<ReportsServiceDeps> = {})
   const tables = deps.customTableRepository as any;
   const columns = deps.customTableColumnRepository as any;
   const rows = deps.customTableRowRepository as any;
+  const transactions = deps.transactionRepository as any;
+  const cache = deps.cacheManager as any;
+  const audit = deps.auditService as any;
   return new ReportsService(
-    deps.transactionRepository as any,
-    deps.cacheManager as any,
-    deps.auditService as any,
+    transactions,
+    audit,
     deps.reportHistoryRepo as any,
     deps.workspaceRepository as any,
     deps.exchangeRatesService as any,
     deps.balanceService as any,
     deps.budgetVsActualReport as any,
     deps.holdingsSnapshotReport as any,
-    new CustomTablesSummaryReport(deps.cacheManager as any, tables, columns, rows),
-    new CustomTablesReport(deps.cacheManager as any, tables, columns, rows),
+    new CustomTablesSummaryReport(cache, tables, columns, rows),
+    new CustomTablesReport(cache, tables, columns, rows),
     new CustomTablesDrillDownReport(tables, columns, rows),
+    new DailyReportGenerator(cache, transactions, audit),
+    new MonthlyReportGenerator(cache, transactions, audit),
+    new CustomReportGenerator(transactions, audit),
+    new StatementsSummaryReport(transactions),
+    new ReportHistoryService(deps.reportHistoryRepo as any),
   );
 }
