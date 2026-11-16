@@ -4,12 +4,8 @@ import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import type { Repository } from 'typeorm';
-import * as xlsx from 'xlsx';
 import { appError } from '../../common/errors/app-error';
-import { onlyCounted } from '../../common/utils/counted-transactions.util';
 import { currencyCodeOrDefault } from '../../common/utils/currency.util';
-import { formatMoney } from '../../common/utils/format-money.util';
-import { neutralizeSpreadsheetFormulaCell } from '../../common/utils/spreadsheet-formula.util';
 import { applyOwnerFilter, parseOwnerFilter } from '../../common/utils/transaction-owner.util';
 import {
   PRIVACY_VIEWER_PARAM,
@@ -29,7 +25,6 @@ import type {
 import { ReportHistory } from '../../entities/report-history.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
-import { AuditService } from '../audit/audit.service';
 import { BalanceService } from '../balance/balance.service';
 import { BalanceExportFormat } from '../balance/dto/export-balance.dto';
 import { UNCATEGORIZED_CATEGORY_NAME } from '../categories/uncategorized-category';
@@ -43,7 +38,8 @@ import { CustomTablesSummaryReport } from './custom-tables-summary.report';
 import { DailyReportGenerator } from './daily-report.report';
 import { ExportFormat } from './dto/export-report.dto';
 import { WorkspaceExportFormat } from './dto/workspace-export.dto';
-import { countedTransactions, logReportGeneration } from './helpers/report-query.util';
+import { exportToCSV, exportToExcel } from './helpers/report-export-writers.util';
+import { countedTransactions } from './helpers/report-query.util';
 import {
   formatMonthLabel,
   formatMonthPeriod,
@@ -68,46 +64,17 @@ import type { StatementsSummaryResponse } from './interfaces/statements-summary.
 import type { TopCategoriesReport } from './interfaces/top-categories-report.interface';
 import { MonthlyReportGenerator } from './monthly-report.report';
 import {
-  loadPdfMake,
   type ReportCell,
   type ReportDocument,
   type ReportFile,
   type ReportFileFormat,
   writeReportFile,
 } from './report-document.util';
-import { renderReportLabels } from './report-export.translations';
 import { ReportHistoryService } from './report-history.service';
 import { fillLabel, renderTemplateLabels } from './report-template.translations';
 import type { TemplateLabels, TemplateReportRow } from './report-template.types';
 import { StatementsSummaryReport } from './statements-summary.report';
-
-interface WorkspaceTransactionExportRow {
-  index: number;
-  transactionDate: string;
-  transactionType: string;
-  counterpartyName: string;
-  counterpartyBin: string;
-  paymentPurpose: string;
-  debit: number | null;
-  credit: number | null;
-  amount: number | null;
-  currency: string;
-  category: string;
-  branch: string;
-  wallet: string;
-  documentNumber: string;
-  comments: string;
-}
-
-interface CustomReportExportRow {
-  group: string;
-  date: string | null;
-  counterparty: string;
-  amount: number;
-  category: string;
-  branch: string;
-  wallet: string;
-}
+import { WorkspaceExportReport } from './workspace-export.report';
 
 /**
  * Where a category sorts: under its group, or — for a top-level category,
@@ -144,16 +111,11 @@ interface CategoryTotal {
   count: number;
 }
 
-/** Keeps the export cell inert while preserving the empty-string default. */
-const neutralize = (value: string | null | undefined): string =>
-  neutralizeSpreadsheetFormulaCell(value || '') as string;
-
 @Injectable()
 export class ReportsService {
   constructor(
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
-    private readonly auditService: AuditService,
     @InjectRepository(ReportHistory)
     private readonly reportHistoryRepo: Repository<ReportHistory>,
     @InjectRepository(Workspace)
@@ -170,6 +132,7 @@ export class ReportsService {
     private readonly customReportGenerator: CustomReportGenerator,
     private readonly statementsSummaryReport: StatementsSummaryReport,
     private readonly reportHistoryService: ReportHistoryService,
+    private readonly workspaceExportReport: WorkspaceExportReport,
   ) {}
 
   getCustomTablesSummary(
@@ -251,492 +214,24 @@ export class ReportsService {
     const filePath = path.join(resolveReportsDir(workspaceId), `${randomUUID()}-${fileName}`);
 
     if (dto.format === ExportFormat.EXCEL) {
-      await this.exportToExcel(reportData, filePath, locale);
+      await exportToExcel(reportData, filePath, locale);
     } else {
-      await this.exportToCSV(reportData, filePath, locale);
+      await exportToCSV(reportData, filePath, locale);
     }
 
     return { filePath, fileName };
   }
 
-  async exportWorkspaceTransactions(
+  exportWorkspaceTransactions(
     workspaceId: string,
     format: WorkspaceExportFormat,
     viewerMemberId: string | null = null,
   ): Promise<{ filePath: string; fileName: string; mimeType: string }> {
-    // A list of rows, not a figure: every confirmed row goes out, crypto moves
-    // included — another member's private ones as the list shows them.
-    const transactions = await onlyCounted(
-      this.transactionRepository
-        .createQueryBuilder('transaction')
-        .where('transaction.workspaceId = :workspaceId', { workspaceId }),
-      'transaction',
-    )
-      .andWhere('transaction.transferPairId IS NULL')
-      .leftJoinAndSelect('transaction.category', 'category')
-      .leftJoinAndSelect('transaction.branch', 'branch')
-      .leftJoinAndSelect('transaction.wallet', 'wallet')
-      .orderBy('transaction.transactionDate', 'DESC')
-      .addOrderBy('transaction.createdAt', 'DESC')
-      .getMany();
-    redactPrivateRows(transactions, viewerMemberId);
-
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const extensionMap: Record<WorkspaceExportFormat, string> = {
-      [WorkspaceExportFormat.EXCEL]: 'xlsx',
-      [WorkspaceExportFormat.PDF]: 'pdf',
-      [WorkspaceExportFormat.CSV]: 'csv',
-      [WorkspaceExportFormat.DOCX]: 'docx',
-    };
-    const mimeTypeMap: Record<WorkspaceExportFormat, string> = {
-      [WorkspaceExportFormat.EXCEL]:
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      [WorkspaceExportFormat.PDF]: 'application/pdf',
-      [WorkspaceExportFormat.CSV]: 'text/csv',
-      [WorkspaceExportFormat.DOCX]:
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    };
-    const normalizedFormat = format || WorkspaceExportFormat.EXCEL;
-    const fileName = `workspace-transactions-${timestamp}.${extensionMap[normalizedFormat]}`;
-    const filePath = path.join(resolveReportsDir(workspaceId), `${randomUUID()}-${fileName}`);
-
-    if (normalizedFormat === WorkspaceExportFormat.EXCEL) {
-      await this.generateWorkspaceExcel(transactions, filePath);
-    } else if (normalizedFormat === WorkspaceExportFormat.CSV) {
-      await this.generateWorkspaceCsv(transactions, filePath);
-    } else if (normalizedFormat === WorkspaceExportFormat.PDF) {
-      await this.generateWorkspacePdf(transactions, filePath);
-    } else {
-      await this.generateWorkspaceDocx(transactions, filePath);
-    }
-
-    await logReportGeneration(this.auditService, workspaceId, 'workspace-transactions', 'all-time');
-
-    return {
-      filePath,
-      fileName,
-      mimeType: mimeTypeMap[normalizedFormat],
-    };
-  }
-
-  private mapWorkspaceTransactionRows(
-    transactions: Transaction[],
-  ): WorkspaceTransactionExportRow[] {
-    return transactions.map((transaction, index) => ({
-      index: index + 1,
-      transactionDate: transaction.transactionDate
-        ? toDateKey(transaction.transactionDate as unknown as Date)
-        : '',
-      transactionType: transaction.transactionType === TransactionType.INCOME ? 'Приход' : 'Расход',
-      // Free-text fields come from parsed statements, receipt OCR and email import, so
-      // a value starting with = + - @ would execute as a formula when the CSV or
-      // XLSX is opened. Control fields below are ours and stay untouched so the
-      // summary can still match on them.
-      counterpartyName: neutralize(transaction.counterpartyName),
-      counterpartyBin: neutralize(transaction.counterpartyBin),
-      paymentPurpose: neutralize(transaction.paymentPurpose),
-      debit: transaction.debit != null ? Number(transaction.debit) : null,
-      credit: transaction.credit != null ? Number(transaction.credit) : null,
-      amount: transaction.amount != null ? Number(transaction.amount) : null,
-      currency: currencyCodeOrDefault(transaction.currency),
-      category: neutralize(transaction.category?.name) || UNCATEGORIZED_CATEGORY_NAME,
-      branch: neutralize(transaction.branch?.name),
-      wallet: neutralize(transaction.wallet?.name),
-      documentNumber: neutralize(transaction.documentNumber),
-      comments: neutralize(transaction.comments),
-    }));
-  }
-
-  private buildWorkspaceSummaryRows(rows: WorkspaceTransactionExportRow[]) {
-    const totalIncome = rows.reduce((sum, row) => sum + (row.credit || 0), 0);
-    const totalExpense = rows.reduce((sum, row) => sum + (row.debit || 0), 0);
-    const incomeCount = rows.filter(row => row.transactionType === 'Приход').length;
-    const expenseCount = rows.filter(row => row.transactionType === 'Расход').length;
-
-    return [
-      { Показатель: 'Всего транзакций', Значение: rows.length },
-      { Показатель: 'Приходы', Значение: incomeCount },
-      { Показатель: 'Расходы', Значение: expenseCount },
-      { Показатель: 'Сумма приходов', Значение: totalIncome },
-      { Показатель: 'Сумма расходов', Значение: totalExpense },
-      { Показатель: 'Баланс', Значение: totalIncome - totalExpense },
-    ];
-  }
-
-  private formatWorkspaceAmount(value: number | null): string {
-    return formatMoney(value);
-  }
-
-  private escapeCsvValue(value: string): string {
-    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-      return `"${value.replace(/"/g, '""')}"`;
-    }
-
-    return value;
-  }
-
-  private async generateWorkspaceExcel(
-    transactions: Transaction[],
-    filePath: string,
-  ): Promise<void> {
-    const workbook = xlsx.utils.book_new();
-    const rows = this.mapWorkspaceTransactionRows(transactions);
-    const transactionSheet = xlsx.utils.json_to_sheet(
-      rows.map(row => ({
-        '№': row.index,
-        Дата: row.transactionDate,
-        Тип: row.transactionType,
-        Контрагент: row.counterpartyName,
-        'БИН/ИИН': row.counterpartyBin,
-        'Назначение платежа': row.paymentPurpose,
-        Дебет: row.debit,
-        Кредит: row.credit,
-        Сумма: row.amount,
-        Валюта: row.currency,
-        Категория: row.category,
-        Филиал: row.branch,
-        Кошелек: row.wallet,
-        '№ документа': row.documentNumber,
-        Комментарий: row.comments,
-      })),
+    return this.workspaceExportReport.exportWorkspaceTransactions(
+      workspaceId,
+      format,
+      viewerMemberId,
     );
-
-    transactionSheet['!cols'] = [
-      { wch: 5 },
-      { wch: 12 },
-      { wch: 10 },
-      { wch: 28 },
-      { wch: 16 },
-      { wch: 48 },
-      { wch: 14 },
-      { wch: 14 },
-      { wch: 14 },
-      { wch: 10 },
-      { wch: 20 },
-      { wch: 18 },
-      { wch: 18 },
-      { wch: 18 },
-      { wch: 28 },
-    ];
-
-    const summarySheet = xlsx.utils.json_to_sheet(this.buildWorkspaceSummaryRows(rows));
-    summarySheet['!cols'] = [{ wch: 24 }, { wch: 18 }];
-
-    xlsx.utils.book_append_sheet(workbook, transactionSheet, 'Транзакции');
-    xlsx.utils.book_append_sheet(workbook, summarySheet, 'Сводка');
-
-    xlsx.writeFile(workbook, filePath);
-  }
-
-  private async generateWorkspaceCsv(transactions: Transaction[], filePath: string): Promise<void> {
-    const rows = this.mapWorkspaceTransactionRows(transactions);
-    const headers = [
-      '№',
-      'Дата',
-      'Тип',
-      'Контрагент',
-      'БИН/ИИН',
-      'Назначение платежа',
-      'Дебет',
-      'Кредит',
-      'Сумма',
-      'Валюта',
-      'Категория',
-      'Филиал',
-      'Кошелек',
-      '№ документа',
-      'Комментарий',
-    ];
-
-    const csvLines = [
-      headers.join(','),
-      ...rows.map(row =>
-        [
-          String(row.index),
-          row.transactionDate,
-          row.transactionType,
-          row.counterpartyName,
-          row.counterpartyBin,
-          row.paymentPurpose,
-          row.debit == null ? '' : String(row.debit),
-          row.credit == null ? '' : String(row.credit),
-          row.amount == null ? '' : String(row.amount),
-          row.currency,
-          row.category,
-          row.branch,
-          row.wallet,
-          row.documentNumber,
-          row.comments,
-        ]
-          .map(value => this.escapeCsvValue(value))
-          .join(','),
-      ),
-    ];
-
-    fs.writeFileSync(filePath, `\uFEFF${csvLines.join('\n')}`, 'utf-8');
-  }
-
-  private async generateWorkspacePdf(transactions: Transaction[], filePath: string): Promise<void> {
-    const rows = this.mapWorkspaceTransactionRows(transactions);
-    const summaryRows = this.buildWorkspaceSummaryRows(rows);
-    const pdfMake = await loadPdfMake();
-
-    const docDefinition = {
-      pageSize: 'A4',
-      pageOrientation: 'landscape',
-      pageMargins: [20, 24, 20, 24],
-      content: [
-        { text: 'Отчет по транзакциям workspace', style: 'title' },
-        {
-          columns: summaryRows.map(row => ({
-            stack: [
-              { text: String(row.Показатель), style: 'summaryLabel' },
-              { text: String(row.Значение), style: 'summaryValue' },
-            ],
-          })),
-          columnGap: 12,
-          margin: [0, 0, 0, 16],
-        },
-        {
-          table: {
-            headerRows: 1,
-            widths: [24, 56, 50, '*', 64, 80],
-            body: [
-              ['№', 'Дата', 'Тип', 'Контрагент', 'Сумма', 'Категория'],
-              ...rows.map(row => [
-                String(row.index),
-                row.transactionDate,
-                row.transactionType,
-                row.counterpartyName,
-                this.formatWorkspaceAmount(row.amount),
-                row.category,
-              ]),
-            ],
-          },
-          layout: 'lightHorizontalLines',
-        },
-      ],
-      styles: {
-        title: { bold: true, fontSize: 16, margin: [0, 0, 0, 12] },
-        summaryLabel: { fontSize: 9, color: '#6b7280' },
-        summaryValue: { fontSize: 11, bold: true },
-      },
-      defaultStyle: {
-        font: 'Roboto',
-        fontSize: 8,
-      },
-    };
-
-    await new Promise<void>(resolve => {
-      pdfMake.createPdf(docDefinition).getBuffer((buffer: Uint8Array) => {
-        fs.writeFileSync(filePath, Buffer.from(buffer));
-        resolve();
-      });
-    });
-  }
-
-  private async generateWorkspaceDocx(
-    transactions: Transaction[],
-    filePath: string,
-  ): Promise<void> {
-    const rows = this.mapWorkspaceTransactionRows(transactions);
-    const summaryRows = this.buildWorkspaceSummaryRows(rows);
-    const docxModule = await import('docx');
-    const {
-      Document,
-      HeadingLevel,
-      Packer,
-      Paragraph,
-      Table,
-      TableCell,
-      TableRow,
-      TextRun,
-      WidthType,
-    } = docxModule;
-
-    const createCell = (text: string, bold = false) =>
-      new TableCell({
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text,
-                bold,
-                size: 18,
-              }),
-            ],
-          }),
-        ],
-      });
-
-    const summaryParagraph = new Paragraph({
-      children: summaryRows.flatMap((row, index) => {
-        const parts = [
-          new TextRun({ text: `${row.Показатель}: `, bold: true, size: 20 }),
-          new TextRun({ text: String(row.Значение), size: 20 }),
-        ];
-
-        if (index < summaryRows.length - 1) {
-          parts.push(new TextRun({ text: '   ', size: 20 }));
-        }
-
-        return parts;
-      }),
-      spacing: { after: 240 },
-    });
-
-    const table = new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      rows: [
-        new TableRow({
-          tableHeader: true,
-          children: [
-            createCell('№', true),
-            createCell('Дата', true),
-            createCell('Тип', true),
-            createCell('Контрагент', true),
-            createCell('Сумма', true),
-            createCell('Категория', true),
-          ],
-        }),
-        ...rows.map(
-          row =>
-            new TableRow({
-              children: [
-                createCell(String(row.index)),
-                createCell(row.transactionDate),
-                createCell(row.transactionType),
-                createCell(row.counterpartyName),
-                createCell(this.formatWorkspaceAmount(row.amount)),
-                createCell(row.category),
-              ],
-            }),
-        ),
-      ],
-    });
-
-    const document = new Document({
-      sections: [
-        {
-          properties: {
-            page: {
-              size: {
-                orientation: 'landscape',
-              },
-            },
-          },
-          children: [
-            new Paragraph({
-              text: 'Отчет по транзакциям workspace',
-              heading: HeadingLevel.HEADING_1,
-            }),
-            summaryParagraph,
-            table,
-          ],
-        },
-      ],
-    });
-
-    const buffer = await Packer.toBuffer(document);
-    fs.writeFileSync(filePath, buffer);
-  }
-
-  private async exportToExcel(
-    reportData: DailyReport | MonthlyReport | CustomReport,
-    filePath: string,
-    locale?: string,
-  ): Promise<void> {
-    const workbook = xlsx.utils.book_new();
-
-    const L = renderReportLabels(locale);
-
-    if ('date' in reportData) {
-      // Daily report
-      const dailyData = reportData as DailyReport;
-      const ws = xlsx.utils.aoa_to_sheet([
-        [L.type, L.amount, L.count],
-        [L.income, dailyData.income.totalAmount, dailyData.income.transactionCount],
-        [L.expense, dailyData.expense.totalAmount, dailyData.expense.transactionCount],
-        [L.difference, dailyData.summary.difference],
-      ]);
-      xlsx.utils.book_append_sheet(workbook, ws, L.sheetReport);
-    } else if ('month' in reportData) {
-      // Monthly report
-      const monthlyData = reportData as MonthlyReport;
-      const ws = xlsx.utils.aoa_to_sheet([
-        [L.date, L.income, L.expense],
-        ...monthlyData.dailyTrends.map(trend => [trend.date, trend.income, trend.expense]),
-      ]);
-      xlsx.utils.book_append_sheet(workbook, ws, L.sheetTrends);
-    } else {
-      // Custom report
-      const customData = reportData as CustomReport;
-      const rows: CustomReportExportRow[] = [];
-      customData.groups.forEach(group => {
-        group.transactions.forEach(t => {
-          rows.push({
-            group: group.label,
-            date: t.date,
-            counterparty: t.counterparty,
-            amount: t.amount,
-            category: t.category || '',
-            branch: t.branch || '',
-            wallet: t.wallet || '',
-          });
-        });
-      });
-      const ws = xlsx.utils.aoa_to_sheet([
-        [L.group, L.date, L.counterparty, L.amount, L.category, L.branch, L.wallet],
-        ...rows.map(r => [
-          r.group,
-          r.date,
-          r.counterparty,
-          r.amount,
-          r.category,
-          r.branch,
-          r.wallet,
-        ]),
-      ]);
-      xlsx.utils.book_append_sheet(workbook, ws, L.sheetReport);
-    }
-
-    xlsx.writeFile(workbook, filePath);
-  }
-
-  private async exportToCSV(
-    reportData: DailyReport | MonthlyReport | CustomReport,
-    filePath: string,
-    locale?: string,
-  ): Promise<void> {
-    let csvContent = '';
-    const L = renderReportLabels(locale);
-
-    if ('date' in reportData) {
-      // Daily report
-      const dailyData = reportData as DailyReport;
-      csvContent = `${L.type},${L.amount},${L.count}\n`;
-      csvContent += `${L.income},${dailyData.income.totalAmount},${dailyData.income.transactionCount}\n`;
-      csvContent += `${L.expense},${dailyData.expense.totalAmount},${dailyData.expense.transactionCount}\n`;
-      csvContent += `${L.difference},${dailyData.summary.difference},\n`;
-    } else if ('month' in reportData) {
-      // Monthly report
-      const monthlyData = reportData as MonthlyReport;
-      csvContent = `${L.date},${L.income},${L.expense}\n`;
-      monthlyData.dailyTrends.forEach(trend => {
-        csvContent += `${trend.date},${trend.income},${trend.expense}\n`;
-      });
-    } else {
-      // Custom report
-      const customData = reportData as CustomReport;
-      csvContent = `${L.group},${L.date},${L.counterparty},${L.amount},${L.category},${L.branch},${L.wallet}\n`;
-      customData.groups.forEach(group => {
-        group.transactions.forEach(t => {
-          csvContent += `${group.label},${t.date},${t.counterparty},${t.amount},${t.category || ''},${t.branch || ''},${t.wallet || ''}\n`;
-        });
-      });
-    }
-
-    fs.writeFileSync(filePath, csvContent, 'utf-8');
   }
 
   getStatementsSummary(

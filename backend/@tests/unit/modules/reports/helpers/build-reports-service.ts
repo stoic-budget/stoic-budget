@@ -7,6 +7,7 @@ import { MonthlyReportGenerator } from '@/modules/reports/monthly-report.report'
 import { ReportHistoryService } from '@/modules/reports/report-history.service';
 import { ReportsService } from '@/modules/reports/reports.service';
 import { StatementsSummaryReport } from '@/modules/reports/statements-summary.report';
+import { WorkspaceExportReport } from '@/modules/reports/workspace-export.report';
 
 /**
  * ReportsService with every collaborator stubbed; a spec passes only the ones
@@ -51,7 +52,6 @@ export function buildReportsService(overrides: Partial<ReportsServiceDeps> = {})
   const audit = deps.auditService as any;
   return new ReportsService(
     transactions,
-    audit,
     deps.reportHistoryRepo as any,
     deps.workspaceRepository as any,
     deps.exchangeRatesService as any,
@@ -66,5 +66,6 @@ export function buildReportsService(overrides: Partial<ReportsServiceDeps> = {})
     new CustomReportGenerator(transactions, audit),
     new StatementsSummaryReport(transactions),
     new ReportHistoryService(deps.reportHistoryRepo as any),
+    new WorkspaceExportReport(transactions, audit),
   );
 }
