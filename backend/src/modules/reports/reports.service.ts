@@ -6,12 +6,7 @@ import * as path from 'path';
 import type { Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { currencyCodeOrDefault } from '../../common/utils/currency.util';
-import { applyOwnerFilter, parseOwnerFilter } from '../../common/utils/transaction-owner.util';
-import {
-  PRIVACY_VIEWER_PARAM,
-  redactedSql,
-  redactPrivateRows,
-} from '../../common/utils/transaction-privacy.util';
+import { redactPrivateRows } from '../../common/utils/transaction-privacy.util';
 import type {
   CustomReportBody,
   CustomTablesReportBody,
@@ -40,15 +35,7 @@ import { ExportFormat } from './dto/export-report.dto';
 import { WorkspaceExportFormat } from './dto/workspace-export.dto';
 import { exportToCSV, exportToExcel } from './helpers/report-export-writers.util';
 import { countedTransactions } from './helpers/report-query.util';
-import {
-  formatMonthLabel,
-  formatMonthPeriod,
-  getIsoWeekInfo,
-  round2,
-  toDateKey,
-  toEndOfUtcDay,
-  toStartOfUtcDay,
-} from './helpers/report-values.util';
+import { round2, toDateKey } from './helpers/report-values.util';
 import { resolveReportsDir } from './helpers/reports-dir.util';
 import { HoldingsSnapshotReport } from './holdings-snapshot.report';
 import type { CustomReport } from './interfaces/custom-report.interface';
@@ -60,8 +47,9 @@ import type {
 } from './interfaces/custom-tables-report.interface';
 import type { DailyReport } from './interfaces/daily-report.interface';
 import type { MonthlyReport } from './interfaces/monthly-report.interface';
+import type { SpendOverTimeResult } from './interfaces/spend-over-time.interface';
 import type { StatementsSummaryResponse } from './interfaces/statements-summary.interface';
-import type { TopCategoriesReport } from './interfaces/top-categories-report.interface';
+import type { TopCategoriesReport as TopCategoriesResult } from './interfaces/top-categories-report.interface';
 import { MonthlyReportGenerator } from './monthly-report.report';
 import {
   type ReportCell,
@@ -73,7 +61,9 @@ import {
 import { ReportHistoryService } from './report-history.service';
 import { fillLabel, renderTemplateLabels } from './report-template.translations';
 import type { TemplateLabels, TemplateReportRow } from './report-template.types';
+import { SpendOverTimeReport } from './spend-over-time.report';
 import { StatementsSummaryReport } from './statements-summary.report';
+import { TopCategoriesReport } from './top-categories.report';
 import { WorkspaceExportReport } from './workspace-export.report';
 
 /**
@@ -133,6 +123,8 @@ export class ReportsService {
     private readonly statementsSummaryReport: StatementsSummaryReport,
     private readonly reportHistoryService: ReportHistoryService,
     private readonly workspaceExportReport: WorkspaceExportReport,
+    private readonly topCategoriesReport: TopCategoriesReport,
+    private readonly spendOverTimeReport: SpendOverTimeReport,
   ) {}
 
   getCustomTablesSummary(
@@ -242,540 +234,20 @@ export class ReportsService {
     return this.statementsSummaryReport.getStatementsSummary(workspaceId, days, viewerMemberId);
   }
 
-  async getTopCategoriesReport(
+  getTopCategoriesReport(
     workspaceId: string,
     query: TopCategoriesQuery,
     selfMemberId: string | null = null,
-  ): Promise<TopCategoriesReport> {
-    const safeLimit = Number.isFinite(query.limit)
-      ? Math.min(Math.max(query.limit || 20, 1), 100)
-      : 20;
-    const now = new Date();
-    const to = query.dateTo ? new Date(query.dateTo) : now;
-    const from = query.dateFrom
-      ? new Date(query.dateFrom)
-      : new Date(new Date(to).setDate(to.getDate() - 30));
-
-    const qb = countedTransactions(this.transactionRepository, workspaceId)
-      .leftJoinAndSelect('transaction.category', 'category')
-      .leftJoinAndSelect('transaction.statement', 'statement')
-      .andWhere('transaction.transactionDate >= :from', { from })
-      .andWhere('transaction.transactionDate <= :to', { to });
-
-    if (query.type === 'income') {
-      qb.andWhere('transaction.transactionType = :transactionType', {
-        transactionType: TransactionType.INCOME,
-      });
-    } else if (query.type === 'expense') {
-      qb.andWhere('transaction.transactionType = :transactionType', {
-        transactionType: TransactionType.EXPENSE,
-      });
-    }
-
-    if (query.bankName) {
-      qb.andWhere('statement.bankName = :bankName', { bankName: query.bankName });
-    }
-
-    applyOwnerFilter(qb, 'transaction', parseOwnerFilter(query.owner, selfMemberId));
-
-    if (query.counterparties) {
-      const counterparties = query.counterparties
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-      if (counterparties.length > 0) {
-        // Matched as the viewer reads it: a merchant filter must not answer
-        // yes or no about another member's private row.
-        qb.andWhere(
-          `${redactedSql('transaction', 'transaction.counterparty_name')} IN (:...counterparties)`,
-          { counterparties, [PRIVACY_VIEWER_PARAM]: selfMemberId },
-        );
-      }
-    }
-
-    if (query.statuses) {
-      const statuses = query.statuses
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-      if (statuses.length > 0) {
-        qb.andWhere('statement.status IN (:...statuses)', { statuses });
-      }
-    }
-
-    if (query.keywords) {
-      const keyword = `%${query.keywords.trim().toLowerCase()}%`;
-      qb.andWhere(
-        `(LOWER(${redactedSql('transaction', 'transaction.counterparty_name')}) LIKE :keyword OR LOWER(${redactedSql('transaction', 'transaction.payment_purpose')}) LIKE :keyword OR LOWER(statement.fileName) LIKE :keyword OR LOWER(CAST(statement.bankName AS text)) LIKE :keyword)`,
-        { keyword, [PRIVACY_VIEWER_PARAM]: selfMemberId },
-      );
-    }
-
-    if (Number.isFinite(query.amountMin)) {
-      qb.andWhere('ABS(COALESCE(transaction.amount, 0)) >= :amountMin', {
-        amountMin: query.amountMin,
-      });
-    }
-
-    if (Number.isFinite(query.amountMax)) {
-      qb.andWhere('ABS(COALESCE(transaction.amount, 0)) <= :amountMax', {
-        amountMax: query.amountMax,
-      });
-    }
-
-    if (query.currencies) {
-      const currencies = query.currencies
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-      if (currencies.length > 0) {
-        qb.andWhere('transaction.currency IN (:...currencies)', { currencies });
-      }
-    }
-
-    if (typeof query.billable === 'boolean') {
-      if (query.billable) {
-        qb.andWhere('ABS(COALESCE(transaction.amount, 0)) > 0');
-      } else {
-        qb.andWhere('ABS(COALESCE(transaction.amount, 0)) <= 0');
-      }
-    }
-
-    if (typeof query.approved === 'boolean') {
-      if (query.approved) {
-        qb.andWhere('statement.status IN (:...approvedStatuses)', {
-          approvedStatuses: ['validated', 'completed', 'parsed'],
-        });
-      } else {
-        qb.andWhere('statement.status IN (:...notApprovedStatuses)', {
-          notApprovedStatuses: ['uploaded', 'processing', 'error'],
-        });
-      }
-    }
-
-    if (query.has) {
-      const hasTokens = query.has
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-      if (hasTokens.includes('errors')) {
-        qb.andWhere('(statement.status = :errorStatus OR statement.errorMessage IS NOT NULL)', {
-          errorStatus: 'error',
-        });
-      }
-      if (hasTokens.includes('transactions')) {
-        qb.andWhere('COALESCE(statement.totalTransactions, 0) > 0');
-      }
-      if (hasTokens.includes('dateRange')) {
-        qb.andWhere(
-          '(statement.statementDateFrom IS NOT NULL OR statement.statementDateTo IS NOT NULL)',
-        );
-      }
-      if (hasTokens.includes('currency')) {
-        qb.andWhere('statement.currency IS NOT NULL');
-      }
-    }
-
-    const transactions = redactPrivateRows(
-      await qb.orderBy('transaction.updatedAt', 'DESC').take(5000).getMany(),
-      selfMemberId,
-    );
-
-    const totals = {
-      income: 0,
-      expense: 0,
-      net: 0,
-      transactions: transactions.length,
-    };
-
-    const categoryMap = new Map<
-      string,
-      {
-        id: string | null;
-        name: string;
-        amount: number;
-        transactions: number;
-        type: TransactionType;
-        color?: string | null;
-        icon?: string | null;
-      }
-    >();
-    const bankMap = new Map<string, { bankName: string; amount: number; statements: number }>();
-    const counterpartyMap = new Map<
-      string,
-      {
-        name: string;
-        amount: number;
-        transactions: number;
-        type: TransactionType;
-      }
-    >();
-
-    transactions.forEach(transaction => {
-      const amount = Math.abs(Number(transaction.amount || 0));
-      if (!amount) {
-        return;
-      }
-
-      if (transaction.transactionType === TransactionType.INCOME) {
-        totals.income += amount;
-      } else {
-        totals.expense += amount;
-      }
-
-      const categoryKey = transaction.category?.id || 'without-category';
-      const categoryName =
-        (transaction.category?.name || UNCATEGORIZED_CATEGORY_NAME).trim() ||
-        UNCATEGORIZED_CATEGORY_NAME;
-      const categoryCurrent = categoryMap.get(categoryKey) || {
-        id: transaction.category?.id || null,
-        name: categoryName,
-        amount: 0,
-        transactions: 0,
-        type: transaction.transactionType,
-        color: transaction.category?.color,
-        icon: transaction.category?.icon,
-      };
-      categoryCurrent.amount += amount;
-      categoryCurrent.transactions += 1;
-      categoryMap.set(categoryKey, categoryCurrent);
-
-      const bankName = (transaction.statement?.bankName || 'Unknown').trim() || 'Unknown';
-      const bankCurrent = bankMap.get(bankName) || {
-        bankName,
-        amount: 0,
-        statements: 0,
-      };
-      bankCurrent.amount += amount;
-      bankCurrent.statements += 1;
-      bankMap.set(bankName, bankCurrent);
-
-      const counterpartyName =
-        (transaction.counterpartyName || 'Без названия').trim() || 'Без названия';
-      const counterpartyCurrent = counterpartyMap.get(counterpartyName) || {
-        name: counterpartyName,
-        amount: 0,
-        transactions: 0,
-        type: transaction.transactionType,
-      };
-      counterpartyCurrent.amount += amount;
-      counterpartyCurrent.transactions += 1;
-      counterpartyMap.set(counterpartyName, counterpartyCurrent);
-    });
-
-    totals.net = totals.income - totals.expense;
-
-    const totalFlow = totals.income + totals.expense;
-    const categories = Array.from(categoryMap.values())
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, safeLimit)
-      .map(item => ({
-        ...item,
-        percentage: totalFlow > 0 ? Number(((item.amount / totalFlow) * 100).toFixed(2)) : 0,
-      }));
-
-    const banks = Array.from(bankMap.values())
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, safeLimit)
-      .map(item => ({
-        ...item,
-        percentage: totalFlow > 0 ? Number(((item.amount / totalFlow) * 100).toFixed(2)) : 0,
-      }));
-
-    const counterparties = Array.from(counterpartyMap.values())
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, safeLimit)
-      .map(item => ({
-        ...item,
-        percentage: totalFlow > 0 ? Number(((item.amount / totalFlow) * 100).toFixed(2)) : 0,
-      }));
-
-    return {
-      period: {
-        from: from.toISOString().split('T')[0],
-        to: to.toISOString().split('T')[0],
-      },
-      totals,
-      categories,
-      banks,
-      counterparties,
-    };
+  ): Promise<TopCategoriesResult> {
+    return this.topCategoriesReport.getTopCategoriesReport(workspaceId, query, selfMemberId);
   }
 
-  async getSpendOverTimeReport(
+  getSpendOverTimeReport(
     workspaceId: string,
     query: SpendOverTimeQuery,
     selfMemberId: string | null = null,
-  ): Promise<{
-    groupBy: string;
-    dateFrom: string;
-    dateTo: string;
-    points: Array<{
-      period: string;
-      label: string;
-      income: number;
-      expense: number;
-      net: number;
-      count: number;
-    }>;
-    totals: {
-      income: number;
-      expense: number;
-      net: number;
-      count: number;
-      avgPerPeriod: number;
-    };
-  }> {
-    const now = new Date();
-    const endDate = query.dateTo ? new Date(query.dateTo) : now;
-    const startDate = query.dateFrom
-      ? new Date(query.dateFrom)
-      : new Date(new Date(endDate).setDate(endDate.getDate() - 30));
-    const groupBy = query.groupBy || 'day';
-
-    const from = toStartOfUtcDay(startDate);
-    const to = toEndOfUtcDay(endDate);
-
-    const qb = countedTransactions(this.transactionRepository, workspaceId)
-      // Rows without a statement (cash, approved receipts) are spending too.
-      .leftJoin('transaction.statement', 'statement')
-      .leftJoin('transaction.category', 'category')
-      .andWhere('transaction.transactionDate >= :from', { from })
-      .andWhere('transaction.transactionDate <= :to', { to });
-
-    if (query.type === 'income') {
-      qb.andWhere('transaction.transactionType = :transactionType', {
-        transactionType: TransactionType.INCOME,
-      });
-    } else if (query.type === 'expense') {
-      qb.andWhere('transaction.transactionType = :transactionType', {
-        transactionType: TransactionType.EXPENSE,
-      });
-    }
-
-    if (query.bankName) {
-      qb.andWhere('statement.bankName = :bankName', { bankName: query.bankName });
-    }
-
-    applyOwnerFilter(qb, 'transaction', parseOwnerFilter(query.owner, selfMemberId));
-
-    if (query.counterparties) {
-      const counterparties = query.counterparties
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-      if (counterparties.length > 0) {
-        // Matched as the viewer reads it: a merchant filter must not answer
-        // yes or no about another member's private row.
-        qb.andWhere(
-          `${redactedSql('transaction', 'transaction.counterparty_name')} IN (:...counterparties)`,
-          { counterparties, [PRIVACY_VIEWER_PARAM]: selfMemberId },
-        );
-      }
-    }
-
-    if (query.statuses) {
-      const statuses = query.statuses
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-      if (statuses.length > 0) {
-        qb.andWhere('statement.status IN (:...statuses)', { statuses });
-      }
-    }
-
-    if (query.keywords) {
-      const keyword = `%${query.keywords.trim().toLowerCase()}%`;
-      qb.andWhere(
-        `(LOWER(${redactedSql('transaction', 'transaction.counterparty_name')}) LIKE :keyword OR LOWER(${redactedSql('transaction', 'transaction.payment_purpose')}) LIKE :keyword OR LOWER(statement.fileName) LIKE :keyword OR LOWER(CAST(statement.bankName AS text)) LIKE :keyword)`,
-        { keyword, [PRIVACY_VIEWER_PARAM]: selfMemberId },
-      );
-    }
-
-    if (Number.isFinite(query.amountMin)) {
-      qb.andWhere('ABS(COALESCE(transaction.amount, 0)) >= :amountMin', {
-        amountMin: query.amountMin,
-      });
-    }
-
-    if (Number.isFinite(query.amountMax)) {
-      qb.andWhere('ABS(COALESCE(transaction.amount, 0)) <= :amountMax', {
-        amountMax: query.amountMax,
-      });
-    }
-
-    if (query.currencies) {
-      const currencies = query.currencies
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-      if (currencies.length > 0) {
-        qb.andWhere('transaction.currency IN (:...currencies)', { currencies });
-      }
-    }
-
-    if (typeof query.billable === 'boolean') {
-      if (query.billable) {
-        qb.andWhere('ABS(COALESCE(transaction.amount, 0)) > 0');
-      } else {
-        qb.andWhere('ABS(COALESCE(transaction.amount, 0)) <= 0');
-      }
-    }
-
-    if (typeof query.approved === 'boolean') {
-      if (query.approved) {
-        qb.andWhere('statement.status IN (:...approvedStatuses)', {
-          approvedStatuses: ['validated', 'completed', 'parsed'],
-        });
-      } else {
-        qb.andWhere('statement.status IN (:...notApprovedStatuses)', {
-          notApprovedStatuses: ['uploaded', 'processing', 'error'],
-        });
-      }
-    }
-
-    if (typeof query.exported === 'boolean') {
-      if (query.exported) {
-        qb.andWhere('statement.processedAt IS NOT NULL');
-      } else {
-        qb.andWhere('statement.processedAt IS NULL');
-      }
-    }
-
-    if (typeof query.paid === 'boolean') {
-      if (query.paid) {
-        qb.andWhere('statement.statementDateTo IS NOT NULL');
-      } else {
-        qb.andWhere('statement.statementDateTo IS NULL');
-      }
-    }
-
-    const dayPeriodExpr = "TO_CHAR(transaction.transactionDate, 'YYYY-MM-DD')";
-    const monthPeriodExpr = "TO_CHAR(transaction.transactionDate, 'YYYY-MM')";
-    const weekPeriodExpr =
-      "TO_CHAR(transaction.transactionDate, 'IYYY') || '-W' || TO_CHAR(transaction.transactionDate, 'IW')";
-    const quarterPeriodExpr =
-      "TO_CHAR(transaction.transactionDate, 'YYYY') || '-Q' || TO_CHAR(transaction.transactionDate, 'Q')";
-    const yearPeriodExpr = "TO_CHAR(transaction.transactionDate, 'YYYY')";
-
-    const periodExpr =
-      groupBy === 'year'
-        ? yearPeriodExpr
-        : groupBy === 'quarter'
-          ? quarterPeriodExpr
-          : groupBy === 'month'
-            ? monthPeriodExpr
-            : groupBy === 'week'
-              ? weekPeriodExpr
-              : dayPeriodExpr;
-
-    const rows = await qb
-      .select(`${periodExpr}`, 'period')
-      .addSelect(
-        `SUM(CASE WHEN transaction.transactionType = '${TransactionType.INCOME}' THEN ABS(COALESCE(transaction.amount, 0)) ELSE 0 END)`,
-        'income',
-      )
-      .addSelect(
-        `SUM(CASE WHEN transaction.transactionType = '${TransactionType.EXPENSE}' THEN ABS(COALESCE(transaction.amount, 0)) ELSE 0 END)`,
-        'expense',
-      )
-      .addSelect('COUNT(transaction.id)', 'count')
-      .groupBy('period')
-      .orderBy('period', 'ASC')
-      .getRawMany<{ period: string; income: string; expense: string; count: string }>();
-
-    const valuesByPeriod = new Map<string, { income: number; expense: number; count: number }>();
-    for (const row of rows) {
-      valuesByPeriod.set(row.period, {
-        income: Number(row.income || 0),
-        expense: Number(row.expense || 0),
-        count: Number(row.count || 0),
-      });
-    }
-
-    const points: Array<{
-      period: string;
-      label: string;
-      income: number;
-      expense: number;
-      net: number;
-      count: number;
-    }> = [];
-
-    const cursor = toStartOfUtcDay(from);
-    const endCursor = toStartOfUtcDay(to);
-    const totals = { income: 0, expense: 0, net: 0, count: 0 };
-
-    while (cursor <= endCursor) {
-      let period = '';
-      let label = '';
-
-      if (groupBy === 'month') {
-        period = formatMonthPeriod(cursor);
-        label = formatMonthLabel(cursor);
-      } else if (groupBy === 'quarter') {
-        const year = cursor.getUTCFullYear();
-        const quarter = Math.floor(cursor.getUTCMonth() / 3) + 1;
-        period = `${year}-Q${quarter}`;
-        label = `Q${quarter} ${year}`;
-      } else if (groupBy === 'year') {
-        period = `${cursor.getUTCFullYear()}`;
-        label = period;
-      } else if (groupBy === 'week') {
-        const { year, week } = getIsoWeekInfo(cursor);
-        const weekString = `${week}`.padStart(2, '0');
-        period = `${year}-W${weekString}`;
-        label = `Week ${weekString}`;
-      } else {
-        period = toDateKey(cursor);
-        label = period;
-      }
-
-      const current = valuesByPeriod.get(period) || { income: 0, expense: 0, count: 0 };
-      const net = current.income - current.expense;
-      points.push({
-        period,
-        label,
-        income: current.income,
-        expense: current.expense,
-        net,
-        count: current.count,
-      });
-
-      totals.income += current.income;
-      totals.expense += current.expense;
-      totals.net += net;
-      totals.count += current.count;
-
-      if (groupBy === 'month') {
-        cursor.setUTCMonth(cursor.getUTCMonth() + 1, 1);
-      } else if (groupBy === 'quarter') {
-        cursor.setUTCMonth(cursor.getUTCMonth() + 3, 1);
-      } else if (groupBy === 'year') {
-        cursor.setUTCFullYear(cursor.getUTCFullYear() + 1, 0, 1);
-      } else if (groupBy === 'week') {
-        cursor.setUTCDate(cursor.getUTCDate() + 7);
-      } else {
-        cursor.setUTCDate(cursor.getUTCDate() + 1);
-      }
-      cursor.setUTCHours(0, 0, 0, 0);
-    }
-
-    const avgPerPeriod = points.length ? totals.net / points.length : 0;
-
-    return {
-      groupBy,
-      dateFrom: from.toISOString().split('T')[0],
-      dateTo: to.toISOString().split('T')[0],
-      points,
-      totals: {
-        income: totals.income,
-        expense: totals.expense,
-        net: totals.net,
-        count: totals.count,
-        avgPerPeriod,
-      },
-    };
+  ): Promise<SpendOverTimeResult> {
+    return this.spendOverTimeReport.getSpendOverTimeReport(workspaceId, query, selfMemberId);
   }
 
   /** Display names persisted on report history rows. */
