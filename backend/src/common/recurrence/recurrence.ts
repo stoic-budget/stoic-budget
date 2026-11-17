@@ -89,6 +89,32 @@ export function nextOccurrence(rule: RecurrenceRule, after: string): string | nu
   return next.done ? null : next.value;
 }
 
+/**
+ * The occurrence a series makes after the one on `after`: the first on or
+ * after `today`, the dates already past passed over (they still count towards
+ * `count`). With `catchUpOne`, the latest of those past dates instead, if
+ * there is one: a series brought over from the old "recurring" flag gets the
+ * bill it missed since its last one, once.
+ */
+export function nextToMake(
+  rule: RecurrenceRule,
+  after: string,
+  today: string,
+  catchUpOne = false,
+): string | null {
+  const from = addDays(after, 1);
+  if (catchUpOne && from < today) {
+    let missed: string | null = null;
+    for (const date of occurrencesFrom(rule, from)) {
+      if (date >= today) break;
+      missed = date;
+    }
+    if (missed) return missed;
+  }
+  const next = occurrencesFrom(rule, from > today ? from : today).next();
+  return next.done ? null : next.value;
+}
+
 /** The first occurrence on or after the start date, or null for a rule that never fires. */
 export function firstOccurrence(rule: RecurrenceRule): string | null {
   const first = occurrencesFrom(rule, rule.startDate).next();

@@ -43,21 +43,29 @@ describe('AddPayableRecurrence migration', () => {
     const text = up();
     expect(text).toContain('SELECT DISTINCT ON ("workspace_id", "direction", "vendor_key", "currency") *');
     expect(text).toContain('"due_date" DESC');
-    // The step comes from the median gap of every flagged copy, deleted ones included.
+    // A deleted copy within 3 days of a live one is a duplicate, not the newest bill.
+    expect(text).toContain('abs(live."due_date" - f."due_date") <= 3');
+    // The step: the median of the live gaps over 3 days, of the newest bill's amount when it recurs.
     expect(text).toContain('percentile_cont(0.5) WITHIN GROUP (ORDER BY "gap")');
-    expect(text).toContain('WHERE "is_recurring" AND "due_date" IS NOT NULL\n');
+    expect(text).toContain('WHERE "gap" > 3');
+    expect(text).toContain('bool_or(f."amount" = n."amount") AS "same_amount"');
+    expect(text).toContain('COALESCE(same."gap", every."gap")');
     expect(text).toContain('"series_id" = p."id"');
     expect(text).toContain('"occurrence_date" = p."due_date"');
     // Not deleted, not archived, not followed by a live bill, at most 45 days old, not run before.
-    expect(text).toContain('n."deleted_at" IS NULL');
-    expect(text).toContain(`n."status" <> 'archived'`);
+    expect(text).toContain('m."deleted_at" IS NULL');
+    expect(text).toContain(`m."status" <> 'archived'`);
     expect(text).toContain('later."deleted_at" IS NULL');
-    expect(text).toContain('AND n."due_date" >= current_date - 45');
-    expect(text).toContain('n."recurrence" IS NULL AND n."series_id" IS NULL');
+    expect(text).toContain('AND m."due_date" >= current_date - 45');
+    expect(text).toContain('m."recurrence" IS NULL AND m."series_id" IS NULL');
+    // Its first extension may make the one bill missed since it.
+    expect(text).toContain('"catch_up_once" = true');
   });
 
   it(`marks a payment's own transaction, so "not this payment" cannot unlink it`, () => {
     expect(up()).toContain('ADD COLUMN IF NOT EXISTS "own_transaction" boolean NOT NULL DEFAULT false');
+    // Older ones only when written with the payment, in one database transaction.
+    expect(up()).toContain('AND t."created_at" = pp."created_at"');
     expect(down()).toContain('DROP COLUMN IF EXISTS "own_transaction"');
   });
 

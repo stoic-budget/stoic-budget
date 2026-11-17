@@ -55,11 +55,7 @@ export class PayableOccurrencesService {
       if (!locked) throw new NotFoundException(appError('PAYABLE_NOT_FOUND'));
       if (!locked.seriesId) throw new BadRequestException(appError('PAYABLE_NOT_RECURRING'));
       if (body.action === 'stop') {
-        await manager.query(
-          `UPDATE "payables" SET "recurrence" = NULL, "is_recurring" = false
-            WHERE "workspace_id" = $1 AND "series_id" = $2`,
-          [workspaceId, locked.seriesId],
-        );
+        await this.recurrence.stopSeries(workspaceId, locked.seriesId, manager);
         return locked;
       }
       if (locked.skippedAt && body.action === 'skip') return locked;

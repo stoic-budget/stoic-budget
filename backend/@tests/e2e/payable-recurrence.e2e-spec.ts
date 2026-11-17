@@ -10,6 +10,7 @@ import { DataSource } from 'typeorm';
 import { addDays, formatDay, weekdayOf } from '../../src/common/recurrence/date-only';
 import {
   nextOccurrence,
+  nextToMake,
   occurrencesFrom,
   type RecurrenceRule,
 } from '../../src/common/recurrence/recurrence';
@@ -349,13 +350,19 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
     vendor: string,
     rule: Record<string, unknown>,
     day: string,
-    columns: { status?: string; dueDate?: string; remindDaysBefore?: number } = {},
+    columns: {
+      status?: string;
+      dueDate?: string;
+      remindDaysBefore?: number;
+      catchUpOnce?: boolean;
+    } = {},
   ): Promise<string> {
     const id = randomUUID();
     await dataSource.query(
       `INSERT INTO payables (id, workspace_id, vendor, amount, currency, status, due_date,
-                             is_recurring, recurrence, series_id, occurrence_date, remind_days_before)
-       VALUES ($1, $2, $3, 20, 'KZT', $4, $5, true, $6, $1, $7, $8)`,
+                             is_recurring, recurrence, series_id, occurrence_date, remind_days_before,
+                             catch_up_once)
+       VALUES ($1, $2, $3, 20, 'KZT', $4, $5, true, $6, $1, $7, $8, $9)`,
       [
         id,
         owner.workspaceId,
@@ -365,10 +372,69 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
         JSON.stringify(rule),
         day,
         columns.remindDaysBefore ?? 3,
+        columns.catchUpOnce ?? false,
       ],
     );
     return id;
   }
+
+  describe('how a series ends', () => {
+    it('ends the whole series when one occurrence is set to "does not repeat", deleted or not', async () => {
+      const start = addDays(today, -6);
+      const rule = { frequency: 'monthly', interval: 1, startDate: start };
+      const id = await seriesRow('ACME Courier', rule, start, { status: 'paid' });
+      await recurrence().ensureSeries(owner.workspaceId, id);
+      const [, later] = await series(id);
+      await put(`/payables/${later.id}`, { recurrence: null }).expect(200);
+      expect((await series(id)).map(row => row.recurrence)).toEqual([null, null]);
+      // Deleting the one that ended it does not bring the series back.
+      await as(owner, request(server()).delete(`/payables/${later.id}`)).expect(200);
+      await recurrence().generateDue();
+      await recurrence().ensureSeries(owner.workspaceId, id);
+      expect(await series(id)).toHaveLength(2);
+    });
+
+    it('stops a run making the next occurrence when the stop lands in between', async () => {
+      const start = addDays(today, -3);
+      const rule = { frequency: 'monthly', interval: 1, startDate: start };
+      const id = await seriesRow('ACME Archive Boxes', rule, start, { status: 'paid' });
+      // The stop comes while the run has read the rule and not yet written the occurrence.
+      let stopping: Promise<request.Response> | null = null;
+      const service = recurrence() as unknown as { holidaysFor: () => Promise<Set<string>> };
+      const holidays = vi.spyOn(service, 'holidaysFor').mockImplementationOnce(async () => {
+        stopping = put(`/payables/${id}/occurrence`, { action: 'stop' }).then(answer => answer);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return new Set<string>();
+      });
+      try {
+        await recurrence().ensureSeries(owner.workspaceId, id);
+        expect(((await stopping) as unknown as request.Response).status).toBe(200);
+      } finally {
+        holidays.mockRestore();
+      }
+      const rows = await series(id);
+      expect(rows.map(row => row.recurrence)).toEqual(rows.map(() => null));
+      expect(await recurrence().ensureSeries(owner.workspaceId, id)).toBe(0);
+    });
+  });
+
+  it('gives a series made by the upgrade the one bill it missed, without an overdue notice', async () => {
+    // Monthly, last bill 40 days ago: the date a month after it has passed and is owed.
+    const last = addDays(today, -40);
+    const rule = { frequency: 'monthly', interval: 1, startDate: last };
+    const id = await seriesRow('ACME Gym Club', rule, last, { catchUpOnce: true });
+    await recurrence().generateDue();
+    const missed = nextToMake(rule as RecurrenceRule, last, today, true) as string;
+    expect(missed < today).toBe(true);
+    const rows = await series(id);
+    expect(rows.map(row => String(row.occurrenceDate))).toEqual([last, missed]);
+    expect(rows[1]).toMatchObject({ status: 'overdue', catchUpOnce: false });
+    const noticed = (await app.get(PayablesService).markOverduePayables()).map(row => row.id);
+    expect(noticed).not.toContain(rows[1].id);
+    // Once only: from it on, nothing before today.
+    await recurrence().generateDue();
+    expect(await series(id)).toHaveLength(2);
+  });
 
   describe('no catch-up', () => {
     const days = async (seriesId: string) =>
@@ -522,10 +588,29 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
       const halfYearly = await history('ACME Car Service', 182);
       const yearly = await history('ACME Domain', 365);
       const odd = await history('ACME Odd Jobs', 50);
-      // A deleted copy still counts for the gaps: 7 and 7, not 14.
+      // A deleted copy does not count for the gaps: 14, not 7 and 7.
       await insert('ACME Dog Walk', 'paid', -17);
       await insert('ACME Dog Walk', 'paid', -10, { deleted: true });
       const walked = await insert('ACME Dog Walk', 'to_pay', -3);
+      // Copies a day apart are duplicates, not a daily bill: 5 and 7 days, weekly.
+      for (const offset of [-17, -16, -15, -10]) await insert('ACME Pool Service', 'paid', offset);
+      const pool = await insert('ACME Pool Service', 'to_pay', -3);
+      // One bank, two bills: a 120 card on one day and a 500 loan two weeks off it.
+      const bank = async (amount: number, offset: number, status = 'paid') =>
+        (
+          await runner.query(
+            `INSERT INTO payables (workspace_id, vendor, amount, currency, status, due_date, is_recurring)
+             VALUES ($1, 'ACME Bank', $2, 'KZT', $3, $4, true) RETURNING id`,
+            [owner.workspaceId, amount, status, addDays(today, offset)],
+          )
+        )[0].id as string;
+      for (const offset of [-93, -63, -33]) await bank(120, offset);
+      for (const offset of [-77, -47]) await bank(500, offset);
+      const loan = await bank(500, -17, 'to_pay');
+      const card = await bank(120, -3, 'to_pay');
+      // A copy deleted two days after the live one is a duplicate removed by hand.
+      const gas = await insert('ACME Gas', 'to_pay', -5);
+      const gasCopy = await insert('ACME Gas', 'to_pay', -3, { deleted: true });
       // Withdrawn, dropped, or already followed by a bill entered by hand: left as they are.
       const archivedOld = await insert('ACME Archived', 'paid', -35);
       const archived = await insert('ACME Archived', 'archived', -5);
@@ -536,20 +621,25 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
 
       const migration = new AddPayableRecurrence1788210000000();
       await migration.up(runner);
-      const read = async (): Promise<Map<string, { recurrence: unknown; series_id: string | null }>> => {
-        const rows: Array<{ id: string; recurrence: unknown; series_id: string | null }> =
-          await runner.query(
-            `SELECT id, recurrence, series_id FROM payables
-              WHERE workspace_id = $1 AND vendor LIKE 'ACME %'`,
-            [owner.workspaceId],
-          );
-        return new Map(rows.map(row => [row.id, { recurrence: row.recurrence, series_id: row.series_id }]));
+      type Converted = { recurrence: unknown; series_id: string | null; catch_up_once: boolean };
+      const read = async (): Promise<Map<string, Converted>> => {
+        const rows: Array<Converted & { id: string }> = await runner.query(
+          `SELECT id, recurrence, series_id, catch_up_once FROM payables
+            WHERE workspace_id = $1 AND vendor LIKE 'ACME %'`,
+          [owner.workspaceId],
+        );
+        return new Map(rows.map(({ id, ...row }) => [id, row]));
       };
       const byId = await read();
       const rule = (frequency: string, interval: number, offset: number) => ({
         recurrence: { frequency, interval, startDate: addDays(today, offset) },
       });
-      expect(byId.get(single)).toMatchObject({ ...rule('monthly', 1, -10), series_id: single });
+      // Its first extension may make the one bill missed since it.
+      expect(byId.get(single)).toMatchObject({
+        ...rule('monthly', 1, -10),
+        series_id: single,
+        catch_up_once: true,
+      });
       expect(byId.get(weekly)).toMatchObject({ ...rule('weekly', 1, -3), series_id: weekly });
       expect(byId.get(fortnightly)).toMatchObject(rule('weekly', 2, -3));
       expect(byId.get(monthly)).toMatchObject(rule('monthly', 1, -3));
@@ -557,8 +647,12 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
       expect(byId.get(halfYearly)).toMatchObject(rule('monthly', 6, -3));
       expect(byId.get(yearly)).toMatchObject(rule('yearly', 1, -3));
       expect(byId.get(odd)).toMatchObject(rule('monthly', 1, -3));
-      expect(byId.get(walked)).toMatchObject(rule('weekly', 1, -3));
-      for (const id of [forgotten, archivedOld, archived, droppedOld, dropped, followed, byHand]) {
+      expect(byId.get(walked)).toMatchObject(rule('weekly', 2, -3));
+      expect(byId.get(pool)).toMatchObject(rule('weekly', 1, -3));
+      expect(byId.get(card)).toMatchObject({ ...rule('monthly', 1, -3), series_id: card });
+      expect(byId.get(gas)).toMatchObject({ ...rule('monthly', 1, -5), series_id: gas });
+      const left = [forgotten, archivedOld, archived, droppedOld, dropped, followed, byHand];
+      for (const id of [...left, loan, gasCopy]) {
         expect(byId.get(id)).toMatchObject({ recurrence: null, series_id: null });
       }
 
@@ -571,40 +665,42 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
     }
   });
 
-  it('marks the payment a bill recorded itself, earlier ones included, but not a bank row', async () => {
+  it('marks the payment a bill recorded itself, earlier ones included, but no row matched later', async () => {
     const runner = dataSource.createQueryRunner();
     await runner.startTransaction();
     try {
-      const bill = await post('/payables', {
-        vendor: 'ACME Locksmith',
-        amount: 12,
-        currency: 'KZT',
-        dueDate: today,
-      }).expect(201);
-      await put(`/payables/${bill.body.id}/mark-paid`, { inHand: true }).expect(200);
-      const linked = await post('/payables', {
-        vendor: 'ACME Plumber',
-        amount: 13,
-        currency: 'KZT',
-        dueDate: today,
-      }).expect(201);
-      const rowId = await bankRow('ACME Plumber Ltd', 13);
-      await put(`/payables/${linked.body.id}/mark-paid`, { linkedTransactionId: rowId }).expect(200);
+      const bill = async (vendor: string) =>
+        (await post('/payables', { vendor, amount: 12, currency: 'KZT', dueDate: today }).expect(201))
+          .body.id as string;
+      const cash = await bill('ACME Locksmith');
+      await put(`/payables/${cash}/mark-paid`, { inHand: true }).expect(200);
+      // Rows already in the books, matched to a bill afterwards: a bank row, then two shaped
+      // like the cash payment (no statement, the vendor as payee and purpose), a receipt
+      // scan's and one typed by hand.
+      const matched: string[] = [];
+      for (const [vendor, payee] of [
+        ['ACME Plumber', 'ACME Plumber Ltd'],
+        ['ACME Bookshop', 'ACME Bookshop'],
+        ['ACME Florist', 'ACME Florist'],
+      ]) {
+        const id = await bill(vendor);
+        const rowId = await bankRow(payee, 12);
+        await put(`/payables/${id}/mark-paid`, { linkedTransactionId: rowId }).expect(200);
+        matched.push(id);
+      }
+      const ids = [cash, ...matched];
       // As before the upgrade: no payment marked.
       await runner.query(
         'UPDATE payable_payments SET own_transaction = false WHERE payable_id = ANY($1::uuid[])',
-        [[bill.body.id, linked.body.id]],
+        [ids],
       );
       await new AddPayableRecurrence1788210000000().up(runner);
       const rows: Array<{ payable_id: string; own_transaction: boolean }> = await runner.query(
         'SELECT payable_id, own_transaction FROM payable_payments WHERE payable_id = ANY($1::uuid[])',
-        [[bill.body.id, linked.body.id]],
+        [ids],
       );
       expect(new Map(rows.map(row => [row.payable_id, row.own_transaction]))).toEqual(
-        new Map([
-          [bill.body.id, true],
-          [linked.body.id, false],
-        ]),
+        new Map(ids.map(id => [id, id === cash])),
       );
     } finally {
       await runner.rollbackTransaction();
@@ -701,7 +797,14 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
       const paid = await put(`/payables/${bill.body.id}/mark-paid`, { inHand: true }).expect(200);
       const cashId = paid.body.linkedTransactionId as string;
       expect(cashId).toEqual(expect.any(String));
-      await post(`/payables/${bill.body.id}/match-rejections`, { transactionId: cashId }).expect(409);
+      const refused = await post(`/payables/${bill.body.id}/match-rejections`, {
+        transactionId: cashId,
+      }).expect(409);
+      // Removing the payment would keep the transaction: the answer does not send anyone there.
+      expect(refused.body.error).toMatchObject({
+        code: 'PAYABLE_REJECT_OWN_PAYMENT',
+        message: 'This transaction is the payment recorded with this bill; it cannot be refused here',
+      });
       const after = await as(owner, request(server()).get(`/payables/${bill.body.id}`)).expect(200);
       expect(after.body).toMatchObject({ status: 'paid', linkedTransactionId: cashId });
       const payments = await as(

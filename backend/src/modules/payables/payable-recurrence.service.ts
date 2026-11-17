@@ -6,7 +6,7 @@ import { appError } from '../../common/errors/app-error';
 import { addDays, formatDay, toDay } from '../../common/recurrence/date-only';
 import {
   firstOccurrence,
-  occurrencesFrom,
+  nextToMake,
   type RecurrenceRule,
   shiftOffNonWorkingDays,
   yearsBetween,
@@ -97,9 +97,10 @@ export class PayableRecurrenceService {
 
   /**
    * A changed rule on a bill being edited. A bill that did not repeat starts a
-   * series on its due date; null ends the series. The rule and the reminder
-   * days carry to the occurrences already made after this one, so ending the
-   * series here is not undone by a later copy that still has the old rule.
+   * series on its due date; null ends the whole series, as "stop repeating"
+   * does: there is one way a series ends. A new rule and the reminder days
+   * carry to the occurrences already made after this one, deleted ones too, so
+   * the newest occurrence always holds the rule the job goes on with.
    * A new amount typed into the form becomes the series amount again, over
    * one set for this occurrence alone.
    */
@@ -128,6 +129,9 @@ export class PayableRecurrenceService {
       }
     }
     if (!(payable.seriesId && payable.occurrenceDate)) return;
+    if (ruleChanged && !payable.recurrence) {
+      await this.stopSeries(payable.workspaceId, payable.seriesId);
+    }
     if (!ruleChanged && dto.remindDaysBefore == null) return;
     await this.payableRepository.query(
       `UPDATE "payables"
@@ -135,7 +139,7 @@ export class PayableRecurrenceService {
               "is_recurring" = CASE WHEN $5 THEN $1::jsonb IS NOT NULL ELSE "is_recurring" END,
               "remind_days_before" = COALESCE($6, "remind_days_before")
         WHERE "workspace_id" = $2 AND "series_id" = $3 AND "occurrence_date" > $4
-          AND "id" <> $7 AND "deleted_at" IS NULL`,
+          AND "id" <> $7`,
       [
         payable.recurrence ? JSON.stringify(payable.recurrence) : null,
         payable.workspaceId,
@@ -150,7 +154,7 @@ export class PayableRecurrenceService {
 
   /** Daily: every live series across workspaces gets the occurrences now due to exist. */
   async generateDue(today = formatDay(new Date())): Promise<number> {
-    // Live: the newest occurrence still on the books carries a rule ("stop repeating" clears it).
+    // A series goes on while its newest occurrence, deleted or not, holds the rule.
     const series: Array<{ workspace_id: string; series_id: string }> =
       await this.payableRepository.query(
         `SELECT newest."workspace_id", newest."series_id"
@@ -158,8 +162,7 @@ export class PayableRecurrenceService {
              SELECT DISTINCT ON (p."workspace_id", p."series_id") p."workspace_id", p."series_id",
                     p."recurrence"
                FROM "payables" p
-              WHERE p."series_id" IS NOT NULL AND p."deleted_at" IS NULL
-                AND ${notInVersionWorkspace('p."workspace_id"')}
+              WHERE p."series_id" IS NOT NULL AND ${notInVersionWorkspace('p."workspace_id"')}
               ORDER BY p."workspace_id", p."series_id", p."occurrence_date" DESC
            ) newest
           WHERE newest."recurrence" IS NOT NULL`,
@@ -200,91 +203,134 @@ export class PayableRecurrenceService {
    * payment is gone) or the next due date is within its window. Never one
    * before today: the grid's dates already past are passed over (they still
    * count towards the rule's `count`), so a series left alone for months makes
-   * one occurrence, not a run of overdue ones. The rule is the newest live
-   * occurrence's: "stop repeating" clears it there. Returns how many it made.
+   * one occurrence, not a run of overdue ones; a series the upgrade made from
+   * an old flag gets the one it missed, once (`catchUpOnce`). A series ends
+   * only when its rule is cleared ("stop repeating", or "does not repeat" in the
+   * form), which clears it on every occurrence. Returns how many it made.
    */
   async ensureSeries(
     workspaceId: string,
     seriesId: string,
     today = formatDay(new Date()),
-    manager: EntityManager = this.payableRepository.manager,
   ): Promise<number> {
-    const payables = manager.getRepository(Payable);
     let created = 0;
     let conflictAt: string | null = null;
     for (let attempt = 0; attempt < MAX_CREATED_PER_RUN; attempt += 1) {
-      const newest = await payables.findOne({
-        where: { workspaceId, seriesId },
-        order: { occurrenceDate: 'DESC' },
-        withDeleted: true,
-      });
-      if (!newest?.occurrenceDate) break;
-      // A deleted newest one gives the day to go on from; the rule and the rest come
-      // from the newest live one (none left: the deleted one's own).
-      const template = newest.deletedAt
-        ? ((await payables.findOne({
-            where: { workspaceId, seriesId },
-            order: { occurrenceDate: 'DESC' },
-          })) ?? newest)
-        : newest;
-      const rule = template.recurrence;
-      if (!rule) break;
-      const after = addDays(toDay(newest.occurrenceDate), 1);
-      const next = occurrencesFrom(rule, after > today ? after : today).next().value;
-      if (!next) break;
-      const settled =
-        Boolean(newest.deletedAt) ||
-        newest.status === PayableStatus.PAID ||
-        newest.status === PayableStatus.ARCHIVED;
-      // Gated on the day it is due, the one its reminder counts back from.
-      const dueDate = shiftOffNonWorkingDays(
-        next,
-        rule.shift,
-        await this.holidaysFor(workspaceId, rule, next),
+      const step = await this.payableRepository.manager.transaction(manager =>
+        this.makeNext(manager, workspaceId, seriesId, today),
       );
-      const window = Math.max(UPCOMING_WINDOW_DAYS, template.remindDaysBefore ?? 0);
-      if (!settled && dueDate > addDays(today, window)) break;
-      const inserted = await payables
-        .createQueryBuilder()
-        .insert()
-        .into(Payable)
-        .values({
-          workspaceId,
-          createdById: template.createdById,
-          direction: template.direction,
-          vendor: template.vendor,
-          amount: Number(template.baseAmount ?? template.amount),
-          currency: template.currency,
-          dueDate: dueDate as unknown as Date,
-          status: PayableStatus.TO_PAY,
-          source: PayableSource.MANUAL,
-          isRecurring: true,
-          recurrence: rule,
-          seriesId,
-          occurrenceDate: next,
-          remindDaysBefore: template.remindDaysBefore,
-          comment: template.comment,
-        })
-        .orIgnore()
-        .returning(['id'])
-        .execute();
-      const newId = (inserted.raw as Array<{ id: string }>)[0]?.id;
-      if (!newId) {
+      if (step.kind === 'done') break;
+      if (step.kind === 'conflict') {
         // Another run made it first: look again from the newest, unless nothing moved.
-        if (conflictAt === newest.id) break;
-        conflictAt = newest.id;
+        if (conflictAt === step.newestId) break;
+        conflictAt = step.newestId;
         continue;
       }
       created += 1;
-      // The same workspace tags as the bill it was made from.
-      await manager.query(
-        `INSERT INTO "payable_tags" ("payable_id", "tag_id")
-         SELECT $1, "tag_id" FROM "payable_tags" WHERE "payable_id" = $2
-         ON CONFLICT DO NOTHING`,
-        [newId, template.id],
-      );
     }
     return created;
+  }
+
+  /**
+   * One step of `ensureSeries`, in a transaction holding the newest occurrence
+   * (the rule's keeper) in share mode. "Stop repeating" locks every occurrence
+   * before clearing the rule, so it either waits for this step and clears the
+   * occurrence made here too, or this step waits for it and finds no rule.
+   */
+  private async makeNext(
+    manager: EntityManager,
+    workspaceId: string,
+    seriesId: string,
+    today: string,
+  ): Promise<{ kind: 'done' | 'made' } | { kind: 'conflict'; newestId: string }> {
+    const payables = manager.getRepository(Payable);
+    const newest = await payables.findOne({
+      where: { workspaceId, seriesId },
+      order: { occurrenceDate: 'DESC' },
+      withDeleted: true,
+      lock: { mode: 'pessimistic_read' },
+    });
+    // A series ends only when its rule is cleared, which clears it on every occurrence.
+    const rule = newest?.recurrence;
+    if (!(newest?.occurrenceDate && rule)) return { kind: 'done' };
+    // A deleted newest one gives the day to go on from; the amount and the rest come
+    // from the newest live one (none left: the deleted one's own).
+    const template = newest.deletedAt
+      ? ((await payables.findOne({
+          where: { workspaceId, seriesId },
+          order: { occurrenceDate: 'DESC' },
+        })) ?? newest)
+      : newest;
+    const next = nextToMake(rule, toDay(newest.occurrenceDate), today, newest.catchUpOnce);
+    if (!next) return { kind: 'done' };
+    const settled =
+      Boolean(newest.deletedAt) ||
+      newest.status === PayableStatus.PAID ||
+      newest.status === PayableStatus.ARCHIVED;
+    // Gated on the day it is due, the one its reminder counts back from.
+    const dueDate = shiftOffNonWorkingDays(
+      next,
+      rule.shift,
+      await this.holidaysFor(workspaceId, rule, next),
+    );
+    const window = Math.max(UPCOMING_WINDOW_DAYS, template.remindDaysBefore ?? 0);
+    if (!settled && dueDate > addDays(today, window)) return { kind: 'done' };
+    const inserted = await payables
+      .createQueryBuilder()
+      .insert()
+      .into(Payable)
+      .values({
+        workspaceId,
+        createdById: template.createdById,
+        direction: template.direction,
+        vendor: template.vendor,
+        amount: Number(template.baseAmount ?? template.amount),
+        currency: template.currency,
+        dueDate: dueDate as unknown as Date,
+        // The one an upgraded series missed is owed already, without an overdue notice.
+        status: next < today ? PayableStatus.OVERDUE : PayableStatus.TO_PAY,
+        source: PayableSource.MANUAL,
+        isRecurring: true,
+        recurrence: rule,
+        seriesId,
+        occurrenceDate: next,
+        remindDaysBefore: template.remindDaysBefore,
+        comment: template.comment,
+      })
+      .orIgnore()
+      .returning(['id'])
+      .execute();
+    const newId = (inserted.raw as Array<{ id: string }>)[0]?.id;
+    if (!newId) return { kind: 'conflict', newestId: newest.id };
+    // The same workspace tags as the bill it was made from.
+    await manager.query(
+      `INSERT INTO "payable_tags" ("payable_id", "tag_id")
+       SELECT $1, "tag_id" FROM "payable_tags" WHERE "payable_id" = $2
+       ON CONFLICT DO NOTHING`,
+      [newId, template.id],
+    );
+    return { kind: 'made' };
+  }
+
+  /**
+   * Ends a series: no occurrence of it carries the rule any more, live or
+   * deleted, so neither the daily job nor a restored backup goes on with it.
+   * Every occurrence is locked first (see `makeNext`). In the caller's
+   * transaction when given one.
+   */
+  async stopSeries(workspaceId: string, seriesId: string, manager?: EntityManager): Promise<void> {
+    const stop = async (tx: EntityManager) => {
+      await tx.query(
+        'SELECT "id" FROM "payables" WHERE "workspace_id" = $1 AND "series_id" = $2 FOR UPDATE',
+        [workspaceId, seriesId],
+      );
+      await tx.query(
+        `UPDATE "payables" SET "recurrence" = NULL, "is_recurring" = false
+          WHERE "workspace_id" = $1 AND "series_id" = $2`,
+        [workspaceId, seriesId],
+      );
+    };
+    await (manager ? stop(manager) : this.payableRepository.manager.transaction(stop));
   }
 
   private firstOf(rule: RecurrenceRule): string {

@@ -1312,7 +1312,6 @@ export class DashboardService {
           label: newest.vendor,
           source: 'payable',
           sourceId: newest.id,
-          isOverdue: false,
         });
       }
     }

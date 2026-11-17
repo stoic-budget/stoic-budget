@@ -9,6 +9,7 @@ import {
   gridDate,
   monthlyRuleFrom,
   nextOccurrence,
+  nextToMake,
   occurrencesBetween,
   type RecurrenceRule,
   shiftOffNonWorkingDays,
@@ -189,6 +190,30 @@ describe('recurrence rules', () => {
     const legacy = monthlyRuleFrom('2026-03-31');
     expect(nextOccurrence(legacy, '2026-03-31')).toBe('2026-04-30');
     expect(nextOccurrence(legacy, '2026-04-30')).toBe('2026-05-31');
+  });
+});
+
+describe('the next occurrence a series makes', () => {
+  const monthly7th = rule({ startDate: '2026-08-07' });
+
+  it('is never before today: the dates already past are passed over', () => {
+    expect(nextToMake(monthly7th, '2026-08-07', '2026-11-16')).toBe('2026-12-07');
+    expect(nextToMake(monthly7th, '2026-11-07', '2026-11-16')).toBe('2026-12-07');
+    // Due today is not past.
+    expect(nextToMake(monthly7th, '2026-10-07', '2026-11-07')).toBe('2026-11-07');
+  });
+
+  it('counts the passed-over dates towards the number of occurrences', () => {
+    expect(nextToMake({ ...monthly7th, count: 3 }, '2026-08-07', '2026-11-16')).toBeNull();
+  });
+
+  it('catches up once on the latest date already past, never further back', () => {
+    // Brought over on 16 November with its last bill on 7 October: the 7 November one is owed.
+    expect(nextToMake(monthly7th, '2026-10-07', '2026-11-16', true)).toBe('2026-11-07');
+    // Three months missed: only the last of them.
+    expect(nextToMake(monthly7th, '2026-08-07', '2026-11-16', true)).toBe('2026-11-07');
+    // Nothing missed: the same as without.
+    expect(nextToMake(monthly7th, '2026-11-07', '2026-11-16', true)).toBe('2026-12-07');
   });
 });
 

@@ -1,7 +1,8 @@
 import type { Repository } from 'typeorm';
 import { localDay } from '../../common/recurrence/date-only';
 import {
-  occurrencesFrom,
+  nextOccurrence,
+  nextToMake,
   type RecurrenceRule,
   shiftOffNonWorkingDays,
 } from '../../common/recurrence/recurrence';
@@ -55,50 +56,59 @@ export function projectSubscriptionCharges(
   return charges;
 }
 
-/** The newest bill of each live repeating series the workspace owes on. */
+/**
+ * The newest bill of each repeating series the workspace owes on, deleted
+ * or not: as for the daily job, a series goes on while its newest occurrence
+ * holds the rule, and only clearing the rule (on every occurrence) ends it.
+ */
 export async function newestRecurringPayables(
   payables: Repository<Payable>,
   workspaceId: string,
 ): Promise<Payable[]> {
   const rows: Array<{ id: string }> = await payables.query(
     `SELECT newest."id" FROM (
-       SELECT DISTINCT ON (p."series_id") p."id", p."deleted_at", p."recurrence"
+       SELECT DISTINCT ON (p."series_id") p."id", p."recurrence"
          FROM "payables" p
         WHERE p."workspace_id" = $1 AND p."series_id" IS NOT NULL AND p."direction" = $2
         ORDER BY p."series_id", p."occurrence_date" DESC
      ) newest
-     WHERE newest."deleted_at" IS NULL AND newest."recurrence" IS NOT NULL`,
+     WHERE newest."recurrence" IS NOT NULL`,
     [workspaceId, PayableDirection.PAYABLE],
   );
   if (rows.length === 0) return [];
   return payables
     .createQueryBuilder('payable')
+    .withDeleted()
     .where('payable.workspaceId = :workspaceId', { workspaceId })
     .andWhere('payable.id IN (:...ids)', { ids: rows.map(row => row.id) })
     .getMany();
 }
 
 /**
- * The occurrences of a series not made yet, inside [today, horizonEnd]: after
- * the newest bill's own day, at the series amount, moved off weekends as the
- * rule says (public holidays are not looked up here; the bill made later is).
+ * The occurrences of a series not made yet, inside [today, horizonEnd]: the
+ * dates the job will make (`nextToMake`), at the series amount, moved off
+ * weekends as the rule says (public holidays are not looked up here; the bill
+ * made later is). The one an upgraded series missed is owed already, so it
+ * lands on today, overdue, like any overdue bill.
  */
 export function projectedOccurrences(
   newest: Payable,
   today: Date,
   horizonEnd: Date,
-): Array<{ date: string; amount: number }> {
+): Array<{ date: string; amount: number; isOverdue: boolean }> {
   const rule = newest.recurrence as RecurrenceRule | null;
   if (!(rule && newest.occurrenceDate)) return [];
   const from = localDay(today);
   const to = localDay(horizonEnd);
   const amount = Number(newest.baseAmount ?? newest.amount);
-  const items: Array<{ date: string; amount: number }> = [];
-  for (const day of occurrencesFrom(rule, String(newest.occurrenceDate).slice(0, 10))) {
-    if (day <= String(newest.occurrenceDate).slice(0, 10)) continue;
+  const items: Array<{ date: string; amount: number; isOverdue: boolean }> = [];
+  const after = String(newest.occurrenceDate).slice(0, 10);
+  let day = nextToMake(rule, after, from, newest.catchUpOnce);
+  while (day) {
     const due = shiftOffNonWorkingDays(day, rule.shift);
     if (due > to) break;
-    if (due >= from) items.push({ date: due, amount });
+    items.push({ date: due < from ? from : due, amount, isOverdue: due < from });
+    day = nextOccurrence(rule, day);
   }
   return items;
 }

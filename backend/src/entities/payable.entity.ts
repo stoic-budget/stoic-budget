@@ -129,6 +129,13 @@ export class Payable {
   @Column({ name: 'skipped_at', type: 'timestamptz', nullable: true })
   skippedAt: Date | null;
 
+  /**
+   * Set by the upgrade on a bill whose old "recurring" flag became a series:
+   * its next occurrence may be the one date already past since it, once.
+   */
+  @Column({ name: 'catch_up_once', type: 'boolean', default: false })
+  catchUpOnce: boolean;
+
   /** How many days before the due date the reminder goes out. */
   @Column({ name: 'remind_days_before', type: 'int', default: 3 })
   remindDaysBefore: number;
