@@ -14,6 +14,7 @@ import { PayableMatchRejection } from '../../entities/payable-match-rejection.en
 import { PayablePayment } from '../../entities/payable-payment.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { PayableRecurrenceService } from './payable-recurrence.service';
+import { lockSeries } from './series-lock';
 
 /**
  * What one occurrence of a repeating bill can do without touching the series
@@ -36,8 +37,9 @@ export class PayableOccurrencesService {
    * A bill with money against it is past all three. Stop: no occurrence is
    * made after this series' last one; the rule is cleared on every occurrence,
    * so neither the daily job nor a restored backup takes it up again.
-   * The bill is locked as a payment locks it, so a payment arriving at the
-   * same time is either seen here or waits for this to finish.
+   * The series lock comes first, then the bill is locked as a payment locks
+   * it, so a payment arriving at the same time is either seen here or waits
+   * for this to finish.
    */
   async apply(id: string, workspaceId: string, body: PayableOccurrenceBody): Promise<Payable> {
     if (
@@ -48,6 +50,12 @@ export class PayableOccurrencesService {
     }
     const payable = await this.payableRepository.manager.transaction(async manager => {
       const payables = manager.getRepository(Payable);
+      // The series lock first, as every writer of a series takes it (see `lockSeries`).
+      const series = await payables.findOne({
+        where: { id, workspaceId },
+        select: { id: true, seriesId: true },
+      });
+      if (series?.seriesId) await lockSeries(manager, workspaceId, series.seriesId);
       const locked = await payables.findOne({
         where: { id, workspaceId },
         lock: { mode: 'pessimistic_write' },

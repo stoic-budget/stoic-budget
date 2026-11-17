@@ -16,6 +16,7 @@ import type { CreatePayableBody, UpdatePayableBody } from '../../contracts';
 import { Payable, PayableSource, PayableStatus } from '../../entities/payable.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { PublicHolidaysService } from '../reference-data/public-holidays.service';
+import { lockSeries } from './series-lock';
 
 /** A repeating bill shows up this many days before it is due, or earlier if its reminder does. */
 export const UPCOMING_WINDOW_DAYS = 14;
@@ -102,9 +103,10 @@ export class PayableRecurrenceService {
    * carry to the occurrences already made after this one, deleted ones too, so
    * the newest occurrence always holds the rule the job goes on with.
    * A new amount typed into the form becomes the series amount again, over
-   * one set for this occurrence alone.
+   * one set for this occurrence alone. Saves the bill: the rule, the
+   * occurrences after it and the bill itself change under the series lock.
    */
-  async applyUpdate(payable: Payable, dto: UpdatePayableBody): Promise<void> {
+  async applyUpdate(payable: Payable, dto: UpdatePayableBody): Promise<Payable> {
     if (dto.amount != null && payable.baseAmount != null) {
       // The edit is already on the entity: what is stored says whether the amount changed.
       const [stored]: Array<{ amount: string }> = await this.payableRepository.query(
@@ -128,28 +130,33 @@ export class PayableRecurrenceService {
         )) as unknown as Date;
       }
     }
-    if (!(payable.seriesId && payable.occurrenceDate)) return;
-    if (ruleChanged && !payable.recurrence) {
-      await this.stopSeries(payable.workspaceId, payable.seriesId);
-    }
-    if (!ruleChanged && dto.remindDaysBefore == null) return;
-    await this.payableRepository.query(
-      `UPDATE "payables"
-          SET "recurrence" = CASE WHEN $5 THEN $1::jsonb ELSE "recurrence" END,
-              "is_recurring" = CASE WHEN $5 THEN $1::jsonb IS NOT NULL ELSE "is_recurring" END,
-              "remind_days_before" = COALESCE($6, "remind_days_before")
-        WHERE "workspace_id" = $2 AND "series_id" = $3 AND "occurrence_date" > $4
-          AND "id" <> $7`,
-      [
-        payable.recurrence ? JSON.stringify(payable.recurrence) : null,
-        payable.workspaceId,
-        payable.seriesId,
-        payable.occurrenceDate,
-        ruleChanged,
-        dto.remindDaysBefore ?? null,
-        payable.id,
-      ],
-    );
+    return this.payableRepository.manager.transaction(async manager => {
+      const { seriesId, occurrenceDate } = payable;
+      if (seriesId) await lockSeries(manager, payable.workspaceId, seriesId);
+      if (seriesId && occurrenceDate && ruleChanged && !payable.recurrence) {
+        await this.stopSeries(payable.workspaceId, seriesId, manager);
+      }
+      if (seriesId && occurrenceDate && (ruleChanged || dto.remindDaysBefore != null)) {
+        await manager.query(
+          `UPDATE "payables"
+              SET "recurrence" = CASE WHEN $5 THEN $1::jsonb ELSE "recurrence" END,
+                  "is_recurring" = CASE WHEN $5 THEN $1::jsonb IS NOT NULL ELSE "is_recurring" END,
+                  "remind_days_before" = COALESCE($6, "remind_days_before")
+            WHERE "workspace_id" = $2 AND "series_id" = $3 AND "occurrence_date" > $4
+              AND "id" <> $7`,
+          [
+            payable.recurrence ? JSON.stringify(payable.recurrence) : null,
+            payable.workspaceId,
+            seriesId,
+            occurrenceDate,
+            ruleChanged,
+            dto.remindDaysBefore ?? null,
+            payable.id,
+          ],
+        );
+      }
+      return manager.getRepository(Payable).save(payable);
+    });
   }
 
   /** Daily: every live series across workspaces gets the occurrences now due to exist. */
@@ -232,10 +239,10 @@ export class PayableRecurrenceService {
   }
 
   /**
-   * One step of `ensureSeries`, in a transaction holding the newest occurrence
-   * (the rule's keeper) in share mode. "Stop repeating" locks every occurrence
-   * before clearing the rule, so it either waits for this step and clears the
-   * occurrence made here too, or this step waits for it and finds no rule.
+   * One step of `ensureSeries`, in a transaction holding the series lock
+   * (`lockSeries`): a stop or a rule edit either waits for this step and
+   * reaches the occurrence made here too, or this step waits for it and reads
+   * the rule it left.
    */
   private async makeNext(
     manager: EntityManager,
@@ -243,12 +250,12 @@ export class PayableRecurrenceService {
     seriesId: string,
     today: string,
   ): Promise<{ kind: 'done' | 'made' } | { kind: 'conflict'; newestId: string }> {
+    await lockSeries(manager, workspaceId, seriesId);
     const payables = manager.getRepository(Payable);
     const newest = await payables.findOne({
       where: { workspaceId, seriesId },
       order: { occurrenceDate: 'DESC' },
       withDeleted: true,
-      lock: { mode: 'pessimistic_read' },
     });
     // A series ends only when its rule is cleared, which clears it on every occurrence.
     const rule = newest?.recurrence;
@@ -287,8 +294,9 @@ export class PayableRecurrenceService {
         amount: Number(template.baseAmount ?? template.amount),
         currency: template.currency,
         dueDate: dueDate as unknown as Date,
-        // The one an upgraded series missed is owed already, without an overdue notice.
-        status: next < today ? PayableStatus.OVERDUE : PayableStatus.TO_PAY,
+        // The one an upgraded series missed, if its shifted day has passed too, is owed
+        // already: no overdue notice. Any other is to pay, noticed as usual if it is late.
+        status: next < today && dueDate < today ? PayableStatus.OVERDUE : PayableStatus.TO_PAY,
         source: PayableSource.MANUAL,
         isRecurring: true,
         recurrence: rule,
@@ -315,22 +323,14 @@ export class PayableRecurrenceService {
   /**
    * Ends a series: no occurrence of it carries the rule any more, live or
    * deleted, so neither the daily job nor a restored backup goes on with it.
-   * Every occurrence is locked first (see `makeNext`). In the caller's
-   * transaction when given one.
+   * In the caller's transaction, which holds the series lock (`lockSeries`).
    */
-  async stopSeries(workspaceId: string, seriesId: string, manager?: EntityManager): Promise<void> {
-    const stop = async (tx: EntityManager) => {
-      await tx.query(
-        'SELECT "id" FROM "payables" WHERE "workspace_id" = $1 AND "series_id" = $2 FOR UPDATE',
-        [workspaceId, seriesId],
-      );
-      await tx.query(
-        `UPDATE "payables" SET "recurrence" = NULL, "is_recurring" = false
-          WHERE "workspace_id" = $1 AND "series_id" = $2`,
-        [workspaceId, seriesId],
-      );
-    };
-    await (manager ? stop(manager) : this.payableRepository.manager.transaction(stop));
+  async stopSeries(workspaceId: string, seriesId: string, manager: EntityManager): Promise<void> {
+    await manager.query(
+      `UPDATE "payables" SET "recurrence" = NULL, "is_recurring" = false
+        WHERE "workspace_id" = $1 AND "series_id" = $2`,
+      [workspaceId, seriesId],
+    );
   }
 
   private firstOf(rule: RecurrenceRule): string {

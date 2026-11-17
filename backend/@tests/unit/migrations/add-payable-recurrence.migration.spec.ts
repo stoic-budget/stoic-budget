@@ -49,7 +49,8 @@ describe('AddPayableRecurrence migration', () => {
     expect(text).toContain('percentile_cont(0.5) WITHIN GROUP (ORDER BY "gap")');
     expect(text).toContain('WHERE "gap" > 3');
     expect(text).toContain('bool_or(f."amount" = n."amount") AS "same_amount"');
-    expect(text).toContain('COALESCE(same."gap", every."gap")');
+    // Of the newest bill's amount only with at least two gaps: one coincidence is no step.
+    expect(text).toContain('CASE WHEN same."gaps" >= 2 THEN same."gap" ELSE every."gap" END');
     expect(text).toContain('"series_id" = p."id"');
     expect(text).toContain('"occurrence_date" = p."due_date"');
     // Not deleted, not archived, not followed by a live bill, at most 45 days old, not run before.

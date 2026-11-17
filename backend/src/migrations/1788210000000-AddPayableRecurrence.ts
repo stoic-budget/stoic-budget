@@ -14,10 +14,11 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * a duplicate removed by hand and does not count as the newest. Its step is
  * guessed from the median gap between the vendor's live flagged due dates,
  * gaps of 3 days or less (duplicates) left out (`STEP_FROM_GAP`): those of the
- * newest bill's amount when that amount recurs, so a bank's 120 card bill on
- * the 15th is not read together with its 500 loan on the 1st; otherwise all
- * of them, so a utility whose amount changes every month still reads as
- * monthly. One bill, or a gap that fits no step, is monthly. A second bill of
+ * newest bill's amount when that amount recurs with at least two gaps, so a
+ * bank's 120 card bill on the 15th is not read together with its 500 loan on
+ * the 1st; otherwise all of them, so a utility whose amount changes every
+ * month still reads as monthly even when one amount happens to come back
+ * once three months later. One bill, or a gap that fits no step, is monthly. A second bill of
  * the same vendor (the loan) is left for the person to set up.
  *
  * Only a bill that is still current converts: not deleted (a deleted newest
@@ -124,13 +125,13 @@ export class AddPayableRecurrence1788210000000 implements MigrationInterface {
       ),
       medians AS (
         SELECT "workspace_id", "direction", "vendor_key", "currency", "same_amount",
-               percentile_cont(0.5) WITHIN GROUP (ORDER BY "gap") AS "gap"
+               percentile_cont(0.5) WITHIN GROUP (ORDER BY "gap") AS "gap", count(*) AS "gaps"
           FROM gaps
          WHERE "gap" > 3
          GROUP BY "workspace_id", "direction", "vendor_key", "currency", "same_amount"
       ),
       picked AS (
-        SELECT n.*, COALESCE(same."gap", every."gap") AS "gap"
+        SELECT n.*, CASE WHEN same."gaps" >= 2 THEN same."gap" ELSE every."gap" END AS "gap"
           FROM newest n
           LEFT JOIN medians same ON same."workspace_id" = n."workspace_id" AND same."direction" = n."direction" AND same."vendor_key" = n."vendor_key" AND same."currency" = n."currency" AND same."same_amount"
           LEFT JOIN medians every ON every."workspace_id" = n."workspace_id" AND every."direction" = n."direction" AND every."vendor_key" = n."vendor_key" AND every."currency" = n."currency" AND NOT every."same_amount"

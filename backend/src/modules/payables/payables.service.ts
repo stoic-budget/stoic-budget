@@ -269,12 +269,13 @@ export class PayablesService {
       dto.statementId === undefined ? undefined : (dto.statementId ?? null),
     );
     Object.assign(payable, this.normalizeUpdateDto(dto, payable));
-    await this.recurrence?.applyUpdate(payable, dto);
     // Left out keeps the tags; a list (empty or not) is the whole new set.
     if (dto.tagIds !== undefined) {
       payable.tags = await this.workspaceTags(workspaceId, dto.tagIds ?? []);
     }
-    return this.asStored(await this.payableRepository.save(payable));
+    // A bill of a series is saved with its rule, under the series lock.
+    const inSeries = this.recurrence?.applyUpdate(payable, dto);
+    return this.asStored(await (inSeries ?? this.payableRepository.save(payable)));
   }
 
   /**

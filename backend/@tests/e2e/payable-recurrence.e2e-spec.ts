@@ -378,6 +378,132 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
     return id;
   }
 
+  /** `count` occurrences of one series a week apart from `start`, written straight to the table. */
+  async function weeklyRows(vendor: string, start: string, count: number): Promise<string[]> {
+    const seriesId = randomUUID();
+    const rule = JSON.stringify({ frequency: 'weekly', interval: 1, startDate: start });
+    const ids: string[] = [];
+    for (let index = 0; index < count; index += 1) {
+      const day = addDays(start, 7 * index);
+      const [{ id }]: Array<{ id: string }> = await dataSource.query(
+        `INSERT INTO payables (workspace_id, vendor, amount, currency, status, due_date,
+                               is_recurring, recurrence, series_id, occurrence_date)
+         VALUES ($1, $2, 20, 'KZT', 'to_pay', $3, true, $4, $5, $3) RETURNING id`,
+        [owner.workspaceId, vendor, day, rule, seriesId],
+      );
+      ids.push(id);
+    }
+    return ids;
+  }
+
+  /** Runs `during` while a run has read the series' rule and not yet written the next occurrence. */
+  async function duringExtension(seriesId: string, during: () => void): Promise<void> {
+    const service = recurrence() as unknown as { holidaysFor: () => Promise<Set<string>> };
+    const holidays = vi.spyOn(service, 'holidaysFor').mockImplementationOnce(async () => {
+      during();
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return new Set<string>();
+    });
+    try {
+      await recurrence().ensureSeries(owner.workspaceId, seriesId);
+    } finally {
+      holidays.mockRestore();
+    }
+  }
+
+  describe('writers of one series', () => {
+    it('serves two stops on two occurrences of one series one after the other', async () => {
+      const ids = await weeklyRows('ACME Shredding', addDays(today, 30), 4);
+      const real = recurrence().stopSeries.bind(recurrence());
+      const stop = vi.spyOn(recurrence(), 'stopSeries').mockImplementation(async (...args) => {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        return real(...args);
+      });
+      try {
+        const answers = await Promise.all(
+          [ids[0], ids[3]].map(id => put(`/payables/${id}/occurrence`, { action: 'stop' })),
+        );
+        expect(answers.map(answer => answer.status)).toEqual([200, 200]);
+      } finally {
+        stop.mockRestore();
+      }
+      const rows = await dataSource.query('SELECT recurrence FROM payables WHERE id = ANY($1)', [ids]);
+      expect(rows.map((row: { recurrence: unknown }) => row.recurrence)).toEqual(ids.map(() => null));
+    });
+
+    it('stops an earlier occurrence while a run makes the next one, and the new one stops too', async () => {
+      const start = addDays(today, -33);
+      const rule = { frequency: 'monthly', interval: 1, startDate: start };
+      const id = await seriesRow('ACME Pest Control', rule, start, { status: 'paid' });
+      await dataSource.query(
+        `INSERT INTO payables (workspace_id, vendor, amount, currency, status, due_date,
+                               is_recurring, recurrence, series_id, occurrence_date)
+         VALUES ($1, 'ACME Pest Control', 20, 'KZT', 'paid', $2, true, $3, $4, $2)`,
+        [owner.workspaceId, nextOccurrence(rule as RecurrenceRule, start), JSON.stringify(rule), id],
+      );
+      let stopping: Promise<request.Response> | null = null;
+      await duringExtension(id, () => {
+        stopping = put(`/payables/${id}/occurrence`, { action: 'stop' }).then(answer => answer);
+      });
+      expect(((await stopping) as unknown as request.Response).status).toBe(200);
+      const rows = await series(id);
+      expect(rows).toHaveLength(3);
+      expect(rows.map(row => row.recurrence)).toEqual([null, null, null]);
+    });
+
+    it('gives the occurrence a run is making the rule an edit sets meanwhile', async () => {
+      const start = addDays(today, -3);
+      const rule = { frequency: 'monthly', interval: 1, startDate: start };
+      const id = await seriesRow('ACME Window Repair', rule, start, { status: 'paid' });
+      const weekly = { frequency: 'weekly', interval: 1, startDate: start };
+      let editing: Promise<request.Response> | null = null;
+      await duringExtension(id, () => {
+        editing = put(`/payables/${id}`, { recurrence: weekly }).then(answer => answer);
+      });
+      expect(((await editing) as unknown as request.Response).status).toBe(200);
+      const newest = (await series(id)).at(-1) as Payable;
+      expect(newest.id).not.toBe(id);
+      expect(newest.recurrence).toMatchObject({ frequency: 'weekly' });
+    });
+
+    it('carries a rule change to a deleted later occurrence too', async () => {
+      const ids = await weeklyRows('ACME Bins', addDays(today, 40), 2);
+      await dataSource.query('UPDATE payables SET deleted_at = now() WHERE id = $1', [ids[1]]);
+      const monthly = { frequency: 'monthly', interval: 1, startDate: addDays(today, 40) };
+      await put(`/payables/${ids[0]}`, { recurrence: monthly }).expect(200);
+      const [later] = await dataSource.query('SELECT recurrence FROM payables WHERE id = $1', [ids[1]]);
+      expect(later.recurrence).toMatchObject({ frequency: 'monthly' });
+    });
+
+    it('goes on in the daily job when every occurrence is deleted and the rule is held', async () => {
+      const start = addDays(today, -2);
+      const rule = { frequency: 'monthly', interval: 1, startDate: start };
+      const id = await seriesRow('ACME Snow Removal', rule, start);
+      await dataSource.query('UPDATE payables SET deleted_at = now() WHERE id = $1', [id]);
+      await recurrence().generateDue();
+      const rows = await series(id);
+      expect(rows.map(row => String(row.occurrenceDate))).toEqual([
+        start,
+        nextOccurrence(rule as RecurrenceRule, start),
+      ]);
+      expect(rows[1].deletedAt).toBeNull();
+    });
+  });
+
+  it('marks a caught-up bill overdue only when its due day, after the shift, has passed', async () => {
+    // 15 November 2026 is a Sunday: moved to the next working day, it is due on the run's own day.
+    expect(weekdayOf('2026-11-15')).toBe(0);
+    const rule = { frequency: 'monthly', interval: 1, startDate: '2026-10-15', shift: 'next' };
+    const id = await seriesRow('ACME Car Park', rule, '2026-10-15', {
+      status: 'paid',
+      catchUpOnce: true,
+    });
+    await recurrence().ensureSeries(owner.workspaceId, id, '2026-11-16');
+    const [, caught] = await series(id);
+    expect(caught).toMatchObject({ occurrenceDate: '2026-11-15', status: 'to_pay' });
+    expect(String(caught.dueDate)).toBe('2026-11-16');
+  });
+
   describe('how a series ends', () => {
     it('ends the whole series when one occurrence is set to "does not repeat", deleted or not', async () => {
       const start = addDays(today, -6);
@@ -595,15 +721,22 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
       // Copies a day apart are duplicates, not a daily bill: 5 and 7 days, weekly.
       for (const offset of [-17, -16, -15, -10]) await insert('ACME Pool Service', 'paid', offset);
       const pool = await insert('ACME Pool Service', 'to_pay', -3);
-      // One bank, two bills: a 120 card on one day and a 500 loan two weeks off it.
-      const bank = async (amount: number, offset: number, status = 'paid') =>
+      const priced = async (vendor: string, amount: number, offset: number, status = 'paid') =>
         (
           await runner.query(
             `INSERT INTO payables (workspace_id, vendor, amount, currency, status, due_date, is_recurring)
-             VALUES ($1, 'ACME Bank', $2, 'KZT', $3, $4, true) RETURNING id`,
-            [owner.workspaceId, amount, status, addDays(today, offset)],
+             VALUES ($1, $2, $3, 'KZT', $4, $5, true) RETURNING id`,
+            [owner.workspaceId, vendor, amount, status, addDays(today, offset)],
           )
         )[0].id as string;
+      // One bank, two bills: a 120 card on one day and a 500 loan two weeks off it.
+      const bank = (amount: number, offset: number, status = 'paid') =>
+        priced('ACME Bank', amount, offset, status);
+      // Monthly, its amount different each time: 15.00 coming back once is no quarterly bill.
+      await priced('ACME Electricity', 15, -93);
+      await priced('ACME Electricity', 18.2, -63);
+      await priced('ACME Electricity', 16.7, -33);
+      const electricity = await priced('ACME Electricity', 15, -3, 'to_pay');
       for (const offset of [-93, -63, -33]) await bank(120, offset);
       for (const offset of [-77, -47]) await bank(500, offset);
       const loan = await bank(500, -17, 'to_pay');
@@ -650,6 +783,7 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
       expect(byId.get(walked)).toMatchObject(rule('weekly', 2, -3));
       expect(byId.get(pool)).toMatchObject(rule('weekly', 1, -3));
       expect(byId.get(card)).toMatchObject({ ...rule('monthly', 1, -3), series_id: card });
+      expect(byId.get(electricity)).toMatchObject(rule('monthly', 1, -3));
       expect(byId.get(gas)).toMatchObject({ ...rule('monthly', 1, -5), series_id: gas });
       const left = [forgotten, archivedOld, archived, droppedOld, dropped, followed, byHand];
       for (const id of [...left, loan, gasCopy]) {
