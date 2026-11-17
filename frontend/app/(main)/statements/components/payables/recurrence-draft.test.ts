@@ -4,6 +4,7 @@ import { createEmptyState, repeatIsComplete, repeatPayload } from './payable-for
 import {
   emptyRepeat,
   isInLastWeek,
+  occurrencesBefore,
   shownMonthMode,
   toRecurrenceRule,
   toRepeatDraft,
@@ -95,6 +96,28 @@ describe('toRecurrenceRule', () => {
     expect(
       toRecurrenceRule({ ...toRepeatDraft(original), monthMode: 'last' }, '2026-04-30'),
     ).toMatchObject({ startDate: '2026-01-31', monthDay: 'last' });
+  });
+
+  it('keeps the total of a fixed number of payments when another frequency restarts it', () => {
+    // Twelve monthly payments from 15 January; the fourth, on 15 April, is edited to weekly.
+    const original = {
+      frequency: 'monthly' as const,
+      interval: 1,
+      startDate: '2026-01-15',
+      count: 12,
+    };
+    expect(
+      toRecurrenceRule({ ...toRepeatDraft(original), frequency: 'weekly' }, '2026-04-15'),
+    ).toEqual({ frequency: 'weekly', interval: 1, startDate: '2026-04-15', count: 9 });
+    // The same frequency keeps its start, so the number stays as it is.
+    expect(toRecurrenceRule(toRepeatDraft(original), '2026-04-15')).toMatchObject({
+      startDate: '2026-01-15',
+      count: 12,
+    });
+    // A monthly rule on the 1st begun on the 20th: its first payment is 1 February.
+    const fromThe20th = { ...original, startDate: '2026-01-20', monthDay: 1 };
+    expect(occurrencesBefore(fromThe20th, '2026-04-01')).toBe(2);
+    expect(occurrencesBefore({ ...original, frequency: 'weekly' }, '2026-02-12')).toBe(4);
   });
 
   it('starts another frequency from the occurrence the form shows, not from the old start', () => {

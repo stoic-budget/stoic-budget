@@ -105,8 +105,51 @@ export function toRecurrenceRule(draft: RepeatDraft, dueDate: string): Recurrenc
     ...monthPart,
     ...(draft.shift !== 'none' ? { shift: draft.shift } : {}),
     ...(draft.end === 'until' ? { until: draft.until } : {}),
-    ...(count ? { count } : {}),
+    // Restarted here, a fixed number of payments keeps its total: those made already count.
+    ...(count
+      ? {
+          count:
+            draft.original && !original
+              ? Math.max(1, count - occurrencesBefore(draft.original, dueDate))
+              : count,
+        }
+      : {}),
   };
+}
+
+/** The day of the month a monthly or yearly rule falls on in this month (`month` 0-based). */
+function ruleDayIn(rule: RecurrenceRule, year: number, month: number): number {
+  const length = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  if (rule.nthWeekday) {
+    const { week, weekday } = rule.nthWeekday;
+    if (week === -1) {
+      return length - ((new Date(Date.UTC(year, month, length)).getUTCDay() - weekday + 7) % 7);
+    }
+    const first = new Date(Date.UTC(year, month, 1)).getUTCDay();
+    return 1 + ((weekday - first + 7) % 7) + (week - 1) * 7;
+  }
+  if (rule.monthDay === 'last') return length;
+  return Math.min(rule.monthDay ?? dayParts(rule.startDate).dayOfMonth, length);
+}
+
+/** How many occurrences of `rule` come before `day`, itself one of them. */
+export function occurrencesBefore(rule: RecurrenceRule, day: string): number {
+  const start = new Date(`${rule.startDate}T00:00:00Z`);
+  const at = new Date(`${day}T00:00:00Z`);
+  const days = Math.round((at.getTime() - start.getTime()) / 86_400_000);
+  const months =
+    (at.getUTCFullYear() - start.getUTCFullYear()) * 12 + at.getUTCMonth() - start.getUTCMonth();
+  const units = {
+    daily: days,
+    weekly: Math.floor(days / 7),
+    monthly: months,
+    yearly: Math.floor(months / 12),
+  }[rule.frequency];
+  const byMonth = rule.frequency === 'monthly' || rule.frequency === 'yearly';
+  // A rule on the 1st that starts on the 20th has nothing in its first month.
+  const emptyFirst =
+    byMonth && ruleDayIn(rule, start.getUTCFullYear(), start.getUTCMonth()) < start.getUTCDate();
+  return Math.max(0, Math.floor(units / rule.interval) - (emptyFirst ? 1 : 0));
 }
 
 /** Whether the due date is in the last seven days of its month: only then is "last weekday" offered. */
