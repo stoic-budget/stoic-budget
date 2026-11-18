@@ -6,7 +6,9 @@ import {
 import {
   actualDays,
   days360,
+  firstPaymentMonth,
   isPaymentDay,
+  MIN_FIRST_PERIOD_DAYS,
   paymentDateAfter,
 } from '../../../../src/modules/loans/engine/loan-calendar';
 import {
@@ -47,6 +49,29 @@ describe('loan calendar', () => {
   it('knows a start on the payment day of its month', () => {
     expect(isPaymentDay('2026-02-28', 31)).toBe(true);
     expect(isPaymentDay('2026-01-15', 1)).toBe(false);
+  });
+
+  it('puts the first payment on the first payment day at least half a month after the start', () => {
+    const first = (startDate: string, paymentDay: number) =>
+      paymentDates({ startDate, paymentDay, termMonths: 2 })[0];
+    // 31 March is 28 days after 3 March: the first payment, not 30 April 58 days on.
+    expect(first('2026-03-03', 31)).toBe('2026-03-31');
+    expect(firstPaymentMonth('2026-03-03', 31)).toBe(0);
+    // 1 February is only 12 days after 20 January: the first payment waits for 1 March.
+    expect(first('2026-01-20', 1)).toBe('2026-03-01');
+    expect(first('2026-01-15', 1)).toBe('2026-02-01');
+    // The shortest first period is MIN_FIRST_PERIOD_DAYS, one day less moves it a month.
+    expect(MIN_FIRST_PERIOD_DAYS).toBe(15);
+    expect(actualDays('2026-01-17', first('2026-01-17', 1))).toBe(15);
+    expect(first('2026-01-18', 1)).toBe('2026-03-01');
+    // A start on the payment day pays a whole month later.
+    expect(first('2026-01-15', 15)).toBe('2026-02-15');
+    expect(first('2026-02-28', 31)).toBe('2026-03-31');
+    expect(paymentDates({ startDate: '2026-03-03', paymentDay: 31, termMonths: 3 })).toEqual([
+      '2026-03-31',
+      '2026-04-30',
+      '2026-05-31',
+    ]);
   });
 
   it('counts actual days and 30E/360 days', () => {
@@ -90,6 +115,77 @@ describe('buildSchedule', () => {
     expect(toMinor(schedule.totalPaid)).toBe(toMinor(10_000) + toMinor(schedule.totalInterest));
   });
 
+  it('quotes the textbook payment for a start on the payment day', () => {
+    const start = { startDate: '2026-01-01', paymentDay: 1 };
+    expect(buildSchedule(loan({ ...start, principal: 100_000, annualRate: 6, termMonths: 360 })).regularPayment).toBe(599.55);
+    expect(buildSchedule(loan({ ...start, principal: 200_000, annualRate: 5, termMonths: 360 })).regularPayment).toBe(1073.64);
+    expect(buildSchedule(loan({ ...start, dayCount: 'actual/365' })).rows[1].payment).toBe(888.49);
+  });
+
+  describe('a broken first period', () => {
+    const levelToTheEnd = (terms: Partial<LoanPlanInput>) => {
+      const schedule = buildSchedule(loan(terms));
+      const dates = paymentDates(loan(terms));
+      const last = schedule.rows[schedule.rows.length - 1];
+      expect(schedule.periods).toBe(loan(terms).termMonths);
+      expect(schedule.payoffDate).toBe(dates[dates.length - 1]);
+      expect(new Set(schedule.rows.slice(0, -1).map(row => row.payment))).toEqual(
+        new Set([schedule.regularPayment]),
+      );
+      expect(last.balance).toBe(0);
+      expect(repaid(schedule.rows)).toBe(toMinor(loan(terms).principal));
+      return { schedule, last };
+    };
+    const mortgage = { principal: 300_000, termMonths: 360, annualRate: 5 };
+
+    it('ends on its term with level payments when the first period is short', () => {
+      // 28 January to 25 February: 27 days under 30/360.
+      const { schedule, last } = levelToTheEnd({
+        ...mortgage,
+        annualRate: 7.5,
+        startDate: '2026-01-28',
+        paymentDay: 25,
+      });
+      expect(schedule.rows[0].date).toBe('2026-02-25');
+      expect(schedule.rows[0].interest).toBe(1687.5);
+      expect(Math.abs(last.payment - schedule.regularPayment)).toBeLessThan(1);
+    });
+
+    it('ends on its term with level payments when the first period is long', () => {
+      // 20 January to 1 March: 41 days under 30/360, more interest than one payment.
+      const { schedule, last } = levelToTheEnd({ ...mortgage, startDate: '2026-01-20', paymentDay: 1 });
+      expect(schedule.rows[0]).toMatchObject({ date: '2026-03-01', interest: 1708.33 });
+      expect(schedule.rows[0].principal).toBeLessThan(0);
+      expect(schedule.rows[0].balance).toBeGreaterThan(300_000);
+      expect(Math.abs(last.payment - schedule.regularPayment)).toBeLessThan(5);
+    });
+
+    it('solves the payment with the first period under either day count', () => {
+      const terms = { ...mortgage, startDate: '2026-03-03', paymentDay: 31 };
+      levelToTheEnd(terms);
+      const actual = levelToTheEnd({ ...terms, dayCount: 'actual/365' });
+      // 3 to 31 March: 28 days of 365.
+      expect(actual.schedule.rows[0].interest).toBe(1150.68);
+    });
+
+    it('lowers the payment for a short first period and raises it for a long one', () => {
+      const whole = buildSchedule(loan(mortgage)).regularPayment;
+      expect(buildSchedule(loan({ ...mortgage, startDate: '2026-01-28', paymentDay: 15 })).regularPayment).toBeLessThan(whole);
+      expect(buildSchedule(loan({ ...mortgage, startDate: '2026-01-20', paymentDay: 1 })).regularPayment).toBeGreaterThan(whole);
+    });
+
+    it('lowers the payment from the start for an extra paid on the start day', () => {
+      const terms = { ...mortgage, startDate: '2026-01-28', paymentDay: 25, extraMode: 'reduce_payment' as const };
+      const smaller = buildSchedule(loan({ ...terms, principal: 290_000 }));
+      const paidDown = buildSchedule(loan({ ...terms, extraPayments: [{ date: '2026-01-28', amount: 10_000 }] }));
+      expect(paidDown.rows[0].extra).toBe(10_000);
+      expect(paidDown.rows.slice(0, -1).map(row => row.payment)).toEqual(
+        smaller.rows.slice(0, -1).map(row => row.payment),
+      );
+      expect(paidDown.periods).toBe(360);
+    });
+  });
+
   it('repays the same principal each month on a linear loan', () => {
     const schedule = buildSchedule(loan({ method: 'linear', principal: 12_000 }));
     expect(schedule.rows.map(row => row.principal)).toEqual(Array(12).fill(1000));
@@ -107,6 +203,17 @@ describe('buildSchedule', () => {
     );
     expect(schedule.rows[11]).toMatchObject({ principal: 10_000, payment: 10_050, balance: 0 });
     expect(schedule.totalInterest).toBe(600);
+  });
+
+  it('never runs out before the term when a monthly part is not whole cents', () => {
+    // 1,000 over 600 months is 1.666… a month: rounded up, 1.67 would repay it in 599.
+    for (const method of ['linear', 'annuity'] as const) {
+      const schedule = buildSchedule(loan({ method, principal: 1_000, termMonths: 600, annualRate: method === 'linear' ? 6 : 0 }));
+      expect(schedule.periods).toBe(600);
+      expect(schedule.rows.slice(0, -1).every(row => row.principal === 1.66)).toBe(true);
+      expect(schedule.rows[599].principal).toBe(5.66);
+      expect(repaid(schedule.rows)).toBe(toMinor(1_000));
+    }
   });
 
   it('charges no interest at zero rate and puts the odd cent last', () => {
@@ -259,6 +366,22 @@ describe('buildSchedule', () => {
     });
   });
 
+  it('pays an extra payment dated on the start day before any interest', () => {
+    const start = loan().startDate;
+    const shorter = buildSchedule(loan({ extraPayments: [{ date: start, amount: 1_000 }] }));
+    // A whole month on 9,000 instead of 10,000, the payment kept, the term shorter.
+    expect(shorter.rows[0]).toMatchObject({ interest: 90, extra: 1_000, payment: 888.49 });
+    expect(shorter.periods).toBeLessThan(12);
+    expect(repaid(shorter.rows)).toBe(toMinor(10_000));
+
+    const lower = buildSchedule(
+      loan({ extraPayments: [{ date: start, amount: 1_000 }], extraMode: 'reduce_payment' }),
+    );
+    expect(lower.periods).toBe(12);
+    expect(lower.rows[0].payment).toBe(fromMinor(annuityPayment(toMinor(9_000), 12, 12)));
+    expect(repaid(lower.rows)).toBe(toMinor(10_000));
+  });
+
   it('ignores extra payments dated before the loan started', () => {
     const schedule = buildSchedule(loan({ extraPayments: [{ date: '2025-12-01', amount: 500 }] }));
     expect(schedule).toEqual(buildSchedule(loan()));
@@ -288,6 +411,15 @@ describe('projectSchedule', () => {
   it('follows the plan when the balance is on plan', () => {
     const onPlan = projectSchedule(terms, today, plan.rows[3].balance);
     expect(onPlan?.rows.map(row => row.balance)).toEqual(plan.rows.slice(4).map(row => row.balance));
+  });
+
+  it('never counts again an extra payment already paid by today', () => {
+    // Paid on 18 May, after the 15 May instalment: the real balance already has it.
+    const paid = loan({ principal: 12_000, extraPayments: [{ date: '2026-05-18', amount: 2_000 }] });
+    const owed = plan.rows[3].balance - 2_000;
+    const projected = projectSchedule(paid, today, owed);
+    expect(projected?.rows).toEqual(projectSchedule(terms, today, owed)?.rows);
+    expect(projected?.rows.every(row => row.extra === 0)).toBe(true);
   });
 
   it('has nothing to project when paid off or past the last payment date', () => {
@@ -323,6 +455,47 @@ describe('whatIf', () => {
     expect(result.interestSaved).toBeGreaterThan(0);
     expect(result.paymentBefore).toBe(888.49);
     expect(result.paymentAfter).toBeLessThan(888.49);
+  });
+
+  it('applies its mode to its own extra payments only, never to the saved ones', () => {
+    const dates = paymentDates(loan());
+    // The plan already shortens the term with 3,000; the what-if adds a cent to lower the payment.
+    const saved = loan({ extraPayments: [{ date: dates[1], amount: 3_000 }] });
+    const result = whatIf(saved, {
+      extraPayments: [{ date: dates[6], amount: 0.01 }],
+      recurringExtras: [],
+      extraMode: 'reduce_payment',
+    });
+    expect(result.monthsSaved).toBe(0);
+    expect(result.scenario.periods).toBe(result.baseline.periods);
+    expect(result.interestSaved).toBeGreaterThanOrEqual(0);
+    expect(result.interestSaved).toBeLessThan(0.05);
+    expect(result.paymentBefore).toBe(888.49);
+    expect(888.49 - (result.paymentAfter ?? 0)).toBeLessThan(0.05);
+
+    // And the other way round: a payment-lowering plan, a term-shortening what-if.
+    const lowered = loan({ extraPayments: [{ date: dates[1], amount: 3_000 }], extraMode: 'reduce_payment' });
+    const shorter = whatIf(lowered, {
+      extraPayments: [{ date: dates[6], amount: 1_500 }],
+      recurringExtras: [],
+      extraMode: 'reduce_term',
+    });
+    expect(shorter.baseline.periods).toBe(12);
+    expect(shorter.monthsSaved).toBeGreaterThan(0);
+    expect(shorter.interestSaved).toBeGreaterThan(0);
+  });
+
+  it("names the payment after the what-if's own first extra payment, not a saved one", () => {
+    const dates = paymentDates(loan());
+    const saved = loan({ extraPayments: [{ date: dates[1], amount: 2_000 }], extraMode: 'reduce_payment' });
+    const baseline = buildSchedule(saved);
+    const result = whatIf(saved, {
+      extraPayments: [{ date: dates[5], amount: 1_000 }],
+      recurringExtras: [],
+      extraMode: 'reduce_payment',
+    });
+    expect(result.paymentBefore).toBe(baseline.rows[6].payment);
+    expect(result.paymentAfter).toBeLessThan(baseline.rows[6].payment);
   });
 
   it('saves nothing without extra payments', () => {
