@@ -21,6 +21,9 @@ export function calendarFeedUrl(token: string, origin = window.location.origin):
 /**
  * The member's own calendar feed: read it, turn it on or make a new link
  * (the answer carries the link, once), change what it shows, turn it off.
+ * `issueLink` asks for a link in the current workspace; `token` is the link
+ * just made there, or null: a link made in another workspace is not shown
+ * after switching.
  */
 export function useCalendarFeed() {
   const workspaceId = useWorkspaceId();
@@ -36,14 +39,20 @@ export function useCalendarFeed() {
     retry: false,
   });
 
+  // The workspace is the mutation's variable: fixed when the link is asked for,
+  // so the answer lands in that workspace even after a switch.
   const issue = useMutation({
-    mutationFn: async (): Promise<CalendarFeedCreated> => {
+    mutationFn: async (_madeIn: string | null): Promise<CalendarFeedCreated> => {
       const body = {} satisfies ContractInput<'CalendarFeedIncludeBody'>;
       const response = await apiClient.post(URL_PATH, body);
       return checkContract('CalendarFeedCreated', response.data, URL_PATH);
     },
-    onSuccess: ({ token: _token, ...settings }) => keep(settings),
+    onSuccess: ({ token: _token, ...settings }, madeIn) =>
+      queryClient.setQueryData(queryKeys.calendarFeed(madeIn), settings),
   });
+  const issueLink = (options?: { onError?: (error: unknown) => void }) =>
+    issue.mutate(workspaceId, options);
+  const token = issue.data && issue.variables === workspaceId ? issue.data.token : null;
 
   const update = useMutation({
     mutationFn: async (change: Partial<CalendarFeedInclude>): Promise<CalendarFeedSettings> => {
@@ -66,5 +75,5 @@ export function useCalendarFeed() {
     },
   });
 
-  return { query, issue, update, remove };
+  return { query, issue, issueLink, token, update, remove };
 }

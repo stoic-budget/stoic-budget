@@ -6,6 +6,7 @@ import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import type React from 'react';
+import { useRef } from 'react';
 import toast from 'react-hot-toast';
 import { Copy } from '@/app/components/icons';
 import { Button } from '@/app/components/ui/button';
@@ -31,25 +32,32 @@ const mutedText = { fontSize: 14, color: 'var(--text-muted)' } as const;
 export function CalendarFeedSection(): React.JSX.Element | null {
   const t = useIntlayer('settingsCalendarFeedSection');
   const { locale } = useLocale();
-  const { query, issue, update, remove } = useCalendarFeed();
+  const { query, issue, issueLink, token, update, remove } = useCalendarFeed();
+  const linkField = useRef<HTMLInputElement>(null);
   const failed = (error: unknown) => toast.error(getApiErrorMessage(error, t.failed.value));
   const settings = query.data;
   if (!settings) return null;
 
-  const token = issue.data?.token ?? null;
   const busy = issue.isPending || update.isPending || remove.isPending;
 
   const makeLink = (): void => {
     if (settings.enabled && !window.confirm(t.newLinkConfirm.value)) return;
-    issue.mutate(undefined, { onError: failed });
+    issueLink({ onError: failed });
   };
   const turnOff = (): void => {
     if (!window.confirm(t.turnOffConfirm.value)) return;
     remove.mutate(undefined, { onError: failed });
   };
   const copy = async (url: string): Promise<void> => {
-    await navigator.clipboard.writeText(url);
-    toast.success(t.copied.value);
+    try {
+      // Undefined on a plain-http instance (not a secure context): the call throws, as a refusal does.
+      await navigator.clipboard.writeText(url);
+      toast.success(t.copied.value);
+    } catch {
+      linkField.current?.focus();
+      linkField.current?.select();
+      toast(t.copyByHand.value);
+    }
   };
 
   if (!settings.enabled) {
@@ -75,6 +83,7 @@ export function CalendarFeedSection(): React.JSX.Element | null {
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
             <TextField
               id="calendar-feed-link"
+              inputRef={linkField}
               fullWidth
               size="small"
               value={calendarFeedUrl(token)}

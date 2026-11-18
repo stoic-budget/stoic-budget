@@ -7,6 +7,8 @@ import { renderWithQuery } from '@/app/test/query-wrapper';
 const hook = vi.hoisted(() => ({
   state: {} as Record<string, unknown>,
 }));
+const toast = vi.hoisted(() => Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }));
+vi.mock('react-hot-toast', () => ({ default: toast }));
 
 vi.mock('@/app/settings/profile/hooks/useCalendarFeed', async importOriginal => ({
   ...(await importOriginal<typeof import('@/app/settings/profile/hooks/useCalendarFeed')>()),
@@ -28,11 +30,14 @@ const settings = (overrides: Partial<CalendarFeedSettings> = {}): CalendarFeedSe
 
 const mutation = (data?: unknown) => ({ mutate: vi.fn(), isPending: false, data });
 const mutate = (name: string) => (hook.state[name] as { mutate: ReturnType<typeof vi.fn> }).mutate;
+const issueLink = () => hook.state.issueLink as ReturnType<typeof vi.fn>;
 
 const setHook = (data: CalendarFeedSettings | undefined, issued?: { token: string }) => {
   hook.state = {
     query: { data },
     issue: mutation(issued),
+    issueLink: vi.fn(),
+    token: issued?.token ?? null,
     update: mutation(),
     remove: mutation(),
   };
@@ -40,6 +45,7 @@ const setHook = (data: CalendarFeedSettings | undefined, issued?: { token: strin
 
 describe('CalendarFeedSection', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     setHook(settings());
     vi.spyOn(window, 'confirm').mockReturnValue(true);
   });
@@ -48,7 +54,7 @@ describe('CalendarFeedSection', () => {
     setHook(settings({ enabled: false }));
     renderWithQuery(<CalendarFeedSection />);
     fireEvent.click(screen.getByRole('button', { name: 'Turn on' }));
-    expect(mutate('issue')).toHaveBeenCalled();
+    expect(issueLink()).toHaveBeenCalled();
     // Turning on asks nothing: there is no old link to revoke.
     expect(window.confirm).not.toHaveBeenCalled();
     expect(screen.queryByRole('switch')).toBeNull();
@@ -64,6 +70,22 @@ describe('CalendarFeedSection', () => {
     expect(url).toBe(`${window.location.origin}/api/v1/public/calendar/${TOKEN}.ics`);
     fireEvent.click(screen.getByRole('button', { name: 'Copy link' }));
     await vi.waitFor(() => expect(writeText).toHaveBeenCalledWith(url));
+  });
+
+  it.each([
+    ['there is no clipboard (plain http)', undefined],
+    ['the browser refuses', { writeText: vi.fn(async () => Promise.reject(new Error('denied'))) }],
+  ])('selects the link to copy by hand when %s', async (_case, clipboard) => {
+    Object.defineProperty(navigator, 'clipboard', { value: clipboard, configurable: true });
+    setHook(settings(), { token: TOKEN });
+    renderWithQuery(<CalendarFeedSection />);
+    const field = screen.getByLabelText<HTMLInputElement>('Calendar link');
+    fireEvent.click(screen.getByRole('button', { name: 'Copy link' }));
+    await vi.waitFor(() => expect(document.activeElement).toBe(field));
+    expect(field.selectionStart).toBe(0);
+    expect(field.selectionEnd).toBe(calendarFeedUrl(TOKEN).length);
+    expect(toast).toHaveBeenCalledWith(expect.stringMatching(/The link is selected: copy it by hand/));
+    expect(toast.success).not.toHaveBeenCalled();
   });
 
   it('says the link was shown once when it is not in hand', () => {
@@ -86,9 +108,9 @@ describe('CalendarFeedSection', () => {
     vi.mocked(window.confirm).mockReturnValueOnce(false);
     renderWithQuery(<CalendarFeedSection />);
     fireEvent.click(screen.getByRole('button', { name: 'New link' }));
-    expect(mutate('issue')).not.toHaveBeenCalled();
+    expect(issueLink()).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'New link' }));
-    expect(mutate('issue')).toHaveBeenCalled();
+    expect(issueLink()).toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Turn off' }));
     expect(window.confirm).toHaveBeenCalledTimes(3);
     expect(mutate('remove')).toHaveBeenCalled();
