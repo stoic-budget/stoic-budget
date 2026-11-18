@@ -27,9 +27,11 @@ const OPEN_STATUSES = [
 
 /**
  * A bill paid with (or linked to) somebody else's private transaction: its
- * counterparty would say what the private row was, so the feed leaves it out.
+ * counterparty would say what the private row was, so the feed leaves it out,
+ * and the invoice standing for such a receivable too. Over the payable aliased
+ * `p`, with the reader's member id as `:viewerMemberId`.
  */
-const PRIVATE_TO_OTHERS = `EXISTS (
+export const PRIVATE_TO_OTHERS = `EXISTS (
   SELECT 1 FROM "transactions" t
    WHERE t."workspace_id" = p."workspace_id"
      AND (t."id" = p."linked_transaction_id"
@@ -96,7 +98,12 @@ export class CalendarFeedPayablesService {
     ];
   }
 
-  /** The occurrences of each live series after its newest bill, inside the projection window. */
+  /**
+   * The occurrences of each live series after its newest bill, inside the
+   * projection window. A series is left out only when that newest bill is tied
+   * to another member's private transaction; the earlier bills of a series are
+   * not looked at, as on the Payables page.
+   */
   private async projected(context: FeedContext): Promise<IcsEvent[]> {
     const series = await newestRecurringPayables(this.payableRepository, context.workspaceId, null);
     const hidden = await this.privateToOthers(

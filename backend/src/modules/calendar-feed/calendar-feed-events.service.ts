@@ -18,7 +18,11 @@ import {
   feedUid,
   fillLabel,
 } from './calendar-feed-format';
-import { CalendarFeedPayablesService, parseLocalDay } from './calendar-feed-payables.service';
+import {
+  CalendarFeedPayablesService,
+  PRIVATE_TO_OTHERS,
+  parseLocalDay,
+} from './calendar-feed-payables.service';
 import type { IcsEvent } from './ics-writer';
 
 /** What the feed may carry for this reader: their choice, narrowed by what their role may see. */
@@ -108,7 +112,11 @@ export class CalendarFeedEventsService {
     }));
   }
 
-  /** Sent invoices by due date; paid and overdue live on the receivable, as everywhere else. */
+  /**
+   * Sent invoices by due date; paid and overdue live on the receivable, as
+   * everywhere else. An invoice whose receivable the feed hides (tied to
+   * another member's private transaction) is hidden with it.
+   */
   private async invoiceEvents(context: FeedContext): Promise<IcsEvent[]> {
     const rows = await this.invoiceRepository
       .createQueryBuilder('i')
@@ -137,6 +145,7 @@ export class CalendarFeedEventsService {
       .andWhere('i.status NOT IN (:...hidden)', {
         hidden: [InvoiceStatus.DRAFT, InvoiceStatus.VOID],
       })
+      .andWhere(`NOT ${PRIVATE_TO_OTHERS}`, { viewerMemberId: context.memberId })
       .andWhere('i.due_date BETWEEN :from AND :to', {
         from: addDays(context.today, -FEED_PAST_DAYS),
         to: addDays(context.today, FEED_AHEAD_DAYS),

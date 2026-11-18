@@ -222,6 +222,26 @@ describe('Calendar feed (e2e)', () => {
     await as(owner, request(server()).put(`/invoices/${invoice.body.id}/send`)).expect(200);
     ids.invoice = invoice.body.id;
 
+    // A sent invoice whose receivable was paid with the partner's private transaction.
+    const privateClient = await as(owner, request(server()).post('/clients'))
+      .send({ name: 'Client Delta', email: 'member-4@example.com', currency: 'EUR' })
+      .expect(201);
+    const privateInvoice = await as(owner, request(server()).post('/invoices'))
+      .send({
+        clientId: privateClient.body.id,
+        issueDate: dayFromToday(-2),
+        dueDate: dayFromToday(9),
+        currency: 'EUR',
+        lineItems: [{ description: 'Design work', quantity: 1, unitPrice: 120 }],
+      })
+      .expect(201);
+    await as(owner, request(server()).put(`/invoices/${privateInvoice.body.id}/send`)).expect(200);
+    await dataSource.query(
+      `UPDATE payables SET linked_transaction_id = $1
+        WHERE id = (SELECT payable_id FROM invoices WHERE id = $2)`,
+      [privateTx, privateInvoice.body.id],
+    );
+
     await as(owner, request(server()).put('/tax/settings/jurisdiction'))
       .send({ code: 'DE' })
       .expect(200);
@@ -370,11 +390,14 @@ describe('Calendar feed (e2e)', () => {
     expect(ownerText).not.toContain('Secret Jeweller');
     expect(ownerText).not.toContain('Hidden Florist');
     expect(ownerText).not.toContain('Private Gym');
+    // The invoice standing for such a receivable is hidden with it.
+    expect(ownerText).not.toContain('Client Delta');
 
     const partnerFeed = await as(partner, request(server()).post('/calendar-feed')).send({}).expect(201);
     const partnerText = await fetchFeed(partnerFeed.body.token);
     expect(unfold(partnerText)).toContain('Pay Secret Jeweller');
     expect(unfold(partnerText)).toContain('Pay Hidden Florist');
+    expect(unfold(partnerText)).toContain('Client Delta');
     // The occurrence itself and its projected repeats.
     expect(eventsOf(partnerText).filter(lines => summaryOf(lines).includes('Private Gym')).length).toBeGreaterThan(20);
     // In the partner's own language.
