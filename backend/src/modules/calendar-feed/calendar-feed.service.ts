@@ -93,9 +93,12 @@ export class CalendarFeedService {
         .execute();
       if (result.raw.length === 0) throw this.changedMeanwhile();
     }
-    const saved = await this.feedRepository.findOneOrFail({
-      where: { workspaceId, memberId: member },
+    // Read back by this token: a request that renewed the link right after our
+    // write has replaced it already, and answering it would hand out a dead link.
+    const saved = await this.feedRepository.findOne({
+      where: { workspaceId, memberId: member, tokenHash },
     });
+    if (!saved) throw this.changedMeanwhile();
     return { ...this.toSettings(saved), token };
   }
 

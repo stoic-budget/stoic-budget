@@ -8,6 +8,7 @@ import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import { APP_NAME, APP_SLUG } from '../../src/common/brand';
+import { CalendarFeed } from '../../src/entities/calendar-feed.entity';
 import {
   deleteUserByEmail,
   type E2eAccount,
@@ -473,6 +474,40 @@ describe('Calendar feed (e2e)', () => {
     expect(loser?.body.error.code).toBe('CALENDAR_FEED_CHANGED');
     const winner = answers.find(res => res.status === 201);
     await feed(winner?.body.token).expect(200);
+  });
+
+  it('answers 409, not a dead link, when another renewal lands right after its write', async () => {
+    // A feed that is on, so both requests take the renewal path.
+    await as(owner, request(server()).post('/calendar-feed')).send({}).expect(201);
+    // Force the interleaving: the first request stops after its write, the
+    // second renews the link meanwhile, then the first reads back.
+    const repository = dataSource.getRepository(CalendarFeed);
+    const original = repository.update.bind(repository);
+    let resume: () => void = () => undefined;
+    let wrote: () => void = () => undefined;
+    const written = new Promise<void>(resolve => (wrote = resolve));
+    const release = new Promise<void>(resolve => (resume = resolve));
+    const update = vi.spyOn(repository, 'update').mockImplementationOnce(async (...args) => {
+      const result = await original(...args);
+      wrote();
+      await release;
+      return result;
+    });
+    try {
+      const first = as(owner, request(server()).post('/calendar-feed')).send({}).then(res => res);
+      await written;
+      const second = await as(owner, request(server()).post('/calendar-feed')).send({});
+      resume();
+      const firstAnswer = await first;
+      expect(second.status).toBe(201);
+      expect(firstAnswer.status).toBe(409);
+      expect(firstAnswer.body.error.code).toBe('CALENDAR_FEED_CHANGED');
+      // Every link answered with a 201 is live.
+      await feed(second.body.token).expect(200);
+    } finally {
+      resume();
+      update.mockRestore();
+    }
   });
 
   it('stops answering once the member has left the workspace', async () => {
