@@ -5,6 +5,7 @@ import { Invoice } from '../../entities/invoice.entity';
 import { Payable } from '../../entities/payable.entity';
 import { Subscription } from '../../entities/subscription.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
+import { AuditModule } from '../audit/audit.module';
 import { TaxRemindersModule } from '../tax-reminders/tax-reminders.module';
 import { CalendarFeedController } from './calendar-feed.controller';
 import { CalendarFeedService } from './calendar-feed.service';
@@ -17,6 +18,7 @@ import { PublicCalendarFeedService } from './public-calendar-feed.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([CalendarFeed, Payable, Subscription, Invoice, WorkspaceMember]),
+    AuditModule,
     TaxRemindersModule,
   ],
   controllers: [CalendarFeedController, PublicCalendarFeedController],

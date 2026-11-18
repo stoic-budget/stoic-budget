@@ -40,6 +40,7 @@ export const ENTITY_TYPES = [
   'branch',
   'wallet',
   'api_key',
+  'calendar_feed',
   'webhook',
   'backup',
   'user',

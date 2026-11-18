@@ -8,6 +8,8 @@ import {
   CalendarFeedIncludeBody,
   CalendarFeedSettings,
 } from '../../contracts';
+import { User } from '../../entities/user.entity';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CalendarFeedService } from './calendar-feed.service';
 
 /**
@@ -32,9 +34,10 @@ export class CalendarFeedController {
   issue(
     @WorkspaceId() workspaceId: string,
     @WorkspaceMemberId() memberId: string | null,
+    @CurrentUser() user: User,
     @SchemaBody(CalendarFeedIncludeBody) body: CalendarFeedIncludeBody,
   ) {
-    return this.feeds.issue(workspaceId, memberId, body);
+    return this.feeds.issue(workspaceId, memberId, user.id, body);
   }
 
   @Patch()
@@ -52,7 +55,11 @@ export class CalendarFeedController {
   @Delete()
   @WorkspaceAuth()
   @SchemaResponse(CalendarFeedSettings)
-  remove(@WorkspaceId() workspaceId: string, @WorkspaceMemberId() memberId: string | null) {
-    return this.feeds.remove(workspaceId, memberId);
+  remove(
+    @WorkspaceId() workspaceId: string,
+    @WorkspaceMemberId() memberId: string | null,
+    @CurrentUser() user: User,
+  ) {
+    return this.feeds.remove(workspaceId, memberId, user.id);
   }
 }

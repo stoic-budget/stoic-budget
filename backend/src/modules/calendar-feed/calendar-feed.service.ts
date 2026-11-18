@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,7 +14,10 @@ import type {
   CalendarFeedIncludeBody,
   CalendarFeedSettings,
 } from '../../contracts';
+import { AuditAction, EntityType, Severity } from '../../entities/audit-event.entity';
 import { CalendarFeed } from '../../entities/calendar-feed.entity';
+import { AuditService } from '../audit/audit.service';
+import { recordSecurityEvent } from '../auth/security-audit.util';
 
 /** What a feed carries before its member changes anything. */
 const DEFAULT_INCLUDE = { payables: true, subscriptions: true, taxDeadlines: true, invoices: true };
@@ -46,9 +50,12 @@ function includeColumns(body: CalendarFeedIncludeBody): IncludeColumns {
  */
 @Injectable()
 export class CalendarFeedService {
+  private readonly logger = new Logger(CalendarFeedService.name);
+
   constructor(
     @InjectRepository(CalendarFeed)
     private readonly feedRepository: Repository<CalendarFeed>,
+    private readonly auditService: AuditService,
   ) {}
 
   async get(workspaceId: string, memberId: string | null): Promise<CalendarFeedSettings> {
@@ -61,11 +68,13 @@ export class CalendarFeedService {
   /**
    * Turns the feed on, or gives it a new link: a new token replaces the stored
    * hash, so the old link stops working at once. What it carries stays, except
-   * the kinds the body names.
+   * the kinds the body names. Audited like an API key: who, which feed, never
+   * the token or its hash.
    */
   async issue(
     workspaceId: string,
     memberId: string | null,
+    userId: string,
     body: CalendarFeedIncludeBody,
   ): Promise<CalendarFeedCreated> {
     const member = this.requireMember(memberId);
@@ -99,6 +108,7 @@ export class CalendarFeedService {
       where: { workspaceId, memberId: member, tokenHash },
     });
     if (!saved) throw this.changedMeanwhile();
+    await this.audit(saved, userId, existing ? AuditAction.UPDATE : AuditAction.CREATE);
     return { ...this.toSettings(saved), token };
   }
 
@@ -118,8 +128,18 @@ export class CalendarFeedService {
   }
 
   /** Turns the feed off: the row goes, and with it the link. Idempotent. */
-  async remove(workspaceId: string, memberId: string | null): Promise<CalendarFeedSettings> {
-    await this.feedRepository.delete({ workspaceId, memberId: this.requireMember(memberId) });
+  async remove(
+    workspaceId: string,
+    memberId: string | null,
+    userId: string,
+  ): Promise<CalendarFeedSettings> {
+    const feed = await this.feedRepository.findOne({
+      where: { workspaceId, memberId: this.requireMember(memberId) },
+    });
+    if (feed) {
+      const result = await this.feedRepository.delete({ id: feed.id, workspaceId });
+      if (result.affected) await this.audit(feed, userId, AuditAction.DELETE);
+    }
     return this.toSettings(null);
   }
 
@@ -134,6 +154,19 @@ export class CalendarFeedService {
       'UPDATE "calendar_feeds" SET "last_fetched_at" = now() WHERE "id" = $1 AND "workspace_id" = $2',
       [feed.id, feed.workspaceId],
     );
+  }
+
+  /** A link made (create), replaced (update) or turned off (delete); the token and its hash stay out. */
+  private audit(feed: CalendarFeed, userId: string, action: AuditAction): Promise<void> {
+    return recordSecurityEvent(this.auditService, this.logger, {
+      workspaceId: feed.workspaceId,
+      actorId: userId,
+      entityType: EntityType.CALENDAR_FEED,
+      entityId: feed.id,
+      action,
+      severity: Severity.WARN,
+      meta: { memberId: feed.memberId },
+    });
   }
 
   /** Another request turned the feed on, renewed or removed it between our read and write. */
