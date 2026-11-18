@@ -340,15 +340,15 @@ export class UsersService {
   async changePassword(userId: string, dto: ChangePasswordBody): Promise<void> {
     const user = await this.findOneWithPassword(userId);
 
-    const isPasswordValid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
-
-    if (!isPasswordValid) {
+    if (!(await bcrypt.compare(dto.currentPassword, user.passwordHash))) {
       throw new ForbiddenException(appError('AUTH_CURRENT_PASSWORD_INCORRECT'));
     }
 
     user.passwordHash = await hashPassword(dto.newPassword);
     user.tokenVersion = (user.tokenVersion ?? 0) + 1;
     await this.userRepository.save(user);
+    // Signed out everywhere, as after a reset: calendar feed links end too.
+    await this.calendarFeeds.revokeAllOf(user.id);
 
     await recordSecurityEvent(this.auditService, this.logger, {
       workspaceId: user.workspaceId,

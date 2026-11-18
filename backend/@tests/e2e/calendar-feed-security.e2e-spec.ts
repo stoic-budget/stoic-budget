@@ -205,4 +205,13 @@ describe('Calendar feed security (e2e)', () => {
       .expect(200);
     await expectRevoked(tokens);
   });
+
+  // Last: the member's password differs from PASSWORD afterwards.
+  it('ends every link of the account when its password is changed', async () => {
+    const tokens = await twoFeeds();
+    await as(member, request(server()).patch('/users/me/password'))
+      .send({ currentPassword: PASSWORD, newPassword: 'Changed123!@#' })
+      .expect(200);
+    await expectRevoked(tokens);
+  });
 });

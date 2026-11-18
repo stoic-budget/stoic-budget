@@ -130,6 +130,10 @@ export class PasswordResetService {
     // existing login to stop working.
     user.tokenVersion = (user.tokenVersion ?? 0) + 1;
     await this.userRepository.save(user);
+    // Spent as soon as the password changed: a failure below must not leave
+    // the link usable again.
+    record.usedAt = new Date();
+    await this.tokenRepository.save(record);
     // IsNull(), not `revokedAt: null` — TypeORM renders a literal null
     // comparison for the latter, which never matches, so nothing was revoked.
     await this.authSessionRepository.update(
@@ -138,9 +142,6 @@ export class PasswordResetService {
     );
     // Calendar feed links end too, in every workspace.
     await this.calendarFeeds.revokeAllOf(user.id);
-
-    record.usedAt = new Date();
-    await this.tokenRepository.save(record);
 
     await recordSecurityEvent(this.auditService, this.logger, {
       workspaceId: user.workspaceId,

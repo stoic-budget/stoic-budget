@@ -154,6 +154,16 @@ describe('PasswordResetService', () => {
       expect(calendarFeeds.revokeAllOf).toHaveBeenCalledWith('user-1');
     });
 
+    it('spends the link as soon as the password changed, so a later failure cannot reuse it', async () => {
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser });
+      calendarFeeds.revokeAllOf.mockRejectedValueOnce(new Error('database went away'));
+
+      await expect(service.resetPassword('plain-token', 'BrandNewPass1')).rejects.toThrow();
+
+      expect(tokenRepository.save.mock.calls[0][0].usedAt).toBeInstanceOf(Date);
+    });
+
     it('logs the completed reset without the password, hash or token', async () => {
       tokenRepository.findOne.mockResolvedValue(validRecord());
       userRepository.findOne.mockResolvedValue({ ...activeUser });
