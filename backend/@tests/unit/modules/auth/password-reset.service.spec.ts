@@ -20,6 +20,7 @@ describe('PasswordResetService', () => {
   let authSessionRepository: { update: Mock };
   let mailerService: { send: Mock };
   let auditService: { createEvent: Mock };
+  let calendarFeeds: { revokeAllOf: Mock };
   let service: PasswordResetService;
 
   const activeUser = {
@@ -42,6 +43,7 @@ describe('PasswordResetService', () => {
     authSessionRepository = { update: vi.fn() };
     mailerService = { send: vi.fn().mockResolvedValue(true) };
     auditService = { createEvent: vi.fn().mockResolvedValue({}) };
+    calendarFeeds = { revokeAllOf: vi.fn() };
 
     service = new PasswordResetService(
       userRepository as never,
@@ -50,6 +52,7 @@ describe('PasswordResetService', () => {
       mailerService as never,
       { get: (key: string) => (key === 'JWT_SECRET' ? SECRET : undefined) } as never,
       auditService as never,
+      calendarFeeds as never,
     );
   });
 
@@ -140,6 +143,15 @@ describe('PasswordResetService', () => {
         expect.objectContaining({ revokedAt: expect.any(Date) }),
       );
       expect(tokenRepository.save.mock.calls[0][0].usedAt).toBeInstanceOf(Date);
+    });
+
+    it('ends the calendar feed links of every workspace', async () => {
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser });
+
+      await service.resetPassword('plain-token', 'BrandNewPass1');
+
+      expect(calendarFeeds.revokeAllOf).toHaveBeenCalledWith('user-1');
     });
 
     it('logs the completed reset without the password, hash or token', async () => {

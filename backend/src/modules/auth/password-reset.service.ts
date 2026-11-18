@@ -12,6 +12,7 @@ import { AuthSession } from '../../entities/auth-session.entity';
 import { PasswordResetToken } from '../../entities/password-reset-token.entity';
 import { User } from '../../entities/user.entity';
 import { AuditService } from '../audit/audit.service';
+import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-revocation.service';
 import { MailerService } from '../mailer/mailer.service';
 import { recordSecurityEvent } from './security-audit.util';
 
@@ -31,6 +32,7 @@ export class PasswordResetService {
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
     private readonly auditService: AuditService,
+    private readonly calendarFeeds: CalendarFeedRevocationService,
   ) {}
 
   /**
@@ -134,6 +136,8 @@ export class PasswordResetService {
       { userId: user.id, revokedAt: IsNull() },
       { revokedAt: new Date() },
     );
+    // Calendar feed links end too, in every workspace.
+    await this.calendarFeeds.revokeAllOf(user.id);
 
     record.usedAt = new Date();
     await this.tokenRepository.save(record);
