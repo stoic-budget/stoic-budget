@@ -114,9 +114,68 @@ describe('API contracts: loans (e2e)', () => {
     await call('put', `/wallets/${loanId}/loan-terms`, 400, { ...terms, paymentDay: 32 });
     // Under a cent would round to nothing in the column: refused before it gets there.
     await call('put', `/wallets/${loanId}/loan-terms`, 400, { ...terms, principal: 0.001 });
+    // Past what the schedule can add up exactly in cents.
+    await call('put', `/wallets/${loanId}/loan-terms`, 400, { ...terms, principal: 1e12 });
+    await call('put', `/wallets/${loanId}/loan-terms`, 400, {
+      ...terms,
+      extraPayments: [{ date: '2027-03-10', amount: 1e12 }],
+    });
+    // Finer than the rate column keeps: refused, so a rate change stores what the rate does.
+    await call('put', `/wallets/${loanId}/loan-terms`, 400, { ...terms, annualRate: 6.12345 });
+    await call('put', `/wallets/${loanId}/loan-terms`, 400, {
+      ...terms,
+      rateChanges: [{ from: '2027-06-10', annualRate: 4.56789 }],
+    });
+    // A last payment past the year 9999 has no date to answer.
+    const late = await call('put', `/wallets/${loanId}/loan-terms`, 400, {
+      ...terms,
+      startDate: '9990-06-15',
+      termMonths: 600,
+    });
+    expect(late.body.error?.code).toBe('LOAN_TERMS_END_TOO_LATE');
+    expect((await call('get', `/wallets/${loanId}/loan-terms`, 200)).body.terms).toBeNull();
+  });
+
+  it('works out the largest loan at the highest rate to its last day', async () => {
+    const largest = 999_999_999_999.99;
+    const saved = await call('put', `/wallets/${loanId}/loan-terms`, 200, {
+      ...terms,
+      principal: largest,
+      startDate: '9949-12-31',
+      termMonths: 600,
+      paymentDay: 31,
+      method: 'interest_only',
+      dayCount: 'actual/365',
+      annualRate: 100,
+      rateChanges: [],
+      extraPayments: [],
+    });
+    expect(saved.body.terms.principal).toBe('999999999999.99');
+    const schedule = await call('get', `/wallets/${loanId}/loan-schedule`, 200);
+    matches(LoanSchedule, schedule.body);
+    expect(schedule.body.plan.payoffDate).toBe('9999-12-31');
+    expect(schedule.body.plan.periods).toBe(600);
+    const whatIf = await call('post', `/wallets/${loanId}/loan-schedule/what-if`, 200, {
+      extraPayments: [{ date: '9950-01-31', amount: largest }],
+      mode: 'reduce_term',
+    });
+    matches(LoanWhatIf, whatIf.body);
+    expect(whatIf.body.scenario.periods).toBe(1);
+    expect(whatIf.body.interestSaved).toBeGreaterThan(0);
+    await call('delete', `/wallets/${loanId}/loan-terms`, 200);
   });
 
   it('stores the terms in the account currency and replaces them on a second save', async () => {
+    // Four decimals, as the rate column keeps them: what is read back is what was sent.
+    const fine = await call('put', `/wallets/${loanId}/loan-terms`, 200, {
+      ...terms,
+      annualRate: 6.1234,
+      rateChanges: [{ from: '2027-06-10', annualRate: 4.5678 }],
+    });
+    expect(fine.body.terms).toMatchObject({
+      annualRate: '6.1234',
+      rateChanges: [{ from: '2027-06-10', annualRate: 4.5678 }],
+    });
     const saved = await call('put', `/wallets/${loanId}/loan-terms`, 200, terms);
     matches(LoanTermsState, saved.body);
     expect(saved.body.terms).toMatchObject({
@@ -157,11 +216,15 @@ describe('API contracts: loans (e2e)', () => {
       ...rows.slice(0, 3).map(row => payment(row.date, row.principal)),
       payment(rows[0].date, 5_000, { isVerified: false }),
       payment(rows[1].date, 4_000, { isDuplicate: true }),
+      // A currency with no rate (no provider knows it): left out, and named.
+      payment(rows[2].date, 700, { currency: 'ZZX' }),
     ]);
 
     const after = await call('get', `/wallets/${loanId}/loan-schedule`, 200);
     matches(LoanSchedule, after.body);
     const { plan, actual, projection, today } = after.body;
+    expect(before.body.unconvertedCurrencies).toEqual([]);
+    expect(after.body.unconvertedCurrencies).toEqual(['ZZX']);
     expect(plan.periods).toBeGreaterThan(0);
     for (const row of plan.rows.slice(0, 3)) {
       expect(row.actualBalance).toBe(row.balance);
@@ -175,6 +238,16 @@ describe('API contracts: loans (e2e)', () => {
     expect(projection.startBalance).toBe(owed);
     expect(projection.from <= today).toBe(true);
     expect(projection.rows[0].date > today).toBe(true);
+
+    // Owed past what a loan can be: the real balance is shown, but nothing is projected from it.
+    const charge = 5e12;
+    await dataSource
+      .getRepository(Transaction)
+      .save(payment(today, charge, { transactionType: TransactionType.EXPENSE, credit: null, debit: charge }));
+    const overdrawn = await call('get', `/wallets/${loanId}/loan-schedule`, 200);
+    matches(LoanSchedule, overdrawn.body);
+    expect(overdrawn.body.actual.balance).toBeGreaterThan(charge);
+    expect(overdrawn.body.projection).toBeNull();
   });
 
   it('works out a what-if in both modes without saving it', async () => {

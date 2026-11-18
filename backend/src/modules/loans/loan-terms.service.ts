@@ -6,7 +6,7 @@ import { assertFound } from '../../common/utils/assert-found.util';
 import type { LoanTermsBody, LoanTermsItem, LoanTermsState } from '../../contracts';
 import { LoanTerms } from '../../entities/loan-terms.entity';
 import { DEBT_WALLET_TYPES, Wallet } from '../../entities/wallet.entity';
-import type { LoanPlanInput } from './engine/loan-plan';
+import { type LoanPlanInput, paymentDates } from './engine/loan-plan';
 
 const toDay = (value: string | Date): string =>
   typeof value === 'string' ? value.slice(0, 10) : value.toISOString().slice(0, 10);
@@ -29,6 +29,10 @@ export class LoanTermsService {
     const wallet = await this.walletOf(walletId, workspaceId);
     if (!DEBT_WALLET_TYPES.includes(wallet.type)) {
       throw new BadRequestException(appError('LOAN_TERMS_DEBT_ONLY'));
+    }
+    // A date past the year 9999 has five digits of year: no `date` the schedule can answer.
+    if (paymentDates(body).at(-1)?.length !== 10) {
+      throw new BadRequestException(appError('LOAN_TERMS_END_TOO_LATE'));
     }
     // One row per account: a second save of the same account replaces the first.
     await this.terms.upsert(

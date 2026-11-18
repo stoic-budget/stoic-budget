@@ -95,6 +95,11 @@ export const LoanSchedule = Schema.Struct({
   startDate: DateOnly,
   principal: Schema.Number,
   today: DateOnly,
+  /**
+   * Currencies of the account's rows with no exchange rate on their day: left
+   * out of the real balance, as in `GET /wallets/:id`.
+   */
+  unconvertedCurrencies: Schema.Array(Schema.String),
   plan: Schema.Struct({ ...loanSummaryFields, rows: Schema.Array(LoanScheduleRow) }),
   /** Null when the account has no opening balance and no counted rows to compare. */
   actual: Schema.NullOr(

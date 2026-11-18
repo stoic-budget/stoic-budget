@@ -52,6 +52,16 @@ describe('loan form', () => {
     });
   });
 
+  it('sends no more than the API keeps: rates to four decimals, amounts under 10^12', () => {
+    expect(formToBody(filled({ annualRate: '4,1234' }))?.annualRate).toBe(4.1234);
+    expect(formToBody(filled({ annualRate: '4,12345' }))).toBeNull();
+    expect(
+      formToBody(filled({ rateChanges: [{ from: '2027-03-15', annualRate: '3.98765' }] })),
+    ).toBeNull();
+    expect(formToBody(filled({ principal: '999999999999.99' }))?.principal).toBe(999_999_999_999.99);
+    expect(formToBody(filled({ principal: '1000000000000' }))).toBeNull();
+  });
+
   it('sends nothing rather than drop a half-filled row it shows', () => {
     expect(formToBody(filled({ rateChanges: [{ from: '', annualRate: '3' }] }))).toBeNull();
     expect(formToBody(filled({ extraPayments: [{ date: '2026-09-15', amount: '' }] }))).toBeNull();
