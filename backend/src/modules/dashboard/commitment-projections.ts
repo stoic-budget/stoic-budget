@@ -88,7 +88,6 @@ export async function newestRecurringPayables(
 }
 
 /**
-
  * The occurrences of a series not made yet, inside [today, horizonEnd]: the
  * dates the job will make (`nextToMake`), at the series amount, moved off
  * weekends as the rule says (public holidays are not looked up here; the bill
@@ -113,7 +112,12 @@ export function projectedOccurrences(
   while (day) {
     const due = shiftOffNonWorkingDays(day, rule.shift);
     if (due > to) break;
-    items.push({ date: due < from ? from : due, occurrenceDate: day, amount, isOverdue: due < from });
+    items.push({
+      date: due < from ? from : due,
+      occurrenceDate: day,
+      amount,
+      isOverdue: due < from,
+    });
     day = nextOccurrence(rule, day);
   }
   return items;
