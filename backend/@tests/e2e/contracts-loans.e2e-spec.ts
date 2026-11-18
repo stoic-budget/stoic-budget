@@ -275,4 +275,23 @@ describe('API contracts: loans (e2e)', () => {
     expect((await call('get', `/wallets/${loanId}/loan-terms`, 200)).body.terms).toBeNull();
     await call('get', `/wallets/${loanId}/loan-schedule`, 404);
   });
+
+  it('keeps the terms from one debt type to another, deletes them when the account stops being a debt', async () => {
+    await call('put', `/wallets/${loanId}/loan-terms`, 200, terms);
+    const count = async () =>
+      (
+        await dataSource.query('SELECT COUNT(*)::int AS count FROM loan_terms WHERE wallet_id = $1', [
+          loanId,
+        ])
+      )[0].count;
+
+    await call('put', `/wallets/${loanId}`, 200, { type: 'credit_card' });
+    expect((await call('get', `/wallets/${loanId}/loan-terms`, 200)).body.terms).not.toBeNull();
+
+    const changed = await call('put', `/wallets/${loanId}`, 200, { type: 'checking' });
+    expect(changed.body.type).toBe('checking');
+    expect(await count()).toBe(0);
+    expect((await call('get', `/wallets/${loanId}/loan-terms`, 200)).body.terms).toBeNull();
+    await call('get', `/wallets/${loanId}/loan-schedule`, 404);
+  });
 });
