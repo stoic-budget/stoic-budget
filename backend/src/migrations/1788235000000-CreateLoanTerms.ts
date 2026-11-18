@@ -4,8 +4,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * The terms of a debt account: principal, rate and its changes, term, payment
  * day, method and day count. One row per account, gone with the account.
  */
-export class CreateLoanTerms1788230000000 implements MigrationInterface {
-  name = 'CreateLoanTerms1788230000000';
+export class CreateLoanTerms1788235000000 implements MigrationInterface {
+  name = 'CreateLoanTerms1788235000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`

@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 describe('CreateLoanTerms migration', () => {
-  const filePath = path.join(process.cwd(), 'src', 'migrations', '1788230000000-CreateLoanTerms.ts');
+  const filePath = path.join(process.cwd(), 'src', 'migrations', '1788235000000-CreateLoanTerms.ts');
   const source = () => readFileSync(filePath, 'utf8');
 
   it('creates the table only when it is missing', () => {
