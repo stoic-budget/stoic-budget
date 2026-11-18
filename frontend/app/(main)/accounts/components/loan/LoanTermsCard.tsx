@@ -51,6 +51,7 @@ export function LoanTermsCard({
   const nextRow = plan?.rows.find(row => row.date > (schedule?.today ?? ''));
   const rate = nextRow?.annualRate ?? Number(terms.annualRate);
   const actual = schedule?.actual;
+  const unconverted = schedule?.unconvertedCurrencies ?? [];
   const percent = new Intl.NumberFormat(locale, { maximumFractionDigits: 4 });
 
   let standing: string | null = null;
@@ -97,7 +98,18 @@ export function LoanTermsCard({
         {plan && <Stat label={t.totalInterest} value={money(plan.totalInterest)} />}
         {actual && <Stat label={t.owedToday} value={money(actual.balance)} />}
       </div>
-      {standing && <span style={mutedStyle}>{standing}</span>}
+      {standing && (
+        <div style={{ display: 'grid', gap: 2 }}>
+          <span style={mutedStyle}>{standing}</span>
+          {/* A payment counts whole as repaid debt: the interest inside it is not split off yet. */}
+          <span style={mutedStyle}>{t.standingHint}</span>
+        </div>
+      )}
+      {unconverted.length > 0 && (
+        <span style={mutedStyle}>
+          {t.unconvertedNote.value.replace('{{list}}', unconverted.join(', '))}
+        </span>
+      )}
     </section>
   );
 }
