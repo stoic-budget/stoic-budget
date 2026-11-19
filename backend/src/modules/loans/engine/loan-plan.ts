@@ -1,13 +1,15 @@
-import { fromMinor, roundHalfAwayFromZero, toMinor } from '../../../common/utils/money.util';
+import { fromMinor, toMinor } from '../../../common/utils/money.util';
 import {
   type AmortizationRun,
   amortize,
+  carriedFactor,
   type DayCount,
   type ExtraMode,
-  firstPeriodYears,
   type LoanMethod,
+  levelPayment,
   type MinorRow,
-  regularAmount,
+  periodYears,
+  quotedPayment,
 } from './loan-amortization';
 import { firstPaymentMonth, isPaymentDay, paymentDateAfter } from './loan-calendar';
 
@@ -86,6 +88,7 @@ function runOf(
     from,
     dates,
     firstIsRegular,
+    paymentDay: input.paymentDay,
     method: input.method,
     dayCount: input.dayCount,
     rates: [
@@ -105,21 +108,6 @@ function runOf(
       mode: item.mode ?? input.extraMode,
     })),
   };
-}
-
-/** A whole month's payment at the start; an annuity's takes a broken first period into account. */
-function regularPaymentOf(input: LoanPlanInput, run: AmortizationRun): number {
-  const amount = regularAmount(
-    input.method,
-    run.balance,
-    input.annualRate,
-    input.termMonths,
-    firstPeriodYears(run),
-  );
-  if (input.method === 'annuity') {
-    return amount;
-  }
-  return amount + roundHalfAwayFromZero((run.balance * input.annualRate) / 1200);
 }
 
 function toSchedule(rows: MinorRow[], regularPayment: number): Schedule {
@@ -155,7 +143,25 @@ function planRun(input: LoanPlanInput): AmortizationRun {
 /** The whole schedule the terms describe, from the start date. */
 export function buildSchedule(input: LoanPlanInput): Schedule {
   const run = planRun(input);
-  return toSchedule(amortize(run), regularPaymentOf(input, run));
+  return toSchedule(amortize(run), quotedPayment(run));
+}
+
+/**
+ * Whether rounding the payment to the cent keeps an annuity on its term: half
+ * a cent a period, carried with interest to the end, must move the last
+ * payment by less than a whole payment. A long term at a high rate on a small
+ * principal fails it (1,000 at 30% over 600 months repays under a cent a
+ * month: rounded, it is an interest-only loan). Checked at the highest rate
+ * the terms name.
+ */
+export function roundsWithinTerm(input: LoanPlanInput): boolean {
+  const rate = Math.max(input.annualRate, ...input.rateChanges.map(change => change.annualRate));
+  if (input.method !== 'annuity' || rate === 0) {
+    return true;
+  }
+  const run = planRun(input);
+  const years = periodYears(run);
+  return carriedFactor(rate, years) / 2 < levelPayment(run.balance, rate, years);
 }
 
 /**
@@ -189,12 +195,16 @@ export function projectSchedule(
     const planned = amortize(planRun(input));
     const next = planned[past];
     if (next && past < planned.length - 1) {
-      run.keep = input.method === 'annuity' ? next.payment : next.principal;
+      // Before the first payment date the plan's regular payment, not its
+      // first one (that carries the days of a broken first period).
+      const payment = past === 0 ? quotedPayment(planRun(input)) : next.payment;
+      run.keep = input.method === 'annuity' ? payment : next.principal;
     }
   }
   const rows = amortize(run);
+  const regular = (firstIsRegular ? rows[0] : rows[1]) ?? rows[0];
   return {
-    ...toSchedule(rows, rows[0]?.payment ?? 0),
+    ...toSchedule(rows, regular?.payment ?? 0),
     from,
     startBalance: fromMinor(balance),
   };

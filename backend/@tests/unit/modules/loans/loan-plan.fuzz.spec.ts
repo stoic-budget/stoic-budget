@@ -1,9 +1,13 @@
 import { toMinor } from '../../../../src/common/utils/money.util';
-import type { ExtraMode } from '../../../../src/modules/loans/engine/loan-amortization';
+import {
+  carriedFactor,
+  type ExtraMode,
+} from '../../../../src/modules/loans/engine/loan-amortization';
 import {
   buildSchedule,
   type LoanPlanInput,
   paymentDates,
+  roundsWithinTerm,
   whatIf,
 } from '../../../../src/modules/loans/engine/loan-plan';
 
@@ -29,11 +33,11 @@ function randomLoan(random: ReturnType<typeof generator>): LoanPlanInput {
   return {
     principal: random.int(1_000_00, 1_000_000_00) / 100,
     startDate,
-    termMonths: random.int(1, 360),
+    termMonths: random.int(1, 480),
     paymentDay: random.pick([random.int(1, 31), Number(startDate.slice(8))]),
     method: random.pick(['annuity', 'linear'] as const),
     dayCount: random.pick(['30/360', 'actual/365'] as const),
-    annualRate: random.int(0, 120_000) / 10_000,
+    annualRate: random.int(0, 250_000) / 10_000,
     rateChanges: [],
     extraPayments: [],
     recurringExtras: [],
@@ -44,17 +48,29 @@ function randomLoan(random: ReturnType<typeof generator>): LoanPlanInput {
 const sumCents = (values: number[]) => values.reduce((sum, value) => sum + toMinor(value), 0);
 
 /**
- * Random loans against what every schedule must hold: the principal parts and
- * extra payments add up to the principal to the cent, the balance ends at
- * zero, and without extra payments the loan ends on its term in level
- * payments (the annuity's, or the linear principal part).
+ * The most the last payment can differ from the regular one by rounding: a
+ * cent a period (half for the payment, half for the interest), carried with
+ * the interest of a 31-day month to the end of the term.
+ */
+const residue = (input: LoanPlanInput) =>
+  carriedFactor(input.annualRate, Array(input.termMonths).fill(31 / 365)) / 100;
+
+/**
+ * Random loans under both day counts against what every schedule must hold:
+ * the principal parts and extra payments add up to the principal to the cent,
+ * the balance ends at zero, and without extra payments the loan ends on its
+ * term in level payments (the annuity's, or the linear principal part), the
+ * first carrying a broken first period's own days and the last only the
+ * rounding. Terms whose rounding outgrows a payment are refused on save
+ * (`roundsWithinTerm`), so they are left out here too.
  */
 describe('loan schedules over random loans', () => {
   const random = generator(744);
   // Some 3,000 schedules in all: each test gets more than the default 5 seconds on a busy machine.
-  const loans = Array.from({ length: 400 }, () => randomLoan(random));
+  const loans = Array.from({ length: 400 }, () => randomLoan(random)).filter(roundsWithinTerm);
 
   it('ends on the term in level payments, the last taking only the residue', () => {
+    expect(loans.length).toBeGreaterThan(300);
     for (const input of loans) {
       const schedule = buildSchedule(input);
       const dates = paymentDates(input);
@@ -69,19 +85,15 @@ describe('loan schedules over random loans', () => {
         toMinor(input.principal) + toMinor(schedule.totalInterest),
       );
       const level = rows
-        .slice(0, -1)
+        .slice(1, -1)
         .map(row => (input.method === 'annuity' ? row.payment : row.principal));
       expect({ label, level: new Set(level).size <= 1 }).toEqual({ label, level: true });
-      if (input.method === 'annuity' && input.dayCount === '30/360' && rows.length > 1) {
-        // Only rounding: up to a cent a month (the payment's and the interest's
-        // half cents), carried with interest to the end of the term.
-        const monthly = input.annualRate / 1200;
-        const carried =
-          monthly === 0 ? rows.length : ((1 + monthly) ** rows.length - 1) / monthly;
-        expect({ label, off: Math.abs(last.payment - rows[0].payment) <= carried / 100 }).toEqual({
+      if (input.method === 'annuity' && rows.length > 2) {
+        expect({ label, regular: rows[1].payment }).toEqual({ label, regular: schedule.regularPayment });
+        expect({
           label,
-          off: true,
-        });
+          off: Math.abs(last.payment - schedule.regularPayment) <= residue(input),
+        }).toEqual({ label, off: true });
       }
     }
   }, 30_000);
@@ -104,7 +116,8 @@ describe('loan schedules over random loans', () => {
         [],
         [{ from: anyDay(), amount: random.int(1, toMinor(input.principal) / 50) / 100, mode: mode() }],
       ]);
-      const schedule = buildSchedule({ ...input, extraPayments, recurringExtras });
+      const planned = { ...input, extraPayments, recurringExtras };
+      const schedule = buildSchedule(planned);
       const rows = schedule.rows;
       const label = JSON.stringify({ input, extraPayments, recurringExtras });
       expect({ label, balance: rows[rows.length - 1].balance }).toEqual({ label, balance: 0 });
@@ -116,18 +129,26 @@ describe('loan schedules over random loans', () => {
         label,
         repaid: sumCents(rows.map(row => row.principal)) + sumCents(rows.map(row => row.extra)),
       }).toEqual({ label, repaid: toMinor(input.principal) });
-      expect(rows.slice(1).every(row => row.payment >= 0 && row.extra >= 0)).toBe(true);
+      // Extra payments never raise an annuity's payment past the regular one
+      // (the first may carry a broken period's days, the last the rounding).
+      const highest = schedule.regularPayment + residue(input);
+      const capped = input.method !== 'annuity' || rows.slice(1).every(row => row.payment <= highest);
+      expect({ label, capped }).toEqual({ label, capped: true });
+      expect(rows.every(row => row.extra >= 0)).toBe(true);
 
-      // A what-if never makes the loan longer, nor (where every month is a
-      // twelfth of a year) dearer than the plan it is tried on. Under
-      // actual/365 a lower payment is worked out again on twelfths, so it can
-      // give back what short months had saved.
-      const tried = whatIf(
-        { ...input, extraPayments, recurringExtras },
-        { extraPayments: [{ date: anyDay(), amount: 100 }], recurringExtras: [], extraMode: mode() },
-      );
-      const dearer = input.dayCount === '30/360' && tried.interestSaved < -0.05;
-      expect({ label, saved: tried.monthsSaved >= 0 && !dearer }).toEqual({ label, saved: true });
+      // A what-if never makes the loan longer, nor dearer than the plan it is
+      // tried on beyond the rounding both carry: a lower payment worked out
+      // again rounds to the cent anew, and a long term at a high rate carries
+      // that cent a long way (see `residue`).
+      const tried = whatIf(planned, {
+        extraPayments: [{ date: anyDay(), amount: 100 }],
+        recurringExtras: [],
+        extraMode: mode(),
+      });
+      expect({
+        label,
+        saved: tried.monthsSaved >= 0 && tried.interestSaved >= -residue(input),
+      }).toEqual({ label, saved: true });
     }
   }, 30_000);
 });

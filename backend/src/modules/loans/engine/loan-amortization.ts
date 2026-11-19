@@ -1,5 +1,5 @@
 import { roundHalfAwayFromZero } from '../../../common/utils/money.util';
-import { actualDays, days360 } from './loan-calendar';
+import { actualDays, days360, paymentDateAfter } from './loan-calendar';
 
 export type LoanMethod = 'annuity' | 'linear' | 'interest_only';
 export type DayCount = '30/360' | 'actual/365';
@@ -36,6 +36,8 @@ export interface AmortizationRun {
   dates: readonly string[];
   /** The first period is a whole month (it starts on a payment day). */
   firstIsRegular: boolean;
+  /** 1–31: places the whole month a broken first period stands in for. */
+  paymentDay: number;
   method: LoanMethod;
   dayCount: DayCount;
   /** Sorted by `from`; the first point holds from the start. */
@@ -70,97 +72,130 @@ export function rateAt(rates: readonly RatePoint[], date: string): number {
 }
 
 /**
- * The level payment that repays `balance` over `periods` payments at
- * `annualRate` percent. The first period runs `firstYears` of a year (a
- * twelfth: a whole month) and every later one a whole month. A shorter or
- * longer first period changes only the first interest, so the payment is
- * solved with it: what is owed on the first payment date, against the first
- * payment and the rest discounted to that date. Every regular payment is then
- * the same and the last one ends the term. Without interest the cents are
- * rounded down, so the payments never run out before the term; the last takes
- * the remainder.
+ * The level payment that repays `balance` over periods of the given lengths
+ * (parts of a year) at `annualRate` percent: the balance against every payment
+ * discounted over the real length of each period, so the last payment takes
+ * only the rounding of the cents. A twelfth for every period is the textbook
+ * annuity. `lastWeight` is the part of a payment the last one is (a term cut
+ * by extra payments ends with a part of one). Without interest the cents are
+ * rounded down, so the payments never run out before the term.
  */
-export function annuityPayment(
+export function levelPayment(
   balance: number,
   annualRate: number,
-  periods: number,
-  firstYears = 1 / 12,
+  years: readonly number[],
+  lastWeight = 1,
 ): number {
-  if (periods <= 0) {
+  if (years.length === 0) {
     return balance;
   }
-  const monthly = annualRate / 1200;
-  if (monthly === 0) {
-    return Math.floor(balance / periods);
-  }
-  const later = (1 - (1 + monthly) ** -(periods - 1)) / monthly;
-  return roundHalfAwayFromZero((balance * (1 + (annualRate / 100) * firstYears)) / (1 + later));
+  let discount = 1;
+  let worth = 0;
+  years.forEach((part, index) => {
+    discount /= 1 + (annualRate * part) / 100;
+    worth += discount * (index === years.length - 1 ? lastWeight : 1);
+  });
+  return annualRate === 0 ? Math.floor(balance / worth) : roundHalfAwayFromZero(balance / worth);
 }
 
-/** Months a payment needs to repay a balance; Infinity when it does not cover the interest. */
-export function periodsToRepay(balance: number, payment: number, annualRate: number): number {
-  const monthly = annualRate / 1200;
-  if (payment <= 0) {
-    return Number.POSITIVE_INFINITY;
-  }
-  if (monthly === 0) {
-    return Math.ceil(balance / payment - 1e-9);
-  }
-  if (payment <= balance * monthly) {
-    return Number.POSITIVE_INFINITY;
-  }
-  return Math.ceil(-Math.log(1 - (balance * monthly) / payment) / Math.log(1 + monthly) - 1e-9);
+/** The textbook annuity: `periods` whole months of a twelfth of a year. */
+export function annuityPayment(balance: number, annualRate: number, periods: number): number {
+  return levelPayment(balance, annualRate, Array(Math.max(periods, 0)).fill(1 / 12));
 }
 
 /**
- * The regular amount of a method: annuity payment, linear principal, nothing
- * for interest-only. The linear part is rounded down, so it never repays the
- * balance before the term; the last payment takes the cents left over.
+ * What one unit paid each period grows to by the end, carried with the
+ * interest of the periods after it: how far a cent of rounding a period can
+ * move the last payment.
+ */
+export function carriedFactor(annualRate: number, years: readonly number[]): number {
+  return years.reduce((carried, part) => carried * (1 + (annualRate * part) / 100) + 1, 0);
+}
+
+/**
+ * The regular amount of a method over the given periods: annuity payment,
+ * linear principal, nothing for interest-only. The linear part is rounded
+ * down, so it never repays the balance before the term; the last payment
+ * takes the cents left over.
  */
 export function regularAmount(
   method: LoanMethod,
   balance: number,
   annualRate: number,
-  periods: number,
-  firstYears = 1 / 12,
+  years: readonly number[],
+  lastWeight = 1,
 ): number {
   if (method === 'annuity') {
-    return annuityPayment(balance, annualRate, periods, firstYears);
+    return levelPayment(balance, annualRate, years, lastWeight);
   }
   if (method === 'linear') {
-    return Math.floor(balance / Math.max(periods, 1));
+    return Math.floor(balance / Math.max(years.length - 1 + lastWeight, 1));
   }
   return 0;
 }
 
 /**
  * Periods a regular amount still needs for a balance, with the part of a
- * period the last payment covers; Infinity when it never repays it.
+ * period the last payment is; Infinity when the periods given are not enough.
  */
-function periodsLeft(method: LoanMethod, balance: number, amount: number, annualRate: number) {
-  const monthly = annualRate / 1200;
+function periodsNeeded(
+  method: LoanMethod,
+  balance: number,
+  amount: number,
+  annualRate: number,
+  years: readonly number[],
+): number {
   if (amount <= 0 || method === 'interest_only') {
     return Number.POSITIVE_INFINITY;
   }
-  if (method === 'linear' || monthly === 0) {
+  if (method === 'linear') {
     return balance / amount;
   }
-  return amount <= balance * monthly
-    ? Number.POSITIVE_INFINITY
-    : -Math.log(1 - (balance * monthly) / amount) / Math.log(1 + monthly);
+  let owed = balance;
+  for (let index = 0; index < years.length; index += 1) {
+    owed *= 1 + (annualRate * years[index]) / 100;
+    if (owed <= amount) {
+      return index + owed / amount;
+    }
+    owed -= amount;
+  }
+  return Number.POSITIVE_INFINITY;
 }
 
-/** The first period as a part of a year: a twelfth when it is a whole month, else its own days. */
-export function firstPeriodYears(
-  run: Pick<AmortizationRun, 'from' | 'dates' | 'firstIsRegular' | 'dayCount'>,
-): number {
-  const end = run.dates[0];
-  if (run.firstIsRegular || end === undefined) {
-    return 1 / 12;
+/**
+ * Each period as a part of a year, as its interest is charged: a twelfth
+ * under 30/360, its days under actual/365. A broken first period counts as the
+ * whole month before the first payment date: the regular payment is worked
+ * out on whole periods, and the first payment adds (or gives back) the
+ * interest of the days it runs longer (or shorter).
+ */
+export function periodYears(
+  run: Pick<AmortizationRun, 'from' | 'dates' | 'firstIsRegular' | 'dayCount' | 'paymentDay'>,
+): number[] {
+  return run.dates.map((end, index) => {
+    if (run.dayCount === '30/360') {
+      return 1 / 12;
+    }
+    let start = index === 0 ? run.from : run.dates[index - 1];
+    if (index === 0 && !run.firstIsRegular) {
+      start = paymentDateAfter(end, -1, run.paymentDay);
+    }
+    return actualDays(start, end) / 365;
+  });
+}
+
+/**
+ * The payment a bank quotes at the start, at the rate in force then: the
+ * annuity payment, or the linear part (or nothing) plus a whole period's interest.
+ */
+export function quotedPayment(run: AmortizationRun): number {
+  const years = periodYears(run);
+  const rate = rateAt(run.rates, run.from);
+  const amount = regularAmount(run.method, run.balance, rate, years);
+  if (run.method === 'annuity') {
+    return amount;
   }
-  return run.dayCount === 'actual/365'
-    ? actualDays(run.from, end) / 365
-    : days360(run.from, end) / 360;
+  return amount + roundHalfAwayFromZero((run.balance * rate * (years[0] ?? 1 / 12)) / 100);
 }
 
 /** What extra payments took from the balance, by what they buy. */
@@ -207,18 +242,20 @@ function periodInterest(
 /**
  * The schedule of one run, period by period. Each period's interest is rounded
  * to the cent, and the last payment takes whatever balance is left, so the
- * principal parts always add up to the balance exactly.
+ * principal parts always add up to the balance exactly. The first payment of
+ * a broken first period repays what a whole one would, with its own interest.
  */
 export function amortize(run: AmortizationRun): MinorRow[] {
   const rows: MinorRow[] = [];
   const last = run.dates.length - 1;
+  const years = periodYears(run);
   const extras = run.extras.filter(extra => extra.date >= run.from && extra.amount > 0);
   let balance = run.balance;
   let amount = 0;
   let paymentRate = Number.NaN;
   let shortened = false;
-  // The period that takes the residue: the term's end, or an earlier one when a
-  // rate change works the payment out over a term extra payments already cut.
+  // The period that takes the residue: the term's end, or an earlier one when
+  // the payment is worked out over a term extra payments already cut.
   let final = last;
 
   /** Pays each item in turn from the balance, never more than is owed. */
@@ -232,14 +269,33 @@ export function amortize(run: AmortizationRun): MinorRow[] {
   };
 
   /**
-   * After extra payments, before period `next`: those that shorten the term
-   * keep the amount; those that lower the payment work it out again on what
-   * is left, over the term left. When the term was already cut (by the first
-   * kind, now or before), that is the cut term, to the part of a period, so a
-   * small extra lowers the payment a little instead of spreading a short last
-   * payment over the whole of its month.
+   * Works the amount out again on what is left from period `next` on: over
+   * the rest of the term, or, once extra payments cut it, over the cut term
+   * as the amount kept so far would repay `owed` (to the part of a period, so
+   * a small extra lowers the payment a little).
    */
-  const rebalance = (paid: Paid, next: number, annualRate: number, firstYears: number) => {
+  const resolve = (next: number, annualRate: number, owed: number) => {
+    const left = run.dates.length - next;
+    const term = shortened
+      ? Math.max(
+          1,
+          Math.min(left, periodsNeeded(run.method, owed, amount, paymentRate, years.slice(next))),
+        )
+      : left;
+    const whole = Math.ceil(term - 1e-9);
+    amount = regularAmount(
+      run.method,
+      balance,
+      annualRate,
+      years.slice(next, next + whole),
+      term - whole + 1,
+    );
+    paymentRate = annualRate;
+    final = next + whole - 1;
+  };
+
+  /** After extra payments: those that shorten the term keep the amount, the others lower it. */
+  const rebalance = (paid: Paid, next: number, annualRate: number) => {
     if (balance <= 0) {
       return;
     }
@@ -247,31 +303,17 @@ export function amortize(run: AmortizationRun): MinorRow[] {
       shortened = true;
     }
     if (paid.reduce_payment > 0) {
-      const left = run.dates.length - next;
-      const term = shortened
-        ? Math.max(
-            1,
-            Math.min(
-              left,
-              periodsLeft(run.method, balance + paid.reduce_payment, amount, paymentRate),
-            ),
-          )
-        : left;
-      amount = regularAmount(run.method, balance, annualRate, term, firstYears);
-      paymentRate = annualRate;
-      final = next + Math.ceil(term - 1e-9) - 1;
+      resolve(next, annualRate, balance + paid.reduce_payment);
     }
   };
 
   for (let index = 0; index <= last && balance > 0; index += 1) {
     const start = index === 0 ? run.from : run.dates[index - 1];
     const end = run.dates[index];
-    const remaining = run.dates.length - index;
     const rate = rateAt(run.rates, start);
     let startExtra = 0;
     if (index === 0) {
-      const firstYears = firstPeriodYears(run);
-      amount = regularAmount(run.method, balance, rate, remaining, firstYears);
+      amount = regularAmount(run.method, balance, rate, years);
       if (run.keep !== undefined && run.keep > amount) {
         amount = run.keep;
         shortened = true;
@@ -282,18 +324,14 @@ export function amortize(run: AmortizationRun): MinorRow[] {
         extras.filter(extra => extra.date === start),
         { reduce_term: 0, reduce_payment: 0 },
       );
-      rebalance(opening, 0, rate, firstYears);
+      rebalance(opening, 0, rate);
       startExtra = opening.reduce_term + opening.reduce_payment;
     } else if (run.method === 'annuity' && rate !== paymentRate) {
-      // A new rate: the payment is worked out again on what is left, over the
-      // term that is left (shorter, when extra payments already cut it).
-      const term = shortened
-        ? Math.min(final - index + 1, periodsToRepay(balance, amount, paymentRate))
-        : remaining;
-      amount = annuityPayment(balance, rate, term);
-      final = index + term - 1;
-      paymentRate = rate;
+      // A new rate: the payment is worked out again on what is left.
+      resolve(index, rate, balance);
     }
+    // What a whole first period would charge: the principal a regular payment repays.
+    const wholeInterest = roundHalfAwayFromZero((balance * rate * years[index]) / 100);
 
     // Extra payments inside the period lower the balance from their day on.
     const paid: Paid = { reduce_term: 0, reduce_payment: 0 };
@@ -317,10 +355,10 @@ export function amortize(run: AmortizationRun): MinorRow[] {
     if (index === final) {
       principal = balance;
     } else if (run.method === 'annuity') {
-      // The first payment is solved with the first period's own days: when a
-      // long first period owes more interest than the payment, the rest is
-      // added to the balance, and the payment stays the same as the others.
-      principal = index === 0 ? amount - interest : Math.max(0, amount - interest);
+      // The payment stays level: under actual/365 a 31-day month at a high rate
+      // can charge more than it, and the rest is added to the balance (clamping
+      // it would leave the loan ahead of its schedule and end it early).
+      principal = amount - (index === 0 && !run.firstIsRegular ? wholeInterest : interest);
     } else {
       principal = amount;
     }
@@ -344,7 +382,7 @@ export function amortize(run: AmortizationRun): MinorRow[] {
       extra: startExtra + paid.reduce_term + paid.reduce_payment,
       balance,
     });
-    rebalance(paid, index + 1, rateAt(run.rates, end), 1 / 12);
+    rebalance(paid, index + 1, rateAt(run.rates, end));
   }
   return rows;
 }

@@ -90,7 +90,12 @@ export function LoanTermsCard({
       <div style={statGrid}>
         {plan && (
           // The payment due next: after a rate change it is no longer the first one.
-          <Stat label={t.regularPayment} value={money(nextRow?.payment ?? plan.regularPayment)} />
+          // The first payment of a broken first period carries its odd days: the
+          // regular one is quoted until it is paid.
+          <Stat
+            label={t.regularPayment}
+            value={money(nextRow && nextRow.period > 1 ? nextRow.payment : plan.regularPayment)}
+          />
         )}
         {plan?.payoffDate && (
           <Stat label={t.payoffDate} value={formatDay(plan.payoffDate, locale)} />

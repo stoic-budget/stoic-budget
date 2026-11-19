@@ -73,6 +73,28 @@ describe('LoanTermsCard', () => {
     expect(screen.getByText('Every payment counts as debt repaid')).toBeInTheDocument();
   });
 
+  it('quotes the regular payment, not a first one that carries the odd days of the first period', () => {
+    const row = (period: number, date: string, payment: number) => ({
+      period,
+      date,
+      annualRate: 6,
+      payment,
+      interest: 10,
+      principal: payment - 10,
+      extra: 0,
+      balance: 1200 - period * 100,
+      actualBalance: null,
+    });
+    card(
+      schedule({
+        today: '2026-01-20',
+        plan: { ...summary, rows: [row(1, '2026-03-10', 131.4), row(2, '2026-04-10', 103.3)] },
+      }),
+    );
+    expect(screen.getByText('$103.3')).toBeInTheDocument();
+    expect(screen.queryByText('$131.4')).toBeNull();
+  });
+
   it('names the currencies left out of the real balance', () => {
     card(schedule({ unconvertedCurrencies: ['ZZX', 'ZZY'] }));
     expect(

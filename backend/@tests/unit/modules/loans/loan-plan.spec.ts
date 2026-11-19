@@ -1,7 +1,8 @@
 import { fromMinor, toMinor } from '../../../../src/common/utils/money.util';
 import {
   annuityPayment,
-  periodsToRepay,
+  carriedFactor,
+  levelPayment,
 } from '../../../../src/modules/loans/engine/loan-amortization';
 import {
   actualDays,
@@ -16,6 +17,7 @@ import {
   type LoanPlanInput,
   paymentDates,
   projectSchedule,
+  roundsWithinTerm,
   whatIf,
 } from '../../../../src/modules/loans/engine/loan-plan';
 
@@ -94,10 +96,20 @@ describe('annuity payment', () => {
     expect(fromMinor(annuityPayment(toMinor(1_000), 0, 3))).toBe(333.33);
   });
 
-  it('knows how long a payment takes, and when it never repays', () => {
-    expect(periodsToRepay(toMinor(10_000), toMinor(888.49), 12)).toBe(12);
-    expect(periodsToRepay(toMinor(1_000), toMinor(100), 0)).toBe(10);
-    expect(periodsToRepay(toMinor(10_000), toMinor(100), 12)).toBe(Number.POSITIVE_INFINITY);
+  it('solves over the real length of each period, to the cent', () => {
+    // Under actual/365 a month is its days: 31, 28 and 31 of them.
+    const months = [31, 28, 31].map(days => days / 365);
+    const payment = levelPayment(toMinor(1_000), 12, months);
+    const owed = months.reduce((left, part) => left * (1 + 0.12 * part) - payment, toMinor(1_000));
+    expect(Math.abs(owed)).toBeLessThan(1);
+    expect(levelPayment(toMinor(1_000), 12, Array(3).fill(1 / 12))).toBe(
+      annuityPayment(toMinor(1_000), 12, 3),
+    );
+  });
+
+  it('carries a cent a period with interest to the end of the term', () => {
+    expect(carriedFactor(0, Array(3).fill(1 / 12))).toBe(3);
+    expect(carriedFactor(12, Array(12).fill(1 / 12))).toBeCloseTo((1.01 ** 12 - 1) / 0.01, 9);
   });
 });
 
@@ -119,59 +131,99 @@ describe('buildSchedule', () => {
     const start = { startDate: '2026-01-01', paymentDay: 1 };
     expect(buildSchedule(loan({ ...start, principal: 100_000, annualRate: 6, termMonths: 360 })).regularPayment).toBe(599.55);
     expect(buildSchedule(loan({ ...start, principal: 200_000, annualRate: 5, termMonths: 360 })).regularPayment).toBe(1073.64);
-    expect(buildSchedule(loan({ ...start, dayCount: 'actual/365' })).rows[1].payment).toBe(888.49);
+  });
+
+  it('quotes the payment at the rate in force on the start day', () => {
+    const quoted = fromMinor(annuityPayment(toMinor(10_000), 6, 12));
+    for (const from of ['2025-06-01', loan().startDate]) {
+      const schedule = buildSchedule(loan({ rateChanges: [{ from, annualRate: 6 }] }));
+      expect(schedule.regularPayment).toBe(quoted);
+      expect(schedule.rows[0].payment).toBe(quoted);
+    }
+  });
+
+  it('repays an actual/365 annuity in level payments, the last within cents of rounding', () => {
+    for (const annualRate of [5, 10, 16, 20]) {
+      for (const startDate of ['2026-01-01', '2026-01-20']) {
+        const input = loan({
+          principal: 300_000,
+          termMonths: 360,
+          annualRate,
+          dayCount: 'actual/365',
+          startDate,
+          paymentDay: 1,
+        });
+        const schedule = buildSchedule(input);
+        const label = { annualRate, startDate };
+        const last = schedule.rows[schedule.rows.length - 1];
+        // A cent a period at most, carried with interest to the end.
+        const bound = carriedFactor(annualRate, Array(360).fill(1 / 12)) / 100;
+        expect({ ...label, periods: schedule.periods }).toEqual({ ...label, periods: 360 });
+        expect({
+          ...label,
+          level: schedule.rows.slice(1, -1).every(row => row.payment === schedule.regularPayment),
+        }).toEqual({ ...label, level: true });
+        expect({ ...label, residue: Math.abs(last.payment - schedule.regularPayment) <= bound }).toEqual(
+          { ...label, residue: true },
+        );
+        expect(repaid(schedule.rows)).toBe(toMinor(300_000));
+      }
+    }
   });
 
   describe('a broken first period', () => {
-    const levelToTheEnd = (terms: Partial<LoanPlanInput>) => {
+    const banked = (terms: Partial<LoanPlanInput>) => {
       const schedule = buildSchedule(loan(terms));
       const dates = paymentDates(loan(terms));
       const last = schedule.rows[schedule.rows.length - 1];
       expect(schedule.periods).toBe(loan(terms).termMonths);
       expect(schedule.payoffDate).toBe(dates[dates.length - 1]);
-      expect(new Set(schedule.rows.slice(0, -1).map(row => row.payment))).toEqual(
+      expect(new Set(schedule.rows.slice(1, -1).map(row => row.payment))).toEqual(
         new Set([schedule.regularPayment]),
       );
+      // The balance never rises: every payment repays some of it.
+      expect(schedule.rows.every(row => row.principal > 0)).toBe(true);
+      expect(Math.abs(last.payment - schedule.regularPayment)).toBeLessThan(5);
       expect(last.balance).toBe(0);
       expect(repaid(schedule.rows)).toBe(toMinor(loan(terms).principal));
-      return { schedule, last };
+      return schedule;
     };
     const mortgage = { principal: 300_000, termMonths: 360, annualRate: 5 };
 
-    it('ends on its term with level payments when the first period is short', () => {
-      // 28 January to 25 February: 27 days under 30/360.
-      const { schedule, last } = levelToTheEnd({
-        ...mortgage,
-        annualRate: 7.5,
-        startDate: '2026-01-28',
-        paymentDay: 25,
+    it('quotes the whole-month payment and adds the extra days of a long first period to the first', () => {
+      // 20 January to 1 March: 41 days of interest under 30/360, where a whole month has 30.
+      const schedule = banked({ ...mortgage, startDate: '2026-01-20', paymentDay: 1 });
+      expect(schedule.regularPayment).toBe(1610.46);
+      expect(schedule.rows[0]).toMatchObject({
+        date: '2026-03-01',
+        interest: 1708.33,
+        principal: 360.46,
+        payment: 2068.79,
       });
-      expect(schedule.rows[0].date).toBe('2026-02-25');
-      expect(schedule.rows[0].interest).toBe(1687.5);
-      expect(Math.abs(last.payment - schedule.regularPayment)).toBeLessThan(1);
     });
 
-    it('ends on its term with level payments when the first period is long', () => {
-      // 20 January to 1 March: 41 days under 30/360, more interest than one payment.
-      const { schedule, last } = levelToTheEnd({ ...mortgage, startDate: '2026-01-20', paymentDay: 1 });
-      expect(schedule.rows[0]).toMatchObject({ date: '2026-03-01', interest: 1708.33 });
-      expect(schedule.rows[0].principal).toBeLessThan(0);
-      expect(schedule.rows[0].balance).toBeGreaterThan(300_000);
-      expect(Math.abs(last.payment - schedule.regularPayment)).toBeLessThan(5);
+    it('takes the missing days of a short first period off the first payment', () => {
+      // 28 January to 25 February: 27 days under 30/360.
+      const schedule = banked({ ...mortgage, annualRate: 7.5, startDate: '2026-01-28', paymentDay: 25 });
+      expect(schedule.regularPayment).toBe(2097.64);
+      expect(schedule.rows[0]).toMatchObject({
+        date: '2026-02-25',
+        interest: 1687.5,
+        principal: 222.64,
+        payment: 1910.14,
+      });
     });
 
-    it('solves the payment with the first period under either day count', () => {
+    it('charges the first period its own days under either day count', () => {
       const terms = { ...mortgage, startDate: '2026-03-03', paymentDay: 31 };
-      levelToTheEnd(terms);
-      const actual = levelToTheEnd({ ...terms, dayCount: 'actual/365' });
-      // 3 to 31 March: 28 days of 365.
-      expect(actual.schedule.rows[0].interest).toBe(1150.68);
-    });
-
-    it('lowers the payment for a short first period and raises it for a long one', () => {
-      const whole = buildSchedule(loan(mortgage)).regularPayment;
-      expect(buildSchedule(loan({ ...mortgage, startDate: '2026-01-28', paymentDay: 15 })).regularPayment).toBeLessThan(whole);
-      expect(buildSchedule(loan({ ...mortgage, startDate: '2026-01-20', paymentDay: 1 })).regularPayment).toBeGreaterThan(whole);
+      // 3 to 31 March: 27 days under 30/360, where a whole month charges 1,250.
+      expect(banked(terms).rows[0]).toMatchObject({ interest: 1125, payment: 1485.46 });
+      // 28 days of 365, where the whole month it stands in for (28 February to 31 March) has 31.
+      const actual = banked({ ...terms, dayCount: 'actual/365' });
+      expect(actual.rows[0].interest).toBe(1150.68);
+      expect(toMinor(actual.rows[0].payment)).toBe(
+        toMinor(actual.regularPayment) - toMinor(1273.97) + toMinor(1150.68),
+      );
     });
 
     it('lowers the payment from the start for an extra paid on the start day', () => {
@@ -358,7 +410,8 @@ describe('buildSchedule', () => {
             annualRate,
             periods: plain.periods,
           });
-          expect(last.payment).toBeGreaterThan(schedule.rows[schedule.rows.length - 2].payment / 2);
+          // The cut term ends with the part of a payment it needs, never more than one.
+          expect(last.payment).toBeLessThanOrEqual(schedule.rows[schedule.rows.length - 2].payment + 0.01);
           expect(last.balance).toBe(0);
           expect(repaid(schedule.rows)).toBe(toMinor(principal));
         }
@@ -413,6 +466,15 @@ describe('projectSchedule', () => {
     expect(onPlan?.rows.map(row => row.balance)).toEqual(plan.rows.slice(4).map(row => row.balance));
   });
 
+  it('keeps the regular payment, not the first one, before a broken first period ends', () => {
+    // 20 January to 1 March: the first payment carries 41 days of interest under 30/360.
+    const broken = loan({ principal: 12_000, startDate: '2026-01-20', paymentDay: 1 });
+    const planned = buildSchedule(broken);
+    const onPlan = projectSchedule(broken, '2026-02-01', 12_000);
+    expect(onPlan?.rows.map(row => row.payment)).toEqual(planned.rows.map(row => row.payment));
+    expect(onPlan?.regularPayment).toBe(planned.regularPayment);
+  });
+
   it('never counts again an extra payment already paid by today', () => {
     // Paid on 18 May, after the 15 May instalment: the real balance already has it.
     const paid = loan({ principal: 12_000, extraPayments: [{ date: '2026-05-18', amount: 2_000 }] });
@@ -425,6 +487,22 @@ describe('projectSchedule', () => {
   it('has nothing to project when paid off or past the last payment date', () => {
     expect(projectSchedule(terms, today, 0)).toBeNull();
     expect(projectSchedule(terms, '2027-02-01', 500)).toBeNull();
+  });
+});
+
+describe('roundsWithinTerm', () => {
+  it('refuses an annuity whose cents of rounding outgrow a payment, as a long term at a high rate does', () => {
+    expect(roundsWithinTerm(loan({ principal: 300_000, annualRate: 5, termMonths: 360 }))).toBe(true);
+    expect(roundsWithinTerm(loan({ principal: 1_000, annualRate: 30, termMonths: 600 }))).toBe(false);
+    // Checked at the highest rate the terms name.
+    expect(
+      roundsWithinTerm(
+        loan({ principal: 1_000, annualRate: 5, termMonths: 600, rateChanges: [{ from: '2030-01-15', annualRate: 30 }] }),
+      ),
+    ).toBe(false);
+    // Linear parts and interest-free payments never carry rounding with interest.
+    expect(roundsWithinTerm(loan({ principal: 1_000, annualRate: 30, termMonths: 600, method: 'linear' }))).toBe(true);
+    expect(roundsWithinTerm(loan({ principal: 1_000, annualRate: 0, termMonths: 600 }))).toBe(true);
   });
 });
 
