@@ -316,6 +316,7 @@ describe('WalletsService', () => {
 
     describe('a change of type', () => {
       const manager = {
+        findOne: vi.fn(async () => ({})),
         delete: vi.fn(async () => ({ affected: 1 })),
         save: vi.fn(async (wallet: Wallet) => wallet),
       };
@@ -336,6 +337,14 @@ describe('WalletsService', () => {
         const result = await service.update('wallet-1', 'ws-1', { type: 'checking' });
 
         expect(result.type).toBe('checking');
+        // The row lock a save of loan terms takes too, before the delete.
+        expect(manager.findOne).toHaveBeenCalledWith(Wallet, {
+          where: { id: 'wallet-1', workspaceId: 'ws-1' },
+          lock: { mode: 'pessimistic_write' },
+        });
+        expect(manager.findOne.mock.invocationCallOrder[0]).toBeLessThan(
+          manager.delete.mock.invocationCallOrder[0],
+        );
         expect(manager.delete).toHaveBeenCalledWith(LoanTerms, {
           walletId: 'wallet-1',
           workspaceId: 'ws-1',

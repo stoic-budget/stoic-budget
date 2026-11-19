@@ -6,7 +6,7 @@ import { type INestApplication, ValidationPipe } from '@nestjs/common';
 import type { TestingModule } from '@nestjs/testing';
 import { Schema } from 'effect';
 import request from 'supertest';
-import { DataSource } from 'typeorm';
+import { DataSource, type QueryRunner } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import { LoanSchedule, LoanTermsState, LoanWhatIf, MessageResult } from '../../src/contracts';
 import { Transaction, TransactionType } from '../../src/entities/transaction.entity';
@@ -133,6 +133,15 @@ describe('API contracts: loans (e2e)', () => {
       termMonths: 600,
     });
     expect(late.body.error?.code).toBe('LOAN_TERMS_END_TOO_LATE');
+    // Under a cent of principal a month at 30% over 50 years: rounded, it never repays.
+    const steep = await call('put', `/wallets/${loanId}/loan-terms`, 400, {
+      ...terms,
+      principal: 1_000,
+      annualRate: 30,
+      termMonths: 600,
+      rateChanges: [],
+    });
+    expect(steep.body.error?.code).toBe('LOAN_TERMS_ROUNDING');
     expect((await call('get', `/wallets/${loanId}/loan-terms`, 200)).body.terms).toBeNull();
   });
 
@@ -274,6 +283,78 @@ describe('API contracts: loans (e2e)', () => {
     matches(MessageResult, (await call('delete', `/wallets/${loanId}/loan-terms`, 200)).body);
     expect((await call('get', `/wallets/${loanId}/loan-terms`, 200)).body.terms).toBeNull();
     await call('get', `/wallets/${loanId}/loan-schedule`, 404);
+  });
+
+  describe('a type change racing a save of the terms', () => {
+    const termsOf = async (walletId: string) =>
+      (
+        await dataSource.query('SELECT COUNT(*)::int AS count FROM loan_terms WHERE wallet_id = $1', [
+          walletId,
+        ])
+      )[0].count;
+    const send = (method: 'put', url: string, body: object) =>
+      request(app.getHttpServer())
+        [method](url)
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('x-workspace-id', owner.workspaceId)
+        .send(body)
+        .then(response => response);
+    const newLoan = async () =>
+      (
+        await call('post', '/wallets', 201, {
+          name: 'ACME Bank - Second loan',
+          type: 'loan',
+          currency: 'USD',
+          initialBalance: -1_000,
+        })
+      ).body.id as string;
+
+    /** Holds the account row as another request would, runs `inside`, then lets go. */
+    const holding = async (walletId: string, inside: (runner: QueryRunner) => Promise<void>) => {
+      const runner = dataSource.createQueryRunner();
+      await runner.connect();
+      await runner.startTransaction();
+      try {
+        await runner.query('SELECT id FROM wallets WHERE id = $1 FOR UPDATE', [walletId]);
+        await inside(runner);
+        await runner.commitTransaction();
+      } finally {
+        await runner.release();
+      }
+    };
+    const pause = () => new Promise(resolve => setTimeout(resolve, 500));
+
+    it('refuses terms for an account that stopped being a debt while the save waited', async () => {
+      const walletId = await newLoan();
+      let saving: Promise<request.Response> | undefined;
+      await holding(walletId, async runner => {
+        saving = send('put', `/wallets/${walletId}/loan-terms`, terms);
+        await pause();
+        await runner.query("UPDATE wallets SET type = 'checking' WHERE id = $1", [walletId]);
+      });
+      const saved = await saving;
+      expect(saved?.status).toBe(400);
+      expect(saved?.body.error?.code).toBe('LOAN_TERMS_DEBT_ONLY');
+      expect(await termsOf(walletId)).toBe(0);
+    });
+
+    it('deletes terms saved while the type change waited', async () => {
+      const walletId = await newLoan();
+      let changing: Promise<request.Response> | undefined;
+      await holding(walletId, async runner => {
+        // A save of terms that has passed its check and holds the row.
+        await runner.query(
+          `INSERT INTO loan_terms (workspace_id, wallet_id, principal, start_date, term_months,
+             payment_day, method, day_count, annual_rate)
+           VALUES ($1, $2, 1000, '2026-01-10', 12, 10, 'annuity', '30/360', 6)`,
+          [owner.workspaceId, walletId],
+        );
+        changing = send('put', `/wallets/${walletId}`, { type: 'checking' });
+        await pause();
+      });
+      expect((await changing)?.status).toBe(200);
+      expect(await termsOf(walletId)).toBe(0);
+    });
   });
 
   it('keeps the terms from one debt type to another, deletes them when the account stops being a debt', async () => {
