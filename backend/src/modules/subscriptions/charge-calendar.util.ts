@@ -158,3 +158,28 @@ function dayKey(date: Date): string {
     date.getDate(),
   ).padStart(2, '0')}`;
 }
+
+/**
+ * The scheduled charge a payment on `chargeDay` settles: the occurrence of the
+ * schedule running through the subscription's next charge that lies nearest to
+ * it. A payment a few days early still settles the next charge; one dated a
+ * period back, such as a receipt added late, settles that period's charge, so
+ * the next one stays owed and reserved. Without a schedule it is the day itself.
+ */
+export function settledDateOf(
+  subscription: { nextChargeDate: Date | string | null; frequency: SubscriptionFrequency },
+  chargeDay: string,
+): Date {
+  const next = subscription.nextChargeDate;
+  if (!next) return chargeDay as unknown as Date;
+  const anchor = localDayOf(next instanceof Date ? next.toISOString() : String(next));
+  const target = localDayOf(chargeDay).getTime();
+  const step = target < anchor.getTime() ? -1 : 1;
+  let best = anchor;
+  for (let index = step; Math.abs(index) < MAX_STEPS; index += step) {
+    const occurrence = chargeAt(anchor, subscription.frequency, index);
+    if (Math.abs(occurrence.getTime() - target) >= Math.abs(best.getTime() - target)) break;
+    best = occurrence;
+  }
+  return dayKey(best) as unknown as Date;
+}

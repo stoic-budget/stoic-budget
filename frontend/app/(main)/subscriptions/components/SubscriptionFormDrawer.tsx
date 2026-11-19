@@ -4,7 +4,7 @@ import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from '@m
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useQuery } from '@tanstack/react-query';
 import { format, isValid, parseISO } from 'date-fns';
-import { type Dispatch, type SetStateAction, useEffect, useMemo, useState } from 'react';
+import { type Dispatch, type SetStateAction, useEffect } from 'react';
 import { fetchBudgets } from '@/app/(main)/budgets/hooks/useBudgetsPage';
 import { ChevronLeft } from '@/app/components/icons';
 import { CurrencyDrawer } from '@/app/components/receipts/components/CurrencyDrawer';
@@ -12,13 +12,10 @@ import { DrawerShell } from '@/app/components/ui/drawer-shell';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer } from '@/app/i18n';
 import { queryKeys } from '@/app/lib/query-keys';
-import {
-  buildCurrencySearchIndex,
-  type CurrencySearchItem,
-  DEFAULT_RECENT_CURRENCIES,
-} from '@/app/lib/statement-expense-drawer';
 import { tokens } from '@/lib/theme-tokens';
+import { useCurrencyPickerState } from '../hooks/useCurrencyPickerState';
 import type { SubscriptionFormData } from '../hooks/useSubscriptionsPage';
+import { MergeIntoSubscription } from './MergeIntoSubscription';
 import { SubscriptionPayments } from './SubscriptionPayments';
 
 interface SubscriptionFormDrawerProps {
@@ -39,70 +36,6 @@ const parseDateValue = (value: string): Date | null => {
   const date = parseISO(value);
   return isValid(date) ? date : null;
 };
-
-function useCurrencyPickerState(currency: string): {
-  currencyDrawerOpen: boolean;
-  setCurrencyDrawerOpen: (open: boolean) => void;
-  currencySearch: string;
-  setCurrencySearch: (value: string) => void;
-  selectedCurrencyItem: CurrencySearchItem | undefined;
-  selectedMatchesSearch: boolean;
-  currencyQuery: string;
-  recentCurrencyItems: CurrencySearchItem[];
-  allCurrencyItems: CurrencySearchItem[];
-  pushRecentCurrency: (code: string) => void;
-} {
-  const [currencyDrawerOpen, setCurrencyDrawerOpen] = useState(false);
-  const [currencySearch, setCurrencySearch] = useState('');
-  const [recentCurrencies, setRecentCurrencies] = useState<string[]>([
-    ...DEFAULT_RECENT_CURRENCIES,
-  ]);
-  const currencyItems = useMemo(() => buildCurrencySearchIndex(), []);
-  const currencyByCode = useMemo(
-    () => new Map(currencyItems.map(item => [item.code, item])),
-    [currencyItems],
-  );
-  const normalizedCurrency = currency.trim().toUpperCase();
-  const selectedCurrencyItem = currencyByCode.get(normalizedCurrency);
-  const currencyQuery = currencySearch.trim().toLowerCase();
-  const selectedMatchesSearch = selectedCurrencyItem
-    ? currencyQuery.length === 0 || selectedCurrencyItem.searchText.includes(currencyQuery)
-    : false;
-  const recentCurrencyItems = useMemo(
-    () =>
-      recentCurrencies
-        .map(code => currencyByCode.get(code))
-        .filter((item): item is CurrencySearchItem => Boolean(item))
-        .filter(item => item.code !== normalizedCurrency),
-    [currencyByCode, normalizedCurrency, recentCurrencies],
-  );
-  const allCurrencyItems = useMemo(() => {
-    const source =
-      currencyQuery.length > 0
-        ? currencyItems.filter(item => item.searchText.includes(currencyQuery))
-        : currencyItems;
-    return source.filter(item => item.code !== normalizedCurrency);
-  }, [currencyItems, currencyQuery, normalizedCurrency]);
-
-  const pushRecentCurrency = (code: string): void => {
-    setRecentCurrencies(prev => [code, ...prev.filter(item => item !== code)]);
-    setCurrencySearch('');
-    setCurrencyDrawerOpen(false);
-  };
-
-  return {
-    currencyDrawerOpen,
-    setCurrencyDrawerOpen,
-    currencySearch,
-    setCurrencySearch,
-    selectedCurrencyItem,
-    selectedMatchesSearch,
-    currencyQuery,
-    recentCurrencyItems,
-    allCurrencyItems,
-    pushRecentCurrency,
-  };
-}
 
 export function SubscriptionFormDrawer({
   open,
@@ -317,6 +250,14 @@ export function SubscriptionFormDrawer({
                     payments: current.payments.filter(payment => payment.key !== key),
                   }))
                 }
+              />
+            )}
+            {/* A receipt of a subscription already kept goes to it, not to a second one. */}
+            {!isEditing && (
+              <MergeIntoSubscription
+                payments={formData.payments}
+                vendorName={formData.vendorName}
+                onMerged={onClose}
               />
             )}
           </div>

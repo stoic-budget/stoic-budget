@@ -74,6 +74,8 @@ export const RecordSubscriptionChargeBody = Schema.Struct({
   transactionId: optionalNullable(Schema.String.check(Schema.isUUID())),
   chargeDate: optionalNullable(DateOnlyInput),
   amount: optionalNullable(Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0))),
+  /** The currency of a payment typed in (a receipt's); the subscription's when left out. */
+  currency: optionalNullable(Schema.String.check(Schema.isBetweenLength(3, 3))),
 });
 export type RecordSubscriptionChargeBody = Wire<typeof RecordSubscriptionChargeBody>;
 
