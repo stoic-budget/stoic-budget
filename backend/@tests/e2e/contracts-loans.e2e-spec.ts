@@ -133,13 +133,16 @@ describe('API contracts: loans (e2e)', () => {
       termMonths: 600,
     });
     expect(late.body.error?.code).toBe('LOAN_TERMS_END_TOO_LATE');
-    // Under a cent of principal a month at 30% over 50 years: rounded, it never repays.
+    // Cents of rounding carried with interest end this plan a period early.
     const steep = await call('put', `/wallets/${loanId}/loan-terms`, 400, {
       ...terms,
-      principal: 1_000,
-      annualRate: 30,
-      termMonths: 600,
+      principal: 10_181.91,
+      annualRate: 11.1412,
+      termMonths: 557,
+      startDate: '2026-06-24',
+      paymentDay: 21,
       rateChanges: [],
+      extraPayments: [],
     });
     expect(steep.body.error?.code).toBe('LOAN_TERMS_ROUNDING');
     expect((await call('get', `/wallets/${loanId}/loan-terms`, 200)).body.terms).toBeNull();

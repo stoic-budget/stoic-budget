@@ -491,18 +491,46 @@ describe('projectSchedule', () => {
 });
 
 describe('roundsWithinTerm', () => {
-  it('refuses an annuity whose cents of rounding outgrow a payment, as a long term at a high rate does', () => {
+  it('accepts a plan that takes its whole term', () => {
     expect(roundsWithinTerm(loan({ principal: 300_000, annualRate: 5, termMonths: 360 }))).toBe(true);
-    expect(roundsWithinTerm(loan({ principal: 1_000, annualRate: 30, termMonths: 600 }))).toBe(false);
-    // Checked at the highest rate the terms name.
-    expect(
-      roundsWithinTerm(
-        loan({ principal: 1_000, annualRate: 5, termMonths: 600, rateChanges: [{ from: '2030-01-15', annualRate: 30 }] }),
-      ),
-    ).toBe(false);
-    // Linear parts and interest-free payments never carry rounding with interest.
+    expect(buildSchedule(loan({ principal: 300_000, annualRate: 5, termMonths: 360 })).periods).toBe(360);
+    // Extra payments end it early on purpose: the check leaves them out.
+    const paidDown = loan({
+      principal: 300_000,
+      annualRate: 5,
+      termMonths: 360,
+      extraPayments: [{ date: '2027-01-15', amount: 50_000 }],
+      recurringExtras: [{ from: '2027-02-15', amount: 200 }],
+    });
+    expect(buildSchedule(paidDown).periods).toBeLessThan(360);
+    expect(roundsWithinTerm(paidDown)).toBe(true);
+    // Linear parts round down and interest-free payments carry no interest: never early.
     expect(roundsWithinTerm(loan({ principal: 1_000, annualRate: 30, termMonths: 600, method: 'linear' }))).toBe(true);
-    expect(roundsWithinTerm(loan({ principal: 1_000, annualRate: 0, termMonths: 600 }))).toBe(true);
+  });
+
+  it('refuses an annuity that cents of rounding end a period early', () => {
+    const early = [
+      { principal: 10_181.91, annualRate: 11.1412, termMonths: 557, startDate: '2026-06-24', paymentDay: 21 },
+      { principal: 200.88, annualRate: 14.729, termMonths: 169, startDate: '2026-06-19', paymentDay: 24 },
+      { principal: 145_863_085.55, annualRate: 49.8213, termMonths: 435, startDate: '2028-03-22', paymentDay: 24 },
+    ];
+    for (const terms of early) {
+      expect({ terms, periods: buildSchedule(loan(terms)).periods }).toEqual({
+        terms,
+        periods: terms.termMonths - 1,
+      });
+      expect({ terms, fits: roundsWithinTerm(loan(terms)) }).toEqual({ terms, fits: false });
+      // Extra payments end a loan early on purpose: they are left out of the check.
+      expect(roundsWithinTerm(loan({ ...terms, extraPayments: [{ date: '2027-01-21', amount: 10 }] }))).toBe(false);
+    }
+  });
+
+  it('checks the plan with its rate changes, not at the first rate alone', () => {
+    const terms = loan({ principal: 95_128, annualRate: 4, termMonths: 588 });
+    expect(roundsWithinTerm(terms)).toBe(true);
+    const raised = { ...terms, rateChanges: [{ from: '2027-01-15', annualRate: 19.16 }] };
+    expect(buildSchedule(raised).periods).toBe(587);
+    expect(roundsWithinTerm(raised)).toBe(false);
   });
 });
 

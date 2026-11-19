@@ -2,13 +2,10 @@ import { fromMinor, toMinor } from '../../../common/utils/money.util';
 import {
   type AmortizationRun,
   amortize,
-  carriedFactor,
   type DayCount,
   type ExtraMode,
   type LoanMethod,
-  levelPayment,
   type MinorRow,
-  periodYears,
   quotedPayment,
 } from './loan-amortization';
 import { firstPaymentMonth, isPaymentDay, paymentDateAfter } from './loan-calendar';
@@ -147,21 +144,18 @@ export function buildSchedule(input: LoanPlanInput): Schedule {
 }
 
 /**
- * Whether rounding the payment to the cent keeps an annuity on its term: half
- * a cent a period, carried with interest to the end, must move the last
- * payment by less than a whole payment. A long term at a high rate on a small
- * principal fails it (1,000 at 30% over 600 months repays under a cent a
- * month: rounded, it is an interest-only loan). Checked at the highest rate
- * the terms name.
+ * Whether rounding to the cent keeps an annuity on its term: the plan,
+ * without extra payments (they end a loan early on purpose), must take every
+ * period of it. At a high rate over a long term, cents of rounding carried
+ * with interest can end it a period early; checked on the plan itself, rate
+ * changes included.
  */
 export function roundsWithinTerm(input: LoanPlanInput): boolean {
-  const rate = Math.max(input.annualRate, ...input.rateChanges.map(change => change.annualRate));
-  if (input.method !== 'annuity' || rate === 0) {
+  if (input.method !== 'annuity') {
     return true;
   }
-  const run = planRun(input);
-  const years = periodYears(run);
-  return carriedFactor(rate, years) / 2 < levelPayment(run.balance, rate, years);
+  const plan = amortize(planRun({ ...input, extraPayments: [], recurringExtras: [] }));
+  return plan.length === input.termMonths;
 }
 
 /**
