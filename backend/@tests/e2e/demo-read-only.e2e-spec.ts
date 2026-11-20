@@ -6,7 +6,10 @@ import { Schema } from 'effect';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
-import { ALLOW_IN_DEMO_KEY } from '../../src/common/decorators/allow-in-demo.decorator';
+import {
+  ALLOW_IN_DEMO_KEY,
+  REFUSE_IN_DEMO_KEY,
+} from '../../src/common/decorators/allow-in-demo.decorator';
 import { ALLOW_IN_VERSION_KEY } from '../../src/common/decorators/allow-in-version.decorator';
 import { DemoStatus, RegistrationStatus } from '../../src/contracts';
 import { accessTokenOf, deleteUserByEmail, e2eTestingModule, registerAccount } from './helpers/e2e-app';
@@ -44,9 +47,9 @@ function writeRoutes(app: INestApplication): Route[] {
       const method = WRITE_METHODS[Reflect.getMetadata(METHOD_METADATA, handler) as RequestMethod];
       const paths = Reflect.getMetadata(PATH_METADATA, handler);
       if (!method || paths === undefined) continue;
-      const allowed = [ALLOW_IN_DEMO_KEY, ALLOW_IN_VERSION_KEY].some(key =>
-        reflector.getAllAndOverride<boolean>(key, [handler, type]),
-      );
+      const marked = (key: string) => reflector.getAllAndOverride<boolean>(key, [handler, type]);
+      const allowed =
+        !marked(REFUSE_IN_DEMO_KEY) && [ALLOW_IN_DEMO_KEY, ALLOW_IN_VERSION_KEY].some(marked);
       for (const prefix of prefixes) {
         for (const path of ([] as string[]).concat(paths)) {
           routes.push({ method, path: joinPath(prefix, path), allowed });
@@ -129,6 +132,24 @@ describe('Demo instance is read-only (e2e)', () => {
       }
     }
     expect(answeredOtherwise).toEqual([]);
+  });
+
+  it('refuses opening, copying and closing a past version, which @AllowInVersion lets in', async () => {
+    const login = await request(server()).post('/auth/login').send({ email, password }).expect(200);
+    const token = accessTokenOf(login);
+    const version = '00000000-0000-4000-8000-000000000000';
+    for (const [method, path] of [
+      ['post', `/versions/${version}/open`],
+      ['post', `/versions/${version}/copy`],
+      ['delete', `/versions/${version}/open`],
+    ] as const) {
+      const res = await request(server())
+        [method](path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'A copy' })
+        .expect(403);
+      expect(res.body.error.code).toBe('DEMO_READ_ONLY');
+    }
   });
 
   it("keeps no visitor's address or browser: everyone sees the one account's sessions", async () => {
