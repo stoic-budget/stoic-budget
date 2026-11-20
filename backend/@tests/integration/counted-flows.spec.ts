@@ -47,15 +47,14 @@ import { ForecastService } from '../../src/modules/forecast/forecast.service';
 import { GoalsService } from '../../src/modules/goals/goals.service';
 import { NotificationsService } from '../../src/modules/notifications/notifications.service';
 import { CashFlowMapService } from '../../src/modules/reports/cash-flow-map.service';
-import { BudgetVsActualReport } from '../../src/modules/reports/budget-vs-actual.report';
 import { CustomTablesReport } from '../../src/modules/reports/custom-tables-report.report';
 import { CustomTablesDrillDownReport } from '../../src/modules/reports/custom-tables-drilldown.report';
 import { CustomTablesSummaryReport } from '../../src/modules/reports/custom-tables-summary.report';
 import { CustomReportGenerator } from '../../src/modules/reports/custom-report.report';
 import { DailyReportGenerator } from '../../src/modules/reports/daily-report.report';
-import { HoldingsSnapshotReport } from '../../src/modules/reports/holdings-snapshot.report';
 import { MonthlyReportGenerator } from '../../src/modules/reports/monthly-report.report';
 import { ReportHistoryService } from '../../src/modules/reports/report-history.service';
+import { ReportTemplateGenerator } from '../../src/modules/reports/report-templates.report';
 import { ReportsService } from '../../src/modules/reports/reports.service';
 import { SpendOverTimeReport } from '../../src/modules/reports/spend-over-time.report';
 import { StatementsSummaryReport } from '../../src/modules/reports/statements-summary.report';
@@ -216,8 +215,7 @@ describe('one rule for income and spending (real Postgres)', () => {
         { provide: TaxReserveService, useValue: { getReserve: vi.fn(async () => null) } },
         { provide: BalanceService, useValue: {} },
         // Template reports this suite does not read.
-        { provide: BudgetVsActualReport, useValue: {} },
-        { provide: HoldingsSnapshotReport, useValue: {} },
+        { provide: ReportTemplateGenerator, useValue: {} },
         // Custom-table reports read their own tables, not transactions.
         { provide: CustomTablesSummaryReport, useValue: {} },
         { provide: CustomTablesReport, useValue: {} },
