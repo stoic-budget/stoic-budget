@@ -247,6 +247,7 @@ describe('ParserFactoryService', () => {
       'LloydsParser',
       'MAndTParser',
       'MarcusParser',
+      'MerrickParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
