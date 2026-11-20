@@ -124,4 +124,5 @@ export const BANKS = [
     aliases: ['marcus', 'goldman sachs'],
   },
   { key: 'merrick', name: 'Merrick Bank', logo: 'merrick.png', aliases: ['merrick'] },
+  { key: 'metro_bank', name: 'Metro Bank', logo: 'metro-bank.png', aliases: ['metrobank'] },
 ] as const satisfies readonly BankEntry[];

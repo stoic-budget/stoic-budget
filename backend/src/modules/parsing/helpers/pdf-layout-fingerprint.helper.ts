@@ -97,6 +97,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.M_AND_T, /\bmanufacturers and traders trust company\b|\bmtb\.com\b/],
   [BankName.MARCUS, /\bmarcus\.com\b/],
   [BankName.MERRICK, /\bmerrick account summary\b/],
+  [BankName.METRO_BANK, /\bmetro bank plc\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
