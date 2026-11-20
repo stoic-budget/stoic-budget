@@ -39,5 +39,6 @@ export enum BankName {
   DCU = 'dcu',
   BANK_OF_AMERICA = 'bank_of_america',
   DESJARDINS = 'desjardins',
+  DEUTSCHE_BANK = 'deutsche_bank',
   OTHER = 'other',
 }

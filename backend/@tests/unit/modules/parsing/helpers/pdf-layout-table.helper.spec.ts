@@ -533,3 +533,17 @@ describe('pdf-layout-table.helper', () => {
     });
   });
 });
+
+describe('wrapped lines', () => {
+  it('keeps a reference with a figure glued to its letters as text, not money', () => {
+    const transactions = readLayoutTransactions([
+      header,
+      row(140, [['01/02/2025', 40], ['Cash', 110], ['10.00', 315]]),
+      row(149, [['GA', 110], ['NR08484020', 125], ['BLZ100708480930.03/21.19UHR', 180]]),
+      row(158, [['B-MEHRINGD', 110]]),
+    ]);
+    expect(transactions.map(t => t.description)).toEqual([
+      'Cash GA NR08484020 BLZ100708480930.03/21.19UHR B-MEHRINGD',
+    ]);
+  });
+});

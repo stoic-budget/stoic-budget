@@ -34,6 +34,7 @@ import { CreditAgricoleParser } from '../parsers/credit-agricole.parser';
 import { CreditOneParser } from '../parsers/credit-one.parser';
 import { DcuParser } from '../parsers/dcu.parser';
 import { DesjardinsParser } from '../parsers/desjardins.parser';
+import { DeutscheBankParser } from '../parsers/deutsche-bank.parser';
 import { HapoalimParser } from '../parsers/hapoalim.parser';
 import { KaspiParser } from '../parsers/kaspi.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
@@ -80,4 +81,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [DcuParser, { bankName: BankName.DCU }],
   [BankOfAmericaParser, { bankName: BankName.BANK_OF_AMERICA }],
   [DesjardinsParser, { bankName: BankName.DESJARDINS }],
+  [DeutscheBankParser, { bankName: BankName.DEUTSCHE_BANK }],
 ];

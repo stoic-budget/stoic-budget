@@ -1,8 +1,8 @@
-import { extractTextFromPdf, type PdfTextRow } from '../../../common/utils/pdf-parser.util';
+import type { PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import type { PaymentType } from '../../../contracts/transactions/payment-type';
 import { BankName } from '../../../entities/statement.entity';
 import type { LayoutTransaction } from '../helpers/pdf-layout-table.helper';
-import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
+import type { ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import { BankPdfParser } from './bank-pdf.parser';
 
 /** The caisse's name in the letterhead and the statement's title, in English or French. */
@@ -72,13 +72,8 @@ export class DesjardinsParser extends BankPdfParser {
     return isDesjardinsStatement(text);
   }
 
-  async parse(filePath: string, cachedText?: string): Promise<ParsedStatement> {
-    const text = cachedText ?? (await extractTextFromPdf(filePath));
-    const statement = await super.parse(filePath, text);
-    const folio = FOLIO.exec(text)?.[1];
-    return folio
-      ? { ...statement, metadata: { ...statement.metadata, accountNumber: folio } }
-      : statement;
+  protected accountNumber(text: string): string | null {
+    return FOLIO.exec(text)?.[1] ?? null;
   }
 
   protected entry(row: ParsedTransaction): ParsedTransaction {
