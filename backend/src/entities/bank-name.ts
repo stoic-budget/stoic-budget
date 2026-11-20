@@ -69,5 +69,6 @@ export enum BankName {
   KROO = 'kroo',
   LAURENTIAN = 'laurentian',
   LLOYDS = 'lloyds',
+  M_AND_T = 'm_and_t',
   OTHER = 'other',
 }
