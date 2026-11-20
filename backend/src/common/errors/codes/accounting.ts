@@ -50,6 +50,10 @@ export const ACCOUNTING_ERRORS = {
     'The payment is divided into parts; join them before splitting off the interest',
   LOAN_PAYMENT_ALREADY_SPLIT: 'The payment is already split into principal and interest',
   LOAN_PAYMENT_INTEREST_TOO_LARGE: 'The interest cannot be more than the payment, {{amount}}',
+  LOAN_PAYMENT_SPLIT_FIRST_JOIN:
+    'The payment is split into principal and interest: join the principal and interest back first',
+  LOAN_INTEREST_STAYS_ON_LOAN:
+    'Interest split off a loan payment stays an expense on the loan account: join the payment back first',
   TRANSFER_SAME_ACCOUNT: 'The transaction is already in this account',
   // Payables
   PAYABLE_PAYMENT_NOT_POSITIVE: 'A payment must be more than zero',

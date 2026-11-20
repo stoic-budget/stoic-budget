@@ -148,6 +148,9 @@ describe('TransactionsService', () => {
   });
 
   it('remove deletes transaction after ownership check', async () => {
+    // Nothing on a filed return: neither the row nor loan interest split off it.
+    transactionRepository.count = vi.fn(async () => 0);
+    transactionRepository.createQueryBuilder = vi.fn(() => ({ setFindOptions: vi.fn().mockReturnThis(), innerJoin: vi.fn().mockReturnThis(), getCount: vi.fn(async () => 0) }));
     userRepository.findOne = vi.fn(async () => ({
       id: 'u1',
       workspaceId: null,

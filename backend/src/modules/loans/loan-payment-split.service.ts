@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { type EntityManager, In, IsNull, type Repository } from 'typeorm';
+import { type EntityManager, In, type Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { fromMinor, toMinor } from '../../common/utils/money.util';
 import type { LoanPaymentItem } from '../../contracts';
@@ -22,9 +22,18 @@ import { AuditService } from '../audit/audit.service';
 import { ensureCanEditStatements } from '../statements/statement-access';
 import type { LoanPlanInput } from './engine/loan-plan';
 import { buildInterestRow } from './loan-interest-row';
-import { amountOf, loadInterest, loadPayments, planOfPayments, toDay } from './loan-payment-rows';
+import {
+  amountOf,
+  loadInterest,
+  loadPayments,
+  lockPaymentRow,
+  planOfPayments,
+  toDay,
+} from './loan-payment-rows';
 import { LoanPaymentsService } from './loan-payments.service';
 import { LoanTermsService } from './loan-terms.service';
+
+const UNIQUE_VIOLATION = '23505';
 
 /**
  * Splits a loan payment into principal and interest, and joins it back.
@@ -159,17 +168,60 @@ export class LoanPaymentSplitService {
         ) {
           continue;
         }
-        await this.transactions.manager.transaction(manager =>
-          this.insertInterest(manager, payment, wallet, toMinor(suggestion.interest)),
-        );
-        split++;
+        const created = await this.autoSplitOne(wallet, payment.id, toMinor(suggestion.interest));
+        if (created) {
+          await this.afterChange(workspaceId, null, payment.id, {
+            operation: 'loan_split',
+            interestTransactionId: created.id,
+            interest: fromMinor(toMinor(suggestion.interest)),
+            auto: true,
+          });
+          split++;
+        }
       }
     }
     if (split > 0) {
-      await this.invalidateReports(workspaceId);
       this.logger.log(`Split ${split} loan payment(s) on import in ${workspaceId}`);
     }
     return split;
+  }
+
+  /**
+   * One payment of an import, split as the manual split does it: locked, and
+   * looked at again under the lock. A payment someone split or changed in the
+   * meantime is left as it is (null), and so is one a concurrent split wins
+   * the unique index against, without stopping the rest of the import.
+   */
+  private async autoSplitOne(
+    wallet: Wallet,
+    paymentId: string,
+    minor: number,
+  ): Promise<Transaction | null> {
+    try {
+      return await this.transactions.manager.transaction(async manager => {
+        const payment = await lockPaymentRow(
+          manager.getRepository(Transaction),
+          wallet.workspaceId,
+          wallet.id,
+          paymentId,
+        );
+        if (!payment || payment.isDuplicate || payment.splitGroupId) {
+          return null;
+        }
+        if (minor > toMinor(amountOf(payment))) {
+          return null;
+        }
+        const existing = await manager
+          .getRepository(Transaction)
+          .count({ where: { workspaceId: wallet.workspaceId, loanInterestOfId: payment.id } });
+        return existing > 0 ? null : this.insertInterest(manager, payment, wallet, minor);
+      });
+    } catch (error) {
+      if ((error as { driverError?: { code?: string } }).driverError?.code === UNIQUE_VIOLATION) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   /** The payment row on this loan account, locked for the change. */
@@ -178,16 +230,12 @@ export class LoanPaymentSplitService {
     wallet: Wallet,
     transactionId: string,
   ): Promise<Transaction> {
-    const payment = await manager.getRepository(Transaction).findOne({
-      where: {
-        id: transactionId,
-        workspaceId: wallet.workspaceId,
-        walletId: wallet.id,
-        transactionType: TransactionType.INCOME,
-        loanInterestOfId: IsNull(),
-      },
-      lock: { mode: 'pessimistic_write' },
-    });
+    const payment = await lockPaymentRow(
+      manager.getRepository(Transaction),
+      wallet.workspaceId,
+      wallet.id,
+      transactionId,
+    );
     if (!payment) {
       throw new NotFoundException(appError('LOAN_PAYMENT_NOT_FOUND'));
     }
@@ -227,16 +275,17 @@ export class LoanPaymentSplitService {
     return repo.save(repo.create(await buildInterestRow(manager, payment, wallet, minor)));
   }
 
+  /** Audited as the user's, or the system's (`null`) for a split made on import. */
   private async afterChange(
     workspaceId: string,
-    userId: string,
+    userId: string | null,
     paymentId: string,
     meta: Record<string, unknown>,
   ): Promise<void> {
     await this.invalidateReports(workspaceId);
     await this.audit.createEvent({
       workspaceId,
-      actorType: ActorType.USER,
+      actorType: userId ? ActorType.USER : ActorType.SYSTEM,
       actorId: userId,
       entityType: EntityType.TRANSACTION,
       entityId: paymentId,

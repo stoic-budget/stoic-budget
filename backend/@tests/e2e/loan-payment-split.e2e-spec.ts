@@ -16,7 +16,9 @@ import {
   TransactionType,
   TransferPairSource,
 } from '../../src/entities/transaction.entity';
+import { LoanPaymentSplitService } from '../../src/modules/loans/loan-payment-split.service';
 import { LoanPaymentsEventsListener } from '../../src/modules/loans/loan-payments-events.listener';
+import { StatementParsingQueue } from '../../src/modules/parsing/queue/statement-parsing.queue';
 import {
   deleteUserByEmail,
   type E2eAccount,
@@ -53,6 +55,7 @@ describe('Loan payment split (e2e)', () => {
   const emails = {
     owner: `loan-split-owner-${stamp}@example.com`,
     other: `loan-split-other-${stamp}@example.com`,
+    member: `loan-split-member-${stamp}@example.com`,
   };
   let owner: E2eAccount;
   let other: E2eAccount;
@@ -128,6 +131,29 @@ describe('Loan payment split (e2e)', () => {
     (await payments()).items.find(item => item.transactionId === id) as LoanPaymentItem;
   const interestRowsOf = (paymentId: string) =>
     dataSource.getRepository(Transaction).find({ where: { loanInterestOfId: paymentId } });
+  const splitOff = (paymentId: string, interest: number) =>
+    call('post', `/wallets/${loanId}/loan-payments/${paymentId}/split`, 200, { interest });
+  /** A statement of the loan account, with nothing to read: parsing is stubbed where it matters. */
+  const loanStatement = () =>
+    dataSource.getRepository(Statement).save({
+      userId: owner.userId,
+      workspaceId: owner.workspaceId,
+      walletId: loanId,
+      fileName: `loan-${stamp}.pdf`,
+      filePath: '/dev/null',
+      fileType: FileType.PDF,
+      fileSize: 1,
+      fileHash: `loan-split-${stamp}-${Math.random()}`,
+      bankName: BankName.OTHER,
+      currency,
+      status: StatementStatus.COMPLETED,
+    });
+  const auditOf = (entityId: string): Promise<Array<{ operation: string; actor_type: string; meta: Record<string, unknown> }>> =>
+    dataSource.query(
+      `SELECT meta->>'operation' AS operation, actor_type, meta FROM audit_events
+        WHERE entity_id = $1 ORDER BY created_at`,
+      [entityId],
+    );
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await e2eTestingModule({ imports: [AppModule] }).compile();
@@ -521,5 +547,299 @@ describe('Loan payment split (e2e)', () => {
     expect(crossed.body.error?.code).toBe('LOAN_PAYMENT_NOT_FOUND');
     expect(await interestRowsOf(target.id)).toHaveLength(0);
     expect((await call('get', `/wallets/${otherLoan}/loan-payments`, 200, undefined, other)).body.items).toEqual([]);
+  });
+  it('refuses to split a payment whose statement is in the trash, as it no longer lists it', async () => {
+    const statement = await loanStatement();
+    const [payment] = await save(
+      incoming(loanId, rows[11].date, rows[11].payment, { statementId: statement.id }),
+    );
+    await call('delete', `/statements/${statement.id}`, 204);
+    const res = await call('post', `/wallets/${loanId}/loan-payments/${payment.id}/split`, 404, {
+      interest: rows[11].interest,
+    });
+    expect(res.body.error?.code).toBe('LOAN_PAYMENT_NOT_FOUND');
+    expect(await interestRowsOf(payment.id)).toHaveLength(0);
+  });
+
+  it('moves the interest with its payment: another day, another month; another currency joins it back', async () => {
+    const period = rows[11];
+    const [dated, priced] = await save(
+      incoming(loanId, period.date, period.payment),
+      incoming(loanId, period.date, period.payment),
+    );
+    await splitOff(dated.id, period.interest);
+    await splitOff(priced.id, period.interest);
+    const later = '2027-03-10';
+    const spentLater = await spending('2027-03');
+    const spentBefore = await spending(period.date.slice(0, 7));
+
+    await call('put', `/transactions/${dated.id}`, 200, { transactionDate: later });
+    const [moved] = await interestRowsOf(dated.id);
+    expect(String(moved.transactionDate).slice(0, 10)).toBe(later);
+    expect(await spending('2027-03')).toBe(money(spentLater + period.interest));
+    expect(await spending(period.date.slice(0, 7))).toBe(money(spentBefore - period.interest));
+
+    // The interest is in the loan's currency: a payment in another one is no longer split.
+    await call('put', `/transactions/${priced.id}`, 200, { currency: currency === 'USD' ? 'EUR' : 'USD' });
+    expect(await interestRowsOf(priced.id)).toHaveLength(0);
+  });
+
+  it('hides the interest from the other members with its payment, and shows it again with it', async () => {
+    const member = await registerAccount(app, emails.member, 'Member Three');
+    await dataSource.query(
+      `INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ($1, $2, 'member')`,
+      [owner.workspaceId, member.userId],
+    );
+    const asMember = { ...member, workspaceId: owner.workspaceId };
+    const [{ id: ownerMemberId }] = await dataSource.query(
+      'SELECT id FROM workspace_members WHERE workspace_id = $1 AND user_id = $2',
+      [owner.workspaceId, owner.userId],
+    );
+    const purpose = 'Instalment, contract 12-345';
+    const [payment] = await save(
+      incoming(loanId, rows[10].date, rows[10].payment, { ownerMemberId, paymentPurpose: purpose }),
+    );
+    await splitOff(payment.id, rows[10].interest);
+    const [interest] = await interestRowsOf(payment.id);
+    const read = async (as: E2eAccount) =>
+      (await call('get', `/transactions/${interest.id}`, 200, undefined, as)).body;
+    expect((await read(asMember)).paymentPurpose).toBe(purpose);
+
+    await call('put', `/transactions/${payment.id}`, 200, { isPrivate: true });
+    const [hidden] = await interestRowsOf(payment.id);
+    expect(hidden).toMatchObject({ isPrivate: true, ownerMemberId, privateCategoryId: interest.categoryId });
+    const [{ name }] = await dataSource.query('SELECT name FROM categories WHERE id = $1', [hidden.categoryId]);
+    expect(name).toBe('Private');
+    expect((await read(asMember)).paymentPurpose).not.toContain('12-345');
+    expect((await read(owner)).paymentPurpose).toBe(purpose);
+
+    await call('put', `/transactions/${payment.id}`, 200, { isPrivate: false });
+    const [shown] = await interestRowsOf(payment.id);
+    expect(shown).toMatchObject({ isPrivate: false, categoryId: interest.categoryId, privateCategoryId: null });
+    expect((await read(asMember)).paymentPurpose).toBe(purpose);
+  });
+
+  it('keeps the interest an expense on its loan, never more than the payment', async () => {
+    const period = rows[9];
+    const [payment] = await save(incoming(loanId, period.date, period.payment));
+    await splitOff(payment.id, period.interest);
+    const [interest] = await interestRowsOf(payment.id);
+    const edit = (body: object, status: number) => call('put', `/transactions/${interest.id}`, status, body);
+
+    expect((await edit({ walletId: checkingId }, 400)).body.error?.code).toBe('LOAN_INTEREST_STAYS_ON_LOAN');
+    expect((await edit({ credit: 5, debit: null }, 400)).body.error?.code).toBe('LOAN_INTEREST_STAYS_ON_LOAN');
+    expect((await edit({ debit: period.payment + 1 }, 400)).body.error?.code).toBe(
+      'LOAN_PAYMENT_INTEREST_TOO_LARGE',
+    );
+    // Less is fine: the bank charged less, the principal is the more.
+    await edit({ debit: money(period.interest - 1) }, 200);
+    expect((await itemOf(payment.id)).split).toMatchObject({
+      interest: money(period.interest - 1),
+      principal: money(period.payment - period.interest + 1),
+    });
+    expect((await interestRowsOf(payment.id))[0].walletId).toBe(loanId);
+  });
+
+  it('refuses a generic split of a split payment: the principal and interest are joined back first', async () => {
+    const period = rows[8];
+    const [payment] = await save(incoming(loanId, period.date, period.payment));
+    await splitOff(payment.id, period.interest);
+    const half = money(period.payment / 2);
+    const res = await call('post', `/transactions/${payment.id}/split`, 409, {
+      parts: [{ amount: half }, { amount: money(period.payment - half) }],
+    });
+    expect(res.body.error?.code).toBe('LOAN_PAYMENT_SPLIT_FIRST_JOIN');
+    const stored = await dataSource.getRepository(Transaction).findOneByOrFail({ id: payment.id });
+    expect(stored.splitGroupId).toBeNull();
+    expect(await interestRowsOf(payment.id)).toHaveLength(1);
+  });
+
+  it('splits on import one payment at a time: a concurrent split skips that payment, not the rest, and each is audited', async () => {
+    const period = rows[7];
+    const [raced, calm] = await save(
+      incoming(loanId, period.date, period.payment, { isVerified: false }),
+      incoming(loanId, period.date, period.payment, { isVerified: false }),
+    );
+    const service = app.get(LoanPaymentSplitService);
+    type Insert = (manager: { getRepository: DataSource['getRepository'] }, payment: Transaction, ...rest: unknown[]) => Promise<Transaction>;
+    const target = service as unknown as { insertInterest: Insert };
+    const original = target.insertInterest.bind(service);
+    const spy = vi.spyOn(target, 'insertInterest').mockImplementation(async (manager, payment, ...rest) => {
+      if (payment.id === raced.id) {
+        // A manual split of the same payment got its row in first.
+        const repo = manager.getRepository(Transaction);
+        await repo.save(
+          repo.create({ ...row({}), walletId: loanId, transactionType: TransactionType.EXPENSE, transactionDate: new Date(period.date), amount: 1, debit: 1, credit: null, loanInterestOfId: raced.id }),
+        );
+      }
+      return original(manager, payment, ...rest);
+    });
+    try {
+      await service.autoSplit(owner.workspaceId, [raced.id, calm.id]);
+    } finally {
+      spy.mockRestore();
+    }
+    const [interest] = await interestRowsOf(calm.id);
+    expect(Number(interest.amount)).toBe(period.interest);
+    expect(await auditOf(calm.id)).toEqual([
+      expect.objectContaining({ operation: 'loan_split', actor_type: 'system' }),
+    ]);
+    expect(await auditOf(raced.id)).toEqual([]);
+  });
+  describe('a statement read again', () => {
+    let enqueue: ReturnType<typeof vi.spyOn>;
+    beforeAll(() => {
+      // Nothing to parse: each test writes what the new reading brings.
+      enqueue = vi.spyOn(app.get(StatementParsingQueue), 'enqueue').mockResolvedValue(undefined);
+    });
+    afterAll(() => enqueue.mockRestore());
+
+    /** A split payment on a fresh statement of the loan account. */
+    const splitOnStatement = async (period: PlanRow, fingerprint: string) => {
+      const statement = await loanStatement();
+      const [payment] = await save(
+        incoming(loanId, period.date, period.payment, { statementId: statement.id, fingerprint }),
+      );
+      await splitOff(payment.id, period.interest);
+      return { statement, payment, interest: (await interestRowsOf(payment.id))[0] };
+    };
+    const readAgain = (statementId: string, mode: 'merge' | 'replace') =>
+      call('post', `/statements/${statementId}/reprocess?mode=${mode}`, 201);
+    const imported = (statementId: string, ids: string[]) =>
+      app.get(LoanPaymentsEventsListener).handleImportCommitted({
+        workspaceId: owner.workspaceId,
+        actorId: owner.userId,
+        actorName: 'Member One',
+        statementId,
+        transactionCount: ids.length,
+        transactionIds: ids,
+      });
+
+    it('carries the split to the payment as read again (replace), by its fingerprint', async () => {
+      const period = rows[6];
+      const month = period.date.slice(0, 7);
+      const fingerprint = `fp-${stamp}-replace`;
+      const { statement, payment, interest } = await splitOnStatement(period, fingerprint);
+      const split = { loan: await balance(loanId), spent: await spending(month) };
+
+      await readAgain(statement.id, 'replace');
+      // Held while the statement is read: neither it nor its interest counts twice.
+      const held = await dataSource.getRepository(Transaction).findOneByOrFail({ id: payment.id });
+      expect(held.isDuplicate).toBe(true);
+      expect((await interestRowsOf(payment.id))[0].isDuplicate).toBe(true);
+      expect(await spending(month)).toBe(money(split.spent - period.interest));
+
+      // The new reading: the same row again, flagged a repeat of the held one.
+      const [again] = await save(
+        incoming(loanId, period.date, period.payment, {
+          statementId: statement.id,
+          fingerprint,
+          isDuplicate: true,
+          duplicateOfId: payment.id,
+        }),
+      );
+      await imported(statement.id, [again.id]);
+
+      expect(await dataSource.getRepository(Transaction).countBy({ id: payment.id })).toBe(0);
+      const [carried] = await interestRowsOf(again.id);
+      expect(carried).toMatchObject({ id: interest.id, isDuplicate: false, isVerified: true });
+      expect(await dataSource.getRepository(Transaction).findOneByOrFail({ id: again.id })).toMatchObject({
+        isDuplicate: false,
+        duplicateOfId: null,
+      });
+      expect({ loan: await balance(loanId), spent: await spending(month) }).toEqual(split);
+      expect((await itemOf(again.id)).split).toMatchObject({ interestTransactionId: interest.id });
+      expect(await auditOf(again.id)).toEqual([
+        expect.objectContaining({ operation: 'loan_split_carried', actor_type: 'system' }),
+      ]);
+    });
+
+    it('removes the interest, and says so, when the payment is not in the statement any more (merge)', async () => {
+      const period = rows[5];
+      const month = period.date.slice(0, 7);
+      const spentBefore = await spending(month);
+      const { statement, payment, interest } = await splitOnStatement(period, `fp-${stamp}-merge`);
+
+      await readAgain(statement.id, 'merge');
+      await imported(statement.id, []);
+
+      expect(await dataSource.getRepository(Transaction).countBy({ id: In([payment.id, interest.id]) })).toBe(0);
+      expect(await spending(month)).toBe(spentBefore);
+      expect(await auditOf(payment.id)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            operation: 'loan_rejoin',
+            actor_type: 'system',
+            meta: expect.objectContaining({ reason: 'statement_read_again', interestTransactionId: interest.id }),
+          }),
+        ]),
+      );
+    });
+  });
+
+  it('keeps interest on a filed tax return: its payment cannot go, move or drop below it', async () => {
+    const period = rows[4];
+    const statement = await loanStatement();
+    const [payment] = await save(
+      incoming(loanId, period.date, period.payment, { statementId: statement.id }),
+    );
+    await splitOff(payment.id, period.interest);
+    const [interest] = await interestRowsOf(payment.id);
+    // Filed: a locked row carries its assessed tax.
+    await dataSource.query('UPDATE transactions SET tax_locked = true, tax_amount = 0 WHERE id = $1', [interest.id]);
+    const code = async (res: Promise<{ body: { error?: { code?: string } } }>) => (await res).body.error?.code;
+    const edit = (body: object, status = 400) => call('put', `/transactions/${payment.id}`, status, body);
+
+    try {
+      expect(await code(call('delete', `/transactions/${payment.id}`, 409))).toBe('TAX_LOCKED');
+      expect(await code(call('delete', `/statements/${statement.id}`, 409))).toBe('TAX_LOCKED');
+      expect(await code(call('post', `/statements/${statement.id}/reprocess?mode=replace`, 409))).toBe(
+        'TAX_LOCKED',
+      );
+      for (const body of [
+        { walletId: checkingId },
+        { debit: period.payment, credit: null },
+        { credit: money(period.interest - 0.01) },
+        { transactionDate: '2027-01-05' },
+        { currency: currency === 'USD' ? 'EUR' : 'USD' },
+      ]) {
+        expect(await code(edit(body))).toBe('TRANSACTION_TAX_LOCKED_FIELDS');
+      }
+      // Still covering the interest, a lower amount leaves it be.
+      await edit({ credit: money(period.payment - 1) }, 200);
+
+      // Nor does the database let it go behind the application's back.
+      await expect(dataSource.query('DELETE FROM transactions WHERE id = $1', [payment.id])).rejects.toMatchObject({
+        driverError: expect.objectContaining({ code: '23503' }),
+      });
+      await expect(
+        dataSource.query('UPDATE transactions SET wallet_id = $2 WHERE id = $1', [payment.id, checkingId]),
+      ).rejects.toMatchObject({ driverError: expect.objectContaining({ code: '23503' }) });
+      expect(await interestRowsOf(payment.id)).toEqual([expect.objectContaining({ id: interest.id, taxLocked: true })]);
+    } finally {
+      await dataSource.query('UPDATE transactions SET tax_locked = false WHERE id = $1', [interest.id]);
+    }
+  });
+
+  it('lets a workspace with locked interest be deleted', async () => {
+    const [{ id: workspaceId }] = await dataSource.query(
+      `INSERT INTO workspaces (name, currency) VALUES ('Closing', $1) RETURNING id`,
+      [currency],
+    );
+    const [{ id: paymentId }] = await dataSource.query(
+      `INSERT INTO transactions (workspace_id, transaction_date, counterparty_name, payment_purpose,
+                                 currency, transaction_type, amount, credit, is_verified)
+       VALUES ($1, '2026-02-15', 'ACME Bank', 'Instalment', $2, 'income', 100, 100, true) RETURNING id`,
+      [workspaceId, currency],
+    );
+    await dataSource.query(
+      `INSERT INTO transactions (workspace_id, transaction_date, counterparty_name, payment_purpose,
+                                 currency, transaction_type, amount, debit, is_verified, tax_locked,
+                                 tax_amount, loan_interest_of_id)
+       VALUES ($1, '2026-02-15', 'ACME Bank', 'Instalment', $2, 'expense', 10, 10, true, true, 0, $3)`,
+      [workspaceId, currency, paymentId],
+    );
+    await dataSource.query('DELETE FROM workspaces WHERE id = $1', [workspaceId]);
+    expect(await dataSource.getRepository(Transaction).countBy({ workspaceId })).toBe(0);
   });
 });

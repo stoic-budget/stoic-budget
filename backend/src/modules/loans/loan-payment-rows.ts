@@ -22,19 +22,40 @@ export function loadPayments(
   workspaceId: string,
   walletId: string,
 ): Promise<Transaction[]> {
+  return paymentRows(transactions, workspaceId, walletId)
+    .andWhere('t.isDuplicate = false')
+    .orderBy('t.transactionDate', 'DESC')
+    .addOrderBy('t.createdAt', 'DESC')
+    .getMany();
+}
+
+/**
+ * One payment into the loan account, locked for a change. A suspected
+ * duplicate is found too (its split can still be joined back); one on a
+ * statement in the trash is not, as it is not listed either.
+ */
+export function lockPaymentRow(
+  transactions: Repository<Transaction>,
+  workspaceId: string,
+  walletId: string,
+  id: string,
+): Promise<Transaction | null> {
+  return paymentRows(transactions, workspaceId, walletId)
+    .andWhere('t.id = :id', { id })
+    .setLock('pessimistic_write')
+    .getOne();
+}
+
+function paymentRows(transactions: Repository<Transaction>, workspaceId: string, walletId: string) {
   return transactions
     .createQueryBuilder('t')
     .where('t.workspaceId = :workspaceId', { workspaceId })
     .andWhere('t.walletId = :walletId', { walletId })
     .andWhere('t.transactionType = :income', { income: TransactionType.INCOME })
-    .andWhere('t.isDuplicate = false')
     .andWhere('t.loanInterestOfId IS NULL')
     .andWhere(
       'NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = t.statementId AND trashed.deleted_at IS NOT NULL)',
-    )
-    .orderBy('t.transactionDate', 'DESC')
-    .addOrderBy('t.createdAt', 'DESC')
-    .getMany();
+    );
 }
 
 export interface PaymentInterest {

@@ -467,6 +467,11 @@ describe('TransactionsService', () => {
       vi
         .spyOn(transactionRepository, 'findOne')
         .mockResolvedValue(mockTransaction as Transaction);
+      // Nothing on a filed return: neither the row nor loan interest split off it.
+      Object.assign(transactionRepository, { count: vi.fn(async () => 0) });
+      vi.spyOn(transactionRepository, 'createQueryBuilder').mockReturnValue(
+        ({ setFindOptions: vi.fn().mockReturnThis(), innerJoin: vi.fn().mockReturnThis(), getCount: vi.fn(async () => 0) }) as never,
+      );
     });
 
     it('should delete transaction', async () => {

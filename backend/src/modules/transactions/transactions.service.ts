@@ -9,7 +9,7 @@ import { appError } from '../../common/errors/app-error';
 import { currencyCodeOrDefault } from '../../common/utils/currency.util';
 import { ensureCanEdit } from '../../common/utils/ensure-can-edit.util';
 import { toMinor } from '../../common/utils/money.util';
-import { taxLockedConflict } from '../../common/utils/tax-lock.util';
+import { assertRowsRemovable } from '../../common/utils/tax-lock.util';
 import {
   applyOwnerFilter,
   assertOwnerMemberInWorkspace,
@@ -807,9 +807,7 @@ export class TransactionsService {
   async remove(id: string, workspaceId: string, userId: string): Promise<void> {
     await this.ensureCanEditStatements(userId, workspaceId);
     const transaction = await this.findOne(id, workspaceId);
-    if (transaction.taxLocked) {
-      throw taxLockedConflict(1);
-    }
+    await assertRowsRemovable(this.transactionRepository, { id: transaction.id, workspaceId });
     // Use delete for simplicity; entity already validated for ownership.
 
     await this.transactionRepository.delete(transaction.id);

@@ -15,10 +15,21 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * The interest counts only while its payment counts (counted-transactions.util
  * checks the payment). A trigger keeps it in step besides:
  * - it copies the payment's `is_verified` and `is_duplicate`, so Review shows
- *   the interest confirmed with its payment;
+ *   the interest confirmed with its payment, and its day, privacy and owner,
+ *   so the interest sits in the payment's month and is hidden from whoever
+ *   the payment is hidden from;
  * - it joins the split back (deletes the interest) once the row is no longer a
  *   payment into that loan: moved to another account, turned into an expense,
- *   or its amount cut below the interest.
+ *   put in another currency than the interest's, or its amount cut below the
+ *   interest.
+ *
+ * Interest on a filed tax return is never removed by any of that: deleting it
+ * (the join back above, or the cascade of its payment going) is refused while
+ * the workspace stands, and so is moving its payment to another day or making
+ * it private. The application refuses those edits first, with the reason.
+ *
+ * Posting to the ledger follows the payment too: trashing or restoring the
+ * payment's statement queues its interest like the statement's own rows.
  *
  * `loan_terms.auto_split`: split new payments into the account on import.
  */
@@ -56,8 +67,10 @@ export class LoanPaymentSplit1788240000000 implements MigrationInterface {
       LANGUAGE plpgsql AS $$
       DECLARE
         interest numeric;
+        interest_currency text;
       BEGIN
-        SELECT SUM(COALESCE("amount", "debit", "credit", 0)) INTO interest
+        SELECT SUM(COALESCE("amount", "debit", "credit", 0)), MIN(upper(trim("currency")))
+          INTO interest, interest_currency
           FROM "transactions"
          WHERE "loan_interest_of_id" = NEW."id" AND "workspace_id" = NEW."workspace_id";
         IF interest IS NULL THEN
@@ -65,16 +78,31 @@ export class LoanPaymentSplit1788240000000 implements MigrationInterface {
         END IF;
         IF NEW."wallet_id" IS DISTINCT FROM OLD."wallet_id"
            OR NEW."transaction_type" <> 'income'
+           OR upper(trim(NEW."currency")) <> interest_currency
            OR COALESCE(NEW."amount", NEW."credit", NEW."debit", 0) < interest THEN
+          -- A tax-locked interest row refuses this (loan_interest_keep_locked).
           DELETE FROM "transactions"
            WHERE "loan_interest_of_id" = NEW."id" AND "workspace_id" = NEW."workspace_id";
           RETURN NULL;
         END IF;
+        IF (NEW."transaction_date", NEW."is_private") IS DISTINCT FROM (OLD."transaction_date", OLD."is_private")
+           AND EXISTS (SELECT 1 FROM "transactions"
+                        WHERE "loan_interest_of_id" = NEW."id" AND "workspace_id" = NEW."workspace_id"
+                          AND "tax_locked") THEN
+          RAISE EXCEPTION 'update or delete on table "transactions" refused: the interest of % is on a filed tax return', NEW."id"
+            USING ERRCODE = 'foreign_key_violation';
+        END IF;
         UPDATE "transactions"
-           SET "is_verified" = NEW."is_verified", "is_duplicate" = NEW."is_duplicate"
+           SET "is_verified" = NEW."is_verified", "is_duplicate" = NEW."is_duplicate",
+               "transaction_date" = NEW."transaction_date", "is_private" = NEW."is_private",
+               -- A payment without an owner leaves the one the interest took from the account.
+               "owner_member_id" = COALESCE(NEW."owner_member_id", "owner_member_id")
          WHERE "loan_interest_of_id" = NEW."id"
            AND "workspace_id" = NEW."workspace_id"
-           AND ("is_verified", "is_duplicate") IS DISTINCT FROM (NEW."is_verified", NEW."is_duplicate");
+           AND ("is_verified", "is_duplicate", "transaction_date", "is_private", "owner_member_id")
+             IS DISTINCT FROM
+               (NEW."is_verified", NEW."is_duplicate", NEW."transaction_date", NEW."is_private",
+                COALESCE(NEW."owner_member_id", "owner_member_id"));
         RETURN NULL;
       END;
       $$
@@ -85,16 +113,71 @@ export class LoanPaymentSplit1788240000000 implements MigrationInterface {
     // Fires on payments only: an interest row has the link, a payment does not.
     await queryRunner.query(`
       CREATE TRIGGER "TRG_transactions_loan_interest_follow"
-        AFTER UPDATE OF "is_verified", "is_duplicate", "wallet_id", "transaction_type", "amount", "debit", "credit"
+        AFTER UPDATE OF "is_verified", "is_duplicate", "wallet_id", "transaction_type", "amount", "debit", "credit",
+                        "currency", "transaction_date", "is_private", "owner_member_id"
         ON "transactions"
         FOR EACH ROW
         WHEN (
           OLD."loan_interest_of_id" IS NULL
-          AND (OLD."is_verified", OLD."is_duplicate", OLD."wallet_id", OLD."transaction_type", OLD."amount", OLD."debit", OLD."credit")
+          AND (OLD."is_verified", OLD."is_duplicate", OLD."wallet_id", OLD."transaction_type", OLD."amount",
+               OLD."debit", OLD."credit", OLD."currency", OLD."transaction_date", OLD."is_private",
+               OLD."owner_member_id")
             IS DISTINCT FROM
-              (NEW."is_verified", NEW."is_duplicate", NEW."wallet_id", NEW."transaction_type", NEW."amount", NEW."debit", NEW."credit")
+              (NEW."is_verified", NEW."is_duplicate", NEW."wallet_id", NEW."transaction_type", NEW."amount",
+               NEW."debit", NEW."credit", NEW."currency", NEW."transaction_date", NEW."is_private",
+               NEW."owner_member_id")
         )
         EXECUTE FUNCTION "loan_interest_follow_payment"()
+    `);
+    // Interest on a filed return goes only with its workspace. The workspace
+    // row is already gone when its own delete cascades here.
+    await queryRunner.query(`
+      CREATE OR REPLACE FUNCTION "loan_interest_keep_locked"() RETURNS trigger
+      LANGUAGE plpgsql AS $$
+      BEGIN
+        IF EXISTS (SELECT 1 FROM "workspaces" WHERE "id" = OLD."workspace_id") THEN
+          RAISE EXCEPTION 'update or delete on table "transactions" refused: interest % is on a filed tax return', OLD."id"
+            USING ERRCODE = 'foreign_key_violation';
+        END IF;
+        RETURN OLD;
+      END;
+      $$
+    `);
+    await queryRunner.query(
+      'DROP TRIGGER IF EXISTS "TRG_transactions_loan_interest_locked" ON "transactions"',
+    );
+    await queryRunner.query(`
+      CREATE TRIGGER "TRG_transactions_loan_interest_locked"
+        BEFORE DELETE ON "transactions"
+        FOR EACH ROW
+        WHEN (OLD."loan_interest_of_id" IS NOT NULL AND OLD."tax_locked")
+        EXECUTE FUNCTION "loan_interest_keep_locked"()
+    `);
+    // The ledger books interest by its payment's statement (ledger-posting,
+    // moved-rows): queue it when that statement goes to the trash or comes back.
+    await queryRunner.query(`
+      CREATE OR REPLACE FUNCTION "loan_interest_follow_statement"() RETURNS trigger
+      LANGUAGE plpgsql AS $$
+      BEGIN
+        UPDATE "transactions" interest
+           SET "ledger_dirty" = true, "ledger_error" = NULL, "ledger_attempted_at" = NULL
+          FROM "transactions" payment
+         WHERE payment."statement_id" = NEW."id"
+           AND interest."loan_interest_of_id" = payment."id"
+           AND interest."workspace_id" = payment."workspace_id";
+        RETURN NULL;
+      END;
+      $$
+    `);
+    await queryRunner.query(
+      'DROP TRIGGER IF EXISTS "TRG_statements_loan_interest_dirty" ON "statements"',
+    );
+    await queryRunner.query(`
+      CREATE TRIGGER "TRG_statements_loan_interest_dirty"
+        AFTER UPDATE OF "deleted_at" ON "statements"
+        FOR EACH ROW
+        WHEN (OLD."deleted_at" IS DISTINCT FROM NEW."deleted_at")
+        EXECUTE FUNCTION "loan_interest_follow_statement"()
     `);
   }
 
@@ -104,6 +187,14 @@ export class LoanPaymentSplit1788240000000 implements MigrationInterface {
    * joined back from the loan page.
    */
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      'DROP TRIGGER IF EXISTS "TRG_statements_loan_interest_dirty" ON "statements"',
+    );
+    await queryRunner.query('DROP FUNCTION IF EXISTS "loan_interest_follow_statement"()');
+    await queryRunner.query(
+      'DROP TRIGGER IF EXISTS "TRG_transactions_loan_interest_locked" ON "transactions"',
+    );
+    await queryRunner.query('DROP FUNCTION IF EXISTS "loan_interest_keep_locked"()');
     await queryRunner.query(
       'DROP TRIGGER IF EXISTS "TRG_transactions_loan_interest_follow" ON "transactions"',
     );
