@@ -35,6 +35,8 @@ describe('parseStatementAmount', () => {
     ['1,000.00 Cr', 1000],
     ['250.00 DR', -250],
     ['3,193.31Cr', 3193.31],
+    ['1,02,801.86', 102801.86],
+    ['12,34,567.00', 1234567],
     ['114.40Dr', -114.4],
   ])('reads %s', (text, expected) => {
     expect(parseStatementAmount(text)).toBe(expected);
@@ -48,6 +50,7 @@ describe('parseStatementAmount', () => {
     expect(findStatementAmounts('ATM WITHDRAWAL -R2 000.00 R5 702.73')).toEqual([-2000, 5702.73]);
     expect(findStatementAmounts('Beginning Balance $3.22- Low 4.00')).toEqual([-3.22, 4]);
     expect(findStatementAmounts('REF 12.50-ACME')).toEqual([12.5]);
+    expect(findStatementAmounts('14,000.00 1,02,801.86')).toEqual([14000, 102801.86]);
     expect(isAmountPart('-R2')).toBe(true);
     expect(isAmountPart('-$503.00')).toBe(true);
     expect(isAmountPart('$4,082.88')).toBe(true);

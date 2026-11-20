@@ -141,5 +141,14 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
   // Columns whose words are no text of the row: the row number left of the date, a
   // category label ("Credit", "Debit") beside the amount.
   fee: ['fee', 'fees'],
-  other: ['no.', 'category', 'channel', 'check number', 'chq./ref.no.', 'ref no./cheque no.'],
+  other: [
+    'no.',
+    'category',
+    'channel',
+    'check number',
+    'chq./ref.no.',
+    'ref no./cheque no.',
+    'mode',
+    'mode**',
+  ],
 };
