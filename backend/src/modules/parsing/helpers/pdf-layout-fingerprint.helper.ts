@@ -72,6 +72,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
     BankName.GREAT_SOUTHERN,
     /\bgreat southern bank\b.*\bcredit union australia\b|\bgreatsouthernbank\.com\.au\b/,
   ],
+  [BankName.GREEN_DOT, /\bgreen dot corporation\b|\bgreendot\.com\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

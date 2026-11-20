@@ -5,6 +5,7 @@ import {
 } from '@/modules/parsing/helpers/pdf-layout-columns.helper';
 import { readLayoutTransactions } from '@/modules/parsing/helpers/pdf-layout-table.helper';
 import {
+  closingBalanceFromRows,
   openingBalanceFromRows,
   splitByAccount,
   toParsedTransactions,
@@ -612,5 +613,15 @@ describe('headings', () => {
       ]),
     ]);
     expect(transactions.map(t => [t.description, t.balance])).toEqual([['POS Purchase ACME', 3193.31]]);
+  });
+
+  it('reads the balances of rows listed newest first from the oldest row', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 110], ['Amount', 400], ['Available', 485]]),
+      row(140, [['08/16', 40], ['ACME', 110], ['-2.50', 400], ['4.10', 490]]),
+      row(160, [['08/15', 40], ['ACME', 110], ['-773.50', 400], ['6.60', 490]]),
+      row(180, [['08/15', 40], ['Deposit', 110], ['+800.00', 400], ['780.10', 490]]),
+    ]);
+    expect([openingBalanceFromRows(transactions), closingBalanceFromRows(transactions)]).toEqual([-19.9, 4.1]);
   });
 });

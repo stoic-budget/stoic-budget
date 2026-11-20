@@ -18,9 +18,30 @@ export function reparseDate(transaction: LayoutTransaction, order: NumericDateOr
   return parseDateParts(transaction.dateText, order) ?? transaction.date;
 }
 
-/** Balance before the first row, undone from the first running balance. */
+const dayOf = (row: LayoutTransaction) =>
+  (row.date.year ?? 0) * 10000 + row.date.month * 100 + row.date.day;
+
+/**
+ * The rows oldest first: a statement that lists them newest first ("08/16,
+ * 08/16, 08/15") is read backwards. Only dates that never rise count as
+ * newest first: a year turning over keeps the order as printed.
+ */
+export function oldestFirst(transactions: LayoutTransaction[]): LayoutTransaction[] {
+  const days = transactions.map(dayOf);
+  const falling =
+    days.some((day, index) => index > 0 && day < days[index - 1]) &&
+    days.every((day, index) => index === 0 || day <= days[index - 1]);
+  return falling ? [...transactions].reverse() : transactions;
+}
+
+/** The running balance after the newest row. */
+export function closingBalanceFromRows(transactions: LayoutTransaction[]): number | null {
+  return oldestFirst(transactions).at(-1)?.balance ?? null;
+}
+
+/** Balance before the oldest row, undone from its running balance. */
 export function openingBalanceFromRows(transactions: LayoutTransaction[]): number | null {
-  const first = transactions[0];
+  const first = oldestFirst(transactions)[0];
   if (first?.balance === undefined) {
     return null;
   }

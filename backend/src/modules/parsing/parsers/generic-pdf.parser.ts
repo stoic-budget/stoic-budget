@@ -19,6 +19,7 @@ import {
   readLayoutTransactions,
 } from '../helpers/pdf-layout-table.helper';
 import {
+  closingBalanceFromRows,
   openingBalanceFromRows,
   splitByAccount,
   toParsedTransactions,
@@ -208,7 +209,7 @@ export class GenericPdfParser extends BaseParser {
     const rows = layout.rows;
     const fromRows = {
       start: openingBalanceFromRows(rows),
-      end: rows[rows.length - 1]?.balance ?? null,
+      end: closingBalanceFromRows(rows),
     };
     return [
       checkBalanceChain(rows, isCard),
@@ -308,7 +309,7 @@ export class GenericPdfParser extends BaseParser {
       this.extractBalance(text, 'Остаток на конец') ??
       this.extractBalance(text, 'Остаток на конец периода') ??
       this.extractBalance(text, 'Исходящий остаток') ??
-      layoutTransactions[layoutTransactions.length - 1]?.balance ??
+      closingBalanceFromRows(layoutTransactions) ??
       labelled.end;
     return { balanceStart, balanceEnd };
   }
