@@ -92,6 +92,8 @@ describe('CryptoPortfolioCard', () => {
   it('draws nothing without a wallet, or for a wallet with nothing to show', async () => {
     for (const summary of [
       cryptoSummary({ walletCount: 0 }),
+      // Figures left over from a wallet since removed: still nothing to draw.
+      cryptoSummary({ walletCount: 0, portfolioValue: 1200, holdings: [cryptoHolding({ asset: 'ETH', amount: '1.5', value: 1200 })] }),
       cryptoSummary({ walletCount: 1 }),
     ]) {
       apiGet.mockResolvedValueOnce({ data: summary });
@@ -104,6 +106,17 @@ describe('CryptoPortfolioCard', () => {
       view.unmount();
       apiGet.mockReset();
     }
+  });
+
+  it.each([
+    ['a coin priced at nothing', { holdings: [cryptoHolding({ asset: 'ETH', amount: '1.5', value: 0 })] }],
+    ['a coin with no price yet', { unpriced: [{ asset: 'ODD', amount: '100' }] }],
+  ])('shows a wallet holding %s', async (_, held) => {
+    apiGet.mockResolvedValue({ data: cryptoSummary({ walletCount: 1, ...held }) });
+
+    renderWithQuery(<CryptoPortfolioCard formatAmount={format} month="2026-08" monthLabel="August 2026" />);
+
+    expect(await screen.findByText('August 2026', { exact: false })).toBeTruthy();
   });
 
   it('shows a past month that has only its closing value', async () => {

@@ -20,12 +20,14 @@ const HALF_HOLDINGS = 5;
 
 /**
  * The card is on the Overview for everyone, so it draws itself only for a
- * linked wallet that holds something or moved something in the month shown.
+ * linked wallet that holds something (priced or not) or moved something in the
+ * month shown.
  */
 function hasSomethingToShow(summary: CryptoSummary): boolean {
   return (
     summary.walletCount > 0 &&
     (summary.holdings.length > 0 ||
+      summary.unpriced.length > 0 ||
       summary.portfolioValue !== 0 ||
       summary.income !== 0 ||
       summary.expense !== 0)
