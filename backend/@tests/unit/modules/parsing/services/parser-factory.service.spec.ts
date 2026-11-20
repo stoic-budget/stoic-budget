@@ -269,6 +269,7 @@ describe('ParserFactoryService', () => {
       'RevolutParser',
       'RbsParser',
       'SantanderParser',
+      'SbiParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
