@@ -1,4 +1,3 @@
-import * as fs from 'node:fs';
 import {
   BadRequestException,
   Controller,
@@ -8,12 +7,7 @@ import {
   HttpStatus,
   Post,
   Put,
-  Res,
-  UploadedFile,
-  UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import type { Response } from 'express';
 import { WorkspaceId, WorkspaceMemberId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
@@ -21,8 +15,6 @@ import { SchemaParams, SchemaQuery } from '../../common/effect/schema-query';
 import { SchemaResponse } from '../../common/effect/schema-response';
 import { Permission } from '../../common/enums/permissions.enum';
 import { appError } from '../../common/errors/app-error';
-import { buildContentDisposition } from '../../common/utils/http-file.util';
-import { deletedResponse } from '../../common/utils/responses.util';
 import { parseOwnerFilter } from '../../common/utils/transaction-owner.util';
 import { redactPrivate, redactPrivateRows } from '../../common/utils/transaction-privacy.util';
 import type { BulkUpdateItemInput } from '../../contracts';
@@ -33,13 +25,9 @@ import {
   DuplicatesMarked,
   MarkDuplicatesBody,
   MergeDuplicatesBody,
-  MessageResult,
   SetTransactionTagsBody,
   SplitTransactionBody,
   StorageTagList,
-  TransactionAttachment,
-  TransactionAttachmentList,
-  TransactionAttachmentParams,
   TransactionListPage,
   TransactionListQuery,
   TransactionParams,
@@ -58,21 +46,10 @@ import type { User } from '../../entities/user.entity';
 import { Audit } from '../audit/decorators/audit.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CrossStatementDeduplicationService } from './services/cross-statement-deduplication.service';
-import { TransactionAttachmentsService } from './services/transaction-attachments.service';
 import { TransactionTagsService } from './services/transaction-tags.service';
 import { TransactionsOverviewService } from './services/transactions-overview.service';
 import { listFiltersFromQuery } from './transaction-list-filters';
 import { TransactionsService } from './transactions.service';
-
-/**
- * Aliased on purpose: writing `Express.Multer.File` straight into a decorated
- * parameter makes emitDecoratorMetadata emit a runtime reference to `Express`,
- * which does not exist and throws at import time.
- */
-type MulterFile = Express.Multer.File;
-
-/** Mirrors the 10 MB ceiling in validateFile, but rejects before the body is buffered. */
-const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 
 @Controller('transactions')
 export class TransactionsController {
@@ -80,7 +57,6 @@ export class TransactionsController {
     private readonly transactionsService: TransactionsService,
     private readonly deduplicationService: CrossStatementDeduplicationService,
     private readonly transactionTagsService: TransactionTagsService,
-    private readonly transactionAttachmentsService: TransactionAttachmentsService,
     private readonly overviewService: TransactionsOverviewService,
   ) {}
 
@@ -382,56 +358,5 @@ export class TransactionsController {
     @WorkspaceId() workspaceId: string,
   ) {
     return this.transactionTagsService.setTags(id, workspaceId, dto.tagIds);
-  }
-
-  @Get(':id/attachments')
-  @WorkspaceAuth(Permission.TRANSACTION_VIEW)
-  @SchemaResponse(TransactionAttachmentList)
-  async listAttachments(
-    @SchemaParams(TransactionParams) { id }: TransactionParams,
-    @WorkspaceId() workspaceId: string,
-  ) {
-    return this.transactionAttachmentsService.list(id, workspaceId);
-  }
-
-  @Post(':id/attachments')
-  @WorkspaceAuth(Permission.TRANSACTION_EDIT)
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_ATTACHMENT_BYTES } }))
-  @Audit({ entityType: EntityType.TRANSACTION })
-  @SchemaResponse(TransactionAttachment)
-  async uploadAttachment(
-    @SchemaParams(TransactionParams) { id }: TransactionParams,
-    @UploadedFile() file: MulterFile,
-    @CurrentUser() user: User,
-    @WorkspaceId() workspaceId: string,
-  ) {
-    return this.transactionAttachmentsService.create(id, workspaceId, user.id, file);
-  }
-
-  @Get('attachments/:attachmentId/download')
-  @WorkspaceAuth(Permission.TRANSACTION_VIEW)
-  async downloadAttachment(
-    @SchemaParams(TransactionAttachmentParams) { attachmentId }: TransactionAttachmentParams,
-    @WorkspaceId() workspaceId: string,
-    @Res() res: Response,
-  ) {
-    const { absolutePath, fileName, mimeType } =
-      await this.transactionAttachmentsService.getForDownload(attachmentId, workspaceId);
-
-    res.setHeader('Content-Type', mimeType);
-    res.setHeader('Content-Disposition', buildContentDisposition('attachment', fileName));
-    fs.createReadStream(absolutePath).pipe(res);
-  }
-
-  @Delete('attachments/:attachmentId')
-  @WorkspaceAuth(Permission.TRANSACTION_EDIT)
-  @Audit({ entityType: EntityType.TRANSACTION })
-  @SchemaResponse(MessageResult)
-  async removeAttachment(
-    @SchemaParams(TransactionAttachmentParams) { attachmentId }: TransactionAttachmentParams,
-    @WorkspaceId() workspaceId: string,
-  ) {
-    await this.transactionAttachmentsService.remove(attachmentId, workspaceId);
-    return deletedResponse('Attachment');
   }
 }

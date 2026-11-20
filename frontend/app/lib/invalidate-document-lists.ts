@@ -64,6 +64,7 @@ export const NON_FINANCIAL_QUERY_ROOTS = [
   'system-update',
   'tax-jurisdictions',
   'tax-rates',
+  'transaction-attachment-file',
   'webhook-deliveries',
   'webhook-endpoints',
   'webhook-subscriptions',
