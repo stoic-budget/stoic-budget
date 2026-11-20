@@ -240,6 +240,27 @@ def smudges(chars: List[Dict[str, Any]]) -> set:
     return found
 
 
+WHITE = {(1.0,), (1.0, 1.0, 1.0), (0.0, 0.0, 0.0, 0.0), (1,), (1, 1, 1), (0, 0, 0, 0)}
+
+
+def white_twins(page) -> set:
+    """
+    White copies of visible characters, drawn at the same spot: a white "3"
+    under the black "3". Same font and size, so dedupe_chars would keep both
+    for their colour and the line reads "3300 JJaann". White text on a dark
+    fill has no black twin and stays.
+    """
+    by_spot: Dict[Any, List[Dict[str, Any]]] = {}
+    for char in page.chars:
+        by_spot.setdefault((char["text"], round(char["x0"]), round(char["top"])), []).append(char)
+    found = set()
+    for twins in by_spot.values():
+        colours = [tuple(char.get("non_stroking_color") or ()) in WHITE for char in twins]
+        if any(colours) and not all(colours):
+            found.update(id(char) for char, white in zip(twins, colours) if white)
+    return found
+
+
 def visible(hidden: set):
     return lambda obj: obj.get("object_type") != "char" or id(obj) not in hidden
 
@@ -253,7 +274,7 @@ def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:
         for page_number, raw_page in enumerate(pdf.pages, start=1):
             # Text painted over goes first: the text written on top at the same
             # spot would otherwise be dropped as its duplicate.
-            hidden = hidden_chars(raw_page)
+            hidden = hidden_chars(raw_page) | white_twins(raw_page)
             page = raw_page.filter(visible(hidden)) if hidden else raw_page
             # Bold drawn twice at the same spot reads "PPaaggee" otherwise.
             page = page.dedupe_chars()

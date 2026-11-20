@@ -88,4 +88,10 @@ export const BANKS = [
   { key: 'frost', name: 'Frost Bank', logo: 'frost.png', aliases: ['frost'] },
   { key: 'go2bank', name: 'GO2bank', logo: 'go2bank.png', aliases: ['go2 bank'] },
   { key: 'gotyme', name: 'GoTyme Bank', logo: 'gotyme.png', aliases: ['gotyme'] },
+  {
+    key: 'great_southern',
+    name: 'Great Southern Bank',
+    logo: 'great-southern.png',
+    aliases: ['great southern'],
+  },
 ] as const satisfies readonly BankEntry[];

@@ -54,4 +54,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.FROST]: 'Frost Bank',
   [BankName.GO2BANK]: 'GO2bank',
   [BankName.GOTYME]: 'GoTyme Bank',
+  [BankName.GREAT_SOUTHERN]: 'Great Southern Bank',
 };
