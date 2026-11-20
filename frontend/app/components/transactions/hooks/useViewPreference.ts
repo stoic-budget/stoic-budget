@@ -22,7 +22,14 @@ const PREFERENCE_STALE_TIME = 30 * 60 * 1000;
 export interface UseViewPreferenceResult<T> {
   /** `undefined` until the saved state has loaded; `null` when nothing was saved or it failed to load. */
   state: T | null | undefined;
+  /** The load failed and nothing is cached: `null` above then does not mean "nothing saved". */
+  failed: boolean;
   save: (next: T) => void;
+  /**
+   * The stored state read afresh, for a change that must apply to what another
+   * tab may have saved since this one loaded. Rejects when the read fails.
+   */
+  latest: () => Promise<T | null>;
 }
 
 /**
@@ -45,14 +52,16 @@ export function useViewPreference<T extends Record<string, unknown>>(
   // Written on every filter change; a ref keeps the latest without re-rendering.
   const pending = useRef<T | null>(null);
 
+  const queryFn = ({ signal }: { signal: AbortSignal }) =>
+    apiQueryDecoded({
+      url: `/view-preferences/${scope}`,
+      signal,
+      contract: 'ViewPreferenceState',
+    });
+
   const { data, isError } = useQuery({
     queryKey,
-    queryFn: ({ signal }) =>
-      apiQueryDecoded({
-        url: `/view-preferences/${scope}`,
-        signal,
-        contract: 'ViewPreferenceState',
-      }),
+    queryFn,
     staleTime: PREFERENCE_STALE_TIME,
     enabled: Boolean(workspaceId),
   });
@@ -85,5 +94,14 @@ export function useViewPreference<T extends Record<string, unknown>>(
     [data, isError, read],
   );
 
-  return { state, save };
+  const latest = useCallback(
+    async () => {
+      const fresh = await queryClient.fetchQuery({ queryKey, queryFn, staleTime: 0 });
+      return fresh.state === null ? null : read(fresh.state);
+    },
+    // biome-ignore lint/correctness/useExhaustiveDependencies: queryKey and queryFn are derived from scope and workspaceId
+    [queryClient, scope, workspaceId, read],
+  );
+
+  return { state, failed: data === undefined && isError, save, latest };
 }
