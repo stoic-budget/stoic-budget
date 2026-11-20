@@ -1,10 +1,12 @@
 # Public read-only demo, on top of docker-compose.yml:
 #   docker compose -f docker-compose.yml -f docker-compose.demo.yml up -d
-# Visitors reach it only through a Cloudflare Tunnel; bind the published ports
-# to the host's loopback in .env (BACKEND_PORT=127.0.0.1:3001,
-# FRONTEND_PORT=127.0.0.1:3000). Setup: website/docs/deployment/demo.md.
+# Visitors reach it only through a Cloudflare Tunnel, so the published ports
+# stay on the host's loopback whatever .env says. The tunnel token lives in
+# .env.tunnel, which only cloudflared reads. Setup: website/docs/deployment/demo.md.
 services:
   backend:
+    ports: !override
+      - "127.0.0.1:3001:3001"
     environment:
       # Every write is refused except signing in and out (DemoReadOnlyGuard).
       - DEMO_MODE=true
@@ -21,12 +23,18 @@ services:
     mem_limit: 1536m
 
   frontend:
+    ports: !override
+      - "127.0.0.1:3000:3000"
     mem_limit: 768m
 
   postgres:
     mem_limit: 768m
 
   redis:
+    # Under the container's limit with room for Redis itself. Only keys with a
+    # TTL (cache entries, rate-limit counters) are evicted; the parsing queue's
+    # keys have none, so a full Redis refuses new jobs instead of losing them.
+    command: ["redis-server", "--maxmemory", "192mb", "--maxmemory-policy", "volatile-lru"]
     mem_limit: 256m
 
   cloudflared:
@@ -35,8 +43,10 @@ services:
     # A remotely managed tunnel: its public hostname and routes live in the
     # Cloudflare dashboard, the token is all the container needs.
     command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:?CLOUDFLARE_TUNNEL_TOKEN is required}
+    # TUNNEL_TOKEN=..., kept out of .env: the backend reads all of .env.
+    env_file:
+      - path: .env.tunnel
+        required: true
     depends_on:
       - frontend
     networks:
