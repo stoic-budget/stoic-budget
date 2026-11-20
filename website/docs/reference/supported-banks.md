@@ -20,8 +20,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **South Africa:** Absa, Capitec
 - **Sri Lanka:** Commercial Bank of Ceylon
 - **United Kingdom:** Barclays, Bank of Scotland
-- **United States:** Ally Bank, Associated Bank, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime,
-  Citizens, Comerica, Commerce Bank, Credit One, DCU
+- **United States:** Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU
 
 ## CSV presets
 

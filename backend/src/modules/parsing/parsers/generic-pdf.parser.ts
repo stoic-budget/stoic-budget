@@ -27,6 +27,11 @@ import {
   pickReconciledTransactions,
 } from '../helpers/pdf-table.helper';
 import {
+  accountStatements,
+  accountTexts,
+  plausiblePeriod,
+} from '../helpers/statement-accounts.helper';
+import {
   checkBalanceChain,
   checkDatesInPeriod,
   checkPrintedBalances,
@@ -56,30 +61,6 @@ import type {
 import { BaseParser } from './base.parser';
 
 const negate = (value: number | null) => (value === null ? null : -value);
-
-/** Rows a week either side of a printed range still place it. */
-const PERIOD_SLACK_MS = 7 * 24 * 60 * 60 * 1000;
-
-/**
- * A printed range is the statement's period only if its rows fall in it: "fee
- * based on your balance from 1 Sep 2024 to 30 Nov 2024" on a statement of
- * September 2025 is a note. A statement without rows keeps the range.
- */
-function plausiblePeriod<T extends { from: Date | null; to: Date | null }>(
-  range: T | null,
-  transactions: ParsedTransaction[],
-): T | null {
-  const { from, to } = range ?? {};
-  if (!(from && to) || transactions.length === 0) {
-    return range;
-  }
-  const inside = transactions.some(
-    row =>
-      row.transactionDate.getTime() >= from.getTime() - PERIOD_SLACK_MS &&
-      row.transactionDate.getTime() <= to.getTime() + PERIOD_SLACK_MS,
-  );
-  return inside ? range : null;
-}
 
 export class GenericPdfParser extends BaseParser {
   /** How the table is read: the built-in headings, or a workspace's taught layout on top. */
@@ -122,9 +103,14 @@ export class GenericPdfParser extends BaseParser {
 
     const accounts = splitByAccount(layoutTransactions);
     if (accounts.length > 1) {
-      const [first, ...others] = accounts.map(rows =>
-        this.accountStatement(rows, text, dateOrder, latestPrinted, detectedCurrency, isCard),
-      );
+      const [first, ...others] = accountStatements(accounts, {
+        text,
+        texts: accountTexts(layoutRows),
+        dateOrder,
+        latestPrinted,
+        currency: detectedCurrency,
+        isCard,
+      });
       return { ...first, otherAccounts: others, layout };
     }
 
@@ -269,40 +255,6 @@ export class GenericPdfParser extends BaseParser {
     }
     const headings = contributedHeadings(text);
     return headings ? { headings } : this.reading;
-  }
-
-  /**
-   * One account of a file that prints several, each in its own table under a
-   * heading naming its number and currency. The running balance column gives
-   * its balances; labels elsewhere on the page cannot be told apart by account.
-   */
-  private accountStatement(
-    rows: LayoutTransaction[],
-    text: string,
-    dateOrder: NumericDateOrder,
-    latestPrinted: Date | null,
-    fallbackCurrency: string,
-    isCard: boolean,
-  ): ParsedStatement {
-    const currency = rows[0].account?.currency ?? fallbackCurrency;
-    const transactions = toParsedTransactions(rows, dateOrder, latestPrinted, currency, isCard);
-    const times = transactions.map(t => t.transactionDate.getTime());
-    const period = plausiblePeriod(findHeaderPeriod(text, dateOrder), transactions);
-    return {
-      metadata: {
-        accountNumber: rows[0].account?.accountNumber ?? '',
-        currency,
-        dateFrom: period?.from ?? new Date(Math.min(...times)),
-        dateTo: period?.to ?? new Date(Math.max(...times)),
-        balanceStart: openingBalanceFromRows(rows) ?? undefined,
-        balanceEnd: rows[rows.length - 1].balance,
-      },
-      transactions,
-      // Labels and totals elsewhere on the page cannot be told apart by account.
-      checks: [checkBalanceChain(rows, isCard), checkDatesInPeriod(transactions, period)].filter(
-        (check): check is ParseCheck => check !== null,
-      ),
-    };
   }
 
   private async extract(filePath: string, cachedText?: string) {
