@@ -17,6 +17,7 @@ const CODES: Record<string, PaymentType | 'transfer'> = {
   OBP: 'bank_transfer_out',
   FPO: 'bank_transfer_out',
   TFR: 'transfer',
+  DR: 'transfer',
   DD: 'direct_debit',
   SO: 'standing_order',
   STO: 'standing_order',

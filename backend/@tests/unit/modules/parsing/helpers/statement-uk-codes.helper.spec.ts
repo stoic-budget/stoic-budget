@@ -18,6 +18,7 @@ describe('ukCodeEntry', () => {
     ['VIS ACME STORE', { debit: 4.2 }, 'ACME STORE', 'card'],
     ['))) ACME CAFE', { debit: 3.1 }, 'ACME CAFE', 'card'],
     ['TFR MEMBER ONE', { credit: 100 }, 'MEMBER ONE', 'bank_transfer_in'],
+    ['DR ACME LTD REF1 ACME', { debit: 100 }, 'ACME LTD REF1 ACME', 'bank_transfer_out'],
     ['TFR MEMBER ONE', { debit: 100 }, 'MEMBER ONE', 'bank_transfer_out'],
     ['ACME RECRUITMENT L BGC', { credit: 520.87 }, 'ACME RECRUITMENT L', 'bank_transfer_in'],
     ['BP SAMPLETOWN S/STN DEB', { debit: 24.35 }, 'BP SAMPLETOWN S/STN', 'card'],
