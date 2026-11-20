@@ -88,4 +88,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.PAYONEER]: 'Payoneer',
   [BankName.PAYPAL]: 'PayPal',
   [BankName.PNC]: 'PNC Bank',
+  [BankName.PROSPERITY]: 'Prosperity Bank',
 };
