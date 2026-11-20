@@ -9,8 +9,8 @@ import { IsNull, Raw } from 'typeorm';
  * Interest split off a loan payment (loans/loan-interest-row) has no statement
  * of its own: it counts only while its payment does, whatever takes the
  * payment out (Review, a duplicate flag, its statement in the trash or still
- * being read). Written as an anti-join, which costs every other row next to
- * nothing (see `whilePaymentCounts`).
+ * being read). Written so that it costs every other row next to nothing (see
+ * `whilePaymentCounts`).
  *
  * Transfers between the user's own accounts are NOT excluded here: a wallet
  * balance needs them, an income/expense figure does not, so each caller that
@@ -115,12 +115,15 @@ export function flowsSql(alias: string): string {
  * while its payment (by column name) passes `paymentCheck`.
  */
 function whilePaymentCounts(link: string, paymentCheck: (alias: string) => string): string {
-  // "No payment that fails the check", a NULL link matching none: the same rule
-  // as `link IS NULL OR EXISTS (payment passes)`, since an interest row goes
-  // with its payment. That OR raised the planner's estimate of every report
-  // query two- to fivefold, past `jit_above_cost`, and Postgres then spent more
-  // time compiling the query than reading it (a month of rows: 20 ms to 200+).
-  return `NOT EXISTS (SELECT 1 FROM transactions interest_payment WHERE interest_payment.id = ${link} AND NOT (${paymentCheck('interest_payment')}))`;
+  // The link is checked against the payments that do NOT count among those
+  // with interest split off: a list Postgres builds once per query (a hashed
+  // subplan over the few linked rows, by their partial index) and probes per
+  // row. The same rule as `link IS NULL OR EXISTS (payment passes)`, since an
+  // interest row goes with its payment, but priced next to nothing: that
+  // EXISTS cost a lookup per row (so did an anti-join), raised the planner's
+  // estimate of every report query past `jit_above_cost`, and Postgres then
+  // spent more time compiling the query than reading it.
+  return `(${link} IS NULL OR ${link} NOT IN (SELECT interest_payment.id FROM transactions interest_link JOIN transactions interest_payment ON interest_payment.id = interest_link.loan_interest_of_id WHERE interest_link.loan_interest_of_id IS NOT NULL AND NOT (${paymentCheck('interest_payment')})))`;
 }
 
 function settlesIfCrypto(cryptoWallet: string, id: string): string {
