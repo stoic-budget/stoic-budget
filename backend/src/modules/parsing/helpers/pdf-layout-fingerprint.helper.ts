@@ -66,6 +66,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.FNB, /\bfnb\.co\.za\b|\bfirst national bank\b/],
   [BankName.FOUND, /\bfound is a financial technology company\b/],
   [BankName.FROST, /\bfrost (?:bank|business checking)\b|\bfort worth, texas 76162 member fdic\b/],
+  [BankName.GO2BANK, /\bgo2bank\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
