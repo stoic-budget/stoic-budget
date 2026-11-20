@@ -26,36 +26,42 @@ What a visitor changes stays in their browser: theme, table layouts, closed guid
   read (exports, previews, counts) and sign-in, refresh and sign-out, and refuses everything else with
   `403 DEMO_READ_ONLY`. An end-to-end test walks every route of the API, so a new endpoint is refused until someone marks
   it.
+- Opening or copying a past version is refused too: either would build a whole workspace.
 - Registration reports closed, and the shared account is an ordinary user, not an instance admin.
-- Each login adds a session row; the nightly reset removes them with everything else.
+- Each login adds a session row; the nightly reset removes them with everything else. Since every visitor signs in as
+  the same account, a demo stores no IP address or browser for a session, and the sessions list shows none.
 
 ## Server
 
-A small VPS is enough: 2 vCPU, 4 GB RAM, 20 GB disk, Docker with the compose plugin. Nothing listens on a public port;
-visitors reach the frontend through a Cloudflare Tunnel.
+A small VPS is enough: 2 vCPU, 4 GB RAM, 20 GB disk, Docker with the compose plugin (2.24.4 or newer, for the `!override`
+in `docker-compose.demo.yml`). Nothing listens on a public port: the demo file publishes the backend and frontend on
+the host's loopback only, whatever `.env` says, and visitors reach the frontend through a Cloudflare Tunnel.
 
 ## Setup
 
-1. Clone the repository on the server and create `.env` as in [Docker deployment](./docker.md), with fresh secrets.
-   Then add:
+1. Clone the repository to `/opt/stoic-budget` (the timer below runs the reset from there; use another path and change
+   it in the unit too) and create `.env` as in [Docker deployment](./docker.md), with fresh secrets. Then add:
 
    ```bash
    # Pin a release that contains seed:public-demo.
    IMAGE_TAG=vX.Y.Z
-   # Only the tunnel talks to these; keep them off the public interface.
-   BACKEND_PORT=127.0.0.1:3001
-   FRONTEND_PORT=127.0.0.1:3000
    FRONTEND_URL=https://demo.example.com
    APP_URL=https://demo.example.com
    CORS_ORIGINS=https://demo.example.com
    # The shared account; the login page shows it to everyone.
    DEMO_USER_EMAIL=demo@example.com
    DEMO_USER_PASSWORD=pick-something-long
-   CLOUDFLARE_TUNNEL_TOKEN=...
    ```
 
 2. Create the tunnel in the Cloudflare dashboard: **Zero Trust → Networks → Tunnels → Create a tunnel →
-   Cloudflared**. Copy the token into `CLOUDFLARE_TUNNEL_TOKEN`. Add two public hostnames, in this order:
+   Cloudflared**. Put its token in a file of its own, `.env.tunnel`, next to `.env`:
+
+   ```bash
+   echo 'TUNNEL_TOKEN=...' > .env.tunnel && chmod 600 .env.tunnel
+   ```
+
+   Only cloudflared reads that file. Keep the token out of `.env`: the backend loads all of `.env` into its
+   environment. Then add two public hostnames, in this order:
 
    | Hostname | Path | Service |
    |---|---|---|
@@ -75,6 +81,11 @@ visitors reach the frontend through a Cloudflare Tunnel.
    The first seed downloads the twelve receipt scans from Wikimedia Commons, checks each against its checksum and keeps
    a smaller copy in the uploads volume; later resets reuse those copies.
 
+   The seed refuses to run unless `DEMO_MODE=true` and the database holds no account besides `DEMO_USER_EMAIL`, and the
+   reset script checks the same before it stops or drops anything, so neither can wipe a real instance by mistake. The
+   shared account stays inactive until the seed's last step: a seed that fails midway leaves an account nobody can sign
+   in to, and running `./scripts/demo-reset.sh` again (or just the seed) repairs it.
+
 4. Reset every night with a systemd timer:
 
    ```ini
@@ -82,12 +93,17 @@ visitors reach the frontend through a Cloudflare Tunnel.
    [Unit]
    Description=Reset the public demo
    After=docker.service
+   OnFailure=demo-reset-failed.service
 
    [Service]
    Type=oneshot
    WorkingDirectory=/opt/stoic-budget
    ExecStart=/opt/stoic-budget/scripts/demo-reset.sh
    ```
+
+   `OnFailure=` starts a unit of your own when a reset fails, for example one that mails you or pings a monitoring
+   service; leave the line out if you have none. Watch the demo from outside as well (an uptime check on the login
+   page): a failed reset leaves it down or without data until the next night, or until you rerun the script.
 
    ```ini
    # /etc/systemd/system/demo-reset.timer
@@ -107,7 +123,8 @@ visitors reach the frontend through a Cloudflare Tunnel.
    ```
 
    The reset stops the backend, recreates the database, clears Redis, starts the backend (which migrates) and runs the
-   seed. The demo is down for about a minute.
+   seed. The demo is down for about a minute. When the host sets `COMPOSE_FILE` (in the environment or `.env`), the
+   script uses that list of files instead of the two above.
 
 ## Cloudflare protections
 
@@ -140,7 +157,7 @@ number or a person's name. Their dates in the demo are moved into its year; ever
 | [Neuhauser Augustiner](https://commons.wikimedia.org/wiki/File:Augustiner_Neuhausen_Rechnung_2020.JPG) | User:Mateus2019 | Public domain |
 | [Saurüsselalm](https://commons.wikimedia.org/wiki/File:GER_%E2%80%94_Bayern_%E2%80%94_Oberbayern_%E2%80%94_Landkreis_Miesbach_%E2%80%94_Gemeinde_Bad_Wiessee_%E2%80%94_Saur%C3%BCsselalm_1_(vorl%C3%A4ufiger_Beleg)_2024-04-07_Mattes.jpg) | User:Mattes | Public domain |
 | [Vogtlandbahn dining car](https://commons.wikimedia.org/wiki/File:Vogtlandbahn_%E2%80%94_Speisewagen_(Quittung)_2015.jpg) | Vogtlandbahn, scan by User:Mattes | Public domain |
-| [Großglockner toll](https://commons.wikimedia.org/wiki/File:Gro%C3%9Fglockner-Hochalpenstra%C3%9Fe_Mautquittung_2020.JPG) | Großglockner-Hochalpenstraßen AG | Public domain |
+| [Großglockner toll](https://commons.wikimedia.org/wiki/File:Gro%C3%9Fglockner-Hochalpenstra%C3%9Fe_Mautquittung_2020.JPG) | Großglockner-Hochalpenstraßen-Aktiengesellschaft | Public domain |
 | [Gerlos toll](https://commons.wikimedia.org/wiki/File:AUT_%E2%80%94_Salzburger_Land_%E2%80%94_Bezirk_Zell_am_See_%E2%80%94_Gemeinde_Krimml_(Gerlospass,_Quittung_f%C3%BCr_die_Zahlung_der_Maut)_2021..jpg) | Großglockner Hochalpenstraßen AG, repro by User:Mateus2019 | Public domain |
 | [Konstanz–Meersburg ferry](https://commons.wikimedia.org/wiki/File:Autof%C3%A4hre_Konstanz%E2%80%93Meersburg_%E2%80%94_Fahrschein_2021.jpg) | Stadtwerke Konstanz | Public domain |
 
