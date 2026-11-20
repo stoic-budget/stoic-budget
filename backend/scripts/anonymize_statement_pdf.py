@@ -208,23 +208,29 @@ def main() -> int:
                 **fonts,
                 **{name.encode(): font_for(font_ref) for name, font_ref in as_dict(as_dict(form_resources).get("/Font")).items()},
             }
-            jobs.append((form, form_fonts))
+            jobs.append((form, form_fonts, None))
             add_forms(form_resources or resources, form_fonts)
 
-    for page in pages:
+    for page_index, page in enumerate(pages):
         font_refs = as_dict(as_dict(page.get("/Resources")).get("/Font"))
         fonts = {name.encode(): font_for(ref) for name, ref in font_refs.items()}
         contents = page.get("/Contents")
+        # A page's content streams are one stream cut in pieces: a font chosen in
+        # one is still the font of the strings that open the next.
         for ref in contents if isinstance(contents, list) else [contents]:
-            jobs.append((resolve(ref), fonts))
+            jobs.append((resolve(ref), fonts, page_index))
         add_forms(page.get("/Resources"), fonts)
 
-    def text_runs(data: bytes, fonts: dict):
+    carried: dict = {}
+
+    def text_runs(data: bytes, fonts: dict, page=None):
         """Yields (match, font, decoded text) for every string drawn in a content stream."""
-        current = Font(None)
+        current = carried.get(page, Font(None)) if page is not None else Font(None)
         for m in TOKEN_RE.finditer(data):
             if m.group(1) is not None:
                 current = fonts.get(m.group(1), Font(None))
+                if page is not None:
+                    carried[page] = current
                 continue
             raw = (
                 bytes.fromhex(re.sub(rb"\s", b"", m.group(2)).decode())
@@ -236,8 +242,8 @@ def main() -> int:
                 yield m, current, text
 
     if args.dump:
-        for stream_obj, fonts in jobs:
-            for _, _, text in text_runs(stream_bytes(stream_obj), fonts):
+        for stream_obj, fonts, page in jobs:
+            for _, _, text in text_runs(stream_bytes(stream_obj), fonts, page):
                 print(repr(text))
         return 0
 
@@ -246,8 +252,9 @@ def main() -> int:
     # fonts that actually draw long numbers count: a font embedding just a page
     # number's "1" would otherwise shrink the pool to a single digit.
     pool = set("0123456789")
-    for stream_obj, fonts in jobs:
-        for _, font, text in text_runs(stream_bytes(stream_obj), fonts):
+    carried.clear()
+    for stream_obj, fonts, page in jobs:
+        for _, font, text in text_runs(stream_bytes(stream_obj), fonts, page):
             if font.forward and any(len(run) >= args.min_digits for run in DIGIT_RUN_RE.findall(text)):
                 pool &= {d for d in "0123456789" if d in font.reverse}
     pool = sorted(pool)
@@ -286,10 +293,11 @@ def main() -> int:
         return ["".join(c) for c in chars]
 
     changed = 0
-    for stream_obj, fonts in jobs:
+    carried.clear()
+    for stream_obj, fonts, page in jobs:
         data = stream_bytes(stream_obj)
         out, last = [], 0
-        runs = list(text_runs(data, fonts))
+        runs = list(text_runs(data, fonts, page))
         new_texts = replace_spanning([transform(text) for _, _, text in runs])
         for (m, font, text), new_text in zip(runs, new_texts):
             if new_text == text:
@@ -324,7 +332,7 @@ def main() -> int:
                 obj["stream"]["data"] = base64.b64encode(b"\xff").decode("ascii")
         # Inline images sit in the page's own content stream: a postal barcode
         # printed beside the address is one, and it encodes the address.
-        for stream_obj, _ in jobs:
+        for stream_obj, _, _ in jobs:
             set_stream_bytes(stream_obj, INLINE_IMAGE_RE.sub(b"", stream_bytes(stream_obj)))
 
     info = resolve(doc["qpdf"][1].get("trailer", {}).get("value", {}).get("/Info"))

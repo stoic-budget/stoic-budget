@@ -80,6 +80,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.HERITAGE, /\bheritage bank limited\b/],
   [BankName.HSA_BANK, /\bhsa bank\b.{0,5} is a division of webster bank\b/],
   [BankName.HSBC, /\bwww\.hsbc\.co\.uk\b|\bhsbc uk bank plc\b/],
+  [BankName.HUNTINGTON, /\bthe huntington national bank\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

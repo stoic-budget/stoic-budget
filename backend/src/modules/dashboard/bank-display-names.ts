@@ -62,4 +62,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.HERITAGE]: 'Heritage Bank',
   [BankName.HSA_BANK]: 'HSA Bank',
   [BankName.HSBC]: 'HSBC',
+  [BankName.HUNTINGTON]: 'Huntington',
 };
