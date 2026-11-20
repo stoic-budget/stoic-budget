@@ -1,4 +1,4 @@
-import { ALLOW_IN_DEMO_KEY } from '@/common/decorators/allow-in-demo.decorator';
+import { ALLOW_IN_DEMO_KEY, REFUSE_IN_DEMO_KEY } from '@/common/decorators/allow-in-demo.decorator';
 import { ALLOW_IN_VERSION_KEY } from '@/common/decorators/allow-in-version.decorator';
 import { DemoReadOnlyGuard } from '@/common/guards/demo-read-only.guard';
 import { ForbiddenException } from '@nestjs/common';
@@ -60,6 +60,15 @@ describe('DemoReadOnlyGuard', () => {
     it('answers a write marked @AllowInDemo or @AllowInVersion', () => {
       expect(routeMarkedWith(ALLOW_IN_DEMO_KEY).canActivate(contextFor('POST'))).toBe(true);
       expect(routeMarkedWith(ALLOW_IN_VERSION_KEY).canActivate(contextFor('POST'))).toBe(true);
+    });
+
+    it('refuses a write marked @RefuseInDemo, whatever else it carries', () => {
+      for (const keys of [[REFUSE_IN_DEMO_KEY, ALLOW_IN_VERSION_KEY], [REFUSE_IN_DEMO_KEY, ALLOW_IN_DEMO_KEY]]) {
+        expect(forbiddenCode(() => routeMarkedWith(...keys).canActivate(contextFor('POST')))).toBe(
+          'DEMO_READ_ONLY',
+        );
+      }
+      expect(routeMarkedWith(REFUSE_IN_DEMO_KEY).canActivate(contextFor('GET'))).toBe(true);
     });
 
     it('leaves non-HTTP contexts alone', () => {
