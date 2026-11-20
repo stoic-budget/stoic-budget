@@ -2,7 +2,7 @@ export interface ClassificationRule {
   id?: string;
   name: string;
   type: 'category' | 'branch' | 'wallet' | 'article' | 'activity_type';
-  conditions: ClassificationCondition[];
+  conditions: RuleConditionNode[];
   /** How the conditions combine; all of them when absent. */
   matchMode?: MatchMode;
   result: ClassificationResult;
@@ -33,7 +33,18 @@ export interface ClassificationCondition {
     /** The row's currency code. */
     | 'currency'
     /** The day number, 1 to 31, of the row's date. */
-    | 'day_of_month';
+    | 'day_of_month'
+    /**
+     * The row's category, payee and tags by id, and its comment as text. They
+     * read the row as the rules ranked above have left it in the same pass
+     * (engine/rule-row-state): a person's pick stays, a rule above sets what
+     * it decides, and its tags join the row's own.
+     */
+    | 'category'
+    | 'payee'
+    /** Several at once: `equals` holds when the row has any of the values, `not_equals` when none. */
+    | 'tags'
+    | 'comment';
   operator:
     | 'contains'
     | 'equals'
@@ -46,12 +57,27 @@ export interface ClassificationCondition {
     | 'not_contains'
     | 'not_equals'
     /** From `value` to `valueTo`, both included. */
-    | 'between';
+    | 'between'
+    /** Blank text, no category or payee, no tags. `value` is '' and is not read. */
+    | 'is_empty'
+    | 'is_not_empty';
   /** Several values mean "any of them"; with a negation, none of them. */
   value: string | number | readonly string[];
   /** The upper end of `between`. */
   valueTo?: number;
 }
+
+/** Conditions that hold together, all of them or any one, as one condition of the rule. */
+export interface ClassificationConditionGroup {
+  matchMode: MatchMode;
+  conditions: ClassificationCondition[];
+}
+
+/**
+ * One entry of a rule's conditions: a condition, or a group of them. Groups go
+ * one level deep. A rule saved before groups holds plain conditions only.
+ */
+export type RuleConditionNode = ClassificationCondition | ClassificationConditionGroup;
 
 export interface ClassificationResult {
   categoryId?: string;

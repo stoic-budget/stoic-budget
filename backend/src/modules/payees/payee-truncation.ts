@@ -1,4 +1,5 @@
 import type { EntityManager } from 'typeorm';
+import { movePayeeConditionsInto } from '../classification/engine/rule-payee-merge';
 
 /** Shortest name, spaces left out, that a cut-off may stand for a longer one. */
 const MIN_PREFIX = 8;
@@ -101,6 +102,7 @@ export async function movePayeesInto(
       WHERE workspace_id = $2 AND result ->> 'payeeId' = ANY($3::text[])`,
     [targetId, workspaceId, sourceIds],
   );
+  await movePayeeConditionsInto(manager, workspaceId, targetId, sourceIds);
   await manager.query('DELETE FROM payees WHERE workspace_id = $1 AND id = ANY($2::uuid[])', [
     workspaceId,
     sourceIds,
