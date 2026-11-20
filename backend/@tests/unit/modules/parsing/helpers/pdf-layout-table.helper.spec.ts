@@ -634,3 +634,18 @@ describe('headings', () => {
     expect(transactions.map(t => t.description)).toEqual(['ACME']);
   });
 });
+
+describe('more headings', () => {
+  it('reads "Payment (Debits)" as money out', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 40],
+        ['Details', 110],
+        ['Payment (Debits)', 250],
+        ['Receipts (Credits)', 350],
+        ['Balance', 470],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
+  });
+});

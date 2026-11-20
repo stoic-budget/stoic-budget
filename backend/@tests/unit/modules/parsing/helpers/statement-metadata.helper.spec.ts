@@ -215,6 +215,7 @@ describe('statement-metadata.helper', () => {
     expect(readAccountHeading('Numéro de compte: 00001-002-0000003')).toEqual({
       accountNumber: '00001-002-0000003',
     });
+    expect(readAccountHeading('A/C NO: 10000002')).toEqual({ accountNumber: '10000002' });
     expect(readAccountHeading('EXAMPLE CITY 19850-1423 Account number: XXXX XXXX 0001')).toBeNull();
     expect(readAccountHeading('Account Summary')).toBeNull();
     expect(readAccountHeading('Example Savings - 1234567890')).toEqual({

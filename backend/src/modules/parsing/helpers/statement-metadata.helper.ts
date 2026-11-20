@@ -366,7 +366,7 @@ export function findStatementTotals(
 }
 
 const ACCOUNT_HEADING =
-  /\b(?:account|compte|rekening|konto|cuenta)\b(?:\s+(?:number|no\.?|nr\.?|#))?\s*[:—–-]?\s*([A-Z]{2}\d{2}[A-Z0-9]{10,30}|\d[\d -]{6,}\d)/i;
+  /\b(?:account|compte|rekening|konto|cuenta|a\/c)\b(?:\s+(?:number|no\.?|nr\.?|#))?\s*[:—–-]?\s*([A-Z]{2}\d{2}[A-Z0-9]{10,30}|\d[\d -]{6,}\d)/i;
 
 /**
  * A line of only a product name and a long number ("Member Savings -

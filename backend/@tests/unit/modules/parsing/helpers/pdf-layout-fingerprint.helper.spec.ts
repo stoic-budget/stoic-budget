@@ -127,6 +127,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('visit greatsouthernbank.com.au')).toBe(BankName.GREAT_SOUTHERN);
     expect(mentionedBank('©2013 - 2016 Green Dot Corporation')).toBe(BankName.GREEN_DOT);
     expect(mentionedBank('Halifax is a division of Bank of Scotland plc')).toBe(BankName.HALIFAX);
+    expect(mentionedBank('Handelsbanken is the trading name of Handelsbanken plc')).toBe(BankName.HANDELSBANKEN);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

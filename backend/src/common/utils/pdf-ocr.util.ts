@@ -128,7 +128,8 @@ async function recognize(filePath: string, lastPage: number): Promise<PdfOcrLayo
     const rows: PdfTextRow[] = [];
     const images = await rasterize(filePath, dir, lastPage);
     for (const [index, image] of images.entries()) {
-      const { data } = await worker.recognize(image, {}, { blocks: true });
+      // A page scanned a degree askew would split each printed line into several rows.
+      const { data } = await worker.recognize(image, { rotateAuto: true }, { blocks: true });
       const words = (data.blocks ?? []).flatMap(block =>
         block.paragraphs.flatMap(paragraph => paragraph.lines.flatMap(line => line.words)),
       );

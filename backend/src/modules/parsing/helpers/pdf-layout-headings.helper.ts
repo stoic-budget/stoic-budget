@@ -81,6 +81,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'withdrawals/subtractions',
     'money out',
     'payments',
+    'payment',
     'cargos',
     'retiros',
     'debito',
