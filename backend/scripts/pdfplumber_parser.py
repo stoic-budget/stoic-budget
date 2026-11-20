@@ -47,6 +47,33 @@ def is_horizontal(obj: Dict[str, Any]) -> bool:
     return abs(b) < 1e-3 and abs(c) < 1e-3 and a > 0 and (d > 0 or obj.get("upright", False))
 
 
+LEADER = re.compile(r"\.{4,}")
+
+
+def without_leaders(words: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    A dot leader runs a row's text out to its amount, glued to both at times
+    ("Interest.........2.57", "..........1,620.00"): those dots are no text,
+    and each piece around them stands where its own characters do.
+    """
+    out = []
+    for word in words:
+        text = word.get("text", "")
+        chars = word.get("chars") or []
+        # Dots alone are a rule between parts of the page: they stay.
+        if not LEADER.search(text) or LEADER.fullmatch(text) or len(chars) != len(text):
+            out.append(word)
+            continue
+        start = 0
+        for match in list(LEADER.finditer(text)) + [None]:
+            end = match.start() if match else len(text)
+            if end > start:
+                piece = chars[start:end]
+                out.append({**word, "text": text[start:end], "x0": piece[0]["x0"], "x1": piece[-1]["x1"]})
+            start = match.end() if match else end
+    return out
+
+
 def build_rows(words: List[Dict[str, Any]], page_number: int, tolerance: float = 2.5) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
     for word in sorted(words, key=lambda w: (float(w.get("top", 0)), float(w.get("x0", 0)))):
@@ -368,8 +395,9 @@ def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:
                 y_tolerance=2.0,
                 keep_blank_chars=False,
                 use_text_flow=True,
+                return_chars=True,
             ) or []
-            rows.extend(build_rows(words, page_number))
+            rows.extend(build_rows(without_leaders(words), page_number))
             tables.extend(extract_tables(page, page_number))
 
     return {
