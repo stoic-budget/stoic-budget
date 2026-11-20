@@ -13,7 +13,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **France:** Crédit Agricole
 - **Germany:** Deutsche Bank
 - **Hong Kong:** Bank of China (Hong Kong)
-- **India:** Axis Bank, Citibank
+- **India:** Axis Bank, Citibank, HDFC Bank
 - **Israel:** Bank Hapoalim / Isracard (Hebrew)
 - **Kazakhstan:** Kaspi Bank; Bereke Bank, old and new PDF layouts
 - **Nigeria:** Fidelity Bank

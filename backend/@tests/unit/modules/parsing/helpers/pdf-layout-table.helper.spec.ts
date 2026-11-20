@@ -649,3 +649,31 @@ describe('more headings', () => {
     expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
   });
 });
+
+describe('Indian headings', () => {
+  it('reads Narration, Chq./Ref.No. and Value Dt', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 40],
+        ['Narration', 150],
+        ['Chq./Ref.No.', 290],
+        ['Value Dt', 360],
+        ['Withdrawal', 405],
+        ['Amt.', 450],
+        ['Deposit', 490],
+        ['Amt.', 525],
+        ['Closing', 560],
+        ['Balance', 600],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual([
+      'date',
+      'description',
+      'other',
+      'otherDate',
+      'debit',
+      'credit',
+      'balance',
+    ]);
+  });
+});
