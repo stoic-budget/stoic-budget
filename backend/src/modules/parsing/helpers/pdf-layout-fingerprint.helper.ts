@@ -62,6 +62,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.FIDELITY_BANK, /\bfidelitybank\.ng\b/],
   [BankName.FIFTH_THIRD, /\bfifth third (?:bank|business|preferred|momentum)/],
   [BankName.FIRST_CITIZENS, /\bfirst citizens bank\b|\bfirstcitizens\.com\b/],
+  [BankName.FIRST_DIRECT, /\bfirstdirect\.com\b|\bfirst direct is a division of hsbc\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

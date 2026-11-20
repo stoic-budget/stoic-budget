@@ -1,6 +1,7 @@
 import {
   findDayRangePeriod,
   findHeaderPeriod,
+  findDayFirstPeriod,
   findLabelledPeriod,
   findMonthPeriod,
   findSharedYearPeriod,
@@ -69,6 +70,20 @@ describe('findSharedYearPeriod', () => {
       expect(findSharedYearPeriod(text)).toBeNull();
     },
   );
+});
+
+describe('findDayFirstPeriod', () => {
+  it('reads a range printed day first with the year once', () => {
+    expect(findDayFirstPeriod('19 January to 18 February 2025')).toEqual({
+      from: new Date(Date.UTC(2025, 0, 19)),
+      to: new Date(Date.UTC(2025, 1, 18)),
+    });
+    expect(findDayFirstPeriod('15 Dec - 14 Jan 2025')?.from).toEqual(new Date(Date.UTC(2024, 11, 15)));
+  });
+
+  it('is null for a word that is no month', () => {
+    expect(findDayFirstPeriod('19 Accounts to 18 Payments 2025')).toBeNull();
+  });
 });
 
 describe('findLabelledPeriod', () => {
