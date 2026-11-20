@@ -123,6 +123,9 @@ const extractBrandFromSender = (sender?: string | null): string | undefined => {
   return toTitleCase(rootDomain);
 };
 
+// A file handed in (scan, upload, Telegram) has its file name as the subject.
+const FILE_NAME_PATTERN = /\.[a-z0-9]{2,5}$/i;
+
 const extractBrandFromSubject = (subject?: string | null): string | undefined => {
   if (!subject) {
     return undefined;
@@ -160,13 +163,19 @@ export const resolveReceiptMerchantLabel = ({
     return senderBrand;
   }
 
-  // A long vendor name still beats the subject: on a scan the subject is the
-  // file name. Kept whole, the list column cuts it where it ends.
+  // An e-mail's subject names the shop ("[ACME] Your receipt") better than a sentence
+  // read off the receipt. A file name does not: a vendor typed on a scan beats "photo_….jpg".
+  const subjectIsFileName = !!subject && FILE_NAME_PATTERN.test(subject.trim());
+  const subjectBrand = extractBrandFromSubject(subject);
+  if (subjectBrand && !subjectIsFileName) {
+    return subjectBrand;
+  }
+
+  // Kept whole: the list column cuts it where it ends.
   if (normalizedVendor && !isLikelyJunkVendor(normalizedVendor)) {
     return normalizedVendor;
   }
 
-  const subjectBrand = extractBrandFromSubject(subject);
   if (subjectBrand) {
     return subjectBrand;
   }

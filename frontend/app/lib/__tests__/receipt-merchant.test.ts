@@ -87,6 +87,20 @@ describe('resolveReceiptMerchantLabel', () => {
     expect(label).toBe('GitHub');
   });
 
+  it('keeps the shop from an e-mail subject over a sentence read off the receipt', () => {
+    // The documents list passes no sender, so only the subject names the shop here.
+    const shop = 'ACME';
+    const subject = `[${shop}] Payment receipt`;
+    for (const vendor of [
+      'Thank you for your order',
+      'We received payment for your subscription.',
+      '123 Main Street, Springfield, Example State 00000',
+    ]) {
+      expect(resolveReceiptMerchantLabel({ vendor, subject })).toBe(shop);
+      expect(resolveReceiptMerchantLabel({ vendor, sender: '', subject })).toBe(shop);
+    }
+  });
+
   describe('a scanned file', () => {
     const fileName = 'photo_2026-01-02_10-00-00.jpg';
     // Six words: long enough to read as a sentence, still the name someone typed.
