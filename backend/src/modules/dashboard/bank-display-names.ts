@@ -69,4 +69,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.ING]: 'ING',
   [BankName.KBC]: 'KBC',
   [BankName.KEYBANK]: 'KeyBank',
+  [BankName.KROO]: 'Kroo',
 };

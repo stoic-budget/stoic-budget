@@ -63,6 +63,7 @@ import { IngParser } from '../parsers/ing.parser';
 import { KaspiParser } from '../parsers/kaspi.parser';
 import { KbcParser } from '../parsers/kbc.parser';
 import { KeybankParser } from '../parsers/keybank.parser';
+import { KrooParser } from '../parsers/kroo.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
 /**
@@ -134,4 +135,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [IngParser, { bankName: BankName.ING }],
   [KbcParser, { bankName: BankName.KBC }],
   [KeybankParser, { bankName: BankName.KEYBANK }],
+  [KrooParser, { bankName: BankName.KROO }],
 ];

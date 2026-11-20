@@ -139,6 +139,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('ING Bank (Australia) Limited ABN 24 000 893 292')).toBe(BankName.ING);
     expect(mentionedBank('Wbsite: www.kbc.be')).toBe(BankName.KBC);
     expect(mentionedBank('KeyBank National Association P.O. Box 94825')).toBe(BankName.KEYBANK);
+    expect(mentionedBank('Kroo Bank Ltd is authorised as a bank by the PRA')).toBe(BankName.KROO);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
