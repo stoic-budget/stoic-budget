@@ -146,6 +146,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Customer Service Information Marcus.com')).toBe(BankName.MARCUS);
     expect(mentionedBank('MERRICK ACCOUNT SUMMARY Account Number')).toBe(BankName.MERRICK);
     expect(mentionedBank('Metro Bank PLC is registered in England and Wales')).toBe(BankName.METRO_BANK);
+    expect(mentionedBank('Monzo Bank Limited (https://monzo.com) is a company registered in England')).toBe(BankName.MONZO);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

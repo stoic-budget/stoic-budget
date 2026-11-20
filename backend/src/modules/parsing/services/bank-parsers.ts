@@ -70,6 +70,7 @@ import { MAndTParser } from '../parsers/m-and-t.parser';
 import { MarcusParser } from '../parsers/marcus.parser';
 import { MerrickParser } from '../parsers/merrick.parser';
 import { MetroBankParser } from '../parsers/metro-bank.parser';
+import { MonzoParser } from '../parsers/monzo.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
 /**
@@ -148,4 +149,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [MarcusParser, { bankName: BankName.MARCUS }],
   [MerrickParser, { bankName: BankName.MERRICK }],
   [MetroBankParser, { bankName: BankName.METRO_BANK }],
+  [MonzoParser, { bankName: BankName.MONZO }],
 ];

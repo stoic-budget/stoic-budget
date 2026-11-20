@@ -76,4 +76,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.MARCUS]: 'Marcus by Goldman Sachs',
   [BankName.MERRICK]: 'Merrick Bank',
   [BankName.METRO_BANK]: 'Metro Bank',
+  [BankName.MONZO]: 'Monzo',
 };
