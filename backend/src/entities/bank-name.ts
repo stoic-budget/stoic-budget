@@ -89,5 +89,6 @@ export enum BankName {
   QNB = 'qnb',
   RAIFFEISEN = 'raiffeisen',
   RBC = 'rbc',
+  REGIONS = 'regions',
   OTHER = 'other',
 }

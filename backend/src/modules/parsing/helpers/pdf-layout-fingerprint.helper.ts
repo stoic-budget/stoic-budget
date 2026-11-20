@@ -114,6 +114,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.QNB, /\bqatar national bank\b/],
   [BankName.RAIFFEISEN, /\brzbrrobu\b/],
   [BankName.RBC, /\byour rbc (?:personal|business) banking\b/],
+  [BankName.REGIONS, /\b1-800-regions\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
