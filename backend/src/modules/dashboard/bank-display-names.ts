@@ -65,4 +65,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.HUNTINGTON]: 'Huntington',
   [BankName.IBC]: 'IBC Bank',
   [BankName.ICICI]: 'ICICI Bank',
+  [BankName.IFAST]: 'iFAST Global Bank',
 };

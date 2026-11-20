@@ -83,6 +83,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.HUNTINGTON, /\bthe huntington national bank\b/],
   [BankName.IBC, /\bwww\.(?:my)?ibc\.com\b|\binternational bank of commerce\b/],
   [BankName.ICICI, /\bwww\.icicibank\.com\b|\bicici bank limited\b/],
+  [BankName.IFAST, /\bifast global bank limited\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

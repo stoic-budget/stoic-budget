@@ -238,6 +238,7 @@ describe('ParserFactoryService', () => {
       'HuntingtonParser',
       'IbcParser',
       'IciciParser',
+      'IfastParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
