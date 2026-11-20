@@ -239,21 +239,24 @@ $seneca-sidebar-brand-height: 44px;
   flex-shrink: 0;
   width: calc(100% - #{2 * $seneca-focus-ring-reach});
   text-decoration: none;
+  // Scales with the row like the rest of the sidebar: 32px at the full 40px row, down
+  // to 24px on short screens, so the brand row (44px at most) keeps its air.
+  --seneca-brand-emblem: clamp(24px, calc(var(--seneca-sidebar-row, 40px) * 0.8), 32px);
 
+  // The row is full at 192px: the link keeps one 36px slot, so a bigger emblem
+  // takes its padding instead of pushing settings into the sidebar's clipped edge.
   &-link {
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    padding: 0 6px;
+    padding: 0 calc((36px - var(--seneca-brand-emblem)) / 2);
     text-decoration: none;
   }
 
-  // Scales with the row like the rest of the sidebar: 32px at the full 40px row, down
-  // to 24px on short screens, so the brand row (44px at most) keeps its air.
   &-emblem {
     display: block;
-    width: clamp(24px, calc(var(--seneca-sidebar-row, 40px) * 0.8), 32px);
-    height: clamp(24px, calc(var(--seneca-sidebar-row, 40px) * 0.8), 32px);
+    width: var(--seneca-brand-emblem);
+    height: var(--seneca-brand-emblem);
     background: url('/images/logo-mark.svg') no-repeat center / contain;
 
     @include dark {
