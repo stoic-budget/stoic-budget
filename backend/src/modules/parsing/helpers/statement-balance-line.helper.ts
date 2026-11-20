@@ -27,7 +27,7 @@ export function balanceLineEnd(
 }
 
 /** A figure, then a word of three letters or more: another column's label begins. */
-const NEXT_COLUMN_LABEL = /(\d[.,]\d{2}\s+)(?=[a-z]{3,}(?!\s*[:.]?\s*$))/;
+const NEXT_COLUMN_LABEL = /(\d[.,]\d{2}(?:\s?[cd]r\b)?\s+)(?=[a-z]{3,}(?!\s*[:.]?\s*$))/;
 
 function lineEnd(folded: string, index: number): number | undefined {
   const end = folded.indexOf('\n', index);

@@ -119,6 +119,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Fifth Third Business Plus')).toBe(BankName.FIFTH_THIRD);
     expect(mentionedBank('Member FDIC. First Citizens Bank')).toBe(BankName.FIRST_CITIZENS);
     expect(mentionedBank('first direct is a division of HSBC UK Bank plc')).toBe(BankName.FIRST_DIRECT);
+    expect(mentionedBank('visit fnb.co.za')).toBe(BankName.FNB);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

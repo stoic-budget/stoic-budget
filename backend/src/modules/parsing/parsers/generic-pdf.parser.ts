@@ -8,6 +8,7 @@ import {
 import { BankName, FileType } from '../../../entities/statement.entity';
 import { contributedHeadings } from '../helpers/contributed-layouts';
 import { findAccountNumberInColumn } from '../helpers/pdf-layout-account-number.helper';
+import { withCreditMarks } from '../helpers/pdf-layout-credit-marks.helper';
 import { statementLayout } from '../helpers/pdf-layout-fingerprint.helper';
 import type { RowRule } from '../helpers/pdf-layout-row-date.helper';
 import { pickByChecks, ROW_RULES } from '../helpers/pdf-layout-rules.helper';
@@ -226,7 +227,7 @@ export class GenericPdfParser extends BaseParser {
     rows: PdfTextRow[],
     reading: LayoutReading = this.reading,
   ): LayoutTransaction[] {
-    return readLayoutTransactions(rows, { ...reading, rows: this.rowRule });
+    return withCreditMarks(rows, readLayoutTransactions(rows, { ...reading, rows: this.rowRule }));
   }
 
   /** The row rule `readTransactions` reads under; a bank's override passes no reading. */
