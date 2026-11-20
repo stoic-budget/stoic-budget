@@ -67,6 +67,7 @@ import { KrooParser } from '../parsers/kroo.parser';
 import { LaurentianParser } from '../parsers/laurentian.parser';
 import { LloydsParser } from '../parsers/lloyds.parser';
 import { MAndTParser } from '../parsers/m-and-t.parser';
+import { MarcusParser } from '../parsers/marcus.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
 /**
@@ -142,4 +143,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [LaurentianParser, { bankName: BankName.LAURENTIAN }],
   [LloydsParser, { bankName: BankName.LLOYDS }],
   [MAndTParser, { bankName: BankName.M_AND_T }],
+  [MarcusParser, { bankName: BankName.MARCUS }],
 ];
