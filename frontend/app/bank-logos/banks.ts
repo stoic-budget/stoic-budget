@@ -134,4 +134,5 @@ export const BANKS = [
     logo: 'nationwide.png',
     aliases: ['nationwide building society'],
   },
+  { key: 'natwest', name: 'NatWest', logo: 'natwest.png', aliases: ['national westminster'] },
 ] as const satisfies readonly BankEntry[];

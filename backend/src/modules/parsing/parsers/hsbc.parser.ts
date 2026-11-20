@@ -1,7 +1,7 @@
 import type { PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import { BankName } from '../../../entities/statement.entity';
+import { joinMoneyLastEntries } from '../helpers/pdf-layout-money-last.helper';
 import type { LayoutTransaction } from '../helpers/pdf-layout-table.helper';
-import { findStatementAmounts } from '../helpers/statement-amount.helper';
 import { ukCodeEntry } from '../helpers/statement-uk-codes.helper';
 import type { ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import { BankPdfParser } from './bank-pdf.parser';
@@ -47,65 +47,13 @@ function opensEntry(row: PdfTextRow): boolean {
   return ENTRY_CODES.has(items[dateWords(row).length]?.text ?? '');
 }
 
-const isMoney = (text: string) => findStatementAmounts(text).length > 0;
-const hasMoney = (row: PdfTextRow) => isMoney(row.text);
-
-/**
- * An entry's lines as the reader expects one row: the date (the day's, when
- * the line prints none) and the money on its first line, the rest of its
- * words below.
- */
-function asOneRow(lines: PdfTextRow[], date: PdfTextRow['items']): PdfTextRow[] {
-  const [first, ...rest] = lines;
-  const money = lines.at(-1)?.items.filter(item => isMoney(item.text)) ?? [];
-  const carried = dateWords(first).length > 0 ? [] : date.map(item => ({ ...item, y: first.y }));
-  const words = (line: PdfTextRow) =>
-    line === first ? [] : line.items.filter(item => !money.includes(item));
-  const opening = [
-    ...carried,
-    ...first.items.filter(item => !money.includes(item)),
-    ...money.map(item => ({ ...item, y: first.items[0]?.y ?? item.y })),
-  ];
-  return [
-    { ...first, items: opening, text: opening.map(item => item.text).join(' ') },
-    ...rest.map(line => ({
-      ...line,
-      items: words(line),
-      text: words(line)
-        .map(item => item.text)
-        .join(' '),
-    })),
-  ].filter(line => line.items.length > 0);
-}
-
 /**
  * HSBC prints an entry over two or three lines: the code and the payee, a
  * reference, and its money on the last ("PLAYDALE  11,852.74"), the date
- * only on a day's first entry. Each entry is laid out as one row: date and
- * money on its first line, its words below.
+ * only on a day's first entry. Each entry opens at its payment type code.
  */
 export function joinHsbcEntries(rows: PdfTextRow[]): PdfTextRow[] {
-  const out: PdfTextRow[] = [];
-  let entry: PdfTextRow[] | null = null;
-  let date: PdfTextRow['items'] = [];
-  for (const row of [...rows].sort((a, b) => a.page - b.page || a.y - b.y)) {
-    if (opensEntry(row)) {
-      out.push(...(entry ?? []));
-      entry = [row];
-      date = dateWords(row).length > 0 ? dateWords(row) : date;
-    } else if (entry && entry[0].page === row.page) {
-      entry.push(row);
-    } else {
-      out.push(...(entry ?? []), row);
-      entry = null;
-      continue;
-    }
-    if (hasMoney(row)) {
-      out.push(...asOneRow(entry, date));
-      entry = null;
-    }
-  }
-  return [...out, ...(entry ?? [])];
+  return joinMoneyLastEntries(rows, opensEntry);
 }
 
 /**

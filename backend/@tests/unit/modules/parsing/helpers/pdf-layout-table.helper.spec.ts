@@ -707,3 +707,19 @@ describe('underscore rules', () => {
     expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
   });
 });
+
+describe('Withdrawn', () => {
+  it('reads "Withdrawn(£)" set close after "Paid In(£)" as money out', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 60],
+        ['Description', 111],
+        ['Paid', 358],
+        ['In(£)', 377],
+        ['Withdrawn(£)', 398],
+        ['Balance(£)', 478],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'credit', 'debit', 'balance']);
+  });
+});

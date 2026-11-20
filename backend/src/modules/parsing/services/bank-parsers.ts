@@ -74,6 +74,7 @@ import { MonzoParser } from '../parsers/monzo.parser';
 import { N26Parser } from '../parsers/n26.parser';
 import { NabParser } from '../parsers/nab.parser';
 import { NationwideParser } from '../parsers/nationwide.parser';
+import { NatwestParser } from '../parsers/natwest.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
 /**
@@ -156,4 +157,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [N26Parser, { bankName: BankName.N26 }],
   [NabParser, { bankName: BankName.NAB }],
   [NationwideParser, { bankName: BankName.NATIONWIDE }],
+  [NatwestParser, { bankName: BankName.NATWEST }],
 ];
