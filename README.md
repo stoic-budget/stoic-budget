@@ -153,7 +153,7 @@ Setting expectations upfront:
 | 🇸🇪 🇩🇰 🇳🇴 🇫🇮 Nordics | | Nordea |
 | 🇫🇷 France | Crédit Agricole | |
 | 🇵🇱 Poland | BNP Paribas Bank Polska | |
-| 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital | |
+| 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital, Desjardins | |
 | 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank | |
 | 🇿🇦 South Africa | Absa, Capitec | |
 | 🇮🇳 India | Axis Bank, Citibank | |
