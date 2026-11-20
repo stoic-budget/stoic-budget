@@ -91,8 +91,8 @@ export function parseDateParts(text: string, order: NumericDateOrder): DateParts
   }
 
   const dayFirst = value.match(
-    // "18 May 23." closes with a full stop on some statements.
-    /^(\d{1,2})(?:er)?[\s-]*([a-z]+)\.?,?(?:[\s-]*((?:19|20)\d{2}|\d{2}))?\.?$/,
+    // "18 May 23." closes with a full stop on some statements; "12th Apr" writes the day's ordinal.
+    /^(\d{1,2})(?:er|st|nd|rd|th)?[\s-]*([a-z]+)\.?,?(?:[\s-]*((?:19|20)\d{2}|\d{2}))?\.?$/,
   );
   if (dayFirst) {
     const month = monthFromName(dayFirst[2]);
@@ -168,7 +168,7 @@ const FULL_DATE_PATTERNS = [
   /\b\d{4}-\d{2}-\d{2}\b/g,
   /\b(?:19|20)\d{2}([/.])\d{1,2}\1\d{1,2}\b/g,
   /\b\d{1,2}[./-]\d{1,2}[./-](?:\d{4}|\d{2})\b/g,
-  /\b\d{1,2}(?:er)?[\s-]+[a-z]+\.?[\s-]+\d{4}\b/g,
+  /\b\d{1,2}(?:er|st|nd|rd|th)?[\s-]+[a-z]+\.?[\s-]+\d{4}\b/g,
   /\b[a-z]+\.?\s+\d{1,2}(?:,?\s+|,)\d{4}\b/g,
   // Glued, as some banks print them: "31AUG23", "02Jul2024".
   /\b\d{1,2}[a-z]{3}(?:\d{4}|\d{2})\b/g,

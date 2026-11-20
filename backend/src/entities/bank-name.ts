@@ -92,5 +92,6 @@ export enum BankName {
   REGIONS = 'regions',
   REVOLUT = 'revolut',
   RBS = 'rbs',
+  SANTANDER = 'santander',
   OTHER = 'other',
 }
