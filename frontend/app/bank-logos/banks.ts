@@ -109,4 +109,5 @@ export const BANKS = [
   { key: 'kbc', name: 'KBC', logo: 'kbc.png', aliases: ['kbc bank'] },
   { key: 'keybank', name: 'KeyBank', logo: 'keybank.png', aliases: ['key bank'] },
   { key: 'kroo', name: 'Kroo', logo: 'kroo.png', aliases: ['kroo bank'] },
+  { key: 'laurentian', name: 'Laurentian Bank', logo: 'laurentian.png', aliases: ['laurentian'] },
 ] as const satisfies readonly BankEntry[];

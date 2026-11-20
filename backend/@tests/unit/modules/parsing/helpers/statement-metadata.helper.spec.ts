@@ -252,3 +252,12 @@ describe('statement-metadata.helper', () => {
     expect(isTotalsLabel('ACME Totalcare')).toBe(false);
   });
 });
+
+describe('a previous statement\'s balance', () => {
+  it('opens at "BALANCE - PREVIOUS STATEMENT"', () => {
+    expect(findStatementBalances('BALANCE - PREVIOUS STATEMENT 12.00\nMAY 31 NEW BALANCE 4.00-', 'mdy')).toEqual({
+      start: 12,
+      end: -4,
+    });
+  });
+});

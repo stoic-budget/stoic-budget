@@ -42,7 +42,8 @@ def is_horizontal(obj: Dict[str, Any]) -> bool:
     if obj.get("object_type") != "char":
         return True
     a, b, c, d = (obj.get("matrix") or (1, 0, 0, 1))[:4]
-    return abs(b) < 1e-3 and abs(c) < 1e-3 and a > 0 and d > 0
+    # A flipped glyph matrix ("0.24 0 0 -0.24", Type 3 fonts) is still horizontal text.
+    return abs(b) < 1e-3 and abs(c) < 1e-3 and a > 0 and (d > 0 or obj.get("upright", False))
 
 
 def build_rows(words: List[Dict[str, Any]], page_number: int, tolerance: float = 2.5) -> List[Dict[str, Any]]:
@@ -261,13 +262,39 @@ def white_twins(page) -> set:
     return found
 
 
+def straighten(page) -> None:
+    """
+    Type 3 fonts draw horizontal text through a flipped matrix ("0.24 0 0 -0.24"):
+    pdfminer calls those glyphs not upright and reads each as a line of its own.
+    A glyph neither rotated nor mirrored left to right is upright.
+    """
+    for char in page.chars:
+        a, b, c, _d, _e, _f = char["matrix"]
+        if not char["upright"] and b == 0 and c == 0 and a > 0:
+            char["upright"] = True
+
+
+def underscore_rules(page) -> set:
+    """
+    Underscores set in a row as a rule ("_DATE___DESCRIPTION___BALANCE $__"):
+    two or more side by side are a line, not text. A lone "_" in a name stays.
+    """
+    marks = sorted((char for char in page.chars if char["text"] == "_"), key=lambda c: (round(c["top"]), c["x0"]))
+    found = set()
+    for left, right in zip(marks, marks[1:]):
+        if round(left["top"]) == round(right["top"]) and right["x0"] - left["x1"] < 1:
+            found.update((id(left), id(right)))
+    return found
+
+
 def unreadable(page) -> set:
     """
     Characters set under 1pt: labels for screen readers ("Column", "Date",
     "Money In (£) blank.") that an accessible statement writes beside every
     cell, interleaved with the cell's own text ("D0ate", "520.87Money").
     """
-    return {id(char) for char in page.chars if char["size"] < 1}
+    # Type 3 fonts report a glyph-space size ("0.24") for full-width letters: their width says otherwise.
+    return {id(char) for char in page.chars if char["size"] < 1 and char["x1"] - char["x0"] < 1}
 
 
 def visible(hidden: set):
@@ -283,7 +310,8 @@ def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:
         for page_number, raw_page in enumerate(pdf.pages, start=1):
             # Text painted over goes first: the text written on top at the same
             # spot would otherwise be dropped as its duplicate.
-            hidden = hidden_chars(raw_page) | white_twins(raw_page) | unreadable(raw_page)
+            straighten(raw_page)
+            hidden = hidden_chars(raw_page) | white_twins(raw_page) | unreadable(raw_page) | underscore_rules(raw_page)
             page = raw_page.filter(visible(hidden)) if hidden else raw_page
             # Bold drawn twice at the same spot reads "PPaaggee" otherwise.
             page = page.dedupe_chars()

@@ -243,6 +243,7 @@ describe('ParserFactoryService', () => {
       'KbcParser',
       'KeybankParser',
       'KrooParser',
+      'LaurentianParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
