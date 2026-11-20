@@ -146,7 +146,7 @@ Setting expectations upfront:
 
 | Country | Native PDF parser | CSV preset |
 |---|---|---|
-| 🇺🇸 United States | Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third | Chase, Bank of America, Capital One, American Express, Wells Fargo |
+| 🇺🇸 United States | Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens | Chase, Bank of America, Capital One, American Express, Wells Fargo |
 | 🇬🇧 United Kingdom | Barclays, Bank of Scotland | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
 | 🇩🇪 Germany | Deutsche Bank | N26, Sparkasse / DKB, Commerzbank |
 | 🇳🇱 Netherlands | | ING, Rabobank |

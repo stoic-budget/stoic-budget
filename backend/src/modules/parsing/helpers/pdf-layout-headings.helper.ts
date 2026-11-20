@@ -76,6 +76,9 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'cheques et debits',
     'paid out',
     'pay out',
+    // Wells Fargo's: "Withdrawals/" over "Subtractions".
+    'withdrawals/ subtractions',
+    'withdrawals/subtractions',
     'money out',
     'payments',
     'cargos',
@@ -96,6 +99,8 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'depots et credits',
     'paid in',
     'pay in',
+    'deposits/ additions',
+    'deposits/additions',
     'receipts',
     'money in',
     'abonos',
@@ -117,9 +122,17 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     // One signed column under both headings, stacked: "Deposits (CR)" over "Withdrawals (DT)".
     'deposits withdrawals',
   ],
-  balance: ['balance', 'running balance', 'solde', 'saldo', 'kontostand'],
+  balance: [
+    'balance',
+    'running balance',
+    'ending daily balance',
+    'daily balance',
+    'solde',
+    'saldo',
+    'kontostand',
+  ],
   // Columns whose words are no text of the row: the row number left of the date, a
   // category label ("Credit", "Debit") beside the amount.
   fee: ['fee', 'fees'],
-  other: ['no.', 'category', 'channel'],
+  other: ['no.', 'category', 'channel', 'check number'],
 };
