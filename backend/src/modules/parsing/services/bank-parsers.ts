@@ -56,6 +56,7 @@ import { HeritageParser } from '../parsers/heritage.parser';
 import { HsaBankParser } from '../parsers/hsa-bank.parser';
 import { HsbcParser } from '../parsers/hsbc.parser';
 import { HuntingtonParser } from '../parsers/huntington.parser';
+import { IbcParser } from '../parsers/ibc.parser';
 import { KaspiParser } from '../parsers/kaspi.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
@@ -122,4 +123,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [HsaBankParser, { bankName: BankName.HSA_BANK }],
   [HsbcParser, { bankName: BankName.HSBC }],
   [HuntingtonParser, { bankName: BankName.HUNTINGTON }],
+  [IbcParser, { bankName: BankName.IBC }],
 ];
