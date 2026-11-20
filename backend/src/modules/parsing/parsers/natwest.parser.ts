@@ -1,7 +1,7 @@
 import type { PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import type { PaymentType } from '../../../contracts/transactions/payment-type';
 import { BankName } from '../../../entities/statement.entity';
-import { hasMoney, joinMoneyLastEntries } from '../helpers/pdf-layout-money-last.helper';
+import { joinMoneyLastTable } from '../helpers/pdf-layout-money-last.helper';
 import type { LayoutReading, LayoutTransaction } from '../helpers/pdf-layout-table.helper';
 import type { ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import { BankPdfParser } from './bank-pdf.parser';
@@ -17,26 +17,9 @@ export function isNatwestStatement(text: string): boolean {
 /** "Date  Description  Paid In(£)  Withdrawn(£)  Balance(£)": the table's header. */
 const isHeader = (row: PdfTextRow) => /\bDate\b.*\bDescription\b.*\bBalance\b/i.test(row.text);
 
-/**
- * An entry opens on the line after the header or after the last entry's
- * money: its words run on until the line that prints its money.
- */
+/** An entry opens on the line after the header or after the last entry's money. */
 export function joinNatwestEntries(rows: PdfTextRow[]): PdfTextRow[] {
-  const headerAt = new Map<number, number>();
-  for (const row of rows) {
-    if (isHeader(row) && !headerAt.has(row.page)) {
-      headerAt.set(row.page, row.y);
-    }
-  }
-  const inTable = (row: PdfTextRow) => row.y > (headerAt.get(row.page) ?? Number.POSITIVE_INFINITY);
-  return joinMoneyLastEntries(
-    rows,
-    (row, before) =>
-      inTable(row) &&
-      before !== null &&
-      before.page === row.page &&
-      (isHeader(before) || hasMoney(before)),
-  );
+  return joinMoneyLastTable(rows, isHeader);
 }
 
 const KINDS: [RegExp, PaymentType | 'transfer'][] = [

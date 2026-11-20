@@ -78,3 +78,30 @@ export function joinMoneyLastEntries(
   }
   return [...out, ...(entry ?? [])];
 }
+
+/**
+ * A table whose every entry runs from the line after the header, or after
+ * the last entry's money, to the line that prints its own money. `isHeader`
+ * tells the table's header; lines above the first header on a page are left
+ * as they are.
+ */
+export function joinMoneyLastTable(
+  rows: PdfTextRow[],
+  isHeader: (row: PdfTextRow) => boolean,
+): PdfTextRow[] {
+  const headerAt = new Map<number, number>();
+  for (const row of rows) {
+    if (isHeader(row) && !headerAt.has(row.page)) {
+      headerAt.set(row.page, row.y);
+    }
+  }
+  const inTable = (row: PdfTextRow) => row.y > (headerAt.get(row.page) ?? Number.POSITIVE_INFINITY);
+  return joinMoneyLastEntries(
+    rows,
+    (row, before) =>
+      inTable(row) &&
+      before !== null &&
+      before.page === row.page &&
+      (isHeader(before) || hasMoney(before)),
+  );
+}
