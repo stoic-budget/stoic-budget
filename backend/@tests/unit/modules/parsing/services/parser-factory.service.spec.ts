@@ -216,6 +216,7 @@ describe('ParserFactoryService', () => {
       'BankOfAmericaParser',
       'DesjardinsParser',
       'DeutscheBankParser',
+      'DiscoverParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

@@ -67,4 +67,5 @@ export const BANKS = [
   },
   { key: 'desjardins', name: 'Desjardins', logo: 'desjardins.png', aliases: ['caisse desjardins'] },
   { key: 'deutsche_bank', name: 'Deutsche Bank', logo: 'deutsche-bank.png' },
+  { key: 'discover', name: 'Discover', logo: 'discover.png', aliases: ['discover bank'] },
 ] as const satisfies readonly BankEntry[];
