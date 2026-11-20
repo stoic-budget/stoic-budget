@@ -155,6 +155,7 @@ Setting expectations upfront:
 | 🇵🇱 Poland | BNP Paribas Bank Polska | |
 | 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank | |
 | 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank | |
+| 🇳🇬 Nigeria | Fidelity Bank | |
 | 🇿🇦 South Africa | Absa, Capitec | |
 | 🇮🇳 India | Axis Bank, Citibank | |
 | 🇧🇷 Brazil | Banco do Brasil | |

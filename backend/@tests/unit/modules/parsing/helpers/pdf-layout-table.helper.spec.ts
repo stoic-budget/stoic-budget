@@ -547,3 +547,28 @@ describe('wrapped lines', () => {
     ]);
   });
 });
+
+describe('headings', () => {
+  it('reads "Pay In" and "Pay Out" as money in and out, "Channel" as no text of the row', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 40],
+        ['Channel', 120],
+        ['Details', 180],
+        ['Pay', 300],
+        ['In', 318],
+        ['Pay', 360],
+        ['Out', 378],
+        ['Balance', 440],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual([
+      'date',
+      'other',
+      'description',
+      'credit',
+      'debit',
+      'balance',
+    ]);
+  });
+});
