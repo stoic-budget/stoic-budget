@@ -144,4 +144,5 @@ export const BANKS = [
   { key: 'ncba', name: 'NCBA Bank', logo: 'ncba.png', aliases: ['ncba'] },
   { key: 'netspend', name: 'Netspend', logo: 'netspend.png', aliases: ['netspend'] },
   { key: 'optum', name: 'Optum Bank', logo: 'optum.png', aliases: ['optum'] },
+  { key: 'payoneer', name: 'Payoneer', logo: 'payoneer.png', aliases: ['payoneer'] },
 ] as const satisfies readonly BankEntry[];
