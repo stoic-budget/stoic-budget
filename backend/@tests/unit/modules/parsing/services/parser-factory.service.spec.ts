@@ -241,6 +241,7 @@ describe('ParserFactoryService', () => {
       'IfastParser',
       'IngParser',
       'KbcParser',
+      'KeybankParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
