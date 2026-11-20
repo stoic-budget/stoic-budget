@@ -43,5 +43,6 @@ export enum BankName {
   DISCOVER = 'discover',
   EQ_BANK = 'eq_bank',
   FIDELITY_BANK = 'fidelity_bank',
+  FIFTH_THIRD = 'fifth_third',
   OTHER = 'other',
 }

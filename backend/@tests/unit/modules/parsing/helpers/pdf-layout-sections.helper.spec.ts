@@ -32,6 +32,7 @@ describe('pdf-layout-sections.helper', () => {
     expect(
       readSectionHeading(row(10, phrase('Withdrawals and Other Deductions (continued)', 50))),
     ).toBe('debit');
+    expect(readSectionHeading(row(10, phrase('ELECTRONIC PAYMENTS', 50)))).toBe('debit');
     expect(readSectionHeading(row(10, phrase('DEPOSIT ACCOUNTS', 50)))).toBeNull();
     expect(readSectionHeading(row(10, phrase('Plus: Deposits and Other Additions 3,909.54', 50)))).toBeNull();
   });

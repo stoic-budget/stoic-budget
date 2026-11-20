@@ -43,6 +43,8 @@ const SECTIONS: Record<SectionSign, string[]> = {
     'other withdrawals and debits',
     'other withdrawals',
     'electronic withdrawals',
+    'electronic payments',
+    'other withdraws',
     'card withdrawals',
     'atm and debit card withdrawals',
     'atm & debit card withdrawals',

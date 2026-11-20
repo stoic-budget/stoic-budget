@@ -60,6 +60,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.DISCOVER, /\bissued by discover bank\b/],
   [BankName.EQ_BANK, /\beq bank\b.*\bequitable bank\b|\bequitable bank tower\b/],
   [BankName.FIDELITY_BANK, /\bfidelitybank\.ng\b/],
+  [BankName.FIFTH_THIRD, /\bfifth third (?:bank|business|preferred|momentum)/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

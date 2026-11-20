@@ -46,4 +46,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.DISCOVER]: 'Discover',
   [BankName.EQ_BANK]: 'EQ Bank',
   [BankName.FIDELITY_BANK]: 'Fidelity Bank',
+  [BankName.FIFTH_THIRD]: 'Fifth Third',
 };

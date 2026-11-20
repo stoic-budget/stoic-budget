@@ -68,3 +68,11 @@ describe('amountsWithoutDates', () => {
     expect(amountsWithoutDates('as at 29.03.2018 EUR 12.50')).toEqual([12.5]);
   });
 });
+
+describe('balanceLineEnd in a two-column summary', () => {
+  it("ends after the label's figure when another column's label follows it", () => {
+    const text = 'beginning balance 353,060.27 electronic payments 120,100.00';
+    const index = 'beginning balance'.length;
+    expect(text.slice(index, balanceLineEnd(text, index))).toBe(' 353,060.27 ');
+  });
+});

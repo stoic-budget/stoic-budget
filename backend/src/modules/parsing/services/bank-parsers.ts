@@ -38,6 +38,7 @@ import { DeutscheBankParser } from '../parsers/deutsche-bank.parser';
 import { DiscoverParser } from '../parsers/discover.parser';
 import { EqBankParser } from '../parsers/eq-bank.parser';
 import { FidelityBankParser } from '../parsers/fidelity-bank.parser';
+import { FifthThirdParser } from '../parsers/fifth-third.parser';
 import { HapoalimParser } from '../parsers/hapoalim.parser';
 import { KaspiParser } from '../parsers/kaspi.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
@@ -88,4 +89,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [DiscoverParser, { bankName: BankName.DISCOVER }],
   [EqBankParser, { bankName: BankName.EQ_BANK }],
   [FidelityBankParser, { bankName: BankName.FIDELITY_BANK }],
+  [FifthThirdParser, { bankName: BankName.FIFTH_THIRD }],
 ];
