@@ -624,4 +624,13 @@ describe('headings', () => {
     ]);
     expect([openingBalanceFromRows(transactions), closingBalanceFromRows(transactions)]).toEqual([-19.9, 4.1]);
   });
+
+  it('leaves "(Continued on next page)" out of the page\'s last row', () => {
+    const transactions = readLayoutTransactions([
+      header,
+      row(140, [['01/02/2025', 40], ['ACME', 110], ['12.50', 315]]),
+      row(149, [['(Continued', 110], ['on', 160], ['next', 175], ['page)', 195]]),
+    ]);
+    expect(transactions.map(t => t.description)).toEqual(['ACME']);
+  });
 });

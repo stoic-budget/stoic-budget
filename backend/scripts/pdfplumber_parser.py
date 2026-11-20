@@ -261,6 +261,15 @@ def white_twins(page) -> set:
     return found
 
 
+def unreadable(page) -> set:
+    """
+    Characters set under 1pt: labels for screen readers ("Column", "Date",
+    "Money In (£) blank.") that an accessible statement writes beside every
+    cell, interleaved with the cell's own text ("D0ate", "520.87Money").
+    """
+    return {id(char) for char in page.chars if char["size"] < 1}
+
+
 def visible(hidden: set):
     return lambda obj: obj.get("object_type") != "char" or id(obj) not in hidden
 
@@ -274,7 +283,7 @@ def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:
         for page_number, raw_page in enumerate(pdf.pages, start=1):
             # Text painted over goes first: the text written on top at the same
             # spot would otherwise be dropped as its duplicate.
-            hidden = hidden_chars(raw_page) | white_twins(raw_page)
+            hidden = hidden_chars(raw_page) | white_twins(raw_page) | unreadable(raw_page)
             page = raw_page.filter(visible(hidden)) if hidden else raw_page
             # Bold drawn twice at the same spot reads "PPaaggee" otherwise.
             page = page.dedupe_chars()

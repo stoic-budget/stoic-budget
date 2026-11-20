@@ -4,7 +4,8 @@ import type { ParsedTransaction } from '../interfaces/parsed-statement.interface
 /**
  * The payment type codes UK banks print before a row's text (HSBC and first
  * direct, Lloyds, Halifax, NatWest and others): "VIS ACME STORE", "DD
- * ACME ENERGY", "))) ACME CAFE" for contactless. A code that names a
+ * ACME ENERGY", "))) ACME CAFE" for contactless; Lloyds and Halifax print it
+ * after the text ("ACME LTD BGC"). A code that names a
  * transfer without its side ("TFR") takes it from the money.
  */
 const CODES: Record<string, PaymentType | 'transfer'> = {
@@ -31,6 +32,8 @@ const CODES: Record<string, PaymentType | 'transfer'> = {
 };
 
 const CODE = /^(\){3}|[A-Z]{2,3})\s+(?=\S)/;
+/** Lloyds and Halifax print the code in a Type column after the text: "ACME LTD BGC". */
+const TRAILING_CODE = /(?<=\S)\s+(\){3}|[A-Z]{2,3})$/;
 
 /**
  * A row whose text starts with a UK payment type code: its type, and its
@@ -38,7 +41,9 @@ const CODE = /^(\){3}|[A-Z]{2,3})\s+(?=\S)/;
  */
 export function ukCodeEntry(row: ParsedTransaction): ParsedTransaction {
   const text = row.paymentPurpose.replace(/\s+/g, ' ').trim();
-  const match = CODE.exec(text);
+  // The Type column's code wins: "BP GLEDHOW S/STN  DEB" is a card payment at a BP station.
+  const trailing = TRAILING_CODE.exec(text);
+  const match = trailing && CODES[trailing[1]] ? trailing : CODE.exec(text);
   const kind = match ? CODES[match[1]] : undefined;
   if (!(match && kind)) {
     return row;
@@ -49,7 +54,7 @@ export function ukCodeEntry(row: ParsedTransaction): ParsedTransaction {
         ? 'bank_transfer_in'
         : 'bank_transfer_out'
       : kind;
-  const party = text.slice(match[0].length);
+  const party = match === trailing ? text.slice(0, match.index) : text.slice(match[0].length);
   return {
     ...row,
     paymentType,

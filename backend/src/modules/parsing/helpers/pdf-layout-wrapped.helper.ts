@@ -25,7 +25,9 @@ export function groupWrappedLines(rows: PdfTextRow[]): PdfTextRow[][] {
     const group = groups[groups.length - 1];
     const last = group?.[group.length - 1];
     const gap = last?.page === row.page ? (row.y - last.y) / rowHeight(last) : null;
-    if (group && gap !== null && gap > WRAPPED_GAP_MIN && gap < WRAPPED_GAP_MAX) {
+    // "(Continued on next page)" under a page's last row is never part of it.
+    const note = PAGE_NOTE.test(row.text.trim());
+    if (group && !note && gap !== null && gap > WRAPPED_GAP_MIN && gap < WRAPPED_GAP_MAX) {
       group.push(row);
     } else {
       groups.push([row]);
