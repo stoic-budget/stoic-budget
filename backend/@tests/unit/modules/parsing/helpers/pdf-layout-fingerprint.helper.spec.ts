@@ -164,6 +164,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Your RBC personal banking account statement')).toBe(BankName.RBC);
     expect(mentionedBank('please call 1-800-REGIONS (734-4667)')).toBe(BankName.REGIONS);
     expect(mentionedBank('Revolut Ltd (No. 08804411) is authorised by the FCA')).toBe(BankName.REVOLUT);
+    expect(mentionedBank('Royal Bank of Scotland Plc. Registered Office, The Mound')).toBe(BankName.RBS);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
