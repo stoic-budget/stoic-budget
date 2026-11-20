@@ -43,7 +43,14 @@ export function CountryDrawer({
   };
 
   return (
-    <DrawerShell isOpen={isOpen} onClose={close} position="right" width="md" title={title}>
+    <DrawerShell
+      demoNotice={false}
+      isOpen={isOpen}
+      onClose={close}
+      position="right"
+      width="md"
+      title={title}
+    >
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, pb: 2 }}>
         <Box sx={{ position: 'relative' }}>
           <Search
