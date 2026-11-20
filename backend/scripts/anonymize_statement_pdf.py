@@ -124,8 +124,18 @@ class Font:
         return b"".join(self.reverse[ch].to_bytes(self.width, "big") for ch in text)
 
 
+LITERAL_ESCAPES = {b"n": b"\n", b"r": b"\r", b"t": b"\t", b"b": b"\b", b"f": b"\f"}
+
+
 def unescape_literal(raw: bytes) -> bytes:
-    return re.sub(rb"\\([nrtbf()\\])", lambda m: {b"n": b"\n", b"r": b"\r", b"t": b"\t", b"b": b"\b", b"f": b"\f"}.get(m.group(1), m.group(1)), raw)
+    """A literal string's bytes: "\\n" and the like, and octal codes ("\\054" is a comma)."""
+
+    def one(m: re.Match) -> bytes:
+        if m.group(1) is not None:
+            return bytes([int(m.group(1), 8) & 0xFF])
+        return LITERAL_ESCAPES.get(m.group(2), m.group(2))
+
+    return re.sub(rb"\\(?:([0-7]{1,3})|([nrtbf()\\]))", one, raw)
 
 
 def escape_literal(raw: bytes) -> bytes:
