@@ -4,7 +4,8 @@
     "currency": "EUR",
     "dateFrom": "2025-01-01T00:00:00",
     "dateTo": "2025-01-30T00:00:00",
-    "balanceStart": 1423.95
+    "balanceStart": 1423.95,
+    "balanceEnd": 463.56
   },
   "transactions": [
     {
@@ -72,6 +73,14 @@
       "paymentType": "card"
     },
     {
+      "transactionDate": "2025-01-18T00:00:00",
+      "counterpartyName": "Nike",
+      "paymentPurpose": "Payment to Nike LD937DF153",
+      "debit": 195.39,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
       "transactionDate": "2025-01-20T00:00:00",
       "counterpartyName": "Member C",
       "paymentPurpose": "Transferred to Member C Ac. 81540482",
@@ -119,8 +128,5 @@
       "currency": "USD",
       "paymentType": "cash"
     }
-  ],
-  "failedChecks": [
-    "balance_chain"
   ]
 }

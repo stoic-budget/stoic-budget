@@ -91,7 +91,8 @@ export function parseDateParts(text: string, order: NumericDateOrder): DateParts
   }
 
   const dayFirst = value.match(
-    /^(\d{1,2})(?:er)?[\s-]*([a-z]+)\.?,?(?:[\s-]*((?:19|20)\d{2}|\d{2}))?$/,
+    // "18 May 23." closes with a full stop on some statements.
+    /^(\d{1,2})(?:er)?[\s-]*([a-z]+)\.?,?(?:[\s-]*((?:19|20)\d{2}|\d{2}))?\.?$/,
   );
   if (dayFirst) {
     const month = monthFromName(dayFirst[2]);
