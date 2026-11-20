@@ -106,6 +106,4 @@ export class TemplateReportRowsLoader {
 
     return { currency, rows, missingRates: converter.missing };
   }
-
-  /** P&L condensed to one screen: the headline numbers plus where the money went. */
 }

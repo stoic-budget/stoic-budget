@@ -174,6 +174,7 @@ export function buildExpenseByCategoryDocument(
   };
 }
 
+/** P&L condensed to one screen: the headline numbers plus where the money went. */
 export function buildMonthlySummaryDocument(
   text: TemplateLabels,
   subtitle: string,
