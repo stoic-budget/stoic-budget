@@ -209,8 +209,8 @@ export class GenericPdfParser extends BaseParser {
   ): ParseCheck[] {
     const rows = layout.rows;
     const fromRows = {
-      start: openingBalanceFromRows(rows),
-      end: closingBalanceFromRows(rows),
+      start: openingBalanceFromRows(rows, dateOrder),
+      end: closingBalanceFromRows(rows, dateOrder),
     };
     return [
       checkBalanceChain(rows, isCard),
@@ -314,13 +314,13 @@ export class GenericPdfParser extends BaseParser {
       this.extractBalance(text, 'Остаток на начало') ??
       this.extractBalance(text, 'Остаток на начало периода') ??
       this.extractBalance(text, 'Входящий остаток') ??
-      openingBalanceFromRows(layoutTransactions) ??
+      openingBalanceFromRows(layoutTransactions, dateOrder) ??
       labelled.start;
     const balanceEnd =
       this.extractBalance(text, 'Остаток на конец') ??
       this.extractBalance(text, 'Остаток на конец периода') ??
       this.extractBalance(text, 'Исходящий остаток') ??
-      closingBalanceFromRows(layoutTransactions) ??
+      closingBalanceFromRows(layoutTransactions, dateOrder) ??
       labelled.end;
     return { balanceStart, balanceEnd };
   }

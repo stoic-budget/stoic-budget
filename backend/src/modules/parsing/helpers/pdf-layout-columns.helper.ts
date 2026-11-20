@@ -69,12 +69,25 @@ function apart(left: PdfTextItem, right: PdfTextItem): boolean {
   return right.x - (left.x + left.width) > PHRASE_WORD_GAP_LETTERS * letter;
 }
 
+/**
+ * "Deposits  Withdrawals" side by side are two columns, money in and out,
+ * however close: only stacked over each other are they one signed column's
+ * heading.
+ */
+function sidesBySide(words: PdfTextItem[]): boolean {
+  const roles = new Set(words.map(word => PHRASES.get(headingWord(word))));
+  const stacked = words.some(
+    (word, at) => at > 0 && word.x < words[at - 1].x + words[at - 1].width,
+  );
+  return roles.has('debit') && roles.has('credit') && !stacked;
+}
+
 function matchHeading(items: PdfTextItem[], index: number, taught?: TaughtHeadings) {
   const longest = Math.max(LONGEST_PHRASE, ...Array.from(taught?.keys() ?? [], wordCount));
   for (let length = Math.min(longest, items.length - index); length > 0; length -= 1) {
     const words = items.slice(index, index + length);
     // One heading's words sit a space apart: "Deposits   Withdrawals" are two headings.
-    if (words.some((word, at) => at > 0 && apart(words[at - 1], word))) {
+    if (words.some((word, at) => at > 0 && apart(words[at - 1], word)) || sidesBySide(words)) {
       continue;
     }
     const phrase = words.map(headingWord).filter(Boolean).join(' ');
