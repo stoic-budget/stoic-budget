@@ -166,7 +166,7 @@ Setting expectations upfront:
 | 🇱🇰 Sri Lanka | Commercial Bank of Ceylon | |
 | 🇮🇱 Israel | Bank Hapoalim / Isracard (Hebrew) | |
 | 🇰🇿 Kazakhstan | Kaspi Bank, Bereke Bank (new and legacy formats) | |
-| 🌍 International | Payoneer | Revolut, Wise, PayPal |
+| 🌍 International | Payoneer, PayPal | Revolut, Wise, PayPal |
 | — | | T-Bank (Tinkoff) |
 
 **Any other bank:** CSV with delimiter detection, XLSX / XLS, DOCX tables, OFX / QFX, QIF, MT940, CAMT.053, any PDF through the generic table reader, and images (PNG / JPG) through OCR.
