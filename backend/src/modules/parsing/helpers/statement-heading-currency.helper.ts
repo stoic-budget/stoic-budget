@@ -36,6 +36,9 @@ const CURRENCY_NAMES: Record<string, string> = {
   'pound sterling': 'GBP',
 };
 
+/** "Valuta: LEI": Romanian statements name the leu by its plural. */
+const LEI = /\b(?:Valuta|Moneda)\s*:?\s*(?:LEI|RON)\b/i;
+
 const SIGNS = CURRENCY_SIGNS.map(([sign]) => sign).join('');
 /** "+400,00€", "-£12.50", "€ 1.000,00": a figure with its sign glued on, before or after. */
 const SIGNED_FIGURE = new RegExp(`(?<=\\d)([${SIGNS}])|([${SIGNS}])\\s?(?=\\d)`, 'g');
@@ -55,8 +58,8 @@ export function printedCurrency(text: string): string | null {
     return heading[1] ?? heading[2] ?? heading[3];
   }
   const named = CURRENCY_NAMES[NAMED_CURRENCY.exec(text)?.[1].toLowerCase() ?? ''];
-  if (named) {
-    return named;
+  if (named || LEI.test(text)) {
+    return named ?? 'RON';
   }
   const counts = new Map<string, number>();
   for (const match of text.matchAll(SIGNED_FIGURE)) {

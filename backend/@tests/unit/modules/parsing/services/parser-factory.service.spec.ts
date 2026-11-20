@@ -263,6 +263,7 @@ describe('ParserFactoryService', () => {
       'PncParser',
       'ProsperityParser',
       'QnbParser',
+      'RaiffeisenParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

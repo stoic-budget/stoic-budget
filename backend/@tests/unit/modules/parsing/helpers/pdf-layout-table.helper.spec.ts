@@ -754,3 +754,20 @@ describe('Deposits and Withdrawals side by side', () => {
     expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'credit', 'debit', 'balance']);
   });
 });
+
+describe('Romanian headings', () => {
+  it('read "Data", "Descrierea tranzacției", "Sumă debit" and "Sumă credit"', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Data', 29],
+        ['Descrierea', 160],
+        ['tranzacției', 212],
+        ['Sumă', 407],
+        ['debit', 432],
+        ['Sumă', 490],
+        ['credit', 515],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit']);
+  });
+});

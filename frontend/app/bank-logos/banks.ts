@@ -149,4 +149,5 @@ export const BANKS = [
   { key: 'pnc', name: 'PNC Bank', logo: 'pnc.png', aliases: ['pnc'] },
   { key: 'prosperity', name: 'Prosperity Bank', logo: 'prosperity.png', aliases: ['prosperity'] },
   { key: 'qnb', name: 'QNB', logo: 'qnb.png', aliases: ['qatar national bank'] },
+  { key: 'raiffeisen', name: 'Raiffeisen Bank', logo: 'raiffeisen.png', aliases: ['raiffeisen'] },
 ] as const satisfies readonly BankEntry[];

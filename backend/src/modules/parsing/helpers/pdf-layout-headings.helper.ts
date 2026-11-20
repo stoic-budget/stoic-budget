@@ -33,6 +33,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'valutadatum',
     'date valeur',
     'valuta',
+    'data tranzactiei',
   ],
   description: [
     'description',
@@ -57,6 +58,8 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'descricao',
     'buchungstext',
     'verwendungszweck',
+    'descriere',
+    'descrierea tranzactiei',
   ],
   counterparty: [
     'counterparty',
@@ -70,6 +73,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'withdrawal',
     'withdrawals',
     'withdrawn',
+    'suma debit',
     'money out of your account',
     'debits to your account',
     'debit',
@@ -103,6 +107,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'depots et credits',
     'paid in',
     'pay in',
+    'suma credit',
     'deposits/ additions',
     'deposits/additions',
     'receipts',

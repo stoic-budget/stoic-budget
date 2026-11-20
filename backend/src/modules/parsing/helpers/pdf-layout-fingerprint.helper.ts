@@ -112,6 +112,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.PNC, /\b1-888-pnc-bank\b/],
   [BankName.PROSPERITY, /\bprosperity bank\b|\bnyse symbol "pb"/],
   [BankName.QNB, /\bqatar national bank\b/],
+  [BankName.RAIFFEISEN, /\brzbrrobu\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
