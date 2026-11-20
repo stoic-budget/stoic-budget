@@ -137,6 +137,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Visit www.icicibank.com')).toBe(BankName.ICICI);
     expect(mentionedBank('© 2025 IFAST GLOBAL BANK LIMITED')).toBe(BankName.IFAST);
     expect(mentionedBank('ING Bank (Australia) Limited ABN 24 000 893 292')).toBe(BankName.ING);
+    expect(mentionedBank('Wbsite: www.kbc.be')).toBe(BankName.KBC);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

@@ -5,7 +5,7 @@ describe('listSupportedBanks', () => {
   it('lists every bank with a parser of its own, Bereke once and no placeholder', () => {
     const banks = listSupportedBanks();
 
-    expect(banks).toHaveLength(63);
+    expect(banks).toHaveLength(64);
     expect(banks.map(bank => bank.key)).not.toContain('other');
     expect(new Set(banks.map(bank => bank.key)).size).toBe(banks.length);
   });
@@ -88,6 +88,7 @@ describe('resolveBankLogo', () => {
     ['icici', 'ICICI Bank'],
     ['ifast', 'iFAST Global Bank'],
     ['ing', 'ING'],
+    ['kbc', 'KBC'],
   ])('names the bank stored as %s by its real name', (bankName, displayName) => {
     expect(resolveBankLogo(bankName).displayName).toBe(displayName);
   });

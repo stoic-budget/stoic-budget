@@ -8,6 +8,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 ## Native PDF support
 
 - **Australia:** ANZ, Bendigo Bank, BOQ, CommBank, Great Southern Bank, Heritage Bank, ING
+- **Belgium:** KBC
 - **Brazil:** Banco do Brasil
 - **Canada:** ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank
 - **France:** Crédit Agricole
