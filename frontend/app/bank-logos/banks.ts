@@ -128,4 +128,10 @@ export const BANKS = [
   { key: 'monzo', name: 'Monzo', logo: 'monzo.png', aliases: ['monzo bank'] },
   { key: 'n26', name: 'N26', logo: 'n26.png', aliases: ['number26'] },
   { key: 'nab', name: 'NAB', logo: 'nab.png', aliases: ['national australia bank'] },
+  {
+    key: 'nationwide',
+    name: 'Nationwide',
+    logo: 'nationwide.png',
+    aliases: ['nationwide building society'],
+  },
 ] as const satisfies readonly BankEntry[];

@@ -76,5 +76,6 @@ export enum BankName {
   MONZO = 'monzo',
   N26 = 'n26',
   NAB = 'nab',
+  NATIONWIDE = 'nationwide',
   OTHER = 'other',
 }

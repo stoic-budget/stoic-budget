@@ -101,6 +101,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.MONZO, /\bmonzo bank limited\b/],
   [BankName.N26, /\byour n26 team\b|\bn26 bank (?:ag|gmbh|se)\b|\bntsbdeb1\b/],
   [BankName.NAB, /\bnational australia bank\b|\bnab isaver\b|\bnab classic banking\b/],
+  [BankName.NATIONWIDE, /\bnationwide\.co\.uk\b|\bnationwide building society\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
