@@ -114,6 +114,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('CAISSE DESJARDINS DE SAMPLETOWN')).toBe(BankName.DESJARDINS);
     expect(mentionedBank('Deutsche Bank Privat- und Geschäftskunden AG')).toBe(BankName.DEUTSCHE_BANK);
     expect(mentionedBank('The Discover card is issued by Discover Bank, Member FDIC.')).toBe(BankName.DISCOVER);
+    expect(mentionedBank('Equitable Bank Tower. 30 Sample Avenue West')).toBe(BankName.EQ_BANK);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

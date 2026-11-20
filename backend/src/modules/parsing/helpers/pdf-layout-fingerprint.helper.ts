@@ -58,6 +58,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.DESJARDINS, /\bcaisse desjardins\b|\bdesjardins\.com\b/],
   [BankName.DEUTSCHE_BANK, /\bdeutsche bank (?:ag|privat)/],
   [BankName.DISCOVER, /\bissued by discover bank\b/],
+  [BankName.EQ_BANK, /\beq bank\b.*\bequitable bank\b|\bequitable bank tower\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
