@@ -17,6 +17,38 @@ compose() {
   fi
 }
 
+# The reset wipes the database, so it runs only where the demo account is the
+# one account there: never against a real instance it was pointed at by mistake.
+demo_email="${DEMO_USER_EMAIL:-}"
+if [ -z "$demo_email" ] && [ -f .env ]; then
+  demo_email="$(sed -n 's/^DEMO_USER_EMAIL=//p' .env | tail -n 1 | tr -d "\"'")"
+fi
+if [ -z "$demo_email" ]; then
+  echo "DEMO_USER_EMAIL is not set (in the environment or .env); not resetting" >&2
+  exit 1
+fi
+
+echo "Checking that the database holds no account but the demo's"
+# The script runs in the postgres container, with its own variables; a fresh
+# database, or one without tables yet, counts as empty.
+others="$(compose exec -T -e DEMO_EMAIL="$demo_email" postgres sh -s <<'SH'
+db="${POSTGRES_DB:-finflow}"
+q() { psql -X -q -v ON_ERROR_STOP=1 -At -U "$POSTGRES_USER" "$@"; }
+exists="$(echo "SELECT count(*) FROM pg_database WHERE datname = :'db'" | q -d postgres -v db="$db")"
+[ "$exists" = 1 ] || { echo 0; exit 0; }
+[ "$(q -d "$db" -c "SELECT to_regclass('public.users') IS NOT NULL")" = t ] || { echo 0; exit 0; }
+echo "SELECT count(*) FROM users WHERE lower(email) <> lower(trim(:'email'))" | q -d "$db" -v email="$DEMO_EMAIL"
+SH
+)" || {
+  echo "Could not check the accounts in the database; not resetting" >&2
+  exit 1
+}
+if [ "$others" != 0 ]; then
+  echo "The database holds $others account(s) besides $demo_email: this does not look like the demo." >&2
+  echo "Not resetting. Point the script at the demo's own stack (COMPOSE_FILE, .env)." >&2
+  exit 1
+fi
+
 echo "Stopping the backend"
 compose stop backend
 
