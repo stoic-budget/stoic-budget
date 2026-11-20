@@ -131,6 +131,67 @@ describe('Demo instance is read-only (e2e)', () => {
     expect(answeredOtherwise).toEqual([]);
   });
 
+  it("keeps no visitor's address or browser: everyone sees the one account's sessions", async () => {
+    const sessionIdOf = (token: string): string =>
+      JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString()).sessionId;
+    const visitors = [
+      { agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0', ip: '198.51.100.21' },
+      { agent: 'Mozilla/5.0 (Macintosh; Mac OS X 14_0) Safari/605.1.15', ip: '198.51.100.22' },
+    ];
+    const tokens: string[] = [];
+    for (const visitor of visitors) {
+      const login = await request(server())
+        .post('/auth/login')
+        .set('User-Agent', visitor.agent)
+        .set('X-Forwarded-For', visitor.ip)
+        .send({ email, password })
+        .expect(200);
+      tokens.push(accessTokenOf(login));
+    }
+
+    const stored = await dataSource.query(
+      'SELECT ip_address, user_agent, browser, os FROM auth_sessions WHERE id = ANY($1)',
+      [tokens.map(sessionIdOf)],
+    );
+    expect(stored).toEqual(
+      visitors.map(() => ({ ip_address: null, user_agent: null, browser: 'Unknown browser', os: 'Unknown OS' })),
+    );
+
+    const list = await request(server())
+      .get('/auth/sessions')
+      .set('Authorization', `Bearer ${tokens[1]}`)
+      .expect(200);
+    // The account's session from before it became a demo is listed without its origin too.
+    expect(list.body.length).toBeGreaterThanOrEqual(visitors.length + 1);
+    for (const session of list.body) {
+      expect(session).toMatchObject({
+        ipAddress: null,
+        device: 'Unknown device',
+        browser: 'Unknown browser',
+        os: 'Unknown OS',
+      });
+    }
+  });
+
+  it('keeps the address and browser of a session off a demo', async () => {
+    process.env.DEMO_MODE = 'false';
+    try {
+      const login = await request(server())
+        .post('/auth/login')
+        .set('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) Firefox/131.0')
+        .send({ email, password })
+        .expect(200);
+      const list = await request(server())
+        .get('/auth/sessions')
+        .set('Authorization', `Bearer ${accessTokenOf(login)}`)
+        .expect(200);
+      const current = list.body.find((session: { isCurrent: boolean }) => session.isCurrent);
+      expect(current).toMatchObject({ browser: 'Firefox', os: 'Linux', ipAddress: expect.any(String) });
+    } finally {
+      process.env.DEMO_MODE = 'true';
+    }
+  });
+
   it('lets the shared account sign in, read, refresh and sign out', async () => {
     const login = await request(server()).post('/auth/login').send({ email, password }).expect(200);
     const token = accessTokenOf(login);
