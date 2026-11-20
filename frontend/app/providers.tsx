@@ -26,10 +26,12 @@ import {
   resolveThemePreference,
   THEME_STORAGE_EVENT,
 } from '@/app/lib/theme-preference';
+import { DemoBanner } from './components/demo/DemoBanner';
 import { KeyboardShortcutsProvider } from './components/keyboard-shortcuts-provider';
 import { OfflineBanner } from './components/pwa/OfflineBanner';
 import { ServiceWorkerRegistrar } from './components/pwa/ServiceWorkerRegistrar';
 import { PastMonthBanner } from './components/versions/PastMonthBanner';
+import { ReadOnlyEchoFilter } from './components/versions/ReadOnlyEchoFilter';
 import { VersionBanner } from './components/versions/VersionBanner';
 import { AuthProvider } from './contexts/AuthContext';
 import { CurrencyDisplayProvider } from './contexts/CurrencyDisplayContext';
@@ -111,8 +113,10 @@ function WorkspaceScopedProviders({
           {mounted ? <Toaster position="top-center" toastOptions={TOASTER_OPTS} /> : null}
           {mounted ? (
             <>
+              <ReadOnlyEchoFilter />
               <ServiceWorkerRegistrar />
               <OfflineBanner />
+              <DemoBanner />
               <VersionBanner />
               {/* Reads the address; under Suspense so it never holds the page's render. */}
               <React.Suspense fallback={null}>
