@@ -2305,6 +2305,7 @@ const content = {
       be: 'Пры такой стаўцы і тэрміне плацёж, акруглены да капейкі, ужо не пагашае крэдыт своечасова: скараціце тэрмін',
       bs: 'Uz ovu kamatu i rok rata zaokružena na fening više ne otplaćuje kredit na vrijeme: skratite rok',
       hsb: 'Při tutej danji a dobje płaćenje, na cent zakrute, kredit hižo načasnje njesplaći: skrótšće dobu',
+    }),
     LOAN_PAYMENT_NOT_FOUND: t({
       ru: 'Платёж не найден на этом кредитном счёте',
       en: 'Payment not found on this loan account',
