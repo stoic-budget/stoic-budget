@@ -1,6 +1,6 @@
 {
   "name": "parse-ledger",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "description": "Stoic Budget - Bank statements processing system",
   "main": "backend/dist/main.js",
   "scripts": {
