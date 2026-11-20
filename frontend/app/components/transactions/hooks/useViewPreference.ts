@@ -62,7 +62,8 @@ export function useViewPreference<T extends Record<string, unknown>>(
     (next: T) => {
       pending.current = next;
       queryClient.setQueryData(queryKey, { state: next });
-      // A demo account is shared: the layout stays in this browser.
+      // A demo account is shared: the layout holds for this visit (until the page
+      // reloads); the server is not asked.
       if (isDemoInstance()) {
         return;
       }

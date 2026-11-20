@@ -32,7 +32,8 @@ export function useMarkPageHintsSeen(): (page: string, version: number) => void 
 
   return (page, version) => {
     setUser(withSeen({ [page]: version }));
-    // A demo account is shared: closed hints stay closed for this visitor only.
+    // A demo account is shared: closed hints stay closed for this visit (until the
+    // page reloads); the server is not asked.
     if (isDemoInstance()) {
       return;
     }

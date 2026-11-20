@@ -32,7 +32,8 @@ export function useMapStylePreference(): UseMapStylePreferenceResult {
       const optimisticUser = { ...previousUser, mapStylePreference: styleId };
       setUser(optimisticUser);
       localStorage.setItem('user', JSON.stringify(optimisticUser));
-      // A demo account is shared: the style stays in this browser.
+      // A demo account is shared: the style holds for this visit (until the page
+      // reloads); the server is not asked.
       if (isDemoInstance()) {
         return;
       }

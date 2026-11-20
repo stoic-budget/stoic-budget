@@ -55,7 +55,8 @@ export function useThemePreference({
         }),
       );
 
-      // A demo account is shared: the choice stays in this browser.
+      // A demo account is shared: the choice holds for this visit (until the page
+      // reloads, when /auth/me brings back the shared value); the server is not asked.
       if (isDemoInstance()) {
         return;
       }

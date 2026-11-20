@@ -53,8 +53,11 @@ function load(): void {
       for (const listener of listeners) listener();
     })
     .catch(() => {
-      // Unknown means "not a demo"; the next page that asks tries again.
-      requested = false;
+      // Unknown means "not a demo": the stored answer may be from another
+      // server on this origin, so it is not trusted either. No retry here; the
+      // next full page load asks again.
+      status = { enabled: false, account: null };
+      for (const listener of listeners) listener();
     });
 }
 
