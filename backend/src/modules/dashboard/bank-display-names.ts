@@ -93,4 +93,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.RAIFFEISEN]: 'Raiffeisen Bank',
   [BankName.RBC]: 'RBC Royal Bank',
   [BankName.REGIONS]: 'Regions Bank',
+  [BankName.REVOLUT]: 'Revolut',
 };

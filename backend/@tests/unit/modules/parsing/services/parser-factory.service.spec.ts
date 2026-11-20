@@ -266,6 +266,7 @@ describe('ParserFactoryService', () => {
       'RaiffeisenParser',
       'RbcParser',
       'RegionsParser',
+      'RevolutParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
