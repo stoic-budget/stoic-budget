@@ -24,8 +24,9 @@ import {
 } from '../exchange-rates/currency-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
+import { balanceCheckOf, reconciliationsFrom } from './wallet-balance-check';
 import { balanceDays, monthDates } from './wallet-balance-days';
-import { toDateOnly, type WalletLedger, walletLedgers } from './wallet-ledger';
+import { type WalletLedger, walletLedgers } from './wallet-ledger';
 
 /** Statements whose rows are read and real; the same set the balance sheet trusts. */
 const LIVE_STATEMENT_STATUSES = [
@@ -33,9 +34,6 @@ const LIVE_STATEMENT_STATUSES = [
   StatementStatus.VALIDATED,
   StatementStatus.COMPLETED,
 ];
-
-/** A closing balance within a cent of the booked one is the same balance. */
-const RECONCILE_TOLERANCE = 0.01;
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
@@ -258,6 +256,7 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
         pendingReviewCount: pending.get(wallet.id) ?? 0,
         lastActivityAt: ledger?.lastDate ?? null,
         reconciliation: reconciliations.get(wallet.id) ?? null,
+        balanceCheck: balanceCheckOf(wallet, ledger?.days ?? []),
         createdAt: wallet.createdAt.toISOString(),
         updatedAt: wallet.updatedAt.toISOString(),
       };
@@ -309,27 +308,6 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       .addOrderBy('statement.createdAt', 'DESC')
       .getMany();
 
-    const byId = new Map(wallets.map(wallet => [wallet.id, wallet]));
-    const result = new Map<string, WalletReconciliation>();
-    for (const statement of latest) {
-      const wallet = statement.walletId ? byId.get(statement.walletId) : undefined;
-      const date = toDateOnly(statement.statementDateTo);
-      if (!(wallet && date)) {
-        continue;
-      }
-      const booked = (ledgers.get(wallet.id)?.days ?? [])
-        .filter(day => day.date <= date)
-        .reduce((sum, day) => sum + day.net, 0);
-      const computedBalance = round2((Number(wallet.initialBalance) || 0) + booked);
-      const statementBalance = round2(Number(statement.balanceEnd));
-      result.set(wallet.id, {
-        statementId: statement.id,
-        date,
-        statementBalance,
-        computedBalance,
-        matches: Math.abs(computedBalance - statementBalance) <= RECONCILE_TOLERANCE,
-      });
-    }
-    return result;
+    return reconciliationsFrom(latest, wallets, ledgers);
   }
 }

@@ -76,6 +76,7 @@ export function walletItem(
     pendingReviewCount: 0,
     lastActivityAt: null,
     reconciliation: null,
+    balanceCheck: null,
     createdAt: TIMESTAMP,
     updatedAt: TIMESTAMP,
     ...overrides,

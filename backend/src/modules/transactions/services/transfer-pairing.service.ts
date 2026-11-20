@@ -17,6 +17,7 @@ import {
 } from '../../../entities/transaction.entity';
 import { TransferPairRejection } from '../../../entities/transfer-pair-rejection.entity';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
+import { assertUnlinkAllowed } from '../helpers/pair-guards';
 import { forgetRejection, rejectedPairKeys, unlinkAndRemember } from './transfer-pair-rejections';
 import { writeTransferPairs } from './transfer-pair-writer';
 import {
@@ -208,10 +209,12 @@ export class TransferPairingService {
   /** Separates both legs and remembers that this pair is wrong, so auto-pairing does not redo it. */
   async unlink(workspaceId: string, id: string): Promise<void> {
     const row = await this.findOwned(workspaceId, id);
-    if (!row.transferPairId) {
-      throw new BadRequestException(appError('TRANSACTION_NOT_TRANSFER'));
-    }
-    await unlinkAndRemember(this.transactionRepository.manager, workspaceId, row.transferPairId);
+    assertUnlinkAllowed(row);
+    await unlinkAndRemember(
+      this.transactionRepository.manager,
+      workspaceId,
+      row.transferPairId as string,
+    );
   }
 
   /**

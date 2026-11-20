@@ -52,6 +52,8 @@ export const DOCUMENTS_ERRORS = {
   TRANSACTION_ALREADY_SPLIT: 'Transaction is already part of a split',
   TRANSACTION_NOT_SPLIT: 'Transaction is not part of a split',
   TRANSACTION_SPLIT_DUPLICATE: 'Cannot split a transaction marked as a duplicate',
+  TRANSACTION_SPLIT_ADJUSTMENT:
+    'A balance adjustment cannot be split; delete it and check the balance again',
   TRANSACTION_SPLIT_TAX_LOCKED: 'Cannot split a transaction that is part of a filed tax return',
   TRANSACTION_SPLIT_NOT_POSITIVE: 'Cannot split a transaction without a positive amount',
   TRANSACTION_SPLIT_SUM_MISMATCH: 'Split parts must sum to {{total}}, received {{received}}',
@@ -66,6 +68,9 @@ export const DOCUMENTS_ERRORS = {
   TRANSACTION_LEG_TRANSFERRED: 'Transaction {{id}} is already part of a transfer',
   TRANSACTION_PAIRED_MEANWHILE: 'One of the transactions was paired in the meantime',
   TRANSACTION_NOT_TRANSFER: 'Transaction is not part of a transfer',
+  TRANSACTION_ADJUSTMENT_CATEGORY:
+    'A balance adjustment takes no category or tax mark: it is neither spending nor income',
+  TRANSACTION_UNLINK_ADJUSTMENT: 'A balance adjustment is not a transfer; delete it to undo it',
   TRANSACTION_REIMBURSEMENT_NOT_INCOMING: 'Only an incoming transaction can be a reimbursement',
   TRANSACTION_REIMBURSEMENT_SAME_LEG: 'A reimbursement needs two different transactions',
   TRANSACTION_REIMBURSEMENT_MUST_BE_INCOMING: 'The reimbursement must be an incoming transaction',

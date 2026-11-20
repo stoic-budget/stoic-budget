@@ -2,7 +2,7 @@
 
 import * as Schema from 'effect/Schema';
 import * as Struct from 'effect/Struct';
-import { optionalNullable } from '../common/requests';
+import { DateOnlyInput, optionalNullable } from '../common/requests';
 import type { Wire } from '../common/wire';
 import { WalletType } from '../reference/reference';
 
@@ -55,3 +55,15 @@ export const WalletStatementParams = Schema.Struct({
   statementId: Schema.String.check(Schema.isUUID()),
 });
 export type WalletStatementParams = Wire<typeof WalletStatementParams>;
+
+/**
+ * `POST /wallets/:id/balance-check`, `.../balance-check/confirm` and
+ * `.../balance-adjustment`: the balance the bank shows at the end of `date`,
+ * in the account's currency (below zero for a debt). Never a difference: the
+ * server works that out itself.
+ */
+export const BalanceCheckBody = Schema.Struct({
+  date: DateOnlyInput,
+  balance: Schema.Finite.check(Schema.isGreaterThan(-1e13), Schema.isLessThan(1e13)),
+});
+export type BalanceCheckBody = Wire<typeof BalanceCheckBody>;

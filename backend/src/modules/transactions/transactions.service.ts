@@ -42,6 +42,7 @@ import { ensurePrivateCategory } from '../categories/private-category';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { DataDeletedEvent } from '../notifications/events/notification-events';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
+import { assertEditAllowed, assertSplitAllowed } from './helpers/pair-guards';
 import { cloneForSplit } from './helpers/transaction-split-clone';
 import { applyListFilters, type TransactionListFilters } from './transaction-list-filters';
 
@@ -234,6 +235,7 @@ export class TransactionsService {
   ): Promise<Transaction> {
     await this.ensureCanEditStatements(userId, workspaceId);
     const transaction = await this.findOne(id, workspaceId);
+    assertEditAllowed(transaction, updateDto);
     await this.assertWorkspaceOwnedRefs(updateDto, workspaceId);
     const movedForPrivacy = await this.applyPrivacy(transaction, updateDto, viewerMemberId);
     const before = { ...transaction };
@@ -426,9 +428,7 @@ export class TransactionsService {
    * on the locked row, which is the read the parts are actually derived from.
    */
   private assertSplittable(transaction: Transaction, dto: SplitTransactionBody): number {
-    if (transaction.splitGroupId) {
-      throw new BadRequestException(appError('TRANSACTION_ALREADY_SPLIT'));
-    }
+    assertSplitAllowed(transaction);
 
     // A duplicate-flagged row is excluded from dashboards and reports. Splitting it
     // would produce siblings that default to isDuplicate=false, so the sibling
