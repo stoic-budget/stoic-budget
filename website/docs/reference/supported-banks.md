@@ -12,7 +12,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **Brazil:** Banco do Brasil
 - **Canada:** ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank
 - **France:** Crédit Agricole
-- **Germany:** Deutsche Bank
+- **Germany:** Deutsche Bank, N26
 - **Hong Kong:** Bank of China (Hong Kong)
 - **India:** Axis Bank, Citibank, HDFC Bank, ICICI Bank
 - **Israel:** Bank Hapoalim / Isracard (Hebrew)

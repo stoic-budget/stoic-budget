@@ -148,7 +148,7 @@ Setting expectations upfront:
 |---|---|---|
 | 🇺🇸 United States | Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens, Found, Frost Bank, GO2bank, Green Dot, HSA Bank, Huntington, IBC Bank, KeyBank, M&T Bank, Marcus by Goldman Sachs, Merrick Bank | Chase, Bank of America, Capital One, American Express, Wells Fargo |
 | 🇬🇧 United Kingdom | Bank of Scotland, Barclays, first direct, Halifax, Handelsbanken, HSBC, iFAST Global Bank, Kroo, Lloyds Bank, Metro Bank, Monzo | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
-| 🇩🇪 Germany | Deutsche Bank | N26, Sparkasse / DKB, Commerzbank |
+| 🇩🇪 Germany | Deutsche Bank, N26 | N26, Sparkasse / DKB, Commerzbank |
 | 🇳🇱 Netherlands | | ING, Rabobank |
 | 🇸🇪 🇩🇰 🇳🇴 🇫🇮 Nordics | | Nordea |
 | 🇫🇷 France | Crédit Agricole | |
