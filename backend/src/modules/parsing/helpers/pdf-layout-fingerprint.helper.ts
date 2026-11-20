@@ -78,6 +78,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.HANDELSBANKEN, /\bhandelsbanken plc\b|\bhandelsbanken\.co\.uk\b/],
   [BankName.HDFC, /\bhdfc bank\b|\bifsc\s*:?\s*hdfc0/],
   [BankName.HERITAGE, /\bheritage bank limited\b/],
+  [BankName.HSA_BANK, /\bhsa bank\b.{0,5} is a division of webster bank\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
