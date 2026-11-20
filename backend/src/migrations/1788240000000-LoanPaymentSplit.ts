@@ -19,7 +19,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  *   so the interest sits in the payment's month and is hidden from whoever
  *   the payment is hidden from;
  * - it joins the split back (deletes the interest) once the row is no longer a
- *   payment into that loan: moved to another account, turned into an expense,
+ *   payment into that loan: moved to another account (a deleted loan account
+ *   only unlinks it: the interest stays, as a plain expense), turned into an expense,
  *   put in another currency than the interest's, or its amount cut below the
  *   interest.
  *
@@ -74,6 +75,13 @@ export class LoanPaymentSplit1788240000000 implements MigrationInterface {
           FROM "transactions"
          WHERE "loan_interest_of_id" = NEW."id" AND "workspace_id" = NEW."workspace_id";
         IF interest IS NULL THEN
+          RETURN NULL;
+        END IF;
+        -- The loan account was deleted (its rows' wallet set NULL): the interest
+        -- stays, as a plain expense with no account, like the payment.
+        IF NEW."wallet_id" IS NULL AND OLD."wallet_id" IS NOT NULL THEN
+          UPDATE "transactions" SET "loan_interest_of_id" = NULL
+           WHERE "loan_interest_of_id" = NEW."id" AND "workspace_id" = NEW."workspace_id";
           RETURN NULL;
         END IF;
         IF NEW."wallet_id" IS DISTINCT FROM OLD."wallet_id"

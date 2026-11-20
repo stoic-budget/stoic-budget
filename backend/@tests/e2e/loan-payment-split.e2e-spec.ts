@@ -655,13 +655,30 @@ describe('Loan payment split (e2e)', () => {
   });
 
   it('splits on import one payment at a time: a concurrent split skips that payment, not the rest, and each is audited', async () => {
-    const period = rows[7];
+    // A loan account of its own: on the shared one every period already has a
+    // payment of the scheduled amount, and the schedule would give the period
+    // to whichever payment's id sorts first.
+    const ownLoan = (
+      await call('post', '/wallets', 201, {
+        name: 'ACME Bank - Boat loan',
+        type: 'loan',
+        currency,
+        initialBalance: -principal,
+      })
+    ).body.id;
+    await call('put', `/wallets/${ownLoan}/loan-terms`, 200, { ...terms, autoSplit: true });
+    const [first, second] = (await call('get', `/wallets/${ownLoan}/loan-schedule`, 200)).body.plan
+      .rows as PlanRow[];
     const [raced, calm] = await save(
-      incoming(loanId, period.date, period.payment, { isVerified: false }),
-      incoming(loanId, period.date, period.payment, { isVerified: false }),
+      incoming(ownLoan, first.date, first.payment, { isVerified: false }),
+      incoming(ownLoan, second.date, second.payment, { isVerified: false }),
     );
     const service = app.get(LoanPaymentSplitService);
-    type Insert = (manager: { getRepository: DataSource['getRepository'] }, payment: Transaction, ...rest: unknown[]) => Promise<Transaction>;
+    type Insert = (
+      manager: { getRepository: DataSource['getRepository'] },
+      payment: Transaction,
+      ...rest: unknown[]
+    ) => Promise<Transaction>;
     const target = service as unknown as { insertInterest: Insert };
     const original = target.insertInterest.bind(service);
     const spy = vi.spyOn(target, 'insertInterest').mockImplementation(async (manager, payment, ...rest) => {
@@ -669,7 +686,16 @@ describe('Loan payment split (e2e)', () => {
         // A manual split of the same payment got its row in first.
         const repo = manager.getRepository(Transaction);
         await repo.save(
-          repo.create({ ...row({}), walletId: loanId, transactionType: TransactionType.EXPENSE, transactionDate: new Date(period.date), amount: 1, debit: 1, credit: null, loanInterestOfId: raced.id }),
+          repo.create({
+            ...row({}),
+            walletId: ownLoan,
+            transactionType: TransactionType.EXPENSE,
+            transactionDate: new Date(first.date),
+            amount: 1,
+            debit: 1,
+            credit: null,
+            loanInterestOfId: raced.id,
+          }),
         );
       }
       return original(manager, payment, ...rest);
@@ -680,12 +706,15 @@ describe('Loan payment split (e2e)', () => {
       spy.mockRestore();
     }
     const [interest] = await interestRowsOf(calm.id);
-    expect(Number(interest.amount)).toBe(period.interest);
+    expect(Number(interest?.amount)).toBe(second.interest);
     expect(await auditOf(calm.id)).toEqual([
       expect.objectContaining({ operation: 'loan_split', actor_type: 'system' }),
     ]);
+    // The race lost rolls back whole: no row of the import's, no audit.
+    expect(await interestRowsOf(raced.id)).toEqual([]);
     expect(await auditOf(raced.id)).toEqual([]);
   });
+
   describe('a statement read again', () => {
     let enqueue: ReturnType<typeof vi.spyOn>;
     beforeAll(() => {
@@ -775,6 +804,33 @@ describe('Loan payment split (e2e)', () => {
         ]),
       );
     });
+
+    it('leaves a payment held for the new reading, and its interest, out of the duplicates to review', async () => {
+      const period = rows[2];
+      const statement = await loanStatement();
+      const [payment] = await save(
+        incoming(loanId, period.date, period.payment, {
+          statementId: statement.id,
+          fingerprint: `fp-${stamp}-held`,
+          isVerified: false,
+        }),
+      );
+      await splitOff(payment.id, period.interest);
+      const [interest] = await interestRowsOf(payment.id);
+      const duplicates = async () => (await call('get', '/review-inbox/counts', 200)).body.duplicate as number;
+      const listed = async () =>
+        ((await call('get', '/review-inbox?kind=duplicate', 200)).body.items as Array<{ id: string }>).map(
+          item => item.id,
+        );
+      const before = await duplicates();
+
+      // Read again, and the reading never finishes: the payment stays held.
+      await readAgain(statement.id, 'merge');
+      expect((await dataSource.getRepository(Transaction).findOneByOrFail({ id: payment.id })).isDuplicate).toBe(true);
+      expect(await duplicates()).toBe(before);
+      expect(await listed()).not.toEqual(expect.arrayContaining([payment.id]));
+      expect(await listed()).not.toEqual(expect.arrayContaining([interest.id]));
+    });
   });
 
   it('keeps interest on a filed tax return: its payment cannot go, move or drop below it', async () => {
@@ -841,5 +897,82 @@ describe('Loan payment split (e2e)', () => {
     );
     await dataSource.query('DELETE FROM workspaces WHERE id = $1', [workspaceId]);
     expect(await dataSource.getRepository(Transaction).countBy({ workspaceId })).toBe(0);
+  });
+  it('keeps the interest as a plain expense when the loan account is deleted, filed or not', async () => {
+    const gone = (
+      await call('post', '/wallets', 201, {
+        name: 'ACME Bank - Old loan',
+        type: 'loan',
+        currency,
+        initialBalance: -principal,
+      })
+    ).body.id;
+    await call('put', `/wallets/${gone}/loan-terms`, 200, terms);
+    const [first, second] = (await call('get', `/wallets/${gone}/loan-schedule`, 200)).body.plan
+      .rows as PlanRow[];
+    const [plain, filed] = await save(
+      incoming(gone, first.date, first.payment),
+      incoming(gone, second.date, second.payment),
+    );
+    await call('post', `/wallets/${gone}/loan-payments/${plain.id}/split`, 200, { interest: first.interest });
+    await call('post', `/wallets/${gone}/loan-payments/${filed.id}/split`, 200, { interest: second.interest });
+    const [plainInterest] = await interestRowsOf(plain.id);
+    const [filedInterest] = await interestRowsOf(filed.id);
+    await dataSource.query('UPDATE transactions SET tax_locked = true, tax_amount = 0 WHERE id = $1', [
+      filedInterest.id,
+    ]);
+    const months = [first.date.slice(0, 7), second.date.slice(0, 7)];
+    const before = await Promise.all(months.map(spending));
+
+    try {
+      await call('delete', `/wallets/${gone}`, 200);
+
+      expect(await Promise.all(months.map(spending))).toEqual(before);
+      const kept = await dataSource
+        .getRepository(Transaction)
+        .findBy({ id: In([plainInterest.id, filedInterest.id]) });
+      expect(kept).toHaveLength(2);
+      for (const interest of kept) {
+        expect(interest).toMatchObject({ loanInterestOfId: null, walletId: null });
+      }
+      expect(kept.find(interest => interest.id === filedInterest.id)?.taxLocked).toBe(true);
+      for (const [interest, payment] of [
+        [plainInterest, plain],
+        [filedInterest, filed],
+      ]) {
+        expect(await auditOf(interest.id)).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              operation: 'loan_interest_unlinked',
+              meta: expect.objectContaining({ reason: 'loan_account_deleted', paymentTransactionId: payment.id }),
+            }),
+          ]),
+        );
+      }
+    } finally {
+      await dataSource.query('UPDATE transactions SET tax_locked = false WHERE id = $1', [filedInterest.id]);
+    }
+  });
+
+  it('refuses merging a payment as a duplicate while its interest is on a filed tax return', async () => {
+    const period = rows[3];
+    const [payment, master] = await save(
+      incoming(loanId, period.date, period.payment),
+      incoming(checkingId, period.date, period.payment),
+    );
+    await splitOff(payment.id, period.interest);
+    const [interest] = await interestRowsOf(payment.id);
+    await dataSource.query('UPDATE transactions SET tax_locked = true, tax_amount = 0 WHERE id = $1', [interest.id]);
+    try {
+      const res = await call('post', '/transactions/duplicates/merge', 409, {
+        transactionIds: [master.id, payment.id],
+      });
+      expect(res.body.error?.code).toBe('TAX_LOCKED');
+      const stored = await dataSource.getRepository(Transaction).findOneByOrFail({ id: payment.id });
+      expect(stored.isDuplicate).toBe(false);
+      expect((await interestRowsOf(payment.id))[0].isDuplicate).toBe(false);
+    } finally {
+      await dataSource.query('UPDATE transactions SET tax_locked = false WHERE id = $1', [interest.id]);
+    }
   });
 });

@@ -13,6 +13,13 @@ describe('CrossStatementDeduplicationService', () => {
     findBy: vi.fn(),
     findOneBy: vi.fn(),
     update: vi.fn(),
+    // The tax-lock check of a merge: no row, nor loan interest split off one, is filed.
+    count: vi.fn(async () => 0),
+    createQueryBuilder: vi.fn(() => ({
+      setFindOptions: vi.fn().mockReturnThis(),
+      innerJoin: vi.fn().mockReturnThis(),
+      getCount: vi.fn(async () => 0),
+    })),
   };
 
   const createMockTransaction = (

@@ -6,6 +6,7 @@ import { Wallet } from '../../entities/wallet.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditModule } from '../audit/audit.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
+import { LoanAccountRemovalSubscriber } from './loan-account-removal.subscriber';
 import { LoanInterestCarryService } from './loan-interest-carry.service';
 import { LoanInterestGuardSubscriber } from './loan-interest-guard.subscriber';
 import { LoanPaymentSplitService } from './loan-payment-split.service';
@@ -30,6 +31,7 @@ import { LoansController } from './loans.controller';
     LoanPaymentSplitService,
     LoanInterestCarryService,
     LoanInterestGuardSubscriber,
+    LoanAccountRemovalSubscriber,
     LoanPaymentsEventsListener,
   ],
 })
