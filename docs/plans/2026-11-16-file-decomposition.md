@@ -2,22 +2,30 @@
 
 On origin/main at f889f58c1 (2026-11-16), 180 hand-written source files are over the 300-lines-of-code
 limit of `scripts/check-file-size.mjs`. The ratchet stops them growing but does not shrink them, so every
-feature that touches one carves a piece out ad hoc. This plan shrinks the 26 worst ones, ranked by size
-× commits in the last two months, the way `statements.service.ts` (1719 → 348, #475–#481), custom tables
-(#704/#705/#707) and `PayablesView` (#708) were already split.
+feature that touches one carves a piece out ad hoc. This plan shrinks 26 of the worst ones, the way
+`statements.service.ts` (1719 → 348, #475–#481), custom tables (#704/#705/#707) and `PayablesView` (#708)
+were already split. The rows were picked by score = code lines × non-merge commits on origin/main since
+2026-09-16; see the Queue for how they are ordered and which high scorers were left out. The count was
+still 180 on origin/main at 84d036c52 (2026-11-20).
 
 Decisions: the dead parsing cluster is deleted rather than split; literal data tables become `*.data.ts`
 and are exempt from the size guard; the other ~145 oversized files stay under the ratchet.
 
 ## How to use this plan
 
-1. Pick the first unchecked row in the Queue whose "Blocked by" is empty. Before starting, check:
-   `gh pr list --state open --search "<file name>"` and `git -C ~/Projects/lumio status --short <path>`.
-   If either shows work in progress on the file, take the next row.
+1. Blockers change daily, so the "Blocked by" column is only a snapshot. Before picking a row, list the
+   open PRs that touch its file (`gh pr list --search` misses most of them; match on changed files):
+   ```bash
+   gh pr list --state open --limit 200 --json number,files \
+     --jq '.[] | select(any(.files[]; .path | endswith("<path from the row>"))) | .number'
+   git -C ~/Projects/lumio status --short <path>   # uncommitted shared-tree work
+   ```
+   Pick the first unchecked row where both print nothing. If either shows work on the file, take the
+   next row.
 2. Branch from fresh origin/main in `.claude/worktrees/<short-name>` (never in the shared tree).
 3. Follow the backend or frontend recipe and the file's map below. Each map line is one PR in a stack.
 4. In the last PR of the stack, tick the row and write the new line count.
-5. Progress check (counts files over the limit on origin/main):
+5. Progress check (counts files over the limit on origin/main; run at the repo root):
    ```bash
    node --input-type=module -e "import{execFileSync as x}from'node:child_process';import{isChecked,countCodeLines}from'./scripts/check-file-size.mjs';const f=x('git',['ls-tree','-r','--name-only','origin/main'],{encoding:'utf8',maxBuffer:1<<28}).split('\n').filter(p=>p&&isChecked(p));console.log(f.filter(p=>countCodeLines(x('git',['show','origin/main:'+p],{encoding:'utf8',maxBuffer:1<<28}))>300).length)"
    ```
@@ -45,13 +53,14 @@ and are exempt from the size guard; the other ~145 oversized files stay under th
 
 ## Backend recipe — checks per PR
 
+Run from the repo root; each line sets its own directory.
 ```bash
 npm --prefix backend run typecheck
 npm --prefix backend run lint:fix
-cd backend && npx vitest run @tests/unit/modules/<module> @tests/integration/<related specs listed in the map>
+(cd backend && npx vitest run @tests/unit/modules/<module> @tests/integration/<related specs listed in the map>)
 npm --prefix backend run test:e2e -- <e2e listed in the map>   # e2e caught lost variables SWC unit runs missed in #479
-GOLDEN_ENABLED=1 npx vitest run --project golden               # parsing changes only, before and after
-node scripts/check-file-size.mjs --base origin/main
+npm --prefix backend run test:golden                            # parsing changes only, before and after
+node scripts/check-file-size.mjs --base origin/main            # repo root; there is no backend/scripts copy
 ```
 Use `--fsModuleCache=false` on local e2e if a migration was added in between (see vitest cache note).
 
@@ -64,27 +73,46 @@ Use `--fsModuleCache=false` on local e2e if a migration was added in between (se
 - React Compiler is on (`frontend/vite.config.ts:37`, oxc). Keep hand-picked effect dependency lists
   and existing `eslint-disable react-hooks/*` lines with the code they guard.
 - Characterization tests first, own commit, for files marked "no tests".
-- Checks: `npm --prefix frontend run type-check`, `npm --prefix frontend run lint:fix`,
-  `cd frontend && npx vitest run <folder>`, `node scripts/check-file-size.mjs --base origin/main`,
-  `node scripts/check-component-requests.mjs --base origin/main`. A full local run is flaky; compare
-  failures against a clean origin/main worktree by test name.
+- Checks, run from the repo root:
+  ```bash
+  npm --prefix frontend run type-check
+  npm --prefix frontend run lint:fix
+  (cd frontend && npx vitest run <folder>)
+  node scripts/check-file-size.mjs --base origin/main
+  node scripts/check-component-requests.mjs --base origin/main
+  ```
+  A full local run is flaky; compare failures against a clean origin/main worktree by test name.
 
 ---
 
 ## Wave 0 — cheap wins (3 PRs, no splitting)
 
-- [ ] **0.1 Delete the dead parsing cluster.** Commented out in `parsing.module.ts` (lines 22–40, 74–139),
-  imported by no live code. Removes 11 files from the over-300 list, ~8,600 lines:
-  `parsing/services/{quality-metrics, quality-logging, feature-flag, column-auto-fix, checksum-auto-fix,
-  column-validation(.service + .util), checksum-validation, text-cleaning, universal-date-parser,
-  bank-profile, statement-normalization, transaction-normalizer, profile-config, parsing-rules}`,
-  `common/utils/data-quality-framework.util.ts`, their specs, the commented lines in `parsing.module.ts`,
-  `intelligent-deduplication.service.example.md` reference.
-  Gate: `npx knip` (root) lists each as an unused file; after deletion typecheck, unit, e2e and the whole
-  golden suite are green. Anything knip says is still used stays and is listed in the PR.
+- [ ] **0.1 Delete the dead parsing cluster.** Commented out in `parsing.module.ts` (the commented lines
+  are 4, within 22–48 and within 93–140; 74–92 are live providers), imported by no live code. Removes
+  12 files from the over-300 list (`transaction-normalizer` is at 301), ~8,700 lines without specs:
+  `parsing/services/{quality-metrics, quality-logging, feature-flag, column-auto-fix(.service + .util),
+  checksum-auto-fix, column-validation(.service + .util), checksum-validation, text-cleaning,
+  universal-date-parser, bank-profile(.service + bank-profile-defaults.ts), statement-normalization,
+  transaction-normalizer, profile-config, parsing-rules, statement-quality-gate}`,
+  `common/utils/data-quality-framework.util.ts`, the commented-out lines in `parsing.module.ts`, and the
+  cluster's `ignoreIssues` entries in `knip.json` (data-quality-framework and 10 of the services).
+  Their specs go with them: the matching files under `backend/@tests/unit/modules/parsing/services/`
+  (bank-profile-defaults, bank-profile, checksum-validation, column-auto-fix.util, column-validation
+  .service and .util, statement-quality-gate, text-cleaning, transaction-normalizer, universal-date-parser).
+  Gate: no file outside the cluster imports a cluster file, except the cluster's own specs and the
+  commented-out lines in `parsing.module.ts`. Check each name, in `backend/`:
+  ```bash
+  git grep -nE "from ['\"][^'\"]*/<name>(\.service|\.util)?['\"]" -- .
+  ```
+  Knip alone is not enough: it treats specs as entry points, so it keeps any file a spec imports.
+  Extra checks: `npx knip` (repo root) shows nothing new, and after deletion typecheck, unit, e2e and the
+  whole golden suite are green. A file that fails the gate stays and is listed in the PR.
+  Open #736 also edits `parsing.module.ts`; rebase on it or wait.
   Not in the cluster (live, keep): `universal-amount-parser`, `universal-extractor`, `metadata-extraction`,
-  `intelligent-deduplication` (ImportModule owns it), `common/utils/bank-profiles.util.ts`,
-  `common/utils/feature-flags.util.ts` (BaseParser uses these, not the same-named services).
+  `intelligent-deduplication` and its `.example.md` (ImportModule owns it),
+  `interfaces/enhanced-parsed-statement.interface.ts` (metadata-extraction uses it),
+  `common/utils/bank-profiles.util.ts`, `common/utils/feature-flags.util.ts` (BaseParser uses these,
+  not the same-named services).
 - [ ] **0.2 Data tables → `*.data.ts`.** In `scripts/check-file-size.mjs` replace
   `/contributed-layouts\.data\.ts$/` with `/\.data\.tsx?$/` (comment: "literal tables only; functions live
   in a sibling file"), with a case in `check-file-size.test.mjs`. Then:
@@ -94,42 +122,57 @@ Use `--fsModuleCache=false` on local e2e if a migration was added in between (se
   `income-tax/filing-info.ts` → entries to `filing-info.data.ts`, types and override logic stay;
   `entity-imports/target-aliases.ts` → alias lists to `target-aliases.data.ts`;
   `frontend/app/lib/category-line-icons.tsx` → icon nodes to `category-line-icons.data.ts`, `lineIcon` stays.
-  Imports keep their old paths (re-export).
+  Imports keep their old paths (re-export). Open PRs on 2026-11-20: #821 edits `filing-info.ts`,
+  #742 and #750 edit `target-aliases.ts`; leave those two files out or wait.
 - [x] **0.3 This plan document.**
 
 ## Queue
 
-Rows are ordered by size × churn. "Blocked by" = open PRs or uncommitted shared-tree work on the
-file as of 2026-11-16; re-check before starting.
+Order: the rows were numbered on 2026-11-16 with the rows that had no blocker then first (B1–B8,
+F1–F7; F10 last because it has no map yet), then the blocked ones. Inside each group the order is
+rough, not a strict score ranking. Row numbers stay fixed so the maps below can refer to them.
+Score = code lines × non-merge commits on origin/main since 2026-09-16
+(`git log --no-merges --since=2026-09-16 --name-only origin/main`).
+
+"Blocked by" = open PRs that change the file, or uncommitted shared-tree work on it, as of 2026-11-20.
+It goes stale within days: run the check in "How to use this plan" step 1 before starting.
 
 | # | File (code lines) | Stack | Blocked by |
 |---|---|---|---|
-| [ ] B1 | backend `reports/reports.service.ts` (3155) | 6 PRs | — |
+| [ ] B1 | backend `reports/reports.service.ts` (3155) | 6 PRs | **In progress**: stack #831 → #839 → #840 → #841 → #842 → #843 does this split; do not pick |
 | [ ] B2 | `telegram/telegram.service.ts` (1241) | 4 | — |
-| [ ] B3 | `storage/storage.service.ts` (1180) | 5 (tests first) | — |
-| [ ] B4 | `workspaces/workspaces.service.ts` (1182) | 4 | — |
+| [ ] B3 | `storage/storage.service.ts` (1180) | 5 (tests first) | #745 |
+| [ ] B4 | `workspaces/workspaces.service.ts` (1182) | 4 | #748 |
 | [ ] B5 | `open-protocol-integrations/…service.ts` (1203) | 3 | — |
 | [ ] B6 | `import/services/import-session.service.ts` (792) | 2 | — |
-| [ ] B7 | `ledger/ledger-posting.service.ts` (842) | 3 | — |
+| [ ] B7 | `ledger/ledger-posting.service.ts` (842) | 3 | #745 |
 | [ ] B8 | `custom-tables/custom-tables.controller.ts` (672) | 1 | — |
-| [ ] B9 | `parsing/services/statement-processing.service.ts` (1016) | 4 | #804 |
+| [ ] B9 | `parsing/services/statement-processing.service.ts` (1016) | 4 | #736, #741, #804 |
 | [ ] B10 | `receipts/receipts.service.ts` (1031) | 4 | #799 |
-| [ ] B11 | `transactions/transactions.service.ts` (604) | 3 | #798, #799, #800 |
+| [ ] B11 | `transactions/transactions.service.ts` (604) | 3 | #737, #741, #745, #798, #799, #800, #833 |
 | [ ] B12 | `balance/balance.service.ts` (643) | 3 | #794 |
-| [ ] B13 | `dashboard/dashboard.service.ts` (1587) | 5 | #809, shared-tree edits |
-| [ ] B14 | `subscriptions/subscriptions.service.ts` (1591) | 5 | #800, #808, shared-tree edits |
-| [ ] B15 | `payables/payables.service.ts` (1279) | 4 | shared-tree edits |
-| [ ] B16 | `budgets/budgets.service.ts` (807) | 3 | #790, shared-tree edits |
+| [ ] B13 | `dashboard/dashboard.service.ts` (1587) | 5 | #737, #742, #748, #809, shared-tree edits |
+| [ ] B14 | `subscriptions/subscriptions.service.ts` (1591) | 5 | #742, #748, #800, #808, shared-tree edits |
+| [ ] B15 | `payables/payables.service.ts` (1279) | 4 | #742, shared-tree edits |
+| [ ] B16 | `budgets/budgets.service.ts` (807) | 3 | #748, #790, shared-tree edits |
 | [ ] F1 | frontend `workspaces/components/WorkspaceMembersView.tsx` (1028) | 3 (tests first) | — |
 | [ ] F2 | `storage/[id]/page.tsx` (939) | 3 (tests first) | — |
 | [ ] F3 | `invoices/components/InvoiceDetailView.tsx` (764) | 3 (tests first) | — |
 | [ ] F4 | `review/components/ReviewInboxView.tsx` (806) | 2 | — |
-| [ ] F5 | `statements/[id]/edit/page.tsx` (650) | 2 | — |
-| [ ] F6 | `subscriptions/components/SubscriptionsContent.tsx` (652) | 2 | — |
+| [ ] F5 | `statements/[id]/edit/page.tsx` (650) | 2 | #798 |
+| [ ] F6 | `subscriptions/components/SubscriptionsContent.tsx` (652) | 2 | #748 (test file only) |
 | [ ] F7 | `reports/components/BalanceSheet.tsx` (600) | 2 | — |
 | [ ] F8 | `statements/components/CreateExpenseDrawer.tsx` (976) | 2 | #792 (test file only) |
 | [ ] F9 | `reports/components/cash-flow/CashFlowView.tsx` (593) | 2 | #791 |
 | [ ] F10 | `workspaces/components/WorkspaceOverviewView.tsx` (650) | map at start | — |
+
+Left out, though they score above some queued rows (score on origin/main at 84d036c52; the lowest
+queued rows are `WorkspaceOverviewView` 5850, `import-session` 6336, `storage/[id]/page` 7512):
+`app.module.ts` 9690 (module wiring), `components/transactions/TransactionDetailsTab.tsx` 9225,
+`net-worth.service.ts` 8998, `classification.service.ts` 8470, `payees.service.ts` 8126,
+`StatementsListView.tsx` 7884, `receipts.controller.ts` 7220, `components/dashboard/OverviewTab.tsx` 7150,
+`application-settings.service.ts` 6656, `transactions.controller.ts` 6579, `(main)/reports/page.tsx` 6400,
+and five more between 5850 and 6336. They are candidates for a later wave; no maps yet.
 
 Backend and frontend rows are independent and can run in parallel worktrees; two rows touching the
 same module (B9/B10 via statements, B13/B16 via forwardRef) do not run at the same time.
@@ -140,7 +183,8 @@ same module (B9/B10 via statements, B13/B16 via forwardRef) do not run at the sa
 
 Line numbers are origin/main at f889f58c1; re-locate by method name.
 
-**B1 `reports.service.ts`** — 16 ctor params (4 unused: category/branch/wallet/user repos — drop in PR 1),
+**B1 `reports.service.ts`** — in progress as stack #831 → #843 (one PR per step below); kept for
+reference. 16 ctor params (4 unused: category/branch/wallet/user repos — drop in PR 1),
 14 hand-built `new ReportsService(` in 5 specs → builder in PR 1. Callers: controller (18 methods),
 `report-schedules.service` (`generateFromTemplate`, static `assertTemplateFormat`), telegram (`generateDailyReport`,
 `generateMonthlyReport`). Naming convention in the module: `*.report.ts`.
@@ -308,7 +352,8 @@ orphan decision. 2. `hooks/useBalanceSheet.ts` (query, sync effect, save, export
 ## After the queue
 
 The other ~145 files over 300 are handled by the ratchet: whoever next adds to one splits the part
-they touch, using the recipes above. Re-rank once the queue is done (size × commits in the last 60 days).
+they touch, using the recipes above. Re-rank once the queue is done, with the same score (code lines × non-merge commits on origin/main
+in the last two months).
 
 Follow-up found during research, out of scope here: `check-component-requests.mjs` matches one line,
 so it misses chained calls split across lines and clients not named `apiClient` (storage `api.get`).
