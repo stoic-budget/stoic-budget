@@ -31,6 +31,7 @@ import { KeyboardShortcutsProvider } from './components/keyboard-shortcuts-provi
 import { OfflineBanner } from './components/pwa/OfflineBanner';
 import { ServiceWorkerRegistrar } from './components/pwa/ServiceWorkerRegistrar';
 import { PastMonthBanner } from './components/versions/PastMonthBanner';
+import { ReadOnlyEchoFilter } from './components/versions/ReadOnlyEchoFilter';
 import { VersionBanner } from './components/versions/VersionBanner';
 import { AuthProvider } from './contexts/AuthContext';
 import { CurrencyDisplayProvider } from './contexts/CurrencyDisplayContext';
@@ -112,6 +113,7 @@ function WorkspaceScopedProviders({
           {mounted ? <Toaster position="top-center" toastOptions={TOASTER_OPTS} /> : null}
           {mounted ? (
             <>
+              <ReadOnlyEchoFilter />
               <ServiceWorkerRegistrar />
               <OfflineBanner />
               <DemoBanner />
