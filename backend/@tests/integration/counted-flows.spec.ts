@@ -18,6 +18,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test } from '@nestjs/testing';
 import { Client } from 'pg';
 import { DataSource, type Repository } from 'typeorm';
+import { countedSql } from '../../src/common/utils/counted-transactions.util';
 
 import * as entityIndex from '../../src/entities';
 import {
@@ -393,5 +394,32 @@ describe('one rule for income and spending (real Postgres)', () => {
     const limit = EXPENSE - 50;
     await budgets.update(budget.id, workspaceId, userId, { limitAmount: limit });
     expect(await budgeted()).toBe(limit);
+  });
+
+  it('asks the planner next to nothing for the interest check', async () => {
+    // The estimate decides when Postgres compiles a query (jit_above_cost). An
+    // `IS NULL OR EXISTS` on every row once doubled it and more, so the reports
+    // spent their time compiling; the anti-join leaves it where it was. Planned
+    // over a workspace with a year of rows, as a real one has.
+    const busy = (await dataSource.getRepository(Workspace).save({ name: 'Busy', currency: 'EUR' })).id;
+    await dataSource.query(
+      `INSERT INTO transactions (workspace_id, transaction_date, counterparty_name, payment_purpose,
+                                 currency, transaction_type, amount, debit, is_verified)
+       SELECT $1, date '2025-01-01' + (g % 365), 'ACME Store', 'Purchase', 'EUR', 'expense', 5, 5, true
+         FROM generate_series(1, 20000) g`,
+      [busy],
+    );
+    await dataSource.query('ANALYZE transactions');
+    const cost = async (where: string) => {
+      const [{ 'QUERY PLAN': plan }] = await dataSource.query(
+        `EXPLAIN (FORMAT JSON) SELECT sum(t.amount) FROM transactions t
+          WHERE t.workspace_id = $1 AND t.transaction_date BETWEEN '2025-03-01' AND '2025-03-31' AND ${where}`,
+        [busy],
+      );
+      return plan[0].Plan['Total Cost'] as number;
+    };
+    const ownChecks =
+      't.is_verified = true AND t.is_duplicate = false AND NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = t.statement_id AND trashed.deleted_at IS NOT NULL)';
+    expect(await cost(countedSql('t'))).toBeLessThan((await cost(ownChecks)) * 1.5);
   });
 });

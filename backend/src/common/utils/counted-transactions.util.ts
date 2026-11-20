@@ -9,7 +9,8 @@ import { IsNull, Raw } from 'typeorm';
  * Interest split off a loan payment (loans/loan-interest-row) has no statement
  * of its own: it counts only while its payment does, whatever takes the
  * payment out (Review, a duplicate flag, its statement in the trash or still
- * being read). The check costs a NULL test on every other row.
+ * being read). Written as an anti-join, which costs every other row next to
+ * nothing (see `whilePaymentCounts`).
  *
  * Transfers between the user's own accounts are NOT excluded here: a wallet
  * balance needs them, an income/expense figure does not, so each caller that
@@ -114,7 +115,12 @@ export function flowsSql(alias: string): string {
  * while its payment (by column name) passes `paymentCheck`.
  */
 function whilePaymentCounts(link: string, paymentCheck: (alias: string) => string): string {
-  return `(${link} IS NULL OR EXISTS (SELECT 1 FROM transactions interest_payment WHERE interest_payment.id = ${link} AND ${paymentCheck('interest_payment')}))`;
+  // "No payment that fails the check", a NULL link matching none: the same rule
+  // as `link IS NULL OR EXISTS (payment passes)`, since an interest row goes
+  // with its payment. That OR raised the planner's estimate of every report
+  // query two- to fivefold, past `jit_above_cost`, and Postgres then spent more
+  // time compiling the query than reading it (a month of rows: 20 ms to 200+).
+  return `NOT EXISTS (SELECT 1 FROM transactions interest_payment WHERE interest_payment.id = ${link} AND NOT (${paymentCheck('interest_payment')}))`;
 }
 
 function settlesIfCrypto(cryptoWallet: string, id: string): string {
