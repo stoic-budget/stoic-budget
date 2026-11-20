@@ -1,5 +1,6 @@
 import type { PdfTextItem, PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import { HEADINGS } from './pdf-layout-headings.helper';
+import { leadingDate } from './pdf-layout-row-date.helper';
 import { isAmountPart, parseStatementAmount } from './statement-amount.helper';
 import { foldText } from './statement-date.helper';
 
@@ -92,6 +93,12 @@ function matchHeading(items: PdfTextItem[], index: number, taught?: TaughtHeadin
  * are read before the built-in ones.
  */
 export function readHeaderRow(row: PdfTextRow, taught?: TaughtHeadings): LayoutColumn[] | null {
+  // A line that opens with a date or prints a sum of money is a row, whatever
+  // its words ("06-28  POS Debit - Debit Card 2252 Transaction …  6.22-").
+  const words = [...row.items].sort((a, b) => a.x - b.x);
+  if (leadingDate(words) || words.some(item => parseStatementAmount(item.text) !== null)) {
+    return null;
+  }
   const columns = readHeadingColumns(row, taught);
   const roles = new Set(columns.map(column => column.role));
   const hasMoney = roles.has('debit') || roles.has('credit') || roles.has('amount');

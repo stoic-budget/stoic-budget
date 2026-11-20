@@ -286,3 +286,10 @@ describe('a currency sign after the figure', () => {
     expect(parseStatementAmount('-300,00€')).toBe(-300);
   });
 });
+
+describe('a minus spaced after the figure', () => {
+  it('signs the amount: "6.22 -"', () => {
+    expect(parseStatementAmount('6.22 -')).toBe(-6.22);
+    expect(parseStatementAmount('1,000.00 -')).toBe(-1000);
+  });
+});

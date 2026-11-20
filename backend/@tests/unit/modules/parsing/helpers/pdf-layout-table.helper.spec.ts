@@ -723,3 +723,19 @@ describe('Withdrawn', () => {
     expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'credit', 'debit', 'balance']);
   });
 });
+
+describe('a row is no header', () => {
+  it('when it opens with a date or prints a sum, whatever its words', () => {
+    const words: [string, number][] = [
+      ['POS', 43],
+      ['Debit', 62],
+      ['-', 83],
+      ['Debit', 88],
+      ['Card', 109],
+      ['1000', 129],
+      ['Transaction', 149],
+    ];
+    expect(readHeaderRow(row(100, [['06-28', 14], ...words]))).toBeNull();
+    expect(readHeaderRow(row(100, [...words, ['6.22', 455], ['-', 472], ['1,701.26', 559]]))).toBeNull();
+  });
+});

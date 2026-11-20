@@ -78,5 +78,6 @@ export enum BankName {
   NAB = 'nab',
   NATIONWIDE = 'nationwide',
   NATWEST = 'natwest',
+  NAVY_FEDERAL = 'navy_federal',
   OTHER = 'other',
 }
