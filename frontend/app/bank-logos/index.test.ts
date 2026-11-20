@@ -5,7 +5,7 @@ describe('listSupportedBanks', () => {
   it('lists every bank with a parser of its own, Bereke once and no placeholder', () => {
     const banks = listSupportedBanks();
 
-    expect(banks).toHaveLength(55);
+    expect(banks).toHaveLength(56);
     expect(banks.map(bank => bank.key)).not.toContain('other');
     expect(new Set(banks.map(bank => bank.key)).size).toBe(banks.length);
   });
@@ -80,6 +80,7 @@ describe('resolveBankLogo', () => {
     ['halifax', 'Halifax'],
     ['handelsbanken', 'Handelsbanken'],
     ['hdfc', 'HDFC Bank'],
+    ['heritage', 'Heritage Bank'],
   ])('names the bank stored as %s by its real name', (bankName, displayName) => {
     expect(resolveBankLogo(bankName).displayName).toBe(displayName);
   });
