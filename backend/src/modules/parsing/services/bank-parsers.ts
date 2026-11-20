@@ -81,6 +81,7 @@ import { NetspendParser } from '../parsers/netspend.parser';
 import { OptumParser } from '../parsers/optum.parser';
 import { PayoneerParser } from '../parsers/payoneer.parser';
 import { PaypalParser } from '../parsers/paypal.parser';
+import { PncParser } from '../parsers/pnc.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
 /**
@@ -170,4 +171,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [OptumParser, { bankName: BankName.OPTUM }],
   [PayoneerParser, { bankName: BankName.PAYONEER }],
   [PaypalParser, { bankName: BankName.PAYPAL }],
+  [PncParser, { bankName: BankName.PNC }],
 ];
