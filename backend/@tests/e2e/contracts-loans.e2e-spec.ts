@@ -294,8 +294,12 @@ describe('API contracts: loans (e2e)', () => {
     const listed = await call('get', `/wallets/${loanId}/loan-payments`, 200);
     matches(LoanPayments, listed.body);
     expect(listed.body).toMatchObject({ currency: 'USD', autoSplit: false });
-    // The three counted instalments and the one still in Review; the duplicate is not a payment.
-    expect(listed.body.items).toHaveLength(4);
+    // The three counted instalments, the one still in Review, and the one in a
+    // currency with no rate (blocked); the duplicate is not a payment.
+    expect(listed.body.items).toHaveLength(5);
+    expect(
+      listed.body.items.filter((item: { blocked: string | null }) => item.blocked === 'other_currency'),
+    ).toHaveLength(1);
     const first = listed.body.items.find(
       (item: { isVerified: boolean; suggestion: { period: number | null } | null }) =>
         item.isVerified && item.suggestion?.period === 1,
