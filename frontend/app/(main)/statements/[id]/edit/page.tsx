@@ -4,22 +4,19 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
-  Button,
   Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
-  Paper,
   TextField,
   Typography,
 } from '@mui/material';
-import Alert from '@mui/material/Alert';
 import { useParams, useRouter } from 'next/navigation';
 import { buildSourceColumnTitles } from '@/app/(main)/custom-tables/labels';
 import CustomDatePicker from '@/app/components/CustomDatePicker';
-import { CheckCircle2, ChevronDown, Layers, Trash2 } from '@/app/components/icons';
+import { CheckCircle2, ChevronDown } from '@/app/components/icons';
 import { NotesPanel } from '@/app/components/notes/NotesPanel';
 import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { DetailActionButton } from '@/app/components/ui/detail-action-button';
@@ -29,9 +26,11 @@ import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatStoredDate } from '@/app/lib/user-format-store';
 import { tokens } from '@/lib/theme-tokens';
 import { BalanceReviewAlert, balanceReviewLabels } from './components/BalanceReviewAlert';
+import { BulkSelectionBar } from './components/BulkSelectionBar';
 import { EditStatementSkeleton } from './components/EditStatementSkeleton';
 import { ParsingFacts } from './components/ParsingFacts';
 import { StatementDetailsFields } from './components/StatementDetailsFields';
+import { StatementNotice } from './components/StatementNotice';
 import { StatementRowsSection } from './components/StatementRowsSection';
 import { StatementSummaryCards } from './components/StatementSummaryCards';
 import {
@@ -352,15 +351,15 @@ export default function EditStatementPage(): React.JSX.Element {
 
       {/* Alerts */}
       {error && (
-        <Alert variant="filled" severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+        <StatementNotice tone="error" onClose={() => setError('')}>
           {error}
-        </Alert>
+        </StatementNotice>
       )}
 
       {success && (
-        <Alert variant="filled" severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(false)}>
+        <StatementNotice tone="success" onClose={() => setSuccess(false)}>
           {t.labels.changesSaved}
-        </Alert>
+        </StatementNotice>
       )}
 
       <StatementSummaryCards
@@ -577,76 +576,13 @@ export default function EditStatementPage(): React.JSX.Element {
 
       {/* Bulk Actions */}
       {selectedRows.size > 0 && (
-        <Paper
-          elevation={0}
-          sx={{
-            mb: 3,
-            p: 3,
-            bgcolor: 'primary.50',
-            border: '1px solid',
-            borderColor: 'primary.200',
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <Typography
-              variant="body1"
-              sx={{
-                fontWeight: 600,
-                color: 'primary.700',
-                fontSize: '0.9375rem',
-              }}
-            >
-              {formatLabel(labels.selectedTransactions?.value, { count: selectedRows.size }) ||
-                `Selected: ${selectedRows.size} transactions`}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1.5 }}>
-              <Button
-                variant="outlined"
-                onClick={handleOpenBulkCategory}
-                startIcon={<Layers size={18} />}
-                disabled={saving}
-                size="small"
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  borderColor: 'primary.300',
-                  color: 'primary.700',
-                  '&:hover': {
-                    borderColor: 'primary.400',
-                    bgcolor: 'primary.100',
-                  },
-                }}
-              >
-                {labels.assignCategory?.value}
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() =>
-                  handleBulkDelete(
-                    formatLabel(labels.confirmDeleteMany?.value, { count: selectedRows.size }) ||
-                      `Delete ${selectedRows.size} transactions?`,
-                  )
-                }
-                disabled={saving}
-                startIcon={<Trash2 size={18} />}
-                size="small"
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 500,
-                }}
-              >
-                {labels.delete?.value}
-              </Button>
-            </Box>
-          </Box>
-        </Paper>
+        <BulkSelectionBar
+          count={selectedRows.size}
+          labels={labels}
+          saving={saving}
+          onAssignCategory={handleOpenBulkCategory}
+          onDelete={handleBulkDelete}
+        />
       )}
 
       <StatementRowsSection

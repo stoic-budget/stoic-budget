@@ -43,6 +43,10 @@ export const DuplicateUnmarked = Schema.Struct({
 });
 export type DuplicateUnmarked = Wire<typeof DuplicateUnmarked>;
 
+/** `POST /transactions/bulk-delete`: how many rows are gone. */
+export const TransactionsDeleted = Schema.Struct({ deleted: Schema.Number });
+export type TransactionsDeleted = Wire<typeof TransactionsDeleted>;
+
 /** `POST /transactions/transfers/detect`: pairs found and pairs written. */
 export const TransfersDetected = Schema.Struct({ found: Schema.Number, paired: Schema.Number });
 export type TransfersDetected = Wire<typeof TransfersDetected>;
