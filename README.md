@@ -157,6 +157,7 @@ Setting expectations upfront:
 | 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank, Great Southern Bank, Heritage Bank, ING, NAB | |
 | 🇳🇬 Nigeria | Fidelity Bank | |
 | 🇧🇪 Belgium | KBC | |
+| 🇰🇪 Kenya | NCBA Bank | |
 | 🇿🇦 South Africa | Absa, Capitec, FNB | |
 | 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank | |
 | 🇧🇷 Brazil | Banco do Brasil | |

@@ -32,3 +32,28 @@ export function withSidesByBalance(rows: LayoutTransaction[]): LayoutTransaction
     ...(debit !== undefined && { credit: debit }),
   }));
 }
+
+/**
+ * A table whose money columns sit too close to tell apart by position
+ * (amounts set right under "Debit" run past "Credit"): each row's side is
+ * the one its running balance moved by, from the row above or, for the
+ * first row, from the opening balance. A row whose balance moved by neither
+ * stays as read.
+ */
+export function withSidesFromBalances(
+  rows: LayoutTransaction[],
+  opening?: number,
+): LayoutTransaction[] {
+  return rows.map((row, index) => {
+    const before = index === 0 ? opening : rows[index - 1].balance;
+    const amount = row.credit ?? row.debit;
+    if (before === undefined || row.balance === undefined || amount === undefined) {
+      return row;
+    }
+    const { debit: _debit, credit: _credit, ...rest } = row;
+    if (round(before - amount) === round(row.balance)) {
+      return { ...rest, debit: amount };
+    }
+    return round(before + amount) === round(row.balance) ? { ...rest, credit: amount } : row;
+  });
+}
