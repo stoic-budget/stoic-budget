@@ -42,6 +42,18 @@ export const ACCOUNTING_ERRORS = {
     'The last payment would fall after 31 December 9999: start earlier or shorten the term',
   LOAN_TERMS_ROUNDING:
     'At this rate and term a payment rounded to the cent no longer repays the loan on time: shorten the term',
+  LOAN_PAYMENT_NOT_FOUND: 'Payment not found on this loan account',
+  LOAN_PAYMENT_CURRENCY:
+    'The payment is in {{currency}} and the loan in {{loanCurrency}}; only a payment in the loan currency can be split',
+  LOAN_PAYMENT_BEFORE_START: 'The payment is dated before the loan starts on {{startDate}}',
+  LOAN_PAYMENT_SPLIT_PART:
+    'The payment is divided into parts; join them before splitting off the interest',
+  LOAN_PAYMENT_ALREADY_SPLIT: 'The payment is already split into principal and interest',
+  LOAN_PAYMENT_INTEREST_TOO_LARGE: 'The interest cannot be more than the payment, {{amount}}',
+  LOAN_PAYMENT_SPLIT_FIRST_JOIN:
+    'The payment is split into principal and interest: join the principal and interest back first',
+  LOAN_INTEREST_STAYS_ON_LOAN:
+    'Interest split off a loan payment stays an expense on the loan account: join the payment back first',
   TRANSFER_SAME_ACCOUNT: 'The transaction is already in this account',
   // Payables
   PAYABLE_PAYMENT_NOT_POSITIVE: 'A payment must be more than zero',

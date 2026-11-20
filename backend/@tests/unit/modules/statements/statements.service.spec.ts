@@ -689,6 +689,12 @@ describe('StatementsService', () => {
       vi.spyOn(workspaceMemberRepository, 'findOne').mockResolvedValue({
         role: WorkspaceRole.ADMIN,
       } as WorkspaceMember);
+      // Earlier tests swap the query builder out; the tax-lock check counts with one.
+      (transactionRepository as any).createQueryBuilder = vi.fn(() => ({
+        setFindOptions: vi.fn().mockReturnThis(),
+        innerJoin: vi.fn().mockReturnThis(),
+        getCount: vi.fn(async () => 0),
+      }));
     });
 
     it('should delete statement and related transactions', async () => {

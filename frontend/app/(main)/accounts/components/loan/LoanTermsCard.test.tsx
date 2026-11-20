@@ -37,6 +37,7 @@ const terms: LoanTermsItem = {
   extraPayments: [],
   recurringExtra: null,
   extraMode: 'reduce_term',
+  autoSplit: false,
   createdAt: '2026-01-10T00:00:00.000Z',
   updatedAt: '2026-01-10T00:00:00.000Z',
 };

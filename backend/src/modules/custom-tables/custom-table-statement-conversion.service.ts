@@ -8,7 +8,7 @@ import { type Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { appDefaultCurrency, currencyCodeOrDefault } from '../../common/utils/currency.util';
 import { normalizeFilename } from '../../common/utils/filename.util';
-import { assertNoTaxLockedTransactions } from '../../common/utils/tax-lock.util';
+import { assertRowsRemovable } from '../../common/utils/tax-lock.util';
 import { resolveUploadsDir } from '../../common/utils/uploads.util';
 import { AuditAction, EntityType } from '../../entities/audit-event.entity';
 import { CustomTableColumn } from '../../entities/custom-table-column.entity';
@@ -220,7 +220,7 @@ export class CustomTableStatementConversionService {
 
     // Re-converting replaces the statement's rows, and rows on a filed return may not go.
     if (existingStatement) {
-      await assertNoTaxLockedTransactions(this.transactionRepository, {
+      await assertRowsRemovable(this.transactionRepository, {
         statementId: existingStatement.id,
         workspaceId,
       });

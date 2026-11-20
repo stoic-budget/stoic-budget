@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import type { Repository } from 'typeorm';
+import { In, type Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { validateFile } from '../../common/utils/file-validator.util';
-import { assertNoTaxLockedTransactions } from '../../common/utils/tax-lock.util';
+import { assertRowsRemovable } from '../../common/utils/tax-lock.util';
 import type {
   ConvertDroppedSampleBody,
   CreateManualExpenseBody,
@@ -16,6 +16,7 @@ import { Statement, StatementStatus } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { User } from '../../entities/user.entity';
 import { AuditService } from '../audit/audit.service';
+import { deleteKeepingSplits } from '../loans/loan-interest-carry';
 import { StatementParsingQueue } from '../parsing/queue/statement-parsing.queue';
 import { StatementProcessingService } from '../parsing/services/statement-processing.service';
 import { DroppedSampleService } from './dropped-sample.service';
@@ -210,11 +211,11 @@ export class StatementsService {
 
     if (mode === 'replace') {
       // Full delete mode - clear all transactions
-      await assertNoTaxLockedTransactions(this.transactionRepository, {
+      await assertRowsRemovable(this.transactionRepository, {
         statementId: statement.id,
         workspaceId,
       });
-      await this.transactionRepository.delete({ statementId: statement.id });
+      await deleteKeepingSplits(this.transactionRepository, workspaceId, { statementId: id });
     } else {
       // Merge mode - keep user-modified transactions, soft-delete others
       const existingTransactions = await this.transactionRepository.find({
@@ -237,9 +238,7 @@ export class StatementsService {
       }
 
       // Soft-delete non-modified transactions
-      if (toDelete.length > 0) {
-        await this.transactionRepository.delete(toDelete);
-      }
+      await deleteKeepingSplits(this.transactionRepository, workspaceId, { id: In(toDelete) });
 
       this.logger.log(
         `[Reprocess Merge] Keeping ${userModified.length} user-modified transactions, deleting ${toDelete.length}`,
