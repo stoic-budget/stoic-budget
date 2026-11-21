@@ -788,3 +788,20 @@ describe('Transactions, withdrawn and deposited', () => {
     expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
   });
 });
+
+describe('funds out and funds in', () => {
+  it('read as money out and in', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['date', 17],
+        ['transaction', 82],
+        ['funds', 356],
+        ['out', 384],
+        ['funds', 453],
+        ['in', 481],
+        ['balance', 543],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
+  });
+});

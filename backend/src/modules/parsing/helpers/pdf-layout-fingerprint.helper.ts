@@ -121,6 +121,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.SANTANDER, /\bsantander uk plc\b/],
   [BankName.SBI, /\bstate bank of india\b/],
   [BankName.SCOTIABANK, /\bwww\.scotiabank\.com\b|\b1 800 4-scotia\b/],
+  [BankName.SIMPLII, /\bsimplii financial\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
