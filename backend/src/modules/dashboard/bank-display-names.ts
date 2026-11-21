@@ -109,4 +109,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.SYNCHRONY]: 'Synchrony Bank',
   [BankName.SYNOVUS]: 'Synovus',
   [BankName.TANGERINE]: 'Tangerine',
+  [BankName.TD]: 'TD Bank',
 };

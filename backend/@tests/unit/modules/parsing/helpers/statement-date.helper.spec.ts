@@ -102,3 +102,9 @@ describe('a day written with its ordinal', () => {
     expect(parseDateParts('23rd Apr 2024', 'dmy')).toMatchObject({ day: 23, month: 4, year: 2024 });
   });
 });
+
+describe('a month, a day and a two-digit year', () => {
+  it('reads "JUL 31/24"', () => {
+    expect(parseDateParts('jul 31/24', 'dmy')).toMatchObject({ day: 31, month: 7, year: 2024 });
+  });
+});
