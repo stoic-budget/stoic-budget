@@ -168,6 +168,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Santander UK plc. Registered Office: 2 Triton Square')).toBe(BankName.SANTANDER);
     expect(mentionedBank('STATE BANK OF INDIA STATEMENT OF ACCOUNT')).toBe(BankName.SBI);
     expect(mentionedBank('For online banking www.scotiabank.com')).toBe(BankName.SCOTIABANK);
+    expect(mentionedBank('“Simplii Financial” is a division of CIBC')).toBe(BankName.SIMPLII);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

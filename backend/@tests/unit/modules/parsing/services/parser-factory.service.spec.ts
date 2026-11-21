@@ -271,6 +271,7 @@ describe('ParserFactoryService', () => {
       'SantanderParser',
       'SbiParser',
       'ScotiabankParser',
+      'SimpliiParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
