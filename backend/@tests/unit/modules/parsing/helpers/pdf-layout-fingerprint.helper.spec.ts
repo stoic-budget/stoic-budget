@@ -175,6 +175,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('support@sogexia.com | www.sogexia.com')).toBe(BankName.SOGEXIA);
     expect(mentionedBank('Apply for the Standard Chartered card')).toBe(BankName.STANDARD_CHARTERED);
     expect(mentionedBank('24hr Customer Service: 0207 930 4450 www.starlingbank.com')).toBe(BankName.STARLING);
+    expect(mentionedBank('Suncorp-Metway Ltd ABN 66 010 831 722')).toBe(BankName.SUNCORP);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

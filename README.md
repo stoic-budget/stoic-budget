@@ -154,7 +154,7 @@ Setting expectations upfront:
 | 🇫🇷 France | Crédit Agricole, Société Générale, Sogexia | |
 | 🇵🇱 Poland | BNP Paribas Bank Polska | |
 | 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank, RBC Royal Bank, Scotiabank, Simplii Financial | |
-| 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank, Great Southern Bank, Heritage Bank, ING, NAB | |
+| 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank, Great Southern Bank, Heritage Bank, ING, NAB, Suncorp Bank | |
 | 🇳🇬 Nigeria | Fidelity Bank | |
 | 🇧🇪 Belgium | KBC | |
 | 🇰🇪 Kenya | NCBA Bank | |

@@ -100,6 +100,7 @@ import { SofiParser } from '../parsers/sofi.parser';
 import { SogexiaParser } from '../parsers/sogexia.parser';
 import { StandardCharteredParser } from '../parsers/standard-chartered.parser';
 import { StarlingParser } from '../parsers/starling.parser';
+import { SuncorpParser } from '../parsers/suncorp.parser';
 
 /**
  * Each bank's own parser, with the bank it claims a file as when the file's
@@ -206,4 +207,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [SogexiaParser, { bankName: BankName.SOGEXIA }],
   [StandardCharteredParser, { bankName: BankName.STANDARD_CHARTERED }],
   [StarlingParser, { bankName: BankName.STARLING }],
+  [SuncorpParser, { bankName: BankName.SUNCORP }],
 ];
