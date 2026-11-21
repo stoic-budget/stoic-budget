@@ -59,6 +59,7 @@ import { HuntingtonParser } from '../parsers/huntington.parser';
 import { IbcParser } from '../parsers/ibc.parser';
 import { IciciParser } from '../parsers/icici.parser';
 import { IfastParser } from '../parsers/ifast.parser';
+import { IngParser } from '../parsers/ing.parser';
 import { KaspiParser } from '../parsers/kaspi.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
@@ -128,4 +129,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [IbcParser, { bankName: BankName.IBC }],
   [IciciParser, { bankName: BankName.ICICI }],
   [IfastParser, { bankName: BankName.IFAST }],
+  [IngParser, { bankName: BankName.ING }],
 ];
