@@ -1,4 +1,4 @@
-import { withSidesByBalance } from '@/modules/parsing/helpers/pdf-layout-swapped-sides.helper';
+import { withSidesByBalance, withSidesFromBalances } from '@/modules/parsing/helpers/pdf-layout-swapped-sides.helper';
 import type { LayoutTransaction } from '@/modules/parsing/helpers/pdf-layout-table.helper';
 
 const read = (money: { debit?: number; credit?: number }, balance: number): LayoutTransaction => ({
@@ -24,5 +24,27 @@ describe('withSidesByBalance', () => {
   it('leaves rows whose balance follows them as read', () => {
     const rows = [read({ debit: 20 }, 80), read({ credit: 5 }, 85)];
     expect(withSidesByBalance(rows)).toBe(rows);
+  });
+});
+
+describe('withSidesFromBalances', () => {
+  const read = (amount: number, balance: number): LayoutTransaction => ({
+    date: { day: 1, month: 8, year: 2024 },
+    dateText: '01/08/2024',
+    description: 'Transfer',
+    firstLine: 'Transfer',
+    counterparty: '',
+    credit: amount,
+    balance,
+    at: { page: 1, y: 0 },
+  });
+
+  it('gives each row the side its running balance moved by, the first from the opening', () => {
+    const rows = withSidesFromBalances([read(1000, 22101.68), read(1500, 23601.68), read(5, 99)], 23101.68);
+    expect(rows.map(row => [row.debit, row.credit])).toEqual([
+      [1000, undefined],
+      [undefined, 1500],
+      [undefined, 5],
+    ]);
   });
 });

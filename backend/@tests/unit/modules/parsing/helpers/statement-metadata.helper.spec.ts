@@ -293,3 +293,9 @@ describe('a minus spaced after the figure', () => {
     expect(parseStatementAmount('1,000.00 -')).toBe(-1000);
   });
 });
+
+describe('a currency named in words', () => {
+  it('after its label: "Currency : Kenyan Shilling"', () => {
+    expect(detectStatementCurrency('From : 01/08/2024\nCurrency : Kenyan Shilling\nUSD 1.00')).toBe('KES');
+  });
+});

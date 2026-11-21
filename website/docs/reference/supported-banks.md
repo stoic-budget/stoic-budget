@@ -17,6 +17,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **India:** Axis Bank, Citibank, HDFC Bank, ICICI Bank
 - **Israel:** Bank Hapoalim / Isracard (Hebrew)
 - **Kazakhstan:** Kaspi Bank; Bereke Bank, old and new PDF layouts
+- **Kenya:** NCBA Bank
 - **Nigeria:** Fidelity Bank
 - **Philippines:** BPI, GoTyme Bank
 - **Poland:** BNP Paribas Bank Polska

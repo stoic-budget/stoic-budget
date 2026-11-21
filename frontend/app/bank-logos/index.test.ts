@@ -5,7 +5,7 @@ describe('listSupportedBanks', () => {
   it('lists every bank with a parser of its own, Bereke once and no placeholder', () => {
     const banks = listSupportedBanks();
 
-    expect(banks).toHaveLength(78);
+    expect(banks).toHaveLength(79);
     expect(banks.map(bank => bank.key)).not.toContain('other');
     expect(new Set(banks.map(bank => bank.key)).size).toBe(banks.length);
   });
@@ -103,6 +103,7 @@ describe('resolveBankLogo', () => {
     ['nationwide', 'Nationwide'],
     ['natwest', 'NatWest'],
     ['navy_federal', 'Navy Federal Credit Union'],
+    ['ncba', 'NCBA Bank'],
   ])('names the bank stored as %s by its real name', (bankName, displayName) => {
     expect(resolveBankLogo(bankName).displayName).toBe(displayName);
   });

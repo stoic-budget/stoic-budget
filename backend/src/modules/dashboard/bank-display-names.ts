@@ -82,4 +82,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.NATIONWIDE]: 'Nationwide',
   [BankName.NATWEST]: 'NatWest',
   [BankName.NAVY_FEDERAL]: 'Navy Federal Credit Union',
+  [BankName.NCBA]: 'NCBA Bank',
 };

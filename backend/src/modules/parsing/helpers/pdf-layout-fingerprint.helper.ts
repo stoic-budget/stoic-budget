@@ -104,6 +104,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.NATIONWIDE, /\bnationwide\.co\.uk\b|\bnationwide building society\b/],
   [BankName.NATWEST, /\bnwbkgb2l\b|\bnatwest\.com\b/],
   [BankName.NAVY_FEDERAL, /\bnavyfederal\.org\b|\bnavy federal credit union\b/],
+  [BankName.NCBA, /\bncba\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
