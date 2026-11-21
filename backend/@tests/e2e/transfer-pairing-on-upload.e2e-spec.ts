@@ -218,7 +218,7 @@ describe('Transfer pairing on a statement upload (e2e)', () => {
     expect(await pairOf(outRow)).toBe(pairId);
   });
 
-  it('releases the other leg when one is deleted, and an undo brings the row back unpaired', async () => {
+  it('releases the other leg when one is deleted, and an undo pairs the two again', async () => {
     const { outRow, intoRow } = await pairedTransfer('5353', '720.00', '20261110');
     await as(request(server()).delete(`/transactions/${intoRow}`)).expect(204);
     expect(await pairOf(outRow)).toBeNull();
@@ -230,7 +230,8 @@ describe('Transfer pairing on a statement upload (e2e)', () => {
       [intoRow],
     );
     await as(request(server()).post(`/audit-events/${event.id}/rollback`)).expect(201);
-    expect(await pairOf(intoRow)).toBeNull();
-    expect(await pairOf(outRow)).toBeNull();
+    const restored = await pairOf(intoRow);
+    expect(restored).not.toBeNull();
+    expect(await pairOf(outRow)).toBe(restored);
   });
 });
