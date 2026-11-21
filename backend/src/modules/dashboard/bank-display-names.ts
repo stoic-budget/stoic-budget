@@ -96,4 +96,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.REVOLUT]: 'Revolut',
   [BankName.RBS]: 'Royal Bank of Scotland',
   [BankName.SANTANDER]: 'Santander UK',
+  [BankName.SBI]: 'State Bank of India',
 };

@@ -161,7 +161,7 @@ Setting expectations upfront:
 | 🇶🇦 Qatar | QNB | |
 | 🇷🇴 Romania | Raiffeisen Bank | |
 | 🇿🇦 South Africa | Absa, Capitec, FNB | |
-| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank | |
+| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India | |
 | 🇧🇷 Brazil | Banco do Brasil | |
 | 🇭🇰 Hong Kong | Bank of China (Hong Kong) | |
 | 🇵🇭 Philippines | BPI, GoTyme Bank | |

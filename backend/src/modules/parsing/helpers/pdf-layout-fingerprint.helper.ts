@@ -119,6 +119,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.REGIONS, /\b1-800-regions\b/],
   [BankName.REVOLUT, /\brevolut (?:ltd|bank uab)\b/],
   [BankName.SANTANDER, /\bsantander uk plc\b/],
+  [BankName.SBI, /\bstate bank of india\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

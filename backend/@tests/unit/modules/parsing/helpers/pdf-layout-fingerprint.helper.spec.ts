@@ -166,6 +166,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Revolut Ltd (No. 08804411) is authorised by the FCA')).toBe(BankName.REVOLUT);
     expect(mentionedBank('Royal Bank of Scotland Plc. Registered Office, The Mound')).toBe(BankName.RBS);
     expect(mentionedBank('Santander UK plc. Registered Office: 2 Triton Square')).toBe(BankName.SANTANDER);
+    expect(mentionedBank('STATE BANK OF INDIA STATEMENT OF ACCOUNT')).toBe(BankName.SBI);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
