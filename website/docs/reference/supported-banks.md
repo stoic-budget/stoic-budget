@@ -19,7 +19,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **Nigeria:** Fidelity Bank
 - **Philippines:** BPI
 - **Poland:** BNP Paribas Bank Polska
-- **South Africa:** Absa, Capitec
+- **South Africa:** Absa, Capitec, FNB
 - **Sri Lanka:** Commercial Bank of Ceylon
 - **United Kingdom:** Bank of Scotland, Barclays, first direct
 - **United States:** Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens

@@ -222,6 +222,7 @@ describe('ParserFactoryService', () => {
       'FifthThirdParser',
       'FirstCitizensParser',
       'FirstDirectParser',
+      'FnbParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

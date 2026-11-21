@@ -46,5 +46,6 @@ export enum BankName {
   FIFTH_THIRD = 'fifth_third',
   FIRST_CITIZENS = 'first_citizens',
   FIRST_DIRECT = 'first_direct',
+  FNB = 'fnb',
   OTHER = 'other',
 }

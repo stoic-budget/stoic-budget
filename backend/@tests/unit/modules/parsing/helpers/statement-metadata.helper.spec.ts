@@ -34,6 +34,8 @@ describe('parseStatementAmount', () => {
     ['120.000,00(+)', 120000],
     ['1,000.00 Cr', 1000],
     ['250.00 DR', -250],
+    ['3,193.31Cr', 3193.31],
+    ['114.40Dr', -114.4],
   ])('reads %s', (text, expected) => {
     expect(parseStatementAmount(text)).toBe(expected);
   });

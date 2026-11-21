@@ -156,7 +156,7 @@ Setting expectations upfront:
 | 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank | |
 | 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank | |
 | 🇳🇬 Nigeria | Fidelity Bank | |
-| 🇿🇦 South Africa | Absa, Capitec | |
+| 🇿🇦 South Africa | Absa, Capitec, FNB | |
 | 🇮🇳 India | Axis Bank, Citibank | |
 | 🇧🇷 Brazil | Banco do Brasil | |
 | 🇭🇰 Hong Kong | Bank of China (Hong Kong) | |

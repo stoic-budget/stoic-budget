@@ -83,4 +83,5 @@ export const BANKS = [
     aliases: ['first citizens bank'],
   },
   { key: 'first_direct', name: 'first direct', logo: 'first-direct.png' },
+  { key: 'fnb', name: 'FNB', logo: 'fnb.png', aliases: ['first national bank'] },
 ] as const satisfies readonly BankEntry[];

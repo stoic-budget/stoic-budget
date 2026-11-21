@@ -592,4 +592,25 @@ describe('headings', () => {
       'balance',
     ]);
   });
+
+  it('opens the text with the words after the date still under its heading', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [
+        ['Date', 16],
+        ['Description', 209],
+        ['Amount', 437],
+        ['Balance', 499],
+      ]),
+      row(140, [
+        ['04', 12],
+        ['Jul', 21],
+        ['POS', 38],
+        ['Purchase', 53],
+        ['ACME', 82],
+        ['206.69', 453],
+        ['3,193.31Cr', 511],
+      ]),
+    ]);
+    expect(transactions.map(t => [t.description, t.balance])).toEqual([['POS Purchase ACME', 3193.31]]);
+  });
 });
