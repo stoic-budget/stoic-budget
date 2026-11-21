@@ -29,11 +29,7 @@ import type {
 import { Payable, PayableDirection, PayableStatus } from '../../entities/payable.entity';
 import { Receipt, ReceiptStatus } from '../../entities/receipt.entity';
 import { BankName, Statement, StatementStatus } from '../../entities/statement.entity';
-import {
-  Subscription,
-  SubscriptionFrequency,
-  SubscriptionStatus,
-} from '../../entities/subscription.entity';
+import { Subscription, SubscriptionStatus } from '../../entities/subscription.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
@@ -46,8 +42,14 @@ import {
   uncategorizedRowsQuery,
   unconfirmedRowsQuery,
 } from '../review-inbox/review-queue.queries';
+import { allTimeBalance } from './all-time-balance';
 import { BANK_DISPLAY_NAMES } from './bank-display-names';
 import { recentRowHrefs } from './bill-hrefs';
+import {
+  newestRecurringPayables,
+  projectedOccurrences,
+  projectSubscriptionCharges,
+} from './commitment-projections';
 import {
   type CashFlowRange,
   type DashboardWindow,
@@ -57,7 +59,7 @@ import {
   getWindowBounds,
   parseMonthWindow,
 } from './dashboard-window.util';
-import { spendableBalance, sumConverted } from './opening-balance';
+import { spendableBalance } from './opening-balance';
 
 /** How many individual categories the donut shows before folding the rest into "Other". */
 const TOP_CATEGORIES_LIMIT = 8;
@@ -337,21 +339,8 @@ export class DashboardService {
   }
 
   /** All-time net of every approved transaction, converted into `targetCurrency`. */
-  private async getAllTimeBalance(workspaceId: string, targetCurrency: string): Promise<number> {
-    const balanceQuery = this.transactionRepo.createQueryBuilder('t').leftJoin('t.statement', 's');
-    this.applyWorkspaceStatementFilters(balanceQuery, workspaceId, true);
-
-    const balanceRows = await balanceQuery
-      .select([
-        't.currency AS currency',
-        `COALESCE(SUM(CASE WHEN t.transactionType = :balIncome THEN t.credit WHEN t.transactionType = :balExpense THEN -t.debit ELSE 0 END), 0) AS "balance"`,
-      ])
-      .setParameter('balIncome', TransactionType.INCOME)
-      .setParameter('balExpense', TransactionType.EXPENSE)
-      .groupBy('t.currency')
-      .getRawMany<{ currency: string; balance: string }>();
-
-    return sumConverted(balanceRows, (amount, from) =>
+  private getAllTimeBalance(workspaceId: string, targetCurrency: string): Promise<number> {
+    return allTimeBalance(this.transactionRepo, workspaceId, (amount, from) =>
       this.convertDashboardAmount(amount, from, targetCurrency, workspaceId),
     );
   }
@@ -1207,7 +1196,7 @@ export class DashboardService {
     const horizonEnd = new Date(today);
     horizonEnd.setDate(horizonEnd.getDate() + horizonDays - 1);
 
-    const [openingBalance, payables, subscriptions] = await Promise.all([
+    const [openingBalance, payables, subscriptions, series] = await Promise.all([
       spendableBalance(this.transactionRepo, workspaceId, {
         convert: (amount, from) => this.convertDashboardAmount(amount, from, currency, workspaceId),
         allTime: () => this.getAllTimeBalance(workspaceId, currency),
@@ -1228,10 +1217,11 @@ export class DashboardService {
       this.subscriptionRepo.find({
         where: { workspaceId, status: SubscriptionStatus.ACTIVE },
       }),
+      newestRecurringPayables(this.payableRepo, workspaceId),
     ]);
 
     const [payableItems, subscriptionItems] = await Promise.all([
-      this.collectPayableCommitments(payables, currency, today, horizonEnd),
+      this.collectPayableCommitments(payables, series, currency, today, horizonEnd),
       this.collectSubscriptionCommitments(subscriptions, currency, today, horizonEnd),
     ]);
 
@@ -1250,9 +1240,14 @@ export class DashboardService {
     };
   }
 
-  /** Unpaid payables placed on their due date, with undated ones split out. */
+  /**
+   * Unpaid payables placed on their due date, with undated ones split out, and
+   * the occurrences of repeating ones not made yet (`series`: the newest bill
+   * of each) on the days their rule gives them.
+   */
   private async collectPayableCommitments(
     payables: Payable[],
+    series: Payable[],
     currency: string,
     today: Date,
     horizonEnd: Date,
@@ -1291,6 +1286,23 @@ export class DashboardService {
         isOverdue,
       });
     }
+    for (const newest of series) {
+      for (const next of projectedOccurrences(newest, today, horizonEnd)) {
+        const amount = await this.convertDashboardAmount(
+          next.amount,
+          newest.currency,
+          currency,
+          newest.workspaceId,
+        );
+        items.push({
+          ...next,
+          amount,
+          label: newest.vendor,
+          source: 'payable',
+          sourceId: newest.id,
+        });
+      }
+    }
 
     return { items, unscheduledCommitted };
   }
@@ -1314,7 +1326,13 @@ export class DashboardService {
       if (amount === 0) {
         continue;
       }
-      for (const chargeDate of this.projectSubscriptionCharges(subscription, today, horizonEnd)) {
+      for (const chargeDate of projectSubscriptionCharges(
+        this.parseDateOnly(subscription.nextChargeDate),
+        subscription.frequency,
+        today,
+        horizonEnd,
+        MAX_COMMITMENT_HORIZON_DAYS,
+      )) {
         items.push({
           date: this.formatDateOnly(chargeDate),
           label: subscription.vendorName,
@@ -1372,57 +1390,6 @@ export class DashboardService {
     }
 
     return { days, totalCommitted, lowestBalance, lowestBalanceDate, shortfallDate };
-  }
-
-  /** Every charge date of `subscription` that falls inside [today, horizonEnd]. */
-  private projectSubscriptionCharges(
-    subscription: Subscription,
-    today: Date,
-    horizonEnd: Date,
-  ): Date[] {
-    let cursor = this.parseDateOnly(subscription.nextChargeDate);
-    if (!cursor) {
-      return [];
-    }
-
-    // A next-charge date left in the past means the charge was never reconciled;
-    // roll it forward so the projection starts from the next real occurrence.
-    let guard = 0;
-    while (cursor < today && guard < MAX_COMMITMENT_HORIZON_DAYS) {
-      cursor = this.advanceByFrequency(cursor, subscription.frequency);
-      guard += 1;
-    }
-
-    const charges: Date[] = [];
-    while (cursor <= horizonEnd && charges.length < MAX_COMMITMENT_HORIZON_DAYS) {
-      charges.push(new Date(cursor));
-      cursor = this.advanceByFrequency(cursor, subscription.frequency);
-    }
-    return charges;
-  }
-
-  private advanceByFrequency(date: Date, frequency: SubscriptionFrequency): Date {
-    switch (frequency) {
-      case SubscriptionFrequency.WEEKLY: {
-        const next = new Date(date);
-        next.setDate(next.getDate() + 7);
-        return next;
-      }
-      case SubscriptionFrequency.QUARTERLY:
-        return this.addMonths(date, 3);
-      case SubscriptionFrequency.ANNUAL:
-        return this.addMonths(date, 12);
-      default:
-        return this.addMonths(date, 1);
-    }
-  }
-
-  /** Month arithmetic that clamps to the last day instead of overflowing (Jan 31 + 1m = Feb 28). */
-  private addMonths(date: Date, months: number): Date {
-    const dayOfMonth = date.getDate();
-    const result = new Date(date.getFullYear(), date.getMonth() + months, 1);
-    result.setDate(Math.min(dayOfMonth, daysInMonth(result)));
-    return result;
   }
 
   /** Postgres `date` columns arrive as 'YYYY-MM-DD' strings; parse them in local time. */

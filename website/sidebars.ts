@@ -23,7 +23,6 @@ const sidebars: SidebarsConfig = {
         'guides/webhooks',
         'guides/categorization',
         'guides/receipt-maps',
-        'guides/income-tax-declaration',
         'guides/observability',
         'guides/mcp',
         'guides/security-posture',
