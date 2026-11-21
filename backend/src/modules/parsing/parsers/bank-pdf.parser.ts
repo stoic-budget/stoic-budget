@@ -6,13 +6,19 @@ import { GenericPdfParser } from './generic-pdf.parser';
 /**
  * A bank's own PDF parser on top of the generic layout reading: it claims a
  * PDF filed under its bank, or under OTHER when the text is the bank's, and
- * may rework each row (payee, type, reference) of every account the file prints.
+ * may name the account its own way and rework each row (payee, type,
+ * reference) of every account the file prints.
  */
 export abstract class BankPdfParser extends GenericPdfParser {
   protected abstract readonly bank: BankName;
 
   /** Whether the statement's text is this bank's. */
   protected abstract recognises(text: string): boolean;
+
+  /** The account the statement is for, when the bank prints it its own way. */
+  protected accountNumber(_text: string): string | null {
+    return null;
+  }
 
   /** A row as the bank prints it, reworked; as it is by default. */
   protected entry(row: ParsedTransaction): ParsedTransaction {
@@ -37,7 +43,12 @@ export abstract class BankPdfParser extends GenericPdfParser {
   }
 
   async parse(filePath: string, cachedText?: string): Promise<ParsedStatement> {
-    const statement = await super.parse(filePath, cachedText);
+    const text = cachedText ?? (await extractTextFromPdf(filePath));
+    const parsed = await super.parse(filePath, text);
+    const accountNumber = parsed.otherAccounts ? null : this.accountNumber(text);
+    const statement = accountNumber
+      ? { ...parsed, metadata: { ...parsed.metadata, accountNumber } }
+      : parsed;
     const rework = (account: ParsedStatement): ParsedStatement => ({
       ...account,
       transactions: account.transactions.map(row => this.entry(row)),

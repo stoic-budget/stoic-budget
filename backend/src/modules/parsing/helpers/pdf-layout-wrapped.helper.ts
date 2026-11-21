@@ -82,6 +82,9 @@ const PAGE_NOTE = /^\(?continued(?: on (?:the )?next page)?\)?$/i;
 /** A line further than this many line heights below the previous one is not a continuation. */
 const CONTINUATION_LINE_HEIGHTS = 2.6;
 
+/** Two or more letters glued to a digit, or a digit to them: a reference or a code. */
+const GLUED_CODE = /[A-Za-z]{2,}\d|\d[A-Za-z]{2,}/;
+
 /**
  * Whether a line without its own date adds to the transaction above it: it
  * sits right under the previous line, carries no money (money anywhere makes
@@ -105,9 +108,11 @@ export function continuesTransaction(
 ) {
   // The row's balance printed again on its wrapped line is not new money.
   const isMoney = (value: number) => value !== 0 && Math.abs(value) !== Math.abs(balance ?? NaN);
+  // A figure glued to letters is a code, not money: "BLZ100708480930.03/21.19UHR".
+  const words = row.items.map(item => item.text).filter(word => !GLUED_CODE.test(word));
   const hasMoney =
     laidOut.amounts.some(amount => isMoney(amount.value)) ||
-    findStatementAmounts(row.items.map(item => item.text).join(' ')).some(isMoney);
+    findStatementAmounts(words.join(' ')).some(isMoney);
   const reachesDateColumn = (laidOut.text.date ?? []).length > 0;
   // "Ending Balance $12,274.35" under the last row states the balance, it is no text of the row.
   return (

@@ -1,5 +1,8 @@
-import { findStatementAmounts } from './statement-amount.helper';
-import { balanceLineEnd } from './statement-balance-line.helper';
+import {
+  amountsWithoutDates,
+  balanceLineEnd,
+  figureUnderLabel,
+} from './statement-balance-line.helper';
 import { findFullDates, foldText, type NumericDateOrder } from './statement-date.helper';
 
 export { isCreditCardStatement } from './statement-card.helper';
@@ -236,20 +239,26 @@ function amountAfter(
   index: number,
   order: NumericDateOrder,
   pick: 'first' | 'last' = 'last',
+  labelStart?: number,
 ) {
   const line = text.slice(index, balanceLineEnd(folded, index, [...OPENING, ...CLOSING]));
   let withoutDates = line;
   for (const found of findFullDates(line, order).reverse()) {
     withoutDates = `${withoutDates.slice(0, found.index)} ${withoutDates.slice(found.index + found.length)}`;
   }
-  const amounts = findStatementAmounts(withoutDates);
-  return (pick === 'first' ? amounts[0] : amounts[amounts.length - 1]) ?? null;
+  const amounts = amountsWithoutDates(withoutDates);
+  return (
+    (pick === 'first' ? amounts[0] : amounts[amounts.length - 1]) ??
+    (labelStart === undefined
+      ? null
+      : figureUnderLabel(text, folded, { start: labelStart, end: index }))
+  );
 }
 
 function labelledAmount(text: string, folded: string, labels: string[], order: NumericDateOrder) {
   for (const label of labels) {
     for (let at = folded.indexOf(label); at !== -1; at = folded.indexOf(label, at + 1)) {
-      const value = amountAfter(text, folded, at + label.length, order);
+      const value = amountAfter(text, folded, at + label.length, order, 'last', at);
       if (value !== null) {
         return value;
       }

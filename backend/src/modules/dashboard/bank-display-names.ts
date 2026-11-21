@@ -42,4 +42,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.OTHER]: 'Bank',
   [BankName.BANK_OF_AMERICA]: 'Bank of America',
   [BankName.DESJARDINS]: 'Desjardins',
+  [BankName.DEUTSCHE_BANK]: 'Deutsche Bank',
 };
