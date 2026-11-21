@@ -1,12 +1,13 @@
 import { BadRequestException } from '@nestjs/common';
 import { Permission } from '../../../common/enums/permissions.enum';
 import { appError } from '../../../common/errors/app-error';
-import type {
-  UpdateBudgetBody,
-  UpdateInvoiceBody,
-  UpdatePayableBody,
-  UpdateSubscriptionBody,
-  UpdateTransactionBody,
+import {
+  SubscriptionFrequency,
+  type UpdateBudgetBody,
+  type UpdateInvoiceBody,
+  type UpdatePayableBody,
+  type UpdateSubscriptionBody,
+  type UpdateTransactionBody,
 } from '../../../contracts';
 import type { SourceValue } from '../sources/source.types';
 
@@ -277,7 +278,6 @@ async function transactionBody(
 
 // ------------------------------------------------------------ subscriptions --
 
-const SUBSCRIPTION_FREQUENCIES = ['weekly', 'monthly', 'quarterly', 'annual'] as const;
 const SUBSCRIPTION_STATUSES = ['detected', 'active', 'paused', 'cancelled'] as const;
 
 const subscriptionsWriter = (services: WriterServices): SourceWriter => {
@@ -302,7 +302,7 @@ async function subscriptionBody(
     case 'currency':
       return { currency: asCurrency(value, field) };
     case 'frequency':
-      return { frequency: asOneOf(value, SUBSCRIPTION_FREQUENCIES, field) };
+      return { frequency: asOneOf(value, SubscriptionFrequency.literals, field) };
     case 'status':
       return { status: asOneOf(value, SUBSCRIPTION_STATUSES, field) };
     case 'nextChargeDate':

@@ -13,6 +13,7 @@ import type { Insight, InsightList, InsightSeverity } from '@/app/lib/contracts'
 import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { localizeStatementCategoryName } from '@/app/lib/statement-categories';
+import { isDemoInstance } from './useDemoStatus';
 import { useWorkspaceId } from './useWorkspaceId';
 
 export type { Insight, InsightSeverity } from '@/app/lib/contracts';
@@ -166,7 +167,8 @@ export function useDailyAdviceRefresh(): void {
   const { mutate } = useRefreshInsights();
 
   useEffect(() => {
-    if (!workspaceId) {
+    // A demo's advice is written when it is reseeded; visitors cannot rewrite it.
+    if (!workspaceId || isDemoInstance()) {
       return;
     }
     const today = new Date().toDateString();

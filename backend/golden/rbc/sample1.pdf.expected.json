@@ -1,0 +1,818 @@
+{
+  "metadata": {
+    "accountNumber": "09453-1000001",
+    "currency": "CAD",
+    "dateFrom": "2018-12-21T00:00:00",
+    "dateTo": "2019-01-21T00:00:00",
+    "balanceStart": 2004.68,
+    "balanceEnd": 57.85
+  },
+  "transactions": [
+    {
+      "transactionDate": "2018-12-24T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 40,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-12-24T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 60,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-12-24T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 400,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-12-24T00:00:00",
+      "counterpartyName": "ATM withdrawal - 11274101",
+      "paymentPurpose": "ATM withdrawal - 11274101",
+      "debit": 302.99,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2018-12-24T00:00:00",
+      "counterpartyName": "INTERAC-SC-4101",
+      "paymentPurpose": "INTERAC-SC-4101",
+      "debit": 1.5,
+      "currency": "CAD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2018-12-24T00:00:00",
+      "counterpartyName": "member",
+      "paymentPurpose": "e-Transfer sent member",
+      "debit": 200,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-12-27T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 15.98,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-12-27T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 125,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-12-27T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 250,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-12-27T00:00:00",
+      "counterpartyName": "BMO MASTERCD",
+      "paymentPurpose": "Online Banking payment - 1825 BMO MASTERCD",
+      "debit": 300,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-12-27T00:00:00",
+      "counterpartyName": "CDN TIRE MC",
+      "paymentPurpose": "Online Banking payment - 3420 CDN TIRE MC",
+      "debit": 400,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-12-27T00:00:00",
+      "counterpartyName": "member",
+      "paymentPurpose": "e-Transfer sent member",
+      "debit": 500,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-12-28T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 125,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-12-28T00:00:00",
+      "counterpartyName": "Membra",
+      "paymentPurpose": "e-Transfer sent Membra",
+      "debit": 140,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-12-28T00:00:00",
+      "counterpartyName": "PETERS PIZZA &",
+      "paymentPurpose": "Contactless Interac purchase - 5236 PETERS PIZZA &",
+      "debit": 38.78,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2018-12-31T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 50,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-12-31T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 50,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-12-31T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 100,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-02T00:00:00",
+      "counterpartyName": "ATM deposit - JA333817",
+      "paymentPurpose": "ATM deposit - JA333817",
+      "credit": 738,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2019-01-02T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 60,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-02T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 100,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-02T00:00:00",
+      "counterpartyName": "RBC INS RRA/PA",
+      "paymentPurpose": "Misc Payment RBC INS RRA/PA",
+      "debit": 19.9,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2019-01-02T00:00:00",
+      "counterpartyName": "CIBC MTGE CORP",
+      "paymentPurpose": "Mortgage CIBC MTGE CORP",
+      "debit": 1295.58,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2019-01-02T00:00:00",
+      "counterpartyName": "sampli",
+      "paymentPurpose": "e-Transfer sent sampli",
+      "debit": 15,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-02T00:00:00",
+      "counterpartyName": "member",
+      "paymentPurpose": "e-Transfer sent member",
+      "debit": 200,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-02T00:00:00",
+      "counterpartyName": "member",
+      "paymentPurpose": "e-Transfer sent member",
+      "debit": 400,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-02T00:00:00",
+      "counterpartyName": "MCDONALD'S #121",
+      "paymentPurpose": "Contactless Interac purchase - 2976 MCDONALD'S #121",
+      "debit": 17.87,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-02T00:00:00",
+      "counterpartyName": "SUBWAY # 27426",
+      "paymentPurpose": "Contactless Interac purchase - 3539 SUBWAY # 27426",
+      "debit": 21.07,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-03T00:00:00",
+      "counterpartyName": "ATM deposit - JA739158",
+      "paymentPurpose": "ATM deposit - JA739158",
+      "credit": 674.4,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2019-01-03T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 100,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-03T00:00:00",
+      "counterpartyName": "TD LOAN PAYMNT",
+      "paymentPurpose": "Loan TD LOAN PAYMNT",
+      "debit": 494.39,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2019-01-04T00:00:00",
+      "counterpartyName": "BR TO BR - 9003",
+      "paymentPurpose": "BR TO BR - 9003",
+      "credit": 2000,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-04T00:00:00",
+      "counterpartyName": "NORTH ATLANTIC",
+      "paymentPurpose": "Contactless Interac purchase - 6646 NORTH ATLANTIC",
+      "debit": 68.9,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 80,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 500,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "CINEPLEX #8126",
+      "paymentPurpose": "Interac purchase - 6896 CINEPLEX #8126",
+      "debit": 35.46,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "BR TO BR - 9353",
+      "paymentPurpose": "BR TO BR - 9353",
+      "credit": 1000,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "Funds transfer MINI MANIA INC.",
+      "paymentPurpose": "Funds transfer MINI MANIA INC.",
+      "debit": 2338.96,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "member",
+      "paymentPurpose": "e-Transfer sent member",
+      "debit": 40,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "mem",
+      "paymentPurpose": "e-Transfer sent mem",
+      "debit": 1250,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "JUST COZY",
+      "paymentPurpose": "Contactless Interac purchase - 0528 JUST COZY",
+      "debit": 11.5,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "PETERS PIZZA &",
+      "paymentPurpose": "Contactless Interac purchase - 9138 PETERS PIZZA &",
+      "debit": 22,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "CINEPLEX #8126",
+      "paymentPurpose": "Contactless Interac purchase - 5318 CINEPLEX #8126",
+      "debit": 24.5,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "ARDENE #507",
+      "paymentPurpose": "Contactless Interac purchase - 2292 ARDENE #507",
+      "debit": 29.79,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "CANADIAN TIRE #",
+      "paymentPurpose": "Contactless Interac purchase - 5987 CANADIAN TIRE #",
+      "debit": 33.67,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-07T00:00:00",
+      "counterpartyName": "BLUENOTES #9097",
+      "paymentPurpose": "Contactless Interac purchase - 6895 BLUENOTES #9097",
+      "debit": 34.5,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-09T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 160,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-09T00:00:00",
+      "counterpartyName": "mem",
+      "paymentPurpose": "e-Transfer sent mem",
+      "debit": 300,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-10T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 270,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-10T00:00:00",
+      "counterpartyName": "BR TO BR - 9503",
+      "paymentPurpose": "BR TO BR - 9503",
+      "credit": 1900,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-10T00:00:00",
+      "counterpartyName": "member",
+      "paymentPurpose": "e-Transfer sent member",
+      "debit": 30,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-10T00:00:00",
+      "counterpartyName": "mem",
+      "paymentPurpose": "e-Transfer sent mem",
+      "debit": 700,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-11T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 15,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-11T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 20,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-11T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 30,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-11T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 200,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-11T00:00:00",
+      "counterpartyName": "AUTOMOTIVE SUPP",
+      "paymentPurpose": "Interac purchase - 5782 AUTOMOTIVE SUPP",
+      "debit": 101.69,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-11T00:00:00",
+      "counterpartyName": "BR TO BR - 9353",
+      "paymentPurpose": "BR TO BR - 9353",
+      "credit": 428.6,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-11T00:00:00",
+      "counterpartyName": "sample",
+      "paymentPurpose": "e-Transfer sent sample",
+      "debit": 60,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-11T00:00:00",
+      "counterpartyName": "Membra",
+      "paymentPurpose": "e-Transfer sent Membra",
+      "debit": 120,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "ATM deposit - JA489558",
+      "paymentPurpose": "ATM deposit - JA489558",
+      "credit": 738,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 10,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 60,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 80,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 180,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 200,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "FAIRSTONE",
+      "paymentPurpose": "Loan FAIRSTONE",
+      "debit": 388.95,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "ATM Cash-back withdrawal - JA489558",
+      "paymentPurpose": "ATM Cash-back withdrawal - JA489558",
+      "debit": 400,
+      "currency": "CAD"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "BELL ALIANT-NL",
+      "paymentPurpose": "Online Banking payment - 2896 BELL ALIANT-NL",
+      "debit": 1250,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "member",
+      "paymentPurpose": "e-Transfer sent member",
+      "debit": 120,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "derek",
+      "paymentPurpose": "e-Transfer sent derek",
+      "debit": 200,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "memb",
+      "paymentPurpose": "e-Transfer sent memb",
+      "debit": 200,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-14T00:00:00",
+      "counterpartyName": "AUTOMOTIVE SUPP",
+      "paymentPurpose": "Contactless Interac purchase - 6178 AUTOMOTIVE SUPP",
+      "debit": 81.57,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-15T00:00:00",
+      "counterpartyName": "e-Transfer received Elsie Parsons",
+      "paymentPurpose": "e-Transfer received Elsie Parsons",
+      "credit": 15,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-16T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 80,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-16T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 100,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-16T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 100,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-16T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit of",
+      "paymentPurpose": "e-Transfer - Autodeposit of",
+      "credit": 230,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-16T00:00:00",
+      "counterpartyName": "NAPA FOXTRAP #",
+      "paymentPurpose": "Interac purchase - 1985 NAPA FOXTRAP #",
+      "debit": 82.13,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-16T00:00:00",
+      "counterpartyName": "ATM withdrawal - JA746069",
+      "paymentPurpose": "ATM withdrawal - JA746069",
+      "debit": 300,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2019-01-16T00:00:00",
+      "counterpartyName": "INTACT INS. CO.",
+      "paymentPurpose": "Insurance INTACT INS. CO.",
+      "debit": 229.62,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2019-01-16T00:00:00",
+      "counterpartyName": "MANUEL'S ESSO S",
+      "paymentPurpose": "Contactless Interac purchase - 0907 MANUEL'S ESSO S",
+      "debit": 61.18,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-01-17T00:00:00",
+      "counterpartyName": "Membra",
+      "paymentPurpose": "e-Transfer sent Membra",
+      "debit": 60,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-18T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 40,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-18T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 120,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-18T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 200,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 20,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 40,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "e-Transfer - Autodeposit",
+      "paymentPurpose": "e-Transfer - Autodeposit",
+      "credit": 160,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "Interac ABM fee credit",
+      "paymentPurpose": "Interac ABM fee credit",
+      "credit": 1.5,
+      "currency": "CAD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "Business PAD Merit Premium F",
+      "paymentPurpose": "Business PAD Merit Premium F",
+      "debit": 206.86,
+      "currency": "CAD"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "sample",
+      "paymentPurpose": "e-Transfer sent sample",
+      "debit": 25,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "sample",
+      "paymentPurpose": "e-Transfer sent sample",
+      "debit": 30,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "sample",
+      "paymentPurpose": "e-Transfer sent sample",
+      "debit": 40,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "sample",
+      "paymentPurpose": "e-Transfer sent sample",
+      "debit": 40,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "member",
+      "paymentPurpose": "e-Transfer sent member",
+      "debit": 40,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "sample",
+      "paymentPurpose": "e-Transfer sent sample",
+      "debit": 45,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "member",
+      "paymentPurpose": "e-Transfer sent member",
+      "debit": 100,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "Membra",
+      "paymentPurpose": "e-Transfer sent Membra",
+      "debit": 150,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "member",
+      "paymentPurpose": "e-Transfer sent member",
+      "debit": 200,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-01-21T00:00:00",
+      "counterpartyName": "Monthly fee",
+      "paymentPurpose": "Monthly fee",
+      "debit": 14.95,
+      "currency": "CAD",
+      "paymentType": "fee"
+    }
+  ]
+}

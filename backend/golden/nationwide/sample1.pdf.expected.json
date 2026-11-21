@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "accountNumber": "00000000",
+    "currency": "GBP",
+    "dateFrom": "2020-04-01T00:00:00",
+    "dateTo": "2020-04-25T00:00:00",
+    "balanceStart": 123,
+    "balanceEnd": 123
+  },
+  "transactions": [
+    {
+      "transactionDate": "2020-04-01T00:00:00",
+      "counterpartyName": "Tesco Store",
+      "paymentPurpose": "Tesco Store",
+      "debit": 0,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2020-04-06T00:00:00",
+      "counterpartyName": "Cash Machine wdl Nationwide",
+      "paymentPurpose": "Cash Machine wdl Nationwide",
+      "debit": 0,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-04-06T00:00:00",
+      "counterpartyName": "Apple itunes store-GBP ITUNES.COM",
+      "paymentPurpose": "Apple itunes store-GBP ITUNES.COM",
+      "debit": 0,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2020-04-09T00:00:00",
+      "counterpartyName": "Cash Machine wdl Nationwide",
+      "paymentPurpose": "Cash Machine wdl Nationwide",
+      "debit": 0,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-04-10T00:00:00",
+      "counterpartyName": "Apple itunes store- GBP ITUNES.COM",
+      "paymentPurpose": "Apple itunes store- GBP ITUNES.COM",
+      "debit": 0,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2020-04-11T00:00:00",
+      "counterpartyName": "Visa New Look 1793 Stroud",
+      "paymentPurpose": "Visa New Look 1793 Stroud",
+      "debit": 0,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-04-17T00:00:00",
+      "counterpartyName": "Costa Cofee Stroud",
+      "paymentPurpose": "Costa Cofee Stroud",
+      "debit": 0,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2020-04-18T00:00:00",
+      "counterpartyName": "McDonalds Cirencester",
+      "paymentPurpose": "McDonalds Cirencester",
+      "debit": 0,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2020-04-19T00:00:00",
+      "counterpartyName": "Bank Credit 0000000",
+      "paymentPurpose": "Bank Credit 0000000",
+      "credit": 0,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-04-20T00:00:00",
+      "counterpartyName": "Cheque deposit",
+      "paymentPurpose": "Cheque deposit",
+      "credit": 0,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2020-04-21T00:00:00",
+      "counterpartyName": "Cheque deposit",
+      "paymentPurpose": "Cheque deposit",
+      "credit": 0,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2020-04-25T00:00:00",
+      "counterpartyName": "Transfer to 00000000",
+      "paymentPurpose": "Transfer to 00000000",
+      "debit": 0,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    }
+  ]
+}

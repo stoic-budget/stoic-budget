@@ -1,5 +1,6 @@
 import type { PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import { findStatementAmounts } from './statement-amount.helper';
+import { parseDateParts } from './statement-date.helper';
 
 /**
  * A row's text can start above its date: the cell's text runs over two or
@@ -23,10 +24,17 @@ const LEAD_IN_RATIO = 0.8;
 const lineText = (row: PdfTextRow) => row.items.map(item => item.text).join(' ');
 const firstX = (row: PdfTextRow) => Math.min(...row.items.map(item => item.x));
 
-/** Where the dated line's text starts: its first word right of the date. */
+/** Where the dated line's text starts: its first word right of the date and of a value date after it. */
 function textStart(dated: PdfTextRow, dateWords: number): number | null {
   const items = [...dated.items].sort((a, b) => a.x - b.x);
-  return items[dateWords]?.x ?? null;
+  let start = dateWords;
+  while (
+    items[start] &&
+    (parseDateParts(items[start].text, 'dmy') ?? parseDateParts(items[start].text, 'mdy'))
+  ) {
+    start += 1;
+  }
+  return items[start]?.x ?? null;
 }
 
 /**

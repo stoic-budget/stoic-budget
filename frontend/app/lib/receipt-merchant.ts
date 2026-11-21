@@ -19,6 +19,9 @@ const SENTENCE_START_PATTERN = /^(we|your|thanks?|dear|hello|hi|please|this)\b/i
 
 const EMAIL_PATTERN = /[A-Z0-9._%+-]+@([A-Z0-9.-]+\.[A-Z]{2,})/i;
 
+// What the backend records as the sender of a file it was handed: how it came, not who sold it.
+const PLACEHOLDER_SENDERS = new Set(['camera-scan', 'telegram', 'manual-upload']);
+
 const SUPPORT_SUFFIX_PATTERN =
   /\s+(support|billing|payments?|service|team|notifications?|no[-\s]?reply)$/i;
 
@@ -89,7 +92,7 @@ const isBrandLikeVendor = (value: string) => {
 };
 
 const extractBrandFromSender = (sender?: string | null): string | undefined => {
-  if (!sender) {
+  if (!sender || PLACEHOLDER_SENDERS.has(sender.trim())) {
     return undefined;
   }
 
@@ -119,6 +122,9 @@ const extractBrandFromSender = (sender?: string | null): string | undefined => {
 
   return toTitleCase(rootDomain);
 };
+
+// A file handed in (scan, upload, Telegram) has its file name as the subject.
+const FILE_NAME_PATTERN = /\.[a-z0-9]{2,5}$/i;
 
 const extractBrandFromSubject = (subject?: string | null): string | undefined => {
   if (!subject) {
@@ -157,18 +163,26 @@ export const resolveReceiptMerchantLabel = ({
     return senderBrand;
   }
 
+  // An e-mail's subject names the shop ("[ACME] Your receipt") better than a sentence
+  // read off the receipt. A file name does not: a vendor typed on a scan beats "photo_….jpg".
+  const subjectIsFileName = !!subject && FILE_NAME_PATTERN.test(subject.trim());
   const subjectBrand = extractBrandFromSubject(subject);
+  if (subjectBrand && !subjectIsFileName) {
+    return subjectBrand;
+  }
+
+  // Kept whole: the list column cuts it where it ends.
+  if (normalizedVendor && !isLikelyJunkVendor(normalizedVendor)) {
+    return normalizedVendor;
+  }
+
   if (subjectBrand) {
     return subjectBrand;
   }
 
-  if (normalizedVendor && !isLikelyJunkVendor(normalizedVendor)) {
-    return normalizedVendor.slice(0, 28);
-  }
-
   const normalizedFallback = fallback ? normalizeWhitespace(fallback) : '';
   if (normalizedFallback && !isLikelySentence(normalizedFallback)) {
-    return normalizedFallback.slice(0, 28);
+    return normalizedFallback;
   }
 
   return 'Receipt';

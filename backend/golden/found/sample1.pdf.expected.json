@@ -1,0 +1,398 @@
+{
+  "metadata": {
+    "accountNumber": "7000 1000 7274",
+    "currency": "USD",
+    "dateFrom": "2025-03-01T00:00:00",
+    "dateTo": "2025-03-31T00:00:00",
+    "balanceStart": 69419.09
+  },
+  "transactions": [
+    {
+      "transactionDate": "2025-03-01T00:00:00",
+      "counterpartyName": "Uber Ride",
+      "paymentPurpose": "Uber Ride (Monroe, LA, USA) - TXN234092",
+      "debit": 1857.38,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-01T00:00:00",
+      "counterpartyName": "Rent Payment - Durham Realty",
+      "paymentPurpose": "Rent Payment - Durham Realty (Monroe, LA, USA) - TXN800261",
+      "debit": 328.41,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-01T00:00:00",
+      "counterpartyName": "State Farm Insurance",
+      "paymentPurpose": "State Farm Insurance (New Orleans, LA, USA) - TXN386859",
+      "debit": 1604.59,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-02T00:00:00",
+      "counterpartyName": "Anne Gilbert",
+      "paymentPurpose": "Check Deposit from Anne Gilbert - Check #8386",
+      "credit": 12319.3,
+      "currency": "USD",
+      "documentNumber": "8386",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-02T00:00:00",
+      "counterpartyName": "Rachel Thomas",
+      "paymentPurpose": "Check Deposit from Rachel Thomas - Check #3228",
+      "credit": 7363.93,
+      "currency": "USD",
+      "documentNumber": "3228",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-03T00:00:00",
+      "counterpartyName": "Larry Carter",
+      "paymentPurpose": "Check Deposit from Larry Carter - Check #4364",
+      "credit": 3703.87,
+      "currency": "USD",
+      "documentNumber": "4364",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-03T00:00:00",
+      "counterpartyName": "Eric Gibson",
+      "paymentPurpose": "Check Deposit from Eric Gibson - Check #4191",
+      "credit": 5313.77,
+      "currency": "USD",
+      "documentNumber": "4191",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-04T00:00:00",
+      "counterpartyName": "Leah Krueger",
+      "paymentPurpose": "Check Deposit from Leah Krueger - Check #8331",
+      "credit": 1230.79,
+      "currency": "USD",
+      "documentNumber": "8331",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-04T00:00:00",
+      "counterpartyName": "American Express",
+      "paymentPurpose": "American Express (Charlotte, NC, USA) - TXN611734",
+      "debit": 626.67,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-05T00:00:00",
+      "counterpartyName": "Peter Wells",
+      "paymentPurpose": "Check Deposit from Peter Wells - Check #2154",
+      "credit": 210.64,
+      "currency": "USD",
+      "documentNumber": "2154",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-05T00:00:00",
+      "counterpartyName": "Panera Bread",
+      "paymentPurpose": "Panera Bread (Charlotte, NC, USA) - TXN531894",
+      "debit": 635.05,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-06T00:00:00",
+      "counterpartyName": "Haley Keller",
+      "paymentPurpose": "Check Deposit from Haley Keller - Check #5866",
+      "credit": 859.39,
+      "currency": "USD",
+      "documentNumber": "5866",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-07T00:00:00",
+      "counterpartyName": "Panera Bread",
+      "paymentPurpose": "Panera Bread (Durham, NC, USA) - TXN999385",
+      "debit": 1047.68,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-08T00:00:00",
+      "counterpartyName": "Walmart",
+      "paymentPurpose": "Walmart (New Orleans, LA, USA) - TXN387777",
+      "debit": 2170.46,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-09T00:00:00",
+      "counterpartyName": "Uber Ride",
+      "paymentPurpose": "Uber Ride (Monroe, LA, USA) - TXN668220",
+      "debit": 120.58,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-09T00:00:00",
+      "counterpartyName": "William Murphy",
+      "paymentPurpose": "Check Deposit from William Murphy - Check #2785",
+      "credit": 7448.81,
+      "currency": "USD",
+      "documentNumber": "2785",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-10T00:00:00",
+      "counterpartyName": "Publix",
+      "paymentPurpose": "Publix (Monroe, LA, USA) - TXN938700",
+      "debit": 914.17,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-11T00:00:00",
+      "counterpartyName": "Publix",
+      "paymentPurpose": "Publix (New Orleans, LA, USA) - TXN345467",
+      "debit": 177.22,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-12T00:00:00",
+      "counterpartyName": "Walmart",
+      "paymentPurpose": "Walmart (New Orleans, LA, USA) - TXN892928",
+      "debit": 395.4,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-12T00:00:00",
+      "counterpartyName": "Walmart",
+      "paymentPurpose": "Walmart (New Orleans, LA, USA) - TXN723744",
+      "debit": 147.79,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-13T00:00:00",
+      "counterpartyName": "Gary Morris",
+      "paymentPurpose": "Check Deposit from Gary Morris - Check #9796",
+      "credit": 2250.84,
+      "currency": "USD",
+      "documentNumber": "9796",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-14T00:00:00",
+      "counterpartyName": "Mr. Joseph Duarte",
+      "paymentPurpose": "Check Deposit from Mr. Joseph Duarte - Check #2269",
+      "credit": 835.35,
+      "currency": "USD",
+      "documentNumber": "2269",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-14T00:00:00",
+      "counterpartyName": "Eduardo Morgan",
+      "paymentPurpose": "Check Deposit from Eduardo Morgan - Check #1895",
+      "credit": 5154.54,
+      "currency": "USD",
+      "documentNumber": "1895",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-14T00:00:00",
+      "counterpartyName": "Verizon",
+      "paymentPurpose": "Verizon (Durham, NC, USA) - TXN998876",
+      "debit": 904.2,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-15T00:00:00",
+      "counterpartyName": "Duke Energy",
+      "paymentPurpose": "Duke Energy (Monroe, LA, USA) - TXN400210",
+      "debit": 1103.3,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-15T00:00:00",
+      "counterpartyName": "Richard Sampless",
+      "paymentPurpose": "Payroll Deduction - Sure Payroll - Richard Sampless",
+      "debit": 3500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-03-15T00:00:00",
+      "counterpartyName": "Thomas Sampleto",
+      "paymentPurpose": "Payroll Deduction - Sure Payroll - Thomas Sampleto",
+      "debit": 3500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-03-15T00:00:00",
+      "counterpartyName": "Chris Payne",
+      "paymentPurpose": "Payroll Deduction - Sure Payroll - Chris Payne",
+      "debit": 3500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-03-15T00:00:00",
+      "counterpartyName": "Alexa Price",
+      "paymentPurpose": "Payroll Deduction - Sure Payroll - Alexa Price",
+      "debit": 5000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-03-15T00:00:00",
+      "counterpartyName": "Brenda Simpson",
+      "paymentPurpose": "Payroll Deduction - Sure Payroll - Brenda Simpson",
+      "debit": 2000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-03-15T00:00:00",
+      "counterpartyName": "Alicia Payne",
+      "paymentPurpose": "Payroll Deduction - Sure Payroll - Alicia Payne",
+      "debit": 2000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-03-16T00:00:00",
+      "counterpartyName": "Spectrum",
+      "paymentPurpose": "Spectrum (New Orleans, LA, USA) - TXN424815",
+      "debit": 830.01,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-16T00:00:00",
+      "counterpartyName": "Jordan Rice",
+      "paymentPurpose": "Check Deposit from Jordan Rice - Check #7015",
+      "credit": 582.8,
+      "currency": "USD",
+      "documentNumber": "7015",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-17T00:00:00",
+      "counterpartyName": "Uber Ride",
+      "paymentPurpose": "Uber Ride (Monroe, LA, USA) - TXN552244",
+      "debit": 1520.41,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-17T00:00:00",
+      "counterpartyName": "CVS Pharmacy",
+      "paymentPurpose": "CVS Pharmacy (Durham, NC, USA) - TXN852051",
+      "debit": 1343.6,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-18T00:00:00",
+      "counterpartyName": "Monica Webb",
+      "paymentPurpose": "Check Deposit from Monica Webb - Check #4639",
+      "credit": 3720.52,
+      "currency": "USD",
+      "documentNumber": "4639",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-19T00:00:00",
+      "counterpartyName": "CVS Pharmacy",
+      "paymentPurpose": "CVS Pharmacy (Durham, NC, USA) - TXN753240",
+      "debit": 106.94,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-20T00:00:00",
+      "counterpartyName": "Publix",
+      "paymentPurpose": "Publix (Monroe, LA, USA) - TXN799111",
+      "debit": 904.94,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-21T00:00:00",
+      "counterpartyName": "Sheila Gallagher",
+      "paymentPurpose": "Check Deposit from Sheila Gallagher - Check #1623",
+      "credit": 3220.32,
+      "currency": "USD",
+      "documentNumber": "1623",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-22T00:00:00",
+      "counterpartyName": "Walmart",
+      "paymentPurpose": "Walmart (Monroe, LA, USA) - TXN992262",
+      "debit": 545.09,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-25T00:00:00",
+      "counterpartyName": "Domino's Pizza",
+      "paymentPurpose": "Domino's Pizza (Monroe, LA, USA) - TXN230275",
+      "debit": 1661.4,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-27T00:00:00",
+      "counterpartyName": "Panera Bread",
+      "paymentPurpose": "Panera Bread (New Orleans, LA, USA) - TXN223458",
+      "debit": 2651.69,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-28T00:00:00",
+      "counterpartyName": "State Farm Insurance",
+      "paymentPurpose": "State Farm Insurance (Monroe, LA, USA) - TXN584271",
+      "debit": 179.83,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-29T00:00:00",
+      "counterpartyName": "Brett Kim",
+      "paymentPurpose": "Check Deposit from Brett Kim - Check #5899",
+      "credit": 10167.61,
+      "currency": "USD",
+      "documentNumber": "5899",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-30T00:00:00",
+      "counterpartyName": "Walmart",
+      "paymentPurpose": "Walmart (Charlotte, NC, USA) - TXN906036",
+      "debit": 5466.4,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-03-31T00:00:00",
+      "counterpartyName": "Capitol One",
+      "paymentPurpose": "Capitol One (Monroe, LA, USA) - TXN836134",
+      "debit": 306.67,
+      "currency": "USD",
+      "paymentType": "card"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain",
+    "printed_balances"
+  ]
+}
