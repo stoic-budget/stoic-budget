@@ -261,6 +261,7 @@ describe('ParserFactoryService', () => {
       'PayoneerParser',
       'PaypalParser',
       'PncParser',
+      'ProsperityParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

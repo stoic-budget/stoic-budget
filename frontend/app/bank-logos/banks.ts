@@ -147,4 +147,5 @@ export const BANKS = [
   { key: 'payoneer', name: 'Payoneer', logo: 'payoneer.png', aliases: ['payoneer'] },
   { key: 'paypal', name: 'PayPal', logo: 'paypal.png', aliases: ['paypal savings'] },
   { key: 'pnc', name: 'PNC Bank', logo: 'pnc.png', aliases: ['pnc'] },
+  { key: 'prosperity', name: 'Prosperity Bank', logo: 'prosperity.png', aliases: ['prosperity'] },
 ] as const satisfies readonly BankEntry[];
