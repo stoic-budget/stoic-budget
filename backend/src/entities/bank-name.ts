@@ -122,5 +122,6 @@ export enum BankName {
   WEBSTER = 'webster',
   WELLS_FARGO = 'wells_fargo',
   WESTPAC = 'westpac',
+  WISE = 'wise',
   OTHER = 'other',
 }
