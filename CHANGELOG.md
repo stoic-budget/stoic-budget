@@ -230,6 +230,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The AI result is applied only where rules, keywords and your corrections found nothing; the
   statement import and the custom-table conversion now agree on that order.
 
+### Removed
+
+#### Income tax declaration moves to the paid edition (2026-11-15)
+
+- The year-end income tax declaration (`/tax-declaration`, `/income-tax/*`, the DE/ES/PL form packs
+  and the filing calendar) leaves the open-source app and continues, with yearly updates, in the
+  paid edition. The last release that has it is v2.0.0.
+- Your data stays: the `income_tax_*` tables and their migrations are untouched.
+- Onboarding no longer asks how you file; the tax step sets the country only.
+- Tax deadlines list VAT returns; another return joins through `TAX_DEADLINE_SOURCE`.
+- Extension points for a paid build: `backend/src/extensions.ts`,
+  `packages/contracts/src/extensions.ts` and `frontend/app/extensions/nav-items.ts`.
+
 ### Fixed
 
 - Changing a transaction's category through `PUT /transactions/:id` or `bulk-update` answered with

@@ -1,0 +1,268 @@
+{
+  "metadata": {
+    "accountNumber": "6789",
+    "currency": "USD",
+    "dateFrom": "2017-09-15T00:00:00",
+    "dateTo": "2017-10-26T00:00:00",
+    "balanceStart": 0,
+    "balanceEnd": 0
+  },
+  "transactions": [
+    {
+      "transactionDate": "2017-10-02T00:00:00",
+      "counterpartyName": "INTERNET PAYMENT - THANK YOU",
+      "paymentPurpose": "INTERNET PAYMENT - THANK YOU",
+      "credit": 180,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2017-10-13T00:00:00",
+      "counterpartyName": "INTERNET PAYMENT - THANK YOU",
+      "paymentPurpose": "INTERNET PAYMENT - THANK YOU",
+      "credit": 80,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2017-10-23T00:00:00",
+      "counterpartyName": "INTERNET PAYMENT - THANK YOU",
+      "paymentPurpose": "INTERNET PAYMENT - THANK YOU",
+      "credit": 164.35,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2017-09-21T00:00:00",
+      "counterpartyName": "WAL-MART SC - #0571 GEORGETOWN KY",
+      "paymentPurpose": "WAL-MART SC - #0571 GEORGETOWN KY",
+      "debit": 22.37,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-09-23T00:00:00",
+      "counterpartyName": "NUMARK TOBACCO PRODUCT 855-MARKTEN VA M170923-12-03587",
+      "paymentPurpose": "NUMARK TOBACCO PRODUCT 855-MARKTEN VA M170923-12-03587",
+      "debit": 6.35,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-03T00:00:00",
+      "counterpartyName": "WAL-MART SC - #0571 GEORGETOWN KY",
+      "paymentPurpose": "WAL-MART SC - #0571 GEORGETOWN KY",
+      "debit": 82.95,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-04T00:00:00",
+      "counterpartyName": "WAL-MART SC - #0571 GEORGETOWN KY",
+      "paymentPurpose": "WAL-MART SC - #0571 GEORGETOWN KY",
+      "debit": 30,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-18T00:00:00",
+      "counterpartyName": "QUICKTAG/PET TAG VENDING TEMPE AZ",
+      "paymentPurpose": "QUICKTAG/PET TAG VENDING TEMPE AZ",
+      "debit": 5,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-18T00:00:00",
+      "counterpartyName": "WAL-MART SC - #0571 GEORGETOWN KY",
+      "paymentPurpose": "WAL-MART SC - #0571 GEORGETOWN KY",
+      "debit": 2.1,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-09-20T00:00:00",
+      "counterpartyName": "COLUMBIA STEAKHOUSE LEXINGTON KY",
+      "paymentPurpose": "COLUMBIA STEAKHOUSE LEXINGTON KY",
+      "debit": 39.19,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-09-20T00:00:00",
+      "counterpartyName": "WENDY'S 810 GEORGETOWN KY",
+      "paymentPurpose": "WENDY'S 810 GEORGETOWN KY",
+      "debit": 2,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-09-20T00:00:00",
+      "counterpartyName": "MCDONALD'S F10663 GEORGETOWN KY",
+      "paymentPurpose": "MCDONALD'S F10663 GEORGETOWN KY",
+      "debit": 6.97,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-09-21T00:00:00",
+      "counterpartyName": "WENDY'S 810 GEORGETOWN KY",
+      "paymentPurpose": "WENDY'S 810 GEORGETOWN KY",
+      "debit": 19.61,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-09-22T00:00:00",
+      "counterpartyName": "DAIRY QUEEN #13388 GEORGETOWN KY",
+      "paymentPurpose": "DAIRY QUEEN #13388 GEORGETOWN KY",
+      "debit": 11.09,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-09-22T00:00:00",
+      "counterpartyName": "OEC JAPANESE EXPRESS GEORGETOWN KY",
+      "paymentPurpose": "OEC JAPANESE EXPRESS GEORGETOWN KY",
+      "debit": 28.62,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-09-23T00:00:00",
+      "counterpartyName": "WENDY'S 810 GEORGETOWN KY",
+      "paymentPurpose": "WENDY'S 810 GEORGETOWN KY",
+      "debit": 21.19,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-18T00:00:00",
+      "counterpartyName": "WENDY'S 810 GEORGETOWN KY",
+      "paymentPurpose": "WENDY'S 810 GEORGETOWN KY",
+      "debit": 12.87,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-09-21T00:00:00",
+      "counterpartyName": "SPEEDWAY 09377 GEO GEORGETOWN KY",
+      "paymentPurpose": "SPEEDWAY 09377 GEO GEORGETOWN KY",
+      "debit": 28.17,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-09-22T00:00:00",
+      "counterpartyName": "VALERO FOOD MART GEORGETOWN KY",
+      "paymentPurpose": "VALERO FOOD MART GEORGETOWN KY",
+      "debit": 4.82,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-09-22T00:00:00",
+      "counterpartyName": "SHELL 81548793118 GEORGETOWN KY",
+      "paymentPurpose": "SHELL 81548793118 GEORGETOWN KY",
+      "debit": 5.87,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-03T00:00:00",
+      "counterpartyName": "JJ'S VALERO GEORGETOWN KY",
+      "paymentPurpose": "JJ'S VALERO GEORGETOWN KY",
+      "debit": 5.71,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-04T00:00:00",
+      "counterpartyName": "JJ'S VALERO GEORGETOWN KY",
+      "paymentPurpose": "JJ'S VALERO GEORGETOWN KY",
+      "debit": 9.06,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-05T00:00:00",
+      "counterpartyName": "THORNTONS #0052 Q35 LEXINGTON KY",
+      "paymentPurpose": "THORNTONS #0052 Q35 LEXINGTON KY",
+      "debit": 5.83,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-08T00:00:00",
+      "counterpartyName": "JJ'S VALERO GEORGETOWN KY",
+      "paymentPurpose": "JJ'S VALERO GEORGETOWN KY",
+      "debit": 10.11,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-10T00:00:00",
+      "counterpartyName": "JJ'S VALERO GEORGETOWN KY",
+      "paymentPurpose": "JJ'S VALERO GEORGETOWN KY",
+      "debit": 5.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-11T00:00:00",
+      "counterpartyName": "JJ'S VALERO GEORGETOWN KY",
+      "paymentPurpose": "JJ'S VALERO GEORGETOWN KY",
+      "debit": 10.65,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-12T00:00:00",
+      "counterpartyName": "SPEEDWAY 09377 GEO GEORGETOWN KY",
+      "paymentPurpose": "SPEEDWAY 09377 GEO GEORGETOWN KY",
+      "debit": 1.05,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-13T00:00:00",
+      "counterpartyName": "SPEEDWAY 09377 GEO GEORGETOWN KY",
+      "paymentPurpose": "SPEEDWAY 09377 GEO GEORGETOWN KY",
+      "debit": 10,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-13T00:00:00",
+      "counterpartyName": "MARATHON PETRO GEORGETOWN KY",
+      "paymentPurpose": "MARATHON PETRO GEORGETOWN KY",
+      "debit": 4.94,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-13T00:00:00",
+      "counterpartyName": "JJ'S VALERO GEORGETOWN KY",
+      "paymentPurpose": "JJ'S VALERO GEORGETOWN KY",
+      "debit": 4.82,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-17T00:00:00",
+      "counterpartyName": "JJ'S VALERO GEORGETOWN KY",
+      "paymentPurpose": "JJ'S VALERO GEORGETOWN KY",
+      "debit": 16.37,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2017-10-18T00:00:00",
+      "counterpartyName": "JJ'S VALERO GEORGETOWN KY",
+      "paymentPurpose": "JJ'S VALERO GEORGETOWN KY",
+      "debit": 10.65,
+      "currency": "USD",
+      "paymentType": "card"
+    }
+  ]
+}

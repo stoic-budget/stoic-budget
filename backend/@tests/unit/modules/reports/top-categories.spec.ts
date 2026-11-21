@@ -1,6 +1,5 @@
 import { TransactionType } from '@/entities/transaction.entity';
-import { AuditService } from '@/modules/audit/audit.service';
-import { ReportsService } from '@/modules/reports/reports.service';
+import { buildReportsService } from './helpers/build-reports-service';
 
 const createQueryBuilderMock = (transactions: any[]) => {
   const queryBuilder = {
@@ -52,21 +51,7 @@ describe('ReportsService top categories report', () => {
       createQueryBuilder: vi.fn().mockReturnValue(queryBuilder),
     };
 
-    const service = new ReportsService(
-      transactionRepository as any,
-      {} as any,
-      {} as any,
-      {} as any,
-      {} as any,
-      {} as any,
-      {} as any,
-      {} as any,
-      { get: vi.fn(), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as AuditService,
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-    );
+    const service = buildReportsService({ transactionRepository });
 
     const result = await service.getTopCategoriesReport('ws-1', {
       limit: 10,

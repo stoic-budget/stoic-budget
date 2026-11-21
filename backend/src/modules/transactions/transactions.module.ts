@@ -18,6 +18,7 @@ import { CrossStatementDeduplicationService } from './services/cross-statement-d
 import { ManualRowDuplicateService } from './services/manual-row-duplicate.service';
 import { TransactionAttachmentSweeperService } from './services/transaction-attachment-sweeper.service';
 import { TransactionAttachmentsService } from './services/transaction-attachments.service';
+import { TransactionDeleteService } from './services/transaction-delete.service';
 import { TransactionFingerprintService } from './services/transaction-fingerprint.service';
 import { TransactionHistoryService } from './services/transaction-history.service';
 import { TransactionTagsService } from './services/transaction-tags.service';
@@ -25,6 +26,7 @@ import { TransactionsOverviewService } from './services/transactions-overview.se
 import { TransferPairingService } from './services/transfer-pairing.service';
 import { TransferToAccountService } from './services/transfer-to-account.service';
 import { TransactionAttachmentsController } from './transaction-attachments.controller';
+import { TransactionDeleteController } from './transaction-delete.controller';
 import { TransactionHistoryController } from './transaction-history.controller';
 import { TransactionPairingController } from './transaction-pairing.controller';
 import { TransactionsController } from './transactions.controller';
@@ -53,6 +55,7 @@ import { TransactionsService } from './transactions.service';
   controllers: [
     TransactionsController,
     TransactionAttachmentsController,
+    TransactionDeleteController,
     TransactionPairingController,
     TransactionHistoryController,
   ],
@@ -64,6 +67,7 @@ import { TransactionsService } from './transactions.service';
     TransactionTagsService,
     TransactionAttachmentsService,
     TransactionAttachmentSweeperService,
+    TransactionDeleteService,
     TransferPairingService,
     TransferToAccountService,
     TransactionsOverviewService,

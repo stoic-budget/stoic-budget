@@ -1,0 +1,172 @@
+{
+  "metadata": {
+    "accountNumber": "RO00RZBR0000060010000001",
+    "currency": "RON",
+    "dateFrom": "2020-07-08T00:00:00",
+    "dateTo": "2020-08-06T00:00:00",
+    "balanceStart": 19996.08,
+    "balanceEnd": 22163.23
+  },
+  "transactions": [
+    {
+      "transactionDate": "2020-07-08T00:00:00",
+      "counterpartyName": "LIDL 248 GAESTI GAESTI",
+      "paymentPurpose": "LIDL 248 GAESTI GAESTI Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 6/07/2020",
+      "debit": 169.99,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-08T00:00:00",
+      "counterpartyName": "LA NOTARU' IONESTI",
+      "paymentPurpose": "LA NOTARU' IONESTI Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 6/07/2020",
+      "debit": 30,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-08T00:00:00",
+      "counterpartyName": "PEPCO 3282 GAESTI 1 BUCHAREST",
+      "paymentPurpose": "PEPCO 3282 GAESTI 1 BUCHAREST Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 6/07/2020",
+      "debit": 25.41,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-09T00:00:00",
+      "counterpartyName": "HUALONG 2014 SRL DEP GAESTI",
+      "paymentPurpose": "HUALONG 2014 SRL DEP GAESTI Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 6/07/2020",
+      "debit": 69,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-09T00:00:00",
+      "counterpartyName": "HUALONG 2014 SRL DEP GAESTI",
+      "paymentPurpose": "HUALONG 2014 SRL DEP GAESTI Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 6/07/2020",
+      "debit": 38,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-13T00:00:00",
+      "counterpartyName": "MEMBRO MARIAN SAMPLEANULU",
+      "paymentPurpose": "OPIB/1 MEMBRO MARIAN SAMPLEANULU RO00 RZBR 0000 0600 1000 0002 RAIFFEISEN BANK S.A. Plata in cont Raiffeisen",
+      "debit": 100,
+      "currency": "RON",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-07-14T00:00:00",
+      "counterpartyName": "SC GIMNAZIALA SERBAN CIOCULE",
+      "paymentPurpose": "OPH/OPTM203/29144039 SC GIMNAZIALA SERBAN CIOCULE RO68 TREZ 23A6 5040 1100 111X TREZORERIA STATULUI (MIN.DE FIN.) Fond aferent platii cu ora",
+      "credit": 741,
+      "currency": "RON",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-14T00:00:00",
+      "counterpartyName": "SC GIMNAZIALA SERBAN CIOCULE",
+      "paymentPurpose": "OPH/OPTM203/29144039 SC GIMNAZIALA SERBAN CIOCULE RO67 TREZ 23A6 5040 1100 117X TREZORERIA STATULUI (MIN.DE FIN.) Indemnizatii de hrana",
+      "credit": 87,
+      "currency": "RON",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-14T00:00:00",
+      "counterpartyName": "SC GIMNAZIALA SERBAN CIOCULE",
+      "paymentPurpose": "OPH/OPTM203/29144039 SC GIMNAZIALA SERBAN CIOCULE RO85 TREZ 23A6 5040 1100 106X TREZORERIA STATULUI (MIN.DE FIN.) Alte sporuri",
+      "credit": 131,
+      "currency": "RON",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-14T00:00:00",
+      "counterpartyName": "SC GIMNAZIALA SERBAN CIOCULE",
+      "paymentPurpose": "OPH/OPTM203/29144039 SC GIMNAZIALA SERBAN CIOCULE RO05 TREZ 23A6 5040 1100 101X TREZORERIA STATULUI (MIN.DE FIN.) Salarii de baza",
+      "credit": 3397,
+      "currency": "RON",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-14T00:00:00",
+      "counterpartyName": "NEPTUN NEPTUN",
+      "paymentPurpose": "NEPTUN NEPTUN Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 11/07/2020",
+      "debit": 900,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-15T00:00:00",
+      "counterpartyName": "FARMAVITA NEPTUN MANGALIA",
+      "paymentPurpose": "FARMAVITA NEPTUN MANGALIA Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 10/07/2020",
+      "debit": 37.94,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-15T00:00:00",
+      "counterpartyName": "FARMAVITA NEPTUN MANGALIA",
+      "paymentPurpose": "FARMAVITA NEPTUN MANGALIA Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 11/07/2020",
+      "debit": 31.59,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-15T00:00:00",
+      "counterpartyName": "FARMAVITA NEPTUN MANGALIA",
+      "paymentPurpose": "FARMAVITA NEPTUN MANGALIA Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 11/07/2020",
+      "debit": 23.03,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-16T00:00:00",
+      "counterpartyName": "PARADISUL PESCARILOR NEPTUN",
+      "paymentPurpose": "PARADISUL PESCARILOR NEPTUN Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 11/07/2020",
+      "debit": 180.05,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-16T00:00:00",
+      "counterpartyName": "ROMPETROL DWS RC046 C3 CONSTANTA",
+      "paymentPurpose": "ROMPETROL DWS RC046 C3 CONSTANTA Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 13/07/2020",
+      "debit": 159.46,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-21T00:00:00",
+      "counterpartyName": "LIDL 884 BARLAD BARLAD",
+      "paymentPurpose": "LIDL 884 BARLAD BARLAD Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 16/07/2020",
+      "debit": 71.97,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-07-21T00:00:00",
+      "counterpartyName": "PIZZA MAESTRO - TARGOV TARGOVISTE",
+      "paymentPurpose": "PIZZA MAESTRO - TARGOV TARGOVISTE Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 16/07/2020",
+      "debit": 37.41,
+      "currency": "RON",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-08-03T00:00:00",
+      "counterpartyName": "ATM AG.GAESTI DB Gaesti Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 3/08/2020",
+      "paymentPurpose": "ATM AG.GAESTI DB Gaesti Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 3/08/2020",
+      "debit": 300,
+      "currency": "RON",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-08-06T00:00:00",
+      "counterpartyName": "HUALONG 2014 SRL DEP GAESTI",
+      "paymentPurpose": "HUALONG 2014 SRL DEP GAESTI Card nr. XXXX XXXX XXXX 1000 Data utilizarii cardului 3/08/2020",
+      "debit": 15,
+      "currency": "RON",
+      "paymentType": "card"
+    }
+  ]
+}

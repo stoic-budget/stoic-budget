@@ -391,7 +391,7 @@ describe('Transaction attachments (e2e)', () => {
     }
   });
 
-  it("refuses to unsplit when a part private to another member has files, and keeps them hidden", async () => {
+  it("refuses to unsplit while a private part has files, and keeps them hidden", async () => {
     const whole = await bookExpense('ACME Store - Split Order');
     await as('owner', request(server()).post(`/transactions/${whole}/split`))
       .send({ parts: [{ amount: 30 }, { amount: 12 }] })
@@ -409,7 +409,11 @@ describe('Transaction attachments (e2e)', () => {
     const secret = await upload('partner', partnerPart, PNG, 'gift.png', 'image/png').expect(201);
     await download('owner', secret.body.id).expect(404);
 
-    const refused = await as('owner', request(server()).post(`/transactions/${whole}/unsplit`));
+    // Only the private part's owner may put the parts back together at all.
+    const notOwner = await as('owner', request(server()).post(`/transactions/${whole}/unsplit`));
+    expect(notOwner.status).toBe(403);
+    // Its owner may, but not while its file would show on the shared row.
+    const refused = await as('partner', request(server()).post(`/transactions/${whole}/unsplit`));
     expect(refused.status).toBe(400);
     expect(refused.body.error.code).toBe('TRANSACTION_UNSPLIT_PRIVATE_FILES');
     await download('owner', secret.body.id).expect(404);
@@ -420,7 +424,7 @@ describe('Transaction attachments (e2e)', () => {
       'partner',
       request(server()).delete(`/transactions/attachments/${secret.body.id}`),
     ).expect(200);
-    const merged = await as('owner', request(server()).post(`/transactions/${whole}/unsplit`));
+    const merged = await as('partner', request(server()).post(`/transactions/${whole}/unsplit`));
     expect(merged.status).toBeLessThan(300);
   });
 

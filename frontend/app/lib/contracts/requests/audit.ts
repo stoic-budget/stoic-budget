@@ -41,6 +41,7 @@ export const AuditEntityType = Schema.Literals([
   'backup',
   'user',
   'payee',
+  'calendar_feed',
 ]);
 
 /** `GET /audit-events`. Page and limit are clamped by the service (50 per page, 200 at most). */

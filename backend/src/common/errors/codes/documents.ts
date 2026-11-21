@@ -64,6 +64,8 @@ export const DOCUMENTS_ERRORS = {
     'A private part has files of its own that the merged row would show to others; its owner can remove them first',
   TRANSACTION_UNSPLIT_HIDES_FILES:
     'A part has files that the merged row, private to one member, would hide from everyone else; remove them or share that row first',
+  TRANSACTION_UNSPLIT_MIXED_BUDGETS:
+    'Before unsplitting, either leave every part out of budgets or count every part in them',
   TRANSACTION_TRANSFER_SAME_LEG: 'A transfer needs two different transactions',
   TRANSACTION_TRANSFER_SAME_DIRECTION: 'The two legs of a transfer must go in opposite directions',
   TRANSACTION_LEG_DUPLICATE: 'Transaction {{id}} is marked as a duplicate',
