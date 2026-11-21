@@ -144,6 +144,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.US_BANK, /\bu\.s\. bank national association\b|\b1-800-us banks\b/],
   [BankName.VARO, /\bvaromoney\.com\b/],
   [BankName.VIRGIN_MONEY, /\bvirgin money\b/],
+  [BankName.WALMART_MONEYCARD, /\bwww\.walmartmoneycard\.com\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
