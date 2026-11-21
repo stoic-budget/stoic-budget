@@ -110,6 +110,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Crédit Agricole Brie Picardie 500 Rue Saint Fuscien')).toBe(BankName.CREDIT_AGRICOLE);
     expect(mentionedBank('made payable to CREDIT ONE BANK.')).toBe(BankName.CREDIT_ONE);
     expect(mentionedBank('Digital Federal Credit Union 220 Sample Boulevard')).toBe(BankName.DCU);
+    expect(mentionedBank('Bank of America, N.A. P.O. Box 25118')).toBe(BankName.BANK_OF_AMERICA);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
