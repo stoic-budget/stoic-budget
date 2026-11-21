@@ -284,6 +284,7 @@ describe('ParserFactoryService', () => {
       'TangerineParser',
       'TdParser',
       'CoOperativeBankParser',
+      'TruistParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
