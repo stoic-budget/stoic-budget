@@ -178,6 +178,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Suncorp-Metway Ltd ABN 66 010 831 722')).toBe(BankName.SUNCORP);
     expect(mentionedBank('Online synchronybank.com Synchrony Bank')).toBe(BankName.SYNCHRONY);
     expect(mentionedBank('P.O. Box 2646-R, Columbus, GA 31902')).toBe(BankName.SYNOVUS);
+    expect(mentionedBank('Statement www.tangerine.ca')).toBe(BankName.TANGERINE);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

@@ -281,6 +281,7 @@ describe('ParserFactoryService', () => {
       'SuncorpParser',
       'SynchronyParser',
       'SynovusParser',
+      'TangerineParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
