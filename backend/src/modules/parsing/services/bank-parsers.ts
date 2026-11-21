@@ -96,6 +96,7 @@ import { ScotiabankParser } from '../parsers/scotiabank.parser';
 import { SimpliiParser } from '../parsers/simplii.parser';
 import { SkrillParser } from '../parsers/skrill.parser';
 import { SocieteGeneraleParser } from '../parsers/societe-generale.parser';
+import { SofiParser } from '../parsers/sofi.parser';
 
 /**
  * Each bank's own parser, with the bank it claims a file as when the file's
@@ -198,4 +199,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [SimpliiParser, { bankName: BankName.SIMPLII }],
   [SkrillParser, { bankName: BankName.SKRILL }],
   [SocieteGeneraleParser, { bankName: BankName.SOCIETE_GENERALE }],
+  [SofiParser, { bankName: BankName.SOFI }],
 ];

@@ -274,6 +274,7 @@ describe('ParserFactoryService', () => {
       'SimpliiParser',
       'SkrillParser',
       'SocieteGeneraleParser',
+      'SofiParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
