@@ -251,6 +251,7 @@ describe('ParserFactoryService', () => {
       'MetroBankParser',
       'MonzoParser',
       'N26Parser',
+      'NabParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
