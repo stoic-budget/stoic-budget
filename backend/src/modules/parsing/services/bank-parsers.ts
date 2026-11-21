@@ -25,6 +25,7 @@ import { ChimeParser } from '../parsers/chime.parser';
 import { CibcParser } from '../parsers/cibc.parser';
 import { CitiParser } from '../parsers/citi.parser';
 import { CitizensParser } from '../parsers/citizens.parser';
+import { CoOperativeBankParser } from '../parsers/co-operative-bank.parser';
 import { CoastCapitalParser } from '../parsers/coast-capital.parser';
 import { ComericaParser } from '../parsers/comerica.parser';
 import { CommBankParser } from '../parsers/commbank.parser';
@@ -216,4 +217,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [SynovusParser, { bankName: BankName.SYNOVUS }],
   [TangerineParser, { bankName: BankName.TANGERINE }],
   [TdParser, { bankName: BankName.TD }],
+  [CoOperativeBankParser, { bankName: BankName.CO_OPERATIVE_BANK }],
 ];
