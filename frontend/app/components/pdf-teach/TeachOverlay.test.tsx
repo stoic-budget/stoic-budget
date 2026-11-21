@@ -12,6 +12,7 @@ const session = (over: Partial<TeachSession> = {}): TeachSession => ({
   regions: [],
   activeTag: 'date',
   setActiveTag: vi.fn(),
+  armed: false,
   addRegion: vi.fn(),
   removeRegion: vi.fn(),
   missing: [],
@@ -30,13 +31,39 @@ describe('TeachOverlay', () => {
     render(<TeachOverlay page={1} width={1200} session={marks} />);
     const layer = screen.getByTestId('teach-layer-1');
     layer.getBoundingClientRect = () => ({ left: 100, top: 50 }) as DOMRect;
-    fireEvent.pointerDown(layer, { button: 0, clientX: 180, clientY: 250 });
-    fireEvent.pointerMove(layer, { clientX: 300, clientY: 350 });
+    // A mouse draws with the tag in hand, armed or not.
+    fireEvent.pointerDown(layer, { button: 0, pointerType: 'mouse', clientX: 180, clientY: 250 });
+    fireEvent.pointerMove(layer, { pointerType: 'mouse', clientX: 300, clientY: 350 });
     // The labels hide while an area is drawn, and come back after.
     expect(layer.className).toContain('seneca-pdf-teach__layer--drawing');
     fireEvent.pointerUp(layer, { clientX: 300, clientY: 350 });
     expect(marks.addRegion).toHaveBeenCalledWith({ page: 1, x0: 40, y0: 100, x1: 100, y1: 150 });
     expect(layer.className).not.toContain('seneca-pdf-teach__layer--drawing');
+  });
+
+  it('lets a finger scroll the page until a tag is tapped, then draw with it', () => {
+    const touch = (layer: HTMLElement, pointerType = 'touch') => {
+      layer.getBoundingClientRect = () => ({ left: 0, top: 0 }) as DOMRect;
+      fireEvent.pointerDown(layer, { button: 0, pointerType, clientX: 40, clientY: 100 });
+      fireEvent.pointerMove(layer, { pointerType, clientX: 160, clientY: 300 });
+      fireEvent.pointerUp(layer, { pointerType, clientX: 160, clientY: 300 });
+    };
+    const idle = session();
+    const { unmount } = render(<TeachOverlay page={1} width={600} session={idle} />);
+    const scrolling = screen.getByTestId('teach-layer-1');
+    expect(scrolling.className).not.toContain('seneca-pdf-teach__layer--armed');
+    touch(scrolling);
+    // A pen pans the page as a finger does (touch-action), so it waits for a tag too.
+    touch(scrolling, 'pen');
+    expect(idle.addRegion).not.toHaveBeenCalled();
+    unmount();
+
+    const armed = session({ armed: true });
+    render(<TeachOverlay page={1} width={600} session={armed} />);
+    const drawing = screen.getByTestId('teach-layer-1');
+    expect(drawing.className).toContain('seneca-pdf-teach__layer--armed');
+    touch(drawing);
+    expect(armed.addRegion).toHaveBeenCalledWith({ page: 1, x0: 40, y0: 100, x1: 160, y1: 300 });
   });
 
   it('draws the areas of its own page, each removable, and the rows the preview read', () => {
@@ -50,6 +77,7 @@ describe('TeachOverlay', () => {
         transactions: 2,
         totalDebit: 0,
         totalCredit: 0,
+        rowsByHand: false,
         checks: [],
         rows: [
           { page: 1, y: 120, broken: false },
