@@ -2,7 +2,6 @@
 
 import MuiButton from '@mui/material/Button';
 import React, { useEffect, useMemo, useState } from 'react';
-import CustomDatePicker from '@/app/components/CustomDatePicker';
 import { ChevronLeft } from '@/app/components/icons';
 import { CurrencyDrawer } from '@/app/components/receipts/components/CurrencyDrawer';
 import { TagPicker } from '@/app/components/tags/TagPicker';
@@ -22,7 +21,13 @@ import type {
 import { useCashPaymentOptions } from './hooks/useCashPaymentOptions';
 import { type CashState, cashSource, IN_HAND, today } from './MarkPaidFields';
 import { PaidNowFields } from './PaidNowFields';
-import { type PayableFormState, toFormState } from './payable-form-state';
+import { PayableScheduleFields } from './PayableScheduleFields';
+import {
+  type PayableFormState,
+  repeatIsComplete,
+  repeatPayload,
+  toFormState,
+} from './payable-form-state';
 
 interface CreatePayableDrawerProps {
   open: boolean;
@@ -110,8 +115,11 @@ export function CreatePayableDrawer({
 
   const canSubmit = useMemo(
     () =>
-      form.vendor.trim().length > 0 && Number(form.amount) > 0 && (!paidNow || account !== null),
-    [account, form, paidNow],
+      form.vendor.trim().length > 0 &&
+      Number(form.amount) > 0 &&
+      (!paidNow || account !== null) &&
+      repeatIsComplete(form, payable),
+    [account, form, paidNow, payable],
   );
 
   const handleSubmit = async (): Promise<void> => {
@@ -129,6 +137,7 @@ export function CreatePayableDrawer({
       status: form.status,
       comment: form.comment.trim() || undefined,
       tagIds: form.tags.map(tag => tag.id),
+      ...repeatPayload(form, payable),
       ...(paidNow && account
         ? {
             payment: {
@@ -219,35 +228,12 @@ export function CreatePayableDrawer({
               </div>
             </div>
 
-            <div className="seneca-payable-drawer__2col">
-              <div className="seneca-payable-drawer__field-group">
-                <label className="seneca-payable-drawer__field-label" htmlFor="payable-due-date">
-                  {labels.dueDate}
-                </label>
-                <CustomDatePicker
-                  id="payable-due-date"
-                  large
-                  value={form.dueDate || null}
-                  onChange={value => setForm(prev => ({ ...prev, dueDate: value }))}
-                />
-              </div>
-              <div className="seneca-payable-drawer__field-group">
-                <label className="seneca-payable-drawer__field-label" htmlFor="payable-source">
-                  {labels.source}
-                </label>
-                <Select
-                  fullWidth
-                  id="payable-source"
-                  sx={FORM_CONTROL_SX}
-                  value={form.source}
-                  onChange={value => setForm(prev => ({ ...prev, source: value as PayableSource }))}
-                  options={Object.entries(labels.sourceOptions).map(([value, label]) => ({
-                    value,
-                    label,
-                  }))}
-                />
-              </div>
-            </div>
+            <PayableScheduleFields
+              form={form}
+              setForm={setForm}
+              payable={payable}
+              labels={labels}
+            />
 
             <div className="seneca-payable-drawer__field-group">
               <label className="seneca-payable-drawer__field-label" htmlFor="payable-status">

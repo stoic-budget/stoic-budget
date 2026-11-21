@@ -54,6 +54,12 @@ export const ACCOUNTING_ERRORS = {
   PAYABLE_PAYMENT_SHORT:
     'That transaction is less than what is still owed; record it as a partial payment',
   PAYABLE_CATEGORY_NOT_FOUND: 'Category not found in this workspace',
+  PAYABLE_NOT_RECURRING: 'This bill does not repeat',
+  PAYABLE_OCCURRENCE_SETTLED:
+    'This payment is already paid, skipped or partly paid; change it as a whole bill instead',
+  PAYABLE_RECURRENCE_NEVER_FIRES: 'This repeat rule has no date on or after its start',
+  PAYABLE_REJECT_OWN_PAYMENT:
+    'This transaction is the payment recorded with this bill; it cannot be refused here',
   // ── invoices ─────────────────────────────────────────────────────────────
   INVOICE_NOT_DRAFT: 'Only a draft invoice can be edited',
   INVOICE_ALREADY_SENT: 'This invoice was already sent',
