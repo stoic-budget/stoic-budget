@@ -13,7 +13,7 @@ import { PrivateAmount } from '@/app/components/ui/private-amount';
 import type { DashboardData } from '@/app/hooks/useDashboard';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { AdviceCard } from './AdviceCard';
-import { CashFlowCard, reportsHref } from './CashFlowCard';
+import { CashFlowCard } from './CashFlowCard';
 import { CryptoPortfolioCard } from './CryptoPortfolioCard';
 import { computeNet, computeSavingsRate, signTone } from './dashboard-stats.util';
 import { GettingStartedCard } from './GettingStartedCard';
@@ -27,7 +27,7 @@ import { RecentTransactionsCard } from './RecentTransactionsCard';
 import { SafeToSpendTile } from './SafeToSpendTile';
 import { SpentTile } from './SpentTile';
 import { TaxesCard } from './TaxesCard';
-import { TopCategoriesCard } from './TopCategoriesCard';
+import { TopPayeesCard } from './TopPayeesCard';
 import { CardLink, DashboardCard, KpiCard } from './ui';
 import { useMonthLabel } from './use-month-label';
 import { WorkspaceActivityCard } from './WorkspaceActivityCard';
@@ -316,15 +316,15 @@ export function OverviewTab({
           ),
           'top-categories': (
             <DashboardCard
-              title={t.topCategoriesTitle}
+              title={t.topPayeesTitle}
               subtitle={monthLabel}
-              action={<CardLink href={reportsHref(monthKey(displayMonth))}>{t.viewAll}</CardLink>}
+              action={
+                <CardLink href={`/statements/payees?month=${monthKey(displayMonth)}`}>
+                  {t.viewAll}
+                </CardLink>
+              }
             >
-              <TopCategoriesCard
-                categories={data.topCategories ?? []}
-                formatAmount={formatAmount}
-                month={monthKey(displayMonth)}
-              />
+              <TopPayeesCard month={monthKey(displayMonth)} formatAmount={formatAmount} />
             </DashboardCard>
           ),
           'recent-transactions': (

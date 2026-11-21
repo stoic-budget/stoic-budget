@@ -39,6 +39,7 @@ import { ParserHealthService } from './services/parser-health.service';
 // import { QualityMetricsService } from './services/quality-metrics.service';
 // import { StatementNormalizationService } from './services/statement-normalization.service';
 import { StatementProcessingService } from './services/statement-processing.service';
+import { StatementRowHintsService } from './services/statement-row-hints.service';
 import { StatementSiblingsService } from './services/statement-siblings.service';
 // import { StatementQualityGate } from './services/statement-quality-gate.service';
 // import { TextCleaningService } from './services/text-cleaning.service';
@@ -87,6 +88,7 @@ import { UniversalExtractorService } from './services/universal-extractor.servic
     LayoutShareService,
     StatementProcessingService,
     StatementSiblingsService,
+    StatementRowHintsService,
     StatementParsingQueue,
     StatementParsingProcessor,
     StaleStatementReaper,
