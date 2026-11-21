@@ -53,15 +53,17 @@ export function parseStatementAmount(text: string): number | null {
 
 /**
  * A currency mark glued to the figure, the sign of the amount before it or
- * not: "$4,082.88", "-$503.00", "S$12.00".
+ * not: "$4,082.88", "-$503.00", "S$12.00"; or after it: "-300,00€".
  */
 const GLUED_SYMBOL = new RegExp(`^([-+(−]?)[A-Z]{0,3}[${CURRENCY_SYMBOLS}](?=\\d)`);
+const TRAILING_SYMBOL = new RegExp(`(?<=\\d)[${CURRENCY_SYMBOLS}]$`);
 
 /** A word that can be part of a printed amount: digits, a sign, or a currency mark. */
 export function isAmountPart(word: string): boolean {
   const figure = word
     .replace(LETTER_SIGNS, '')
     .replace(GLUED_SYMBOL, '$1')
+    .replace(TRAILING_SYMBOL, '')
     .replace(/\([+-]\)$/, '')
     .replace(/(\d)[CcDd][Rr]\.?$/, '$1');
   return (

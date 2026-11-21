@@ -278,3 +278,11 @@ describe('the currency a money column names', () => {
     expect(detectStatementCurrency(rows.join('\n'))).toBe('HKD');
   });
 });
+
+describe('a currency sign after the figure', () => {
+  it('is part of the amount: "-300,00€"', () => {
+    expect(isAmountPart('-300,00€')).toBe(true);
+    expect(isAmountPart('+400,00€')).toBe(true);
+    expect(parseStatementAmount('-300,00€')).toBe(-300);
+  });
+});
