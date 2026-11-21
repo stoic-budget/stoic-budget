@@ -692,3 +692,18 @@ describe('headings set apart', () => {
     expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'credit', 'debit', 'balance']);
   });
 });
+
+describe('underscore rules', () => {
+  it('reads a heading set on an underscore rule ("_DATE")', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['_DATE', 40],
+        ['DESCRIPTION', 90],
+        ['WITHDRAWALS', 300],
+        ['DEPOSITS', 380],
+        ['BALANCE', 450],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
+  });
+});

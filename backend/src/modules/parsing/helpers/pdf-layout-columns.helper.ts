@@ -43,10 +43,14 @@ const ATTACH_GAP = 8;
 
 /** A heading's words, folded, without colons and the unit in brackets ("Balance ($)"). */
 export function headingWord(item: PdfTextItem): string {
-  return foldText(item.text)
-    .replace(/[:]|\([^)]*\)/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return (
+    foldText(item.text)
+      // "_DATE": the end of an underscore rule the heading was set on.
+      .replace(/^_+|_+$/g, '')
+      .replace(/[:]|\([^)]*\)/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
 }
 
 /** Headings a workspace taught for its own statements, folded as `headingWord` reads them. */
