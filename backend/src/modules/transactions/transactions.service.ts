@@ -45,6 +45,7 @@ import {
 } from './helpers/repoint-split-parts';
 import { lockSplitGroup } from './helpers/split-group-lock';
 import { assertMayReshape, assertSplittable, memberIdOf } from './helpers/split-guards';
+import { assertTaxEditable } from './helpers/tax-edit-guard';
 import { applyPartCategory, cloneForSplit } from './helpers/transaction-split-clone';
 import { applyListFilters, type TransactionListFilters } from './transaction-list-filters';
 import { assertUnsplittable } from './unsplit-guards';
@@ -181,41 +182,6 @@ export class TransactionsService {
     return redactPrivate(await this.findOne(id, workspaceId), viewerMemberId);
   }
 
-  /**
-   * Refuses edits that would put a filed return out of step with its data.
-   *
-   * A locked transaction has been reported to a tax authority. Its money and
-   * its tax are therefore fixed; everything else about it — comments, wallet,
-   * counterparty spelling — stays editable, so locking does not turn the row
-   * into a museum piece.
-   */
-  private assertTaxEditable(transaction: Transaction, updateDto: UpdateTransactionBody): void {
-    if (!transaction.taxLocked) {
-      return;
-    }
-
-    const frozen: Array<keyof UpdateTransactionBody> = [
-      'amount',
-      'debit',
-      'credit',
-      'amountForeign',
-      'exchangeRate',
-      'transactionType',
-      'categoryId',
-      'transactionDate',
-      // Changing it would re-convert the tax at a different rate than the one
-      // the filed figure was built from.
-      'currency',
-    ];
-
-    const attempted = frozen.filter(field => updateDto[field] !== undefined);
-    if (attempted.length > 0) {
-      throw new BadRequestException(
-        appError('TRANSACTION_TAX_LOCKED_FIELDS', { fields: attempted.join(', ') }),
-      );
-    }
-  }
-
   async update(
     id: string,
     workspaceId: string,
@@ -231,7 +197,7 @@ export class TransactionsService {
     const movedForPrivacy = await this.applyPrivacy(transaction, updateDto, viewerMemberId);
     const before = { ...transaction };
     const previousCategoryId = transaction.categoryId;
-    this.assertTaxEditable(transaction, updateDto);
+    assertTaxEditable(transaction, updateDto);
 
     // Recalculate amount if debit/credit changed
     if (updateDto.debit !== undefined || updateDto.credit !== undefined) {
