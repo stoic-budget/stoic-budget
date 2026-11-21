@@ -464,16 +464,40 @@ describe('Calendar feed (e2e)', () => {
 
   it('answers one live link, or a 409, when the feed is turned on twice at once', async () => {
     await as(owner, request(server()).delete('/calendar-feed')).expect(200);
-    const answers = await Promise.all(
-      [0, 1].map(() => as(owner, request(server()).post('/calendar-feed')).send({})),
-    );
-    const statuses = answers.map(res => res.status).sort();
-    // Without the conditional write both answered 201, and one of the links was dead from the start.
-    expect(statuses).toEqual([201, 409]);
-    const loser = answers.find(res => res.status === 409);
-    expect(loser?.body.error.code).toBe('CALENDAR_FEED_CHANGED');
-    const winner = answers.find(res => res.status === 201);
-    await feed(winner?.body.token).expect(200);
+    // Force the overlap: both requests read "no feed yet" before either writes.
+    // Left to timing, a busy runner sometimes finished the first request before
+    // the second read, and the second then renewed the link with a 201.
+    const repository = dataSource.getRepository(CalendarFeed);
+    const original = repository.findOne.bind(repository);
+    let arrived = 0;
+    let bothRead: () => void = () => undefined;
+    const together = new Promise<void>(resolve => (bothRead = resolve));
+    const meet = async (...args: Parameters<typeof repository.findOne>) => {
+      const found = await original(...args);
+      arrived += 1;
+      if (arrived === 2) bothRead();
+      await together;
+      return found;
+    };
+    const findOne = vi
+      .spyOn(repository, 'findOne')
+      .mockImplementationOnce(meet)
+      .mockImplementationOnce(meet);
+    try {
+      const answers = await Promise.all(
+        [0, 1].map(() => as(owner, request(server()).post('/calendar-feed')).send({})),
+      );
+      const statuses = answers.map(res => res.status).sort();
+      // Without the conditional write both answered 201, and one of the links was dead from the start.
+      expect(statuses).toEqual([201, 409]);
+      const loser = answers.find(res => res.status === 409);
+      expect(loser?.body.error.code).toBe('CALENDAR_FEED_CHANGED');
+      const winner = answers.find(res => res.status === 201);
+      await feed(winner?.body.token).expect(200);
+    } finally {
+      bothRead();
+      findOne.mockRestore();
+    }
   });
 
   it('answers 409, not a dead link, when another renewal lands right after its write', async () => {
