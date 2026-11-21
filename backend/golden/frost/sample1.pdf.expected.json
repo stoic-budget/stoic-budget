@@ -1,0 +1,468 @@
+{
+  "metadata": {
+    "accountNumber": "60 1000001",
+    "currency": "USD",
+    "dateFrom": "2024-09-03T00:00:00",
+    "dateTo": "2024-09-30T00:00:00",
+    "balanceStart": 84385.46,
+    "balanceEnd": 51228.93
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-09-23T00:00:00",
+      "counterpartyName": "TELLER DEPOSIT",
+      "paymentPurpose": "TELLER DEPOSIT",
+      "credit": 19800,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-09-27T00:00:00",
+      "counterpartyName": "TELLER DEPOSIT",
+      "paymentPurpose": "TELLER DEPOSIT",
+      "credit": 9900,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-09-30T00:00:00",
+      "counterpartyName": "TELLER DEPOSIT",
+      "paymentPurpose": "TELLER DEPOSIT",
+      "credit": 9900,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "WIRE TRANSFER FROST BANK WIRE IN 05469",
+      "paymentPurpose": "WIRE TRANSFER FROST BANK WIRE IN 05469",
+      "credit": 24493.33,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-05T00:00:00",
+      "counterpartyName": "INTERNET FUND TRANSFER FROM ACCOUNT XXXXX0000",
+      "paymentPurpose": "INTERNET FUND TRANSFER FROM ACCOUNT XXXXX0000",
+      "credit": 94500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "INTERINSURANCE Claim Pmt 65b33e04-905b-4",
+      "paymentPurpose": "ELECTRONIC DEPOSIT INTERINSURANCE Claim Pmt 65b33e04-905b-4",
+      "credit": 7043,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "INTERNET FUND TRANSFER FROM ACCOUNT XXXXX0000",
+      "paymentPurpose": "INTERNET FUND TRANSFER FROM ACCOUNT XXXXX0000",
+      "credit": 25000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-11T00:00:00",
+      "counterpartyName": "INTERNET FUND TRANSFER FROM ACCOUNT XXXXX0000",
+      "paymentPurpose": "INTERNET FUND TRANSFER FROM ACCOUNT XXXXX0000",
+      "credit": 60000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-16T00:00:00",
+      "counterpartyName": "WIRE TRANSFER FROST BANK WIRE IN 04689",
+      "paymentPurpose": "WIRE TRANSFER FROST BANK WIRE IN 04689",
+      "credit": 9226.14,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-16T00:00:00",
+      "counterpartyName": "INTERNET FUND TRANSFER FROM ACCOUNT XXXXX0000",
+      "paymentPurpose": "INTERNET FUND TRANSFER FROM ACCOUNT XXXXX0000",
+      "credit": 30000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-23T00:00:00",
+      "counterpartyName": "OVERDRAFT TRANSFER TRANSFERRED FROM CHECKING ACCOUNT xxxxx0000",
+      "paymentPurpose": "OVERDRAFT TRANSFER TRANSFERRED FROM CHECKING ACCOUNT xxxxx0000",
+      "credit": 3436.96,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-24T00:00:00",
+      "counterpartyName": "OVERDRAFT TRANSFER TRANSFERRED FROM CHECKING ACCOUNT xxxxx0000",
+      "paymentPurpose": "OVERDRAFT TRANSFER TRANSFERRED FROM CHECKING ACCOUNT xxxxx0000",
+      "credit": 20408,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-30T00:00:00",
+      "counterpartyName": "INTERNET FUND TRANSFER FROM ACCOUNT XXXXX0000",
+      "paymentPurpose": "INTERNET FUND TRANSFER FROM ACCOUNT XXXXX0000",
+      "credit": 64500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-30T00:00:00",
+      "counterpartyName": "Check 8753",
+      "paymentPurpose": "CHECK 8753",
+      "debit": 11806.07,
+      "currency": "USD",
+      "documentNumber": "8753"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "Check 8773",
+      "paymentPurpose": "CHECK 8773",
+      "debit": 11140,
+      "currency": "USD",
+      "documentNumber": "8773"
+    },
+    {
+      "transactionDate": "2024-09-24T00:00:00",
+      "counterpartyName": "Check 8779",
+      "paymentPurpose": "CHECK 8779",
+      "debit": 6115,
+      "currency": "USD",
+      "documentNumber": "8779"
+    },
+    {
+      "transactionDate": "2024-09-06T00:00:00",
+      "counterpartyName": "Check 8756",
+      "paymentPurpose": "CHECK 8756",
+      "debit": 6933.33,
+      "currency": "USD",
+      "documentNumber": "8756"
+    },
+    {
+      "transactionDate": "2024-09-23T00:00:00",
+      "counterpartyName": "Check 8776",
+      "paymentPurpose": "CHECK 8776",
+      "debit": 11025,
+      "currency": "USD",
+      "documentNumber": "8776"
+    },
+    {
+      "transactionDate": "2024-09-27T00:00:00",
+      "counterpartyName": "Check 8780",
+      "paymentPurpose": "CHECK 8780",
+      "debit": 4975,
+      "currency": "USD",
+      "documentNumber": "8780"
+    },
+    {
+      "transactionDate": "2024-09-23T00:00:00",
+      "counterpartyName": "Check 8757",
+      "paymentPurpose": "CHECK 8757",
+      "debit": 2872,
+      "currency": "USD",
+      "documentNumber": "8757"
+    },
+    {
+      "transactionDate": "2024-09-24T00:00:00",
+      "counterpartyName": "Check 8777",
+      "paymentPurpose": "CHECK 8777",
+      "debit": 9375,
+      "currency": "USD",
+      "documentNumber": "8777"
+    },
+    {
+      "transactionDate": "2024-09-27T00:00:00",
+      "counterpartyName": "Check 8781",
+      "paymentPurpose": "CHECK 8781",
+      "debit": 4850,
+      "currency": "USD",
+      "documentNumber": "8781"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "Check 8758",
+      "paymentPurpose": "CHECK 8758",
+      "debit": 3250,
+      "currency": "USD",
+      "documentNumber": "8758"
+    },
+    {
+      "transactionDate": "2024-09-24T00:00:00",
+      "counterpartyName": "Check 8778",
+      "paymentPurpose": "CHECK 8778",
+      "debit": 4918,
+      "currency": "USD",
+      "documentNumber": "8778"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "BROKERS QUALITY GRASS CARROLLTON",
+      "paymentPurpose": "DEBIT CARD PURCHASE BROKERS QUALITY GRASS CARROLLTON CARD: 1000001",
+      "debit": 227.33,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "SITEONE LANDSCAPE SUPP 469-7420953",
+      "paymentPurpose": "DEBIT CARD PURCHASE SITEONE LANDSCAPE SUPP 469-7420953 CARD: 1000001",
+      "debit": 166.22,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "SITEONE LANDSCAPE SUPP 469-7420953",
+      "paymentPurpose": "DEBIT CARD PURCHASE SITEONE LANDSCAPE SUPP 469-7420953 CARD: 1000001",
+      "debit": 235.71,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "INTERNET FUND TRANSFER TO ACCOUNT XXXXX0000",
+      "paymentPurpose": "INTERNET FUND TRANSFER TO ACCOUNT XXXXX0000",
+      "debit": 7000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "INTERNET FUND TRANSFER TO ACCOUNT XXXXX0000",
+      "paymentPurpose": "INTERNET FUND TRANSFER TO ACCOUNT XXXXX0000",
+      "debit": 74000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "Channel Partner AUTH PAYME G-44F67F297A144",
+      "paymentPurpose": "ELECTRONIC DEBIT Channel Partner AUTH PAYME G-44F67F297A144",
+      "debit": 1336.54,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "AMEX EPAYMENT ACH PMT W9140",
+      "paymentPurpose": "ELECTRONIC DEBIT AMEX EPAYMENT ACH PMT W9140",
+      "debit": 1500,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "SN SERVICING COR WEB PAY SNSC",
+      "paymentPurpose": "ELECTRONIC DEBIT SN SERVICING COR WEB PAY SNSC",
+      "debit": 6012.13,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-05T00:00:00",
+      "counterpartyName": "ALLSTATE V&P INS INS PREM 379780289129465",
+      "paymentPurpose": "ELECTRONIC DEBIT ALLSTATE V&P INS INS PREM 379780289129465",
+      "debit": 553.26,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-05T00:00:00",
+      "counterpartyName": "NSF FEE",
+      "paymentPurpose": "NSF FEE",
+      "debit": 35,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-06T00:00:00",
+      "counterpartyName": "ACCOUNT TRANSFER TO ACCOUNT xxxxx0000",
+      "paymentPurpose": "ACCOUNT TRANSFER TO ACCOUNT xxxxx0000",
+      "debit": 3860.11,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-06T00:00:00",
+      "counterpartyName": "LINCOLN AFS FORDCREDIT 572263353",
+      "paymentPurpose": "ELECTRONIC DEBIT LINCOLN AFS FORDCREDIT 572263353",
+      "debit": 965,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "DFW LANDSCAPING & SOD, 214-7967587",
+      "paymentPurpose": "DEBIT CARD PURCHASE DFW LANDSCAPING & SOD, 214-7967587 CARD: 1000001",
+      "debit": 4638.95,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "DFW LANDSCAPING & SOD, 214-7967587",
+      "paymentPurpose": "DEBIT CARD PURCHASE DFW LANDSCAPING & SOD, 214-7967587 CARD: 1000001",
+      "debit": 1992.53,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-09T00:00:00",
+      "counterpartyName": "Channel Partner AUTH PAYME G-4C2C68EF7CE74",
+      "paymentPurpose": "ELECTRONIC DEBIT Channel Partner AUTH PAYME G-4C2C68EF7CE74",
+      "debit": 1336.54,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-10T00:00:00",
+      "counterpartyName": "INTERNET FUND TRANSFER TO ACCOUNT XXXXX0000",
+      "paymentPurpose": "INTERNET FUND TRANSFER TO ACCOUNT XXXXX0000",
+      "debit": 108000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-11T00:00:00",
+      "counterpartyName": "AMEX EPAYMENT ACH PMT A5956",
+      "paymentPurpose": "ELECTRONIC DEBIT AMEX EPAYMENT ACH PMT A5956",
+      "debit": 24650.26,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-12T00:00:00",
+      "counterpartyName": "TELLER WITHDRAWAL",
+      "paymentPurpose": "TELLER WITHDRAWAL",
+      "debit": 12300,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-09-16T00:00:00",
+      "counterpartyName": "INTERNET FUND TRANSFER TO ACCOUNT XXXXX0000",
+      "paymentPurpose": "INTERNET FUND TRANSFER TO ACCOUNT XXXXX0000",
+      "debit": 2000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-16T00:00:00",
+      "counterpartyName": "32 Pawnee Leasin AUTH PAYME G-28ADB47D18CF4",
+      "paymentPurpose": "ELECTRONIC DEBIT 32 Pawnee Leasin AUTH PAYME G-28ADB47D18CF4",
+      "debit": 1064.89,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-16T00:00:00",
+      "counterpartyName": "Channel Partner AUTH PAYME G-C5709C72DE0E4",
+      "paymentPurpose": "ELECTRONIC DEBIT Channel Partner AUTH PAYME G-C5709C72DE0E4",
+      "debit": 1336.54,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-16T00:00:00",
+      "counterpartyName": "AMEX EPAYMENT ACH PMT W4582",
+      "paymentPurpose": "ELECTRONIC DEBIT AMEX EPAYMENT ACH PMT W4582",
+      "debit": 8500,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-17T00:00:00",
+      "counterpartyName": "INTERNET FUND TRANSFER TO ACCOUNT XXXXX0000",
+      "paymentPurpose": "INTERNET FUND TRANSFER TO ACCOUNT XXXXX0000",
+      "debit": 51000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-23T00:00:00",
+      "counterpartyName": "AMEX EPAYMENT ACH PMT W4658",
+      "paymentPurpose": "ELECTRONIC DEBIT AMEX EPAYMENT ACH PMT W4658",
+      "debit": 8547,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-23T00:00:00",
+      "counterpartyName": "Channel Partner AUTH PAYME G-579E3A4C3D614",
+      "paymentPurpose": "ELECTRONIC DEBIT Channel Partner AUTH PAYME G-579E3A4C3D614",
+      "debit": 1336.54,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-23T00:00:00",
+      "counterpartyName": "OVERDRAFT FEE",
+      "paymentPurpose": "OVERDRAFT FEE",
+      "debit": 70,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-27T00:00:00",
+      "counterpartyName": "OVERDRAFT FEE",
+      "paymentPurpose": "OVERDRAFT FEE",
+      "debit": 70,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-30T00:00:00",
+      "counterpartyName": "FORD MOTOR CR FORDCREDIT 350133082",
+      "paymentPurpose": "ELECTRONIC DEBIT FORD MOTOR CR FORDCREDIT 350133082",
+      "debit": 1769.73,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-30T00:00:00",
+      "counterpartyName": "AMEX EPAYMENT ACH PMT W2058",
+      "paymentPurpose": "ELECTRONIC DEBIT AMEX EPAYMENT ACH PMT W2058",
+      "debit": 2500,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-30T00:00:00",
+      "counterpartyName": "AMEX EPAYMENT ACH PMT W1160",
+      "paymentPurpose": "ELECTRONIC DEBIT AMEX EPAYMENT ACH PMT W1160",
+      "debit": 5609.74,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-30T00:00:00",
+      "counterpartyName": "Channel Partner AUTH PAYME G-1EB8719195617",
+      "paymentPurpose": "ELECTRONIC DEBIT Channel Partner AUTH PAYME G-1EB8719195617",
+      "debit": 1336.54,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-09-30T00:00:00",
+      "counterpartyName": "OVERDRAFT FEE",
+      "paymentPurpose": "OVERDRAFT FEE",
+      "debit": 105,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-09-30T00:00:00",
+      "counterpartyName": "SERVICE CHARGE/FEE CASH PROCESSING CHARGE",
+      "paymentPurpose": "SERVICE CHARGE/FEE CASH PROCESSING CHARGE",
+      "debit": 49,
+      "currency": "USD",
+      "paymentType": "fee"
+    }
+  ]
+}
