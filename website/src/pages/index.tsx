@@ -25,9 +25,9 @@ const features = [
       'Budgets with live spend, savings goals, subscription detection, a crypto portfolio, net worth across accounts, and advice generated from your own numbers.',
   },
   {
-    title: 'VAT and income tax',
+    title: 'VAT',
     description:
-      'A VAT engine with returns, plus year-end income tax drafts: Germany Anlage EÜR, Spain Modelo 100, Poland PIT-36L / PIT-28 / PIT-36, and a generic summary elsewhere. Filing deadlines for 25 EU countries.',
+      'A VAT engine with returns, EU VAT numbers checked against VIES, and filing deadlines for 25 EU countries.',
   },
   {
     title: 'Receipts on a map',
@@ -132,7 +132,7 @@ export default function Home(): JSX.Element {
           <h1 className="hero__title">Your bank statements, turned into clean financial data</h1>
           <p className="hero__subtitle">
             Stoic Budget imports statements and receipts, deduplicates and categorizes every transaction, and builds
-            dashboards, budgets, VAT returns and income tax drafts on top — on your own server.
+            dashboards, budgets and VAT returns on top — on your own server.
           </p>
           <div className="hero__buttons">
             <Link className="button button--primary button--lg" to="/docs/getting-started/quick-start">

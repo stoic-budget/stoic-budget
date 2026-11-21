@@ -37,6 +37,11 @@ export const ACCOUNTING_ERRORS = {
   WALLET_STATEMENT_CURRENCY_MISMATCH:
     'The account holds {{walletCurrency}}; the statement is in {{currency}}',
   WALLET_NOT_FOUND: 'Account not found in this workspace',
+  LOAN_TERMS_DEBT_ONLY: 'Loan terms can be set only on a loan or credit card account',
+  LOAN_TERMS_END_TOO_LATE:
+    'The last payment would fall after 31 December 9999: start earlier or shorten the term',
+  LOAN_TERMS_ROUNDING:
+    'At this rate and term a payment rounded to the cent no longer repays the loan on time: shorten the term',
   TRANSFER_SAME_ACCOUNT: 'The transaction is already in this account',
   // Payables
   PAYABLE_PAYMENT_NOT_POSITIVE: 'A payment must be more than zero',
@@ -54,6 +59,12 @@ export const ACCOUNTING_ERRORS = {
   PAYABLE_PAYMENT_SHORT:
     'That transaction is less than what is still owed; record it as a partial payment',
   PAYABLE_CATEGORY_NOT_FOUND: 'Category not found in this workspace',
+  PAYABLE_NOT_RECURRING: 'This bill does not repeat',
+  PAYABLE_OCCURRENCE_SETTLED:
+    'This payment is already paid, skipped or partly paid; change it as a whole bill instead',
+  PAYABLE_RECURRENCE_NEVER_FIRES: 'This repeat rule has no date on or after its start',
+  PAYABLE_REJECT_OWN_PAYMENT:
+    'This transaction is the payment recorded with this bill; it cannot be refused here',
   // ── invoices ─────────────────────────────────────────────────────────────
   INVOICE_NOT_DRAFT: 'Only a draft invoice can be edited',
   INVOICE_ALREADY_SENT: 'This invoice was already sent',

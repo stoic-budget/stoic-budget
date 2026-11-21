@@ -25,6 +25,7 @@ import {
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { balanceDays, monthDates } from './wallet-balance-days';
+import { saveWalletChange } from './wallet-change';
 import { toDateOnly, type WalletLedger, walletLedgers } from './wallet-ledger';
 
 /** Statements whose rows are read and real; the same set the balance sheet trusts. */
@@ -83,7 +84,7 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       workspaceId,
       dto.ownerMemberId,
     );
-    return super.update(id, workspaceId, dto);
+    return saveWalletChange(this.repository, await this.findOne(id, workspaceId), dto);
   }
 
   /** Every account of the workspace with its balance, for `GET /wallets`. */

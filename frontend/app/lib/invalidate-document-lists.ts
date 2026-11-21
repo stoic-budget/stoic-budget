@@ -32,6 +32,7 @@ export const FINANCIAL_QUERY_ROOTS = [
   'tax-return',
   'tax-settings',
   'tax-year',
+  // The paid edition's income tax declaration; its keys live with its pages.
   'income-tax',
   'datev',
   // How each bank's statements parsed (the instance admin's parser health page).

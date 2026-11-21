@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
+import { useIntlayer } from '@/app/i18n';
 import { getApiErrorMessage } from '@/app/lib/api-error';
 import {
   type CreatePayableInput,
@@ -29,6 +30,10 @@ export function usePayableActions({
 }) {
   const workspaceId = useWorkspaceId();
   const queryClient = useQueryClient();
+  const recurrenceText = useIntlayer('payableRecurrence');
+  // An occurrence of a repeating bill goes alone: the series makes its next one.
+  const withSeriesNote = (payable: Payable, message: string): string =>
+    payable.recurrence ? `${message}\n\n${recurrenceText.seriesContinues.value}` : message;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingPayable, setEditingPayable] = useState<Payable | null>(null);
   const [saving, setSaving] = useState(false);
@@ -140,6 +145,10 @@ export function usePayableActions({
   };
 
   const handleArchive = async (payable: Payable): Promise<void> => {
+    const confirmMessage = recurrenceText.archiveConfirm.value.replace('{vendor}', payable.vendor);
+    if (payable.recurrence && !window.confirm(withSeriesNote(payable, confirmMessage))) {
+      return;
+    }
     setArchivingId(payable.id);
 
     await (async () => {
@@ -157,7 +166,7 @@ export function usePayableActions({
 
   const handleDelete = async (payable: Payable): Promise<void> => {
     const confirmMessage = toasts.deleteConfirm.replace('{vendor}', payable.vendor);
-    if (!window.confirm(confirmMessage)) {
+    if (!window.confirm(withSeriesNote(payable, confirmMessage))) {
       return;
     }
 
