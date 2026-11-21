@@ -6,7 +6,7 @@
 <h1>Stoic Budget</h1>
 
 <p align="center">
-  :globe_with_meridians: <a href="https://github.com/stoic-budget/stoic-budget/releases/latest">Download</a> · :book: <a href="https://stoic-budget.github.io/stoic-budget/">Documentation</a>
+  :globe_with_meridians: <a href="https://github.com/stoic-budget/stoic-budget/releases/latest">Download</a> · :eyes: <a href="https://demo-stoic-budget.org">Demo</a> · :book: <a href="https://stoic-budget.github.io/stoic-budget/">Documentation</a>
 </p>
 
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
@@ -24,33 +24,9 @@
 
 <div align="center">
 
-<img width="1890" height="887" alt="Overview dashboard: month budgets, income, spending, net and savings rate, top categories and recent transactions" src="https://github.com/user-attachments/assets/2f7fec9e-83da-4ebd-b80d-c6f2c8ae3c46" />
-
-
-<br /><br />
-
-<table>
-<tr>
-<td width="50%"><img width="1892" height="886" alt="Documents list: receipts with merchant, category, amount and approval status" src="https://github.com/user-attachments/assets/256ae873-93b5-47e8-bdbc-eb2f53f0799e" />
-</td>
-<td width="50%"><img width="1889" height="888" alt="Crypto portfolio: balance chart, holdings with profit and connected Ethereum and Tron wallets" src="https://github.com/user-attachments/assets/6d1130c6-b33e-4326-ac12-1eaf7408230c" />
-</td>
-</tr>
-<tr>
-<td width="50%"><img width="1891" height="882" alt="Cash-flow forecast: runway, lowest point and shortfall over the next 90 days" src="https://github.com/user-attachments/assets/b655215b-989f-483d-91bc-72ac457658c9" />
-</td>
-<td width="50%"><img width="1887" height="884" alt="Custom table of invoices with typed columns, paid checkboxes and statuses" src="https://github.com/user-attachments/assets/746cca0a-4c0e-43c5-8003-10cf251d13b2" />
-</td>
-</tr>
-<tr>
-<td colspan="2" align="center"><img width="1893" height="886" alt="Budgets with the Stoic balance: planned versus actual spending across necessity, work, virtue and leisure" src="https://github.com/user-attachments/assets/6b834d00-8a9b-43e3-b144-fb1262696984" />
-
-</td>
-</tr>
-</table>
+<img width="1739" height="1022" alt="image" src="https://github.com/user-attachments/assets/3f46dbc3-2fd7-4aad-9e78-31e05b44ffba" />
 
 </div>
-
 
 ---
 
@@ -59,6 +35,7 @@
 [![GitHub Stars](https://img.shields.io/github/stars/stoic-budget/stoic-budget?style=flat-square&logo=github)](https://github.com/stoic-budget/stoic-budget/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/stoic-budget/stoic-budget?style=flat-square&logo=github)](https://github.com/stoic-budget/stoic-budget/network/members)
 [![GitHub Issues](https://img.shields.io/github/issues/stoic-budget/stoic-budget?style=flat-square&logo=github)](https://github.com/stoic-budget/stoic-budget/issues)
+[![Maintained by Dosu](https://img.shields.io/badge/Maintained%20by-Dosu-6E7358?style=flat-square&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjQuODEgMy44MSAxMi4zOCAxMi4zOCI%2BPHBhdGggZD0iTTUuNTIwNTEgNS41NzE2Mkw3LjMxMjI2IDQuNjkzMzZWMTQuMTYyNEw1LjUyMDUxIDE1LjgxNDRWNS41NzE2MloiIGZpbGw9IiNCNEJCOTEiLz4gPHBhdGggZD0iTTcuMzgzNzEgMTQuMjQyOUwxMy4yNTgzIDE0LjE4OTVMMTIuMTkwMiAxNS41NzhMOC45MzI0OCAxNi4xMzU4TDUuNjU2NDkgMTUuOTcyN0w3LjM4MzcxIDE0LjI0MjlaIiBmaWxsPSIjNzc4NTYxIi8%2BIDxwYXRoIGQ9Ik03LjI3MzM3IDQuMjcxNDhMNS4yNzQ3OCA1LjU2MTE3VjE1Ljc0NjZDNS4yNzQ3OCAxNS45MTU0IDUuNDc2IDE2LjAwMzIgNS41OTk4IDE1Ljg4ODRMNy41ODA2MyAxNC4wNTA4IiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjAuOTIzODk5IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPG1hc2sgaWQ9InBhdGgtNi1pbnNpZGUtMV81NTE3XzM2NzUiIGZpbGw9IndoaXRlIj4gPHBhdGggZD0iTTExLjYyODcgMy44MDg1OUMxNC42MzMyIDMuODA4NTkgMTcuMDY5MSA2LjI0NDUzIDE3LjA2OTEgOS4yNDkwMkMxNy4wNjg5IDEyLjI1MzQgMTQuNjMzMSAxNC42ODg1IDExLjYyODcgMTQuNjg4NUg3LjIwODc0VjMuODA4NTlIMTEuNjI4N1oiLz4gPC9tYXNrPiA8cGF0aCBkPSJNMTEuNjI4NyAzLjgwODU5QzE0LjYzMzIgMy44MDg1OSAxNy4wNjkxIDYuMjQ0NTMgMTcuMDY5MSA5LjI0OTAyQzE3LjA2ODkgMTIuMjUzNCAxNC42MzMxIDE0LjY4ODUgMTEuNjI4NyAxNC42ODg1SDcuMjA4NzRWMy44MDg1OUgxMS42Mjg3WiIgZmlsbD0iI0U2RUFFMiIvPiA8cGF0aCBkPSJNMTcuMDY5MSA5LjI0OTAyTDE4LjA4OTEgOS4yNDkwOFY5LjI0OTAySDE3LjA2OTFaTTcuMjA4NzQgMTQuNjg4NUg2LjE4ODcyVjE1LjcwODVINy4yMDg3NFYxNC42ODg1Wk03LjIwODc0IDMuODA4NTlWMi43ODg1N0g2LjE4ODcyVjMuODA4NTlINy4yMDg3NFpNMTEuNjI4NyAzLjgwODU5VjQuODI4NjJDMTQuMDY5OCA0LjgyODYyIDE2LjA0OTEgNi44MDc4NyAxNi4wNDkxIDkuMjQ5MDJIMTcuMDY5MUgxOC4wODkxQzE4LjA4OTEgNS42ODExOSAxNS4xOTY1IDIuNzg4NTcgMTEuNjI4NyAyLjc4ODU3VjMuODA4NTlaTTE3LjA2OTEgOS4yNDkwMkwxNi4wNDkxIDkuMjQ4OTdDMTYuMDQ4OSAxMS42ODk4IDE0LjA2OTkgMTMuNjY4NSAxMS42Mjg3IDEzLjY2ODVWMTQuNjg4NVYxNS43MDg1QzE1LjE5NjIgMTUuNzA4NSAxOC4wODg5IDEyLjgxNjkgMTguMDg5MSA5LjI0OTA4TDE3LjA2OTEgOS4yNDkwMlpNMTEuNjI4NyAxNC42ODg1VjEzLjY2ODVINy4yMDg3NFYxNC42ODg1VjE1LjcwODVIMTEuNjI4N1YxNC42ODg1Wk03LjIwODc0IDE0LjY4ODVIOC4yMjg3NlYzLjgwODU5SDcuMjA4NzRINi4xODg3MlYxNC42ODg1SDcuMjA4NzRaTTcuMjA4NzQgMy44MDg1OVY0LjgyODYySDExLjYyODdWMy44MDg1OVYyLjc4ODU3SDcuMjA4NzRWMy44MDg1OVoiIGZpbGw9ImJsYWNrIiBtYXNrPSJ1cmwoI3BhdGgtNi1pbnNpZGUtMV81NTE3XzM2NzUpIi8%2BIDxwYXRoIGQ9Ik0xNC42NjQ1IDguOTEwMTNDMTQuNjY0NSA4LjkxMDEzIDE0LjIwNjkgMTAuODQ0NyAxMi4xNDk3IDEwLjg0NDdDMTAuMDkyNSAxMC44NDQ3IDkuNDQxMzQgOS4xMDM1OSA5LjQ0MTM0IDguOTEwMTMiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMS4xMDU0NCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8%2BIDxwYXRoIGQ9Ik00LjgwOTU3IDE2LjAyMjFDNC44MDk1NyAxNi4wMjIxIDguOTk3MTUgMTYuMDcwNCA5Ljc2MjI0IDE2LjA1MTNDMTEuMjAzIDE2LjAxNTMgMTIuMTMwNSAxNS44NjUgMTMuMDI3MyAxNS4wODQ3QzEzLjc4NyAxNC40MjM2IDE1LjU1NzggMTIuMzEyNSAxNS41NTc4IDEyLjMxMjUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMC44ODYwMTIiLz48L3N2Zz4%3D)](https://dosu.dev)
 
 ---
 
@@ -122,7 +99,7 @@ Stoic Budget is a full-stack platform for importing, categorizing and analyzing 
 
 ### Understand your money
 
-- **Dashboard** — this month's budgets, income, spending, net and savings rate, top categories, cash flow as a chart, calendar or flow, recent transactions and upcoming charges; pick which sections show.
+- **Dashboard** — this month's budgets, income, spending, net and savings rate, top categories, cash flow as each account's balance day by day, a calendar or a flow, recent transactions and upcoming charges; pick which sections show.
 - **Reports** — cash flow, trends, spend flow, tax year and your own report templates, on a schedule if you like; export to CSV, XLSX or PDF.
 - **Budgets** — monthly limits per category in any currency, plus the Stoic balance: planned versus actual spending across necessity, work, virtue and leisure.
 - **Subscriptions and bills** — recurring charges found automatically, what is paid and still due this month, bills to pay and money to receive.
@@ -169,24 +146,31 @@ Setting expectations upfront:
 
 | Country | Native PDF parser | CSV preset |
 |---|---|---|
-| 🇺🇸 United States | Ally Bank, Associated Bank, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU | Chase, Bank of America, Capital One, American Express, Wells Fargo |
-| 🇬🇧 United Kingdom | Barclays, Bank of Scotland | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
-| 🇩🇪 Germany | | N26, Sparkasse / DKB, Commerzbank |
+| 🇺🇸 United States | Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens, Found, Frost Bank, GO2bank, Green Dot, HSA Bank, Huntington, IBC Bank, KeyBank, M&T Bank, Marcus by Goldman Sachs, Merrick Bank, Navy Federal Credit Union, Netspend, Optum Bank, PNC Bank, Prosperity Bank, Regions Bank, SoFi, Synchrony Bank, Synovus, Truist, U.S. Bank, USAA, Varo Bank, Walmart MoneyCard, Webster Bank, Wells Fargo, Woodforest National Bank | Chase, Bank of America, Capital One, American Express, Wells Fargo |
+| 🇬🇧 United Kingdom | Bank of Scotland, Barclays, first direct, Halifax, Handelsbanken, HSBC, iFAST Global Bank, Kroo, Lloyds Bank, Metro Bank, Monzo, Nationwide, NatWest, Royal Bank of Scotland, Santander UK, Starling Bank, The Co-operative Bank, Ulster Bank, Virgin Money | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
+| 🇩🇪 Germany | Deutsche Bank, N26 | N26, Sparkasse / DKB, Commerzbank |
 | 🇳🇱 Netherlands | | ING, Rabobank |
 | 🇸🇪 🇩🇰 🇳🇴 🇫🇮 Nordics | | Nordea |
-| 🇫🇷 France | Crédit Agricole | |
+| 🇫🇷 France | Crédit Agricole, Société Générale, Sogexia | |
 | 🇵🇱 Poland | BNP Paribas Bank Polska | |
-| 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital | |
-| 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank | |
-| 🇿🇦 South Africa | Absa, Capitec | |
-| 🇮🇳 India | Axis Bank, Citibank | |
+| 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank, RBC Royal Bank, Scotiabank, Simplii Financial, Tangerine, TD Bank | |
+| 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank, Great Southern Bank, Heritage Bank, ING, NAB, Suncorp Bank, Westpac | |
+| 🇳🇬 Nigeria | Fidelity Bank, Zenith Bank | |
+| 🇧🇪 Belgium | KBC | |
+| 🇰🇪 Kenya | NCBA Bank | |
+| 🇶🇦 Qatar | QNB | |
+| 🇷🇴 Romania | Raiffeisen Bank | |
+| 🇨🇭 Switzerland | UBS | |
+| 🇮🇹 Italy | UniCredit | |
+| 🇿🇦 South Africa | Absa, Capitec, FNB | |
+| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India | UCO Bank, Union Bank of India |
 | 🇧🇷 Brazil | Banco do Brasil | |
 | 🇭🇰 Hong Kong | Bank of China (Hong Kong) | |
-| 🇵🇭 Philippines | BPI | |
+| 🇵🇭 Philippines | BPI, GoTyme Bank | |
 | 🇱🇰 Sri Lanka | Commercial Bank of Ceylon | |
 | 🇮🇱 Israel | Bank Hapoalim / Isracard (Hebrew) | |
 | 🇰🇿 Kazakhstan | Kaspi Bank, Bereke Bank (new and legacy formats) | |
-| 🌍 International | | Revolut, Wise, PayPal |
+| 🌍 International | Payoneer, PayPal, Revolut, Skrill, Standard Chartered, Wise | Revolut, Wise, PayPal |
 | — | | T-Bank (Tinkoff) |
 
 **Any other bank:** CSV with delimiter detection, XLSX / XLS, DOCX tables, OFX / QFX, QIF, MT940, CAMT.053, any PDF through the generic table reader, and images (PNG / JPG) through OCR.

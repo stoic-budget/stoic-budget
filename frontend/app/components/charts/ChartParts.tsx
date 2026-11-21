@@ -10,6 +10,8 @@ export interface ChartTooltipRow {
   label?: string;
   value: string;
   tone?: 'positive' | 'negative' | 'budgeted' | 'strong';
+  /** The row's line colour, shown as a square before it (a chart of several lines). */
+  color?: string;
 }
 
 export function ChartTooltipCard({
@@ -36,8 +38,12 @@ export function ChartTooltipCard({
           className={clsx(
             'seneca-chart__tooltip-row',
             row.tone && `seneca-chart__tooltip-row--${row.tone}`,
+            row.color && 'seneca-chart__tooltip-row--swatch',
           )}
         >
+          {row.color && (
+            <span className="seneca-chart__tooltip-swatch" style={{ background: row.color }} />
+          )}
           {row.label ? `${row.label}: ${row.value}` : row.value}
         </div>
       ))}
