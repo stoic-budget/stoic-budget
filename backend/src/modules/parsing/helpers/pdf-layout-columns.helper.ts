@@ -274,8 +274,10 @@ function textColumnFor(x: number, columns: LayoutColumn[]): ColumnRole {
   if (isDate && next && x > owner.x1 + DATE_CELL_GAP) {
     return next.role;
   }
-  // A table of dates and amounts alone ("Date  Serial #  Amount") keeps its words in the row's text.
-  return isDate && !next ? 'description' : (owner?.role ?? 'description');
+  // A table of dates and amounts alone ("Date  Serial #  Amount") keeps its words in the row's
+  // text; one with a text column of its own leaves a value date's out of it.
+  const textless = !text.some(column => column.role === 'description');
+  return isDate && !next && textless ? 'description' : (owner?.role ?? 'description');
 }
 
 /**

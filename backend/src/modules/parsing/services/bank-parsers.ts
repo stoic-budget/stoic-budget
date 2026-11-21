@@ -51,6 +51,7 @@ import { GreenDotParser } from '../parsers/green-dot.parser';
 import { HalifaxParser } from '../parsers/halifax.parser';
 import { HandelsbankenParser } from '../parsers/handelsbanken.parser';
 import { HapoalimParser } from '../parsers/hapoalim.parser';
+import { HdfcParser } from '../parsers/hdfc.parser';
 import { KaspiParser } from '../parsers/kaspi.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
@@ -112,4 +113,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [GreenDotParser, { bankName: BankName.GREEN_DOT }],
   [HalifaxParser, { bankName: BankName.HALIFAX }],
   [HandelsbankenParser, { bankName: BankName.HANDELSBANKEN }],
+  [HdfcParser, { bankName: BankName.HDFC }],
 ];

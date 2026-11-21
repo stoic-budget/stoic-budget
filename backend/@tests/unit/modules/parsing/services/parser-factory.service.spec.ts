@@ -231,6 +231,7 @@ describe('ParserFactoryService', () => {
       'GreenDotParser',
       'HalifaxParser',
       'HandelsbankenParser',
+      'HdfcParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

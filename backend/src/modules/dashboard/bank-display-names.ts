@@ -58,4 +58,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.GREEN_DOT]: 'Green Dot',
   [BankName.HALIFAX]: 'Halifax',
   [BankName.HANDELSBANKEN]: 'Handelsbanken',
+  [BankName.HDFC]: 'HDFC Bank',
 };

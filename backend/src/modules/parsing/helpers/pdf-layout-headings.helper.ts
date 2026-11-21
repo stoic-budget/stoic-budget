@@ -28,6 +28,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'tran date',
     'interest date',
     'value date',
+    'value dt',
     'rentedatum',
     'valutadatum',
     'date valeur',
@@ -44,6 +45,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'omschrijving',
     'particulars',
     'narrative',
+    'narration',
     'operation',
     'operation type',
     'operation details',
@@ -126,6 +128,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
   balance: [
     'balance',
     'running balance',
+    'closing balance',
     'ending daily balance',
     'daily balance',
     // Green Dot's running balance: "Amount  Available".
@@ -138,5 +141,5 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
   // Columns whose words are no text of the row: the row number left of the date, a
   // category label ("Credit", "Debit") beside the amount.
   fee: ['fee', 'fees'],
-  other: ['no.', 'category', 'channel', 'check number'],
+  other: ['no.', 'category', 'channel', 'check number', 'chq./ref.no.', 'ref no./cheque no.'],
 };
