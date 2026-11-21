@@ -37,6 +37,8 @@ export const CreateWalletBody = Schema.Struct({
    * imported into it start on the same person.
    */
   ownerMemberId: optionalNullable(Schema.String.check(Schema.isUUID())),
+  /** Whether the account counts in net worth; on when left out. */
+  includeInNetWorth: optionalNullable(Schema.Boolean),
   /**
    * Credit cards only: any other type is refused with `WALLET_CREDIT_LIMIT_CARD_ONLY`,
    * and moving a card to another type clears it. `null` clears it.

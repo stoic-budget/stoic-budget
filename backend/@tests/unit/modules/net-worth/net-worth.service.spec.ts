@@ -1,5 +1,7 @@
 import { BalanceAccountType, CapitalRole, RiskLevel } from '@/entities/balance-account.entity';
 import { NetWorthService } from '@/modules/net-worth/net-worth.service';
+import { DEBT_WALLET_TYPES } from '@/entities/wallet.entity';
+import { NET_WORTH_SCOPE } from '@/modules/balance/balance-cash-series';
 
 const WORKSPACE_ID = 'workspace-1';
 
@@ -58,6 +60,8 @@ function createService(options: {
   income?: Record<string, { amount: number; currency?: string }>;
   /** What was paid into an account during the window, by currency. */
   contributions?: Record<string, Record<string, number>>;
+  /** Ids of the accounts set not to count in net worth. */
+  leftOut?: string[];
   /** Rate curve to KZT by currency; absent means no rate at all. */
   rates?: Record<string, number | Array<{ date: string; rate: number }>>;
   /** Spot price of one ounce, by day; absent means that day has no quote. */
@@ -131,6 +135,7 @@ function createService(options: {
       async (_workspaceId: string, dates: string[]) =>
         new Map(dates.map(date => [date, new Map(Object.entries(options.debts ?? {}))])),
     ),
+    walletsLeftOutOfNetWorth: vi.fn(async () => options.leftOut ?? []),
   } as any;
 
   const exchangeRates = {
@@ -702,6 +707,44 @@ describe('NetWorthService', () => {
       expect(result.change).toBe(0);
       expect(result.attribution.byAccount).toEqual([]);
       expect(result.attribution.byKind).toEqual([]);
+    });
+  });
+
+  describe('accounts set not to count', () => {
+    it('reads cash and both kinds of debt only from the accounts that count', async () => {
+      const { service, balanceService } = createService({ cash: { KZT: 100 } });
+
+      await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
+
+      const cashScopes = balanceService.getCashSeries.mock.calls.map((call: unknown[]) => call[2]);
+      const debtCalls = balanceService.getDebtSeries.mock.calls.map((call: unknown[]) => [
+        call[2],
+        call[3],
+      ]);
+      expect(cashScopes).toEqual([NET_WORTH_SCOPE]);
+      expect(debtCalls).toEqual([
+        [DEBT_WALLET_TYPES, NET_WORTH_SCOPE],
+        [['credit_card'], NET_WORTH_SCOPE],
+      ]);
+    });
+
+    it('says how many accounts are left out', async () => {
+      const { service } = createService({ leftOut: ['wallet-held', 'wallet-float'] });
+
+      const result = await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
+
+      expect(result.accountsLeftOut).toBe(2);
+    });
+
+    it('does not count income into a left-out account as income', async () => {
+      const { service, transactionQueryBuilder } = createService({ leftOut: ['wallet-held'] });
+
+      await service.getNetWorth(WORKSPACE_ID, { range: '30d' });
+
+      expect(transactionQueryBuilder.andWhere).toHaveBeenCalledWith(
+        '(transaction.walletId IS NULL OR transaction.walletId <> ALL(:leftOut))',
+        { leftOut: ['wallet-held'] },
+      );
     });
   });
 

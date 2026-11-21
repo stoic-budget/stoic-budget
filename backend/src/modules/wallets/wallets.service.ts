@@ -28,6 +28,7 @@ import { balanceDays, monthDates } from './wallet-balance-days';
 import { saveWalletChange } from './wallet-change';
 import { creditLimitPatch } from './wallet-credit-limit';
 import { toDateOnly, type WalletLedger, walletLedgers } from './wallet-ledger';
+import { walletStoredFields } from './wallet-stored-fields';
 
 /** Statements whose rows are read and real; the same set the balance sheet trusts. */
 const LIVE_STATEMENT_STATUSES = [
@@ -76,6 +77,7 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       ...creditLimitPatch(type, creditLimit),
       currency: await this.workspaceCurrency.resolveFor(workspaceId, createDto.currency),
       initialBalance: createDto.initialBalance || 0,
+      includeInNetWorth: createDto.includeInNetWorth ?? true,
       isActive: true,
     });
 
@@ -246,26 +248,13 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
     return wallets.map(wallet => {
       const ledger = ledgers.get(wallet.id);
       return {
-        id: wallet.id,
-        workspaceId: wallet.workspaceId,
-        userId: wallet.userId,
-        name: wallet.name,
-        type: wallet.type,
-        accountNumber: wallet.accountNumber,
-        bankName: wallet.bankName,
-        currency: wallet.currency,
-        initialBalance: String(wallet.initialBalance ?? '0'),
-        isActive: wallet.isActive,
-        ownerMemberId: wallet.ownerMemberId,
-        creditLimit: wallet.creditLimit == null ? null : String(wallet.creditLimit),
+        ...walletStoredFields(wallet),
         balance: round2((Number(wallet.initialBalance) || 0) + (ledger?.net ?? 0)),
         unconvertedCurrencies: ledger?.unconverted ?? [],
         transactionCount: ledger?.count ?? 0,
         pendingReviewCount: pending.get(wallet.id) ?? 0,
         lastActivityAt: ledger?.lastDate ?? null,
         reconciliation: reconciliations.get(wallet.id) ?? null,
-        createdAt: wallet.createdAt.toISOString(),
-        updatedAt: wallet.updatedAt.toISOString(),
       };
     });
   }
