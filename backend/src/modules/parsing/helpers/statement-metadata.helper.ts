@@ -105,7 +105,10 @@ export function findAccountNumber(text: string): string | null {
   return labelled ? labelled[1].replace(/[ \t]+/g, ' ').trim() : null;
 }
 
-/** "09/01/2025 - 09/30/2025", "1 janvier 2025 - 31 janvier 2025", "from … to …", "From : … To : …". */
+/**
+ * "09/01/2025 - 09/30/2025", "1 janvier 2025 - 31 janvier 2025", "from … to …", "From : … To : …",
+ * "1 March 2023 [GMT+07:00] - 8 August 2023 [GMT+07:00]" (a time zone after each date).
+ */
 export function findStatementPeriod(
   text: string,
   order: NumericDateOrder,
@@ -116,7 +119,9 @@ export function findStatementPeriod(
     const [from, to] = [dates[index], dates[index + 1]];
     const between = folded.slice(from.index + from.length, to.index);
     if (
-      /^\s*(?:[-–—]|to|au|tot|bis|al|hasta|through)\s*:?\s*$/.test(between) &&
+      /^\s*(?:\[(?:gmt|utc)[^\]]*\]\s*)?(?:[-–—]|to|au|tot|bis|al|hasta|through)\s*:?\s*$/.test(
+        between,
+      ) &&
       from.date <= to.date
     ) {
       return { from: from.date, to: to.date };
