@@ -126,4 +126,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.WELLS_FARGO]: 'Wells Fargo',
   [BankName.WESTPAC]: 'Westpac',
   [BankName.WISE]: 'Wise',
+  [BankName.WOODFOREST]: 'Woodforest National Bank',
 };
