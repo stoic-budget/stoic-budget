@@ -227,6 +227,7 @@ describe('ParserFactoryService', () => {
       'FrostParser',
       'Go2bankParser',
       'GotymeParser',
+      'GreatSouthernParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

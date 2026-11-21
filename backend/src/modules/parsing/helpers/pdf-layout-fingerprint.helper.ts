@@ -68,6 +68,10 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.FROST, /\bfrost (?:bank|business checking)\b|\bfort worth, texas 76162 member fdic\b/],
   [BankName.GO2BANK, /\bgo2bank\b/],
   [BankName.GOTYME, /\bgotyme bank\b/],
+  [
+    BankName.GREAT_SOUTHERN,
+    /\bgreat southern bank\b.*\bcredit union australia\b|\bgreatsouthernbank\.com\.au\b/,
+  ],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
