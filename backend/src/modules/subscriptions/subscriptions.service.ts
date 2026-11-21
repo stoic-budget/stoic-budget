@@ -70,7 +70,7 @@ import {
   assignmentInputOf,
   TaxAssignmentService,
 } from '../tax/tax-assignment.service';
-import { projectMonthlyCharges, splitMonthCharges } from './charge-calendar.util';
+import * as calendar from './charge-calendar.util';
 import { CurrencyTotals } from './currency-totals';
 import {
   type ConvertAt,
@@ -89,6 +89,7 @@ import {
   monthlyCost,
   monthlySetAside,
 } from './subscription-insights.util';
+import { forgetPayeeRule, NOT_REJECTED_FOR_SUBSCRIPTION, rejectedRows } from './subscription-links';
 
 const DEFAULT_CALENDAR_MONTHS = 6;
 /** How far back a bank row can still be picked as a payment. */
@@ -104,6 +105,13 @@ export interface ChargeCalendarRow {
   amounts: number[];
   kind: 'subscription' | 'payable' | 'invoice';
 }
+
+/** Charges far enough apart to save up for: a fund for each is a savings goal. */
+const SINKING_FUND_FREQUENCIES = [
+  SubscriptionFrequency.QUARTERLY,
+  SubscriptionFrequency.SEMIANNUAL,
+  SubscriptionFrequency.ANNUAL,
+];
 
 @Injectable()
 export class SubscriptionsService {
@@ -637,7 +645,7 @@ export class SubscriptionsService {
 
     const rows: ChargeCalendarRow[] = await Promise.all(
       active.map(async sub => {
-        const occurrences = projectMonthlyCharges(
+        const occurrences = calendar.projectMonthlyCharges(
           sub.nextChargeDate ? new Date(sub.nextChargeDate) : null,
           sub.frequency,
           from,
@@ -719,7 +727,7 @@ export class SubscriptionsService {
     const items: SubscriptionMonthStatus['items'][number][] = [];
 
     for (const sub of active) {
-      const byDate = splitMonthCharges(
+      const byDate = calendar.splitMonthCharges(
         sub.nextChargeDate ? new Date(sub.nextChargeDate) : null,
         sub.frequency,
         today,
@@ -962,7 +970,7 @@ export class SubscriptionsService {
       where: {
         workspaceId,
         status: SubscriptionStatus.ACTIVE,
-        frequency: In([SubscriptionFrequency.QUARTERLY, SubscriptionFrequency.ANNUAL]),
+        frequency: In(SINKING_FUND_FREQUENCIES),
       },
       order: { nextChargeDate: 'ASC' },
     });
@@ -989,10 +997,7 @@ export class SubscriptionsService {
     userId: string,
   ): Promise<{ goalId: string; monthlySetAside: number; created: boolean }> {
     const subscription = await this.findOne(id, workspaceId);
-    if (
-      subscription.frequency !== SubscriptionFrequency.QUARTERLY &&
-      subscription.frequency !== SubscriptionFrequency.ANNUAL
-    ) {
+    if (!SINKING_FUND_FREQUENCIES.includes(subscription.frequency)) {
       throw new BadRequestException(appError('SUBSCRIPTION_SINKING_FUND_CADENCE'));
     }
     const setAside = monthlySetAside(Number(subscription.amount), subscription.nextChargeDate);
@@ -1191,6 +1196,9 @@ export class SubscriptionsService {
     if (query.statementId) {
       builder.andWhere('tx.statementId = :statementId', { statementId: query.statementId });
     }
+    if (query.subscriptionId) {
+      builder.andWhere(NOT_REJECTED_FOR_SUBSCRIPTION, { subscriptionId: query.subscriptionId });
+    }
     const rows = await builder.getMany();
 
     const candidates = rows.map(row => ({
@@ -1252,7 +1260,7 @@ export class SubscriptionsService {
             transactionId: null,
             chargeDate: body.chargeDate,
             amount: body.amount ?? Number(subscription.amount),
-            currency: subscription.currency,
+            currency: body.currency?.trim().toUpperCase() || subscription.currency,
           };
         }
         const charge = await this.bookCharge(manager, subscription, paid);
@@ -1399,7 +1407,7 @@ export class SubscriptionsService {
         ...paid,
         chargeDate: paid.chargeDate as unknown as Date,
         expectedAmount: subscription.amount,
-        expectedDate: subscription.nextChargeDate,
+        expectedDate: calendar.settledDateOf(subscription, paid.chargeDate),
         matchStatus,
       }),
     );
@@ -1559,32 +1567,22 @@ export class SubscriptionsService {
     switch (frequency) {
       case SubscriptionFrequency.WEEKLY:
         return amount * 4.33;
+      case SubscriptionFrequency.BIWEEKLY:
+        return (amount * 4.33) / 2;
       case SubscriptionFrequency.MONTHLY:
         return amount;
       case SubscriptionFrequency.QUARTERLY:
         return amount / 3;
+      case SubscriptionFrequency.SEMIANNUAL:
+        return amount / 6;
       case SubscriptionFrequency.ANNUAL:
         return amount / 12;
     }
   }
 
+  /** One step on: a month-end clamps to a shorter month (31 Jan, 28 Feb) instead of overflowing. */
   private addInterval(date: Date, frequency: SubscriptionFrequency): Date {
-    const d = new Date(date);
-    switch (frequency) {
-      case SubscriptionFrequency.WEEKLY:
-        d.setDate(d.getDate() + 7);
-        break;
-      case SubscriptionFrequency.MONTHLY:
-        d.setMonth(d.getMonth() + 1);
-        break;
-      case SubscriptionFrequency.QUARTERLY:
-        d.setMonth(d.getMonth() + 3);
-        break;
-      case SubscriptionFrequency.ANNUAL:
-        d.setFullYear(d.getFullYear() + 1);
-        break;
-    }
-    return d;
+    return calendar.chargeAt(date, frequency, 1);
   }
 
   private async recordDetectedCharges(subscription: Subscription): Promise<void> {
@@ -1594,7 +1592,9 @@ export class SubscriptionsService {
     const transactions = await this.transactionRepository.find({
       where: { workspaceId: subscription.workspaceId, id: In(transactionIds) },
     });
+    const rejected = await rejectedRows(this.transactionRepository.manager, subscription);
     for (const transaction of transactions) {
+      if (rejected.has(transaction.id)) continue;
       const existing = await this.chargeRepository.findOne({
         where: { transactionId: transaction.id },
       });
@@ -1694,28 +1694,6 @@ async function learnPayeeRule(
      VALUES ($1, $2, $3)
      ON CONFLICT (subscription_id, payee_id) DO NOTHING`,
     [subscription.workspaceId, subscription.id, transaction.payeeId],
-  );
-}
-
-/** Drops the rule of the row's payee once no payment of the subscription is a row of that payee. */
-async function forgetPayeeRule(
-  manager: EntityManager,
-  subscription: Subscription,
-  transactionId: string,
-): Promise<void> {
-  await manager.query(
-    `DELETE FROM subscription_payees rule
-      WHERE rule.workspace_id = $1
-        AND rule.subscription_id = $2
-        AND rule.payee_id = (SELECT payee_id FROM transactions WHERE id = $3 AND workspace_id = $1)
-        AND NOT EXISTS (
-          SELECT 1 FROM subscription_charges charge
-          JOIN transactions tx ON tx.id = charge.transaction_id AND tx.workspace_id = charge.workspace_id
-          WHERE charge.subscription_id = rule.subscription_id
-            AND charge.workspace_id = rule.workspace_id
-            AND tx.payee_id = rule.payee_id
-        )`,
-    [subscription.workspaceId, subscription.id, transactionId],
   );
 }
 

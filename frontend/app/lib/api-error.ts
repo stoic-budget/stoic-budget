@@ -95,12 +95,17 @@ export function getApiErrorStatus(error: unknown): number | undefined {
   return isAxiosError(error) ? error.response?.status : undefined;
 }
 
-/** A write refused because the open workspace is a past version, which can only be viewed. */
-export function isVersionReadOnlyError(error: unknown): boolean {
+const READ_ONLY_CODES = new Set(['VERSION_READ_ONLY', 'DEMO_READ_ONLY']);
+
+/**
+ * A write refused because nothing here can change: the open workspace is a
+ * past version, or the server is a read-only demo.
+ */
+export function isReadOnlyError(error: unknown): boolean {
   return (
     isAxiosError(error) &&
     error.response?.status === 403 &&
-    error.response.data?.error?.code === 'VERSION_READ_ONLY'
+    READ_ONLY_CODES.has(error.response.data?.error?.code ?? '')
   );
 }
 

@@ -1,0 +1,197 @@
+{
+  "metadata": {
+    "accountNumber": "00001213456789",
+    "currency": "USD",
+    "dateFrom": "2020-04-08T00:00:00",
+    "dateTo": "2020-04-21T00:00:00",
+    "balanceStart": 5234.09
+  },
+  "transactions": [
+    {
+      "transactionDate": "2020-04-08T00:00:00",
+      "counterpartyName": "Insurance",
+      "paymentPurpose": "Insurance",
+      "credit": 272.45,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2020-04-10T00:00:00",
+      "counterpartyName": "ATM",
+      "paymentPurpose": "ATM",
+      "debit": 200,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-04-12T00:00:00",
+      "counterpartyName": "Internet Transfer",
+      "paymentPurpose": "Internet Transfer",
+      "credit": 250,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-04-12T00:00:00",
+      "counterpartyName": "Payroll",
+      "paymentPurpose": "Payroll",
+      "credit": 2100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-04-13T00:00:00",
+      "counterpartyName": "Bill payment",
+      "paymentPurpose": "Bill payment",
+      "debit": 135.07,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-04-14T00:00:00",
+      "counterpartyName": "Direct debit",
+      "paymentPurpose": "Direct debit",
+      "debit": 200,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2020-04-14T00:00:00",
+      "counterpartyName": "Deposit",
+      "paymentPurpose": "Deposit",
+      "credit": 250,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-04-15T00:00:00",
+      "counterpartyName": "Bill payment",
+      "paymentPurpose": "Bill payment",
+      "debit": 525.72,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-04-17T00:00:00",
+      "counterpartyName": "Bill payment",
+      "paymentPurpose": "Bill payment",
+      "debit": 327.63,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-04-17T00:00:00",
+      "counterpartyName": "Bill payment",
+      "paymentPurpose": "Bill payment",
+      "debit": 729.96,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-04-18T00:00:00",
+      "counterpartyName": "Insurance",
+      "paymentPurpose": "Insurance",
+      "credit": 272.45,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2020-04-18T00:00:00",
+      "counterpartyName": "ATM",
+      "paymentPurpose": "ATM",
+      "debit": 200,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-04-18T00:00:00",
+      "counterpartyName": "Internet Transfer",
+      "paymentPurpose": "Internet Transfer",
+      "credit": 250,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-04-18T00:00:00",
+      "counterpartyName": "Bill payment",
+      "paymentPurpose": "Bill payment",
+      "debit": 135.07,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-04-19T00:00:00",
+      "counterpartyName": "Direct debit",
+      "paymentPurpose": "Direct debit",
+      "debit": 200,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2020-04-19T00:00:00",
+      "counterpartyName": "Deposit",
+      "paymentPurpose": "Deposit",
+      "credit": 250,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-04-19T00:00:00",
+      "counterpartyName": "Bill payment",
+      "paymentPurpose": "Bill payment",
+      "debit": 525.72,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-04-20T00:00:00",
+      "counterpartyName": "Bill payment",
+      "paymentPurpose": "Bill payment",
+      "debit": 327.63,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-04-20T00:00:00",
+      "counterpartyName": "Bill payment",
+      "paymentPurpose": "Bill payment",
+      "debit": 729.96,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-04-20T00:00:00",
+      "counterpartyName": "Deposit",
+      "paymentPurpose": "Deposit",
+      "credit": 250,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-04-20T00:00:00",
+      "counterpartyName": "Bill payment",
+      "paymentPurpose": "Bill payment",
+      "debit": 525.72,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-04-20T00:00:00",
+      "counterpartyName": "Bill payment",
+      "paymentPurpose": "Bill payment",
+      "debit": 327.63,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-04-21T00:00:00",
+      "counterpartyName": "Bill payment",
+      "paymentPurpose": "Bill payment",
+      "debit": 729.96,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain",
+    "printed_balances"
+  ]
+}

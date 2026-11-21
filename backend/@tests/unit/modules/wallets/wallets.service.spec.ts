@@ -1,6 +1,7 @@
 import { createRepoMock } from '../../../helpers/create-repo-mock';
 import { Statement } from '@/entities/statement.entity';
 import { Transaction } from '@/entities/transaction.entity';
+import { LoanTerms } from '@/entities/loan-terms.entity';
 import { Wallet } from '@/entities/wallet.entity';
 import { ExchangeRatesService } from '@/modules/exchange-rates/exchange-rates.service';
 import { WorkspaceMember } from '@/entities/workspace-member.entity';
@@ -354,6 +355,47 @@ describe('WalletsService', () => {
       const result = await service.update('wallet-1', 'ws-1', toggleDto);
 
       expect(result.isActive).toBe(false);
+    });
+
+    describe('a change of type', () => {
+      let deleteTerms: ReturnType<typeof vi.fn>;
+
+      beforeEach(() => {
+        stored = { ...mockWallet, type: 'loan', creditLimit: null } as Wallet;
+        deleteTerms = vi.fn(async () => ({ affected: 1 }));
+        Object.assign(walletRepository, {
+          manager: {
+            transaction: vi.fn(async (work: (manager: unknown) => unknown) =>
+              work({ getRepository: () => locked, delete: deleteTerms }),
+            ),
+          },
+        });
+      });
+
+      it('deletes the loan terms in the same transaction when a loan stops being a debt', async () => {
+        const result = await service.update('wallet-1', 'ws-1', { type: 'checking' });
+
+        expect(result.type).toBe('checking');
+        // The row lock a save of loan terms takes too, before the delete.
+        expect(locked.findOne).toHaveBeenCalledWith({
+          where: { id: 'wallet-1', workspaceId: 'ws-1' },
+          lock: { mode: 'pessimistic_write' },
+        });
+        expect(locked.findOne.mock.invocationCallOrder[0]).toBeLessThan(
+          deleteTerms.mock.invocationCallOrder[0],
+        );
+        expect(deleteTerms).toHaveBeenCalledWith(LoanTerms, {
+          walletId: 'wallet-1',
+          workspaceId: 'ws-1',
+        });
+      });
+
+      it('keeps the loan terms from one debt type to another, and on any other change', async () => {
+        await service.update('wallet-1', 'ws-1', { type: 'credit_card' });
+        await service.update('wallet-1', 'ws-1', { name: 'ACME Bank - Car loan' });
+
+        expect(deleteTerms).not.toHaveBeenCalled();
+      });
     });
 
     it('should update currency', async () => {

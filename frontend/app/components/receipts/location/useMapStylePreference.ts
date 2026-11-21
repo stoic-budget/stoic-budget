@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/app/hooks/useAuth';
+import { isDemoInstance } from '@/app/hooks/useDemoStatus';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
 import type { ContractInput } from '@/app/lib/query-fn-schema';
@@ -31,6 +32,11 @@ export function useMapStylePreference(): UseMapStylePreferenceResult {
       const optimisticUser = { ...previousUser, mapStylePreference: styleId };
       setUser(optimisticUser);
       localStorage.setItem('user', JSON.stringify(optimisticUser));
+      // A demo account is shared: the style holds for this visit (until the page
+      // reloads); the server is not asked.
+      if (isDemoInstance()) {
+        return;
+      }
 
       await apiClient
         .patch('/users/me/preferences', {

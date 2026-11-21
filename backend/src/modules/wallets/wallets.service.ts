@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
-import { withoutNullsOnRequired } from '../../common/effect/without-nulls';
 import { WorkspaceCrudBaseService } from '../../common/services/workspace-crud-base.service';
-import { assertFound } from '../../common/utils/assert-found.util';
 import { assertOwnerMemberInWorkspace } from '../../common/utils/transaction-owner.util';
 import type {
   CreateWalletBody,
   UpdateWalletBody,
+  WalletBalanceDays,
   WalletItem,
   WalletReconciliation,
   WalletSeries,
@@ -15,7 +14,7 @@ import type {
 } from '../../contracts';
 import { Statement, StatementStatus } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
-import { DEBT_WALLET_TYPES, Wallet } from '../../entities/wallet.entity';
+import { DEBT_WALLET_TYPES, SPENDABLE_WALLET_TYPES, Wallet } from '../../entities/wallet.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import {
   addAmount,
@@ -25,7 +24,9 @@ import {
 } from '../exchange-rates/currency-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
-import { creditLimitPatch, refuseCardOnlyViolation } from './wallet-credit-limit';
+import { balanceDays, monthDates } from './wallet-balance-days';
+import { saveWalletChange } from './wallet-change';
+import { creditLimitPatch } from './wallet-credit-limit';
 import { toDateOnly, type WalletLedger, walletLedgers } from './wallet-ledger';
 
 /** Statements whose rows are read and real; the same set the balance sheet trusts. */
@@ -87,31 +88,7 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       workspaceId,
       dto.ownerMemberId,
     );
-    const { creditLimit, ...fields } = dto;
-    // Read, decide and write under a row lock: a type change and a new limit sent
-    // at once are applied one after the other, and each writes only the columns
-    // it names, so a stale copy never puts the old type back.
-    return this.repository.manager
-      .transaction(async manager => {
-        const wallets = manager.getRepository(Wallet);
-        const wallet = await wallets.findOne({
-          where: { id, workspaceId },
-          lock: { mode: 'pessimistic_write' },
-        });
-        assertFound(wallet, this.entityName);
-        const patch = withoutNullsOnRequired(wallets.metadata, {
-          ...fields,
-          ...creditLimitPatch(fields.type ?? wallet.type, creditLimit),
-        });
-        const columns = Object.fromEntries(
-          Object.entries(patch).filter(([, value]) => value !== undefined),
-        );
-        if (Object.keys(columns).length > 0) {
-          await wallets.update({ id, workspaceId }, columns);
-        }
-        return wallets.findOneByOrFail({ id, workspaceId });
-      })
-      .catch(refuseCardOnlyViolation);
+    return saveWalletChange(this.repository, id, workspaceId, dto, this.entityName);
   }
 
   /** Every account of the workspace with its balance, for `GET /wallets`. */
@@ -181,6 +158,76 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       balance += day.net;
       return { date: day.date, balance: round2(balance) };
     });
+  }
+
+  /**
+   * What each active everyday account (checking, cash, card) held at the end of
+   * every day of `month`, converted to the workspace currency at that day's rate.
+   */
+  async balanceDays(workspaceId: string, month: string): Promise<WalletBalanceDays> {
+    const currency = normalizeCurrencyCode(await this.workspaceCurrency.resolve(workspaceId));
+    const wallets = (await this.findAll(workspaceId)).filter(
+      wallet => wallet.isActive && SPENDABLE_WALLET_TYPES.includes(wallet.type),
+    );
+    const dates = monthDates(month);
+    const ledgers = await walletLedgers(
+      this.transactionRepository,
+      this.exchangeRates,
+      workspaceId,
+      wallets,
+    );
+    // Rates exist up to today; a later day of this month takes today's, never a fetch for the future.
+    const today = new Date().toISOString().slice(0, 10);
+    const rateDates = dates.some(date => date <= today)
+      ? dates.filter(date => date <= today)
+      : dates;
+    const lastRateDate = rateDates[rateDates.length - 1];
+    const converter = await CurrencyConverter.loadRange(
+      this.exchangeRates,
+      currency,
+      wallets.map(wallet => normalizeCurrencyCode(wallet.currency)),
+      rateDates,
+      workspaceId,
+    );
+
+    const series = wallets.map(wallet => {
+      const own = normalizeCurrencyCode(wallet.currency);
+      const balances = balanceDays(
+        Number(wallet.initialBalance) || 0,
+        ledgers.get(wallet.id)?.days ?? [],
+        dates,
+      );
+      return balances.map((balance, index) => {
+        // A rate is never 0, so one unit converting to 0 means the day has none.
+        const rate = converter.convert(
+          1,
+          own,
+          dates[index] > lastRateDate ? lastRateDate : dates[index],
+        );
+        return rate === 0 ? null : round2(balance * rate);
+      });
+    });
+
+    return {
+      currency,
+      accounts: wallets.map(wallet => ({
+        id: wallet.id,
+        name: wallet.name,
+        type: wallet.type,
+        currency: wallet.currency,
+      })),
+      days: dates.map((date, index) => ({
+        date,
+        balances: Object.fromEntries(wallets.map((wallet, at) => [wallet.id, series[at][index]])),
+      })),
+      // Both the account's own rows in another currency and the account itself, when either had no rate.
+      unconverted: [
+        ...new Set([
+          ...converter.missing,
+          ...wallets.flatMap(wallet => ledgers.get(wallet.id)?.unconverted ?? []),
+        ]),
+      ].sort(),
+    };
   }
 
   private async withBalances(workspaceId: string, wallets: Wallet[]): Promise<WalletItem[]> {

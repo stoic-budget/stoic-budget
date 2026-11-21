@@ -144,6 +144,30 @@ export function AccountFormDrawer({
         }
       >
         <TypePicker value={form.type} onChange={type => set({ type })} />
+        {editing && isDebtType(initial.type) && !debt && (
+          <span
+            role="note"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 13,
+              color: 'var(--text-muted)',
+            }}
+          >
+            <span
+              aria-hidden
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                flexShrink: 0,
+                background: 'var(--attention)',
+              }}
+            />
+            {t.loanTermsDropped}
+          </span>
+        )}
 
         <Field id="account-name" label={t.nameLabel}>
           <TextField
