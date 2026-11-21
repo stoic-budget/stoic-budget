@@ -101,4 +101,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.SIMPLII]: 'Simplii Financial',
   [BankName.SKRILL]: 'Skrill',
   [BankName.SOCIETE_GENERALE]: 'Société Générale',
+  [BankName.SOFI]: 'SoFi',
 };
