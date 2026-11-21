@@ -115,5 +115,6 @@ export enum BankName {
   UNICREDIT = 'unicredit',
   UNION_BANK_OF_INDIA = 'union_bank_of_india',
   USAA = 'usaa',
+  US_BANK = 'us_bank',
   OTHER = 'other',
 }

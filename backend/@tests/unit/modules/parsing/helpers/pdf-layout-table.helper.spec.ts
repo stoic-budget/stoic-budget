@@ -870,3 +870,20 @@ describe('Tran Date alone', () => {
     expect(columns?.map(column => column.role)).toEqual(['other', 'date', 'description', 'amount', 'balance']);
   });
 });
+
+describe('Description of Transaction and Ref Number', () => {
+  it('read as the text and a column of its own', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 7],
+        ['Description', 43],
+        ['of', 100],
+        ['Transaction', 112],
+        ['Ref', 396],
+        ['Number', 414],
+        ['Amount', 545],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'other', 'amount']);
+  });
+});

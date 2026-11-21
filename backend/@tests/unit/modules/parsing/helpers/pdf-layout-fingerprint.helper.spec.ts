@@ -188,6 +188,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Codice BIC SWIFT: UNCRITM1AG0')).toBe(BankName.UNICREDIT);
     expect(mentionedBank('IFSC : UBIN0567221')).toBe(BankName.UNION_BANK_OF_INDIA);
     expect(mentionedBank('USAA Federal Savings Bank 10750 McDermott Freeway')).toBe(BankName.USAA);
+    expect(mentionedBank('U.S. Bank National Association Member FDIC')).toBe(BankName.US_BANK);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

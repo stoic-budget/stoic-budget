@@ -29,7 +29,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **Sri Lanka:** Commercial Bank of Ceylon
 - **Switzerland:** UBS
 - **United Kingdom:** Bank of Scotland, Barclays, first direct, Halifax, Handelsbanken, HSBC, iFAST Global Bank, Kroo, Lloyds Bank, Metro Bank, Monzo, Nationwide, NatWest, Royal Bank of Scotland, Santander UK, Starling Bank, The Co-operative Bank, Ulster Bank
-- **United States:** Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens, Found, Frost Bank, GO2bank, Green Dot, HSA Bank, Huntington, IBC Bank, KeyBank, M&T Bank, Marcus by Goldman Sachs, Merrick Bank, Navy Federal Credit Union, Netspend, Optum Bank, PNC Bank, Prosperity Bank, Regions Bank, SoFi, Synchrony Bank, Synovus, Truist, USAA
+- **United States:** Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens, Found, Frost Bank, GO2bank, Green Dot, HSA Bank, Huntington, IBC Bank, KeyBank, M&T Bank, Marcus by Goldman Sachs, Merrick Bank, Navy Federal Credit Union, Netspend, Optum Bank, PNC Bank, Prosperity Bank, Regions Bank, SoFi, Synchrony Bank, Synovus, Truist, U.S. Bank, USAA
 
 ## CSV presets
 
