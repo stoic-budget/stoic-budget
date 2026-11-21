@@ -295,6 +295,7 @@ describe('ParserFactoryService', () => {
       'VaroParser',
       'VirginMoneyParser',
       'WalmartMoneyCardParser',
+      'WebsterParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

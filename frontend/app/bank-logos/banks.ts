@@ -211,4 +211,5 @@ export const BANKS = [
     logo: 'walmart-moneycard.png',
     aliases: ['walmart', 'moneycard'],
   },
+  { key: 'webster', name: 'Webster Bank', logo: 'webster.png', aliases: ['webster'] },
 ] as const satisfies readonly BankEntry[];
