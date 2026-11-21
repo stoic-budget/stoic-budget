@@ -299,3 +299,14 @@ describe('a currency named in words', () => {
     expect(detectStatementCurrency('From : 01/08/2024\nCurrency : Kenyan Shilling\nUSD 1.00')).toBe('KES');
   });
 });
+
+describe('Romanian statements', () => {
+  it('name the leu "LEI" after its label', () => {
+    expect(detectStatementCurrency('Tip cont: curent\nValuta: LEI\nEUR 1.00')).toBe('RON');
+  });
+
+  it('open at "Sold initial" and close at "Sold final"', () => {
+    expect(isBalanceLabel('Sold final')).toBe(true);
+    expect(isBalanceLabel('Sold inițial')).toBe(true);
+  });
+});

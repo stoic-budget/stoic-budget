@@ -84,6 +84,7 @@ import { PaypalParser } from '../parsers/paypal.parser';
 import { PncParser } from '../parsers/pnc.parser';
 import { ProsperityParser } from '../parsers/prosperity.parser';
 import { QnbParser } from '../parsers/qnb.parser';
+import { RaiffeisenParser } from '../parsers/raiffeisen.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
 /**
@@ -176,4 +177,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [PncParser, { bankName: BankName.PNC }],
   [ProsperityParser, { bankName: BankName.PROSPERITY }],
   [QnbParser, { bankName: BankName.QNB }],
+  [RaiffeisenParser, { bankName: BankName.RAIFFEISEN }],
 ];

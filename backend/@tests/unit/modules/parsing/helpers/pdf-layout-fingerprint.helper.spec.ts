@@ -160,6 +160,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('For customer service call 1-888-PNC-BANK')).toBe(BankName.PNC);
     expect(mentionedBank('MEMBER FDIC NYSE Symbol "PB"')).toBe(BankName.PROSPERITY);
     expect(mentionedBank('Qatar National Bank (Q.P.S.C.)')).toBe(BankName.QNB);
+    expect(mentionedBank('Cod BIC Raiffeisen Bank: RZBRROBU')).toBe(BankName.RAIFFEISEN);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
