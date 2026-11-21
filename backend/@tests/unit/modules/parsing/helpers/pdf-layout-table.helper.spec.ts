@@ -677,3 +677,18 @@ describe('Indian headings', () => {
     ]);
   });
 });
+
+describe('headings set apart', () => {
+  it('reads "Deposits" and "Withdrawals" a column apart as two columns', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 40],
+        ['Description', 140],
+        ['Deposits', 325],
+        ['Withdrawals', 381],
+        ['Balance', 450],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'credit', 'debit', 'balance']);
+  });
+});

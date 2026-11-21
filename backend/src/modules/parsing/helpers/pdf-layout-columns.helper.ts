@@ -53,14 +53,26 @@ export function headingWord(item: PdfTextItem): string {
 export type TaughtHeadings = ReadonlyMap<string, ColumnRole>;
 
 /** The longest heading that starts at `index`, and how many words it spans. */
+/**
+ * Two words further apart than a few of their letters are two headings: a
+ * space is about one letter wide, the gap between columns' headings wider.
+ */
+const PHRASE_WORD_GAP_LETTERS = 2.5;
+
+function apart(left: PdfTextItem, right: PdfTextItem): boolean {
+  const letter = (left.width + right.width) / Math.max(1, left.text.length + right.text.length);
+  return right.x - (left.x + left.width) > PHRASE_WORD_GAP_LETTERS * letter;
+}
+
 function matchHeading(items: PdfTextItem[], index: number, taught?: TaughtHeadings) {
   const longest = Math.max(LONGEST_PHRASE, ...Array.from(taught?.keys() ?? [], wordCount));
   for (let length = Math.min(longest, items.length - index); length > 0; length -= 1) {
-    const phrase = items
-      .slice(index, index + length)
-      .map(headingWord)
-      .filter(Boolean)
-      .join(' ');
+    const words = items.slice(index, index + length);
+    // One heading's words sit a space apart: "Deposits   Withdrawals" are two headings.
+    if (words.some((word, at) => at > 0 && apart(words[at - 1], word))) {
+      continue;
+    }
+    const phrase = words.map(headingWord).filter(Boolean).join(' ');
     const role = taught?.get(phrase) ?? PHRASES.get(phrase);
     if (role) {
       return { role, length, phrase };

@@ -130,6 +130,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Handelsbanken is the trading name of Handelsbanken plc')).toBe(BankName.HANDELSBANKEN);
     expect(mentionedBank('RTGS/NEFT IFSC : HDFC0001000')).toBe(BankName.HDFC);
     expect(mentionedBank('Heritage Bank Limited ABN 32 087 652 024')).toBe(BankName.HERITAGE);
+    expect(mentionedBank('HSA Bank is a division of Webster Bank, N.A., Member FDIC')).toBe(BankName.HSA_BANK);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
