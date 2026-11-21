@@ -321,10 +321,6 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     needs: [changes, typecheck]
-    permissions:
-      contents: read
-      # Uploads the coverage the main ruleset's code coverage rule reads.
-      code-quality: write
     if: needs.changes.outputs.backend == 'true'
     services:
       postgres:
@@ -419,17 +415,6 @@ jobs:
           # lcov paths are relative to backend/ (src/...); map them to
           # repo-root paths so Qlty can match files
           add-prefix: backend/
-
-      # The main ruleset blocks a merge below its minimum line coverage, and it
-      # reads only coverage uploaded here. Merge queue runs are skipped by the
-      # action: the PR head and main carry the numbers.
-      - name: Upload coverage to GitHub
-        if: ${{ !cancelled() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-        uses: actions/upload-code-coverage@2b21a77928be8d5168c2b9581a67f2adbebacc52 # v1.4.4
-        with:
-          file: backend/coverage/cobertura-coverage.xml
-          language: TypeScript
-          label: code-coverage/vitest-backend
 
       - name: Upload coverage
         if: always()

@@ -58,10 +58,10 @@ export default defineConfig({
         'src/data-source.ts',
       ],
       reportsDirectory: 'coverage',
-      // Cobertura is what GitHub's code coverage rule reads; its file names are
-      // made relative to the repository root so they match the PR's paths.
-      reporter: ['text', 'lcov', 'html', ['cobertura', { projectRoot: '..' }]],
-      thresholds: { statements: 8, branches: 5, functions: 8, lines: 8 },
+      reporter: ['text', 'lcov', 'html'],
+      // The merge gate for test coverage (main is at about 74% lines, 64%
+      // branches). A PR that drops the backend under it fails `tests`, and so ci-ok.
+      thresholds: { statements: 60, branches: 55, functions: 60, lines: 60 },
     },
     projects: [
       {
