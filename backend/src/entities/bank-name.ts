@@ -104,5 +104,6 @@ export enum BankName {
   STARLING = 'starling',
   SUNCORP = 'suncorp',
   SYNCHRONY = 'synchrony',
+  SYNOVUS = 'synovus',
   OTHER = 'other',
 }
