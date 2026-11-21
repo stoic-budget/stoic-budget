@@ -48,6 +48,7 @@ import { Go2bankParser } from '../parsers/go2bank.parser';
 import { GotymeParser } from '../parsers/gotyme.parser';
 import { GreatSouthernParser } from '../parsers/great-southern.parser';
 import { GreenDotParser } from '../parsers/green-dot.parser';
+import { HalifaxParser } from '../parsers/halifax.parser';
 import { HapoalimParser } from '../parsers/hapoalim.parser';
 import { KaspiParser } from '../parsers/kaspi.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
@@ -108,4 +109,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [GotymeParser, { bankName: BankName.GOTYME }],
   [GreatSouthernParser, { bankName: BankName.GREAT_SOUTHERN }],
   [GreenDotParser, { bankName: BankName.GREEN_DOT }],
+  [HalifaxParser, { bankName: BankName.HALIFAX }],
 ];

@@ -95,4 +95,5 @@ export const BANKS = [
     aliases: ['great southern'],
   },
   { key: 'green_dot', name: 'Green Dot', logo: 'green-dot.png' },
+  { key: 'halifax', name: 'Halifax', logo: 'halifax.png' },
 ] as const satisfies readonly BankEntry[];

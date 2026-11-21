@@ -19,6 +19,8 @@ describe('ukCodeEntry', () => {
     ['))) ACME CAFE', { debit: 3.1 }, 'ACME CAFE', 'card'],
     ['TFR MEMBER ONE', { credit: 100 }, 'MEMBER ONE', 'bank_transfer_in'],
     ['TFR MEMBER ONE', { debit: 100 }, 'MEMBER ONE', 'bank_transfer_out'],
+    ['ACME RECRUITMENT L BGC', { credit: 520.87 }, 'ACME RECRUITMENT L', 'bank_transfer_in'],
+    ['BP SAMPLETOWN S/STN DEB', { debit: 24.35 }, 'BP SAMPLETOWN S/STN', 'card'],
   ])('reads %s', (purpose, amount, payee, paymentType) => {
     expect(ukCodeEntry(row(purpose, amount))).toMatchObject({ counterpartyName: payee, paymentType });
   });

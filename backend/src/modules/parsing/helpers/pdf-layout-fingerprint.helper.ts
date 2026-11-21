@@ -33,6 +33,8 @@ const FINGERPRINT_LENGTH = 12;
 const BANK_MENTIONS: [BankName, RegExp][] = [
   // First: a Citibank statement names other banks in its IMPS and NEFT lines ("MOBIKWIK AXIS BANK").
   [BankName.CITI, /\bcitibank n\.?a\b|\bcitibank account statement\b/],
+  // Before Bank of Scotland: "Halifax is a division of Bank of Scotland plc".
+  [BankName.HALIFAX, /\bhalifax is a division of bank of scotland\b|\blogo, halifax\b/],
   [BankName.ABSA, /\babsa\b/],
   [BankName.ALLY, /\bally bank\b/],
   [BankName.ANZ, /\banz\b|australia and new zealand banking/],
