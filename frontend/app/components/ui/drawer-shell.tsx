@@ -5,6 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import type { SxProps, Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
+import { DemoNotice } from '@/app/components/demo/DemoNotice';
 import { X } from '@/app/components/icons';
 import { useIntlayer } from '@/app/i18n';
 import { tokens } from '@/lib/theme-tokens';
@@ -41,6 +42,8 @@ export interface DrawerShellProps {
   zIndex?: number;
   /** Pinned under the content, which then scrolls on its own: the drawer's main actions. */
   footer?: React.ReactNode;
+  /** On a demo server, say above the content that nothing here is saved. Off for drawers that only show or pick. */
+  demoNotice?: boolean;
 }
 
 /** Set on an overlay while a sidebar opened after it sits on top; styled in `_drawer-stack.scss`. */
@@ -142,6 +145,7 @@ export function DrawerShell({
   sx,
   zIndex,
   footer,
+  demoNotice = true,
 }: DrawerShellProps) {
   const t = useIntlayer('uiShell');
   const handleClose = (_event: object, reason: 'backdropClick' | 'escapeKeyDown'): void => {
@@ -231,6 +235,7 @@ export function DrawerShell({
           overflowY: footer ? 'auto' : undefined,
         }}
       >
+        {demoNotice && <DemoNotice />}
         {children}
       </div>
       {footer && (

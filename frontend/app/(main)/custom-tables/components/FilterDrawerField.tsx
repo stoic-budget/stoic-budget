@@ -102,6 +102,7 @@ export function FilterDrawerField(props: FilterDrawerFieldProps): React.JSX.Elem
       {/* Mounted while open only: the dialog holds several of these fields. */}
       {open ? (
         <DrawerShell
+          demoNotice={false}
           isOpen
           onClose={close}
           position="right"

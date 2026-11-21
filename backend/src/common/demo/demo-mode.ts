@@ -16,3 +16,31 @@ export function demoCredentials(): { email: string; password: string } | null {
   }
   return { email, password };
 }
+
+type SessionOrigin = {
+  ipAddress: string | null;
+  userAgent?: string | null;
+  device: string;
+  browser: string;
+  os: string;
+};
+
+/**
+ * A session as the sessions list and the account export show it. On a demo
+ * every visitor signs in as the one shared account, so each would see the
+ * others' addresses and browsers: there a session shows none, whatever an
+ * older row still holds.
+ */
+export function shownSession<T extends SessionOrigin>(session: T): T {
+  if (!isDemoMode()) {
+    return session;
+  }
+  return {
+    ...session,
+    ipAddress: null,
+    ...('userAgent' in session ? { userAgent: null } : {}),
+    device: 'Unknown device',
+    browser: 'Unknown browser',
+    os: 'Unknown OS',
+  };
+}

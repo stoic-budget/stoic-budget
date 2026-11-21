@@ -93,6 +93,7 @@ export function FiltersDrawer({
 
   return (
     <DrawerShell
+      demoNotice={false}
       isOpen={open}
       onClose={onClose}
       position="right"
