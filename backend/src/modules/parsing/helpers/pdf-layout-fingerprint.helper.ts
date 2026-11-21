@@ -136,6 +136,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.CO_OPERATIVE_BANK, /\bthe co-operative bank\b/],
   [BankName.TRUIST, /\b4truist\b/],
   [BankName.UBS, /\bwww\.ubs\.com\b/],
+  [BankName.UCO, /\bucba0\d{6}\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

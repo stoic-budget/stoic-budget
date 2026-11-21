@@ -162,7 +162,7 @@ Setting expectations upfront:
 | 🇷🇴 Romania | Raiffeisen Bank | |
 | 🇨🇭 Switzerland | UBS | |
 | 🇿🇦 South Africa | Absa, Capitec, FNB | |
-| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India | |
+| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India | UCO Bank |
 | 🇧🇷 Brazil | Banco do Brasil | |
 | 🇭🇰 Hong Kong | Bank of China (Hong Kong) | |
 | 🇵🇭 Philippines | BPI, GoTyme Bank | |
