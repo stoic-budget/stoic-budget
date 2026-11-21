@@ -133,6 +133,9 @@ export const INTEGRATIONS_ERRORS = {
   TELEGRAM_TOKEN_REJECTED: '{{reason}}',
   TELEGRAM_API_ERROR: 'Telegram API error: {{reason}}',
   TELEGRAM_FILE_DOWNLOAD_FAILED: 'Failed to download the file from Telegram',
+  // ── calendar feed ───────────────────────────────────────────────
+  CALENDAR_FEED_NOT_FOUND: 'Calendar feed not found',
+  CALENDAR_FEED_CHANGED: 'The calendar link was just changed elsewhere. Reload the page.',
   // ── vendor-icons ────────────────────────────────────────────────
   VENDOR_ICON_DOMAIN_INVALID: 'Not a vendor domain',
   VENDOR_ICON_NOT_FOUND: 'No icon for this vendor',
