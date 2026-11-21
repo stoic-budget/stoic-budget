@@ -3,7 +3,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { In, type Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { currencyCodeOrDefault } from '../../common/utils/currency.util';
 import { ensureCanEdit } from '../../common/utils/ensure-can-edit.util';
@@ -23,8 +23,6 @@ import type {
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
 import { Branch } from '../../entities/branch.entity';
 import { Category, CategoryType } from '../../entities/category.entity';
-import { Payable } from '../../entities/payable.entity';
-import { Receipt } from '../../entities/receipt.entity';
 import { Statement } from '../../entities/statement.entity';
 import {
   TaxSource,
@@ -39,6 +37,11 @@ import { AuditService } from '../audit/audit.service';
 import { ensurePrivateCategory } from '../categories/private-category';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
+import {
+  assertFilesKeepTheirReaders,
+  NOTHING_REPOINTED,
+  repointSplitParts,
+} from './helpers/repoint-split-parts';
 import { lockSplitGroup } from './helpers/split-group-lock';
 import { assertMayReshape, assertSplittable, memberIdOf } from './helpers/split-guards';
 import { applyPartCategory, cloneForSplit } from './helpers/transaction-split-clone';
@@ -607,7 +610,7 @@ export class TransactionsService {
     // Plain copies for the audit diff, not entities: spreading drops the
     // entity's own methods.
     let before: Array<Partial<Transaction>> = [];
-    let repointed = { duplicates: 0, receipts: 0, payables: 0 };
+    let repointed = NOTHING_REPOINTED;
 
     const merged = await this.transactionRepository.manager.transaction(async manager => {
       const repo = manager.getRepository(Transaction);
@@ -637,6 +640,7 @@ export class TransactionsService {
       assertUnsplittable(parts);
 
       const [survivor, ...rest] = parts;
+      await assertFilesKeepTheirReaders(manager, workspaceId, survivor, rest);
       // Falls back the same way assertSplittable reads an amount. Unreachable while
       // split() always writes `amount`, but the two sides should not disagree about
       // where a part's money lives.
@@ -667,39 +671,9 @@ export class TransactionsService {
       const saved = await repo.save(survivor);
 
       if (rest.length > 0) {
-        // Every FK pointing at transactions.id is ON DELETE SET NULL, so deleting a
-        // part silently unlinks whatever referenced it. Repoint at the survivor
-        // FIRST — after the delete the FK has already been nulled and the link is
-        // unrecoverable. The survivor represents the whole charge again, so it is
-        // the right target for all three.
+        // Repoint FIRST: after the delete the foreign keys have already cut the links.
         const removedIds = rest.map(part => part.id);
-
-        // Without this, a transaction whose master was a deleted part is left
-        // isDuplicate=true with duplicateOfId=null: excluded from reports forever,
-        // with no master and no UI path to unflag it. The survivor cannot be
-        // repointed at itself here — a row with duplicateOfId set always has
-        // isDuplicate set too, which the guard above already rejected.
-        const duplicates = await manager
-          .getRepository(Transaction)
-          .update({ workspaceId, duplicateOfId: In(removedIds) }, { duplicateOfId: survivor.id });
-
-        const receipts = await manager
-          .getRepository(Receipt)
-          .update({ workspaceId, transactionId: In(removedIds) }, { transactionId: survivor.id });
-
-        const payables = await manager
-          .getRepository(Payable)
-          .update(
-            { workspaceId, linkedTransactionId: In(removedIds) },
-            { linkedTransactionId: survivor.id },
-          );
-
-        repointed = {
-          duplicates: duplicates.affected ?? 0,
-          receipts: receipts.affected ?? 0,
-          payables: payables.affected ?? 0,
-        };
-
+        repointed = await repointSplitParts(manager, workspaceId, removedIds, survivor.id);
         await repo.remove(rest);
       }
 
@@ -723,6 +697,7 @@ export class TransactionsService {
         duplicatesRepointed: repointed.duplicates,
         receiptsRepointed: repointed.receipts,
         payablesRepointed: repointed.payables,
+        attachmentsRepointed: repointed.attachments,
       },
       isUndoable: false,
     });

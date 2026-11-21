@@ -20,6 +20,7 @@ import { useDuplicateTransaction } from './hooks/useDuplicateTransaction';
 import { useTransactionReviewActions } from './hooks/useTransactionReviewActions';
 import { TransactionCommentSection } from './TransactionCommentSection';
 import { TransactionDetailsTab } from './TransactionDetailsTab';
+import { TransactionFilesSection } from './TransactionFilesSection';
 import { TransactionHistoryTab } from './TransactionHistoryTab';
 import type { Category, Transaction } from './types';
 
@@ -292,6 +293,10 @@ export default function DetailsDrawer({
                 syncKey={`${transaction.amount}|${transaction.transactionType}|${transaction.currency}`}
               />
             </div>
+            <TransactionFilesSection
+              key={`files-${transaction.id}`}
+              transactionId={transaction.id}
+            />
           </>
         )}
         {activeTab === 'notes' && (
