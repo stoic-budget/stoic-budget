@@ -33,6 +33,7 @@ vi.mock('@/app/lib/use-category-name', () => ({ useCategoryName: () => categoryN
 vi.mock('@/app/i18n', () => ({
   useIntlayer: () => ({
     other: { value: 'Other' },
+    flowOther: { value: 'Other' },
     empty: 'No cash flow data yet',
     missingRates: { value: 'No rate for {{currencies}}' },
   }),
