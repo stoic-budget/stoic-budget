@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "accountNumber": "10000001",
+    "currency": "GBP",
+    "dateFrom": "2024-08-01T00:00:00",
+    "dateTo": "2024-08-30T00:00:00",
+    "balanceStart": 23235.15,
+    "balanceEnd": 11562.53
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-08-02T00:00:00",
+      "counterpartyName": "PLAYDALE RBD02084IVJPTAV4 PLAYDALE",
+      "paymentPurpose": "DR PLAYDALE RBD02084IVJPTAV4 PLAYDALE",
+      "debit": 11852.74,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-02T00:00:00",
+      "counterpartyName": "PLAYDALE RBD02084IVJPTAV4 PAYMENT CHARGE",
+      "paymentPurpose": "DR PLAYDALE RBD02084IVJPTAV4 PAYMENT CHARGE",
+      "debit": 17,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-06T00:00:00",
+      "counterpartyName": "Sample PC HMRC PAYE/NIC CUMB BIB BACS PAYMENT",
+      "paymentPurpose": "BP Sample PC HMRC PAYE/NIC CUMB BIB BACS PAYMENT",
+      "debit": 76.4,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-07T00:00:00",
+      "counterpartyName": "Sample PC Peak Landscape BIB BACS PAYMENT",
+      "paymentPurpose": "BP Sample PC Peak Landscape BIB BACS PAYMENT",
+      "debit": 690,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-15T00:00:00",
+      "counterpartyName": "Sample PC Member Sample BIB BACS PAYMENT",
+      "paymentPurpose": "BP Sample PC Member Sample BIB BACS PAYMENT",
+      "debit": 306.48,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-21T00:00:00",
+      "counterpartyName": "SAMPLE GALA ASSOCI SAMPLE GALA ASSOCI",
+      "paymentPurpose": "CR SAMPLE GALA ASSOCI SAMPLE GALA ASSOCI",
+      "credit": 1250,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-08-30T00:00:00",
+      "counterpartyName": "CONE M & T 1st sept hut hire",
+      "paymentPurpose": "CR CONE M & T 1st sept hut hire",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    }
+  ]
+}
