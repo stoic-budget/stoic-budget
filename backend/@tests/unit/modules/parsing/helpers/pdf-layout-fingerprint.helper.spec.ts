@@ -144,6 +144,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('LLOYDS BASIC ACCT 18 May 2023 to 18 Aug 2023')).toBe(BankName.LLOYDS);
     expect(mentionedBank('Manufacturers and Traders Trust Company, member FDIC')).toBe(BankName.M_AND_T);
     expect(mentionedBank('Customer Service Information Marcus.com')).toBe(BankName.MARCUS);
+    expect(mentionedBank('MERRICK ACCOUNT SUMMARY Account Number')).toBe(BankName.MERRICK);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
