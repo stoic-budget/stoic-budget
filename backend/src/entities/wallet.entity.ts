@@ -1,4 +1,5 @@
 import {
+  Check,
   Column,
   CreateDateColumn,
   Entity,
@@ -43,6 +44,7 @@ export const RESERVE_WALLET_TYPES: readonly WalletType[] = [
 ];
 
 @Entity('wallets')
+@Check('CHK_wallets_credit_limit_card_only', `"type" = 'credit_card' OR "credit_limit" IS NULL`)
 export class Wallet {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -81,6 +83,13 @@ export class Wallet {
 
   @Column({ name: 'initial_balance', type: 'decimal', precision: 15, scale: 2, default: 0 })
   initialBalance: number;
+
+  /**
+   * A credit card's limit, in the account's currency; null for every other type.
+   * Shown as what is left to spend, never counted in a balance or total.
+   */
+  @Column({ name: 'credit_limit', type: 'decimal', precision: 15, scale: 2, nullable: true })
+  creditLimit: string | null;
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;

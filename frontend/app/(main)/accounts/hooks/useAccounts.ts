@@ -10,6 +10,7 @@ import { invalidateFinancialData } from '@/app/lib/invalidate-document-lists';
 import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { countsInNetWorth, isDebtType } from '../account-types';
+import { parseCreditLimit } from '../credit-limit';
 
 export type Account = WalletItem;
 
@@ -27,6 +28,8 @@ export interface AccountForm {
   ownerMemberId: string | null;
   /** Whether the account counts in net worth; it counts everywhere else either way. */
   includeInNetWorth: boolean;
+  /** A credit card's limit as typed; empty means none. Sent only for a card. */
+  creditLimit: string;
   /** Statements to move into a new account (creating one from found statements). */
   statementIds?: string[];
 }
@@ -40,6 +43,7 @@ export const emptyAccountForm = (currency: string): AccountForm => ({
   openingBalance: '',
   ownerMemberId: null,
   includeInNetWorth: true,
+  creditLimit: '',
 });
 
 export function accountToForm(account: Account): AccountForm {
@@ -53,11 +57,14 @@ export function accountToForm(account: Account): AccountForm {
     openingBalance: opening === 0 ? '' : String(isDebtType(account.type) ? -opening : opening),
     ownerMemberId: account.ownerMemberId,
     includeInNetWorth: countsInNetWorth(account),
+    creditLimit: account.creditLimit === null ? '' : String(Number(account.creditLimit)),
   };
 }
 
 function toPayload(form: AccountForm) {
   const typed = Number(form.openingBalance.replace(',', '.')) || 0;
+  // The form refuses to save an invalid limit, so 'invalid' never gets here.
+  const limit = parseCreditLimit(form.creditLimit);
   return {
     type: form.type,
     name: form.name.trim(),
@@ -68,6 +75,8 @@ function toPayload(form: AccountForm) {
     initialBalance: isDebtType(form.type) ? -Math.abs(typed) : typed,
     ownerMemberId: form.ownerMemberId,
     includeInNetWorth: form.includeInNetWorth,
+    // Only a card has a limit; any other type clears it.
+    creditLimit: form.type === 'credit_card' && limit !== 'invalid' ? limit : null,
   };
 }
 

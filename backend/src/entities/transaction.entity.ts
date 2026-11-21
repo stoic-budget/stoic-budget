@@ -225,6 +225,14 @@ export class Transaction {
   @Column({ name: 'private_category_id', type: 'uuid', nullable: true })
   privateCategoryId: string | null;
 
+  /**
+   * Left out of every income and spending figure (budgets, reports, dashboard,
+   * forecast, goals, insights) through `onlyFlows`/`flowsSql`, while it keeps
+   * counting in balances, net worth and tax: the money still moved.
+   */
+  @Column({ name: 'excluded_from_budgets', type: 'boolean', default: false })
+  excludedFromBudgets: boolean;
+
   @ManyToOne(() => CryptoWallet, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'crypto_wallet_id' })
   cryptoWallet: Relation<CryptoWallet | null>;

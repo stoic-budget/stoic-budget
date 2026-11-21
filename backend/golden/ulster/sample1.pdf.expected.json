@@ -1,0 +1,804 @@
+{
+  "metadata": {
+    "accountNumber": "GB08ULSB35412255031172",
+    "currency": "GBP",
+    "dateFrom": "2023-03-08T00:00:00",
+    "dateTo": "2023-04-06T00:00:00",
+    "balanceStart": 5,
+    "balanceEnd": 44.42
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-03-08T00:00:00",
+      "counterpartyName": "Automated Credit SAMPLE MEMBERA OVERPAYMENT FP",
+      "paymentPurpose": "Automated Credit SAMPLE MEMBERA OVERPAYMENT FP",
+      "credit": 1.07,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-08T00:00:00",
+      "counterpartyName": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 08/03/23 10 45800208647786048J",
+      "paymentPurpose": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 08/03/23 10 45800208647786048J",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-09T00:00:00",
+      "counterpartyName": "FREEMANS 0333 200 8077 GB",
+      "paymentPurpose": "Card Transaction 1000 08MAR23 FREEMANS 0333 200 8077 GB",
+      "debit": 1.07,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-10T00:00:00",
+      "counterpartyName": "OnLine Transaction SAMPLERS DRS SAMPL VIA MOBILE - PYMT",
+      "paymentPurpose": "OnLine Transaction SAMPLERS DRS SAMPL VIA MOBILE - PYMT",
+      "credit": 40,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-10T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 30,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 0.19,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "Automated Credit HMRC CHILD BENEFIT",
+      "paymentPurpose": "Automated Credit HMRC CHILD BENEFIT",
+      "credit": 36.25,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 0.25,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 9.94,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 13/03/23 10 09627593138323459J",
+      "paymentPurpose": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 13/03/23 10 09627593138323459J",
+      "debit": 6.19,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "MR SPORTS BELFAST GB",
+      "paymentPurpose": "Card Transaction 1000 10MAR23 MR SPORTS BELFAST GB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "MR SPORTS BELFAST GB",
+      "paymentPurpose": "Card Transaction 1000 10MAR23 MR SPORTS BELFAST GB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "TESCO-STORES 6596 SAMPLETOWN GB",
+      "paymentPurpose": "Card Transaction 1000 11MAR23 C TESCO-STORES 6596 SAMPLETOWN GB",
+      "debit": 10.06,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "Cash Withdrawal NOTEMACHINE 13MAR",
+      "paymentPurpose": "Cash Withdrawal NOTEMACHINE 13MAR",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "VERY BOOTLE GB",
+      "paymentPurpose": "Card Transaction 1000 13MAR23 VERY BOOTLE GB",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "Cash Withdrawal ROYAL BANK 14MAR",
+      "paymentPurpose": "Cash Withdrawal ROYAL BANK 14MAR",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-16T00:00:00",
+      "counterpartyName": "OnLine Transaction SAMPLERS DRS SAMPL VIA MOBILE - PYMT",
+      "paymentPurpose": "OnLine Transaction SAMPLERS DRS SAMPL VIA MOBILE - PYMT",
+      "credit": 40,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-16T00:00:00",
+      "counterpartyName": "Automated Credit 202007R5U DFC UC",
+      "paymentPurpose": "Automated Credit 202007R5U DFC UC",
+      "credit": 353.42,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-16T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-16T00:00:00",
+      "counterpartyName": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 16/03/23 10 90730701609672060J",
+      "paymentPurpose": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 16/03/23 10 90730701609672060J",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-16T00:00:00",
+      "counterpartyName": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 16/03/23 10 20675212622529692J",
+      "paymentPurpose": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 16/03/23 10 20675212622529692J",
+      "debit": 23.42,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-16T00:00:00",
+      "counterpartyName": "OnLine Transaction INTERNET BILL 5890642 VIA MOBILE - PYMT FP 16/03/23 10 00778583174980170J",
+      "paymentPurpose": "OnLine Transaction INTERNET BILL 5890642 VIA MOBILE - PYMT FP 16/03/23 10 00778583174980170J",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-16T00:00:00",
+      "counterpartyName": "Cash Withdrawal PAYPOINT 16MAR",
+      "paymentPurpose": "Cash Withdrawal PAYPOINT 16MAR",
+      "debit": 180,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-20T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-20T00:00:00",
+      "counterpartyName": "MR SPORTS BELFAST GB",
+      "paymentPurpose": "Card Transaction 1000 16MAR23 MR SPORTS BELFAST GB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-20T00:00:00",
+      "counterpartyName": "MR SPORTS BELFAST GB",
+      "paymentPurpose": "Card Transaction 1000 16MAR23 MR SPORTS BELFAST GB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-20T00:00:00",
+      "counterpartyName": "CLICKENERGYNI 47733007374 GB",
+      "paymentPurpose": "Card Transaction 1000 16MAR23 CLICKENERGYNI 47733007374 GB",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-20T00:00:00",
+      "counterpartyName": "MR SPORTS BELFAST GB",
+      "paymentPurpose": "Card Transaction 1000 16MAR23 MR SPORTS BELFAST GB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-20T00:00:00",
+      "counterpartyName": "MR SPORTS BELFAST GB",
+      "paymentPurpose": "Card Transaction 1000 16MAR23 MR SPORTS BELFAST GB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-21T00:00:00",
+      "counterpartyName": "Automated Credit HMRC CHILD BENEFIT",
+      "paymentPurpose": "Automated Credit HMRC CHILD BENEFIT",
+      "credit": 36.25,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-21T00:00:00",
+      "counterpartyName": "Cash Withdrawal BMACH 21MAR",
+      "paymentPurpose": "Cash Withdrawal BMACH 21MAR",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-22T00:00:00",
+      "counterpartyName": "VERY BOOTLE GB",
+      "paymentPurpose": "Card Transaction 1000 21MAR23 VERY BOOTLE GB",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "Automated Credit SAMPLE MEMBERA OVERPAYMENT FP 0539 FP23082O03328481",
+      "paymentPurpose": "Automated Credit SAMPLE MEMBERA OVERPAYMENT FP 0539 FP23082O03328481",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 30,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 23/03/23 10 93008419017598592J",
+      "paymentPurpose": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 23/03/23 10 93008419017598592J",
+      "debit": 1.25,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "MR SPORTS BELFAST GB",
+      "paymentPurpose": "Card Transaction 1000 22MAR23 MR SPORTS BELFAST GB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "MR SPORTS BELFAST GB",
+      "paymentPurpose": "Card Transaction 1000 22MAR23 MR SPORTS BELFAST GB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "MR SPORTS BELFAST GB",
+      "paymentPurpose": "Card Transaction 1000 22MAR23 MR SPORTS BELFAST GB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "MR SPORTS BELFAST GB",
+      "paymentPurpose": "Card Transaction 1000 22MAR23 MR SPORTS BELFAST GB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "Cash Withdrawal BMACH 23MAR",
+      "paymentPurpose": "Cash Withdrawal BMACH 23MAR",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-24T00:00:00",
+      "counterpartyName": "Automated Credit SAMPLE MEMBERA OVERPAYMENT FP 0911 FP23083O05792380",
+      "paymentPurpose": "Automated Credit SAMPLE MEMBERA OVERPAYMENT FP 0911 FP23083O05792380",
+      "credit": 4.76,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-24T00:00:00",
+      "counterpartyName": "OnLine Transaction SAMPLERS DRS SAMPL VIA MOBILE - PYMT",
+      "paymentPurpose": "OnLine Transaction SAMPLERS DRS SAMPL VIA MOBILE - PYMT",
+      "credit": 40,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-24T00:00:00",
+      "counterpartyName": "Cash Withdrawal DANSKE BANK 23MAR",
+      "paymentPurpose": "Cash Withdrawal DANSKE BANK 23MAR",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-27T00:00:00",
+      "counterpartyName": "Automated Credit HMRC CHILD BENEFIT",
+      "paymentPurpose": "Automated Credit HMRC CHILD BENEFIT",
+      "credit": 36.25,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-27T00:00:00",
+      "counterpartyName": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 27/03/23 10 46111802361378625J",
+      "paymentPurpose": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 27/03/23 10 46111802361378625J",
+      "debit": 6.56,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-27T00:00:00",
+      "counterpartyName": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 27/03/23 10 03785305572132864J",
+      "paymentPurpose": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 27/03/23 10 03785305572132864J",
+      "debit": 11,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-27T00:00:00",
+      "counterpartyName": "CENTRA SAMPLETOWN GB",
+      "paymentPurpose": "Card Transaction 1000 24MAR23 C CENTRA SAMPLETOWN GB",
+      "debit": 8.45,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-27T00:00:00",
+      "counterpartyName": "Cash Withdrawal DANSKE BANK 24MAR",
+      "paymentPurpose": "Cash Withdrawal DANSKE BANK 24MAR",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-27T00:00:00",
+      "counterpartyName": "Cash Withdrawal DANSKE BANK 24MAR",
+      "paymentPurpose": "Cash Withdrawal DANSKE BANK 24MAR",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-27T00:00:00",
+      "counterpartyName": "Cash Withdrawal BANK OF IREL 27MAR",
+      "paymentPurpose": "Cash Withdrawal BANK OF IREL 27MAR",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-28T00:00:00",
+      "counterpartyName": "Automated Credit ST MARYS TUITION",
+      "paymentPurpose": "Automated Credit ST MARYS TUITION",
+      "credit": 666.98,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-28T00:00:00",
+      "counterpartyName": "Automated Credit SAMPLE MEMBERA OVERPAYMENT FP 0442 FP23087O12759084",
+      "paymentPurpose": "Automated Credit SAMPLE MEMBERA OVERPAYMENT FP 0442 FP23087O12759084",
+      "credit": 2.08,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-28T00:00:00",
+      "counterpartyName": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 28/03/23 10 14937684465996794J",
+      "paymentPurpose": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 28/03/23 10 14937684465996794J",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-28T00:00:00",
+      "counterpartyName": "Cash Withdrawal ALL & LEICS 28MAR",
+      "paymentPurpose": "Cash Withdrawal ALL & LEICS 28MAR",
+      "debit": 110,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-28T00:00:00",
+      "counterpartyName": "Cash Withdrawal BMACH 28MAR",
+      "paymentPurpose": "Cash Withdrawal BMACH 28MAR",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-29T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-29T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 300,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-29T00:00:00",
+      "counterpartyName": "FREEMANS 0333 200 8077 GB",
+      "paymentPurpose": "Card Transaction 1000 28MAR23 FREEMANS 0333 200 8077 GB",
+      "debit": 1.04,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-29T00:00:00",
+      "counterpartyName": "Cash Withdrawal ALL & LEICS 29MAR",
+      "paymentPurpose": "Cash Withdrawal ALL & LEICS 29MAR",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-30T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-30T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-30T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-30T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 14.37,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-30T00:00:00",
+      "counterpartyName": "CLUBLAND TICKETS COOKSTOWN GB",
+      "paymentPurpose": "Card Transaction 1000 29MAR23 CLUBLAND TICKETS COOKSTOWN GB",
+      "debit": 16.61,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-30T00:00:00",
+      "counterpartyName": "CLUBLAND TICKETS COOKSTOWN GB",
+      "paymentPurpose": "Card Transaction 1000 29MAR23 CLUBLAND TICKETS COOKSTOWN GB",
+      "debit": 14.52,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "OnLine Transaction SAMPLERS DRS SAMPL VIA MOBILE - PYMT",
+      "paymentPurpose": "OnLine Transaction SAMPLERS DRS SAMPL VIA MOBILE - PYMT",
+      "credit": 40,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "CLUBLAND TICKETS COOKSTOWN GB REFUND",
+      "paymentPurpose": "Card Transaction 1000 30MAR23 CLUBLAND TICKETS COOKSTOWN GB REFUND",
+      "credit": 16.61,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "Automated Credit 202007R5V DFC UC",
+      "paymentPurpose": "Automated Credit 202007R5V DFC UC",
+      "credit": 353.41,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 31/03/23 10 35026371486242104J",
+      "paymentPurpose": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 31/03/23 10 35026371486242104J",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "OnLine Transaction INTERNET BILL 5890642 VIA MOBILE - PYMT FP 31/03/23 10 66705987395746937J",
+      "paymentPurpose": "OnLine Transaction INTERNET BILL 5890642 VIA MOBILE - PYMT FP 31/03/23 10 66705987395746937J",
+      "debit": 13.41,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 31/03/23 10 85961264979110428J",
+      "paymentPurpose": "OnLine Transaction MY ACCOUNT MY ACCOUNT VIA MOBILE - PYMT FP 31/03/23 10 85961264979110428J",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "OnLine Transaction TV LICENCE/SUB SER 210129808 VIA MOBILE - PYMT FP 31/03/23 10 69372763108186299J",
+      "paymentPurpose": "OnLine Transaction TV LICENCE/SUB SER 210129808 VIA MOBILE - PYMT FP 31/03/23 10 69372763108186299J",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "WWW.SCOTTSF UELS.COM 38481597173 GB",
+      "paymentPurpose": "Card Transaction 1000 28MAR23 WWW.SCOTTSF UELS.COM 38481597173 GB",
+      "debit": 148,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "CLUBLAND TICKETS COOKSTOWN GB",
+      "paymentPurpose": "Card Transaction 1000 30MAR23 CLUBLAND TICKETS COOKSTOWN GB",
+      "debit": 14.52,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "Cash Withdrawal BMACH 31MAR",
+      "paymentPurpose": "Cash Withdrawal BMACH 31MAR",
+      "debit": 210,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 40,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 4.37,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "Automated Credit HMRC CHILD BENEFIT",
+      "paymentPurpose": "Automated Credit HMRC CHILD BENEFIT",
+      "credit": 36.25,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 20.2,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 40,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "CLICKENERGYNI 47733007374 GB",
+      "paymentPurpose": "Card Transaction 1000 31MAR23 CLICKENERGYNI 47733007374 GB",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "EBAY O*16-0 9887-31522 LONDON GB",
+      "paymentPurpose": "Card Transaction 1000 31MAR23 EBAY O*16-0 9887-31522 LONDON GB",
+      "debit": 3.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "INTRUM UK REIGATE GB",
+      "paymentPurpose": "Card Transaction 1000 31MAR23 INTRUM UK REIGATE GB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "PAYPAL *MAINESOFTDR 61381862357 GB",
+      "paymentPurpose": "Card Transaction 1000 01APR23 PAYPAL *MAINESOFTDR 61381862357 GB",
+      "debit": 25,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "Cash Withdrawal BARCLAYS BNK 02APR",
+      "paymentPurpose": "Cash Withdrawal BARCLAYS BNK 02APR",
+      "debit": 40,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-04-04T00:00:00",
+      "counterpartyName": "VERY BOOTLE GB",
+      "paymentPurpose": "Card Transaction 1000 03APR23 VERY BOOTLE GB",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-04T00:00:00",
+      "counterpartyName": "FREEMANS 0333 200 8077 GB",
+      "paymentPurpose": "Card Transaction 1000 03APR23 FREEMANS 0333 200 8077 GB",
+      "debit": 8.04,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-05T00:00:00",
+      "counterpartyName": "CLUBLAND TICKETS COOKSTOWN GB REFUND",
+      "paymentPurpose": "Card Transaction 1000 04APR23 CLUBLAND TICKETS COOKSTOWN GB REFUND",
+      "credit": 14.32,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-06T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "credit": 4.52,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-04-06T00:00:00",
+      "counterpartyName": "Automated Credit HMRC CHILD BENEFIT",
+      "paymentPurpose": "Automated Credit HMRC CHILD BENEFIT",
+      "credit": 39.9,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-04-06T00:00:00",
+      "counterpartyName": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction To A/C 11000002 SAMPLE SM Via Mobile Xfer",
+      "debit": 14.32,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    }
+  ]
+}

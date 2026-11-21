@@ -206,6 +206,38 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     });
     const tag = await insert('tags', { workspace_id: workspaceId, name: 'tax' });
     const wallet = await insert('wallets', { workspace_id: workspaceId, user_id: userId, name: 'Cash', currency: 'EUR' });
+    await insert('wallets', {
+      workspace_id: workspaceId,
+      user_id: userId,
+      name: 'ACME Card',
+      type: 'credit_card',
+      currency: 'EUR',
+      initial_balance: -1200,
+      credit_limit: 5000,
+    });
+
+    // A loan account with its terms: the schedule's inputs travel with the account.
+    const loan = await insert('wallets', {
+      workspace_id: workspaceId,
+      user_id: userId,
+      name: 'Car loan',
+      type: 'loan',
+      currency: 'EUR',
+      initial_balance: -9000,
+    });
+    await insert('loan_terms', {
+      workspace_id: workspaceId,
+      wallet_id: loan,
+      principal: 9000,
+      start_date: '2026-01-15',
+      term_months: 48,
+      payment_day: 15,
+      method: 'linear',
+      day_count: 'actual/365',
+      annual_rate: 4.9,
+      rate_changes: JSON.stringify([{ from: '2027-01-15', annualRate: 3.9 }]),
+      extra_payments: JSON.stringify([{ date: '2026-06-15', amount: 500 }]),
+    });
 
     // A statement with its file on disk, two tagged rows on it.
     const statementFile = writeDocument('bank.pdf', '%PDF-1.4 bank statement');
@@ -358,7 +390,14 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
       period_type: 'monthly',
       current_period_start: '2026-10-01',
     });
-    await insert('goals', { workspace_id: workspaceId, name: 'Laptop', target_amount: 2000, currency: 'EUR' });
+    // A goal following an account: the restored copy must follow the restored account.
+    await insert('goals', {
+      workspace_id: workspaceId,
+      name: 'Laptop',
+      target_amount: 2000,
+      currency: 'EUR',
+      wallet_id: wallet,
+    });
     const table = await insert('custom_tables', { workspace_id: workspaceId, user_id: userId, name: 'Projects' });
     await insert('custom_table_columns', { table_id: table, key: 'client', title: 'Client' });
     await insert('custom_table_rows', { table_id: table, row_number: 1, data: { client: 'Client GmbH' } });
@@ -409,6 +448,7 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
       'goals',
       'custom_table_rows',
       'payables',
+      'loan_terms',
     ]) {
       expect(source[table]).toBeGreaterThan(0);
     }
@@ -454,10 +494,21 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
       'SELECT name, include_in_net_worth FROM wallets WHERE workspace_id = $1 ORDER BY name',
       [copy.id],
     );
-    expect(wallets).toEqual([
-      { name: 'Cash', include_in_net_worth: true },
-      { name: 'Held for a friend', include_in_net_worth: false },
+    // Every other account the setup made still counts; only this one is left out.
+    expect(wallets.filter(wallet => !wallet.include_in_net_worth).map(wallet => wallet.name)).toEqual([
+      'Held for a friend',
     ]);
+    expect(wallets.map(wallet => wallet.name)).toContain('Cash');
+  });
+
+  it('brings back a goal following the restored account, not the source one', async () => {
+    const copy = await roundTrip(workspaceId, 'Goal account copy');
+    const [goal] = await sql(
+      `SELECT w.workspace_id, w.name FROM goals g JOIN wallets w ON w.id = g.wallet_id
+        WHERE g.workspace_id = $1`,
+      [copy.id],
+    );
+    expect(goal).toEqual({ workspace_id: copy.id, name: 'Cash' });
   });
 
   it('brings back the ledger as it was booked: numbered, posted and reversed', async () => {
@@ -489,6 +540,15 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     expect(invoice.share_token).toBeNull();
     const [creditNote] = await sql('SELECT file_data FROM credit_notes WHERE workspace_id = $1', [copy.id]);
     expect(creditNote.file_data?.toString()).toBe('%PDF-1.4 credit note');
+  });
+
+  it("brings back a card's credit limit", async () => {
+    const copy = await roundTrip(workspaceId, 'Card copy');
+    const cards = await sql(
+      "SELECT name, credit_limit FROM wallets WHERE workspace_id = $1 AND type = 'credit_card'",
+      [copy.id],
+    );
+    expect(cards).toEqual([{ name: 'ACME Card', credit_limit: '5000.00' }]);
   });
 
   it('accounts for every table that has no workspace column', () => {

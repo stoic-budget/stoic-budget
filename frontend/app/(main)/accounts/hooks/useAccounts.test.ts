@@ -19,4 +19,11 @@ describe('account form', () => {
     const heldForAFriend = walletItem({ id: 'w-2', name: 'Held', includeInNetWorth: false });
     expect(accountToForm(heldForAFriend).includeInNetWorth).toBe(false);
   });
+
+  it('puts a card limit in the form as typed, and none for a card without one', () => {
+    const card = walletItem({ id: 'w-card', name: 'ACME Card', type: 'credit_card', creditLimit: '5000.50' });
+    expect(accountToForm(card).creditLimit).toBe('5000.5');
+    expect(accountToForm({ ...card, creditLimit: null }).creditLimit).toBe('');
+    expect(emptyAccountForm('EUR').creditLimit).toBe('');
+  });
 });

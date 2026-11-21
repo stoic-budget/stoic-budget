@@ -44,7 +44,13 @@ export function ViewMenu({
         {labels.view}
         {changes ? <span className="seneca-grid__menu-count">{changes}</span> : null}
       </Button>
-      <DrawerShell isOpen={open} onClose={() => setOpen(false)} title={labels.view} width="sm">
+      <DrawerShell
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title={labels.view}
+        width="sm"
+        demoNotice={false}
+      >
         {/* MenuList walks its children for focus; a Fragment hides them, so give it arrays. */}
         <MenuList>
           <DropdownMenuLabel>{labels.groupBy}</DropdownMenuLabel>

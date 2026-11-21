@@ -56,8 +56,10 @@ export const StatementLayoutWords = Schema.Struct({
       y: Schema.Number,
       width: Schema.Number,
       height: Schema.Number,
-      /** Its line starts with a date, as the parser reads one ("02 Sep", "01-02-2025"). */
-      dated: Schema.Boolean,
+      /** Its line, numbered from 0 in the order the parser reads them. */
+      line: Schema.Number,
+      /** A date starts at this word, as the parser reads one ("02 Sep", "01-02-2025"). */
+      opensDate: Schema.Boolean,
     }),
   ),
 });
@@ -70,6 +72,11 @@ export const TeachLayoutPreview = Schema.Struct({
   transactions: Schema.Number,
   totalDebit: Schema.Number,
   totalCredit: Schema.Number,
+  /**
+   * The statement waits for review, so its page takes rows typed by hand: the
+   * way out when no marking reads a row.
+   */
+  rowsByHand: Schema.Boolean,
   /** The reading's checks: a failed format check makes the statement wait for review. */
   checks: Schema.Array(
     Schema.Struct({

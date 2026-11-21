@@ -1,3 +1,4 @@
+import { resolveBankLogo } from '@bank-logos';
 import {
   Banknote,
   CreditCard,
@@ -94,8 +95,11 @@ const BANK_LABELS: Record<string, string> = {
   dcu: 'DCU',
 };
 
-export const statementBankLabel = (bankName: string): string | null =>
-  BANK_LABELS[bankName] ?? null;
+/** A bank missing above goes by its name in the bank list; "other" says nothing. */
+export const statementBankLabel = (bankName: string): string | null => {
+  const logo = resolveBankLogo(bankName);
+  return BANK_LABELS[bankName] ?? (logo.key === 'other' ? null : logo.displayName);
+};
 
 /** The muted line under an account's name: "ACME Bank · ••0001". */
 export function accountSubtitle(account: Pick<WalletItem, 'bankName' | 'accountNumber'>): string {

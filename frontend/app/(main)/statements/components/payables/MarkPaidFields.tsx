@@ -19,6 +19,7 @@ import { useIntlayer } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import type { PayablePayment, PaymentCandidate } from '@/app/lib/payables-api';
 import { usePayeeName } from '@/app/lib/use-payee-name';
+import { RejectButton } from './RejectButton';
 
 export type WalletOption = { id: string; name: string; currency: string; isActive?: boolean };
 
@@ -30,6 +31,8 @@ export function CandidateList(props: {
   loading: boolean;
   selected: string | null;
   onSelect: (id: string) => void;
+  /** "Not this payment": the row is never proposed for this bill again. */
+  onReject?: (id: string) => void;
   locale: string;
 }): React.JSX.Element {
   const t = useIntlayer('payableMarkPaid');
@@ -49,15 +52,19 @@ export function CandidateList(props: {
         onChange={event => props.onSelect(event.target.value)}
       >
         {props.candidates.map(candidate => (
-          <FormControlLabel
-            key={candidate.id}
-            value={candidate.id}
-            control={<Radio size="small" />}
-            // The label is a block of its own; the default <p> wrapper cannot hold it.
-            disableTypography
-            sx={{ alignItems: 'flex-start', mb: 1, minWidth: 0 }}
-            label={<CandidateLabel candidate={candidate} locale={props.locale} />}
-          />
+          <div key={candidate.id}>
+            <FormControlLabel
+              value={candidate.id}
+              control={<Radio size="small" />}
+              // The label is a block of its own; the default <p> wrapper cannot hold it.
+              disableTypography
+              sx={{ alignItems: 'flex-start', mb: 1, minWidth: 0 }}
+              label={<CandidateLabel candidate={candidate} locale={props.locale} />}
+            />
+            {props.onReject && (
+              <RejectButton indented id={candidate.id} onReject={props.onReject} />
+            )}
+          </div>
         ))}
       </RadioGroup>
     </Box>
