@@ -32,6 +32,7 @@ const SECTIONS: Record<SectionSign, string[]> = {
     'other credits',
     'additions',
     'other additions',
+    'deposits credits and interest',
   ],
   debit: [
     'withdrawals',
@@ -58,6 +59,7 @@ const SECTIONS: Record<SectionSign, string[]> = {
     'deductions',
     'other deductions',
     'other subtractions',
+    'other withdrawals debits and service charges',
     'fees',
     'service fees',
   ],
@@ -94,8 +96,9 @@ function headingText(row: PdfTextRow): string {
       .replace(/\(?\bcontinued\b\)?|\(cont\.?\)/g, '')
       .replace(/\s+account\s*(?:#|no\.?|number)\s*[\dx*-]+\s*$/, '')
       .replace(/&/g, ' and ')
-      // "Deposits/Other Credits": a slash joins a heading's two names.
+      // "Deposits/Other Credits": a slash joins a heading's two names; commas list them.
       .replace(/\s*\/\s*/g, ' and ')
+      .replace(/,/g, '')
       .replace(/\*+/g, '')
       .replace(/[\s:.]+$/, '')
       .replace(/\s+/g, ' ')

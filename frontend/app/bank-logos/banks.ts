@@ -190,4 +190,5 @@ export const BANKS = [
     logo: 'co-operative-bank.png',
     aliases: ['co-operative bank', 'coop bank'],
   },
+  { key: 'truist', name: 'Truist', logo: 'truist.png', aliases: ['truist bank'] },
 ] as const satisfies readonly BankEntry[];

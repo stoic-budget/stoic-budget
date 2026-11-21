@@ -181,6 +181,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Statement www.tangerine.ca')).toBe(BankName.TANGERINE);
     expect(mentionedBank('ACCOUNT ISSUED BY: THE TORONTO-DOMINION BANK')).toBe(BankName.TD);
     expect(mentionedBank('The Co-operative Bank Registered office')).toBe(BankName.CO_OPERATIVE_BANK);
+    expect(mentionedBank('call us at 844-4TRUIST')).toBe(BankName.TRUIST);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

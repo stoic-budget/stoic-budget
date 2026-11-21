@@ -106,3 +106,10 @@ describe('a section heading with a slash', () => {
     expect(readSectionHeading(row(10, phrase('Deposits/Other Credits', 50)))).toBe('credit');
   });
 });
+
+describe('a section heading with commas', () => {
+  it('reads Truist\'s lists by their names', () => {
+    expect(readSectionHeading(row(10, phrase('Other withdrawals, debits and service charges', 50)))).toBe('debit');
+    expect(readSectionHeading(row(10, phrase('Deposits, credits and interest', 50)))).toBe('credit');
+  });
+});
