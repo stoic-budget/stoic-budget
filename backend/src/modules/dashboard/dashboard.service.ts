@@ -42,6 +42,7 @@ import {
   uncategorizedRowsQuery,
   unconfirmedRowsQuery,
 } from '../review-inbox/review-queue.queries';
+import { allTimeBalance } from './all-time-balance';
 import { BANK_DISPLAY_NAMES } from './bank-display-names';
 import { recentRowHrefs } from './bill-hrefs';
 import {
@@ -58,7 +59,7 @@ import {
   getWindowBounds,
   parseMonthWindow,
 } from './dashboard-window.util';
-import { spendableBalance, sumConverted } from './opening-balance';
+import { spendableBalance } from './opening-balance';
 
 /** How many individual categories the donut shows before folding the rest into "Other". */
 const TOP_CATEGORIES_LIMIT = 8;
@@ -338,21 +339,8 @@ export class DashboardService {
   }
 
   /** All-time net of every approved transaction, converted into `targetCurrency`. */
-  private async getAllTimeBalance(workspaceId: string, targetCurrency: string): Promise<number> {
-    const balanceQuery = this.transactionRepo.createQueryBuilder('t').leftJoin('t.statement', 's');
-    this.applyWorkspaceStatementFilters(balanceQuery, workspaceId, true);
-
-    const balanceRows = await balanceQuery
-      .select([
-        't.currency AS currency',
-        `COALESCE(SUM(CASE WHEN t.transactionType = :balIncome THEN t.credit WHEN t.transactionType = :balExpense THEN -t.debit ELSE 0 END), 0) AS "balance"`,
-      ])
-      .setParameter('balIncome', TransactionType.INCOME)
-      .setParameter('balExpense', TransactionType.EXPENSE)
-      .groupBy('t.currency')
-      .getRawMany<{ currency: string; balance: string }>();
-
-    return sumConverted(balanceRows, (amount, from) =>
+  private getAllTimeBalance(workspaceId: string, targetCurrency: string): Promise<number> {
+    return allTimeBalance(this.transactionRepo, workspaceId, (amount, from) =>
       this.convertDashboardAmount(amount, from, targetCurrency, workspaceId),
     );
   }

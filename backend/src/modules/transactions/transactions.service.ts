@@ -44,6 +44,7 @@ import type { DataDeletedEvent } from '../notifications/events/notification-even
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
 import { cloneForSplit } from './helpers/transaction-split-clone';
 import { applyListFilters, type TransactionListFilters } from './transaction-list-filters';
+import { assertUnsplittable } from './unsplit-guards';
 
 export type TransactionWithConversion = Transaction & {
   convertedAmount?: number;
@@ -697,18 +698,7 @@ export class TransactionsService {
 
       before = parts.map(part => ({ ...part }));
 
-      // A part can be flagged as a duplicate AFTER the split: isSameSplitGroup only
-      // excludes pairs sharing a splitGroupId, so a part stays comparable against
-      // rows in other statements and markDuplicates can flag it at any time. A
-      // flagged row is excluded from reports, so merging would either inflate
-      // reported spend (a flagged sibling folded into the unflagged survivor) or
-      // erase the whole charge (part 0 flagged, survivor keeps isDuplicate). Refuse,
-      // as assertSplittable does on the way in — with its own message, so the two
-      // sides are distinguishable. Checked on the locked rows: the flag may have
-      // landed after the unlocked read.
-      if (parts.some(part => part.isDuplicate)) {
-        throw new BadRequestException(appError('TRANSACTION_UNSPLIT_DUPLICATE'));
-      }
+      assertUnsplittable(parts);
 
       const [survivor, ...rest] = parts;
       // Falls back the same way assertSplittable reads an amount. Unreachable while

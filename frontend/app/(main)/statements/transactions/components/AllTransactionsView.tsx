@@ -11,6 +11,7 @@ import {
   fromStatementTransaction,
   mapApiRecordToTransaction,
 } from '@/app/components/transactions/helpers/transactionMapper';
+import { useSetExcludedFromBudgets } from '@/app/components/transactions/hooks/useBulkExcludeFromBudgets';
 import { useBulkUpdateCategory } from '@/app/components/transactions/hooks/useBulkUpdateCategory';
 import type { Transaction } from '@/app/components/transactions/types';
 import { Button } from '@/app/components/ui/button';
@@ -93,6 +94,7 @@ export function AllTransactionsView(): React.JSX.Element {
     enabled: Boolean(workspaceId),
   });
   const bulkUpdateCategory = useBulkUpdateCategory();
+  const { setExcluded } = useSetExcludedFromBudgets();
 
   const budgetByCategory = useMemo(
     () => new Map((budgetsQuery.data ?? []).map(budget => [budget.categoryId, budget.name])),
@@ -227,6 +229,9 @@ export function AllTransactionsView(): React.JSX.Element {
               onToggleAll={checked => setSelected(new Set(checked ? rows.map(row => row.id) : []))}
               onSetCategory={(ids, categoryId) => {
                 void setCategory(ids, categoryId).then(done => done && setSelected(new Set()));
+              }}
+              onSetExcluded={(ids, excluded) => {
+                void setExcluded(ids, excluded).then(done => done && setSelected(new Set()));
               }}
               onOpen={openRow}
             />

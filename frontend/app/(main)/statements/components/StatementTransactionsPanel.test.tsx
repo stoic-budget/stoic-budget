@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { categoryRef, transactionItem } from '@/app/test/fixtures/contracts';
-import { renderWithQuery } from '@/app/test/query-wrapper';
+import { createTestQueryClient, renderWithQuery } from '@/app/test/query-wrapper';
 import { StatementTransactionsPanel } from './StatementTransactionsPanel';
 
 const { confirmedPayee } = vi.hoisted(() => ({ confirmedPayee: 'ACME Store' }));
 const appLocale = vi.hoisted(() => ({ current: 'en' }));
+// What the server holds for tx-1: a save from the drawer changes it here.
+const server = vi.hoisted(() => ({ excluded: false }));
 
 vi.mock('@/app/i18n', async importOriginal => ({
   ...(await importOriginal<typeof import('@/app/i18n')>()),
@@ -22,6 +24,7 @@ vi.mock('@/app/lib/query-fn-schema', () => ({
           transactions: [
             transactionItem({
               id: 'tx-1',
+              excludedFromBudgets: server.excluded,
               category: categoryRef({ id: 'cat-ads', name: 'Advertising' }),
             }),
             transactionItem({ id: 'tx-2', counterpartyName: confirmedPayee, isVerified: true }),
@@ -32,7 +35,13 @@ vi.mock('@/app/lib/query-fn-schema', () => ({
 }));
 
 vi.mock('@/app/hooks/useWorkspaceId', () => ({ useWorkspaceId: () => 'ws-1' }));
-vi.mock('@/app/components/transactions/DetailsDrawer', () => ({ default: () => null }));
+// The drawer reports which version of the row it was handed.
+vi.mock('@/app/components/transactions/DetailsDrawer', () => ({
+  default: ({ transaction }: { transaction: { excludedFromBudgets?: boolean } | null }) =>
+    transaction ? (
+      <output data-testid="drawer-excluded">{String(transaction.excludedFromBudgets)}</output>
+    ) : null,
+}));
 vi.mock('@/app/components/transactions/hooks/useBulkUpdateCategory', () => ({
   useBulkUpdateCategory: () => ({ mutateAsync: vi.fn() }),
 }));
@@ -44,6 +53,7 @@ vi.mock('@/app/components/dashboard/CategoryIconBadge', () => ({
 describe('StatementTransactionsPanel', () => {
   beforeEach(() => {
     appLocale.current = 'en';
+    server.excluded = false;
   });
 
   it("names a system category in the reader's language and keeps the stored name for its icon", async () => {
@@ -77,5 +87,17 @@ describe('StatementTransactionsPanel', () => {
     renderWithQuery(<StatementTransactionsPanel statementId="st-1" />);
 
     expect(await screen.findByText(confirmedPayee)).toBeInTheDocument();
+  });
+
+  it('hands the drawer the row as the list reloads it, so a saved change shows there', async () => {
+    const client = createTestQueryClient();
+    renderWithQuery(<StatementTransactionsPanel statementId="st-1" />, { client });
+    fireEvent.click(await screen.findByText('Advertising', { selector: 'span' }));
+    expect(screen.getByTestId('drawer-excluded')).toHaveTextContent('false');
+
+    server.excluded = true;
+    await client.invalidateQueries({ queryKey: ['transactions'] });
+
+    expect(await screen.findByText('true')).toBeInTheDocument();
   });
 });
