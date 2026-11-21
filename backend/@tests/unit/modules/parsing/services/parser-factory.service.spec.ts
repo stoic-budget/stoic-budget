@@ -219,6 +219,7 @@ describe('ParserFactoryService', () => {
       'DiscoverParser',
       'EqBankParser',
       'FidelityBankParser',
+      'FifthThirdParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

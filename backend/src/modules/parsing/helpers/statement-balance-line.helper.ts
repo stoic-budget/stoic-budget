@@ -5,7 +5,8 @@ import { findStatementAmounts } from './statement-amount.helper';
  * line, or the next one when the label stands alone and its amount is printed
  * under it with its date ("Ending balance" / "on September 24, 2024 $122.45").
  * Another balance label on the same line ends it too: a summary of two columns
- * prints "Previous Balance $916.96   New Balance $203.39" as one line.
+ * prints "Previous Balance $916.96   New Balance $203.39" as one line, and so
+ * does any word after the label's figure ("… 353,060.27   Electronic Payments …").
  * `folded` is the statement folded by `foldText`; undefined means the end.
  */
 export function balanceLineEnd(
@@ -18,8 +19,15 @@ export function balanceLineEnd(
   const others = labels
     .map(label => new RegExp(`(?:^|[^a-z])${label}(?![a-z])`).exec(rest)?.index)
     .filter((at): at is number => at !== undefined);
-  return others.length > 0 ? index + Math.min(...others) : end;
+  // "Beginning Balance  353,060.27   Electronic Payments  120,100.00": a word after
+  // the figure starts the next column's label.
+  const nextLabel = NEXT_COLUMN_LABEL.exec(rest);
+  const cuts = [...others, ...(nextLabel ? [nextLabel.index + nextLabel[1].length] : [])];
+  return cuts.length > 0 ? index + Math.min(...cuts) : end;
 }
+
+/** A figure, then a word of three letters or more: another column's label begins. */
+const NEXT_COLUMN_LABEL = /(\d[.,]\d{2}\s+)(?=[a-z]{3,}(?!\s*[:.]?\s*$))/;
 
 function lineEnd(folded: string, index: number): number | undefined {
   const end = folded.indexOf('\n', index);

@@ -116,6 +116,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('The Discover card is issued by Discover Bank, Member FDIC.')).toBe(BankName.DISCOVER);
     expect(mentionedBank('Equitable Bank Tower. 30 Sample Avenue West')).toBe(BankName.EQ_BANK);
     expect(mentionedBank('www.fidelitybank.ng')).toBe(BankName.FIDELITY_BANK);
+    expect(mentionedBank('Fifth Third Business Plus')).toBe(BankName.FIFTH_THIRD);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
