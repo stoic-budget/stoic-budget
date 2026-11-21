@@ -8,6 +8,7 @@ import { getNestedValue, resolveLabel } from '@/app/lib/side-panel-utils';
 /** The screen's wording for one direction, resolved once from the dictionary. */
 export function usePayablesLabels(direction: PayableDirection) {
   const t = useIntlayer('statementsPage');
+  const recurrence = useIntlayer('payableRecurrence');
   const tx = useCallback((path: string[]) => resolveLabel(getNestedValue(t, path)), [t]);
   // Receivables reuse the payables screen; only the wording that names the counterparty
   // or the money flow switches, and it lives under the `receivables` content key.
@@ -82,6 +83,8 @@ export function usePayablesLabels(direction: PayableDirection) {
           paid: dx(['status', 'paid']),
           overdue: tx(['payables', 'status', 'overdue']),
           archived: tx(['payables', 'status', 'archived']),
+          // One occurrence of a repeating bill left out; the series goes on.
+          skipped: recurrence.skipped.value,
         },
         amountPaid: dx(['list', 'amountPaid']),
         sourceLabels: {
@@ -136,7 +139,7 @@ export function usePayablesLabels(direction: PayableDirection) {
         deleteConfirm: tx(['payables', 'toasts', 'deleteConfirm']),
       },
     }),
-    [dx, tx],
+    [dx, tx, recurrence],
   );
   return { labels, tx };
 }

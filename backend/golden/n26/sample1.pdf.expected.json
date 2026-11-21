@@ -1,0 +1,74 @@
+{
+  "metadata": {
+    "accountNumber": "IT60X1463688970371936774327",
+    "currency": "EUR",
+    "dateFrom": "2023-01-01T00:00:00",
+    "dateTo": "2023-01-31T00:00:00",
+    "balanceStart": 511,
+    "balanceEnd": 903.46
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-01-01T00:00:00",
+      "counterpartyName": "Mem A A",
+      "paymentPurpose": "Mem A A Income IBAN: DE67372003438023503346 • BIC: COBADEFFXXX Sent from Revolut",
+      "credit": 400,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-01-11T00:00:00",
+      "counterpartyName": "N26",
+      "paymentPurpose": "N26 N26 Smart Membership",
+      "debit": 4.9,
+      "currency": "EUR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-01-19T00:00:00",
+      "counterpartyName": "OVH US LLC",
+      "paymentPurpose": "OVH US LLC Mastercard • Business Expenses",
+      "debit": 11.64,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-01-19T00:00:00",
+      "counterpartyName": "Alipay",
+      "paymentPurpose": "Alipay Mastercard • Multimedia & Telecom",
+      "debit": 5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-01-19T00:00:00",
+      "counterpartyName": "NUMBER26 Referral Thanks for spreading the banking revolution.",
+      "paymentPurpose": "NUMBER26 Referral Thanks for spreading the banking revolution.",
+      "credit": 5,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2023-01-29T00:00:00",
+      "counterpartyName": "ExtraVM LLC",
+      "paymentPurpose": "ExtraVM LLC Mastercard • Business Expenses",
+      "debit": 101,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-01-29T00:00:00",
+      "counterpartyName": "Laron Ai",
+      "paymentPurpose": "Laron Ai MoneyBeam for food",
+      "debit": 300,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-01-31T00:00:00",
+      "counterpartyName": "Mem A A MIncome IBAN: DE24857672389479899 000 • BIC: COBADEFFXXX Sent from Revolut",
+      "paymentPurpose": "Mem A A MIncome IBAN: DE24857672389479899 000 • BIC: COBADEFFXXX Sent from Revolut",
+      "credit": 410,
+      "currency": "EUR"
+    }
+  ]
+}

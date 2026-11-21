@@ -59,7 +59,9 @@ export default defineConfig({
       ],
       reportsDirectory: 'coverage',
       reporter: ['text', 'lcov', 'html'],
-      thresholds: { statements: 8, branches: 5, functions: 8, lines: 8 },
+      // The merge gate for test coverage (main is at about 74% lines, 64%
+      // branches). A PR that drops the backend under it fails `tests`, and so ci-ok.
+      thresholds: { statements: 60, branches: 55, functions: 60, lines: 60 },
     },
     projects: [
       {

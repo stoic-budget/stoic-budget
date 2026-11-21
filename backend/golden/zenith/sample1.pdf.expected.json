@@ -1,0 +1,917 @@
+{
+  "metadata": {
+    "accountNumber": "4035101538",
+    "currency": "NGN",
+    "dateFrom": "2023-08-01T00:00:00",
+    "dateTo": "2024-08-30T00:00:00",
+    "balanceStart": 6941150.91
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-08-02T00:00:00",
+      "counterpartyName": "COT + VAT on NIP",
+      "paymentPurpose": "COT + VAT on NIP",
+      "debit": 28.35,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-03T00:00:00",
+      "counterpartyName": "NIP Charge + VAT",
+      "paymentPurpose": "NIP Charge + VAT",
+      "debit": 52.5,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-09T00:00:00",
+      "counterpartyName": "EHNOSY NIGERIA LIMITED",
+      "paymentPurpose": "NIP CR/EHNOSY NIGERIA LIMITED/DBP",
+      "debit": 9000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-11T00:00:00",
+      "counterpartyName": "EELLNOV OSTY IND LTD",
+      "paymentPurpose": "TRF TO EELLNOV OSTY IND LTD",
+      "debit": 230000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-14T00:00:00",
+      "counterpartyName": "AAAA ELW ADEIJLO AAHNSS",
+      "paymentPurpose": "TRF TO AAAA ELW ADEIJLO AAHNSS",
+      "debit": 20000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-18T00:00:00",
+      "counterpartyName": "NIP Charge + VAT",
+      "paymentPurpose": "NIP Charge + VAT",
+      "debit": 52.5,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-22T00:00:00",
+      "counterpartyName": "COT + VAT on NIP",
+      "paymentPurpose": "COT + VAT on NIP",
+      "debit": 388.5,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-23T00:00:00",
+      "counterpartyName": "AAIKLNOT-EIMNOOS, AADMNOS O.",
+      "paymentPurpose": "NIP CR/AAIKLNOT-EIMNOOS, AADMNOS O. /GTB",
+      "debit": 90000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-24T00:00:00",
+      "counterpartyName": "MC Loc ATM Wdl-000632781216--327/329 ABEOKUTA EXP. AY AABGL",
+      "paymentPurpose": "MC Loc ATM Wdl-000632781216--327/329 ABEOKUTA EXP. AY AABGL",
+      "debit": 2000,
+      "currency": "NGN",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-08-28T00:00:00",
+      "counterpartyName": "DMMOOU ADHOR AEEI MNOORY",
+      "paymentPurpose": "NIP/FBN/DMMOOU ADHOR AEEI MNOORY/FBNMOBILE:AEE LMMNU CILL NOS O",
+      "credit": 50000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-30T00:00:00",
+      "counterpartyName": "COT + VAT on NIP",
+      "paymentPurpose": "COT + VAT on NIP",
+      "debit": 15.75,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-09-04T00:00:00",
+      "counterpartyName": "NIP Charge + VAT",
+      "paymentPurpose": "NIP Charge + VAT",
+      "debit": 52.5,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-09-05T00:00:00",
+      "counterpartyName": "AAHNSS ADEINY ADEEEKL",
+      "paymentPurpose": "NIP CR/AAHNSS ADEINY ADEEEKL/SKYE",
+      "debit": 5000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-08T00:00:00",
+      "counterpartyName": "NIP Charge + VAT",
+      "paymentPurpose": "NIP Charge + VAT",
+      "debit": 52.5,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-09-11T00:00:00",
+      "counterpartyName": "COT + VAT on NIP",
+      "paymentPurpose": "COT + VAT on NIP",
+      "debit": 52.5,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-09-12T00:00:00",
+      "counterpartyName": "AABEKR,AI JMU DEEKOR",
+      "paymentPurpose": "NIP CR/AABEKR,AI JMU DEEKOR/GTB",
+      "debit": 54000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-13T00:00:00",
+      "counterpartyName": "CEEGNRY ACILPST NIG",
+      "paymentPurpose": "OUTFLOW TO CEEGNRY ACILPST NIG",
+      "debit": 358000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-14T00:00:00",
+      "counterpartyName": "MC Loc ATM Wdl-000632781284--327/329 ABEOKUTA EXP. AY AABGL",
+      "paymentPurpose": "MC Loc ATM Wdl-000632781284--327/329 ABEOKUTA EXP. AY AABGL",
+      "debit": 10000,
+      "currency": "NGN",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-09-15T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714526913999756",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714526913999756",
+      "debit": 200,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-09-19T00:00:00",
+      "counterpartyName": "MC Loc ATM Wdl-000632781296--327/329 ABEOKUTA EXP. AY AABGL",
+      "paymentPurpose": "MC Loc ATM Wdl-000632781296--327/329 ABEOKUTA EXP. AY AABGL",
+      "debit": 15000,
+      "currency": "NGN",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-09-20T00:00:00",
+      "counterpartyName": "CD/AIILMS/3216234",
+      "paymentPurpose": "CD/AIILMS/3216234",
+      "credit": 10000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-09-21T00:00:00",
+      "counterpartyName": "MC Loc ATM Wdl-000632781320--327/329 ABEOKUTA EXP. AY AABGL",
+      "paymentPurpose": "MC Loc ATM Wdl-000632781320--327/329 ABEOKUTA EXP. AY AABGL",
+      "debit": 11000,
+      "currency": "NGN",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-09-22T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714526914479480",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714526914479480",
+      "debit": 100,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-09-25T00:00:00",
+      "counterpartyName": "AI NSSU AADIJTU AAI AIKNY",
+      "paymentPurpose": "NIP/GTB/AI NSSU AADIJTU AAI AIKNY/USSD NIP Transfer from: 080",
+      "credit": 62000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-09-26T00:00:00",
+      "counterpartyName": "COT + VAT on NIP",
+      "paymentPurpose": "COT + VAT on NIP",
+      "debit": 884.1,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-09-29T00:00:00",
+      "counterpartyName": "NIP Charge + VAT",
+      "paymentPurpose": "NIP Charge + VAT",
+      "debit": 52.5,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-10-02T00:00:00",
+      "counterpartyName": "NIP CR//EHNOSY NIGERIA LIMITED/DBP",
+      "paymentPurpose": "NIP CR//EHNOSY NIGERIA LIMITED/DBP",
+      "debit": 10000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-03T00:00:00",
+      "counterpartyName": "NIP Charge + VAT",
+      "paymentPurpose": "NIP Charge + VAT",
+      "debit": 52.5,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-10-06T00:00:00",
+      "counterpartyName": "COT + VAT on NIP",
+      "paymentPurpose": "COT + VAT on NIP",
+      "debit": 325.5,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-10-09T00:00:00",
+      "counterpartyName": "DEEHINOR ADEEIKN. O",
+      "paymentPurpose": "NIP CR/DEEHINOR ADEEIKN. O/FDP",
+      "debit": 70000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-11T00:00:00",
+      "counterpartyName": "ADEIIJN MR H O",
+      "paymentPurpose": "NIP/UBN/ADEIIJN MR H O/BO H O ADEI INY IFO AAL LW",
+      "credit": 5000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-10-13T00:00:00",
+      "counterpartyName": "CSH DEP BCHIORUZ CEINPR EEMN",
+      "paymentPurpose": "CSH DEP BCHIORUZ CEINPR EEMN",
+      "credit": 450000,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2023-10-17T00:00:00",
+      "counterpartyName": "csh-wtdl self",
+      "paymentPurpose": "csh-wtdl self",
+      "debit": 100000,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2023-10-19T00:00:00",
+      "counterpartyName": "SMS Notification Charge Oct 2023",
+      "paymentPurpose": "SMS Notification Charge Oct 2023",
+      "debit": 72,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-10-20T00:00:00",
+      "counterpartyName": "CWP BCHIORUZ CEINPR EEMN",
+      "paymentPurpose": "CWP BCHIORUZ CEINPR EEMN",
+      "debit": 50000,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2023-10-23T00:00:00",
+      "counterpartyName": "AI NSSU AADIJTU AAI AIKNY",
+      "paymentPurpose": "NIP/GTB/AI NSSU AADIJTU AAI AIKNY/USSD NIP Transfer from: 080",
+      "credit": 246000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-10-25T00:00:00",
+      "counterpartyName": "AI NSSU AADIJTU AAI AIKNY",
+      "paymentPurpose": "NIP/GTB/AI NSSU AADIJTU AAI AIKNY/USSD NIP Transfer from: 080",
+      "credit": 100000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-10-31T00:00:00",
+      "counterpartyName": "CWP BCHIORUZ CEINPR EEMN",
+      "paymentPurpose": "CWP BCHIORUZ CEINPR EEMN",
+      "debit": 75000,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2023-11-02T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714539091083823",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714539091083823",
+      "debit": 100,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-09T00:00:00",
+      "counterpartyName": "TRF BY adeh mmmo/0010860",
+      "paymentPurpose": "TRF BY adeh mmmo/0010860",
+      "credit": 300000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-13T00:00:00",
+      "counterpartyName": "MC Loc ATM Wdl-000632781320--327/329 ABEOKUTA EXP. AY AABGL",
+      "paymentPurpose": "MC Loc ATM Wdl-000632781320--327/329 ABEOKUTA EXP. AY AABGL",
+      "debit": 20000,
+      "currency": "NGN",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "AFGLRU COMM LIMITED",
+      "paymentPurpose": "NIP/UBN/AFGLRU COMM LIMITED/UnionOnline Trf from AFGL RU CO",
+      "credit": 390000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-24T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714539091151816",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714539091151816",
+      "debit": 100,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-29T00:00:00",
+      "counterpartyName": "Charge back for OnDemand USSD Airtime. REFID: 105714539091151",
+      "paymentPurpose": "Charge back for OnDemand USSD Airtime. REFID: 105714539091151",
+      "credit": 100,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-11-30T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 157.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2023-12-04T00:00:00",
+      "counterpartyName": "AIKNY AADIJT AINS SU",
+      "paymentPurpose": "NIP CR/AIKNY AADIJT AINS SU/DBP",
+      "debit": 50000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-08T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2023-12-12T00:00:00",
+      "counterpartyName": "AAAA ELW ABIJLO AAIMMR",
+      "paymentPurpose": "NIP CR/AAAA ELW ABIJLO AAIMMR/GTB",
+      "debit": 3000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-15T00:00:00",
+      "counterpartyName": "ADEEEKL EEPRT",
+      "paymentPurpose": "TRF IFO ADEEEKL EEPRT",
+      "debit": 93000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-19T00:00:00",
+      "counterpartyName": "COUNTER CQ CHARGES ON TRF",
+      "paymentPurpose": "COUNTER CQ CHARGES ON TRF",
+      "debit": 265.65,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2023-12-20T00:00:00",
+      "counterpartyName": "COUNTER CQ CHARGES ON TRF",
+      "paymentPurpose": "COUNTER CQ CHARGES ON TRF",
+      "debit": 210,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2023-12-21T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714543267442974",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714543267442974",
+      "debit": 100,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-22T00:00:00",
+      "counterpartyName": "TRF BY ABILOS",
+      "paymentPurpose": "TRF BY ABILOS",
+      "credit": 330000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-29T00:00:00",
+      "counterpartyName": "TRF BY AAAA ELW ADEIJLO",
+      "paymentPurpose": "TRF BY AAAA ELW ADEIJLO",
+      "credit": 300000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-02T00:00:00",
+      "counterpartyName": "TRF FRM AAAA ELW ADEIJLO AAHNSS",
+      "paymentPurpose": "TRF FRM AAAA ELW ADEIJLO AAHNSS",
+      "credit": 385000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-09T00:00:00",
+      "counterpartyName": "TRF FRM ACMO F GLOBAL LIMITED",
+      "paymentPurpose": "TRF FRM ACMO F GLOBAL LIMITED",
+      "credit": 300000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-16T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714545777995638",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714545777995638",
+      "debit": 400,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-22T00:00:00",
+      "counterpartyName": "ADEIJLO AAHNSS AAAA ELW",
+      "paymentPurpose": "TRF TO ADEIJLO AAHNSS AAAA ELW",
+      "debit": 100000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-25T00:00:00",
+      "counterpartyName": "EELLNOV OSTY IND LTD",
+      "paymentPurpose": "TRF TO EELLNOV OSTY IND LTD",
+      "debit": 120000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-31T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-02-01T00:00:00",
+      "counterpartyName": "ADNSUY AAHHNN EELOOWY",
+      "paymentPurpose": "NIP CR/ADNSUY AAHHNN EELOOWY/UBA",
+      "debit": 10000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-02-05T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 126,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-02-09T00:00:00",
+      "counterpartyName": "AAHNSS ADEINY ADELEK",
+      "paymentPurpose": "NIP CR/AAHNSS ADEINY ADELEK/SKYE",
+      "debit": 20000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-02-12T00:00:00",
+      "counterpartyName": "TRF FORM CHARGE + VAT",
+      "paymentPurpose": "TRF FORM CHARGE + VAT",
+      "debit": 52.5,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-02-15T00:00:00",
+      "counterpartyName": "TRF FORM CHARGE + VAT",
+      "paymentPurpose": "TRF FORM CHARGE + VAT",
+      "debit": 52.5,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-02-19T00:00:00",
+      "counterpartyName": "TRF FORM CHARGE + VAT",
+      "paymentPurpose": "TRF FORM CHARGE + VAT",
+      "debit": 5000,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-02-21T00:00:00",
+      "counterpartyName": "TRF FORM CHARGE + VAT",
+      "paymentPurpose": "TRF FORM CHARGE + VAT",
+      "debit": 2000,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-02-22T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-02-25T00:00:00",
+      "counterpartyName": "AIJ LNOTU EELO OWY AADELMO",
+      "paymentPurpose": "NIP CR/AIJ LNOTU EELO OWY AADELMO/GTB",
+      "debit": 20000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-02-29T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-03-01T00:00:00",
+      "counterpartyName": "AIKNY AADIJT AINS SU",
+      "paymentPurpose": "NIP CR/AIKNY AADIJT AINS SU/DBP",
+      "debit": 50000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-03-05T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-03-13T00:00:00",
+      "counterpartyName": "EHNOSY NIGERIA LIMITED",
+      "paymentPurpose": "NIP CR/EHNOSY NIGERIA LIMITED/DBP",
+      "debit": 22000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-03-21T00:00:00",
+      "counterpartyName": "ADEEHTU L AADFIR",
+      "paymentPurpose": "NIP CR/ADEEHTU L AADFIR/ABN",
+      "debit": 20000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-03-25T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714546800116610",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714546800116610",
+      "debit": 500,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-28T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714546800141561",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714546800141561",
+      "debit": 300,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "TRF FRM ADGOSWY NIGERIA LIMITED",
+      "paymentPurpose": "TRF FRM ADGOSWY NIGERIA LIMITED",
+      "credit": 293000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-03T00:00:00",
+      "counterpartyName": "ADEEEKL EEPRT",
+      "paymentPurpose": "TRF IFO ADEEEKL EEPRT",
+      "debit": 100000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-04T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714546800199951",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714546800199951",
+      "debit": 525.6,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-05T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-08T00:00:00",
+      "counterpartyName": "AABDEGIK N AEEKMZ ADEEKLNU",
+      "paymentPurpose": "NIP CR/AABDEGIK N AEEKMZ ADEEKLNU/FCMB",
+      "debit": 20000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-08T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-12T00:00:00",
+      "counterpartyName": "AIIM R EINNRU AADEL",
+      "paymentPurpose": "NIP CR/AIIM R EINNRU AADEL/WBP",
+      "debit": 50000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-12T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-15T00:00:00",
+      "counterpartyName": "ACIKPRT AEFII NY AKNNOWW",
+      "paymentPurpose": "NIP CR/ACIKPRT AEFII NY AKNNOWW/DBP",
+      "debit": 110000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-16T00:00:00",
+      "counterpartyName": "A ELW AIKLLNNOS MOORST COY",
+      "paymentPurpose": "TRF TO A ELW AIKLLNNOS MOORST COY",
+      "debit": 50000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-16T00:00:00",
+      "counterpartyName": "AAAA ELW H ADEIJLO",
+      "paymentPurpose": "TRF TO AAAA ELW H ADEIJLO",
+      "debit": 120000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-17T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-18T00:00:00",
+      "counterpartyName": "AAAA ELW, AADILL MO ENSU",
+      "paymentPurpose": "NIP CR/AAAA ELW, AADILL MO ENSU/GTB",
+      "debit": 100000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-19T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-22T00:00:00",
+      "counterpartyName": "AINS SU, AELN OENSU ABI KRU",
+      "paymentPurpose": "NIP CR/AINS SU, AELN OENSU ABI KRU/GTB",
+      "debit": 40000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-23T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-23T00:00:00",
+      "counterpartyName": "EHNOSY NIGERIA LIMITED",
+      "paymentPurpose": "NIP CR/EHNOSY NIGERIA LIMITED/DBP",
+      "debit": 20000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-24T00:00:00",
+      "counterpartyName": "AIN SSU AADIJT AAI AIKNY",
+      "paymentPurpose": "TRF TO AIN SSU AADIJT AAI AIKNY",
+      "debit": 66000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-24T00:00:00",
+      "counterpartyName": "TRANSFER BY CELNU EHKS INTEGRATED SERVICES LTD",
+      "paymentPurpose": "TRANSFER BY CELNU EHKS INTEGRATED SERVICES LTD",
+      "credit": 450000,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-25T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-25T00:00:00",
+      "counterpartyName": "AIKNY AADIJT AINS SU",
+      "paymentPurpose": "NIP CR/AIKNY AADIJT AINS SU/DBP",
+      "debit": 286000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-25T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 52.5,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-26T00:00:00",
+      "counterpartyName": "AABDEGIK N AEEKMZ ADEEKLNU",
+      "paymentPurpose": "NIP CR/AABDEGIK N AEEKMZ ADEEKLNU/FCMB",
+      "debit": 30000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-26T00:00:00",
+      "counterpartyName": "EEGLNOUY AEEFZ",
+      "paymentPurpose": "TRF IFO EEGLNOUY AEEFZ",
+      "debit": 282000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-26T00:00:00",
+      "counterpartyName": "ADEEEKL EEPRT",
+      "paymentPurpose": "TRF IFO ADEEEKL EEPRT",
+      "debit": 50000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-26T00:00:00",
+      "counterpartyName": "FT FORM CHRG",
+      "paymentPurpose": "FT FORM CHRG",
+      "debit": 2236.8,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-29T00:00:00",
+      "counterpartyName": "FT FORM CHRG-29/04/24",
+      "paymentPurpose": "FT FORM CHRG-29/04/24",
+      "debit": 840,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-29T00:00:00",
+      "counterpartyName": "COUNTER CHQ CHG ON TRF",
+      "paymentPurpose": "COUNTER CHQ CHG ON TRF",
+      "debit": 210,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-04-29T00:00:00",
+      "counterpartyName": "ADEEEKL EEPRT",
+      "paymentPurpose": "TRF IFO ADEEEKL EEPRT",
+      "debit": 70000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-29T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714549182465687",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714549182465687",
+      "debit": 200,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-29T00:00:00",
+      "counterpartyName": "Transfer Charges",
+      "paymentPurpose": "Transfer Charges",
+      "debit": 141.75,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-30T00:00:00",
+      "counterpartyName": "EHNOSY NIGERIA LIMITED",
+      "paymentPurpose": "NIP CR/EHNOSY NIGERIA LIMITED/DBP",
+      "debit": 35000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-30T00:00:00",
+      "counterpartyName": "SMS Notification Charge Apr 2024",
+      "paymentPurpose": "SMS Notification Charge Apr 2024",
+      "debit": 290,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-05-02T00:00:00",
+      "counterpartyName": "CASH PD BCHIORUZ CEINPR EEMN",
+      "paymentPurpose": "CASH PD BCHIORUZ CEINPR EEMN",
+      "debit": 23000,
+      "currency": "NGN",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-05-03T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714550060561113",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714550060561113",
+      "debit": 200,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-03T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714550060561543",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714550060561543",
+      "debit": 100,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-03T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714550060572285",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714550060572285",
+      "debit": 200,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-06T00:00:00",
+      "counterpartyName": "OnDemand USSD Airtime. REFID: 105714550060624469",
+      "paymentPurpose": "OnDemand USSD Airtime. REFID: 105714550060624469",
+      "debit": 100,
+      "currency": "NGN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-07T00:00:00",
+      "counterpartyName": "EELLNOV OSTY IND LTD",
+      "paymentPurpose": "TRF TO EELLNOV OSTY IND LTD",
+      "debit": 206000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain",
+    "printed_balances"
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "metadata": {
+    "accountNumber": "178297093274",
+    "currency": "GBP",
+    "dateFrom": "2024-08-24T00:00:00",
+    "dateTo": "2024-11-22T00:00:00"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-09-24T00:00:00",
+      "counterpartyName": "Member Sampl",
+      "paymentPurpose": "Payment to Member Sampl",
+      "debit": 40.82,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-24T00:00:00",
+      "counterpartyName": "ACMR",
+      "paymentPurpose": "Payment from ACMR - XX-100000 (ACMESSTORE LLC)",
+      "credit": 9.3,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-20T00:00:00",
+      "counterpartyName": "Shopify",
+      "paymentPurpose": "Payment from Shopify - XX-100000 (SAMPLESTO LTD)",
+      "credit": 32.22,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-19T00:00:00",
+      "counterpartyName": "Community Federal Savings Bank",
+      "paymentPurpose": "Withdrawal to Community Federal Savings Bank (1000)",
+      "debit": 54.15,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-19T00:00:00",
+      "counterpartyName": "Shopify",
+      "paymentPurpose": "Payment from Shopify - XX-100000 (SAMPLESTO LTD)",
+      "credit": 54.15,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-18T00:00:00",
+      "counterpartyName": "Community Federal Savings Bank",
+      "paymentPurpose": "Withdrawal to Community Federal Savings Bank (1000)",
+      "debit": 41.3,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-18T00:00:00",
+      "counterpartyName": "Shopify",
+      "paymentPurpose": "Payment from Shopify - XX-100000 (SAMPLESTO LTD)",
+      "credit": 28.35,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-17T00:00:00",
+      "counterpartyName": "Community Federal Savings Bank",
+      "paymentPurpose": "Withdrawal to Community Federal Savings Bank (1000)",
+      "debit": 40,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-17T00:00:00",
+      "counterpartyName": "Shopify",
+      "paymentPurpose": "Payment from Shopify - XX-100000 (SAMPLESTO LTD)",
+      "credit": 27.48,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-13T00:00:00",
+      "counterpartyName": "Community Federal Savings Bank",
+      "paymentPurpose": "Withdrawal to Community Federal Savings Bank (1000)",
+      "debit": 45,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-13T00:00:00",
+      "counterpartyName": "Shopify",
+      "paymentPurpose": "Payment from Shopify - XX-100000 (SAMPLESTO LTD)",
+      "credit": 28.39,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-11T00:00:00",
+      "counterpartyName": "Shopify",
+      "paymentPurpose": "Payment from Shopify - XX-100000 (SAMPLESTO LTD)",
+      "credit": 42.08,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    }
+  ]
+}

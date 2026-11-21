@@ -99,12 +99,12 @@ Stoic Budget is a full-stack platform for importing, categorizing and analyzing 
 
 ### Understand your money
 
-- **Dashboard** — this month's budgets, income, spending, net and savings rate, top categories, cash flow as each account's balance day by day, a calendar or a flow, recent transactions and upcoming charges; pick which sections show.
+- **Dashboard** — this month's budgets, income, spending, net and savings rate, top payees, cash flow as each account's balance day by day, a calendar or a flow, recent transactions and upcoming charges; pick which sections show.
 - **Reports** — cash flow, trends, spend flow, tax year and your own report templates, on a schedule if you like; export to CSV, XLSX or PDF.
 - **Budgets** — monthly limits per category in any currency, plus the Stoic balance: planned versus actual spending across necessity, work, virtue and leisure.
 - **Subscriptions and bills** — recurring charges found automatically, what is paid and still due this month, bills to pay and money to receive.
 - **Forecast** — the next 90 days from paydays, bills, subscriptions and receivables: runway, lowest point and safe-to-spend, with a note when history is too short to trust it.
-- **Goals and net worth** — savings goals fed by real transactions, and net worth across accounts, investments, precious metals and crypto.
+- **Goals and net worth** — savings goals fed by real transactions or following an account's balance, and net worth across accounts, investments, precious metals and crypto.
 - **Crypto and investments** — wallets on Ethereum, Base, Arbitrum, Optimism, Polygon, Tron, Bitcoin and Solana kept in sync, investment accounts, metal lots and a returns page.
 - **Advice** — observations and suggestions computed from your own numbers.
 
@@ -113,7 +113,6 @@ Stoic Budget is a full-stack platform for importing, categorizing and analyzing 
 - **Invoicing** — clients, itemized invoices with tax per line, PDFs, recurring invoices and credit notes; e-invoices in XRechnung, Peppol BIS and ZUGFeRD / Factur-X, sent and received over Peppol.
 - **Payables and receivables** — matched against statement rows, with ageing and payment reminders.
 - **VAT** — rates, rules and returns, EU VAT numbers checked against VIES, reminders before deadlines.
-- **Income tax drafts** — Germany (Anlage EÜR), Spain (Modelo 100), Poland (PIT-36L / PIT-28 / PIT-36) and a generic summary elsewhere, built only from the mappings you confirm.
 - **For your accountant** — a tax pack with the year's rows and every receipt behind them, and a DATEV export for Germany and Austria.
 - **Double-entry ledger** (opt-in) — every transaction posted as a balanced entry; trial balance, profit and loss, balance sheet and reconciliation against statements.
 
@@ -137,7 +136,7 @@ Setting expectations upfront:
 
 - **Not a bank integration** — Stoic Budget holds no bank integration of its own: it parses statement files you export from your bank. If you hold your own account with a data provider (SimpleFIN Bridge for the US and Canada, Enable Banking for the EU/EEA), you can connect it under Integrations and Stoic Budget pulls your statements through the same import; Stoic Budget itself never talks to a bank and holds no provider contract. That arrangement is also the only one in which this is free: every provider's free tier covers the accounts the person who linked them can see, which is why a workspace may hold one connection per person. A wallet's feed can be moved to another provider without losing its history.
 - **Not an accrual accounting suite** — The ledger records what your statements and manual entries say. There is no automatic accrual, depreciation schedule, or period-end closing workflow.
-- **Not a filing service or tax adviser** — Stoic Budget computes tax figures and drafts VAT and income tax documents, but it does not submit anything to a tax authority on your behalf. An income tax draft is not tax advice — check it before you file.
+- **Not a filing service or tax adviser** — Stoic Budget computes tax figures and drafts VAT returns, but it does not submit anything to a tax authority on your behalf. A draft is not tax advice — check it before you file.
 - **Not a replacement for accounting software** — Stoic Budget keeps double-entry books of your bank activity and issues invoices, but it does not run payroll or file statutory reports. Use it next to QuickBooks, Xero, or 1C rather than instead of them.
 
 ---
@@ -146,24 +145,31 @@ Setting expectations upfront:
 
 | Country | Native PDF parser | CSV preset |
 |---|---|---|
-| 🇺🇸 United States | Ally Bank, Associated Bank, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU | Chase, Bank of America, Capital One, American Express, Wells Fargo |
-| 🇬🇧 United Kingdom | Barclays, Bank of Scotland | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
-| 🇩🇪 Germany | | N26, Sparkasse / DKB, Commerzbank |
+| 🇺🇸 United States | Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens, Found, Frost Bank, GO2bank, Green Dot, HSA Bank, Huntington, IBC Bank, KeyBank, M&T Bank, Marcus by Goldman Sachs, Merrick Bank, Navy Federal Credit Union, Netspend, Optum Bank, PNC Bank, Prosperity Bank, Regions Bank, SoFi, Synchrony Bank, Synovus, Truist, U.S. Bank, USAA, Varo Bank, Walmart MoneyCard, Webster Bank, Wells Fargo, Woodforest National Bank | Chase, Bank of America, Capital One, American Express, Wells Fargo |
+| 🇬🇧 United Kingdom | Bank of Scotland, Barclays, first direct, Halifax, Handelsbanken, HSBC, iFAST Global Bank, Kroo, Lloyds Bank, Metro Bank, Monzo, Nationwide, NatWest, Royal Bank of Scotland, Santander UK, Starling Bank, The Co-operative Bank, Ulster Bank, Virgin Money | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
+| 🇩🇪 Germany | Deutsche Bank, N26 | N26, Sparkasse / DKB, Commerzbank |
 | 🇳🇱 Netherlands | | ING, Rabobank |
 | 🇸🇪 🇩🇰 🇳🇴 🇫🇮 Nordics | | Nordea |
-| 🇫🇷 France | Crédit Agricole | |
+| 🇫🇷 France | Crédit Agricole, Société Générale, Sogexia | |
 | 🇵🇱 Poland | BNP Paribas Bank Polska | |
-| 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital | |
-| 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank | |
-| 🇿🇦 South Africa | Absa, Capitec | |
-| 🇮🇳 India | Axis Bank, Citibank | |
+| 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank, RBC Royal Bank, Scotiabank, Simplii Financial, Tangerine, TD Bank | |
+| 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank, Great Southern Bank, Heritage Bank, ING, NAB, Suncorp Bank, Westpac | |
+| 🇳🇬 Nigeria | Fidelity Bank, Zenith Bank | |
+| 🇧🇪 Belgium | KBC | |
+| 🇰🇪 Kenya | NCBA Bank | |
+| 🇶🇦 Qatar | QNB | |
+| 🇷🇴 Romania | Raiffeisen Bank | |
+| 🇨🇭 Switzerland | UBS | |
+| 🇮🇹 Italy | UniCredit | |
+| 🇿🇦 South Africa | Absa, Capitec, FNB | |
+| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India | UCO Bank, Union Bank of India |
 | 🇧🇷 Brazil | Banco do Brasil | |
 | 🇭🇰 Hong Kong | Bank of China (Hong Kong) | |
-| 🇵🇭 Philippines | BPI | |
+| 🇵🇭 Philippines | BPI, GoTyme Bank | |
 | 🇱🇰 Sri Lanka | Commercial Bank of Ceylon | |
 | 🇮🇱 Israel | Bank Hapoalim / Isracard (Hebrew) | |
 | 🇰🇿 Kazakhstan | Kaspi Bank, Bereke Bank (new and legacy formats) | |
-| 🌍 International | | Revolut, Wise, PayPal |
+| 🌍 International | Payoneer, PayPal, Revolut, Skrill, Standard Chartered, Wise | Revolut, Wise, PayPal |
 | — | | T-Bank (Tinkoff) |
 
 **Any other bank:** CSV with delimiter detection, XLSX / XLS, DOCX tables, OFX / QFX, QIF, MT940, CAMT.053, any PDF through the generic table reader, and images (PNG / JPG) through OCR.

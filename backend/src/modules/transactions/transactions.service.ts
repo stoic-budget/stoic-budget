@@ -1,15 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { In, type Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { currencyCodeOrDefault } from '../../common/utils/currency.util';
 import { ensureCanEdit } from '../../common/utils/ensure-can-edit.util';
 import { toMinor } from '../../common/utils/money.util';
-import { taxLockedConflict } from '../../common/utils/tax-lock.util';
 import {
   applyOwnerFilter,
   assertOwnerMemberInWorkspace,
@@ -25,8 +23,6 @@ import type {
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
 import { Branch } from '../../entities/branch.entity';
 import { Category, CategoryType } from '../../entities/category.entity';
-import { Payable } from '../../entities/payable.entity';
-import { Receipt } from '../../entities/receipt.entity';
 import { Statement } from '../../entities/statement.entity';
 import {
   TaxSource,
@@ -40,10 +36,17 @@ import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
 import { ensurePrivateCategory } from '../categories/private-category';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
-import type { DataDeletedEvent } from '../notifications/events/notification-events';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
-import { cloneForSplit } from './helpers/transaction-split-clone';
+import {
+  assertFilesKeepTheirReaders,
+  NOTHING_REPOINTED,
+  repointSplitParts,
+} from './helpers/repoint-split-parts';
+import { lockSplitGroup } from './helpers/split-group-lock';
+import { assertMayReshape, assertSplittable, memberIdOf } from './helpers/split-guards';
+import { applyPartCategory, cloneForSplit } from './helpers/transaction-split-clone';
 import { applyListFilters, type TransactionListFilters } from './transaction-list-filters';
+import { assertUnsplittable } from './unsplit-guards';
 
 export type TransactionWithConversion = Transaction & {
   convertedAmount?: number;
@@ -59,7 +62,7 @@ export class TransactionsService {
     @InjectRepository(Statement)
     statementRepository: Repository<Statement>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    userRepository: Repository<User>,
     @InjectRepository(WorkspaceMember)
     private readonly workspaceMemberRepository: Repository<WorkspaceMember>,
     @InjectRepository(Category)
@@ -68,19 +71,7 @@ export class TransactionsService {
     private readonly auditService: AuditService,
     private readonly exchangeRatesService: ExchangeRatesService,
     private readonly taxAssignmentService: TaxAssignmentService,
-    private readonly eventEmitter?: EventEmitter2,
   ) {}
-
-  private async resolveActorName(userId: string): Promise<string> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      select: {
-        name: true,
-        email: true,
-      },
-    });
-    return user?.name || user?.email || 'User';
-  }
 
   /** Bumps the version the cached reports are keyed by; they are keyed by workspace. */
   private async invalidateReports(workspaceId: string): Promise<void> {
@@ -420,50 +411,6 @@ export class TransactionsService {
   }
 
   /**
-   * Guards that a transaction may be split, and returns its authoritative amount.
-   *
-   * Called twice: once outside the DB transaction as a cheap fast path, and again
-   * on the locked row, which is the read the parts are actually derived from.
-   */
-  private assertSplittable(transaction: Transaction, dto: SplitTransactionBody): number {
-    if (transaction.splitGroupId) {
-      throw new BadRequestException(appError('TRANSACTION_ALREADY_SPLIT'));
-    }
-
-    // A duplicate-flagged row is excluded from dashboards and reports. Splitting it
-    // would produce siblings that default to isDuplicate=false, so the sibling
-    // amounts would reappear in those totals. Refuse instead.
-    if (transaction.isDuplicate) {
-      throw new BadRequestException(appError('TRANSACTION_SPLIT_DUPLICATE'));
-    }
-
-    // A locked row has already been reported on a filed return. Splitting it
-    // re-assesses the tax across the parts, which would change figures that
-    // have been submitted to a tax authority.
-    if (transaction.taxLocked) {
-      throw new BadRequestException(appError('TRANSACTION_SPLIT_TAX_LOCKED'));
-    }
-
-    const total = Number(
-      transaction.amount ?? transaction.debit ?? transaction.credit ?? Number.NaN,
-    );
-    if (!Number.isFinite(total) || total <= 0) {
-      throw new BadRequestException(appError('TRANSACTION_SPLIT_NOT_POSITIVE'));
-    }
-
-    const partsTotal = this.round2(dto.parts.reduce((sum, part) => sum + Number(part.amount), 0));
-    // Round the drift too: |99.99 - 100| is 0.010000000000005 in binary floating
-    // point, which would reject the very boundary the tolerance exists to accept.
-    if (this.round2(Math.abs(partsTotal - total)) > 0.01) {
-      throw new BadRequestException(
-        appError('TRANSACTION_SPLIT_SUM_MISMATCH', { total, received: partsTotal }),
-      );
-    }
-
-    return total;
-  }
-
-  /**
    * Divides a transaction's money across its parts.
    *
    * The requested amounts are rounded to cents and the LAST part absorbs the
@@ -508,6 +455,7 @@ export class TransactionsService {
     dto: SplitTransactionBody,
   ): Promise<Transaction[]> {
     await this.ensureCanEditStatements(userId, workspaceId);
+    const viewerMemberId = await memberIdOf(this.workspaceMemberRepository, workspaceId, userId);
     const original = await this.findOne(id, workspaceId);
     await assertWorkspaceOwned(
       this.transactionRepository.manager,
@@ -517,7 +465,7 @@ export class TransactionsService {
     );
     // Fast path only: reject an obviously invalid request before opening a DB
     // transaction and taking a row lock. The authoritative check is the one below.
-    this.assertSplittable(original, dto);
+    assertSplittable(original, dto, viewerMemberId);
 
     const before = { ...original };
     const splitGroupId = randomUUID();
@@ -537,7 +485,7 @@ export class TransactionsService {
         throw new NotFoundException(appError('TRANSACTION_NOT_FOUND'));
       }
 
-      const total = this.assertSplittable(locked, dto);
+      const total = assertSplittable(locked, dto, viewerMemberId);
       const isExpense = locked.transactionType === TransactionType.EXPENSE;
       const rawForeign = locked.amountForeign ?? null;
       const { amounts, foreignAmounts } = this.allocateParts(
@@ -563,12 +511,7 @@ export class TransactionsService {
         // amount. Null on every part so backfillFingerprints recomputes them all.
         row.fingerprint = null;
 
-        // Per-part override, else keep what the row already inherited.
-        if (part.categoryId && part.categoryId !== row.categoryId) {
-          row.categoryId = part.categoryId;
-          row.categorySource = TransactionCategorySource.MANUAL;
-          row.categoryReason = null;
-        }
+        applyPartCategory(row, part.categoryId, locked.isPrivate);
         row.paymentPurpose = part.paymentPurpose ?? row.paymentPurpose;
         row.comments = part.comments ?? row.comments;
 
@@ -654,6 +597,7 @@ export class TransactionsService {
    */
   async unsplit(id: string, workspaceId: string, userId: string): Promise<Transaction> {
     await this.ensureCanEditStatements(userId, workspaceId);
+    const viewerMemberId = await memberIdOf(this.workspaceMemberRepository, workspaceId, userId);
 
     // Fast path only: reject an obviously invalid request before opening a DB
     // transaction and taking row locks. The authoritative read is the locked one.
@@ -666,21 +610,15 @@ export class TransactionsService {
     // Plain copies for the audit diff, not entities: spreading drops the
     // entity's own methods.
     let before: Array<Partial<Transaction>> = [];
-    let repointed = { duplicates: 0, receipts: 0, payables: 0 };
+    let repointed = NOTHING_REPOINTED;
 
     const merged = await this.transactionRepository.manager.transaction(async manager => {
       const repo = manager.getRepository(Transaction);
 
       // Lock the whole group in one ordered statement. A concurrent unsplit of the
-      // same group queues here instead of double-counting the total or deleting
-      // rows this one already folded in, and the shared ORDER BY gives both
-      // statements the same lock order, so they queue rather than deadlock.
-      // No relations: Postgres cannot lock the nullable side of an outer join.
-      const parts = await repo.find({
-        where: { workspaceId, splitGroupId },
-        order: { splitIndex: 'ASC' },
-        lock: { mode: 'pessimistic_write' },
-      });
+      // same group, or a delete of one of its parts, queues here instead of
+      // double-counting the total or deleting rows this one already folded in.
+      const parts = await lockSplitGroup(repo, workspaceId, splitGroupId);
 
       // Empty means the group is gone — another request unsplit it while this one
       // waited for the lock. A single part is a group that lost its siblings some
@@ -694,23 +632,15 @@ export class TransactionsService {
       if (parts.some(part => part.taxLocked)) {
         throw new BadRequestException(appError('TRANSACTION_UNSPLIT_TAX_LOCKED'));
       }
+      // Every part, not only the one asked about: another may be someone's private row.
+      assertMayReshape(parts, viewerMemberId);
 
       before = parts.map(part => ({ ...part }));
 
-      // A part can be flagged as a duplicate AFTER the split: isSameSplitGroup only
-      // excludes pairs sharing a splitGroupId, so a part stays comparable against
-      // rows in other statements and markDuplicates can flag it at any time. A
-      // flagged row is excluded from reports, so merging would either inflate
-      // reported spend (a flagged sibling folded into the unflagged survivor) or
-      // erase the whole charge (part 0 flagged, survivor keeps isDuplicate). Refuse,
-      // as assertSplittable does on the way in — with its own message, so the two
-      // sides are distinguishable. Checked on the locked rows: the flag may have
-      // landed after the unlocked read.
-      if (parts.some(part => part.isDuplicate)) {
-        throw new BadRequestException(appError('TRANSACTION_UNSPLIT_DUPLICATE'));
-      }
+      assertUnsplittable(parts);
 
       const [survivor, ...rest] = parts;
+      await assertFilesKeepTheirReaders(manager, workspaceId, survivor, rest);
       // Falls back the same way assertSplittable reads an amount. Unreachable while
       // split() always writes `amount`, but the two sides should not disagree about
       // where a part's money lives.
@@ -741,39 +671,9 @@ export class TransactionsService {
       const saved = await repo.save(survivor);
 
       if (rest.length > 0) {
-        // Every FK pointing at transactions.id is ON DELETE SET NULL, so deleting a
-        // part silently unlinks whatever referenced it. Repoint at the survivor
-        // FIRST — after the delete the FK has already been nulled and the link is
-        // unrecoverable. The survivor represents the whole charge again, so it is
-        // the right target for all three.
+        // Repoint FIRST: after the delete the foreign keys have already cut the links.
         const removedIds = rest.map(part => part.id);
-
-        // Without this, a transaction whose master was a deleted part is left
-        // isDuplicate=true with duplicateOfId=null: excluded from reports forever,
-        // with no master and no UI path to unflag it. The survivor cannot be
-        // repointed at itself here — a row with duplicateOfId set always has
-        // isDuplicate set too, which the guard above already rejected.
-        const duplicates = await manager
-          .getRepository(Transaction)
-          .update({ workspaceId, duplicateOfId: In(removedIds) }, { duplicateOfId: survivor.id });
-
-        const receipts = await manager
-          .getRepository(Receipt)
-          .update({ workspaceId, transactionId: In(removedIds) }, { transactionId: survivor.id });
-
-        const payables = await manager
-          .getRepository(Payable)
-          .update(
-            { workspaceId, linkedTransactionId: In(removedIds) },
-            { linkedTransactionId: survivor.id },
-          );
-
-        repointed = {
-          duplicates: duplicates.affected ?? 0,
-          receipts: receipts.affected ?? 0,
-          payables: payables.affected ?? 0,
-        };
-
+        repointed = await repointSplitParts(manager, workspaceId, removedIds, survivor.id);
         await repo.remove(rest);
       }
 
@@ -797,46 +697,11 @@ export class TransactionsService {
         duplicatesRepointed: repointed.duplicates,
         receiptsRepointed: repointed.receipts,
         payablesRepointed: repointed.payables,
+        attachmentsRepointed: repointed.attachments,
       },
       isUndoable: false,
     });
 
     return merged;
-  }
-
-  async remove(id: string, workspaceId: string, userId: string): Promise<void> {
-    await this.ensureCanEditStatements(userId, workspaceId);
-    const transaction = await this.findOne(id, workspaceId);
-    if (transaction.taxLocked) {
-      throw taxLockedConflict(1);
-    }
-    // Use delete for simplicity; entity already validated for ownership.
-
-    await this.transactionRepository.delete(transaction.id);
-    await this.invalidateReports(workspaceId);
-
-    // Audit: record deletion for potential rollback.
-    await this.auditService.createEvent({
-      workspaceId,
-      actorType: ActorType.USER,
-      actorId: userId,
-      entityType: EntityType.TRANSACTION,
-      entityId: transaction.id,
-      action: AuditAction.DELETE,
-      diff: { before: transaction, after: null },
-      meta: {
-        statementId: transaction.statementId,
-      },
-      isUndoable: true,
-    });
-
-    this.eventEmitter?.emit('data.deleted', {
-      workspaceId,
-      actorId: userId,
-      actorName: await this.resolveActorName(userId),
-      entityType: 'transaction',
-      entityLabel: transaction.documentNumber || transaction.counterpartyName,
-      count: 1,
-    } satisfies DataDeletedEvent);
   }
 }

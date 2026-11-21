@@ -113,6 +113,7 @@ export function ChangelogModal({
 
   return (
     <ModalShell
+      demoNotice={false}
       isOpen={isOpen}
       onClose={onClose}
       size="full"

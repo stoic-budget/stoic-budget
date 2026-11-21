@@ -2,7 +2,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Payable, PayableStatus } from '@/app/lib/payables-api';
-import { categoryItem, walletItem } from '@/app/test/fixtures/contracts';
+import { categoryItem, payableRow, walletItem } from '@/app/test/fixtures/contracts';
 import { renderWithQuery } from '@/app/test/query-wrapper';
 import { CreatePayableDrawer } from './CreatePayableDrawer';
 
@@ -186,5 +186,40 @@ describe('CreatePayableDrawer', () => {
 
     fireEvent.mouseDown(statusField());
     expect(within(await screen.findByRole('listbox')).queryByText('Received')).not.toBeInTheDocument();
+  });
+
+  it('keeps the rule of a repeating bill, and ends it when set to not repeat', async () => {
+    const rule = {
+      frequency: 'monthly',
+      interval: 1,
+      startDate: '2026-01-31',
+      monthDay: 31,
+    } as const;
+    // The April occurrence, clamped to the 30th: saving it must keep the series on the 31st.
+    const onSubmit = renderDrawer({
+      payable: payableRow({
+        id: 'p1',
+        vendor: 'ACME Rent',
+        amount: '900.00',
+        currency: 'EUR',
+        dueDate: '2026-04-30',
+        seriesId: 'p1',
+        occurrenceDate: '2026-04-30',
+        recurrence: rule,
+        remindDaysBefore: 5,
+      }) as Payable,
+    });
+    expect(document.getElementById('payable-interval')).toHaveValue(1);
+    save();
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    expect(onSubmit).toHaveBeenLastCalledWith(
+      expect.objectContaining({ recurrence: rule, remindDaysBefore: 5 }),
+    );
+
+    fireEvent.mouseDown(document.getElementById('payable-repeat') as HTMLElement);
+    fireEvent.click(within(await screen.findByRole('listbox')).getByText('never'));
+    save();
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(2));
+    expect(onSubmit).toHaveBeenLastCalledWith(expect.objectContaining({ recurrence: null }));
   });
 });

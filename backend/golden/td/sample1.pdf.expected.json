@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "accountNumber": "0107-1000001",
+    "currency": "CAD",
+    "dateFrom": "2024-07-31T00:00:00",
+    "dateTo": "2024-08-30T00:00:00",
+    "balanceStart": 4673.31,
+    "balanceEnd": 5966.52
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-08-06T00:00:00",
+      "counterpartyName": "TD ATM DEP 001059",
+      "paymentPurpose": "TD ATM DEP 001059",
+      "credit": 815.69,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-08-19T00:00:00",
+      "counterpartyName": "TD ATM DEP 008673",
+      "paymentPurpose": "TD ATM DEP 008673",
+      "credit": 777.52,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-08-19T00:00:00",
+      "counterpartyName": "TD ATM W/D 008675",
+      "paymentPurpose": "TD ATM W/D 008675",
+      "debit": 100,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-08-30T00:00:00",
+      "counterpartyName": "PTS TO: 42920000001",
+      "paymentPurpose": "PTS TO: 42920000001",
+      "debit": 200,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-30T00:00:00",
+      "counterpartyName": "MONTHLY ACCOUNT FEE",
+      "paymentPurpose": "MONTHLY ACCOUNT FEE",
+      "debit": 16.95,
+      "currency": "CAD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-08-30T00:00:00",
+      "counterpartyName": "ACCT FEE REBATE",
+      "paymentPurpose": "ACCT FEE REBATE",
+      "credit": 16.95,
+      "currency": "CAD",
+      "paymentType": "fee"
+    }
+  ]
+}
