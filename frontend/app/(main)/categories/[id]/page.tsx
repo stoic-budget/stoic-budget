@@ -5,7 +5,12 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { categoryTones } from '@/app/components/charts/chart-theme';
-import { MonthBars, MonthBarsSkeleton } from '@/app/components/charts/MonthBars';
+import {
+  MonthBars,
+  MonthBarsSkeleton,
+  monthBounds,
+  monthLabel,
+} from '@/app/components/charts/MonthBars';
 import { CategoryIconBadge } from '@/app/components/dashboard/CategoryIconBadge';
 import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { LoadError } from '@/app/components/ui/load-error';
@@ -17,11 +22,6 @@ import { FilteredTransactions } from '../../statements/transactions/components/F
 import { CategoryBreakdown } from '../components/CategoryBreakdown';
 import { CategoryFigures } from '../components/CategoryFigures';
 import { useCategory, useCategorySummary } from '../hooks/useCategoryDetail';
-
-const lastDayOf = (month: string) => {
-  const [year, index] = month.split('-').map(Number);
-  return new Date(Date.UTC(year, index, 0)).toISOString().slice(0, 10);
-};
 
 /**
  * One category: its last twelve months with subcategories included, counted
@@ -41,11 +41,7 @@ export default function CategoryPage(): React.JSX.Element {
   const info = summary.data;
   const money = (value: number) => formatMoney(value, info?.currency ?? 'EUR', locale);
   const name = data ? getCategoryDisplayName(data, locale) : undefined;
-  const monthName = month
-    ? new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
-        new Date(`${month}-01T00:00:00Z`),
-      )
-    : '';
+  const monthName = month ? monthLabel(month, locale) : '';
 
   return (
     <div className="seneca-all-tx">
@@ -127,7 +123,7 @@ export default function CategoryPage(): React.JSX.Element {
             filter={{
               categoryId: id,
               subcategories: '1',
-              ...(month ? { date_from: `${month}-01`, date_to: lastDayOf(month) } : {}),
+              ...(month ? monthBounds(month) : {}),
             }}
             title={
               month
