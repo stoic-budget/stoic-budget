@@ -147,7 +147,7 @@ Setting expectations upfront:
 | Country | Native PDF parser | CSV preset |
 |---|---|---|
 | 🇺🇸 United States | Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens, Found, Frost Bank, GO2bank, Green Dot, HSA Bank, Huntington, IBC Bank, KeyBank, M&T Bank, Marcus by Goldman Sachs, Merrick Bank, Navy Federal Credit Union, Netspend, Optum Bank, PNC Bank, Prosperity Bank, Regions Bank, SoFi, Synchrony Bank, Synovus, Truist | Chase, Bank of America, Capital One, American Express, Wells Fargo |
-| 🇬🇧 United Kingdom | Bank of Scotland, Barclays, first direct, Halifax, Handelsbanken, HSBC, iFAST Global Bank, Kroo, Lloyds Bank, Metro Bank, Monzo, Nationwide, NatWest, Royal Bank of Scotland, Santander UK, Starling Bank, The Co-operative Bank | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
+| 🇬🇧 United Kingdom | Bank of Scotland, Barclays, first direct, Halifax, Handelsbanken, HSBC, iFAST Global Bank, Kroo, Lloyds Bank, Metro Bank, Monzo, Nationwide, NatWest, Royal Bank of Scotland, Santander UK, Starling Bank, The Co-operative Bank, Ulster Bank | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
 | 🇩🇪 Germany | Deutsche Bank, N26 | N26, Sparkasse / DKB, Commerzbank |
 | 🇳🇱 Netherlands | | ING, Rabobank |
 | 🇸🇪 🇩🇰 🇳🇴 🇫🇮 Nordics | | Nordea |

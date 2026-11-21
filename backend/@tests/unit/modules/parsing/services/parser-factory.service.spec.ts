@@ -287,6 +287,7 @@ describe('ParserFactoryService', () => {
       'TruistParser',
       'UbsParser',
       'UcoParser',
+      'UlsterParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
