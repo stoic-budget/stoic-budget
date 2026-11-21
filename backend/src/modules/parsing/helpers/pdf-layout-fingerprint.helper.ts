@@ -48,6 +48,8 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.AXIS, /\baxis bank\b/],
   [BankName.BANCO_DO_BRASIL, /\bbanco do brasil\b/],
   [BankName.BANK_OF_CHINA, /\bbochk\b|\bbank of china\b/],
+  // Before Bank of Scotland: "Royal Bank of Scotland" holds its name.
+  [BankName.RBS, /\brbosgb2l\b|\broyal bank of scotland\b/],
   [BankName.BANK_OF_SCOTLAND, /\bbank\s*of\s*scotland/],
   [BankName.BARCLAYS, /\bbarclays bank\b/],
   [BankName.BENDIGO, /\bbendigo (?:and adelaide )?bank\b/],
