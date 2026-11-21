@@ -3,10 +3,10 @@ import { BullModule } from '@nestjs/bullmq';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
 import { AppController } from './app.controller';
@@ -14,8 +14,7 @@ import { AppService } from './app.service';
 import { CommonModule } from './common/common.module';
 import { EffectRuntimeModule } from './common/effect/effect-runtime';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { CsrfGuard } from './common/guards/csrf.guard';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { APP_GUARDS } from './common/guards/app-guards';
 import { AuditActorInterceptor } from './common/interceptors/audit-actor.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { StripKeysInterceptor } from './common/interceptors/strip-keys.interceptor';
@@ -313,20 +312,7 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
       provide: APP_INTERCEPTOR,
       useClass: AuditInterceptor,
     },
-    // Registered before JwtAuthGuard: a forged cross-site request should be
-    // rejected before it reaches authentication or any handler.
-    {
-      provide: APP_GUARD,
-      useClass: CsrfGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    ...APP_GUARDS,
   ],
 })
 export class AppModule {}

@@ -364,6 +364,27 @@ describe('Private transactions (e2e)', () => {
       }
     });
 
+    it('does not re-run the rules on it for the partner, who could read its comment and payee by them', async () => {
+      const before = await dataSource.query(
+        'SELECT category_id, comments, payee_id FROM transactions WHERE id = $1',
+        [ids.gift],
+      );
+
+      const bulk = await as(partner, request(server()).post('/classification/bulk'))
+        .send({ transactionIds: [ids.gift] })
+        .expect(200);
+      expect(bulk.body).toMatchObject({ total: 1, notFound: 1, successful: 0 });
+      await as(partner, request(server()).post(`/classification/transaction/${ids.gift}`)).expect(
+        404,
+      );
+
+      expect(
+        await dataSource.query('SELECT category_id, comments, payee_id FROM transactions WHERE id = $1', [
+          ids.gift,
+        ]),
+      ).toEqual(before);
+    });
+
     it('keeps the merchant out of the search box, the receipt picker and the documents list', async () => {
       const search = await both(account =>
         as(account, request(server()).get('/search?q=jewel')),

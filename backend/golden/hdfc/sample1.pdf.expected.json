@@ -1,0 +1,670 @@
+{
+  "metadata": {
+    "accountNumber": "03868335670723",
+    "currency": "INR",
+    "dateFrom": "2018-06-01T00:00:00",
+    "dateTo": "2018-10-10T00:00:00",
+    "balanceStart": 14109.95,
+    "balanceEnd": 7194.94
+  },
+  "transactions": [
+    {
+      "transactionDate": "2018-06-02T00:00:00",
+      "counterpartyName": "GM1TSA/MY0326/19",
+      "paymentPurpose": "GM1TSA/MY0326/19",
+      "credit": 14955,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-06-03T00:00:00",
+      "counterpartyName": "IB BILLPAY DR-HDFCPE-545964XXXXXX3563",
+      "paymentPurpose": "IB BILLPAY DR-HDFCPE-545964XXXXXX3563",
+      "debit": 1285.98,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-06-04T00:00:00",
+      "counterpartyName": "ALAN SAMPL",
+      "paymentPurpose": "NEFT DR-UBIN0539686-ALAN SAMPL-NETBANK, N050458152664479 MUM-N050458152664479-PERSONAL",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-06-04T00:00:00",
+      "counterpartyName": "2518648942@UPI",
+      "paymentPurpose": "UPI-251679426685179-2518648942@UPI-81551 8551633-OK",
+      "credit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-06-05T00:00:00",
+      "counterpartyName": "EMI 4923306 CHQ S23732964110 4063642055 6",
+      "paymentPurpose": "EMI 4923306 CHQ S23732964110 4063642055 6",
+      "debit": 2268,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-06-05T00:00:00",
+      "counterpartyName": "2518648942@UPI",
+      "paymentPurpose": "UPI-251679426685179-2518648942@UPI-81561 9325080-OK",
+      "credit": 1500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-06-07T00:00:00",
+      "counterpartyName": "EMI 50037630 CHQ S272568315731 233511318 630",
+      "paymentPurpose": "EMI 50037630 CHQ S272568315731 233511318 630",
+      "debit": 5333,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-06-09T00:00:00",
+      "counterpartyName": "NHDF0171255246/SBI CARDS",
+      "paymentPurpose": "NHDF0171255246/SBI CARDS",
+      "debit": 2820,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-06-12T00:00:00",
+      "counterpartyName": "NHDF3837458364/BILLDKVODAFONEINDIAL",
+      "paymentPurpose": "NHDF3837458364/BILLDKVODAFONEINDIAL",
+      "debit": 119.18,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-06-18T00:00:00",
+      "counterpartyName": "ACH D- TP ACH HOME-277048448",
+      "paymentPurpose": "ACH D- TP ACH HOME-277048448",
+      "debit": 2284.98,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-06-18T00:00:00",
+      "counterpartyName": "MEMBRB KUMAR SINGH",
+      "paymentPurpose": "NEFT DR-VIJB0005051-MEMBRB KUMAR SINGH-N N791450437299909 ETBANK, MUM-N791450437299909-PERSOKNAL",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-06-19T00:00:00",
+      "counterpartyName": "2518648942@UPI",
+      "paymentPurpose": "UPI-251679426685179-2518648942@UPI-81701 1076987-OK",
+      "credit": 2300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-06-19T00:00:00",
+      "counterpartyName": "NHDF2442443817/BILLDKKOTAKCARDS",
+      "paymentPurpose": "NHDF2442443817/BILLDKKOTAKCARDS",
+      "debit": 11445,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-06-22T00:00:00",
+      "counterpartyName": "ACH D- HOMECRINDFINPVTLTD-46887276750070",
+      "paymentPurpose": "ACH D- HOMECRINDFINPVTLTD-46887276750070",
+      "debit": 1315,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-06-26T00:00:00",
+      "counterpartyName": "DCSIRELIANCE POS DE 0000N70641028199 BIT",
+      "paymentPurpose": "POS 416021XXXXXX8060 DCSIRELIANCE POS DE 0000N70641028199 BIT",
+      "debit": 1760,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2018-06-27T00:00:00",
+      "counterpartyName": "ALAN SAMPL",
+      "paymentPurpose": "NEFT DR-UBIN0539686-ALAN SAMPL-NETBANK, N626440570584047 MUM-N626440570584047-PERSONAL",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-07-01T00:00:00",
+      "counterpartyName": "CREDIT INTEREST CAPITALISED",
+      "paymentPurpose": "CREDIT INTEREST CAPITALISED",
+      "credit": 156,
+      "currency": "INR",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2018-07-02T00:00:00",
+      "counterpartyName": "MICRO ATM CASH DEP - HDFC THANE MH IN - BNAKMU02",
+      "paymentPurpose": "MICRO ATM CASH DEP - HDFC THANE MH IN - BNAKMU02",
+      "credit": 10000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-07-02T00:00:00",
+      "counterpartyName": "IB BILLPAY DR-HDFCPE-545964XXXXXX3563",
+      "paymentPurpose": "IB BILLPAY DR-HDFCPE-545964XXXXXX3563",
+      "debit": 3756,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-07-03T00:00:00",
+      "counterpartyName": "MEMBERFIVE",
+      "paymentPurpose": "IMPS-026384328432-MEMBERFIVE-HDF",
+      "credit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-07-05T00:00:00",
+      "counterpartyName": "EMI 4923306 CHQ S63519651523 8445621461 6",
+      "paymentPurpose": "EMI 4923306 CHQ S63519651523 8445621461 6",
+      "debit": 2268,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-07-05T00:00:00",
+      "counterpartyName": "MEMBD DAS",
+      "paymentPurpose": "IMPS-738213473953-MEMBD DAS-CORP-XXXXXXX XXXX8925-EMI K LIY",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-07-05T00:00:00",
+      "counterpartyName": "REV-IMPS-738213473953-MEMBD DAS-CORP-XXX XXXXXXXX8925-EMI K LIY",
+      "paymentPurpose": "REV-IMPS-738213473953-MEMBD DAS-CORP-XXX XXXXXXXX8925-EMI K LIY",
+      "credit": 2000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-07-05T00:00:00",
+      "counterpartyName": "GM1TSA/JU0363/19",
+      "paymentPurpose": "GM1TSA/JU0363/19",
+      "credit": 13288,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-07-07T00:00:00",
+      "counterpartyName": "EMI 50037630 CHQ S810708298456 883747726 630",
+      "paymentPurpose": "EMI 50037630 CHQ S810708298456 883747726 630",
+      "debit": 5333,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-07-09T00:00:00",
+      "counterpartyName": "CASH DEP MIRA ROAD -",
+      "paymentPurpose": "CASH DEP MIRA ROAD -",
+      "credit": 22500,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-07-09T00:00:00",
+      "counterpartyName": "NHDF8107879553/SBI CARDS",
+      "paymentPurpose": "NHDF8107879553/SBI CARDS",
+      "debit": 35914,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-07-09T00:00:00",
+      "counterpartyName": "2518648942@UPI",
+      "paymentPurpose": "UPI-251679426685179-2518648942@UPI-81901 4420736-OK",
+      "credit": 2500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-07-11T00:00:00",
+      "counterpartyName": "2518648942@UPI",
+      "paymentPurpose": "UPI-251679426685179-2518648942@UPI-81921 7936299-OK",
+      "credit": 2500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-07-18T00:00:00",
+      "counterpartyName": "ACH D- TP ACH HOME-454175406",
+      "paymentPurpose": "ACH D- TP ACH HOME-454175406",
+      "debit": 2284.98,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-07-18T00:00:00",
+      "counterpartyName": "MICRO ATM CASH DEP - HDFC THANE MH IN - BNAKMU02",
+      "paymentPurpose": "MICRO ATM CASH DEP - HDFC THANE MH IN - BNAKMU02",
+      "credit": 10000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-07-18T00:00:00",
+      "counterpartyName": "MEMBRB KUMAR SINGH",
+      "paymentPurpose": "NEFT DR-VIJB0005051-MEMBRB KUMAR SINGH-N N898389038925920 ETBANK, MUM-N898389038925920-PERSONAL",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-07-21T00:00:00",
+      "counterpartyName": "APEX MOTORS POS DEB IT",
+      "paymentPurpose": "POS 416021XXXXXX8060 APEX MOTORS POS DEB IT",
+      "debit": 763,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2018-07-23T00:00:00",
+      "counterpartyName": "ACH D- HOMECRINDFINPVTLTD-13722629067795",
+      "paymentPurpose": "ACH D- HOMECRINDFINPVTLTD-13722629067795",
+      "debit": 1314,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-07-24T00:00:00",
+      "counterpartyName": "2518648942@UPI",
+      "paymentPurpose": "UPI-251679426685179-2518648942@UPI-82051 0633512-OK",
+      "credit": 2300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-07-24T00:00:00",
+      "counterpartyName": "SHREEJI ENTERPRI PO S DEBIT",
+      "paymentPurpose": "POS 416021XXXXXX8060 SHREEJI ENTERPRI PO S DEBIT",
+      "debit": 399,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2018-07-25T00:00:00",
+      "counterpartyName": "DCSIRELIANCE POS DE 0000N62210812527 BIT",
+      "paymentPurpose": "POS 416021XXXXXX8060 DCSIRELIANCE POS DE 0000N62210812527 BIT",
+      "debit": 1390,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2018-07-25T00:00:00",
+      "counterpartyName": "MEMBERCC KANOJIA",
+      "paymentPurpose": "IMPS-534766846693-MEMBERCC KANOJIA-CORP- XXXXXXXXXXX1052-PERSONAL",
+      "debit": 4300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-07-30T00:00:00",
+      "counterpartyName": "MEMBRA GOND",
+      "paymentPurpose": "IMPS-680107255422-MEMBRA GOND-KKBK-XXXXX X4834-PERSONAL",
+      "debit": 4500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-07-31T00:00:00",
+      "counterpartyName": "MICRO ATM CASH DEP - HDFC THANE MH IN - BNAKMU02",
+      "paymentPurpose": "MICRO ATM CASH DEP - HDFC THANE MH IN - BNAKMU02",
+      "credit": 4500,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-08-01T00:00:00",
+      "counterpartyName": "2518648942@UPI",
+      "paymentPurpose": "UPI-251679426685179-2518648942@UPI-82131 4213895-OK",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-08-03T00:00:00",
+      "counterpartyName": "IB BILLPAY DR-HDFCPE-545964XXXXXX3563",
+      "paymentPurpose": "IB BILLPAY DR-HDFCPE-545964XXXXXX3563",
+      "debit": 1239,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-08-04T00:00:00",
+      "counterpartyName": "GM1TSA/JL0330/19",
+      "paymentPurpose": "GM1TSA/JL0330/19",
+      "credit": 7664,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-08-06T00:00:00",
+      "counterpartyName": "EMI 4923306 CHQ S18034518676 5041530425 6",
+      "paymentPurpose": "EMI 4923306 CHQ S18034518676 5041530425 6",
+      "debit": 2268,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-08-07T00:00:00",
+      "counterpartyName": "EMI 50037630 CHQ S308341203589 671422372 630",
+      "paymentPurpose": "EMI 50037630 CHQ S308341203589 671422372 630",
+      "debit": 5333,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-08-07T00:00:00",
+      "counterpartyName": "NHDF2134640831/SBI CARDS",
+      "paymentPurpose": "NHDF2134640831/SBI CARDS",
+      "debit": 3483,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-08-08T00:00:00",
+      "counterpartyName": "NHDF2146121622/BILLDKVODAFONEINDIAL",
+      "paymentPurpose": "NHDF2146121622/BILLDKVODAFONEINDIAL",
+      "debit": 264.32,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-08-08T00:00:00",
+      "counterpartyName": "NWD-416021XXXXXX8060-CCCB0004-THANE",
+      "paymentPurpose": "NWD-416021XXXXXX8060-CCCB0004-THANE",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2018-08-11T00:00:00",
+      "counterpartyName": "MEMBRA GOND",
+      "paymentPurpose": "NEFT DR-KKBK0001418-MEMBRA GOND-NETBANK, N302953908998666 MUM-N302953908998666-PERSONAL",
+      "debit": 1500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-08-16T00:00:00",
+      "counterpartyName": "MICRO ATM CASH DEP - HDFC MUMBAI MH IN - BNAKMU29",
+      "paymentPurpose": "MICRO ATM CASH DEP - HDFC MUMBAI MH IN - BNAKMU29",
+      "credit": 2800,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-08-18T00:00:00",
+      "counterpartyName": "ACH D- TP ACH HOME-416677375",
+      "paymentPurpose": "ACH D- TP ACH HOME-416677375",
+      "debit": 2284.98,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-08-21T00:00:00",
+      "counterpartyName": "MEMBRA GOND",
+      "paymentPurpose": "IMPS-099623116832-MEMBRA GOND-KKBK-XXXXX X4834-PERSONAL",
+      "debit": 1200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-08-21T00:00:00",
+      "counterpartyName": "872720838450502918- CBDT TAX",
+      "paymentPurpose": "872720838450502918- CBDT TAX",
+      "debit": 1140,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-08-21T00:00:00",
+      "counterpartyName": "MEMBRA GOND",
+      "paymentPurpose": "IMPS-861833541932-MEMBRA GOND-HDFC-XXXXX X4834-MB: REVERSE MONEY TANSFER",
+      "credit": 1200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-08-22T00:00:00",
+      "counterpartyName": "2518648942@UPI",
+      "paymentPurpose": "UPI-251679426685179-2518648942@UPI-82341 5351687-OK",
+      "credit": 2300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-08-23T00:00:00",
+      "counterpartyName": "DCSIRELIANCE POS DE 0000N45563545940 BIT",
+      "paymentPurpose": "POS 416021XXXXXX8060 DCSIRELIANCE POS DE 0000N45563545940 BIT",
+      "debit": 1250,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2018-08-23T00:00:00",
+      "counterpartyName": "NHDF1761742436/BILLDKRELIANCEJIOINF",
+      "paymentPurpose": "NHDF1761742436/BILLDKRELIANCEJIOINF",
+      "debit": 399,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-08-31T00:00:00",
+      "counterpartyName": "NWD-416021XXXXXX8060-SB002702-MUMBAI",
+      "paymentPurpose": "NWD-416021XXXXXX8060-SB002702-MUMBAI",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2018-09-01T00:00:00",
+      "counterpartyName": "FT - CR - 55861161476037 - INDIABULLS HO",
+      "paymentPurpose": "FT - CR - 55861161476037 - INDIABULLS HO",
+      "credit": 15230.39,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-09-01T00:00:00",
+      "counterpartyName": "IB BILLPAY DR-HDFCPE-545964XXXXXX3563",
+      "paymentPurpose": "IB BILLPAY DR-HDFCPE-545964XXXXXX3563",
+      "debit": 4987,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-09-04T00:00:00",
+      "counterpartyName": "33168858605938-TPT-PERSONAL",
+      "paymentPurpose": "33168858605938-TPT-PERSONAL",
+      "debit": 8000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-09-05T00:00:00",
+      "counterpartyName": "EMI 4923306 CHQ S49092155087 7166415849 6",
+      "paymentPurpose": "EMI 4923306 CHQ S49092155087 7166415849 6",
+      "debit": 2268,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-09-07T00:00:00",
+      "counterpartyName": "MICRO ATM CASH DEP - HDFC MUMBAI MH IN - BNAKMU29",
+      "paymentPurpose": "MICRO ATM CASH DEP - HDFC MUMBAI MH IN - BNAKMU29",
+      "credit": 3000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-09-07T00:00:00",
+      "counterpartyName": "MEMBE",
+      "paymentPurpose": "IMPS-069313361037-MEMBE -HDFC--ALEX",
+      "credit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-09-07T00:00:00",
+      "counterpartyName": "EMI 50037630 CHQ S939610631767 587948576 630",
+      "paymentPurpose": "EMI 50037630 CHQ S939610631767 587948576 630",
+      "debit": 5333,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-09-07T00:00:00",
+      "counterpartyName": "MEMBRB KUMAR SINGH",
+      "paymentPurpose": "NEFT DR-VIJB0005051-MEMBRB KUMAR SINGH-N N345955997175237 ETBANK, MUM-N345955997175237-PERSONAL",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-09-09T00:00:00",
+      "counterpartyName": "EAW-416021XXXXXX8060-MUOD9463-THANE",
+      "paymentPurpose": "EAW-416021XXXXXX8060-MUOD9463-THANE",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2018-09-10T00:00:00",
+      "counterpartyName": "NHDF5248014211/SBI CARDS",
+      "paymentPurpose": "NHDF5248014211/SBI CARDS",
+      "debit": 3372,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-09-12T00:00:00",
+      "counterpartyName": "2518648942@UPI",
+      "paymentPurpose": "UPI-251679426685179-2518648942@UPI-82551 1907785-OK",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-09-17T00:00:00",
+      "counterpartyName": "ANIL SAMPLENAMEAB SH",
+      "paymentPurpose": "IMPS-876628874111-ANIL SAMPLENAMEAB SH-H DFC-XXXXXX4802-COMMENTS",
+      "credit": 900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-09-18T00:00:00",
+      "counterpartyName": "ACH D- TP ACH HOME-978614945",
+      "paymentPurpose": "ACH D- TP ACH HOME-978614945",
+      "debit": 2284.98,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-09-18T00:00:00",
+      "counterpartyName": "ATW-416021XXXXXX8060-S1ACMU94-THANE",
+      "paymentPurpose": "ATW-416021XXXXXX8060-S1ACMU94-THANE",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2018-09-22T00:00:00",
+      "counterpartyName": "DCSIRELIANCE POS DE 0000N19953902050 BIT",
+      "paymentPurpose": "POS 416021XXXXXX8060 DCSIRELIANCE POS DE 0000N19953902050 BIT",
+      "debit": 1160,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2018-09-25T00:00:00",
+      "counterpartyName": "MEMBG SAMPLEXY SAMPL",
+      "paymentPurpose": "IMPS-844407848140-MEMBG SAMPLEXY SAMPL-H DFC-XXXXXXXX1317-",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-09-25T00:00:00",
+      "counterpartyName": "MEMBERCC KANOJIA",
+      "paymentPurpose": "IMPS-126635312402-MEMBERCC KANOJIA-CORP- XXXXXXXXXXX1052-PERSONAL",
+      "debit": 4430,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-09-26T00:00:00",
+      "counterpartyName": "ATW-416021XXXXXX8060-P3AWMI10-MUMBAI",
+      "paymentPurpose": "ATW-416021XXXXXX8060-P3AWMI10-MUMBAI",
+      "debit": 300,
+      "currency": "INR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2018-09-26T00:00:00",
+      "counterpartyName": "MEMBEH SINGH",
+      "paymentPurpose": "IMPS-388223362533-MEMBEH SINGH-CORP-XXXX XXXXXXX9986-PERSONAL",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-09-30T00:00:00",
+      "counterpartyName": "CREDIT INTEREST CAPITALISED",
+      "paymentPurpose": "CREDIT INTEREST CAPITALISED",
+      "credit": 60,
+      "currency": "INR",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2018-10-03T00:00:00",
+      "counterpartyName": "CASH DEP MIRA ROAD -",
+      "paymentPurpose": "CASH DEP MIRA ROAD -",
+      "credit": 6800,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2018-10-04T00:00:00",
+      "counterpartyName": "IB BILLPAY DR-HDFCPE-545964XXXXXX3563",
+      "paymentPurpose": "IB BILLPAY DR-HDFCPE-545964XXXXXX3563",
+      "debit": 3348,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2018-10-04T00:00:00",
+      "counterpartyName": "FT - CR - 55861161476037 - INDIABULLS HO USING FINANCE LTD",
+      "paymentPurpose": "FT - CR - 55861161476037 - INDIABULLS HO USING FINANCE LTD",
+      "credit": 20649,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2018-10-05T00:00:00",
+      "counterpartyName": "EMI 4923306 CHQ S33490596392 6039218976 6",
+      "paymentPurpose": "EMI 4923306 CHQ S33490596392 6039218976 6",
+      "debit": 2268,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-10-08T00:00:00",
+      "counterpartyName": "EMI 50037630 CHQ S670673254025 399853832 630",
+      "paymentPurpose": "EMI 50037630 CHQ S670673254025 399853832 630",
+      "debit": 5333,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-10-09T00:00:00",
+      "counterpartyName": "ACH D- HOMECRINDFINPVTLTD-44104488205382",
+      "paymentPurpose": "ACH D- HOMECRINDFINPVTLTD-44104488205382",
+      "debit": 1659,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2018-10-10T00:00:00",
+      "counterpartyName": "PHDF5558712900/SBI CARDS",
+      "paymentPurpose": "PHDF5558712900/SBI CARDS",
+      "debit": 10060,
+      "currency": "INR"
+    }
+  ]
+}

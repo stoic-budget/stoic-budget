@@ -146,24 +146,31 @@ Setting expectations upfront:
 
 | Country | Native PDF parser | CSV preset |
 |---|---|---|
-| 🇺🇸 United States | Ally Bank, Associated Bank, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU | Chase, Bank of America, Capital One, American Express, Wells Fargo |
-| 🇬🇧 United Kingdom | Barclays, Bank of Scotland | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
-| 🇩🇪 Germany | | N26, Sparkasse / DKB, Commerzbank |
+| 🇺🇸 United States | Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens, Found, Frost Bank, GO2bank, Green Dot, HSA Bank, Huntington, IBC Bank, KeyBank, M&T Bank, Marcus by Goldman Sachs, Merrick Bank, Navy Federal Credit Union, Netspend, Optum Bank, PNC Bank, Prosperity Bank, Regions Bank, SoFi, Synchrony Bank, Synovus, Truist, U.S. Bank, USAA, Varo Bank, Walmart MoneyCard, Webster Bank, Wells Fargo, Woodforest National Bank | Chase, Bank of America, Capital One, American Express, Wells Fargo |
+| 🇬🇧 United Kingdom | Bank of Scotland, Barclays, first direct, Halifax, Handelsbanken, HSBC, iFAST Global Bank, Kroo, Lloyds Bank, Metro Bank, Monzo, Nationwide, NatWest, Royal Bank of Scotland, Santander UK, Starling Bank, The Co-operative Bank, Ulster Bank, Virgin Money | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
+| 🇩🇪 Germany | Deutsche Bank, N26 | N26, Sparkasse / DKB, Commerzbank |
 | 🇳🇱 Netherlands | | ING, Rabobank |
 | 🇸🇪 🇩🇰 🇳🇴 🇫🇮 Nordics | | Nordea |
-| 🇫🇷 France | Crédit Agricole | |
+| 🇫🇷 France | Crédit Agricole, Société Générale, Sogexia | |
 | 🇵🇱 Poland | BNP Paribas Bank Polska | |
-| 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital | |
-| 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank | |
-| 🇿🇦 South Africa | Absa, Capitec | |
-| 🇮🇳 India | Axis Bank, Citibank | |
+| 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank, RBC Royal Bank, Scotiabank, Simplii Financial, Tangerine, TD Bank | |
+| 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank, Great Southern Bank, Heritage Bank, ING, NAB, Suncorp Bank, Westpac | |
+| 🇳🇬 Nigeria | Fidelity Bank, Zenith Bank | |
+| 🇧🇪 Belgium | KBC | |
+| 🇰🇪 Kenya | NCBA Bank | |
+| 🇶🇦 Qatar | QNB | |
+| 🇷🇴 Romania | Raiffeisen Bank | |
+| 🇨🇭 Switzerland | UBS | |
+| 🇮🇹 Italy | UniCredit | |
+| 🇿🇦 South Africa | Absa, Capitec, FNB | |
+| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India | UCO Bank, Union Bank of India |
 | 🇧🇷 Brazil | Banco do Brasil | |
 | 🇭🇰 Hong Kong | Bank of China (Hong Kong) | |
-| 🇵🇭 Philippines | BPI | |
+| 🇵🇭 Philippines | BPI, GoTyme Bank | |
 | 🇱🇰 Sri Lanka | Commercial Bank of Ceylon | |
 | 🇮🇱 Israel | Bank Hapoalim / Isracard (Hebrew) | |
 | 🇰🇿 Kazakhstan | Kaspi Bank, Bereke Bank (new and legacy formats) | |
-| 🌍 International | | Revolut, Wise, PayPal |
+| 🌍 International | Payoneer, PayPal, Revolut, Skrill, Standard Chartered, Wise | Revolut, Wise, PayPal |
 | — | | T-Bank (Tinkoff) |
 
 **Any other bank:** CSV with delimiter detection, XLSX / XLS, DOCX tables, OFX / QFX, QIF, MT940, CAMT.053, any PDF through the generic table reader, and images (PNG / JPG) through OCR.
