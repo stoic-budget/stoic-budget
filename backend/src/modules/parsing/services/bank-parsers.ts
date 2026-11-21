@@ -102,6 +102,7 @@ import { StandardCharteredParser } from '../parsers/standard-chartered.parser';
 import { StarlingParser } from '../parsers/starling.parser';
 import { SuncorpParser } from '../parsers/suncorp.parser';
 import { SynchronyParser } from '../parsers/synchrony.parser';
+import { SynovusParser } from '../parsers/synovus.parser';
 
 /**
  * Each bank's own parser, with the bank it claims a file as when the file's
@@ -210,4 +211,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [StarlingParser, { bankName: BankName.STARLING }],
   [SuncorpParser, { bankName: BankName.SUNCORP }],
   [SynchronyParser, { bankName: BankName.SYNCHRONY }],
+  [SynovusParser, { bankName: BankName.SYNOVUS }],
 ];

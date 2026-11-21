@@ -100,3 +100,9 @@ describe('pdf-layout-sections.helper', () => {
     expect(rows.map(t => t.description)).toEqual(['DDA PUR ACME STORE EXAMPLE TOWN']);
   });
 });
+
+describe('a section heading with a slash', () => {
+  it('reads "Deposits/Other Credits" as money in', () => {
+    expect(readSectionHeading(row(10, phrase('Deposits/Other Credits', 50)))).toBe('credit');
+  });
+});
