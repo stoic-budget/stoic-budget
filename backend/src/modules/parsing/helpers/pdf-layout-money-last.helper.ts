@@ -1,4 +1,5 @@
 import type { PdfTextRow } from '../../../common/utils/pdf-parser.util';
+import { readHeaderRow } from './pdf-layout-columns.helper';
 import { leadingDate } from './pdf-layout-row-date.helper';
 import { findStatementAmounts } from './statement-amount.helper';
 
@@ -20,9 +21,18 @@ function dateWords(row: PdfTextRow) {
   return items.slice(0, leadingDate(items)?.used ?? 0);
 }
 
-function asOneRow(lines: PdfTextRow[], date: PdfTextRow['items']): PdfTextRow[] {
+function asOneRow(
+  lines: PdfTextRow[],
+  date: PdfTextRow['items'],
+  printsMoney: (row: PdfTextRow) => boolean,
+): PdfTextRow[] {
   const [first, ...rest] = lines;
-  const money = lines.at(-1)?.items.filter(item => isMoney(item.text)) ?? [];
+  const last = lines.at(-1);
+  // The money words of the last line: those the money test takes, one word at a time.
+  const money =
+    last?.items.filter(
+      item => isMoney(item.text) && printsMoney({ ...last, items: [item], text: item.text }),
+    ) ?? [];
   const carried = dateWords(first).length > 0 ? [] : date.map(item => ({ ...item, y: first.y }));
   const words = (line: PdfTextRow) =>
     line === first ? [] : line.items.filter(item => !money.includes(item));
@@ -52,6 +62,7 @@ function asOneRow(lines: PdfTextRow[], date: PdfTextRow['items']): PdfTextRow[] 
 export function joinMoneyLastEntries(
   rows: PdfTextRow[],
   opensEntry: (row: PdfTextRow, before: PdfTextRow | null) => boolean,
+  printsMoney: (row: PdfTextRow) => boolean = hasMoney,
 ): PdfTextRow[] {
   const out: PdfTextRow[] = [];
   let entry: PdfTextRow[] | null = null;
@@ -71,8 +82,8 @@ export function joinMoneyLastEntries(
       entry = null;
       continue;
     }
-    if (hasMoney(row)) {
-      out.push(...asOneRow(entry, date));
+    if (printsMoney(row)) {
+      out.push(...asOneRow(entry, date, printsMoney));
       entry = null;
     }
   }
@@ -90,11 +101,19 @@ export function joinMoneyLastTable(
   isHeader: (row: PdfTextRow) => boolean,
 ): PdfTextRow[] {
   const headerAt = new Map<number, number>();
+  let moneyFrom = Number.POSITIVE_INFINITY;
   for (const row of rows) {
     if (isHeader(row) && !headerAt.has(row.page)) {
       headerAt.set(row.page, row.y);
+      const money = (readHeaderRow(row) ?? []).filter(column => MONEY.includes(column.role));
+      moneyFrom = Math.min(moneyFrom, ...money.map(column => column.x0 - MONEY_SLACK));
     }
   }
+  // "Usa Usd 9.99 incl. Fee Aud $0.39" in the text is no money of the row's: only figures under the money headings are.
+  const printsMoney = (row: PdfTextRow) =>
+    Number.isFinite(moneyFrom)
+      ? row.items.some(item => item.x >= moneyFrom && isMoney(item.text))
+      : hasMoney(row);
   const inTable = (row: PdfTextRow) => row.y > (headerAt.get(row.page) ?? Number.POSITIVE_INFINITY);
   return joinMoneyLastEntries(
     rows,
@@ -102,6 +121,11 @@ export function joinMoneyLastTable(
       inTable(row) &&
       before !== null &&
       before.page === row.page &&
-      (isHeader(before) || hasMoney(before)),
+      (isHeader(before) || printsMoney(before)),
+    printsMoney,
   );
 }
+
+const MONEY: string[] = ['debit', 'credit', 'amount', 'balance'];
+/** A figure right-aligned under its heading may start this far left of it, in points. */
+const MONEY_SLACK = 40;

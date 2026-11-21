@@ -56,3 +56,23 @@ describe('joinMoneyLastTable', () => {
     ]);
   });
 });
+
+describe('figures in an entry\'s text', () => {
+  it('are no money of the entry: only those under the money headings close it', () => {
+    const rows = joinMoneyLastTable(
+      [
+        row(90, [['DATE', 40], ['TRANSACTION', 100], ['DESCRIPTION', 160], ['DEBIT', 430], ['CREDIT', 490], ['BALANCE', 550]]),
+        row(100, [['26/03/25', 40], ['Debit', 100], ['Card', 130], ['Purchase', 160]]),
+        row(110, [['Usa', 100], ['Usd', 120], ['9.99', 140], ['incl.', 165]]),
+        row(120, [['Fee', 100], ['Aud', 120], ['$0.39', 140], ['13.60', 430], ['317.18', 550]]),
+      ],
+      line => line.text.startsWith('DATE'),
+    );
+    expect(rows.map(line => line.text)).toEqual([
+      'DATE TRANSACTION DESCRIPTION DEBIT CREDIT BALANCE',
+      '26/03/25 Debit Card Purchase 13.60 317.18',
+      'Usa Usd 9.99 incl.',
+      'Fee Aud $0.39',
+    ]);
+  });
+});
