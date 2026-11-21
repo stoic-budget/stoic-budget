@@ -34,7 +34,6 @@ const base: OnboardingData = {
   workspaceBackgroundImage: 'lightscape-LtnPejWDSAY-unsplash.jpg',
   profile: 'business',
   taxCountry: 'DE',
-  taxpayerType: 'self_employed',
   business: { ...EMPTY_BUSINESS_DETAILS, legalName: ' Acme GmbH ' },
 };
 
@@ -43,28 +42,26 @@ describe('submitOnboarding', () => {
 
   it('writes every answer and marks onboarding complete last', async () => {
     const { api, calls } = fakeApi();
-    const result = await submitOnboarding(api, base, 'standard', 'ws-1', 2026);
+    const result = await submitOnboarding(api, base, 'standard', 'ws-1');
 
     expect(calls.map(call => `${call.method} ${call.url}`)).toEqual([
       'patch /workspaces/ws-1',
       'put /tax/settings/jurisdiction',
-      'put /income-tax/profile',
       'put /business-profile',
       'patch /users/me/preferences',
       'patch /users/me/onboarding',
     ]);
     expect(calls[0].body).toEqual({ profile: 'business' });
     expect(calls[1].body).toEqual({ code: 'DE' });
-    expect(calls[2].body).toEqual({ taxYear: 2026, taxpayerType: 'self_employed' });
-    expect(calls[3].body).toEqual({
+    expect(calls[2].body).toEqual({
       legalName: 'Acme GmbH',
       taxId: undefined,
       registrationId: undefined,
       addressLines: undefined,
       countryCode: 'DE',
     });
-    expect(calls[4].body).toEqual({ dateFormat: 'dmy', firstDayOfWeek: 1 });
-    expect(calls[5].body).toEqual({
+    expect(calls[3].body).toEqual({ dateFormat: 'dmy', firstDayOfWeek: 1 });
+    expect(calls[4].body).toEqual({
       locale: 'de',
       timeZone: 'Europe/Berlin',
       workspaceName: 'Acme',
@@ -76,7 +73,7 @@ describe('submitOnboarding', () => {
 
   it('sends the workspace-scoped writes to the workspace being set up', async () => {
     const { api, calls } = fakeApi();
-    await submitOnboarding(api, base, 'standard', 'ws-1', 2026);
+    await submitOnboarding(api, base, 'standard', 'ws-1');
 
     for (const call of calls.filter(c => c.method === 'put')) {
       expect(call.headers).toEqual({ 'X-Workspace-Id': 'ws-1' });
@@ -85,24 +82,14 @@ describe('submitOnboarding', () => {
 
   it('leaves tax alone when the country was deferred', async () => {
     const { api, calls } = fakeApi();
-    await submitOnboarding(api, { ...base, taxCountry: null, taxpayerType: null }, 'standard', 'ws-1');
+    await submitOnboarding(api, { ...base, taxCountry: null }, 'standard', 'ws-1');
 
     const urls = calls.map(call => call.url);
     expect(urls).not.toContain('/tax/settings/jurisdiction');
-    expect(urls).not.toContain('/income-tax/profile');
     // Business details still go out, without a country of their own.
     expect(calls.find(call => call.url === '/business-profile')?.body).toMatchObject({
       countryCode: undefined,
     });
-  });
-
-  it('sets the country without a taxpayer kind when none was picked', async () => {
-    const { api, calls } = fakeApi();
-    await submitOnboarding(api, { ...base, taxpayerType: null }, 'standard', 'ws-1');
-
-    const urls = calls.map(call => call.url);
-    expect(urls).toContain('/tax/settings/jurisdiction');
-    expect(urls).not.toContain('/income-tax/profile');
   });
 
   it('never writes business details for a home workspace', async () => {
@@ -133,13 +120,12 @@ describe('submitOnboarding', () => {
 
   it('creates and switches to a new workspace, then scopes the tax writes to it', async () => {
     const { api, calls } = fakeApi();
-    const result = await submitOnboarding(api, base, 'create-workspace', 'ws-1', 2026);
+    const result = await submitOnboarding(api, base, 'create-workspace', 'ws-1');
 
     expect(calls.map(call => `${call.method} ${call.url}`)).toEqual([
       'post /workspaces',
       'post /workspaces/ws-new/switch',
       'put /tax/settings/jurisdiction',
-      'put /income-tax/profile',
       'put /business-profile',
       'patch /users/me/preferences',
     ]);
@@ -151,7 +137,7 @@ describe('submitOnboarding', () => {
     });
     expect(calls[2].headers).toEqual({ 'X-Workspace-Id': 'ws-new' });
     // Only the language: the date format and week start were not asked in this flow.
-    expect(calls[5].body).toEqual({ locale: 'de' });
+    expect(calls[4].body).toEqual({ locale: 'de' });
     expect(result).toEqual({
       workspaceId: 'ws-new',
       user: expect.objectContaining({ id: 'u-1' }),

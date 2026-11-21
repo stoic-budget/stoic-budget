@@ -1,5 +1,6 @@
 import type { PdfTextItem, PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import { HEADINGS } from './pdf-layout-headings.helper';
+import { leadingDate } from './pdf-layout-row-date.helper';
 import { isAmountPart, parseStatementAmount } from './statement-amount.helper';
 import { foldText } from './statement-date.helper';
 
@@ -43,24 +44,53 @@ const ATTACH_GAP = 8;
 
 /** A heading's words, folded, without colons and the unit in brackets ("Balance ($)"). */
 export function headingWord(item: PdfTextItem): string {
-  return foldText(item.text)
-    .replace(/[:]|\([^)]*\)/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return (
+    foldText(item.text)
+      // "_DATE": the end of an underscore rule the heading was set on.
+      .replace(/^_+|_+$/g, '')
+      .replace(/[:]|\([^)]*\)/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
 }
 
 /** Headings a workspace taught for its own statements, folded as `headingWord` reads them. */
 export type TaughtHeadings = ReadonlyMap<string, ColumnRole>;
 
 /** The longest heading that starts at `index`, and how many words it spans. */
+/**
+ * Two words further apart than a few of their letters are two headings: a
+ * space is about one letter wide, the gap between columns' headings wider.
+ */
+const PHRASE_WORD_GAP_LETTERS = 2.5;
+
+function apart(left: PdfTextItem, right: PdfTextItem): boolean {
+  const letter = (left.width + right.width) / Math.max(1, left.text.length + right.text.length);
+  return right.x - (left.x + left.width) > PHRASE_WORD_GAP_LETTERS * letter;
+}
+
+/**
+ * "Deposits  Withdrawals" side by side are two columns, money in and out,
+ * however close: only stacked over each other are they one signed column's
+ * heading.
+ */
+function sidesBySide(words: PdfTextItem[]): boolean {
+  const roles = new Set(words.map(word => PHRASES.get(headingWord(word))));
+  const stacked = words.some(
+    (word, at) => at > 0 && word.x < words[at - 1].x + words[at - 1].width,
+  );
+  return roles.has('debit') && roles.has('credit') && !stacked;
+}
+
 function matchHeading(items: PdfTextItem[], index: number, taught?: TaughtHeadings) {
   const longest = Math.max(LONGEST_PHRASE, ...Array.from(taught?.keys() ?? [], wordCount));
   for (let length = Math.min(longest, items.length - index); length > 0; length -= 1) {
-    const phrase = items
-      .slice(index, index + length)
-      .map(headingWord)
-      .filter(Boolean)
-      .join(' ');
+    const words = items.slice(index, index + length);
+    // One heading's words sit a space apart: "Deposits   Withdrawals" are two headings.
+    if (words.some((word, at) => at > 0 && apart(words[at - 1], word)) || sidesBySide(words)) {
+      continue;
+    }
+    const phrase = words.map(headingWord).filter(Boolean).join(' ');
     const role = taught?.get(phrase) ?? PHRASES.get(phrase);
     if (role) {
       return { role, length, phrase };
@@ -76,7 +106,25 @@ function matchHeading(items: PdfTextItem[], index: number, taught?: TaughtHeadin
  * are read before the built-in ones.
  */
 export function readHeaderRow(row: PdfTextRow, taught?: TaughtHeadings): LayoutColumn[] | null {
-  const columns = readHeadingColumns(row, taught);
+  // A line that opens with a date or prints a sum of money is a row, whatever
+  // its words ("06-28  POS Debit - Debit Card 2252 Transaction …  6.22-").
+  const words = [...row.items].sort((a, b) => a.x - b.x);
+  if (leadingDate(words) || words.some(item => parseStatementAmount(item.text) !== null)) {
+    return null;
+  }
+  const read = readHeadingColumns(row, taught);
+  // "Tran Date" alone dates the rows: a transaction date is only second beside
+  // a posting date. Not a value date, and not when the text comes first.
+  const others = read.filter(column => column.role === 'otherDate');
+  const tranDate =
+    others.length === 1 && /^(?:trans?|transaction) date$/.test(others[0].heading ?? '');
+  const textFirst = read.some(
+    column => column.role === 'description' && column.x0 < (others[0]?.x0 ?? 0),
+  );
+  const columns =
+    tranDate && !textFirst && !read.some(column => column.role === 'date')
+      ? read.map(column => (column === others[0] ? { ...column, role: 'date' as const } : column))
+      : read;
   const roles = new Set(columns.map(column => column.role));
   const hasMoney = roles.has('debit') || roles.has('credit') || roles.has('amount');
   const hasText = roles.has('date') || roles.has('description');
@@ -242,6 +290,26 @@ const MONEY_EDGE_TOLERANCE = 30;
 /** Words of one printed amount ("1", "200,45", "$") sit closer than this. */
 const AMOUNT_WORD_GAP = 7;
 
+/** Slack, in points, around a money heading for a dash set under it. */
+const EMPTY_CELL_SLACK = 8;
+
+/**
+ * A dash under a money heading, or set where right-aligned figures end
+ * under it, past every text heading: an empty money cell.
+ */
+function underMoneyHeading(word: PdfTextItem, columns: LayoutColumn[]): boolean {
+  const under = columns.some(
+    column =>
+      MONEY_ROLES.includes(column.role) &&
+      word.x < column.x1 + EMPTY_CELL_SLACK &&
+      word.x + word.width > column.x0 - EMPTY_CELL_SLACK,
+  );
+  const pastText = columns
+    .filter(column => TEXT_ROLES.includes(column.role))
+    .every(column => word.x > column.x1);
+  return under || (pastText && moneyColumnFor(word.x, word.x + word.width, columns) !== null);
+}
+
 function moneyColumnFor(x0: number, x1: number, columns: LayoutColumn[]): LayoutColumn | null {
   const money = columns.filter(column => MONEY_ROLES.includes(column.role));
   const candidates = money
@@ -274,8 +342,10 @@ function textColumnFor(x: number, columns: LayoutColumn[]): ColumnRole {
   if (isDate && next && x > owner.x1 + DATE_CELL_GAP) {
     return next.role;
   }
-  // A table of dates and amounts alone ("Date  Serial #  Amount") keeps its words in the row's text.
-  return isDate && !next ? 'description' : (owner?.role ?? 'description');
+  // A table of dates and amounts alone ("Date  Serial #  Amount") keeps its words in the row's
+  // text; one with a text column of its own leaves a value date's out of it.
+  const textless = !text.some(column => column.role === 'description');
+  return isDate && !next && textless ? 'description' : (owner?.role ?? 'description');
 }
 
 /**
@@ -297,8 +367,14 @@ export function layOutRow(items: PdfTextItem[], columns: LayoutColumn[]): LaidOu
       index = cell.end;
       continue;
     }
-    const role = textColumnFor(sorted[index].x, columns);
-    result.text[role] = [...(result.text[role] ?? []), sorted[index].text];
+    const word = sorted[index];
+    // A dash under a money heading marks the cell empty ("SALARY  -  1,119.00"): no text.
+    if (/^[-–—]$/.test(word.text) && underMoneyHeading(word, columns)) {
+      index += 1;
+      continue;
+    }
+    const role = textColumnFor(word.x, columns);
+    result.text[role] = [...(result.text[role] ?? []), word.text];
     index += 1;
   }
 

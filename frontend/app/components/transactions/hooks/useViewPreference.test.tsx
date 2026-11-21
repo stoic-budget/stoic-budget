@@ -49,6 +49,19 @@ describe('useViewPreference', () => {
     await waitFor(() => expect(getByTestId('state').textContent).toBe('null'));
   });
 
+  it('says failed, not just null, when the load failed', async () => {
+    apiGet.mockRejectedValue({ response: { status: 500 } });
+    let failed: boolean | null = null;
+    function FailedProbe(): React.JSX.Element {
+      const result = useViewPreference('transactions', readOwner);
+      failed = result.failed;
+      return <output data-testid="state">{result.state === undefined ? 'loading' : JSON.stringify(result.state)}</output>;
+    }
+    const { getByTestId } = renderWithQuery(<FailedProbe />);
+    await waitFor(() => expect(getByTestId('state').textContent).toBe('null'));
+    expect(failed).toBe(true);
+  });
+
   it('shows the new value without waiting for the round trip', async () => {
     apiGet.mockResolvedValue({ data: { state: null } });
     const { getByTestId } = renderWithQuery(<Probe />);
