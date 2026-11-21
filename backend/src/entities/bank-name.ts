@@ -61,5 +61,6 @@ export enum BankName {
   HSBC = 'hsbc',
   HUNTINGTON = 'huntington',
   IBC = 'ibc',
+  ICICI = 'icici',
   OTHER = 'other',
 }

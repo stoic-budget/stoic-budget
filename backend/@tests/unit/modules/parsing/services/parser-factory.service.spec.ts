@@ -237,6 +237,7 @@ describe('ParserFactoryService', () => {
       'HsbcParser',
       'HuntingtonParser',
       'IbcParser',
+      'IciciParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

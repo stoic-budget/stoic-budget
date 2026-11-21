@@ -19,7 +19,9 @@ const LETTER_SIGNS = new RegExp(LETTER_SIGN.source, 'g');
  * "-1.450,77", "1 200,45", "(12.00)", "100.00-", ".11" for 0.11). Requiring the decimals keeps
  * reference numbers such as "8373579" out.
  */
-const AMOUNT_SHAPE = /^[-+(]?(?:(?:\d{1,3}(?:[ .,  ]\d{3})+|\d+)[.,]\d{2}|\.\d{2})\)?-?$/;
+/** Thousands in threes, or the Indian way (lakhs and crores in twos): "1,02,801.86". */
+const AMOUNT_SHAPE =
+  /^[-+(]?(?:(?:\d{1,2}(?:,\d{2})+,\d{3}|\d{1,3}(?:[ .,  ]\d{3})+|\d+)[.,]\d{2}|\.\d{2})\)?-?$/;
 
 /** Parses a printed amount, currency marks included; null when it is not one. */
 /**
@@ -77,7 +79,7 @@ export function isAmountPart(word: string): boolean {
 export function findStatementAmounts(text: string): number[] {
   // A minus after the figure ("$3.22-") is its sign; not a hyphen into a word ("12.50-ACME").
   const pattern = new RegExp(
-    `[-+]?(?:${LETTER_SIGN.source})?(?:\\d{1,3}(?:[ .,  ]\\d{3})+|\\d+)[.,]\\d{2}(?!\\d)(?:\\s?\\([+-]\\)|-(?![\\w-]))?`,
+    `[-+]?(?:${LETTER_SIGN.source})?(?:\\d{1,2}(?:,\\d{2})+,\\d{3}|\\d{1,3}(?:[ .,  ]\\d{3})+|\\d+)[.,]\\d{2}(?!\\d)(?:\\s?\\([+-]\\)|-(?![\\w-]))?`,
     'g',
   );
   return Array.from(text.matchAll(pattern), match => parseStatementAmount(match[0])).filter(

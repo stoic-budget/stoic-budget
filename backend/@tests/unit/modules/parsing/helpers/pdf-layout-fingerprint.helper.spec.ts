@@ -134,6 +134,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('visit www.hsbc.co.uk')).toBe(BankName.HSBC);
     expect(mentionedBank('The Huntington National Bank is Member FDIC.')).toBe(BankName.HUNTINGTON);
     expect(mentionedBank('Visit us Online: www.IBC.com')).toBe(BankName.IBC);
+    expect(mentionedBank('Visit www.icicibank.com')).toBe(BankName.ICICI);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

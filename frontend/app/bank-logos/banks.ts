@@ -103,4 +103,5 @@ export const BANKS = [
   { key: 'hsbc', name: 'HSBC', logo: 'hsbc.png' },
   { key: 'huntington', name: 'Huntington', logo: 'huntington.png', aliases: ['huntington bank'] },
   { key: 'ibc', name: 'IBC Bank', logo: 'ibc.png', aliases: ['international bank of commerce'] },
+  { key: 'icici', name: 'ICICI Bank', logo: 'icici.png', aliases: ['icici'] },
 ] as const satisfies readonly BankEntry[];
