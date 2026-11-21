@@ -119,4 +119,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.UNION_BANK_OF_INDIA]: 'Union Bank of India',
   [BankName.USAA]: 'USAA',
   [BankName.US_BANK]: 'U.S. Bank',
+  [BankName.VARO]: 'Varo Bank',
 };

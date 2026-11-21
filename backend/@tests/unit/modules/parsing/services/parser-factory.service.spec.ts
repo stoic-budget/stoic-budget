@@ -292,6 +292,7 @@ describe('ParserFactoryService', () => {
       'UnionBankOfIndiaParser',
       'UsaaParser',
       'UsBankParser',
+      'VaroParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
