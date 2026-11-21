@@ -19,6 +19,8 @@ export const TransactionHistoryField = Schema.Literals([
   'confirmed',
   'budgets',
   'comment',
+  // Tags added (or put back) from a list's selection bar; names, comma-separated.
+  'tags',
 ]);
 export type TransactionHistoryField = Wire<typeof TransactionHistoryField>;
 

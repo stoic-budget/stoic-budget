@@ -116,6 +116,7 @@ export * from './storage/storage-actions';
 export * from './subscriptions/subscriptions';
 export * from './tax/tax';
 export * from './tax/tax-engine';
+export * from './transactions/bulk-annotate';
 export * from './transactions/payment-type';
 export * from './transactions/transaction-history';
 export * from './transactions/transaction-list';

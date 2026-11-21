@@ -3,6 +3,7 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import React from 'react';
+import { useTags } from '@/app/hooks/useTags';
 import { useIntlayer } from '@/app/i18n';
 import { getRecord } from '@/app/lib/side-panel-utils';
 import type { AuditEventDiff } from '@/lib/api/audit';
@@ -69,6 +70,13 @@ function DiffPatchView({ diff }: { diff: Extract<AuditEventDiff, unknown[]> }): 
   );
 }
 
+/** A transaction's tags are stored as ids; a deleted tag drops out of the names. */
+function TagNames({ ids }: { ids: unknown[] }): React.JSX.Element {
+  const { data: tags } = useTags();
+  const names = ids.flatMap(id => tags?.find(tag => tag.id === id)?.name ?? []);
+  return <>{names.join(', ') || '—'}</>;
+}
+
 function getRowBackground(hadBefore: boolean, hadAfter: boolean, changed: boolean): string {
   if (hadBefore && !hadAfter) {
     return 'var(--color-error-soft-bg)';
@@ -99,7 +107,10 @@ function DiffObjectView({
     description: t.fieldLabels.description.value,
     title: t.fieldLabels.title.value,
     position: t.fieldLabels.position.value,
+    tagIds: t.fieldLabels.tags.value,
   };
+  const show = (key: string, value: unknown): React.ReactNode =>
+    key === 'tagIds' && Array.isArray(value) ? <TagNames ids={value} /> : formatValue(value);
   return (
     <Box sx={{ overflow: 'hidden', border: '1px solid var(--border-color)' }}>
       <Box
@@ -141,12 +152,12 @@ function DiffObjectView({
               </Box>
               <Box sx={{ px: 1.5, py: 1, color: 'var(--text-secondary)' }}>
                 <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12, margin: 0 }}>
-                  {formatValue(beforeValue)}
+                  {show(key, beforeValue)}
                 </pre>
               </Box>
               <Box sx={{ px: 1.5, py: 1, color: 'var(--text-secondary)' }}>
                 <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12, margin: 0 }}>
-                  {formatValue(afterValue)}
+                  {show(key, afterValue)}
                 </pre>
               </Box>
             </Box>

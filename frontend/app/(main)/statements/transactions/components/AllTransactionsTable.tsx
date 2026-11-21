@@ -2,8 +2,6 @@
 
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import StatementCategoryDrawer from '@/app/(main)/statements/[id]/edit/StatementCategoryDrawer';
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, ChevronDown } from '@/app/components/icons';
 import { ItemImageBadge } from '@/app/components/item-images/ItemImageBadge';
 import { canDuplicate } from '@/app/components/transactions/helpers/duplicate-draft';
@@ -36,6 +34,7 @@ import {
   rowSides,
   signedAmount,
 } from '../all-transactions';
+import { BulkActionsBar } from './BulkActionsBar';
 
 const DIRECTION_ICONS: Record<Direction, typeof ArrowUpRight> = {
   expense: ArrowUpRight,
@@ -72,6 +71,7 @@ export function AllTransactionsTable({
   onToggle,
   onToggleAll,
   onSetCategory,
+  onBulkDone,
   onSetExcluded,
   onOpen,
 }: {
@@ -85,6 +85,8 @@ export function AllTransactionsTable({
   onToggle: (id: string) => void;
   onToggleAll: (checked: boolean) => void;
   onSetCategory: (ids: string[], categoryId: string) => void;
+  /** Tags or a comment were added to the ticked rows. */
+  onBulkDone: () => void;
   /** Leaves the rows out of budgets (true) or counts them again (false). */
   onSetExcluded: (ids: string[], excluded: boolean) => void;
   onOpen: (row: ListedRow) => void;
@@ -100,50 +102,16 @@ export function AllTransactionsTable({
   const someSelected = !allSelected && rows.some(row => selected.has(row.id));
   const choices = categories.filter(category => category.isEnabled);
   const money = (value: number, currency: string) => formatMoney(value, currency, locale);
-  const [pickingCategory, setPickingCategory] = useState(false);
   const duplicate = useDuplicateTransaction(categories);
 
   return (
     <div className="seneca-all-tx__table-wrap">
-      {selected.size > 0 ? (
-        <div className="seneca-all-tx__bulk" role="status">
-          <span>{t.selected.value.replace('{count}', String(selected.size))}</span>
-          {/* The category drawer every other place uses, not a menu of its own. */}
-          <button
-            type="button"
-            className="seneca-all-tx__menu-button"
-            onClick={() => setPickingCategory(true)}
-          >
-            {t.setCategory}
-            <ChevronDown size={16} aria-hidden />
-          </button>
-          <button
-            type="button"
-            className="seneca-all-tx__menu-button"
-            onClick={() => onSetExcluded([...selected], true)}
-          >
-            {tExcluded.toggle}
-          </button>
-          <button
-            type="button"
-            className="seneca-all-tx__menu-button"
-            onClick={() => onSetExcluded([...selected], false)}
-          >
-            {tExcluded.bulkInclude}
-          </button>
-        </div>
-      ) : null}
-      <StatementCategoryDrawer
-        open={pickingCategory}
-        onClose={() => setPickingCategory(false)}
+      <BulkActionsBar
+        selected={selected}
+        onSetExcluded={onSetExcluded}
         categories={choices}
-        selectedCategoryId=""
-        onSelect={categoryId => {
-          setPickingCategory(false);
-          if (categoryId) {
-            onSetCategory([...selected], categoryId);
-          }
-        }}
+        onSetCategory={onSetCategory}
+        onDone={onBulkDone}
       />
       <table className="seneca-all-tx__table">
         <thead>

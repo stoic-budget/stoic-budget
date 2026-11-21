@@ -17,6 +17,11 @@ const router = vi.hoisted(() => ({ push: vi.fn() }));
 
 vi.mock('@/app/lib/api', () => ({ default: api, apiBaseUrl: '/api/v1' }));
 vi.mock('@/app/hooks/useWorkspaceId', () => ({ useWorkspaceId: () => 'ws-1' }));
+// The bulk bar's tag and comment actions read the user and the workspace.
+vi.mock('@/app/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'user-1' } }) }));
+vi.mock('@/app/contexts/WorkspaceContext', () => ({
+  useWorkspace: () => ({ currentWorkspace: { id: 'w1' } }),
+}));
 vi.mock('next/navigation', () => ({ useRouter: () => router }));
 vi.mock('@/app/i18n', async () => {
   const { autoDictionary } = await import('@/app/components/dashboard/__tests__/intlayer-mock');
@@ -52,6 +57,7 @@ function renderTable(rows: ListedRow[]) {
       onToggleAll={vi.fn()}
       onSetCategory={vi.fn()}
       onSetExcluded={vi.fn()}
+      onBulkDone={vi.fn()}
       onOpen={vi.fn()}
     />,
   );

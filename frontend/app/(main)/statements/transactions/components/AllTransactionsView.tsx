@@ -241,6 +241,7 @@ export function AllTransactionsView(): React.JSX.Element {
               onSetCategory={(ids, categoryId) => {
                 void setCategory(ids, categoryId).then(done => done && setSelected(new Set()));
               }}
+              onBulkDone={() => setSelected(new Set())}
               onSetExcluded={(ids, excluded) => {
                 void setExcluded(ids, excluded).then(done => done && setSelected(new Set()));
               }}

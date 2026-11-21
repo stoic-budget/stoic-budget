@@ -114,6 +114,7 @@ function FilteredList({
           onSetExcluded={(ids, excluded) => {
             void setExcluded(ids, excluded).then(done => done && setSelected(new Set()));
           }}
+          onBulkDone={() => setSelected(new Set())}
           onOpen={openRow}
         />
       )}
