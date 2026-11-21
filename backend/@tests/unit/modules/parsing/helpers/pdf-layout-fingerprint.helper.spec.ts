@@ -133,6 +133,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('HSA Bank is a division of Webster Bank, N.A., Member FDIC')).toBe(BankName.HSA_BANK);
     expect(mentionedBank('visit www.hsbc.co.uk')).toBe(BankName.HSBC);
     expect(mentionedBank('The Huntington National Bank is Member FDIC.')).toBe(BankName.HUNTINGTON);
+    expect(mentionedBank('Visit us Online: www.IBC.com')).toBe(BankName.IBC);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
