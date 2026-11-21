@@ -1,4 +1,4 @@
-import type { Transaction } from '../../../entities/transaction.entity';
+import { type Transaction, TransactionCategorySource } from '../../../entities/transaction.entity';
 
 /**
  * Builds the sibling template: every column a split part inherits verbatim from
@@ -42,6 +42,9 @@ export function cloneForSplit(source: Transaction): Partial<Transaction> {
     // Each part starts on the same person as the whole; splitting a shared
     // purchase between two people is done by reassigning the parts afterwards.
     ownerMemberId: source.ownerMemberId,
+    // A private row's parts stay private, each keeping the real category behind the Private one.
+    isPrivate: source.isPrivate,
+    privateCategoryId: source.privateCategoryId,
     article: source.article,
     activityType: source.activityType,
     vendorNormalized: source.vendorNormalized,
@@ -54,4 +57,25 @@ export function cloneForSplit(source: Transaction): Partial<Transaction> {
     isVerified: source.isVerified,
     importSessionId: source.importSessionId,
   };
+}
+
+/**
+ * A part's own category, else what it inherited. A private row stays in the
+ * Private category for everyone; the part's own goes behind it, for its owner.
+ */
+export function applyPartCategory(
+  row: Transaction,
+  categoryId: string | null | undefined,
+  isPrivate: boolean,
+): void {
+  if (!categoryId) {
+    return;
+  }
+  if (isPrivate) {
+    row.privateCategoryId = categoryId;
+  } else if (categoryId !== row.categoryId) {
+    row.categoryId = categoryId;
+    row.categorySource = TransactionCategorySource.MANUAL;
+    row.categoryReason = null;
+  }
 }
