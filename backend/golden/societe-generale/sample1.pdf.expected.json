@@ -1,0 +1,354 @@
+{
+  "metadata": {
+    "accountNumber": "30003 01234 31336561126 12",
+    "currency": "EUR",
+    "dateFrom": "2010-06-10T00:00:00",
+    "dateTo": "2010-07-09T00:00:00",
+    "balanceStart": 2543.19
+  },
+  "transactions": [
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "SDEI",
+      "paymentPurpose": "VIR RECU 6738680226 DE: SDEI MOTIF: 7766602664252887 )2SDEI 121534264456",
+      "credit": 109.43,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "CARREFOURMARKET",
+      "paymentPurpose": "CARTE X3403 0906 CARREFOURMARKET",
+      "debit": 30.65,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "GRENIER GOURMAND",
+      "paymentPurpose": "CARTE X3403 09/06 GRENIER GOURMAND",
+      "debit": 60,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "CHEQUE 458",
+      "paymentPurpose": "CHEQUE 458",
+      "debit": 150,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "CHEQUE 459",
+      "paymentPurpose": "CHEQUE 459",
+      "debit": 70,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "CARREFOURMARKET",
+      "paymentPurpose": "CARTE X3403 0906 CARREFOURMARKET",
+      "debit": 20,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "GIE DU SECBRON",
+      "paymentPurpose": "CARTE X3403 09/06 GIE DU SECBRON",
+      "debit": 25,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "CHEQUE 460",
+      "paymentPurpose": "CHEQUE 460",
+      "debit": 49.99,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "CHEQUE 461",
+      "paymentPurpose": "CHEQUE 461",
+      "debit": 26,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "CARTE X3403 RETRAIT DAB SG 10/06 06H27 TREVOUX 00904623",
+      "paymentPurpose": "CARTE X3403 RETRAIT DAB SG 10/06 06H27 TREVOUX 00904623",
+      "debit": 50,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "CHEQUE 462",
+      "paymentPurpose": "CHEQUE 462",
+      "debit": 10,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "CARTE X3403 RETRAIT DAB 09/06 15H01 ST GENIS 2 CICLB 18701A00",
+      "paymentPurpose": "CARTE X3403 RETRAIT DAB 09/06 15H01 ST GENIS 2 CICLB 18701A00",
+      "debit": 40,
+      "credit": 5,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2010-06-10T00:00:00",
+      "counterpartyName": "CHEQUE 463",
+      "paymentPurpose": "CHEQUE 463",
+      "debit": 150,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2010-06-14T00:00:00",
+      "counterpartyName": "GIE DU SECBRON",
+      "paymentPurpose": "CARTE X3403 11/06 GIE DU SECBRON",
+      "debit": 14.87,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-14T00:00:00",
+      "counterpartyName": "CREP PIERRE DORE",
+      "paymentPurpose": "CARTE X3403 12/06 CREP PIERRE DORE",
+      "debit": 36.4,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-15T00:00:00",
+      "counterpartyName": "CARTE X3403 RETRAIT DAB SG 15/06 06H27 TREVOUX 00904623",
+      "paymentPurpose": "CARTE X3403 RETRAIT DAB SG 15/06 06H27 TREVOUX 00904623",
+      "debit": 40,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2010-06-15T00:00:00",
+      "counterpartyName": "MAC DONALD’S",
+      "paymentPurpose": "CARTE X3403 11/06 MAC DONALD’S",
+      "debit": 5.65,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-15T00:00:00",
+      "counterpartyName": "CARREFMARKETDAC",
+      "paymentPurpose": "CARTE X3403 13/06 CARREFMARKETDAC",
+      "debit": 35.18,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-16T00:00:00",
+      "counterpartyName": "MAC DONALD’S",
+      "paymentPurpose": "CARTE X3403 14/06 MAC DONALD’S",
+      "debit": 6.7,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-16T00:00:00",
+      "counterpartyName": "MAC DONALDS",
+      "paymentPurpose": "CARTE X3403 15/06 MAC DONALDS",
+      "debit": 5.05,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-17T00:00:00",
+      "counterpartyName": "COTISATION CARTE BLEUE VISA N° XXXXXXXXXXXXXX9826",
+      "paymentPurpose": "COTISATION CARTE BLEUE VISA N° XXXXXXXXXXXXXX9826",
+      "debit": 44,
+      "currency": "EUR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2010-06-18T00:00:00",
+      "counterpartyName": "EDF VRT QE",
+      "paymentPurpose": "VIR RECU 3102452176 DE: EDF VRT QE MOTIF: )207757428785 19917 498 EDF VIR",
+      "credit": 169.63,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2010-06-18T00:00:00",
+      "counterpartyName": "ABONNEMENT MENSUEL MESSALIA",
+      "paymentPurpose": "ABONNEMENT MENSUEL MESSALIA",
+      "debit": 3,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2010-06-18T00:00:00",
+      "counterpartyName": "KENTUCKY FRIED",
+      "paymentPurpose": "CARTE X3403 17/06 KENTUCKY FRIED",
+      "debit": 6.75,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-18T00:00:00",
+      "counterpartyName": "CARREFOUR VAULX",
+      "paymentPurpose": "CARTE X3403 17/06 CARREFOUR VAULX",
+      "debit": 9.85,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-21T00:00:00",
+      "counterpartyName": "GIE SECBRON",
+      "paymentPurpose": "CARTE X3403 18/06 GIE SECBRON",
+      "debit": 12.7,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-21T00:00:00",
+      "counterpartyName": "TABAC PEROCHE",
+      "paymentPurpose": "CARTE X3403 18/06 TABAC PEROCHE",
+      "debit": 56,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-21T00:00:00",
+      "counterpartyName": "GRENIER GOURMAND",
+      "paymentPurpose": "CARTE X3403 19/06 GRENIER GOURMAND",
+      "debit": 12.3,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-21T00:00:00",
+      "counterpartyName": "DOUGLAS 108",
+      "paymentPurpose": "CARTE X3403 19/06 DOUGLAS 108",
+      "debit": 53.2,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-21T00:00:00",
+      "counterpartyName": "CHEQUE 458",
+      "paymentPurpose": "CHEQUE 458",
+      "debit": 110,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2010-06-22T00:00:00",
+      "counterpartyName": "CARTE X3403 RETRAIT DAB SG 22/06 06H25 TREVOUX 00904623",
+      "paymentPurpose": "CARTE X3403 RETRAIT DAB SG 22/06 06H25 TREVOUX 00904623",
+      "debit": 40,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2010-06-22T00:00:00",
+      "counterpartyName": "MAC DONALDS",
+      "paymentPurpose": "CARTE X3403 21/06 MAC DONALDS",
+      "debit": 5.2,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-22T00:00:00",
+      "counterpartyName": "GIE DU SECBRON",
+      "paymentPurpose": "CARTE X3403 21/06 GIE DU SECBRON",
+      "debit": 8.86,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-23T00:00:00",
+      "counterpartyName": "CARREFOUR VAULX",
+      "paymentPurpose": "CARTE X3403 22/06 CARREFOUR VAULX",
+      "debit": 48.64,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-25T00:00:00",
+      "counterpartyName": "DOCTEUR EYMARD P",
+      "paymentPurpose": "CARTE X3403 24/06 DOCTEUR EYMARD P",
+      "debit": 22,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-25T00:00:00",
+      "counterpartyName": "3526574033 ORANGE FRANCE SA 542236440661877356 50 *458230 1482133473",
+      "paymentPurpose": "PRELEVEMENT 3526574033 ORANGE FRANCE SA 542236440661877356 50 *458230 1482133473",
+      "debit": 33.08,
+      "currency": "EUR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2010-06-28T00:00:00",
+      "counterpartyName": "CALSUN HOLDING",
+      "paymentPurpose": "VIR RECU 3468822214 DE: CALSUN HOLDING MOTIF: )FRAIS S16 18 22 24",
+      "credit": 168.97,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2010-06-28T00:00:00",
+      "counterpartyName": "APRR AUTOROUTE",
+      "paymentPurpose": "CARTE X3403 24/06 APRR AUTOROUTE",
+      "debit": 1.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-06-28T00:00:00",
+      "counterpartyName": "5133400007 FRANCE TELECOM CLE 74000181 264552050E363E",
+      "paymentPurpose": "PRELEVEMENT 5133400007 FRANCE TELECOM CLE 74000181 264552050E363E",
+      "debit": 44.46,
+      "currency": "EUR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2010-06-29T00:00:00",
+      "counterpartyName": "CALSUN HOLDING",
+      "paymentPurpose": "VIR RECU 0377138373 DE: CALSUN HOLDING MOTIF: )VIREMENT NET A PAYER 07/0852 *** solde au 30/06/2010 + X XXX ,XX ***",
+      "credit": 1595.49,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2010-07-02T00:00:00",
+      "counterpartyName": "PHARMA PARLEMENT",
+      "paymentPurpose": "CARTE X3403 01/07 PHARMA PARLEMENT",
+      "debit": 7.03,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-07-07T00:00:00",
+      "counterpartyName": "CAMILLE ALBANE",
+      "paymentPurpose": "CARTE X3403 06/07 CAMILLE ALBANE",
+      "debit": 24,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2010-07-07T00:00:00",
+      "counterpartyName": "CHEQUE 461",
+      "paymentPurpose": "CHEQUE 461",
+      "debit": 30,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2010-07-09T00:00:00",
+      "counterpartyName": "CHEQUE 467 totauX des mouvements",
+      "paymentPurpose": "CHEQUE 467 totauX des mouvements",
+      "debit": 32.96,
+      "currency": "EUR"
+    }
+  ]
+}

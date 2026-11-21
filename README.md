@@ -6,7 +6,7 @@
 <h1>Stoic Budget</h1>
 
 <p align="center">
-  :globe_with_meridians: <a href="https://github.com/stoic-budget/stoic-budget/releases/latest">Download</a> · :book: <a href="https://stoic-budget.github.io/stoic-budget/">Documentation</a>
+  :globe_with_meridians: <a href="https://github.com/stoic-budget/stoic-budget/releases/latest">Download</a> · :eyes: <a href="https://demo-stoic-budget.org">Demo</a> · :book: <a href="https://stoic-budget.github.io/stoic-budget/">Documentation</a>
 </p>
 
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
@@ -24,33 +24,9 @@
 
 <div align="center">
 
-<img width="1890" height="887" alt="Overview dashboard: month budgets, income, spending, net and savings rate, top categories and recent transactions" src="https://github.com/user-attachments/assets/2f7fec9e-83da-4ebd-b80d-c6f2c8ae3c46" />
-
-
-<br /><br />
-
-<table>
-<tr>
-<td width="50%"><img width="1892" height="886" alt="Documents list: receipts with merchant, category, amount and approval status" src="https://github.com/user-attachments/assets/256ae873-93b5-47e8-bdbc-eb2f53f0799e" />
-</td>
-<td width="50%"><img width="1889" height="888" alt="Crypto portfolio: balance chart, holdings with profit and connected Ethereum and Tron wallets" src="https://github.com/user-attachments/assets/6d1130c6-b33e-4326-ac12-1eaf7408230c" />
-</td>
-</tr>
-<tr>
-<td width="50%"><img width="1891" height="882" alt="Cash-flow forecast: runway, lowest point and shortfall over the next 90 days" src="https://github.com/user-attachments/assets/b655215b-989f-483d-91bc-72ac457658c9" />
-</td>
-<td width="50%"><img width="1887" height="884" alt="Custom table of invoices with typed columns, paid checkboxes and statuses" src="https://github.com/user-attachments/assets/746cca0a-4c0e-43c5-8003-10cf251d13b2" />
-</td>
-</tr>
-<tr>
-<td colspan="2" align="center"><img width="1893" height="886" alt="Budgets with the Stoic balance: planned versus actual spending across necessity, work, virtue and leisure" src="https://github.com/user-attachments/assets/6b834d00-8a9b-43e3-b144-fb1262696984" />
-
-</td>
-</tr>
-</table>
+<img width="1739" height="1022" alt="image" src="https://github.com/user-attachments/assets/3f46dbc3-2fd7-4aad-9e78-31e05b44ffba" />
 
 </div>
-
 
 ---
 
@@ -123,7 +99,7 @@ Stoic Budget is a full-stack platform for importing, categorizing and analyzing 
 
 ### Understand your money
 
-- **Dashboard** — this month's budgets, income, spending, net and savings rate, top categories, cash flow as a chart, calendar or flow, recent transactions and upcoming charges; pick which sections show.
+- **Dashboard** — this month's budgets, income, spending, net and savings rate, top categories, cash flow as each account's balance day by day, a calendar or a flow, recent transactions and upcoming charges; pick which sections show.
 - **Reports** — cash flow, trends, spend flow, tax year and your own report templates, on a schedule if you like; export to CSV, XLSX or PDF.
 - **Budgets** — monthly limits per category in any currency, plus the Stoic balance: planned versus actual spending across necessity, work, virtue and leisure.
 - **Subscriptions and bills** — recurring charges found automatically, what is paid and still due this month, bills to pay and money to receive.
@@ -170,24 +146,31 @@ Setting expectations upfront:
 
 | Country | Native PDF parser | CSV preset |
 |---|---|---|
-| 🇺🇸 United States | Ally Bank, Associated Bank, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU | Chase, Bank of America, Capital One, American Express, Wells Fargo |
-| 🇬🇧 United Kingdom | Barclays, Bank of Scotland | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
-| 🇩🇪 Germany | | N26, Sparkasse / DKB, Commerzbank |
+| 🇺🇸 United States | Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens, Found, Frost Bank, GO2bank, Green Dot, HSA Bank, Huntington, IBC Bank, KeyBank, M&T Bank, Marcus by Goldman Sachs, Merrick Bank, Navy Federal Credit Union, Netspend, Optum Bank, PNC Bank, Prosperity Bank, Regions Bank, SoFi, Synchrony Bank, Synovus, Truist, U.S. Bank, USAA, Varo Bank, Walmart MoneyCard, Webster Bank, Wells Fargo, Woodforest National Bank | Chase, Bank of America, Capital One, American Express, Wells Fargo |
+| 🇬🇧 United Kingdom | Bank of Scotland, Barclays, first direct, Halifax, Handelsbanken, HSBC, iFAST Global Bank, Kroo, Lloyds Bank, Metro Bank, Monzo, Nationwide, NatWest, Royal Bank of Scotland, Santander UK, Starling Bank, The Co-operative Bank, Ulster Bank, Virgin Money | Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds |
+| 🇩🇪 Germany | Deutsche Bank, N26 | N26, Sparkasse / DKB, Commerzbank |
 | 🇳🇱 Netherlands | | ING, Rabobank |
 | 🇸🇪 🇩🇰 🇳🇴 🇫🇮 Nordics | | Nordea |
-| 🇫🇷 France | Crédit Agricole | |
+| 🇫🇷 France | Crédit Agricole, Société Générale, Sogexia | |
 | 🇵🇱 Poland | BNP Paribas Bank Polska | |
-| 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital | |
-| 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank | |
-| 🇿🇦 South Africa | Absa, Capitec | |
-| 🇮🇳 India | Axis Bank, Citibank | |
+| 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank, RBC Royal Bank, Scotiabank, Simplii Financial, Tangerine, TD Bank | |
+| 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank, Great Southern Bank, Heritage Bank, ING, NAB, Suncorp Bank, Westpac | |
+| 🇳🇬 Nigeria | Fidelity Bank, Zenith Bank | |
+| 🇧🇪 Belgium | KBC | |
+| 🇰🇪 Kenya | NCBA Bank | |
+| 🇶🇦 Qatar | QNB | |
+| 🇷🇴 Romania | Raiffeisen Bank | |
+| 🇨🇭 Switzerland | UBS | |
+| 🇮🇹 Italy | UniCredit | |
+| 🇿🇦 South Africa | Absa, Capitec, FNB | |
+| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India | UCO Bank, Union Bank of India |
 | 🇧🇷 Brazil | Banco do Brasil | |
 | 🇭🇰 Hong Kong | Bank of China (Hong Kong) | |
-| 🇵🇭 Philippines | BPI | |
+| 🇵🇭 Philippines | BPI, GoTyme Bank | |
 | 🇱🇰 Sri Lanka | Commercial Bank of Ceylon | |
 | 🇮🇱 Israel | Bank Hapoalim / Isracard (Hebrew) | |
 | 🇰🇿 Kazakhstan | Kaspi Bank, Bereke Bank (new and legacy formats) | |
-| 🌍 International | | Revolut, Wise, PayPal |
+| 🌍 International | Payoneer, PayPal, Revolut, Skrill, Standard Chartered, Wise | Revolut, Wise, PayPal |
 | — | | T-Bank (Tinkoff) |
 
 **Any other bank:** CSV with delimiter detection, XLSX / XLS, DOCX tables, OFX / QFX, QIF, MT940, CAMT.053, any PDF through the generic table reader, and images (PNG / JPG) through OCR.

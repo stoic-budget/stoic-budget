@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "accountNumber": "1966744246",
+    "currency": "EUR",
+    "dateFrom": "2021-01-20T00:00:00",
+    "dateTo": "2021-01-20T00:00:00",
+    "balanceStart": 19777.92
+  },
+  "transactions": [
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "Bankcard Merch Fees 150130 883903818411687 Kennedale Rotary Club",
+      "paymentPurpose": "Bankcard Merch Fees 150130 883903818411687 Kennedale Rotary Club",
+      "debit": 15,
+      "currency": "EUR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "Check 1078",
+      "paymentPurpose": "1078 Check",
+      "debit": 250,
+      "currency": "EUR",
+      "documentNumber": "1078"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "Deposit Made In A Branch/Store",
+      "paymentPurpose": "Deposit Made In A Branch/Store",
+      "credit": 123,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "Check 1079",
+      "paymentPurpose": "1079 Check",
+      "debit": 2361.35,
+      "currency": "EUR",
+      "documentNumber": "1079"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "Purchase authorized Card 9443",
+      "paymentPurpose": "Purchase authorized Card 9443",
+      "debit": 895.6,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "Bankcard Merch Dep 150205 883903818411687 Kennedale Rotary Club",
+      "paymentPurpose": "Bankcard Merch Dep 150205 883903818411687 Kennedale Rotary Club",
+      "credit": 1010.69,
+      "currency": "EUR"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain",
+    "printed_balances"
+  ]
+}

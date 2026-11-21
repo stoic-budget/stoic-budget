@@ -11,7 +11,7 @@ Stoic Budget does not file anything with a tax authority, and a draft is not tax
 before you file.
 :::
 
-![Tax declaration profile step for a German freelancer filing Anlage EÜR](/img/screenshots/tax-declaration.png)
+![Tax declaration draft step: a German freelancer's Anlage EÜR, line by line, with the profit at the bottom](/img/screenshots/tax-declaration.png)
 
 ## The wizard
 

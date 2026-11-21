@@ -106,11 +106,36 @@ function withoutMarginCode(items: PdfTextItem[]): PdfTextItem[] {
   return isCode ? items.slice(1) : items;
 }
 
+/** A page longer than this, in points, is a scan placed a pixel to a point (2481 × 3508 for A4). */
+const OVERSIZED_PAGE_POINTS = 1200;
+/** Such a page is rendered to the size an A4 page has at OCR_DPI, its longest side in pixels. */
+const OVERSIZED_PAGE_PIXELS = 3508;
+
+/**
+ * How the pages are rendered: at OCR_DPI, or, for a page many times the size
+ * of paper, scaled to an A4 page's pixels. At OCR_DPI such a page is a
+ * hundred megapixels and more, past what the OCR engine can hold; scaled,
+ * its words come out where an A4 page's would.
+ */
+async function renderSize(filePath: string): Promise<string[]> {
+  const { stdout } = await promisify(execFile)('pdfinfo', ['-f', '1', '-l', '1', filePath], {
+    timeout: RASTERIZE_TIMEOUT_MS,
+  }).catch(() => ({ stdout: '' }));
+  const size =
+    /Page\s+1 size:\s*([\d.]+) x ([\d.]+)/.exec(stdout) ??
+    /Page size:\s*([\d.]+) x ([\d.]+)/.exec(stdout);
+  const longest = size ? Math.max(Number(size[1]), Number(size[2])) : 0;
+  return longest > OVERSIZED_PAGE_POINTS
+    ? ['-scale-to', String(OVERSIZED_PAGE_PIXELS)]
+    : ['-r', String(OCR_DPI)];
+}
+
 async function rasterize(filePath: string, dir: string, lastPage: number): Promise<string[]> {
   const prefix = path.join(dir, 'page');
+  const size = await renderSize(filePath);
   await promisify(execFile)(
     'pdftoppm',
-    ['-png', '-gray', '-r', String(OCR_DPI), '-l', String(lastPage), filePath, prefix],
+    ['-png', '-gray', ...size, '-l', String(lastPage), filePath, prefix],
     { timeout: RASTERIZE_TIMEOUT_MS },
   );
   const pageNumber = (name: string) => Number(name.match(/-(\d+)\.png$/)?.[1] ?? 0);
@@ -128,7 +153,8 @@ async function recognize(filePath: string, lastPage: number): Promise<PdfOcrLayo
     const rows: PdfTextRow[] = [];
     const images = await rasterize(filePath, dir, lastPage);
     for (const [index, image] of images.entries()) {
-      const { data } = await worker.recognize(image, {}, { blocks: true });
+      // A page scanned a degree askew would split each printed line into several rows.
+      const { data } = await worker.recognize(image, { rotateAuto: true }, { blocks: true });
       const words = (data.blocks ?? []).flatMap(block =>
         block.paragraphs.flatMap(paragraph => paragraph.lines.flatMap(line => line.words)),
       );
