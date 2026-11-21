@@ -18,6 +18,7 @@ import { CrossStatementDeduplicationService } from './services/cross-statement-d
 import { ManualRowDuplicateService } from './services/manual-row-duplicate.service';
 import { TransactionAttachmentSweeperService } from './services/transaction-attachment-sweeper.service';
 import { TransactionAttachmentsService } from './services/transaction-attachments.service';
+import { TransactionCommentEditService } from './services/transaction-comment-edit.service';
 import { TransactionDeleteService } from './services/transaction-delete.service';
 import { TransactionFingerprintService } from './services/transaction-fingerprint.service';
 import { TransactionHistoryService } from './services/transaction-history.service';
@@ -72,6 +73,7 @@ import { TransactionsService } from './transactions.service';
     TransferToAccountService,
     TransactionsOverviewService,
     TransactionHistoryService,
+    TransactionCommentEditService,
   ],
   exports: [
     TransactionsService,
