@@ -82,5 +82,6 @@ export enum BankName {
   NCBA = 'ncba',
   NETSPEND = 'netspend',
   OPTUM = 'optum',
+  PAYONEER = 'payoneer',
   OTHER = 'other',
 }

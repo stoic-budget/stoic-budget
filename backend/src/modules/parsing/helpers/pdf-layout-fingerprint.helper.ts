@@ -107,6 +107,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.NCBA, /\bncba\b/],
   [BankName.NETSPEND, /\bnetspend\.com\b/],
   [BankName.OPTUM, /\boptumbank\.com\b/],
+  [BankName.PAYONEER, /\bpayoneer, all rights reserved\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

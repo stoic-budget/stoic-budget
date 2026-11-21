@@ -258,6 +258,7 @@ describe('ParserFactoryService', () => {
       'NcbaParser',
       'NetspendParser',
       'OptumParser',
+      'PayoneerParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
