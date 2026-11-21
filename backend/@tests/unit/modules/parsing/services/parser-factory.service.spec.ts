@@ -232,6 +232,7 @@ describe('ParserFactoryService', () => {
       'HalifaxParser',
       'HandelsbankenParser',
       'HdfcParser',
+      'HeritageParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

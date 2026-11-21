@@ -59,4 +59,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.HALIFAX]: 'Halifax',
   [BankName.HANDELSBANKEN]: 'Handelsbanken',
   [BankName.HDFC]: 'HDFC Bank',
+  [BankName.HERITAGE]: 'Heritage Bank',
 };

@@ -52,6 +52,7 @@ import { HalifaxParser } from '../parsers/halifax.parser';
 import { HandelsbankenParser } from '../parsers/handelsbanken.parser';
 import { HapoalimParser } from '../parsers/hapoalim.parser';
 import { HdfcParser } from '../parsers/hdfc.parser';
+import { HeritageParser } from '../parsers/heritage.parser';
 import { KaspiParser } from '../parsers/kaspi.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
@@ -114,4 +115,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [HalifaxParser, { bankName: BankName.HALIFAX }],
   [HandelsbankenParser, { bankName: BankName.HANDELSBANKEN }],
   [HdfcParser, { bankName: BankName.HDFC }],
+  [HeritageParser, { bankName: BankName.HERITAGE }],
 ];

@@ -77,6 +77,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.GREEN_DOT, /\bgreen dot corporation\b|\bgreendot\.com\b/],
   [BankName.HANDELSBANKEN, /\bhandelsbanken plc\b|\bhandelsbanken\.co\.uk\b/],
   [BankName.HDFC, /\bhdfc bank\b|\bifsc\s*:?\s*hdfc0/],
+  [BankName.HERITAGE, /\bheritage bank limited\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
