@@ -1,0 +1,151 @@
+{
+  "metadata": {
+    "accountNumber": "GB00RBOS16101000000001",
+    "currency": "GBP",
+    "dateFrom": "2023-06-22T00:00:00",
+    "dateTo": "2023-07-21T00:00:00",
+    "balanceStart": 1803.9
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-06-22T00:00:00",
+      "counterpartyName": "650000000001-CHB CALL REF. NO. 3442, FROM",
+      "paymentPurpose": "AUTOMATED PAY IN 650000000001-CHB CALL REF. NO. 3442, FROM",
+      "debit": 190.4,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-06-22T00:00:00",
+      "counterpartyName": "A/C 000000001",
+      "paymentPurpose": "DIGITAL BANKING A/C 000000001",
+      "debit": 140,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-06-24T00:00:00",
+      "counterpartyName": "Amazon",
+      "paymentPurpose": "Faster Payment Amazon",
+      "debit": 132.3,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-06-24T00:00:00",
+      "counterpartyName": "Tebay Trading Co.",
+      "paymentPurpose": "BACS Tebay Trading Co.",
+      "debit": 515.22,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-06-25T00:00:00",
+      "counterpartyName": "Morrisons Petrol",
+      "paymentPurpose": "Faster Payment Morrisons Petrol",
+      "debit": 80,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-06-25T00:00:00",
+      "counterpartyName": "Business Loan",
+      "paymentPurpose": "BACS Business Loan",
+      "credit": 20000,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-06-26T00:00:00",
+      "counterpartyName": "James White Media",
+      "paymentPurpose": "BACS James White Media",
+      "debit": 2461.55,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-06-27T00:00:00",
+      "counterpartyName": "ATM High Street",
+      "paymentPurpose": "Faster Payment ATM High Street",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-01T00:00:00",
+      "counterpartyName": "Acorn Advertising Studies",
+      "paymentPurpose": "BACS Acorn Advertising Studies",
+      "debit": 150,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-01T00:00:00",
+      "counterpartyName": "Marriott Hotel",
+      "paymentPurpose": "BACS Marriott Hotel",
+      "debit": 177,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-01T00:00:00",
+      "counterpartyName": "Abellio Scotrail Ltd",
+      "paymentPurpose": "Faster Payment Abellio Scotrail Ltd",
+      "debit": 122.22,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-01T00:00:00",
+      "counterpartyName": "Cheque 0000234",
+      "paymentPurpose": "CHQ Cheque 0000234",
+      "debit": 1200,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-01T00:00:00",
+      "counterpartyName": "Interest Paid",
+      "paymentPurpose": "Int. Bank Interest Paid",
+      "credit": 9.33,
+      "currency": "GBP",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-07-01T00:00:00",
+      "counterpartyName": "OVO Energy",
+      "paymentPurpose": "DD OVO Energy",
+      "debit": 2470,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "Various Payment",
+      "paymentPurpose": "BACS Various Payment",
+      "debit": 10526.4,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "HMRC",
+      "paymentPurpose": "BACS HMRC",
+      "debit": 1000,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-21T00:00:00",
+      "counterpartyName": "DVLA Balance Received Forward",
+      "paymentPurpose": "DD DVLA Balance Received Forward",
+      "debit": 280,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain",
+    "printed_balances"
+  ]
+}
