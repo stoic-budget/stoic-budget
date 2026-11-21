@@ -822,3 +822,19 @@ describe('French headings', () => {
     expect(columns?.map(column => column.role)).toEqual(['date', 'otherDate', 'description', 'debit', 'credit']);
   });
 });
+
+describe('an empty money cell', () => {
+  it('printed "-" is no part of the row\'s text', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [
+        ['Date', 91],
+        ['Description', 197],
+        ['Withdrawal', 322],
+        ['Deposit', 402],
+        ['Balance', 475],
+      ]),
+      row(115, [['15/08/2022', 80], ['SALARY', 135], ['PAYMENT', 169], ['-', 375], ['1,119.00', 420], ['1,122.92', 493]]),
+    ]);
+    expect(transactions[0]).toMatchObject({ description: 'SALARY PAYMENT', credit: 1119 });
+  });
+});
