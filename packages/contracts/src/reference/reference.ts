@@ -134,6 +134,61 @@ export const WalletSeries = Schema.Array(Schema.Struct({ date: DateOnly, balance
 export type WalletSeries = Wire<typeof WalletSeries>;
 
 /**
+ * `GET /wallets/coverage`: how far each bank account's statements reach. An
+ * account (`kind: 'account'`) is an active one fed by bank statements; a bank
+ * (`kind: 'bank'`) is a bank whose statements no account holds yet, named by
+ * its bank and the last four characters of its number, never the whole number.
+ */
+export const WalletCoverage = Schema.Struct({
+  rows: Schema.Array(
+    Schema.Struct({
+      kind: Schema.Literals(['account', 'bank']),
+      walletId: Schema.NullOr(Schema.String),
+      /** The account's name; null for a bank, which the page names by `bankName`. */
+      name: Schema.NullOr(Schema.String),
+      bankName: Schema.NullOr(Schema.String),
+      accountTail: Schema.NullOr(Schema.String),
+      /** The last day its statements cover. */
+      dataTo: Schema.NullOr(DateOnly),
+      /** Its rows still waiting in Review. */
+      pendingReview: Schema.Number,
+      /** The account's currency, which `reconciliation` is in; null for a bank. */
+      currency: Schema.NullOr(Schema.String),
+      reconciliation: Schema.NullOr(WalletReconciliation),
+    }),
+  ),
+});
+export type WalletCoverage = Wire<typeof WalletCoverage>;
+
+/**
+ * `GET /wallets/balance-days?month=`: what each everyday account (checking, cash,
+ * card) held at the end of every day of the month, in the workspace currency at
+ * that day's rate. Every day of the month is listed; where the lines end (today)
+ * is the reader's to say, in their own time zone.
+ */
+export const WalletBalanceDays = Schema.Struct({
+  currency: Schema.String,
+  accounts: Schema.Array(
+    Schema.Struct({
+      id: Schema.String,
+      name: Schema.String,
+      type: WalletType,
+      currency: Schema.String,
+    }),
+  ),
+  days: Schema.Array(
+    Schema.Struct({
+      date: DateOnly,
+      /** By account id; null on a day with no rate for the account's currency. */
+      balances: Schema.Record(Schema.String, Schema.NullOr(Schema.Number)),
+    }),
+  ),
+  /** Account currencies with no rate on some day of the month. */
+  unconverted: Schema.Array(Schema.String),
+});
+export type WalletBalanceDays = Wire<typeof WalletBalanceDays>;
+
+/**
  * A bank statement as the Accounts pages list it: one no account holds yet
  * (`GET /wallets/unlinked-statements`) or one of an account (`GET /wallets/:id/statements`).
  */

@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "accountNumber": "97894670",
+    "currency": "GBP",
+    "dateFrom": "2025-01-19T00:00:00",
+    "dateTo": "2025-02-18T00:00:00",
+    "balanceStart": 0,
+    "balanceEnd": 0
+  },
+  "transactions": [
+    {
+      "transactionDate": "2025-01-20T00:00:00",
+      "counterpartyName": "K MFHD JFG",
+      "paymentPurpose": "CR K MFHD JFG",
+      "credit": 65,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-21T00:00:00",
+      "counterpartyName": "J HTUKJ MR HGFHFGH",
+      "paymentPurpose": "CR J HTUKJ MR HGFHFGH",
+      "credit": 50,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-23T00:00:00",
+      "counterpartyName": "CEX",
+      "paymentPurpose": "CR CEX",
+      "credit": 505,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-24T00:00:00",
+      "counterpartyName": "YHRHNFG-JHGJHG",
+      "paymentPurpose": "BP YHRHNFG-JHGJHG",
+      "debit": 620,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    }
+  ]
+}

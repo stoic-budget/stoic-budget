@@ -206,6 +206,28 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     });
     const tag = await insert('tags', { workspace_id: workspaceId, name: 'tax' });
     const wallet = await insert('wallets', { workspace_id: workspaceId, user_id: userId, name: 'Cash', currency: 'EUR' });
+    // A loan account with its terms: the schedule's inputs travel with the account.
+    const loan = await insert('wallets', {
+      workspace_id: workspaceId,
+      user_id: userId,
+      name: 'Car loan',
+      type: 'loan',
+      currency: 'EUR',
+      initial_balance: -9000,
+    });
+    await insert('loan_terms', {
+      workspace_id: workspaceId,
+      wallet_id: loan,
+      principal: 9000,
+      start_date: '2026-01-15',
+      term_months: 48,
+      payment_day: 15,
+      method: 'linear',
+      day_count: 'actual/365',
+      annual_rate: 4.9,
+      rate_changes: JSON.stringify([{ from: '2027-01-15', annualRate: 3.9 }]),
+      extra_payments: JSON.stringify([{ date: '2026-06-15', amount: 500 }]),
+    });
 
     // A statement with its file on disk, two tagged rows on it.
     const statementFile = writeDocument('bank.pdf', '%PDF-1.4 bank statement');
@@ -358,7 +380,14 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
       period_type: 'monthly',
       current_period_start: '2026-10-01',
     });
-    await insert('goals', { workspace_id: workspaceId, name: 'Laptop', target_amount: 2000, currency: 'EUR' });
+    // A goal following an account: the restored copy must follow the restored account.
+    await insert('goals', {
+      workspace_id: workspaceId,
+      name: 'Laptop',
+      target_amount: 2000,
+      currency: 'EUR',
+      wallet_id: wallet,
+    });
     const table = await insert('custom_tables', { workspace_id: workspaceId, user_id: userId, name: 'Projects' });
     await insert('custom_table_columns', { table_id: table, key: 'client', title: 'Client' });
     await insert('custom_table_rows', { table_id: table, row_number: 1, data: { client: 'Client GmbH' } });
@@ -401,6 +430,7 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
       'goals',
       'custom_table_rows',
       'payables',
+      'loan_terms',
     ]) {
       expect(source[table]).toBeGreaterThan(0);
     }
@@ -438,6 +468,16 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
       if (count > 0) leaks.push(`${key.source}.${key.column} -> ${key.target}: ${count}`);
     }
     expect(leaks).toEqual([]);
+  });
+
+  it('brings back a goal following the restored account, not the source one', async () => {
+    const copy = await roundTrip(workspaceId, 'Goal account copy');
+    const [goal] = await sql(
+      `SELECT w.workspace_id, w.name FROM goals g JOIN wallets w ON w.id = g.wallet_id
+        WHERE g.workspace_id = $1`,
+      [copy.id],
+    );
+    expect(goal).toEqual({ workspace_id: copy.id, name: 'Cash' });
   });
 
   it('brings back the ledger as it was booked: numbered, posted and reversed', async () => {

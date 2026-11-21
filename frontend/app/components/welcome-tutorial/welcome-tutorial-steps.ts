@@ -8,7 +8,6 @@ export const TUTORIAL_POINTS: Record<TutorialStepId, readonly string[]> = {
   tables: ['grid', 'list'],
   workspaces: ['list', 'members', 'categories'],
   reports: ['flow', 'templates', 'categories'],
-  taxDeclaration: ['gate', 'steps'],
   netWorth: ['chart', 'allocation', 'risk'],
   budgets: ['cards', 'over'],
   advice: ['info', 'attention'],

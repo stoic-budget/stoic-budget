@@ -59,6 +59,8 @@ export const DOCUMENTS_ERRORS = {
     'Cannot unsplit a transaction whose parts are part of a filed tax return',
   TRANSACTION_UNSPLIT_DUPLICATE:
     'Cannot unsplit a group containing a transaction marked as a duplicate',
+  TRANSACTION_UNSPLIT_MIXED_BUDGETS:
+    'Before unsplitting, either leave every part out of budgets or count every part in them',
   TRANSACTION_TRANSFER_SAME_LEG: 'A transfer needs two different transactions',
   TRANSACTION_TRANSFER_SAME_DIRECTION: 'The two legs of a transfer must go in opposite directions',
   TRANSACTION_LEG_DUPLICATE: 'Transaction {{id}} is marked as a duplicate',
@@ -139,6 +141,10 @@ export const DOCUMENTS_ERRORS = {
   BUDGET_ALREADY_EXISTS: 'Budget for this category with period "{{period}}" already exists',
   BUDGET_WINDOW_INVALID: 'Budget "endsOn" must not be earlier than "startsOn"',
   GOAL_COVER_ONE_SOURCE: 'Send exactly one of preset or photoId',
+  GOAL_ACCOUNT_UNAVAILABLE:
+    'A goal can follow only an active account of this workspace that is shared or yours',
+  GOAL_FOLLOWS_ACCOUNT:
+    "This goal follows an account: its progress is the account's balance, so it takes no contributions",
   // ── balance sheet ───────────────────────────────────────────────────────
   BALANCE_DATE_INVALID: 'Invalid date format',
   BALANCE_ACCOUNT_NOT_FOUND: 'Balance account not found',

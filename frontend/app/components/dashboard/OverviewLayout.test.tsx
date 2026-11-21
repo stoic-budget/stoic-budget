@@ -76,11 +76,13 @@ describe('OverviewLayout', () => {
     renderWithQuery(<OverviewLayout sections={sections()} />);
 
     await waitFor(() =>
-      expect(order().slice(0, 5)).toEqual([
+      // The crypto card, on by itself now, takes a row under the full net worth row.
+      expect(order().slice(0, 6)).toEqual([
         'getting-started',
         'net-worth',
         'kpi-income',
         'kpi-net',
+        'crypto',
         'goals',
       ]),
     );
@@ -201,7 +203,7 @@ describe('OverviewLayout', () => {
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: 'Reset layout' })).not.toBeInTheDocument(),
     );
-    expect(order().slice(0, 3)).toEqual(['getting-started', 'kpi-spent', 'kpi-income']);
+    expect(order().slice(0, 3)).toEqual(['getting-started', 'kpi-income', 'kpi-spent']);
   });
 
   it('switches on a widget that is off by default from the picker', async () => {

@@ -8,6 +8,7 @@ import {
   fromStatementTransaction,
   mapApiRecordToTransaction,
 } from '@/app/components/transactions/helpers/transactionMapper';
+import { useSetExcludedFromBudgets } from '@/app/components/transactions/hooks/useBulkExcludeFromBudgets';
 import { useBulkUpdateCategory } from '@/app/components/transactions/hooks/useBulkUpdateCategory';
 import type { Transaction } from '@/app/components/transactions/types';
 import { AppPagination } from '@/app/components/ui/pagination';
@@ -53,6 +54,7 @@ function FilteredList({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { list, categories, budgetByCategory } = useFilteredTransactions(filter, page, PAGE_SIZE);
   const bulkUpdateCategory = useBulkUpdateCategory();
+  const { setExcluded } = useSetExcludedFromBudgets();
 
   const rows = list.data?.data ?? [];
   const totalPages = Math.max(1, Math.ceil((list.data?.total ?? 0) / PAGE_SIZE));
@@ -108,6 +110,9 @@ function FilteredList({
           onToggleAll={checked => setSelected(new Set(checked ? rows.map(row => row.id) : []))}
           onSetCategory={(ids, categoryId) => {
             void setCategory(ids, categoryId).then(done => done && setSelected(new Set()));
+          }}
+          onSetExcluded={(ids, excluded) => {
+            void setExcluded(ids, excluded).then(done => done && setSelected(new Set()));
           }}
           onOpen={openRow}
         />

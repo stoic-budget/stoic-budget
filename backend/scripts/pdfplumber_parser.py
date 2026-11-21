@@ -17,6 +17,7 @@ Returns:
 """
 
 import json
+import re
 import pathlib
 import sys
 from typing import List, Dict, Any
@@ -42,7 +43,35 @@ def is_horizontal(obj: Dict[str, Any]) -> bool:
     if obj.get("object_type") != "char":
         return True
     a, b, c, d = (obj.get("matrix") or (1, 0, 0, 1))[:4]
-    return abs(b) < 1e-3 and abs(c) < 1e-3 and a > 0 and d > 0
+    # A flipped glyph matrix ("0.24 0 0 -0.24", Type 3 fonts) is still horizontal text.
+    return abs(b) < 1e-3 and abs(c) < 1e-3 and a > 0 and (d > 0 or obj.get("upright", False))
+
+
+LEADER = re.compile(r"\.{4,}")
+
+
+def without_leaders(words: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    A dot leader runs a row's text out to its amount, glued to both at times
+    ("Interest.........2.57", "..........1,620.00"): those dots are no text,
+    and each piece around them stands where its own characters do.
+    """
+    out = []
+    for word in words:
+        text = word.get("text", "")
+        chars = word.get("chars") or []
+        # Dots alone are a rule between parts of the page: they stay.
+        if not LEADER.search(text) or LEADER.fullmatch(text) or len(chars) != len(text):
+            out.append(word)
+            continue
+        start = 0
+        for match in list(LEADER.finditer(text)) + [None]:
+            end = match.start() if match else len(text)
+            if end > start:
+                piece = chars[start:end]
+                out.append({**word, "text": text[start:end], "x0": piece[0]["x0"], "x1": piece[-1]["x1"]})
+            start = match.end() if match else end
+    return out
 
 
 def build_rows(words: List[Dict[str, Any]], page_number: int, tolerance: float = 2.5) -> List[Dict[str, Any]]:
@@ -73,11 +102,73 @@ def build_rows(words: List[Dict[str, Any]], page_number: int, tolerance: float =
             }
         )
 
+    rows = join_stray_amounts(rows, tolerance)
     for row in rows:
-        row["items"].sort(key=lambda i: i["x"])
+        row["items"] = join_touching_digits(sorted(row["items"], key=lambda i: i["x"]))
         row["text"] = " ".join([i["text"] for i in row["items"] if i.get("text")])
 
     return sorted(rows, key=lambda r: (r["page"], -r["y"]))
+
+
+DIGITS = re.compile(r"^[\d.,]+$")
+
+
+def join_touching_digits(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Digits drawn out of order split one number into words that touch ("202"
+    and "5" of a year, no gap between them): they are one word again.
+    """
+    out: List[Dict[str, Any]] = []
+    for item in items:
+        last = out[-1] if out else None
+        if (
+            last is not None
+            and DIGITS.match(last["text"])
+            and DIGITS.match(item["text"])
+            and abs(item["x"] - (last["x"] + last["width"])) < 0.5
+        ):
+            last["text"] += item["text"]
+            last["width"] = item["x"] + item["width"] - last["x"]
+            continue
+        out.append(dict(item))
+    return out
+
+
+AMOUNT_WORD = re.compile(r"^[-+(]?[£$€]?\d[\d,. ]*[.,]\d{2}\)?-?$")
+
+
+def join_stray_amounts(rows: List[Dict[str, Any]], tolerance: float) -> List[Dict[str, Any]]:
+    """
+    A row of amounts alone set a little off its line ("3,550.00" 3 points above
+    the date, text and balance it belongs to) joins the nearest row within
+    twice the tolerance that holds amounts and words both (a transaction's
+    line, not a text line beside a summary box), when no word of that row
+    stands where it does.
+    """
+    def amounts_only(row):
+        return all(AMOUNT_WORD.match(item["text"]) for item in row["items"])
+
+    kept = []
+    for row in rows:
+        if not amounts_only(row):
+            kept.append(row)
+            continue
+        near = [
+            other for other in rows
+            if other is not row and abs(other["y"] - row["y"]) <= 2 * tolerance
+            and not amounts_only(other)
+            and any(AMOUNT_WORD.match(item["text"]) for item in other["items"])
+        ]
+        target = min(near, key=lambda other: abs(other["y"] - row["y"]), default=None)
+        clear = target is not None and not any(
+            item["x"] < mine["x"] + mine["width"] and mine["x"] < item["x"] + item["width"]
+            for item in target["items"] for mine in row["items"]
+        )
+        if clear:
+            target["items"].extend(row["items"])
+        else:
+            kept.append(row)
+    return kept
 
 
 def build_structured_rows(data: List[List[str]], bbox: List[float], page_number: int) -> List[Dict[str, Any]]:
@@ -240,6 +331,62 @@ def smudges(chars: List[Dict[str, Any]]) -> set:
     return found
 
 
+WHITE = {(1.0,), (1.0, 1.0, 1.0), (0.0, 0.0, 0.0, 0.0), (1,), (1, 1, 1), (0, 0, 0, 0)}
+
+
+def white_twins(page) -> set:
+    """
+    White copies of visible characters, drawn at the same spot: a white "3"
+    under the black "3". Same font and size, so dedupe_chars would keep both
+    for their colour and the line reads "3300 JJaann". White text on a dark
+    fill has no black twin and stays.
+    """
+    by_spot: Dict[Any, List[Dict[str, Any]]] = {}
+    for char in page.chars:
+        by_spot.setdefault((char["text"], round(char["x0"]), round(char["top"])), []).append(char)
+    found = set()
+    for twins in by_spot.values():
+        colours = [tuple(char.get("non_stroking_color") or ()) in WHITE for char in twins]
+        if any(colours) and not all(colours):
+            found.update(id(char) for char, white in zip(twins, colours) if white)
+    return found
+
+
+def straighten(page) -> None:
+    """
+    Type 3 fonts draw horizontal text through a flipped matrix ("0.24 0 0 -0.24"):
+    pdfminer calls those glyphs not upright and reads each as a line of its own.
+    A glyph neither rotated nor mirrored left to right is upright.
+    """
+    for char in page.chars:
+        a, b, c, _d, _e, _f = char["matrix"]
+        if not char["upright"] and b == 0 and c == 0 and a > 0:
+            char["upright"] = True
+
+
+def underscore_rules(page) -> set:
+    """
+    Underscores set in a row as a rule ("_DATE___DESCRIPTION___BALANCE $__"):
+    two or more side by side are a line, not text. A lone "_" in a name stays.
+    """
+    marks = sorted((char for char in page.chars if char["text"] == "_"), key=lambda c: (round(c["top"]), c["x0"]))
+    found = set()
+    for left, right in zip(marks, marks[1:]):
+        if round(left["top"]) == round(right["top"]) and right["x0"] - left["x1"] < 1:
+            found.update((id(left), id(right)))
+    return found
+
+
+def unreadable(page) -> set:
+    """
+    Characters set under 1pt: labels for screen readers ("Column", "Date",
+    "Money In (£) blank.") that an accessible statement writes beside every
+    cell, interleaved with the cell's own text ("D0ate", "520.87Money").
+    """
+    # Type 3 fonts report a glyph-space size ("0.24") for full-width letters: their width says otherwise.
+    return {id(char) for char in page.chars if char["size"] <= 1 and char["x1"] - char["x0"] < 1}
+
+
 def visible(hidden: set):
     return lambda obj: obj.get("object_type") != "char" or id(obj) not in hidden
 
@@ -253,7 +400,8 @@ def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:
         for page_number, raw_page in enumerate(pdf.pages, start=1):
             # Text painted over goes first: the text written on top at the same
             # spot would otherwise be dropped as its duplicate.
-            hidden = hidden_chars(raw_page)
+            straighten(raw_page)
+            hidden = hidden_chars(raw_page) | white_twins(raw_page) | unreadable(raw_page) | underscore_rules(raw_page)
             page = raw_page.filter(visible(hidden)) if hidden else raw_page
             # Bold drawn twice at the same spot reads "PPaaggee" otherwise.
             page = page.dedupe_chars()
@@ -271,8 +419,9 @@ def parse_pdf(file_path: pathlib.Path) -> Dict[str, Any]:
                 y_tolerance=2.0,
                 keep_blank_chars=False,
                 use_text_flow=True,
+                return_chars=True,
             ) or []
-            rows.extend(build_rows(words, page_number))
+            rows.extend(build_rows(without_leaders(words), page_number))
             tables.extend(extract_tables(page, page_number))
 
     return {

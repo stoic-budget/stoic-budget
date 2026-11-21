@@ -14,7 +14,8 @@ The backend defines its entities under `backend/src/entities`. Highlights, by ta
 - `auth_sessions`, `password_reset_tokens`, `email_change_tokens` for accounts and sessions
 - `audit_events`, `notifications`, `report_history` for governance
 - `income_tax_profiles`, `income_tax_line_mappings`, `income_tax_returns`, `income_tax_disclaimer_acceptances`
-  for the income tax declaration
+  for the income tax declaration, which moved to the paid edition; the tables and their migrations stay
+  so existing data is kept
 - `integration_tokens`, `user_ai_settings`, `idempotency_keys` for integrations and request safety
 
 ## Migrations

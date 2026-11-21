@@ -13,6 +13,10 @@ export const queryKeys = {
     ['dashboard', o.workspaceId, o.range, o.date] as const,
   dashboardCashFlowEntries: (o: { workspaceId: string | null; month: string }) =>
     ['dashboard', 'cash-flow-entries', o.workspaceId, o.month] as const,
+  dashboardAccountBalanceDays: (o: { workspaceId: string | null; month: string }) =>
+    ['dashboard', 'account-balance-days', o.workspaceId, o.month] as const,
+  dashboardWalletCoverage: (workspaceId: string | null) =>
+    ['dashboard', 'wallet-coverage', workspaceId] as const,
   dashboardSetupProgress: (workspaceId: string | null) =>
     ['dashboard', 'setup-progress', workspaceId] as const,
   statements: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
@@ -151,15 +155,6 @@ export const queryKeys = {
   taxJurisdictions: () => ['tax-jurisdictions'] as const,
   taxJurisdictionRates: (o: { code: string | null; date: string }) =>
     ['tax-jurisdictions', o.code, 'rates', o.date] as const,
-  // Prefix ['income-tax', workspaceId] invalidates every part of the declaration at once.
-  incomeTaxDisclaimer: (workspaceId: string | null) =>
-    ['income-tax', workspaceId, 'disclaimer'] as const,
-  incomeTaxProfile: (o: { workspaceId: string | null; taxYear: number }) =>
-    ['income-tax', o.workspaceId, 'profile', o.taxYear] as const,
-  incomeTaxMappings: (o: { workspaceId: string | null; taxYear: number }) =>
-    ['income-tax', o.workspaceId, 'mappings', o.taxYear] as const,
-  incomeTaxDraft: (o: { workspaceId: string | null; taxYear: number }) =>
-    ['income-tax', o.workspaceId, 'draft', o.taxYear] as const,
   subscriptions: (o: { workspaceId: string | null; status: string }) =>
     ['subscriptions', o.workspaceId, 'list', o.status] as const,
   subscriptionsSummary: (workspaceId: string | null) =>
@@ -176,7 +171,17 @@ export const queryKeys = {
     workspaceId: string | null;
     vendorName: string;
     statementId: string | null;
-  }) => ['subscriptions', o.workspaceId, 'charge-candidates', o.vendorName, o.statementId] as const,
+    /** A saved subscription's refused rows are left out, so its answer differs. */
+    subscriptionId?: string;
+  }) =>
+    [
+      'subscriptions',
+      o.workspaceId,
+      'charge-candidates',
+      o.vendorName,
+      o.statementId,
+      o.subscriptionId ?? null,
+    ] as const,
   auditEvents: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
     ['audit-events', o.workspaceId, o.params] as const,
   forecast: (o: { workspaceId: string | null; days: number; scenario: string }) =>
@@ -259,4 +264,6 @@ export const queryKeys = {
   /** Instance-wide too: every workspace's statements, as counts per bank and layout. */
   parserHealth: () => ['parser-health'] as const,
   workspaceVersions: (workspaceId: string | null) => ['workspace-versions', workspaceId] as const,
+  /** The caller's own calendar feed in this workspace. */
+  calendarFeed: (workspaceId: string | null) => ['calendar-feed', workspaceId] as const,
 } as const;
