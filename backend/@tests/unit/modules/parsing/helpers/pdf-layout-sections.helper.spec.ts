@@ -113,3 +113,20 @@ describe('a section heading with commas', () => {
     expect(readSectionHeading(row(10, phrase('Deposits, credits and interest', 50)))).toBe('credit');
   });
 });
+
+describe('a two-sided table after a section heading', () => {
+  it('is signed by its own columns, not by the heading above it', () => {
+    const transactions = readLayoutTransactions([
+      row(10, phrase('Fees', 108)),
+      row(30, [
+        ['Date', 42],
+        ['Description', 79],
+        ['Debits', 368],
+        ['Credits', 440],
+        ['Balance', 513],
+      ]),
+      row(45, [['03/02', 40], ['ACH', 79], ['DEP', 103], ['143.45', 450], ['10,702.97', 510]]),
+    ]);
+    expect(transactions[0]).toMatchObject({ credit: 143.45 });
+  });
+});

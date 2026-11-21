@@ -201,4 +201,5 @@ export const BANKS = [
     logo: 'union-bank-of-india.png',
     aliases: ['union bank'],
   },
+  { key: 'usaa', name: 'USAA', logo: 'usaa.png', aliases: ['usaa bank'] },
 ] as const satisfies readonly BankEntry[];
