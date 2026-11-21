@@ -44,6 +44,7 @@ import { FirstDirectParser } from '../parsers/first-direct.parser';
 import { FnbParser } from '../parsers/fnb.parser';
 import { FoundParser } from '../parsers/found.parser';
 import { FrostParser } from '../parsers/frost.parser';
+import { Go2bankParser } from '../parsers/go2bank.parser';
 import { HapoalimParser } from '../parsers/hapoalim.parser';
 import { KaspiParser } from '../parsers/kaspi.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
@@ -100,4 +101,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [FnbParser, { bankName: BankName.FNB }],
   [FoundParser, { bankName: BankName.FOUND }],
   [FrostParser, { bankName: BankName.FROST }],
+  [Go2bankParser, { bankName: BankName.GO2BANK }],
 ];
