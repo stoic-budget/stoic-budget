@@ -7,6 +7,8 @@ import type { ListedRow } from '../all-transactions';
 import { AllTransactionsTable } from './AllTransactionsTable';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
+// The row menu offers Duplicate, which reads the workspace.
+vi.mock('@/app/hooks/useWorkspaceId', () => ({ useWorkspaceId: () => 'ws-1' }));
 vi.mock('@/app/components/item-images/ItemImageBadge', () => ({
   ItemImageBadge: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));

@@ -198,7 +198,7 @@ export const SharedFileAccess = Schema.Struct({
     fileSize: Schema.Number,
     accountNumber: Schema.NullOr(Schema.String),
   }),
-  /** Without the split: the shared page cannot undo one. */
+  /** No split markers: an anonymous reader has no use for how the owner filed the rows. */
   transactions: Schema.Array(
     StatementTransaction.mapFields(Struct.omit(['splitGroupId', 'splitIndex'])),
   ),

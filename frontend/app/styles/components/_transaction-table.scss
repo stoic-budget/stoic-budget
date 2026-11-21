@@ -1326,8 +1326,9 @@
 // The pinned row under the drawer's content: open the source, delete, confirm.
 .seneca-tx-footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 8px 16px;
 
   &__question {
     margin-right: auto;
