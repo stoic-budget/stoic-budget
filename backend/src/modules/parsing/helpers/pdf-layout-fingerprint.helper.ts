@@ -147,6 +147,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.WALMART_MONEYCARD, /\bwww\.walmartmoneycard\.com\b/],
   [BankName.WEBSTER, /\bwebsterbank\.com\b/],
   [BankName.WELLS_FARGO, /\bwells fargo bank, n\.a\.|\b1-800-to-wells\b/],
+  [BankName.WESTPAC, /\bwestpac banking corporation\b|\binform westpac\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

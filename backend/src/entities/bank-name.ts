@@ -121,5 +121,6 @@ export enum BankName {
   WALMART_MONEYCARD = 'walmart_moneycard',
   WEBSTER = 'webster',
   WELLS_FARGO = 'wells_fargo',
+  WESTPAC = 'westpac',
   OTHER = 'other',
 }
