@@ -154,4 +154,5 @@ export const BANKS = [
   { key: 'regions', name: 'Regions Bank', logo: 'regions.png', aliases: ['regions'] },
   { key: 'revolut', name: 'Revolut', logo: 'revolut.png', aliases: ['revolut'] },
   { key: 'rbs', name: 'Royal Bank of Scotland', logo: 'rbs.png', aliases: ['rbs'] },
+  { key: 'santander', name: 'Santander UK', logo: 'santander.png', aliases: ['santander'] },
 ] as const satisfies readonly BankEntry[];

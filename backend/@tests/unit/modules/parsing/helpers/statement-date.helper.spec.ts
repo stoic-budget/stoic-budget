@@ -93,3 +93,12 @@ describe('a full stop after the year', () => {
     expect(parseDateParts('18 May 23.', 'dmy')).toMatchObject({ year: 2023, month: 5, day: 18 });
   });
 });
+
+describe('a day written with its ordinal', () => {
+  it('reads "12th Apr", "1st May", "2nd May" and "23rd Apr 2024"', () => {
+    expect(parseDateParts('12th Apr', 'dmy')).toMatchObject({ day: 12, month: 4 });
+    expect(parseDateParts('1st May', 'dmy')).toMatchObject({ day: 1, month: 5 });
+    expect(parseDateParts('2nd May', 'dmy')).toMatchObject({ day: 2, month: 5 });
+    expect(parseDateParts('23rd Apr 2024', 'dmy')).toMatchObject({ day: 23, month: 4, year: 2024 });
+  });
+});

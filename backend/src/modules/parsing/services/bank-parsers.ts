@@ -89,6 +89,7 @@ import { RbcParser } from '../parsers/rbc.parser';
 import { RbsParser } from '../parsers/rbs.parser';
 import { RegionsParser } from '../parsers/regions.parser';
 import { RevolutParser } from '../parsers/revolut.parser';
+import { SantanderParser } from '../parsers/santander.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
 /**
@@ -186,4 +187,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [RegionsParser, { bankName: BankName.REGIONS }],
   [RevolutParser, { bankName: BankName.REVOLUT }],
   [RbsParser, { bankName: BankName.RBS }],
+  [SantanderParser, { bankName: BankName.SANTANDER }],
 ];
