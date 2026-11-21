@@ -99,5 +99,6 @@ export enum BankName {
   SKRILL = 'skrill',
   SOCIETE_GENERALE = 'societe_generale',
   SOFI = 'sofi',
+  SOGEXIA = 'sogexia',
   OTHER = 'other',
 }

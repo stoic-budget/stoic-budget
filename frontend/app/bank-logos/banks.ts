@@ -171,4 +171,5 @@ export const BANKS = [
     aliases: ['societe generale', 'sg'],
   },
   { key: 'sofi', name: 'SoFi', logo: 'sofi.png', aliases: ['sofi bank'] },
+  { key: 'sogexia', name: 'Sogexia', logo: 'sogexia.png', aliases: ['sogexia'] },
 ] as const satisfies readonly BankEntry[];

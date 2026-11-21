@@ -147,6 +147,7 @@ const OPENING = [
   'opening balance',
   'balance brought forward',
   'previous balance',
+  'former balance',
   'balance - previous statement',
   'beginning balance',
   "solde d'ouverture",
