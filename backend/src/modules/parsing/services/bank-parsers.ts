@@ -116,6 +116,7 @@ import { UsBankParser } from '../parsers/us-bank.parser';
 import { UsaaParser } from '../parsers/usaa.parser';
 import { VaroParser } from '../parsers/varo.parser';
 import { VirginMoneyParser } from '../parsers/virgin-money.parser';
+import { WalmartMoneyCardParser } from '../parsers/walmart-moneycard.parser';
 
 /**
  * Each bank's own parser, with the bank it claims a file as when the file's
@@ -238,4 +239,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [UsBankParser, { bankName: BankName.US_BANK }],
   [VaroParser, { bankName: BankName.VARO }],
   [VirginMoneyParser, { bankName: BankName.VIRGIN_MONEY }],
+  [WalmartMoneyCardParser, { bankName: BankName.WALMART_MONEYCARD }],
 ];

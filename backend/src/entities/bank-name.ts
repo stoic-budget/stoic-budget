@@ -118,5 +118,6 @@ export enum BankName {
   US_BANK = 'us_bank',
   VARO = 'varo',
   VIRGIN_MONEY = 'virgin_money',
+  WALMART_MONEYCARD = 'walmart_moneycard',
   OTHER = 'other',
 }
