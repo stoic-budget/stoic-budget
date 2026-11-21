@@ -9,15 +9,13 @@ import { Transaction, TransactionCategorySource } from '../../../entities/transa
 import { AuditService } from '../../audit/audit.service';
 import { TaxAssignmentService } from '../../tax/tax-assignment.service';
 import { hasDecidedCategory } from '../engine/category-decision';
-import { movesToWallet, planRuleApply } from '../engine/rule-apply-plan';
-import { explainMatch, matchesRule } from '../engine/rule-conditions';
+import { movesToWallet, planRuleApply, rowsMatching } from '../engine/rule-apply-plan';
+import { conditionsUse } from '../engine/rule-condition-tree';
+import { explainMatch } from '../engine/rule-conditions';
 import { ownsRuleRefs } from '../engine/rule-refs';
-import { addTransactionTags, ownedTagIds } from '../engine/rule-tags';
+import { addTransactionTags, ownedTagIds, rowTagIds } from '../engine/rule-tags';
 import { ruleApplyEvents } from '../helpers/rule-audit';
-import type {
-  ClassificationCondition,
-  MatchMode,
-} from '../interfaces/classification-rule.interface';
+import type { MatchMode, RuleConditionNode } from '../interfaces/classification-rule.interface';
 import { ClassificationService } from './classification.service';
 
 /** How many of a workspace's most recent rows a rule preview looks at. */
@@ -102,16 +100,36 @@ export class RuleApplicationService {
    * The active rules tried before `ruleId`, best first. A rule not saved yet
    * goes on top, so nothing is tried before it.
    */
-  private async rulesAbove(workspaceId: string, ruleId?: string): Promise<CategorizationRule[]> {
-    if (!ruleId) {
-      return [];
-    }
+  /** The active rules ranked above `ruleId` (none for a rule not saved yet), and every active rule. */
+  private async rulesAround(
+    workspaceId: string,
+    ruleId?: string,
+  ): Promise<{ above: CategorizationRule[]; active: CategorizationRule[] }> {
     const rules = await this.transactionRepository.manager.getRepository(CategorizationRule).find({
       where: { workspaceId },
       order: { priority: 'DESC', createdAt: 'DESC' },
     });
-    const index = rules.findIndex(rule => rule.id === ruleId);
-    return index < 0 ? [] : rules.slice(0, index).filter(rule => rule.isActive);
+    const index = ruleId ? rules.findIndex(rule => rule.id === ruleId) : -1;
+    return {
+      above: index < 0 ? [] : rules.slice(0, index).filter(rule => rule.isActive),
+      active: rules.filter(rule => rule.isActive),
+    };
+  }
+
+  /** The rows' tags by row id when one of the rules asks about tags; else nothing is read. */
+  private async tagsFor(
+    workspaceId: string,
+    rows: readonly Transaction[],
+    rules: ReadonlyArray<{ conditions: readonly RuleConditionNode[] }>,
+  ): Promise<Map<string, string[]> | undefined> {
+    if (!conditionsUse(rules, 'tags')) {
+      return undefined;
+    }
+    return rowTagIds(
+      this.transactionRepository.manager,
+      workspaceId,
+      rows.map(row => row.id),
+    );
   }
 
   /**
@@ -123,7 +141,7 @@ export class RuleApplicationService {
   async previewRule(input: {
     workspaceId: string;
     viewerMemberId: string | null;
-    conditions: ClassificationCondition[];
+    conditions: RuleConditionNode[];
     matchMode?: MatchMode;
     transactionIds?: readonly string[];
     ruleId?: string;
@@ -131,15 +149,19 @@ export class RuleApplicationService {
     walletId?: string;
   }) {
     const { rows, truncated } = await this.rowsForRule(input.workspaceId, input.transactionIds);
-    const above = await this.rulesAbove(input.workspaceId, input.ruleId);
+    const { above, active } = await this.rulesAround(input.workspaceId, input.ruleId);
     const readable = rows.filter(row => canReadPrivate(row, input.viewerMemberId));
-    const matches = readable
-      .filter(row => matchesRule(row, input))
-      .map(row => {
-        // Rules add up, so only a rule that sets a category takes that from this one.
-        const winner = above.find(rule => rule.result.categoryId && matchesRule(row, rule));
-        return { row, wonBy: winner ? { id: winner.id, name: winner.name } : null };
-      });
+    const tagIds = await this.tagsFor(input.workspaceId, readable, [input, ...above]);
+    const matches = rowsMatching(readable, input, {
+      above,
+      written: active,
+      viewerMemberId: input.viewerMemberId,
+      tagIds,
+    }).map(({ row, above: matchingAbove, state }) => {
+      // Rules add up, so only a rule that sets a category takes that from this one.
+      const winner = matchingAbove.find(rule => rule.result.categoryId);
+      return { row, state, wonBy: winner ? { id: winner.id, name: winner.name } : null };
+    });
     return {
       totalTransactions: readable.length,
       matchedTransactions: matches.length,
@@ -147,13 +169,13 @@ export class RuleApplicationService {
       shadowed: matches.filter(({ wonBy }) => wonBy).length,
       movable: matches.filter(({ row }) => movesToWallet(row, input.walletId)).length,
       truncated,
-      matches: matches.slice(0, RULE_PREVIEW_MATCHES).map(({ row, wonBy }) => ({
+      matches: matches.slice(0, RULE_PREVIEW_MATCHES).map(({ row, state, wonBy }) => ({
         id: row.id,
         date: row.transactionDate ? String(row.transactionDate) : null,
         amount: row.debit || row.credit || row.amount,
         counterparty: row.counterpartyName,
         purpose: row.paymentPurpose,
-        matchReason: explainMatch(row, input.conditions, input.matchMode),
+        matchReason: explainMatch(row, input.conditions, input.matchMode, state),
         direction: row.transactionType ?? null,
         currency: row.currency,
         categoryId: row.categoryId ?? null,
@@ -188,12 +210,14 @@ export class RuleApplicationService {
     if (!(owned && (categoryId || walletId || comment || payeeId || tagIds.length > 0))) {
       return totals;
     }
-    const above = await this.rulesAbove(workspaceId, rule.id);
+    const { above, active } = await this.rulesAround(workspaceId, rule.id);
     let touchedRows = 0;
     for await (const rows of this.pagesForRule(workspaceId)) {
       const plan = planRuleApply(rows, rule, {
         above,
+        written: [rule, ...active],
         viewerMemberId,
+        tagIds: await this.tagsFor(workspaceId, rows, [rule, ...above]),
         setsCategory: Boolean(categoryId),
         setsTags: tagIds.length > 0,
         walletId,

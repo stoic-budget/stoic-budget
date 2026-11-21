@@ -143,8 +143,6 @@ export function DailyQuoteBanner(): React.JSX.Element | null {
           py: 1.25,
           border: '1px solid',
           borderColor: 'divider',
-          borderLeft: '3px solid',
-          borderLeftColor: 'success.main',
           borderRadius: tokens.radius.sm,
           bgcolor: 'background.paper',
         }}

@@ -228,5 +228,35 @@ describe('transfer-pairing matcher', () => {
         ]);
       });
     });
+
+    describe('with the account the file named ([Account])', () => {
+      const savings = { accountNumber: 'Rainy Day Savings', walletId: null };
+      const other = { accountNumber: 'Holiday Fund', walletId: null };
+
+      it('picks the one of two counterparts whose account the outgoing row named', async () => {
+        const a = out('a', { categoryHint: '[rainy day savings]' });
+        const b = inc('b', { statement: other });
+        const c = inc('c', { statementId: 'stmt-c', statement: savings });
+        expect(await matchTransferPairs([a], [a, b, c], noRates)).toEqual([
+          { outgoing: a, incoming: c },
+        ]);
+      });
+
+      it('picks the counterpart that named the checked row’s account', async () => {
+        const a = out('a', { statement: { accountNumber: 'Everyday Account', walletId: null } });
+        const b = inc('b');
+        const c = inc('c', { statementId: 'stmt-c', categoryHint: '[Everyday Account]' });
+        expect(await matchTransferPairs([a], [a, b, c], noRates)).toEqual([
+          { outgoing: a, incoming: c },
+        ]);
+      });
+
+      it('still pairs nothing when the name fits both counterparts', async () => {
+        const a = out('a', { categoryHint: '[Rainy Day Savings]' });
+        const b = inc('b', { statement: savings });
+        const c = inc('c', { statementId: 'stmt-c', statement: savings });
+        expect(await matchTransferPairs([a], [a, b, c], noRates)).toEqual([]);
+      });
+    });
   });
 });

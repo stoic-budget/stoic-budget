@@ -86,4 +86,58 @@ describe('resolveReceiptMerchantLabel', () => {
 
     expect(label).toBe('GitHub');
   });
+
+  it('keeps the shop from an e-mail subject over a sentence read off the receipt', () => {
+    // The documents list passes no sender, so only the subject names the shop here.
+    const shop = 'ACME';
+    const subject = `[${shop}] Payment receipt`;
+    for (const vendor of [
+      'Thank you for your order',
+      'We received payment for your subscription.',
+      '123 Main Street, Springfield, Example State 00000',
+    ]) {
+      expect(resolveReceiptMerchantLabel({ vendor, subject })).toBe(shop);
+      expect(resolveReceiptMerchantLabel({ vendor, sender: '', subject })).toBe(shop);
+    }
+  });
+
+  describe('a scanned file', () => {
+    const fileName = 'photo_2026-01-02_10-00-00.jpg';
+    // Six words: long enough to read as a sentence, still the name someone typed.
+    const longVendor = 'ACME Case for Tablet Pro Series';
+
+    it('is named by its vendor, not its file name, when the vendor is six words', () => {
+      const label = resolveReceiptMerchantLabel({
+        vendor: longVendor,
+        subject: fileName,
+        fallback: fileName,
+      });
+
+      expect(label).toBe(longVendor);
+    });
+
+    it.each(['camera-scan', 'telegram', 'manual-upload'])(
+      'does not take the "%s" sender for the merchant',
+      sender => {
+        expect(resolveReceiptMerchantLabel({ vendor: longVendor, sender, subject: fileName })).toBe(
+          longVendor,
+        );
+        expect(resolveReceiptMerchantLabel({ sender, subject: fileName })).toBe(fileName);
+      },
+    );
+
+    it('keeps the whole vendor: the column cuts it where it ends', () => {
+      const vendor = 'ACME Leather Folio Case for Tablet Pro Series Twelve Inch';
+
+      expect(resolveReceiptMerchantLabel({ vendor, subject: fileName })).toBe(vendor);
+    });
+
+    it('falls back to the whole file name when nothing names the merchant', () => {
+      const longFileName = 'photo_2026-01-02_10-00-00_front_page_scan.jpg';
+
+      expect(
+        resolveReceiptMerchantLabel({ subject: 'Receipt', fallback: longFileName }),
+      ).toBe(longFileName);
+    });
+  });
 });
