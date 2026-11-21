@@ -3,6 +3,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo, useRef } from 'react';
 
+import { isDemoInstance } from '@/app/hooks/useDemoStatus';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import api from '@/app/lib/api';
 import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
@@ -61,6 +62,11 @@ export function useViewPreference<T extends Record<string, unknown>>(
     (next: T) => {
       pending.current = next;
       queryClient.setQueryData(queryKey, { state: next });
+      // A demo account is shared: the layout holds for this visit (until the page
+      // reloads); the server is not asked.
+      if (isDemoInstance()) {
+        return;
+      }
       void api
         .put(`/view-preferences/${scope}`, {
           state: next,

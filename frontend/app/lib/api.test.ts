@@ -240,6 +240,32 @@ describe('api inside a past version', () => {
     expect(window.location.href).toBe('/dashboard');
   });
 
+  it('explains a demo refusal the same way and keeps the workspace', async () => {
+    localStorage.setItem('currentWorkspaceId', 'demo-ws');
+    apiClient.defaults.adapter = (config =>
+      Promise.reject({
+        config,
+        isAxiosError: true,
+        response: {
+          status: 403,
+          data: {
+            error: {
+              code: 'DEMO_READ_ONLY',
+              message: 'This is a demo: you can look around, but nothing can be changed',
+            },
+          },
+        },
+      })) as typeof apiClient.defaults.adapter;
+
+    await expect(apiClient.post('/budgets', {})).rejects.toBeTruthy();
+
+    expect(toastMock).toHaveBeenCalledTimes(1);
+    const [message, options] = toastMock.mock.calls[0];
+    expect(message).toBe('This is a demo: you can look around, but nothing can be changed');
+    expect(options).toEqual({ id: VERSION_READ_ONLY_TOAST_ID });
+    expect(localStorage.getItem('currentWorkspaceId')).toBe('demo-ws');
+  });
+
   it('still resets the workspace when access to it is really gone', async () => {
     localStorage.setItem('currentWorkspaceId', 'gone');
     apiClient.defaults.adapter = (config =>
