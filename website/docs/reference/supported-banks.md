@@ -7,21 +7,29 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 
 ## Native PDF support
 
-- **Australia:** ANZ, Bendigo Bank, BOQ, CommBank
+- **Australia:** ANZ, Bendigo Bank, BOQ, CommBank, Great Southern Bank, Heritage Bank, ING, NAB, Suncorp Bank, Westpac
+- **Belgium:** KBC
 - **Brazil:** Banco do Brasil
-- **Canada:** ATB Financial, CIBC, Coast Capital
-- **France:** Crédit Agricole
+- **Canada:** ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank, RBC Royal Bank, Scotiabank, Simplii Financial, Tangerine, TD Bank
+- **France:** Crédit Agricole, Société Générale, Sogexia
+- **Germany:** Deutsche Bank, N26
 - **Hong Kong:** Bank of China (Hong Kong)
-- **India:** Axis Bank, Citibank
+- **India:** Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India, UCO Bank, Union Bank of India
+- **International:** Payoneer, PayPal, Revolut, Skrill, Standard Chartered, Wise
 - **Israel:** Bank Hapoalim / Isracard (Hebrew)
+- **Italy:** UniCredit
 - **Kazakhstan:** Kaspi Bank; Bereke Bank, old and new PDF layouts
-- **Philippines:** BPI
+- **Kenya:** NCBA Bank
+- **Nigeria:** Fidelity Bank, Zenith Bank
+- **Philippines:** BPI, GoTyme Bank
 - **Poland:** BNP Paribas Bank Polska
-- **South Africa:** Absa, Capitec
+- **Qatar:** QNB
+- **Romania:** Raiffeisen Bank
+- **South Africa:** Absa, Capitec, FNB
 - **Sri Lanka:** Commercial Bank of Ceylon
-- **United Kingdom:** Barclays, Bank of Scotland
-- **United States:** Ally Bank, Associated Bank, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime,
-  Citizens, Comerica, Commerce Bank, Credit One, DCU
+- **Switzerland:** UBS
+- **United Kingdom:** Bank of Scotland, Barclays, first direct, Halifax, Handelsbanken, HSBC, iFAST Global Bank, Kroo, Lloyds Bank, Metro Bank, Monzo, Nationwide, NatWest, Royal Bank of Scotland, Santander UK, Starling Bank, The Co-operative Bank, Ulster Bank, Virgin Money
+- **United States:** Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens, Found, Frost Bank, GO2bank, Green Dot, HSA Bank, Huntington, IBC Bank, KeyBank, M&T Bank, Marcus by Goldman Sachs, Merrick Bank, Navy Federal Credit Union, Netspend, Optum Bank, PNC Bank, Prosperity Bank, Regions Bank, SoFi, Synchrony Bank, Synovus, Truist, U.S. Bank, USAA, Varo Bank, Walmart MoneyCard, Webster Bank, Wells Fargo, Woodforest National Bank
 
 ## CSV presets
 
