@@ -87,4 +87,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.OPTUM]: 'Optum Bank',
   [BankName.PAYONEER]: 'Payoneer',
   [BankName.PAYPAL]: 'PayPal',
+  [BankName.PNC]: 'PNC Bank',
 };

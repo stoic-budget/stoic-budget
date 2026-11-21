@@ -52,6 +52,7 @@ const SECTIONS: Record<SectionSign, string[]> = {
     'card purchases',
     'debit card purchases',
     'debit card purchases and debits',
+    'banking/debit card withdrawals and purchases',
     'debits',
     'other debits',
     'deductions',
