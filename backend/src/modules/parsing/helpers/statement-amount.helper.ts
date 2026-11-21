@@ -75,8 +75,9 @@ export function isAmountPart(word: string): boolean {
  * first: "1 janvier 2025 10 750,00 $" would otherwise read "2025 10".
  */
 export function findStatementAmounts(text: string): number[] {
+  // A minus after the figure ("$3.22-") is its sign; not a hyphen into a word ("12.50-ACME").
   const pattern = new RegExp(
-    `[-+]?(?:${LETTER_SIGN.source})?(?:\\d{1,3}(?:[ .,  ]\\d{3})+|\\d+)[.,]\\d{2}(?!\\d)(?:\\s?\\([+-]\\))?`,
+    `[-+]?(?:${LETTER_SIGN.source})?(?:\\d{1,3}(?:[ .,  ]\\d{3})+|\\d+)[.,]\\d{2}(?!\\d)(?:\\s?\\([+-]\\)|-(?![\\w-]))?`,
     'g',
   );
   return Array.from(text.matchAll(pattern), match => parseStatementAmount(match[0])).filter(

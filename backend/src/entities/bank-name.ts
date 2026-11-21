@@ -59,5 +59,6 @@ export enum BankName {
   HERITAGE = 'heritage',
   HSA_BANK = 'hsa_bank',
   HSBC = 'hsbc',
+  HUNTINGTON = 'huntington',
   OTHER = 'other',
 }
