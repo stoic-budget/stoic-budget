@@ -9,7 +9,7 @@ import { SchemaParams } from '../../common/effect/schema-query';
 import { SchemaResponse } from '../../common/effect/schema-response';
 import { Permission } from '../../common/enums/permissions.enum';
 import { appError } from '../../common/errors/app-error';
-import { redactPrivate } from '../../common/utils/transaction-privacy.util';
+import { canReadPrivate, redactPrivate } from '../../common/utils/transaction-privacy.util';
 import { ClassifyBulkBody, ClassifyTransactionParams } from '../../contracts';
 import {
   ClassifiedTransaction,
@@ -21,6 +21,10 @@ import type { User } from '../../entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { addTransactionTags } from './engine/rule-tags';
 import { ClassificationService } from './services/classification.service';
+
+/** A category a person picked, or one on a filed tax return, is not the rules' to change. */
+const keepsCategory = (row: Transaction) =>
+  row.categorySource === TransactionCategorySource.MANUAL || row.taxLocked;
 
 /** Re-running the rules rewrites a row's category, so it takes the right to edit transactions. */
 @Controller('classification')
@@ -45,12 +49,14 @@ export class ClassificationController {
       where: { id, workspaceId },
     });
 
-    if (!transaction) {
+    // Another member's private row is not the caller's to re-run: the rules
+    // would read its hidden comment and payee, and rewrite it.
+    if (!(transaction && canReadPrivate(transaction, selfMemberId))) {
       throw new NotFoundException(appError('CLASSIFICATION_TRANSACTION_NOT_FOUND'));
     }
 
-    // A category picked by hand outranks the rules, as in the bulk re-run.
-    if (transaction.categorySource === TransactionCategorySource.MANUAL) {
+    // A category picked by hand, or one on a filed tax return, outranks the rules, as in the bulk re-run.
+    if (keepsCategory(transaction)) {
       return redactPrivate(transaction, selfMemberId);
     }
 
@@ -74,6 +80,7 @@ export class ClassificationController {
     @SchemaBody(ClassifyBulkBody) body: ClassifyBulkBody,
     @CurrentUser() user: User,
     @WorkspaceId() workspaceId: string,
+    @WorkspaceMemberId() selfMemberId: string | null,
   ) {
     const { transactionIds } = body;
     const batchId = transactionIds.length > 1 ? randomUUID() : null;
@@ -82,7 +89,7 @@ export class ClassificationController {
       successful: 0,
       failed: 0,
       notFound: 0,
-      /** Rows whose category the user picked by hand; re-classification never touches them. */
+      /** Rows whose category the user picked by hand, or on a filed tax return; re-classification never touches them. */
       keptManual: 0,
       errors: [] as { transactionId: string; error: string }[],
     };
@@ -93,7 +100,8 @@ export class ClassificationController {
           where: { id: transactionId, workspaceId },
         });
 
-        if (!transaction) {
+        // Another member's private row counts as not found, as it reads elsewhere.
+        if (!(transaction && canReadPrivate(transaction, selfMemberId))) {
           results.notFound++;
           results.errors.push({
             transactionId,
@@ -102,7 +110,7 @@ export class ClassificationController {
           continue;
         }
 
-        if (transaction.categorySource === TransactionCategorySource.MANUAL) {
+        if (keepsCategory(transaction)) {
           results.keptManual++;
           continue;
         }
