@@ -140,6 +140,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.ULSTER, /\bulsbgb2b\b|\bulsterbank\.co\.uk\b/],
   [BankName.UNICREDIT, /\buncritm1\w*\b|\bunicredit\.eu\b/],
   [BankName.UNION_BANK_OF_INDIA, /\bubin0\d{6}\b/],
+  [BankName.USAA, /\busaa federal savings bank\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

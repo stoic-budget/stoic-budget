@@ -384,7 +384,7 @@ def unreadable(page) -> set:
     cell, interleaved with the cell's own text ("D0ate", "520.87Money").
     """
     # Type 3 fonts report a glyph-space size ("0.24") for full-width letters: their width says otherwise.
-    return {id(char) for char in page.chars if char["size"] < 1 and char["x1"] - char["x0"] < 1}
+    return {id(char) for char in page.chars if char["size"] <= 1 and char["x1"] - char["x0"] < 1}
 
 
 def visible(hidden: set):
