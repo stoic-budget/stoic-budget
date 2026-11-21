@@ -70,12 +70,14 @@ export function findSharedYearPeriod(text: string): { from: Date; to: Date } | n
   return real && from <= to ? { from, to } : null;
 }
 
-const FROM_LABEL = /\bf\s?rom\s+date\s*:?/i;
-const TO_LABEL = /\bto\s+date\s*:?/i;
+// "Open Date" alone is when the account was opened: a period's only beside its "Close Date".
+const FROM_LABEL = /\bf\s?rom\s+date\s*:?|\bopen(?:ing)? date\s*:?(?=[^\n]*\bclos(?:e|ing) date)/i;
+const TO_LABEL = /\bto\s+date\s*:?|\bclos(?:e|ing) date\s*:?/i;
 
 /**
  * A period printed as two labelled dates that other text may sit between:
- * "From Date: 10/01/2020" and, a line further, "To Date: 09/02/2020". Each
+ * "From Date: 10/01/2020" and, a line further, "To Date: 09/02/2020"; a card's
+ * "Open Date: Sep 15, 2017 - Close Date: Oct 26, 2017". Each
  * takes the first date after its label. Null when a label or its date is
  * missing or the dates run backwards.
  */
