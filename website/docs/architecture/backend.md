@@ -12,7 +12,9 @@ The backend is a NestJS 11 application organized into 47 feature modules under `
 - Categorization: `classification`, `categories`, `insights`
 - Finance: `dashboard`, `reports`, `balance`, `ledger` (double-entry journal and its reports), `budgets`, `goals`, `net-worth`, `crypto`, `subscriptions`,
   `payables`, `wallets`, `branches`, `exchange-rates`
-- Tax: `tax` (VAT rates, rules, jurisdictions, returns) and `income-tax` (year-end income tax declaration drafts)
+- Tax: `tax` (VAT rates, rules, jurisdictions, returns), `tax-pack`, `tax-reminders` (VAT deadlines; other
+  returns join through `TAX_DEADLINE_SOURCE`) and `datev`
+- Extensions: `src/extensions.ts` lists the modules a paid build adds; the open-source build has none
 - Maps: `maps` (tile proxy) and `geocoding` (Nominatim client)
 - Integrations: `open-protocol-integrations` (S3-compatible, WebDAV, IMAP), `mailer`, `telegram`, `webhooks`,
   `application-settings`

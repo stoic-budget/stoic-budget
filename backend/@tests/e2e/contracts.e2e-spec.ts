@@ -88,10 +88,6 @@ import {
   GoalPlanResponse,
   GoalWithProgress,
   ImportSuggestion,
-  IncomeTaxDisclaimer,
-  IncomeTaxDraft,
-  IncomeTaxMappings,
-  IncomeTaxProfile,
   InsightList,
   InvestmentAccountList,
   InvitationPreview,
@@ -2037,8 +2033,7 @@ describe('API contracts (e2e)', () => {
     });
   });
 
-  describe('tax and income tax', () => {
-    const taxYear = 2025;
+  describe('tax', () => {
     const send = (method: 'post' | 'put', url: string, body: object) =>
       request(app.getHttpServer())
         [method](url)
@@ -2048,11 +2043,6 @@ describe('API contracts (e2e)', () => {
 
     beforeAll(async () => {
       await send('put', '/tax/settings/jurisdiction', { code: 'DE' }).expect(200);
-      await send('put', '/income-tax/profile', {
-        taxYear,
-        taxpayerType: 'self_employed',
-        details: { homeOfficeDays: 120 },
-      }).expect(200);
       const categories = await get('/categories?type=expense');
       const rates = await get('/tax-rates');
       await send('post', '/tax/rules', {
@@ -2167,14 +2157,6 @@ describe('API contracts (e2e)', () => {
       matches(TaxReturnRecord, (await get(`/tax/returns/period?${period}`)).body);
     });
 
-    it('GET the income tax disclaimer, profile, mappings and draft', async () => {
-      matches(IncomeTaxDisclaimer, (await get('/income-tax/disclaimer')).body);
-      const profile = await get(`/income-tax/profile?taxYear=${taxYear}`);
-      matches(IncomeTaxProfile, profile.body);
-      expect(profile.body.filingInfo).not.toBeNull();
-      matches(IncomeTaxMappings, (await get(`/income-tax/mappings?taxYear=${taxYear}`)).body);
-      matches(IncomeTaxDraft, (await get(`/income-tax/returns/${taxYear}`)).body);
-    });
   });
 
   describe('ledger and reconciliation', () => {
@@ -2709,7 +2691,7 @@ describe('API contracts (e2e)', () => {
       );
     });
 
-    it('review approvals, notes, goal contributions and income-tax finalize and reopen', async () => {
+    it('review approvals, notes and goal contributions', async () => {
       const rows = await get('/transactions');
       matches(
         ReviewApproved,
@@ -2742,9 +2724,6 @@ describe('API contracts (e2e)', () => {
         GoalDetail,
         (await call('post', `/goals/${goal.body.id}/contributions`, { amount: 25 }).expect(succeeded)).body,
       );
-      await call('post', '/income-tax/disclaimer').expect(succeeded);
-      matches(IncomeTaxDraft, (await call('post', '/income-tax/returns/2025/finalize').expect(succeeded)).body);
-      matches(IncomeTaxDraft, (await call('post', '/income-tax/returns/2025/reopen').expect(succeeded)).body);
     });
 
     it('imports, a webhook endpoint, a chat, an invoice and semantic search', async () => {
