@@ -192,6 +192,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Customer Support support@varomoney.com')).toBe(BankName.VARO);
     expect(mentionedBank('Virgin Money PLC')).toBe(BankName.VIRGIN_MONEY);
     expect(mentionedBank('web www.WalmartMoneyCard.com')).toBe(BankName.WALMART_MONEYCARD);
+    expect(mentionedBank('Online Access websterbank.com')).toBe(BankName.WEBSTER);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
