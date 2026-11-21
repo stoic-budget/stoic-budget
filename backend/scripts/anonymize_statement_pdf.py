@@ -73,13 +73,19 @@ def set_stream_bytes(obj: dict, data: bytes) -> None:
     obj["stream"]["dict"].pop("/DecodeParms", None)
 
 
+def unicode_of(hex_text: str) -> str:
+    """A CMap's destination: UTF-16BE, or a single byte some writers print ("<20>")."""
+    raw = bytes.fromhex(hex_text)
+    return raw.decode("utf-16-be") if len(raw) % 2 == 0 else raw.decode("latin-1")
+
+
 def parse_cmap(data: bytes) -> dict:
     """ToUnicode CMap → {glyph code (int): unicode str}."""
     text = data.decode("latin-1")
     mapping: dict = {}
     for block in re.findall(r"beginbfchar(.*?)endbfchar", text, re.S):
         for src, dst in re.findall(r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", block):
-            mapping[int(src, 16)] = bytes.fromhex(dst).decode("utf-16-be")
+            mapping[int(src, 16)] = unicode_of(dst)
     for block in re.findall(r"beginbfrange(.*?)endbfrange", text, re.S):
         for lo, hi, dst in re.findall(
             r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*(<[0-9A-Fa-f]+>|\[[^\]]*\])", block
@@ -87,9 +93,9 @@ def parse_cmap(data: bytes) -> dict:
             lo_i, hi_i = int(lo, 16), int(hi, 16)
             if dst.startswith("["):
                 for offset, item in enumerate(re.findall(r"<([0-9A-Fa-f]+)>", dst)):
-                    mapping[lo_i + offset] = bytes.fromhex(item).decode("utf-16-be")
+                    mapping[lo_i + offset] = unicode_of(item)
             else:
-                base = bytes.fromhex(dst[1:-1]).decode("utf-16-be")
+                base = unicode_of(dst[1:-1])
                 for offset in range(hi_i - lo_i + 1):
                     mapping[lo_i + offset] = base[:-1] + chr(ord(base[-1]) + offset)
     return mapping

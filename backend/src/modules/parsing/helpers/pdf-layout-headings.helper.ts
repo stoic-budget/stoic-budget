@@ -69,6 +69,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
   debit: [
     'withdrawal',
     'withdrawals',
+    'withdrawn',
     'money out of your account',
     'debits to your account',
     'debit',

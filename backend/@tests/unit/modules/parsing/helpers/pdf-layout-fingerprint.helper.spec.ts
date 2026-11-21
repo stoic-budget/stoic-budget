@@ -150,6 +150,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Your N26 Team')).toBe(BankName.N26);
     expect(mentionedBank('NAB iSaver For further information call 13 22 65')).toBe(BankName.NAB);
     expect(mentionedBank('Online nationwide.co.uk Phone 0800 30 20 11')).toBe(BankName.NATIONWIDE);
+    expect(mentionedBank('Manage your statements online at www.natwest.com')).toBe(BankName.NATWEST);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
