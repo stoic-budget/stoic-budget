@@ -123,4 +123,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.VIRGIN_MONEY]: 'Virgin Money',
   [BankName.WALMART_MONEYCARD]: 'Walmart MoneyCard',
   [BankName.WEBSTER]: 'Webster Bank',
+  [BankName.WELLS_FARGO]: 'Wells Fargo',
 };
