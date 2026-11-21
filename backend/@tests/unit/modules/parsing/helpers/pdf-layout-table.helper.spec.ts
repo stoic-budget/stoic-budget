@@ -571,4 +571,25 @@ describe('headings', () => {
       'balance',
     ]);
   });
+
+  it('reads the headings of a "Deposits/" over "Additions" header', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 40],
+        ['Check Number', 70],
+        ['Description', 140],
+        ['Deposits/ Additions', 300],
+        ['Withdrawals/ Subtractions', 380],
+        ['Ending daily balance', 480],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual([
+      'date',
+      'other',
+      'description',
+      'credit',
+      'debit',
+      'balance',
+    ]);
+  });
 });
