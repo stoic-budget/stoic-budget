@@ -48,3 +48,25 @@ describe('withSidesFromBalances', () => {
     ]);
   });
 });
+
+describe('withSidesFromBalances on one unsigned amount column', () => {
+  it('gives the amount the side its balance moved by', () => {
+    const [row] = withSidesFromBalances(
+      [
+        {
+          date: { day: 11, month: 10, year: 2021 },
+          dateText: '11 Oct 2021',
+          description: 'Withdrawal',
+          firstLine: 'Withdrawal',
+          counterparty: '',
+          amount: 500,
+          balance: 164.54,
+          at: { page: 1, y: 0 },
+        },
+      ],
+      664.54,
+    );
+    expect(row).toMatchObject({ debit: 500 });
+    expect(row.amount).toBeUndefined();
+  });
+});
