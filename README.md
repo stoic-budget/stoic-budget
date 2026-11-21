@@ -160,7 +160,7 @@ Setting expectations upfront:
 | 🇮🇳 India | Axis Bank, Citibank | |
 | 🇧🇷 Brazil | Banco do Brasil | |
 | 🇭🇰 Hong Kong | Bank of China (Hong Kong) | |
-| 🇵🇭 Philippines | BPI | |
+| 🇵🇭 Philippines | BPI, GoTyme Bank | |
 | 🇱🇰 Sri Lanka | Commercial Bank of Ceylon | |
 | 🇮🇱 Israel | Bank Hapoalim / Isracard (Hebrew) | |
 | 🇰🇿 Kazakhstan | Kaspi Bank, Bereke Bank (new and legacy formats) | |

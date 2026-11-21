@@ -50,5 +50,6 @@ export enum BankName {
   FOUND = 'found',
   FROST = 'frost',
   GO2BANK = 'go2bank',
+  GOTYME = 'gotyme',
   OTHER = 'other',
 }

@@ -123,6 +123,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Found is a financial technology company, not a bank.')).toBe(BankName.FOUND);
     expect(mentionedBank('P.O. Box 16509 Fort Worth, Texas 76162 Member FDIC')).toBe(BankName.FROST);
     expect(mentionedBank('GO2bank, member FDIC')).toBe(BankName.GO2BANK);
+    expect(mentionedBank('GoTyme Bank is regulated by the Bangko Sentral ng Pilipinas')).toBe(BankName.GOTYME);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
