@@ -25,9 +25,9 @@ const features = [
       'Budgets with live spend, savings goals, subscription detection, a crypto portfolio, net worth across accounts, and advice generated from your own numbers.',
   },
   {
-    title: 'VAT and income tax',
+    title: 'VAT',
     description:
-      'A VAT engine with returns, plus year-end income tax drafts: Germany Anlage EÜR, Spain Modelo 100, Poland PIT-36L / PIT-28 / PIT-36, and a generic summary elsewhere. Filing deadlines for 25 EU countries.',
+      'A VAT engine with returns, EU VAT numbers checked against VIES, and filing deadlines for 25 EU countries.',
   },
   {
     title: 'Receipts on a map',
@@ -58,9 +58,19 @@ const screenshots = [
     caption: 'Statements, receipts and invoices in one list, categorized and approved.',
   },
   {
-    src: '/img/screenshots/crypto.png',
-    title: 'Crypto',
-    caption: 'Wallets synced from the chain, holdings with cost and profit, realized gains.',
+    src: '/img/screenshots/reports.png',
+    title: 'Reports',
+    caption: 'Income, spending and savings rate for any period, and where the money went.',
+  },
+  {
+    src: '/img/screenshots/budgets.png',
+    title: 'Budgets',
+    caption: 'Planned against actual by Necessity, Work, Virtue and Leisure.',
+  },
+  {
+    src: '/img/screenshots/goals.png',
+    title: 'Goals',
+    caption: 'Savings goals with a target date and how far along each one is.',
   },
   {
     src: '/img/screenshots/cash-flow-forecast.png',
@@ -68,14 +78,19 @@ const screenshots = [
     caption: 'Runway, the lowest point and the bills ahead, with what-if toggles.',
   },
   {
+    src: '/img/screenshots/net-worth.png',
+    title: 'Net worth',
+    caption: 'Every account, coin and asset in one figure, and what changed it.',
+  },
+  {
+    src: '/img/screenshots/crypto.png',
+    title: 'Crypto',
+    caption: 'Wallets synced from the chain or imported from an exchange, with cost and profit.',
+  },
+  {
     src: '/img/screenshots/custom-tables.png',
     title: 'Custom tables',
     caption: 'Your own tables next to the books, filled by hand or from your data.',
-  },
-  {
-    src: '/img/screenshots/budgets.png',
-    title: 'Budgets',
-    caption: 'Planned against actual by Necessity, Work, Virtue and Leisure.',
   },
 ];
 
@@ -96,7 +111,7 @@ function Screenshot({ src, title, caption }: { src: string; title: string; capti
   return (
     <figure className="homepage-shot">
       <a href={useBaseUrl(src)} target="_blank" rel="noopener noreferrer">
-        <img src={useBaseUrl(src)} alt={`Stoic Budget ${title.toLowerCase()} screen`} loading="lazy" width={1890} height={886} />
+        <img src={useBaseUrl(src)} alt={`Stoic Budget ${title.toLowerCase()} screen`} loading="lazy" width={1600} height={1000} />
       </a>
       <figcaption>
         <strong>{title}</strong> — {caption}
@@ -117,7 +132,7 @@ export default function Home(): JSX.Element {
           <h1 className="hero__title">Your bank statements, turned into clean financial data</h1>
           <p className="hero__subtitle">
             Stoic Budget imports statements and receipts, deduplicates and categorizes every transaction, and builds
-            dashboards, budgets, VAT returns and income tax drafts on top — on your own server.
+            dashboards, budgets and VAT returns on top — on your own server.
           </p>
           <div className="hero__buttons">
             <Link className="button button--primary button--lg" to="/docs/getting-started/quick-start">
@@ -137,9 +152,9 @@ export default function Home(): JSX.Element {
               <img
                 className="homepage-showcase__main"
                 src={useBaseUrl('/img/screenshots/dashboard-overview.png')}
-                alt="Stoic Budget dashboard overview with budgets, income, spending, savings rate and top categories"
-                width={1890}
-                height={887}
+                alt="Stoic Budget dashboard with left to spend, income, net and the month's cash flow from clients to rent, meals and travel"
+                width={1600}
+                height={1000}
               />
             </a>
           </div>

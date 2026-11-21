@@ -94,4 +94,4 @@ port:
 
 All of them require the statement edit permission.
 
-Next: [Income Tax Declaration](income-tax-declaration)
+Next: [Observability](observability)

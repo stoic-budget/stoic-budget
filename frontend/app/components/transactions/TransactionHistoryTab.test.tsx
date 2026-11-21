@@ -30,6 +30,9 @@ vi.mock('@/app/i18n', async () => {
         visible: value('Visible to everyone'),
         confirmed: value('Confirmed'),
         unconfirmed: value('Not confirmed'),
+        fieldBudgets: value('Budgets'),
+        inBudgets: value('In budgets'),
+        outOfBudgets: value('Not in budgets'),
         undo: value('Put back'),
         undone: value('Change put back'),
         undoFailed: value('This change can no longer be put back'),
@@ -135,6 +138,22 @@ describe('TransactionHistoryTab', () => {
     expect(screen.getByText('Kept')).toBeInTheDocument();
     expect(screen.getByText('Kept, Trip')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Put back' })).toBeInTheDocument();
+  });
+
+  it('titles leaving a row out of budgets by its new state, and bringing it back too', async () => {
+    api.get.mockResolvedValue({
+      data: {
+        ...answer,
+        entries: [
+          entry('ev-out', { changes: [{ field: 'budgets', before: 'false', after: 'true' }] }),
+          entry('ev-in', { changes: [{ field: 'budgets', before: 'true', after: 'false' }] }),
+        ],
+      },
+    });
+    renderWithQuery(<TransactionHistoryTab transactionId="tx-1" />);
+
+    expect(await screen.findByText('Not in budgets')).toBeInTheDocument();
+    expect(screen.getByText('In budgets')).toBeInTheDocument();
   });
 
   it('puts a change back and says so', async () => {

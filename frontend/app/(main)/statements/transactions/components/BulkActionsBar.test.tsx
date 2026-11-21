@@ -40,6 +40,7 @@ function renderBar() {
       selected={new Set(rowIds)}
       categories={[]}
       onSetCategory={vi.fn()}
+      onSetExcluded={vi.fn()}
       onDone={onDone}
     />,
   );

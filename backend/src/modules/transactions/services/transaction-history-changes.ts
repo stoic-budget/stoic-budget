@@ -28,6 +28,7 @@ export const FIELDS: ReadonlyArray<{
   { field: 'owner', key: 'ownerMemberId', undo: 'ownerMemberId' },
   { field: 'private', key: 'isPrivate', undo: 'isPrivate' },
   { field: 'confirmed', key: 'isVerified', undo: 'isVerified' },
+  { field: 'budgets', key: 'excludedFromBudgets', undo: 'excludedFromBudgets' },
   { field: 'comment', key: 'comments', undo: 'comments' },
 ];
 

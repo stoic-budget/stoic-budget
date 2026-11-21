@@ -12,6 +12,7 @@ import { AuthSession } from '../../entities/auth-session.entity';
 import { PasswordResetToken } from '../../entities/password-reset-token.entity';
 import { User } from '../../entities/user.entity';
 import { AuditService } from '../audit/audit.service';
+import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-revocation.service';
 import { MailerService } from '../mailer/mailer.service';
 import { recordSecurityEvent } from './security-audit.util';
 
@@ -31,6 +32,7 @@ export class PasswordResetService {
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
     private readonly auditService: AuditService,
+    private readonly calendarFeeds: CalendarFeedRevocationService,
   ) {}
 
   /**
@@ -128,15 +130,18 @@ export class PasswordResetService {
     // existing login to stop working.
     user.tokenVersion = (user.tokenVersion ?? 0) + 1;
     await this.userRepository.save(user);
+    // Spent as soon as the password changed: a failure below must not leave
+    // the link usable again.
+    record.usedAt = new Date();
+    await this.tokenRepository.save(record);
     // IsNull(), not `revokedAt: null` — TypeORM renders a literal null
     // comparison for the latter, which never matches, so nothing was revoked.
     await this.authSessionRepository.update(
       { userId: user.id, revokedAt: IsNull() },
       { revokedAt: new Date() },
     );
-
-    record.usedAt = new Date();
-    await this.tokenRepository.save(record);
+    // Calendar feed links end too, in every workspace.
+    await this.calendarFeeds.revokeAllOf(user.id);
 
     await recordSecurityEvent(this.auditService, this.logger, {
       workspaceId: user.workspaceId,

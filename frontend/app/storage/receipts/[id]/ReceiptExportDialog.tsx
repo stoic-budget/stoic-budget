@@ -6,6 +6,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { useTheme } from 'next-themes';
+import { DemoNotice } from '@/app/components/demo/DemoNotice';
 import { Spinner } from '@/app/components/ui/spinner';
 import { useIntlayer } from '@/app/i18n';
 import { tokens } from '@/lib/theme-tokens';
@@ -31,6 +32,7 @@ export function ReceiptExportDialog({
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ fontSize: 22, fontWeight: 600 }}>{t.confirmExportTitle}</DialogTitle>
       <DialogContent dividers>
+        <DemoNotice />
         <Typography style={{ fontSize: 16, lineHeight: 2, color: c.ink800 }}>
           {t.confirmExportBody}
         </Typography>

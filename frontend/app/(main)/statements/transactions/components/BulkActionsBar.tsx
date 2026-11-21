@@ -19,24 +19,29 @@ import { BulkCommentDrawer } from './BulkCommentDrawer';
 type Picking = 'category' | 'tags' | 'comment' | null;
 
 /**
- * What can be done to the ticked rows: a category, tags, a comment. Each opens
- * the drawer the app already uses for it. On a phone the two additive actions
- * fold into a "More" menu, so the bar stays one line.
+ * What can be done to the ticked rows: a category, tags, a comment, leaving
+ * them out of budgets or counting them again. The first three open the drawer
+ * the app already uses for each. On a phone everything but the category folds
+ * into a "More" menu, so the bar stays one line.
  */
 export function BulkActionsBar({
   selected,
   categories,
   onSetCategory,
+  onSetExcluded,
   onDone,
 }: {
   selected: ReadonlySet<string>;
   categories: CategoryList;
   onSetCategory: (ids: string[], categoryId: string) => void;
+  /** Leaves the rows out of budgets (true) or counts them again (false). */
+  onSetExcluded: (ids: string[], excluded: boolean) => void;
   /** Called after tags or a comment were saved: the selection has done its job. */
   onDone: () => void;
 }): React.JSX.Element {
   const t = useIntlayer('allTransactionsPage');
   const tBulk = useIntlayer('allTransactionsBulk');
+  const tExcluded = useIntlayer('budgetExclusion');
   const annotate = useBulkAnnotate();
   const [picking, setPicking] = useState<Picking>(null);
   const [tags, setTags] = useState<StorageTag[]>([]);
@@ -102,6 +107,20 @@ export function BulkActionsBar({
           >
             {tBulk.addComment}
           </button>
+          <button
+            type="button"
+            className="seneca-all-tx__menu-button seneca-all-tx__bulk-wide"
+            onClick={() => onSetExcluded([...selected], true)}
+          >
+            {tExcluded.toggle}
+          </button>
+          <button
+            type="button"
+            className="seneca-all-tx__menu-button seneca-all-tx__bulk-wide"
+            onClick={() => onSetExcluded([...selected], false)}
+          >
+            {tExcluded.bulkInclude}
+          </button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -118,6 +137,12 @@ export function BulkActionsBar({
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setPicking('comment')}>
                 {tBulk.addComment}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onSetExcluded([...selected], true)}>
+                {tExcluded.toggle}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onSetExcluded([...selected], false)}>
+                {tExcluded.bulkInclude}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

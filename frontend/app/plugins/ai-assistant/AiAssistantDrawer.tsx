@@ -178,6 +178,7 @@ export function AiAssistantDrawer({ isOpen, onClose, onBack, zIndex }: AiAssista
 
   return (
     <DrawerShell
+      demoNotice={false}
       isOpen={isOpen}
       onClose={closeDrawer}
       title={onBack ? <PanelBackTitle title={t.title} onBack={onBack} /> : t.title}

@@ -17,6 +17,7 @@ export const TransactionHistoryField = Schema.Literals([
   'owner',
   'private',
   'confirmed',
+  'budgets',
   'comment',
   // Tags added (or put back) from a list's selection bar; names, comma-separated.
   'tags',

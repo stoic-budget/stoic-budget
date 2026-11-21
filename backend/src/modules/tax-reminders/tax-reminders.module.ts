@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { IncomeTaxProfile } from '../../entities/income-tax-profile.entity';
-import { IncomeTaxReturn } from '../../entities/income-tax-return.entity';
 import { TaxReturn } from '../../entities/tax-return.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { WorkspaceServiceSettings } from '../../entities/workspace-service-settings.entity';
@@ -11,19 +9,12 @@ import { TaxDeadlinesController } from './tax-deadlines.controller';
 import { TaxDeadlinesService } from './tax-deadlines.service';
 
 /**
- * Due dates of VAT and income-tax returns, and the daily reminder sweep.
- * Its own module because it reads both the VAT returns (tax) and the income
- * tax returns, and income-tax already imports tax.
+ * Due dates of tax returns and the daily reminder sweep. VAT returns come
+ * from the tax module; any other return from a `TAX_DEADLINE_SOURCE`.
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Workspace,
-      TaxReturn,
-      IncomeTaxReturn,
-      IncomeTaxProfile,
-      WorkspaceServiceSettings,
-    ]),
+    TypeOrmModule.forFeature([Workspace, TaxReturn, WorkspaceServiceSettings]),
     TaxModule,
     ReferenceDataModule,
   ],

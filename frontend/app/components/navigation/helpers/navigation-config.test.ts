@@ -1,4 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import React from 'react';
+import { describe, expect, it, vi } from 'vitest';
+
+// The core's own menu, whatever a paid build copies over the extension file.
+const extensionNavItems = vi.hoisted(() => vi.fn((_nav: object): NavItem[] => []));
+vi.mock('@/app/extensions/nav-items', () => ({ extensionNavItems }));
+
 import {
   activeNavPath,
   buildNavGroups,
@@ -7,6 +13,7 @@ import {
   groupNavItems,
   isNavItemActive,
   isNavItemVisible,
+  type NavItem,
   workspaceProfileOf,
 } from './navigation-config';
 
@@ -19,7 +26,6 @@ const nav = {
   tables: 'Tables',
   workspaces: 'Workspaces',
   reports: 'Reports',
-  taxDeclaration: 'Tax declaration',
   netWorth: 'Net worth',
   forecast: 'Forecast',
   advice: 'Advice',
@@ -54,13 +60,13 @@ describe('workspace profile', () => {
     expect(workspaceProfileOf(null)).toBe('business');
   });
 
-  it('hides invoices, the ledger, the tax declaration and tables at home, nothing else', () => {
+  it('hides invoices, the ledger and tables at home, nothing else', () => {
     const items = buildNavItems(nav);
     const hiddenAtHome = items
       .filter(item => !isNavItemVisible(item, { hasPermission: allowAll, experimentalMode: true, profile: 'home' }))
       .map(item => item.path)
       .sort();
-    expect(hiddenAtHome).toEqual(['/custom-tables', '/invoices', '/ledger', '/tax-declaration']);
+    expect(hiddenAtHome).toEqual(['/custom-tables', '/invoices', '/ledger']);
 
     const hiddenInBusiness = items.filter(
       item => !isNavItemVisible(item, { hasPermission: allowAll, experimentalMode: true, profile: 'business' }),
@@ -107,12 +113,6 @@ describe('buildNavItems', () => {
     const items = buildNavItems(nav);
 
     expect(items.find(item => item.path === '/crypto')?.permission).toBe('wallet.view');
-  });
-
-  it('gates the tax declaration behind the report permission its endpoints use', () => {
-    const items = buildNavItems(nav);
-
-    expect(items.find(item => item.path === '/tax-declaration')?.permission).toBe('report.view');
   });
 
   it('puts net worth and the forecast built on it with the analytics', () => {
@@ -164,9 +164,26 @@ describe('groupNavItems', () => {
       '/subscriptions',
       'analytics: /reports /net-worth /forecast /advice',
       'investments: /crypto /roi',
-      'business: /invoices /tax-declaration /ledger /custom-tables',
+      'business: /invoices /ledger /custom-tables',
       '/workspaces',
     ]);
+  });
+
+  it("adds a paid edition's entries after the core ones, labelled from the same dictionary", () => {
+    const entry = {
+      label: 'Extra',
+      path: '/extra',
+      group: 'business' as const,
+      icon: React.createElement('span'),
+      permission: 'report.view',
+    };
+    extensionNavItems.mockReturnValueOnce([entry]);
+
+    const items = buildNavItems(nav);
+
+    expect(extensionNavItems).toHaveBeenLastCalledWith(nav);
+    expect(items.at(-1)).toBe(entry);
+    expect(rows(items).at(-2)).toBe('business: /invoices /ledger /custom-tables /extra');
   });
 
   it('leaves out a group with nothing visible in it', () => {

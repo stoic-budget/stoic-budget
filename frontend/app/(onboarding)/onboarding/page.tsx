@@ -95,14 +95,8 @@ function StepView({
       return (
         <TaxStep
           locale={data.locale}
-          profile={data.profile}
           taxCountry={data.taxCountry}
-          taxpayerType={data.taxpayerType}
-          // Without a country there is no taxpayer kind to keep.
-          onTaxCountryChange={taxCountry =>
-            updateData(taxCountry ? { taxCountry } : { taxCountry, taxpayerType: null })
-          }
-          onTaxpayerTypeChange={taxpayerType => updateData({ taxpayerType })}
+          onTaxCountryChange={taxCountry => updateData({ taxCountry })}
           onDefer={onDeferTax}
         />
       );
@@ -139,7 +133,6 @@ export default function OnboardingPage() {
     workspaceBackgroundImage: null,
     profile: null,
     taxCountry: null,
-    taxpayerType: null,
     business: EMPTY_BUSINESS_DETAILS,
   });
   const text = useOnboardingText(data.locale);
@@ -201,11 +194,7 @@ export default function OnboardingPage() {
   );
 
   const handleProfileChange = (profile: WorkspaceProfile) => {
-    updateData({
-      profile,
-      // A household does not file as a company; that option disappears with the choice.
-      ...(profile === 'home' && data.taxpayerType === 'company' ? { taxpayerType: null } : {}),
-    });
+    updateData({ profile });
   };
 
   const handleFinish = async () => {
@@ -262,7 +251,7 @@ export default function OnboardingPage() {
   };
 
   const handleDeferTax = () => {
-    updateData({ taxCountry: null, taxpayerType: null });
+    updateData({ taxCountry: null });
     goTo(currentStep + 1);
   };
 

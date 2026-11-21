@@ -63,6 +63,7 @@ export function AllTransactionsTable({
   onToggleAll,
   onSetCategory,
   onBulkDone,
+  onSetExcluded,
   onOpen,
 }: {
   /** The header stays and the rows are placeholders while the page loads. */
@@ -77,10 +78,13 @@ export function AllTransactionsTable({
   onSetCategory: (ids: string[], categoryId: string) => void;
   /** Tags or a comment were added to the ticked rows. */
   onBulkDone: () => void;
+  /** Leaves the rows out of budgets (true) or counts them again (false). */
+  onSetExcluded: (ids: string[], excluded: boolean) => void;
   onOpen: (row: ListedRow) => void;
 }): React.JSX.Element {
   const t = useIntlayer('allTransactionsPage');
   const tTable = useIntlayer('transactionsTable');
+  const tExcluded = useIntlayer('budgetExclusion');
   const payeeName = usePayeeName();
   const { locale } = useLocale();
   const router = useRouter();
@@ -94,6 +98,7 @@ export function AllTransactionsTable({
     <div className="seneca-all-tx__table-wrap">
       <BulkActionsBar
         selected={selected}
+        onSetExcluded={onSetExcluded}
         categories={choices}
         onSetCategory={onSetCategory}
         onDone={onBulkDone}
@@ -185,7 +190,14 @@ export function AllTransactionsTable({
                       {row.category ? categoryName(row.category.name) : t.uncategorized}
                     </span>
                   </td>
-                  <td data-label={t.budget.value}>{budget ?? ''}</td>
+                  <td data-label={t.budget.value}>
+                    {/* Out of every budget, whatever its category's budget is. */}
+                    {row.excludedFromBudgets ? (
+                      <span className="seneca-all-tx__muted">{tExcluded.badge}</span>
+                    ) : (
+                      (budget ?? '')
+                    )}
+                  </td>
                   <td className="seneca-all-tx__col-actions">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
