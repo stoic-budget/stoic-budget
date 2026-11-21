@@ -115,4 +115,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.UBS]: 'UBS',
   [BankName.UCO]: 'UCO Bank',
   [BankName.ULSTER]: 'Ulster Bank',
+  [BankName.UNICREDIT]: 'UniCredit',
 };

@@ -838,3 +838,18 @@ describe('an empty money cell', () => {
     expect(transactions[0]).toMatchObject({ description: 'SALARY PAYMENT', credit: 1119 });
   });
 });
+
+describe('Italian headings', () => {
+  it('read "Descrizione", "Uscite" and "Entrate"', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Data', 45],
+        ['Valuta', 86],
+        ['Descrizione', 128],
+        ['Uscite', 470],
+        ['Entrate', 530],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'otherDate', 'description', 'debit', 'credit']);
+  });
+});
