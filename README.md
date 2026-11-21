@@ -160,6 +160,7 @@ Setting expectations upfront:
 | 🇰🇪 Kenya | NCBA Bank | |
 | 🇶🇦 Qatar | QNB | |
 | 🇷🇴 Romania | Raiffeisen Bank | |
+| 🇨🇭 Switzerland | UBS | |
 | 🇿🇦 South Africa | Absa, Capitec, FNB | |
 | 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India | |
 | 🇧🇷 Brazil | Banco do Brasil | |

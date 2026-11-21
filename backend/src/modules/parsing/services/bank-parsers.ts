@@ -107,6 +107,7 @@ import { SynovusParser } from '../parsers/synovus.parser';
 import { TangerineParser } from '../parsers/tangerine.parser';
 import { TdParser } from '../parsers/td.parser';
 import { TruistParser } from '../parsers/truist.parser';
+import { UbsParser } from '../parsers/ubs.parser';
 
 /**
  * Each bank's own parser, with the bank it claims a file as when the file's
@@ -220,4 +221,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [TdParser, { bankName: BankName.TD }],
   [CoOperativeBankParser, { bankName: BankName.CO_OPERATIVE_BANK }],
   [TruistParser, { bankName: BankName.TRUIST }],
+  [UbsParser, { bankName: BankName.UBS }],
 ];
