@@ -96,5 +96,6 @@ export enum BankName {
   SBI = 'sbi',
   SCOTIABANK = 'scotiabank',
   SIMPLII = 'simplii',
+  SKRILL = 'skrill',
   OTHER = 'other',
 }

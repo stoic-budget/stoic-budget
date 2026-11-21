@@ -15,7 +15,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **Germany:** Deutsche Bank, N26
 - **Hong Kong:** Bank of China (Hong Kong)
 - **India:** Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India
-- **International:** Payoneer, PayPal, Revolut
+- **International:** Payoneer, PayPal, Revolut, Skrill
 - **Israel:** Bank Hapoalim / Isracard (Hebrew)
 - **Kazakhstan:** Kaspi Bank; Bereke Bank, old and new PDF layouts
 - **Kenya:** NCBA Bank

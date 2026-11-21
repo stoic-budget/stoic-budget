@@ -163,4 +163,5 @@ export const BANKS = [
     aliases: ['scotia', 'bank of nova scotia'],
   },
   { key: 'simplii', name: 'Simplii Financial', logo: 'simplii.png', aliases: ['simplii'] },
+  { key: 'skrill', name: 'Skrill', logo: 'skrill.png', aliases: ['paysafe'] },
 ] as const satisfies readonly BankEntry[];
