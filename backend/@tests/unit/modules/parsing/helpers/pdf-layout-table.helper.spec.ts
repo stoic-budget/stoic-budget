@@ -5,6 +5,7 @@ import {
 } from '@/modules/parsing/helpers/pdf-layout-columns.helper';
 import { readLayoutTransactions } from '@/modules/parsing/helpers/pdf-layout-table.helper';
 import {
+  closingBalanceFromRows,
   openingBalanceFromRows,
   splitByAccount,
   toParsedTransactions,
@@ -531,5 +532,358 @@ describe('pdf-layout-table.helper', () => {
         ['Jun 25', 10, '4241'],
       ]);
     });
+  });
+});
+
+describe('wrapped lines', () => {
+  it('keeps a reference with a figure glued to its letters as text, not money', () => {
+    const transactions = readLayoutTransactions([
+      header,
+      row(140, [['01/02/2025', 40], ['Cash', 110], ['10.00', 315]]),
+      row(149, [['GA', 110], ['NR08484020', 125], ['BLZ100708480930.03/21.19UHR', 180]]),
+      row(158, [['B-MEHRINGD', 110]]),
+    ]);
+    expect(transactions.map(t => t.description)).toEqual([
+      'Cash GA NR08484020 BLZ100708480930.03/21.19UHR B-MEHRINGD',
+    ]);
+  });
+});
+
+describe('headings', () => {
+  it('reads "Pay In" and "Pay Out" as money in and out, "Channel" as no text of the row', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 40],
+        ['Channel', 120],
+        ['Details', 180],
+        ['Pay', 300],
+        ['In', 318],
+        ['Pay', 360],
+        ['Out', 378],
+        ['Balance', 440],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual([
+      'date',
+      'other',
+      'description',
+      'credit',
+      'debit',
+      'balance',
+    ]);
+  });
+
+  it('reads the headings of a "Deposits/" over "Additions" header', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 40],
+        ['Check Number', 70],
+        ['Description', 140],
+        ['Deposits/ Additions', 300],
+        ['Withdrawals/ Subtractions', 380],
+        ['Ending daily balance', 480],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual([
+      'date',
+      'other',
+      'description',
+      'credit',
+      'debit',
+      'balance',
+    ]);
+  });
+
+  it('opens the text with the words after the date still under its heading', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [
+        ['Date', 16],
+        ['Description', 209],
+        ['Amount', 437],
+        ['Balance', 499],
+      ]),
+      row(140, [
+        ['04', 12],
+        ['Jul', 21],
+        ['POS', 38],
+        ['Purchase', 53],
+        ['ACME', 82],
+        ['206.69', 453],
+        ['3,193.31Cr', 511],
+      ]),
+    ]);
+    expect(transactions.map(t => [t.description, t.balance])).toEqual([['POS Purchase ACME', 3193.31]]);
+  });
+
+  it('reads the balances of rows listed newest first from the oldest row', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [['Date', 40], ['Description', 110], ['Amount', 400], ['Available', 485]]),
+      row(140, [['08/16', 40], ['ACME', 110], ['-2.50', 400], ['4.10', 490]]),
+      row(160, [['08/15', 40], ['ACME', 110], ['-773.50', 400], ['6.60', 490]]),
+      row(180, [['08/15', 40], ['Deposit', 110], ['+800.00', 400], ['780.10', 490]]),
+    ]);
+    expect([openingBalanceFromRows(transactions), closingBalanceFromRows(transactions)]).toEqual([-19.9, 4.1]);
+  });
+
+  it('leaves "(Continued on next page)" out of the page\'s last row', () => {
+    const transactions = readLayoutTransactions([
+      header,
+      row(140, [['01/02/2025', 40], ['ACME', 110], ['12.50', 315]]),
+      row(149, [['(Continued', 110], ['on', 160], ['next', 175], ['page)', 195]]),
+    ]);
+    expect(transactions.map(t => t.description)).toEqual(['ACME']);
+  });
+});
+
+describe('more headings', () => {
+  it('reads "Payment (Debits)" as money out', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 40],
+        ['Details', 110],
+        ['Payment (Debits)', 250],
+        ['Receipts (Credits)', 350],
+        ['Balance', 470],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
+  });
+});
+
+describe('Indian headings', () => {
+  it('reads Narration, Chq./Ref.No. and Value Dt', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 40],
+        ['Narration', 150],
+        ['Chq./Ref.No.', 290],
+        ['Value Dt', 360],
+        ['Withdrawal', 405],
+        ['Amt.', 450],
+        ['Deposit', 490],
+        ['Amt.', 525],
+        ['Closing', 560],
+        ['Balance', 600],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual([
+      'date',
+      'description',
+      'other',
+      'otherDate',
+      'debit',
+      'credit',
+      'balance',
+    ]);
+  });
+});
+
+describe('headings set apart', () => {
+  it('reads "Deposits" and "Withdrawals" a column apart as two columns', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 40],
+        ['Description', 140],
+        ['Deposits', 325],
+        ['Withdrawals', 381],
+        ['Balance', 450],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'credit', 'debit', 'balance']);
+  });
+});
+
+describe('underscore rules', () => {
+  it('reads a heading set on an underscore rule ("_DATE")', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['_DATE', 40],
+        ['DESCRIPTION', 90],
+        ['WITHDRAWALS', 300],
+        ['DEPOSITS', 380],
+        ['BALANCE', 450],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
+  });
+});
+
+describe('Withdrawn', () => {
+  it('reads "Withdrawn(£)" set close after "Paid In(£)" as money out', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 60],
+        ['Description', 111],
+        ['Paid', 358],
+        ['In(£)', 377],
+        ['Withdrawn(£)', 398],
+        ['Balance(£)', 478],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'credit', 'debit', 'balance']);
+  });
+});
+
+describe('a row is no header', () => {
+  it('when it opens with a date or prints a sum, whatever its words', () => {
+    const words: [string, number][] = [
+      ['POS', 43],
+      ['Debit', 62],
+      ['-', 83],
+      ['Debit', 88],
+      ['Card', 109],
+      ['1000', 129],
+      ['Transaction', 149],
+    ];
+    expect(readHeaderRow(row(100, [['06-28', 14], ...words]))).toBeNull();
+    expect(readHeaderRow(row(100, [...words, ['6.22', 455], ['-', 472], ['1,701.26', 559]]))).toBeNull();
+  });
+});
+
+describe('Deposits and Withdrawals side by side', () => {
+  it('are two columns however close, not the stacked heading of one', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 68],
+        ['Description', 116],
+        ['Deposits', 387],
+        ['Withdrawals', 437],
+        ['Balance', 506],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'credit', 'debit', 'balance']);
+  });
+});
+
+describe('Romanian headings', () => {
+  it('read "Data", "Descrierea tranzacției", "Sumă debit" and "Sumă credit"', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Data', 29],
+        ['Descrierea', 160],
+        ['tranzacției', 212],
+        ['Sumă', 407],
+        ['debit', 432],
+        ['Sumă', 490],
+        ['credit', 515],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit']);
+  });
+});
+
+describe('Transactions, withdrawn and deposited', () => {
+  it('read as the text and the money out and in', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 73],
+        ['Transactions', 113],
+        ['withdrawn', 252],
+        ['($)', 296],
+        ['deposited', 322],
+        ['($)', 361],
+        ['Balance', 395],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
+  });
+});
+
+describe('funds out and funds in', () => {
+  it('read as money out and in', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['date', 17],
+        ['transaction', 82],
+        ['funds', 356],
+        ['out', 384],
+        ['funds', 453],
+        ['in', 481],
+        ['balance', 543],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
+  });
+});
+
+describe('French headings', () => {
+  it('read "Valeur" as the value date and "Nature de l’opération" as the text', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 43],
+        ['Valeur', 89],
+        ['Nature', 230],
+        ['de', 262],
+        ['l’opération', 275],
+        ['Débit', 452],
+        ['Crédit', 519],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'otherDate', 'description', 'debit', 'credit']);
+  });
+});
+
+describe('an empty money cell', () => {
+  it('printed "-" is no part of the row\'s text', () => {
+    const transactions = readLayoutTransactions([
+      row(100, [
+        ['Date', 91],
+        ['Description', 197],
+        ['Withdrawal', 322],
+        ['Deposit', 402],
+        ['Balance', 475],
+      ]),
+      row(115, [['15/08/2022', 80], ['SALARY', 135], ['PAYMENT', 169], ['-', 375], ['1,119.00', 420], ['1,122.92', 493]]),
+    ]);
+    expect(transactions[0]).toMatchObject({ description: 'SALARY PAYMENT', credit: 1119 });
+  });
+});
+
+describe('Italian headings', () => {
+  it('read "Descrizione", "Uscite" and "Entrate"', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Data', 45],
+        ['Valuta', 86],
+        ['Descrizione', 128],
+        ['Uscite', 470],
+        ['Entrate', 530],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'otherDate', 'description', 'debit', 'credit']);
+  });
+});
+
+describe('Tran Date alone', () => {
+  it('dates the rows, Remarks is the text and Tran Id a column of its own', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Tran', 47],
+        ['Id', 70],
+        ['Tran', 130],
+        ['Date', 155],
+        ['Remarks', 270],
+        ['Amount', 393],
+        ['Balance', 485],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['other', 'date', 'description', 'amount', 'balance']);
+  });
+});
+
+describe('Description of Transaction and Ref Number', () => {
+  it('read as the text and a column of its own', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 7],
+        ['Description', 43],
+        ['of', 100],
+        ['Transaction', 112],
+        ['Ref', 396],
+        ['Number', 414],
+        ['Amount', 545],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'other', 'amount']);
   });
 });

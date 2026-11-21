@@ -1,0 +1,492 @@
+{
+  "metadata": {
+    "accountNumber": "DE48100701240012345600",
+    "currency": "EUR",
+    "dateFrom": "2022-05-03T00:00:00",
+    "dateTo": "2022-05-30T00:00:00",
+    "balanceStart": 12898.29,
+    "balanceEnd": 15509.61
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-05-03T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Payment Reference/E2E-Ref. GA NR08484020 BLZ100708480930.03/21.19UHR B-MEHRINGD",
+      "debit": 10,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-03T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Payment Reference/E2E-Ref. GA NR08484030 BLZ100708480902.04/20.11UHR B-MEHRINGD",
+      "debit": 10,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-03T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Payment Reference/E2E-Ref. GA NR07001744 BLZ100700240903.04/12.48UHR B-HERM-PL",
+      "debit": 20,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-03T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Payment Reference/E2E-Ref. GA NR08484020 BLZ100708480903.04/12.19UHR B-MEHRINGD",
+      "debit": 200,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-03T00:00:00",
+      "counterpartyName": "FitX Deutschland GmbH",
+      "paymentPurpose": "SEPA Lastschrifteinzug von FitX Deutschland GmbH Payment Reference/E2E-Ref. XREF 336-872097-857259 FitX Deutschland versch. Rechnungen 336-872097-857259 Creditor-ID DE48ZZZ00000858428 Mand-ID 872097-1 RCUR Wiederholungslastschrift",
+      "debit": 20,
+      "currency": "EUR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-05-03T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 29-05-2022 T12:17:46 Folgenr. 09 Verfalld. 1221",
+      "debit": 2.74,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-03T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 31-05-2022 T19:24:08 Folgenr. 09 Verfalld. 1221",
+      "debit": 5.61,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-03T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 31-04-2022 T15:36:05 Folgenr. 09 Verfalld. 1221",
+      "debit": 6.49,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-03T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 29-04-2022 T20:20:51 Folgenr. 09 Verfalld. 1221",
+      "debit": 18.05,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-04T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Payment Reference/E2E-Ref. GA NR08484020 BLZ100708480904.04/15.10UHR B-MEHRINGD",
+      "debit": 10,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-04T00:00:00",
+      "counterpartyName": "NETFLIX INTERNATIONAL B.V.",
+      "paymentPurpose": "SEPA Lastschrifteinzug von NETFLIX INTERNATIONAL B.V. Payment Reference/E2E-Ref. Netflix Monthly Subscription 85828347937 Creditor-ID GB96NFXSDDCHAS00000041302392 Mand-ID DD-864885214496486139-136-180129 RCUR Wiederholungslastschrift",
+      "debit": 13.99,
+      "currency": "EUR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-05-04T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 03-05-2022 T13:58:29 Folgenr. 09 Verfalld. 1221",
+      "debit": 11.71,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-05T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Payment Reference/E2E-Ref. GA NR08484010 BLZ100708480905.04/14.55UHR B-MEHRINGD",
+      "debit": 20,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-05T00:00:00",
+      "counterpartyName": "DIRK ROSSMANN GMBH",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. DIRK ROSSMANN GMBH//BERLIN/DE 04-05-2022 T09:04:42 Folgenr. 09 Verfalld. 1221",
+      "debit": 3.95,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-05T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 04-05-2022 T20:29:38 Folgenr. 09 Verfalld. 1221",
+      "debit": 16.16,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-06T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 05-05-2022 T10:42:02 Folgenr. 09 Verfalld. 1221",
+      "debit": 2.04,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-09T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 07-05-2022 T19:56:46 Folgenr. 09 Verfalld. 1221",
+      "debit": 2.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-09T00:00:00",
+      "counterpartyName": "DOMINOS BERLIN TEMPELHOF",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. DOMINOS BERLIN TEMPELHOF//BERLIN/DE 06-05-2022T20:44:00 Folgenr. 09 Verfalld. 1221",
+      "debit": 6.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-09T00:00:00",
+      "counterpartyName": "DOMINOS BERLIN TEMPELHOF",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. DOMINOS BERLIN TEMPELHOF//BERLIN/DE 06-05-2022T20:29:22 Folgenr. 09 Verfalld. 1221",
+      "debit": 10.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-09T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 07-05-2022 T14:27:14 Folgenr. 09 Verfalld. 1221",
+      "debit": 13.89,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-09T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Auszahlung Geldautomat Payment Reference/E2E-Ref. 651 897812//Berliner Sparkasse/DE 08-05-2022 T22:19:30 Folgenr. 09 Verfalld. 1221 Fremdentgelt",
+      "debit": 24.95,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-09T00:00:00",
+      "counterpartyName": "H+M 348 SAGT VIELEN DANK",
+      "paymentPurpose": "SEPA Lastschrifteinzug von H+M 348 SAGT VIELEN DANK Payment Reference/E2E-Ref.",
+      "debit": 20.14,
+      "currency": "EUR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-05-11T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 10-05-2022 T20:12:23 Folgenr. 09 Verfalld. 1221",
+      "debit": 8.22,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-12T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 11-05-2022 T20:41:14 Folgenr. 09 Verfalld. 1221",
+      "debit": 2.63,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-13T00:00:00",
+      "counterpartyName": "HelloFresh",
+      "paymentPurpose": "SEPA Überweisung von HelloFresh Payment Reference/E2E-Ref. Lohn und Gehalt 03.2018 5975177823-0000276 SALA Lohn/Gehalt",
+      "credit": 3500.5,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-05-13T00:00:00",
+      "counterpartyName": "NP-MARKT 1233 BERLIN-KRE",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. NP-MARKT 1233 BERLIN-KRE//BERLIN-KRE/DE 11-05-2022T15:09:51 Folgenr. 09 Verfalld. 1221",
+      "debit": 2.38,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-13T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 12-05-2022 T19:14:29 Folgenr. 09 Verfalld. 1221",
+      "debit": 7.04,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-13T00:00:00",
+      "counterpartyName": "Risa Chicken Temp",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. Risa Chicken Temp//BERLIN/DE 11-05-2022T20:56:07 Folgenr. 009 Verfalld. 1221",
+      "debit": 7.68,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-13T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 12-05-2022 T14:43:14 Folgenr. 09 Verfalld. 1221",
+      "debit": 10.44,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-16T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Payment Reference/E2E-Ref. GA NR08484030 BLZ100708480916.04/10.57UHR B-MEHRINGD",
+      "debit": 10,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-16T00:00:00",
+      "counterpartyName": "DAK-Gesundheit",
+      "paymentPurpose": "SEPA Lastschrifteinzug von DAK-Gesundheit Payment Reference/E2E-Ref.",
+      "debit": 92.62,
+      "currency": "EUR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-05-16T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 14-05-2022 T19:48:24 Folgenr. 09 Verfalld. 1221",
+      "debit": 4.58,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-16T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 13-05-2022 T19:53:48 Folgenr. 09 Verfalld. 1221",
+      "debit": 4.81,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-16T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 14-05-2022 T13:40:07 Folgenr. 09 Verfalld. 1221",
+      "debit": 15.41,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-17T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 16-05-2022 T16:15:17 Folgenr. 09 Verfalld. 1221",
+      "debit": 3.45,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-17T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 16-05-2022 T18:52:54 Folgenr. 09 Verfalld. 1221",
+      "debit": 8.51,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-18T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 17-05-2022 T20:09:36 Folgenr. 09 Verfalld. 1221",
+      "debit": 5.25,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-18T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Auszahlung Geldautomat Payment Reference/E2E-Ref. COMMERZBANK-AG/B-SUED/B-SUED/DE 17-05-2022 T14:30:28 Folgenr. 009 Verfalld. 1221",
+      "debit": 20,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-19T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Payment Reference/E2E-Ref. GA NR08484030 BLZ100708480919.04/12.13UHR B-MEHRINGD",
+      "debit": 20,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-19T00:00:00",
+      "counterpartyName": "FITNESSDEPOT KREUZBERG",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. FITNESSDEPOT KREUZBERG//BERLIN/DE 18-05-2022 T13:51:21 Folgenr. 09 Verfalld. 1221",
+      "debit": 1.9,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-19T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 18-05-2022 T15:32:39 Folgenr. 09 Verfalld. 1221",
+      "debit": 2.58,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-19T00:00:00",
+      "counterpartyName": "FITNESSDEPOT KREUZBERG",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. FITNESSDEPOT KREUZBERG//BERLIN/DE 18-05-2022 T13:50:41 Folgenr. 09 Verfalld. 1221",
+      "debit": 3,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-19T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 18-05-2022 T19:52:12 Folgenr. 09 Verfalld. 1221",
+      "debit": 4.91,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-20T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 19-05-2022 T19:36:39 Folgenr. 09 Verfalld. 1221",
+      "debit": 11.49,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-20T00:00:00",
+      "counterpartyName": "IZ .Muskelando UG (haf",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. IZ .Muskelando UG (haf//Berlin/DE 19-05-2022T19:26:33 Folgenr. 009 Verfalld. 1299",
+      "debit": 9,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-23T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Payment Reference/E2E-Ref. GA NR08484010 BLZ100708480920.04/21.31UHR B-MEHRINGD",
+      "debit": 20,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-23T00:00:00",
+      "counterpartyName": "DIRK ROSSMANN GMBH",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. DIRK ROSSMANN GMBH//BERLIN/DE 20-05-2022 T18:43:46 Folgenr. 09 Verfalld. 1221",
+      "debit": 3.34,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-23T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 21-05-2022 T15:28:06 Folgenr. 09 Verfalld. 1221",
+      "debit": 10.04,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-23T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 20-05-2022 T18:37:38 Folgenr. 09 Verfalld. 1221",
+      "debit": 14.02,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-24T00:00:00",
+      "counterpartyName": "AMAZON PAYMENTS EUROPE S.C.A.",
+      "paymentPurpose": "SEPA Lastschrifteinzug von AMAZON PAYMENTS EUROPE S.C.A. Payment Reference/E2E-Ref. 303-0694033-2649149 Amazon .Mktplce EU-DE 6318903444926307 6318903444926307 Creditor-ID DE94ZZZ00000561653 Mand-ID SXEQIV6CXJ?2FZ1F.2KO:2T6SEDANP FRST Erstlastschrift",
+      "debit": 17.49,
+      "currency": "EUR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-05-24T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 23-05-2022 T20:09:24 Folgenr. 09 Verfalld. 1221",
+      "debit": 13.13,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-25T00:00:00",
+      "counterpartyName": "ALBRECHT-APOTHEKE, PAECHTE",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. ALBRECHT-APOTHEKE, PAECHTE//BERLIN/DE 24-04-2018T16:44:28 Folgenr. 009 Verfalld. 1221",
+      "debit": 14.48,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-26T00:00:00",
+      "counterpartyName": "AMAZON PAYMENTS EUROPE S.C.A.",
+      "paymentPurpose": "SEPA Lastschrifteinzug von AMAZON PAYMENTS EUROPE S.C.A. Payment Reference/E2E-Ref. 303-0694033-2649149 Amazon .Mktplce EU-DE 8477990588924758 8477990588924758 Creditor-ID DE94ZZZ00000561653 Mand-ID SXEQIV6CXJ?2FZ1F.2KO:2T6SEDANP FRST Erstlastschrift",
+      "debit": 17.62,
+      "currency": "EUR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-05-26T00:00:00",
+      "counterpartyName": "DIRK ROSSMANN GMBH",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. DIRK ROSSMANN GMBH//BERLIN/DE 25-05-2022 T20:17:16 Folgenr. 09 Verfalld. 1221",
+      "debit": 1.78,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-26T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 25-05-2022 T20:10:38 Folgenr. 09 Verfalld. 1221",
+      "debit": 14.41,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-27T00:00:00",
+      "counterpartyName": "AMAZON PAYMENTS EUROPE S.C.A.",
+      "paymentPurpose": "SEPA Überweisung von AMAZON PAYMENTS EUROPE S.C.A. Payment Reference/E2E-Ref. 303-0694033-2649149 AMZ.Vanilla Underground 8282057980810948 8282057980810948",
+      "credit": 17.49,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-05-27T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 26-05-2022 T19:13:00 Folgenr. 09 Verfalld. 1221",
+      "debit": 4.76,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-27T00:00:00",
+      "counterpartyName": "Auszahlung Geldautomat",
+      "paymentPurpose": "Auszahlung Geldautomat Payment Reference/E2E-Ref. SB Tempelhofer Damm CRS//Berlin/DE 26-05-2022 T13:33:03 Folgenr. 009 Verfalld. 1221 Fremdentgelt",
+      "debit": 54.95,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 28-05-2022 T17:39:29 Folgenr. 09 Verfalld. 1221",
+      "debit": 4.62,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "EDEKA 5457, BERLIN",
+      "paymentPurpose": "Kartenzahlung Payment Reference/E2E-Ref. EDEKA 5457, BERLIN//BERLIN/DE 27-05-2022 T19:57:47 Folgenr. 09 Verfalld. 1221",
+      "debit": 9.44,
+      "currency": "EUR",
+      "paymentType": "card"
+    }
+  ]
+}
