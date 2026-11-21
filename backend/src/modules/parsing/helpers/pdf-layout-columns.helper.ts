@@ -278,6 +278,26 @@ const MONEY_EDGE_TOLERANCE = 30;
 /** Words of one printed amount ("1", "200,45", "$") sit closer than this. */
 const AMOUNT_WORD_GAP = 7;
 
+/** Slack, in points, around a money heading for a dash set under it. */
+const EMPTY_CELL_SLACK = 8;
+
+/**
+ * A dash under a money heading, or set where right-aligned figures end
+ * under it, past every text heading: an empty money cell.
+ */
+function underMoneyHeading(word: PdfTextItem, columns: LayoutColumn[]): boolean {
+  const under = columns.some(
+    column =>
+      MONEY_ROLES.includes(column.role) &&
+      word.x < column.x1 + EMPTY_CELL_SLACK &&
+      word.x + word.width > column.x0 - EMPTY_CELL_SLACK,
+  );
+  const pastText = columns
+    .filter(column => TEXT_ROLES.includes(column.role))
+    .every(column => word.x > column.x1);
+  return under || (pastText && moneyColumnFor(word.x, word.x + word.width, columns) !== null);
+}
+
 function moneyColumnFor(x0: number, x1: number, columns: LayoutColumn[]): LayoutColumn | null {
   const money = columns.filter(column => MONEY_ROLES.includes(column.role));
   const candidates = money
@@ -335,8 +355,14 @@ export function layOutRow(items: PdfTextItem[], columns: LayoutColumn[]): LaidOu
       index = cell.end;
       continue;
     }
-    const role = textColumnFor(sorted[index].x, columns);
-    result.text[role] = [...(result.text[role] ?? []), sorted[index].text];
+    const word = sorted[index];
+    // A dash under a money heading marks the cell empty ("SALARY  -  1,119.00"): no text.
+    if (/^[-–—]$/.test(word.text) && underMoneyHeading(word, columns)) {
+      index += 1;
+      continue;
+    }
+    const role = textColumnFor(word.x, columns);
+    result.text[role] = [...(result.text[role] ?? []), word.text];
     index += 1;
   }
 

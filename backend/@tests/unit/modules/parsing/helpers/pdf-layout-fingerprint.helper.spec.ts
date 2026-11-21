@@ -173,6 +173,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Internet : particuliers.societegenerale.fr')).toBe(BankName.SOCIETE_GENERALE);
     expect(mentionedBank('Mailing Address SoFi Bank, N.A.')).toBe(BankName.SOFI);
     expect(mentionedBank('support@sogexia.com | www.sogexia.com')).toBe(BankName.SOGEXIA);
+    expect(mentionedBank('Apply for the Standard Chartered card')).toBe(BankName.STANDARD_CHARTERED);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

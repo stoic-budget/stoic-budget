@@ -172,4 +172,10 @@ export const BANKS = [
   },
   { key: 'sofi', name: 'SoFi', logo: 'sofi.png', aliases: ['sofi bank'] },
   { key: 'sogexia', name: 'Sogexia', logo: 'sogexia.png', aliases: ['sogexia'] },
+  {
+    key: 'standard_chartered',
+    name: 'Standard Chartered',
+    logo: 'standard-chartered.png',
+    aliases: ['stanchart'],
+  },
 ] as const satisfies readonly BankEntry[];

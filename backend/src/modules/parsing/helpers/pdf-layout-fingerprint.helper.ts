@@ -126,6 +126,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.SOCIETE_GENERALE, /\bparticuliers\.societegenerale\.fr\b/],
   [BankName.SOFI, /\bsofi bank, n\.a\./],
   [BankName.SOGEXIA, /\bsogexia\.com\b/],
+  [BankName.STANDARD_CHARTERED, /\bstandard chartered\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
