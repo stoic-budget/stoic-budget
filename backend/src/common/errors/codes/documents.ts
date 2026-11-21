@@ -59,6 +59,8 @@ export const DOCUMENTS_ERRORS = {
     'Cannot unsplit a transaction whose parts are part of a filed tax return',
   TRANSACTION_UNSPLIT_DUPLICATE:
     'Cannot unsplit a group containing a transaction marked as a duplicate',
+  TRANSACTION_UNSPLIT_MIXED_BUDGETS:
+    'Before unsplitting, either leave every part out of budgets or count every part in them',
   TRANSACTION_TRANSFER_SAME_LEG: 'A transfer needs two different transactions',
   TRANSACTION_TRANSFER_SAME_DIRECTION: 'The two legs of a transfer must go in opposite directions',
   TRANSACTION_LEG_DUPLICATE: 'Transaction {{id}} is marked as a duplicate',

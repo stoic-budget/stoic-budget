@@ -674,6 +674,7 @@ const content = {
         bs: 'Glavna knjiga',
         hsb: 'Hłowna kniha',
       }),
+      // Label of the paid edition's menu entry (app/extensions/nav-items.ts).
       taxDeclaration: t({
         ru: 'Налоговая декларация',
         en: 'Tax declaration',

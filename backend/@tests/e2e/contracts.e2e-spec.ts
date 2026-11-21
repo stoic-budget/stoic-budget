@@ -88,10 +88,6 @@ import {
   GoalPlanResponse,
   GoalWithProgress,
   ImportSuggestion,
-  IncomeTaxDisclaimer,
-  IncomeTaxDraft,
-  IncomeTaxMappings,
-  IncomeTaxProfile,
   InsightList,
   InvestmentAccountList,
   InvitationPreview,
@@ -204,6 +200,8 @@ import {
   UserPermissions,
   UserSessionList,
   UserUpdateResponse,
+  WalletBalanceDays,
+  WalletCoverage,
   WalletList,
   WebhookEndpointList,
   WebhookSubscriptionList,
@@ -416,6 +414,32 @@ describe('API contracts (e2e)', () => {
       const res = await get('/wallets');
       matches(WalletList, res.body);
       expect(res.body[0].initialBalance).toBe('12.50');
+    });
+
+    it('GET /wallets/coverage, with a bank no account holds', async () => {
+      const [{ id }] = await dataSource.query(
+        `INSERT INTO statements (user_id, workspace_id, file_name, file_path, file_type, file_size, file_hash,
+           bank_name, account_number, currency, statement_date_from, statement_date_to, total_transactions, status)
+         VALUES ($1, $2, 'coverage.csv', '/dev/null', 'csv', 1, $3, 'other', 'DE00 0000 0000 0000 0007',
+           'USD', '2026-01-01', '2026-01-31', 2, 'completed') RETURNING id`,
+        [owner.userId, owner.workspaceId, `coverage-${Date.now()}`],
+      );
+      try {
+        const res = await get('/wallets/coverage');
+        matches(WalletCoverage, res.body);
+        expect(res.body.rows).toContainEqual(
+          expect.objectContaining({ kind: 'bank', accountTail: '0007', dataTo: '2026-01-31' }),
+        );
+      } finally {
+        await dataSource.query('DELETE FROM statements WHERE id = $1', [id]);
+      }
+    });
+
+    it('GET /wallets/balance-days', async () => {
+      const res = await get(`/wallets/balance-days?month=${new Date().toISOString().slice(0, 7)}`);
+      matches(WalletBalanceDays, res.body);
+      expect(res.body.accounts.length).toBeGreaterThan(0);
+      expect(res.body.days.length).toBeGreaterThanOrEqual(28);
     });
   });
 
@@ -1177,6 +1201,85 @@ describe('API contracts (e2e)', () => {
       }
     });
 
+    it('a rule with a group and conditions on the category, tags and comment, previewed below another and applied', async () => {
+      const categories = await get('/categories?type=expense');
+      // The category the coffee row was entered with, by hand.
+      const categoryId: string = categories.body[0].id;
+      const tag = await send('post', '/tags', { name: 'Filed coffee' }).expect(201);
+      const ids: string[] = [];
+      try {
+        const files = await send('post', '/categorization-rules', {
+          name: 'Coffee filed',
+          conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'contract coffee' }],
+          result: { categoryId: categories.body[1].id, comment: 'Filed by rule' },
+        }).expect(201);
+        ids.push(files.body.id);
+        const conditions = [
+          { field: 'category', operator: 'equals', value: categoryId },
+          {
+            matchMode: 'any',
+            conditions: [
+              { field: 'tags', operator: 'is_empty', value: '' },
+              { field: 'comment', operator: 'equals', value: 'filed by rule' },
+            ],
+          },
+        ];
+        const nested = await send('post', '/categorization-rules', {
+          name: 'Filed coffee is tagged',
+          conditions,
+          result: { tagIds: [tag.body.id] },
+        }).expect(201);
+        ids.push(nested.body.id);
+        matches(CategorizationRuleContract, nested.body);
+        expect(nested.body.conditions).toEqual(conditions);
+        // The filing rule first: the nested one reads the comment it sets, and the
+        // category a person picked, which no rule takes over.
+        await send('put', '/categorization-rules/order', { ids }).expect(200);
+        const list = await get('/categorization-rules');
+        matches(CategorizationRuleList, list.body);
+
+        const preview = await send('post', '/categorization-rules/test', {
+          conditions,
+          ruleId: nested.body.id,
+        }).expect(200);
+        matches(CategorizationRuleTestResult, preview.body);
+        expect(preview.body.matchedTransactions).toBeGreaterThan(0);
+        expect(
+          preview.body.matches.some((match: { matchReason: string }) =>
+            match.matchReason.includes('(set by "Coffee filed")'),
+          ),
+        ).toBe(true);
+
+        const applied = await send('post', `/categorization-rules/${nested.body.id}/apply`).expect(200);
+        matches(CategorizationRuleApplyResult, applied.body);
+        expect(applied.body.tagged).toBe(preview.body.matchedTransactions);
+        // Tagged now, none of those rows passes "no tags" any more.
+        const before = new Set(preview.body.matches.map((match: { id: string }) => match.id));
+        const untagged = await send('post', '/categorization-rules/test', {
+          conditions: [conditions[0], { field: 'tags', operator: 'is_empty', value: '' }],
+          ruleId: nested.body.id,
+        }).expect(200);
+        expect(untagged.body.matches.filter((match: { id: string }) => before.has(match.id))).toEqual([]);
+
+        // A blank check carries no value, and a category is named by its id.
+        await send('put', `/categorization-rules/${nested.body.id}`, {
+          conditions: [{ field: 'comment', operator: 'is_empty', value: 'x' }],
+        }).expect(400);
+        await send('put', `/categorization-rules/${nested.body.id}`, {
+          conditions: [{ field: 'category', operator: 'equals', value: 'Groceries' }],
+        }).expect(400);
+        // Groups go one level deep.
+        await send('put', `/categorization-rules/${nested.body.id}`, {
+          conditions: [{ matchMode: 'any', conditions: [{ matchMode: 'all', conditions }] }],
+        }).expect(400);
+      } finally {
+        for (const id of ids) {
+          await send('delete', `/categorization-rules/${id}`).expect(204);
+        }
+        await send('delete', `/tags/${tag.body.id}`);
+      }
+    });
+
     it('a rule that writes a comment and gives a payee by name, applied to existing rows', async () => {
       const conditions = [
         { field: 'counterparty_name', operator: 'contains', value: 'contract coffee' },
@@ -1491,6 +1594,66 @@ describe('API contracts (e2e)', () => {
       matches(PayablePaymentList, payments.body);
       expect(payments.body).toHaveLength(1);
       matches(PaymentCandidateList, (await get(`/payables/${payableId}/payment-candidates`)).body);
+    });
+
+    it('a repeating bill, its occurrence actions and "not this payment"', async () => {
+      const send = (method: 'post' | 'put', url: string, body: object) =>
+        request(app.getHttpServer())
+          [method](url)
+          .set('Authorization', `Bearer ${owner.token}`)
+          .set('x-workspace-id', owner.workspaceId)
+          .send(body)
+          .expect(method === 'post' ? 201 : 200);
+      const rule = {
+        frequency: 'monthly',
+        interval: 1,
+        startDate: '2027-03-31',
+        monthDay: 'last',
+        shift: 'next',
+        count: 12,
+      };
+      const created = await send('post', '/payables', {
+        vendor: 'Contract Rent',
+        amount: 800,
+        currency: 'USD',
+        remindDaysBefore: 5,
+        recurrence: rule,
+      });
+      matches(Payable, created.body);
+      expect(created.body).toMatchObject({
+        recurrence: rule,
+        seriesId: created.body.id,
+        occurrenceDate: '2027-03-31',
+        baseAmount: null,
+        skippedAt: null,
+        remindDaysBefore: 5,
+      });
+      const id = created.body.id;
+      const moved = await send('put', `/payables/${id}/occurrence`, {
+        action: 'move',
+        dueDate: '2027-04-02',
+      });
+      matches(Payable, moved.body);
+      expect(moved.body).toMatchObject({ dueDate: '2027-04-02', occurrenceDate: '2027-03-31' });
+      const changed = await send('put', `/payables/${id}/occurrence`, {
+        action: 'amount',
+        amount: 850,
+      });
+      matches(Payable, changed.body);
+      expect(changed.body).toMatchObject({ amount: '850.00', baseAmount: '800.00' });
+      const skipped = await send('put', `/payables/${id}/occurrence`, { action: 'skip' });
+      matches(Payable, skipped.body);
+      expect(skipped.body.skippedAt).toEqual(expect.any(String));
+
+      const [row] = await dataSource.query(
+        'SELECT id FROM transactions WHERE workspace_id = $1 LIMIT 1',
+        [owner.workspaceId],
+      );
+      const rejected = await send('post', `/payables/${payableId}/match-rejections`, {
+        transactionId: row.id,
+      });
+      matches(Payable, rejected.body);
+      expect(rejected.body.id).toBe(payableId);
     });
   });
 
@@ -1893,8 +2056,7 @@ describe('API contracts (e2e)', () => {
     });
   });
 
-  describe('tax and income tax', () => {
-    const taxYear = 2025;
+  describe('tax', () => {
     const send = (method: 'post' | 'put', url: string, body: object) =>
       request(app.getHttpServer())
         [method](url)
@@ -1904,11 +2066,6 @@ describe('API contracts (e2e)', () => {
 
     beforeAll(async () => {
       await send('put', '/tax/settings/jurisdiction', { code: 'DE' }).expect(200);
-      await send('put', '/income-tax/profile', {
-        taxYear,
-        taxpayerType: 'self_employed',
-        details: { homeOfficeDays: 120 },
-      }).expect(200);
       const categories = await get('/categories?type=expense');
       const rates = await get('/tax-rates');
       await send('post', '/tax/rules', {
@@ -2023,14 +2180,6 @@ describe('API contracts (e2e)', () => {
       matches(TaxReturnRecord, (await get(`/tax/returns/period?${period}`)).body);
     });
 
-    it('GET the income tax disclaimer, profile, mappings and draft', async () => {
-      matches(IncomeTaxDisclaimer, (await get('/income-tax/disclaimer')).body);
-      const profile = await get(`/income-tax/profile?taxYear=${taxYear}`);
-      matches(IncomeTaxProfile, profile.body);
-      expect(profile.body.filingInfo).not.toBeNull();
-      matches(IncomeTaxMappings, (await get(`/income-tax/mappings?taxYear=${taxYear}`)).body);
-      matches(IncomeTaxDraft, (await get(`/income-tax/returns/${taxYear}`)).body);
-    });
   });
 
   describe('ledger and reconciliation', () => {
@@ -2565,7 +2714,7 @@ describe('API contracts (e2e)', () => {
       );
     });
 
-    it('review approvals, notes, goal contributions and income-tax finalize and reopen', async () => {
+    it('review approvals, notes and goal contributions', async () => {
       const rows = await get('/transactions');
       matches(
         ReviewApproved,
@@ -2598,9 +2747,6 @@ describe('API contracts (e2e)', () => {
         GoalDetail,
         (await call('post', `/goals/${goal.body.id}/contributions`, { amount: 25 }).expect(succeeded)).body,
       );
-      await call('post', '/income-tax/disclaimer').expect(succeeded);
-      matches(IncomeTaxDraft, (await call('post', '/income-tax/returns/2025/finalize').expect(succeeded)).body);
-      matches(IncomeTaxDraft, (await call('post', '/income-tax/returns/2025/reopen').expect(succeeded)).body);
     });
 
     it('imports, a webhook endpoint, a chat, an invoice and semantic search', async () => {

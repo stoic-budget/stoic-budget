@@ -1,0 +1,5580 @@
+{
+  "metadata": {
+    "accountNumber": "051764837226",
+    "currency": "INR",
+    "dateFrom": "2019-04-01T00:00:00",
+    "dateTo": "2020-03-31T00:00:00",
+    "balanceStart": 65731.31,
+    "balanceEnd": 274724.85
+  },
+  "transactions": [
+    {
+      "transactionDate": "2019-04-02T00:00:00",
+      "counterpartyName": "ACT",
+      "paymentPurpose": "VPS/ACT /792354600434/840996436313/HYDERABAD",
+      "debit": 4377,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-04-03T00:00:00",
+      "counterpartyName": "IPS REF DT 31 03 2019 032260 HPCL 0 75 CASHLESS IN",
+      "paymentPurpose": "IPS REF DT 31 03 2019 032260 HPCL 0 75 CASHLESS IN",
+      "credit": 19.95,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-04-03T00:00:00",
+      "counterpartyName": "VISA REF SRI SAI BABA FILLING S",
+      "paymentPurpose": "VISA REF SRI SAI BABA FILLING S",
+      "credit": 15,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-04-03T00:00:00",
+      "counterpartyName": "SINRN MABE",
+      "paymentPurpose": "MMT/IMPS/166347873412/SINRN MABE/AXIS BANK LTD",
+      "credit": 29600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-04-03T00:00:00",
+      "counterpartyName": "utpkksbaurrsgk5",
+      "paymentPurpose": "UPI/000218950274/UPI/utpkksbaurrsgk5/State Bank Of I/",
+      "debit": 1600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-03T00:00:00",
+      "counterpartyName": "sshadudipd2@kab",
+      "paymentPurpose": "UPI/174553832796/UPI/sshadudipd2@kab/State Bank Of I/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-04T00:00:00",
+      "counterpartyName": "nikthulu.787744",
+      "paymentPurpose": "UPI/633735170194/Ok/nikthulu.787744/Andhra Bank",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-04-04T00:00:00",
+      "counterpartyName": "naren9682@okhdf",
+      "paymentPurpose": "UPI/600190959472/Dih servicing/naren9682@okhdf/State Bank Of I",
+      "credit": 4900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-04-04T00:00:00",
+      "counterpartyName": "rpopbbgobg@ogda",
+      "paymentPurpose": "UPI/675122454277/Uol/rpopbbgobg@ogda/HDFC BANK LTD",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-05T00:00:00",
+      "counterpartyName": "bnkskrluht8@nbr",
+      "paymentPurpose": "UPI/859002926863/UPI/bnkskrluht8@nbr/Axis Bank Ltd.",
+      "credit": 1200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-04-09T00:00:00",
+      "counterpartyName": "hkpoeonuul@dmhk",
+      "paymentPurpose": "UPI/778464222128/UPI/hkpoeonuul@dmhk/Axis Bank Ltd./",
+      "debit": 3650,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-09T00:00:00",
+      "counterpartyName": "rnrbislrrula@nk",
+      "paymentPurpose": "UPI/246853899173/UPI/rnrbislrrula@nk/Corporati on Ban/",
+      "debit": 130,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-10T00:00:00",
+      "counterpartyName": "utpkksbaurrsgk5",
+      "paymentPurpose": "UPI/220702471001/UPI/utpkksbaurrsgk5/State Bank Of I/",
+      "debit": 600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-10T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/688578307626/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 15,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-04-10T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/325790192953/Gktka/kdtubuss@kutnr/CHATISG ARH R G/",
+      "debit": 8300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-10T00:00:00",
+      "counterpartyName": "ulurrbnhpd@cdgb",
+      "paymentPurpose": "UPI/235199187231/UPI/ulurrbnhpd@cdgb/Bank of India",
+      "credit": 850,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-04-11T00:00:00",
+      "counterpartyName": "kdomripeicpuae@",
+      "paymentPurpose": "UPI/456680405466/UPI/kdomripeicpuae@/HDFC BANK LTD",
+      "debit": 700,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-12T00:00:00",
+      "counterpartyName": "RAINBOW HOS",
+      "paymentPurpose": "VPS/RAINBOW HOS/576372650915/525088124770/HYDERABAD",
+      "debit": 800,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-04-12T00:00:00",
+      "counterpartyName": "tndosalhc@bilnc",
+      "paymentPurpose": "UPI/877968066412/UPI/tndosalhc@bilnc/State Bank Of I",
+      "credit": 3800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-04-12T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/763183412271/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 450,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-15T00:00:00",
+      "counterpartyName": "RAINBOW",
+      "paymentPurpose": "VPS/RAINBOW /670737801330/738084099698/HYDERABAD",
+      "debit": 700,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-04-15T00:00:00",
+      "counterpartyName": "RAINBOW HOS",
+      "paymentPurpose": "VPS/RAINBOW HOS/210083017152/145836899357/HYDERABAD",
+      "debit": 1235,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-04-15T00:00:00",
+      "counterpartyName": "dmkgiundrc14isc",
+      "paymentPurpose": "UPI/282892678669/Mnh/dmkgiundrc14isc/Andhra Bank",
+      "debit": 600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-16T00:00:00",
+      "counterpartyName": "C BHARAT KU",
+      "paymentPurpose": "VPS/C BHARAT KU/468518177420/370333119750/HYDERABAD",
+      "debit": 370.45,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-04-16T00:00:00",
+      "counterpartyName": "ibnih4900@ukdrr",
+      "paymentPurpose": "UPI/076265719623/Kmhbngrr/ibnih4900@ukdrr/ICICI Bank/",
+      "debit": 22000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-17T00:00:00",
+      "counterpartyName": "hhptetro10358@a",
+      "paymentPurpose": "UPI/984181378504/Her/hhptetro10358@a/Andhra Bank",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-18T00:00:00",
+      "counterpartyName": "APBS/BLPGCM7055DT1704/8972294949",
+      "paymentPurpose": "APBS/BLPGCM7055DT1704/8972294949",
+      "credit": 257.79,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-04-19T00:00:00",
+      "counterpartyName": "kulhc2956@mdbod",
+      "paymentPurpose": "UPI/183605632796/UPI/kulhc2956@mdbod/Kotak Mahindra/",
+      "debit": 900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-22T00:00:00",
+      "counterpartyName": "NFS/13330465/CASH WDL/22-04-19",
+      "paymentPurpose": "NFS/13330465/CASH WDL/22-04-19",
+      "debit": 3000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-04-24T00:00:00",
+      "counterpartyName": "udgsdgthc@srhho",
+      "paymentPurpose": "UPI/324306471197/UPI/udgsdgthc@srhho/State Bank Of I",
+      "credit": 28000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-04-24T00:00:00",
+      "counterpartyName": "daipdotbttkpcod",
+      "paymentPurpose": "UPI/217777287685/UPI/daipdotbttkpcod/Adarsh Co- opera/",
+      "debit": 25000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-24T00:00:00",
+      "counterpartyName": "essbgc.uhd-5@ik",
+      "paymentPurpose": "UPI/496339739282/UPI/essbgc.uhd-5@ik/HSBC",
+      "credit": 3100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-04-25T00:00:00",
+      "counterpartyName": "lhdebbuotbgsiu-",
+      "paymentPurpose": "UPI/904535540651/UPI/lhdebbuotbgsiu-/State Bank Of I/",
+      "debit": 134,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-25T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/114464639458/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-04-29T00:00:00",
+      "counterpartyName": "ugnkrouakbke-2@",
+      "paymentPurpose": "UPI/769266757986/Hi/ugnkrouakbke-2@/Axis Bank Ltd.",
+      "credit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-04-29T00:00:00",
+      "counterpartyName": "bumsr.p.7415@sb",
+      "paymentPurpose": "UPI/916663364727/UPI/bumsr.p.7415@sb/State Bank Of I",
+      "credit": 9000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-01T00:00:00",
+      "counterpartyName": "MIDLAND BAK",
+      "paymentPurpose": "VPS/MIDLAND BAK/338433493180/566003601392/HYDERABAD",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-05-02T00:00:00",
+      "counterpartyName": "BIL/INFT/389075026726/Het/ CH SRINIVAS RED",
+      "paymentPurpose": "BIL/INFT/389075026726/Het/ CH SRINIVAS RED",
+      "credit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-02T00:00:00",
+      "counterpartyName": "rldgcrugtctn65@",
+      "paymentPurpose": "UPI/851438738067/UPI/rldgcrugtctn65@/Axis Bank Ltd.",
+      "credit": 23000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-03T00:00:00",
+      "counterpartyName": "sbtaeeucdlmekrg",
+      "paymentPurpose": "UPI/039946407285/UPI/sbtaeeucdlmekrg/State Bank Of I/",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-03T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/882047237894/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-04T00:00:00",
+      "counterpartyName": "bumsr.p.7415@sb",
+      "paymentPurpose": "UPI/329718653051/UPI/bumsr.p.7415@sb/State Bank Of I",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-04T00:00:00",
+      "counterpartyName": "rldgcrugtctn65@",
+      "paymentPurpose": "UPI/329971617812/UPI/rldgcrugtctn65@/Axis Bank Ltd.",
+      "credit": 21000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-06T00:00:00",
+      "counterpartyName": "irbkhhkash2631@",
+      "paymentPurpose": "UPI/449878477036/Uol/irbkhhkash2631@/State Bank Of I/",
+      "debit": 17200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-06T00:00:00",
+      "counterpartyName": "dmkgiundrc14isc",
+      "paymentPurpose": "UPI/680687760302/UPI/dmkgiundrc14isc/Andhra Bank",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-06T00:00:00",
+      "counterpartyName": "bobdgsb.lpbu@lt",
+      "paymentPurpose": "UPI/347509998403/Tnirmla/bobdgsb.lpbu@lt/ICIC I Bank",
+      "credit": 20370,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-07T00:00:00",
+      "counterpartyName": "ocmodclaih33@bl",
+      "paymentPurpose": "UPI/807036993659/UPI/ocmodclaih33@bl/Kotak Mahindra/",
+      "debit": 79,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-07T00:00:00",
+      "counterpartyName": "gptrssbk7-9@imm",
+      "paymentPurpose": "UPI/901556676122/UPI/gptrssbk7-9@imm/Oriental Bank o/",
+      "debit": 79,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-07T00:00:00",
+      "counterpartyName": "op.bdhbi@dnobms",
+      "paymentPurpose": "UPI/359080156088/Ahphrndds/op.bdhbi@dnobms/And hraBank",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-08T00:00:00",
+      "counterpartyName": "iibpgiaphhtlnps",
+      "paymentPurpose": "UPI/390880798645/UPI/iibpgiaphhtlnps/State Bank Of I/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-09T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/969906403224/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-09T00:00:00",
+      "counterpartyName": "nikthulu.787744",
+      "paymentPurpose": "UPI/456893680522/UPI/nikthulu.787744/Andhra Bank",
+      "debit": 130,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-09T00:00:00",
+      "counterpartyName": "nod592597@soeta",
+      "paymentPurpose": "UPI/274639373573/Keorb/nod592597@soeta/State BankOf I/",
+      "debit": 1800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-09T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/030768827595/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 13,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-10T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/945455119658/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 15050,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-10T00:00:00",
+      "counterpartyName": "rblgadk.nhemcmg",
+      "paymentPurpose": "UPI/770097872176/UPI/rblgadk.nhemcmg/State Bank Of I/",
+      "debit": 66,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-10T00:00:00",
+      "counterpartyName": "eol.uranosgd-4@",
+      "paymentPurpose": "UPI/803574918253/UPI/eol.uranosgd-4@/ICICI Bank",
+      "credit": 5500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-11T00:00:00",
+      "counterpartyName": "Lemrr",
+      "paymentPurpose": "MMT/IMPS/363503154197/Lemrr/ARUN RAMA /HDFC BANK LTD",
+      "credit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-11T00:00:00",
+      "counterpartyName": "BIL/INFT/687325711435/Friends/ M RAGHAVENDER R",
+      "paymentPurpose": "BIL/INFT/687325711435/Friends/ M RAGHAVENDER R",
+      "credit": 14000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-11T00:00:00",
+      "counterpartyName": "MIRRA HOSPI",
+      "paymentPurpose": "VPS/MIRRA HOSPI/164603402917/110724433221/HYDERABAD",
+      "debit": 2377,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-05-13T00:00:00",
+      "counterpartyName": "VIN/CITRUS PAY /090559403904/687641456390/ VPS/THE",
+      "paymentPurpose": "VIN/CITRUS PAY /090559403904/687641456390/ VPS/THE",
+      "debit": 3400,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-05-13T00:00:00",
+      "counterpartyName": "CHENNAI/082366793206/590676459351/HYDERAB AD",
+      "paymentPurpose": "CHENNAI/082366793206/590676459351/HYDERAB AD",
+      "debit": 15170,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-05-13T00:00:00",
+      "counterpartyName": "ittohcosc@biobl",
+      "paymentPurpose": "UPI/133236917550/Dih washing/ittohcosc@biobl/Kotak Mahindra/",
+      "debit": 800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-13T00:00:00",
+      "counterpartyName": "MERIDIAN RE",
+      "paymentPurpose": "VPS/MERIDIAN RE/957831861479/190566368397/HYDERABAD",
+      "debit": 1181,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-05-14T00:00:00",
+      "counterpartyName": "gall.ostnsie135",
+      "paymentPurpose": "UPI/959041258214/UPI/gall.ostnsie135/Axis Bank Ltd.",
+      "credit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-15T00:00:00",
+      "counterpartyName": "hhptetro10358@a",
+      "paymentPurpose": "UPI/694397254234/Her/hhptetro10358@a/Andhra Bank",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-15T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/233332231389/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-15T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/182097233620/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-16T00:00:00",
+      "counterpartyName": "hlohrphgprttlu5",
+      "paymentPurpose": "UPI/637001237280/UPI/hlohrphgprttlu5/State Bank Of I",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-16T00:00:00",
+      "counterpartyName": "VISA REF DISCOUNT ON FUEL PURCHASE",
+      "paymentPurpose": "VISA REF DISCOUNT ON FUEL PURCHASE",
+      "credit": 2.78,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-05-16T00:00:00",
+      "counterpartyName": "dodeed96@rsisnk",
+      "paymentPurpose": "UPI/574649335692/UPI/dodeed96@rsisnk/Andhra Bank",
+      "debit": 432,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-17T00:00:00",
+      "counterpartyName": "daipdotbttkpcod",
+      "paymentPurpose": "UPI/459532520363/UPI/daipdotbttkpcod/HDFC BANK LTD",
+      "credit": 11000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-18T00:00:00",
+      "counterpartyName": "bobdgsb.lpbu@lt",
+      "paymentPurpose": "UPI/938250235663/Tnirmla/bobdgsb.lpbu@lt/ICIC I Bank",
+      "credit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-18T00:00:00",
+      "counterpartyName": "ittohcosc@biobl",
+      "paymentPurpose": "UPI/110938623271/Blndkag/ittohcosc@biobl/Kot ak Mahindra/",
+      "debit": 400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-18T00:00:00",
+      "counterpartyName": "naitsubcehoregg",
+      "paymentPurpose": "UPI/042554578247/UPI/naitsubcehoregg/Andhra Bank",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-18T00:00:00",
+      "counterpartyName": "tihedhi7123@hie",
+      "paymentPurpose": "UPI/760571851266/UPI/tihedhi7123@hie/State Bank Of I/",
+      "debit": 133,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-18T00:00:00",
+      "counterpartyName": "BHARAT PETR",
+      "paymentPurpose": "VPS/BHARAT PETR/526009847841/471876756009/HYDERABAD",
+      "debit": 320,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-05-18T00:00:00",
+      "counterpartyName": "tddhrpehei3@stb",
+      "paymentPurpose": "UPI/902894645690/UPI/tddhrpehei3@stb/State Bank Of I/",
+      "debit": 795,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-21T00:00:00",
+      "counterpartyName": "hoagisgnkagibpt",
+      "paymentPurpose": "UPI/989836449652/UPI/hoagisgnkagibpt/Kotak Mahindra/",
+      "debit": 161,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-22T00:00:00",
+      "counterpartyName": "VISA REF BHARAT PETROLEUM CORPO",
+      "paymentPurpose": "VISA REF BHARAT PETROLEUM CORPO",
+      "credit": 2.4,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-05-22T00:00:00",
+      "counterpartyName": "eupkblbkm.kpkpe",
+      "paymentPurpose": "UPI/826661812771/Dih/eupkblbkm.kpkpe/ICICI Bank",
+      "credit": 11000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-22T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/804378577996/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 13,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-23T00:00:00",
+      "counterpartyName": "kiogalk@lrdokb",
+      "paymentPurpose": "UPI/965818132502/UPI/kiogalk@lrdokb/Yes Bank Ltd",
+      "debit": 550,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-24T00:00:00",
+      "counterpartyName": "bdst.smok@igtus",
+      "paymentPurpose": "UPI/502633532048/Mctu/bdst.smok@igtus/ICICI Bank",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-24T00:00:00",
+      "counterpartyName": "BY CASH-MARKAPUR",
+      "paymentPurpose": "BY CASH-MARKAPUR",
+      "credit": 30000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-05-27T00:00:00",
+      "counterpartyName": "METROFUEL P",
+      "paymentPurpose": "VPS/METROFUEL P/476197729261/695415392336/HYDERABAD",
+      "debit": 1240,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-05-27T00:00:00",
+      "counterpartyName": "SPICY RESTA",
+      "paymentPurpose": "VPS/SPICY RESTA/411478140145/933984402603/HYDERABAD",
+      "debit": 440,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-05-27T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/736120923673/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-27T00:00:00",
+      "counterpartyName": "utpkksbaurrsgk5",
+      "paymentPurpose": "UPI/958642319322/UPI/utpkksbaurrsgk5/State Bank Of I/",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-27T00:00:00",
+      "counterpartyName": "FUTURE LIFE",
+      "paymentPurpose": "VPS/FUTURE LIFE/766313462619/800894425946/HYDERABAD",
+      "debit": 4200,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-05-27T00:00:00",
+      "counterpartyName": "LIFE STYLE",
+      "paymentPurpose": "VPS/LIFE STYLE /974683763759/288268012751/HYDERABAD",
+      "debit": 399,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-05-27T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/180652327896/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 25000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-05-27T00:00:00",
+      "counterpartyName": "MIDLAND BAK",
+      "paymentPurpose": "VPS/MIDLAND BAK/396966439722/462639120276/HYDERABAD",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-05-28T00:00:00",
+      "counterpartyName": "ATM/SFCNM723/CASH WDL/28-05-19",
+      "paymentPurpose": "ATM/SFCNM723/CASH WDL/28-05-19",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2019-05-28T00:00:00",
+      "counterpartyName": "hlohrphgprttlu5",
+      "paymentPurpose": "UPI/921839259624/UPI/hlohrphgprttlu5/State Bank Of I",
+      "credit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-28T00:00:00",
+      "counterpartyName": "daipdotbttkpcod",
+      "paymentPurpose": "UPI/322518380312/UPI/daipdotbttkpcod/HDFC BANK LTD",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-30T00:00:00",
+      "counterpartyName": "BY CASH - GUNTUR (6307)",
+      "paymentPurpose": "BY CASH - GUNTUR (6307)",
+      "credit": 9600,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-05-30T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/108894851743/Phone pay amt r/phgmdboprbaos@l/HDFC BANK LTD",
+      "credit": 3450,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-05-30T00:00:00",
+      "counterpartyName": "tarun7633@okhdf",
+      "paymentPurpose": "UPI/851010273199/Saakshi photogr/tarun7633@okhdf/Andhra Bank/",
+      "debit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-03T00:00:00",
+      "counterpartyName": "naitsubcehoregg",
+      "paymentPurpose": "UPI/280315632860/UPI/naitsubcehoregg/Andhra Bank",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-04T00:00:00",
+      "counterpartyName": "2535557914@ybl",
+      "paymentPurpose": "UPI/640693571055/Hetment from Ph/2535557914@ybl/Axis Bank Ltd.",
+      "credit": 30000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-06-06T00:00:00",
+      "counterpartyName": "VYJAYANTHY",
+      "paymentPurpose": "VPS/VYJAYANTHY /025417579728/366442974683/HYDERABAD",
+      "debit": 2400,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-06-10T00:00:00",
+      "counterpartyName": "ekkrokssgcetln3",
+      "paymentPurpose": "UPI/339430984154/UPI/ekkrokssgcetln3/State Bank Of I/",
+      "debit": 250,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-10T00:00:00",
+      "counterpartyName": "ngiccllbgn@mpct",
+      "paymentPurpose": "UPI/578283582574/UPI/ngiccllbgn@mpct/State Bank Of I/",
+      "debit": 136,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-10T00:00:00",
+      "counterpartyName": "kdomripeicpuae@",
+      "paymentPurpose": "UPI/019937292378/UPI/kdomripeicpuae@/HDFC BANK LTD",
+      "debit": 250,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-10T00:00:00",
+      "counterpartyName": "bbbia.alc11-3@n",
+      "paymentPurpose": "UPI/330747729544/UPI/bbbia.alc11-3@n/Central BankOf/",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-10T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/117949140028/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 13,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-06-10T00:00:00",
+      "counterpartyName": "gdencmeogks@mhh",
+      "paymentPurpose": "UPI/027218908386/Het/gdencmeogks@mhh/ICICI Bank",
+      "credit": 4500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-06-12T00:00:00",
+      "counterpartyName": "CLG/GANESH ENTERPRISES/000728/CHB/07.06.2019",
+      "paymentPurpose": "CLG/GANESH ENTERPRISES/000728/CHB/07.06.2019",
+      "credit": 122000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-06-13T00:00:00",
+      "counterpartyName": "gpnscikolcnocu@",
+      "paymentPurpose": "UPI/240647177357/UPI/gpnscikolcnocu@/Vijaya Bank",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-13T00:00:00",
+      "counterpartyName": "IOCL COCO J",
+      "paymentPurpose": "VPS/IOCL COCO J/386339140100/924118695200/HYDERABAD",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-06-13T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/471683864555/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 4600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-14T00:00:00",
+      "counterpartyName": "namcielbtdrkbam",
+      "paymentPurpose": "UPI/716812041835/UPI/namcielbtdrkbam/Syndica te Bank/ NEFT-N227676605403280-MOHAMMED MADINA",
+      "debit": 43,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-15T00:00:00",
+      "counterpartyName": "MEHRAJ-WORKETHESHAM-78590352527214- HDFC0000001",
+      "paymentPurpose": "MEHRAJ-WORKETHESHAM-78590352527214- HDFC0000001",
+      "credit": 30000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-06-15T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/114967152756/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 14260,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-15T00:00:00",
+      "counterpartyName": "AVENUE SUPE",
+      "paymentPurpose": "VPS/AVENUE SUPE/585340570436/554791046814/HYDERABAD",
+      "debit": 2406.74,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-06-17T00:00:00",
+      "counterpartyName": "arkcprdruecge26",
+      "paymentPurpose": "UPI/838474365937/UPI/arkcprdruecge26/Andhra Bank",
+      "debit": 147,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-17T00:00:00",
+      "counterpartyName": "tobsbcdca.sugra",
+      "paymentPurpose": "UPI/641108524322/Snpt/tobsbcdca.sugra/State Bank Of I",
+      "credit": 147,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-06-18T00:00:00",
+      "counterpartyName": "munagalaaditya1",
+      "paymentPurpose": "UPI/157861497973/Mercedes servic/munagalaaditya1/HDFC BANK LTD",
+      "credit": 13000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-06-18T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/505234630993/Gktka/kdtubuss@kutnr/State Bank Of I/ VPS/SAVLA",
+      "debit": 7130,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-18T00:00:00",
+      "counterpartyName": "AUTOM/016853067407/667623039993/HYDERABA D",
+      "paymentPurpose": "AUTOM/016853067407/667623039993/HYDERABA D",
+      "debit": 10250,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-06-18T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/529375366375/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 14700,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-18T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/114249494762/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 15,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-06-19T00:00:00",
+      "counterpartyName": "IOCL COCO J",
+      "paymentPurpose": "VPS/IOCL COCO J/907651473795/630021820317/HYDERABAD",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-06-19T00:00:00",
+      "counterpartyName": "VISA REF BHARAT KUMARSERVICE PR",
+      "paymentPurpose": "VISA REF BHARAT KUMARSERVICE PR",
+      "credit": 3.75,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-06-20T00:00:00",
+      "counterpartyName": "inmbictdubugdg4",
+      "paymentPurpose": "UPI/559628599956/Gktka/inmbictdubugdg4/State BankOf I/",
+      "debit": 7200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-20T00:00:00",
+      "counterpartyName": "hhptetro10358@a",
+      "paymentPurpose": "UPI/274373745678/Her/hhptetro10358@a/Andhra Bank",
+      "debit": 1278,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-20T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/328086849983/Berpd 5/DUMMY NAME/State Bank OfI/",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-21T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/432040149204/UPI/DUMMY NAME/State Bank Of I",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-24T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/424433595212/Berpd 2/DUMMY NAME/State Bank OfI/",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-24T00:00:00",
+      "counterpartyName": "ucmnbdgo46-5@ha",
+      "paymentPurpose": "UPI/104508842595/Pgkm/ucmnbdgo46-5@ha/Kotak Mahindra/",
+      "debit": 1200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-24T00:00:00",
+      "counterpartyName": "CAM/03481HRY/CASH DEP/24-06-19",
+      "paymentPurpose": "CAM/03481HRY/CASH DEP/24-06-19",
+      "credit": 13500,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-06-24T00:00:00",
+      "counterpartyName": "CAM/03481HRY/CASH DEP/24-06-19 NEFT-P42082229248542-SHRI KANDULA OBULARE",
+      "paymentPurpose": "CAM/03481HRY/CASH DEP/24-06-19 NEFT-P42082229248542-SHRI KANDULA OBULARE",
+      "credit": 4000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-06-24T00:00:00",
+      "counterpartyName": "-SHRI KANDULA OBULARE-00666856402995- SYNB0003667",
+      "paymentPurpose": "-SHRI KANDULA OBULARE-00666856402995- SYNB0003667",
+      "credit": 20000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-06-25T00:00:00",
+      "counterpartyName": "VISA REF BHARAT KUMARSERVICE PR",
+      "paymentPurpose": "VISA REF BHARAT KUMARSERVICE PR",
+      "credit": 7.5,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-06-26T00:00:00",
+      "counterpartyName": "dta.iehcc-2@nrh",
+      "paymentPurpose": "UPI/257186783157/Ihnrn/dta.iehcc-2@nrh/Kotak Mahindra",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-06-26T00:00:00",
+      "counterpartyName": "dta.iehcc-2@nrh",
+      "paymentPurpose": "UPI/684146561909/Ihnrn/dta.iehcc-2@nrh/Kotak Mahindra",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-06-27T00:00:00",
+      "counterpartyName": "pdgcbmgbrugti@u",
+      "paymentPurpose": "UPI/689824433860/UPI/pdgcbmgbrugti@u/State Bank Of I",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-06-27T00:00:00",
+      "counterpartyName": "MSW HOT LIN",
+      "paymentPurpose": "VPS/MSW HOT LIN/998246281876/761036811857/Hyderabad",
+      "debit": 2500,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-06-28T00:00:00",
+      "counterpartyName": "TRFR FROM: AUTO PRIDE",
+      "paymentPurpose": "TRFR FROM: AUTO PRIDE",
+      "credit": 50000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-06-29T00:00:00",
+      "counterpartyName": "051764837226:Int.Pd:31-03-2019 to 28-06-2019",
+      "paymentPurpose": "051764837226:Int.Pd:31-03-2019 to 28-06-2019",
+      "credit": 952,
+      "currency": "INR",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2019-06-29T00:00:00",
+      "counterpartyName": "btssauegmomtsdc",
+      "paymentPurpose": "UPI/472262296142/Gktka/btssauegmomtsdc/Yes Bank Ltd/",
+      "debit": 4593,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-01T00:00:00",
+      "counterpartyName": "m.sblsbhkmpiodm",
+      "paymentPurpose": "UPI/750918205505/UPI/m.sblsbhkmpiodm/HSBC",
+      "credit": 14000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-01T00:00:00",
+      "counterpartyName": "DPBG UTGCB",
+      "paymentPurpose": "MMT/IMPS/806909967231/DPBG UTGCB/AXIS BANK LTD",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-02T00:00:00",
+      "counterpartyName": "utpkksbaurrsgk5",
+      "paymentPurpose": "UPI/568322630202/UPI/utpkksbaurrsgk5/State Bank Of I/ NEFT-N583610216905132-MOHAMMED MADINA",
+      "debit": 1500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-03T00:00:00",
+      "counterpartyName": "MEHRAJ-ETHESHAM RAZAQ-78590352527214- HDFC0000001",
+      "paymentPurpose": "MEHRAJ-ETHESHAM RAZAQ-78590352527214- HDFC0000001",
+      "credit": 11000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-07-03T00:00:00",
+      "counterpartyName": "Uhcucc",
+      "paymentPurpose": "MMT/IMPS/313168871157/Uhcucc/ARUN RAMA /HDFC BANKLTD",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-04T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/857076360434/UPI/secccdtbcms@uel/State Bank Of I/",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-05T00:00:00",
+      "counterpartyName": "dimupkeokdel-8@",
+      "paymentPurpose": "UPI/140204663435/UPI/dimupkeokdel-8@/Kotak Mahindra/",
+      "debit": 250,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-05T00:00:00",
+      "counterpartyName": "amudeeg2@kpoitu",
+      "paymentPurpose": "UPI/782666575825/EB75MN1770/amudeeg2@kpoitu/ HDFC BANK LTD",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-06T00:00:00",
+      "counterpartyName": "eatpnblmidodghl",
+      "paymentPurpose": "UPI/270775213117/UPI/eatpnblmidodghl/Andhra Bank",
+      "debit": 290,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-06T00:00:00",
+      "counterpartyName": "vikranthpatel- 1",
+      "paymentPurpose": "UPI/905225159160/Nanna tgpl cht/vikranthpatel- 1/Kotak Mahindra",
+      "credit": 6500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-08T00:00:00",
+      "counterpartyName": "PALAMURU GR",
+      "paymentPurpose": "VPS/PALAMURU GR/171327583214/584911397866/HYDERABAD",
+      "debit": 968,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-07-08T00:00:00",
+      "counterpartyName": "sbtaeeucdlmekrg",
+      "paymentPurpose": "UPI/172560016242/Bnrlkac/sbtaeeucdlmekrg/State Bank Of I/",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-08T00:00:00",
+      "counterpartyName": "LIFE STYLE",
+      "paymentPurpose": "VPS/LIFE STYLE /965464960040/968441716472/HYDERABAD",
+      "debit": 4216.51,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-07-08T00:00:00",
+      "counterpartyName": "elhrcugeuba73-6",
+      "paymentPurpose": "UPI/474812207058/UPI/elhrcugeuba73-6/Andhra Pradesh/",
+      "debit": 82,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-08T00:00:00",
+      "counterpartyName": "ikuehtppcpcbbme",
+      "paymentPurpose": "UPI/423114715141/Hi/ikuehtppcpcbbme/ICICI Bank",
+      "credit": 1250,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-08T00:00:00",
+      "counterpartyName": "ikuehtppcpcbbme",
+      "paymentPurpose": "UPI/716839512524/UPI/ikuehtppcpcbbme/ICICI Bank",
+      "credit": 11000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-09T00:00:00",
+      "counterpartyName": "CAM/63073SRY/CASH DEP/09-07-19",
+      "paymentPurpose": "CAM/63073SRY/CASH DEP/09-07-19",
+      "credit": 19000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-07-10T00:00:00",
+      "counterpartyName": "gouesehp7493608",
+      "paymentPurpose": "UPI/590506895708/MSO/gouesehp7493608/Axis Bank Ltd./",
+      "debit": 815,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-10T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/537653275664/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 3790,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-10T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/085802136821/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 3313,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-11T00:00:00",
+      "counterpartyName": "ghuempdkdilio52",
+      "paymentPurpose": "UPI/239952140017/UPI/ghuempdkdilio52/IDBI Bank Limit/",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-11T00:00:00",
+      "counterpartyName": "mkksrnhksd2662@",
+      "paymentPurpose": "UPI/031378789931/UPI/mkksrnhksd2662@/Kotak Mahindra",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-11T00:00:00",
+      "counterpartyName": "pdmtponhkm13966",
+      "paymentPurpose": "UPI/588507485587/UPI/pdmtponhkm13966/Kotak Mahindra/",
+      "debit": 154,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-15T00:00:00",
+      "counterpartyName": "sbchouhdboos485",
+      "paymentPurpose": "UPI/646100123164/UPI/sbchouhdboos485/State Bank Of I/",
+      "debit": 554,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-15T00:00:00",
+      "counterpartyName": "chseld3501-7@ue",
+      "paymentPurpose": "UPI/244161089523/UPI/chseld3501-7@ue/ICICI Bank",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-15T00:00:00",
+      "counterpartyName": "mimkblnilcgbpch",
+      "paymentPurpose": "UPI/937701708833/UPI/mimkblnilcgbpch/HDFC BANK LTD",
+      "credit": 700,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-15T00:00:00",
+      "counterpartyName": "navaneethgoud03",
+      "paymentPurpose": "UPI/797558843197/For din90batter/navaneethgoud03/ICICI Bank",
+      "credit": 1200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-16T00:00:00",
+      "counterpartyName": "VOI JEANS R",
+      "paymentPurpose": "VPS/VOI JEANS R/379424599356/349694166144/HYDERABAD",
+      "debit": 3160,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-07-17T00:00:00",
+      "counterpartyName": "cdpbmpb.rkudk71",
+      "paymentPurpose": "UPI/032210861602/UPI/cdpbmpb.rkudk71/State Bank Of I/",
+      "debit": 400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-17T00:00:00",
+      "counterpartyName": "hhptetro10358@a",
+      "paymentPurpose": "UPI/379685953542/UPI/hhptetro10358@a/Andhra Bank",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-18T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/853853833781/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 16160,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-19T00:00:00",
+      "counterpartyName": "irbkhhkash2631@",
+      "paymentPurpose": "UPI/566333974193/UPI/irbkhhkash2631@/State Bank Of I/",
+      "debit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-19T00:00:00",
+      "counterpartyName": "2535557914@ybl",
+      "paymentPurpose": "UPI/321053361933/Hetment from Ph/2535557914@ybl/Axis Bank Ltd.",
+      "credit": 3400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-20T00:00:00",
+      "counterpartyName": "APBS/BLPGCM48722DT1907/5586283306",
+      "paymentPurpose": "APBS/BLPGCM48722DT1907/5586283306",
+      "credit": 186.93,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-07-20T00:00:00",
+      "counterpartyName": "mhahh.ehmoahnur",
+      "paymentPurpose": "UPI/219807403589/Gktka/mhahh.ehmoahnur/State BankOf I/",
+      "debit": 2180,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-20T00:00:00",
+      "counterpartyName": "nikthulu.787744",
+      "paymentPurpose": "UPI/528340924516/UPI/nikthulu.787744/Andhra Bank",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-20T00:00:00",
+      "counterpartyName": "kalyanchakravar",
+      "paymentPurpose": "UPI/057324703405/Lpci Dih servic/kalyanchakravar/HDFC BANK LTD NEFT-P44679261129581-SHRI KANDULA OBULARE",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-20T00:00:00",
+      "counterpartyName": "-SHRI KANDULA OBULARE-48133416870848- SYNB0003667",
+      "paymentPurpose": "-SHRI KANDULA OBULARE-48133416870848- SYNB0003667",
+      "credit": 10000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-07-22T00:00:00",
+      "counterpartyName": "KISHAN SERV",
+      "paymentPurpose": "VPS/KISHAN SERV/781813171817/486045248436/HYDERABAD",
+      "debit": 1500,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-07-22T00:00:00",
+      "counterpartyName": "kgoiea.tbcp@apo",
+      "paymentPurpose": "UPI/353304800477/From auto engin/kgoiea.tbcp@apo/Axis Bank Ltd.",
+      "credit": 32000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-22T00:00:00",
+      "counterpartyName": "DPBG UTGCB",
+      "paymentPurpose": "MMT/IMPS/800077159382/DPBG UTGCB/AXIS BANK LTD",
+      "credit": 3280,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-22T00:00:00",
+      "counterpartyName": "daipdotbttkpcod",
+      "paymentPurpose": "UPI/636749944319/UPI/daipdotbttkpcod/HDFC BANK LTD",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-22T00:00:00",
+      "counterpartyName": "NEFT:411172475199/HDFC0000521/KRISHNA AND COMPANY",
+      "paymentPurpose": "NEFT:411172475199/HDFC0000521/KRISHNA AND COMPANY",
+      "debit": 50000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-23T00:00:00",
+      "counterpartyName": "nikthulu.787744",
+      "paymentPurpose": "UPI/162040317440/Ok/nikthulu.787744/Andhra Bank",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-24T00:00:00",
+      "counterpartyName": "enonkkad.lldsda",
+      "paymentPurpose": "UPI/791126500128/UPI/enonkkad.lldsda/Andhra Pradesh",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-24T00:00:00",
+      "counterpartyName": "enonkkad.lldsda",
+      "paymentPurpose": "UPI/900741494213/UPI/enonkkad.lldsda/Andhra Bank",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-24T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/725092966684/Phone pay amoun/phgmdboprbaos@l/HDFC BANK LTD",
+      "credit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-25T00:00:00",
+      "counterpartyName": "TRFR TO:MUHAMMAD MUSTAFA",
+      "paymentPurpose": "TRFR TO:MUHAMMAD MUSTAFA",
+      "debit": 16800,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-07-25T00:00:00",
+      "counterpartyName": "VISA REF KISHAN SERVICE STATION",
+      "paymentPurpose": "VISA REF KISHAN SERVICE STATION",
+      "credit": 11.25,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-07-25T00:00:00",
+      "counterpartyName": "kulhc2956@mdbod",
+      "paymentPurpose": "UPI/142171261014/UPI/kulhc2956@mdbod/Kotak Mahindra INF/781906417648/AUDI CAR",
+      "credit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-26T00:00:00",
+      "counterpartyName": "SENSOR828031539680/MK DAYLIGHTING SOLUTIONS PRIVA",
+      "paymentPurpose": "SENSOR828031539680/MK DAYLIGHTING SOLUTIONS PRIVA",
+      "credit": 2500,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-07-26T00:00:00",
+      "counterpartyName": "BIL/INFT/305070178876/Pshbk repair pa/ POTHEM SHETTY S",
+      "paymentPurpose": "BIL/INFT/305070178876/Pshbk repair pa/ POTHEM SHETTY S",
+      "credit": 7600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-29T00:00:00",
+      "counterpartyName": "esrkrki52oao@ag",
+      "paymentPurpose": "UPI/620421510213/UPI/esrkrki52oao@ag/Bank of India",
+      "debit": 1200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-29T00:00:00",
+      "counterpartyName": "ookgrnrblir@hmo",
+      "paymentPurpose": "UPI/918266941039/UPI/ookgrnrblir@hmo/Andhra Bank",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-29T00:00:00",
+      "counterpartyName": "kdomripeicpuae@",
+      "paymentPurpose": "UPI/482442978664/UPI/kdomripeicpuae@/HDFC BANK LTD",
+      "debit": 1400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-29T00:00:00",
+      "counterpartyName": "KHAZANA JEW",
+      "paymentPurpose": "VPS/KHAZANA JEW/438030949132/825799783924/HYDERABAD",
+      "debit": 39430,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-07-29T00:00:00",
+      "counterpartyName": "PALAMURU GR",
+      "paymentPurpose": "VPS/PALAMURU GR/475043778331/530822013706/HYDERABAD",
+      "debit": 2071,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-07-29T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/295248481325/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 5200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-29T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/981554317186/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 9,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-07-29T00:00:00",
+      "counterpartyName": "utpkksbaurrsgk5",
+      "paymentPurpose": "UPI/023968131130/UPI/utpkksbaurrsgk5/State Bank Of I/",
+      "debit": 2200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-07-29T00:00:00",
+      "counterpartyName": "SHADAB FOOD",
+      "paymentPurpose": "VPS/SHADAB FOOD/514089904270/214064263336/HYDERABAD",
+      "debit": 1495.2,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-07-30T00:00:00",
+      "counterpartyName": "dimupkeokdel-8@",
+      "paymentPurpose": "UPI/627672954237/UPI/dimupkeokdel-8@/Kotak Mahindra/",
+      "debit": 810,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-01T00:00:00",
+      "counterpartyName": "hlohrphgprttlu5",
+      "paymentPurpose": "UPI/497757812988/UPI/hlohrphgprttlu5/State Bank Of I/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-01T00:00:00",
+      "counterpartyName": "dimupkeokdel-8@",
+      "paymentPurpose": "UPI/041846500098/UPI/dimupkeokdel-8@/Kotak Mahindra/",
+      "debit": 8340,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-01T00:00:00",
+      "counterpartyName": "pdrhcircmdlap@g",
+      "paymentPurpose": "UPI/792376735298/Ketd/pdrhcircmdlap@g/Oriental Bank o",
+      "credit": 6700,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-01T00:00:00",
+      "counterpartyName": "hlohrphgprttlu5",
+      "paymentPurpose": "UPI/984361035113/UPI/hlohrphgprttlu5/State Bank Of I",
+      "credit": 4500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-02T00:00:00",
+      "counterpartyName": "eabhcmedaa.aa@s",
+      "paymentPurpose": "UPI/801789183942/UPI/eabhcmedaa.aa@s/IDBI Bank Limit",
+      "credit": 3500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-05T00:00:00",
+      "counterpartyName": "opidsdug7986@il",
+      "paymentPurpose": "UPI/396626885658/UPI/opidsdug7986@il/State Bank Of I/",
+      "debit": 6500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-06T00:00:00",
+      "counterpartyName": "kulhc2956@mdbod",
+      "paymentPurpose": "UPI/337526364963/UPI/kulhc2956@mdbod/Kotak Mahindra/",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-06T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/918922602859/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 32,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-06T00:00:00",
+      "counterpartyName": "bdst.smok@igtus",
+      "paymentPurpose": "UPI/240849590708/UPI/bdst.smok@igtus/ICICI Bank",
+      "debit": 2173,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-06T00:00:00",
+      "counterpartyName": "ookgrnrblir@hmo",
+      "paymentPurpose": "UPI/219844126937/UPI/ookgrnrblir@hmo/Andhra Bank",
+      "credit": 3500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-06T00:00:00",
+      "counterpartyName": "inmbictdubugdg4",
+      "paymentPurpose": "UPI/467655762080/Gktka/inmbictdubugdg4/State BankOf I/",
+      "debit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-06T00:00:00",
+      "counterpartyName": "monksanand@okax",
+      "paymentPurpose": "UPI/566993325195/Dih ahlerl and/monksanand@okax/Axis Bank Ltd.",
+      "credit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-06T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/678357581996/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 3319,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-07T00:00:00",
+      "counterpartyName": "CLG/V S T TITANIUM MOTORS PRI/HDF",
+      "paymentPurpose": "CLG/V S T TITANIUM MOTORS PRI/HDF",
+      "debit": 58643,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-08-07T00:00:00",
+      "counterpartyName": "kulhc2956@mdbod",
+      "paymentPurpose": "UPI/164910220726/UPI/kulhc2956@mdbod/Kotak Mahindra/",
+      "debit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-07T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/053030282382/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 6240,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-07T00:00:00",
+      "counterpartyName": "bnkskrluht8@nbr",
+      "paymentPurpose": "UPI/668375523500/UPI/bnkskrluht8@nbr/Axis Bank Ltd./",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-07T00:00:00",
+      "counterpartyName": "hlohrphgprttlu5",
+      "paymentPurpose": "UPI/544915276681/UPI/hlohrphgprttlu5/State Bank Of I/",
+      "debit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-08T00:00:00",
+      "counterpartyName": "sbtaeeucdlmekrg",
+      "paymentPurpose": "UPI/830669634093/UPI/sbtaeeucdlmekrg/State Bank Of I/",
+      "debit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-08T00:00:00",
+      "counterpartyName": "tarun7633@oksbi",
+      "paymentPurpose": "UPI/641157781941/Saakshi patel/tarun7633@oksbi/State Bank Of I/",
+      "debit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-09T00:00:00",
+      "counterpartyName": "scdnachbstnamet",
+      "paymentPurpose": "UPI/267703490482/UPI/scdnachbstnamet/ICICI Bank",
+      "credit": 16000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-12T00:00:00",
+      "counterpartyName": "inmbictdubugdg4",
+      "paymentPurpose": "UPI/855084136764/Gktka/inmbictdubugdg4/State BankOf I/",
+      "debit": 4090,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-12T00:00:00",
+      "counterpartyName": "hlohrphgprttlu5",
+      "paymentPurpose": "UPI/968335182944/UPI/hlohrphgprttlu5/State Bank Of I",
+      "credit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-12T00:00:00",
+      "counterpartyName": "cncknsditol5731",
+      "paymentPurpose": "UPI/809035234325/UPI/cncknsditol5731/HDFC BANK LTD",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-12T00:00:00",
+      "counterpartyName": "D K AND CO",
+      "paymentPurpose": "VPS/D K AND CO /153359630930/742385120420/MEDAK",
+      "debit": 2780,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-08-12T00:00:00",
+      "counterpartyName": "nmkraahprosehub",
+      "paymentPurpose": "UPI/469195059201/UPI/nmkraahprosehub/State Bank Of I/",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-13T00:00:00",
+      "counterpartyName": "VISA REF DISCOUNT ON FUEL PURCHASE",
+      "paymentPurpose": "VISA REF DISCOUNT ON FUEL PURCHASE",
+      "credit": 9.3,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-08-13T00:00:00",
+      "counterpartyName": "ittohcosc@biobl",
+      "paymentPurpose": "UPI/479486588210/UPI/ittohcosc@biobl/Kotak Mahindra/",
+      "debit": 400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-13T00:00:00",
+      "counterpartyName": "ulurrbnhpd@cdgb",
+      "paymentPurpose": "UPI/483779052584/UPI/ulurrbnhpd@cdgb/Bank of India",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-13T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/138746048170/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 15,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-14T00:00:00",
+      "counterpartyName": "CLG/M A SALEEM/000160/BOB/08.08.2019",
+      "paymentPurpose": "CLG/M A SALEEM/000160/BOB/08.08.2019",
+      "credit": 24400,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-08-16T00:00:00",
+      "counterpartyName": "hhptetro10358@a",
+      "paymentPurpose": "UPI/336805707256/Her/hhptetro10358@a/Andhra Bank",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-16T00:00:00",
+      "counterpartyName": "VISA REF D K AND CO",
+      "paymentPurpose": "VISA REF D K AND CO",
+      "credit": 20.85,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-08-16T00:00:00",
+      "counterpartyName": "BIL/INFT/741340338053/FromPrasanthFor/ PAGADALA PRASAN",
+      "paymentPurpose": "BIL/INFT/741340338053/FromPrasanthFor/ PAGADALA PRASAN",
+      "credit": 8500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-17T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/926046211868/UPI/DUMMY NAME/State Bank Of I",
+      "debit": 100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-17T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/666915619776/UPI/DUMMY NAME/State Bank Of I",
+      "debit": 4900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-17T00:00:00",
+      "counterpartyName": "ckhgkdbodd2184-",
+      "paymentPurpose": "UPI/359002472791/UPI/ckhgkdbodd2184-/ICICI Bank",
+      "debit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-17T00:00:00",
+      "counterpartyName": "ckhgkdbodd2184-",
+      "paymentPurpose": "UPI/812175910581/UPI/ckhgkdbodd2184-/ICICI Bank",
+      "debit": 1600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-19T00:00:00",
+      "counterpartyName": "hlohrphgprttlu5",
+      "paymentPurpose": "UPI/982534469386/UPI/hlohrphgprttlu5/State Bank Of I",
+      "credit": 1200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-19T00:00:00",
+      "counterpartyName": "vishwanathsharm",
+      "paymentPurpose": "UPI/746956373359/CAR REPAIR/vishwanathsharm/Standard Charte",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-19T00:00:00",
+      "counterpartyName": "nikthulu.787744",
+      "paymentPurpose": "UPI/089930793421/UPI/nikthulu.787744/Andhra Bank",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-19T00:00:00",
+      "counterpartyName": "lokeshkannab3- 1",
+      "paymentPurpose": "UPI/846993161022/Dih money/lokeshkannab3- 1/HDFC BANK LTD",
+      "credit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-20T00:00:00",
+      "counterpartyName": "Uhcucc",
+      "paymentPurpose": "MMT/IMPS/879289521522/Uhcucc/ARUN RAMA /HDFC BANKLTD",
+      "credit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-21T00:00:00",
+      "counterpartyName": "gddmcupel@blbpk",
+      "paymentPurpose": "UPI/590738648530/UPI/gddmcupel@blbpk/Standard Charte",
+      "credit": 4050,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-22T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/491807547632/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 7300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-22T00:00:00",
+      "counterpartyName": "iibpgiaphhtlnps",
+      "paymentPurpose": "UPI/305185275613/UPI/iibpgiaphhtlnps/State Bank Of I/",
+      "debit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-22T00:00:00",
+      "counterpartyName": "mhahh.ehmoahnur",
+      "paymentPurpose": "UPI/684258869417/UPI/mhahh.ehmoahnur/State Bank Of I/",
+      "debit": 30,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-23T00:00:00",
+      "counterpartyName": "iibpgiaphhtlnps",
+      "paymentPurpose": "UPI/598936209061/UPI/iibpgiaphhtlnps/State Bank Of I/",
+      "debit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-23T00:00:00",
+      "counterpartyName": "bpsgisrgbbubr50",
+      "paymentPurpose": "UPI/296258434927/UPI/bpsgisrgbbubr50/Andhra Bank",
+      "debit": 3500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-26T00:00:00",
+      "counterpartyName": "ikuehtppcpcbbme",
+      "paymentPurpose": "UPI/278412591366/UPI/ikuehtppcpcbbme/ICICI Bank",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-26T00:00:00",
+      "counterpartyName": "rbalctodaeoc607",
+      "paymentPurpose": "UPI/794462968494/UPI/rbalctodaeoc607/Kotak Mahindra/",
+      "debit": 11000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-26T00:00:00",
+      "counterpartyName": "biksldgs3d@sgmd",
+      "paymentPurpose": "UPI/293872881670/UPI/biksldgs3d@sgmd/State Bank Of I",
+      "credit": 40000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-26T00:00:00",
+      "counterpartyName": "biksldgs3d@sgmd",
+      "paymentPurpose": "UPI/494731541872/UPI/biksldgs3d@sgmd/State Bank Of I",
+      "credit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-26T00:00:00",
+      "counterpartyName": "CAM/07031HRY/CASH DEP/26-08-19",
+      "paymentPurpose": "CAM/07031HRY/CASH DEP/26-08-19",
+      "credit": 36000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-08-26T00:00:00",
+      "counterpartyName": "CAM/07031HRY/CASH DEP/26-08-19",
+      "paymentPurpose": "CAM/07031HRY/CASH DEP/26-08-19",
+      "credit": 1400,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-08-26T00:00:00",
+      "counterpartyName": "biksldgs3d@sgmd",
+      "paymentPurpose": "UPI/433318999873/UPI/biksldgs3d@sgmd/State Bank Of I",
+      "credit": 1600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-26T00:00:00",
+      "counterpartyName": "BIL/INFT/356495731009/PrasanthFord/ PAGADALA PRASAN",
+      "paymentPurpose": "BIL/INFT/356495731009/PrasanthFord/ PAGADALA PRASAN",
+      "credit": 9500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-26T00:00:00",
+      "counterpartyName": "Dih ahlerl",
+      "paymentPurpose": "MMT/IMPS/490443403356/Dih ahlerl/RAVI JALLY to TMGUKSGDSK",
+      "credit": 2650,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-08-27T00:00:00",
+      "counterpartyName": "CLG/VOOTLA SRIDHAR/000210/BOB/24.08.2019",
+      "paymentPurpose": "CLG/VOOTLA SRIDHAR/000210/BOB/24.08.2019",
+      "credit": 23100,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-08-27T00:00:00",
+      "counterpartyName": "sbtaeeucdlmekrg",
+      "paymentPurpose": "UPI/946444756748/UPI/sbtaeeucdlmekrg/State Bank Of I/",
+      "debit": 1,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-28T00:00:00",
+      "counterpartyName": "VENKATA NAGARAJA--432919638156929- UTIB0003750",
+      "paymentPurpose": "VENKATA NAGARAJA--432919638156929- UTIB0003750",
+      "credit": 16450,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-08-28T00:00:00",
+      "counterpartyName": "gdadbggcbru@uml",
+      "paymentPurpose": "UPI/476186711187/UPI/gdadbggcbru@uml/Andhra Bank",
+      "debit": 16300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-30T00:00:00",
+      "counterpartyName": "sbtaeeucdlmekrg",
+      "paymentPurpose": "UPI/218081692873/UPI/sbtaeeucdlmekrg/State Bank Of I/",
+      "debit": 3700,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-31T00:00:00",
+      "counterpartyName": "ssoso818@occpu",
+      "paymentPurpose": "UPI/447201547162/UPI/ssoso818@occpu/Oriental Banko/",
+      "debit": 1500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-31T00:00:00",
+      "counterpartyName": "daipdotbttkpcod",
+      "paymentPurpose": "UPI/387640107851/UPI/daipdotbttkpcod/HDFC BANK LTD",
+      "debit": 13000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-08-31T00:00:00",
+      "counterpartyName": "350ismos748@reh",
+      "paymentPurpose": "UPI/655847970046/Numnpnr/350ismos748@reh/HD FC BANK LTD",
+      "credit": 30000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-05T00:00:00",
+      "counterpartyName": "monksanand@okax",
+      "paymentPurpose": "UPI/990776764191/Dih ah lerl/monksanand@okax/AxisBank Ltd.",
+      "credit": 6843,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-06T00:00:00",
+      "counterpartyName": "alamkhan.manzoo",
+      "paymentPurpose": "UPI/375546488746/Smessguk Servic/alamkhan.manzoo/HDFC BANK LTD",
+      "credit": 3100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-06T00:00:00",
+      "counterpartyName": "eabhcmedaa.aa@s",
+      "paymentPurpose": "UPI/500264828317/Emo 530d servic/eabhcmedaa.aa@s/IDBI Bank Limit",
+      "credit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-09T00:00:00",
+      "counterpartyName": "hhptetro10358@a",
+      "paymentPurpose": "UPI/352024790526/Her/hhptetro10358@a/Andhra Bank",
+      "debit": 12926,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-10T00:00:00",
+      "counterpartyName": "SOAKH SKMG",
+      "paymentPurpose": "MMT/IMPS/315189094081/SOAKH SKMG/AXIS BANK LTD",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-10T00:00:00",
+      "counterpartyName": "otaksnogdlsgsrl",
+      "paymentPurpose": "UPI/603024976575/UPI/otaksnogdlsgsrl/HDFC BANK LTD",
+      "credit": 2500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-11T00:00:00",
+      "counterpartyName": "arpgduiic7489@a",
+      "paymentPurpose": "UPI/986537395723/UPI/arpgduiic7489@a/City Union Bank/",
+      "debit": 900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-11T00:00:00",
+      "counterpartyName": "sbtaeeucdlmekrg",
+      "paymentPurpose": "UPI/492608718354/UPI/sbtaeeucdlmekrg/State Bank Of I/",
+      "debit": 22500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-12T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/416196506692/UPI/secccdtbcms@uel/State Bank Of I/",
+      "debit": 2500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-13T00:00:00",
+      "counterpartyName": "msgtguokcl.hbdk",
+      "paymentPurpose": "UPI/411770061706/UPI/msgtguokcl.hbdk/Kotak Mahindra",
+      "credit": 800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-13T00:00:00",
+      "counterpartyName": "INF/INFT/764811784138/SHRI KANDULA OB/Smessgukexpe",
+      "paymentPurpose": "INF/INFT/764811784138/SHRI KANDULA OB/Smessgukexpe",
+      "credit": 10000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-09-16T00:00:00",
+      "counterpartyName": "ucmnbdgo46-5@ha",
+      "paymentPurpose": "UPI/572599676152/UPI/ucmnbdgo46-5@ha/Kotak Mahindra/",
+      "debit": 900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-16T00:00:00",
+      "counterpartyName": "bobdgsb.lpbu@lt",
+      "paymentPurpose": "UPI/378047890378/Tnirmla/bobdgsb.lpbu@lt/ICIC I Bank",
+      "credit": 7800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-16T00:00:00",
+      "counterpartyName": "aihhiihd60@dkgk",
+      "paymentPurpose": "UPI/519380011084/UPI/aihhiihd60@dkgk/Kotak Mahindra",
+      "credit": 3500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-16T00:00:00",
+      "counterpartyName": "ittohcosc@biobl",
+      "paymentPurpose": "UPI/221379086368/UPI/ittohcosc@biobl/Kotak Mahindra/",
+      "debit": 400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-17T00:00:00",
+      "counterpartyName": "ntkbkrahuoalbhn",
+      "paymentPurpose": "UPI/997239976955/Dih repair/ntkbkrahuoalbhn/KotakMahindra",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-17T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/019427975466/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 10773,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-18T00:00:00",
+      "counterpartyName": "eabhcmedaa.aa@s",
+      "paymentPurpose": "UPI/730715916938/Emo 320d servic/eabhcmedaa.aa@s/IDBI Bank Limit",
+      "credit": 13000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-18T00:00:00",
+      "counterpartyName": "mloosntcmbtsdtk",
+      "paymentPurpose": "UPI/260123308241/UPI/mloosntcmbtsdtk/HDFC BANK LTD",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-18T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/189602034242/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 18,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-20T00:00:00",
+      "counterpartyName": "datllllpnd.nirm",
+      "paymentPurpose": "UPI/869418381849/UPI/datllllpnd.nirm/Kotak Mahindra",
+      "credit": 5500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-20T00:00:00",
+      "counterpartyName": "atullupbosebuns",
+      "paymentPurpose": "UPI/005073257280/Keorb/atullupbosebuns/HDFC BANK LTD/",
+      "debit": 6500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-20T00:00:00",
+      "counterpartyName": "nmkglieium621@g",
+      "paymentPurpose": "UPI/911118269171/UPI/nmkglieium621@g/State Bank Of I/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-20T00:00:00",
+      "counterpartyName": "nmkglieium621@g",
+      "paymentPurpose": "UPI/631501331524/UPI/nmkglieium621@g/State Bank Of I/",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-20T00:00:00",
+      "counterpartyName": "bobdgsb.lpbu@lt",
+      "paymentPurpose": "UPI/188777125714/Nntka/bobdgsb.lpbu@lt/ICICI Bank",
+      "credit": 6500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-20T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/931339475127/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-20T00:00:00",
+      "counterpartyName": "iibpgiaphhtlnps",
+      "paymentPurpose": "UPI/467054590204/UPI/iibpgiaphhtlnps/State Bank Of I/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-21T00:00:00",
+      "counterpartyName": "CAEKIBBAU M",
+      "paymentPurpose": "VPS/CAEKIBBAU M/987679606168/136312596069/HYDERABAD",
+      "debit": 10,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-09-21T00:00:00",
+      "counterpartyName": "aapgudcbiudag94",
+      "paymentPurpose": "UPI/150003005618/UPI/aapgudcbiudag94/Bank of India",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-21T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/125744417222/Gktka/DUMMY NAME/HDFC BANK LTD",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-23T00:00:00",
+      "counterpartyName": "atdiledu5dn-5@l",
+      "paymentPurpose": "UPI/785246507292/UPI/atdiledu5dn-5@l/State Bank Of I/",
+      "debit": 2200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-23T00:00:00",
+      "counterpartyName": "esdbkurpe169@ag",
+      "paymentPurpose": "UPI/277151906430/UPI/esdbkurpe169@ag/State Bank Of I/",
+      "debit": 1500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-23T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/059854312970/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 10,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-24T00:00:00",
+      "counterpartyName": "APBS/BLPGCM81019DT2109/9444855532",
+      "paymentPurpose": "APBS/BLPGCM81019DT2109/9444855532",
+      "credit": 104.33,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-09-24T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/830822936807/Gktka/DUMMY NAME/HDFC BANK LTD",
+      "debit": 11082,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-24T00:00:00",
+      "counterpartyName": "mahesh.bethi19@",
+      "paymentPurpose": "UPI/316078725820/Dih service/mahesh.bethi19@/Standard Charte",
+      "credit": 5520,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-24T00:00:00",
+      "counterpartyName": "hckbdde27ebs-5@",
+      "paymentPurpose": "UPI/722510440711/UPI/hckbdde27ebs-5@/HDFC BANK LTD",
+      "debit": 2500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-24T00:00:00",
+      "counterpartyName": "eabhcmedaa.aa@s",
+      "paymentPurpose": "UPI/378703571403/320d mec/eabhcmedaa.aa@s/IDBI Bank Limit",
+      "credit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-25T00:00:00",
+      "counterpartyName": "dmmbcib9354@tbi",
+      "paymentPurpose": "UPI/199138527619/UPI/dmmbcib9354@tbi/HDFC BANK LTD",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-25T00:00:00",
+      "counterpartyName": "dmmbcib9354@tbi",
+      "paymentPurpose": "UPI/186156543451/UPI/dmmbcib9354@tbi/HDFC BANK LTD",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-25T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/831063415841/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-25T00:00:00",
+      "counterpartyName": "Uhcucc",
+      "paymentPurpose": "MMT/IMPS/247042052306/Uhcucc/ARUN RAMA /HDFC BANKLTD",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-25T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/968823172718/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 5500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-26T00:00:00",
+      "counterpartyName": "dmekngbccnnmtnb",
+      "paymentPurpose": "UPI/186358923947/UPI/dmekngbccnnmtnb/Bank of India",
+      "debit": 1600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-30T00:00:00",
+      "counterpartyName": "hlohrphgprttlu5",
+      "paymentPurpose": "UPI/789191258289/UPI/hlohrphgprttlu5/State Bank Of I",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-30T00:00:00",
+      "counterpartyName": "ulteghlnm8@cclk",
+      "paymentPurpose": "UPI/628429421301/UPI/ulteghlnm8@cclk/HDFC BANK LTD",
+      "credit": 11500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-30T00:00:00",
+      "counterpartyName": "riedlhk91@sauoc",
+      "paymentPurpose": "UPI/193997663251/UPI/riedlhk91@sauoc/Syndicate Bank/",
+      "debit": 470,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-30T00:00:00",
+      "counterpartyName": "051764837226:Int.Pd:29-06-2019 to 29-09-2019",
+      "paymentPurpose": "051764837226:Int.Pd:29-06-2019 to 29-09-2019",
+      "credit": 2439,
+      "currency": "INR",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2019-09-30T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/157365274324/UPI/DUMMY NAME/HDFC BANK LTD",
+      "debit": 18000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-30T00:00:00",
+      "counterpartyName": "prasadkayala.92",
+      "paymentPurpose": "UPI/217765777646/For Emo service/prasadkayala.92/HDFC BANK LTD",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-09-30T00:00:00",
+      "counterpartyName": "dmkgiundrc14isc",
+      "paymentPurpose": "UPI/787231681416/UPI/dmkgiundrc14isc/Andhra Bank",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-30T00:00:00",
+      "counterpartyName": "dmkgiundrc14isc",
+      "paymentPurpose": "UPI/548992818731/UPI/dmkgiundrc14isc/Andhra Bank",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-09-30T00:00:00",
+      "counterpartyName": "bpsgisrgbbubr50",
+      "paymentPurpose": "UPI/641998898106/UPI/bpsgisrgbbubr50/Andhra Bank",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-01T00:00:00",
+      "counterpartyName": "tkloriccb.puabu",
+      "paymentPurpose": "UPI/653652380908/UPI/tkloriccb.puabu/Axis Bank Ltd.",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-03T00:00:00",
+      "counterpartyName": "ibnhkberllbgli@",
+      "paymentPurpose": "UPI/553106344796/Lpci/ibnhkberllbgli@/INDUSIND BANK",
+      "credit": 25000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-03T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/433819910084/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 8950,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-03T00:00:00",
+      "counterpartyName": "gouthnag@oksbi",
+      "paymentPurpose": "UPI/316149792689/CRV REPAIR/gouthnag@oksbi/State Bank Of I",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-04T00:00:00",
+      "counterpartyName": "asrmrenr3131@pn",
+      "paymentPurpose": "UPI/380330082571/UPI/asrmrenr3131@pn/Andhra Bank",
+      "debit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-04T00:00:00",
+      "counterpartyName": "atullupbosebuns",
+      "paymentPurpose": "UPI/902525443896/UPI/atullupbosebuns/HDFC BANK LTD",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-04T00:00:00",
+      "counterpartyName": "atullupbosebuns",
+      "paymentPurpose": "UPI/228970369212/UPI/atullupbosebuns/HDFC BANK LTD",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-04T00:00:00",
+      "counterpartyName": "LIFE STYLE",
+      "paymentPurpose": "VPS/LIFE STYLE /086327345894/060696552510/HYDERABAD",
+      "debit": 12482.55,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-10-05T00:00:00",
+      "counterpartyName": "elnktplhgbnunal",
+      "paymentPurpose": "UPI/789969802077/UPI/elnktplhgbnunal/Axis Bank Ltd.",
+      "credit": 2280,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-05T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/675096306551/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 3500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-05T00:00:00",
+      "counterpartyName": "gdencmeogks@mhh",
+      "paymentPurpose": "UPI/548134603524/Body cover/gdencmeogks@mhh/ICICIBank/",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-05T00:00:00",
+      "counterpartyName": "sbleriucal3902@",
+      "paymentPurpose": "UPI/688877706439/Smessguk/sbleriucal3902@/HDF C BANK LTD",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-07T00:00:00",
+      "counterpartyName": "nikthulu.787744",
+      "paymentPurpose": "UPI/063599322676/UPI/nikthulu.787744/Andhra Bank",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-07T00:00:00",
+      "counterpartyName": "kulhc2956@mdbod",
+      "paymentPurpose": "UPI/334111569216/UPI/kulhc2956@mdbod/Kotak Mahindra/",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-08T00:00:00",
+      "counterpartyName": "KISHAN SERV",
+      "paymentPurpose": "VPS/KISHAN SERV/087772348060/473320505019/HYDERABAD",
+      "debit": 2400,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-10-10T00:00:00",
+      "counterpartyName": "bobdgsb.lpbu@lt",
+      "paymentPurpose": "UPI/790117413264/Tnirmla/bobdgsb.lpbu@lt/ICIC I Bank",
+      "credit": 13000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-10T00:00:00",
+      "counterpartyName": "hhptetro10358@a",
+      "paymentPurpose": "UPI/552484118533/Her/hhptetro10358@a/Andhra Bank",
+      "debit": 2383,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-10T00:00:00",
+      "counterpartyName": "atullupbosebuns",
+      "paymentPurpose": "UPI/612330325153/Emo/atullupbosebuns/HDFC BANK LTD",
+      "debit": 5500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-14T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/336440608606/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 20540,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-14T00:00:00",
+      "counterpartyName": "dmkgiundrc14isc",
+      "paymentPurpose": "UPI/213263161556/UPI/dmkgiundrc14isc/Andhra Bank",
+      "debit": 6100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-15T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/535397406436/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 2750,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-15T00:00:00",
+      "counterpartyName": "VISA REF KISHAN SERVICE STATION",
+      "paymentPurpose": "VISA REF KISHAN SERVICE STATION",
+      "credit": 18,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-10-16T00:00:00",
+      "counterpartyName": "mssrbdbtc@popco",
+      "paymentPurpose": "UPI/000341415284/UPI/mssrbdbtc@popco/Axis Bank Ltd.",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-16T00:00:00",
+      "counterpartyName": "inmbictdubugdg4",
+      "paymentPurpose": "UPI/947866929978/UPI/inmbictdubugdg4/State Bank Of I/",
+      "debit": 8400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-17T00:00:00",
+      "counterpartyName": "mhahh.ehmoahnur",
+      "paymentPurpose": "UPI/343843312178/UPI/mhahh.ehmoahnur/State Bank Of I/",
+      "debit": 400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-17T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/295522011641/Lkle/DUMMY NAME/HDFC BANK LTD",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-17T00:00:00",
+      "counterpartyName": "hbshlokmshahg05",
+      "paymentPurpose": "UPI/535918627515/UPI/hbshlokmshahg05/Andhra Bank",
+      "debit": 100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-17T00:00:00",
+      "counterpartyName": "cpdku.minssm57@",
+      "paymentPurpose": "UPI/540198118132/UPI/cpdku.minssm57@/Axis Bank Ltd.",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-18T00:00:00",
+      "counterpartyName": "mmnbpbpcgtsdogg",
+      "paymentPurpose": "UPI/784748755154/UPI/mmnbpbpcgtsdogg/Andhra Bank",
+      "debit": 1163,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-18T00:00:00",
+      "counterpartyName": "prathmesh.pisal",
+      "paymentPurpose": "UPI/140068140153/For workshop ch/prathmesh.pisal/HDFC BANK LTD",
+      "credit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-19T00:00:00",
+      "counterpartyName": "ologme.opc@gdrs",
+      "paymentPurpose": "UPI/537700451194/BHEGCSA/ologme.opc@gdrs/ID FC FIRST Bank/",
+      "debit": 5500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-19T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/733233196924/U Apgbo/DUMMY NAME/HDFC BANK LTD",
+      "debit": 16000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-21T00:00:00",
+      "counterpartyName": "nikthulu.787744",
+      "paymentPurpose": "UPI/617411513696/UPI/nikthulu.787744/Andhra Bank",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-21T00:00:00",
+      "counterpartyName": "IPS/WONDERLA HO/278408612614/849455814975/HYDERABAD",
+      "paymentPurpose": "IPS/WONDERLA HO/278408612614/849455814975/HYDERABAD",
+      "debit": 7774.8,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-10-22T00:00:00",
+      "counterpartyName": "nikthulu.787744",
+      "paymentPurpose": "UPI/328641660784/Ok/nikthulu.787744/Andhra Bank",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-24T00:00:00",
+      "counterpartyName": "abkltniitbndnha",
+      "paymentPurpose": "UPI/865841521450/Kmhbn/abkltniitbndnha/HDFC BANK LTD/",
+      "debit": 2125,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-25T00:00:00",
+      "counterpartyName": "roekmt@mpgntd",
+      "paymentPurpose": "UPI/331769006492/l39/roekmt@mpgntd/Axis Bank Ltd.",
+      "credit": 5875,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-25T00:00:00",
+      "counterpartyName": "ALMOND HOUS",
+      "paymentPurpose": "VPS/ALMOND HOUS/238256692208/463123323896/HYDERABAD",
+      "debit": 13600,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-10-28T00:00:00",
+      "counterpartyName": "daeoek015431@nd",
+      "paymentPurpose": "UPI/437099495985/Ooobusi/daeoek015431@nd/Laks hmi Vilas B",
+      "credit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-28T00:00:00",
+      "counterpartyName": "rbh215@rlaomrom",
+      "paymentPurpose": "UPI/829219139812/UPI/rbh215@rlaomrom/Bank of Baroda",
+      "credit": 15100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-28T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/160034647159/Lpci/DUMMY NAME/HDFC BANK LTD",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-28T00:00:00",
+      "counterpartyName": "ALMOND HOUS",
+      "paymentPurpose": "VPS/ALMOND HOUS/186705550480/573472605863/HYDERABAD",
+      "debit": 6120,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-10-28T00:00:00",
+      "counterpartyName": "IPS/KAMUN /345486399969/197387007627/Market Yd",
+      "paymentPurpose": "IPS/KAMUN /345486399969/197387007627/Market Yd",
+      "debit": 6350,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-10-28T00:00:00",
+      "counterpartyName": "ntbsnbteni46958",
+      "paymentPurpose": "UPI/864191384542/UPI/ntbsnbteni46958/Kotak Mahindra/",
+      "debit": 2040,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-10-28T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/420952465968/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 18,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-28T00:00:00",
+      "counterpartyName": "IPS/RAM SURESH /374801660939/661030559670/HYDERABAD",
+      "paymentPurpose": "IPS/RAM SURESH /374801660939/661030559670/HYDERABAD",
+      "debit": 13000,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-10-30T00:00:00",
+      "counterpartyName": "sumasureshchava",
+      "paymentPurpose": "UPI/639841063042/Dih repair/sumasureshchava/HDFC BANK LTD",
+      "credit": 4400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-10-30T00:00:00",
+      "counterpartyName": "oauuk.csbuse.bp",
+      "paymentPurpose": "UPI/565033132012/UPI/oauuk.csbuse.bp/Kotak Mahindra/",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-01T00:00:00",
+      "counterpartyName": "tkorrcmushnakgd",
+      "paymentPurpose": "UPI/788652872259/UPI/tkorrcmushnakgd/Andhra Bank",
+      "debit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-01T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/568488303497/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 10330,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-01T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/946691187351/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 18,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-01T00:00:00",
+      "counterpartyName": "aiarncaocapku@i",
+      "paymentPurpose": "UPI/958531414127/Lpci A4 2627/aiarncaocapku@i/HDFC BANK LTD",
+      "credit": 14000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-02T00:00:00",
+      "counterpartyName": "nikthulu.787744",
+      "paymentPurpose": "UPI/597753575055/UPI/nikthulu.787744/Andhra Bank",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-02T00:00:00",
+      "counterpartyName": "AVENUE SUPE",
+      "paymentPurpose": "VPS/AVENUE SUPE/482027033474/147006104517/HYDERABAD",
+      "debit": 1941,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-11-04T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/346621207055/UPI/secccdtbcms@uel/State Bank Of I/",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-04T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/139508191083/UPI/secccdtbcms@uel/State Bank Of I/",
+      "debit": 9000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-04T00:00:00",
+      "counterpartyName": "sbleriucal3902@",
+      "paymentPurpose": "UPI/481764177630/Pshbk/sbleriucal3902@/HDFC BANK LTD",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-04T00:00:00",
+      "counterpartyName": "APBS/BLPGCM102096DT3010/2217606650",
+      "paymentPurpose": "APBS/BLPGCM102096DT3010/2217606650",
+      "credit": 110.33,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-05T00:00:00",
+      "counterpartyName": "aiarncaocapku@i",
+      "paymentPurpose": "UPI/244864996289/Superb TS09FD81/aiarncaocapku@i/HDFC BANK LTD",
+      "credit": 11450,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-06T00:00:00",
+      "counterpartyName": "m.sblsbhkmpiodm",
+      "paymentPurpose": "UPI/082140919416/UPI/m.sblsbhkmpiodm/HSBC",
+      "credit": 3200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-06T00:00:00",
+      "counterpartyName": "rachamadugugiri",
+      "paymentPurpose": "UPI/244476295963/Octavia repair/rachamadugugiri/ICICI Bank",
+      "credit": 4900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-06T00:00:00",
+      "counterpartyName": "RAINBOW",
+      "paymentPurpose": "VPS/RAINBOW /137683457791/067141183023/HYDERABAD",
+      "debit": 1903,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-11-06T00:00:00",
+      "counterpartyName": "BAR ONE",
+      "paymentPurpose": "VPS/BAR ONE /503349902515/582014328447/HYDERABAD",
+      "debit": 2907,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-11-07T00:00:00",
+      "counterpartyName": "IIN/PAYTM /629714183731/168835382503/",
+      "paymentPurpose": "IIN/PAYTM /629714183731/168835382503/",
+      "debit": 7965,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-07T00:00:00",
+      "counterpartyName": "tkorrcmushnakgd",
+      "paymentPurpose": "UPI/807722329803/UPI/tkorrcmushnakgd/Andhra Bank",
+      "credit": 2080,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-07T00:00:00",
+      "counterpartyName": "ucmnbdgo46- 5@ha",
+      "paymentPurpose": "UPI/825294723995/Activa/ucmnbdgo46- 5@ha/Kotak Mahindra/",
+      "debit": 2900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-08T00:00:00",
+      "counterpartyName": "sbleriucal3902@",
+      "paymentPurpose": "UPI/521333420289/Lpci L9/sbleriucal3902@/HDFC BANK LTD",
+      "credit": 12500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-08T00:00:00",
+      "counterpartyName": "lraeoico73@gbse",
+      "paymentPurpose": "UPI/855223684989/Lpci/lraeoico73@gbse/Kotak Mahindra/",
+      "debit": 24500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-08T00:00:00",
+      "counterpartyName": "IPS/D MART /449163864122/332578142393/HYDERABAD",
+      "paymentPurpose": "IPS/D MART /449163864122/332578142393/HYDERABAD",
+      "debit": 3560.07,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-11-11T00:00:00",
+      "counterpartyName": "sivakumar.t86@o",
+      "paymentPurpose": "UPI/319667312155/Dih ahlerl amou/sivakumar.t86@o/HDFC BANK LTD",
+      "credit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-11T00:00:00",
+      "counterpartyName": "lngpaagedellrc@",
+      "paymentPurpose": "UPI/056912403215/UPI/lngpaagedellrc@/Indian Overseas",
+      "credit": 300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-11T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/051721778696/Emo/DUMMY NAME/HDFC BANK LTD",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-11T00:00:00",
+      "counterpartyName": "hhptetro10358@a",
+      "paymentPurpose": "UPI/657835781639/Her/hhptetro10358@a/Andhra Bank",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-11T00:00:00",
+      "counterpartyName": "orotmlm.otbsatt",
+      "paymentPurpose": "UPI/727462064231/Door lock s/orotmlm.otbsatt/AxisBank Ltd./",
+      "debit": 9000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-11T00:00:00",
+      "counterpartyName": "ghckghhmumh3289",
+      "paymentPurpose": "UPI/868276490177/UPI/ghckghhmumh3289/HDFC BANK LTD",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-11T00:00:00",
+      "counterpartyName": "atullupbosebuns",
+      "paymentPurpose": "UPI/991037170932/A ocilp/atullupbosebuns/HDFC BANK LTD/",
+      "debit": 5800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-12T00:00:00",
+      "counterpartyName": "APBS/BLPGCM107024DT0811/2069913161",
+      "paymentPurpose": "APBS/BLPGCM107024DT0811/2069913161",
+      "credit": 178.71,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-12T00:00:00",
+      "counterpartyName": "phhodl3183@snge",
+      "paymentPurpose": "UPI/462791202861/UPI/phhodl3183@snge/HDFC BANK LTD",
+      "debit": 168,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-12T00:00:00",
+      "counterpartyName": "aiarncaocapku@i",
+      "paymentPurpose": "UPI/810883225059/AP09CT2341 A6 p/aiarncaocapku@i/HDFC BANK LTD",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-13T00:00:00",
+      "counterpartyName": "nikthulu.787744",
+      "paymentPurpose": "UPI/884269208858/Nslcagg/nikthulu.787744/Andhr a Bank",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-13T00:00:00",
+      "counterpartyName": "ukltchl4334@dtc",
+      "paymentPurpose": "UPI/822122846708/Hdcps/ukltchl4334@dtc/Axis Bank Ltd./",
+      "debit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-14T00:00:00",
+      "counterpartyName": "CLG/SRIKANTH REDDY/000200/CHB/11.11.2019",
+      "paymentPurpose": "CLG/SRIKANTH REDDY/000200/CHB/11.11.2019",
+      "credit": 67600,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-14T00:00:00",
+      "counterpartyName": "CLG/GANESH ENTR/000757/CHB/08.11.2019",
+      "paymentPurpose": "CLG/GANESH ENTR/000757/CHB/08.11.2019",
+      "credit": 49700,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-15T00:00:00",
+      "counterpartyName": "roekmt@mpgntd",
+      "paymentPurpose": "UPI/568260768821/Cltrlm/roekmt@mpgntd/Axis Bank Ltd.",
+      "credit": 4600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-16T00:00:00",
+      "counterpartyName": "gouthnag@oksbi",
+      "paymentPurpose": "UPI/134766201489/CRV ENGINE REPA/gouthnag@oksbi/State Bank Of I",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-16T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/504596735072/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-18T00:00:00",
+      "counterpartyName": "AEHSS CCCU",
+      "paymentPurpose": "MMT/IMPS/516998945789/AEHSS CCCU/AXIS BANK LTD",
+      "credit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-18T00:00:00",
+      "counterpartyName": "gesgertt42@gbsm",
+      "paymentPurpose": "UPI/820879537635/G ramarao flat/gesgertt42@gbsm/Andhra Bank/",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-18T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/128899687459/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 6600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-18T00:00:00",
+      "counterpartyName": "BIL/INFT/003700083610/Dih ahlerl/ VUPPUNUTULA HAR",
+      "paymentPurpose": "BIL/INFT/003700083610/Dih ahlerl/ VUPPUNUTULA HAR",
+      "credit": 16000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-18T00:00:00",
+      "counterpartyName": "aclomgulanhk@mg",
+      "paymentPurpose": "UPI/589436125625/UPI/aclomgulanhk@mg/IDBI Bank Limit/",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-18T00:00:00",
+      "counterpartyName": "ibmghruk41@hdpi",
+      "paymentPurpose": "UPI/250127353134/S rcctb/ibmghruk41@hdpi/State Bank Of I/",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-18T00:00:00",
+      "counterpartyName": "lppmarem74-7@cp",
+      "paymentPurpose": "UPI/268870754543/UPI/lppmarem74-7@cp/State Bank Of I/",
+      "debit": 153,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-18T00:00:00",
+      "counterpartyName": "gesgertt42@gbsm",
+      "paymentPurpose": "UPI/875133895133/G ramaram flat/gesgertt42@gbsm/Andhra Bank/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-18T00:00:00",
+      "counterpartyName": "INF/INFT/635455552863/SHRI KANDULA OB/CRVrepair",
+      "paymentPurpose": "INF/INFT/635455552863/SHRI KANDULA OB/CRVrepair",
+      "credit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-19T00:00:00",
+      "counterpartyName": "rbsnhpstmusb184",
+      "paymentPurpose": "UPI/163331458800/UPI/rbsnhpstmusb184/Karur Vysya Ban/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-19T00:00:00",
+      "counterpartyName": "INF/INFT/226060629087/SHRI KANDULA OB/Pltrepair",
+      "paymentPurpose": "INF/INFT/226060629087/SHRI KANDULA OB/Pltrepair",
+      "credit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-19T00:00:00",
+      "counterpartyName": "b4719181920@oks",
+      "paymentPurpose": "UPI/918962608043/UPI/b4719181920@oks/State Bank Of I",
+      "credit": 13800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-19T00:00:00",
+      "counterpartyName": "rpairkgopmm667@",
+      "paymentPurpose": "UPI/222115539040/UPI/rpairkgopmm667@/ICICI Bank",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-19T00:00:00",
+      "counterpartyName": "rpairkgopmm667@",
+      "paymentPurpose": "UPI/085940603532/UPI/rpairkgopmm667@/ICICI Bank",
+      "debit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-19T00:00:00",
+      "counterpartyName": "kduhhnehd@ppscp",
+      "paymentPurpose": "UPI/848056450238/Mtohkes/kduhhnehd@ppscp/ICICI Bank",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-19T00:00:00",
+      "counterpartyName": "kulhc2956@mdbod",
+      "paymentPurpose": "UPI/405030381290/UPI/kulhc2956@mdbod/Kotak Mahindra",
+      "credit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-20T00:00:00",
+      "counterpartyName": "inmbictdubugdg4",
+      "paymentPurpose": "UPI/386909839311/Clutch kit/inmbictdubugdg4/StateBank Of I/",
+      "debit": 6382,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-20T00:00:00",
+      "counterpartyName": "INF/INFT/598715370051/SHRI KANDULA OB",
+      "paymentPurpose": "INF/INFT/598715370051/SHRI KANDULA OB",
+      "credit": 10000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-20T00:00:00",
+      "counterpartyName": "cklp7140@utonbb",
+      "paymentPurpose": "UPI/529834481335/Lpci/cklp7140@utonbb/Axis Bank Ltd./",
+      "debit": 25000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-21T00:00:00",
+      "counterpartyName": "mssrbdbtc@popco",
+      "paymentPurpose": "UPI/310213294115/UPI/mssrbdbtc@popco/Axis Bank Ltd./",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-21T00:00:00",
+      "counterpartyName": "bembktbhuca77@t",
+      "paymentPurpose": "UPI/609768187492/Plt/bembktbhuca77@t/IDBI Bank Limit/ VPS/KUN",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-21T00:00:00",
+      "counterpartyName": "EXCLUSI/129453100559/254350613433/HYDERABA D",
+      "paymentPurpose": "EXCLUSI/129453100559/254350613433/HYDERABA D",
+      "debit": 21884,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-22T00:00:00",
+      "counterpartyName": "gesgertt42@gbsm",
+      "paymentPurpose": "UPI/073275217039/UPI/gesgertt42@gbsm/Andhra Bank",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-22T00:00:00",
+      "counterpartyName": "bembktbhuca77@t",
+      "paymentPurpose": "UPI/568904148625/Plt/bembktbhuca77@t/IDBI Bank Limit/",
+      "debit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-22T00:00:00",
+      "counterpartyName": "ctoipeddbndp991",
+      "paymentPurpose": "UPI/242879983613/UPI/ctoipeddbndp991/Allahabad Bank/",
+      "debit": 162,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-25T00:00:00",
+      "counterpartyName": "kgoiea.tbcp@apo",
+      "paymentPurpose": "UPI/871229394252/UPI/kgoiea.tbcp@apo/Axis Bank Ltd.",
+      "credit": 50000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-25T00:00:00",
+      "counterpartyName": "sumasureshchava",
+      "paymentPurpose": "UPI/718598654119/Dih repair/sumasureshchava/HDFC BANK LTD",
+      "credit": 11150,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-25T00:00:00",
+      "counterpartyName": "CLG/MD MUJAHED ALI/HDF",
+      "paymentPurpose": "CLG/MD MUJAHED ALI/HDF",
+      "debit": 40000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-25T00:00:00",
+      "counterpartyName": "etscgebpu-8@hle",
+      "paymentPurpose": "UPI/566027424057/UPI/etscgebpu-8@hle/State Bank Of I",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-25T00:00:00",
+      "counterpartyName": "etscgebpu-8@hle",
+      "paymentPurpose": "UPI/983906583239/UPI/etscgebpu-8@hle/State Bank Of I",
+      "credit": 19000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-26T00:00:00",
+      "counterpartyName": "hcinauhcennr41@",
+      "paymentPurpose": "UPI/571671948086/UPI/hcinauhcennr41@/State Bank Of I/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-26T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/312546415367/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 8,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-26T00:00:00",
+      "counterpartyName": "INF/INFT/065830646146/CRVrepair /SHRI KANDULA",
+      "paymentPurpose": "INF/INFT/065830646146/CRVrepair /SHRI KANDULA",
+      "credit": 13000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-26T00:00:00",
+      "counterpartyName": "atullupbosebuns",
+      "paymentPurpose": "UPI/267868498923/UPI/atullupbosebuns/HDFC BANK LTD",
+      "debit": 11000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-26T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/769271425027/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 10,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-27T00:00:00",
+      "counterpartyName": "monksanand@okhd",
+      "paymentPurpose": "UPI/135299267809/Dih service/monksanand@okhd/HDFCBANK LTD NEFT-ON91505132155409-M/S GANESH",
+      "credit": 7400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-27T00:00:00",
+      "counterpartyName": "ENTERPRISES-/ACC/ CHQ NO 000759 SUPPLIER PAYMEN-76703210888-SCBL00",
+      "paymentPurpose": "ENTERPRISES-/ACC/ CHQ NO 000759 SUPPLIER PAYMEN-76703210888-SCBL00",
+      "credit": 25000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-27T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/353026364183/Q7/DUMMY NAME/HDFC BANK LTD",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-27T00:00:00",
+      "counterpartyName": "riedlhk91@sauoc",
+      "paymentPurpose": "UPI/477401370377/UPI/riedlhk91@sauoc/Syndicate Bank/",
+      "debit": 6800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-27T00:00:00",
+      "counterpartyName": "mo1028679@dsomi",
+      "paymentPurpose": "UPI/510383640596/UPI/mo1028679@dsomi/State Bank Of I/",
+      "debit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-27T00:00:00",
+      "counterpartyName": "elnktplhgbnunal",
+      "paymentPurpose": "UPI/770012718124/UPI/elnktplhgbnunal/Axis Bank Ltd./",
+      "debit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-29T00:00:00",
+      "counterpartyName": "4170070332@ybl",
+      "paymentPurpose": "UPI/413082909433/Hetment from Ph/4170070332@ybl/HDFC BANK LTD",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-29T00:00:00",
+      "counterpartyName": "INSTAKART",
+      "paymentPurpose": "VPS/INSTAKART /461818214738/397895796474/HYDERABAD",
+      "debit": 26490,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-11-29T00:00:00",
+      "counterpartyName": "raboiesmhkepr09",
+      "paymentPurpose": "UPI/937924491178/UPI/raboiesmhkepr09/ICICI Bank",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-30T00:00:00",
+      "counterpartyName": "3720415706@ybl",
+      "paymentPurpose": "UPI/526083164031/Hetment from Ph/3720415706@ybl/HDFC BANK LTD",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-30T00:00:00",
+      "counterpartyName": "INF/INFT/887466570728/HondaPltrepair /SHRI KANDULA",
+      "paymentPurpose": "INF/INFT/887466570728/HondaPltrepair /SHRI KANDULA",
+      "credit": 12000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-11-30T00:00:00",
+      "counterpartyName": "carmnbgurrusthp",
+      "paymentPurpose": "UPI/760984783536/UPI/carmnbgurrusthp/INDUSIND BANK",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-30T00:00:00",
+      "counterpartyName": "mloosntcmbtsdtk",
+      "paymentPurpose": "UPI/417779276777/Gmigm/mloosntcmbtsdtk/HDFC BANK LTD/",
+      "debit": 5300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-30T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/064003445143/Turad/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 13720,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-11-30T00:00:00",
+      "counterpartyName": "ntcrccapuugobmd",
+      "paymentPurpose": "UPI/992549326596/UPI/ntcrccapuugobmd/Axis Bank Ltd.",
+      "credit": 1700,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-11-30T00:00:00",
+      "counterpartyName": "aiarncaocapku@i",
+      "paymentPurpose": "UPI/207730487382/6669 Q5 bill ba/aiarncaocapku@i/HDFC BANK LTD",
+      "credit": 2700,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-03T00:00:00",
+      "counterpartyName": "ilpialmnhgrln53",
+      "paymentPurpose": "UPI/668661996288/UPI/ilpialmnhgrln53/Punjab National/",
+      "debit": 155,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-03T00:00:00",
+      "counterpartyName": "INF/INFT/933058650278/HondaCRV /SHRI KANDULA",
+      "paymentPurpose": "INF/INFT/933058650278/HondaCRV /SHRI KANDULA",
+      "credit": 10000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-12-04T00:00:00",
+      "counterpartyName": "TRFR TO: SURYA MOTORS",
+      "paymentPurpose": "TRFR TO: SURYA MOTORS",
+      "debit": 100000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-12-04T00:00:00",
+      "counterpartyName": "otaksnogdlsgsrl",
+      "paymentPurpose": "UPI/047823798009/Nntkao/otaksnogdlsgsrl/HDFC BANKLTD",
+      "credit": 6500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-04T00:00:00",
+      "counterpartyName": "SINRN MABE",
+      "paymentPurpose": "MMT/IMPS/826921518561/SINRN MABE/AXIS BANK LTD",
+      "credit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-04T00:00:00",
+      "counterpartyName": "mklulsoire@klph",
+      "paymentPurpose": "UPI/285655158237/UPI/mklulsoire@klph/Axis Bank Ltd.",
+      "credit": 6430,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-05T00:00:00",
+      "counterpartyName": "sbtaeeucdlmekrg",
+      "paymentPurpose": "UPI/924438093769/UPI/sbtaeeucdlmekrg/State Bank Of I/",
+      "debit": 1050,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-05T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/060377511167/Berpd/secccdtbcms@uel/State BankOf I/",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-05T00:00:00",
+      "counterpartyName": "Smessguk",
+      "paymentPurpose": "MMT/IMPS/201671509124/Smessguk/ARUN RAMA /HDFC BANK LTD",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-05T00:00:00",
+      "counterpartyName": "udpne.upth@rimb",
+      "paymentPurpose": "UPI/522820163789/UPI/udpne.upth@rimb/Canara Bank",
+      "debit": 110,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-06T00:00:00",
+      "counterpartyName": "ntkbkrahuoalbhn",
+      "paymentPurpose": "UPI/601931988519/Dih Uhcucc/ntkbkrahuoalbhn/Axis Bank Ltd.",
+      "credit": 13200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-06T00:00:00",
+      "counterpartyName": "dmkgiundrc14isc",
+      "paymentPurpose": "UPI/598057810248/Mnh/dmkgiundrc14isc/Andhra Bank",
+      "debit": 900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-06T00:00:00",
+      "counterpartyName": "lraeoico73@gbse",
+      "paymentPurpose": "UPI/476403170683/C class audi ke/lraeoico73@gbse/Kotak Mahindra/",
+      "debit": 13500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-06T00:00:00",
+      "counterpartyName": "orotmlm.otbsatt",
+      "paymentPurpose": "UPI/239334023300/UPI/orotmlm.otbsatt/Axis Bank Ltd.",
+      "credit": 520,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-07T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/751397647089/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 14490,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-07T00:00:00",
+      "counterpartyName": "ntcrccapuugobmd",
+      "paymentPurpose": "UPI/555940712855/UPI/ntcrccapuugobmd/Andhra Bank",
+      "credit": 6600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-09T00:00:00",
+      "counterpartyName": "hhptetro10358@a",
+      "paymentPurpose": "UPI/362322823072/Her/hhptetro10358@a/Andhra Bank",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-09T00:00:00",
+      "counterpartyName": "nmkraahprosehub",
+      "paymentPurpose": "UPI/443838934537/City MOTORS/nmkraahprosehub/State Bank Of I/",
+      "debit": 13450,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-09T00:00:00",
+      "counterpartyName": "3720415706@ybl",
+      "paymentPurpose": "UPI/645225830502/Hetment from Ph/3720415706@ybl/Axis Bank Ltd.",
+      "credit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-10T00:00:00",
+      "counterpartyName": "mhahh.ehmoahnur",
+      "paymentPurpose": "UPI/386769552320/UPI/mhahh.ehmoahnur/State Bank Of I/",
+      "debit": 1210,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-10T00:00:00",
+      "counterpartyName": "CLG/CAR SPOC/ANB",
+      "paymentPurpose": "CLG/CAR SPOC/ANB",
+      "debit": 25919,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-12-10T00:00:00",
+      "counterpartyName": "mo1028679@dsomi",
+      "paymentPurpose": "UPI/892678148047/BHEGCSA/mo1028679@dsomi/S tate Bank Of I/",
+      "debit": 5500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-11T00:00:00",
+      "counterpartyName": "rggg-gkbnnls@ua",
+      "paymentPurpose": "UPI/078774898835/UPI/rggg-gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 17,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-11T00:00:00",
+      "counterpartyName": "sbleriucal3902@",
+      "paymentPurpose": "UPI/332386300265/Kolios payment/sbleriucal3902@/HDFC BANK LTD",
+      "credit": 12000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-11T00:00:00",
+      "counterpartyName": "nmeohsulc285@pr",
+      "paymentPurpose": "UPI/914759720960/UPI/nmeohsulc285@pr/ICICI Bank",
+      "debit": 1785,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-12T00:00:00",
+      "counterpartyName": "BIL/INFT/168118121048/Tnirmla/ KOSURI DILIP VA",
+      "paymentPurpose": "BIL/INFT/168118121048/Tnirmla/ KOSURI DILIP VA",
+      "credit": 22000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-13T00:00:00",
+      "counterpartyName": "isaihnpnb4095@s",
+      "paymentPurpose": "UPI/902266073920/UPI/isaihnpnb4095@s/HDFC BANK LTD",
+      "debit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-13T00:00:00",
+      "counterpartyName": "dtprspm.4500210",
+      "paymentPurpose": "UPI/272688328575/UPI/dtprspm.4500210/Andhra Bank",
+      "debit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "iapdogu170@omls",
+      "paymentPurpose": "UPI/740244138670/UPI/iapdogu170@omls/HDFC BANK LTD",
+      "debit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/359213946598/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 4518,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/025270913280/UPI/DUMMY NAME/Hettm Hetments",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/535582379509/UPI/DUMMY NAME/Hettm Hetments",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/137724490653/UPI/DUMMY NAME/Hettm Hetments",
+      "debit": 14000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "DUMMY NAME",
+      "paymentPurpose": "UPI/313350918144/UPI/DUMMY NAME/Hettm Hetments",
+      "debit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "nsnreddy2020@ok",
+      "paymentPurpose": "UPI/278944355246/Test Innova rep/nsnreddy2020@ok/HDFC BANK LTD",
+      "credit": 100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "nsnreddy2020@ok",
+      "paymentPurpose": "UPI/459047101760/Innova 8051/nsnreddy2020@ok/HDFCBANK LTD",
+      "credit": 14570,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "elnktplhgbnunal",
+      "paymentPurpose": "UPI/122383950792/Ins addition/elnktplhgbnunal/Axis Bank Ltd.",
+      "credit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "isaihnpnb4095@s",
+      "paymentPurpose": "UPI/902977363114/UPI/isaihnpnb4095@s/HDFC BANK LTD",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "LIFE STYLE",
+      "paymentPurpose": "VPS/LIFE STYLE /150075187750/301711441475/HYDERABAD",
+      "debit": 1950.75,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "riedlhk91@sauoc",
+      "paymentPurpose": "UPI/093731311055/UPI/riedlhk91@sauoc/Syndicate Bank/",
+      "debit": 1800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-16T00:00:00",
+      "counterpartyName": "ESOK NBTEI",
+      "paymentPurpose": "MMT/IMPS/954792203881/ESOK NBTEI/AXIS BANK LTD",
+      "credit": 80000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-17T00:00:00",
+      "counterpartyName": "CAM/63071HRY/CASH DEP/17-12-19",
+      "paymentPurpose": "CAM/63071HRY/CASH DEP/17-12-19",
+      "credit": 14000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-12-17T00:00:00",
+      "counterpartyName": "CAM/63071HRY/CASH DEP/17-12-19",
+      "paymentPurpose": "CAM/63071HRY/CASH DEP/17-12-19",
+      "credit": 6000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-12-18T00:00:00",
+      "counterpartyName": "enmeechnuukisb3",
+      "paymentPurpose": "UPI/319882212645/UPI/enmeechnuukisb3/State Bank Of I",
+      "credit": 17000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-18T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/428847034046/Maebomlic/phgmdboprbaos@l/HDFC BANK LTD",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-18T00:00:00",
+      "counterpartyName": "kulhc2956@mdbod",
+      "paymentPurpose": "UPI/793263922614/UPI/kulhc2956@mdbod/Kotak Mahindra",
+      "credit": 840,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-20T00:00:00",
+      "counterpartyName": "NEFT-P60759377142199-KORVI ACTIVATED EART-- 9182226415695-CNRB0000513",
+      "paymentPurpose": "NEFT-P60759377142199-KORVI ACTIVATED EART-- 9182226415695-CNRB0000513",
+      "credit": 19875,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-20T00:00:00",
+      "counterpartyName": "kulhc2956@mdbod",
+      "paymentPurpose": "UPI/867268710794/UPI/kulhc2956@mdbod/Kotak Mahindra/",
+      "debit": 440,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-21T00:00:00",
+      "counterpartyName": "Emo koabopd",
+      "paymentPurpose": "MMT/IMPS/041189182105/Emo koabopd/THIRD EYE /AXISBANK LTD",
+      "credit": 19200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-23T00:00:00",
+      "counterpartyName": "APBS/BLPGCM128210DT1912/5603386518",
+      "paymentPurpose": "APBS/BLPGCM128210DT1912/5603386518",
+      "credit": 188.52,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-12-23T00:00:00",
+      "counterpartyName": "bharatpe0989793",
+      "paymentPurpose": "UPI/052910075330/SHANROHI TECHNO/bharatpe0989793/Yes Bank Ltd/",
+      "debit": 12575,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-23T00:00:00",
+      "counterpartyName": "mssrbdbtc@popco",
+      "paymentPurpose": "UPI/270896146670/UPI/mssrbdbtc@popco/Axis Bank Ltd./",
+      "debit": 16350,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-23T00:00:00",
+      "counterpartyName": "prasadkayala.92",
+      "paymentPurpose": "UPI/313584761673/For BMW service/prasadkayala.92/HDFC BANK LTD",
+      "credit": 17000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-23T00:00:00",
+      "counterpartyName": "mssrbdbtc@popco",
+      "paymentPurpose": "UPI/511895350313/UPI/mssrbdbtc@popco/Axis Bank Ltd./",
+      "debit": 3850,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-23T00:00:00",
+      "counterpartyName": "NEFT-N356130131660610-KOTIM REDDY SAHITYA REDDY-NEFT-30827174714657-HDFC0000001",
+      "paymentPurpose": "NEFT-N356130131660610-KOTIM REDDY SAHITYA REDDY-NEFT-30827174714657-HDFC0000001",
+      "credit": 37900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-24T00:00:00",
+      "counterpartyName": "enmeechnuukisb3",
+      "paymentPurpose": "UPI/550800930161/Jaanu car/enmeechnuukisb3/State Bank Of I",
+      "credit": 30000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-24T00:00:00",
+      "counterpartyName": "utpkksbaurrsgk5",
+      "paymentPurpose": "UPI/217764281455/UPI/utpkksbaurrsgk5/State Bank Of I/",
+      "debit": 2200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-24T00:00:00",
+      "counterpartyName": "gouthnag@oksbi",
+      "paymentPurpose": "UPI/473441834616/CRV REPAIR/gouthnag@oksbi/State Bank Of I",
+      "credit": 12000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-24T00:00:00",
+      "counterpartyName": "INF/INFT/517347993976/CRVREPAIR /SHRI KANDULA",
+      "paymentPurpose": "INF/INFT/517347993976/CRVREPAIR /SHRI KANDULA",
+      "credit": 17000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2019-12-26T00:00:00",
+      "counterpartyName": "vsbabu1015@okic",
+      "paymentPurpose": "UPI/520444194829/Rakesh ftcc/vsbabu1015@okic/ICICI Bank",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-26T00:00:00",
+      "counterpartyName": "mumghm2534@sibh",
+      "paymentPurpose": "UPI/220291970527/Idmronoh/mumghm2534@sibh/HD FC BANK LTD",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-30T00:00:00",
+      "counterpartyName": "ksedlkdguu30-1@",
+      "paymentPurpose": "UPI/007638450513/UPI/ksedlkdguu30-1@/Axis Bank Ltd.",
+      "credit": 4260,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-30T00:00:00",
+      "counterpartyName": "ulteghlnm8@cclk",
+      "paymentPurpose": "UPI/419715028407/UPI/ulteghlnm8@cclk/HDFC BANK LTD",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-12-30T00:00:00",
+      "counterpartyName": "CHAUDHARY C",
+      "paymentPurpose": "VPS/CHAUDHARY C/307781103572/701528387293/HYDERABAD",
+      "debit": 1500,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-12-30T00:00:00",
+      "counterpartyName": "LIFE STYLE",
+      "paymentPurpose": "VPS/LIFE STYLE /530913338891/419241559066/HYDERABAD",
+      "debit": 349.3,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-12-30T00:00:00",
+      "counterpartyName": "kulhc2956@mdbod",
+      "paymentPurpose": "UPI/479758241552/UPI/kulhc2956@mdbod/Kotak Mahindra",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-30T00:00:00",
+      "counterpartyName": "mloosntcmbtsdtk",
+      "paymentPurpose": "UPI/096811087315/UPI/mloosntcmbtsdtk/HDFC BANK LTD",
+      "credit": 1500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-12-31T00:00:00",
+      "counterpartyName": "051764837226:Int.Pd:30-09-2019 to 30-12-2019",
+      "paymentPurpose": "051764837226:Int.Pd:30-09-2019 to 30-12-2019",
+      "credit": 2231,
+      "currency": "INR",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2020-01-01T00:00:00",
+      "counterpartyName": "huzefa20935@oka",
+      "paymentPurpose": "UPI/876157999030/BMW X3/huzefa20935@oka/Axis BankLtd.",
+      "credit": 32000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-01T00:00:00",
+      "counterpartyName": "CLG/V S T TITANIUM MOTORS PRI/HDF",
+      "paymentPurpose": "CLG/V S T TITANIUM MOTORS PRI/HDF",
+      "debit": 40157,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-01-02T00:00:00",
+      "counterpartyName": "otaksnogdlsgsrl",
+      "paymentPurpose": "UPI/856085933504/UPI/otaksnogdlsgsrl/HDFC BANK LTD",
+      "credit": 520,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-03T00:00:00",
+      "counterpartyName": "APBS/BLPGCM134119DT0101/2124346182",
+      "paymentPurpose": "APBS/BLPGCM134119DT0101/2124346182",
+      "credit": 188.52,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-01-03T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/338031202419/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 10700,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-04T00:00:00",
+      "counterpartyName": "chgrtpecges@erd",
+      "paymentPurpose": "UPI/590789340176/UPI/chgrtpecges@erd/State Bank Of I/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-04T00:00:00",
+      "counterpartyName": "iibpgiaphhtlnps",
+      "paymentPurpose": "UPI/670459828628/UPI/iibpgiaphhtlnps/State Bank Of I/",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-06T00:00:00",
+      "counterpartyName": "klrggoou7743@se",
+      "paymentPurpose": "UPI/726701332643/UPI/klrggoou7743@se/HDFC BANK LTD",
+      "debit": 4447,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-06T00:00:00",
+      "counterpartyName": "LIFE STYLE",
+      "paymentPurpose": "VPS/LIFE STYLE /292127825402/534841254336/HYDERABAD",
+      "debit": 5422.2,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-01-06T00:00:00",
+      "counterpartyName": "TRFR TO: ROTEX PETROCHEM PRIVATE LIMITED",
+      "paymentPurpose": "TRFR TO: ROTEX PETROCHEM PRIVATE LIMITED",
+      "debit": 40536,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-01-07T00:00:00",
+      "counterpartyName": "aiarncaocapku@i",
+      "paymentPurpose": "UPI/544776577104/UPI/aiarncaocapku@i/HDFC BANK LTD",
+      "credit": 26910,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-07T00:00:00",
+      "counterpartyName": "ksedlkdguu30-1@",
+      "paymentPurpose": "UPI/887397779053/UPI/ksedlkdguu30-1@/Axis Bank Ltd.",
+      "credit": 17000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-07T00:00:00",
+      "counterpartyName": "DMART Shana",
+      "paymentPurpose": "VPS/DMART Shana/473400046645/737227080642/HYDERABAD",
+      "debit": 6437.63,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-01-08T00:00:00",
+      "counterpartyName": "hhptetro10358@a",
+      "paymentPurpose": "UPI/985637218114/Her/hhptetro10358@a/Andhra Bank",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-08T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/118990997470/B15/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 23100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-08T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/151783448090/Nkuoh/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 11900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-08T00:00:00",
+      "counterpartyName": "snmsg.nbunaho@n",
+      "paymentPurpose": "UPI/034785549571/UPI/snmsg.nbunaho@n/State Bank Of I",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-09T00:00:00",
+      "counterpartyName": "pthdsoemt@pmkko",
+      "paymentPurpose": "UPI/347325966079/UPI/pthdsoemt@pmkko/Hettm Hetments/",
+      "debit": 1500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-09T00:00:00",
+      "counterpartyName": "bobdgsb.lpbu@lt",
+      "paymentPurpose": "UPI/772559790329/Ahphrndd/bobdgsb.lpbu@lt/ICI CI Bank",
+      "credit": 12350,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-09T00:00:00",
+      "counterpartyName": "cklp7140@utonbb",
+      "paymentPurpose": "UPI/657780105884/UPI/cklp7140@utonbb/Axis Bank Ltd./",
+      "debit": 100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-09T00:00:00",
+      "counterpartyName": "cklp7140@utonbb",
+      "paymentPurpose": "UPI/082148876190/UPI/cklp7140@utonbb/Axis Bank Ltd./",
+      "debit": 19900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-10T00:00:00",
+      "counterpartyName": "mklulsoire@klph",
+      "paymentPurpose": "UPI/402642778950/UPI/mklulsoire@klph/Axis Bank Ltd.",
+      "credit": 17500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-10T00:00:00",
+      "counterpartyName": "nikthulu.787744",
+      "paymentPurpose": "UPI/749432143668/UPI/nikthulu.787744/Andhra Bank",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-10T00:00:00",
+      "counterpartyName": "DMART CASH BACK OFFER 2020",
+      "paymentPurpose": "DMART CASH BACK OFFER 2020",
+      "credit": 321.88,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-01-10T00:00:00",
+      "counterpartyName": "sgklukdtbbkrci@",
+      "paymentPurpose": "UPI/850370801362/UPI/sgklukdtbbkrci@/State Bank Of I/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-10T00:00:00",
+      "counterpartyName": "shreeshailkubas",
+      "paymentPurpose": "UPI/497532575762/For BMW X1/shreeshailkubas/HDFC BANK LTD",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-13T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/947120221259/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 11391,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-13T00:00:00",
+      "counterpartyName": "sbleriucal3902@",
+      "paymentPurpose": "UPI/692805942773/Uhcucc/sbleriucal3902@/HDFC BANKLTD",
+      "credit": 14000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-13T00:00:00",
+      "counterpartyName": "snmsg.nbunaho@n",
+      "paymentPurpose": "UPI/252355567892/UPI/snmsg.nbunaho@n/State Bank Of I",
+      "credit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-13T00:00:00",
+      "counterpartyName": "nakoucgn2253@el",
+      "paymentPurpose": "UPI/196171563174/Gktka/nakoucgn2253@el/Standar d Charte/",
+      "debit": 15600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-13T00:00:00",
+      "counterpartyName": "prpkgrdemd9513@",
+      "paymentPurpose": "UPI/834026336056/UPI/prpkgrdemd9513@/ICICI Bank",
+      "debit": 5126,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-13T00:00:00",
+      "counterpartyName": "thadns.ldahmemo",
+      "paymentPurpose": "UPI/965007796931/UPI/thadns.ldahmemo/HDFC BANK LTD",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-14T00:00:00",
+      "counterpartyName": "CLG/MAHASU AUTOMOTIVE SOLUTIO/HDF",
+      "paymentPurpose": "CLG/MAHASU AUTOMOTIVE SOLUTIO/HDF",
+      "debit": 88000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-01-14T00:00:00",
+      "counterpartyName": "Dih Uhcucc",
+      "paymentPurpose": "MMT/IMPS/020212653049/Dih Uhcucc/PASSWORD T/HDFC BANK LTD",
+      "credit": 6400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-14T00:00:00",
+      "counterpartyName": "aiarncaocapku@i",
+      "paymentPurpose": "UPI/937346523649/5885 balance bi/aiarncaocapku@i/HDFC BANK LTD",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-17T00:00:00",
+      "counterpartyName": "aiarncaocapku@i",
+      "paymentPurpose": "UPI/447067049814/Q5 5885/aiarncaocapku@i/HDFC BANK LTD",
+      "credit": 5500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-17T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/544491467192/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-18T00:00:00",
+      "counterpartyName": "350ismos748@reh",
+      "paymentPurpose": "UPI/094348454416/UPI/350ismos748@reh/HDFC BANK LTD",
+      "credit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-18T00:00:00",
+      "counterpartyName": "TRFR TO: SURYA MOTORS",
+      "paymentPurpose": "TRFR TO: SURYA MOTORS",
+      "debit": 70000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-01-18T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/880394002165/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 33160,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-18T00:00:00",
+      "counterpartyName": "thpem4267@kebns",
+      "paymentPurpose": "UPI/885246787458/UPI/thpem4267@kebns/State Bank Of I",
+      "credit": 3200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-20T00:00:00",
+      "counterpartyName": "kalyanchakravar",
+      "paymentPurpose": "UPI/075034322614/i10 Dih Uhcucc/kalyanchakravar/HDFC BANK LTD",
+      "credit": 13000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-21T00:00:00",
+      "counterpartyName": "otaksnogdlsgsrl",
+      "paymentPurpose": "UPI/958677602833/UPI/otaksnogdlsgsrl/HDFC BANK LTD",
+      "credit": 6300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-23T00:00:00",
+      "counterpartyName": "ucmnbdgo46-5@ha",
+      "paymentPurpose": "UPI/209728066893/UPI/ucmnbdgo46-5@ha/Kotak Mahindra/",
+      "debit": 900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-23T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/259215320377/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 2402,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-23T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/452179577303/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 8500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-24T00:00:00",
+      "counterpartyName": "NEFT-AXMB630103158690-M/S THE KVS GROUP-- 240612786590646-UTIB0001628",
+      "paymentPurpose": "NEFT-AXMB630103158690-M/S THE KVS GROUP-- 240612786590646-UTIB0001628",
+      "credit": 50000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-27T00:00:00",
+      "counterpartyName": "ulteghlnm8@cclk",
+      "paymentPurpose": "UPI/427618950736/UPI/ulteghlnm8@cclk/HDFC BANK LTD",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-27T00:00:00",
+      "counterpartyName": "gdr.minerals@ok",
+      "paymentPurpose": "UPI/683449825223/Dih Uhcucc/gdr.minerals@ok/StateBank Of I",
+      "credit": 9500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-27T00:00:00",
+      "counterpartyName": "amkigbeo2144@ol",
+      "paymentPurpose": "UPI/109439997116/UPI/amkigbeo2144@ol/State Bank Of I/",
+      "debit": 1400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-27T00:00:00",
+      "counterpartyName": "uaepeuclahbk0@a",
+      "paymentPurpose": "UPI/446615615600/UPI/uaepeuclahbk0@a/State Bank Of I",
+      "credit": 30000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-27T00:00:00",
+      "counterpartyName": "acotc1923@ndesd",
+      "paymentPurpose": "UPI/816648514038/UPI/acotc1923@ndesd/Kotak Mahindra/",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-27T00:00:00",
+      "counterpartyName": "APPLE TREND",
+      "paymentPurpose": "VPS/APPLE TREND/128198531485/390618209602/HYDERABAD",
+      "debit": 1800,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-01-27T00:00:00",
+      "counterpartyName": "RELIANCE",
+      "paymentPurpose": "VPS/RELIANCE /761055430991/776982706328/HYDERABAD NEFT-N105720374314355-MAHASU AUTOMOTIVE",
+      "debit": 1103,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-01-27T00:00:00",
+      "counterpartyName": "SOLUTIONSPVT LTD-SHOCK ABSORBER REV- 84506980473696-HDFC000",
+      "paymentPurpose": "SOLUTIONSPVT LTD-SHOCK ABSORBER REV- 84506980473696-HDFC000",
+      "credit": 42000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-01-27T00:00:00",
+      "counterpartyName": "sk.bndotk.hciur",
+      "paymentPurpose": "UPI/302461312062/B15 car Uhcucc/sk.bndotk.hciur/HDFC BANK LTD",
+      "credit": 54000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-28T00:00:00",
+      "counterpartyName": "sbleriucal3902@",
+      "paymentPurpose": "UPI/289779011926/Gtob rck/sbleriucal3902@/HDFC BANK LTD",
+      "credit": 30000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-01-28T00:00:00",
+      "counterpartyName": "MSW AAVEE C",
+      "paymentPurpose": "VPS/MSW AAVEE C/056242866552/911022237096/Hyderabad",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-01-28T00:00:00",
+      "counterpartyName": "rpairkgopmm667@",
+      "paymentPurpose": "UPI/597216349184/B15/rpairkgopmm667@/ICICI Bank",
+      "debit": 28000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-29T00:00:00",
+      "counterpartyName": "acotc1923@ndesd",
+      "paymentPurpose": "UPI/142872714612/UPI/acotc1923@ndesd/Kotak Mahindra/",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-30T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/419329479678/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 30000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-30T00:00:00",
+      "counterpartyName": "smrec0249806-2@",
+      "paymentPurpose": "UPI/346211456327/UPI/smrec0249806-2@/State Bank Of I/",
+      "debit": 183,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-30T00:00:00",
+      "counterpartyName": "mo1028679@dsomi",
+      "paymentPurpose": "UPI/643862252161/UPI/mo1028679@dsomi/State Bank Of I/",
+      "debit": 6500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-01-31T00:00:00",
+      "counterpartyName": "dmkgiundrc14isc",
+      "paymentPurpose": "UPI/778343169737/UPI/dmkgiundrc14isc/Andhra Bank",
+      "debit": 42000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-01T00:00:00",
+      "counterpartyName": "acotc1923@ndesd",
+      "paymentPurpose": "UPI/410950534102/UPI/acotc1923@ndesd/Kotak Mahindra/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-01T00:00:00",
+      "counterpartyName": "2535557914@ybl",
+      "paymentPurpose": "UPI/826477778821/Hetment from Ph/2535557914@ybl/HDFC BANK LTD",
+      "credit": 5800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/458838587252/UPI/secccdtbcms@uel/State Bank Of I",
+      "credit": 30000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/673751547750/UPI/secccdtbcms@uel/State Bank Of I",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/075194716761/UPI/secccdtbcms@uel/State Bank Of I",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/258235632609/UPI/secccdtbcms@uel/State Bank Of I",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/083021229554/UPI/secccdtbcms@uel/State Bank Of I",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/694040318953/UPI/secccdtbcms@uel/State Bank Of I",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/121416904313/UPI/secccdtbcms@uel/State Bank Of I",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "secccdtbcms@uel",
+      "paymentPurpose": "UPI/024163202198/UPI/secccdtbcms@uel/State Bank Of I",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "nauelpigcccgh@e",
+      "paymentPurpose": "UPI/184860722686/UPI/nauelpigcccgh@e/Axis Bank Ltd./",
+      "debit": 14400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "dmkgiundrc14isc",
+      "paymentPurpose": "UPI/868505624574/Het/dmkgiundrc14isc/Andhra Bank",
+      "credit": 36000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-05T00:00:00",
+      "counterpartyName": "acanaopsnobrcbg",
+      "paymentPurpose": "UPI/795828107543/UPI/acanaopsnobrcbg/State Bank Of I/",
+      "debit": 5600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-05T00:00:00",
+      "counterpartyName": "oiitacbtos35800",
+      "paymentPurpose": "UPI/546947573122/UPI/oiitacbtos35800/Andhra Pradesh/",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-06T00:00:00",
+      "counterpartyName": "NEFT-AXMB827928264897-REVELLY RAMAKRISHNA--869512057895396-UTIB0001134",
+      "paymentPurpose": "NEFT-AXMB827928264897-REVELLY RAMAKRISHNA--869512057895396-UTIB0001134",
+      "credit": 45000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-06T00:00:00",
+      "counterpartyName": "ggsranlobnsc@gk",
+      "paymentPurpose": "UPI/484602859513/UPI/ggsranlobnsc@gk/State Bank Of I",
+      "credit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-06T00:00:00",
+      "counterpartyName": "tna7285@aapsimp",
+      "paymentPurpose": "UPI/055920166827/Kmhbnpmg/tna7285@aapsimp/ICICI Bank",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-10T00:00:00",
+      "counterpartyName": "atdiledu5dn-5@l",
+      "paymentPurpose": "UPI/291016900390/UPI/atdiledu5dn-5@l/State Bank Of I/",
+      "debit": 7500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-10T00:00:00",
+      "counterpartyName": "tshoroa.dbhs@rt",
+      "paymentPurpose": "UPI/376817355126/Dih/tshoroa.dbhs@rt/ICICI Bank",
+      "credit": 3700,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-10T00:00:00",
+      "counterpartyName": "acotc1923@ndesd",
+      "paymentPurpose": "UPI/527233429490/UPI/acotc1923@ndesd/Kotak Mahindra",
+      "credit": 5500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-10T00:00:00",
+      "counterpartyName": "rggg- gkbnnls@ua",
+      "paymentPurpose": "UPI/846242441030/Rewarded for pa/rggg- gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 7,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-10T00:00:00",
+      "counterpartyName": "ATM/SPCNL154/CASH WDL/08-02-20",
+      "paymentPurpose": "ATM/SPCNL154/CASH WDL/08-02-20",
+      "debit": 12000,
+      "currency": "INR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-10T00:00:00",
+      "counterpartyName": "bobdgsb.lpbu@lt",
+      "paymentPurpose": "UPI/326250093731/Pclmttt/bobdgsb.lpbu@lt/ICIC I Bank",
+      "credit": 14000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-10T00:00:00",
+      "counterpartyName": "rpairkgopmm667@",
+      "paymentPurpose": "UPI/446000692830/B15/rpairkgopmm667@/ICICI Bank",
+      "debit": 9000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-10T00:00:00",
+      "counterpartyName": "mssrbdbtc@popco",
+      "paymentPurpose": "UPI/329140590370/UPI/mssrbdbtc@popco/Axis Bank Ltd./",
+      "debit": 25600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-10T00:00:00",
+      "counterpartyName": "nsnreddy2020@ok",
+      "paymentPurpose": "UPI/723612248371/Innova timing b/nsnreddy2020@ok/HDFC BANK LTD",
+      "credit": 7900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-10T00:00:00",
+      "counterpartyName": "naren9682@okaxi",
+      "paymentPurpose": "UPI/052951017849/Xcent 8200/naren9682@okaxi/Axis Bank Ltd.",
+      "credit": 7550,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-12T00:00:00",
+      "counterpartyName": "nsnreddy2020@ok",
+      "paymentPurpose": "UPI/644620829118/EmoTnirmla/nsnreddy2020@ok /HDFC BANK LTD",
+      "credit": 30000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-12T00:00:00",
+      "counterpartyName": "noorbhai0734@ok",
+      "paymentPurpose": "UPI/157438559144/Q3 Amount/noorbhai0734@ok/HDFC BANK LTD",
+      "credit": 28000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-12T00:00:00",
+      "counterpartyName": "sgklukdtbbkrci@",
+      "paymentPurpose": "UPI/155938374127/UPI/sgklukdtbbkrci@/ICICI Bank",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-13T00:00:00",
+      "counterpartyName": "2535557914@ybl",
+      "paymentPurpose": "UPI/400652559588/Hetment from Ph/2535557914@ybl/Axis Bank Ltd.",
+      "credit": 19000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-13T00:00:00",
+      "counterpartyName": "drlsc.atbdlplth",
+      "paymentPurpose": "UPI/985914384305/UPI/drlsc.atbdlplth/ICICI Bank",
+      "credit": 9800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-13T00:00:00",
+      "counterpartyName": "ulteghlnm8@cclk",
+      "paymentPurpose": "UPI/250699597011/UPI/ulteghlnm8@cclk/HDFC BANK LTD",
+      "debit": 2500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-13T00:00:00",
+      "counterpartyName": "dbunotdaplliido",
+      "paymentPurpose": "UPI/258892789581/UPI/dbunotdaplliido/Oriental Bank o/",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-13T00:00:00",
+      "counterpartyName": "atdiledu5dn-5@l",
+      "paymentPurpose": "UPI/030363062147/UPI/atdiledu5dn-5@l/State Bank Of I/",
+      "debit": 7500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-15T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/920489264535/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 50000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-17T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/387836435453/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 17970,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-17T00:00:00",
+      "counterpartyName": "rggg- gkbnnls@ua",
+      "paymentPurpose": "UPI/166809346635/Rewarded for pa/rggg- gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 74,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-18T00:00:00",
+      "counterpartyName": "vbh2010@okicici",
+      "paymentPurpose": "UPI/504201168443/Raja cruze/vbh2010@okicici/ICICIBank",
+      "credit": 4500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-19T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/400411300712/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 12196,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-19T00:00:00",
+      "counterpartyName": "rggg- gkbnnls@ua",
+      "paymentPurpose": "UPI/179511907370/Rewarded for pa/rggg- gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 11,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-19T00:00:00",
+      "counterpartyName": "daipdotbttkpcod",
+      "paymentPurpose": "UPI/862820414301/UPI/daipdotbttkpcod/HDFC BANK LTD",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-19T00:00:00",
+      "counterpartyName": "noeitstl77@ckcr",
+      "paymentPurpose": "UPI/198703475399/UPI/noeitstl77@ckcr/ICICI Bank",
+      "credit": 380,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-20T00:00:00",
+      "counterpartyName": "TRFR TO: GAUTAM AUTOARENA CARS PRIVATE LIMITED",
+      "paymentPurpose": "TRFR TO: GAUTAM AUTOARENA CARS PRIVATE LIMITED",
+      "debit": 375000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-02-20T00:00:00",
+      "counterpartyName": "daipdotbttkpcod",
+      "paymentPurpose": "UPI/808409611957/UPI/daipdotbttkpcod/HDFC BANK LTD",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-20T00:00:00",
+      "counterpartyName": "rggg- gkbnnls@ua",
+      "paymentPurpose": "UPI/668213520688/Rewarded for pa/rggg- gkbnnls@ua/Axis Bank Ltd.",
+      "credit": 75,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-20T00:00:00",
+      "counterpartyName": "daipdotbttkpcod",
+      "paymentPurpose": "UPI/003686092289/UPI/daipdotbttkpcod/HDFC BANK LTD",
+      "credit": 3500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-20T00:00:00",
+      "counterpartyName": "irbkhhkash2631@",
+      "paymentPurpose": "UPI/694965241487/UPI/irbkhhkash2631@/State Bank Of I",
+      "credit": 4300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-21T00:00:00",
+      "counterpartyName": "reddihpt4494@do",
+      "paymentPurpose": "UPI/076635859314/UPI/reddihpt4494@do/South IndianBa",
+      "credit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-24T00:00:00",
+      "counterpartyName": "9856467528@okbi",
+      "paymentPurpose": "UPI/268108764220/UPI/9856467528@okbi/Axis Bank Ltd./",
+      "debit": 189,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-24T00:00:00",
+      "counterpartyName": "atullupbosebuns",
+      "paymentPurpose": "UPI/003752634158/UPI/atullupbosebuns/HDFC BANK LTD",
+      "debit": 2500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-24T00:00:00",
+      "counterpartyName": "mo1028679@dsomi",
+      "paymentPurpose": "UPI/279559822986/UPI/mo1028679@dsomi/State Bank Of I/",
+      "debit": 4450,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-25T00:00:00",
+      "counterpartyName": "hhpmisesal164@e",
+      "paymentPurpose": "UPI/065579450344/UPI/hhpmisesal164@e/Federal Bank",
+      "debit": 1750,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-26T00:00:00",
+      "counterpartyName": "spnr.ipglsenlr@",
+      "paymentPurpose": "UPI/563155541245/UPI/spnr.ipglsenlr@/ICICI Bank",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-27T00:00:00",
+      "counterpartyName": "tshoroa.dbhs@rt",
+      "paymentPurpose": "UPI/471651591149/Dih/tshoroa.dbhs@rt/ICICI Bank",
+      "credit": 6999,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-27T00:00:00",
+      "counterpartyName": "atshs087432@lnd",
+      "paymentPurpose": "UPI/247840220704/Pb 00/atshs087432@lnd/State BankOf I/",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-28T00:00:00",
+      "counterpartyName": "TRFR FROM: GAUTAM AUTOARENA CARS PRIVATE LIMITED",
+      "paymentPurpose": "TRFR FROM: GAUTAM AUTOARENA CARS PRIVATE LIMITED",
+      "credit": 30000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-02-29T00:00:00",
+      "counterpartyName": "kulhc2956@mdbod",
+      "paymentPurpose": "UPI/558666089680/UPI/kulhc2956@mdbod/Kotak Mahindra",
+      "credit": 9000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-29T00:00:00",
+      "counterpartyName": "bahadur4u1987@o",
+      "paymentPurpose": "UPI/097654168050/Saher Ali varna/bahadur4u1987@o/State Bank Of I",
+      "credit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-29T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/902231523106/Phone pay amoun/phgmdboprbaos@l/HDFC BANK LTD",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-02T00:00:00",
+      "counterpartyName": "iplnrgtdddilcp2",
+      "paymentPurpose": "UPI/530047817840/UPI/iplnrgtdddilcp2/DBS Bank India",
+      "credit": 4650,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-02T00:00:00",
+      "counterpartyName": "ttagttc59009@gn",
+      "paymentPurpose": "UPI/509865940486/UPI/ttagttc59009@gn/Central BankOf",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-02T00:00:00",
+      "counterpartyName": "ttagttc59009@gn",
+      "paymentPurpose": "UPI/199294553622/UPI/ttagttc59009@gn/Central BankOf",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-02T00:00:00",
+      "counterpartyName": "ttagttc59009@gn",
+      "paymentPurpose": "UPI/063478392926/UPI/ttagttc59009@gn/Central BankOf",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-02T00:00:00",
+      "counterpartyName": "arpgduiic7489@a",
+      "paymentPurpose": "UPI/915664002332/UPI/arpgduiic7489@a/City Union Bank/",
+      "debit": 1800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-02T00:00:00",
+      "counterpartyName": "suugapahkd@bhhp",
+      "paymentPurpose": "UPI/040918905698/UPI/suugapahkd@bhhp/HDFC BANK LTD",
+      "debit": 3360,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-04T00:00:00",
+      "counterpartyName": "AVENUE SUPE",
+      "paymentPurpose": "VPS/AVENUE SUPE/812663770924/561057749273/HYDERABAD",
+      "debit": 2164,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-03-04T00:00:00",
+      "counterpartyName": "satyas.apse- 1@o",
+      "paymentPurpose": "UPI/345485752830/Dih/satyas.apse- 1@o/Corporation Ban",
+      "credit": 4800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-05T00:00:00",
+      "counterpartyName": "rpairkgopmm667@",
+      "paymentPurpose": "UPI/846608477806/Gimsn/rpairkgopmm667@/ICICI Bank",
+      "debit": 28000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-05T00:00:00",
+      "counterpartyName": "APBS/BLPGCM164996DT2902/2901614780 NEFT-SBIN331003577117-INDO QATAR PROJECTS",
+      "paymentPurpose": "APBS/BLPGCM164996DT2902/2901614780 NEFT-SBIN331003577117-INDO QATAR PROJECTS",
+      "credit": 341.95,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-03-05T00:00:00",
+      "counterpartyName": "PVT LTD-/ATTN//INB-54424470675866631- SBIN0012655",
+      "paymentPurpose": "PVT LTD-/ATTN//INB-54424470675866631- SBIN0012655",
+      "credit": 45000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-03-05T00:00:00",
+      "counterpartyName": "ppegpbhpidhaioa",
+      "paymentPurpose": "UPI/355869423389/UPI/ppegpbhpidhaioa/Kotak Mahindra/",
+      "debit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-05T00:00:00",
+      "counterpartyName": "ucbpatt@gmassea",
+      "paymentPurpose": "UPI/058959767308/UPI/ucbpatt@gmassea/Yes Bank Ltd",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-05T00:00:00",
+      "counterpartyName": "ucbpatt@gmassea",
+      "paymentPurpose": "UPI/042708365812/UPI/ucbpatt@gmassea/Yes Bank Ltd",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-05T00:00:00",
+      "counterpartyName": "ucbpatt@gmassea",
+      "paymentPurpose": "UPI/221918384504/UPI/ucbpatt@gmassea/Yes Bank Ltd",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-07T00:00:00",
+      "counterpartyName": "cdcsaroicm4258@",
+      "paymentPurpose": "UPI/247241683458/Dhp/cdcsaroicm4258@/Andhra Bank",
+      "credit": 19500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-09T00:00:00",
+      "counterpartyName": "roekmt@mpgntd",
+      "paymentPurpose": "UPI/033633923087/l39 2001/roekmt@mpgntd/Axis BankLtd.",
+      "credit": 7000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-09T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/727394546117/UPI/kdtubuss@kutnr/State Bank OfI/",
+      "debit": 26390,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-09T00:00:00",
+      "counterpartyName": "spteopcmhidpeko",
+      "paymentPurpose": "UPI/845586273623/UPI/spteopcmhidpeko/Indian Bank",
+      "debit": 2500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-09T00:00:00",
+      "counterpartyName": "CLG/GEEREDDY/000494/HDF/05.03.2020 NEFT-744724699446-SVKR INFRA DEVELOPERS-",
+      "paymentPurpose": "CLG/GEEREDDY/000494/HDF/05.03.2020 NEFT-744724699446-SVKR INFRA DEVELOPERS-",
+      "credit": 31040,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-03-10T00:00:00",
+      "counterpartyName": "VOLVO SERVICING-103846992104417- CORP0002066",
+      "paymentPurpose": "VOLVO SERVICING-103846992104417- CORP0002066",
+      "credit": 28430,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-03-10T00:00:00",
+      "counterpartyName": "sagiraju81audi@",
+      "paymentPurpose": "UPI/670121519235/Drive shaft bal/sagiraju81audi@/HDFC BANK LTD",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-10T00:00:00",
+      "counterpartyName": "dpblkr.scpdan@t",
+      "paymentPurpose": "UPI/017440332799/UPI/dpblkr.scpdan@t/State Bank Of I",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-10T00:00:00",
+      "counterpartyName": "dpblkr.scpdan@t",
+      "paymentPurpose": "UPI/132048422936/UPI/dpblkr.scpdan@t/State Bank Of I",
+      "credit": 29000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-10T00:00:00",
+      "counterpartyName": "CAM/04382SRY/CASH DEP/10-03-20",
+      "paymentPurpose": "CAM/04382SRY/CASH DEP/10-03-20",
+      "credit": 33500,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-03-10T00:00:00",
+      "counterpartyName": "CAM/04382SRY/CASH DEP/10-03-20",
+      "paymentPurpose": "CAM/04382SRY/CASH DEP/10-03-20",
+      "credit": 500,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-03-11T00:00:00",
+      "counterpartyName": "rnrbislrrula@nk",
+      "paymentPurpose": "UPI/511539513333/UPI/rnrbislrrula@nk/ICICI Bank",
+      "debit": 18164,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-11T00:00:00",
+      "counterpartyName": "tecakcpidkhrm09",
+      "paymentPurpose": "UPI/220728252993/hi/tecakcpidkhrm09/State Bank OfI",
+      "credit": 1300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-12T00:00:00",
+      "counterpartyName": "sk.bndotk.hciur",
+      "paymentPurpose": "UPI/033544847874/UPI/sk.bndotk.hciur/HDFC BANK LTD",
+      "credit": 28150,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-12T00:00:00",
+      "counterpartyName": "hhptetro10358@a",
+      "paymentPurpose": "UPI/551275273194/Her/hhptetro10358@a/Andhra Bank",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-13T00:00:00",
+      "counterpartyName": "sakediettmggrk2",
+      "paymentPurpose": "UPI/534070810270/UPI/sakediettmggrk2/Airtel Hetments/",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-13T00:00:00",
+      "counterpartyName": "UTTARA ENTE",
+      "paymentPurpose": "VPS/UTTARA ENTE/741123858930/393583489922/HYDERABAD",
+      "debit": 2750,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-03-16T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/655731242576/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-16T00:00:00",
+      "counterpartyName": "cokdepdnbspclsk",
+      "paymentPurpose": "UPI/290360456285/PstbpgNnobr/cokdepdnbspclsk/Ax isBank Ltd./",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-16T00:00:00",
+      "counterpartyName": "uobpsddrrd66506",
+      "paymentPurpose": "UPI/866363688964/UPI/uobpsddrrd66506/Andhra Bank",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-16T00:00:00",
+      "counterpartyName": "sgklukdtbbkrci@",
+      "paymentPurpose": "UPI/685193731924/UPI/sgklukdtbbkrci@/ICICI Bank",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-16T00:00:00",
+      "counterpartyName": "hlohrphgprttlu5",
+      "paymentPurpose": "UPI/616370675676/UPI/hlohrphgprttlu5/State Bank Of I/",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-16T00:00:00",
+      "counterpartyName": "NEFT-SBIN986816975558-MUKKU SRINIVAS RAO- /ATTN//INB-30348350342307844-SBIN0004071",
+      "paymentPurpose": "NEFT-SBIN986816975558-MUKKU SRINIVAS RAO- /ATTN//INB-30348350342307844-SBIN0004071",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-16T00:00:00",
+      "counterpartyName": "NEFT-SBIN162941895801-MUKKU SHRINIVAS RAO -/ATTN//INB-67911153095062291-SBIN0004357",
+      "paymentPurpose": "NEFT-SBIN162941895801-MUKKU SHRINIVAS RAO -/ATTN//INB-67911153095062291-SBIN0004357",
+      "credit": 20000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-16T00:00:00",
+      "counterpartyName": "dsitlsgda@cabbs",
+      "paymentPurpose": "UPI/562852336809/UPI/dsitlsgda@cabbs/Kotak Mahindra/",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-16T00:00:00",
+      "counterpartyName": "pagadala@oki cic",
+      "paymentPurpose": "UPI/522413739185/FromPrasanthFor/pagadala@oki cic/ICICI Bank",
+      "credit": 1500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-16T00:00:00",
+      "counterpartyName": "kdtubuss@kutnr",
+      "paymentPurpose": "UPI/234277392204/Gktka/kdtubuss@kutnr/State Bank Of I/",
+      "debit": 16155,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-18T00:00:00",
+      "counterpartyName": "pmlels4911@gbdb",
+      "paymentPurpose": "UPI/860035748363/UPI/pmlels4911@gbdb/Karur Vysya Ban",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-18T00:00:00",
+      "counterpartyName": "amnbiac670@smas",
+      "paymentPurpose": "UPI/882139914935/Rubicp/amnbiac670@smas/Kotak Mahindra",
+      "credit": 25000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-03-19T00:00:00",
+      "counterpartyName": "sdhpcbmrbapp722",
+      "paymentPurpose": "UPI/229290439599/UPI/sdhpcbmrbapp722/Telangana State/ NEFT-AXISP10785744196-SKYONN",
+      "debit": 23800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-20T00:00:00",
+      "counterpartyName": "TECHNOLOGIES PRIVATELIMITE-RENT PAYMENT- 996931621300558-UTIB0000515",
+      "paymentPurpose": "TECHNOLOGIES PRIVATELIMITE-RENT PAYMENT- 996931621300558-UTIB0000515",
+      "credit": 2500,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2020-03-21T00:00:00",
+      "counterpartyName": "kmrhnnsmseer@sb",
+      "paymentPurpose": "UPI/434144689443/UPI/kmrhnnsmseer@sb/ICICI Bank",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-21T00:00:00",
+      "counterpartyName": "bshllomcp294@sp",
+      "paymentPurpose": "UPI/772454876367/UPI/bshllomcp294@sp/Syndica te Bank/",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-21T00:00:00",
+      "counterpartyName": "bakdc.rrnpuh@rn",
+      "paymentPurpose": "UPI/813545154087/UPI/bakdc.rrnpuh@rn/Axis Bank Ltd./",
+      "debit": 1990,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-27T00:00:00",
+      "counterpartyName": "METRO CASH",
+      "paymentPurpose": "VPS/METRO CASH /786328955402/823696743132/HYDERABAD",
+      "debit": 5464,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-03-30T00:00:00",
+      "counterpartyName": "051764837226:Int.Pd:31-12-2019 to 29-03-2020",
+      "paymentPurpose": "051764837226:Int.Pd:31-12-2019 to 29-03-2020",
+      "credit": 2228,
+      "currency": "INR",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2020-03-30T00:00:00",
+      "counterpartyName": "phgmdboprbaos@l",
+      "paymentPurpose": "UPI/325792505140/UPI/phgmdboprbaos@l/HDFC BANK LTD",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-03-31T00:00:00",
+      "counterpartyName": "EASY DAY",
+      "paymentPurpose": "VPS/EASY DAY /171596814124/041956613085/HYDERABAD",
+      "debit": 196,
+      "currency": "INR",
+      "paymentType": "card"
+    }
+  ]
+}

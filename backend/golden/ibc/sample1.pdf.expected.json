@@ -1,0 +1,1305 @@
+{
+  "metadata": {
+    "accountNumber": "0111010011",
+    "currency": "USD",
+    "dateFrom": "2021-10-29T00:00:00",
+    "dateTo": "2021-11-28T00:00:00",
+    "balanceStart": 5100.12,
+    "balanceEnd": -27.96
+  },
+  "transactions": [
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "DEPOSIT",
+      "paymentPurpose": "DEPOSIT",
+      "credit": 1439,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2021-11-19T00:00:00",
+      "counterpartyName": "DEPOSIT",
+      "paymentPurpose": "DEPOSIT",
+      "credit": 1000,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2021-11-23T00:00:00",
+      "counterpartyName": "DEPOSIT",
+      "paymentPurpose": "DEPOSIT",
+      "credit": 500,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "Check 1681",
+      "paymentPurpose": "CHECK 1681",
+      "debit": 75,
+      "currency": "ZAR",
+      "documentNumber": "1681"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "Check 1726",
+      "paymentPurpose": "CHECK 1726",
+      "debit": 50,
+      "currency": "ZAR",
+      "documentNumber": "1726"
+    },
+    {
+      "transactionDate": "2021-11-02T00:00:00",
+      "counterpartyName": "Check 1731",
+      "paymentPurpose": "CHECK 1731",
+      "debit": 50,
+      "currency": "ZAR",
+      "documentNumber": "1731"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "Check 1716",
+      "paymentPurpose": "CHECK 1716",
+      "debit": 11.7,
+      "currency": "ZAR",
+      "documentNumber": "1716"
+    },
+    {
+      "transactionDate": "2021-11-02T00:00:00",
+      "counterpartyName": "Check 1727",
+      "paymentPurpose": "CHECK 1727",
+      "debit": 50,
+      "currency": "ZAR",
+      "documentNumber": "1727"
+    },
+    {
+      "transactionDate": "2021-11-02T00:00:00",
+      "counterpartyName": "Check 1732",
+      "paymentPurpose": "CHECK 1732",
+      "debit": 290.49,
+      "currency": "ZAR",
+      "documentNumber": "1732"
+    },
+    {
+      "transactionDate": "2021-11-02T00:00:00",
+      "counterpartyName": "Check 1718",
+      "paymentPurpose": "CHECK 1718",
+      "debit": 69.39,
+      "currency": "ZAR",
+      "documentNumber": "1718"
+    },
+    {
+      "transactionDate": "2021-10-29T00:00:00",
+      "counterpartyName": "Check 1728",
+      "paymentPurpose": "CHECK 1728",
+      "debit": 50,
+      "currency": "ZAR",
+      "documentNumber": "1728"
+    },
+    {
+      "transactionDate": "2021-11-04T00:00:00",
+      "counterpartyName": "Check 1733",
+      "paymentPurpose": "CHECK 1733",
+      "debit": 212.34,
+      "currency": "ZAR",
+      "documentNumber": "1733"
+    },
+    {
+      "transactionDate": "2021-11-02T00:00:00",
+      "counterpartyName": "Check 1719",
+      "paymentPurpose": "CHECK 1719",
+      "debit": 50,
+      "currency": "ZAR",
+      "documentNumber": "1719"
+    },
+    {
+      "transactionDate": "2021-10-29T00:00:00",
+      "counterpartyName": "Check 1729",
+      "paymentPurpose": "CHECK 1729",
+      "debit": 50,
+      "currency": "ZAR",
+      "documentNumber": "1729"
+    },
+    {
+      "transactionDate": "2021-11-23T00:00:00",
+      "counterpartyName": "Check 1734",
+      "paymentPurpose": "CHECK 1734",
+      "debit": 208,
+      "currency": "ZAR",
+      "documentNumber": "1734"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "Check 1723",
+      "paymentPurpose": "CHECK 1723",
+      "debit": 42,
+      "currency": "ZAR",
+      "documentNumber": "1723"
+    },
+    {
+      "transactionDate": "2021-11-02T00:00:00",
+      "counterpartyName": "Check 1730",
+      "paymentPurpose": "CHECK 1730",
+      "debit": 50,
+      "currency": "ZAR",
+      "documentNumber": "1730"
+    },
+    {
+      "transactionDate": "2021-11-23T00:00:00",
+      "counterpartyName": "Check 1735",
+      "paymentPurpose": "CHECK 1735",
+      "debit": 369.57,
+      "currency": "ZAR",
+      "documentNumber": "1735"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "Check 1724",
+      "paymentPurpose": "CHECK 1724",
+      "debit": 20,
+      "currency": "ZAR",
+      "documentNumber": "1724"
+    },
+    {
+      "transactionDate": "2021-11-04T00:00:00",
+      "counterpartyName": "MEMBER-SENDER FndTrnsfr MEMBER-SENDER",
+      "paymentPurpose": "ACH Deposit MEMBER-SENDER FndTrnsfr MEMBER-SENDER",
+      "credit": 600,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-11-05T00:00:00",
+      "counterpartyName": "STATE PAYROLL CHECKING 135585",
+      "paymentPurpose": "ACH Deposit STATE PAYROLL CHECKING 135585",
+      "credit": 1092.55,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-11-09T00:00:00",
+      "counterpartyName": "CVS/PHARMACY #10 CLAREMORE",
+      "paymentPurpose": "Check Card Credit CVS/PHARMACY #10 CLAREMORE OK",
+      "credit": 100,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "UNUM LTD BEN UNUM LTD/STD BENEFIT 0110011100",
+      "paymentPurpose": "ACH Deposit UNUM LTD BEN UNUM LTD/STD BENEFIT 0110011100",
+      "credit": 569.12,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-11-19T00:00:00",
+      "counterpartyName": "STATE PAYROLL CHECKING 135585",
+      "paymentPurpose": "ACH Deposit STATE PAYROLL CHECKING 135585",
+      "credit": 2542.79,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "CVS/PHARMACY #10 CLAREMORE",
+      "paymentPurpose": "Check Card Credit CVS/PHARMACY #10 CLAREMORE OK",
+      "credit": 500,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "SP WASABI KNIVES HAMBURG",
+      "paymentPurpose": "Check Card Credit SP WASABI KNIVES HAMBURG",
+      "credit": 189,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-10-29T00:00:00",
+      "counterpartyName": "REASORS #4 1000 W WILL CLAREMORE",
+      "paymentPurpose": "Check Card Debit REASORS #4 1000 W WILL CLAREMORE OK",
+      "debit": 13.02,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-10-29T00:00:00",
+      "counterpartyName": "NTTA ONLINE 972 818 6882",
+      "paymentPurpose": "Check Card Debit NTTA ONLINE 972 818 6882 TX",
+      "debit": 16.74,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-10-29T00:00:00",
+      "counterpartyName": "ATWOOD CLAREMORE CLAREMORE",
+      "paymentPurpose": "Check Card Debit ATWOOD CLAREMORE CLAREMORE OK",
+      "debit": 65.59,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-10-29T00:00:00",
+      "counterpartyName": "FARMERS N W LIFE INS. PREM *****0474",
+      "paymentPurpose": "ACH Payment FARMERS N W LIFE INS. PREM *****0474",
+      "debit": 17.2,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-10-29T00:00:00",
+      "counterpartyName": "SNAP FINANCE PAYMENT P0110111000",
+      "paymentPurpose": "ACH Payment SNAP FINANCE PAYMENT P0110111000",
+      "debit": 44.03,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "Roku for Showtime Digit 816 2728107",
+      "paymentPurpose": "Check Card Debit Roku for Showtime Digit 816 2728107 DE",
+      "debit": 10.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "STILLWATER MILLING COMP CLAREMORE",
+      "paymentPurpose": "Check Card Debit STILLWATER MILLING COMP CLAREMORE OK",
+      "debit": 30.6,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "WAL-MART #0012 CLAREMORE",
+      "paymentPurpose": "Check Card Debit WAL-MART #0012 CLAREMORE OK",
+      "debit": 42.97,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "REASORS #4 1000 W WILL CLAREMORE",
+      "paymentPurpose": "Check Card Debit REASORS #4 1000 W WILL CLAREMORE OK",
+      "debit": 46.22,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "color moon",
+      "paymentPurpose": "Check Card Debit color moon UK",
+      "debit": 55.22,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "paymentPurpose": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "debit": 100,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "paymentPurpose": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "debit": 100,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "Fgn Db/ATM Trans Fee Foreign Debit/ATM Transaction Fee 11/01 655",
+      "paymentPurpose": "Fgn Db/ATM Trans Fee Foreign Debit/ATM Transaction Fee 11/01 655",
+      "debit": 1.66,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-11-02T00:00:00",
+      "counterpartyName": "10 BOX COST-PLUS CLAREMORE",
+      "paymentPurpose": "Check Card Debit 10 BOX COST-PLUS CLAREMORE OK",
+      "debit": 15.66,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-02T00:00:00",
+      "counterpartyName": "POP A LOCK TULSA",
+      "paymentPurpose": "Check Card Debit POP A LOCK TULSA OK",
+      "debit": 97,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-02T00:00:00",
+      "counterpartyName": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "paymentPurpose": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "debit": 500,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-11-02T00:00:00",
+      "counterpartyName": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "paymentPurpose": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "debit": 500,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-11-02T00:00:00",
+      "counterpartyName": "Aqua FBO Connexu CXS ACH CXS PC *****0800",
+      "paymentPurpose": "ACH Payment Aqua FBO Connexu CXS ACH CXS PC *****0800",
+      "debit": 224.23,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-03T00:00:00",
+      "counterpartyName": "Audible D140P69N3 Amzn com bill",
+      "paymentPurpose": "Check Card Debit Audible D140P69N3 Amzn com bill NJ",
+      "debit": 14.95,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-03T00:00:00",
+      "counterpartyName": "WAL-MART #0012 CLAREMORE",
+      "paymentPurpose": "Check Card Debit WAL-MART #0012 CLAREMORE OK",
+      "debit": 19.76,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-03T00:00:00",
+      "counterpartyName": "PETPLAN FETCH INC HTTPSWWW GOPE",
+      "paymentPurpose": "Check Card Debit PETPLAN FETCH INC HTTPSWWW GOPE PA",
+      "debit": 28.94,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-03T00:00:00",
+      "counterpartyName": "SWIFT MART CLAREMORE",
+      "paymentPurpose": "Check Card Debit SWIFT MART CLAREMORE OK",
+      "debit": 34.21,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-03T00:00:00",
+      "counterpartyName": "CMFG LIFE INS CO ADD PYMT XXXXXXXXX 0480084R0069875",
+      "paymentPurpose": "ACH Payment CMFG LIFE INS CO ADD PYMT XXXXXXXXX 0480084R0069875",
+      "debit": 26.5,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-04T00:00:00",
+      "counterpartyName": "Prime Video 2H0EC9CD3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video 2H0EC9CD3 888 802 3080 WA",
+      "debit": 0.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-04T00:00:00",
+      "counterpartyName": "Prime Video T04WJ70A3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video T04WJ70A3 888 802 3080 WA",
+      "debit": 9.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-04T00:00:00",
+      "counterpartyName": "ROYAL NEIGHBORS PREM DEBIT PREAUTHORIZED COL 1011001110010C",
+      "paymentPurpose": "ACH Payment ROYAL NEIGHBORS PREM DEBIT PREAUTHORIZED COL 1011001110010C",
+      "debit": 10.7,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-05T00:00:00",
+      "counterpartyName": "Amazon Music 140ID73G3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Amazon Music 140ID73G3 888 802 3080 WA",
+      "debit": 7.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-05T00:00:00",
+      "counterpartyName": "Prime Video OY5JB7PR3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video OY5JB7PR3 888 802 3080 WA",
+      "debit": 9.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-05T00:00:00",
+      "counterpartyName": "CVS/PHARMACY #10 CLAREMORE",
+      "paymentPurpose": "Check Card Debit CVS/PHARMACY #10 CLAREMORE OK",
+      "debit": 20.33,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-05T00:00:00",
+      "counterpartyName": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "paymentPurpose": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "debit": 60,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-11-05T00:00:00",
+      "counterpartyName": "ECKLERS AUTO PARTS 800 3274868",
+      "paymentPurpose": "Check Card Debit ECKLERS AUTO PARTS 800 3274868 FL",
+      "debit": 170.19,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-05T00:00:00",
+      "counterpartyName": "WALGREENS STORE 601 W W CLAREMORE",
+      "paymentPurpose": "Check Card Debit WALGREENS STORE 601 W W CLAREMORE OK",
+      "debit": 505.95,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-05T00:00:00",
+      "counterpartyName": "ROYAL NEIGHBORS PREM DEBIT PREAUTHORIZED COL 1011001110010C",
+      "paymentPurpose": "ACH Payment ROYAL NEIGHBORS PREM DEBIT PREAUTHORIZED COL 1011001110010C",
+      "debit": 20,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-05T00:00:00",
+      "counterpartyName": "SNAP FINANCE PAYMENT P0111011110",
+      "paymentPurpose": "ACH Payment SNAP FINANCE PAYMENT P0111011110",
+      "debit": 44.03,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "IMAGINE TREND GADGETS 877 5611388",
+      "paymentPurpose": "Check Card Debit IMAGINE TREND GADGETS 877 5611388 LA",
+      "debit": 7.53,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "Amazon Prime HW6FC26M3 Amzn com bill",
+      "paymentPurpose": "Check Card Debit Amazon Prime HW6FC26M3 Amzn com bill WA",
+      "debit": 12.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "QT 20 INSIDE CLAREMORE",
+      "paymentPurpose": "Check Card Debit QT 20 INSIDE CLAREMORE OK",
+      "debit": 15.36,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "Transfer Withdrawal Transfer to 1100011000",
+      "paymentPurpose": "Transfer Withdrawal Transfer to 1100011000",
+      "debit": 20,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "The Roku Channel 816 2728107",
+      "paymentPurpose": "Check Card Debit The Roku Channel 816 2728107 DE",
+      "debit": 34.95,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "MURPHY6605ATWALMART CLAREMORE",
+      "paymentPurpose": "Check Card Debit MURPHY6605ATWALMART CLAREMORE OK",
+      "debit": 54.98,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "paymentPurpose": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "debit": 60,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "WALGREENS STORE 601 W W CLAREMORE",
+      "paymentPurpose": "Check Card Debit WALGREENS STORE 601 W W CLAREMORE OK",
+      "debit": 105.95,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "10 BOX COST-PLUS CLAREMORE",
+      "paymentPurpose": "Check Card Debit 10 BOX COST-PLUS CLAREMORE OK",
+      "debit": 137.83,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "WAL-MART #0012 CLAREMORE",
+      "paymentPurpose": "Check Card Debit WAL-MART #0012 CLAREMORE OK",
+      "debit": 595.06,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-08T00:00:00",
+      "counterpartyName": "SAFECO INSURANCE INS PREM 11010000111",
+      "paymentPurpose": "ACH Payment SAFECO INSURANCE INS PREM 11010000111",
+      "debit": 199.81,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-09T00:00:00",
+      "counterpartyName": "Prime Video KM57Y7CD3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video KM57Y7CD3 888 802 3080 WA",
+      "debit": 3.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-09T00:00:00",
+      "counterpartyName": "Prime Video AQ0M06CT3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video AQ0M06CT3 888 802 3080 WA",
+      "debit": 8.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-09T00:00:00",
+      "counterpartyName": "WALGREENS 7504 CLAREMORE",
+      "paymentPurpose": "Check Card Debit WALGREENS 7504 CLAREMORE OK",
+      "debit": 100,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-09T00:00:00",
+      "counterpartyName": "CVS/PHARMACY #10 10272- CLAREMORE",
+      "paymentPurpose": "Check Card Debit CVS/PHARMACY #10 10272- CLAREMORE OK",
+      "debit": 600,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-10T00:00:00",
+      "counterpartyName": "Prime Video J83T69HJ3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video J83T69HJ3 888 802 3080 WA",
+      "debit": 8.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-10T00:00:00",
+      "counterpartyName": "MCDONALD S F25007 CLAREMORE",
+      "paymentPurpose": "Check Card Debit MCDONALD S F25007 CLAREMORE OK",
+      "debit": 38.55,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-10T00:00:00",
+      "counterpartyName": "SYNCB PAYMENT 800 613 9545",
+      "paymentPurpose": "Check Card Debit SYNCB PAYMENT 800 613 9545 GA",
+      "debit": 40,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "Prime Video FB8UB3J63 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video FB8UB3J63 888 802 3080 WA",
+      "debit": 9.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "QUICK N EASY QNE CLAREMORE",
+      "paymentPurpose": "Check Card Debit QUICK N EASY QNE CLAREMORE OK",
+      "debit": 12.23,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "CVS/PHARMACY #10 CLAREMORE",
+      "paymentPurpose": "Check Card Debit CVS/PHARMACY #10 CLAREMORE OK",
+      "debit": 16.9,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "AMZN Mktp US J38BF2ST3 Amzn com bill",
+      "paymentPurpose": "Check Card Debit AMZN Mktp US J38BF2ST3 Amzn com bill WA",
+      "debit": 18.79,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "PANDA CHINESE CLAREMORE",
+      "paymentPurpose": "Check Card Debit PANDA CHINESE CLAREMORE OK",
+      "debit": 28.53,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "WM SUPERCENTER # CLAREMORE",
+      "paymentPurpose": "Check Card Debit WM SUPERCENTER # CLAREMORE OK",
+      "debit": 42.39,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "VIOC IJ0002 CLAREMORE",
+      "paymentPurpose": "Check Card Debit VIOC IJ0002 CLAREMORE OK",
+      "debit": 47.44,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "SWIFT MART CLAREMORE",
+      "paymentPurpose": "Check Card Debit SWIFT MART CLAREMORE OK",
+      "debit": 47.59,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "AMERICAN HOME PROTECT 877 4073820",
+      "paymentPurpose": "Check Card Debit AMERICAN HOME PROTECT 877 4073820 TX",
+      "debit": 95.3,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "paymentPurpose": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "debit": 100,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "PAYMENT PLAN AUTO HOME 800 6857096",
+      "paymentPurpose": "Check Card Debit PAYMENT PLAN AUTO HOME 800 6857096 IL",
+      "debit": 190.6,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-12T00:00:00",
+      "counterpartyName": "SNAP FINANCE PAYMENT P0110001100",
+      "paymentPurpose": "ACH Payment SNAP FINANCE PAYMENT P0110001100",
+      "debit": 44.03,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "CHICK FIL A 03829 CLAREMORE",
+      "paymentPurpose": "Check Card Debit CHICK FIL A 03829 CLAREMORE OK",
+      "debit": 4.57,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "Prime Video TI4049AB3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video TI4049AB3 888 802 3080 WA",
+      "debit": 5.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "Prime Video CR6FS6D43 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video CR6FS6D43 888 802 3080 WA",
+      "debit": 6.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "AMZN MKTP US 0C0GI4WT3 AMZN COM BILL",
+      "paymentPurpose": "Check Card Debit AMZN MKTP US 0C0GI4WT3 AMZN COM BILL WA",
+      "debit": 8.3,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "Prime Video 4D56E6UZ3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video 4D56E6UZ3 888 802 3080 WA",
+      "debit": 10.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "CLAREMORE CINEMA 8 CLAREMORE",
+      "paymentPurpose": "Check Card Debit CLAREMORE CINEMA 8 CLAREMORE OK",
+      "debit": 11.59,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "QUICK N EASY QNE CLAREMORE",
+      "paymentPurpose": "Check Card Debit QUICK N EASY QNE CLAREMORE OK",
+      "debit": 13.08,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "MAZZIO S 104 Q85 CLAREMORE",
+      "paymentPurpose": "Check Card Debit MAZZIO S 104 Q85 CLAREMORE OK",
+      "debit": 16.23,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "CHICK FIL A 03829 CLAREMORE",
+      "paymentPurpose": "Check Card Debit CHICK FIL A 03829 CLAREMORE OK",
+      "debit": 17.97,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "CATO #714 CLAREMORE",
+      "paymentPurpose": "Check Card Debit CATO #714 CLAREMORE OK",
+      "debit": 20,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "CHICK FIL A 03829 CLAREMORE",
+      "paymentPurpose": "Check Card Debit CHICK FIL A 03829 CLAREMORE OK",
+      "debit": 33.41,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "SWIFT MART CLAREMORE",
+      "paymentPurpose": "Check Card Debit SWIFT MART CLAREMORE OK",
+      "debit": 48.32,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "DOLLAR-GENERAL # DG 025 CLAREMORE",
+      "paymentPurpose": "Check Card Debit DOLLAR-GENERAL # DG 025 CLAREMORE OK",
+      "debit": 52.7,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "CLAREMORE CINEMA 8 CLAREMORE",
+      "paymentPurpose": "Check Card Debit CLAREMORE CINEMA 8 CLAREMORE OK",
+      "debit": 67.8,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "SYNCB PAYMENT 800 613 9545",
+      "paymentPurpose": "Check Card Debit SYNCB PAYMENT 800 613 9545 GA",
+      "debit": 100,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "paymentPurpose": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "debit": 100,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "MUTUAL OF OMAHA NOV INSPRM VZQ261",
+      "paymentPurpose": "ACH Payment MUTUAL OF OMAHA NOV INSPRM VZQ261",
+      "debit": 8.55,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-15T00:00:00",
+      "counterpartyName": "COMENITY PAY AC PHONE PYMT 800-395-5714 P01011011011101",
+      "paymentPurpose": "ACH Payment COMENITY PAY AC PHONE PYMT 800-395-5714 P01011011011101",
+      "debit": 100,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-16T00:00:00",
+      "counterpartyName": "Prime Video CA0MC0PB3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video CA0MC0PB3 888 802 3080 WA",
+      "debit": 5.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-16T00:00:00",
+      "counterpartyName": "10 BOX COST-PLUS CLAREMORE",
+      "paymentPurpose": "Check Card Debit 10 BOX COST-PLUS CLAREMORE OK",
+      "debit": 16.2,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-16T00:00:00",
+      "counterpartyName": "10 BOX COST-PLUS CLAREMORE",
+      "paymentPurpose": "Check Card Debit 10 BOX COST-PLUS CLAREMORE OK",
+      "debit": 16.57,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-16T00:00:00",
+      "counterpartyName": "BELLELILY ST ALBANS",
+      "paymentPurpose": "Check Card Debit BELLELILY ST ALBANS",
+      "debit": 26.61,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-16T00:00:00",
+      "counterpartyName": "CVS/PHARMACY #10 10272- CLAREMORE",
+      "paymentPurpose": "Check Card Debit CVS/PHARMACY #10 10272- CLAREMORE OK",
+      "debit": 50,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-16T00:00:00",
+      "counterpartyName": "Fgn Db/ATM Trans Fee Foreign Debit/ATM Transaction Fee 11/16 655",
+      "paymentPurpose": "Fgn Db/ATM Trans Fee Foreign Debit/ATM Transaction Fee 11/16 655",
+      "debit": 0.8,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-11-17T00:00:00",
+      "counterpartyName": "Prime Video 6J5MC7EN3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video 6J5MC7EN3 888 802 3080 WA",
+      "debit": 9.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-17T00:00:00",
+      "counterpartyName": "QUICK N EASY QNE CLAREMORE",
+      "paymentPurpose": "Check Card Debit QUICK N EASY QNE CLAREMORE OK",
+      "debit": 39.34,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-17T00:00:00",
+      "counterpartyName": "PLANET FIT CLUB FEES 888-237-9005 0011011010011",
+      "paymentPurpose": "ACH Payment PLANET FIT CLUB FEES 888-237-9005 0011011010011",
+      "debit": 21.92,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-17T00:00:00",
+      "counterpartyName": "UNITED OF OMAHA INS PREM 77L889NOV-21",
+      "paymentPurpose": "ACH Payment UNITED OF OMAHA INS PREM 77L889NOV-21",
+      "debit": 38.92,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-17T00:00:00",
+      "counterpartyName": "UNITED OF OMAHA INS PREM XARL89NOV-21",
+      "paymentPurpose": "ACH Payment UNITED OF OMAHA INS PREM XARL89NOV-21",
+      "debit": 46.42,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-18T00:00:00",
+      "counterpartyName": "QUICK N EASY QNE CLAREMORE",
+      "paymentPurpose": "Check Card Debit QUICK N EASY QNE CLAREMORE OK",
+      "debit": 5.19,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-18T00:00:00",
+      "counterpartyName": "KOHL S CHARGE PAYMENT 800 564 5740",
+      "paymentPurpose": "Check Card Debit KOHL S CHARGE PAYMENT 800 564 5740 WI",
+      "debit": 56,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-18T00:00:00",
+      "counterpartyName": "SHEFFIELD FINANCIAL LLC 336 7761388",
+      "paymentPurpose": "Check Card Debit SHEFFIELD FINANCIAL LLC 336 7761388 NC",
+      "debit": 109.18,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-18T00:00:00",
+      "counterpartyName": "GERBER LIFE INS INSURANCE 800-704-2180 7200217",
+      "paymentPurpose": "ACH Payment GERBER LIFE INS INSURANCE 800-704-2180 7200217",
+      "debit": 21.98,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-18T00:00:00",
+      "counterpartyName": "FROST-ARNETT COM PREAUTHPMT 4INFO 1-800-264- PNS* FROST ARNE",
+      "paymentPurpose": "ACH Payment FROST-ARNETT COM PREAUTHPMT 4INFO 1-800-264- PNS* FROST ARNE",
+      "debit": 25,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-18T00:00:00",
+      "counterpartyName": "Credit One Bank Payment Credit One Bank",
+      "paymentPurpose": "ACH Payment Credit One Bank Payment Credit One Bank",
+      "debit": 63,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-18T00:00:00",
+      "counterpartyName": "COX COMM TUL BANK DRAFT 010110110100010",
+      "paymentPurpose": "ACH Payment COX COMM TUL BANK DRAFT 010110110100010",
+      "debit": 79.11,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-18T00:00:00",
+      "counterpartyName": "Aqua FBO Connexu CXS ACH CXS PC *****0800",
+      "paymentPurpose": "ACH Payment Aqua FBO Connexu CXS ACH CXS PC *****0800",
+      "debit": 213.55,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-19T00:00:00",
+      "counterpartyName": "AB centerbear Internet",
+      "paymentPurpose": "Check Card Debit AB centerbear Internet",
+      "debit": 40.78,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-19T00:00:00",
+      "counterpartyName": "SP WASABI KNIVES HAMBURG",
+      "paymentPurpose": "Check Card Debit SP WASABI KNIVES HAMBURG",
+      "debit": 402.9,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-19T00:00:00",
+      "counterpartyName": "Fgn Db/ATM Trans Fee Foreign Debit/ATM Transaction Fee 11/19 655",
+      "paymentPurpose": "Fgn Db/ATM Trans Fee Foreign Debit/ATM Transaction Fee 11/19 655",
+      "debit": 1.22,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-11-19T00:00:00",
+      "counterpartyName": "Fgn Db/ATM Trans Fee Foreign Debit/ATM Transaction Fee 11/19 655",
+      "paymentPurpose": "Fgn Db/ATM Trans Fee Foreign Debit/ATM Transaction Fee 11/19 655",
+      "debit": 12.09,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-11-19T00:00:00",
+      "counterpartyName": "SNAP FINANCE PAYMENT P1110001101",
+      "paymentPurpose": "ACH Payment SNAP FINANCE PAYMENT P1110001101",
+      "debit": 44.03,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "QT 20 CLAREMORE",
+      "paymentPurpose": "Check Card Debit QT 20 CLAREMORE OK",
+      "debit": 2.5,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "10 BOX COST-PLUS CLAREMORE",
+      "paymentPurpose": "Check Card Debit 10 BOX COST-PLUS CLAREMORE OK",
+      "debit": 5.6,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "Prime Video GI60U19J3 888 802 3080",
+      "paymentPurpose": "Check Card Debit Prime Video GI60U19J3 888 802 3080 WA",
+      "debit": 5.99,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "SWIFT MART CLAREMORE",
+      "paymentPurpose": "Check Card Debit SWIFT MART CLAREMORE OK",
+      "debit": 9.95,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "ADVANCE AUTO PARTS #801 CLAREMORE",
+      "paymentPurpose": "Check Card Debit ADVANCE AUTO PARTS #801 CLAREMORE OK",
+      "debit": 14.52,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "Transfer Withdrawal Transfer to 1100011000",
+      "paymentPurpose": "Transfer Withdrawal Transfer to 1100011000",
+      "debit": 20,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "MCDONALD S F25007 CLAREMORE",
+      "paymentPurpose": "Check Card Debit MCDONALD S F25007 CLAREMORE OK",
+      "debit": 24.24,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "SWIFT MART CLAREMORE",
+      "paymentPurpose": "Check Card Debit SWIFT MART CLAREMORE OK",
+      "debit": 38.12,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "CHICK FIL A 03829 CLAREMORE",
+      "paymentPurpose": "Check Card Debit CHICK FIL A 03829 CLAREMORE OK",
+      "debit": 39.14,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "SYNCB PAYMENT 800 613 9545",
+      "paymentPurpose": "Check Card Debit SYNCB PAYMENT 800 613 9545 GA",
+      "debit": 100,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "paymentPurpose": "ATM Withdrawal 1050 N LYNN RIGGS BLVD CLAREMORE OK",
+      "debit": 100,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "WALGREENS STORE 601 W W CLAREMORE",
+      "paymentPurpose": "Check Card Debit WALGREENS STORE 601 W W CLAREMORE OK",
+      "debit": 500,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "WAL-MART #0012 CLAREMORE",
+      "paymentPurpose": "Check Card Debit WAL-MART #0012 CLAREMORE OK",
+      "debit": 500,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "WALGREENS STORE 601 W W CLAREMORE",
+      "paymentPurpose": "Check Card Debit WALGREENS STORE 601 W W CLAREMORE OK",
+      "debit": 500,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "WAL-MART #0012 CLAREMORE",
+      "paymentPurpose": "Check Card Debit WAL-MART #0012 CLAREMORE OK",
+      "debit": 610.38,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "CVS/PHARMACY #10 10272- CLAREMORE",
+      "paymentPurpose": "Check Card Debit CVS/PHARMACY #10 10272- CLAREMORE OK",
+      "debit": 1001,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-22T00:00:00",
+      "counterpartyName": "OK NATURAL GAS UTIL PAYMT 111010001011100",
+      "paymentPurpose": "ACH Payment OK NATURAL GAS UTIL PAYMT 111010001011100",
+      "debit": 60,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-23T00:00:00",
+      "counterpartyName": "CORVETTE CENTRAL 800 345 4122",
+      "paymentPurpose": "Check Card Debit CORVETTE CENTRAL 800 345 4122 MI",
+      "debit": 118.39,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-24T00:00:00",
+      "counterpartyName": "DOLLAR-GENERAL # DG 025 CLAREMORE",
+      "paymentPurpose": "Check Card Debit DOLLAR-GENERAL # DG 025 CLAREMORE OK",
+      "debit": 17,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-24T00:00:00",
+      "counterpartyName": "AMZN Mktp US 2B3S20C33 Amzn com bill",
+      "paymentPurpose": "Check Card Debit AMZN Mktp US 2B3S20C33 Amzn com bill WA",
+      "debit": 26.44,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-24T00:00:00",
+      "counterpartyName": "107 BRAUMS STORE CLAREMORE",
+      "paymentPurpose": "Check Card Debit 107 BRAUMS STORE CLAREMORE OK",
+      "debit": 30.57,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-24T00:00:00",
+      "counterpartyName": "10 BOX COST-PLUS CLAREMORE",
+      "paymentPurpose": "Check Card Debit 10 BOX COST-PLUS CLAREMORE OK",
+      "debit": 112.56,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-26T00:00:00",
+      "counterpartyName": "KUM&GO 1840 CLAREMOR CLAREMORE",
+      "paymentPurpose": "Check Card Debit KUM&GO 1840 CLAREMOR CLAREMORE OK",
+      "debit": 5.86,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-26T00:00:00",
+      "counterpartyName": "BASS PRO STORE BROKEN BROKEN ARROW",
+      "paymentPurpose": "Check Card Debit BASS PRO STORE BROKEN BROKEN ARROW OK",
+      "debit": 32.51,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-26T00:00:00",
+      "counterpartyName": "QT 20 INSIDE CLAREMORE",
+      "paymentPurpose": "Check Card Debit QT 20 INSIDE CLAREMORE OK",
+      "debit": 40,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-26T00:00:00",
+      "counterpartyName": "BASS PRO STORE BROKEN BROKEN ARROW",
+      "paymentPurpose": "Check Card Debit BASS PRO STORE BROKEN BROKEN ARROW OK",
+      "debit": 95.44,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-26T00:00:00",
+      "counterpartyName": "WAL Wal-Mart Super 0024 CLAREMORE",
+      "paymentPurpose": "Check Card Debit WAL Wal-Mart Super 0024 CLAREMORE OK",
+      "debit": 207.73,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-11-26T00:00:00",
+      "counterpartyName": "GERBER LIFE INS INSURANCE 800-704-2180 0489057",
+      "paymentPurpose": "ACH Payment GERBER LIFE INS INSURANCE 800-704-2180 0489057",
+      "debit": 27.86,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-26T00:00:00",
+      "counterpartyName": "SNAP FINANCE PAYMENT P0000000100",
+      "paymentPurpose": "ACH Payment SNAP FINANCE PAYMENT P0000000100",
+      "debit": 44.03,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-26T00:00:00",
+      "counterpartyName": "GreenSky WEB PAY 0110001001 Greensky",
+      "paymentPurpose": "ACH Payment GreenSky WEB PAY 0110001001 Greensky",
+      "debit": 184.52,
+      "currency": "ZAR",
+      "paymentType": "direct_debit"
+    }
+  ]
+}

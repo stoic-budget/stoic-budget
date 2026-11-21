@@ -51,6 +51,7 @@ function renderTable(rows: ListedRow[]) {
       onToggle={vi.fn()}
       onToggleAll={vi.fn()}
       onSetCategory={vi.fn()}
+      onSetExcluded={vi.fn()}
       onOpen={vi.fn()}
     />,
   );

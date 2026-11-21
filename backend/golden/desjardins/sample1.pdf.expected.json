@@ -1,0 +1,412 @@
+{
+  "metadata": {
+    "accountNumber": "10001",
+    "currency": "CAD",
+    "dateFrom": "2024-05-01T00:00:00",
+    "dateTo": "2024-05-31T00:00:00",
+    "balanceStart": 128529.81
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-05-02T00:00:00",
+      "counterpartyName": "REMISES WORLD ELITE MASTERCARD",
+      "paymentPurpose": "Bill payment - AccèsD - Internet / REMISES WORLD ELITE MASTERCARD",
+      "debit": 386,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-05-02T00:00:00",
+      "counterpartyName": "Payroll Deposit ADP KORPOWER INC",
+      "paymentPurpose": "Payroll Deposit ADP KORPOWER INC",
+      "credit": 6995.09,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-05-09T00:00:00",
+      "counterpartyName": "STARBUCKS COFFEE #1031",
+      "paymentPurpose": "Purchase / STARBUCKS COFFEE #1031",
+      "debit": 6.26,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-09T00:00:00",
+      "counterpartyName": "L2 BUBBLE TEA CF LAVAL",
+      "paymentPurpose": "Purchase / L2 BUBBLE TEA CF LAVAL",
+      "debit": 13.28,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-13T00:00:00",
+      "counterpartyName": "STARBUCKS COFFEE #1031",
+      "paymentPurpose": "Purchase / STARBUCKS COFFEE #1031",
+      "debit": 13.11,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-13T00:00:00",
+      "counterpartyName": "ESSO COUCHE -TARD",
+      "paymentPurpose": "Pre-authorized purchase / ESSO COUCHE -TARD",
+      "debit": 60,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-15T00:00:00",
+      "counterpartyName": "REMISES WORLD ELITE MASTERCARD",
+      "paymentPurpose": "Bill payment - AccèsD - Internet / REMISES WORLD ELITE MASTERCARD",
+      "debit": 461,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-05-15T00:00:00",
+      "counterpartyName": "STARBUCKS COFFEE #0411",
+      "paymentPurpose": "Purchase / STARBUCKS COFFEE #0411",
+      "debit": 5.46,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-16T00:00:00",
+      "counterpartyName": "CANADA",
+      "paymentPurpose": "Tax refund / CANADA",
+      "credit": 2076.2,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-05-16T00:00:00",
+      "counterpartyName": "PETRO CANADA12996",
+      "paymentPurpose": "Pre-authorized purchase / PETRO CANADA12996",
+      "debit": 75,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-16T00:00:00",
+      "counterpartyName": "Payroll Deposit ADP KORPOWER INC",
+      "paymentPurpose": "Payroll Deposit ADP KORPOWER INC",
+      "credit": 6995.09,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-05-17T00:00:00",
+      "counterpartyName": "POKE MONSTER (AVE DU P",
+      "paymentPurpose": "Purchase / POKE MONSTER (AVE DU P",
+      "debit": 6.95,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-17T00:00:00",
+      "counterpartyName": "Hillside (Inte",
+      "paymentPurpose": "Interac e-Transfer from / Hillside (Inte/",
+      "credit": 3000,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-05-20T00:00:00",
+      "counterpartyName": "CDS BORDEAUX-CARTIERVILLE",
+      "paymentPurpose": "Withdrawal on ATM / CDS BORDEAUX-CARTIERVILLE",
+      "debit": 1000,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-05-20T00:00:00",
+      "counterpartyName": "KENZA",
+      "paymentPurpose": "Purchase / KENZA",
+      "debit": 187.23,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-20T00:00:00",
+      "counterpartyName": "STARBUCKS COFFEE #1031",
+      "paymentPurpose": "Purchase / STARBUCKS COFFEE #1031",
+      "debit": 6.26,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-20T00:00:00",
+      "counterpartyName": "MCDONALD'S #40517",
+      "paymentPurpose": "Purchase / MCDONALD'S #40517",
+      "debit": 6.43,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-20T00:00:00",
+      "counterpartyName": "STARBUCKS COFFEE #1031",
+      "paymentPurpose": "Purchase / STARBUCKS COFFEE #1031",
+      "debit": 13.39,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-20T00:00:00",
+      "counterpartyName": "PHARMAPRIX #1803",
+      "paymentPurpose": "Purchase / PHARMAPRIX #1803",
+      "debit": 28.73,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-20T00:00:00",
+      "counterpartyName": "to LN 1",
+      "paymentPurpose": "Payment transfer / to LN 1",
+      "debit": 123.04,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-05-21T00:00:00",
+      "counterpartyName": "STARBUCKS COFFEE #1031",
+      "paymentPurpose": "Purchase / STARBUCKS COFFEE #1031",
+      "debit": 5.46,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-22T00:00:00",
+      "counterpartyName": "STARBUCKS COFFEE #1819",
+      "paymentPurpose": "Purchase / STARBUCKS COFFEE #1819",
+      "debit": 7.71,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-22T00:00:00",
+      "counterpartyName": "PETRO CANADA13048",
+      "paymentPurpose": "Pre-authorized purchase / PETRO CANADA13048",
+      "debit": 4.92,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-23T00:00:00",
+      "counterpartyName": "member four",
+      "paymentPurpose": "Interac e-Transfer to / member four /",
+      "debit": 1500,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-05-23T00:00:00",
+      "counterpartyName": "PHARMAPRIX #1803",
+      "paymentPurpose": "Purchase / PHARMAPRIX #1803",
+      "debit": 38.49,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-23T00:00:00",
+      "counterpartyName": "member five",
+      "paymentPurpose": "Interac e-Transfer to / member five /",
+      "debit": 500,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-05-23T00:00:00",
+      "counterpartyName": "MONEY MART #625",
+      "paymentPurpose": "Purchase / MONEY MART #625",
+      "debit": 310,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-23T00:00:00",
+      "counterpartyName": "ULTRAMAR #679",
+      "paymentPurpose": "Pre-authorized purchase / ULTRAMAR #679",
+      "debit": 75,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-24T00:00:00",
+      "counterpartyName": "SHELL C03081",
+      "paymentPurpose": "Purchase / SHELL C03081",
+      "debit": 12.74,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-27T00:00:00",
+      "counterpartyName": "CDS DE L'EGLISE",
+      "paymentPurpose": "Withdrawal on ATM / CDS DE L'EGLISE",
+      "debit": 400,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-05-27T00:00:00",
+      "counterpartyName": "CDS DE L'EGLISE",
+      "paymentPurpose": "Withdrawal on ATM / CDS DE L'EGLISE",
+      "debit": 100,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-05-27T00:00:00",
+      "counterpartyName": "STARBUCKS COFFEE #1031",
+      "paymentPurpose": "Purchase / STARBUCKS COFFEE #1031",
+      "debit": 5.46,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-27T00:00:00",
+      "counterpartyName": "PETRO CANADA12764",
+      "paymentPurpose": "Pre-authorized purchase / PETRO CANADA12764",
+      "debit": 75,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-27T00:00:00",
+      "counterpartyName": "MONEY MART #625",
+      "paymentPurpose": "Purchase / MONEY MART #625",
+      "debit": 307.95,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-27T00:00:00",
+      "counterpartyName": "STARBUCKS COFFEE #1031",
+      "paymentPurpose": "Purchase / STARBUCKS COFFEE #1031",
+      "debit": 6.84,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-28T00:00:00",
+      "counterpartyName": "PROVISOIR-5010",
+      "paymentPurpose": "Purchase / PROVISOIR-5010",
+      "debit": 2.98,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-28T00:00:00",
+      "counterpartyName": "POKE MONSTER (SALABERR",
+      "paymentPurpose": "Purchase / POKE MONSTER (SALABERR",
+      "debit": 47.58,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-28T00:00:00",
+      "counterpartyName": "POKE MONSTER (SALABERR",
+      "paymentPurpose": "Purchase / POKE MONSTER (SALABERR",
+      "debit": 6.95,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-29T00:00:00",
+      "counterpartyName": "TIM HORTONS #4171",
+      "paymentPurpose": "Purchase / TIM HORTONS #4171",
+      "debit": 15.45,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-29T00:00:00",
+      "counterpartyName": "member three",
+      "paymentPurpose": "Interac e-Transfer to / member three /",
+      "debit": 10,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-05-30T00:00:00",
+      "counterpartyName": "MEMBER ONE",
+      "paymentPurpose": "Cancellation-Interac e-Transfer to / MEMBER ONE/",
+      "credit": 10,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-05-30T00:00:00",
+      "counterpartyName": "POULET ROUGE CDN",
+      "paymentPurpose": "Purchase / POULET ROUGE CDN",
+      "debit": 14.25,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-30T00:00:00",
+      "counterpartyName": "ESSO COUCHE -TARD",
+      "paymentPurpose": "Pre-authorized purchase / ESSO COUCHE -TARD",
+      "debit": 100,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-30T00:00:00",
+      "counterpartyName": "COUCHE-TARD # 1163",
+      "paymentPurpose": "Pre-authorized purchase / COUCHE-TARD # 1163",
+      "debit": 35.92,
+      "currency": "CAD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-30T00:00:00",
+      "counterpartyName": "Payroll Deposit ADP KORPOWER INC",
+      "paymentPurpose": "Payroll Deposit ADP KORPOWER INC",
+      "credit": 6995.09,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-05-31T00:00:00",
+      "counterpartyName": "CAF MILANO - LAVAL",
+      "paymentPurpose": "Purchase / CAF MILANO - LAVAL",
+      "debit": 17.82,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-05-31T00:00:00",
+      "counterpartyName": "CAISSE DESJ. PORTUGAISE",
+      "paymentPurpose": "Withdrawal on ATM / CAISSE DESJ. PORTUGAISE",
+      "debit": 400,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-05-31T00:00:00",
+      "counterpartyName": "SAMPLE PAYER/ Withdrawal",
+      "paymentPurpose": "Interac e-Transfer from / SAMPLE PAYER/ Withdrawal",
+      "credit": 225,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-05-31T00:00:00",
+      "counterpartyName": "CDS BORDEAUX-CARTIERVILLE Interest on",
+      "paymentPurpose": "on ATM / CDS BORDEAUX-CARTIERVILLE Interest on",
+      "debit": 220,
+      "currency": "CAD"
+    },
+    {
+      "transactionDate": "2024-05-31T00:00:00",
+      "counterpartyName": "PCA SAVINGS AND INVESTMENT ACCOUNT",
+      "paymentPurpose": "PCA SAVINGS AND INVESTMENT ACCOUNT",
+      "credit": 0.13,
+      "currency": "CAD"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain"
+  ]
+}

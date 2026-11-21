@@ -56,8 +56,8 @@ const bakery = 'Example Bakery';
 const overview: PayeesOverview = {
   currency: 'EUR',
   rows: [
-    { id: 'p-store', name: store, mode: 'auto', category: { id: 'c-1', name: 'Groceries' }, count: 2, amount: 50, lastSeen: '2026-05-10' },
-    { id: 'p-bakery', name: bakery, mode: 'auto', category: null, count: 1, amount: 5, lastSeen: '2026-05-09' },
+    { id: 'p-store', name: store, mode: 'auto', category: { id: 'c-1', name: 'Groceries' }, vendorDomain: null, count: 2, amount: 50, lastSeen: '2026-05-10' },
+    { id: 'p-bakery', name: bakery, mode: 'auto', category: null, vendorDomain: null, count: 1, amount: 5, lastSeen: '2026-05-09' },
   ],
   totalPayees: 2,
   totalAmount: 55,
@@ -93,6 +93,24 @@ describe('PayeesPage', () => {
     expect(api.get).toHaveBeenCalledWith(
       '/payees/overview',
       expect.objectContaining({ params: expect.objectContaining({ month: '2026-05', direction: 'expense' }) }),
+    );
+  });
+
+  it("marks a payee by its own website when it has one", async () => {
+    const domain = 'acme-store.example';
+    api.get.mockImplementation((url: string) =>
+      Promise.resolve({
+        data:
+          url === '/payees/overview'
+            ? { ...overview, rows: overview.rows.map(row => (row.name === store ? { ...row, vendorDomain: domain } : row)) }
+            : duplicates,
+      }),
+    );
+    renderWithQuery(<PayeesPage />);
+
+    await screen.findByRole('link', { name: store });
+    await waitFor(() =>
+      expect(document.querySelector(`img[src*="/vendor-icons/${domain}"]`)).not.toBeNull(),
     );
   });
 
