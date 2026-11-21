@@ -106,4 +106,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.STANDARD_CHARTERED]: 'Standard Chartered',
   [BankName.STARLING]: 'Starling Bank',
   [BankName.SUNCORP]: 'Suncorp Bank',
+  [BankName.SYNCHRONY]: 'Synchrony Bank',
 };

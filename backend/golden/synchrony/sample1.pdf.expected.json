@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "accountNumber": "5545227302",
+    "currency": "USD",
+    "dateFrom": "2023-04-26T00:00:00",
+    "dateTo": "2023-05-25T00:00:00",
+    "balanceStart": 15.02,
+    "balanceEnd": 5.05
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-05-23T00:00:00",
+      "counterpartyName": "ATM W/D 799091448422 5492 1000 Sample Rd",
+      "paymentPurpose": "ATM W/D 799091448422 5492 1000 Sample Rd",
+      "debit": 10,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-05-23T00:00:00",
+      "counterpartyName": "Surcharge",
+      "paymentPurpose": "Surcharge",
+      "debit": 2,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-05-25T00:00:00",
+      "counterpartyName": "INT PMT",
+      "paymentPurpose": "INT PMT",
+      "credit": 0.03,
+      "currency": "USD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-25T00:00:00",
+      "counterpartyName": "ATM REBATE",
+      "paymentPurpose": "ATM REBATE",
+      "credit": 2,
+      "currency": "USD",
+      "paymentType": "fee"
+    }
+  ]
+}
