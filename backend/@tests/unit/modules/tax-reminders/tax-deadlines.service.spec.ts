@@ -2,6 +2,7 @@ import type { Mock } from 'vitest';
 import { createRepoMock } from '../../../helpers/create-repo-mock';
 import { TaxFilingPeriod } from '@/entities/tax-jurisdiction.entity';
 import { VatStatus } from '@/entities/workspace.entity';
+import type { TaxDeadline, TaxDeadlineSource } from '@/modules/tax-reminders/tax-deadline-source';
 import { TaxDeadlinesService } from '@/modules/tax-reminders/tax-deadlines.service';
 import { APP_NAME } from '../../../../src/common/brand';
 
@@ -9,13 +10,35 @@ describe('TaxDeadlinesService', () => {
   let service: TaxDeadlinesService;
   let workspaceRepo: ReturnType<typeof createRepoMock>;
   let taxReturnRepo: ReturnType<typeof createRepoMock> & { exists: Mock };
-  let incomeTaxReturnRepo: ReturnType<typeof createRepoMock> & { exists: Mock };
-  let profileRepo: ReturnType<typeof createRepoMock>;
   let settingsRepo: ReturnType<typeof createRepoMock>;
   let filing: { frequency: TaxFilingPeriod | null; extension: boolean };
   let events: { emit: Mock };
   let workspace: Record<string, unknown>;
   let holidays: string[];
+
+  const incomeTaxReturn: TaxDeadline = {
+    kind: 'income_tax',
+    periodStart: '2026-01-01',
+    periodEnd: '2026-12-31',
+    dueDate: '2027-08-02',
+    daysLeft: 30,
+    done: false,
+    filedElsewhere: false,
+    returnName: 'Example income tax return',
+    basis: 'statute',
+    checkedAt: '2026-10-10',
+  };
+
+  const serviceWith = (source: TaxDeadlineSource) =>
+    new TaxDeadlinesService(
+      workspaceRepo as never,
+      taxReturnRepo as never,
+      settingsRepo as never,
+      { getVatFiling: vi.fn(async () => filing) } as never,
+      events as never,
+      { holidaysFor: vi.fn(async () => new Set(holidays)) } as never,
+      source,
+    );
 
   beforeEach(() => {
     workspace = {
@@ -27,11 +50,6 @@ describe('TaxDeadlinesService', () => {
     workspaceRepo = createRepoMock();
     workspaceRepo.findOne.mockImplementation(async () => workspace);
     taxReturnRepo = Object.assign(createRepoMock(), { exists: vi.fn().mockResolvedValue(false) });
-    incomeTaxReturnRepo = Object.assign(createRepoMock(), {
-      exists: vi.fn().mockResolvedValue(false),
-    });
-    profileRepo = createRepoMock();
-    profileRepo.findOne.mockResolvedValue(null);
     settingsRepo = createRepoMock();
     settingsRepo.findOne.mockResolvedValue(null);
     settingsRepo.save.mockImplementation(async (row: unknown) => row);
@@ -41,8 +59,6 @@ describe('TaxDeadlinesService', () => {
     service = new TaxDeadlinesService(
       workspaceRepo as never,
       taxReturnRepo as never,
-      incomeTaxReturnRepo as never,
-      profileRepo as never,
       settingsRepo as never,
       { getVatFiling: vi.fn(async () => filing) } as never,
       events as never,
@@ -63,9 +79,6 @@ describe('TaxDeadlinesService', () => {
       expect(deadlines.find(item => item.kind === 'vat_return')).toMatchObject({
         basis: 'statute',
         checkedAt: '2026-10-10',
-      });
-      expect(deadlines.find(item => item.kind === 'income_tax')).toMatchObject({
-        basis: 'statute',
       });
     });
   });
@@ -101,18 +114,22 @@ describe('TaxDeadlinesService', () => {
       expect((await service.getUpcoming('ws-1', '2026-10-05')).length).toBe(0);
     });
 
-    it('adds the income tax return while its deadline is ahead', async () => {
+    it('lists only VAT returns when no edition adds others', async () => {
       const deadlines = await service.getUpcoming('ws-1', '2027-07-10');
-      expect(deadlines.find(item => item.kind === 'income_tax')).toMatchObject({
-        periodStart: '2026-01-01',
-        dueDate: '2027-08-02',
-      });
+      expect(deadlines.length).toBeGreaterThan(0);
+      expect(deadlines.every(item => item.kind === 'vat_return')).toBe(true);
     });
 
-    it('does not remind a household about the income tax return', async () => {
-      workspace.settings = { profile: 'home' };
-      const deadlines = await service.getUpcoming('ws-1', '2027-07-10');
-      expect(deadlines.some(item => item.kind === 'income_tax')).toBe(false);
+    it('adds the returns of a deadline source, in due-date order with the VAT ones', async () => {
+      const deadlinesFor = vi.fn(async () => [incomeTaxReturn]);
+      const withSource = serviceWith({ deadlinesFor });
+
+      const deadlines = await withSource.getUpcoming('ws-1', '2027-07-10');
+
+      expect(deadlinesFor).toHaveBeenCalledWith(workspace, 'DE', '2027-07-10', expect.any(Set));
+      expect(deadlines.find(item => item.kind === 'income_tax')).toMatchObject({ dueDate: '2027-08-02' });
+      const dueDates = deadlines.map(item => item.dueDate);
+      expect(dueDates).toEqual([...dueDates].sort());
     });
   });
 
@@ -147,6 +164,18 @@ describe('TaxDeadlinesService', () => {
       settingsRepo.findOne.mockResolvedValue(null);
       // Long past the deadline nothing more is sent.
       expect(await service.remindWorkspace('ws-1', '2026-10-25')).toBe(0);
+    });
+
+    it("reminds a month ahead about a source's income tax return", async () => {
+      const withSource = serviceWith({ deadlinesFor: vi.fn(async () => [incomeTaxReturn]) });
+      // VAT not registered, so the income tax return is the only one listed.
+      workspace.vatStatus = VatStatus.SMALL_BUSINESS;
+
+      expect(await withSource.remindWorkspace('ws-1', '2027-07-03')).toBe(1);
+      expect(events.emit).toHaveBeenCalledWith(
+        'tax.deadline.upcoming',
+        expect.objectContaining({ kind: 'income_tax', daysLeft: 30 }),
+      );
     });
 
     it('sends nothing for a filed return', async () => {

@@ -150,22 +150,50 @@ export function hasTextUnderText(words: readonly LayoutWord[]): boolean {
 }
 
 /**
+ * Whether a line is a transaction row, as the parser judges it
+ * (layout-template-rows.helper): its first word opens a date, or, on a line a
+ * Date area covers and that area lies right of a marked description, the first
+ * word under that area does (a date printed right of the text).
+ */
+function isDatedLine(line: readonly LayoutWord[], marked: readonly TeachRegion[]): boolean {
+  const sorted = [...line].sort((a, b) => a.x - b.x);
+  const texts = marked.filter(area => area.tag === 'description');
+  return (
+    Boolean(sorted[0]?.opensDate) ||
+    marked.some(
+      date =>
+        date.tag === 'date' &&
+        texts.some(text => date.x0 > text.x0) &&
+        wordsInRegion(line, date).length > 0 &&
+        (sorted.find(word => word.x + word.width > date.x0 && word.x < date.x1)?.opensDate ??
+          false),
+    )
+  );
+}
+
+/**
  * The first look of an area against its tag, as the parser will judge it:
- * a column crosses at least one transaction row (a line the parser reads as
- * starting with a date, `dated`); one figure is one line with a figure, not
- * a whole column. With text under the text (`hasTextUnderText`) no line
- * reads as dated, so a column is not judged.
+ * a column crosses at least one transaction row (`isDatedLine`, judged with
+ * the areas `marked`); one figure is one line with a figure, not a
+ * whole column. With text under the text (`hasTextUnderText`) no line reads
+ * as dated, so a column is not judged.
  */
 export function regionWarning(
   region: TeachRegion,
   words: readonly LayoutWord[],
   textUnderText = false,
+  marked: readonly TeachRegion[] = [],
 ): RegionWarning | null {
   const lines = new Set(wordsInRegion(words, region).map(lineKey));
   if (COLUMN_TAGS.has(region.tag)) {
-    return textUnderText || wordsInRegion(words, region).some(word => word.dated)
-      ? null
-      : 'notColumn';
+    const crossed = new Set(wordsInRegion(words, region).map(word => word.line));
+    const dated = [...crossed].some(line =>
+      isDatedLine(
+        words.filter(word => word.line === line),
+        marked,
+      ),
+    );
+    return textUnderText || dated ? null : 'notColumn';
   }
   if (ONE_FIGURE_TAGS.has(region.tag)) {
     const withFigures = [...lines].filter(key =>

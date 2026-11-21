@@ -54,8 +54,10 @@ export const StatementLayoutWords = Schema.Struct({
       y: Schema.Number,
       width: Schema.Number,
       height: Schema.Number,
-      /** Its line starts with a date, as the parser reads one ("02 Sep", "01-02-2025"). */
-      dated: Schema.Boolean,
+      /** Its line, numbered from 0 in the order the parser reads them. */
+      line: Schema.Number,
+      /** A date starts at this word, as the parser reads one ("02 Sep", "01-02-2025"). */
+      opensDate: Schema.Boolean,
     }),
   ),
 });

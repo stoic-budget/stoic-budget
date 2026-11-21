@@ -3,10 +3,10 @@ import { BullModule } from '@nestjs/bullmq';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
 import { AppController } from './app.controller';
@@ -14,8 +14,7 @@ import { AppService } from './app.service';
 import { CommonModule } from './common/common.module';
 import { EffectRuntimeModule } from './common/effect/effect-runtime';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { CsrfGuard } from './common/guards/csrf.guard';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { APP_GUARDS } from './common/guards/app-guards';
 import { AuditActorInterceptor } from './common/interceptors/audit-actor.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { StripKeysInterceptor } from './common/interceptors/strip-keys.interceptor';
@@ -65,6 +64,7 @@ import {
   WorkspaceMember,
   WorkspaceServiceSettings,
 } from './entities';
+import { EXTENSION_MODULES } from './extensions';
 import { ApiKeysModule } from './modules/api-keys/api-keys.module';
 import { ApplicationSettingsModule } from './modules/application-settings/application-settings.module';
 import { AuditModule } from './modules/audit/audit.module';
@@ -87,7 +87,6 @@ import { EntityImportsModule } from './modules/entity-imports/entity-imports.mod
 import { ExchangeRatesModule } from './modules/exchange-rates/exchange-rates.module';
 import { ForecastModule } from './modules/forecast/forecast.module';
 import { GoalsModule } from './modules/goals/goals.module';
-import { IncomeTaxModule } from './modules/income-tax/income-tax.module';
 import { InsightsModule } from './modules/insights/insights.module';
 import { InvestmentsModule } from './modules/investments/investments.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
@@ -249,7 +248,6 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
     StorageModule,
     TelegramModule,
     TaxModule,
-    IncomeTaxModule,
     TaxPackModule,
     TaxRemindersModule,
     DatevModule,
@@ -283,6 +281,7 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
     WebhooksModule,
     ApiKeysModule,
     McpModule,
+    ...EXTENSION_MODULES,
   ],
   controllers: [AppController],
   providers: [
@@ -313,20 +312,7 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
       provide: APP_INTERCEPTOR,
       useClass: AuditInterceptor,
     },
-    // Registered before JwtAuthGuard: a forged cross-site request should be
-    // rejected before it reaches authentication or any handler.
-    {
-      provide: APP_GUARD,
-      useClass: CsrfGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    ...APP_GUARDS,
   ],
 })
 export class AppModule {}

@@ -39,7 +39,7 @@ interface CashFlowFlowProps {
  */
 export function CashFlowFlow({ month, formatAmount }: CashFlowFlowProps): React.JSX.Element {
   const t = useIntlayer('cashFlowCard');
-  const otherName = useIntlayer('topCategoriesCard').other.value;
+  const otherName = t.flowOther.value;
   const workspaceId = useWorkspaceId();
   const { resolvedTheme } = useTheme();
   const isMobile = useIsMobile();

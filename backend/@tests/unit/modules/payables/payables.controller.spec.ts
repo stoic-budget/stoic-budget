@@ -14,6 +14,8 @@ vi.mock('fs', async () => {
 });
 
 describe('PayablesController', () => {
+  const recurrence = { ensureSeriesOf: vi.fn(async () => 0), ensureSeriesFor: vi.fn(async () => 0) };
+
   it('answers a repeated idempotency key with the first bill, without creating another', async () => {
     const first = { id: 'p1' };
     const payablesService = { create: vi.fn(async () => first) };
@@ -26,7 +28,12 @@ describe('PayablesController', () => {
         stored.set(key, data);
       }),
     };
-    const controller = new PayablesController(payablesService as any, idempotency as any);
+    const controller = new PayablesController(
+      payablesService as any,
+      idempotency as any,
+      recurrence as any,
+      {} as any,
+    );
     const body = { vendor: 'Acme', amount: 10 } as any;
     const user = { id: 'user-1' } as any;
 
@@ -57,7 +64,7 @@ describe('PayablesController', () => {
       remove: vi.fn(async () => undefined),
       exportData: vi.fn(async () => ({ filePath: '/tmp/p.csv', fileName: 'p.csv', contentType: 'text/csv' })),
     };
-    const controller = new PayablesController(payablesService as any, {} as any);
+    const controller = new PayablesController(payablesService as any, {} as any, recurrence as any, {} as any);
     const user = { id: 'user-1' } as any;
     const workspaceId = 'workspace-1';
     const res = new PassThrough() as any;
@@ -107,6 +114,9 @@ describe('PayablesController', () => {
     });
     expect(payablesService.archive).toHaveBeenCalledWith('p1', workspaceId, 'user-1');
     expect(payablesService.remove).toHaveBeenCalledWith('p1', workspaceId, 'user-1');
+    // Withdrawing or deleting one occurrence makes the series' next one at once.
+    expect(recurrence.ensureSeriesOf).toHaveBeenCalledWith({ id: 'p1', status: PayableStatus.ARCHIVED });
+    expect(recurrence.ensureSeriesFor).toHaveBeenCalledWith(workspaceId, 'p1');
     expect(payablesService.exportData).toHaveBeenCalledWith(workspaceId, { format: ExportFormat.CSV });
     expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv');
     expect(fs.createReadStream).toHaveBeenCalledWith('/tmp/p.csv');
