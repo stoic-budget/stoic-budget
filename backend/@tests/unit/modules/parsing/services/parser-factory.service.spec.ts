@@ -298,6 +298,8 @@ describe('ParserFactoryService', () => {
       'WebsterParser',
       'WellsFargoParser',
       'WestpacParser',
+      'WiseParser',
+      'WoodforestParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

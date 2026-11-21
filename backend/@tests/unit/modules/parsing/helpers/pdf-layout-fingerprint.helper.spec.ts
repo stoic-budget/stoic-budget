@@ -195,6 +195,8 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Online Access websterbank.com')).toBe(BankName.WEBSTER);
     expect(mentionedBank('Write: Wells Fargo Bank, N.A. (808)')).toBe(BankName.WELLS_FARGO);
     expect(mentionedBank('promptly inform Westpac of any possible error')).toBe(BankName.WESTPAC);
+    expect(mentionedBank('Wise Payments Limited, trading as Wise')).toBe(BankName.WISE);
+    expect(mentionedBank('Visit Us Online at www.woodforest.com')).toBe(BankName.WOODFOREST);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

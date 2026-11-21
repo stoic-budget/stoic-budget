@@ -219,4 +219,11 @@ export const BANKS = [
     aliases: ['wells fargo bank', 'wellsfargo'],
   },
   { key: 'westpac', name: 'Westpac', logo: 'westpac.png', aliases: ['westpac bank'] },
+  { key: 'wise', name: 'Wise', logo: 'wise.png', aliases: ['transferwise'] },
+  {
+    key: 'woodforest',
+    name: 'Woodforest National Bank',
+    logo: 'woodforest.png',
+    aliases: ['woodforest'],
+  },
 ] as const satisfies readonly BankEntry[];

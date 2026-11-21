@@ -138,6 +138,8 @@ describe('statement-metadata.helper', () => {
     expect(findStatementPeriod('Due 10/24/2025, issued 09/30/2025', 'mdy')).toBeNull();
     const colons = findStatementPeriod('for the period (From : 23-08-2023 To : 24-01-2024)', 'dmy');
     expect([dayMonth(colons?.from), dayMonth(colons?.to)]).toEqual([[23, 8], [24, 1]]);
+    const zoned = findStatementPeriod('1 March 2023 [GMT+07:00] - 8 August 2023 [GMT+07:00]', 'dmy');
+    expect([dayMonth(zoned?.from), dayMonth(zoned?.to)]).toEqual([[1, 3], [8, 8]]);
   });
 
   it('reads the period between dated balance rows, for a month without movements', () => {
