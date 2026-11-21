@@ -43,6 +43,13 @@ be previewed, audited, or reprocessed.
    - Transaction fingerprints plus fuzzy matching on date, amount, and text
    - Uncertain matches are flagged for manual review
 
+8. **Transfer pairing**
+   - After deduplication and saving the rows, account details, and final statement status, uploads and import
+     commits automatically pair matching transfers between your own accounts
+   - Statements held for review are eligible; statements in the trash, still processing, or failed are excluded
+   - Pairing counts are recorded in the statement's parsing details when transfers are paired; a pairing failure
+     is logged without failing the import
+
 ## Error handling
 
 - Parsing errors are captured on the statement and its import session

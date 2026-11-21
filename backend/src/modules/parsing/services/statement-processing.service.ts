@@ -40,6 +40,7 @@ import {
   takeStatementAccount,
 } from '../helpers/statement-account.helper';
 import { fileExtensionOf } from '../helpers/statement-file.helper';
+import { pairStatementTransfers } from '../helpers/statement-transfer-pairing.helper';
 import {
   type ValidationReasonCode,
   validateParsedStatement,
@@ -417,24 +418,6 @@ export class StatementProcessingService {
       }
     }
 
-    // After dedupe on purpose: a duplicate leg must not take the pair.
-    if (this.transferPairingService && statement.workspaceId) {
-      try {
-        const pairing = await this.transferPairingService.detectAndApply(
-          statement.workspaceId,
-          statement.id,
-        );
-        if (pairing.paired > 0) {
-          statement.parsingDetails = {
-            ...(statement.parsingDetails || {}),
-            transferPairs: pairing,
-          };
-        }
-      } catch (pairingError) {
-        this.logger.warn(`Transfer pairing failed: ${this.getErrorMessage(pairingError)}`);
-      }
-    }
-
     const committedTransactions = await this.transactionRepository.find({
       where: { statementId: statement.id },
     });
@@ -449,6 +432,10 @@ export class StatementProcessingService {
     } as unknown as Statement['parsingDetails'];
 
     await this.statementRepository.save(statement);
+    // After dedupe, and once COMPLETED is stored: pairing takes finished imports only.
+    if (await pairStatementTransfers(this.transferPairingService, statement, this.logger)) {
+      await this.statementRepository.save(statement);
+    }
 
     return statement;
   }
@@ -804,6 +791,11 @@ export class StatementProcessingService {
       statement.processedAt = new Date();
       statement.parsingDetails = parsingDetails;
       await this.statementRepository.save(statement);
+      // Only now: the matcher reads the stored account number and status, and
+      // pairs nothing of a statement held for review.
+      if (await pairStatementTransfers(this.transferPairingService, statement, this.logger)) {
+        await this.statementRepository.save(statement);
+      }
 
       if (this.eventEmitter && statement.workspaceId) {
         const actorName = await this.resolveActorName(statement.userId);
