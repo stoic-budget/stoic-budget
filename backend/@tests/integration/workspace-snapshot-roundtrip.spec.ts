@@ -206,6 +206,28 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     });
     const tag = await insert('tags', { workspace_id: workspaceId, name: 'tax' });
     const wallet = await insert('wallets', { workspace_id: workspaceId, user_id: userId, name: 'Cash', currency: 'EUR' });
+    // A loan account with its terms: the schedule's inputs travel with the account.
+    const loan = await insert('wallets', {
+      workspace_id: workspaceId,
+      user_id: userId,
+      name: 'Car loan',
+      type: 'loan',
+      currency: 'EUR',
+      initial_balance: -9000,
+    });
+    await insert('loan_terms', {
+      workspace_id: workspaceId,
+      wallet_id: loan,
+      principal: 9000,
+      start_date: '2026-01-15',
+      term_months: 48,
+      payment_day: 15,
+      method: 'linear',
+      day_count: 'actual/365',
+      annual_rate: 4.9,
+      rate_changes: JSON.stringify([{ from: '2027-01-15', annualRate: 3.9 }]),
+      extra_payments: JSON.stringify([{ date: '2026-06-15', amount: 500 }]),
+    });
 
     // A statement with its file on disk, two tagged rows on it.
     const statementFile = writeDocument('bank.pdf', '%PDF-1.4 bank statement');
@@ -401,6 +423,7 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
       'goals',
       'custom_table_rows',
       'payables',
+      'loan_terms',
     ]) {
       expect(source[table]).toBeGreaterThan(0);
     }

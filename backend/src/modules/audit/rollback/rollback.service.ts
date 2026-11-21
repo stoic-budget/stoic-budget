@@ -87,7 +87,35 @@ export class RollbackService {
   }
 
   async rollbackTransaction(event: AuditEvent): Promise<RollbackResult> {
-    return this.applyRollback(event, this.transactionRepository);
+    const result = await this.applyRollback(event, this.transactionRepository);
+    if (result.success && event.action === AuditAction.DELETE) {
+      await this.dropLonePair(event.entityId);
+    }
+    return result;
+  }
+
+  /**
+   * Deleting the row released the other leg of its pair (the database does it,
+   * see ReleaseTransferPartnerOnDelete), so the restored row would be half of a
+   * pair nobody else is in, and out of every income and spending figure. It comes
+   * back unpaired instead. An investment move, paired with itself, keeps it. A
+   * lone crypto leg comes back unpaired too: a crypto row counts as income or
+   * spending only when it settles a bill, paired or not.
+   */
+  private async dropLonePair(id: string): Promise<void> {
+    const row = await this.transactionRepository.findOne({ where: { id } });
+    if (!row?.transferPairId || row.transferPairId === row.id) {
+      return;
+    }
+    const legs = await this.transactionRepository.count({
+      where: { workspaceId: row.workspaceId, transferPairId: row.transferPairId },
+    });
+    if (legs < 2) {
+      await this.transactionRepository.update(
+        { id: row.id, workspaceId: row.workspaceId },
+        { transferPairId: null, transferPairSource: null, transferPairKind: null },
+      );
+    }
   }
 
   async rollbackStatement(event: AuditEvent): Promise<RollbackResult> {

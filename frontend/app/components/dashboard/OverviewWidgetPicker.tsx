@@ -17,7 +17,7 @@ type SectionNameKey =
   | 'safeToSpend'
   | 'cashFlow'
   | 'crypto'
-  | 'topCategories'
+  | 'topPayees'
   | 'recentTransactions'
   | 'goals'
   | 'netWorth'
@@ -38,7 +38,7 @@ const NAME_KEYS: Record<Exclude<OverviewSectionId, 'getting-started'>, SectionNa
   'safe-to-spend': 'safeToSpend',
   'cash-flow': 'cashFlow',
   crypto: 'crypto',
-  'top-categories': 'topCategories',
+  'top-categories': 'topPayees',
   'recent-transactions': 'recentTransactions',
   goals: 'goals',
   'net-worth': 'netWorth',

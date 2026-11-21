@@ -5,6 +5,7 @@ import { Transaction } from '../../entities/transaction.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
+import { LoansModule } from '../loans/loans.module';
 import { WorkspaceCurrencyModule } from '../workspaces/workspace-currency.module';
 import { WalletCoverageService } from './wallet-coverage.service';
 import { WalletStatementsService } from './wallet-statements.service';
@@ -16,6 +17,8 @@ import { WalletsService } from './wallets.service';
     TypeOrmModule.forFeature([Wallet, WorkspaceMember, Transaction, Statement]),
     WorkspaceCurrencyModule,
     ExchangeRatesModule,
+    // Loan terms and schedules live on debt wallets; registered here so the app module stays small.
+    LoansModule,
   ],
   controllers: [WalletsController],
   providers: [WalletsService, WalletStatementsService, WalletCoverageService],

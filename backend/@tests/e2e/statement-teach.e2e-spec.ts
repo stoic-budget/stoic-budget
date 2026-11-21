@@ -47,11 +47,28 @@ const LINES: Placed[] = [
   { text: '1,087.50', right: 500, top: 140 },
 ];
 
-async function statementPdf(): Promise<Buffer> {
+/** The same statement with the date printed right of the description. */
+const DATE_RIGHT_LINES: Placed[] = [
+  { text: 'What', x: 40, top: 100 },
+  { text: 'When', x: 200, top: 100 },
+  { text: 'Went Out', x: 300, top: 100 },
+  { text: 'Came In', x: 375, top: 100 },
+  { text: 'Left', x: 475, top: 100 },
+  { text: 'ACME Store', x: 40, top: 120 },
+  { text: '01-02-2025', x: 200, top: 120 },
+  { text: '12.50', right: 342, top: 120 },
+  { text: '987.50', right: 500, top: 120 },
+  { text: 'Member One', x: 40, top: 140 },
+  { text: '03-02-2025', x: 200, top: 140 },
+  { text: '100.00', right: 412, top: 140 },
+  { text: '1,087.50', right: 500, top: 140 },
+];
+
+async function statementPdf(lines: Placed[] = LINES): Promise<Buffer> {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const page = doc.addPage([600, PAGE_HEIGHT]);
-  for (const line of LINES) {
+  for (const line of lines) {
     const width = font.widthOfTextAtSize(line.text, SIZE);
     const x = line.x ?? (line.right as number) - width;
     page.drawText(line.text, { x, y: PAGE_HEIGHT - line.top - SIZE, size: SIZE, font });
@@ -65,6 +82,12 @@ const REGIONS = [
   { tag: 'debit', page: 1, x0: 295, y0: 115, x1: 350, y1: 155 },
   { tag: 'credit', page: 1, x0: 365, y0: 115, x1: 420, y1: 155 },
   { tag: 'balance', page: 1, x0: 450, y0: 115, x1: 505, y1: 155 },
+];
+
+const DATE_RIGHT_REGIONS = [
+  { tag: 'description', page: 1, x0: 35, y0: 115, x1: 180, y1: 155 },
+  { tag: 'date', page: 1, x0: 195, y0: 115, x1: 260, y1: 155 },
+  ...REGIONS.filter(region => ['debit', 'credit', 'balance'].includes(region.tag)),
 ];
 
 /**
@@ -83,10 +106,12 @@ describe('Teaching a statement layout (e2e)', () => {
     owner: `teach-owner-${stamp}@example.com`,
     other: `teach-other-${stamp}@example.com`,
     sharer: `teach-sharer-${stamp}@example.com`,
+    dater: `teach-dater-${stamp}@example.com`,
   };
   let owner: E2eAccount;
   let other: E2eAccount;
   let sharer: E2eAccount;
+  let dater: E2eAccount;
   const files: string[] = [];
 
   const as = (account: E2eAccount, req: request.Test) =>
@@ -94,10 +119,10 @@ describe('Teaching a statement layout (e2e)', () => {
   const server = () => app.getHttpServer();
 
   let seeded = 0;
-  const seedStatement = async (account: E2eAccount) => {
+  const seedStatement = async (account: E2eAccount, file = pdf) => {
     // Where an upload keeps its file.
     const filePath = path.join(os.tmpdir(), `teach-e2e-${stamp}-${seeded}.pdf`);
-    await fs.promises.writeFile(filePath, pdf);
+    await fs.promises.writeFile(filePath, file);
     files.push(filePath);
     const saved = await dataSource.getRepository(Statement).save({
       userId: account.userId,
@@ -105,7 +130,7 @@ describe('Teaching a statement layout (e2e)', () => {
       fileName: 'statement.pdf',
       filePath,
       fileType: FileType.PDF,
-      fileSize: pdf.length,
+      fileSize: file.length,
       fileHash: `teach-${stamp}-${seeded++}`,
       bankName: BankName.OTHER,
       status: StatementStatus.UPLOADED,
@@ -127,6 +152,7 @@ describe('Teaching a statement layout (e2e)', () => {
     owner = await registerAccount(app, emails.owner, 'Teach Owner');
     other = await registerAccount(app, emails.other, 'Teach Other');
     sharer = await registerAccount(app, emails.sharer, 'Teach Sharer');
+    dater = await registerAccount(app, emails.dater, 'Teach Dater');
   });
 
   afterAll(async () => {
@@ -149,10 +175,12 @@ describe('Teaching a statement layout (e2e)', () => {
       request(server()).get(`/statements/${statement.id}/layout-words`),
     ).expect(200);
     const when = words.body.words.find((word: { text: string }) => word.text === 'When');
-    expect(when).toMatchObject({ page: 1, x: expect.closeTo(40, 0), dated: false });
-    // Every word of a transaction row knows its line starts with a date.
-    const acme = words.body.words.find((word: { text: string }) => word.text === 'ACME');
-    expect(acme).toMatchObject({ dated: true });
+    expect(when).toMatchObject({ page: 1, x: expect.closeTo(40, 0), opensDate: false });
+    // A transaction row's date opens it, and its words share one line.
+    const word = (text: string) =>
+      words.body.words.find((found: { text: string }) => found.text === text);
+    expect(word('01-02-2025')).toMatchObject({ opensDate: true });
+    expect(word('ACME')).toMatchObject({ opensDate: false, line: word('01-02-2025').line });
 
     const incomplete = await as(
       owner,
@@ -233,6 +261,33 @@ describe('Teaching a statement layout (e2e)', () => {
     const elsewhere = await seedStatement(other);
     expect(elsewhere.status).not.toBe(StatementStatus.COMPLETED);
     expect(await rowsOf(elsewhere.id)).toHaveLength(0);
+  });
+
+  it('reads a statement that prints the date right of the description once it is marked', async () => {
+    const file = await statementPdf(DATE_RIGHT_LINES);
+    const statement = await seedStatement(dater, file);
+    expect(await rowsOf(statement.id)).toHaveLength(0);
+
+    const preview = await as(
+      dater,
+      request(server()).post(`/statements/${statement.id}/teach/preview`),
+    )
+      .send({ regions: DATE_RIGHT_REGIONS })
+      .expect(200);
+    expect(preview.body).toMatchObject({ transactions: 2, totalDebit: 12.5, totalCredit: 100 });
+    expect(preview.body.checks).toContainEqual({ code: 'balance_chain', passed: true });
+
+    await as(dater, request(server()).post(`/statements/${statement.id}/teach`))
+      .send({ regions: DATE_RIGHT_REGIONS })
+      .expect(201);
+    expect((await processing.processStatement(statement.id)).status).toBe(
+      StatementStatus.COMPLETED,
+    );
+    expect((await rowsOf(statement.id)).map(row => Number(row.amount)).sort((a, b) => a - b)).toEqual([
+      12.5, 100,
+    ]);
+    // The next statement in that layout reads by itself.
+    expect((await seedStatement(dater, file)).status).toBe(StatementStatus.COMPLETED);
   });
 
   it('shares the taught layout with the project only, and refuses another workspace', async () => {

@@ -233,4 +233,72 @@ describe('RollbackService', () => {
     });
     expect(result.success).toBe(true);
   });
+
+  describe('undoing the deletion of one leg of a pair', () => {
+    const PAIR = 'pair-1';
+    const deletion = (before: Record<string, unknown>): AuditEvent =>
+      ({
+        id: 'evt-8',
+        entityId: 't1',
+        entityType: EntityType.TRANSACTION,
+        action: AuditAction.DELETE,
+        diff: { before, after: null },
+      }) as AuditEvent;
+    const restoredRow = (extra: Record<string, unknown> = {}) => ({
+      id: 't1',
+      workspaceId: 'ws-1',
+      transferPairId: PAIR,
+      transferPairKind: 'transfer',
+      cryptoWalletId: null,
+      ...extra,
+    });
+
+    it('brings the row back unpaired when its partner was released', async () => {
+      transactionRepository.findOne.mockResolvedValueOnce(restoredRow());
+      transactionRepository.count = vi.fn(async () => 1);
+
+      const result = await service.rollback(deletion(restoredRow()));
+
+      expect(result.success).toBe(true);
+      expect(transactionRepository.count).toHaveBeenCalledWith({
+        where: { workspaceId: 'ws-1', transferPairId: PAIR },
+      });
+      expect(transactionRepository.update).toHaveBeenCalledWith(
+        { id: 't1', workspaceId: 'ws-1' },
+        { transferPairId: null, transferPairSource: null, transferPairKind: null },
+      );
+    });
+
+    it('keeps the pair while another row is still in it', async () => {
+      transactionRepository.findOne.mockResolvedValueOnce(restoredRow());
+      transactionRepository.count = vi.fn(async () => 2);
+
+      await service.rollback(deletion(restoredRow()));
+
+      expect(transactionRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('keeps an investment move, paired with itself', async () => {
+      const move = restoredRow({ transferPairId: 't1', transferPairKind: 'investment' });
+      transactionRepository.findOne.mockResolvedValueOnce(move);
+      transactionRepository.count = vi.fn(async () => 1);
+
+      await service.rollback(deletion(move));
+
+      expect(transactionRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('brings a lone crypto leg back unpaired as well', async () => {
+      const leg = restoredRow({ cryptoWalletId: 'wallet-1' });
+      transactionRepository.findOne.mockResolvedValueOnce(leg);
+      transactionRepository.count = vi.fn(async () => 1);
+
+      await service.rollback(deletion(leg));
+
+      expect(transactionRepository.update).toHaveBeenCalledWith(
+        { id: 't1', workspaceId: 'ws-1' },
+        { transferPairId: null, transferPairSource: null, transferPairKind: null },
+      );
+    });
+  });
 });

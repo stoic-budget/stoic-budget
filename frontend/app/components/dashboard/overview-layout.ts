@@ -35,6 +35,7 @@ export const OVERVIEW_SECTION_IDS = [
   ...KPI_SECTION_IDS,
   'safe-to-spend',
   'cash-flow',
+  // Top payees; the id is the old Top categories card's, so saved layouts keep the slot.
   'top-categories',
   'recent-transactions',
   'goals',

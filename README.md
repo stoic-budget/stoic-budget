@@ -99,7 +99,7 @@ Stoic Budget is a full-stack platform for importing, categorizing and analyzing 
 
 ### Understand your money
 
-- **Dashboard** — this month's budgets, income, spending, net and savings rate, top categories, cash flow as each account's balance day by day, a calendar or a flow, recent transactions and upcoming charges; pick which sections show.
+- **Dashboard** — this month's budgets, income, spending, net and savings rate, top payees, cash flow as each account's balance day by day, a calendar or a flow, recent transactions and upcoming charges; pick which sections show.
 - **Reports** — cash flow, trends, spend flow, tax year and your own report templates, on a schedule if you like; export to CSV, XLSX or PDF.
 - **Budgets** — monthly limits per category in any currency, plus the Stoic balance: planned versus actual spending across necessity, work, virtue and leisure.
 - **Subscriptions and bills** — recurring charges found automatically, what is paid and still due this month, bills to pay and money to receive.
@@ -113,7 +113,6 @@ Stoic Budget is a full-stack platform for importing, categorizing and analyzing 
 - **Invoicing** — clients, itemized invoices with tax per line, PDFs, recurring invoices and credit notes; e-invoices in XRechnung, Peppol BIS and ZUGFeRD / Factur-X, sent and received over Peppol.
 - **Payables and receivables** — matched against statement rows, with ageing and payment reminders.
 - **VAT** — rates, rules and returns, EU VAT numbers checked against VIES, reminders before deadlines.
-- **Income tax drafts** — Germany (Anlage EÜR), Spain (Modelo 100), Poland (PIT-36L / PIT-28 / PIT-36) and a generic summary elsewhere, built only from the mappings you confirm.
 - **For your accountant** — a tax pack with the year's rows and every receipt behind them, and a DATEV export for Germany and Austria.
 - **Double-entry ledger** (opt-in) — every transaction posted as a balanced entry; trial balance, profit and loss, balance sheet and reconciliation against statements.
 
@@ -137,7 +136,7 @@ Setting expectations upfront:
 
 - **Not a bank integration** — Stoic Budget holds no bank integration of its own: it parses statement files you export from your bank. If you hold your own account with a data provider (SimpleFIN Bridge for the US and Canada, Enable Banking for the EU/EEA), you can connect it under Integrations and Stoic Budget pulls your statements through the same import; Stoic Budget itself never talks to a bank and holds no provider contract. That arrangement is also the only one in which this is free: every provider's free tier covers the accounts the person who linked them can see, which is why a workspace may hold one connection per person. A wallet's feed can be moved to another provider without losing its history.
 - **Not an accrual accounting suite** — The ledger records what your statements and manual entries say. There is no automatic accrual, depreciation schedule, or period-end closing workflow.
-- **Not a filing service or tax adviser** — Stoic Budget computes tax figures and drafts VAT and income tax documents, but it does not submit anything to a tax authority on your behalf. An income tax draft is not tax advice — check it before you file.
+- **Not a filing service or tax adviser** — Stoic Budget computes tax figures and drafts VAT returns, but it does not submit anything to a tax authority on your behalf. A draft is not tax advice — check it before you file.
 - **Not a replacement for accounting software** — Stoic Budget keeps double-entry books of your bank activity and issues invoices, but it does not run payroll or file statutory reports. Use it next to QuickBooks, Xero, or 1C rather than instead of them.
 
 ---
