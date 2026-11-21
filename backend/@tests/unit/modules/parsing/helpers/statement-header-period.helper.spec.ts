@@ -1,6 +1,7 @@
 import {
   findDayRangePeriod,
   findHeaderPeriod,
+  findDayFirstPeriod,
   findLabelledPeriod,
   findMonthPeriod,
   findSharedYearPeriod,
@@ -71,6 +72,20 @@ describe('findSharedYearPeriod', () => {
   );
 });
 
+describe('findDayFirstPeriod', () => {
+  it('reads a range printed day first with the year once', () => {
+    expect(findDayFirstPeriod('19 January to 18 February 2025')).toEqual({
+      from: new Date(Date.UTC(2025, 0, 19)),
+      to: new Date(Date.UTC(2025, 1, 18)),
+    });
+    expect(findDayFirstPeriod('15 Dec - 14 Jan 2025')?.from).toEqual(new Date(Date.UTC(2024, 11, 15)));
+  });
+
+  it('is null for a word that is no month', () => {
+    expect(findDayFirstPeriod('19 Accounts to 18 Payments 2025')).toBeNull();
+  });
+});
+
 describe('findLabelledPeriod', () => {
   const header = [
     'Example Bank Limited 09/02/2020',
@@ -86,12 +101,20 @@ describe('findLabelledPeriod', () => {
     });
   });
 
-  it.each(['Print Date: 09/02/2020', 'From Date: 10/01/2020', 'From Date: 10/02/2020 To Date: 10/01/2020'])(
+  it.each(['Account Number: xxxxxx1000 Open Date: 12/06/2017\nStatement Date: 01/06/2023', 'Print Date: 09/02/2020', 'From Date: 10/01/2020', 'From Date: 10/02/2020 To Date: 10/01/2020'])(
     'is null for %s',
     text => {
       expect(findLabelledPeriod(text, 'dmy')).toBeNull();
     },
   );
+
+  it("reads a card's open and close dates", () => {
+    const card = 'Account number ending in 1000\nOpen Date: Sep 15, 2017- Close Date: Oct 26, 2017';
+    expect(findLabelledPeriod(card, 'mdy')).toEqual({
+      from: new Date(2017, 8, 15),
+      to: new Date(2017, 9, 26),
+    });
+  });
 
   it('is tried after the unlabelled forms', () => {
     expect(findHeaderPeriod('01/01/2020 - 31/01/2020', 'dmy')?.to).toEqual(new Date(2020, 0, 31));

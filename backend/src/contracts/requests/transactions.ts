@@ -2,11 +2,13 @@
 
 import * as Schema from 'effect/Schema';
 import {
+  BooleanInput,
   IsoDateString,
   isAtMostTwoDecimals,
   NumericInput,
   optionalNullable,
   PageInput,
+  StringListInput,
 } from '../common/requests';
 import type { Wire } from '../common/wire';
 import { PaymentType } from '../transactions/payment-type';
@@ -44,6 +46,12 @@ export const UpdateTransactionBody = Schema.Struct({
    * set it, and only on a row that is theirs.
    */
   isPrivate: optionalNullable(Schema.Boolean),
+  /**
+   * Leaves the row out of budgets, reports, the dashboard and the forecast, or
+   * brings it back. Balances, net worth and tax keep counting it either way.
+   * Not nullable: the column always holds a decision, so there is nothing to clear.
+   */
+  excludedFromBudgets: Schema.optional(Schema.Boolean),
   /**
    * Marks this one row as mattering for the tax return, or not, whatever its
    * category says. Null hands the decision back to the category.
@@ -83,6 +91,18 @@ export const BulkUpdateRequestBody = Schema.Struct({
   updates: optionalNullable(UpdateTransactionBody),
 });
 export type BulkUpdateRequestBody = Wire<typeof BulkUpdateRequestBody>;
+
+/**
+ * `POST /transactions/bulk-delete`. Capped at the 1000 rows the statement edit
+ * page loads at once, so "select all" there always fits in one request.
+ */
+export const BulkDeleteTransactionsBody = Schema.Struct({
+  ids: Schema.Array(Schema.String.check(Schema.isUUID())).check(
+    Schema.isMinLength(1),
+    Schema.isMaxLength(1000),
+  ),
+});
+export type BulkDeleteTransactionsBody = Wire<typeof BulkDeleteTransactionsBody>;
 
 /**
  * Inline structural types on a `@Body()` give the global ValidationPipe an
@@ -141,6 +161,14 @@ export type SetTransactionTagsBody = Wire<typeof SetTransactionTagsBody>;
 
 const Uuid = Schema.String.check(Schema.isUUID());
 
+/** Uuids in a query string: repeated keys or comma-separated. */
+const UuidListInput = StringListInput.pipe(
+  Schema.decodeTo(Schema.Array(Uuid).check(Schema.isMaxLength(100))),
+);
+
+/** An amount bound in a query string: zero or more. */
+const AmountBound = NumericInput.check(Schema.isGreaterThanOrEqualTo(0));
+
 /** `/transactions/:id…`: a transaction's uuid. */
 export const TransactionParams = Schema.Struct({ id: Uuid });
 export type TransactionParams = Wire<typeof TransactionParams>;
@@ -181,6 +209,22 @@ export const TransactionListQuery = Schema.Struct({
   payeeId: Schema.optional(Uuid),
   /** Only the rows paid this way. */
   paymentType: Schema.optional(PaymentType),
+  /** Text in the payee, the counterparty, the purpose or the comment, any case. */
+  q: Schema.optional(Schema.String.check(Schema.isMaxLength(200))),
+  /** The row's amount, as an absolute value in its own currency, at least this. */
+  amountMin: Schema.optional(AmountBound),
+  /** The row's amount, as an absolute value in its own currency, at most this. */
+  amountMax: Schema.optional(AmountBound),
+  /** Rows carrying any of these tags: their own, their statement's or a receipt's. */
+  tagIds: Schema.optional(UuidListInput),
+  /** Rows in any of these categories (exactly these, not their subcategories). */
+  categoryIds: Schema.optional(UuidListInput),
+  /** `true`: only rows still waiting for a category (none, or the Uncategorized fallback). */
+  uncategorized: Schema.optional(BooleanInput),
+  /** `true`: only rows carrying no tag at all. */
+  untagged: Schema.optional(BooleanInput),
+  /** `true`: only rows without a payee. */
+  noPayee: Schema.optional(BooleanInput),
 });
 export type TransactionListQuery = Wire<typeof TransactionListQuery>;
 

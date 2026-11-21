@@ -19,6 +19,14 @@ vi.mock('react-hot-toast', () => ({
   },
 }));
 
+/** A refusal as the API sends it: an axios error carrying `{ error: { code, message } }`. */
+const rejected = (code: string, message: string) => ({
+  isAxiosError: true,
+  response: { data: { error: { code, message } } },
+});
+const privateRefusal =
+  'Only the person a private transaction belongs to can split it or undo its split';
+
 describe('useTransactionSplit', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -40,9 +48,9 @@ describe('useTransactionSplit', () => {
   });
 
   it('surfaces the backend message when the split is rejected', async () => {
-    vi.mocked(apiClient.post).mockRejectedValue({
-      response: { data: { message: 'Split parts must sum to 12000, received 11000' } },
-    });
+    vi.mocked(apiClient.post).mockRejectedValue(
+      rejected('TRANSACTION_SPLIT_PRIVATE_NOT_OWNER', privateRefusal),
+    );
     const onDone = vi.fn();
     const { result } = renderHook(() => useTransactionSplit(onDone));
 
@@ -50,13 +58,13 @@ describe('useTransactionSplit', () => {
       await result.current.split('tx-1', [{ amount: 1 }, { amount: 2 }]);
     });
 
-    expect(toast.error).toHaveBeenCalledWith('Split parts must sum to 12000, received 11000');
+    expect(toast.error).toHaveBeenCalledWith(privateRefusal);
     expect(toast.success).not.toHaveBeenCalled();
     expect(onDone).not.toHaveBeenCalled();
   });
 
   it('falls back to a generic message when the backend sends none', async () => {
-    vi.mocked(apiClient.post).mockRejectedValue(new Error('network'));
+    vi.mocked(apiClient.post).mockRejectedValue({});
     const { result } = renderHook(() => useTransactionSplit(vi.fn()));
 
     await act(async () => {
@@ -81,16 +89,16 @@ describe('useTransactionSplit', () => {
   });
 
   it('surfaces the backend message when the unsplit is rejected', async () => {
-    vi.mocked(apiClient.post).mockRejectedValue({
-      response: { data: { message: 'Transaction is not part of a split' } },
-    });
+    vi.mocked(apiClient.post).mockRejectedValue(
+      rejected('TRANSACTION_SPLIT_PRIVATE_NOT_OWNER', privateRefusal),
+    );
     const { result } = renderHook(() => useTransactionSplit(vi.fn()));
 
     await act(async () => {
       await result.current.unsplit('tx-1');
     });
 
-    expect(toast.error).toHaveBeenCalledWith('Transaction is not part of a split');
+    expect(toast.error).toHaveBeenCalledWith(privateRefusal);
   });
 
   it('toggles saving while the request is in flight', async () => {

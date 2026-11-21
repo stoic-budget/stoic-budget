@@ -260,21 +260,6 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     expect(reserve.body.total).toBe(0);
   });
 
-  it('declares a VAT-registered business net in the EÜR, with the VAT on its own line', async () => {
-    await auth(api().put('/income-tax/profile'))
-      .send({ taxYear: 2026, taxpayerType: 'self_employed', details: {} })
-      .expect(200);
-    await auth(api().put('/income-tax/mappings'))
-      .send({ taxYear: 2026, entries: [{ categoryId: office, lineKey: 'goods' }] })
-      .expect(200);
-
-    const draft = await auth(api().get('/income-tax/returns/2026')).expect(200);
-    const figure = (key: string) =>
-      (draft.body.figures as Array<{ key: string; amount: number }>).find(f => f.key === key);
-    expect(figure('goods')?.amount).toBe(111.21);
-    expect(figure('input_vat_paid')?.amount).toBe(7.79);
-  });
-
   describe('a filed return', () => {
     let customCategory: string;
     let secondId: string;

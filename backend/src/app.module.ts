@@ -64,6 +64,7 @@ import {
   WorkspaceMember,
   WorkspaceServiceSettings,
 } from './entities';
+import { EXTENSION_MODULES } from './extensions';
 import { ApiKeysModule } from './modules/api-keys/api-keys.module';
 import { ApplicationSettingsModule } from './modules/application-settings/application-settings.module';
 import { AuditModule } from './modules/audit/audit.module';
@@ -86,7 +87,6 @@ import { EntityImportsModule } from './modules/entity-imports/entity-imports.mod
 import { ExchangeRatesModule } from './modules/exchange-rates/exchange-rates.module';
 import { ForecastModule } from './modules/forecast/forecast.module';
 import { GoalsModule } from './modules/goals/goals.module';
-import { IncomeTaxModule } from './modules/income-tax/income-tax.module';
 import { InsightsModule } from './modules/insights/insights.module';
 import { InvestmentsModule } from './modules/investments/investments.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
@@ -248,7 +248,6 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
     StorageModule,
     TelegramModule,
     TaxModule,
-    IncomeTaxModule,
     TaxPackModule,
     TaxRemindersModule,
     DatevModule,
@@ -282,6 +281,7 @@ import { WorkspacesModule } from './modules/workspaces/workspaces.module';
     WebhooksModule,
     ApiKeysModule,
     McpModule,
+    ...EXTENSION_MODULES,
   ],
   controllers: [AppController],
   providers: [

@@ -9,6 +9,7 @@ import type {
   PayableStatus,
   PayablesSummary,
   PaymentCandidate,
+  RecurrenceRule,
 } from '@/app/lib/contracts';
 import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 
@@ -20,6 +21,7 @@ export type {
   PayableStatus,
   PayablesSummary,
   PaymentCandidate,
+  RecurrenceRule,
 } from '@/app/lib/contracts';
 
 export type PayablesExportFormat = 'csv' | 'excel';
@@ -45,6 +47,9 @@ export interface CreatePayableInput {
   linkedTransactionId?: string;
   source?: PayableSource;
   isRecurring?: boolean;
+  /** Repeats on this rule; the first occurrence is due on its start date. */
+  recurrence?: RecurrenceRule;
+  remindDaysBefore?: number;
   comment?: string;
   statementId?: string;
   tagIds?: string[];
@@ -66,6 +71,9 @@ export interface UpdatePayableInput {
   linkedTransactionId?: string | null;
   source?: PayableSource;
   isRecurring?: boolean;
+  /** Null ends the series; left out keeps it. */
+  recurrence?: RecurrenceRule | null;
+  remindDaysBefore?: number;
   comment?: string | null;
   statementId?: string | null;
   /** The whole new tag set; left out keeps the tags. */
@@ -252,6 +260,20 @@ export const payablesApi = {
       payload satisfies ContractInput<'MarkPayablePaidBody'>,
     );
     return checkContract('Payable', unwrapData(response), '/payables/:id/mark-paid');
+  },
+
+  /** One occurrence of a repeating bill, the series left as it is. */
+  async changeOccurrence(id: string, payload: ContractInput<'PayableOccurrenceBody'>) {
+    const response = await apiClient.put(`/payables/${id}/occurrence`, payload);
+    return checkContract('Payable', unwrapData(response), '/payables/:id/occurrence');
+  },
+
+  /** "Not this payment": the row is never proposed or linked to this bill again. */
+  async rejectMatch(id: string, transactionId: string): Promise<Payable> {
+    const response = await apiClient.post(`/payables/${id}/match-rejections`, {
+      transactionId,
+    } satisfies ContractInput<'RejectPayableMatchBody'>);
+    return checkContract('Payable', unwrapData(response), '/payables/:id/match-rejections');
   },
 
   async archive(id: string): Promise<Payable> {

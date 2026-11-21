@@ -29,6 +29,8 @@ export const CORE_ERRORS = {
   MEMBER_PERMISSIONS_ROLE_INVALID: 'Only members have individual permissions',
   TRANSACTION_PRIVATE_NOT_OWNER:
     'Only the person a transaction belongs to can make it private; assign it to yourself first',
+  TRANSACTION_SPLIT_PRIVATE_NOT_OWNER:
+    'Only the person a private transaction belongs to can split it or undo its split',
   INVITATION_NOT_FOUND: 'Invitation not found',
   INVITATION_NOT_FOUND_OR_USED: 'Invitation not found or already used',
   INVITATION_INVALID: 'Invalid invitation',

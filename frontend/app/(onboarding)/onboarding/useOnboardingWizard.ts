@@ -7,8 +7,6 @@ import type { DateFormatPreference } from '@/app/lib/user-format';
 
 export type { AppLocale as SupportedLocale } from '@/app/lib/locale';
 
-export type TaxpayerType = 'self_employed' | 'employee' | 'company';
-
 export interface OnboardingBusinessDetails {
   legalName: string;
   taxId: string;
@@ -36,7 +34,6 @@ export interface OnboardingData {
   profile: WorkspaceProfile | null;
   /** ISO 3166-1 alpha-2; null for "not listed / decide later". */
   taxCountry: string | null;
-  taxpayerType: TaxpayerType | null;
   business: OnboardingBusinessDetails;
 }
 

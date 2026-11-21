@@ -484,4 +484,21 @@ describe('split() preserves every money aggregate (real Postgres)', () => {
     // survivor is part 0, which kept the original category here.
     expect(after.budgetSpendByCategory).toEqual(before.budgetSpendByCategory);
   });
+
+  it('keeps every part of a row left out of budgets out of budgets and reports', async () => {
+    const original = await txRepo.findOneByOrFail({ workspaceId, counterpartyName: 'Taxi' });
+    await txRepo.update({ id: original.id }, { excludedFromBudgets: true });
+    const before = await capture();
+
+    await transactionsService.split(original.id, workspaceId, userId, {
+      parts: [{ amount: 1000 }, { amount: 2000 }],
+    });
+
+    const group = await transactionsService.getSplitParts(original.id, workspaceId);
+    expect(group.map(part => part.excludedFromBudgets)).toEqual([true, true]);
+    const after = await capture();
+    expect(after.budgetSpendTotal).toBe(before.budgetSpendTotal);
+    expect(after.reportTotals).toEqual(before.reportTotals);
+    expect(after.balanceSheet).toEqual(before.balanceSheet);
+  });
 });

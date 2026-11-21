@@ -17,6 +17,7 @@ export const TransactionHistoryField = Schema.Literals([
   'owner',
   'private',
   'confirmed',
+  'budgets',
   'comment',
 ]);
 export type TransactionHistoryField = Wire<typeof TransactionHistoryField>;
