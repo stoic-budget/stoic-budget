@@ -42,6 +42,7 @@ export const ACCOUNTING_ERRORS = {
     'The last payment would fall after 31 December 9999: start earlier or shorten the term',
   LOAN_TERMS_ROUNDING:
     'At this rate and term a payment rounded to the cent no longer repays the loan on time: shorten the term',
+  WALLET_CREDIT_LIMIT_CARD_ONLY: 'Only a credit card account can have a credit limit',
   TRANSFER_SAME_ACCOUNT: 'The transaction is already in this account',
   // Payables
   PAYABLE_PAYMENT_NOT_POSITIVE: 'A payment must be more than zero',
