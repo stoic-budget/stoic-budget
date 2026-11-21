@@ -215,10 +215,16 @@ def main() -> int:
         font_refs = as_dict(as_dict(page.get("/Resources")).get("/Font"))
         fonts = {name.encode(): font_for(ref) for name, ref in font_refs.items()}
         contents = page.get("/Contents")
+        # /Contents may be a reference to an array of streams rather than the array itself.
+        target = resolve(contents) if not isinstance(contents, list) else None
+        if isinstance(target, dict) and isinstance(target.get("value"), list):
+            contents = target["value"]
         # A page's content streams are one stream cut in pieces: a font chosen in
         # one is still the font of the strings that open the next.
         for ref in contents if isinstance(contents, list) else [contents]:
-            jobs.append((resolve(ref), fonts, page_index))
+            stream = resolve(ref)
+            if isinstance(stream, dict) and "stream" in stream:
+                jobs.append((stream, fonts, page_index))
         add_forms(page.get("/Resources"), fonts)
 
     carried: dict = {}

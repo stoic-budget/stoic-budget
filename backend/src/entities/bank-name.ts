@@ -65,5 +65,6 @@ export enum BankName {
   IFAST = 'ifast',
   ING = 'ing',
   KBC = 'kbc',
+  KEYBANK = 'keybank',
   OTHER = 'other',
 }
