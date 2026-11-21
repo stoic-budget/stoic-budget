@@ -4,7 +4,7 @@ import type { Repository } from 'typeorm';
 import { assertFound } from '../../common/utils/assert-found.util';
 import { flowsSql } from '../../common/utils/counted-transactions.util';
 import type { GoalPlanResponse, GoalPlanStatus } from '../../contracts';
-import { Goal, GoalContribution } from '../../entities';
+import { Goal } from '../../entities';
 import { Budget } from '../../entities/budget.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
@@ -24,6 +24,7 @@ import {
   toDateOnly,
   toNumber,
 } from './goal-money.util';
+import { GoalProgressService } from './goal-progress.service';
 
 /**
  * How many complete months of history the pace and the income average read.
@@ -54,8 +55,6 @@ export class GoalPlanService {
   constructor(
     @InjectRepository(Goal)
     private readonly goalRepository: Repository<Goal>,
-    @InjectRepository(GoalContribution)
-    private readonly contributionRepository: Repository<GoalContribution>,
     @InjectRepository(Budget)
     private readonly budgetRepository: Repository<Budget>,
     @InjectRepository(Transaction)
@@ -64,6 +63,7 @@ export class GoalPlanService {
     private readonly workspaceRepository: Repository<Workspace>,
     private readonly goalItemsService: GoalItemsService,
     private readonly exchangeRatesService: ExchangeRatesService,
+    private readonly progressService: GoalProgressService,
   ) {}
 
   async getPlan(goalId: string, workspaceId: string, now = new Date()): Promise<GoalPlanResponse> {
@@ -74,14 +74,15 @@ export class GoalPlanService {
     const goalCurrency = normalizeCurrency(goal.currency);
     const history = historyWindow(now, HISTORY_MONTHS);
 
-    const [saved, estimatedInGoalCurrency, contributedInHistory, budgets, incomeRows] =
-      await Promise.all([
-        this.sumContributions(workspaceId, goalId),
-        this.goalItemsService.estimatedTotal(goalId, workspaceId, goalCurrency),
-        this.sumContributions(workspaceId, goalId, history),
-        this.budgetRepository.find({ where: { workspaceId } }),
-        this.loadIncome(workspaceId, history),
-      ]);
+    // Progress and pace both come from the followed account's balance when the
+    // goal follows one, and from its contributions otherwise.
+    const [progress, estimatedInGoalCurrency, budgets, incomeRows] = await Promise.all([
+      this.progressService.progress(workspaceId, [goal]),
+      this.goalItemsService.estimatedTotal(goalId, workspaceId, goalCurrency),
+      this.budgetRepository.find({ where: { workspaceId } }),
+      this.loadIncome(workspaceId, history),
+    ]);
+    const saved = progress.get(goal.id)?.amount ?? 0;
 
     const rates = await buildRateMap(
       this.exchangeRatesService,
@@ -104,7 +105,16 @@ export class GoalPlanService {
     // goal is averaged over the complete months it has actually been around.
     // Dividing a two-week-old goal by three would report a third of its real
     // pace; zero observed months reports no pace at all rather than a fake one.
-    const monthsObserved = Math.min(HISTORY_MONTHS, monthsSinceStart(goal.createdAt, now));
+    // A followed account has its own history, which starts with the account.
+    const since = progress.get(goal.id)?.since ?? goal.createdAt;
+    const monthsObserved = Math.min(HISTORY_MONTHS, monthsSinceStart(since, now));
+    const moved = await this.progressService.movedBetween(
+      workspaceId,
+      [goal],
+      toDateOnly(history.start),
+      toDateOnly(startOfMonth(now)),
+    );
+    const contributedInHistory = moved.get(goal.id) ?? 0;
     const perMonth =
       monthsObserved === 0 ? 0 : round2(fromGoal(contributedInHistory) / monthsObserved);
 
@@ -155,28 +165,6 @@ export class GoalPlanService {
       gap: requiredPerMonth === null ? null : round2(requiredPerMonth - free),
       status: resolveStatus(remaining, requiredPerMonth, free),
     };
-  }
-
-  /** Contributions for the goal, optionally restricted to a date window. */
-  private async sumContributions(
-    workspaceId: string,
-    goalId: string,
-    window?: { start: Date; end: Date },
-  ): Promise<number> {
-    const query = this.contributionRepository
-      .createQueryBuilder('contribution')
-      .select('COALESCE(SUM(contribution.amount), 0)', 'total')
-      .where('contribution.workspace_id = :workspaceId', { workspaceId })
-      .andWhere('contribution.goal_id = :goalId', { goalId });
-
-    if (window) {
-      query
-        .andWhere('contribution.contribution_date >= :start', { start: toDateOnly(window.start) })
-        .andWhere('contribution.contribution_date <= :end', { end: toDateOnly(window.end) });
-    }
-
-    const row = await query.getRawOne<{ total: string }>();
-    return toNumber(row?.total);
   }
 
   /**

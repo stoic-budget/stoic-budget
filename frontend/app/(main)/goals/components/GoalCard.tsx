@@ -11,6 +11,7 @@ import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { formatMoney } from '@/app/lib/format-money';
 import { tokens } from '@/lib/theme-tokens';
 import type { Goal } from '../hooks/useGoals';
+import { GoalAccountNote } from './GoalAccountNote';
 import { GoalCoverThumb } from './GoalCoverThumb';
 
 interface GoalCardProps {
@@ -119,6 +120,7 @@ export function GoalCard({ goal, locale, labels, note, actions }: GoalCardProps)
               {note}
             </Typography>
           )}
+          <GoalAccountNote account={goal.account} goalCurrency={goal.currency} />
         </Box>
 
         {actions && <Box sx={{ display: 'flex', gap: 1 }}>{actions}</Box>}

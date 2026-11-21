@@ -11,6 +11,8 @@ export const CreateGoalBody = Schema.Struct({
   targetAmount: Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0.01)),
   currency: optionalNullable(Schema.String),
   targetDate: optionalNullable(IsoDateString),
+  /** An account of the workspace whose balance becomes the goal's progress. */
+  walletId: optionalNullable(Uuid),
 });
 export type CreateGoalBody = Wire<typeof CreateGoalBody>;
 
@@ -55,6 +57,8 @@ export const UpdateGoalBody = Schema.Struct({
   currency: optionalNullable(Schema.String),
   /** Explicit null clears the deadline; omitting the field leaves it alone. */
   targetDate: optionalNullable(IsoDateString),
+  /** Explicit null stops following the account; omitting the field leaves it alone. */
+  walletId: optionalNullable(Uuid),
 });
 export type UpdateGoalBody = Wire<typeof UpdateGoalBody>;
 
