@@ -75,6 +75,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'debit amt',
     'cheques et debits',
     'paid out',
+    'pay out',
     'money out',
     'payments',
     'cargos',
@@ -94,6 +95,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'credit amt',
     'depots et credits',
     'paid in',
+    'pay in',
     'receipts',
     'money in',
     'abonos',
@@ -119,5 +121,5 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
   // Columns whose words are no text of the row: the row number left of the date, a
   // category label ("Credit", "Debit") beside the amount.
   fee: ['fee', 'fees'],
-  other: ['no.', 'category'],
+  other: ['no.', 'category', 'channel'],
 };
