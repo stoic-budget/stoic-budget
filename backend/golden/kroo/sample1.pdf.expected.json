@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "accountNumber": "10000001",
+    "currency": "GBP",
+    "dateFrom": "2024-04-01T00:00:00",
+    "dateTo": "2024-04-30T00:00:00",
+    "balanceStart": 0
+  },
+  "transactions": []
+}
