@@ -4,6 +4,12 @@ import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, ChevronDown } from '@/app/components/icons';
 import { ItemImageBadge } from '@/app/components/item-images/ItemImageBadge';
+import { canDuplicate } from '@/app/components/transactions/helpers/duplicate-draft';
+import {
+  fromStatementTransaction,
+  mapApiRecordToTransaction,
+} from '@/app/components/transactions/helpers/transactionMapper';
+import { useDuplicateTransaction } from '@/app/components/transactions/hooks/useDuplicateTransaction';
 import { PaymentTypeLabel } from '@/app/components/transactions/PaymentTypeLabel';
 import { Checkbox } from '@/app/components/ui/checkbox';
 import {
@@ -51,6 +57,9 @@ const LOADING_COLUMNS: SkeletonColumn[] = [
   { className: 'seneca-all-tx__col-check', shape: 'none' },
 ];
 
+/** A listed row as the drawer and its actions read it (split markers included). */
+const asTransaction = (row: ListedRow) => mapApiRecordToTransaction(fromStatementTransaction(row));
+
 const LONG_DATE: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
 
 export function AllTransactionsTable({
@@ -93,6 +102,7 @@ export function AllTransactionsTable({
   const someSelected = !allSelected && rows.some(row => selected.has(row.id));
   const choices = categories.filter(category => category.isEnabled);
   const money = (value: number, currency: string) => formatMoney(value, currency, locale);
+  const duplicate = useDuplicateTransaction(categories);
 
   return (
     <div className="seneca-all-tx__table-wrap">
@@ -208,6 +218,11 @@ export function AllTransactionsTable({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => onOpen(row)}>{t.details}</DropdownMenuItem>
+                        {canDuplicate(asTransaction(row)) ? (
+                          <DropdownMenuItem onClick={() => void duplicate(asTransaction(row))}>
+                            {t.duplicate}
+                          </DropdownMenuItem>
+                        ) : null}
                         {row.statementId ? (
                           <DropdownMenuItem
                             onClick={() => router.push(`/statements/${row.statementId}/edit`)}

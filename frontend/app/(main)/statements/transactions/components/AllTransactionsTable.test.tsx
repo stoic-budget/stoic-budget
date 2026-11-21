@@ -12,6 +12,8 @@ vi.mock('@/app/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'user-1' }
 vi.mock('@/app/contexts/WorkspaceContext', () => ({
   useWorkspace: () => ({ currentWorkspace: { id: 'w1' } }),
 }));
+// The row menu offers Duplicate, which reads the workspace.
+vi.mock('@/app/hooks/useWorkspaceId', () => ({ useWorkspaceId: () => 'ws-1' }));
 vi.mock('@/app/components/item-images/ItemImageBadge', () => ({
   ItemImageBadge: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));

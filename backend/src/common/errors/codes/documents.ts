@@ -45,6 +45,7 @@ export const DOCUMENTS_ERRORS = {
   TRANSACTION_MERGE_TOO_FEW: 'At least 2 transactions required for merge',
   TRANSACTION_ATTACHMENT_FILE_MISSING: 'Attachment file is missing from storage',
   TRANSACTION_ATTACHMENT_NOT_FOUND: 'Attachment not found',
+  TRANSACTION_ATTACHMENT_TYPE_UNSUPPORTED: 'Only photos and PDF files can be attached',
   TRANSACTION_TAGS_NOT_FOUND: 'One or more tags do not exist in this workspace',
   TRANSACTION_BULK_UPDATE_FORMAT: 'Invalid bulk update format. Expected {items} or {ids, updates}',
   TRANSACTION_TAX_LOCKED_FIELDS:
@@ -59,6 +60,10 @@ export const DOCUMENTS_ERRORS = {
     'Cannot unsplit a transaction whose parts are part of a filed tax return',
   TRANSACTION_UNSPLIT_DUPLICATE:
     'Cannot unsplit a group containing a transaction marked as a duplicate',
+  TRANSACTION_UNSPLIT_PRIVATE_FILES:
+    'A private part has files of its own that the merged row would show to others; its owner can remove them first',
+  TRANSACTION_UNSPLIT_HIDES_FILES:
+    'A part has files that the merged row, private to one member, would hide from everyone else; remove them or share that row first',
   TRANSACTION_UNSPLIT_MIXED_BUDGETS:
     'Before unsplitting, either leave every part out of budgets or count every part in them',
   TRANSACTION_TRANSFER_SAME_LEG: 'A transfer needs two different transactions',
@@ -99,6 +104,8 @@ export const DOCUMENTS_ERRORS = {
   EXPENSE_CATEGORY_DISABLED: 'Category is disabled',
   EXPENSE_CATEGORY_NOT_EXPENSE: 'Category must be an expense category',
   EXPENSE_TAX_RATE_NOT_FOUND: 'Tax rate not found',
+  EXPENSE_WALLET_CURRENCY_MISMATCH:
+    'The account holds {{walletCurrency}}; the expense is in {{currency}}',
   // ── receipts ────────────────────────────────────────────────────────────
   RECEIPT_NOT_FOUND: 'Receipt not found',
   RECEIPT_ORIGINAL_NOT_FOUND: 'Original receipt not found',

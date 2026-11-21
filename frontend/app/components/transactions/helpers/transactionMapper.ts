@@ -65,6 +65,7 @@ export function mapApiRecordToTransaction(tx: TransactionApiRecord): Transaction
     branch: tx.branch,
     wallet: tx.wallet,
     walletId: tx.walletId ?? null,
+    cryptoWalletId: tx.cryptoWalletId ?? null,
     ownerMemberId: tx.ownerMemberId ?? null,
     isPrivate: tx.isPrivate ?? false,
     excludedFromBudgets: tx.excludedFromBudgets ?? false,

@@ -206,6 +206,16 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     });
     const tag = await insert('tags', { workspace_id: workspaceId, name: 'tax' });
     const wallet = await insert('wallets', { workspace_id: workspaceId, user_id: userId, name: 'Cash', currency: 'EUR' });
+    await insert('wallets', {
+      workspace_id: workspaceId,
+      user_id: userId,
+      name: 'ACME Card',
+      type: 'credit_card',
+      currency: 'EUR',
+      initial_balance: -1200,
+      credit_limit: 5000,
+    });
+
     // A loan account with its terms: the schedule's inputs travel with the account.
     const loan = await insert('wallets', {
       workspace_id: workspaceId,
@@ -393,6 +403,14 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     await insert('custom_table_rows', { table_id: table, row_number: 1, data: { client: 'Client GmbH' } });
     await insert('payables', { workspace_id: workspaceId, vendor: 'Adobe', amount: 60, currency: 'EUR' });
     await insert('payees', { workspace_id: workspaceId, name: 'Lidl' });
+    // An account set not to count in net worth: the setting is part of the account.
+    await insert('wallets', {
+      workspace_id: workspaceId,
+      user_id: userId,
+      name: 'Held for a friend',
+      currency: 'EUR',
+      include_in_net_worth: false,
+    });
   });
 
   afterAll(async () => {
@@ -470,6 +488,19 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     expect(leaks).toEqual([]);
   });
 
+  it('keeps which accounts count in net worth', async () => {
+    const copy = await roundTrip(workspaceId, 'Accounts copy');
+    const wallets: Array<{ name: string; include_in_net_worth: boolean }> = await sql(
+      'SELECT name, include_in_net_worth FROM wallets WHERE workspace_id = $1 ORDER BY name',
+      [copy.id],
+    );
+    // Every other account the setup made still counts; only this one is left out.
+    expect(wallets.filter(wallet => !wallet.include_in_net_worth).map(wallet => wallet.name)).toEqual([
+      'Held for a friend',
+    ]);
+    expect(wallets.map(wallet => wallet.name)).toContain('Cash');
+  });
+
   it('brings back a goal following the restored account, not the source one', async () => {
     const copy = await roundTrip(workspaceId, 'Goal account copy');
     const [goal] = await sql(
@@ -509,6 +540,15 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     expect(invoice.share_token).toBeNull();
     const [creditNote] = await sql('SELECT file_data FROM credit_notes WHERE workspace_id = $1', [copy.id]);
     expect(creditNote.file_data?.toString()).toBe('%PDF-1.4 credit note');
+  });
+
+  it("brings back a card's credit limit", async () => {
+    const copy = await roundTrip(workspaceId, 'Card copy');
+    const cards = await sql(
+      "SELECT name, credit_limit FROM wallets WHERE workspace_id = $1 AND type = 'credit_card'",
+      [copy.id],
+    );
+    expect(cards).toEqual([{ name: 'ACME Card', credit_limit: '5000.00' }]);
   });
 
   it('accounts for every table that has no workspace column', () => {

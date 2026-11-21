@@ -106,15 +106,26 @@ export function summarize(
           .filter(entry => entry.amount !== 0)
           .sort((a, b) => b.amount - a.amount)
       : [],
-    topPayees: [...byPayee]
-      .filter(([id, totals]) => payeeNames.has(id) && totals.amount !== 0)
-      .map(([id, totals]) => ({
-        id,
-        name: payeeNames.get(id) as string,
-        amount: round2(totals.amount),
-        count: totals.count,
-      }))
-      .sort((a, b) => b.amount - a.amount || b.count - a.count)
-      .slice(0, TOP_PAYEES),
+    topPayees: rankPayees(byPayee, payeeNames),
   };
+}
+
+/**
+ * The largest named payees, largest first and then by how many rows; a payee
+ * whose rows add up to nothing, or without a name, is left out.
+ */
+export function rankPayees(
+  byPayee: Map<string, { amount: number; count: number }>,
+  payeeNames: Map<string, string>,
+): Array<{ id: string; name: string; amount: number; count: number }> {
+  return [...byPayee]
+    .filter(([id, totals]) => payeeNames.has(id) && totals.amount !== 0)
+    .map(([id, totals]) => ({
+      id,
+      name: payeeNames.get(id) as string,
+      amount: round2(totals.amount),
+      count: totals.count,
+    }))
+    .sort((a, b) => b.amount - a.amount || b.count - a.count)
+    .slice(0, TOP_PAYEES);
 }

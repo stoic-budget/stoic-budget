@@ -1,6 +1,8 @@
 'use client';
 
 import Button from '@mui/material/Button';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import { useEffect, useState } from 'react';
 import { CurrencyDrawer } from '@/app/components/receipts/components/CurrencyDrawer';
@@ -11,6 +13,7 @@ import { useIntlayer } from '@/app/i18n';
 import type { WalletType } from '@/app/lib/contracts';
 import { tokens } from '@/lib/theme-tokens';
 import { ACCOUNT_TYPES, isDebtType } from '../account-types';
+import { parseCreditLimit } from '../credit-limit';
 import type { AccountForm } from '../hooks/useAccounts';
 import { AccountSideDrawer, Field } from './AccountSideDrawer';
 import { useAccountLabels } from './use-account-labels';
@@ -110,7 +113,9 @@ export function AccountFormDrawer({
   const set = (patch: Partial<AccountForm>) => setForm(prev => ({ ...prev, ...patch }));
   const openCurrency = () => picker.setCurrencyDrawerOpen(true);
   const debt = isDebtType(form.type);
-  const canSave = form.name.trim().length > 0 && !saving;
+  const card = form.type === 'credit_card';
+  const limitInvalid = card && parseCreditLimit(form.creditLimit) === 'invalid';
+  const canSave = form.name.trim().length > 0 && !limitInvalid && !saving;
 
   return (
     <>
@@ -236,6 +241,31 @@ export function AccountFormDrawer({
           />
         </Field>
 
+        {card && (
+          <Field
+            id="account-credit-limit"
+            label={t.creditLimitLabel}
+            hint={
+              limitInvalid ? (
+                <span role="alert" style={{ color: 'var(--money-down)' }}>
+                  {t.creditLimitInvalid}
+                </span>
+              ) : (
+                t.creditLimitHint
+              )
+            }
+          >
+            <TextField
+              id="account-credit-limit"
+              value={form.creditLimit}
+              onChange={event => set({ creditLimit: event.target.value })}
+              fullWidth
+              size="small"
+              slotProps={{ htmlInput: { inputMode: 'decimal', 'aria-invalid': limitInvalid } }}
+            />
+          </Field>
+        )}
+
         {members.length > 1 && (
           <Field id="account-owner" label={t.ownerLabel}>
             <Select
@@ -251,6 +281,23 @@ export function AccountFormDrawer({
             />
           </Field>
         )}
+
+        {/* Money held for someone else is still cash flow, only not wealth. */}
+        <div style={{ display: 'grid', gap: 2 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.includeInNetWorth}
+                onChange={event => set({ includeInNetWorth: event.target.checked })}
+                slotProps={{ input: { 'aria-describedby': 'account-net-worth-hint' } }}
+              />
+            }
+            label={t.countInNetWorth.value}
+          />
+          <span id="account-net-worth-hint" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+            {t.countInNetWorthHint}
+          </span>
+        </div>
       </AccountSideDrawer>
 
       <CurrencyDrawer

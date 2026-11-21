@@ -70,6 +70,8 @@ export function walletItem(
     initialBalance: '0.00',
     isActive: true,
     ownerMemberId: null,
+    includeInNetWorth: true,
+    creditLimit: null,
     balance: 0,
     unconvertedCurrencies: [],
     transactionCount: 0,

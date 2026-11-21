@@ -14,6 +14,8 @@ export interface TransactionListFilters {
   statementId?: string;
   walletId?: string;
   payeeId?: string;
+  /** Rows carrying the tag, their own or their statement's or receipt's. */
+  tagId?: string;
   paymentType?: PaymentType;
   dateFrom?: Date;
   dateTo?: Date;
@@ -48,6 +50,7 @@ export function listFiltersFromQuery(
     statementId: query.statement_id || query.statementId,
     walletId: query.walletId,
     payeeId: query.payeeId,
+    tagId: query.tagId,
     paymentType: query.paymentType,
     dateFrom: dateFrom ? new Date(dateFrom) : undefined,
     dateTo: dateTo ? new Date(dateTo) : undefined,
@@ -102,6 +105,19 @@ export function applyListFilters(
     query.andWhere('transaction.payeeId = :payeeId', { payeeId: filters.payeeId });
     // Another member's private row hides its payee, so the filter must not reveal it either.
     query.andWhere(READABLE_SQL, { viewerMemberId });
+  }
+
+  if (filters.tagId) {
+    // The pairs are bound to the list's own `:workspaceId`: another workspace's tag picks nothing.
+    query.andWhere(
+      `transaction.id IN (SELECT pairs.transaction_id FROM (${TRANSACTION_TAG_PAIRS_SQL}) pairs WHERE pairs.tag_id = :tagId)`,
+      { tagId: filters.tagId },
+    );
+    // Which tag another member's private row carries is what it hides.
+    query.andWhere(
+      '(transaction.isPrivate = false OR transaction.ownerMemberId = :viewerMemberId)',
+      { viewerMemberId },
+    );
   }
 
   if (filters.paymentType) {

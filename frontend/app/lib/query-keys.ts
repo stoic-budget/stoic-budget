@@ -70,6 +70,8 @@ export const queryKeys = {
     ['tags', workspaceId, 'receipt', receiptId] as const,
   statementTags: (workspaceId: string | null, statementId: string) =>
     ['tags', workspaceId, 'statement', statementId] as const,
+  tagSummary: (workspaceId: string | null, id: string) =>
+    ['tags', workspaceId, 'summary', id] as const,
   // Under the tags prefix: a tag saved anywhere refreshes the By tag figures too.
   transactionTagLinks: (workspaceId: string | null) =>
     ['tags', workspaceId, 'transaction-links'] as const,
@@ -257,6 +259,12 @@ export const queryKeys = {
     ['transactions', 'receipt-tax', o.workspaceId, o.receiptId] as const,
   transactionRecord: (o: { workspaceId: string | null; transactionId: string }) =>
     ['transactions', 'record', o.workspaceId, o.transactionId] as const,
+  // The list under 'transactions' (an approved receipt adds its photo to the row);
+  // the bytes outside it, so a refresh of the figures does not download every file again.
+  transactionAttachments: (workspaceId: string | null, transactionId: string) =>
+    ['transactions', 'attachments', workspaceId, transactionId] as const,
+  transactionAttachmentFile: (workspaceId: string | null, attachmentId: string) =>
+    ['transaction-attachment-file', workspaceId, attachmentId] as const,
   /** Instance-wide (the running containers), so the one key without a workspace. */
   systemUpdate: () => ['system-update'] as const,
   /** Instance-wide too: every workspace's statements, as counts per bank and layout. */
