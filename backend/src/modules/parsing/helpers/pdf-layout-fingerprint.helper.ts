@@ -132,6 +132,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.SYNCHRONY, /\bsynchronybank\.com\b/],
   [BankName.SYNOVUS, /\bp\.o\. box 2646-r, columbus, ga 31902\b|\bsynovus\.com\b/],
   [BankName.TANGERINE, /\bwww\.tangerine\.ca\b/],
+  [BankName.TD, /\bthe toronto-dominion bank\b|\btd canada trust\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
