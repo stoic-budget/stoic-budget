@@ -53,15 +53,14 @@ import { ClassificationService } from '../../src/modules/classification/services
 import { DashboardService } from '../../src/modules/dashboard/dashboard.service';
 import { ExchangeRatesService } from '../../src/modules/exchange-rates/exchange-rates.service';
 import { NotificationsService } from '../../src/modules/notifications/notifications.service';
-import { BudgetVsActualReport } from '../../src/modules/reports/budget-vs-actual.report';
 import { CustomTablesReport } from '../../src/modules/reports/custom-tables-report.report';
 import { CustomTablesDrillDownReport } from '../../src/modules/reports/custom-tables-drilldown.report';
 import { CustomTablesSummaryReport } from '../../src/modules/reports/custom-tables-summary.report';
 import { CustomReportGenerator } from '../../src/modules/reports/custom-report.report';
 import { DailyReportGenerator } from '../../src/modules/reports/daily-report.report';
-import { HoldingsSnapshotReport } from '../../src/modules/reports/holdings-snapshot.report';
 import { MonthlyReportGenerator } from '../../src/modules/reports/monthly-report.report';
 import { ReportHistoryService } from '../../src/modules/reports/report-history.service';
+import { ReportTemplateGenerator } from '../../src/modules/reports/report-templates.report';
 import { ReportsService } from '../../src/modules/reports/reports.service';
 import { SpendOverTimeReport } from '../../src/modules/reports/spend-over-time.report';
 import { StatementsSummaryReport } from '../../src/modules/reports/statements-summary.report';
@@ -236,9 +235,8 @@ describe('split() preserves every money aggregate (real Postgres)', () => {
         { provide: AuditService, useValue: auditStub },
         { provide: CACHE_MANAGER, useValue: cacheStub },
         { provide: ExchangeRatesService, useValue: exchangeStub },
-        // The P&L totals compared here never reach these two templates.
-        { provide: BudgetVsActualReport, useValue: {} },
-        { provide: HoldingsSnapshotReport, useValue: {} },
+        // Template reports this suite does not read.
+        { provide: ReportTemplateGenerator, useValue: {} },
         // Custom-table reports read their own tables, not transactions.
         { provide: CustomTablesSummaryReport, useValue: {} },
         { provide: CustomTablesReport, useValue: {} },

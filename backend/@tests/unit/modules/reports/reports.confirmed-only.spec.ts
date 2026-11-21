@@ -118,11 +118,12 @@ describe('ReportsService counts only what a report should', () => {
   it('template reports load confirmed rows only', async () => {
     const { service, transactionRepository, conditionsPerQuery } = buildService();
 
-    await (service as any).loadReportRows('ws-1', {
+    await service.previewTemplate('ws-1', {
       templateId: 'pnl',
       dateFrom: '2026-01-01',
       dateTo: '2026-12-31',
-    });
+      format: 'pdf',
+    } as any);
 
     // The same conditions as every other figure, on the one query it builds.
     const { built, counts } = conditionsPerQuery();

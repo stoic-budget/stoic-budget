@@ -33,11 +33,13 @@ import { ReportRetentionService } from './report-retention.service';
 import { ReportSchedulesController } from './report-schedules.controller';
 import { ReportSchedulesScheduler } from './report-schedules.scheduler';
 import { ReportSchedulesService } from './report-schedules.service';
+import { ReportTemplateGenerator } from './report-templates.report';
 import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 import { SpendFlowService } from './spend-flow.service';
 import { SpendOverTimeReport } from './spend-over-time.report';
 import { StatementsSummaryReport } from './statements-summary.report';
+import { TemplateReportRowsLoader } from './template-report-rows.loader';
 import { TopCategoriesReport } from './top-categories.report';
 import { WorkspaceExportReport } from './workspace-export.report';
 
@@ -86,6 +88,8 @@ import { WorkspaceExportReport } from './workspace-export.report';
     WorkspaceExportReport,
     TopCategoriesReport,
     SpendOverTimeReport,
+    TemplateReportRowsLoader,
+    ReportTemplateGenerator,
   ],
   exports: [ReportsService, ReportSchedulesService],
 })
