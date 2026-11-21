@@ -1311,12 +1311,8 @@
   &__footer {
     position: sticky;
     bottom: 0;
-    background: $color-card-bg;
+    background: var(--background);
     padding: 16px 0 8px;
-
-    @include dark {
-      background: $seneca-color-surface-dk;
-    }
   }
 }
 
