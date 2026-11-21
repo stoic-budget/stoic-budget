@@ -290,6 +290,14 @@ describe('TwoFactorService', () => {
       ).resolves.toEqual({ twoFactorRequired: true });
     });
 
+    it('still asks for the code when the passkey challenge cannot be built', async () => {
+      // No usable APP_URL, or the challenge store not answering.
+      passkeyAuth.secondFactorOptions.mockRejectedValue(new Error('passkeys unavailable'));
+      await expect(
+        service.checkLogin('u1', { email: 'member-1@example.com', password: 'x' }, context),
+      ).resolves.toEqual({ twoFactorRequired: true });
+    });
+
     it('offers no passkey challenge without a login flow to bind it to', async () => {
       passkeyAuth.secondFactorOptions.mockResolvedValue(passkeyOptions);
       await expect(
