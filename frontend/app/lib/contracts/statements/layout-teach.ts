@@ -72,6 +72,11 @@ export const TeachLayoutPreview = Schema.Struct({
   transactions: Schema.Number,
   totalDebit: Schema.Number,
   totalCredit: Schema.Number,
+  /**
+   * The statement waits for review, so its page takes rows typed by hand: the
+   * way out when no marking reads a row.
+   */
+  rowsByHand: Schema.Boolean,
   /** The reading's checks: a failed format check makes the statement wait for review. */
   checks: Schema.Array(
     Schema.Struct({

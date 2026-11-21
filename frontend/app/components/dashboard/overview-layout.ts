@@ -20,7 +20,15 @@ const LEAD_TILE_ID = 'kpi-spent';
  * Widgets someone switches on from the picker; until then they stay off the
  * Overview, so it does not fill up with cards most people never asked for.
  */
-export const OFF_BY_DEFAULT_SECTION_IDS = ['crypto', 'money-owed', 'taxes'] as const;
+export const OFF_BY_DEFAULT_SECTION_IDS = ['money-owed', 'taxes'] as const;
+
+/**
+ * The crypto card is on for everyone and draws nothing until a wallet has
+ * something to show, so it takes no room in a workspace without one. Its place
+ * is beside the net worth, which it is a part of.
+ */
+const CRYPTO_ID = 'crypto';
+const CRYPTO_BESIDE = 'net-worth';
 
 export const OVERVIEW_SECTION_IDS = [
   'getting-started',
@@ -33,12 +41,14 @@ export const OVERVIEW_SECTION_IDS = [
   'goals',
   'net-worth',
   'balances',
+  'data-sources',
   'budgets',
   // This month's subscriptions; the id is the old cash runway card's, so saved layouts keep the slot.
   'cash-runway',
   'activity',
   'month-close',
   'advice',
+  CRYPTO_ID,
   ...OFF_BY_DEFAULT_SECTION_IDS,
 ] as const;
 
@@ -65,20 +75,20 @@ const CARD_UNITS = 2;
 const LEGACY_KPI_ROW = 'kpis';
 
 /**
- * The arrangement set up in the Administrator workspace (2026-11-02), made
+ * The arrangement set up in the Administrator workspace (2026-11-15), made
  * everyone's starting point.
  */
 export const DEFAULT_OVERVIEW_ROWS: OverviewRows = [
   ['getting-started'],
-  [...KPI_SECTION_IDS],
+  ['kpi-income', 'kpi-spent', 'kpi-net'],
   ['cash-flow'],
   ['top-categories', 'recent-transactions'],
+  ['data-sources', 'advice'],
   ['balances', 'safe-to-spend'],
   ['goals', 'cash-runway'],
   ['budgets', 'month-close'],
-  ['net-worth'],
+  [CRYPTO_BESIDE, CRYPTO_ID],
   ['activity'],
-  ['advice'],
 ];
 
 /**
@@ -86,7 +96,13 @@ export const DEFAULT_OVERVIEW_ROWS: OverviewRows = [
  * is owed, taxes, advice), whatever month is picked: in
  * another month they stay in place, muted, under their "Today" note.
  */
-const PRESENT_SECTION_IDS = new Set<string>(['safe-to-spend', 'money-owed', 'taxes', 'advice']);
+const PRESENT_SECTION_IDS = new Set<string>([
+  'safe-to-spend',
+  'data-sources',
+  'money-owed',
+  'taxes',
+  'advice',
+]);
 
 export const tellsThePresent = (id: string): boolean => PRESENT_SECTION_IDS.has(id);
 
@@ -134,11 +150,28 @@ function pack(ids: string[]): OverviewRows {
 }
 
 /**
+ * Brings the crypto card into a layout saved while it was still switched on by
+ * hand: beside the net worth when that row has room, else on a row right under
+ * it. Without the net worth on the page it is appended like any new section.
+ */
+function placeCrypto(rows: OverviewRows): OverviewRows {
+  const at = rowOf(rows, CRYPTO_BESIDE);
+  if (at < 0) {
+    return rows;
+  }
+  const row = rows[at];
+  const placed =
+    unitsIn(row) + unitsOf(CRYPTO_ID) <= ROW_UNITS ? [[...row, CRYPTO_ID]] : [row, [CRYPTO_ID]];
+  return [...rows.slice(0, at), ...placed, ...rows.slice(at + 1)];
+}
+
+/**
  * A saved layout made safe to draw: sections that no longer exist, repeats and
  * hidden ones are dropped, the old single KPI row becomes the four tiles in its
  * place, overfull rows are cut, and sections added since the layout was saved
  * are appended, so nothing silently disappears (the setup checklist goes first
- * instead). Widgets that are off by default join only when switched on.
+ * instead), the crypto card beside the net worth. Widgets that are off by
+ * default join only when switched on.
  */
 export function normalizeRows(
   saved: { rows?: unknown; hidden?: unknown } | null | undefined,
@@ -182,13 +215,17 @@ export function normalizeRows(
       rows.push(kept);
     }
   }
+  const withCrypto = seen.has(CRYPTO_ID) ? rows : placeCrypto(rows);
+  if (withCrypto !== rows) {
+    seen.add(CRYPTO_ID);
+  }
   // The setup checklist is for newcomers, so it opens a layout saved before it
   // existed instead of hiding at the bottom; it vanishes once its job is done.
   const missing = OVERVIEW_SECTION_IDS.filter(
     id => !(seen.has(id) || OFF_BY_DEFAULT.has(id) || id === 'getting-started'),
   );
   const head = seen.has('getting-started') ? [] : [['getting-started']];
-  return [...head, ...rows, ...pack([...overflow, ...missing])];
+  return [...head, ...withCrypto, ...pack([...overflow, ...missing])];
 }
 
 function rowOf(rows: OverviewRows, id: string): number {

@@ -20,6 +20,9 @@ vi.mock('../CashFlowCard', () => ({
   ),
 }));
 
+vi.mock('../DataCoverageCard', () => ({
+  DataCoverageCard: () => <div data-testid="data-coverage" />,
+}));
 vi.mock('../TopPayeesCard', () => ({
   TopPayeesCard: ({ month }: { month: string }) => <div data-testid="top-payees">{month}</div>,
 }));

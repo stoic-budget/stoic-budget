@@ -16,6 +16,10 @@ import { CustomTableRow } from '../../../entities/custom-table-row.entity';
 import { Statement } from '../../../entities/statement.entity';
 import { Transaction } from '../../../entities/transaction.entity';
 import { Workspace } from '../../../entities/workspace.entity';
+import {
+  recordedLinks,
+  restoreDeletedTransaction,
+} from '../../transactions/helpers/transaction-undo-delete';
 import type { RollbackResult } from '../interfaces/audit-event.interface';
 
 type SnapshotRecord = Record<string, unknown>;
@@ -87,34 +91,28 @@ export class RollbackService {
   }
 
   async rollbackTransaction(event: AuditEvent): Promise<RollbackResult> {
-    const result = await this.applyRollback(event, this.transactionRepository);
-    if (result.success && event.action === AuditAction.DELETE) {
-      await this.dropLonePair(event.entityId);
+    if (event.action !== AuditAction.DELETE) {
+      return this.applyRollback(event, this.transactionRepository);
     }
-    return result;
-  }
-
-  /**
-   * Deleting the row released the other leg of its pair (the database does it,
-   * see ReleaseTransferPartnerOnDelete), so the restored row would be half of a
-   * pair nobody else is in, and out of every income and spending figure. It comes
-   * back unpaired instead. An investment move, paired with itself, keeps it. A
-   * lone crypto leg comes back unpaired too: a crypto row counts as income or
-   * spending only when it settles a bill, paired or not.
-   */
-  private async dropLonePair(id: string): Promise<void> {
-    const row = await this.transactionRepository.findOne({ where: { id } });
-    if (!row?.transferPairId || row.transferPairId === row.id) {
-      return;
+    // A deleted row comes back with what its delete took apart around it:
+    // the pair, the duplicate flags, the split and the statement's totals.
+    const before = this.extractSnapshots(event.diff)?.before;
+    const workspaceId = event.workspaceId ?? (before?.workspaceId as string | undefined);
+    if (!(before && workspaceId)) {
+      return { success: false, message: 'Missing before state for rollback' };
     }
-    const legs = await this.transactionRepository.count({
-      where: { workspaceId: row.workspaceId, transferPairId: row.transferPairId },
-    });
-    if (legs < 2) {
-      await this.transactionRepository.update(
-        { id: row.id, workspaceId: row.workspaceId },
-        { transferPairId: null, transferPairSource: null, transferPairKind: null },
+    try {
+      await restoreDeletedTransaction(
+        this.transactionRepository.manager,
+        workspaceId,
+        before,
+        recordedLinks(event.meta),
       );
+      return { success: true, message: 'Delete rolled back' };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Rollback failed: ${message}`);
+      return { success: false, message };
     }
   }
 
