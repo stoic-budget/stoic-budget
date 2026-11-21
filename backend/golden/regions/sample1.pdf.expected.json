@@ -1,0 +1,107 @@
+{
+  "metadata": {
+    "accountNumber": "700000001",
+    "currency": "USD",
+    "dateFrom": "2022-09-25T00:00:00",
+    "dateTo": "2022-10-22T00:00:00",
+    "balanceStart": -69.1
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-09-30T00:00:00",
+      "counterpartyName": "Enterprise Rent",
+      "paymentPurpose": "Card Credit Enterprise Rent 3405 Brewton AL 36426",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-10-01T00:00:00",
+      "counterpartyName": "Cash App*cash O",
+      "paymentPurpose": "Card Credit Cash App*cash O 7511 VISA Direct NM 87505",
+      "credit": 14.94,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-10-04T00:00:00",
+      "counterpartyName": "Cash App*cash O",
+      "paymentPurpose": "Card Credit Cash App*cash O 7511 VISA Direct NM 87505",
+      "credit": 50.24,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-10-04T00:00:00",
+      "counterpartyName": "Deposit - Thank You",
+      "paymentPurpose": "Deposit - Thank You",
+      "credit": 445.88,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-10-06T00:00:00",
+      "counterpartyName": "ATM Imaged Deposit",
+      "paymentPurpose": "ATM Imaged Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-10-11T00:00:00",
+      "counterpartyName": "Cash App*cash O",
+      "paymentPurpose": "Card Credit Cash App*cash O 7511 VISA Direct NM 87505",
+      "credit": 30.54,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-10-19T00:00:00",
+      "counterpartyName": "Tax Products Pe1 Xxtaxeip2 Membersa Samp Aaaaaaaaaaa1000",
+      "paymentPurpose": "Tax Products Pe1 Xxtaxeip2 Membersa Samp Aaaaaaaaaaa1000",
+      "credit": 2400,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-10-01T00:00:00",
+      "counterpartyName": "Wal-Mart Super",
+      "paymentPurpose": "PIN Purchase Wal-Mart Super 5411 Brewton AL 2149",
+      "debit": 36.38,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-10-04T00:00:00",
+      "counterpartyName": "Market Work 206",
+      "paymentPurpose": "Card Purchase Market Work 206 5814 Renton NM 87505",
+      "debit": 0.76,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-10-04T00:00:00",
+      "counterpartyName": "Market Work 206",
+      "paymentPurpose": "Card Purchase Market Work 206 5814 Renton NM 87505",
+      "debit": 1.1,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-10-04T00:00:00",
+      "counterpartyName": "Market Work 206",
+      "paymentPurpose": "Card Purchase Market Work 206 5814 Renton NM 87505",
+      "debit": 1.51,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-10-04T00:00:00",
+      "counterpartyName": "Market Work 206",
+      "paymentPurpose": "Card Purchase Market Work 206 5814 Renton NM 87505",
+      "debit": 1.51,
+      "currency": "USD",
+      "paymentType": "card"
+    }
+  ]
+}

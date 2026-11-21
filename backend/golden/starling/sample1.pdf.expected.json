@@ -1,0 +1,1212 @@
+{
+  "metadata": {
+    "accountNumber": "GB04SRLG06932292647992",
+    "currency": "GBP",
+    "dateFrom": "2023-10-01T00:00:00",
+    "dateTo": "2024-01-19T00:00:00",
+    "balanceStart": 1644,
+    "balanceEnd": 0.4
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-10-03T00:00:00",
+      "counterpartyName": "Smart Kids Nursery Ltd",
+      "paymentPurpose": "FASTER PAYMENT Smart Kids Nursery Ltd",
+      "debit": 1630,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-31T00:00:00",
+      "counterpartyName": "Bella",
+      "paymentPurpose": "ONLINE PAYMENT Bella",
+      "debit": 14,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-10-31T00:00:00",
+      "counterpartyName": "K Sampl",
+      "paymentPurpose": "FASTER PAYMENT K Sampl ()",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "Sampl Membersa",
+      "paymentPurpose": "FASTER PAYMENT Sampl Membersa (BILL RENT)",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "Skill On Net Ltd",
+      "paymentPurpose": "FASTER PAYMENT Skill On Net Ltd (BG9969JU05XMX2NPP2)",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "Skill On Net Ltd",
+      "paymentPurpose": "FASTER PAYMENT Skill On Net Ltd (BG9969JU05XMX2NPP2)",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Friend)",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "Skill On Net Ltd",
+      "paymentPurpose": "FASTER PAYMENT Skill On Net Ltd (CYYOPM6MMX2G32OPRX)",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "Skill On Net Ltd",
+      "paymentPurpose": "FASTER PAYMENT Skill On Net Ltd (CYYOPM6MMX2G32OPRX)",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "Bella",
+      "paymentPurpose": "ONLINE PAYMENT Bella",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-01T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-02T00:00:00",
+      "counterpartyName": "Lc International",
+      "paymentPurpose": "ONLINE PAYMENT Lc International",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-02T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-02T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-03T00:00:00",
+      "counterpartyName": "MOSINA KAMPARELOV",
+      "paymentPurpose": "FASTER PAYMENT MOSINA KAMPARELOV (Friend)",
+      "credit": 260,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-03T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Friend)",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-03T00:00:00",
+      "counterpartyName": "Membe Samp",
+      "paymentPurpose": "FASTER PAYMENT Membe Samp (Friend)",
+      "debit": 8,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-03T00:00:00",
+      "counterpartyName": "giffgaff",
+      "paymentPurpose": "ONLINE PAYMENT giffgaff",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-03T00:00:00",
+      "counterpartyName": "Membersa Sample",
+      "paymentPurpose": "FASTER PAYMENT Membersa Sample (Friend)",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-04T00:00:00",
+      "counterpartyName": "Membersa Sample",
+      "paymentPurpose": "FASTER PAYMENT Membersa Sample (Friend)",
+      "debit": 6.6,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-04T00:00:00",
+      "counterpartyName": "Sadiq Brothers",
+      "paymentPurpose": "CONTACTLESS Sadiq Brothers",
+      "debit": 14.46,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-04T00:00:00",
+      "counterpartyName": "Mini Market Oltenia",
+      "paymentPurpose": "CONTACTLESS Mini Market Oltenia",
+      "debit": 40.5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-04T00:00:00",
+      "counterpartyName": "Wah Wah Mirchi Froz",
+      "paymentPurpose": "CONTACTLESS Wah Wah Mirchi Froz",
+      "debit": 21.43,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-04T00:00:00",
+      "counterpartyName": "C S Home",
+      "paymentPurpose": "CONTACTLESS C S Home",
+      "debit": 9.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-04T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-04T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 60,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-04T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 30,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-05T00:00:00",
+      "counterpartyName": "Wah Wah Mirchi",
+      "paymentPurpose": "CONTACTLESS Wah Wah Mirchi",
+      "debit": 8.95,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-07T00:00:00",
+      "counterpartyName": "MOSINA KAMPARELOV",
+      "paymentPurpose": "FASTER PAYMENT MOSINA KAMPARELOV (Friend)",
+      "credit": 28,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-08T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "debit": 0.6,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-08T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-09T00:00:00",
+      "counterpartyName": "Ppoint_*international",
+      "paymentPurpose": "CONTACTLESS Ppoint_*international",
+      "debit": 14.71,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-09T00:00:00",
+      "counterpartyName": "Wah Wah Mirchi Froz",
+      "paymentPurpose": "CONTACTLESS Wah Wah Mirchi Froz",
+      "debit": 1.69,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-09T00:00:00",
+      "counterpartyName": "Wah Wah Mirchi Froz",
+      "paymentPurpose": "CONTACTLESS Wah Wah Mirchi Froz",
+      "debit": 1,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-11T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-12T00:00:00",
+      "counterpartyName": "Z. Mini Market",
+      "paymentPurpose": "CONTACTLESS Z. Mini Market",
+      "debit": 9,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-12T00:00:00",
+      "counterpartyName": "Z. Mini Market",
+      "paymentPurpose": "CONTACTLESS Z. Mini Market",
+      "debit": 1,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-13T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "credit": 89,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-13T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Friend)",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-13T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Friend)",
+      "debit": 24,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-13T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 1,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-13T00:00:00",
+      "counterpartyName": "Skill On Net Ltd",
+      "paymentPurpose": "FASTER PAYMENT Skill On Net Ltd (FAR27PCROEQJNISSHO)",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-13T00:00:00",
+      "counterpartyName": "Skill On Net Ltd",
+      "paymentPurpose": "FASTER PAYMENT Skill On Net Ltd (FAR27PCROEQJNISSHO)",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-13T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "debit": 1.98,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-13T00:00:00",
+      "counterpartyName": "Khyber Shop 12",
+      "paymentPurpose": "CONTACTLESS Khyber Shop 12",
+      "debit": 13.28,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-13T00:00:00",
+      "counterpartyName": "Membera Sampl",
+      "paymentPurpose": "FASTER PAYMENT Membera Sampl ()",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-14T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "credit": 19,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-14T00:00:00",
+      "counterpartyName": "Bb-Megabus/sccl",
+      "paymentPurpose": "ONLINE PAYMENT Bb-Megabus/sccl",
+      "debit": 6.59,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-14T00:00:00",
+      "counterpartyName": "Ppoint_*international",
+      "paymentPurpose": "CONTACTLESS Ppoint_*international",
+      "debit": 7.23,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-14T00:00:00",
+      "counterpartyName": "Wah Wah Mirchi",
+      "paymentPurpose": "CONTACTLESS Wah Wah Mirchi",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-14T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-14T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 15,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-14T00:00:00",
+      "counterpartyName": "Sampleva Membera",
+      "paymentPurpose": "FASTER PAYMENT Sampleva Membera (0447617861985744)",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-15T00:00:00",
+      "counterpartyName": "SAMPLERO-H MT",
+      "paymentPurpose": "FASTER PAYMENT SAMPLERO-H MT (B138DN PAINT)",
+      "credit": 50,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-15T00:00:00",
+      "counterpartyName": "Cash Machine",
+      "paymentPurpose": "ATM Cash Machine",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-11-15T00:00:00",
+      "counterpartyName": "Ppoint_*international",
+      "paymentPurpose": "CONTACTLESS Ppoint_*international",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-15T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 9,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-15T00:00:00",
+      "counterpartyName": "Khyber Shop 12",
+      "paymentPurpose": "CONTACTLESS Khyber Shop 12",
+      "debit": 9.36,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-15T00:00:00",
+      "counterpartyName": "Khyber Shop 12",
+      "paymentPurpose": "CONTACTLESS Khyber Shop 12",
+      "debit": 5.03,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 25,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Continental Superma",
+      "paymentPurpose": "CONTACTLESS Continental Superma",
+      "debit": 4.5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Wah Wah Mirchi",
+      "paymentPurpose": "CONTACTLESS Wah Wah Mirchi",
+      "debit": 14.84,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "McDonald's",
+      "paymentPurpose": "ONLINE PAYMENT McDonald's",
+      "debit": 15.57,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Bolt",
+      "paymentPurpose": "ONLINE PAYMENT Bolt",
+      "debit": 6.3,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Bolt",
+      "paymentPurpose": "ONLINE PAYMENT Bolt",
+      "debit": 6,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Member Sampleva",
+      "paymentPurpose": "FASTER PAYMENT Member Sampleva (Odoslane z Revolut)",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Membersa Sampleva",
+      "paymentPurpose": "FASTER PAYMENT Membersa Sampleva (gift)",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 5,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-16T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 1,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "Ppoint_*international",
+      "paymentPurpose": "CONTACTLESS Ppoint_*international",
+      "debit": 9.77,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "Pizza Point",
+      "paymentPurpose": "CONTACTLESS Pizza Point",
+      "debit": 9.48,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "Z. Mini Market",
+      "paymentPurpose": "CONTACTLESS Z. Mini Market",
+      "debit": 9.5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "Sampleva Membera",
+      "paymentPurpose": "FASTER PAYMENT Sampleva Membera (0447617861985744)",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-17T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "credit": 49,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "Bolt",
+      "paymentPurpose": "ONLINE PAYMENT Bolt",
+      "debit": 5.6,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "Lc International",
+      "paymentPurpose": "ONLINE PAYMENT Lc International",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "Ppoint_*international",
+      "paymentPurpose": "CONTACTLESS Ppoint_*international",
+      "debit": 2.37,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "Lc International",
+      "paymentPurpose": "ONLINE PAYMENT Lc International",
+      "debit": 15,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "Pakeezah",
+      "paymentPurpose": "CONTACTLESS Pakeezah",
+      "debit": 1.5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "Wah Wah Mirchi",
+      "paymentPurpose": "CONTACTLESS Wah Wah Mirchi",
+      "debit": 7.36,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "Z. Mini Market",
+      "paymentPurpose": "CONTACTLESS Z. Mini Market",
+      "debit": 11.36,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "Z. Mini Market",
+      "paymentPurpose": "CONTACTLESS Z. Mini Market",
+      "debit": 11.55,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 8,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "Trainline",
+      "paymentPurpose": "ONLINE PAYMENT Trainline",
+      "debit": 23.5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-18T00:00:00",
+      "counterpartyName": "Bolt",
+      "paymentPurpose": "ONLINE PAYMENT Bolt",
+      "debit": 7,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-19T00:00:00",
+      "counterpartyName": "Lc International",
+      "paymentPurpose": "ONLINE PAYMENT Lc International",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-19T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "credit": 18.95,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-19T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "debit": 11,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-11-20T00:00:00",
+      "counterpartyName": "Bolt",
+      "paymentPurpose": "ONLINE PAYMENT Bolt",
+      "debit": 6.8,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-20T00:00:00",
+      "counterpartyName": "Ppoint_*international",
+      "paymentPurpose": "CONTACTLESS Ppoint_*international",
+      "debit": 2.08,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-21T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 8.49,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-22T00:00:00",
+      "counterpartyName": "Bolt",
+      "paymentPurpose": "ONLINE PAYMENT Bolt",
+      "debit": 5.9,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-28T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 3.49,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-28T00:00:00",
+      "counterpartyName": "Bolt",
+      "paymentPurpose": "ONLINE PAYMENT Bolt",
+      "debit": 5.9,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-11-30T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (friend)",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-11-30T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (friend)",
+      "credit": 5,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-01T00:00:00",
+      "counterpartyName": "Starling Bank",
+      "paymentPurpose": "DEPOSIT INTEREST Starling Bank (November Interest Earned)",
+      "credit": 0.06,
+      "currency": "GBP",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-12-01T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-01T00:00:00",
+      "counterpartyName": "Membe Samplova",
+      "paymentPurpose": "FASTER PAYMENT Membe Samplova (Sent from Revolut)",
+      "credit": 462.9,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-01T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "debit": 430,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-01T00:00:00",
+      "counterpartyName": "Lc International",
+      "paymentPurpose": "ONLINE PAYMENT Lc International",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-01T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-01T00:00:00",
+      "counterpartyName": "Gala Bingo",
+      "paymentPurpose": "ONLINE PAYMENT Gala Bingo",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-01T00:00:00",
+      "counterpartyName": "Jan Sampl",
+      "paymentPurpose": "FASTER PAYMENT Jan Sampl (From S Kamparelov)",
+      "debit": 8,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-02T00:00:00",
+      "counterpartyName": "Lc International",
+      "paymentPurpose": "ONLINE PAYMENT Lc International",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-02T00:00:00",
+      "counterpartyName": "Lc International",
+      "paymentPurpose": "ONLINE PAYMENT Lc International",
+      "debit": 15,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-03T00:00:00",
+      "counterpartyName": "Membe Samp",
+      "paymentPurpose": "FASTER PAYMENT Membe Samp (Papire)",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-03T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (friend)",
+      "credit": 0.84,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-04T00:00:00",
+      "counterpartyName": "Curve",
+      "paymentPurpose": "CARD SUBSCRIPTION Curve",
+      "debit": 5.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-04T00:00:00",
+      "counterpartyName": "Gala Bingo",
+      "paymentPurpose": "ONLINE PAYMENT Gala Bingo",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-11T00:00:00",
+      "counterpartyName": "Ppoint_*international",
+      "paymentPurpose": "CONTACTLESS Ppoint_*international",
+      "debit": 0.4,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-11T00:00:00",
+      "counterpartyName": "CREDIT Card Transaction Dispute",
+      "paymentPurpose": "CARD PAYMENT CREDIT Card Transaction Dispute (Card Fraud Refund)",
+      "credit": 0.4,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-12T00:00:00",
+      "counterpartyName": "Membera Sampl",
+      "paymentPurpose": "FASTER PAYMENT Membera Sampl (Mosina Kamparelov)",
+      "credit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-22T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-30T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "debit": 0.47,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-01T00:00:00",
+      "counterpartyName": "Starling Bank",
+      "paymentPurpose": "DEPOSIT INTEREST Starling Bank (December Interest Earned)",
+      "credit": 0.02,
+      "currency": "GBP",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2024-01-06T00:00:00",
+      "counterpartyName": "MEMBER SAMPL",
+      "paymentPurpose": "FASTER PAYMENT MEMBER SAMPL (friend)",
+      "credit": 120,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-06T00:00:00",
+      "counterpartyName": "Member Sampl",
+      "paymentPurpose": "FASTER PAYMENT Member Sampl (friend )",
+      "debit": 7,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-06T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (To Revolut -VZNP-)",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-06T00:00:00",
+      "counterpartyName": "Member Sampl",
+      "paymentPurpose": "FASTER PAYMENT Member Sampl (friend)",
+      "credit": 8,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-06T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-06T00:00:00",
+      "counterpartyName": "Membersa Sampl",
+      "paymentPurpose": "FASTER PAYMENT Membersa Sampl (friend )",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-06T00:00:00",
+      "counterpartyName": "Jan Samp",
+      "paymentPurpose": "FASTER PAYMENT Jan Samp (friend)",
+      "debit": 15,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-07T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 17,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "Kfc Perry Bar",
+      "paymentPurpose": "ONLINE PAYMENT Kfc Perry Bar",
+      "debit": 26.97,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "Villa Supermarket",
+      "paymentPurpose": "CONTACTLESS Villa Supermarket",
+      "debit": 9.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "Ppoint_*international",
+      "paymentPurpose": "CONTACTLESS Ppoint_*international",
+      "debit": 1.69,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (friend)",
+      "credit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (friend)",
+      "credit": 8,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "888",
+      "paymentPurpose": "ONLINE PAYMENT 888",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "Mosina Kamparelov",
+      "paymentPurpose": "FASTER PAYMENT Mosina Kamparelov (Friend)",
+      "debit": 8,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-09T00:00:00",
+      "counterpartyName": "Member Sampl",
+      "paymentPurpose": "FASTER PAYMENT Member Sampl (friend )",
+      "debit": 0.37,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-09T00:00:00",
+      "counterpartyName": "888",
+      "paymentPurpose": "ONLINE PAYMENT 888",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-17T00:00:00",
+      "counterpartyName": "ProgressPlay",
+      "paymentPurpose": "ONLINE PAYMENT ProgressPlay",
+      "credit": 197.01,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-17T00:00:00",
+      "counterpartyName": "member Sampler",
+      "paymentPurpose": "FASTER PAYMENT member Sampler (Friend)",
+      "debit": 21,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-18T00:00:00",
+      "counterpartyName": "Cash Machine",
+      "paymentPurpose": "ATM Cash Machine",
+      "debit": 60,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-01-18T00:00:00",
+      "counterpartyName": "Sklep Shop",
+      "paymentPurpose": "CONTACTLESS Sklep Shop",
+      "debit": 70.52,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-18T00:00:00",
+      "counterpartyName": "Wah Wah Mirchi",
+      "paymentPurpose": "CONTACTLESS Wah Wah Mirchi",
+      "debit": 18.53,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-18T00:00:00",
+      "counterpartyName": "Kani Mini Market",
+      "paymentPurpose": "CONTACTLESS Kani Mini Market",
+      "debit": 8.58,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-18T00:00:00",
+      "counterpartyName": "Paysafecard",
+      "paymentPurpose": "ONLINE PAYMENT Paysafecard",
+      "debit": 15,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-18T00:00:00",
+      "counterpartyName": "Apple App Store",
+      "paymentPurpose": "ONLINE PAYMENT Apple App Store",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-18T00:00:00",
+      "counterpartyName": "Apple App Store",
+      "paymentPurpose": "CARD SUBSCRIPTION Apple App Store",
+      "debit": 0.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    }
+  ]
+}

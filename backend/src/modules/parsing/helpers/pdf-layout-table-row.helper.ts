@@ -1,5 +1,5 @@
 import type { PdfTextItem, PdfTextRow } from '../../../common/utils/pdf-parser.util';
-import { type LayoutColumn, layOutRow } from './pdf-layout-columns.helper';
+import { type LaidOutRow, type LayoutColumn, layOutRow } from './pdf-layout-columns.helper';
 import { leadingDate, startsLeftOfText } from './pdf-layout-row-date.helper';
 
 /** A word's slack, in points, when it is placed against a column's edge. */
@@ -73,5 +73,22 @@ export function readTableRow(row: PdfTextRow, columns: LayoutColumn[]) {
   // "07 Sep") opens no row; it is left out of the text all the same.
   const date = found && startsLeftOfText(items[0], columns) ? found : null;
   const used = found ? found.used + valueDateAfter(items, found, columns) : 0;
-  return { date, laidOut: layOutRow(items.slice(used), columns) };
+  const laidOut = layOutRow(items.slice(used), columns);
+  return { date, laidOut: date ? withDateColumnText(laidOut, columns) : laidOut };
+}
+
+/**
+ * Words after a row's date still under the date heading open its text: the
+ * description heading is centred over the column ("04 Jul  POS Purchase
+ * Superspar …" under "Date … Description"). Not when a heading of its own
+ * stands beside the date's ("Date  Code  Description": "PUR" is the code).
+ */
+function withDateColumnText(laidOut: LaidOutRow, columns: LayoutColumn[]): LaidOutRow {
+  const lead = laidOut.text.date;
+  const dateColumn = columns.find(column => column.role === 'date');
+  if (!(lead && lead.length > 0) || (dateColumn?.extra?.length ?? 0) > 0) {
+    return laidOut;
+  }
+  const { date: _date, ...text } = laidOut.text;
+  return { ...laidOut, text: { ...text, description: [...lead, ...(text.description ?? [])] } };
 }

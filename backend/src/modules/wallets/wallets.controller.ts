@@ -2,7 +2,7 @@ import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
 import { WorkspaceId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
-import { SchemaParams } from '../../common/effect/schema-query';
+import { SchemaParams, SchemaQuery } from '../../common/effect/schema-query';
 import { SchemaResponse } from '../../common/effect/schema-response';
 import { Permission } from '../../common/enums/permissions.enum';
 import { deletedResponse } from '../../common/utils/responses.util';
@@ -13,6 +13,8 @@ import {
   CreateWalletRequest,
   MessageResult,
   UpdateWalletBody,
+  WalletBalanceDays,
+  WalletBalanceDaysQuery,
   WalletItem,
   WalletList,
   WalletParams,
@@ -61,6 +63,17 @@ export class WalletsController {
   @SchemaResponse(WalletSummary)
   async summary(@WorkspaceId() workspaceId: string) {
     return this.walletsService.summary(workspaceId);
+  }
+
+  /** Declared before `:id`, so the literal path is not read as an account id. */
+  @Get('balance-days')
+  @WorkspaceAuth(Permission.WALLET_VIEW)
+  @SchemaResponse(WalletBalanceDays)
+  async balanceDays(
+    @SchemaQuery(WalletBalanceDaysQuery) { month }: WalletBalanceDaysQuery,
+    @WorkspaceId() workspaceId: string,
+  ) {
+    return this.walletsService.balanceDays(workspaceId, month);
   }
 
   @Get('unlinked-statements')

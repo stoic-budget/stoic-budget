@@ -1,0 +1,153 @@
+{
+  "metadata": {
+    "accountNumber": "XXXXXX1000",
+    "currency": "USD",
+    "dateFrom": "2025-05-21T00:00:00",
+    "dateTo": "2025-06-22T00:00:00",
+    "balanceStart": 5711.05,
+    "balanceEnd": 9731.91
+  },
+  "transactions": [
+    {
+      "transactionDate": "2025-05-22T00:00:00",
+      "counterpartyName": "SAMPLE,MEMBER TRANSFER MEMBER SAMPLE",
+      "paymentPurpose": "SAMPLE,MEMBER TRANSFER MEMBER SAMPLE",
+      "credit": 3000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-05-23T00:00:00",
+      "counterpartyName": "HOME DEPOT AUTO PYMT MEMBER SAMPLE XXXXXXXXXXX0506",
+      "paymentPurpose": "HOME DEPOT AUTO PYMT MEMBER SAMPLE XXXXXXXXXXX0506",
+      "debit": 100,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-05-27T00:00:00",
+      "counterpartyName": "SamsClub MstrCRD SYF PAYMNT SAMPLEMEMBER XXXXXXXXXXX6301",
+      "paymentPurpose": "SamsClub MstrCRD SYF PAYMNT SAMPLEMEMBER XXXXXXXXXXX6301",
+      "debit": 184.04,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-05-27T00:00:00",
+      "counterpartyName": "TECO/PEOPLE GAS UTILITYBIL MEMBER SAMPLE XXXXXXXX4501",
+      "paymentPurpose": "TECO/PEOPLE GAS UTILITYBIL MEMBER SAMPLE XXXXXXXX4501",
+      "debit": 388.24,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-05-27T00:00:00",
+      "counterpartyName": "CHASE CREDIT CRD EPAY MEMBER SAMPLE",
+      "paymentPurpose": "CHASE CREDIT CRD EPAY MEMBER SAMPLE",
+      "debit": 1000,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-05-27T00:00:00",
+      "counterpartyName": "ROCKET MORTGAGE MTG PYMTS MEMBER SAMPLE XXXXXX9336",
+      "paymentPurpose": "ROCKET MORTGAGE MTG PYMTS MEMBER SAMPLE XXXXXX9336",
+      "debit": 3450,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-05-29T00:00:00",
+      "counterpartyName": "USBANK LOAN PAYMENT NTE*SPH*ACCT XXXXXXX8004",
+      "paymentPurpose": "USBANK LOAN PAYMENT NTE*SPH*ACCT XXXXXXX8004",
+      "debit": 1049.39,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-06-03T00:00:00",
+      "counterpartyName": "D2SOL, INC. DEPOSIT MEMBER SAMPLE DPAAAFPDVL",
+      "paymentPurpose": "D2SOL, INC. DEPOSIT MEMBER SAMPLE DPAAAFPDVL",
+      "credit": 21000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-06-05T00:00:00",
+      "counterpartyName": "AMERICANEXPRESS TRANSFER SAMPLE,MEMBER XXXXXXXXXXX3868",
+      "paymentPurpose": "AMERICANEXPRESS TRANSFER SAMPLE,MEMBER XXXXXXXXXXX3868",
+      "debit": 12000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-06-06T00:00:00",
+      "counterpartyName": "MERRICK BANK MOBILE PAY MEMBER SAMPLE XXXXXXXXXXX9068",
+      "paymentPurpose": "MERRICK BANK MOBILE PAY MEMBER SAMPLE XXXXXXXXXXX9068",
+      "debit": 3,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-06-09T00:00:00",
+      "counterpartyName": "CITI CARD ONLINE PAYMENT MEMBER SAMPLE XXXXXXXXXXX3179",
+      "paymentPurpose": "CITI CARD ONLINE PAYMENT MEMBER SAMPLE XXXXXXXXXXX3179",
+      "debit": 250,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-06-09T00:00:00",
+      "counterpartyName": "SamsClub MstrCRD SYF PAYMNT SAMPLEMEMBER XXXXXXXXXXX6301",
+      "paymentPurpose": "SamsClub MstrCRD SYF PAYMNT SAMPLEMEMBER XXXXXXXXXXX6301",
+      "debit": 485.75,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-06-09T00:00:00",
+      "counterpartyName": "CHASE CREDIT CRD EPAY MEMBER SAMPLE XXXXXX9065",
+      "paymentPurpose": "CHASE CREDIT CRD EPAY MEMBER SAMPLE XXXXXX9065",
+      "debit": 500,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-06-10T00:00:00",
+      "counterpartyName": "HC-WATER INTERNET SAMPLE MEMBERA XXXXXXXXXXX1146",
+      "paymentPurpose": "HC-WATER INTERNET SAMPLE MEMBERA XXXXXXXXXXX1146",
+      "debit": 154.06,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2025-06-13T00:00:00",
+      "counterpartyName": "FSB BLAZE PAYMENT SAMPLE,MEMBER XXXXXXXXXXX7098",
+      "paymentPurpose": "FSB BLAZE PAYMENT SAMPLE,MEMBER XXXXXXXXXXX7098",
+      "debit": 6.25,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-06-13T00:00:00",
+      "counterpartyName": "Credit One Bank Payment SAMPLE,MEMBERA 21217694",
+      "paymentPurpose": "Credit One Bank Payment SAMPLE,MEMBERA 21217694",
+      "debit": 8.41,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-06-16T00:00:00",
+      "counterpartyName": "DISCOVER E-PAYMENT SAMPLE MEMBER 8841",
+      "paymentPurpose": "DISCOVER E-PAYMENT SAMPLE MEMBER 8841",
+      "debit": 250,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2025-06-20T00:00:00",
+      "counterpartyName": "CITI AUTOPAY PAYMENT MEMBERA M SAMPLE XXXXXXXXXXX0025",
+      "paymentPurpose": "CITI AUTOPAY PAYMENT MEMBERA M SAMPLE XXXXXXXXXXX0025",
+      "debit": 150,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    }
+  ]
+}
