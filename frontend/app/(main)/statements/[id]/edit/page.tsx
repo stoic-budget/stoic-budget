@@ -35,7 +35,6 @@ import { StatementRowsSection } from './components/StatementRowsSection';
 import { StatementSummaryCards } from './components/StatementSummaryCards';
 import {
   filterEnabledCategories,
-  formatLabel,
   formatNumber as formatNumberHelper,
   resolveLocale,
 } from './editHelpers';
