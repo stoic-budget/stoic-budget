@@ -155,7 +155,7 @@ Setting expectations upfront:
 | 🇵🇱 Poland | BNP Paribas Bank Polska | |
 | 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank, RBC Royal Bank, Scotiabank, Simplii Financial, Tangerine, TD Bank | |
 | 🇦🇺 Australia | ANZ, Bendigo Bank, BOQ, CommBank, Great Southern Bank, Heritage Bank, ING, NAB, Suncorp Bank, Westpac | |
-| 🇳🇬 Nigeria | Fidelity Bank | |
+| 🇳🇬 Nigeria | Fidelity Bank, Zenith Bank | |
 | 🇧🇪 Belgium | KBC | |
 | 🇰🇪 Kenya | NCBA Bank | |
 | 🇶🇦 Qatar | QNB | |

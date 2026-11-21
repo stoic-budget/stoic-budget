@@ -150,6 +150,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.WESTPAC, /\bwestpac banking corporation\b|\binform westpac\b/],
   [BankName.WISE, /\bwise payments (?:ltd|limited)\b/],
   [BankName.WOODFOREST, /\bwww\.woodforest\.com\b/],
+  [BankName.ZENITH, /\bzenith bank plc\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

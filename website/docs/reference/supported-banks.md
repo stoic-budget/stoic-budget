@@ -20,7 +20,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **Italy:** UniCredit
 - **Kazakhstan:** Kaspi Bank; Bereke Bank, old and new PDF layouts
 - **Kenya:** NCBA Bank
-- **Nigeria:** Fidelity Bank
+- **Nigeria:** Fidelity Bank, Zenith Bank
 - **Philippines:** BPI, GoTyme Bank
 - **Poland:** BNP Paribas Bank Polska
 - **Qatar:** QNB

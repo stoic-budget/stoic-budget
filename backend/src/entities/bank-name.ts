@@ -124,5 +124,6 @@ export enum BankName {
   WESTPAC = 'westpac',
   WISE = 'wise',
   WOODFOREST = 'woodforest',
+  ZENITH = 'zenith',
   OTHER = 'other',
 }

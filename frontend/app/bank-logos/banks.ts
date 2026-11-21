@@ -226,4 +226,5 @@ export const BANKS = [
     logo: 'woodforest.png',
     aliases: ['woodforest'],
   },
+  { key: 'zenith', name: 'Zenith Bank', logo: 'zenith.png', aliases: ['zenith bank plc'] },
 ] as const satisfies readonly BankEntry[];

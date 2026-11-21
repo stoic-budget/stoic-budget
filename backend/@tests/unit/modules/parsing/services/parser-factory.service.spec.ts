@@ -300,6 +300,7 @@ describe('ParserFactoryService', () => {
       'WestpacParser',
       'WiseParser',
       'WoodforestParser',
+      'ZenithParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
