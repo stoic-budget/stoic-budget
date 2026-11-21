@@ -101,5 +101,6 @@ export enum BankName {
   SOFI = 'sofi',
   SOGEXIA = 'sogexia',
   STANDARD_CHARTERED = 'standard_chartered',
+  STARLING = 'starling',
   OTHER = 'other',
 }

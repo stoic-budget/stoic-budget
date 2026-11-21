@@ -178,4 +178,5 @@ export const BANKS = [
     logo: 'standard-chartered.png',
     aliases: ['stanchart'],
   },
+  { key: 'starling', name: 'Starling Bank', logo: 'starling.png', aliases: ['starling'] },
 ] as const satisfies readonly BankEntry[];

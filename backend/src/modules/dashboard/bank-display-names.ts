@@ -104,4 +104,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.SOFI]: 'SoFi',
   [BankName.SOGEXIA]: 'Sogexia',
   [BankName.STANDARD_CHARTERED]: 'Standard Chartered',
+  [BankName.STARLING]: 'Starling Bank',
 };
