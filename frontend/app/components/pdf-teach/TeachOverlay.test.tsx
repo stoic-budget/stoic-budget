@@ -5,7 +5,9 @@ import type { TeachSession } from './useTeachSession';
 
 const session = (over: Partial<TeachSession> = {}): TeachSession => ({
   statementId: 'statement-1',
-  words: [{ text: 'When', page: 1, x: 40, y: 100, width: 20, height: 8, dated: false }],
+  words: [
+    { text: 'When', page: 1, x: 40, y: 100, width: 20, height: 8, line: 0, opensDate: false },
+  ],
   textUnderText: false,
   regions: [],
   activeTag: 'date',
