@@ -1,0 +1,180 @@
+{
+  "metadata": {
+    "accountNumber": "9310000001",
+    "currency": "KES",
+    "dateFrom": "2024-08-01T00:00:00",
+    "dateTo": "2024-08-31T00:00:00",
+    "balanceStart": 23101.68,
+    "balanceEnd": 1.68
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-08-01T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240801ZGNW",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240801ZGNW",
+      "debit": 1000,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-01T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240801ZIFR",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240801ZIFR",
+      "debit": 2000,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-01T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240801ZLXN",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240801ZLXN",
+      "debit": 2000,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-01T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240801ZMXW",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240801ZMXW",
+      "debit": 500,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-02T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240802RANF",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240802RANF",
+      "debit": 500,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-02T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240802RJSQ",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240802RJSQ",
+      "debit": 2000,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-05T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240804NMXO",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240804NMXO",
+      "debit": 1000,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-05T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240804YKQK",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240804YKQK",
+      "debit": 1000,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-05T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240805ZBGG",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240805ZBGG",
+      "debit": 5000,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-05T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240805ZDDR",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240805ZDDR",
+      "debit": 1000,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-05T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240805ZGZV",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240805ZGZV",
+      "debit": 1000,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-05T00:00:00",
+      "counterpartyName": "MPESA Paybill Transfer MPESA REF: SH53ZKXL1N 653 FTC240805BMDV",
+      "paymentPurpose": "MPESA Paybill Transfer MPESA REF: SH53ZKXL1N 653 FTC240805BMDV",
+      "credit": 1500,
+      "currency": "KES",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-08-05T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240805KMQK",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240805KMQK",
+      "debit": 500,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-08T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240807MIEW",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240807MIEW",
+      "debit": 500,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-08T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240808RIAS",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240808RIAS",
+      "debit": 600,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-08T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240808SFEL",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240808SFEL",
+      "debit": 2000,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-09T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240809BQFA",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240809BQFA",
+      "debit": 1000,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-09T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240809IIHQ",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240809IIHQ",
+      "debit": 400,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-12T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240810SXEK",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240810SXEK",
+      "debit": 100,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-12T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240810VSHT",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240810VSHT",
+      "debit": 400,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-12T00:00:00",
+      "counterpartyName": "IB Outgoing Mobile Payments FTC240811DFXR",
+      "paymentPurpose": "IB Outgoing Mobile Payments FTC240811DFXR",
+      "debit": 2100,
+      "currency": "KES",
+      "paymentType": "bank_transfer_out"
+    }
+  ]
+}

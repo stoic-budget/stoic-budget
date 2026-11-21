@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "accountNumber": "4000 1000 2000 3000",
+    "currency": "USD",
+    "dateFrom": "2020-12-18T00:00:00",
+    "dateTo": "2021-01-14T00:00:00",
+    "balanceStart": -1746.46,
+    "balanceEnd": -1863.76
+  },
+  "transactions": [
+    {
+      "transactionDate": "2020-12-18T00:00:00",
+      "counterpartyName": "PAYPAL *PYPL PAYIN4 888-221-1161 CA",
+      "paymentPurpose": "PAYPAL *PYPL PAYIN4 888-221-1161 CA",
+      "debit": 13.98,
+      "currency": "USD",
+      "documentNumber": "2449215PHRS9MMW9K",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-12-18T00:00:00",
+      "counterpartyName": "Amazon Prime*N72KS2TA3 Amzn.com/bill WA",
+      "paymentPurpose": "Amazon Prime*N72KS2TA3 Amzn.com/bill WA",
+      "debit": 13.77,
+      "currency": "USD",
+      "documentNumber": "2469216PH2XX6B9QE",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-01T00:00:00",
+      "counterpartyName": "PAYPAL *PYPL PAYIN4 888-221-1161 CA",
+      "paymentPurpose": "PAYPAL *PYPL PAYIN4 888-221-1161 CA",
+      "debit": 13.97,
+      "currency": "USD",
+      "documentNumber": "359015501RS174YNN",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-08T00:00:00",
+      "counterpartyName": "LATE FEE",
+      "paymentPurpose": "LATE FEE",
+      "debit": 40,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-01-14T00:00:00",
+      "counterpartyName": "Interest Charge on Purchases",
+      "paymentPurpose": "Interest Charge on Purchases",
+      "debit": 35.58,
+      "currency": "USD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2021-01-14T00:00:00",
+      "counterpartyName": "Interest Charge on Cash Advances",
+      "paymentPurpose": "Interest Charge on Cash Advances",
+      "credit": 0,
+      "currency": "USD",
+      "paymentType": "interest"
+    }
+  ]
+}

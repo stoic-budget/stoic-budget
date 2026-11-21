@@ -1,0 +1,301 @@
+{
+  "metadata": {
+    "accountNumber": "23549 07362 92",
+    "currency": "CAD",
+    "dateFrom": "2024-01-02T00:00:00",
+    "dateTo": "2024-02-03T00:00:00",
+    "balanceStart": 14324.74
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-01-03T00:00:00",
+      "counterpartyName": "Valley Farms Produceetobicoke ONCA",
+      "paymentPurpose": "Point of sale purchase Fpos Valley Farms Produceetobicoke ONCA",
+      "debit": 15,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-03T00:00:00",
+      "counterpartyName": "Dairy Jug Toronto ONCA",
+      "paymentPurpose": "Point of sale purchase Fpos Dairy Jug Toronto ONCA",
+      "debit": 10.15,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-04T00:00:00",
+      "counterpartyName": "Tim Hortons #3196# Qnorth York ONCD",
+      "paymentPurpose": "Point of sale purchase Fpos Tim Hortons #3196# Qnorth York ONCD",
+      "debit": 1.68,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-04T00:00:00",
+      "counterpartyName": "Gateway News Stand Toronto ONCA",
+      "paymentPurpose": "Point of sale purchase Gateway News Stand Toronto ONCA",
+      "debit": 1.75,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-04T00:00:00",
+      "counterpartyName": "Deposit 1044 Payroll KARLEY HALVES LTD",
+      "paymentPurpose": "Deposit 1044 Payroll KARLEY HALVES LTD",
+      "credit": 1017,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-04T00:00:00",
+      "counterpartyName": "Spoon & Fork Japanese Etobicoke ONCA",
+      "paymentPurpose": "Point of sale purchase Spoon & Fork Japanese Etobicoke ONCA",
+      "debit": 67.1,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "Metro #065 Etobicoke ONCA",
+      "paymentPurpose": "Point of sale purchase Fpos Metro #065 Etobicoke ONCA",
+      "debit": 14.94,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "Metro #065 Etobicoke ONCA",
+      "paymentPurpose": "Point of sale purchase Fpos Metro #065 Etobicoke ONCA",
+      "debit": 33.64,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "ABM withdrawal Yorkdale S.C. #2 Toronto ON",
+      "paymentPurpose": "ABM withdrawal Yorkdale S.C. #2 Toronto ON",
+      "debit": 400,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-01-06T00:00:00",
+      "counterpartyName": "Withdrawal",
+      "paymentPurpose": "Withdrawal",
+      "debit": 1500,
+      "currency": "CAD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-01-06T00:00:00",
+      "counterpartyName": "PC Transfer to Credit Card",
+      "paymentPurpose": "PC Transfer to Credit Card",
+      "debit": 850,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-07T00:00:00",
+      "counterpartyName": "Humber College Bldg West Etobiconcd",
+      "paymentPurpose": "Point of sale purchase Fpos Humber College Bldg West Etobiconcd",
+      "debit": 11.16,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-09T00:00:00",
+      "counterpartyName": "Pho House Toronto ONCA",
+      "paymentPurpose": "Point of sale purchase Pho House Toronto ONCA",
+      "debit": 12.87,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-10T00:00:00",
+      "counterpartyName": "12 Deposit 91872396 MB-Email Money Trf",
+      "paymentPurpose": "12 Deposit 91872396 MB-Email Money Trf",
+      "credit": 100,
+      "currency": "CAD"
+    },
+    {
+      "transactionDate": "2024-01-14T00:00:00",
+      "counterpartyName": "Deposit 91874917 MB-Email Money Trf",
+      "paymentPurpose": "Deposit 91874917 MB-Email Money Trf",
+      "credit": 50,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-14T00:00:00",
+      "counterpartyName": "Szechuan Express Toronto ONCA",
+      "paymentPurpose": "Point of sale purchase Fpos Szechuan Express Toronto ONCA",
+      "debit": 8.98,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-17T00:00:00",
+      "counterpartyName": "Yogen Fruz Eaton Ctrtoronto ONCD",
+      "paymentPurpose": "Point of sale purchase Fpos Yogen Fruz Eaton Ctrtoronto ONCD",
+      "debit": 5.65,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-18T00:00:00",
+      "counterpartyName": "Town Shoes # 12 Toronto ONCA",
+      "paymentPurpose": "Point of sale purchase Town Shoes # 12 Toronto ONCA",
+      "debit": 1252.53,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-18T00:00:00",
+      "counterpartyName": "Deposit 94379212 MB-Email Money Trf",
+      "paymentPurpose": "Deposit 94379212 MB-Email Money Trf",
+      "credit": 1000,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-19T00:00:00",
+      "counterpartyName": "Ramen Raijin Toronto ONCA",
+      "paymentPurpose": "Point of sale purchase Ramen Raijin Toronto ONCA",
+      "debit": 59.09,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-19T00:00:00",
+      "counterpartyName": "Uniqlo Eaton Ctr#200Toronto ONCA",
+      "paymentPurpose": "Point of sale purchase Fpos Uniqlo Eaton Ctr#200Toronto ONCA",
+      "debit": 161.84,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-19T00:00:00",
+      "counterpartyName": "Starbucks #4497 Toronto ONCD",
+      "paymentPurpose": "Point of sale purchase Fpos Starbucks #4497 Toronto ONCD",
+      "debit": 5.03,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-20T00:00:00",
+      "counterpartyName": "PC Transfer to Credit Card",
+      "paymentPurpose": "PC Transfer to Credit Card",
+      "debit": 1000,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-21T00:00:00",
+      "counterpartyName": "Dairy Jug Toronto ONCA",
+      "paymentPurpose": "Point of sale purchase Fpos Dairy Jug Toronto ONCA",
+      "debit": 8,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-21T00:00:00",
+      "counterpartyName": "Opos Google *Youtube Videg.co/payhelnsca",
+      "paymentPurpose": "Point of sale purchase Opos Google *Youtube Videg.co/payhelnsca",
+      "debit": 2.49,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-21T00:00:00",
+      "counterpartyName": "Opos Google *Youtube Videg.co/payhelnsca",
+      "paymentPurpose": "Point of sale purchase Opos Google *Youtube Videg.co/payhelnsca",
+      "debit": 2.49,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-22T00:00:00",
+      "counterpartyName": "Opos Google *Youtube Videg.co/payhelnsca",
+      "paymentPurpose": "Point of sale purchase Opos Google *Youtube Videg.co/payhelnsca",
+      "debit": 2.49,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-22T00:00:00",
+      "counterpartyName": "Opos Google *Youtube Videg.co/payhelnsca",
+      "paymentPurpose": "Point of sale purchase Opos Google *Youtube Videg.co/payhelnsca",
+      "debit": 2.49,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-23T00:00:00",
+      "counterpartyName": "Opos Google *Youtube Videg.co/payhelnsca",
+      "paymentPurpose": "Point of sale purchase Opos Google *Youtube Videg.co/payhelnsca",
+      "debit": 2.49,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-24T00:00:00",
+      "counterpartyName": "Opos Google *Youtube Videg.co/payhelnsca",
+      "paymentPurpose": "Point of sale purchase Opos Google *Youtube Videg.co/payhelnsca",
+      "debit": 19.99,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-27T00:00:00",
+      "counterpartyName": "Lush Eaton Centre Toronto ONCA",
+      "paymentPurpose": "Point of sale purchase Fpos Lush Eaton Centre Toronto ONCA",
+      "debit": 2391.24,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-29T00:00:00",
+      "counterpartyName": "Deposit 1044 Payroll KARLEY HALVES LTD",
+      "paymentPurpose": "Deposit 1044 Payroll KARLEY HALVES LTD",
+      "credit": 9503.86,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-29T00:00:00",
+      "counterpartyName": "Deposit 1044 Payroll KARLEY HALVES LTD",
+      "paymentPurpose": "Deposit 1044 Payroll KARLEY HALVES LTD",
+      "credit": 933.44,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-30T00:00:00",
+      "counterpartyName": "Maison Birks #741 Qtoronto ONCD",
+      "paymentPurpose": "Point of sale purchase Maison Birks #741 Qtoronto ONCD",
+      "debit": 7954.79,
+      "currency": "CAD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-02-01T00:00:00",
+      "counterpartyName": "PC Transfer to ScotiaLine 7891",
+      "paymentPurpose": "PC Transfer to ScotiaLine 7891",
+      "debit": 3400,
+      "currency": "CAD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-02-03T00:00:00",
+      "counterpartyName": "Service charge Monthly Fees",
+      "paymentPurpose": "Service charge Monthly Fees",
+      "debit": 15.95,
+      "currency": "CAD",
+      "paymentType": "fee"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain"
+  ]
+}

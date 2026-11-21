@@ -1,0 +1,265 @@
+{
+  "metadata": {
+    "accountNumber": "1222222221",
+    "currency": "NGN",
+    "dateFrom": "2024-03-31T00:00:00",
+    "dateTo": "2024-04-06T00:00:00",
+    "balanceStart": 31911.22,
+    "balanceEnd": 66780.12
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **3435 - PAYSTACK- TITAN",
+      "debit": 1010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **3435 - PAYSTACK- TITAN",
+      "debit": 1010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **3435 - PAYSTACK- TITAN|ONB",
+      "credit": 1010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **9036 - PAYSTACK- TITAN",
+      "debit": 2010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "SAMPLE ROE",
+      "paymentPurpose": "ONB TRF TO SAMPLE ROE **4560 - STE",
+      "debit": 2010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "MR B POS",
+      "paymentPurpose": "ONB TRF TO MR B POS **9593 - MP MFB",
+      "debit": 960.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PETER ROE",
+      "paymentPurpose": "ONB TRF TO PETER ROE **0861 - OPAY",
+      "debit": 10026.88,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **4480 - PAYSTACK- TITAN",
+      "debit": 1010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **4480 - PAYSTACK- TITAN|ONB",
+      "credit": 1010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **1039 - PAYSTACK- TITAN",
+      "debit": 1010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **4854 - PAYSTACK- TITAN",
+      "debit": 1010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "Paystack",
+      "paymentPurpose": "Paystack/170519506877puid33057317msport.com",
+      "credit": 5000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "SMS ALERT CHARGES 29MAR 24",
+      "paymentPurpose": "SMS ALERT CHARGES 29MAR 24",
+      "debit": 12,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "SMS ALERT CHARGES 30MAR 24",
+      "paymentPurpose": "SMS ALERT CHARGES 30MAR 24",
+      "debit": 20,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **8342 - PAYSTACK- TITAN",
+      "debit": 1010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PETER SAMPLE",
+      "paymentPurpose": "PETER SAMPLE/Transfer from PETER SAMPLE",
+      "credit": 7000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "ALAN SAMPLE ABD",
+      "paymentPurpose": "ALAN SAMPLE ABD/alan",
+      "credit": 4761,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "SMS ALERT CHARGES 31MAR 24",
+      "paymentPurpose": "SMS ALERT CHARGES 31MAR 24",
+      "debit": 8,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **7690 - PAYSTACK- TITAN",
+      "debit": 1010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **8528 - PAYSTACK- TITAN",
+      "debit": 10026.88,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "ONB47406751704036350/ISEC/07347443857/RCH",
+      "paymentPurpose": "ONB47406751704036350/ISEC/07347443857/RCH",
+      "debit": 2500,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "ONB70710552954037265/ISEC/07347443857/RCH",
+      "paymentPurpose": "ONB70710552954037265/ISEC/07347443857/RCH",
+      "debit": 2500,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "PAYSTACK C",
+      "paymentPurpose": "ONB TRF TO PAYSTACK C **3277 - PAYSTACK- TITAN",
+      "debit": 2010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "Paystack",
+      "paymentPurpose": "Paystack/170519506877puid33057317msport.com",
+      "credit": 7000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "NFT BRISTOL PALACE HOTEL",
+      "paymentPurpose": "NFT BRISTOL PALACE HOTEL/BEING THE NEFT TRANS FOR",
+      "credit": 15000,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "Alana Samples Payee",
+      "paymentPurpose": "770 TRANSFER TO Alana Samples Payee 2444070349 GTB",
+      "debit": 1010.75,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-02T00:00:00",
+      "counterpartyName": "AIRTEL USSD SESSION FEE 31555584394",
+      "paymentPurpose": "AIRTEL USSD SESSION FEE 31555584394",
+      "debit": 6.98,
+      "currency": "NGN",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-04-03T00:00:00",
+      "counterpartyName": "SAMPLEMAN PAYER",
+      "paymentPurpose": "SAMPLEMAN PAYER/MOB: To Fidelity Bank|PAYEE SAMPLE",
+      "credit": 34800,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-03T00:00:00",
+      "counterpartyName": "Sample Roe",
+      "paymentPurpose": "ONB TRF TO Sample Roe **2404 - OPAY",
+      "debit": 28826.88,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-03T00:00:00",
+      "counterpartyName": "SAMPLERS SENDER",
+      "paymentPurpose": "SAMPLERS SENDER/",
+      "credit": 28800,
+      "currency": "NGN",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-03T00:00:00",
+      "counterpartyName": "INB92823376483576130/RINGO/31555584394/ AIRTIME/RCH",
+      "paymentPurpose": "INB92823376483576130/RINGO/31555584394/ AIRTIME/RCH",
+      "debit": 500,
+      "currency": "NGN"
+    },
+    {
+      "transactionDate": "2024-04-03T00:00:00",
+      "counterpartyName": "AIRTEL USSD SESSION FEE 31555584394",
+      "paymentPurpose": "AIRTEL USSD SESSION FEE 31555584394",
+      "debit": 6.98,
+      "currency": "NGN",
+      "paymentType": "fee"
+    }
+  ]
+}
