@@ -13,7 +13,11 @@ export type TransferLeg = Pick<
   | 'statementId'
   | 'walletId'
   | 'cryptoWalletId'
-> & { statement?: { accountNumber?: string | null; walletId?: string | null } | null };
+> & {
+  statement?: { accountNumber?: string | null; walletId?: string | null } | null;
+  /** `[Account]`: the account the source file says the money went to (QIF). */
+  categoryHint?: string | null;
+};
 
 export interface TransferPair<T extends TransferLeg = TransferLeg> {
   outgoing: T;
@@ -115,6 +119,16 @@ export function pairKey(a: string, b: string): string {
   return a < b ? `${a}|${b}` : `${b}|${a}`;
 }
 
+/** Whether `leg`'s file named `other`'s account as where the money went. */
+function namesAccountOf(leg: TransferLeg, other: TransferLeg): boolean {
+  const named = /^\[(.+)\]$/
+    .exec(leg.categoryHint?.trim() ?? '')?.[1]
+    .trim()
+    .toLowerCase();
+  const account = other.statement?.accountNumber?.trim().toLowerCase();
+  return Boolean(named && account && named === account);
+}
+
 function sortKey(leg: TransferLeg): string {
   return `${new Date(leg.transactionDate).toISOString()}|${leg.id}`;
 }
@@ -124,7 +138,8 @@ function sortKey(leg: TransferLeg): string {
  * when, exactly one row qualifies: opposite direction, a different account,
  * within the date window, same money. Two qualifying rows mean the matcher
  * cannot tell which one is the transfer, so it pairs neither — a wrong pair
- * silently hides real spending, a missing one is visible and fixable by hand.
+ * silently hides real spending, a missing one is visible and fixable by hand —
+ * unless the file named the account of exactly one of them (`categoryHint`).
  *
  * `pool` may include the rows of `toCheck`; a row is used at most once.
  * `rejected` holds the `pairKey`s of pairs the user unlinked: those two rows
@@ -159,13 +174,15 @@ export async function matchTransferPairs<T extends TransferLeg>(
       const incoming = outgoing === row ? candidate : row;
       if (await amountsMatch(outgoing, incoming, lookupRate)) {
         matches.push(candidate);
-        if (matches.length > 1) break;
       }
     }
 
-    if (matches.length !== 1) continue;
+    const named = matches.filter(
+      candidate => namesAccountOf(row, candidate) || namesAccountOf(candidate, row),
+    );
+    const match = matches.length === 1 ? matches[0] : named.length === 1 ? named[0] : undefined;
+    if (!match) continue;
 
-    const match = matches[0];
     const outgoing = row.transactionType === TransactionType.EXPENSE ? row : match;
     const incoming = outgoing === row ? match : row;
     pairs.push({ outgoing, incoming });
