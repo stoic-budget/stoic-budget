@@ -109,5 +109,6 @@ export enum BankName {
   TD = 'td',
   CO_OPERATIVE_BANK = 'co_operative_bank',
   TRUIST = 'truist',
+  UBS = 'ubs',
   OTHER = 'other',
 }
