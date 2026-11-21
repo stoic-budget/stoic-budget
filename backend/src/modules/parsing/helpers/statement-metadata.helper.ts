@@ -4,6 +4,7 @@ import {
   figureUnderLabel,
 } from './statement-balance-line.helper';
 import { findFullDates, foldText, type NumericDateOrder } from './statement-date.helper';
+import { CURRENCY_SIGNS, printedCurrency } from './statement-heading-currency.helper';
 
 export { isCreditCardStatement } from './statement-card.helper';
 
@@ -53,22 +54,15 @@ const UNMARKED_COUNTRIES: [RegExp, string][] = [
   [/\bSouth Africa\b|\.co\.za\b/i, 'ZAR'],
 ];
 
-const SYMBOLS: [string, string][] = [
-  ['€', 'EUR'],
-  ['£', 'GBP'],
-  ['₸', 'KZT'],
-  ['₽', 'RUB'],
-  ['₪', 'ILS'],
-  ['₹', 'INR'],
-  ['฿', 'THB'],
-  ['¥', 'JPY'],
-];
-
 /**
  * The statement currency: the ISO code printed most often (upper case only:
  * "try" and "eur" are words too; "EUROS" is EUR), else a currency symbol.
  */
 export function detectStatementCurrency(text: string): string | null {
+  const printed = printedCurrency(text);
+  if (printed) {
+    return printed;
+  }
   const counts = new Map<string, number>();
   for (const match of text.matchAll(ISO_CODES)) {
     // "RELEVE DE COMPTES EN EUROS": the currency named in capitals counts as its code.
@@ -87,7 +81,7 @@ export function detectStatementCurrency(text: string): string | null {
   if (lettered) {
     return lettered[1];
   }
-  const symbol = SYMBOLS.find(([mark]) => text.includes(mark));
+  const symbol = CURRENCY_SIGNS.find(([mark]) => text.includes(mark));
   if (symbol) {
     return symbol[1];
   }

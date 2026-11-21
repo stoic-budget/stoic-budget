@@ -261,3 +261,20 @@ describe('a previous statement\'s balance', () => {
     });
   });
 });
+
+describe('the currency a money column names', () => {
+  it('outranks codes in the rows\' notes', () => {
+    const text = ['Date Description (GBP) Amount (GBP) Balance', 'Amount: EUR -109.40.', 'Amount: EUR -99.17.', 'EUR 1.00'].join(
+      '\n',
+    );
+    expect(detectStatementCurrency(text)).toBe('GBP');
+    expect(detectStatementCurrency('Withdrawal Deposit Balance(INR)\nUSD 1.00 USD 2.00')).toBe('INR');
+  });
+
+  it('is the sign glued to most figures, over the codes of converted amounts', () => {
+    const rows = ['ACME Store -11,64€', 'Original amount 99.00 HKD', 'ACME Cafe -5,00€', 'Original amount 37.00 HKD'];
+    expect(detectStatementCurrency([...rows, 'Member One +400,00€'].join('\n'))).toBe('EUR');
+    // Two signed figures say nothing yet: the codes decide.
+    expect(detectStatementCurrency(rows.join('\n'))).toBe('HKD');
+  });
+});
