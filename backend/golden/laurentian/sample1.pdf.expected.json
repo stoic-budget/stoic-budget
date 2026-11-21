@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "accountNumber": "100-1 01",
+    "currency": "CAD",
+    "dateFrom": "2023-05-24T00:00:00",
+    "dateTo": "2023-05-31T00:00:00",
+    "balanceStart": 0,
+    "balanceEnd": -4
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-05-31T00:00:00",
+      "counterpartyName": "Banking plan fee",
+      "paymentPurpose": "Banking plan fee",
+      "debit": 4,
+      "currency": "USD",
+      "paymentType": "fee"
+    }
+  ]
+}
