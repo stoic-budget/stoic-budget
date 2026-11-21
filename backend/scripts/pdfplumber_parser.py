@@ -104,10 +104,34 @@ def build_rows(words: List[Dict[str, Any]], page_number: int, tolerance: float =
 
     rows = join_stray_amounts(rows, tolerance)
     for row in rows:
-        row["items"].sort(key=lambda i: i["x"])
+        row["items"] = join_touching_digits(sorted(row["items"], key=lambda i: i["x"]))
         row["text"] = " ".join([i["text"] for i in row["items"] if i.get("text")])
 
     return sorted(rows, key=lambda r: (r["page"], -r["y"]))
+
+
+DIGITS = re.compile(r"^[\d.,]+$")
+
+
+def join_touching_digits(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Digits drawn out of order split one number into words that touch ("202"
+    and "5" of a year, no gap between them): they are one word again.
+    """
+    out: List[Dict[str, Any]] = []
+    for item in items:
+        last = out[-1] if out else None
+        if (
+            last is not None
+            and DIGITS.match(last["text"])
+            and DIGITS.match(item["text"])
+            and abs(item["x"] - (last["x"] + last["width"])) < 0.5
+        ):
+            last["text"] += item["text"]
+            last["width"] = item["x"] + item["width"] - last["x"]
+            continue
+        out.append(dict(item))
+    return out
 
 
 AMOUNT_WORD = re.compile(r"^[-+(]?[£$€]?\d[\d,. ]*[.,]\d{2}\)?-?$")
