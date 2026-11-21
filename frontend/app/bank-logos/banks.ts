@@ -164,4 +164,10 @@ export const BANKS = [
   },
   { key: 'simplii', name: 'Simplii Financial', logo: 'simplii.png', aliases: ['simplii'] },
   { key: 'skrill', name: 'Skrill', logo: 'skrill.png', aliases: ['paysafe'] },
+  {
+    key: 'societe_generale',
+    name: 'Société Générale',
+    logo: 'societe-generale.png',
+    aliases: ['societe generale', 'sg'],
+  },
 ] as const satisfies readonly BankEntry[];
