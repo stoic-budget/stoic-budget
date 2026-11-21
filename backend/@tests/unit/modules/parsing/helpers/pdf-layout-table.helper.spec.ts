@@ -739,3 +739,18 @@ describe('a row is no header', () => {
     expect(readHeaderRow(row(100, [...words, ['6.22', 455], ['-', 472], ['1,701.26', 559]]))).toBeNull();
   });
 });
+
+describe('Deposits and Withdrawals side by side', () => {
+  it('are two columns however close, not the stacked heading of one', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 68],
+        ['Description', 116],
+        ['Deposits', 387],
+        ['Withdrawals', 437],
+        ['Balance', 506],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'credit', 'debit', 'balance']);
+  });
+});

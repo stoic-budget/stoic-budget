@@ -154,6 +154,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Visit navyfederal.org for more information')).toBe(BankName.NAVY_FEDERAL);
     expect(mentionedBank('NCBA Bank Kenya PLC')).toBe(BankName.NCBA);
     expect(mentionedBank('WebSite: www.netspend.com')).toBe(BankName.NETSPEND);
+    expect(mentionedBank('Online: optumbank.com')).toBe(BankName.OPTUM);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

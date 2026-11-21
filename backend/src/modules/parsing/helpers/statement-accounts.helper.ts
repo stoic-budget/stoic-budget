@@ -96,9 +96,10 @@ export function accountStatement(
   const labelled = findStatementBalances(context.texts.get(accountNumber) ?? '', dateOrder);
   const sign = isCard ? -1 : 1;
   const balanceStart =
-    openingBalanceFromRows(rows) ?? (labelled.start === null ? null : sign * labelled.start);
+    openingBalanceFromRows(rows, dateOrder) ??
+    (labelled.start === null ? null : sign * labelled.start);
   const balanceEnd =
-    closingBalanceFromRows(rows) ?? (labelled.end === null ? null : sign * labelled.end);
+    closingBalanceFromRows(rows, dateOrder) ?? (labelled.end === null ? null : sign * labelled.end);
   return {
     metadata: {
       accountNumber,
