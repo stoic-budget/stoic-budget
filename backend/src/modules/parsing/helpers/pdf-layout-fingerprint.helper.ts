@@ -85,6 +85,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.ICICI, /\bwww\.icicibank\.com\b|\bicici bank limited\b/],
   [BankName.IFAST, /\bifast global bank limited\b/],
   [BankName.ING, /\bing bank \(australia\)|\babn 24 000 893 292\b/],
+  [BankName.KBC, /\bwww\.kbc\.be\b|\bkbc bank nv\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
