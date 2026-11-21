@@ -70,12 +70,7 @@ import {
   assignmentInputOf,
   TaxAssignmentService,
 } from '../tax/tax-assignment.service';
-import {
-  chargeAt,
-  projectMonthlyCharges,
-  settledDateOf,
-  splitMonthCharges,
-} from './charge-calendar.util';
+import * as calendar from './charge-calendar.util';
 import { CurrencyTotals } from './currency-totals';
 import {
   type ConvertAt,
@@ -650,7 +645,7 @@ export class SubscriptionsService {
 
     const rows: ChargeCalendarRow[] = await Promise.all(
       active.map(async sub => {
-        const occurrences = projectMonthlyCharges(
+        const occurrences = calendar.projectMonthlyCharges(
           sub.nextChargeDate ? new Date(sub.nextChargeDate) : null,
           sub.frequency,
           from,
@@ -732,7 +727,7 @@ export class SubscriptionsService {
     const items: SubscriptionMonthStatus['items'][number][] = [];
 
     for (const sub of active) {
-      const byDate = splitMonthCharges(
+      const byDate = calendar.splitMonthCharges(
         sub.nextChargeDate ? new Date(sub.nextChargeDate) : null,
         sub.frequency,
         today,
@@ -1412,7 +1407,7 @@ export class SubscriptionsService {
         ...paid,
         chargeDate: paid.chargeDate as unknown as Date,
         expectedAmount: subscription.amount,
-        expectedDate: settledDateOf(subscription, paid.chargeDate),
+        expectedDate: calendar.settledDateOf(subscription, paid.chargeDate),
         matchStatus,
       }),
     );
@@ -1587,7 +1582,7 @@ export class SubscriptionsService {
 
   /** One step on: a month-end clamps to a shorter month (31 Jan, 28 Feb) instead of overflowing. */
   private addInterval(date: Date, frequency: SubscriptionFrequency): Date {
-    return chargeAt(date, frequency, 1);
+    return calendar.chargeAt(date, frequency, 1);
   }
 
   private async recordDetectedCharges(subscription: Subscription): Promise<void> {
