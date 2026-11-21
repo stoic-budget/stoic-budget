@@ -79,4 +79,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.MONZO]: 'Monzo',
   [BankName.N26]: 'N26',
   [BankName.NAB]: 'NAB',
+  [BankName.NATIONWIDE]: 'Nationwide',
 };
