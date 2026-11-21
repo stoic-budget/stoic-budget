@@ -293,6 +293,7 @@ describe('ParserFactoryService', () => {
       'UsaaParser',
       'UsBankParser',
       'VaroParser',
+      'VirginMoneyParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',
