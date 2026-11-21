@@ -58,7 +58,9 @@ export default defineConfig({
         'src/data-source.ts',
       ],
       reportsDirectory: 'coverage',
-      reporter: ['text', 'lcov', 'html'],
+      // Cobertura is what GitHub's code coverage rule reads; its file names are
+      // made relative to the repository root so they match the PR's paths.
+      reporter: ['text', 'lcov', 'html', ['cobertura', { projectRoot: '..' }]],
       thresholds: { statements: 8, branches: 5, functions: 8, lines: 8 },
     },
     projects: [
