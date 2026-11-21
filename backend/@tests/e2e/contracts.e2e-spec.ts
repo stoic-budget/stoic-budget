@@ -201,6 +201,7 @@ import {
   UserSessionList,
   UserUpdateResponse,
   WalletBalanceDays,
+  WalletCoverage,
   WalletList,
   WebhookEndpointList,
   WebhookSubscriptionList,
@@ -413,6 +414,25 @@ describe('API contracts (e2e)', () => {
       const res = await get('/wallets');
       matches(WalletList, res.body);
       expect(res.body[0].initialBalance).toBe('12.50');
+    });
+
+    it('GET /wallets/coverage, with a bank no account holds', async () => {
+      const [{ id }] = await dataSource.query(
+        `INSERT INTO statements (user_id, workspace_id, file_name, file_path, file_type, file_size, file_hash,
+           bank_name, account_number, currency, statement_date_from, statement_date_to, total_transactions, status)
+         VALUES ($1, $2, 'coverage.csv', '/dev/null', 'csv', 1, $3, 'other', 'DE00 0000 0000 0000 0007',
+           'USD', '2026-01-01', '2026-01-31', 2, 'completed') RETURNING id`,
+        [owner.userId, owner.workspaceId, `coverage-${Date.now()}`],
+      );
+      try {
+        const res = await get('/wallets/coverage');
+        matches(WalletCoverage, res.body);
+        expect(res.body.rows).toContainEqual(
+          expect.objectContaining({ kind: 'bank', accountTail: '0007', dataTo: '2026-01-31' }),
+        );
+      } finally {
+        await dataSource.query('DELETE FROM statements WHERE id = $1', [id]);
+      }
     });
 
     it('GET /wallets/balance-days', async () => {
