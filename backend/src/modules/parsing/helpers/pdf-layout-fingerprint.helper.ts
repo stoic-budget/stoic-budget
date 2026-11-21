@@ -129,6 +129,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.STANDARD_CHARTERED, /\bstandard chartered\b/],
   [BankName.STARLING, /\bwww\.starlingbank\.com\b|\bsrlggb2l\b/],
   [BankName.SUNCORP, /\bsuncorp-metway ltd\b/],
+  [BankName.SYNCHRONY, /\bsynchronybank\.com\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],
