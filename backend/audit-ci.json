@@ -3,6 +3,7 @@
   "moderate": true,
   "allowlist": [
     "GHSA-vfj7-8cjw-p6xm",
-    "GHSA-hp3w-g68c-fv3c"
+    "GHSA-hp3w-g68c-fv3c",
+    "GHSA-fc5q-39xc-vjpf"
   ]
 }

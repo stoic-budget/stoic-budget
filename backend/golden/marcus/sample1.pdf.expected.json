@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "accountNumber": "300010000001",
+    "currency": "USD",
+    "dateFrom": "2025-02-01T00:00:00",
+    "dateTo": "2025-02-28T00:00:00",
+    "balanceStart": 12139.44,
+    "balanceEnd": 10885.53
+  },
+  "transactions": [
+    {
+      "transactionDate": "2025-02-08T00:00:00",
+      "counterpartyName": "JPMORGAN CHASE BANK, NA",
+      "paymentPurpose": "ACH Deposit Internet transfer from JPMORGAN CHASE BANK, NA SAV account **************** 1000",
+      "credit": 106.93,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-02-11T00:00:00",
+      "counterpartyName": "JPMORGAN CHASE BANK, NA",
+      "paymentPurpose": "ACH Withdrawal Internet transfer to JPMORGAN CHASE BANK, NA SAV account **************** 1000",
+      "debit": 1000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-02-18T00:00:00",
+      "counterpartyName": "JPMORGAN CHASE BANK, NA",
+      "paymentPurpose": "ACH Withdrawal Internet transfer to JPMORGAN CHASE BANK, NA SAV account **************** 1000",
+      "debit": 150,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-02-19T00:00:00",
+      "counterpartyName": "JPMORGAN CHASE BANK, NA",
+      "paymentPurpose": "ACH Withdrawal Internet transfer to JPMORGAN CHASE BANK, NA SAV account **************** 1000",
+      "debit": 1000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-02-26T00:00:00",
+      "counterpartyName": "JPMORGAN CHASE BANK, NA",
+      "paymentPurpose": "ACH Deposit Internet transfer from JPMORGAN CHASE BANK, NA SAV account **************** 1000",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-02-28T00:00:00",
+      "counterpartyName": "JPMORGAN CHASE BANK, NA",
+      "paymentPurpose": "ACH Deposit Internet transfer from JPMORGAN CHASE BANK, NA SAV account **************** 1000",
+      "credit": 700,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-02-28T00:00:00",
+      "counterpartyName": "Interest Paid",
+      "paymentPurpose": "Interest Paid",
+      "credit": 39.16,
+      "currency": "USD",
+      "paymentType": "interest"
+    }
+  ]
+}

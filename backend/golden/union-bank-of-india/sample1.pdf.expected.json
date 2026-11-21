@@ -1,0 +1,1100 @@
+{
+  "metadata": {
+    "accountNumber": "726778464510596",
+    "currency": "INR",
+    "dateFrom": "2021-09-01T00:00:00",
+    "dateTo": "2022-02-28T00:00:00",
+    "balanceStart": 444.22,
+    "balanceEnd": 85.57
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-02-17T00:00:00",
+      "counterpartyName": "UPIAR/214270594494/DR/Bidsbot /CNRB/5630310552582@",
+      "paymentPurpose": "UPIAR/214270594494/DR/Bidsbot /CNRB/5630310552582@",
+      "debit": 300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-02-17T00:00:00",
+      "counterpartyName": "UPIAR/555402195398/DR/Bidsbot /CNRB/5630310552582@",
+      "paymentPurpose": "UPIAR/555402195398/DR/Bidsbot /CNRB/5630310552582@",
+      "debit": 300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-02-11T00:00:00",
+      "counterpartyName": "General Charges Opcovery",
+      "paymentPurpose": "General Charges Opcovery",
+      "debit": 147.5,
+      "currency": "INR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-02-05T00:00:00",
+      "counterpartyName": "MAND DR- BCF2442-",
+      "paymentPurpose": "MAND DR- BCF2442-",
+      "debit": 2083,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-26T00:00:00",
+      "counterpartyName": "MOBFT to: MIBHRHRT CLSSOO O T/943344726607",
+      "paymentPurpose": "MOBFT to: MIBHRHRT CLSSOO O T/943344726607",
+      "debit": 8000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-01-20T00:00:00",
+      "counterpartyName": "UPIAR/172198291944/DR/GLPI RGO /UTIB/6665744728-1@o",
+      "paymentPurpose": "UPIAR/172198291944/DR/GLPI RGO /UTIB/6665744728-1@o",
+      "debit": 50,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-01-14T00:00:00",
+      "counterpartyName": "NEFT:BLGHH AEIPLKS KHIAEOC KIPCTM FDRLM3179032318",
+      "paymentPurpose": "NEFT:BLGHH AEIPLKS KHIAEOC KIPCTM FDRLM3179032318",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-01-10T00:00:00",
+      "counterpartyName": "UPIAR/835821076141/DR/Bhsmtop a/UBIN/79836911860529",
+      "paymentPurpose": "UPIAR/835821076141/DR/Bhsmtop a/UBIN/79836911860529",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-01-09T00:00:00",
+      "counterpartyName": "UPIAR/924400923336/DR/DUMM Y RG/ubin/08931240778728",
+      "paymentPurpose": "UPIAR/924400923336/DR/DUMM Y RG/ubin/08931240778728",
+      "debit": 25000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-01-09T00:00:00",
+      "counterpartyName": "UPIAB/899422075820/CR/RGAANR T/KLGB/sgrnlueeagdtgs",
+      "paymentPurpose": "UPIAB/899422075820/CR/RGAANR T/KLGB/sgrnlueeagdtgs",
+      "credit": 25000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-01-09T00:00:00",
+      "counterpartyName": "UPIAR/004039493750/DR/RGAANR T/KLGB/sgrnlueeagdtgs",
+      "paymentPurpose": "UPIAR/004039493750/DR/RGAANR T/KLGB/sgrnlueeagdtgs",
+      "debit": 25000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-01-09T00:00:00",
+      "counterpartyName": "UPIAB/557153014986/CR/PKOGDK M /SIBL/ighc522@aosoci",
+      "paymentPurpose": "UPIAB/557153014986/CR/PKOGDK M /SIBL/ighc522@aosoci",
+      "credit": 25000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-01-07T00:00:00",
+      "counterpartyName": "UPIAR/131501474418/DR/Maacgh /ESMF/grhclkttlphkhm",
+      "paymentPurpose": "UPIAR/131501474418/DR/Maacgh /ESMF/grhclkttlphkhm",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-01-07T00:00:00",
+      "counterpartyName": "NEFT:BLGHH AEIPLKS KHIAEOC KIPCTM FDRLM3371467103",
+      "paymentPurpose": "NEFT:BLGHH AEIPLKS KHIAEOC KIPCTM FDRLM3371467103",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-01-06T00:00:00",
+      "counterpartyName": "726778464510596:Int.Pd:01-10- 2021 to 31-12-2021",
+      "paymentPurpose": "726778464510596:Int.Pd:01-10- 2021 to 31-12-2021",
+      "credit": 20,
+      "currency": "INR",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2022-01-05T00:00:00",
+      "counterpartyName": "UPIAR/582429469280/DR/DUMM Y RG/ubin/08931240778728",
+      "paymentPurpose": "UPIAR/582429469280/DR/DUMM Y RG/ubin/08931240778728",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-01-05T00:00:00",
+      "counterpartyName": "MAND DR- BCF2442-",
+      "paymentPurpose": "MAND DR- BCF2442-",
+      "debit": 2083,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-23T00:00:00",
+      "counterpartyName": "UPIAR/707083705845/DR/Bidsbot /CNRB/5630310552582@",
+      "paymentPurpose": "UPIAR/707083705845/DR/Bidsbot /CNRB/5630310552582@",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-23T00:00:00",
+      "counterpartyName": "UPIAR/567808659062/DR/DUMM Y RG/cnrb/5630310552582@",
+      "paymentPurpose": "UPIAR/567808659062/DR/DUMM Y RG/cnrb/5630310552582@",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-18T00:00:00",
+      "counterpartyName": "UPIAB/621722625816/CR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "paymentPurpose": "UPIAB/621722625816/CR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "credit": 4500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-16T00:00:00",
+      "counterpartyName": "UPIAR/245635915691/DR/RMHTD GB /SIBL/oimeogskbppgdb",
+      "paymentPurpose": "UPIAR/245635915691/DR/RMHTD GB /SIBL/oimeogskbppgdb",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-15T00:00:00",
+      "counterpartyName": "UPIAR/226899316394/DR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAR/226899316394/DR/AUPLM EOA/CNRB/aooettclokt02-",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-11T00:00:00",
+      "counterpartyName": "NEFT:BLGHH AEIPLKS KHIAEOC KIPCTM FDRLM5175103841",
+      "paymentPurpose": "NEFT:BLGHH AEIPLKS KHIAEOC KIPCTM FDRLM5175103841",
+      "credit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-11T00:00:00",
+      "counterpartyName": "UPIAB/542231431201/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "paymentPurpose": "UPIAB/542231431201/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "credit": 6,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-11T00:00:00",
+      "counterpartyName": "UPIAR/149125220838/DR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "paymentPurpose": "UPIAR/149125220838/DR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "debit": 4100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-10T00:00:00",
+      "counterpartyName": "SMS Charges for December,2021 Quarter",
+      "paymentPurpose": "SMS Charges for December,2021 Quarter",
+      "debit": 17.7,
+      "currency": "INR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-12-08T00:00:00",
+      "counterpartyName": "UPIAR/649974762284/DR/6722020 1/UBIN/08931240778728",
+      "paymentPurpose": "UPIAR/649974762284/DR/6722020 1/UBIN/08931240778728",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-08T00:00:00",
+      "counterpartyName": "NEFT:BLGHH AEIPLKS KHIAEOC KIPCTM FDRLM5823551621",
+      "paymentPurpose": "NEFT:BLGHH AEIPLKS KHIAEOC KIPCTM FDRLM5823551621",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-08T00:00:00",
+      "counterpartyName": "UPIAR/222023876301/DR/RGAANR T/KLGB/sgrnlueeagdtgs",
+      "paymentPurpose": "UPIAR/222023876301/DR/RGAANR T/KLGB/sgrnlueeagdtgs",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-08T00:00:00",
+      "counterpartyName": "POS:GOOGLEPAEY/MUMGBI/13 2674742203",
+      "paymentPurpose": "POS:GOOGLEPAEY/MUMGBI/13 2674742203",
+      "debit": 550,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-07T00:00:00",
+      "counterpartyName": "UPIAB/001698352804/CR/Bimtuop /SBIN/mocrtdoclkdiu9",
+      "paymentPurpose": "UPIAB/001698352804/CR/Bimtuop /SBIN/mocrtdoclkdiu9",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-07T00:00:00",
+      "counterpartyName": "UPIAR/132249802325/DR/Bimtuop /SBIN/mocrtdoclkdiu9",
+      "paymentPurpose": "UPIAR/132249802325/DR/Bimtuop /SBIN/mocrtdoclkdiu9",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "MAND DR- BCF2442-",
+      "paymentPurpose": "MAND DR- BCF2442-",
+      "debit": 2083,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-05T00:00:00",
+      "counterpartyName": "UPIAR/663501395364/DR/KHHSR MCP/GBRB/tnaacuee47@uok",
+      "paymentPurpose": "UPIAR/663501395364/DR/KHHSR MCP/GBRB/tnaacuee47@uok",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-05T00:00:00",
+      "counterpartyName": "NEFT:BLGHH AEIPLKS KHIAEOC KIPCTM FDRLM6242695130",
+      "paymentPurpose": "NEFT:BLGHH AEIPLKS KHIAEOC KIPCTM FDRLM6242695130",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-04T00:00:00",
+      "counterpartyName": "UPIAR/396504825993/DR/Timta Ro/PYTM/heugmg4344@mlc",
+      "paymentPurpose": "UPIAR/396504825993/DR/Timta Ro/PYTM/heugmg4344@mlc",
+      "debit": 479,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-11-29T00:00:00",
+      "counterpartyName": "MOBFT from: MIBHRHRT CLSSOO O T/416796985149",
+      "paymentPurpose": "MOBFT from: MIBHRHRT CLSSOO O T/416796985149",
+      "credit": 2100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-11-29T00:00:00",
+      "counterpartyName": "UPIAB/776671079706/CR/BLGHH AE/CNRB/tutmurcicnt@rh",
+      "paymentPurpose": "UPIAB/776671079706/CR/BLGHH AE/CNRB/tutmurcicnt@rh",
+      "credit": 2150,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-11-06T00:00:00",
+      "counterpartyName": "MAND DR- BCF2442-",
+      "paymentPurpose": "MAND DR- BCF2442-",
+      "debit": 2083,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-11-01T00:00:00",
+      "counterpartyName": "POS:TS GBRMEER/KANMHR/724619277 709",
+      "paymentPurpose": "POS:TS GBRMEER/KANMHR/724619277 709",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-10-31T00:00:00",
+      "counterpartyName": "MOBFT from: MIBHRHRT CLSSOO O T/180674127124",
+      "paymentPurpose": "MOBFT from: MIBHRHRT CLSSOO O T/180674127124",
+      "credit": 2100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-27T00:00:00",
+      "counterpartyName": "UPIAR/785318344528/DR/Timta Ro/PYTM/heugmg4344@mlc",
+      "paymentPurpose": "UPIAR/785318344528/DR/Timta Ro/PYTM/heugmg4344@mlc",
+      "debit": 249,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-27T00:00:00",
+      "counterpartyName": "UPIAB/340150977536/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "paymentPurpose": "UPIAB/340150977536/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "credit": 4,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-27T00:00:00",
+      "counterpartyName": "UPIAB/328072120723/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "paymentPurpose": "UPIAB/328072120723/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "credit": 5,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-27T00:00:00",
+      "counterpartyName": "UPIAB/087483189826/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "paymentPurpose": "UPIAB/087483189826/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "credit": 7,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-27T00:00:00",
+      "counterpartyName": "UPIAR/446020859528/DR/OHR MMBG/UTIB/4949421013@okb",
+      "paymentPurpose": "UPIAR/446020859528/DR/OHR MMBG/UTIB/4949421013@okb",
+      "debit": 50,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-27T00:00:00",
+      "counterpartyName": "UPIAR/304212143035/DR/UDRSC L P/HDFC/eunuuosg61@blt",
+      "paymentPurpose": "UPIAR/304212143035/DR/UDRSC L P/HDFC/eunuuosg61@blt",
+      "debit": 50,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-27T00:00:00",
+      "counterpartyName": "UPIAR/279353554789/DR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAR/279353554789/DR/AUPLM EOA/CNRB/aooettclokt02-",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-27T00:00:00",
+      "counterpartyName": "UPIAR/606459043815/DR/Indian O/YESB/h58608731@duk/",
+      "paymentPurpose": "UPIAR/606459043815/DR/Indian O/YESB/h58608731@duk/",
+      "debit": 260,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-27T00:00:00",
+      "counterpartyName": "UPIAB/775827955938/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAB/775827955938/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "credit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-27T00:00:00",
+      "counterpartyName": "UPIAR/207807893023/DR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAR/207807893023/DR/AUPLM EOA/CNRB/aooettclokt02-",
+      "debit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-27T00:00:00",
+      "counterpartyName": "IMPSAB/561131996590/UBIN0567 221/2642481783",
+      "paymentPurpose": "IMPSAB/561131996590/UBIN0567 221/2642481783",
+      "credit": 15000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2021-10-26T00:00:00",
+      "counterpartyName": "UPIAR/164244108299/DR/Oeec Etu/UTIB/1131761592@okb",
+      "paymentPurpose": "UPIAR/164244108299/DR/Oeec Etu/UTIB/1131761592@okb",
+      "debit": 160,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-26T00:00:00",
+      "counterpartyName": "UPIAR/085447884480/DR/OHR MMBG/UTIB/4949421013@okb",
+      "paymentPurpose": "UPIAR/085447884480/DR/OHR MMBG/UTIB/4949421013@okb",
+      "debit": 392,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-24T00:00:00",
+      "counterpartyName": "UPIAR/173261864956/DR/OHR MMBG/UTIB/4949421013@okb",
+      "paymentPurpose": "UPIAR/173261864956/DR/OHR MMBG/UTIB/4949421013@okb",
+      "debit": 114,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-23T00:00:00",
+      "counterpartyName": "UPIAB/580488516223/CR/HSENB LGH/FDRL/ocnarhtpntmgo1",
+      "paymentPurpose": "UPIAB/580488516223/CR/HSENB LGH/FDRL/ocnarhtpntmgo1",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-23T00:00:00",
+      "counterpartyName": "UPIAR/488213066920/DR/Timta Ro/PYTM/heugmg4344@mlc",
+      "paymentPurpose": "UPIAR/488213066920/DR/Timta Ro/PYTM/heugmg4344@mlc",
+      "debit": 48,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-22T00:00:00",
+      "counterpartyName": "UPIAR/747329662000/DR/ITHP A C/UBIN/ijas4042712364",
+      "paymentPurpose": "UPIAR/747329662000/DR/ITHP A C/UBIN/ijas4042712364",
+      "debit": 150,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-15T00:00:00",
+      "counterpartyName": "UPIAR/421710217837/DR/IPKN RUT /PYTM/eiolirop@idksn",
+      "paymentPurpose": "UPIAR/421710217837/DR/IPKN RUT /PYTM/eiolirop@idksn",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-15T00:00:00",
+      "counterpartyName": "UPIAB/339730047356/CR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "paymentPurpose": "UPIAB/339730047356/CR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "credit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-12T00:00:00",
+      "counterpartyName": "UPIAB/549764734333/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "paymentPurpose": "UPIAB/549764734333/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "credit": 3,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-12T00:00:00",
+      "counterpartyName": "UPIAR/596245935848/DR/MIBH CGAI/CNRB/nnkksskmshkm1@",
+      "paymentPurpose": "UPIAR/596245935848/DR/MIBH CGAI/CNRB/nnkksskmshkm1@",
+      "debit": 1500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-12T00:00:00",
+      "counterpartyName": "IMPSAB/062321855371/UBIN0567 221/2642481783",
+      "paymentPurpose": "IMPSAB/062321855371/UBIN0567 221/2642481783",
+      "credit": 1500,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2021-10-12T00:00:00",
+      "counterpartyName": "UPIAR/840471892776/DR/DUMM Y RG/cnrb/5630310552582@",
+      "paymentPurpose": "UPIAR/840471892776/DR/DUMM Y RG/cnrb/5630310552582@",
+      "debit": 50,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-12T00:00:00",
+      "counterpartyName": "UPIAB/946631529499/CR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "paymentPurpose": "UPIAB/946631529499/CR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "credit": 50,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-10T00:00:00",
+      "counterpartyName": "UPIAR/128056644106/DR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAR/128056644106/DR/AUPLM EOA/CNRB/aooettclokt02-",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-10T00:00:00",
+      "counterpartyName": "IMPSAB/904391437397/UBIN0567 221/2642481783",
+      "paymentPurpose": "IMPSAB/904391437397/UBIN0567 221/2642481783",
+      "credit": 4000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2021-10-07T00:00:00",
+      "counterpartyName": "UPIAR/536564679641/DR/TOASR M M/KLGB/lgocondm0719@d",
+      "paymentPurpose": "UPIAR/536564679641/DR/TOASR M M/KLGB/lgocondm0719@d",
+      "debit": 70,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-06T00:00:00",
+      "counterpartyName": "UPIAR/623753204637/DR/LOINNO P/FDRL/q196006616@ybl",
+      "paymentPurpose": "UPIAR/623753204637/DR/LOINNO P/FDRL/q196006616@ybl",
+      "debit": 22000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-06T00:00:00",
+      "counterpartyName": "IMPSAB/778815673524/UBIN0567 221/2642481783",
+      "paymentPurpose": "IMPSAB/778815673524/UBIN0567 221/2642481783",
+      "credit": 22000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2021-10-05T00:00:00",
+      "counterpartyName": "UPIAR/115248135669/DR/MIBH RHRT/UBIN/homncdlucpom@o",
+      "paymentPurpose": "UPIAR/115248135669/DR/MIBH RHRT/UBIN/homncdlucpom@o",
+      "debit": 12000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-05T00:00:00",
+      "counterpartyName": "UPIAB/309548727417/CR/BLGHH AE/CNRB/2642481783@pay",
+      "paymentPurpose": "UPIAB/309548727417/CR/BLGHH AE/CNRB/2642481783@pay",
+      "credit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-05T00:00:00",
+      "counterpartyName": "UPIAR/550197014576/DR/OHR MMBG/UTIB/4949421013@okb",
+      "paymentPurpose": "UPIAR/550197014576/DR/OHR MMBG/UTIB/4949421013@okb",
+      "debit": 343,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-05T00:00:00",
+      "counterpartyName": "UPIAB/852029258775/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAB/852029258775/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "credit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-05T00:00:00",
+      "counterpartyName": "BCF_5N4GPLEC661181_63308",
+      "paymentPurpose": "BCF_5N4GPLEC661181_63308",
+      "debit": 2083,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2021-10-05T00:00:00",
+      "counterpartyName": "UPIAB/221329821928/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAB/221329821928/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "credit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-05T00:00:00",
+      "counterpartyName": "MOBFT from: MIBHRHRT CLSSOO O T/007812710221",
+      "paymentPurpose": "MOBFT from: MIBHRHRT CLSSOO O T/007812710221",
+      "credit": 2100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-04T00:00:00",
+      "counterpartyName": "UPIAR/476863225593/DR/Bidsbot /CNRB/5630310552582@",
+      "paymentPurpose": "UPIAR/476863225593/DR/Bidsbot /CNRB/5630310552582@",
+      "debit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-02T00:00:00",
+      "counterpartyName": "726778464510596:Int.Pd:01-07- 2021 to 30-09-2021",
+      "paymentPurpose": "726778464510596:Int.Pd:01-07- 2021 to 30-09-2021",
+      "credit": 32,
+      "currency": "INR",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2021-10-02T00:00:00",
+      "counterpartyName": "UPIAR/807803444993/DR/Indian O/YESB/i19302944@nhn/",
+      "paymentPurpose": "UPIAR/807803444993/DR/Indian O/YESB/i19302944@nhn/",
+      "debit": 350,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-02T00:00:00",
+      "counterpartyName": "UPIAB/736135197563/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "paymentPurpose": "UPIAB/736135197563/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "credit": 3,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-10-02T00:00:00",
+      "counterpartyName": "UPIAR/305914691813/DR/DUMM Y RG/cnrb/5630310552582@",
+      "paymentPurpose": "UPIAR/305914691813/DR/DUMM Y RG/cnrb/5630310552582@",
+      "debit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-10-02T00:00:00",
+      "counterpartyName": "IMPSAB/015444977201/UBIN0567 221/2642481783",
+      "paymentPurpose": "IMPSAB/015444977201/UBIN0567 221/2642481783",
+      "credit": 10000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2021-09-30T00:00:00",
+      "counterpartyName": "UPIAR/874593331414/DR/bharatpe /FDRL/nniurpad.87109",
+      "paymentPurpose": "UPIAR/874593331414/DR/bharatpe /FDRL/nniurpad.87109",
+      "debit": 60,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-30T00:00:00",
+      "counterpartyName": "UPI 777733332232 DT",
+      "paymentPurpose": "UPI 777733332232 DT",
+      "credit": 2.25,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-29T00:00:00",
+      "counterpartyName": "UPIAB/161947934066/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "paymentPurpose": "UPIAB/161947934066/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "credit": 12,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-28T00:00:00",
+      "counterpartyName": "UPIAR/041658827749/DR/Indian O/YESB/h58608731@duk/",
+      "paymentPurpose": "UPIAR/041658827749/DR/Indian O/YESB/h58608731@duk/",
+      "debit": 160,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-28T00:00:00",
+      "counterpartyName": "UPIAR/915049473107/DR/Petkc Bi/PYTM/718742382774@P",
+      "paymentPurpose": "UPIAR/915049473107/DR/Petkc Bi/PYTM/718742382774@P",
+      "debit": 9000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-28T00:00:00",
+      "counterpartyName": "UPIAR/974643530378/DR/IGHTE RM /SBIN/eisghodl303@eh",
+      "paymentPurpose": "UPIAR/974643530378/DR/IGHTE RM /SBIN/eisghodl303@eh",
+      "debit": 456,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-28T00:00:00",
+      "counterpartyName": "UPIAR/495095087024/DR/IGHTE RM /SBIN/eisghodl303@eh",
+      "paymentPurpose": "UPIAR/495095087024/DR/IGHTE RM /SBIN/eisghodl303@eh",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-27T00:00:00",
+      "counterpartyName": "UPIAB/271133834205/CR/MIBH CGAI/UBIN/nkculbpolgea@r",
+      "paymentPurpose": "UPIAB/271133834205/CR/MIBH CGAI/UBIN/nkculbpolgea@r",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-26T00:00:00",
+      "counterpartyName": "UPIAR/532743245816/DR/CKHR DCEH/UBIN/oalrgniohh767@",
+      "paymentPurpose": "UPIAR/532743245816/DR/CKHR DCEH/UBIN/oalrgniohh767@",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-26T00:00:00",
+      "counterpartyName": "UPIAR/941712497241/DR/OHR MMBG/UTIB/4949421013@okb",
+      "paymentPurpose": "UPIAR/941712497241/DR/OHR MMBG/UTIB/4949421013@okb",
+      "debit": 79,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-26T00:00:00",
+      "counterpartyName": "UPIAR/764422225367/DR/EKBNIP K/KLGB/n31134532@cep/",
+      "paymentPurpose": "UPIAR/764422225367/DR/EKBNIP K/KLGB/n31134532@cep/",
+      "debit": 60,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-25T00:00:00",
+      "counterpartyName": "UPIAB/446977091428/CR/FIRGS P/SBIN/prlcd249@gceso",
+      "paymentPurpose": "UPIAB/446977091428/CR/FIRGS P/SBIN/prlcd249@gceso",
+      "credit": 2000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-25T00:00:00",
+      "counterpartyName": "UPIAR/777733332232/DR/NNCGN AIU/HDFC/sorehnmmnbdcum",
+      "paymentPurpose": "UPIAR/777733332232/DR/NNCGN AIU/HDFC/sorehnmmnbdcum",
+      "debit": 300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-25T00:00:00",
+      "counterpartyName": "UPIAR/968389256606/DR/BCNM SPA/SBIN/d49059958@ipl/",
+      "paymentPurpose": "UPIAR/968389256606/DR/BCNM SPA/SBIN/d49059958@ipl/",
+      "debit": 198,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-25T00:00:00",
+      "counterpartyName": "UPIAR/120102984793/DR/EKBNIP K/KLGB/n31134532@cep/",
+      "paymentPurpose": "UPIAR/120102984793/DR/EKBNIP K/KLGB/n31134532@cep/",
+      "debit": 60,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-25T00:00:00",
+      "counterpartyName": "UPIAB/502924145356/CR/NPNSM IP /CNRB/opgbauamlatgha",
+      "paymentPurpose": "UPIAB/502924145356/CR/NPNSM IP /CNRB/opgbauamlatgha",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-24T00:00:00",
+      "counterpartyName": "UPIAR/009326833484/DR/OHR MMBG/UTIB/4949421013@okb",
+      "paymentPurpose": "UPIAR/009326833484/DR/OHR MMBG/UTIB/4949421013@okb",
+      "debit": 80,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-24T00:00:00",
+      "counterpartyName": "UPIAR/489478563965/DR/NGBAR GOI/UBIN/n03612621@obk/",
+      "paymentPurpose": "UPIAR/489478563965/DR/NGBAR GOI/UBIN/n03612621@obk/",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-24T00:00:00",
+      "counterpartyName": "UPIAR/077346252903/DR/LBEMBU MH/FDRL/ahdhunhd1@itom",
+      "paymentPurpose": "UPIAR/077346252903/DR/LBEMBU MH/FDRL/ahdhunhd1@itom",
+      "debit": 180,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-22T00:00:00",
+      "counterpartyName": "UPIAR/838806178609/DR/HSEN BLGH/CNRB/asgattksr60@mm",
+      "paymentPurpose": "UPIAR/838806178609/DR/HSEN BLGH/CNRB/asgattksr60@mm",
+      "debit": 1400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-22T00:00:00",
+      "counterpartyName": "UPIAR/794562821835/DR/EKBNIP K/KLGB/n31134532@cep/",
+      "paymentPurpose": "UPIAR/794562821835/DR/EKBNIP K/KLGB/n31134532@cep/",
+      "debit": 60,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-21T00:00:00",
+      "counterpartyName": "UPIAR/076751433594/DR/bharatpe /FDRL/nniurpad.87109",
+      "paymentPurpose": "UPIAR/076751433594/DR/bharatpe /FDRL/nniurpad.87109",
+      "debit": 60,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-19T00:00:00",
+      "counterpartyName": "UPIAB/585045387313/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "paymentPurpose": "UPIAB/585045387313/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "credit": 4,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-19T00:00:00",
+      "counterpartyName": "UPIAB/127576298935/CR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "paymentPurpose": "UPIAB/127576298935/CR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "credit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-19T00:00:00",
+      "counterpartyName": "UPIAR/837029251698/DR/BPNAL S /SBIN/rbahcunidkdngr",
+      "paymentPurpose": "UPIAR/837029251698/DR/BPNAL S /SBIN/rbahcunidkdngr",
+      "debit": 1760,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-19T00:00:00",
+      "counterpartyName": "UPIAR/373943288025/DR/Petkc Bi/PYTM/718742382774@P",
+      "paymentPurpose": "UPIAR/373943288025/DR/Petkc Bi/PYTM/718742382774@P",
+      "debit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-19T00:00:00",
+      "counterpartyName": "UPIAB/575768008128/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAB/575768008128/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-19T00:00:00",
+      "counterpartyName": "UPIAB/656797164091/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAB/656797164091/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-17T00:00:00",
+      "counterpartyName": "UPIAR/716230745026/DR/MIBH RHRT/UBIN/homncdlucpom@o",
+      "paymentPurpose": "UPIAR/716230745026/DR/MIBH RHRT/UBIN/homncdlucpom@o",
+      "debit": 100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-13T00:00:00",
+      "counterpartyName": "UPIAR/722401460419/DR/Timta Op/PYTM/irueld3781@nre",
+      "paymentPurpose": "UPIAR/722401460419/DR/Timta Op/PYTM/irueld3781@nre",
+      "debit": 399,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-13T00:00:00",
+      "counterpartyName": "UPIAR/906044533709/DR/RMPAH GHT/CNRB/tcsdlghducptpa",
+      "paymentPurpose": "UPIAR/906044533709/DR/RMPAH GHT/CNRB/tcsdlghducptpa",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-13T00:00:00",
+      "counterpartyName": "UPIAB/592624634174/CR/RMHTD GB /SIBL/oimeogskbppgdb",
+      "paymentPurpose": "UPIAB/592624634174/CR/RMHTD GB /SIBL/oimeogskbppgdb",
+      "credit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-13T00:00:00",
+      "counterpartyName": "UPIAB/855058614349/CR/KUGBB R M/UTIB/bugmslue@otbui",
+      "paymentPurpose": "UPIAB/855058614349/CR/KUGBB R M/UTIB/bugmslue@otbui",
+      "credit": 2500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-11T00:00:00",
+      "counterpartyName": "UPIAR/824763589949/DR/MIIPE HM/CNRB/dbgeriu6575@cs",
+      "paymentPurpose": "UPIAR/824763589949/DR/MIIPE HM/CNRB/dbgeriu6575@cs",
+      "debit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-11T00:00:00",
+      "counterpartyName": "UPIAB/217985316300/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAB/217985316300/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-11T00:00:00",
+      "counterpartyName": "UPIAB/697960987714/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAB/697960987714/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-11T00:00:00",
+      "counterpartyName": "UPIAR/193239729575/DR/OHR MMBG/UTIB/4949421013@okb",
+      "paymentPurpose": "UPIAR/193239729575/DR/OHR MMBG/UTIB/4949421013@okb",
+      "debit": 32,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-11T00:00:00",
+      "counterpartyName": "SMS Charges for September,2021 Quarter",
+      "paymentPurpose": "SMS Charges for September,2021 Quarter",
+      "debit": 17.7,
+      "currency": "INR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-09-11T00:00:00",
+      "counterpartyName": "UPIAB/464974181823/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "paymentPurpose": "UPIAB/464974181823/CR/GOOGL UNI/UTIB/mmiu-mremcng@r",
+      "credit": 2,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-11T00:00:00",
+      "counterpartyName": "UPIAR/403370305500/DR/MIBH RHRT/UBIN/homncdlucpom@o",
+      "paymentPurpose": "UPIAR/403370305500/DR/MIBH RHRT/UBIN/homncdlucpom@o",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-10T00:00:00",
+      "counterpartyName": "UPIAB/807608518841/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "paymentPurpose": "UPIAB/807608518841/CR/AUPLM EOA/CNRB/aooettclokt02-",
+      "credit": 100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-10T00:00:00",
+      "counterpartyName": "6558177047282344/355201314985/ 726778464510596",
+      "paymentPurpose": "6558177047282344/355201314985/ 726778464510596",
+      "debit": 15000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2021-09-10T00:00:00",
+      "counterpartyName": "UPIAB/902959113824/CR/MIBH RHRT/UBIN/homncdlucpom@o",
+      "paymentPurpose": "UPIAB/902959113824/CR/MIBH RHRT/UBIN/homncdlucpom@o",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-10T00:00:00",
+      "counterpartyName": "NEFT:GKORMUR IPKHHO SIBLN14337475157",
+      "paymentPurpose": "NEFT:GKORMUR IPKHHO SIBLN14337475157",
+      "credit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-09T00:00:00",
+      "counterpartyName": "UPIAR/331191902187/DR/OHR MMBG/UTIB/4949421013@okb",
+      "paymentPurpose": "UPIAR/331191902187/DR/OHR MMBG/UTIB/4949421013@okb",
+      "debit": 239,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-09T00:00:00",
+      "counterpartyName": "UPIAR/721360990243/DR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "paymentPurpose": "UPIAR/721360990243/DR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "debit": 3000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-07T00:00:00",
+      "counterpartyName": "BCF_2083_42121_5N4GPLEC6611 81",
+      "paymentPurpose": "BCF_2083_42121_5N4GPLEC6611 81",
+      "debit": 2083,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2021-09-06T00:00:00",
+      "counterpartyName": "UPIAB/557771091402/CR/MIBH CGAI/KLGB/ecrgsolncdd@uo",
+      "paymentPurpose": "UPIAB/557771091402/CR/MIBH CGAI/KLGB/ecrgsolncdd@uo",
+      "credit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-05T00:00:00",
+      "counterpartyName": "UPIAB/484334404023/CR/ORMGG K /FDRL/msastureenn55@",
+      "paymentPurpose": "UPIAB/484334404023/CR/ORMGG K /FDRL/msastureenn55@",
+      "credit": 80,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-04T00:00:00",
+      "counterpartyName": "UPIAR/049051766249/DR/OHR MMBG/UTIB/4949421013@okb",
+      "paymentPurpose": "UPIAR/049051766249/DR/OHR MMBG/UTIB/4949421013@okb",
+      "debit": 10,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-03T00:00:00",
+      "counterpartyName": "UPIAR/319690784581/DR/BLGHH AE/CNRB/5630310552582@",
+      "paymentPurpose": "UPIAR/319690784581/DR/BLGHH AE/CNRB/5630310552582@",
+      "debit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-09-03T00:00:00",
+      "counterpartyName": "UPIAB/828053458854/CR/MIBH RHRT/UBIN/homncdlucpom@o",
+      "paymentPurpose": "UPIAB/828053458854/CR/MIBH RHRT/UBIN/homncdlucpom@o",
+      "credit": 1600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-03T00:00:00",
+      "counterpartyName": "UPIAB/643484166606/CR/MIBH CGAI/UBIN/kkucet570@dpib",
+      "paymentPurpose": "UPIAB/643484166606/CR/MIBH CGAI/UBIN/kkucet570@dpib",
+      "credit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-09-02T00:00:00",
+      "counterpartyName": "UPIAB/158745322191/CR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "paymentPurpose": "UPIAB/158745322191/CR/MHSEN R A/GBRB/lgcpob649@kesk",
+      "credit": 3500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    }
+  ]
+}
