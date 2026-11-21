@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useReadOnlyWorkspace } from '@/app/contexts/WorkspaceContext';
 import apiClient from '@/app/lib/api';
-import { getApiErrorStatus, isVersionReadOnlyError } from '@/app/lib/api-error';
+import { getApiErrorStatus, isReadOnlyError } from '@/app/lib/api-error';
 import {
   indexedDbStore,
   isOfflineStoreAvailable,
@@ -38,7 +38,7 @@ export async function sendOfflineEntry(
   } catch (error: unknown) {
     // A past version refuses every write: no status, so the entry is kept for
     // the live workspace instead of dropped as rejected.
-    const status = isVersionReadOnlyError(error) ? undefined : getApiErrorStatus(error);
+    const status = isReadOnlyError(error) ? undefined : getApiErrorStatus(error);
     return { ok: false, status, error: String(error) };
   }
 }

@@ -21,6 +21,8 @@ import { queryKeys } from '@/app/lib/query-keys';
 import { usePayeeName } from '@/app/lib/use-payee-name';
 import { formatStoredDateWithOptions } from '@/app/lib/user-format-store';
 import { useAliveRef } from '../hooks/useAliveRef';
+import { useSubscriptionMatchRejection } from '../hooks/useSubscriptionMatchRejection';
+import { SubscriptionCandidatePicker } from './SubscriptionCandidatePicker';
 
 export type CandidateRow = SubscriptionChargeCandidates[number];
 
@@ -37,6 +39,8 @@ export type PaymentEntry = {
 interface SubscriptionPaymentsProps {
   payments: PaymentEntry[];
   vendorName: string;
+  /** The saved subscription: its refused rows stay out, and a row can be refused. */
+  subscriptionId?: string;
   /** Prefills the amount of a payment typed in: the subscription's price. */
   defaultAmount: number | '';
   /** Rows picked in the form but not saved yet, kept out of the picker. */
@@ -58,6 +62,7 @@ interface SubscriptionPaymentsProps {
 export function SubscriptionPayments({
   payments,
   vendorName,
+  subscriptionId,
   defaultAmount,
   pickedTransactionIds = [],
   autoLinkPayees = [],
@@ -80,15 +85,22 @@ export function SubscriptionPayments({
   const [note, setNote] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const alive = useAliveRef();
+  const rejectRow = useSubscriptionMatchRejection(subscriptionId);
 
   const candidates = useQuery({
-    queryKey: queryKeys.subscriptionChargeCandidates({ workspaceId, vendorName, statementId }),
+    queryKey: queryKeys.subscriptionChargeCandidates({
+      workspaceId,
+      vendorName,
+      statementId,
+      subscriptionId,
+    }),
     queryFn: ({ signal }) =>
       apiQueryDecoded({
         url: '/subscriptions/charge-candidates',
         params: {
           vendorName: vendorName || undefined,
           statementId: statementId ?? undefined,
+          subscriptionId,
         } satisfies ContractInput<'SubscriptionChargeCandidatesQuery'>,
         signal,
         contract: 'SubscriptionChargeCandidates',
@@ -281,24 +293,10 @@ export function SubscriptionPayments({
         (candidates.isPending ? null : rows.length === 0 ? (
           <p className="seneca-sub-payments__empty">{t.noCandidates}</p>
         ) : (
-          <ul className="seneca-sub-payments__picker">
-            {rows.map(row => (
-              <li key={row.transactionId}>
-                <button
-                  type="button"
-                  className="seneca-sub-payments__candidate"
-                  data-match={row.matchesVendor || undefined}
-                  onClick={() => void pick(row)}
-                >
-                  <span className="seneca-sub-payments__candidate-name">
-                    {payeeName(row.counterpartyName)}
-                  </span>
-                  <span>{formatDate(row.transactionDate)}</span>
-                  <PrivateAmount>{money(row.amount, row.currency)}</PrivateAmount>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <SubscriptionCandidatePicker
+            {...{ rows, payeeName, formatDate, money, onReject: rejectRow }}
+            onPick={row => void pick(row)}
+          />
         ))}
 
       {note && <p className="seneca-sub-payments__note">{note}</p>}

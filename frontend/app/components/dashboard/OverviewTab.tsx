@@ -12,7 +12,6 @@ import { FileUp } from '@/app/components/icons';
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import type { DashboardData } from '@/app/hooks/useDashboard';
 import { useIntlayer, useLocale } from '@/app/i18n';
-import { Scale, TrayArrowDown, WalletArrowUp } from '@/app/lib/category-line-icons';
 import { AdviceCard } from './AdviceCard';
 import { CashFlowCard, reportsHref } from './CashFlowCard';
 import { CryptoPortfolioCard } from './CryptoPortfolioCard';
@@ -176,7 +175,6 @@ function kpiTiles({
     'kpi-income': (
       <KpiCard
         label={labels.income}
-        icon={TrayArrowDown}
         value={spinner || formatAmount(income)}
         tone={signTone(income)}
         caption={monthLabel}
@@ -198,7 +196,6 @@ function kpiTiles({
         leftLabel={labels.leftToSpend}
         spentValue={formatAmount(expense)}
         label={labels.spent}
-        icon={WalletArrowUp}
         lead
         value={spinner || formatAmount(expense)}
         // Spending is not an alarm: the card stays neutral whatever the amount.
@@ -219,7 +216,6 @@ function kpiTiles({
     'kpi-net': (
       <KpiCard
         label={labels.net}
-        icon={Scale}
         value={spinner || signed(net, formatAmount)}
         tone={signTone(net)}
         // What share of income is kept says the same as the net, so it is the net's caption.

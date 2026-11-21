@@ -2,6 +2,31 @@ import { SubscriptionFrequency } from '../../entities/subscription.entity';
 
 const bucketOf = (date: Date): number => date.getFullYear() * 12 + date.getMonth();
 
+/**
+ * How far one charge of a subscription is from the next: whole days, or whole
+ * months clamped to the month's length (the shared recurrence rules' daily
+ * and monthly steps).
+ */
+export function subscriptionStep(frequency: SubscriptionFrequency): {
+  unit: 'day' | 'month';
+  count: number;
+} {
+  switch (frequency) {
+    case SubscriptionFrequency.WEEKLY:
+      return { unit: 'day', count: 7 };
+    case SubscriptionFrequency.BIWEEKLY:
+      return { unit: 'day', count: 14 };
+    case SubscriptionFrequency.MONTHLY:
+      return { unit: 'month', count: 1 };
+    case SubscriptionFrequency.QUARTERLY:
+      return { unit: 'month', count: 3 };
+    case SubscriptionFrequency.SEMIANNUAL:
+      return { unit: 'month', count: 6 };
+    case SubscriptionFrequency.ANNUAL:
+      return { unit: 'month', count: 12 };
+  }
+}
+
 /** ~380 years of weekly charges: only a corrupt row can reach this. */
 const MAX_STEPS = 20000;
 
@@ -19,20 +44,14 @@ const MAX_MONTHS = 120;
  * every month and an annual one on Feb 29 falls back to Feb 28.
  */
 export function chargeAt(anchor: Date, frequency: SubscriptionFrequency, index: number): Date {
-  if (frequency === SubscriptionFrequency.WEEKLY) {
-    const weekly = new Date(anchor);
-    weekly.setDate(weekly.getDate() + 7 * index);
-    return weekly;
+  const step = subscriptionStep(frequency);
+  if (step.unit === 'day') {
+    const byDays = new Date(anchor);
+    byDays.setDate(byDays.getDate() + step.count * index);
+    return byDays;
   }
 
-  const monthStep =
-    frequency === SubscriptionFrequency.MONTHLY
-      ? 1
-      : frequency === SubscriptionFrequency.QUARTERLY
-        ? 3
-        : 12;
-
-  const target = bucketOf(anchor) + monthStep * index;
+  const target = bucketOf(anchor) + step.count * index;
   const year = Math.floor(target / 12);
   const month = target % 12;
   // Day 0 of the next month is the last day of this one.

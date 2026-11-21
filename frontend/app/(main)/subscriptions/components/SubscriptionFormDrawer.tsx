@@ -13,6 +13,7 @@ import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer } from '@/app/i18n';
 import { queryKeys } from '@/app/lib/query-keys';
 import { tokens } from '@/lib/theme-tokens';
+import { SUBSCRIPTION_FREQUENCIES } from '../hooks/subscription-draft';
 import { useCurrencyPickerState } from '../hooks/useCurrencyPickerState';
 import type { SubscriptionFormData } from '../hooks/useSubscriptionsPage';
 import { MergeIntoSubscription } from './MergeIntoSubscription';
@@ -92,7 +93,6 @@ export function SubscriptionFormDrawer({
         sx={{
           maxWidth: '100%',
           borderLeft: 0,
-          bgcolor: 'background.paper',
           '@media (min-width:600px)': { maxWidth: 512 },
         }}
         title={
@@ -137,20 +137,16 @@ export function SubscriptionFormDrawer({
 
             <FormControl fullWidth>
               <InputLabel>{t.frequency}</InputLabel>
-              <Select
+              <Select<SubscriptionFormData['frequency']>
                 value={formData.frequency}
                 label={t.frequency.value}
-                onChange={event =>
-                  setFormData({
-                    ...formData,
-                    frequency: event.target.value as SubscriptionFormData['frequency'],
-                  })
-                }
+                onChange={event => setFormData({ ...formData, frequency: event.target.value })}
               >
-                <MenuItem value="weekly">{t.weekly}</MenuItem>
-                <MenuItem value="monthly">{t.monthly}</MenuItem>
-                <MenuItem value="quarterly">{t.quarterly}</MenuItem>
-                <MenuItem value="annual">{t.annual}</MenuItem>
+                {SUBSCRIPTION_FREQUENCIES.map(value => (
+                  <MenuItem key={value} value={value}>
+                    {t[value]}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
 
