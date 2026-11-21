@@ -179,6 +179,7 @@ import {
   SubscriptionSummary,
   SystemUpdateStatus,
   TagList,
+  TagSummary,
   TransactionTagLinks,
   TaxJurisdictionList,
   TaxRateItem,
@@ -191,6 +192,7 @@ import {
   TelegramReportPage,
   TransactionAttachmentList,
   TransactionCandidates,
+  TransactionCommentEdit,
   TransactionGoalLink,
   TransactionList,
   TrialBalance,
@@ -416,12 +418,45 @@ describe('API contracts (e2e)', () => {
       ]);
     });
 
+    it('GET /tags/:id/summary, with the row booked in beforeAll tagged', async () => {
+      const send = (method: 'post' | 'put', url: string, body: object) =>
+        request(app.getHttpServer())
+          [method](url)
+          .set('Authorization', `Bearer ${owner.token}`)
+          .set('x-workspace-id', owner.workspaceId)
+          .send(body);
+      const tag = await send('post', '/tags', { name: 'Contract Trip' }).expect(201);
+      const rows = await get('/transactions?limit=100');
+      const coffee = rows.body.data.find(
+        (row: { counterpartyName: string }) => row.counterpartyName === 'Contract Coffee',
+      );
+      await send('put', `/transactions/${coffee.id}/tags`, { tagIds: [tag.body.id] }).expect(200);
+      const res = await get(`/tags/${tag.body.id}/summary`);
+      matches(TagSummary, res.body);
+      expect(res.body).toMatchObject({ spent: 42.5, received: 0, direction: 'expense' });
+      expect(res.body.months).toHaveLength(1);
+      expect(res.body.categories).toHaveLength(1);
+      expect(res.body.topPayees).toEqual([
+        expect.objectContaining({ name: 'Contract Coffee', amount: 42.5, count: 1 }),
+      ]);
+      await request(app.getHttpServer())
+        .delete(`/tags/${tag.body.id}`)
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('x-workspace-id', owner.workspaceId)
+        .expect(200);
+    });
+
     it('GET /wallets', async () => {
       await request(app.getHttpServer())
         .post('/wallets')
         .set('Authorization', `Bearer ${owner.token}`)
         .set('x-workspace-id', owner.workspaceId)
-        .send({ name: 'Contract Wallet', currency: 'USD', initialBalance: 12.5 })
+        .send({
+          name: 'Contract Wallet',
+          currency: 'USD',
+          initialBalance: 12.5,
+          includeInNetWorth: false,
+        })
         .expect(201);
       const card = await request(app.getHttpServer())
         .post('/wallets')
@@ -433,6 +468,7 @@ describe('API contracts (e2e)', () => {
       const res = await get('/wallets');
       matches(WalletList, res.body);
       expect(res.body[0].initialBalance).toBe('12.50');
+      expect(res.body[0].includeInNetWorth).toBe(false);
       expect(res.body[0].creditLimit).toBeNull();
       expect(res.body.find((row: { name: string }) => row.name === 'Contract Wallet Card').creditLimit).toBe('5000.00');
     });
@@ -657,6 +693,8 @@ describe('API contracts (e2e)', () => {
       const res = await get('/reports/net-worth?range=30d');
       matches(NetWorthResponse, res.body);
       expect(res.body.assetLines.length).toBeGreaterThan(0);
+      // The wallet made under reference data is set not to count.
+      expect(res.body.accountsLeftOut).toBe(1);
     });
 
     it('GET /reports/balance/sheet', async () => {
@@ -2353,6 +2391,13 @@ describe('API contracts (e2e)', () => {
         AllocationSuggestion,
         (await get(`/payables/allocation-suggestion/${transactionId}`)).body,
       );
+    });
+
+    it('GET who last edited a comment, after an edit', async () => {
+      await send('put', `/transactions/${transactionId}`, { comments: 'Contract comment' }).expect(200);
+      const edit = await get(`/transactions/${transactionId}/comment-edit`);
+      matches(TransactionCommentEdit, edit.body);
+      expect(edit.body.edit).toMatchObject({ by: 'you', name: null });
     });
 
     it('GET the report history and schedules, webhooks and a subscription', async () => {

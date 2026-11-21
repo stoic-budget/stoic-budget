@@ -9,7 +9,7 @@ import type { WalletItem, WalletType } from '@/app/lib/contracts';
 import { invalidateFinancialData } from '@/app/lib/invalidate-document-lists';
 import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
-import { isDebtType } from '../account-types';
+import { countsInNetWorth, isDebtType } from '../account-types';
 import { parseCreditLimit } from '../credit-limit';
 
 export type Account = WalletItem;
@@ -26,6 +26,8 @@ export interface AccountForm {
    */
   openingBalance: string;
   ownerMemberId: string | null;
+  /** Whether the account counts in net worth; it counts everywhere else either way. */
+  includeInNetWorth: boolean;
   /** A credit card's limit as typed; empty means none. Sent only for a card. */
   creditLimit: string;
   /** Statements to move into a new account (creating one from found statements). */
@@ -40,6 +42,7 @@ export const emptyAccountForm = (currency: string): AccountForm => ({
   currency,
   openingBalance: '',
   ownerMemberId: null,
+  includeInNetWorth: true,
   creditLimit: '',
 });
 
@@ -53,6 +56,7 @@ export function accountToForm(account: Account): AccountForm {
     currency: account.currency,
     openingBalance: opening === 0 ? '' : String(isDebtType(account.type) ? -opening : opening),
     ownerMemberId: account.ownerMemberId,
+    includeInNetWorth: countsInNetWorth(account),
     creditLimit: account.creditLimit === null ? '' : String(Number(account.creditLimit)),
   };
 }
@@ -70,6 +74,7 @@ function toPayload(form: AccountForm) {
     currency: form.currency || null,
     initialBalance: isDebtType(form.type) ? -Math.abs(typed) : typed,
     ownerMemberId: form.ownerMemberId,
+    includeInNetWorth: form.includeInNetWorth,
     // Only a card has a limit; any other type clears it.
     creditLimit: form.type === 'credit_card' && limit !== 'invalid' ? limit : null,
   };

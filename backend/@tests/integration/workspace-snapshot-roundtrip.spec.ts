@@ -403,6 +403,14 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     await insert('custom_table_rows', { table_id: table, row_number: 1, data: { client: 'Client GmbH' } });
     await insert('payables', { workspace_id: workspaceId, vendor: 'Adobe', amount: 60, currency: 'EUR' });
     await insert('payees', { workspace_id: workspaceId, name: 'Lidl' });
+    // An account set not to count in net worth: the setting is part of the account.
+    await insert('wallets', {
+      workspace_id: workspaceId,
+      user_id: userId,
+      name: 'Held for a friend',
+      currency: 'EUR',
+      include_in_net_worth: false,
+    });
   });
 
   afterAll(async () => {
@@ -478,6 +486,19 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
       if (count > 0) leaks.push(`${key.source}.${key.column} -> ${key.target}: ${count}`);
     }
     expect(leaks).toEqual([]);
+  });
+
+  it('keeps which accounts count in net worth', async () => {
+    const copy = await roundTrip(workspaceId, 'Accounts copy');
+    const wallets: Array<{ name: string; include_in_net_worth: boolean }> = await sql(
+      'SELECT name, include_in_net_worth FROM wallets WHERE workspace_id = $1 ORDER BY name',
+      [copy.id],
+    );
+    // Every other account the setup made still counts; only this one is left out.
+    expect(wallets.filter(wallet => !wallet.include_in_net_worth).map(wallet => wallet.name)).toEqual([
+      'Held for a friend',
+    ]);
+    expect(wallets.map(wallet => wallet.name)).toContain('Cash');
   });
 
   it('brings back a goal following the restored account, not the source one', async () => {

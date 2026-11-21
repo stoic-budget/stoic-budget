@@ -104,6 +104,8 @@ export const WalletItem = Schema.Struct({
   initialBalance: DecimalString,
   isActive: Schema.Boolean,
   ownerMemberId: Schema.NullOr(Schema.String),
+  /** Whether the account counts in net worth; it counts everywhere else either way. */
+  includeInNetWorth: Schema.Boolean,
   /**
    * A credit card's limit in the account's currency, or null when none is set.
    * Information only: no total, balance or net worth counts it.

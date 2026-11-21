@@ -1,5 +1,6 @@
 // The category page (app/(main)/categories/[id]): the All transactions layout
 // (`seneca-all-tx`) and the payee page's figures, plus the few pieces of its own.
+// The tag page (app/(main)/tags/[id]) shares them and adds its badge.
 
 .seneca-category-page {
   &__header {
@@ -82,4 +83,17 @@
       border-radius: 4px;
     }
   }
+}
+
+// The tag's line icon in the neutral circle, the size of a category badge.
+.seneca-tag-page__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--icon-badge-bg);
+  color: var(--text-muted);
 }

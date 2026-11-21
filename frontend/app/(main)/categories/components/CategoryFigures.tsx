@@ -1,3 +1,4 @@
+import { Figures } from '@/app/components/ui/figures';
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer } from '@/app/i18n';
 import type { CategorySummary } from '@/app/lib/contracts';
@@ -23,15 +24,11 @@ export function CategoryFigures({
     { key: 'year', label: t.lastYear, value: summary.lastYearTotal, hint: undefined },
   ];
   return (
-    <div className="seneca-payees__figures">
-      {figures.map(figure => (
-        <div key={figure.key} title={figure.hint}>
-          <span className="seneca-payees__figure-label">{figure.label}</span>
-          <span className="seneca-payees__figure-value">
-            {figure.value === null ? '—' : <PrivateAmount>{money(figure.value)}</PrivateAmount>}
-          </span>
-        </div>
-      ))}
-    </div>
+    <Figures
+      figures={figures.map(figure => ({
+        ...figure,
+        value: figure.value === null ? '—' : <PrivateAmount>{money(figure.value)}</PrivateAmount>,
+      }))}
+    />
   );
 }

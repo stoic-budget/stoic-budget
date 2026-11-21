@@ -42,6 +42,7 @@ export * from './receipts/receipts';
 export * from './reference/balance-check';
 export * from './reference/category-summary';
 export * from './reference/reference';
+export * from './reference/tag-summary';
 export * from './reports/report-summaries';
 export * from './reports/reports';
 export * from './requests/api-keys';

@@ -14,10 +14,12 @@ import { DrawerShell } from '../ui/drawer-shell';
 import { PRIVATE_CLASS } from '../ui/private-amount';
 import { TextTabs } from '../ui/text-tabs';
 import { BudgetExclusionToggle } from './BudgetExclusionToggle';
+import { canReadComment } from './helpers/commentAccess';
 import { canDuplicate } from './helpers/duplicate-draft';
 import { formatDate } from './helpers/transactionFormatters';
 import { useDuplicateTransaction } from './hooks/useDuplicateTransaction';
 import { useTransactionReviewActions } from './hooks/useTransactionReviewActions';
+import { useWorkspaceMembers } from './hooks/useWorkspaceMembers';
 import { TransactionCommentSection } from './TransactionCommentSection';
 import { TransactionDetailsTab } from './TransactionDetailsTab';
 import { TransactionFilesSection } from './TransactionFilesSection';
@@ -227,6 +229,7 @@ export default function DetailsDrawer({
   const t = useIntlayer('transactionsDrawer');
   const notes = useIntlayer('notes');
   const [activeTab, setActiveTab] = useState<TabId>('details');
+  const selfMemberId = useWorkspaceMembers().find(member => member.isSelf)?.memberId ?? null;
 
   if (!transaction) return null;
 
@@ -278,7 +281,8 @@ export default function DetailsDrawer({
               onSplitDone={onSplitDone}
             />
             <BudgetExclusionToggle transaction={transaction} />
-            {!transaction.isPrivate && (
+            {/* Hidden on someone else's private row; the owner of one sees it, and who edited it. */}
+            {canReadComment(transaction, selfMemberId) && (
               <TransactionCommentSection
                 key={transaction.id}
                 transactionId={transaction.id}

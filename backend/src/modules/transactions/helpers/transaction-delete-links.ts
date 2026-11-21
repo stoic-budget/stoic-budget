@@ -185,8 +185,12 @@ export async function restoreLinks(
       },
     );
   }
-  // A pair of one is no pair, except an investment, which pairs with itself.
-  if (restored.transferPairId && restored.transferPairKind !== TransferPairKind.INVESTMENT) {
+  // A pair of one is no pair, except an investment, which pairs with itself, and
+  // a balance adjustment, a one-leg pair kept out of spending by that pair.
+  const pairsAlone =
+    restored.transferPairKind === TransferPairKind.INVESTMENT ||
+    restored.transferPairKind === TransferPairKind.ADJUSTMENT;
+  if (restored.transferPairId && !pairsAlone) {
     const legs = await repo.count({
       where: { workspaceId, transferPairId: restored.transferPairId },
     });

@@ -8,10 +8,10 @@ import apiClient from '@/app/lib/api';
 import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 
-/** What narrows the list: a payee, or a category with its subcategories in a month. */
+/** What narrows the list: a payee, a tag, or a category with its subcategories; a month. */
 export type TransactionsFilter = Pick<
   ContractInput<'TransactionListQuery'>,
-  'payeeId' | 'categoryId' | 'subcategories' | 'date_from' | 'date_to'
+  'payeeId' | 'tagId' | 'categoryId' | 'subcategories' | 'date_from' | 'date_to'
 >;
 
 /**

@@ -13,6 +13,13 @@ describe('account form', () => {
     expect(emptyAccountForm('EUR')).toMatchObject({ type: 'checking', currency: 'EUR' });
   });
 
+  it('opens a cached account without the setting as counted, so saving keeps it counted', () => {
+    const { includeInNetWorth: _missing, ...cached } = walletItem({ id: 'w-1', name: 'Everyday' });
+    expect(accountToForm(cached as ReturnType<typeof walletItem>).includeInNetWorth).toBe(true);
+    const heldForAFriend = walletItem({ id: 'w-2', name: 'Held', includeInNetWorth: false });
+    expect(accountToForm(heldForAFriend).includeInNetWorth).toBe(false);
+  });
+
   it('puts a card limit in the form as typed, and none for a card without one', () => {
     const card = walletItem({ id: 'w-card', name: 'ACME Card', type: 'credit_card', creditLimit: '5000.50' });
     expect(accountToForm(card).creditLimit).toBe('5000.5');
