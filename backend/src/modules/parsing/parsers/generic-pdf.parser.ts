@@ -1,4 +1,5 @@
 import { appDefaultCurrency } from '../../../common/utils/currency.util';
+import { ocrPdfLayout } from '../../../common/utils/pdf-ocr.util';
 import {
   extractTablesFromPdf,
   extractTextAndLayoutFromPdf,
@@ -259,7 +260,17 @@ export class GenericPdfParser extends BaseParser {
     return headings ? { headings } : this.reading;
   }
 
+  /**
+   * Whether the pages are read from their images by OCR even when the file
+   * has a text layer: a scanner's own OCR can be too garbled to read.
+   */
+  protected readsImages = false;
+
   private async extract(filePath: string, cachedText?: string) {
+    if (this.readsImages) {
+      const ocr = await ocrPdfLayout(filePath);
+      return { text: ocr.text, rowSets: [] as string[][][], layoutRows: ocr.rows };
+    }
     let text = '';
     let rowSets: string[][][] = [];
     let layoutRows: PdfTextRow[] = [];

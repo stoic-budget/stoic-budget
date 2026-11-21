@@ -230,6 +230,7 @@ describe('ParserFactoryService', () => {
       'GreatSouthernParser',
       'GreenDotParser',
       'HalifaxParser',
+      'HandelsbankenParser',
       'GenericPdfParser',
       'ExcelParser',
       'CsvParser',

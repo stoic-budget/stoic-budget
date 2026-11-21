@@ -96,4 +96,5 @@ export const BANKS = [
   },
   { key: 'green_dot', name: 'Green Dot', logo: 'green-dot.png' },
   { key: 'halifax', name: 'Halifax', logo: 'halifax.png' },
+  { key: 'handelsbanken', name: 'Handelsbanken', logo: 'handelsbanken.png' },
 ] as const satisfies readonly BankEntry[];
