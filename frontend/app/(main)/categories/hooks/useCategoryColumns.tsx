@@ -1,4 +1,5 @@
 import { parseISO } from 'date-fns';
+import Link from 'next/link';
 import { useMemo } from 'react';
 import { CategoryIconBadge } from '@/app/components/dashboard/CategoryIconBadge';
 import type { GridColumnDef } from '@/app/components/data-grid';
@@ -55,9 +56,9 @@ export function useCategoryColumns(options: {
               className={`seneca-categories__name${enabled ? '' : ' seneca-categories__name--disabled'}`}
             >
               <CategoryIconBadge name={category.name} color={null} icon={category.icon} size={24} />
-              <span className="seneca-categories__name-text">
+              <Link href={`/categories/${category.id}`} className="seneca-categories__name-text">
                 {getCategoryDisplayName(category, locale)}
-              </span>
+              </Link>
               {category.isSystem ? (
                 <Lock size={13} className="seneca-categories__lock" aria-label={labels.system} />
               ) : null}
