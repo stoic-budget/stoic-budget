@@ -1,5 +1,9 @@
 import type { PdfTextRow } from '@/common/utils/pdf-parser.util';
-import { hasMoney, joinMoneyLastEntries } from '@/modules/parsing/helpers/pdf-layout-money-last.helper';
+import {
+  hasMoney,
+  joinMoneyLastEntries,
+  joinMoneyLastTable,
+} from '@/modules/parsing/helpers/pdf-layout-money-last.helper';
 
 const row = (y: number, words: [string, number][]): PdfTextRow => ({
   page: 1,
@@ -27,6 +31,28 @@ describe('joinMoneyLastEntries', () => {
       'SAMPLETOWN',
       '14 DEC Card ACME CAFE 35.40 10,024.09',
       'SAMPLETOWN',
+    ]);
+  });
+});
+
+describe('joinMoneyLastTable', () => {
+  it('opens an entry after the header or the last money, and leaves lines above the header alone', () => {
+    const rows = joinMoneyLastTable(
+      [
+        row(80, [['Summary', 60], ['1,000.00', 431]]),
+        row(90, [['Date', 60], ['Description', 111], ['Withdrawals', 300], ['Deposits', 380]]),
+        row(100, [['24', 60], ['Dec', 72], ['Interac', 111], ['purchase', 150]]),
+        row(110, [['ACME', 115], ['STORE', 145], ['12.34', 431]]),
+        row(120, [['e-Transfer', 111], ['sent', 160], ['40.00', 431]]),
+      ],
+      line => line.text.startsWith('Date Description'),
+    );
+    expect(rows.map(line => line.text)).toEqual([
+      'Summary 1,000.00',
+      'Date Description Withdrawals Deposits',
+      '24 Dec Interac purchase 12.34',
+      'ACME STORE',
+      '24 Dec e-Transfer sent 40.00',
     ]);
   });
 });
