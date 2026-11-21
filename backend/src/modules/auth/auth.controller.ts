@@ -2,6 +2,7 @@ import { Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from
 import { Throttle } from '@nestjs/throttler';
 import { randomBytes } from 'crypto';
 import type { Request, Response } from 'express';
+import { AllowInDemo } from '../../common/decorators/allow-in-demo.decorator';
 import { SkipCsrf } from '../../common/decorators/skip-csrf.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
 import { SchemaParams } from '../../common/effect/schema-query';
@@ -97,6 +98,7 @@ export class AuthController {
   @Public()
   @SkipCsrf()
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 attempts per minute
+  @AllowInDemo()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @SchemaResponse(LoginResponse)
@@ -206,6 +208,7 @@ export class AuthController {
 
   @Public()
   @UseGuards(JwtRefreshGuard)
+  @AllowInDemo()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @SchemaResponse(MessageResult)
@@ -225,6 +228,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @AllowInDemo()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @SchemaResponse(MessageResult)

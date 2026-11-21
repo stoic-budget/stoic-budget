@@ -18,6 +18,7 @@ import {
   MessageCircle,
   Pencil,
   PencilLine,
+  PiggyBank,
   Plus,
   Store,
   Tag,
@@ -35,7 +36,7 @@ type Entry = TransactionHistory['entries'][number];
 
 const TEXT_FIELDS = new Set<TransactionHistoryField>(['name', 'purpose', 'comment']);
 /** Yes/no fields: the new state alone says what happened. */
-const TOGGLE_FIELDS = new Set<TransactionHistoryField>(['confirmed', 'private']);
+const TOGGLE_FIELDS = new Set<TransactionHistoryField>(['confirmed', 'private', 'budgets']);
 
 const FIELD_ICONS: Record<TransactionHistoryField, LucideIcon> = {
   category: Tag,
@@ -50,6 +51,7 @@ const FIELD_ICONS: Record<TransactionHistoryField, LucideIcon> = {
   owner: User,
   private: EyeOff,
   confirmed: CheckCircleOutline,
+  budgets: PiggyBank,
   comment: MessageCircle,
 };
 const KIND_ICONS: Record<Exclude<Entry['kind'], 'changed'>, LucideIcon> = {
@@ -117,6 +119,7 @@ export function TransactionHistoryTab({
     owner: t.fieldOwner.value,
     private: t.fieldPrivate.value,
     confirmed: t.fieldConfirmed.value,
+    budgets: t.fieldBudgets.value,
     comment: t.fieldComment.value,
   };
 
@@ -130,6 +133,8 @@ export function TransactionHistoryTab({
         return value === 'true' ? t.private.value : t.visible.value;
       case 'confirmed':
         return value === 'true' ? t.confirmed.value : t.unconfirmed.value;
+      case 'budgets':
+        return value === 'true' ? t.outOfBudgets.value : t.inBudgets.value;
       case 'type':
         return value === 'income' ? t.income.value : value === 'expense' ? t.expense.value : '–';
       case 'amount':

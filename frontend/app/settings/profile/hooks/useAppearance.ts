@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { User } from '@/app/hooks/useAuth';
+import { isDemoInstance } from '@/app/hooks/useDemoStatus';
 import apiClient from '@/app/lib/api';
 import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import {
@@ -73,6 +74,16 @@ export function useAppearance(
     setAppearanceMessage(null);
     setAppearanceError(null);
 
+    // A demo account is shared: the change is this visitor's, for this visit
+    // (until the page reloads), and the server is not asked.
+    if (isDemoInstance()) {
+      const nextUser = { ...(user || {}), ...patch };
+      setUser(nextUser as User);
+      localStorage.setItem('user', JSON.stringify(nextUser));
+      notifyUserFormatChanged();
+      return;
+    }
+
     await (async () => {
       setAppearanceLoading(true);
       const response = await apiClient.patch(
@@ -122,6 +133,20 @@ export function useAppearance(
   const handleThemePreferenceChange = async (nextThemePreference: ThemePreference) => {
     setAppearanceMessage(null);
     setAppearanceError(null);
+
+    // Same as the account menu on a demo: applied here, not saved.
+    if (isDemoInstance()) {
+      setThemePreference(nextThemePreference);
+      if (user) {
+        const nextUser = { ...user, themePreference: nextThemePreference };
+        setUser(nextUser);
+        localStorage.setItem('user', JSON.stringify(nextUser));
+      }
+      window.dispatchEvent(
+        new CustomEvent(THEME_STORAGE_EVENT, { detail: { themePreference: nextThemePreference } }),
+      );
+      return;
+    }
 
     await (async () => {
       setAppearanceLoading(true);

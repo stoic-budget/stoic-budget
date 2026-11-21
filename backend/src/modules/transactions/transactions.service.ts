@@ -39,9 +39,11 @@ import { AuditService } from '../audit/audit.service';
 import { ensurePrivateCategory } from '../categories/private-category';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
+import { assertMayReshape, assertSplittable, memberIdOf } from './helpers/split-guards';
 import { lockSplitGroup } from './helpers/split-group-lock';
-import { cloneForSplit } from './helpers/transaction-split-clone';
+import { applyPartCategory, cloneForSplit } from './helpers/transaction-split-clone';
 import { applyListFilters, type TransactionListFilters } from './transaction-list-filters';
+import { assertUnsplittable } from './unsplit-guards';
 
 export type TransactionWithConversion = Transaction & {
   convertedAmount?: number;
@@ -406,50 +408,6 @@ export class TransactionsService {
   }
 
   /**
-   * Guards that a transaction may be split, and returns its authoritative amount.
-   *
-   * Called twice: once outside the DB transaction as a cheap fast path, and again
-   * on the locked row, which is the read the parts are actually derived from.
-   */
-  private assertSplittable(transaction: Transaction, dto: SplitTransactionBody): number {
-    if (transaction.splitGroupId) {
-      throw new BadRequestException(appError('TRANSACTION_ALREADY_SPLIT'));
-    }
-
-    // A duplicate-flagged row is excluded from dashboards and reports. Splitting it
-    // would produce siblings that default to isDuplicate=false, so the sibling
-    // amounts would reappear in those totals. Refuse instead.
-    if (transaction.isDuplicate) {
-      throw new BadRequestException(appError('TRANSACTION_SPLIT_DUPLICATE'));
-    }
-
-    // A locked row has already been reported on a filed return. Splitting it
-    // re-assesses the tax across the parts, which would change figures that
-    // have been submitted to a tax authority.
-    if (transaction.taxLocked) {
-      throw new BadRequestException(appError('TRANSACTION_SPLIT_TAX_LOCKED'));
-    }
-
-    const total = Number(
-      transaction.amount ?? transaction.debit ?? transaction.credit ?? Number.NaN,
-    );
-    if (!Number.isFinite(total) || total <= 0) {
-      throw new BadRequestException(appError('TRANSACTION_SPLIT_NOT_POSITIVE'));
-    }
-
-    const partsTotal = this.round2(dto.parts.reduce((sum, part) => sum + Number(part.amount), 0));
-    // Round the drift too: |99.99 - 100| is 0.010000000000005 in binary floating
-    // point, which would reject the very boundary the tolerance exists to accept.
-    if (this.round2(Math.abs(partsTotal - total)) > 0.01) {
-      throw new BadRequestException(
-        appError('TRANSACTION_SPLIT_SUM_MISMATCH', { total, received: partsTotal }),
-      );
-    }
-
-    return total;
-  }
-
-  /**
    * Divides a transaction's money across its parts.
    *
    * The requested amounts are rounded to cents and the LAST part absorbs the
@@ -494,6 +452,7 @@ export class TransactionsService {
     dto: SplitTransactionBody,
   ): Promise<Transaction[]> {
     await this.ensureCanEditStatements(userId, workspaceId);
+    const viewerMemberId = await memberIdOf(this.workspaceMemberRepository, workspaceId, userId);
     const original = await this.findOne(id, workspaceId);
     await assertWorkspaceOwned(
       this.transactionRepository.manager,
@@ -503,7 +462,7 @@ export class TransactionsService {
     );
     // Fast path only: reject an obviously invalid request before opening a DB
     // transaction and taking a row lock. The authoritative check is the one below.
-    this.assertSplittable(original, dto);
+    assertSplittable(original, dto, viewerMemberId);
 
     const before = { ...original };
     const splitGroupId = randomUUID();
@@ -523,7 +482,7 @@ export class TransactionsService {
         throw new NotFoundException(appError('TRANSACTION_NOT_FOUND'));
       }
 
-      const total = this.assertSplittable(locked, dto);
+      const total = assertSplittable(locked, dto, viewerMemberId);
       const isExpense = locked.transactionType === TransactionType.EXPENSE;
       const rawForeign = locked.amountForeign ?? null;
       const { amounts, foreignAmounts } = this.allocateParts(
@@ -549,12 +508,7 @@ export class TransactionsService {
         // amount. Null on every part so backfillFingerprints recomputes them all.
         row.fingerprint = null;
 
-        // Per-part override, else keep what the row already inherited.
-        if (part.categoryId && part.categoryId !== row.categoryId) {
-          row.categoryId = part.categoryId;
-          row.categorySource = TransactionCategorySource.MANUAL;
-          row.categoryReason = null;
-        }
+        applyPartCategory(row, part.categoryId, locked.isPrivate);
         row.paymentPurpose = part.paymentPurpose ?? row.paymentPurpose;
         row.comments = part.comments ?? row.comments;
 
@@ -640,6 +594,7 @@ export class TransactionsService {
    */
   async unsplit(id: string, workspaceId: string, userId: string): Promise<Transaction> {
     await this.ensureCanEditStatements(userId, workspaceId);
+    const viewerMemberId = await memberIdOf(this.workspaceMemberRepository, workspaceId, userId);
 
     // Fast path only: reject an obviously invalid request before opening a DB
     // transaction and taking row locks. The authoritative read is the locked one.
@@ -674,21 +629,12 @@ export class TransactionsService {
       if (parts.some(part => part.taxLocked)) {
         throw new BadRequestException(appError('TRANSACTION_UNSPLIT_TAX_LOCKED'));
       }
+      // Every part, not only the one asked about: another may be someone's private row.
+      assertMayReshape(parts, viewerMemberId);
 
       before = parts.map(part => ({ ...part }));
 
-      // A part can be flagged as a duplicate AFTER the split: isSameSplitGroup only
-      // excludes pairs sharing a splitGroupId, so a part stays comparable against
-      // rows in other statements and markDuplicates can flag it at any time. A
-      // flagged row is excluded from reports, so merging would either inflate
-      // reported spend (a flagged sibling folded into the unflagged survivor) or
-      // erase the whole charge (part 0 flagged, survivor keeps isDuplicate). Refuse,
-      // as assertSplittable does on the way in — with its own message, so the two
-      // sides are distinguishable. Checked on the locked rows: the flag may have
-      // landed after the unlocked read.
-      if (parts.some(part => part.isDuplicate)) {
-        throw new BadRequestException(appError('TRANSACTION_UNSPLIT_DUPLICATE'));
-      }
+      assertUnsplittable(parts);
 
       const [survivor, ...rest] = parts;
       // Falls back the same way assertSplittable reads an amount. Unreachable while
