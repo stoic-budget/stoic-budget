@@ -9,6 +9,8 @@ import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import {
+  BalanceAdjustmentResult,
+  BalanceCheckResult,
   BranchItem,
   CategoryItem,
   MessageResult,
@@ -176,6 +178,45 @@ describe('API contracts: ledger book (e2e)', () => {
       expect(updated.body.initialBalance).toBe('20.00');
       expect(updated.body.includeInNetWorth).toBe(false);
       matches(MessageResult, (await call('delete', `/wallets/${id}`).expect(200)).body);
+    });
+
+    it('check a wallet against the bank, book the difference, and read the check back', async () => {
+      const created = await call('post', '/wallets', {
+        name: 'Checked box',
+        currency: 'EUR',
+        initialBalance: 40,
+      }).expect(201);
+      const id = created.body.id;
+      const date = '2026-09-10';
+      const off = await call('post', `/wallets/${id}/balance-check`, {
+        date,
+        balance: 52.25,
+      }).expect(200);
+      matches(BalanceCheckResult, off.body);
+      expect(off.body).toMatchObject({ ourBalance: 40, difference: 12.25, matches: false });
+
+      const booked = await call('post', `/wallets/${id}/balance-adjustment`, {
+        date,
+        balance: 52.25,
+      }).expect(200);
+      matches(BalanceAdjustmentResult, booked.body);
+      expect(booked.body.transactionId).toEqual(expect.any(String));
+      expect(booked.body.check).toMatchObject({ matches: true, reasons: [] });
+
+      const confirmed = await call('post', `/wallets/${id}/balance-check/confirm`, {
+        date,
+        balance: 52.25,
+      }).expect(200);
+      matches(BalanceCheckResult, confirmed.body);
+
+      const read = await call('get', `/wallets/${id}`).expect(200);
+      matches(WalletItem, read.body);
+      expect(read.body.balanceCheck).toEqual({ date, bankBalance: 52.25, stillMatches: true });
+      const rows = await call('get', `/transactions?walletId=${id}`).expect(200);
+      matches(TransactionListPage, rows.body);
+      expect(rows.body.data).toEqual([
+        expect.objectContaining({ id: booked.body.transactionId, transferPairKind: 'adjustment' }),
+      ]);
     });
 
     it('create, read, update and delete a category, with its parent', async () => {

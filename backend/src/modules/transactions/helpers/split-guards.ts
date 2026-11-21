@@ -5,6 +5,7 @@ import { canReadPrivate } from '../../../common/utils/transaction-privacy.util';
 import type { SplitTransactionBody } from '../../../contracts';
 import type { Transaction } from '../../../entities/transaction.entity';
 import type { WorkspaceMember } from '../../../entities/workspace-member.entity';
+import { assertSplitAllowed } from './pair-guards';
 
 export const round2 = (value: number): number => Math.round(value * 100) / 100;
 
@@ -44,9 +45,8 @@ export function assertSplittable(
 ): number {
   assertMayReshape([transaction], viewerMemberId);
 
-  if (transaction.splitGroupId) {
-    throw new BadRequestException(appError('TRANSACTION_ALREADY_SPLIT'));
-  }
+  // Not split already, and not a balance adjustment (a one-leg pair).
+  assertSplitAllowed(transaction);
 
   // A duplicate-flagged row is excluded from dashboards and reports. Splitting it
   // would produce siblings that default to isDuplicate=false, so the sibling

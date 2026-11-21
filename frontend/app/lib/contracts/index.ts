@@ -39,6 +39,7 @@ export * from './payees/payees';
 export * from './peppol/peppol';
 export * from './receipts/receipt-documents';
 export * from './receipts/receipts';
+export * from './reference/balance-check';
 export * from './reference/category-summary';
 export * from './reference/reference';
 export * from './reference/tag-summary';
