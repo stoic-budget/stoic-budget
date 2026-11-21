@@ -1,0 +1,90 @@
+{
+  "metadata": {
+    "accountNumber": "GB00CPBK08924904100001",
+    "currency": "GBP",
+    "dateFrom": "2015-11-30T00:00:00",
+    "dateTo": "2015-12-14T00:00:00",
+    "balanceStart": 2.61,
+    "balanceEnd": 17.91
+  },
+  "transactions": [
+    {
+      "transactionDate": "2015-11-30T00:00:00",
+      "counterpartyName": "COOP ATM12:35NOV30",
+      "paymentPurpose": "COOP ATM12:35NOV30",
+      "debit": 70,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2015-11-30T00:00:00",
+      "counterpartyName": "820000000001-CHB",
+      "paymentPurpose": "820000000001-CHB",
+      "credit": 34.4,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2015-11-30T00:00:00",
+      "counterpartyName": "CHILD TAX CREDIT MEMB S AMPL",
+      "paymentPurpose": "CHILD TAX CREDIT MEMB S AMPL",
+      "credit": 46.52,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2015-12-01T00:00:00",
+      "counterpartyName": "UNITED UTIL WATER 4100000001",
+      "paymentPurpose": "UNITED UTIL WATER 4100000001",
+      "debit": 8.73,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2015-12-07T00:00:00",
+      "counterpartyName": "820000000002-CHB",
+      "paymentPurpose": "820000000002-CHB",
+      "credit": 34.4,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2015-12-07T00:00:00",
+      "counterpartyName": "CHILD TAX CREDIT MEMB S AMPL",
+      "paymentPurpose": "CHILD TAX CREDIT MEMB S AMPL",
+      "credit": 46.52,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2015-12-08T00:00:00",
+      "counterpartyName": "UNITED UTIL WATER 4100000001",
+      "paymentPurpose": "UNITED UTIL WATER 4100000001",
+      "debit": 8.73,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2015-12-14T00:00:00",
+      "counterpartyName": "COOP ATM11:09DEC14",
+      "paymentPurpose": "COOP ATM11:09DEC14",
+      "debit": 140,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2015-12-14T00:00:00",
+      "counterpartyName": "820000000003-CHB",
+      "paymentPurpose": "820000000003-CHB",
+      "credit": 34.4,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2015-12-14T00:00:00",
+      "counterpartyName": "CHILD TAX CREDIT MEMB S AMPL",
+      "paymentPurpose": "CHILD TAX CREDIT MEMB S AMPL",
+      "credit": 46.52,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    }
+  ]
+}

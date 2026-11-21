@@ -1,0 +1,299 @@
+{
+  "metadata": {
+    "accountNumber": "",
+    "currency": "GBP",
+    "dateFrom": "2024-04-01T00:00:00",
+    "dateTo": "2024-04-30T00:00:00",
+    "balanceStart": 0.44,
+    "balanceEnd": 927.08
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-04-06T00:00:00",
+      "counterpartyName": "Premium plan fee",
+      "paymentPurpose": "Premium plan fee",
+      "debit": 7.99,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-04-07T00:00:00",
+      "counterpartyName": "Membera Membera",
+      "paymentPurpose": "Payment from Membera Membera From: MEMBERA MEMBERA, 10000008",
+      "credit": 200,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-08T00:00:00",
+      "counterpartyName": "Mem Sample",
+      "paymentPurpose": "Payment from Mem Sample From: MEM SAMPLE, 10000002",
+      "credit": 600,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-08T00:00:00",
+      "counterpartyName": "Sample Fm",
+      "paymentPurpose": "Payment from Sample Fm From: SAMPLE FM, 10000001",
+      "credit": 250,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-09T00:00:00",
+      "counterpartyName": "Close Brothers Premium Finance",
+      "paymentPurpose": "Close Brothers Premium Finance To: Www.closebrotherpf.co., 01 Card: 400000******1000",
+      "debit": 930.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-09T00:00:00",
+      "counterpartyName": "Memb Samp",
+      "paymentPurpose": "Payment from Memb Samp From: MEMB SAMP, 10000005",
+      "credit": 240,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-10T00:00:00",
+      "counterpartyName": "Westfield",
+      "paymentPurpose": "Westfield To: Westfield Shopping, London Card: 400000******1000",
+      "debit": 8.5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-10T00:00:00",
+      "counterpartyName": "Samp Mm",
+      "paymentPurpose": "Payment from Samp Mm From: SAMP MM, 10000003",
+      "credit": 800,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-12T00:00:00",
+      "counterpartyName": "Membe Sampler",
+      "paymentPurpose": "To Membe Sampler To: Membe Sampler, 10000011 (GB)",
+      "debit": 50,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-12T00:00:00",
+      "counterpartyName": "Membe Sampler",
+      "paymentPurpose": "To Membe Sampler To: Membe Sampler, 10000011 (GB)",
+      "debit": 50,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-13T00:00:00",
+      "counterpartyName": "Liberty Food & Wine London",
+      "paymentPurpose": "Liberty Food & Wine London To: Liberty Food & Wine, London Nw2 Card: 400000******1000",
+      "debit": 41.46,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-13T00:00:00",
+      "counterpartyName": "TikTok",
+      "paymentPurpose": "TikTok To: Tiktok Shop Seller, London Card: 400000******1000",
+      "debit": 4.64,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-13T00:00:00",
+      "counterpartyName": "Transport for London",
+      "paymentPurpose": "Transport for London To: Tfl Travel Ch, Tfl.gov.uk/cp Card: 400000******1000",
+      "debit": 1.8,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-14T00:00:00",
+      "counterpartyName": "Apple",
+      "paymentPurpose": "Apple To: Apple.com/bill, Apple.com/bil Card: 400000******1000",
+      "debit": 25.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-15T00:00:00",
+      "counterpartyName": "Apple",
+      "paymentPurpose": "Apple To: Apple.com/bill, Apple.com/bil Card: 400000******1000",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-16T00:00:00",
+      "counterpartyName": "Acmes Ltd",
+      "paymentPurpose": "Payment from Acmes Ltd From: ACMES LTD, 10000004",
+      "credit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-17T00:00:00",
+      "counterpartyName": "Member Sample",
+      "paymentPurpose": "To Member Sample To: Member Sample, 10000001 (GB)",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-17T00:00:00",
+      "counterpartyName": "giffgaff",
+      "paymentPurpose": "giffgaff To: Giffgaff, London Card: 400000******1000",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-17T00:00:00",
+      "counterpartyName": "giffgaff",
+      "paymentPurpose": "giffgaff To: Giffgaff, London Card: 400000******1000",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-17T00:00:00",
+      "counterpartyName": "Member Samples",
+      "paymentPurpose": "Payment from Member Samples From: MEMBER SAMPLES, 10000006",
+      "credit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-18T00:00:00",
+      "counterpartyName": "Marston",
+      "paymentPurpose": "Marston To: Marston Group Limited, Harlow Card: 400000******1000",
+      "debit": 624,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-19T00:00:00",
+      "counterpartyName": "Sample Fm",
+      "paymentPurpose": "Payment from Sample Fm From: SAMPLE FM, 10000001",
+      "credit": 600,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-20T00:00:00",
+      "counterpartyName": "Membe Sample",
+      "paymentPurpose": "Payment from Membe Sample From: MEMBE SAMPLE, 10000009",
+      "credit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-22T00:00:00",
+      "counterpartyName": "Vantage Aut T/as",
+      "paymentPurpose": "Payment from Vantage Aut T/as From: VANTAGE AUT T/AS, 10000010",
+      "credit": 320,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-23T00:00:00",
+      "counterpartyName": "One Car Hire Ltd",
+      "paymentPurpose": "Payment from One Car Hire Ltd From: ONE CAR HIRE LTD, 10000007",
+      "credit": 120,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-25T00:00:00",
+      "counterpartyName": "Brent Parking Service",
+      "paymentPurpose": "Brent Parking Service To: Brent Parking Service, London Card: 400000******1000",
+      "debit": 265,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-04-27T00:00:00",
+      "counterpartyName": "Memberss Sampl",
+      "paymentPurpose": "To Memberss Sampl To: Memberss Sampl, 10000012 (GB)",
+      "debit": 550,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-27T00:00:00",
+      "counterpartyName": "Sample Fm",
+      "paymentPurpose": "Payment from Sample Fm From: SAMPLE FM, 10000001",
+      "credit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-27T00:00:00",
+      "counterpartyName": "Member Sample",
+      "paymentPurpose": "To Member Sample To: Member Sample, 10000001 (GB)",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-27T00:00:00",
+      "counterpartyName": "Member Sample",
+      "paymentPurpose": "To Member Sample To: Member Sample, 10000001 (GB)",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-27T00:00:00",
+      "counterpartyName": "Member Sample",
+      "paymentPurpose": "To Member Sample To: Member Sample, 10000001 (GB)",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-29T00:00:00",
+      "counterpartyName": "Member Sample",
+      "paymentPurpose": "To Member Sample To: Member Sample, 10000001 (GB)",
+      "debit": 50,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-29T00:00:00",
+      "counterpartyName": "Member Sample",
+      "paymentPurpose": "To Member Sample To: Member Sample, 10000001 (GB)",
+      "debit": 40,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-29T00:00:00",
+      "counterpartyName": "MEMB SAMP SAMPLEON",
+      "paymentPurpose": "From MEMB SAMP SAMPLEON From: MEMB SAMP SAMPLEON",
+      "credit": 90,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-29T00:00:00",
+      "counterpartyName": "One Car Hire Ltd",
+      "paymentPurpose": "Payment from One Car Hire Ltd From: ONE CAR HIRE LTD, 10000007",
+      "credit": 150,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-30T00:00:00",
+      "counterpartyName": "Exchanged to BONK",
+      "paymentPurpose": "Exchanged to BONK",
+      "debit": 30,
+      "currency": "GBP"
+    }
+  ]
+}

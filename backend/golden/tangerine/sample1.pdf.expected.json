@@ -1,0 +1,68 @@
+{
+  "accounts": [
+    {
+      "metadata": {
+        "accountNumber": "4188213914",
+        "currency": "CAD",
+        "dateFrom": "2021-10-01T00:00:00",
+        "dateTo": "2021-10-31T00:00:00",
+        "balanceStart": 664.54,
+        "balanceEnd": 1015.23
+      },
+      "transactions": [
+        {
+          "transactionDate": "2021-10-11T00:00:00",
+          "counterpartyName": "Internet Withdrawal to Tangerine Chequing Account - 4150010512",
+          "paymentPurpose": "Internet Withdrawal to Tangerine Chequing Account - 4150010512",
+          "debit": 500,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_out"
+        },
+        {
+          "transactionDate": "2021-10-17T00:00:00",
+          "counterpartyName": "Internet Withdrawal to Tangerine Chequing Account - 4150010512",
+          "paymentPurpose": "Internet Withdrawal to Tangerine Chequing Account - 4150010512",
+          "debit": 150,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_out"
+        },
+        {
+          "transactionDate": "2021-10-18T00:00:00",
+          "counterpartyName": "Members Sample Sampler Samplez",
+          "paymentPurpose": "INTERAC e-Transfer From: Members Sample Sampler Samplez",
+          "credit": 1000,
+          "currency": "CAD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-10-31T00:00:00",
+          "counterpartyName": "Interest Paid",
+          "paymentPurpose": "Interest Paid",
+          "credit": 0.69,
+          "currency": "CAD",
+          "paymentType": "interest"
+        }
+      ]
+    },
+    {
+      "metadata": {
+        "accountNumber": "3596540584",
+        "currency": "CAD",
+        "dateFrom": "2021-10-01T00:00:00",
+        "dateTo": "2021-10-31T00:00:00",
+        "balanceStart": 10025.57,
+        "balanceEnd": 10035.36
+      },
+      "transactions": [
+        {
+          "transactionDate": "2021-10-31T00:00:00",
+          "counterpartyName": "Interest Paid",
+          "paymentPurpose": "Interest Paid",
+          "credit": 9.79,
+          "currency": "CAD",
+          "paymentType": "interest"
+        }
+      ]
+    }
+  ]
+}

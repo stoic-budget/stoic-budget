@@ -1,6 +1,10 @@
-import { findStatementAmounts } from './statement-amount.helper';
-import { balanceLineEnd } from './statement-balance-line.helper';
+import {
+  amountsWithoutDates,
+  balanceLineEnd,
+  figureUnderLabel,
+} from './statement-balance-line.helper';
 import { findFullDates, foldText, type NumericDateOrder } from './statement-date.helper';
+import { CURRENCY_SIGNS, printedCurrency } from './statement-heading-currency.helper';
 
 export { isCreditCardStatement } from './statement-card.helper';
 
@@ -10,7 +14,7 @@ export { isCreditCardStatement } from './statement-card.helper';
  */
 
 const ISO_CODES =
-  /\b(KZT|UZS|GEL|UAH|BYN|AMD|AZN|KGS|TJS|TMT|USD|EUR|RUB|GBP|CNY|TRY|AED|JPY|CHF|CAD|AUD|SEK|NOK|DKK|PLN|CZK|HUF|RON|INR|BRL|MXN|SGD|HKD|NZD|ZAR|THB|MYR|IDR|ILS|SAR|QAR|KWD|LKR|EUROS?)\b/g;
+  /\b(KZT|UZS|GEL|UAH|BYN|AMD|AZN|KGS|TJS|TMT|USD|EUR|RUB|GBP|CNY|TRY|AED|JPY|CHF|CAD|AUD|SEK|NOK|DKK|PLN|CZK|HUF|RON|INR|BRL|MXN|SGD|HKD|NZD|ZAR|THB|MYR|IDR|ILS|SAR|QAR|KWD|LKR|NGN|KES|PHP|GHS|EGP|BND|EUROS?)\b/g;
 
 const PREFIXED_DOLLARS: [RegExp, string][] = [
   [/\bS\$/, 'SGD'],
@@ -50,22 +54,15 @@ const UNMARKED_COUNTRIES: [RegExp, string][] = [
   [/\bSouth Africa\b|\.co\.za\b/i, 'ZAR'],
 ];
 
-const SYMBOLS: [string, string][] = [
-  ['€', 'EUR'],
-  ['£', 'GBP'],
-  ['₸', 'KZT'],
-  ['₽', 'RUB'],
-  ['₪', 'ILS'],
-  ['₹', 'INR'],
-  ['฿', 'THB'],
-  ['¥', 'JPY'],
-];
-
 /**
  * The statement currency: the ISO code printed most often (upper case only:
  * "try" and "eur" are words too; "EUROS" is EUR), else a currency symbol.
  */
 export function detectStatementCurrency(text: string): string | null {
+  const printed = printedCurrency(text);
+  if (printed) {
+    return printed;
+  }
   const counts = new Map<string, number>();
   for (const match of text.matchAll(ISO_CODES)) {
     // "RELEVE DE COMPTES EN EUROS": the currency named in capitals counts as its code.
@@ -84,7 +81,7 @@ export function detectStatementCurrency(text: string): string | null {
   if (lettered) {
     return lettered[1];
   }
-  const symbol = SYMBOLS.find(([mark]) => text.includes(mark));
+  const symbol = CURRENCY_SIGNS.find(([mark]) => text.includes(mark));
   if (symbol) {
     return symbol[1];
   }
@@ -108,7 +105,10 @@ export function findAccountNumber(text: string): string | null {
   return labelled ? labelled[1].replace(/[ \t]+/g, ' ').trim() : null;
 }
 
-/** "09/01/2025 - 09/30/2025", "1 janvier 2025 - 31 janvier 2025", "from … to …", "From : … To : …". */
+/**
+ * "09/01/2025 - 09/30/2025", "1 janvier 2025 - 31 janvier 2025", "from … to …", "From : … To : …",
+ * "1 March 2023 [GMT+07:00] - 8 August 2023 [GMT+07:00]" (a time zone after each date).
+ */
 export function findStatementPeriod(
   text: string,
   order: NumericDateOrder,
@@ -119,7 +119,9 @@ export function findStatementPeriod(
     const [from, to] = [dates[index], dates[index + 1]];
     const between = folded.slice(from.index + from.length, to.index);
     if (
-      /^\s*(?:[-–—]|to|au|tot|bis|al|hasta|through)\s*:?\s*$/.test(between) &&
+      /^\s*(?:\[(?:gmt|utc)[^\]]*\]\s*)?(?:[-–—]|to|au|tot|bis|al|hasta|through)\s*:?\s*$/.test(
+        between,
+      ) &&
       from.date <= to.date
     ) {
       return { from: from.date, to: to.date };
@@ -150,12 +152,16 @@ const OPENING = [
   'opening balance',
   'balance brought forward',
   'previous balance',
+  'former balance',
+  'balance - previous statement',
   'beginning balance',
   "solde d'ouverture",
   'solde precedent',
   'ancien solde',
   'beginsaldo',
   'saldo inicial',
+  'sold initial',
+  'saldo iniziale',
   'saldo anterior',
   'anfangssaldo',
   'alter kontostand',
@@ -169,6 +175,8 @@ const CLOSING = [
   'nouveau solde',
   'eindsaldo',
   'saldo final',
+  'sold final',
+  'saldo finale',
   'endsaldo',
   'neuer kontostand',
 ];
@@ -236,20 +244,26 @@ function amountAfter(
   index: number,
   order: NumericDateOrder,
   pick: 'first' | 'last' = 'last',
+  labelStart?: number,
 ) {
   const line = text.slice(index, balanceLineEnd(folded, index, [...OPENING, ...CLOSING]));
   let withoutDates = line;
   for (const found of findFullDates(line, order).reverse()) {
     withoutDates = `${withoutDates.slice(0, found.index)} ${withoutDates.slice(found.index + found.length)}`;
   }
-  const amounts = findStatementAmounts(withoutDates);
-  return (pick === 'first' ? amounts[0] : amounts[amounts.length - 1]) ?? null;
+  const amounts = amountsWithoutDates(withoutDates);
+  return (
+    (pick === 'first' ? amounts[0] : amounts[amounts.length - 1]) ??
+    (labelStart === undefined
+      ? null
+      : figureUnderLabel(text, folded, { start: labelStart, end: index }))
+  );
 }
 
 function labelledAmount(text: string, folded: string, labels: string[], order: NumericDateOrder) {
   for (const label of labels) {
     for (let at = folded.indexOf(label); at !== -1; at = folded.indexOf(label, at + 1)) {
-      const value = amountAfter(text, folded, at + label.length, order);
+      const value = amountAfter(text, folded, at + label.length, order, 'last', at);
       if (value !== null) {
         return value;
       }
@@ -357,7 +371,7 @@ export function findStatementTotals(
 }
 
 const ACCOUNT_HEADING =
-  /\b(?:account|compte|rekening|konto|cuenta)\b(?:\s+(?:number|no\.?|nr\.?|#))?\s*[:—–-]?\s*([A-Z]{2}\d{2}[A-Z0-9]{10,30}|\d[\d -]{6,}\d)/i;
+  /\b(?:account|compte|rekening|konto|cuenta|a\/c)\b(?:\s+(?:number|no\.?|nr\.?|#))?\s*[:—–-]?\s*([A-Z]{2}\d{2}[A-Z0-9]{10,30}|\d[\d -]{6,}\d)/i;
 
 /**
  * A line of only a product name and a long number ("Member Savings -
