@@ -204,6 +204,7 @@ import {
   UserPermissions,
   UserSessionList,
   UserUpdateResponse,
+  WalletBalanceDays,
   WalletCoverage,
   WalletList,
   WebhookEndpointList,
@@ -436,6 +437,13 @@ describe('API contracts (e2e)', () => {
       } finally {
         await dataSource.query('DELETE FROM statements WHERE id = $1', [id]);
       }
+    });
+
+    it('GET /wallets/balance-days', async () => {
+      const res = await get(`/wallets/balance-days?month=${new Date().toISOString().slice(0, 7)}`);
+      matches(WalletBalanceDays, res.body);
+      expect(res.body.accounts.length).toBeGreaterThan(0);
+      expect(res.body.days.length).toBeGreaterThanOrEqual(28);
     });
   });
 

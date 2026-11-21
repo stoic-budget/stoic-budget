@@ -13,6 +13,8 @@ export const queryKeys = {
     ['dashboard', o.workspaceId, o.range, o.date] as const,
   dashboardCashFlowEntries: (o: { workspaceId: string | null; month: string }) =>
     ['dashboard', 'cash-flow-entries', o.workspaceId, o.month] as const,
+  dashboardAccountBalanceDays: (o: { workspaceId: string | null; month: string }) =>
+    ['dashboard', 'account-balance-days', o.workspaceId, o.month] as const,
   dashboardWalletCoverage: (workspaceId: string | null) =>
     ['dashboard', 'wallet-coverage', workspaceId] as const,
   dashboardSetupProgress: (workspaceId: string | null) =>

@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "accountNumber": "334385919",
+    "currency": "AUD",
+    "dateFrom": "2021-06-17T00:00:00",
+    "dateTo": "2021-07-16T00:00:00",
+    "balanceStart": -4.86,
+    "balanceEnd": -1.68
+  },
+  "transactions": [
+    {
+      "transactionDate": "2021-06-30T00:00:00",
+      "counterpartyName": "THE GOOD GUYS",
+      "paymentPurpose": "Refund of POS purchase at THE GOOD GUYS",
+      "credit": 85,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-06-30T00:00:00",
+      "counterpartyName": "THE GOOD GUYS",
+      "paymentPurpose": "POS purchase at THE GOOD GUYS",
+      "debit": 953,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-07-07T00:00:00",
+      "counterpartyName": "Transfer from $65 #7553",
+      "paymentPurpose": "Transfer from $65 #7553",
+      "credit": 873,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-07-16T00:00:00",
+      "counterpartyName": "Interest debit comprised of:",
+      "paymentPurpose": "Interest debit comprised of:",
+      "debit": 1.82,
+      "currency": "AUD",
+      "paymentType": "interest"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain"
+  ]
+}

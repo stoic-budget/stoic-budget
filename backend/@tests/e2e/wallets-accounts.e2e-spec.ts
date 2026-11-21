@@ -37,6 +37,7 @@ describe('Accounts (e2e)', () => {
     exporter: `accounts-exporter-${stamp}@example.com`,
     importer: `accounts-importer-${stamp}@example.com`,
     coverage: `accounts-coverage-${stamp}@example.com`,
+    balances: `accounts-balances-${stamp}@example.com`,
   };
   let owner: E2eAccount;
   let other: E2eAccount;
@@ -455,6 +456,42 @@ describe('Accounts (e2e)', () => {
     const othersRows = await coverage(other);
     expect(othersRows.map(row => row.walletId)).not.toContain(everyday.body.id);
     expect(othersRows.map(row => row.accountTail)).not.toContain('0042');
+  });
+
+  it('draws each everyday account day by day through a month, in its own workspace only', async () => {
+    const balances = await registerAccount(app, emails.balances, 'Member Three');
+    const days = async (account: E2eAccount, month: string) =>
+      (await as(account, request(server()).get(`/wallets/balance-days?month=${month}`)).expect(200))
+        .body;
+    const everyday = await as(
+      balances,
+      request(server()).post('/wallets').send({ name: 'Everyday Account', currency, initialBalance: opening }),
+    ).expect(201);
+    await as(
+      balances,
+      request(server()).post('/wallets').send({ name: 'Savings Pot', type: 'savings', currency }),
+    ).expect(201);
+    const statementId = await seedStatement(balances, currency);
+    await as(
+      balances,
+      request(server())
+        .post(`/wallets/${everyday.body.id}/statements`)
+        .send({ statementIds: [statementId] }),
+    ).expect(201);
+
+    const january = await days(balances, '2026-01');
+    expect(january.currency).toBe(currency);
+    expect(january.accounts.map((account: { id: string }) => account.id)).toEqual([everyday.body.id]);
+    expect(january.days).toHaveLength(31);
+    const on = (date: string) =>
+      january.days.find((day: { date: string }) => day.date === date).balances[everyday.body.id];
+    expect(on('2026-01-09')).toBe(opening);
+    expect(on('2026-01-10')).toBe(opening + income);
+    expect(on('2026-01-31')).toBe(closing);
+
+    expect((await days(other, '2026-01')).accounts.map((account: { id: string }) => account.id))
+      .not.toContain(everyday.body.id);
+    await as(balances, request(server()).get('/wallets/balance-days?month=2026-13')).expect(400);
   });
 
   it('keeps accounts and statements inside their workspace', async () => {

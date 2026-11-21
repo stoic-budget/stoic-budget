@@ -130,3 +130,22 @@ export function useWalletCoverage() {
     enabled: Boolean(workspaceId),
   });
 }
+
+/**
+ * What each everyday account held at the end of every day of a month (YYYY-MM),
+ * for the cash flow card's Accounts view.
+ */
+export function useAccountBalanceDays(month: string) {
+  const workspaceId = useWorkspaceId();
+  return useQuery({
+    queryKey: queryKeys.dashboardAccountBalanceDays({ workspaceId, month }),
+    queryFn: ({ signal }) =>
+      apiQueryDecoded({
+        contract: 'WalletBalanceDays',
+        url: '/wallets/balance-days',
+        params: { month } satisfies ContractInput<'WalletBalanceDaysQuery'>,
+        signal,
+      }),
+    enabled: Boolean(workspaceId),
+  });
+}
