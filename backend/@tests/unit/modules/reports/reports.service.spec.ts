@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import type { CustomTableColumn } from '@/entities';
 import { CustomTableColumnType } from '@/entities/custom-table-column.entity';
@@ -1005,14 +1006,16 @@ describe('exportWorkspaceTransactions', () => {
       createQueryBuilder: vi.fn(() => qb),
     };
     const service = buildReportsService({ transactionRepository });
-    const excelSpy = vi
-      .spyOn(service as any, 'generateWorkspaceExcel')
-      .mockResolvedValue(undefined);
+    // The file itself is pinned in reports.exports.spec.ts; here it only has to land.
+    const uploadsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'reports-workspace-export-'));
+    const previousUploadsDir = process.env.UPLOADS_DIR;
+    process.env.UPLOADS_DIR = uploadsDir;
 
-    const result = await (service as any).exportWorkspaceTransactions(
-      'ws-42',
-      WorkspaceExportFormat.EXCEL,
-    );
+    const result = await (service as any)
+      .exportWorkspaceTransactions('ws-42', WorkspaceExportFormat.EXCEL)
+      .finally(() => {
+        process.env.UPLOADS_DIR = previousUploadsDir;
+      });
 
     expect(transactionRepository.createQueryBuilder).toHaveBeenCalledWith('transaction');
     expect(qb.where).toHaveBeenCalledWith('transaction.workspaceId = :workspaceId', {
@@ -1024,7 +1027,8 @@ describe('exportWorkspaceTransactions', () => {
     // Trashed statements are left out through a subquery, not a join.
     expect(qb.andWhere).toHaveBeenNthCalledWith(3, expect.stringContaining('deleted_at IS NOT NULL'));
     expect(qb.andWhere).toHaveBeenNthCalledWith(4, 'transaction.transferPairId IS NULL');
-    expect(excelSpy).toHaveBeenCalledWith([{ id: 'tx-1' }], expect.stringContaining('workspace-transactions-'));
+    expect(fs.existsSync(result.filePath)).toBe(true);
+    fs.rmSync(uploadsDir, { recursive: true, force: true });
     expect(result.fileName).toMatch(/^workspace-transactions-.*\.xlsx$/);
     expect(result.mimeType).toBe(
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

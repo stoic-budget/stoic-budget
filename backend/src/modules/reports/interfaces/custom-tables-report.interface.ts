@@ -82,3 +82,10 @@ export interface CustomTablesReportDrillDownResponse {
     currency: string | null;
   }>;
 }
+
+export interface AvailableCustomTable {
+  id: string;
+  name: string;
+  source: 'manual';
+  rowCount: number;
+}
