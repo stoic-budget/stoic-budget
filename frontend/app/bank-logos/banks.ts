@@ -94,4 +94,5 @@ export const BANKS = [
     logo: 'great-southern.png',
     aliases: ['great southern'],
   },
+  { key: 'green_dot', name: 'Green Dot', logo: 'green-dot.png' },
 ] as const satisfies readonly BankEntry[];

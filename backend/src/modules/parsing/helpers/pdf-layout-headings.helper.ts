@@ -127,6 +127,9 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'running balance',
     'ending daily balance',
     'daily balance',
+    // Green Dot's running balance: "Amount  Available".
+    'available',
+    'available balance',
     'solde',
     'saldo',
     'kontostand',

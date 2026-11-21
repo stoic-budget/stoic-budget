@@ -52,5 +52,6 @@ export enum BankName {
   GO2BANK = 'go2bank',
   GOTYME = 'gotyme',
   GREAT_SOUTHERN = 'great_southern',
+  GREEN_DOT = 'green_dot',
   OTHER = 'other',
 }

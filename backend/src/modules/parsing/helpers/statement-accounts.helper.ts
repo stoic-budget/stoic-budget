@@ -6,7 +6,11 @@ import type {
 } from '../interfaces/parsed-statement.interface';
 import { accountHeadingAt } from './pdf-layout-account-number.helper';
 import type { LayoutTransaction } from './pdf-layout-table.helper';
-import { openingBalanceFromRows, toParsedTransactions } from './pdf-layout-transactions.helper';
+import {
+  closingBalanceFromRows,
+  openingBalanceFromRows,
+  toParsedTransactions,
+} from './pdf-layout-transactions.helper';
 import { checkBalanceChain, checkDatesInPeriod } from './statement-checks.helper';
 import type { NumericDateOrder } from './statement-date.helper';
 import { findHeaderPeriod } from './statement-header-period.helper';
@@ -93,7 +97,8 @@ export function accountStatement(
   const sign = isCard ? -1 : 1;
   const balanceStart =
     openingBalanceFromRows(rows) ?? (labelled.start === null ? null : sign * labelled.start);
-  const balanceEnd = rows.at(-1)?.balance ?? (labelled.end === null ? null : sign * labelled.end);
+  const balanceEnd =
+    closingBalanceFromRows(rows) ?? (labelled.end === null ? null : sign * labelled.end);
   return {
     metadata: {
       accountNumber,

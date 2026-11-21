@@ -125,6 +125,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('GO2bank, member FDIC')).toBe(BankName.GO2BANK);
     expect(mentionedBank('GoTyme Bank is regulated by the Bangko Sentral ng Pilipinas')).toBe(BankName.GOTYME);
     expect(mentionedBank('visit greatsouthernbank.com.au')).toBe(BankName.GREAT_SOUTHERN);
+    expect(mentionedBank('©2013 - 2016 Green Dot Corporation')).toBe(BankName.GREEN_DOT);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
