@@ -114,4 +114,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.TRUIST]: 'Truist',
   [BankName.UBS]: 'UBS',
   [BankName.UCO]: 'UCO Bank',
+  [BankName.ULSTER]: 'Ulster Bank',
 };

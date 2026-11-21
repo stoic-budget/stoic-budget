@@ -184,6 +184,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('call us at 844-4TRUIST')).toBe(BankName.TRUIST);
     expect(mentionedBank('Online: www.ubs.com Write: UBS US AG')).toBe(BankName.UBS);
     expect(mentionedBank('IFSC Code UCBA0002025')).toBe(BankName.UCO);
+    expect(mentionedBank('Manage your statements online at www.ulsterbank.co.uk')).toBe(BankName.ULSTER);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
