@@ -36,6 +36,7 @@ describe('Accounts (e2e)', () => {
     other: `accounts-other-${stamp}@example.com`,
     exporter: `accounts-exporter-${stamp}@example.com`,
     importer: `accounts-importer-${stamp}@example.com`,
+    coverage: `accounts-coverage-${stamp}@example.com`,
     balances: `accounts-balances-${stamp}@example.com`,
   };
   let owner: E2eAccount;
@@ -378,6 +379,83 @@ describe('Accounts (e2e)', () => {
       await as(other, request(server()).get('/dashboard/commitments')).expect(200)
     ).body;
     expect(commitments.openingBalance).toBe(-owed);
+  });
+
+  it('says how far each bank account reaches, and a bank no account holds by its last four characters', async () => {
+    const reader = await registerAccount(app, emails.coverage, 'Member Three');
+    const coverage = async (account: E2eAccount) =>
+      (await as(account, request(server()).get('/wallets/coverage')).expect(200)).body.rows as Array<
+        Record<string, any>
+      >;
+    const everyday = await as(
+      reader,
+      request(server()).post('/wallets').send({ name: 'Everyday Account', currency }),
+    ).expect(201);
+    await as(
+      reader,
+      request(server()).post('/wallets').send({ name: 'Cash', type: 'cash', currency }),
+    ).expect(201);
+    const attached = await seedStatement(reader, currency, { accountNumber: null });
+    await as(
+      reader,
+      request(server())
+        .post(`/wallets/${everyday.body.id}/statements`)
+        .send({ statementIds: [attached] }),
+    ).expect(201);
+    const unheld = await seedStatement(reader, currency, {
+      statementDateTo: new Date('2026-02-28'),
+      accountNumber: 'DE00 0000 0000 0000 0042',
+    });
+    // One row of it still waits in Review; the two seeded with it are confirmed.
+    await dataSource.getRepository(Transaction).save(
+      dataSource.getRepository(Transaction).create({
+        workspaceId: reader.workspaceId,
+        statementId: unheld,
+        transactionDate: new Date('2026-02-10'),
+        counterpartyName: 'ACME Store',
+        paymentPurpose: 'Purchase',
+        currency,
+        transactionType: TransactionType.EXPENSE,
+        amount: 5,
+        debit: 5,
+        isVerified: false,
+      }),
+    );
+    await seedStatement(reader, currency, {
+      fileName: 'manual-expense-1.csv',
+      accountNumber: 'DE00 0000 0000 0000 0099',
+    });
+    // A converted table no account holds is no bank's statement.
+    await seedStatement(reader, currency, {
+      fileName: 'table-1.csv',
+      accountNumber: null,
+      balanceEnd: null,
+      parsingDetails: { detectedBy: 'custom-table-conversion' },
+    });
+
+    const rows = await coverage(reader);
+
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toMatchObject({
+      kind: 'account',
+      walletId: everyday.body.id,
+      name: 'Everyday Account',
+      dataTo: '2026-01-31',
+      pendingReview: 0,
+    });
+    expect(rows[1]).toMatchObject({
+      kind: 'bank',
+      walletId: null,
+      accountTail: '0042',
+      dataTo: '2026-02-28',
+      pendingReview: 1,
+    });
+    expect(JSON.stringify(rows)).not.toContain(accountNumber);
+    expect(JSON.stringify(rows)).not.toContain('0099');
+
+    const othersRows = await coverage(other);
+    expect(othersRows.map(row => row.walletId)).not.toContain(everyday.body.id);
+    expect(othersRows.map(row => row.accountTail)).not.toContain('0042');
   });
 
   it('draws each everyday account day by day through a month, in its own workspace only', async () => {

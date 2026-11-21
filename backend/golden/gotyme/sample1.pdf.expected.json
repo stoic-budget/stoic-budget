@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "accountNumber": "855486826922",
+    "currency": "PHP",
+    "dateFrom": "2024-08-22T00:00:00",
+    "dateTo": "2024-11-21T00:00:00",
+    "balanceStart": 0,
+    "balanceEnd": 0
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-08-22T00:00:00",
+      "counterpartyName": "Inbound interbank transfer",
+      "paymentPurpose": "Inbound interbank transfer",
+      "debit": 0,
+      "credit": 100,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-08-22T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "Card payment at PAYPAL, Card •••• 7977",
+      "debit": 57.09,
+      "credit": 0,
+      "currency": "PHP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-08-22T00:00:00",
+      "counterpartyName": "Refund for card payment",
+      "paymentPurpose": "Refund for card payment",
+      "debit": 0,
+      "credit": 57.09,
+      "currency": "PHP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-08-22T00:00:00",
+      "counterpartyName": "PP*9697CODE",
+      "paymentPurpose": "Card payment at PP*9697CODE, Card •••• 7977",
+      "debit": 100,
+      "credit": 0,
+      "currency": "PHP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-08-23T00:00:00",
+      "counterpartyName": "Refund for card payment",
+      "paymentPurpose": "Refund for card payment",
+      "debit": 0,
+      "credit": 100,
+      "currency": "PHP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-08-24T00:00:00",
+      "counterpartyName": "Refund for card payment",
+      "paymentPurpose": "Refund for card payment",
+      "debit": 0,
+      "credit": 75949.92,
+      "currency": "PHP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-08-24T00:00:00",
+      "counterpartyName": "Outbound interbank transfer",
+      "paymentPurpose": "Outbound interbank transfer",
+      "debit": 50000,
+      "credit": 0,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-24T00:00:00",
+      "counterpartyName": "Outbound interbank transfer",
+      "paymentPurpose": "Outbound interbank transfer",
+      "debit": 26000,
+      "credit": 0,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-26T00:00:00",
+      "counterpartyName": "DITO",
+      "paymentPurpose": "In-app purchase for Mobile from DITO, for +63••••••9474",
+      "debit": 10,
+      "credit": 0,
+      "currency": "PHP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-08-26T00:00:00",
+      "counterpartyName": "Inbound interbank transfer",
+      "paymentPurpose": "Inbound interbank transfer",
+      "debit": 0,
+      "credit": 85,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-08-26T00:00:00",
+      "counterpartyName": "PAYPAL *SAMPLESHOPTNE",
+      "paymentPurpose": "Card payment at PAYPAL *SAMPLESHOPTNE, Card •••• 7977",
+      "debit": 53,
+      "credit": 0,
+      "currency": "PHP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-08-26T00:00:00",
+      "counterpartyName": "PAYPAL *SAMPLESHOPT",
+      "paymentPurpose": "Card payment at PAYPAL *SAMPLESHOPT, Card •••• 7977",
+      "debit": 31.92,
+      "credit": 0,
+      "currency": "PHP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-01T00:00:00",
+      "counterpartyName": "DITO",
+      "paymentPurpose": "In-app purchase for Mobile from DITO, for +63••••••2632",
+      "debit": 10,
+      "credit": 0,
+      "currency": "PHP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-01T00:00:00",
+      "counterpartyName": "DITO",
+      "paymentPurpose": "In-app purchase for Mobile from DITO, for +63••••••2632",
+      "debit": 10,
+      "credit": 0,
+      "currency": "PHP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-09-03T00:00:00",
+      "counterpartyName": "MEMBER B.",
+      "paymentPurpose": "Transfer to MEMBER B. GoTyme Bank, Account No. •••• •••• 5342",
+      "debit": 20,
+      "credit": 0,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-09-30T00:00:00",
+      "counterpartyName": "MEMBER C.",
+      "paymentPurpose": "Transfer from MEMBER C. GoTyme Bank, Account No. •••• •••• 6724",
+      "debit": 0,
+      "credit": 48423.97,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-09-30T00:00:00",
+      "counterpartyName": "Outbound interbank transfer",
+      "paymentPurpose": "Outbound interbank transfer",
+      "debit": 48423.97,
+      "credit": 0,
+      "currency": "PHP",
+      "paymentType": "bank_transfer_out"
+    }
+  ]
+}

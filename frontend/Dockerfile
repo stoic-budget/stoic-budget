@@ -92,8 +92,10 @@ USER app
 EXPOSE 3000
 
 # Health check
+# /login, not /: the root redirects (307) to the right start page, so asking it
+# for a 200 marked every container unhealthy. The login page renders for anyone.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD ["node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+  CMD ["node", "-e", "require('http').get('http://127.0.0.1:' + (process.env.PORT || 3000) + '/login', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
 
 # Start application
 CMD ["node", "server.js"]

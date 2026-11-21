@@ -26,6 +26,8 @@ import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { balanceCheckOf, reconciliationsFrom } from './wallet-balance-check';
 import { balanceDays, monthDates } from './wallet-balance-days';
+import { saveWalletChange } from './wallet-change';
+import { creditLimitPatch } from './wallet-credit-limit';
 import { type WalletLedger, walletLedgers } from './wallet-ledger';
 
 /** Statements whose rows are read and real; the same set the balance sheet trusts. */
@@ -61,12 +63,15 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       createDto.ownerMemberId,
     );
 
+    const { creditLimit, ...fields } = createDto;
+    const type = fields.type ?? 'checking';
     // wallets.user_id is NOT NULL: without it every create failed with a 500.
     const wallet = this.repository.create({
       workspaceId,
       userId,
-      ...createDto,
-      type: createDto.type ?? 'checking',
+      ...fields,
+      type,
+      ...creditLimitPatch(type, creditLimit),
       currency: await this.workspaceCurrency.resolveFor(workspaceId, createDto.currency),
       initialBalance: createDto.initialBalance || 0,
       isActive: true,
@@ -81,7 +86,7 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       workspaceId,
       dto.ownerMemberId,
     );
-    return super.update(id, workspaceId, dto);
+    return saveWalletChange(this.repository, id, workspaceId, dto, this.entityName);
   }
 
   /** Every account of the workspace with its balance, for `GET /wallets`. */
@@ -250,6 +255,7 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
         initialBalance: String(wallet.initialBalance ?? '0'),
         isActive: wallet.isActive,
         ownerMemberId: wallet.ownerMemberId,
+        creditLimit: wallet.creditLimit == null ? null : String(wallet.creditLimit),
         balance: round2((Number(wallet.initialBalance) || 0) + (ledger?.net ?? 0)),
         unconvertedCurrencies: ledger?.unconverted ?? [],
         transactionCount: ledger?.count ?? 0,

@@ -59,6 +59,12 @@ vi.mock('@/app/i18n', async () => {
         newAccount: value('New account'),
         nameLabel: value('Name'),
         accountWithNumber: value('Account {{number}}'),
+        typeCreditCard: value('Credit card'),
+        typeChecking: value('Checking'),
+        creditLimitLabel: value('Credit limit'),
+        creditLimitInvalid: value('Enter an amount above zero, with at most two decimals'),
+        creditAvailable: value('Available {{amount}} of {{limit}}'),
+        creditOverLimit: value('Over the limit by {{amount}}'),
       }),
   };
 });
@@ -198,6 +204,93 @@ describe('AccountsPage', () => {
           initialBalance: 100,
           statementIds: ['s-jan', 's-feb'],
         }),
+      ),
+    );
+  });
+
+  it('shows what is left on a card with a limit, and nothing new on one without', async () => {
+    serve([
+      walletItem({
+        id: 'w-gold',
+        name: 'ACME Gold',
+        type: 'credit_card',
+        currency: 'EUR',
+        balance: -1200,
+        creditLimit: '5000.00',
+      }),
+      walletItem({
+        id: 'w-over',
+        name: 'ACME Over',
+        type: 'credit_card',
+        currency: 'EUR',
+        balance: -5100,
+        creditLimit: '5000.00',
+      }),
+      walletItem({ id: 'w-plain', name: 'ACME Plain', type: 'credit_card', balance: -40 }),
+    ]);
+
+    renderWithQuery(<AccountsPage />);
+
+    const gold = await screen.findByRole('link', { name: /ACME Gold/ });
+    expect(gold).toHaveTextContent('Available €3,800.00 of €5,000.00');
+    expect(within(gold).getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /ACME Over/ })).toHaveTextContent(
+      'Over the limit by €100.00',
+    );
+    const plain = screen.getByRole('link', { name: /ACME Plain/ });
+    expect(plain).not.toHaveTextContent(/Available|Over the limit/);
+    expect(within(plain).queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
+  it('asks for a limit only on a credit card, refuses one the API would refuse, and sends what it shows', async () => {
+    serve([walletItem({ id: 'w-other', name: 'Other', currency: 'EUR' })]);
+
+    renderWithQuery(<AccountsPage />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Add account' }));
+    const drawer = await screen.findByRole('dialog');
+    fireEvent.change(within(drawer).getByLabelText('Name'), { target: { value: 'ACME Card' } });
+    expect(within(drawer).queryByLabelText('Credit limit')).not.toBeInTheDocument();
+
+    fireEvent.click(within(drawer).getByRole('radio', { name: 'Credit card' }));
+    const limit = within(drawer).getByLabelText('Credit limit');
+    const save = within(drawer).getByRole('button', { name: 'save' });
+
+    fireEvent.change(limit, { target: { value: '100.123' } });
+    expect(within(drawer).getByRole('alert')).toHaveTextContent(/at most two decimals/);
+    expect(save).toBeDisabled();
+    fireEvent.change(limit, { target: { value: '0' } });
+    expect(save).toBeDisabled();
+
+    fireEvent.change(limit, { target: { value: '5000,50' } });
+    expect(within(drawer).queryByRole('alert')).not.toBeInTheDocument();
+    fireEvent.click(save);
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith(
+        '/wallets',
+        expect.objectContaining({ type: 'credit_card', creditLimit: 5000.5 }),
+      ),
+    );
+  });
+
+  it('drops a typed limit when the account is switched to another type', async () => {
+    serve([walletItem({ id: 'w-other', name: 'Other', currency: 'EUR' })]);
+
+    renderWithQuery(<AccountsPage />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Add account' }));
+    const drawer = await screen.findByRole('dialog');
+    fireEvent.change(within(drawer).getByLabelText('Name'), { target: { value: 'Everyday' } });
+    fireEvent.click(within(drawer).getByRole('radio', { name: 'Credit card' }));
+    fireEvent.change(within(drawer).getByLabelText('Credit limit'), { target: { value: '5000' } });
+    fireEvent.click(within(drawer).getByRole('radio', { name: 'Checking' }));
+    expect(within(drawer).queryByLabelText('Credit limit')).not.toBeInTheDocument();
+
+    fireEvent.click(within(drawer).getByRole('button', { name: 'save' }));
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith(
+        '/wallets',
+        expect.objectContaining({ type: 'checking', creditLimit: null }),
       ),
     );
   });

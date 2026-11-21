@@ -77,6 +77,8 @@ export const TransactionListItem = Schema.Struct({
   isPrivate: Schema.Boolean,
   /** The owner's real category of a private row; null for everybody else. */
   privateCategoryId: Schema.NullOr(Schema.String),
+  /** Left out of every income and spending figure; balances and net worth still count it. */
+  excludedFromBudgets: Schema.Boolean,
   transferPairId: Schema.NullOr(Schema.String),
   transferPairSource: Schema.NullOr(Schema.Literals(['auto', 'manual', 'rejected'])),
   transferPairKind: Schema.NullOr(
@@ -84,6 +86,12 @@ export const TransactionListItem = Schema.Struct({
   ),
   /** The expense this income pays back. */
   reimbursementOfId: Schema.NullOr(Schema.String),
+  /**
+   * Set on each part of a split row (the parts share it): the drawer offers
+   * "Undo split" and no "Duplicate" on a part. Optional: not every answer
+   * built from these fields reads it from a stored row.
+   */
+  splitGroupId: Schema.optional(Schema.NullOr(Schema.String)),
   createdAt: Timestamp,
   updatedAt: Timestamp,
 });
@@ -110,6 +118,9 @@ const ListedTransaction = Schema.Struct({
   payee: Schema.optional(Schema.NullOr(PayeeRef)),
   /** Which step set the category; tells a suggestion from a decision. */
   categorySource: Schema.optional(Schema.NullOr(TransactionCategorySource)),
+  /** The parts of one split share the group: the drawer offers to undo it. */
+  splitGroupId: Schema.optional(Schema.NullOr(Schema.String)),
+  splitIndex: Schema.optional(Schema.NullOr(Schema.Number)),
 });
 
 /** The rows of `GET /transactions`, read out of the `{ data }` envelope. */

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { GoalLinkField } from '@/app/components/goals/GoalLinkField';
-import { FileText } from '@/app/components/icons';
+import { Copy, FileText } from '@/app/components/icons';
 import { NotesPanel } from '@/app/components/notes/NotesPanel';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { FALLBACK_CURRENCY } from '@/app/lib/currency';
@@ -13,10 +13,14 @@ import { ItemImageBadge } from '../item-images/ItemImageBadge';
 import { DrawerShell } from '../ui/drawer-shell';
 import { PRIVATE_CLASS } from '../ui/private-amount';
 import { TextTabs } from '../ui/text-tabs';
+import { BudgetExclusionToggle } from './BudgetExclusionToggle';
+import { canDuplicate } from './helpers/duplicate-draft';
 import { formatDate } from './helpers/transactionFormatters';
+import { useDuplicateTransaction } from './hooks/useDuplicateTransaction';
 import { useTransactionReviewActions } from './hooks/useTransactionReviewActions';
 import { TransactionCommentSection } from './TransactionCommentSection';
 import { TransactionDetailsTab } from './TransactionDetailsTab';
+import { TransactionFilesSection } from './TransactionFilesSection';
 import { TransactionHistoryTab } from './TransactionHistoryTab';
 import type { Category, Transaction } from './types';
 
@@ -111,18 +115,23 @@ function TransactionSummary({
   );
 }
 
-/** The drawer's main actions, pinned under the tabs: open the source, delete, confirm. */
+/** The drawer's main actions, pinned under the tabs: open the source, duplicate, delete, confirm. */
 function TransactionFooter({
   transaction,
+  categories,
   source,
   onChanged,
+  onClose,
 }: {
   transaction: Transaction;
+  categories: Category[];
   source?: TransactionSource;
   onChanged?: () => void;
+  onClose: () => void;
 }): React.JSX.Element {
   const t = useIntlayer('transactionsDrawer');
   const [askingDelete, setAskingDelete] = useState(false);
+  const duplicate = useDuplicateTransaction(categories);
   const { confirm, remove, busy } = useTransactionReviewActions(
     {
       confirmed: t.sheet.confirmedToast.value,
@@ -165,6 +174,18 @@ function TransactionFooter({
           <FileText size={15} />
           {t.sheet.openDocument}
         </Link>
+      )}
+      {canDuplicate(transaction) && (
+        <button
+          type="button"
+          className="seneca-tx-footer__text-btn"
+          // The form opens on top; this drawer closes so it is not left behind it.
+          onClick={() => void duplicate(transaction).then(opened => opened && onClose())}
+          title={t.sheet.duplicateHint.value}
+        >
+          <Copy size={15} />
+          {t.sheet.duplicate}
+        </button>
       )}
       <button
         type="button"
@@ -225,7 +246,13 @@ export default function DetailsDrawer({
       lockScroll={false}
       footer={
         onChanged ? (
-          <TransactionFooter transaction={transaction} source={source} onChanged={onChanged} />
+          <TransactionFooter
+            transaction={transaction}
+            categories={categories}
+            source={source}
+            onChanged={onChanged}
+            onClose={onClose}
+          />
         ) : undefined
       }
     >
@@ -250,6 +277,7 @@ export default function DetailsDrawer({
               onMarkIgnored={onMarkIgnored}
               onSplitDone={onSplitDone}
             />
+            <BudgetExclusionToggle transaction={transaction} />
             {!transaction.isPrivate && (
               <TransactionCommentSection
                 key={transaction.id}
@@ -265,6 +293,10 @@ export default function DetailsDrawer({
                 syncKey={`${transaction.amount}|${transaction.transactionType}|${transaction.currency}`}
               />
             </div>
+            <TransactionFilesSection
+              key={`files-${transaction.id}`}
+              transactionId={transaction.id}
+            />
           </>
         )}
         {activeTab === 'notes' && (

@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "accountNumber": "****2279",
+    "currency": "USD",
+    "dateFrom": "2022-07-21T00:00:00",
+    "dateTo": "2022-08-21T00:00:00",
+    "balanceStart": 0,
+    "balanceEnd": 83.62
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-07-21T00:00:00",
+      "counterpartyName": "Opening Deposit",
+      "paymentPurpose": "Opening Deposit",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-08-18T00:00:00",
+      "counterpartyName": "PORTER'S - ALPIN ALPINE TX",
+      "paymentPurpose": "POS Purchase PORTER'S - ALPIN ALPINE TX #3392",
+      "debit": 9.71,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-08-19T00:00:00",
+      "counterpartyName": "THE-FRENCH-CO MARATHON TX",
+      "paymentPurpose": "Debit Card - Sig THE-FRENCH-CO MARATHON TX #3392",
+      "debit": 6.67,
+      "currency": "USD",
+      "paymentType": "card"
+    }
+  ]
+}

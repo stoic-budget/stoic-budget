@@ -26,14 +26,7 @@ vi.mock('@/app/i18n', () => ({
             countryNotFound: 'No countries found',
           },
         }
-      : key === 'uiShell'
-        ? { closeDrawer: { value: 'Close' } }
-        : {
-          taxpayerTypeLabel: { value: 'You file as' },
-          typeEmployee: { value: 'Employee' },
-          typeSelfEmployed: { value: 'Self-employed' },
-          typeCompany: { value: 'Company' },
-        },
+      : { closeDrawer: { value: 'Close' } },
 }));
 
 const jurisdiction = (code: string, name: string) =>
@@ -41,11 +34,8 @@ const jurisdiction = (code: string, name: string) =>
 
 const props = {
   locale: 'en' as const,
-  profile: 'business' as const,
   taxCountry: null,
-  taxpayerType: null,
   onTaxCountryChange: vi.fn(),
-  onTaxpayerTypeChange: vi.fn(),
   onDefer: vi.fn(),
 };
 
@@ -55,25 +45,17 @@ describe('TaxStep', () => {
     get.mockResolvedValue({ data: [jurisdiction('DE', 'Germany'), jurisdiction('PL', 'Poland')] });
   });
 
-  it('asks for the taxpayer kind only once a country is chosen', async () => {
-    renderWithQuery(<TaxStep {...props} />);
+  it('asks only for the country, with a hint until one is chosen', async () => {
+    const { unmount } = renderWithQuery(<TaxStep {...props} />);
 
     await waitFor(() => expect(get).toHaveBeenCalled());
     expect(screen.getByText('Tax features stay off')).toBeInTheDocument();
     expect(screen.queryByRole('radiogroup')).toBeNull();
-  });
-
-  it('offers company only to a business workspace', () => {
-    const { unmount } = renderWithQuery(<TaxStep {...props} taxCountry="DE" />);
-    expect(screen.getAllByRole('radio').map(radio => radio.textContent)).toEqual([
-      'Employee',
-      'Self-employed',
-      'Company',
-    ]);
     unmount();
 
-    renderWithQuery(<TaxStep {...props} taxCountry="DE" profile="home" />);
-    expect(screen.queryByRole('radio', { name: /Company/ })).toBeNull();
+    renderWithQuery(<TaxStep {...props} taxCountry="DE" />);
+    expect(screen.queryByText('Tax features stay off')).toBeNull();
+    expect(screen.queryByRole('radiogroup')).toBeNull();
   });
 
   it('picks the country from a sidebar list', async () => {

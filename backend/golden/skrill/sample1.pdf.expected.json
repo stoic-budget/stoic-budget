@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "accountNumber": "IT03T1902528831342046332689",
+    "currency": "USD",
+    "dateFrom": "2024-05-02T00:00:00",
+    "dateTo": "2024-06-01T00:00:00",
+    "balanceStart": 0
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-05-09T00:00:00",
+      "counterpartyName": "CURRENCY_EXCHANGE USD/EUR",
+      "paymentPurpose": "CURRENCY_EXCHANGE USD/EUR",
+      "debit": 17.75,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    }
+  ]
+}

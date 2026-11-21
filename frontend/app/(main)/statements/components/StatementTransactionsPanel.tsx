@@ -102,6 +102,9 @@ export function StatementTransactionsPanel({
   };
 
   const rows = (rowsQuery.data?.rows ?? []).filter(tx => !(unconfirmedOnly && tx.isVerified));
+  // The drawer shows the row as the list last loaded it, so a change saved
+  // from the drawer (left out of budgets) shows there once the list refreshes.
+  const drawerRow = open ? (rowsQuery.data?.rows.find(tx => tx.id === open.id) ?? open) : null;
   const statement = rowsQuery.data?.statement;
   // The drawer names the document the row came from and opens it.
   const source = statement
@@ -171,7 +174,7 @@ export function StatementTransactionsPanel({
       )}
       <DetailsDrawer
         open={drawerOpen}
-        transaction={open}
+        transaction={drawerRow}
         categories={categories}
         onClose={closeDrawer}
         onUpdateCategory={updateCategory}

@@ -19,7 +19,7 @@ import { TransferPairRejection } from '../../../entities/transfer-pair-rejection
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
 import { assertUnlinkAllowed } from '../helpers/pair-guards';
 import { forgetRejection, rejectedPairKeys, unlinkAndRemember } from './transfer-pair-rejections';
-import { writeTransferPairs } from './transfer-pair-writer';
+import { PAIRABLE_STATEMENT, writeTransferPairs } from './transfer-pair-writer';
 import {
   absAmount,
   accountKey,
@@ -79,7 +79,7 @@ export class TransferPairingService {
       // income, and pairing it with some transfer would make it vanish.
       .andWhere('t.transferPairId IS NULL AND t.investmentAccountId IS NULL')
       .andWhere('t.reimbursementOfId IS NULL')
-      .andWhere('(t.statementId IS NULL OR s.deletedAt IS NULL)');
+      .andWhere(PAIRABLE_STATEMENT.where, PAIRABLE_STATEMENT.params);
     if (!options.includeRejected) {
       query.andWhere('(t.transferPairSource IS NULL OR t.transferPairSource != :rejected)', {
         rejected: TransferPairSource.REJECTED,

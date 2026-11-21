@@ -12,4 +12,11 @@ describe('account form', () => {
     expect(accountToForm(walletItem({ id: 'w-1', name: 'Everyday' })).openingBalance).toBe('');
     expect(emptyAccountForm('EUR')).toMatchObject({ type: 'checking', currency: 'EUR' });
   });
+
+  it('puts a card limit in the form as typed, and none for a card without one', () => {
+    const card = walletItem({ id: 'w-card', name: 'ACME Card', type: 'credit_card', creditLimit: '5000.50' });
+    expect(accountToForm(card).creditLimit).toBe('5000.5');
+    expect(accountToForm({ ...card, creditLimit: null }).creditLimit).toBe('');
+    expect(emptyAccountForm('EUR').creditLimit).toBe('');
+  });
 });
