@@ -145,6 +145,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Manufacturers and Traders Trust Company, member FDIC')).toBe(BankName.M_AND_T);
     expect(mentionedBank('Customer Service Information Marcus.com')).toBe(BankName.MARCUS);
     expect(mentionedBank('MERRICK ACCOUNT SUMMARY Account Number')).toBe(BankName.MERRICK);
+    expect(mentionedBank('Metro Bank PLC is registered in England and Wales')).toBe(BankName.METRO_BANK);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
