@@ -80,7 +80,10 @@ export function StatementsListItemMobile(props: {
         </button>
         <div className="seneca-stmt-list-item__mobile-body">
           <div className="seneca-stmt-list-item__mobile-line">
-            <span className="seneca-stmt-list-item__mobile-merchant">
+            <span
+              className="seneca-stmt-list-item__mobile-merchant"
+              title={isProcessing ? undefined : merchantLabel}
+            >
               {isProcessing ? listText.processing : merchantLabel}
             </span>
             {hasError ? <AlertCircle size={14} style={{ color: c.danger, flexShrink: 0 }} /> : null}

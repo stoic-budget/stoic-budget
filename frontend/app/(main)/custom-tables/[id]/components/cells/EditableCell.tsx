@@ -15,19 +15,16 @@ import type {
   CustomTableColumn,
   CustomTableGridRow,
 } from '../../utils/types';
-import { CategoryCellEditor } from './CategoryCellEditor';
-import { CurrencyCodeEditor } from './CurrencyCodeEditor';
 import {
   EMPTY_CELL,
   formatCellText,
-  isCategoryColumn,
-  isCurrencyCodeColumn,
   isEditableColumn,
   isNumericColumn,
   isReadOnlySourceCell,
   selectedOptions,
 } from './formatCell';
 import { MultiSelectEditor, OptionChip, SelectEditor } from './SelectEditors';
+import { useCellPicker } from './useCellPicker';
 
 export type UpdateCellFn = (
   rowId: string,
@@ -228,6 +225,13 @@ export function EditableCell(props: EditableCellProps) {
   const editable = isEditableColumn(column) && !lockedBySource;
   const issue = Boolean(row.styles?.[column.key]?.importIssue);
   const className = cellClassName(column, missingRequired, editable, issue);
+  // Categories, currencies and tags are picked in the app's drawers, not typed.
+  const picker = useCellPicker({
+    column,
+    value: row.data?.[column.key] ?? null,
+    clearLabel: labels.clear,
+    onChange: next => void saveQuietly(onUpdate(row.id, column.key, next)),
+  });
 
   if (column.type === 'boolean') {
     return (
@@ -247,33 +251,6 @@ export function EditableCell(props: EditableCellProps) {
     if (column.type === 'select' || column.type === 'multi_select') {
       return <OptionsEditor {...props} done={done} />;
     }
-    if (isCategoryColumn(column)) {
-      return (
-        <div className={className}>
-          <CellDisplay {...props} />
-          <CategoryCellEditor
-            value={row.data?.[column.key] ?? null}
-            clearLabel={labels.clear}
-            onChange={name => void saveQuietly(onUpdate(row.id, column.key, name))}
-            onClose={done}
-          />
-        </div>
-      );
-    }
-    if (isCurrencyCodeColumn(column)) {
-      // The cell keeps its value on show while the drawer is open beside the grid.
-      return (
-        <div className={className}>
-          <CellDisplay {...props} />
-          <CurrencyCodeEditor
-            value={row.data?.[column.key] ?? null}
-            clearLabel={labels.clear}
-            onChange={code => void saveQuietly(onUpdate(row.id, column.key, code))}
-            onClose={done}
-          />
-        </div>
-      );
-    }
     return column.type === 'date' ? (
       <DateEditor {...props} done={done} />
     ) : (
@@ -288,14 +265,18 @@ export function EditableCell(props: EditableCellProps) {
       </div>
     );
   }
+  // The drawer sits beside the button, not in it: a click inside it must not reach the cell.
   return (
-    <button
-      type="button"
-      className={`${className} seneca-ct__cell-button`}
-      aria-label={`${labels.edit}: ${column.title}`}
-      onClick={() => setEditing(true)}
-    >
-      <CellDisplay {...props} />
-    </button>
+    <>
+      <button
+        type="button"
+        className={`${className} seneca-ct__cell-button`}
+        aria-label={`${labels.edit}: ${column.title}`}
+        onClick={() => (picker.available ? picker.open() : setEditing(true))}
+      >
+        <CellDisplay {...props} />
+      </button>
+      {picker.drawer}
+    </>
   );
 }

@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "accountNumber": "411000000240",
+    "currency": "USD",
+    "dateFrom": "2024-08-01T00:00:00",
+    "dateTo": "2024-08-31T00:00:00",
+    "balanceStart": 0,
+    "balanceEnd": 0.4
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-08-31T00:00:00",
+      "counterpartyName": "Interest earned",
+      "paymentPurpose": "Interest Earned Interest earned",
+      "credit": 0.01,
+      "currency": "USD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2024-08-27T00:00:00",
+      "counterpartyName": "Reversal of deposit from FIRST NATIONAL BANK GILLETTE",
+      "paymentPurpose": "Deposit Reversal of deposit from FIRST NATIONAL BANK GILLETTE",
+      "debit": 25,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-26T00:00:00",
+      "counterpartyName": "FIRST NATIONAL BANK GILLETTE",
+      "paymentPurpose": "Deposit FIRST NATIONAL BANK GILLETTE",
+      "credit": 25,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-08-23T00:00:00",
+      "counterpartyName": "FIRST NATIONAL BANK GILLETTE",
+      "paymentPurpose": "Withdrawal FIRST NATIONAL BANK GILLETTE",
+      "debit": 25,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-23T00:00:00",
+      "counterpartyName": "Membera del sampl",
+      "paymentPurpose": "Pay a Friend Membera del sampl Sender: Member Sampleson",
+      "debit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-21T00:00:00",
+      "counterpartyName": "Memberss Sampler",
+      "paymentPurpose": "Pay a Friend Memberss Sampler Sender: Member Sampleson",
+      "debit": 5,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-16T00:00:00",
+      "counterpartyName": "FIRST NATIONAL BANK GILLETTE",
+      "paymentPurpose": "Withdrawal FIRST NATIONAL BANK GILLETTE",
+      "debit": 4,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-12T00:00:00",
+      "counterpartyName": "FIRST NATIONAL BANK GILLETTE",
+      "paymentPurpose": "Deposit FIRST NATIONAL BANK GILLETTE",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-08-11T00:00:00",
+      "counterpartyName": "Membera del sampl",
+      "paymentPurpose": "Pay a Friend Membera del sampl Sender: Membera del sampl",
+      "credit": 30,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-08-11T00:00:00",
+      "counterpartyName": "Membera del sampl",
+      "paymentPurpose": "Pay a Friend Membera del sampl Sender: Member Sampleson",
+      "debit": 30,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-11T00:00:00",
+      "counterpartyName": "Membera del sampl",
+      "paymentPurpose": "Pay a Friend Membera del sampl Sender: Membera del sampl",
+      "credit": 5,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-08-11T00:00:00",
+      "counterpartyName": "Membera del sampl",
+      "paymentPurpose": "Pay a Friend Membera del sampl Sender: Member Sampleson",
+      "debit": 5,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-08-10T00:00:00",
+      "counterpartyName": "CASH APP*MEMBERA DEL S",
+      "paymentPurpose": "Debit Card CASH APP*MEMBERA DEL S",
+      "credit": 34.39,
+      "currency": "USD",
+      "paymentType": "card"
+    }
+  ]
+}

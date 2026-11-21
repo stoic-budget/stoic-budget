@@ -238,17 +238,6 @@ export class TransactionsController {
     );
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @WorkspaceAuth(Permission.TRANSACTION_DELETE)
-  async remove(
-    @SchemaParams(TransactionParams) { id }: TransactionParams,
-    @CurrentUser() user: User,
-    @WorkspaceId() workspaceId: string,
-  ) {
-    await this.transactionsService.remove(id, workspaceId, user.id);
-  }
-
   @Get('duplicates/detect')
   @WorkspaceAuth(Permission.TRANSACTION_VIEW)
   @SchemaResponse(DuplicateGroups)
