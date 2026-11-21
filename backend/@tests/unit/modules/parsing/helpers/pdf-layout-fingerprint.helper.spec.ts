@@ -159,6 +159,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('PayPal Savings Statement Statement Period')).toBe(BankName.PAYPAL);
     expect(mentionedBank('For customer service call 1-888-PNC-BANK')).toBe(BankName.PNC);
     expect(mentionedBank('MEMBER FDIC NYSE Symbol "PB"')).toBe(BankName.PROSPERITY);
+    expect(mentionedBank('Qatar National Bank (Q.P.S.C.)')).toBe(BankName.QNB);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();

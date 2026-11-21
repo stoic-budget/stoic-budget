@@ -86,5 +86,6 @@ export enum BankName {
   PAYPAL = 'paypal',
   PNC = 'pnc',
   PROSPERITY = 'prosperity',
+  QNB = 'qnb',
   OTHER = 'other',
 }

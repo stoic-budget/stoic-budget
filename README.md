@@ -158,6 +158,7 @@ Setting expectations upfront:
 | 🇳🇬 Nigeria | Fidelity Bank | |
 | 🇧🇪 Belgium | KBC | |
 | 🇰🇪 Kenya | NCBA Bank | |
+| 🇶🇦 Qatar | QNB | |
 | 🇿🇦 South Africa | Absa, Capitec, FNB | |
 | 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank | |
 | 🇧🇷 Brazil | Banco do Brasil | |

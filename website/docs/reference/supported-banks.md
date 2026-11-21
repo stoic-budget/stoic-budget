@@ -22,6 +22,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **Nigeria:** Fidelity Bank
 - **Philippines:** BPI, GoTyme Bank
 - **Poland:** BNP Paribas Bank Polska
+- **Qatar:** QNB
 - **South Africa:** Absa, Capitec, FNB
 - **Sri Lanka:** Commercial Bank of Ceylon
 - **United Kingdom:** Bank of Scotland, Barclays, first direct, Halifax, Handelsbanken, HSBC, iFAST Global Bank, Kroo, Lloyds Bank, Metro Bank, Monzo, Nationwide, NatWest
