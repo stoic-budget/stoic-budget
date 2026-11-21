@@ -53,6 +53,10 @@ export type CashFlowQuery = Wire<typeof CashFlowQuery>;
 export const CashFlowEntriesQuery = Schema.Struct({ month: Month });
 export type CashFlowEntriesQuery = Wire<typeof CashFlowEntriesQuery>;
 
+/** `GET /wallets/balance-days`. */
+export const WalletBalanceDaysQuery = Schema.Struct({ month: Month });
+export type WalletBalanceDaysQuery = Wire<typeof WalletBalanceDaysQuery>;
+
 /** `GET /forecast`. */
 export const ForecastQuery = Schema.Struct({
   days: Schema.optional(

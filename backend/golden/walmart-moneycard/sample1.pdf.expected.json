@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "accountNumber": "012873275469",
+    "currency": "USD",
+    "dateFrom": "2022-02-01T00:00:00",
+    "dateTo": "2022-02-28T00:00:00",
+    "balanceStart": 0,
+    "balanceEnd": -4.37
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-02-03T00:00:00",
+      "counterpartyName": "UPSTART NETWORK",
+      "paymentPurpose": "UPSTART NETWORK Deposit UPSTRT PMT",
+      "credit": 0.43,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-02-03T00:00:00",
+      "counterpartyName": "UPSTART NETWORK",
+      "paymentPurpose": "UPSTART NETWORK Deposit UPSTRT PMT",
+      "credit": 0.7,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-02-02T00:00:00",
+      "counterpartyName": "MSPBNA BANK",
+      "paymentPurpose": "MSPBNA BANK TRANSFER Deposit",
+      "credit": 0.2,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-02-02T00:00:00",
+      "counterpartyName": "MSPBNA BANK",
+      "paymentPurpose": "MSPBNA BANK TRANSFER Deposit",
+      "credit": 0.24,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-02-01T00:00:00",
+      "counterpartyName": "Monthly",
+      "paymentPurpose": "Monthly Fee Fee",
+      "debit": 5.94,
+      "currency": "USD",
+      "paymentType": "fee"
+    }
+  ]
+}

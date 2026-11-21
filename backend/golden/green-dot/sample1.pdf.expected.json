@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "accountNumber": "677218064866",
+    "currency": "USD",
+    "dateFrom": "2018-07-18T00:00:00",
+    "dateTo": "2018-08-17T00:00:00",
+    "balanceStart": -19.9,
+    "balanceEnd": 4.1
+  },
+  "transactions": [
+    {
+      "transactionDate": "2018-08-16T00:00:00",
+      "counterpartyName": "ATM Withdrawal Fee Fee",
+      "paymentPurpose": "ATM Withdrawal Fee Fee",
+      "debit": 2.5,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2018-08-16T00:00:00",
+      "counterpartyName": "CHASE722 BRIGHTON ATM Withdrawal BEACH A",
+      "paymentPurpose": "CHASE722 BRIGHTON ATM Withdrawal BEACH A",
+      "debit": 368,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2018-08-15T00:00:00",
+      "counterpartyName": "BROOKLYN, NY ATM Withdrawal Fee Fee",
+      "paymentPurpose": "BROOKLYN, NY ATM Withdrawal Fee Fee",
+      "debit": 2.5,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2018-08-15T00:00:00",
+      "counterpartyName": "CHASE722 BRIGHTON ATM Withdrawal BEACH A",
+      "paymentPurpose": "CHASE722 BRIGHTON ATM Withdrawal BEACH A",
+      "debit": 403,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2018-08-15T00:00:00",
+      "counterpartyName": "BROOKLYN, NY DD:FNBO - BILLPA-BILLPAY Direct Deposit",
+      "paymentPurpose": "BROOKLYN, NY DD:FNBO - BILLPA-BILLPAY Direct Deposit",
+      "credit": 800,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    }
+  ]
+}

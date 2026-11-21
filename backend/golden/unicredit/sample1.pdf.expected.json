@@ -1,0 +1,1342 @@
+{
+  "metadata": {
+    "accountNumber": "000100000002",
+    "currency": "EUR",
+    "dateFrom": "2022-04-01T00:00:00",
+    "dateTo": "2022-06-30T00:00:00",
+    "balanceStart": 674.47,
+    "balanceEnd": 1990.28
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-04-01T00:00:00",
+      "counterpartyName": "ROCCO MARIA NICOLINA TORINO",
+      "paymentPurpose": "PAGAMENTO Contactless del 29/03/2022 CARTA *1000 DI EUR 3,00 ROCCO MARIA NICOLINA TORINO",
+      "debit": 3,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-01T00:00:00",
+      "counterpartyName": "UBER *EATS HELP.UBER.COM",
+      "paymentPurpose": "PAGAMENTO E-Commerce del 30/03/2022 CARTA *1000 DI EUR 1,60 UBER *EATS HELP.UBER.COM",
+      "debit": 1.6,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-01T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 0.25,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-04-01T00:00:00",
+      "counterpartyName": "SAMPLE SAMPLER MEMBER",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: SAMPLE SAMPLER MEMBER COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 30,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-04-04T00:00:00",
+      "counterpartyName": "PRELIEVO VISA DEL 02/04/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "paymentPurpose": "PRELIEVO VISA DEL 02/04/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "debit": 480,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-04-04T00:00:00",
+      "counterpartyName": "VENPAY SPA TREZZO SULL'A",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 31/03/2022 CARTA *1000 DI EUR 5,00 VENPAY SPA TREZZO SULL'A",
+      "debit": 5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-04T00:00:00",
+      "counterpartyName": "ALA SRL TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 31/03/2022 CARTA *1000 DI EUR 3,00 ALA SRL TORINO",
+      "debit": 3,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-04T00:00:00",
+      "counterpartyName": "POSTE ITALIANE TORINO",
+      "paymentPurpose": "PAGAMENTO del 01/04/2022 CARTA *1000 DI EUR 149,77 POSTE ITALIANE TORINO",
+      "debit": 149.77,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-04T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 30,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-04-05T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 2.85,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-04-06T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL ITUNES.COM",
+      "paymentPurpose": "PAGAMENTO del 04/04/2022 CARTA *1000 DI EUR 4,99 APPLE.COM/BILL ITUNES.COM",
+      "debit": 4.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-06T00:00:00",
+      "counterpartyName": "MEMBE SAMPLE SAMPLE",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: MEMBE SAMPLE SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 3.1,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-04-08T00:00:00",
+      "counterpartyName": "SUPERMERCATO CARREFOUR TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 05/04/2022 CARTA *1000 DI EUR 6,34 SUPERMERCATO CARREFOUR TORINO",
+      "debit": 6.34,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-08T00:00:00",
+      "counterpartyName": "MEMBER SAMPLEROS SAMP SAMPLE",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: MEMBER SAMPLEROS SAMP SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 7.5,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-04-11T00:00:00",
+      "counterpartyName": "VERSAMENTO SU SPORTELLO AUTOMATICO ATM NUM. 04051CARTA 63900633 VERSAMENTO DEL 11.04.2022 ALLE 12:58",
+      "paymentPurpose": "VERSAMENTO SU SPORTELLO AUTOMATICO ATM NUM. 04051CARTA 63900633 VERSAMENTO DEL 11.04.2022 ALLE 12:58",
+      "credit": 370,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2022-04-11T00:00:00",
+      "counterpartyName": "CUCCO ANNA PER: Affitto Stanza 5 - 15 Aprile 2022",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: CUCCO ANNA PER: Affitto Stanza 5 - 15 Aprile 2022 COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 370,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-04-12T00:00:00",
+      "counterpartyName": "BAR DENISE POLITECNICO TO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 08/04/2022 CARTA *1000 DI EUR 1,50 BAR DENISE POLITECNICO TO TORINO",
+      "debit": 1.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-12T00:00:00",
+      "counterpartyName": "OLD WILD WEST TORINO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 07/04/2022 CARTA *1000 DI EUR 8,90 OLD WILD WEST TORINO TORINO",
+      "debit": 8.9,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-14T00:00:00",
+      "counterpartyName": "VERSAMENTO SU SPORTELLO AUTOMATICO ATM NUM. 04051CARTA 63900633 VERSAMENTO DEL 14.04.2022 ALLE 18:17",
+      "paymentPurpose": "VERSAMENTO SU SPORTELLO AUTOMATICO ATM NUM. 04051CARTA 63900633 VERSAMENTO DEL 14.04.2022 ALLE 18:17",
+      "credit": 20,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2022-04-15T00:00:00",
+      "counterpartyName": "VERSAMENTO SU SPORTELLO AUTOMATICO ATM NUM. 04051CARTA 63900633 VERSAMENTO DEL 14.04.2022 ALLE 23:58",
+      "paymentPurpose": "VERSAMENTO SU SPORTELLO AUTOMATICO ATM NUM. 04051CARTA 63900633 VERSAMENTO DEL 14.04.2022 ALLE 23:58",
+      "credit": 10,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2022-04-19T00:00:00",
+      "counterpartyName": "FARMACIA COMUNALE N. 42 TORINO",
+      "paymentPurpose": "PAGAMENTO Contactless del 14/04/2022 CARTA *1000 DI EUR 18,40 FARMACIA COMUNALE N. 42 TORINO",
+      "debit": 18.4,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-19T00:00:00",
+      "counterpartyName": "ILIAD Italia PARIS",
+      "paymentPurpose": "PAGAMENTO E-Commerce del 15/04/2022 CARTA *1000 DI EUR 9,99 ILIAD Italia PARIS",
+      "debit": 9.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-21T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 7,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-04-26T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL CORK",
+      "paymentPurpose": "PAGAMENTO del 23/04/2022 CARTA *1000 DI EUR 0,99 APPLE.COM/BILL CORK",
+      "debit": 0.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-26T00:00:00",
+      "counterpartyName": "SUPERMERCATO CARREFOUR TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 22/04/2022 CARTA *1000 DI EUR 4,93 SUPERMERCATO CARREFOUR TORINO",
+      "debit": 4.93,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-28T00:00:00",
+      "counterpartyName": "SUPERMERCATO CARREFOUR TORINO",
+      "paymentPurpose": "PAGAMENTO Contactless del 23/04/2022 CARTA *1000 DI EUR 1,49 SUPERMERCATO CARREFOUR TORINO",
+      "debit": 1.49,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-29T00:00:00",
+      "counterpartyName": "SUPERMERCATO CARREFOUR TORINO",
+      "paymentPurpose": "PAGAMENTO Contactless del 26/04/2022 CARTA *1000 DI EUR 1,28 SUPERMERCATO CARREFOUR TORINO",
+      "debit": 1.28,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-04-29T00:00:00",
+      "counterpartyName": "EXCO CAFFE TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 27/04/2022 CARTA *1000 DI EUR 1,30 EXCO CAFFE TORINO",
+      "debit": 1.3,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-04T00:00:00",
+      "counterpartyName": "VERSAMENTO SU SPORTELLO AUTOMATICO ATM NUM. 06144 CARTA 63900633 VERSAMENTO DEL 04.05.2022 ALLE 20:39",
+      "paymentPurpose": "VERSAMENTO SU SPORTELLO AUTOMATICO ATM NUM. 06144 CARTA 63900633 VERSAMENTO DEL 04.05.2022 ALLE 20:39",
+      "credit": 500,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2022-05-05T00:00:00",
+      "counterpartyName": "CUCCO ANNA PER: Affitto Stanza 5 - Maggio 15",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: CUCCO ANNA PER: Affitto Stanza 5 - Maggio 15 COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 370,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-05-05T00:00:00",
+      "counterpartyName": "MEMBE SAMPLE SAMPLE",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: MEMBE SAMPLE SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 3.99,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-05-05T00:00:00",
+      "counterpartyName": "MEMBE SAMPLE SAMPLE",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: MEMBE SAMPLE SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 1,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-05-05T00:00:00",
+      "counterpartyName": "Eileen Katherine Rodriguez Ramirez PER: Pago prestito compleanno",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: Eileen Katherine Rodriguez Ramirez PER: Pago prestito compleanno COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 1.64,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-05-05T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 0.3,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-05-06T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL ITUNES.COM",
+      "paymentPurpose": "PAGAMENTO del 04/05/2022 CARTA *1000 DI EUR 4,99 APPLE.COM/BILL ITUNES.COM",
+      "debit": 4.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-09T00:00:00",
+      "counterpartyName": "ISTANBUL IMPERATORE TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 07/05/2022 CARTA *1000 DI EUR 6,50 ISTANBUL IMPERATORE TORINO",
+      "debit": 6.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-09T00:00:00",
+      "counterpartyName": "GETIR IT Milano",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 05/05/2022 CARTA *1000 DI EUR 7,06 GETIR IT Milano",
+      "debit": 7.06,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-09T00:00:00",
+      "counterpartyName": "BAR DENISE POLITECNICO TO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 06/05/2022 CARTA *1000 DI EUR 3,00 BAR DENISE POLITECNICO TO TORINO",
+      "debit": 3,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-09T00:00:00",
+      "counterpartyName": "BAR DENISE POLITECNICO TO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 06/05/2022 CARTA *1000 DI EUR 2,50 BAR DENISE POLITECNICO TO TORINO",
+      "debit": 2.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-11T00:00:00",
+      "counterpartyName": "ALA SRL TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 08/05/2022 CARTA *1000 DI EUR 3,00 ALA SRL TORINO",
+      "debit": 3,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-11T00:00:00",
+      "counterpartyName": "CAMST MIXTO POLI.TORINO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 09/05/2022 CARTA *1000 DI EUR 1,50 CAMST MIXTO POLI.TORINO TORINO",
+      "debit": 1.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-11T00:00:00",
+      "counterpartyName": "CDC SPA TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 09/05/2022 CARTA *1000 DI EUR 10,80 CDC SPA TORINO",
+      "debit": 10.8,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-11T00:00:00",
+      "counterpartyName": "BAR MARCO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 09/05/2022 CARTA *1000 DI EUR 2,50 BAR MARCO TORINO",
+      "debit": 2.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-11T00:00:00",
+      "counterpartyName": "EDISU-RISTORANTE UNIVERSI TORINO",
+      "paymentPurpose": "PAGAMENTO del 09/05/2022 CARTA *1000 DI EUR 25,00 EDISU-RISTORANTE UNIVERSI TORINO",
+      "debit": 25,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-12T00:00:00",
+      "counterpartyName": "MEMBE SAMPLE SAMPLE",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: MEMBE SAMPLE SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 5.8,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-05-13T00:00:00",
+      "counterpartyName": "SUPERMERCATO CARREFOUR TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 10/05/2022 CARTA *1000 DI EUR 3,40 SUPERMERCATO CARREFOUR TORINO",
+      "debit": 3.4,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-16T00:00:00",
+      "counterpartyName": "SUPERMERCATO CARREFOUR TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 13/05/2022 CARTA *1000 DI EUR 3,49 SUPERMERCATO CARREFOUR TORINO",
+      "debit": 3.49,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-16T00:00:00",
+      "counterpartyName": "SumUp *Gelateria Mosa torino",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 14/05/2022 CARTA *1000 DI EUR 2,10 SumUp *Gelateria Mosa torino",
+      "debit": 2.1,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-16T00:00:00",
+      "counterpartyName": "GETIR IT Milano",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 12/05/2022 CARTA *1000 DI EUR 10,56 GETIR IT Milano",
+      "debit": 10.56,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-16T00:00:00",
+      "counterpartyName": "revolutie Dublin",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 13/05/2022 CARTA *1000 DI EUR 10,97 revolutie Dublin",
+      "debit": 10.97,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-16T00:00:00",
+      "counterpartyName": "CAMST MIXTO POLI.TORINO TORINO",
+      "paymentPurpose": "PAGAMENTO Contactless del 12/05/2022 CARTA *1000 DI EUR 1,50 CAMST MIXTO POLI.TORINO TORINO",
+      "debit": 1.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-17T00:00:00",
+      "counterpartyName": "Dott package purchase Amsterdam",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 15/05/2022 CARTA *1000 DI EUR 2,99 Dott package purchase Amsterdam",
+      "debit": 2.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-17T00:00:00",
+      "counterpartyName": "UBER *EATS HELP.UBER.COM",
+      "paymentPurpose": "PAGAMENTO E-Commerce del 14/05/2022 CARTA *1000 DI EUR 15,00 UBER *EATS HELP.UBER.COM",
+      "debit": 15,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-20T00:00:00",
+      "counterpartyName": "BAR DENISE POLITECNICO TO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 17/05/2022 CARTA *1000 DI EUR 2,50 BAR DENISE POLITECNICO TO TORINO",
+      "debit": 2.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-23T00:00:00",
+      "counterpartyName": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 23.05.2022 ALLE 12.39.37 DA: Member Sampleros Samp Sample PER: Servir TRN: 1091221433255983 COMM: COMM SERV:",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 23.05.2022 ALLE 12.39.37 DA: Member Sampleros Samp Sample PER: Servir TRN: 1091221433255983 COMM: COMM SERV:",
+      "credit": 5,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-05-23T00:00:00",
+      "counterpartyName": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 23.05.2022 ALLE 20.26.27 DA: Member Sampleros Samp Sample PER: Servir TRN: 1091221433340603 COMM: COMM SERV:",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 23.05.2022 ALLE 20.26.27 DA: Member Sampleros Samp Sample PER: Servir TRN: 1091221433340603 COMM: COMM SERV:",
+      "credit": 5,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-05-25T00:00:00",
+      "counterpartyName": "Revolut**8124* Dublin",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 23/05/2022 CARTA *1000 DI EUR 10,00 Revolut**8124* Dublin",
+      "debit": 10,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-26T00:00:00",
+      "counterpartyName": "MOLINA MANRIQUE MARLIO PER: Pago",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: MOLINA MANRIQUE MARLIO PER: Pago COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 400,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "BONIFICO A VOSTRO FAVORE PER TRASFERIMENTO BANCOMAT PAY DA MARLIO MOLINA MANRIQUE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE PER TRASFERIMENTO BANCOMAT PAY DA MARLIO MOLINA MANRIQUE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 17,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "PVH Italia srl SETTIMO TORIN",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 28/05/2022 CARTA *1000 DI EUR 56,50 PVH Italia srl SETTIMO TORIN",
+      "debit": 56.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "Outlet Torino Village Turin",
+      "paymentPurpose": "PAGAMENTO Contactless del 28/05/2022 CARTA *1000 DI EUR 36,00 Outlet Torino Village Turin",
+      "debit": 36,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "Outlet Torino Village Turin",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 28/05/2022 CARTA *1000 DI EUR 36,00 Outlet Torino Village Turin",
+      "debit": 36,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "PVH Italia srl SETTIMO TORIN",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 28/05/2022 CARTA *1000 DI EUR 50,30 PVH Italia srl SETTIMO TORIN",
+      "debit": 50.3,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "MAIOR SERVICE TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 28/05/2022 CARTA *1000 DI EUR 14,00 MAIOR SERVICE TORINO",
+      "debit": 14,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "MAIOR SERVICE TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 28/05/2022 CARTA *1000 DI EUR 7,00 MAIOR SERVICE TORINO",
+      "debit": 7,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "MEDIAWORLD TORINO SMAR TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 27/05/2022 CARTA *1000 DI EUR 19,99 MEDIAWORLD TORINO SMAR TORINO",
+      "debit": 19.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "Revolut**2700* Dublin",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 28/05/2022 CARTA *1000 DI EUR 10,00 Revolut**2700* Dublin",
+      "debit": 10,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "Dott package purchase Amsterdam",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 28/05/2022 CARTA *1000 DI EUR 2,99 Dott package purchase Amsterdam",
+      "debit": 2.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "GUTTERIDGE G054 TORINO",
+      "paymentPurpose": "PAGAMENTO Contactless del 27/05/2022 CARTA *1000 DI EUR 59,00 GUTTERIDGE G054 TORINO",
+      "debit": 59,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-30T00:00:00",
+      "counterpartyName": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 30.05.2022 ALLE 10.50.06 DA: J.M. Puerto Cortes PER: 498498 TRN: 1091221503995441COMM: COMM SERV:",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 30.05.2022 ALLE 10.50.06 DA: J.M. Puerto Cortes PER: 498498 TRN: 1091221503995441COMM: COMM SERV:",
+      "credit": 0.01,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-05-31T00:00:00",
+      "counterpartyName": "COVER HOUSE TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 29/05/2022 CARTA *1000 DI EUR 9,90 COVER HOUSE TORINO",
+      "debit": 9.9,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-31T00:00:00",
+      "counterpartyName": "PAGAMENTO APPLE PAY NFC del 28/05/2022 CARTA *1000 DI EUR 44,91LIU JO UOMO SETTIMO TORIN",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 28/05/2022 CARTA *1000 DI EUR 44,91LIU JO UOMO SETTIMO TORIN",
+      "debit": 44.91,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-31T00:00:00",
+      "counterpartyName": "PAM LOCAL 3 TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 29/05/2022 CARTA *1000 DI EUR 8,20 PAM LOCAL 3 TORINO",
+      "debit": 8.2,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-31T00:00:00",
+      "counterpartyName": "TRUSSARDI SETTIMO TORIN",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 28/05/2022 CARTA *1000 DI EUR 28,00 TRUSSARDI SETTIMO TORIN",
+      "debit": 28,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-31T00:00:00",
+      "counterpartyName": "CAFFE E BOLLICINE SETTIMO TORIN",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 28/05/2022 CARTA *1000 DI EUR 6,20 CAFFE E BOLLICINE SETTIMO TORIN",
+      "debit": 6.2,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-05-31T00:00:00",
+      "counterpartyName": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 31.05.2022 ALLE 09.15.12 DA: Member Sampleros Samp Sample PER: Services TRN: 1091221514122281COMM: COMM SERV:",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 31.05.2022 ALLE 09.15.12 DA: Member Sampleros Samp Sample PER: Services TRN: 1091221514122281COMM: COMM SERV:",
+      "credit": 50,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-05-31T00:00:00",
+      "counterpartyName": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 31.05.2022 ALLE 09.16.19 DA: Member Sampleros Samp Sample PER: Services TRN: 1091221514122558 COMM: COMM SERV:",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 31.05.2022 ALLE 09.16.19 DA: Member Sampleros Samp Sample PER: Services TRN: 1091221514122558 COMM: COMM SERV:",
+      "credit": 572,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-01T00:00:00",
+      "counterpartyName": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 01.06.2022 ALLE 06.49.06 DA: Member Sampleros Samp Sample PER: Services TRN: 1091221524283700 COMM: COMM SERV:",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 01.06.2022 ALLE 06.49.06 DA: Member Sampleros Samp Sample PER: Services TRN: 1091221524283700 COMM: COMM SERV:",
+      "credit": 492,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "paymentPurpose": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "debit": 80,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 0926 CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "paymentPurpose": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 0926 CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "debit": 80,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "paymentPurpose": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "debit": 80,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 0926 CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "paymentPurpose": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 0926 CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "debit": 80,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "paymentPurpose": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "debit": 80,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "paymentPurpose": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "debit": 80,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 0926 CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "paymentPurpose": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 0926 CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "debit": 80,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "paymentPurpose": "PRELIEVO VISA DEL 02/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "debit": 20,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "FARMACIA BORGO CROCETTA TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 31/05/2022 CARTA *1000 DI EUR 9,55 FARMACIA BORGO CROCETTA TORINO",
+      "debit": 9.55,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "PAYPALEUROP 02086100150",
+      "paymentPurpose": "PAGAMENTO E-Commerce del 01/06/2022 CARTA *1000 DI EUR 490,12 PAYPALEUROP 02086100150",
+      "debit": 490.12,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "CRF MARKET 0613 TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 01/06/2022 CARTA *1000 DI EUR 7,65 CRF MARKET 0613 TORINO",
+      "debit": 7.65,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "CAMST MIXTO POLI.TORINO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 01/06/2022 CARTA *1000 DI EUR 1,00 CAMST MIXTO POLI.TORINO TORINO",
+      "debit": 1,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-03T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 3.75,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-06T00:00:00",
+      "counterpartyName": "VERSAMENTO SU SPORTELLO AUTOMATICO ATM NUM. 04051CARTA 63900633 VERSAMENTO DEL 04.06.2022 ALLE 19:48",
+      "paymentPurpose": "VERSAMENTO SU SPORTELLO AUTOMATICO ATM NUM. 04051CARTA 63900633 VERSAMENTO DEL 04.06.2022 ALLE 19:48",
+      "credit": 540,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2022-06-06T00:00:00",
+      "counterpartyName": "SUPERMERCATO CARREFOUR TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 02/06/2022 CARTA *1000 DI EUR 5,44 SUPERMERCATO CARREFOUR TORINO",
+      "debit": 5.44,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-06T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL ITUNES.COM",
+      "paymentPurpose": "PAGAMENTO del 04/06/2022 CARTA *1000 DI EUR 4,99 APPLE.COM/BILL ITUNES.COM",
+      "debit": 4.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-06T00:00:00",
+      "counterpartyName": "PAM LOCAL TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 03/06/2022 CARTA *1000 DI EUR 3,95 PAM LOCAL TORINO",
+      "debit": 3.95,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-06T00:00:00",
+      "counterpartyName": "Dott package purchase Amsterdam",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 04/06/2022 CARTA *1000 DI EUR 2,99 Dott package purchase Amsterdam",
+      "debit": 2.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-06T00:00:00",
+      "counterpartyName": "KARATUT TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 02/06/2022 CARTA *1000 DI EUR 7,50 KARATUT TORINO",
+      "debit": 7.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-06T00:00:00",
+      "counterpartyName": "CUCCO ANNA PER: Affitto Stanza 5 - 15 Giugno",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: CUCCO ANNA PER: Affitto Stanza 5 - 15 Giugno COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 370,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-06-07T00:00:00",
+      "counterpartyName": "Dott package purchase Amsterdam",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 05/06/2022 CARTA *1000 DI EUR 2,99 Dott package purchase Amsterdam",
+      "debit": 2.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-07T00:00:00",
+      "counterpartyName": "BlaBlaCar-Bus Paris",
+      "paymentPurpose": "PAGAMENTO E-Commerce del 05/06/2022 CARTA *1000 DI EUR 4,99 BlaBlaCar-Bus Paris",
+      "debit": 4.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-07T00:00:00",
+      "counterpartyName": "BlaBlaCar-Bus Paris",
+      "paymentPurpose": "PAGAMENTO E-Commerce del 05/06/2022 CARTA *1000 DI EUR 4,99 BlaBlaCar-Bus Paris",
+      "debit": 4.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-07T00:00:00",
+      "counterpartyName": "OMIO *OMIO BERLIN",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 05/06/2022 CARTA *1000 DI EUR 10,00 OMIO *OMIO BERLIN",
+      "debit": 10,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-07T00:00:00",
+      "counterpartyName": "eDreams BARCELONA",
+      "paymentPurpose": "PAGAMENTO del 05/06/2022 CARTA *1000 DI EUR 29,48 eDreams BARCELONA",
+      "debit": 29.48,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-07T00:00:00",
+      "counterpartyName": "OMIO *OMIO OMIO.COM",
+      "paymentPurpose": "PAGAMENTO E-Commerce del 05/06/2022 CARTA *1000 DI EUR 10,00 OMIO *OMIO OMIO.COM",
+      "debit": 10,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-07T00:00:00",
+      "counterpartyName": "eDreams BARCELONA",
+      "paymentPurpose": "PAGAMENTO del 05/06/2022 CARTA *1000 DI EUR 29,48 eDreams BARCELONA",
+      "debit": 29.48,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-07T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 44.48,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-08T00:00:00",
+      "counterpartyName": "ADDEBITO SEPA DD PER FATTURA A VOSTRO CARICO Incasso IT031–0042-0002810 SDD da IT410010000007104110965 RSG GROUP ITALIA S.R.L. mandato nr. MLREFIT03102503 Per Abbonamento Palestra McFIT IT031–0042-0002810 IT031-89252152",
+      "paymentPurpose": "ADDEBITO SEPA DD PER FATTURA A VOSTRO CARICO Incasso IT031–0042-0002810 SDD da IT410010000007104110965 RSG GROUP ITALIA S.R.L. mandato nr. MLREFIT03102503 Per Abbonamento Palestra McFIT IT031–0042-0002810 IT031-89252152",
+      "debit": 19.9,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2022-06-08T00:00:00",
+      "counterpartyName": "Revolut**2606* Dublin",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 04/06/2022 CARTA *1000 DI EUR 10,00 Revolut**2606* Dublin",
+      "debit": 10,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-08T00:00:00",
+      "counterpartyName": "Dott package purchase Amsterdam",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 06/06/2022 CARTA *1000 DI EUR 2,99 Dott package purchase Amsterdam",
+      "debit": 2.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-08T00:00:00",
+      "counterpartyName": "SAMPLE SAMPLER MEMBER",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: SAMPLE SAMPLER MEMBER COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 4.5,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-06-09T00:00:00",
+      "counterpartyName": "Julian Mateo Puerto Cortes PER: Inviato da Revolut",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: Julian Mateo Puerto Cortes PER: Inviato da Revolut COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 17.35,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-10T00:00:00",
+      "counterpartyName": "PAGAMENTO APPLE PAY E-Commerce del 08/06/2022 CARTA *1000 DI EUR 33,81WWW.TICKETMASTER.IT MILANO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 08/06/2022 CARTA *1000 DI EUR 33,81WWW.TICKETMASTER.IT MILANO",
+      "debit": 33.81,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-10T00:00:00",
+      "counterpartyName": "Wise Bruxelles",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 08/06/2022 CARTA *1000 DI EUR 7,00 Wise Bruxelles",
+      "debit": 7,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-10T00:00:00",
+      "counterpartyName": "PAGAMENTO Contactless del 08/06/2022 CARTA *1000 DI EUR 34,91CRF MARKET 0613 TORINO",
+      "paymentPurpose": "PAGAMENTO Contactless del 08/06/2022 CARTA *1000 DI EUR 34,91CRF MARKET 0613 TORINO",
+      "debit": 34.91,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-13T00:00:00",
+      "counterpartyName": "Dott package purchase Amsterdam",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 11/06/2022 CARTA *1000 DI EUR 2,99 Dott package purchase Amsterdam",
+      "debit": 2.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-13T00:00:00",
+      "counterpartyName": "EDISU PIEMONTE CAMPUS LI TORINO",
+      "paymentPurpose": "PAGAMENTO del 11/06/2022 CARTA *1000 DI EUR 20,00 EDISU PIEMONTE CAMPUS LI TORINO",
+      "debit": 20,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-13T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 2.55,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-13T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 3.6,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-15T00:00:00",
+      "counterpartyName": "Julian Mateo Puerto Cortes PER: Inviato da Revolut",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: Julian Mateo Puerto Cortes PER: Inviato da Revolut COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 13,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-20T00:00:00",
+      "counterpartyName": "EDISU-RISTORANTE UNIVERSI TORINO",
+      "paymentPurpose": "PAGAMENTO del 18/06/2022 CARTA *1000 DI EUR 5,00 EDISU-RISTORANTE UNIVERSI TORINO",
+      "debit": 5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-20T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 4.9,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-21T00:00:00",
+      "counterpartyName": "ILIAD Italia PARIS",
+      "paymentPurpose": "PAGAMENTO E-Commerce del 15/06/2022 CARTA *1000 DI EUR 9,99 ILIAD Italia PARIS",
+      "debit": 9.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-21T00:00:00",
+      "counterpartyName": "CAMST MIXTO POLI.TORINO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 16/06/2022 CARTA *1000 DI EUR 3,40 CAMST MIXTO POLI.TORINO TORINO",
+      "debit": 3.4,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-21T00:00:00",
+      "counterpartyName": "LA ROMANA DAL 1947 SRL TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 14/06/2022 CARTA *1000 DI EUR 13,00 LA ROMANA DAL 1947 SRL TORINO",
+      "debit": 13,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-21T00:00:00",
+      "counterpartyName": "PAM LOCAL TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 11/06/2022 CARTA *1000 DI EUR 7,25 PAM LOCAL TORINO",
+      "debit": 7.25,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-21T00:00:00",
+      "counterpartyName": "Dott package purchase Amsterdam",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 18/06/2022 CARTA *1000 DI EUR 2,99 Dott package purchase Amsterdam",
+      "debit": 2.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-21T00:00:00",
+      "counterpartyName": "TAP & GO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 17/06/2022 CARTA *1000 DI EUR 3,40 TAP & GO TORINO",
+      "debit": 3.4,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-21T00:00:00",
+      "counterpartyName": "EUROSPIN SPESA INTELLIGE TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 19/06/2022 CARTA *1000 DI EUR 5,48 EUROSPIN SPESA INTELLIGE TORINO",
+      "debit": 5.48,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-21T00:00:00",
+      "counterpartyName": "Julian Mateo Puerto Cortes PER: Inviato da Revolut",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: Julian Mateo Puerto Cortes PER: Inviato da Revolut COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 1150,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-21T00:00:00",
+      "counterpartyName": "Julian Mateo Puerto Cortes PER: Sent from Revolut",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: Julian Mateo Puerto Cortes PER: Sent from Revolut COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 87.7,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-21T00:00:00",
+      "counterpartyName": "PayPal (Europe) S.a r.l. et Cie, S. C.A. PER: YYW1020778559847 PAYPAL",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: PayPal (Europe) S.a r.l. et Cie, S. C.A. PER: YYW1020778559847 PAYPAL COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 1050,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-22T00:00:00",
+      "counterpartyName": "ALA SRL TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 19/06/2022 CARTA *1000 DI EUR 3,00 ALA SRL TORINO",
+      "debit": 3,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-23T00:00:00",
+      "counterpartyName": "BAR DENISE POLITECNICO TO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 20/06/2022 CARTA *1000 DI EUR 1,50 BAR DENISE POLITECNICO TO TORINO",
+      "debit": 1.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-23T00:00:00",
+      "counterpartyName": "CAMST MIXTO POLI.TORINO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 21/06/2022 CARTA *1000 DI EUR 2,80 CAMST MIXTO POLI.TORINO TORINO",
+      "debit": 2.8,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-24T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL ITUNES.COM",
+      "paymentPurpose": "PAGAMENTO del 22/06/2022 CARTA *1000 DI EUR 0,99 APPLE.COM/BILL ITUNES.COM",
+      "debit": 0.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-24T00:00:00",
+      "counterpartyName": "CAMST MIXTO POLI.TORINO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 22/06/2022 CARTA *1000 DI EUR 2,60 CAMST MIXTO POLI.TORINO TORINO",
+      "debit": 2.6,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-24T00:00:00",
+      "counterpartyName": "PARASHOP TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 22/06/2022 CARTA *1000 DI EUR 18,32 PARASHOP TORINO",
+      "debit": 18.32,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-24T00:00:00",
+      "counterpartyName": "FARMACIA DEL MONUMENTO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 22/06/2022 CARTA *1000 DI EUR 19,80 FARMACIA DEL MONUMENTO TORINO",
+      "debit": 19.8,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 25.06.2022 ALLE 18.13.52 DA: Julian Mateo Puerto Cortes PER: Has surprise TRN: 1091221767176827 COMM: COMM SERV:",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO ISTANTANEO DEL 25.06.2022 ALLE 18.13.52 DA: Julian Mateo Puerto Cortes PER: Has surprise TRN: 1091221767176827 COMM: COMM SERV:",
+      "credit": 125,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "LA ROMANA DAL 1947 SRL TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 23/06/2022 CARTA *1000 DI EUR 4,50 LA ROMANA DAL 1947 SRL TORINO",
+      "debit": 4.5,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "PAGAMENTO APPLE PAY NFC del 22/06/2022 CARTA *1000 DI EUR 38,51FARMACIA COMUNALE N. 42 TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 22/06/2022 CARTA *1000 DI EUR 38,51FARMACIA COMUNALE N. 42 TORINO",
+      "debit": 38.51,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "CENTRO MUNDIAL DE AVIV WWW.AVIVAMIEN",
+      "paymentPurpose": "PAGAMENTO E-Commerce del 24/06/2022 CARTA *1000 DI USD 12,00 CENTRO MUNDIAL DE AVIV WWW.AVIVAMIEN",
+      "debit": 11.45,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "CENTRO MUNDIAL DE AVIV WWW.AVIVAMIEN COMMISSIONE PER OPERAZIONE IN VALUTA EXTRA EURO",
+      "paymentPurpose": "COMMISSIONI - PROVVIGIONI - SPESE PAGAMENTO E-Commerce del 24/06/2022 CARTA *1000 DI USD 12,00 CENTRO MUNDIAL DE AVIV WWW.AVIVAMIEN COMMISSIONE PER OPERAZIONE IN VALUTA EXTRA EURO",
+      "debit": 0.2,
+      "currency": "EUR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "PAM LOCAL TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 24/06/2022 CARTA *1000 DI EUR 13,94 PAM LOCAL TORINO",
+      "debit": 13.94,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "LA ROMANA DAL 1947 SRL TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 24/06/2022 CARTA *1000 DI EUR 3,00 LA ROMANA DAL 1947 SRL TORINO",
+      "debit": 3,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "Dott package purchase Amsterdam",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 25/06/2022 CARTA *1000 DI EUR 2,99 Dott package purchase Amsterdam",
+      "debit": 2.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "Hotel at Booking.com Amsterdam",
+      "paymentPurpose": "PAGAMENTO E-Commerce del 25/06/2022 CARTA *1000 DI EUR 251,40 Hotel at Booking.com Amsterdam",
+      "debit": 251.4,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "Claire's Torino",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 25/06/2022 CARTA *1000 DI EUR 19,99 Claire's Torino",
+      "debit": 19.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "Claire's Torino",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 25/06/2022 CARTA *1000 DI EUR 4,99 Claire's Torino",
+      "debit": 4.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "DIANA FIORI TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 25/06/2022 CARTA *1000 DI EUR 30,00 DIANA FIORI TORINO",
+      "debit": 30,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 62.85,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 11.73,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER SAMPLE",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: SAMPLER MEMBER SAMPLE COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 1,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "SAMPLE SAMPLER MEMBER",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: SAMPLE SAMPLER MEMBER COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 1,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "SAMPLE SAMPLER MEMBER",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: SAMPLE SAMPLER MEMBER COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 10.73,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER MEMBR SAMPLEZ",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: SAMPLER MEMBER MEMBR SAMPLEZ COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 22.75,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "SAMPLER MEMBER MEMBR SAMPLEZ",
+      "paymentPurpose": "DISPOSIZIONE DI BONIFICO BONIFICO SEPA A: SAMPLER MEMBER MEMBR SAMPLEZ COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "debit": 18.8,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-06-27T00:00:00",
+      "counterpartyName": "Sampler Member Membr Samplez PER: Sent from Revolut",
+      "paymentPurpose": "BONIFICO A VOSTRO FAVORE BONIFICO SEPA DA: Sampler Member Membr Samplez PER: Sent from Revolut COMM: 0,00 SPESE: 0,00 COMM SERV: 0,00",
+      "credit": 62.85,
+      "currency": "EUR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-06-28T00:00:00",
+      "counterpartyName": "Dott package purchase Amsterdam",
+      "paymentPurpose": "PAGAMENTO APPLE PAY E-Commerce del 26/06/2022 CARTA *1000 DI EUR 2,99 Dott package purchase Amsterdam",
+      "debit": 2.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-28T00:00:00",
+      "counterpartyName": "PASTICCERIA TAMBORINI TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 25/06/2022 CARTA *1000 DI EUR 29,00 PASTICCERIA TAMBORINI TORINO",
+      "debit": 29,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-28T00:00:00",
+      "counterpartyName": "PARADISO DELLE SORPRESE TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 25/06/2022 CARTA *1000 DI EUR 6,99 PARADISO DELLE SORPRESE TORINO",
+      "debit": 6.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-28T00:00:00",
+      "counterpartyName": "PARADISO DELLE SORPRESE TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 25/06/2022 CARTA *1000 DI EUR 6,99 PARADISO DELLE SORPRESE TORINO",
+      "debit": 6.99,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-28T00:00:00",
+      "counterpartyName": "PAMPLING TORINO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 25/06/2022 CARTA *1000 DI EUR 7,00 PAMPLING TORINO TORINO",
+      "debit": 7,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-29T00:00:00",
+      "counterpartyName": "CRF MARKET 0613 TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 27/06/2022 CARTA *1000 DI EUR 11,94 CRF MARKET 0613 TORINO",
+      "debit": 11.94,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-30T00:00:00",
+      "counterpartyName": "CAMST MIXTO POLI.TORINO TORINO",
+      "paymentPurpose": "PAGAMENTO APPLE PAY NFC del 28/06/2022 CARTA *1000 DI EUR 2,60 CAMST MIXTO POLI.TORINO TORINO",
+      "debit": 2.6,
+      "currency": "EUR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-06-30T00:00:00",
+      "counterpartyName": "PRELIEVO VISA DEL 30/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "paymentPurpose": "PRELIEVO VISA DEL 30/06/22 CARTA *1000 UNICREDIT A TM 4051CAB 01006 TORINO (TO) - CORSO VINZAGLIO, 2 7 D",
+      "debit": 20,
+      "currency": "EUR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-06-30T00:00:00",
+      "counterpartyName": "COMPETENZE (INTERESSI/ONERI)",
+      "paymentPurpose": "COMPETENZE (INTERESSI/ONERI)",
+      "credit": 0,
+      "currency": "EUR",
+      "paymentType": "interest"
+    }
+  ]
+}
