@@ -50,4 +50,5 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.FIRST_CITIZENS]: 'First Citizens',
   [BankName.FIRST_DIRECT]: 'first direct',
   [BankName.FNB]: 'FNB',
+  [BankName.FOUND]: 'Found',
 };

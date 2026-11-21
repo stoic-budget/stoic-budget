@@ -42,6 +42,7 @@ import { FifthThirdParser } from '../parsers/fifth-third.parser';
 import { FirstCitizensParser } from '../parsers/first-citizens.parser';
 import { FirstDirectParser } from '../parsers/first-direct.parser';
 import { FnbParser } from '../parsers/fnb.parser';
+import { FoundParser } from '../parsers/found.parser';
 import { HapoalimParser } from '../parsers/hapoalim.parser';
 import { KaspiParser } from '../parsers/kaspi.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
@@ -96,4 +97,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [FirstCitizensParser, { bankName: BankName.FIRST_CITIZENS }],
   [FirstDirectParser, { bankName: BankName.FIRST_DIRECT }],
   [FnbParser, { bankName: BankName.FNB }],
+  [FoundParser, { bankName: BankName.FOUND }],
 ];
