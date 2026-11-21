@@ -42,7 +42,7 @@ import { InvestmentsService } from '../investments/investments.service';
 import { computedCurrencyCodes, computedValue, loadComputedLines } from './computed-lines';
 import type { NetWorthRange } from './dto/net-worth-query.dto';
 import { buildAttribution, buildSavings } from './net-worth-attribution';
-import { buildBreakdown, buildGroups } from './net-worth-groups';
+import { buildBreakdown, buildGroups, findLeaves } from './net-worth-groups';
 import { round2, round4, toNumber } from './net-worth-math';
 
 export type {
@@ -135,11 +135,12 @@ export class NetWorthService {
       to,
     );
 
-    const [accounts, snapshots, computedByCode, currency] = await Promise.all([
+    const [accounts, snapshots, computedByCode, currency, leftOut] = await Promise.all([
       this.balanceAccountRepository.find({ where: { workspaceId } }),
       this.loadSnapshots(workspaceId, to),
       loadComputedLines(this.balanceService, workspaceId, dates),
       this.resolveCurrency(workspaceId),
+      this.balanceService.walletsLeftOutOfNetWorth(workspaceId),
     ]);
 
     // A line left out is left out of everything — the curve, the totals, the
@@ -243,6 +244,7 @@ export class NetWorthService {
       from: windowFrom,
       to,
       kept: attribution.byKind.find(row => row.kind === 'money')?.amount ?? 0,
+      leftOut,
     });
 
     // The high is a property of the whole history, not of the window shown.
@@ -300,6 +302,7 @@ export class NetWorthService {
       assetLines,
       missingRates: converter.missing,
       excluded: [...excluded],
+      accountsLeftOut: leftOut.length,
       attribution,
       savings,
       denominated: denominate
@@ -495,13 +498,6 @@ function groupBy(
     }))
     .filter(item => item.amount !== 0)
     .sort((a, b) => b.amount - a.amount);
-}
-
-function findLeaves(accounts: BalanceAccount[]): BalanceAccount[] {
-  const parentIds = new Set(
-    accounts.map(account => account.parentId).filter((id): id is string => Boolean(id)),
-  );
-  return accounts.filter(account => !parentIds.has(account.id));
 }
 
 /** The peak of a series, or null when it never rose above zero. */

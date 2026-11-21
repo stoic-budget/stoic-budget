@@ -93,6 +93,7 @@ export function FiltersDrawer({
 
   return (
     <DrawerShell
+      demoNotice={false}
       isOpen={open}
       onClose={onClose}
       position="right"
@@ -240,7 +241,7 @@ export function FiltersDrawer({
               display: 'flex',
               flexDirection: 'column',
               gap: 1.5,
-              bgcolor: 'background.paper',
+              bgcolor: 'var(--background)',
             }}
           >
             <MuiButton variant="outlined" sx={{ width: '100%' }} size="large" disabled>
@@ -249,7 +250,7 @@ export function FiltersDrawer({
             {viewResultsButton}
           </Box>
         ) : (
-          <Box sx={{ position: 'sticky', bottom: 0, pt: 2, pb: 1, bgcolor: 'background.paper' }}>
+          <Box sx={{ position: 'sticky', bottom: 0, pt: 2, pb: 1, bgcolor: 'var(--background)' }}>
             {viewResultsButton}
           </Box>
         )}

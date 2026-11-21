@@ -245,6 +245,29 @@ describe('Spend flow (e2e)', () => {
     expect(expense.body.total).toBe(150);
   });
 
+  it('leaves money moved between own accounts out, by category and by tag', async () => {
+    const before = (await flow(owner).expect(200)).body.total;
+    await bookExpense('777', 'Own savings', '2026-02-20');
+    const [{ id }] = await dataSource.query(
+      'SELECT id FROM transactions WHERE statement_id = $1',
+      [statementIds[statementIds.length - 1]],
+    );
+    await dataSource.query(
+      'UPDATE transactions SET transfer_pair_id = gen_random_uuid() WHERE id = $1',
+      [id],
+    );
+    const moved = (
+      await as(owner, request(server()).post('/tags')).send({ name: 'Moved' }).expect(201)
+    ).body.id;
+    await as(owner, request(server()).put(`/transactions/${id}/tags`))
+      .send({ tagIds: [moved] })
+      .expect(200);
+
+    expect((await flow(owner).expect(200)).body.total).toBe(before);
+    const byTag = await flow(owner, '?groupBy=tag').expect(200);
+    expect(byTag.body.nodes.some((node: FlowNode) => node.id === `tag:${moved}`)).toBe(false);
+  });
+
   it('rejects invalid query values', async () => {
     await flow(owner, '?type=transfer').expect(400);
     await flow(owner, '?groupBy=weekday').expect(400);

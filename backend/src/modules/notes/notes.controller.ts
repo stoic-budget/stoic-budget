@@ -1,4 +1,5 @@
 import { Controller, Delete, Get, Patch, Post } from '@nestjs/common';
+import { AllowInVersion } from '../../common/decorators/allow-in-version.decorator';
 import { WorkspaceId, WorkspaceMemberId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
@@ -67,6 +68,8 @@ export class NotesController {
     );
   }
 
+  // Only reads: answered in a past version and on a demo.
+  @AllowInVersion()
   @Post('counts')
   @WorkspaceAuth(Permission.STATEMENT_VIEW)
   @SchemaResponse(NoteCounts)

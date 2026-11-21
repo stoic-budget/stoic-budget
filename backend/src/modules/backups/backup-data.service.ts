@@ -5,6 +5,10 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { type DataSource, type EntityMetadata, In } from 'typeorm';
 import { FileStorageService } from '../../common/services/file-storage.service';
 import type { Statement } from '../../entities';
+import {
+  collectTransactionAttachmentFiles,
+  shareIdenticalAttachmentFiles,
+} from './backup-attachment-files';
 
 export const EXCLUDED_TABLES = new Set([
   'api_keys',
@@ -35,6 +39,8 @@ export const EXCLUDED_TABLES = new Set([
   'workspace_versions',
   // Useless without the token this backup strips: recreated, not restored.
   'custom_table_shares',
+  // A member's feed link (its hash): per member, and the restored copy has its own members.
+  'calendar_feeds',
 ]);
 
 export const SENSITIVE_PROPERTIES = new Set([
@@ -119,8 +125,12 @@ export class BackupDataService {
       if (metadata.tableName === 'receipts') {
         await this.collectReceiptAttachments(records, files);
       }
+      if (metadata.tableName === 'transaction_attachments') {
+        collections[metadata.tableName] = await collectTransactionAttachmentFiles(records, files);
+      }
     }
     await this.collectRelatedCollections(collections);
+    shareIdenticalAttachmentFiles(collections, files);
     return { collections, files };
   }
 

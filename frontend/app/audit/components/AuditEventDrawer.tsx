@@ -188,7 +188,14 @@ export function AuditEventDrawer({
     return null;
   }
   return (
-    <DrawerShell isOpen={open} onClose={onClose} title={t.title.value} position="right" width="lg">
+    <DrawerShell
+      demoNotice={false}
+      isOpen={open}
+      onClose={onClose}
+      title={t.title.value}
+      position="right"
+      width="lg"
+    >
       <Box
         data-testid="audit-event-drawer-scroll"
         sx={{ minHeight: 0, flex: 1, overflowY: 'auto', pr: 0.5 }}
