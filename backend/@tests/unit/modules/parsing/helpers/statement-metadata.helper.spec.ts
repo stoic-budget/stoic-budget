@@ -318,3 +318,11 @@ describe('a plus after the figure', () => {
     expect(parseStatementAmount('£67.39-')).toBe(-67.39);
   });
 });
+
+describe('Dr and Cr in brackets after the figure', () => {
+  it('sign the amount: "300.00 (Dr)", "10000.00 (Cr)"', () => {
+    expect(parseStatementAmount('300.00 (Dr)')).toBe(-300);
+    expect(parseStatementAmount('10000.00 (Cr)')).toBe(10000);
+    expect(isAmountPart('(Dr)')).toBe(true);
+  });
+});

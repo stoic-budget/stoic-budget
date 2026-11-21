@@ -112,7 +112,19 @@ export function readHeaderRow(row: PdfTextRow, taught?: TaughtHeadings): LayoutC
   if (leadingDate(words) || words.some(item => parseStatementAmount(item.text) !== null)) {
     return null;
   }
-  const columns = readHeadingColumns(row, taught);
+  const read = readHeadingColumns(row, taught);
+  // "Tran Date" alone dates the rows: a transaction date is only second beside
+  // a posting date. Not a value date, and not when the text comes first.
+  const others = read.filter(column => column.role === 'otherDate');
+  const tranDate =
+    others.length === 1 && /^(?:trans?|transaction) date$/.test(others[0].heading ?? '');
+  const textFirst = read.some(
+    column => column.role === 'description' && column.x0 < (others[0]?.x0 ?? 0),
+  );
+  const columns =
+    tranDate && !textFirst && !read.some(column => column.role === 'date')
+      ? read.map(column => (column === others[0] ? { ...column, role: 'date' as const } : column))
+      : read;
   const roles = new Set(columns.map(column => column.role));
   const hasMoney = roles.has('debit') || roles.has('credit') || roles.has('amount');
   const hasText = roles.has('date') || roles.has('description');

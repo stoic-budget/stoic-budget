@@ -113,5 +113,6 @@ export enum BankName {
   UCO = 'uco',
   ULSTER = 'ulster',
   UNICREDIT = 'unicredit',
+  UNION_BANK_OF_INDIA = 'union_bank_of_india',
   OTHER = 'other',
 }

@@ -853,3 +853,20 @@ describe('Italian headings', () => {
     expect(columns?.map(column => column.role)).toEqual(['date', 'otherDate', 'description', 'debit', 'credit']);
   });
 });
+
+describe('Tran Date alone', () => {
+  it('dates the rows, Remarks is the text and Tran Id a column of its own', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Tran', 47],
+        ['Id', 70],
+        ['Tran', 130],
+        ['Date', 155],
+        ['Remarks', 270],
+        ['Amount', 393],
+        ['Balance', 485],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['other', 'date', 'description', 'amount', 'balance']);
+  });
+});

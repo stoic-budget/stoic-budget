@@ -64,6 +64,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'verwendungszweck',
     'descriere',
     'descrizione',
+    'remarks',
     'descrierea tranzactiei',
   ],
   counterparty: [
@@ -161,6 +162,8 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
   fee: ['fee', 'fees'],
   other: [
     'no.',
+    'tran id',
+    'transaction id',
     'category',
     'channel',
     'check number',

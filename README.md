@@ -163,7 +163,7 @@ Setting expectations upfront:
 | 🇨🇭 Switzerland | UBS | |
 | 🇮🇹 Italy | UniCredit | |
 | 🇿🇦 South Africa | Absa, Capitec, FNB | |
-| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India | UCO Bank |
+| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India | UCO Bank, Union Bank of India |
 | 🇧🇷 Brazil | Banco do Brasil | |
 | 🇭🇰 Hong Kong | Bank of China (Hong Kong) | |
 | 🇵🇭 Philippines | BPI, GoTyme Bank | |

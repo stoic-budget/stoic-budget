@@ -14,7 +14,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **France:** Crédit Agricole, Société Générale, Sogexia
 - **Germany:** Deutsche Bank, N26
 - **Hong Kong:** Bank of China (Hong Kong)
-- **India:** Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India, UCO Bank
+- **India:** Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India, UCO Bank, Union Bank of India
 - **International:** Payoneer, PayPal, Revolut, Skrill, Standard Chartered
 - **Israel:** Bank Hapoalim / Isracard (Hebrew)
 - **Italy:** UniCredit
