@@ -73,6 +73,8 @@ export const PayeeOverviewRow = Schema.Struct({
   mode: PayeeMode,
   /** What a new row of this payee would be filed as now. */
   category: Schema.NullOr(PayeeRef),
+  /** Its website, for its brand mark: its subscription's, or its name when that is a domain. */
+  vendorDomain: Schema.NullOr(Schema.String),
   count: Schema.Number,
   /** In the workspace currency; rows in a currency with no rate are left out. */
   amount: Schema.Number,
@@ -112,6 +114,8 @@ export const PayeeSummary = Schema.Struct({
     Schema.Struct({ key: Schema.String, example: Schema.NullOr(Schema.String) }),
   ),
   subscriptions: Schema.Array(PayeeRef),
+  /** Its website, for its brand mark: its subscription's, or its name when that is a domain. */
+  vendorDomain: Schema.NullOr(Schema.String),
   /** Rows whose category nobody chose: what applying the pinned category would change. */
   undecidedCount: Schema.Number,
   missingRates: Schema.Array(Schema.String),

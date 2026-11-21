@@ -16,6 +16,10 @@ import { CustomTableRow } from '../../../entities/custom-table-row.entity';
 import { Statement } from '../../../entities/statement.entity';
 import { Transaction } from '../../../entities/transaction.entity';
 import { Workspace } from '../../../entities/workspace.entity';
+import {
+  recordedLinks,
+  restoreDeletedTransaction,
+} from '../../transactions/helpers/transaction-undo-delete';
 import type { RollbackResult } from '../interfaces/audit-event.interface';
 
 type SnapshotRecord = Record<string, unknown>;
@@ -87,7 +91,29 @@ export class RollbackService {
   }
 
   async rollbackTransaction(event: AuditEvent): Promise<RollbackResult> {
-    return this.applyRollback(event, this.transactionRepository);
+    if (event.action !== AuditAction.DELETE) {
+      return this.applyRollback(event, this.transactionRepository);
+    }
+    // A deleted row comes back with what its delete took apart around it:
+    // the pair, the duplicate flags, the split and the statement's totals.
+    const before = this.extractSnapshots(event.diff)?.before;
+    const workspaceId = event.workspaceId ?? (before?.workspaceId as string | undefined);
+    if (!(before && workspaceId)) {
+      return { success: false, message: 'Missing before state for rollback' };
+    }
+    try {
+      await restoreDeletedTransaction(
+        this.transactionRepository.manager,
+        workspaceId,
+        before,
+        recordedLinks(event.meta),
+      );
+      return { success: true, message: 'Delete rolled back' };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Rollback failed: ${message}`);
+      return { success: false, message };
+    }
   }
 
   async rollbackStatement(event: AuditEvent): Promise<RollbackResult> {

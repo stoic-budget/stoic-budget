@@ -38,3 +38,10 @@ export function exactSubset(amounts: number[], target: number): number[] | null 
   }
   return best;
 }
+
+/** SQL: the bank row was not refused ("not this payment") as the payment of the bill. */
+export function notRejectedSql(payableId: string, transactionId: string): string {
+  return `NOT EXISTS (
+    SELECT 1 FROM "payable_match_rejections" rejected
+     WHERE rejected."payable_id" = ${payableId} AND rejected."transaction_id" = ${transactionId})`;
+}

@@ -63,6 +63,7 @@ export function AllTransactionsTable({
   onToggle,
   onToggleAll,
   onSetCategory,
+  onSetExcluded,
   onOpen,
 }: {
   /** The header stays and the rows are placeholders while the page loads. */
@@ -75,10 +76,13 @@ export function AllTransactionsTable({
   onToggle: (id: string) => void;
   onToggleAll: (checked: boolean) => void;
   onSetCategory: (ids: string[], categoryId: string) => void;
+  /** Leaves the rows out of budgets (true) or counts them again (false). */
+  onSetExcluded: (ids: string[], excluded: boolean) => void;
   onOpen: (row: ListedRow) => void;
 }): React.JSX.Element {
   const t = useIntlayer('allTransactionsPage');
   const tTable = useIntlayer('transactionsTable');
+  const tExcluded = useIntlayer('budgetExclusion');
   const payeeName = usePayeeName();
   const { locale } = useLocale();
   const router = useRouter();
@@ -102,6 +106,20 @@ export function AllTransactionsTable({
           >
             {t.setCategory}
             <ChevronDown size={16} aria-hidden />
+          </button>
+          <button
+            type="button"
+            className="seneca-all-tx__menu-button"
+            onClick={() => onSetExcluded([...selected], true)}
+          >
+            {tExcluded.toggle}
+          </button>
+          <button
+            type="button"
+            className="seneca-all-tx__menu-button"
+            onClick={() => onSetExcluded([...selected], false)}
+          >
+            {tExcluded.bulkInclude}
           </button>
         </div>
       ) : null}
@@ -204,7 +222,14 @@ export function AllTransactionsTable({
                       {row.category ? categoryName(row.category.name) : t.uncategorized}
                     </span>
                   </td>
-                  <td data-label={t.budget.value}>{budget ?? ''}</td>
+                  <td data-label={t.budget.value}>
+                    {/* Out of every budget, whatever its category's budget is. */}
+                    {row.excludedFromBudgets ? (
+                      <span className="seneca-all-tx__muted">{tExcluded.badge}</span>
+                    ) : (
+                      (budget ?? '')
+                    )}
+                  </td>
                   <td className="seneca-all-tx__col-actions">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

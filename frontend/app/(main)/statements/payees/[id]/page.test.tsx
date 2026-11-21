@@ -69,6 +69,7 @@ const payee: Payee = {
   lastSeen: '2026-05-10',
 };
 const summary: PayeeSummary = {
+  vendorDomain: null,
   currency: 'EUR',
   months: Array.from({ length: 12 }, (_, index) => ({
     month: `2025-${String(index + 1).padStart(2, '0')}`,
@@ -126,6 +127,21 @@ describe('PayeePage', () => {
     api.delete.mockReset().mockResolvedValue({ data: { updated: 1 } });
     api.patch.mockReset();
     offers.offerAction.mockReset();
+  });
+
+  it("shows the payee's own website mark in its header", async () => {
+    const domain = 'acme-store.example';
+    const answer = api.get.getMockImplementation();
+    api.get.mockImplementation((url: string) =>
+      url.endsWith('/summary')
+        ? Promise.resolve({ data: { ...summary, vendorDomain: domain } })
+        : answer?.(url),
+    );
+    renderWithQuery(<PayeePage />);
+
+    await waitFor(() =>
+      expect(document.querySelector(`img[src*="/vendor-icons/${domain}"]`)).not.toBeNull(),
+    );
   });
 
   it('draws the payee against the others of its category', async () => {

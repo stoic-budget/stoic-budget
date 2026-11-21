@@ -182,13 +182,18 @@ export function useStatementEditForm({
 
   const handleBulkDelete = async (confirmMessage: string): Promise<void> => {
     await bulkDeleteAction(confirmMessage, loadData, {
+      statementId,
+      setStatement: s.setStatement,
       selectedRows: s.selectedRows,
       setTransactions: s.setTransactions,
       setSaving: s.setSaving,
       setSelectedRows: s.setSelectedRows,
       setSuccess: s.setSuccess,
       setError: s.setError,
-      messages: { deleteTransactionsError: messages.deleteTransactionsError },
+      messages: {
+        deleteTransactionsError: messages.deleteTransactionsError,
+        loadDataError: messages.loadDataError,
+      },
     });
   };
 

@@ -14,7 +14,7 @@ import { RuleEditorForm } from './RuleEditorForm';
 import { RuleMatchesTable } from './RuleMatchesTable';
 import { seedFromParams, seedOf } from './rule-seed';
 import { describeConditions, fill } from './rule-text';
-import type { RuleDraftBody, RuleSeed } from './types';
+import { conditionRefs, type RuleDraftBody, type RuleSeed } from './types';
 import { useRuleApply } from './useRuleApply';
 import { useRuleNames } from './useRuleNames';
 import { completeConditions, useRule, useRulePreview, useSaveRule } from './useRules';
@@ -48,11 +48,8 @@ export function RuleEditorView({ id }: { id: string }) {
   const params = useSearchParams();
   const { hasPermission } = usePermissions();
   const canEdit = hasPermission('category.edit');
-  const targets = useRuleNames();
-  const { words, names } = targets;
   const saved = useRule(isNew ? null : id);
   const save = useSaveRule();
-  const applying = useRuleApply(names.wallet);
   const [edited, setEdited] = useState<RuleSeed | null>(null);
 
   // The form holds the user's edits; until the first one it shows the rule as loaded.
@@ -60,6 +57,10 @@ export function RuleEditorView({ id }: { id: string }) {
     ? seedFromParams(new URLSearchParams(params.toString()))
     : saved.data && seedOf(saved.data);
   const draft = edited ?? loaded ?? null;
+  // The payees its conditions ask about, so the default name reads them by name.
+  const targets = useRuleNames(conditionRefs(draft?.conditions ?? [], 'payee'));
+  const { words, names } = targets;
+  const applying = useRuleApply(names.wallet);
   const preview = useRulePreview(
     draft?.conditions ?? [],
     isNew ? null : id,

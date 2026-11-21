@@ -32,6 +32,7 @@ const SECTIONS: Record<SectionSign, string[]> = {
     'other credits',
     'additions',
     'other additions',
+    'deposits credits and interest',
   ],
   debit: [
     'withdrawals',
@@ -43,6 +44,8 @@ const SECTIONS: Record<SectionSign, string[]> = {
     'other withdrawals and debits',
     'other withdrawals',
     'electronic withdrawals',
+    'electronic payments',
+    'other withdraws',
     'card withdrawals',
     'atm and debit card withdrawals',
     'atm & debit card withdrawals',
@@ -50,11 +53,13 @@ const SECTIONS: Record<SectionSign, string[]> = {
     'card purchases',
     'debit card purchases',
     'debit card purchases and debits',
+    'banking and debit card withdrawals and purchases',
     'debits',
     'other debits',
     'deductions',
     'other deductions',
     'other subtractions',
+    'other withdrawals debits and service charges',
     'fees',
     'service fees',
   ],
@@ -70,7 +75,7 @@ const SECTION_BY_HEADING = new Map<string, SectionSign>(
 const HEADING_GAP = 40;
 
 /**
- * A heading as the section tables print it, folded: "&" is "and", a footnote
+ * A heading as the section tables print it, folded: "&" and "/" are "and", a footnote
  * star, "(continued)", "(Cont.)" and the account it names after it ("Account #
  * 123456789") are no part of it. A line that also holds a block
  * further right ("Withdrawals & Debits **" over the page's left half and
@@ -86,19 +91,34 @@ function headingText(row: PdfTextRow): string {
   // A block on the right with a figure in it is a summary line ("Deposits   $2,869.18"), no heading.
   const left =
     end < 0 || items.slice(end).some(item => /\d/.test(item.text)) ? items : items.slice(0, end);
-  return foldText(left.map(item => item.text).join(' '))
-    .replace(/\(?\bcontinued\b\)?|\(cont\.?\)/g, '')
-    .replace(/\s+account\s*(?:#|no\.?|number)\s*[\dx*-]+\s*$/, '')
-    .replace(/&/g, ' and ')
-    .replace(/\*+/g, '')
-    .replace(/[\s:.]+$/, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return (
+    foldText(left.map(item => item.text).join(' '))
+      .replace(/\(?\bcontinued\b\)?|\(cont\.?\)/g, '')
+      .replace(/\s+account\s*(?:#|no\.?|number)\s*[\dx*-]+\s*$/, '')
+      .replace(/&/g, ' and ')
+      // "Deposits/Other Credits": a slash joins a heading's two names; commas list them.
+      .replace(/\s*\/\s*/g, ' and ')
+      .replace(/,/g, '')
+      .replace(/\*+/g, '')
+      .replace(/[\s:.]+$/, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
 }
 
 /** The sign a section heading gives the rows under it; null for any other line. */
+/**
+ * A heading that writes its sign: "Deposit / Credit Activity (+)", "Debit
+ * Card / POS Activity (-)", the account it is for maybe after it. A summary
+ * line puts its figure after the sign ("Credits (+)  9,379.18") and is none.
+ */
+const SIGNED_HEADING =
+  /^[a-z][a-z /&'-]*\((\+|-|−)\)(?:\s*account\s*(?:#|no\.?|number)?:?\s*[\dx*-]+)?$/;
+
 export function readSectionHeading(row: PdfTextRow): SectionSign | null {
-  return SECTION_BY_HEADING.get(headingText(row)) ?? null;
+  const text = headingText(row);
+  const signed = SIGNED_HEADING.exec(text)?.[1];
+  return SECTION_BY_HEADING.get(text) ?? (signed ? (signed === '+' ? 'credit' : 'debit') : null);
 }
 
 /** "Daily Balance": a list of end-of-day balances follows, and the section above is over. */

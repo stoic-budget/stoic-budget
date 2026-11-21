@@ -1,0 +1,270 @@
+{
+  "metadata": {
+    "accountNumber": "1111111111111",
+    "currency": "USD",
+    "dateFrom": "2022-07-06T00:00:00",
+    "dateTo": "2022-08-04T00:00:00",
+    "balanceStart": 860.88
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-07-07T00:00:00",
+      "counterpartyName": "INTERNET PAYMENT TO TIP JAR Earnin 111111111",
+      "paymentPurpose": "INTERNET PAYMENT TO TIP JAR Earnin 111111111",
+      "debit": 10,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-07-07T00:00:00",
+      "counterpartyName": "INTERNET PAYMENT DEBIT Dave, Inc",
+      "paymentPurpose": "INTERNET PAYMENT DEBIT Dave, Inc",
+      "debit": 57.24,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-07-08T00:00:00",
+      "counterpartyName": "11111111111 AutoPayPlus 1111 Membr Samples",
+      "paymentPurpose": "11111111111 AutoPayPlus 1111 Membr Samples",
+      "debit": 339.08,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2022-07-08T00:00:00",
+      "counterpartyName": "OVERDRAFT ITEM FEE($360/ITEM) 360",
+      "paymentPurpose": "OVERDRAFT ITEM FEE($360/ITEM) 360",
+      "debit": 360,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-07-14T00:00:00",
+      "counterpartyName": "INTERNET PAYMENT TO TIP JAR Earnin 111111111",
+      "paymentPurpose": "INTERNET PAYMENT TO TIP JAR Earnin 111111111",
+      "debit": 10,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-07-14T00:00:00",
+      "counterpartyName": "OVERDRAFT ITEMFEE ($360/ITEM) 360",
+      "paymentPurpose": "OVERDRAFT ITEMFEE ($360/ITEM) 360",
+      "debit": 360,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2022-07-15T00:00:00",
+      "counterpartyName": "DEBIT CARD MISC DEBIT CASH ApP*MEMBR 07-18 1111111111",
+      "paymentPurpose": "DEBIT CARD MISC DEBIT CASH ApP*MEMBR 07-18 1111111111",
+      "debit": 558.17,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-07-15T00:00:00",
+      "counterpartyName": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "paymentPurpose": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "debit": 360,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-07-21T00:00:00",
+      "counterpartyName": "TRUIST APP TRANSFER TRANSFER TO MONEY ACCOUNT 48736 11111111111 07-21 -22",
+      "paymentPurpose": "TRUIST APP TRANSFER TRANSFER TO MONEY ACCOUNT 48736 11111111111 07-21 -22",
+      "debit": 500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-07-21T00:00:00",
+      "counterpartyName": "INTERNET PAYMENT TO TIP JAR Earnin 111111111",
+      "paymentPurpose": "INTERNET PAYMENT TO TIP JAR Earnin 111111111",
+      "debit": 1110,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-07-21T00:00:00",
+      "counterpartyName": "TRUIST APP TRANSFER TRANSFER TO MONEY ACCOUNT 48736 11111111111 07 -21 -22",
+      "paymentPurpose": "TRUIST APP TRANSFER TRANSFER TO MONEY ACCOUNT 48736 11111111111 07 -21 -22",
+      "debit": 1998.31,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-07-22T00:00:00",
+      "counterpartyName": "11111111111 Auto PayPlus 1111 Membr Samples",
+      "paymentPurpose": "11111111111 Auto PayPlus 1111 Membr Samples",
+      "debit": 339.08,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2022-07-22T00:00:00",
+      "counterpartyName": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "paymentPurpose": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "debit": 360,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-07-25T00:00:00",
+      "counterpartyName": "DEBIT CARD PURCHASE HOME DEPOT 1111111111 07-25 sAMPLE LAKE, CA 92000",
+      "paymentPurpose": "DEBIT CARD PURCHASE HOME DEPOT 1111111111 07-25 sAMPLE LAKE, CA 92000",
+      "debit": 1705.37,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-07-25T00:00:00",
+      "counterpartyName": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "paymentPurpose": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "debit": 360,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-08-01T00:00:00",
+      "counterpartyName": "DEBIT CARD MISC DEBIT CASH APP*DHL 07-29 1111111111 CA 1111",
+      "paymentPurpose": "DEBIT CARD MISC DEBIT CASH APP*DHL 07-29 1111111111 CA 1111",
+      "debit": 220,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-08-01T00:00:00",
+      "counterpartyName": "DEBIT CARD NON-TRUIST ATM FEE sAMPLE LAKE, CA 92000 1111 PNC BANK",
+      "paymentPurpose": "DEBIT CARD NON-TRUIST ATM FEE sAMPLE LAKE, CA 92000 1111 PNC BANK",
+      "debit": 3,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-08-01T00:00:00",
+      "counterpartyName": "ATM NETWORK CASH WITHDRAWAL 07 -30- 22 LAKE, CA 92000 1111 PNC BANK",
+      "paymentPurpose": "ATM NETWORK CASH WITHDRAWAL 07 -30- 22 LAKE, CA 92000 1111 PNC BANK",
+      "debit": 50,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-08-01T00:00:00",
+      "counterpartyName": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "paymentPurpose": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "debit": 360,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-08-01T00:00:00",
+      "counterpartyName": "DEBIT CARD PURCHASE KATHY'S TIRES 07-30 SAMPLE LAKE, CA 92000 1111",
+      "paymentPurpose": "DEBIT CARD PURCHASE KATHY'S TIRES 07-30 SAMPLE LAKE, CA 92000 1111",
+      "debit": 442.27,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-08-01T00:00:00",
+      "counterpartyName": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "paymentPurpose": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "debit": 36,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-08-01T00:00:00",
+      "counterpartyName": "DEBIT CARD PURCHASE CITI STAR 07-31 SAMPLE LAKE, CA 92000 1111",
+      "paymentPurpose": "DEBIT CARD PURCHASE CITI STAR 07-31 SAMPLE LAKE, CA 92000 1111",
+      "debit": 661.34,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-08-01T00:00:00",
+      "counterpartyName": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "paymentPurpose": "OVERDRAFT ITEM FEE ($360/ITEM) 360",
+      "debit": 36,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-08-04T00:00:00",
+      "counterpartyName": "DEBIT CARD PURCHASE 08-04-22 LOS ANGELES CA 1111 DAVE INC",
+      "paymentPurpose": "DEBIT CARD PURCHASE 08-04-22 LOS ANGELES CA 1111 DAVE INC",
+      "debit": 883.74,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-08-04T00:00:00",
+      "counterpartyName": "TRUISTAPP TRANFER TRANSFER TO MONEYACCOUNT 1111111111111",
+      "paymentPurpose": "TRUISTAPP TRANFER TRANSFER TO MONEYACCOUNT 1111111111111",
+      "debit": 1500.47,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-07-07T00:00:00",
+      "counterpartyName": "PAYROLL ONLY GOOD THINGS, LLC 9170 SamplesMembr Samplers",
+      "paymentPurpose": "PAYROLL ONLY GOOD THINGS, LLC 9170 SamplesMembr Samplers",
+      "credit": 781.02,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-07-14T00:00:00",
+      "counterpartyName": "TIP JAR Earnin 6404 Membr Samples",
+      "paymentPurpose": "TIP JAR Earnin 6404 Membr Samples",
+      "credit": 20,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2022-07-14T00:00:00",
+      "counterpartyName": "PAYROLL ONLY GOOD THINGS, LLC 9170 Samples Membr Samplers",
+      "paymentPurpose": "PAYROLL ONLY GOOD THINGS, LLC 9170 Samples Membr Samplers",
+      "credit": 402.6,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-07-21T00:00:00",
+      "counterpartyName": "PAYROLL ONLY GOOD THINGS, LLC 9170 Samples Membr Samplers",
+      "paymentPurpose": "PAYROLL ONLY GOOD THINGS, LLC 9170 Samples Membr Samplers",
+      "credit": 783.12,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-07-26T00:00:00",
+      "counterpartyName": "DoorDash, DoorDash, Inc. MEMBR SAMPLES CUSTOMER ID",
+      "paymentPurpose": "DoorDash, DoorDash, Inc. MEMBR SAMPLES CUSTOMER ID",
+      "credit": 20.25,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2022-07-28T00:00:00",
+      "counterpartyName": "PAYROLL ONLY GOOD THINGS, LLC 9170 SamplesMembr Samplers",
+      "paymentPurpose": "PAYROLL ONLY GOOD THINGS, LLC 9170 SamplesMembr Samplers",
+      "credit": 750.78,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-08-01T00:00:00",
+      "counterpartyName": "VISA MONEY TRANSFER CREDIT 07-29-22 LOS ANGELES CA 1111 DAVE INC",
+      "paymentPurpose": "VISA MONEY TRANSFER CREDIT 07-29-22 LOS ANGELES CA 1111 DAVE INC",
+      "credit": 9500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-08-04T00:00:00",
+      "counterpartyName": "PAYROLL ONLY GOOD THINGS, LLC 9170 SamplesMembr Samplers",
+      "paymentPurpose": "PAYROLL ONLY GOOD THINGS, LLC 9170 SamplesMembr Samplers",
+      "credit": 527.77,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    }
+  ]
+}
