@@ -385,6 +385,91 @@ describe('RuleEditorView', () => {
     );
   });
 
+  it('adds a group with its own "any of these", and a blank check that sends no value', async () => {
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+    await screen.findByRole('table');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add group' }));
+    const group = screen.getByRole('combobox', { name: 'How this group’s conditions combine' });
+    expect(group.textContent).toContain('Any of these');
+    // The group's first condition: a payee text; then a second one on the comment.
+    fireEvent.change(screen.getAllByLabelText('Value')[1], { target: { value: 'Corner Bakery' } });
+    await userEvent.click(screen.getAllByRole('button', { name: 'Add condition' })[0]);
+    selectOption(screen.getAllByLabelText('Field')[2], 'Comment');
+    selectOption(screen.getAllByLabelText('Check')[2], 'is empty');
+    // Nothing to type for a blank check, and the rule says how such fields are read.
+    expect(screen.getAllByLabelText('Value')).toHaveLength(2);
+    expect(screen.getByText(/read as the rules above this one leave the row/)).toBeTruthy();
+
+    const conditions = [
+      { field: 'counterparty_name', operator: 'contains', value: 'ACME Store' },
+      {
+        matchMode: 'any',
+        conditions: [
+          { field: 'counterparty_name', operator: 'contains', value: 'Corner Bakery' },
+          { field: 'comment', operator: 'is_empty', value: '' },
+        ],
+      },
+    ];
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        '/categorization-rules/test',
+        expect.objectContaining({ conditions, ruleId: 'rule-1' }),
+        expect.anything(),
+      ),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({ conditions }),
+      ),
+    );
+
+    // A group taken away takes its conditions with it.
+    await userEvent.click(screen.getByRole('button', { name: 'Remove group' }));
+    expect(screen.getAllByLabelText('Field')).toHaveLength(1);
+  });
+
+  it('opens a rule on the category and tags by their names, and drops a group left empty', async () => {
+    const tag = { id: '00000000-0000-4000-8000-000000000005', name: 'Gadgets', color: null, usageCount: 1 };
+    get.mockImplementation(async (url: string) => {
+      if (url === '/categorization-rules/rule-1')
+        return apiResponse({
+          ...saved,
+          conditions: [
+            { field: 'category', operator: 'not_equals', value: ELECTRONICS.id },
+            { matchMode: 'all', conditions: [{ field: 'tags', operator: 'equals', value: tag.id }] },
+          ],
+          result: { walletId: CARD.id },
+        });
+      if (url === '/categories') return apiResponse([ELECTRONICS]);
+      if (url === '/wallets') return apiResponse([CARD]);
+      if (url === '/tags') return apiResponse([tag]);
+      if (url.startsWith('/workspaces/')) return apiResponse({ members: [] });
+      throw new Error(`unexpected GET ${url}`);
+    });
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+
+    expect(await screen.findByRole('button', { name: 'Value' })).toBeTruthy();
+    expect(screen.getAllByText('Electronics').length).toBeGreaterThan(0);
+    expect(await screen.findByText('Gadgets')).toBeTruthy();
+    expect(screen.getAllByLabelText('Check')[0].textContent).toContain('is not');
+    expect(screen.getAllByLabelText('Check')[1].textContent).toContain('has any of');
+
+    // The tag taken off leaves the group with nothing to ask: it is not sent.
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Gadgets' }));
+    await waitFor(() =>
+      expect(post).toHaveBeenLastCalledWith(
+        '/categorization-rules/test',
+        expect.objectContaining({
+          conditions: [{ field: 'category', operator: 'not_equals', value: ELECTRONICS.id }],
+        }),
+        expect.anything(),
+      ),
+    );
+  });
+
   it('asks for a condition before it looks anything up', async () => {
     renderWithQuery(<RuleEditorView id="new" />);
 

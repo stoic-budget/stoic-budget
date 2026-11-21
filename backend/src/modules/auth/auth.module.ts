@@ -16,6 +16,7 @@ import {
   WorkspaceMember,
 } from '../../entities';
 import { AuditModule } from '../audit/audit.module';
+import { CalendarFeedRevocationModule } from '../calendar-feed/calendar-feed-revocation.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { AuthController } from './auth.controller';
@@ -45,6 +46,7 @@ import { TwoFactorService } from './two-factor.service';
       PasskeyCredential,
     ]),
     AuditModule,
+    CalendarFeedRevocationModule,
     CategoriesModule,
     MailerModule,
     PassportModule,

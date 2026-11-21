@@ -14,6 +14,7 @@ import {
   StatementProcessingService,
   StatementRejected,
 } from '@/modules/parsing/services/statement-processing.service';
+import { StatementRowHintsService } from '@/modules/parsing/services/statement-row-hints.service';
 
 describe('StatementProcessingService', () => {
   const tempFilePath = path.join(os.tmpdir(), 'sample.pdf');
@@ -194,7 +195,7 @@ describe('StatementProcessingService', () => {
       transactionRepository as any,
       { findOne: vi.fn().mockResolvedValue({ name: 'User' }) } as any,
       parserFactory as any,
-      classificationService as any,
+      new StatementRowHintsService(classificationService as any, {} as any, dataSource as any),
       metadataExtractionService as any,
       importSessionService as any,
       transactionFingerprintService as any,
@@ -378,7 +379,7 @@ describe('StatementProcessingService', () => {
       transactionRepository as any,
       { findOne: vi.fn().mockResolvedValue({ name: 'User' }) } as any,
       parserFactory as any,
-      classificationService as any,
+      new StatementRowHintsService(classificationService as any, {} as any, dataSource as any),
       metadataExtractionService as any,
       importSessionService as any,
       transactionFingerprintService as any,

@@ -31,6 +31,7 @@ import {
 } from '../../entities';
 import { AuditAction, EntityType, Severity } from '../../entities/audit-event.entity';
 import { AuditService } from '../audit/audit.service';
+import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-revocation.service';
 import { CategoriesService } from '../categories/categories.service';
 import type { AuthResponseDto, LoginResultDto } from './dto/auth-response.dto';
 import { recordSecurityEvent } from './security-audit.util';
@@ -91,6 +92,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private readonly auditService: AuditService,
+    private readonly calendarFeeds: CalendarFeedRevocationService,
   ) {}
 
   async ensureDevAdminUser(): Promise<void> {
@@ -472,16 +474,13 @@ export class AuthService {
 
   async logoutAll(userId: string): Promise<{ message: string }> {
     await this.authSessionRepository.update(
-      {
-        userId,
-        revokedAt: IsNull(),
-      },
-      {
-        revokedAt: new Date(),
-      },
+      { userId, revokedAt: IsNull() },
+      { revokedAt: new Date() },
     );
 
     await this.userRepository.increment({ id: userId }, 'tokenVersion', 1);
+    // Calendar links are a way in too: "everywhere" ends them.
+    await this.calendarFeeds.revokeAllOf(userId);
     await this.recordSessionRevocation(userId, { sessions: 'all-revoked' });
     return { message: 'Logged out from all devices successfully' };
   }

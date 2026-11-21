@@ -31,7 +31,6 @@ export function AccountSideDrawer({
       sx={{
         maxWidth: '100%',
         borderLeft: 0,
-        bgcolor: 'background.paper',
         '@media (min-width:600px)': { maxWidth: 512 },
       }}
       title={

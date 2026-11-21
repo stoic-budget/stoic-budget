@@ -2,6 +2,8 @@
 import { renderHookWithQuery } from '@/app/test/query-wrapper';
 import { waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
+import { dayKeyIn } from '../helpers/left-per-day';
 import { useBudgetsPage } from './useBudgetsPage';
 
 const navigation = vi.hoisted(() => ({
@@ -31,6 +33,7 @@ vi.mock('@/app/i18n', () => ({
 describe('useBudgetsPage URL handoffs', () => {
   beforeEach(() => {
     navigation.replace.mockClear();
+    vi.mocked(apiQueryDecoded).mockClear();
   });
 
   // The goal page's empty "plan versus actual" card links here to create the
@@ -55,5 +58,31 @@ describe('useBudgetsPage URL handoffs', () => {
     expect(result.current.formData.categoryId).toBe('cat-3');
     expect(result.current.formData.goalId).toBe('');
     expect(navigation.replace).toHaveBeenCalledWith('/budgets');
+  });
+
+  it("asks for the reader's own today on the current view, where the per-day line shows", async () => {
+    navigation.params = new URLSearchParams();
+
+    const { result } = renderHookWithQuery(() => useBudgetsPage());
+
+    await waitFor(() => expect(apiQueryDecoded).toHaveBeenCalled());
+    // Not left to the server's clock, which is on another day around midnight.
+    expect(vi.mocked(apiQueryDecoded).mock.calls.at(-1)?.[0]).toMatchObject({
+      url: '/budgets',
+      params: { date: dayKeyIn(new Date()) },
+    });
+    expect(result.current.isCurrentPeriod).toBe(true);
+  });
+
+  it('measures a past month on its last day and turns the per-day line off', async () => {
+    navigation.params = new URLSearchParams('month=2025-02');
+
+    const { result } = renderHookWithQuery(() => useBudgetsPage());
+
+    await waitFor(() => expect(apiQueryDecoded).toHaveBeenCalled());
+    expect(vi.mocked(apiQueryDecoded).mock.calls.at(-1)?.[0]).toMatchObject({
+      params: { date: '2025-02-28' },
+    });
+    expect(result.current.isCurrentPeriod).toBe(false);
   });
 });

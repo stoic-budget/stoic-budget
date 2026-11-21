@@ -62,6 +62,7 @@ export function AuditEventModal({
 
   return (
     <ModalShell
+      demoNotice={false}
       isOpen={isOpen}
       onClose={onClose}
       title={t.eventDetails.value}

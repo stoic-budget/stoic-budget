@@ -7,6 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import * as React from 'react';
+import { DemoNotice } from '@/app/components/demo/DemoNotice';
 import { X } from '@/app/components/icons';
 import { Spinner } from '@/app/components/ui/spinner';
 import { useIntlayer } from '@/app/i18n';
@@ -27,6 +28,8 @@ export interface ModalShellProps {
   contentSx?: SxProps<Theme>;
   className?: string;
   contentClassName?: string;
+  /** On a demo server, say above the content that nothing here is saved. Off for dialogs that only show or pick. */
+  demoNotice?: boolean;
 }
 
 export interface ModalFooterProps {
@@ -137,6 +140,7 @@ export function ModalShell({
   contentSx,
   className,
   contentClassName,
+  demoNotice = true,
 }: ModalShellProps): React.JSX.Element {
   const handleClose = makeCloseHandler(onClose, closeOnBackdropClick, closeOnEscape);
   return (
@@ -156,6 +160,7 @@ export function ModalShell({
         <TitleBar title={title} showClose={showCloseButton} onClose={onClose} />
       )}
       <DialogContent className={contentClassName} sx={contentSx}>
+        {demoNotice && <DemoNotice />}
         {children}
       </DialogContent>
       {footer && <FooterBar>{footer}</FooterBar>}

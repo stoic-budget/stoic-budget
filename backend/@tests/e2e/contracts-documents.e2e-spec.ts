@@ -58,6 +58,7 @@ import {
   StatementUploadResult,
   StatementWritten,
 } from '../../src/contracts/statements/statement-writes';
+import { TransactionsDeleted } from '../../src/contracts/transactions/transaction-record';
 import { Receipt, ReceiptSource, ReceiptStatus } from '../../src/entities/receipt.entity';
 import { PEPPOL_DOCTYPES } from '../../src/modules/e-invoices/peppol-ubl-writer';
 import { MailerService } from '../../src/modules/mailer/mailer.service';
@@ -170,6 +171,30 @@ describe('API contracts: documents (e2e)', () => {
         'SELECT id FROM transactions WHERE statement_id = $1',
         [statementId],
       );
+    });
+
+    it('POST /statements/manual-expense refuses an account in another currency', async () => {
+      const account = (currency: string) =>
+        call('post', '/wallets')
+          .send({ name: `Card ${currency}`, type: 'checking', currency })
+          .expect(201)
+          .then(res => res.body.id as string);
+      const [euro, dollar] = [await account('EUR'), await account('USD')];
+      const expense = (walletId: string) =>
+        call('post', '/statements/manual-expense')
+          .field('amount', '7.20')
+          .field('currency', 'USD')
+          .field('merchant', 'Example Cafe - Flat White')
+          .field('categoryId', categoryId)
+          .field('date', '2026-09-04')
+          .field('walletId', walletId);
+      const refused = await expense(euro).expect(400);
+      expect(refused.body.error.code).toBe('EXPENSE_WALLET_CURRENCY_MISMATCH');
+      const [{ count }] = await dataSource.query(
+        "SELECT count(*)::int AS count FROM transactions WHERE counterparty_name = 'Example Cafe - Flat White'",
+      );
+      expect(count).toBe(0);
+      await expense(dollar).expect(201);
     });
 
     it('POST /statements/upload, /statements (legacy) and /statements/upload-receipt', async () => {
@@ -285,6 +310,26 @@ describe('API contracts: documents (e2e)', () => {
         decision: 'keep',
       }).expect(200);
       expect(matches(DuplicateResolved, res)).toEqual({ id: sampleTransactionId, isDuplicate: false });
+    });
+
+    it('POST /transactions/bulk-delete', async () => {
+      const ids: string[] = [];
+      for (const merchant of ['ACME Store - Desk lamp', 'ACME Store - Desk chair']) {
+        const created = await call('post', '/statements/manual-expense')
+          .field('amount', '7.50')
+          .field('currency', 'USD')
+          .field('merchant', merchant)
+          .field('categoryId', categoryId)
+          .field('date', '2026-09-04')
+          .expect(201);
+        const [{ id }] = await dataSource.query(
+          'SELECT id FROM transactions WHERE statement_id = $1',
+          [matches(ManualExpenseCreated, created).id],
+        );
+        ids.push(id);
+      }
+      const res = await send('post', '/transactions/bulk-delete', { ids }).expect(200);
+      expect(matches(TransactionsDeleted, res)).toEqual({ deleted: 2 });
     });
   });
 

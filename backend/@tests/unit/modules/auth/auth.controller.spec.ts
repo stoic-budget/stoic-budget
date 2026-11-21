@@ -97,4 +97,74 @@ describe('AuthController', () => {
     expect(authService.logout).toHaveBeenCalledWith('u1', 's1');
     expect(authService.getSessions).toHaveBeenCalledWith('u1', 's1');
   });
+
+  describe('session origin on a demo, where every visitor is one account', () => {
+    const previous = process.env.DEMO_MODE;
+    afterEach(() => {
+      process.env.DEMO_MODE = previous;
+    });
+
+    const visitorAddress = '203.0.113.7';
+    const visitorAgent = 'Mozilla/5.0 (X11; Linux x86_64) Firefox/131.0';
+    const storedSession = {
+      id: 's1',
+      device: 'Desktop',
+      browser: 'Firefox',
+      os: 'Linux',
+      ipAddress: visitorAddress,
+      createdAt: new Date(0),
+      lastUsedAt: new Date(0),
+      isCurrent: true,
+    };
+    const setup = () => {
+      const authService = {
+        login: vi.fn(async () => ({ user: { id: 'u1' }, access_token: 'a', refresh_token: 'r' })),
+        refreshToken: vi.fn(async () => ({ access_token: 'a2', refresh_token: 'r2' })),
+        getSessions: vi.fn(async () => [storedSession]),
+      };
+      const controller = new AuthController(authService as any, {} as any);
+      const res = { cookie: vi.fn(), clearCookie: vi.fn() };
+      const req = {
+        headers: { 'user-agent': visitorAgent },
+        cookies: { refresh_token: 'r' },
+        user: { currentSessionId: 's1' },
+        ip: visitorAddress,
+      };
+      return { authService, controller, res, req };
+    };
+
+    it('records neither the address nor the browser and shows none back', async () => {
+      process.env.DEMO_MODE = 'true';
+      const { authService, controller, res, req } = setup();
+      await controller.login({ email: 'a@b.com', password: 'x' } as any, req as any, res as any);
+      await controller.refresh(req as any, res as any);
+      const none = { userAgent: null, ipAddress: null };
+      expect(authService.login).toHaveBeenCalledWith(expect.anything(), expect.objectContaining(none));
+      expect(authService.refreshToken).toHaveBeenCalledWith('r', none);
+
+      // A row stored before the instance became a demo is not shown either.
+      await expect(controller.getSessions({ id: 'u1' } as any, req as any)).resolves.toEqual([
+        {
+          ...storedSession,
+          ipAddress: null,
+          device: 'Unknown device',
+          browser: 'Unknown browser',
+          os: 'Unknown OS',
+        },
+      ]);
+    });
+
+    it('keeps both off a demo', async () => {
+      process.env.DEMO_MODE = 'false';
+      const { authService, controller, res, req } = setup();
+      await controller.login({ email: 'a@b.com', password: 'x' } as any, req as any, res as any);
+      expect(authService.login).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+        userAgent: visitorAgent,
+        ipAddress: visitorAddress,
+      }));
+      await expect(controller.getSessions({ id: 'u1' } as any, req as any)).resolves.toEqual([
+        storedSession,
+      ]);
+    });
+  });
 });

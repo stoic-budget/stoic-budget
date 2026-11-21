@@ -3,7 +3,14 @@ import * as Struct from 'effect/Struct';
 import { DateOnly, DecimalString, Timestamp, type Wire } from '../common/wire';
 import { CategoryRef } from '../reference/reference';
 
-export const SubscriptionFrequency = Schema.Literals(['weekly', 'monthly', 'quarterly', 'annual']);
+export const SubscriptionFrequency = Schema.Literals([
+  'weekly',
+  'biweekly',
+  'monthly',
+  'quarterly',
+  'semiannual',
+  'annual',
+]);
 export type SubscriptionFrequency = Wire<typeof SubscriptionFrequency>;
 
 export const SubscriptionStatus = Schema.Literals(['detected', 'active', 'paused', 'cancelled']);
