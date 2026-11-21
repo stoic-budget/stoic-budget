@@ -111,6 +111,7 @@ import { UbsParser } from '../parsers/ubs.parser';
 import { UcoParser } from '../parsers/uco.parser';
 import { UlsterParser } from '../parsers/ulster.parser';
 import { UnicreditParser } from '../parsers/unicredit.parser';
+import { UnionBankOfIndiaParser } from '../parsers/union-bank-of-india.parser';
 
 /**
  * Each bank's own parser, with the bank it claims a file as when the file's
@@ -228,4 +229,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [UcoParser, { bankName: BankName.UCO }],
   [UlsterParser, { bankName: BankName.ULSTER }],
   [UnicreditParser, { bankName: BankName.UNICREDIT }],
+  [UnionBankOfIndiaParser, { bankName: BankName.UNION_BANK_OF_INDIA }],
 ];

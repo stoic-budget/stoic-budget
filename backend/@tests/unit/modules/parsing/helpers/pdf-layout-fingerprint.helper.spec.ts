@@ -186,6 +186,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('IFSC Code UCBA0002025')).toBe(BankName.UCO);
     expect(mentionedBank('Manage your statements online at www.ulsterbank.co.uk')).toBe(BankName.ULSTER);
     expect(mentionedBank('Codice BIC SWIFT: UNCRITM1AG0')).toBe(BankName.UNICREDIT);
+    expect(mentionedBank('IFSC : UBIN0567221')).toBe(BankName.UNION_BANK_OF_INDIA);
     expect(mentionedBank('interac e-transfer to cibc client')).toBeUndefined();
     expect(mentionedBank('transfer from chime savings account')).toBeUndefined();
     expect(mentionedBank('Example Bank, Main Street')).toBeUndefined();
