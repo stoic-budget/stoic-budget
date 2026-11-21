@@ -184,6 +184,32 @@ describe('RulesView', () => {
     ).toBeTruthy();
   });
 
+  it('words a group, and the category, payee, tags and comment by their names', async () => {
+    mockApi([
+      rule({
+        conditions: [
+          { field: 'category', operator: 'equals', value: ELECTRONICS.id },
+          {
+            matchMode: 'any',
+            conditions: [
+              { field: 'tags', operator: 'not_equals', value: GADGETS.id },
+              { field: 'payee', operator: 'equals', value: CAFE.id },
+              { field: 'comment', operator: 'is_empty', value: '' },
+            ],
+          },
+        ],
+        result: { tagIds: [GADGETS.id] },
+      }),
+    ]);
+    renderWithQuery(<RulesView />);
+
+    expect(
+      await screen.findByText(
+        'Category is Electronics and (Tags has none of Gadgets or Assigned payee is Corner Café or Comment is empty)',
+      ),
+    ).toBeTruthy();
+  });
+
   it('says what payee and comment a rule gives its rows', async () => {
     mockApi([rule({ result: { payeeId: CAFE.id, comment: 'Team coffee' } })]);
     renderWithQuery(<RulesView />);
@@ -248,7 +274,13 @@ describe('RulesView', () => {
     );
     expect(post).toHaveBeenCalledWith(
       '/categorization-rules/test',
-      { conditions: moving.conditions, ruleId: 'rule-1', walletId: CARD.id },
+      // With its mode: a rule of "any of these" moves what any of them matches.
+      {
+        conditions: moving.conditions,
+        matchMode: moving.matchMode,
+        ruleId: 'rule-1',
+        walletId: CARD.id,
+      },
       expect.anything(),
     );
     expect(post).not.toHaveBeenCalledWith('/categorization-rules/rule-1/apply');

@@ -21,14 +21,7 @@ interface CompletionStepProps {
 export function CompletionStep({ data, mode }: CompletionStepProps) {
   const text = useOnboardingText(data.locale);
   const settingsText = makeTx(useIntlayer('settingsProfilePage'));
-  const declaration = useIntlayer('taxDeclarationPage');
   const notSet = text(['completion', 'notSet']);
-
-  const taxpayerLabel: Record<NonNullable<OnboardingData['taxpayerType']>, string> = {
-    employee: String(declaration.typeEmployee.value),
-    self_employed: String(declaration.typeSelfEmployed.value),
-    company: String(declaration.typeCompany.value),
-  };
 
   const rows: Array<{ key: string; label: string; value: ReactNode }> = [
     {
@@ -72,15 +65,6 @@ export function CompletionStep({ data, mode }: CompletionStepProps) {
         notSet
       ),
     },
-    ...(data.taxCountry
-      ? [
-          {
-            key: 'taxpayer',
-            label: text(['completion', 'summary', 'taxpayer']),
-            value: data.taxpayerType ? taxpayerLabel[data.taxpayerType] : notSet,
-          },
-        ]
-      : []),
   ];
 
   return (

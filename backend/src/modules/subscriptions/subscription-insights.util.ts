@@ -52,8 +52,12 @@ export function monthlyCost(amount: number, frequency: SubscriptionFrequency): n
   switch (frequency) {
     case 'weekly':
       return amount * 4.33;
+    case 'biweekly':
+      return (amount * 4.33) / 2;
     case 'quarterly':
       return amount / 3;
+    case 'semiannual':
+      return amount / 6;
     case 'annual':
       return amount / 12;
     default:

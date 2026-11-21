@@ -4,6 +4,7 @@ import { renderWithQuery } from '@/app/test/query-wrapper';
 import { type CandidateRow, SubscriptionPayments } from './SubscriptionPayments';
 
 const apiQueryDecoded = vi.hoisted(() => vi.fn());
+const apiPost = vi.hoisted(() => vi.fn());
 const uploadScan = vi.hoisted(() => vi.fn());
 
 vi.mock('@/app/i18n', async importOriginal => ({
@@ -12,6 +13,7 @@ vi.mock('@/app/i18n', async importOriginal => ({
 }));
 vi.mock('@/app/hooks/useWorkspaceId', () => ({ useWorkspaceId: () => 'ws-1' }));
 vi.mock('@/app/lib/query-fn-schema', () => ({ apiQueryDecoded }));
+vi.mock('@/app/lib/api', () => ({ default: { post: apiPost } }));
 vi.mock('@/app/(main)/statements/components/statement-upload', async importOriginal => ({
   ...(await importOriginal<typeof import('@/app/(main)/statements/components/statement-upload')>()),
   uploadReceiptScanFiles: uploadScan,
@@ -187,5 +189,34 @@ describe('SubscriptionPayments', () => {
 
     expect(await screen.findByText('The statement could not be read.')).toBeInTheDocument();
     expect(onAddRows).not.toHaveBeenCalled();
+  });
+
+  it('refuses a row for a saved subscription and asks again without it', async () => {
+    apiQueryDecoded.mockResolvedValueOnce([row(), other]).mockResolvedValue([other]);
+    apiPost.mockResolvedValue({ data: { ok: true } });
+    const { onAddRows } = renderPayments({ subscriptionId: 'sub-1' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'From statements' }));
+    await screen.findByText('Example Grocer');
+    expect(apiQueryDecoded).toHaveBeenCalledWith(
+      expect.objectContaining({ params: expect.objectContaining({ subscriptionId: 'sub-1' }) }),
+    );
+    fireEvent.click(screen.getAllByRole('button', { name: 'Not this payment' })[0]);
+
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith('/subscriptions/sub-1/match-rejections', {
+        transactionId: 'tx-1',
+      }),
+    );
+    await waitFor(() => expect(screen.queryByText('ACME MUSIC*PREMIUM')).toBeNull());
+    expect(onAddRows).not.toHaveBeenCalled();
+  });
+
+  it('offers no refusal before the subscription is saved', async () => {
+    apiQueryDecoded.mockResolvedValue([row()]);
+    renderPayments();
+    fireEvent.click(screen.getByRole('button', { name: 'From statements' }));
+    await screen.findByText('ACME MUSIC*PREMIUM');
+    expect(screen.queryByRole('button', { name: 'Not this payment' })).toBeNull();
   });
 });

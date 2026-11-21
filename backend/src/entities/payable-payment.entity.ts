@@ -66,6 +66,13 @@ export class PayablePayment {
   @Column({ name: 'transaction_id', type: 'uuid', nullable: true })
   transactionId: string | null;
 
+  /**
+   * The transaction was recorded with this payment (cash, a wallet), not a
+   * row found in the books: "not this payment" cannot be said of it.
+   */
+  @Column({ name: 'own_transaction', type: 'boolean', default: false })
+  ownTransaction: boolean;
+
   @Column({ type: 'text', nullable: true })
   comment: string | null;
 

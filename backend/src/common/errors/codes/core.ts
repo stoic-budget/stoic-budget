@@ -10,6 +10,8 @@ export const CORE_ERRORS = {
   // any 403 that does as "you lost access" and switches workspaces.
   VERSION_READ_ONLY: 'This is a past version and can only be viewed',
   VERSION_OWNER_ONLY: 'Only the owner can open past versions',
+  // Same rule as above: no "workspace" in the message.
+  DEMO_READ_ONLY: 'This is a demo: you can look around, but nothing can be changed',
   WORKSPACE_ONLY_OWNER_CAN_DELETE: 'Only the owner can delete the workspace',
   WORKSPACE_ONLY_OWNER_CAN_MANAGE_ADMINS: 'Only the owner can manage administrators',
   WORKSPACE_ONLY_OWNER_CAN_MANAGE_ADMINS_AND_OWNER:
