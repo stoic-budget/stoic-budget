@@ -1,0 +1,596 @@
+{
+  "metadata": {
+    "accountNumber": "10000002",
+    "currency": "GBP",
+    "dateFrom": "2023-05-18T00:00:00",
+    "dateTo": "2023-08-18T00:00:00",
+    "balanceStart": 5081.32,
+    "balanceEnd": 14793.16
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-05-18T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.8,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-05-18T00:00:00",
+      "counterpartyName": "SALARY, ACMEEMP SAMPLE LTD",
+      "paymentPurpose": "SALARY, ACMEEMP SAMPLE LTD FPI",
+      "credit": 3590,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-05-19T00:00:00",
+      "counterpartyName": "M MEMBERS",
+      "paymentPurpose": "M MEMBERS TFR",
+      "credit": 661,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-05-19T00:00:00",
+      "counterpartyName": "M MEMBERS",
+      "paymentPurpose": "M MEMBERS TFR",
+      "credit": 150,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-05-20T00:00:00",
+      "counterpartyName": "LNK TESCO BR AX RD",
+      "paymentPurpose": "LNK TESCO BR AX RD CPT",
+      "debit": 500,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-05-20T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 0.3,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-05-21T00:00:00",
+      "counterpartyName": "LNK SAINSBURYS BAN",
+      "paymentPurpose": "LNK SAINSBURYS BAN CPT",
+      "debit": 500,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-05-22T00:00:00",
+      "counterpartyName": "M MEMBERS",
+      "paymentPurpose": "M MEMBERS TFR",
+      "credit": 90,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-05-23T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 0.98,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-05-24T00:00:00",
+      "counterpartyName": "LNK SAINSBURYS BAN",
+      "paymentPurpose": "LNK SAINSBURYS BAN CPT",
+      "debit": 500,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-05-25T00:00:00",
+      "counterpartyName": "SAMPLEMAN E",
+      "paymentPurpose": "SAMPLEMAN E FPI",
+      "credit": 501,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-05-26T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 0.98,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-05-27T00:00:00",
+      "counterpartyName": "LNK TESCO BRISLING",
+      "paymentPurpose": "LNK TESCO BRISLING CPT",
+      "debit": 500,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-05-28T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.82,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-05-28T00:00:00",
+      "counterpartyName": "S SAMPLE",
+      "paymentPurpose": "S SAMPLE FPI",
+      "credit": 501,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-05-28T00:00:00",
+      "counterpartyName": "LNK SAMPLE BRISTOL",
+      "paymentPurpose": "LNK SAMPLE BRISTOL CPT",
+      "debit": 500,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-06-05T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.82,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-06-06T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.82,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-06-09T00:00:00",
+      "counterpartyName": "M MEMBERS",
+      "paymentPurpose": "M MEMBERS TFR",
+      "credit": 374,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-06-11T00:00:00",
+      "counterpartyName": "M MEMBERS",
+      "paymentPurpose": "M MEMBERS TFR",
+      "credit": 287,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-06-11T00:00:00",
+      "counterpartyName": "LNK SAINSBURYS BAN",
+      "paymentPurpose": "LNK SAINSBURYS BAN CPT",
+      "debit": 500,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-06-11T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.56,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-06-12T00:00:00",
+      "counterpartyName": "M MEMBERS",
+      "paymentPurpose": "M MEMBERS TFR",
+      "credit": 183,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-06-13T00:00:00",
+      "counterpartyName": "LNK SAINSBURYS BAN",
+      "paymentPurpose": "LNK SAINSBURYS BAN CPT",
+      "debit": 330,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-06-14T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.8,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-06-14T00:00:00",
+      "counterpartyName": "M MEMBERS",
+      "paymentPurpose": "M MEMBERS TFR",
+      "credit": 250,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-06-16T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.39,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-06-19T00:00:00",
+      "counterpartyName": "LNK TESCO BRISLING",
+      "paymentPurpose": "LNK TESCO BRISLING CPT",
+      "debit": 250,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-06-19T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.81,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-06-20T00:00:00",
+      "counterpartyName": "SALARY, ACMEEMP SAMPLE LTD",
+      "paymentPurpose": "SALARY, ACMEEMP SAMPLE LTD TFR",
+      "credit": 3540,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-06-22T00:00:00",
+      "counterpartyName": "LNK SAMPLE BRISTOL",
+      "paymentPurpose": "LNK SAMPLE BRISTOL CPT",
+      "debit": 1500,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-06-22T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.75,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-06-25T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.75,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-06-26T00:00:00",
+      "counterpartyName": "TFR",
+      "paymentPurpose": "TFR TFR",
+      "credit": 0.01,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-06-27T00:00:00",
+      "counterpartyName": "M MEMBERS",
+      "paymentPurpose": "M MEMBERS TFR",
+      "credit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-06-27T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.58,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-07-01T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.59,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-07-01T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.59,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-07-06T00:00:00",
+      "counterpartyName": "M MEMBERS",
+      "paymentPurpose": "M MEMBERS TFR",
+      "credit": 361,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "LNK SAINSBURYS BAN",
+      "paymentPurpose": "LNK SAINSBURYS BAN CPT",
+      "debit": 500,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.82,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "M MEMBERS",
+      "paymentPurpose": "M MEMBERS TFR",
+      "credit": 700,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-10T00:00:00",
+      "counterpartyName": "LNK TESCO BRISLING",
+      "paymentPurpose": "LNK TESCO BRISLING CPT",
+      "debit": 2500,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-10T00:00:00",
+      "counterpartyName": "TFR",
+      "paymentPurpose": "TFR TFR",
+      "credit": 0.04,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-11T00:00:00",
+      "counterpartyName": "TFR",
+      "paymentPurpose": "TFR TFR",
+      "credit": 0.8,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-11T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.49,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-07-11T00:00:00",
+      "counterpartyName": "LNK SAMPLE BRISTOL",
+      "paymentPurpose": "LNK SAMPLE BRISTOL CPT",
+      "debit": 190,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-13T00:00:00",
+      "counterpartyName": "S SAMPLE",
+      "paymentPurpose": "S SAMPLE FPI",
+      "credit": 301,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-13T00:00:00",
+      "counterpartyName": "LNK SAINSBURYS BAN",
+      "paymentPurpose": "LNK SAINSBURYS BAN CPT",
+      "debit": 300,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-15T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 1.81,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "M MEMBERS",
+      "paymentPurpose": "M MEMBERS TFR",
+      "credit": 442,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "SALARY, ACMEEMP SAMPLE LTD",
+      "paymentPurpose": "SALARY, ACMEEMP SAMPLE LTD FPI",
+      "credit": 3750,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-18T00:00:00",
+      "counterpartyName": "LNK SAMPLE BRISTOL",
+      "paymentPurpose": "LNK SAMPLE BRISTOL CPT",
+      "debit": 500,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-19T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 0.66,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-07-19T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 0.66,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-07-23T00:00:00",
+      "counterpartyName": "MEMBER TWOOO",
+      "paymentPurpose": "MEMBER TWOOO DEB",
+      "debit": 1.98,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-23T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 0.67,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "TESCO STORES 3302",
+      "paymentPurpose": "TESCO STORES 3302 DEB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-29T00:00:00",
+      "counterpartyName": "ASDA SUPERSTORE",
+      "paymentPurpose": "ASDA SUPERSTORE DEB",
+      "debit": 17.5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-29T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 0.7,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 0.71,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-02T00:00:00",
+      "counterpartyName": "TESCO PFS 3825",
+      "paymentPurpose": "TESCO PFS 3825 DEB",
+      "debit": 22.59,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-08-03T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 0.74,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-04T00:00:00",
+      "counterpartyName": "HOMESENSE",
+      "paymentPurpose": "HOMESENSE DEB",
+      "debit": 240.36,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-08-05T00:00:00",
+      "counterpartyName": "T K MAXX",
+      "paymentPurpose": "T K MAXX DEB",
+      "debit": 24.68,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-08-05T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 50.83,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-05T00:00:00",
+      "counterpartyName": "FIRST BUS - MOBILE",
+      "paymentPurpose": "FIRST BUS - MOBILE DEB",
+      "debit": 18.9,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-08-08T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 20.86,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-08T00:00:00",
+      "counterpartyName": "TESCO PFS 3825",
+      "paymentPurpose": "TESCO PFS 3825 DEB",
+      "debit": 25.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-08-10T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 0.9,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-15T00:00:00",
+      "counterpartyName": "DAILY OD FEE 15/05",
+      "paymentPurpose": "DAILY OD FEE 15/05 CHG",
+      "debit": 30.91,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-18T00:00:00",
+      "counterpartyName": "SALARY, ACMEEMP SAMPLE LTD",
+      "paymentPurpose": "SALARY, ACMEEMP SAMPLE LTD FPI",
+      "credit": 3550,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-18T00:00:00",
+      "counterpartyName": "DAILY OD FEE",
+      "paymentPurpose": "DAILY OD FEE CHG",
+      "debit": 55.91,
+      "currency": "GBP",
+      "paymentType": "fee"
+    }
+  ]
+}

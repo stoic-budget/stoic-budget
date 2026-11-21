@@ -32,6 +32,10 @@ describe('pdf-layout-sections.helper', () => {
     expect(
       readSectionHeading(row(10, phrase('Withdrawals and Other Deductions (continued)', 50))),
     ).toBe('debit');
+    expect(readSectionHeading(row(10, phrase('ELECTRONIC PAYMENTS', 50)))).toBe('debit');
+    expect(readSectionHeading(row(10, phrase('Deposit / Credit Activity (+) Account: 10000001', 50)))).toBe('credit');
+    expect(readSectionHeading(row(10, phrase('Debit Card / POS Activity (-)', 50)))).toBe('debit');
+    expect(readSectionHeading(row(10, phrase('Credits (+) 9,379.18', 50)))).toBeNull();
     expect(readSectionHeading(row(10, phrase('DEPOSIT ACCOUNTS', 50)))).toBeNull();
     expect(readSectionHeading(row(10, phrase('Plus: Deposits and Other Additions 3,909.54', 50)))).toBeNull();
   });
@@ -94,5 +98,35 @@ describe('pdf-layout-sections.helper', () => {
       row(131, phrase('EXAMPLE TOWN', 130)),
     ]);
     expect(rows.map(t => t.description)).toEqual(['DDA PUR ACME STORE EXAMPLE TOWN']);
+  });
+});
+
+describe('a section heading with a slash', () => {
+  it('reads "Deposits/Other Credits" as money in', () => {
+    expect(readSectionHeading(row(10, phrase('Deposits/Other Credits', 50)))).toBe('credit');
+  });
+});
+
+describe('a section heading with commas', () => {
+  it('reads Truist\'s lists by their names', () => {
+    expect(readSectionHeading(row(10, phrase('Other withdrawals, debits and service charges', 50)))).toBe('debit');
+    expect(readSectionHeading(row(10, phrase('Deposits, credits and interest', 50)))).toBe('credit');
+  });
+});
+
+describe('a two-sided table after a section heading', () => {
+  it('is signed by its own columns, not by the heading above it', () => {
+    const transactions = readLayoutTransactions([
+      row(10, phrase('Fees', 108)),
+      row(30, [
+        ['Date', 42],
+        ['Description', 79],
+        ['Debits', 368],
+        ['Credits', 440],
+        ['Balance', 513],
+      ]),
+      row(45, [['03/02', 40], ['ACH', 79], ['DEP', 103], ['143.45', 450], ['10,702.97', 510]]),
+    ]);
+    expect(transactions[0]).toMatchObject({ credit: 143.45 });
   });
 });

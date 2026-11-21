@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "accountNumber": "40094040",
+    "currency": "GBP",
+    "dateFrom": "2022-09-05T00:00:00",
+    "dateTo": "2022-09-14T00:00:00",
+    "balanceStart": 5102.97,
+    "balanceEnd": 3510
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-09-05T00:00:00",
+      "counterpartyName": "M Current",
+      "paymentPurpose": "MOB, M Current Transfer",
+      "debit": 70,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-09-08T00:00:00",
+      "counterpartyName": "M Current",
+      "paymentPurpose": "MOB, M Current Transfer",
+      "debit": 2.97,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-09-08T00:00:00",
+      "counterpartyName": "M Current",
+      "paymentPurpose": "MOB, M Current Transfer",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-09-13T00:00:00",
+      "counterpartyName": "M Current",
+      "paymentPurpose": "MOB, M Current Transfer",
+      "debit": 1300,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-09-14T00:00:00",
+      "counterpartyName": "Member Sampler",
+      "paymentPurpose": "MOB, Member Sampler, membersamp ref Transfer",
+      "debit": 30,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-09-14T00:00:00",
+      "counterpartyName": "G Sampleon",
+      "paymentPurpose": "MOB, G Sampleon, van man Transfer",
+      "debit": 90,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    }
+  ]
+}

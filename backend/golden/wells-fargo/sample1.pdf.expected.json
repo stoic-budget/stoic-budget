@@ -1,0 +1,264 @@
+{
+  "metadata": {
+    "accountNumber": "7026131363",
+    "currency": "USD",
+    "dateFrom": "2022-12-08T00:00:00",
+    "dateTo": "2023-01-09T00:00:00",
+    "balanceStart": 179.24,
+    "balanceEnd": -9.95
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-12-08T00:00:00",
+      "counterpartyName": "Autozone 2000 2770 E Tri Carrollton TX",
+      "paymentPurpose": "Purchase authorized on 12/07 Autozone 2000 2770 E Tri Carrollton TX P547783120617601 Card 1002",
+      "debit": 27.31,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-12-09T00:00:00",
+      "counterpartyName": "Money Transfer authorized on 12/09 From Membersampl TX S665327090070672 Card 1002",
+      "paymentPurpose": "Money Transfer authorized on 12/09 From Membersampl TX S665327090070672 Card 1002",
+      "credit": 93.93,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-12-09T00:00:00",
+      "counterpartyName": "Taco Bell # '02988 Dallas TX",
+      "paymentPurpose": "Purchase authorized on 12/07 Taco Bell # '02988 Dallas TX S407113680587683 Card 1002",
+      "debit": 10.98,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-12-09T00:00:00",
+      "counterpartyName": "Racetrac064 Addison TX",
+      "paymentPurpose": "Purchase authorized on 12/08 Racetrac064 Addison TX P126029074956620 Card 1002",
+      "debit": 8.82,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-12-12T00:00:00",
+      "counterpartyName": "Cash App*Christoph 5999091541 CA",
+      "paymentPurpose": "Purchase authorized on 12/08 Cash App*Christoph 5999091541 CA S819183809957046 Card 1002",
+      "debit": 100,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-12-13T00:00:00",
+      "counterpartyName": "Betmgm 7757409095 NJ",
+      "paymentPurpose": "Purchase authorized on 12/09 Betmgm 7757409095 NJ S105388864080316 Card 1002",
+      "debit": 100,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-12-14T00:00:00",
+      "counterpartyName": "Card Final Credit 97629315937",
+      "paymentPurpose": "Card Final Credit 97629315937",
+      "credit": 100,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2022-12-14T00:00:00",
+      "counterpartyName": "Zelle From Member Samplers on 12/14 Ref # Bacgrs7Jpe3O",
+      "paymentPurpose": "Zelle From Member Samplers on 12/14 Ref # Bacgrs7Jpe3O",
+      "credit": 1400,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-12-15T00:00:00",
+      "counterpartyName": "Online Transfer to Onee M Way2Save Savings xxxxxx8072 Ref #Ib0H6F9Zrk on 12/15/22",
+      "paymentPurpose": "Online Transfer to Onee M Way2Save Savings xxxxxx8072 Ref #Ib0H6F9Zrk on 12/15/22",
+      "debit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-15T00:00:00",
+      "counterpartyName": "Zelle to Sampl Memb on 12/15 Ref #Rp0Qw9Ttkf Refund for Parts",
+      "paymentPurpose": "Zelle to Sampl Memb on 12/15 Ref #Rp0Qw9Ttkf Refund for Parts",
+      "debit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-15T00:00:00",
+      "counterpartyName": "Zelle to Sampl Memb on 12/15 Ref #Rp0Qw9Wnq3",
+      "paymentPurpose": "Zelle to Sampl Memb on 12/15 Ref #Rp0Qw9Wnq3",
+      "debit": 410,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-16T00:00:00",
+      "counterpartyName": "Online Transfer to Onee M Way2Save Savings xxxxxx8072 Ref #Ib0H6Qx2x7 on 12/16/22",
+      "paymentPurpose": "Online Transfer to Onee M Way2Save Savings xxxxxx8072 Ref #Ib0H6Qx2x7 on 12/16/22",
+      "debit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-16T00:00:00",
+      "counterpartyName": "Withdrawal Made In A Branch/Store",
+      "paymentPurpose": "Withdrawal Made In A Branch/Store",
+      "debit": 500,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2022-12-19T00:00:00",
+      "counterpartyName": "Non-WF ATM Balance Inquiry Fee 12/17 777 Casino A Thackerville OK ATM ID Okwix106 Card 1001",
+      "paymentPurpose": "Non-WF ATM Balance Inquiry Fee 12/17 777 Casino A Thackerville OK ATM ID Okwix106 Card 1001",
+      "debit": 2.5,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-12-19T00:00:00",
+      "counterpartyName": "Online Transfer From Onee M Way2Save Savings xxxxxx8072 Ref #Ib0H736Tbw on 12/17/22",
+      "paymentPurpose": "Online Transfer From Onee M Way2Save Savings xxxxxx8072 Ref #Ib0H736Tbw on 12/17/22",
+      "credit": 140,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-12-19T00:00:00",
+      "counterpartyName": "ATM Withdrawal authorized on 12/17 18190 Dallas Pkwy Dallas TX 0008580 ATM ID 0392D Card 1001",
+      "paymentPurpose": "ATM Withdrawal authorized on 12/17 18190 Dallas Pkwy Dallas TX 0008580 ATM ID 0392D Card 1001",
+      "debit": 400,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-12-19T00:00:00",
+      "counterpartyName": "Non-WF ATM Withdrawal authorized on 12/17 777 Casino Ave Thackerville OK 884234165084665 ATM ID Okwix106 Card 1001",
+      "paymentPurpose": "Non-WF ATM Withdrawal authorized on 12/17 777 Casino Ave Thackerville OK 884234165084665 ATM ID Okwix106 Card 1001",
+      "debit": 144.99,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-12-19T00:00:00",
+      "counterpartyName": "Non-Wells Fargo ATM Transaction Fee",
+      "paymentPurpose": "Non-Wells Fargo ATM Transaction Fee",
+      "debit": 2.5,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2022-12-20T00:00:00",
+      "counterpartyName": "Zelle From Memb Sample on 12/20 Ref # Cof01Gjq49Im",
+      "paymentPurpose": "Zelle From Memb Sample on 12/20 Ref # Cof01Gjq49Im",
+      "credit": 200,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-12-21T00:00:00",
+      "counterpartyName": "Zelle to Sampl Memb on 12/20 Ref #Rp0Qwmvpb2",
+      "paymentPurpose": "Zelle to Sampl Memb on 12/20 Ref #Rp0Qwmvpb2",
+      "debit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-21T00:00:00",
+      "counterpartyName": "ATM Withdrawal authorized on 12/21 18190 Dallas Pkwy Dallas TX 0009350 ATM ID 0392D Card 1001",
+      "paymentPurpose": "ATM Withdrawal authorized on 12/21 18190 Dallas Pkwy Dallas TX 0009350 ATM ID 0392D Card 1001",
+      "debit": 100,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-12-22T00:00:00",
+      "counterpartyName": "Check",
+      "paymentPurpose": "Check",
+      "debit": 62.7,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2022-12-23T00:00:00",
+      "counterpartyName": "Overdraft Fee for a Transaction Posted on 12/22 $62.70 Check # 00000",
+      "paymentPurpose": "Overdraft Fee for a Transaction Posted on 12/22 $62.70 Check # 00000",
+      "debit": 35,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-01-03T00:00:00",
+      "counterpartyName": "Zelle From Membera Sample on 01/02 Ref # Jpm999Kegj11",
+      "paymentPurpose": "Zelle From Membera Sample on 01/02 Ref # Jpm999Kegj11",
+      "credit": 400,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-01-04T00:00:00",
+      "counterpartyName": "ATM Cash Deposit on 01/03 5936 W Park Blvd Plano TX 0003376 ATM ID 9865P Card 1001",
+      "paymentPurpose": "ATM Cash Deposit on 01/03 5936 W Park Blvd Plano TX 0003376 ATM ID 9865P Card 1001",
+      "credit": 800,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-01-04T00:00:00",
+      "counterpartyName": "Moonpay 9396 Delaware NY",
+      "paymentPurpose": "Purchase authorized on 01/03 Moonpay 9396 Delaware NY S004282427717879 Card 1001",
+      "debit": 200,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-01-04T00:00:00",
+      "counterpartyName": "Moonpay 3846 Delaware NY",
+      "paymentPurpose": "Purchase authorized on 01/03 Moonpay 3846 Delaware NY S241943830751282 Card 1001",
+      "debit": 100,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-01-04T00:00:00",
+      "counterpartyName": "Withdrawal Made In A Branch/Store",
+      "paymentPurpose": "Withdrawal Made In A Branch/Store",
+      "debit": 455,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-01-05T00:00:00",
+      "counterpartyName": "Moonpay 1484 Delaware NY",
+      "paymentPurpose": "Purchase authorized on 01/04 Moonpay 1484 Delaware NY S246429181045856 Card 1001",
+      "debit": 150,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-01-05T00:00:00",
+      "counterpartyName": "Moonpay 3921 Delaware NY",
+      "paymentPurpose": "Purchase authorized on 01/04 Moonpay 3921 Delaware NY S336932517242963 Card 1001",
+      "debit": 200,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-01-05T00:00:00",
+      "counterpartyName": "Txdps Crime Recs Egov.Com TX",
+      "paymentPurpose": "Purchase authorized on 01/04 Txdps Crime Recs Egov.Com TX S126650357353621 Card 1001",
+      "debit": 3.32,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-01-09T00:00:00",
+      "counterpartyName": "Monthly Service Fee",
+      "paymentPurpose": "Monthly Service Fee",
+      "debit": 10,
+      "currency": "USD",
+      "paymentType": "fee"
+    }
+  ]
+}
