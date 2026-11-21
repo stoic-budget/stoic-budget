@@ -65,6 +65,7 @@ import { KbcParser } from '../parsers/kbc.parser';
 import { KeybankParser } from '../parsers/keybank.parser';
 import { KrooParser } from '../parsers/kroo.parser';
 import { LaurentianParser } from '../parsers/laurentian.parser';
+import { LloydsParser } from '../parsers/lloyds.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
 
 /**
@@ -138,4 +139,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [KeybankParser, { bankName: BankName.KEYBANK }],
   [KrooParser, { bankName: BankName.KROO }],
   [LaurentianParser, { bankName: BankName.LAURENTIAN }],
+  [LloydsParser, { bankName: BankName.LLOYDS }],
 ];

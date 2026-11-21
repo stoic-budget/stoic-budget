@@ -17,6 +17,7 @@ Returns:
 """
 
 import json
+import re
 import pathlib
 import sys
 from typing import List, Dict, Any
@@ -74,11 +75,49 @@ def build_rows(words: List[Dict[str, Any]], page_number: int, tolerance: float =
             }
         )
 
+    rows = join_stray_amounts(rows, tolerance)
     for row in rows:
         row["items"].sort(key=lambda i: i["x"])
         row["text"] = " ".join([i["text"] for i in row["items"] if i.get("text")])
 
     return sorted(rows, key=lambda r: (r["page"], -r["y"]))
+
+
+AMOUNT_WORD = re.compile(r"^[-+(]?[£$€]?\d[\d,. ]*[.,]\d{2}\)?-?$")
+
+
+def join_stray_amounts(rows: List[Dict[str, Any]], tolerance: float) -> List[Dict[str, Any]]:
+    """
+    A row of amounts alone set a little off its line ("3,550.00" 3 points above
+    the date, text and balance it belongs to) joins the nearest row within
+    twice the tolerance that holds amounts and words both (a transaction's
+    line, not a text line beside a summary box), when no word of that row
+    stands where it does.
+    """
+    def amounts_only(row):
+        return all(AMOUNT_WORD.match(item["text"]) for item in row["items"])
+
+    kept = []
+    for row in rows:
+        if not amounts_only(row):
+            kept.append(row)
+            continue
+        near = [
+            other for other in rows
+            if other is not row and abs(other["y"] - row["y"]) <= 2 * tolerance
+            and not amounts_only(other)
+            and any(AMOUNT_WORD.match(item["text"]) for item in other["items"])
+        ]
+        target = min(near, key=lambda other: abs(other["y"] - row["y"]), default=None)
+        clear = target is not None and not any(
+            item["x"] < mine["x"] + mine["width"] and mine["x"] < item["x"] + item["width"]
+            for item in target["items"] for mine in row["items"]
+        )
+        if clear:
+            target["items"].extend(row["items"])
+        else:
+            kept.append(row)
+    return kept
 
 
 def build_structured_rows(data: List[List[str]], bbox: List[float], page_number: int) -> List[Dict[str, Any]]:

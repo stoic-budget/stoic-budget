@@ -34,6 +34,11 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   // First: a Citibank statement names other banks in its IMPS and NEFT lines ("MOBIKWIK AXIS BANK").
   [BankName.CITI, /\bcitibank n\.?a\b|\bcitibank account statement\b/],
   // Before Bank of Scotland: "Halifax is a division of Bank of Scotland plc".
+  // Lloyds statements may print the group's Halifax footer.
+  [
+    BankName.LLOYDS,
+    /\blloyds (?:basic|classic|current|platinum|silver|gold|club)\b|\blloydsbank\.com\b/,
+  ],
   [BankName.HALIFAX, /\bhalifax is a division of bank of scotland\b|\blogo, halifax\b/],
   [BankName.ABSA, /\babsa\b/],
   [BankName.ALLY, /\bally bank\b/],

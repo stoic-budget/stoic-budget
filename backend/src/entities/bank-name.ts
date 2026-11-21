@@ -68,5 +68,6 @@ export enum BankName {
   KEYBANK = 'keybank',
   KROO = 'kroo',
   LAURENTIAN = 'laurentian',
+  LLOYDS = 'lloyds',
   OTHER = 'other',
 }

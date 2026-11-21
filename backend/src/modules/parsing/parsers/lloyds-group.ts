@@ -1,5 +1,13 @@
 import type { ParsedStatement } from '../interfaces/parsed-statement.interface';
 
+/** A Lloyds account name ("LLOYDS BASIC ACCT") or its web address: Lloyds prints the group's footers. */
+const LLOYDS_ACCOUNT =
+  /\bLLOYDS (?:BASIC|CLASSIC|CURRENT|PLATINUM|SILVER|GOLD|CLUB)\b|\blloydsbank\.com\b/i;
+
+export function namesLloydsAccount(text: string): boolean {
+  return LLOYDS_ACCOUNT.test(text);
+}
+
 const round = (value: number) => Math.round(value * 100) / 100;
 
 /**

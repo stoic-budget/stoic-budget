@@ -87,3 +87,9 @@ describe('statement-date.helper', () => {
     ).toEqual(['2025-03-02', '2025-04-01']);
   });
 });
+
+describe('a full stop after the year', () => {
+  it('reads "18 May 23." as the date', () => {
+    expect(parseDateParts('18 May 23.', 'dmy')).toMatchObject({ year: 2023, month: 5, day: 18 });
+  });
+});

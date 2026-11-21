@@ -3,14 +3,14 @@ import { BankName } from '../../../entities/statement.entity';
 import { ukCodeEntry } from '../helpers/statement-uk-codes.helper';
 import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import { BankPdfParser } from './bank-pdf.parser';
-import { firstDayBalanceLabel } from './lloyds-group';
+import { firstDayBalanceLabel, namesLloydsAccount } from './lloyds-group';
 
 /** The logo's text and the summary's dated balance lines. */
 const HALIFAX_LOGO = /\blogo, Halifax\b|\bHalifax is a division of Bank of Scotland\b/i;
 const HALIFAX_SUMMARY = /\bYour Transactions\b/;
 
 export function isHalifaxStatement(text: string): boolean {
-  return HALIFAX_LOGO.test(text) && HALIFAX_SUMMARY.test(text);
+  return HALIFAX_LOGO.test(text) && HALIFAX_SUMMARY.test(text) && !namesLloydsAccount(text);
 }
 
 /**
