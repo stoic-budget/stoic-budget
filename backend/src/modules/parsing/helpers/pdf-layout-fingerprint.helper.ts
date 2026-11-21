@@ -123,6 +123,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.SCOTIABANK, /\bwww\.scotiabank\.com\b|\b1 800 4-scotia\b/],
   [BankName.SIMPLII, /\bsimplii financial\b/],
   [BankName.SKRILL, /\bwww\.skrill\.com\b/],
+  [BankName.SOCIETE_GENERALE, /\bparticuliers\.societegenerale\.fr\b/],
   [BankName.CIBC, /\bcibc account statement\b|\bwww\.cibc\.com\b/],
   [BankName.CHIME, /\bchime member services\b/],
   [BankName.CHASE, /\bjpmorgan chase bank\b/],

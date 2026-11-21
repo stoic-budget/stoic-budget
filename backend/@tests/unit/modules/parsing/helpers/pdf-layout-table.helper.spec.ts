@@ -805,3 +805,20 @@ describe('funds out and funds in', () => {
     expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
   });
 });
+
+describe('French headings', () => {
+  it('read "Valeur" as the value date and "Nature de l’opération" as the text', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 43],
+        ['Valeur', 89],
+        ['Nature', 230],
+        ['de', 262],
+        ['l’opération', 275],
+        ['Débit', 452],
+        ['Crédit', 519],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'otherDate', 'description', 'debit', 'credit']);
+  });
+});
