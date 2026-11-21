@@ -121,6 +121,7 @@ import { WebsterParser } from '../parsers/webster.parser';
 import { WellsFargoParser } from '../parsers/wells-fargo.parser';
 import { WestpacParser } from '../parsers/westpac.parser';
 import { WiseParser } from '../parsers/wise.parser';
+import { WoodforestParser } from '../parsers/woodforest.parser';
 
 /**
  * Each bank's own parser, with the bank it claims a file as when the file's
@@ -248,4 +249,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [WellsFargoParser, { bankName: BankName.WELLS_FARGO }],
   [WestpacParser, { bankName: BankName.WESTPAC }],
   [WiseParser, { bankName: BankName.WISE }],
+  [WoodforestParser, { bankName: BankName.WOODFOREST }],
 ];

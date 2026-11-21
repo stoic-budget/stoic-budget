@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "accountNumber": "1001110010",
+    "currency": "USD",
+    "dateFrom": "2020-01-31T00:00:00",
+    "dateTo": "2020-02-29T00:00:00",
+    "balanceStart": 7637.89,
+    "balanceEnd": 10601.32
+  },
+  "transactions": [
+    {
+      "transactionDate": "2020-02-01T00:00:00",
+      "counterpartyName": "DEPOSIT",
+      "paymentPurpose": "DEPOSIT",
+      "credit": 900.38,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-03T00:00:00",
+      "counterpartyName": "DEPOSIT",
+      "paymentPurpose": "DEPOSIT",
+      "credit": 3600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-05T00:00:00",
+      "counterpartyName": "TRF TO SAFE DEP BX ***1000 AUT TRF",
+      "paymentPurpose": "TRF TO SAFE DEP BX ***1000 AUT TRF",
+      "debit": 25,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-10T00:00:00",
+      "counterpartyName": "Online Transfer Debit OL XFER",
+      "paymentPurpose": "Online Transfer Debit OL XFER",
+      "debit": 1100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-02-11T00:00:00",
+      "counterpartyName": "FAMOUS CAJUN GRILL THE WOODLANDS TX",
+      "paymentPurpose": "POS DB FAMOUS CAJUN GRILL THE WOODLANDS TX 010001001010000",
+      "debit": 14.45,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-02-18T00:00:00",
+      "counterpartyName": "JOHNSON SUPPLY SPRING SPRING TX",
+      "paymentPurpose": "POS DB JOHNSON SUPPLY SPRING SPRING TX 100110111100011",
+      "debit": 59.84,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-02-18T00:00:00",
+      "counterpartyName": "MEMB L SAMPLER RVOS FARM MUTUAL",
+      "paymentPurpose": "ACH-INS PREM MEMB L SAMPLER RVOS FARM MUTUAL",
+      "debit": 337.66,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    }
+  ]
+}
