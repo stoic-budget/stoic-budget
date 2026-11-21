@@ -92,6 +92,7 @@ import { RevolutParser } from '../parsers/revolut.parser';
 import { SantanderParser } from '../parsers/santander.parser';
 import { SbiParser } from '../parsers/sbi.parser';
 import { SchwabParser } from '../parsers/schwab.parser';
+import { ScotiabankParser } from '../parsers/scotiabank.parser';
 
 /**
  * Each bank's own parser, with the bank it claims a file as when the file's
@@ -190,4 +191,5 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [RbsParser, { bankName: BankName.RBS }],
   [SantanderParser, { bankName: BankName.SANTANDER }],
   [SbiParser, { bankName: BankName.SBI }],
+  [ScotiabankParser, { bankName: BankName.SCOTIABANK }],
 ];

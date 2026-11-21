@@ -771,3 +771,20 @@ describe('Romanian headings', () => {
     expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit']);
   });
 });
+
+describe('Transactions, withdrawn and deposited', () => {
+  it('read as the text and the money out and in', () => {
+    const columns = readHeaderRow(
+      row(100, [
+        ['Date', 73],
+        ['Transactions', 113],
+        ['withdrawn', 252],
+        ['($)', 296],
+        ['deposited', 322],
+        ['($)', 361],
+        ['Balance', 395],
+      ]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'debit', 'credit', 'balance']);
+  });
+});
