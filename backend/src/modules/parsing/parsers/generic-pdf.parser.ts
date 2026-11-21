@@ -1,4 +1,5 @@
 import { appDefaultCurrency } from '../../../common/utils/currency.util';
+import { ocrPdfLayout } from '../../../common/utils/pdf-ocr.util';
 import {
   extractTablesFromPdf,
   extractTextAndLayoutFromPdf,
@@ -8,6 +9,7 @@ import {
 import { BankName, FileType } from '../../../entities/statement.entity';
 import { contributedHeadings } from '../helpers/contributed-layouts';
 import { findAccountNumberInColumn } from '../helpers/pdf-layout-account-number.helper';
+import { withCreditMarks } from '../helpers/pdf-layout-credit-marks.helper';
 import { statementLayout } from '../helpers/pdf-layout-fingerprint.helper';
 import type { RowRule } from '../helpers/pdf-layout-row-date.helper';
 import { pickByChecks, ROW_RULES } from '../helpers/pdf-layout-rules.helper';
@@ -18,6 +20,7 @@ import {
   readLayoutTransactions,
 } from '../helpers/pdf-layout-table.helper';
 import {
+  closingBalanceFromRows,
   openingBalanceFromRows,
   splitByAccount,
   toParsedTransactions,
@@ -26,6 +29,11 @@ import {
   mapPdfTableRowsToTransactions,
   pickReconciledTransactions,
 } from '../helpers/pdf-table.helper';
+import {
+  accountStatements,
+  accountTexts,
+  plausiblePeriod,
+} from '../helpers/statement-accounts.helper';
 import {
   checkBalanceChain,
   checkDatesInPeriod,
@@ -56,30 +64,6 @@ import type {
 import { BaseParser } from './base.parser';
 
 const negate = (value: number | null) => (value === null ? null : -value);
-
-/** Rows a week either side of a printed range still place it. */
-const PERIOD_SLACK_MS = 7 * 24 * 60 * 60 * 1000;
-
-/**
- * A printed range is the statement's period only if its rows fall in it: "fee
- * based on your balance from 1 Sep 2024 to 30 Nov 2024" on a statement of
- * September 2025 is a note. A statement without rows keeps the range.
- */
-function plausiblePeriod<T extends { from: Date | null; to: Date | null }>(
-  range: T | null,
-  transactions: ParsedTransaction[],
-): T | null {
-  const { from, to } = range ?? {};
-  if (!(from && to) || transactions.length === 0) {
-    return range;
-  }
-  const inside = transactions.some(
-    row =>
-      row.transactionDate.getTime() >= from.getTime() - PERIOD_SLACK_MS &&
-      row.transactionDate.getTime() <= to.getTime() + PERIOD_SLACK_MS,
-  );
-  return inside ? range : null;
-}
 
 export class GenericPdfParser extends BaseParser {
   /** How the table is read: the built-in headings, or a workspace's taught layout on top. */
@@ -122,9 +106,14 @@ export class GenericPdfParser extends BaseParser {
 
     const accounts = splitByAccount(layoutTransactions);
     if (accounts.length > 1) {
-      const [first, ...others] = accounts.map(rows =>
-        this.accountStatement(rows, text, dateOrder, latestPrinted, detectedCurrency, isCard),
-      );
+      const [first, ...others] = accountStatements(accounts, {
+        text,
+        texts: accountTexts(layoutRows),
+        dateOrder,
+        latestPrinted,
+        currency: detectedCurrency,
+        isCard,
+      });
       return { ...first, otherAccounts: others, layout };
     }
 
@@ -220,8 +209,8 @@ export class GenericPdfParser extends BaseParser {
   ): ParseCheck[] {
     const rows = layout.rows;
     const fromRows = {
-      start: openingBalanceFromRows(rows),
-      end: rows[rows.length - 1]?.balance ?? null,
+      start: openingBalanceFromRows(rows, dateOrder),
+      end: closingBalanceFromRows(rows, dateOrder),
     };
     return [
       checkBalanceChain(rows, isCard),
@@ -240,7 +229,7 @@ export class GenericPdfParser extends BaseParser {
     rows: PdfTextRow[],
     reading: LayoutReading = this.reading,
   ): LayoutTransaction[] {
-    return readLayoutTransactions(rows, { ...reading, rows: this.rowRule });
+    return withCreditMarks(rows, readLayoutTransactions(rows, { ...reading, rows: this.rowRule }));
   }
 
   /** The row rule `readTransactions` reads under; a bank's override passes no reading. */
@@ -272,40 +261,16 @@ export class GenericPdfParser extends BaseParser {
   }
 
   /**
-   * One account of a file that prints several, each in its own table under a
-   * heading naming its number and currency. The running balance column gives
-   * its balances; labels elsewhere on the page cannot be told apart by account.
+   * Whether the pages are read from their images by OCR even when the file
+   * has a text layer: a scanner's own OCR can be too garbled to read.
    */
-  private accountStatement(
-    rows: LayoutTransaction[],
-    text: string,
-    dateOrder: NumericDateOrder,
-    latestPrinted: Date | null,
-    fallbackCurrency: string,
-    isCard: boolean,
-  ): ParsedStatement {
-    const currency = rows[0].account?.currency ?? fallbackCurrency;
-    const transactions = toParsedTransactions(rows, dateOrder, latestPrinted, currency, isCard);
-    const times = transactions.map(t => t.transactionDate.getTime());
-    const period = plausiblePeriod(findHeaderPeriod(text, dateOrder), transactions);
-    return {
-      metadata: {
-        accountNumber: rows[0].account?.accountNumber ?? '',
-        currency,
-        dateFrom: period?.from ?? new Date(Math.min(...times)),
-        dateTo: period?.to ?? new Date(Math.max(...times)),
-        balanceStart: openingBalanceFromRows(rows) ?? undefined,
-        balanceEnd: rows[rows.length - 1].balance,
-      },
-      transactions,
-      // Labels and totals elsewhere on the page cannot be told apart by account.
-      checks: [checkBalanceChain(rows, isCard), checkDatesInPeriod(transactions, period)].filter(
-        (check): check is ParseCheck => check !== null,
-      ),
-    };
-  }
+  protected readsImages = false;
 
   private async extract(filePath: string, cachedText?: string) {
+    if (this.readsImages) {
+      const ocr = await ocrPdfLayout(filePath);
+      return { text: ocr.text, rowSets: [] as string[][][], layoutRows: ocr.rows };
+    }
     let text = '';
     let rowSets: string[][][] = [];
     let layoutRows: PdfTextRow[] = [];
@@ -349,13 +314,13 @@ export class GenericPdfParser extends BaseParser {
       this.extractBalance(text, 'Остаток на начало') ??
       this.extractBalance(text, 'Остаток на начало периода') ??
       this.extractBalance(text, 'Входящий остаток') ??
-      openingBalanceFromRows(layoutTransactions) ??
+      openingBalanceFromRows(layoutTransactions, dateOrder) ??
       labelled.start;
     const balanceEnd =
       this.extractBalance(text, 'Остаток на конец') ??
       this.extractBalance(text, 'Остаток на конец периода') ??
       this.extractBalance(text, 'Исходящий остаток') ??
-      layoutTransactions[layoutTransactions.length - 1]?.balance ??
+      closingBalanceFromRows(layoutTransactions, dateOrder) ??
       labelled.end;
     return { balanceStart, balanceEnd };
   }
