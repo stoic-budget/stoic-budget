@@ -17,6 +17,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **India:** Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India, UCO Bank
 - **International:** Payoneer, PayPal, Revolut, Skrill, Standard Chartered
 - **Israel:** Bank Hapoalim / Isracard (Hebrew)
+- **Italy:** UniCredit
 - **Kazakhstan:** Kaspi Bank; Bereke Bank, old and new PDF layouts
 - **Kenya:** NCBA Bank
 - **Nigeria:** Fidelity Bank

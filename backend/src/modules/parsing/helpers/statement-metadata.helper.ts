@@ -156,6 +156,7 @@ const OPENING = [
   'beginsaldo',
   'saldo inicial',
   'sold initial',
+  'saldo iniziale',
   'saldo anterior',
   'anfangssaldo',
   'alter kontostand',
@@ -170,6 +171,7 @@ const CLOSING = [
   'eindsaldo',
   'saldo final',
   'sold final',
+  'saldo finale',
   'endsaldo',
   'neuer kontostand',
 ];
