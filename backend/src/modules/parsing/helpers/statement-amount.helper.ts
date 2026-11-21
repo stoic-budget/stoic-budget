@@ -21,7 +21,7 @@ const LETTER_SIGNS = new RegExp(LETTER_SIGN.source, 'g');
  */
 /** Thousands in threes, or the Indian way (lakhs and crores in twos): "1,02,801.86". */
 const AMOUNT_SHAPE =
-  /^[-+(]?(?:(?:\d{1,2}(?:,\d{2})+,\d{3}|\d{1,3}(?:[ .,  ]\d{3})+|\d+)[.,]\d{2}|\.\d{2})\)?-?$/;
+  /^[-+(]?(?:(?:\d{1,2}(?:,\d{2})+,\d{3}|\d{1,3}(?:[ .,  ]\d{3})+|\d+)[.,]\d{2}|\.\d{2})\)?[-+]?$/;
 
 /** Parses a printed amount, currency marks included; null when it is not one. */
 /**
@@ -49,7 +49,8 @@ export function parseStatementAmount(text: string): number | null {
   if (!AMOUNT_SHAPE.test(bare)) {
     return null;
   }
-  return normalizeNumber(bare);
+  // "13.53+" keeps its sign after the figure, as "100.00-" does.
+  return normalizeNumber(bare.replace(/\+$/, ''));
 }
 
 /**
@@ -68,7 +69,7 @@ export function isAmountPart(word: string): boolean {
     .replace(/\([+-]\)$/, '')
     .replace(/(\d)[CcDd][Rr]\.?$/, '$1');
   return (
-    /^[-+(−]?[\d.,]*\d[\d.,]*\)?-?$/.test(figure) ||
+    /^[-+(−]?[\d.,]*\d[\d.,]*\)?[-+]?$/.test(figure) ||
     new RegExp(
       `^(?:[A-Z]{0,3}[${CURRENCY_SYMBOLS}]|[A-Z]{3}|[-+=]|\\([+-]\\)|[CcDd][Rr]\\.?)$`,
     ).test(word)

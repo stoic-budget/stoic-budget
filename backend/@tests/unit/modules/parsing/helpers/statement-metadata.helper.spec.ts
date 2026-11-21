@@ -310,3 +310,11 @@ describe('Romanian statements', () => {
     expect(isBalanceLabel('Sold inițial')).toBe(true);
   });
 });
+
+describe('a plus after the figure', () => {
+  it('is the amount\'s sign: "£13.53+"', () => {
+    expect(parseStatementAmount('£13.53+')).toBe(13.53);
+    expect(isAmountPart('£13.53+')).toBe(true);
+    expect(parseStatementAmount('£67.39-')).toBe(-67.39);
+  });
+});
