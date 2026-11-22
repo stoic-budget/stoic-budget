@@ -6,6 +6,7 @@ import { Category } from '../../entities/category.entity';
 import { Payee } from '../../entities/payee.entity';
 import { PayeeAlias } from '../../entities/payee-alias.entity';
 import { Receipt } from '../../entities/receipt.entity';
+import { RuleGroup } from '../../entities/rule-group.entity';
 import { Statement } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { ViewPreference } from '../../entities/view-preference.entity';
@@ -16,10 +17,15 @@ import { TaxModule } from '../tax/tax.module';
 import { CategorizationRuleToolsController } from './categorization-rule-tools.controller';
 import { CategorizationRulesController } from './categorization-rules.controller';
 import { ClassificationController } from './classification.controller';
+import { RuleGroupsController } from './rule-groups.controller';
+import { RulePacksController } from './rule-packs.controller';
 import { ClassificationService } from './services/classification.service';
 import { RuleApplicationService } from './services/rule-application.service';
+import { RuleGroupsService } from './services/rule-groups.service';
 import { RuleHealthService } from './services/rule-health.service';
+import { RuleNotifyService } from './services/rule-notify.service';
 import { RuleOrderService } from './services/rule-order.service';
+import { RulePackService } from './services/rule-pack.service';
 import { RuleSuggestionsService } from './services/rule-suggestions.service';
 import { PayeeLearningService } from './suggestions/payee-learning.service';
 import { PayeeLearningSubscriber } from './suggestions/payee-learning.subscriber';
@@ -38,6 +44,7 @@ import { StatementSuggestionsService } from './suggestions/statement-suggestions
       Statement,
       Receipt,
       CategorizationRule,
+      RuleGroup,
       WorkspaceMember,
       Workspace,
       User,
@@ -51,6 +58,8 @@ import { StatementSuggestionsService } from './suggestions/statement-suggestions
     ClassificationController,
     CategorizationRuleToolsController,
     CategorizationRulesController,
+    RuleGroupsController,
+    RulePacksController,
     StatementSuggestionsController,
   ],
   providers: [
@@ -59,6 +68,9 @@ import { StatementSuggestionsService } from './suggestions/statement-suggestions
     RuleOrderService,
     RuleSuggestionsService,
     RuleHealthService,
+    RuleGroupsService,
+    RuleNotifyService,
+    RulePackService,
     StatementSuggestionsService,
     PayeeLearningService,
     PayeeLearningSubscriber,

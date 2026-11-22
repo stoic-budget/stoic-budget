@@ -6,6 +6,7 @@ import { AuthSession } from '../../entities/auth-session.entity';
 import { EmailChangeToken } from '../../entities/email-change-token.entity';
 import { Notification } from '../../entities/notification.entity';
 import { NotificationPreference } from '../../entities/notification-preference.entity';
+import { PasskeyCredential } from '../../entities/passkey-credential.entity';
 import { User } from '../../entities/user.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
@@ -13,7 +14,9 @@ import { AuditModule } from '../audit/audit.module';
 import { CalendarFeedRevocationModule } from '../calendar-feed/calendar-feed-revocation.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { WorkspacesModule } from '../workspaces/workspaces.module';
+import { ChangelogSeenController } from './changelog-seen.controller';
 import { AccountDataService } from './services/account-data.service';
+import { ChangelogSeenService } from './services/changelog-seen.service';
 import { EmailChangeService } from './services/email-change.service';
 import { PermissionsService } from './services/permissions.service';
 import { UsersController } from './users.controller';
@@ -30,19 +33,21 @@ import { UsersService } from './users.service';
       Notification,
       AuditEvent,
       EmailChangeToken,
+      PasskeyCredential,
     ]),
     WorkspacesModule,
     MailerModule,
     AuditModule,
     CalendarFeedRevocationModule,
   ],
-  controllers: [UsersController],
+  controllers: [UsersController, ChangelogSeenController],
   providers: [
     UsersService,
     PermissionsService,
     TimezonesService,
     AccountDataService,
     EmailChangeService,
+    ChangelogSeenService,
   ],
   exports: [UsersService, PermissionsService, TimezonesService],
 })

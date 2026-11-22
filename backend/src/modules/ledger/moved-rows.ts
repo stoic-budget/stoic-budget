@@ -1,6 +1,7 @@
 import { IsNull, type Repository } from 'typeorm';
 import { Statement } from '../../entities/statement.entity';
 import type { Transaction } from '../../entities/transaction.entity';
+import type { SkipReason } from './ledger-posting.rules';
 
 /** What names a statement's cash account. */
 type CashHome = Pick<Statement, 'bankName' | 'accountNumber'>;
@@ -50,4 +51,37 @@ export async function mirrorsAStatement(
     .andWhere('transaction.walletId = :walletId', { walletId })
     .andWhere('(statement.walletId IS NULL OR statement.walletId = transaction.walletId)')
     .getExists();
+}
+
+/**
+ * Why interest split off a loan payment (loans/loan-interest-row) is not
+ * booked: it has no statement of its own and counts only while its payment
+ * does (`countedSql`), so a payment in Review, flagged a duplicate or on a
+ * statement in the trash keeps its interest out of the ledger too. Null for
+ * every other row, and for interest whose payment counts.
+ */
+export async function interestSkip(
+  transactions: Repository<Transaction>,
+  tx: Pick<Transaction, 'workspaceId' | 'loanInterestOfId'>,
+): Promise<SkipReason | 'statement_deleted' | null> {
+  if (!tx.loanInterestOfId) {
+    return null;
+  }
+  const [payment]: Array<{ is_duplicate: boolean; is_verified: boolean; trashed: boolean }> =
+    await transactions.query(
+      `SELECT p."is_duplicate", p."is_verified", (s."deleted_at" IS NOT NULL) AS "trashed"
+         FROM "transactions" p LEFT JOIN "statements" s ON s."id" = p."statement_id"
+        WHERE p."id" = $1 AND p."workspace_id" = $2`,
+      [tx.loanInterestOfId, tx.workspaceId],
+    );
+  if (!payment) {
+    return null;
+  }
+  if (payment.is_duplicate) {
+    return 'duplicate';
+  }
+  if (!payment.is_verified) {
+    return 'unconfirmed';
+  }
+  return payment.trashed ? 'statement_deleted' : null;
 }

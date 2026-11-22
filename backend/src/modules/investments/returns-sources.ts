@@ -13,6 +13,11 @@ export interface TrackedSource {
   accountId: string | null;
   liveValue: number;
   flows: Array<Pick<ValuedInvestmentFlow, 'date' | 'value' | 'kind'>>;
+  /**
+   * The money the holdings' trades moved, when `flows` are linked bank rows
+   * instead (the trades then are not flows of their own); absent otherwise.
+   */
+  tradeMoves?: Array<Pick<ValuedInvestmentFlow, 'date' | 'value' | 'kind'>>;
   /** Flags that keep the source out of the return. */
   blockers: ReturnsFlagCode[];
   /** Flags worth saying that leave the figures standing. */

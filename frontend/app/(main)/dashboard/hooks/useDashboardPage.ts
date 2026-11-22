@@ -6,8 +6,10 @@ import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useDashboard } from '@/app/hooks/useDashboard';
 import { useIsMobile } from '@/app/hooks/useIsMobile';
+import { usePayPeriods } from '@/app/hooks/usePayPeriods';
 import { usePullToRefresh } from '@/app/hooks/usePullToRefresh';
 import { useIntlayer, useLocale } from '@/app/i18n';
+import { periodOf } from '@/app/lib/contracts/workspaces/pay-period';
 import { FALLBACK_CURRENCY } from '@/app/lib/currency';
 import { resolveDashboardEffectivePeriod } from '@/app/lib/dashboard-effective-window';
 import { wholeUnitDigits } from '@/app/lib/user-format-store';
@@ -61,15 +63,17 @@ export function useDashboardPage() {
   const targetDateParam = pickedMonth ? formatDateOnly(pickedMonth) : undefined;
   const { data, isPending, error, refetch, range } = useDashboard('month', targetDateParam);
   const effectiveSince = data?.effectiveSince;
+  const { context: payPeriod } = usePayPeriods();
   const displayMonth = useMemo(() => {
     if (pickedMonth) {
       return pickedMonth;
     }
-    if (effectiveSince) {
-      return parseDateOnly(effectiveSince);
-    }
-    return new Date();
-  }, [pickedMonth, effectiveSince]);
+    const shown = effectiveSince ? parseDateOnly(effectiveSince) : new Date();
+    // A workspace month starting on another day is named after the month it
+    // mostly covers, which is not always the calendar month of its first day.
+    const named = payPeriod && parseMonthParam(periodOf(payPeriod, formatDateOnly(shown)));
+    return named || shown;
+  }, [pickedMonth, effectiveSince, payPeriod]);
   const isRedirecting = useDashboardRedirect({
     user,
     authLoading,

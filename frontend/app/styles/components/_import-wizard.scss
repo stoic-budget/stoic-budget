@@ -140,3 +140,123 @@
   cursor: pointer;
   text-decoration: underline;
 }
+
+// Import from another app (app/components/import-wizard/app-import).
+.seneca-ai {
+  &__files {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 16px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: var(--surface-soft);
+    color: var(--foreground);
+    font: inherit;
+    cursor: pointer;
+
+    &--active,
+    &:hover,
+    &:focus-visible {
+      border-color: var(--primary);
+    }
+  }
+
+  &__drop-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--primary);
+  }
+
+  &__file-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__file {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  &__file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__remove {
+    display: inline-flex;
+    padding: 4px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--foreground);
+      background: var(--surface-soft);
+    }
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__section-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  &__summary {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+  }
+
+  &__note {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  &__summary-row {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 8px;
+
+    dt {
+      color: var(--text-muted);
+    }
+
+    dd {
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+    }
+  }
+}

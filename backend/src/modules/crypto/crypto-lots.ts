@@ -14,6 +14,8 @@
  * compares against the balance the chain actually reports.
  */
 
+import { daysBetween, type Lot, takeFromLots } from '../../common/lots/lot-book';
+
 export interface LotEvent {
   asset: string;
   /** ISO date; events are sorted by it before anything else happens. */
@@ -85,12 +87,6 @@ export interface AssetBasis {
   incomplete: boolean;
 }
 
-interface Lot {
-  quantity: number;
-  unitCost: number;
-  date: string;
-}
-
 export interface BasisResult {
   byAsset: Map<string, AssetBasis>;
   /** Every sale in the events, oldest first. */
@@ -150,26 +146,14 @@ export function computeBasisWithDisposals(events: LotEvent[]): BasisResult {
         continue;
       }
 
-      let left = event.amount;
       const proceedsPerUnit = event.value / event.amount;
-      let matched = 0;
-      let cost = 0;
-      let oldest: string | null = null;
-      while (left > 0 && lots.length > 0) {
-        const lot = lots[0];
-        const taken = Math.min(lot.quantity, left);
-        realized += taken * (proceedsPerUnit - lot.unitCost);
-        matched += taken;
-        cost += taken * lot.unitCost;
-        oldest = oldest ?? lot.date;
-        lot.quantity -= taken;
-        left -= taken;
-        if (lot.quantity <= 1e-18) {
-          lots.shift();
-        }
+      const taken = takeFromLots(lots, event.amount, 'fifo');
+      for (const piece of taken.pieces) {
+        realized += piece.quantity * (proceedsPerUnit - piece.unitCost);
       }
+      const { matched, cost, oldest } = taken;
       // Sold more than we ever saw bought: the rest has no basis to measure against.
-      const uncovered = left > 1e-18 ? left : 0;
+      const uncovered = taken.uncovered;
       if (uncovered > 0) {
         incomplete = true;
       }
@@ -210,13 +194,6 @@ export function computeBasisWithDisposals(events: LotEvent[]): BasisResult {
     byAsset: result,
     disposals: disposals.sort((a, b) => a.date.localeCompare(b.date)),
   };
-}
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-function daysBetween(from: string, to: string): number {
-  const days = (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS;
-  return Number.isFinite(days) ? Math.max(Math.round(days), 0) : 0;
 }
 
 function round(value: number, decimals: number): number {

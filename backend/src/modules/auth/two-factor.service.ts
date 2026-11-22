@@ -16,9 +16,12 @@ import { APP_NAME } from '../../common/brand';
 import { appError } from '../../common/errors/app-error';
 import { decryptText, encryptText } from '../../common/utils/encryption.util';
 import { requireSecret } from '../../common/utils/required-secret.util';
+import type { LoginBody } from '../../contracts';
 import { User } from '../../entities';
 import { AuditAction, EntityType, Severity } from '../../entities/audit-event.entity';
 import { AuditService } from '../audit/audit.service';
+import type { TwoFactorChallengeDto } from './dto/auth-response.dto';
+import { PasskeyAuthService, type SecondFactorFlow } from './passkeys/passkey-auth.service';
 import { recordSecurityEvent } from './security-audit.util';
 
 const ISSUER = APP_NAME;
@@ -38,6 +41,11 @@ export interface TwoFactorSetupDto {
   qrDataUrl: string;
 }
 
+/** The login attempt a second-factor passkey challenge is bound to (see `SecondFactorFlow`). */
+export interface SecondFactorContext {
+  passkeyFlow?: SecondFactorFlow;
+}
+
 @Injectable()
 export class TwoFactorService {
   private readonly logger = new Logger(TwoFactorService.name);
@@ -47,6 +55,7 @@ export class TwoFactorService {
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
     private readonly auditService: AuditService,
+    private readonly passkeyAuth: PasskeyAuthService,
   ) {}
 
   async getStatus(userId: string): Promise<TwoFactorStatusDto> {
@@ -138,6 +147,48 @@ export class TwoFactorService {
     });
 
     return { recoveryCodes: codes };
+  }
+
+  /**
+   * The second step of a password login on an account with 2FA on: a passkey
+   * answering the challenge the first attempt returned, or a code. Without
+   * either, the challenge to ask for (with the passkey's, when there is one).
+   */
+  async checkLogin(
+    userId: string,
+    dto: LoginBody,
+    context?: SecondFactorContext,
+  ): Promise<TwoFactorChallengeDto | null> {
+    const flow = context?.passkeyFlow;
+    if (dto.twoFactorPasskey) {
+      await this.passkeyAuth.assertSecondFactor(userId, flow?.presented, dto.twoFactorPasskey);
+      return null;
+    }
+    if (!dto.twoFactorCode) {
+      // Without a flow to bind it to, no passkey challenge is offered: the code still works.
+      const passkeyOptions = flow
+        ? await this.passkeyOptionsOrNone(userId, flow.issued)
+        : undefined;
+      return { twoFactorRequired: true, ...(passkeyOptions ? { passkeyOptions } : {}) };
+    }
+    await this.assertLoginCode(userId, dto.twoFactorCode);
+    return null;
+  }
+
+  /**
+   * The passkey challenge to offer beside the code, or none when it cannot be
+   * built (no usable APP_URL, the challenge store not answering): the code
+   * field must still appear, or an account with both could not sign in at all.
+   */
+  private async passkeyOptionsOrNone(userId: string, issued: string) {
+    try {
+      return await this.passkeyAuth.secondFactorOptions(userId, issued);
+    } catch (error) {
+      this.logger.warn(
+        `Passkey options for the second factor unavailable: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return undefined;
+    }
   }
 
   /**

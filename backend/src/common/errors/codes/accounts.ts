@@ -51,6 +51,14 @@ export const ACCOUNTS_ERRORS = {
   OIDC_LAST_SIGN_IN_METHOD:
     'This is your only way to sign in. Set a password first with "Forgot password"',
   OIDC_SIGN_IN_EXPIRED: 'The sign-in took too long. Start again',
+  AUTH_PASSKEYS_UNAVAILABLE: 'Passkeys need APP_URL to be set on this server',
+  AUTH_PASSKEY_INVALID: 'The passkey could not be verified',
+  AUTH_PASSKEY_COUNTER_REGRESSION:
+    'This passkey reported an older use count than before and was refused',
+  AUTH_PASSKEY_REGISTRATION_INVALID: 'The new passkey could not be verified. Try again',
+  AUTH_PASSKEY_ALREADY_REGISTERED: 'This passkey is already registered',
+  AUTH_PASSKEY_NOT_FOUND: 'Passkey not found',
+  AUTH_PASSKEY_NAME_REQUIRED: 'Give the passkey a name',
   AUTHZ_PERMISSIONS_REQUIRED: 'Insufficient permissions. Required: {{permissions}}',
   AUTHZ_API_KEY_SCOPE_MISSING: 'API key scope missing: {{scopes}}',
   // ── api keys ────────────────────────────────────────────────────────────

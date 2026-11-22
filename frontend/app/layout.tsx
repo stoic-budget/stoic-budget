@@ -12,6 +12,7 @@ import { AppPanels } from './components/panels/AppPanels';
 import { ReceiptPlaceFollowupHost } from './components/receipts/place-followup/ReceiptPlaceFollowupHost';
 import { SidePanelProvider } from './components/side-panel/SidePanelContext';
 import { WelcomeTutorialHost } from './components/welcome-tutorial/WelcomeTutorialHost';
+import { WhatsNewHost } from './components/whats-new/WhatsNewHost';
 import { FONT_FAMILY_VARIABLES } from './font-faces';
 import { normalizeLocale } from './lib/locale';
 import { PRIVACY_BOOT_SCRIPT } from './lib/privacy-mode-boot';
@@ -110,6 +111,7 @@ export default async function RootLayout({
                     <MobileBottomBar />
                     <AppPanels />
                     <WelcomeTutorialHost />
+                    <WhatsNewHost />
                     <ReceiptPlaceFollowupHost />
                     <div
                       id="fab-portal"

@@ -35,6 +35,8 @@ const ALLOWED = new Set([
   'modules/auth/oidc/oidc-settings.service.ts',
   'modules/auth/password-reset.service.ts',
   'modules/auth/two-factor.service.ts',
+  // Adding, removing or a cloned-looking passkey.
+  'modules/auth/passkeys/passkey-helpers.ts',
   'modules/auth/registration-settings.service.ts',
   'modules/users/services/account-data.service.ts',
   'modules/users/services/email-change.service.ts',

@@ -91,4 +91,27 @@ describe('MailerService', () => {
 
     expect(createTransport).toHaveBeenCalledWith(expect.objectContaining({ host: 'mailpit' }));
   });
+
+  describe('the health page signal', () => {
+    const recordSmtpSend = vi.fn(async () => undefined);
+    const watched = new MailerService(settings as never, { recordSmtpSend } as never);
+
+    it("records each send through the server's own SMTP, good or failed", async () => {
+      settings.getSmtpSettings.mockResolvedValueOnce(smtp({ host: 'mailpit', source: 'env' }));
+      await watched.send({ ...content, workspaceId: 'ws-b' });
+      expect(recordSmtpSend).toHaveBeenLastCalledWith(true);
+
+      settings.getSmtpSettings.mockResolvedValueOnce(smtp({ host: 'mailpit', source: 'env' }));
+      sendMail.mockRejectedValue(new Error('535 authentication failed'));
+      await expect(watched.send({ ...content, workspaceId: 'ws-b' })).rejects.toThrow('535');
+      expect(recordSmtpSend).toHaveBeenLastCalledWith(false);
+      sendMail.mockReset();
+      sendMail.mockResolvedValue({ messageId: 'test' });
+    });
+
+    it("leaves a workspace's own mail server out of it", async () => {
+      await watched.send({ ...content, workspaceId: 'ws-b' });
+      expect(recordSmtpSend).not.toHaveBeenCalled();
+    });
+  });
 });

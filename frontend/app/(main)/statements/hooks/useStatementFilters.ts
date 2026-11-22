@@ -7,6 +7,7 @@ import {
   resetSingleStatementFilter,
   type StatementFilters,
 } from '@/app/(main)/statements/components/filters/statement-filters';
+import { usePayPeriods } from '@/app/hooks/usePayPeriods';
 
 const loadFilters = (storageKey: string): StatementFilters => {
   if (typeof window === 'undefined') {
@@ -74,11 +75,17 @@ export const useStatementFilters = (
   const [fromDropdownOpen, setFromDropdownOpen] = useState(false);
   const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false);
 
+  // The workspace's own month; a link's month is read again once it has loaded.
+  const { context } = usePayPeriods();
+  const linkFilters = useMemo(
+    () => monthDeepLinkFilters(deepLinkMonth, new Date(), context),
+    [deepLinkMonth, context],
+  );
   useEffect(() => {
-    const next = monthDeepLinkFilters(deepLinkMonth) ?? loadFilters(storageKey);
+    const next = linkFilters ?? loadFilters(storageKey);
     setDraftFilters(next);
     setAppliedFilters(next);
-  }, [storageKey, deepLinkMonth]);
+  }, [storageKey, linkFilters]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;

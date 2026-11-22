@@ -34,6 +34,7 @@ import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-re
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { snapshotAdminFields } from './admin-fields';
 import { CURRENT_DISCLAIMER_VERSION } from './disclaimer.constant';
+import { OWN_PROFILE_COLUMNS } from './own-profile-columns';
 import { recordPasswordChanged } from './password-changed';
 import { EmailChangeService } from './services/email-change.service';
 
@@ -64,42 +65,7 @@ export class UsersService {
   }
 
   private async findOneWithPassword(id: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      select: {
-        id: true,
-        email: true,
-        passwordHash: true,
-        name: true,
-        company: true,
-        role: true,
-        workspaceId: true,
-        telegramId: true,
-        telegramChatId: true,
-        createdAt: true,
-        updatedAt: true,
-        lastLogin: true,
-        isActive: true,
-        permissions: true,
-        locale: true,
-        timeZone: true,
-        dateFormat: true,
-        firstDayOfWeek: true,
-        uiDensity: true,
-        reduceMotion: true,
-        showDailyQuote: true,
-        roundAmounts: true,
-        themePreference: true,
-        mapStylePreference: true,
-        avatarUrl: true,
-        onboardingCompletedAt: true,
-        disclaimerAcceptedAt: true,
-        disclaimerVersion: true,
-        welcomeTutorialSeenAt: true,
-        pageHintsSeen: true,
-        tokenVersion: true,
-      },
-    });
+    const user = await this.userRepository.findOne({ where: { id }, select: OWN_PROFILE_COLUMNS });
 
     if (!user) {
       throw new NotFoundException(appError('USER_NOT_FOUND'));

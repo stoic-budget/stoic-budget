@@ -1,9 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { assertFound } from '../../common/utils/assert-found.util';
 import { flowsSql } from '../../common/utils/counted-transactions.util';
-import type { GoalPlanResponse, GoalPlanStatus } from '../../contracts';
+import {
+  type GoalPlanResponse,
+  type GoalPlanStatus,
+  monthsBetweenKeys,
+  type PayPeriodContext,
+  periodOf,
+  shiftMonth,
+} from '../../contracts';
 import { Goal } from '../../entities';
 import { Budget } from '../../entities/budget.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
@@ -12,9 +19,10 @@ import {
   computeMonthRange,
   normalizeLimitToMonth,
   overlapsWindow,
-  toMonthKey,
 } from '../budgets/budget-period.util';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { PayPeriodService } from '../pay-period/pay-period.service';
+import { orCalendar, periodBefore, periodKeyAt } from '../pay-period/pay-period-dates';
 import { GoalItemsService } from './goal-items.service';
 import {
   buildRateMap,
@@ -27,7 +35,8 @@ import {
 import { GoalProgressService } from './goal-progress.service';
 
 /**
- * How many complete months of history the pace and the income average read.
+ * How many complete months of history the pace and the income average read
+ * (the workspace's months, when it starts them on another day than the 1st).
  * Three is short enough to react to a change in circumstances and long enough
  * that one large month does not become the forecast.
  */
@@ -64,6 +73,7 @@ export class GoalPlanService {
     private readonly goalItemsService: GoalItemsService,
     private readonly exchangeRatesService: ExchangeRatesService,
     private readonly progressService: GoalProgressService,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
 
   async getPlan(goalId: string, workspaceId: string, now = new Date()): Promise<GoalPlanResponse> {
@@ -72,7 +82,8 @@ export class GoalPlanService {
 
     const currency = await this.getWorkspaceCurrency(workspaceId);
     const goalCurrency = normalizeCurrency(goal.currency);
-    const history = historyWindow(now, HISTORY_MONTHS);
+    const payPeriod = await this.payPeriods?.contextFor(workspaceId);
+    const history = historyWindow(now, HISTORY_MONTHS, payPeriod);
 
     // Progress and pace both come from the followed account's balance when the
     // goal follows one, and from its contributions otherwise.
@@ -97,7 +108,7 @@ export class GoalPlanService {
     const savedTotal = fromGoal(saved);
     const remaining = Math.max(declared - savedTotal, 0);
 
-    const monthsLeft = goal.targetDate ? monthsUntil(now, goal.targetDate) : null;
+    const monthsLeft = goal.targetDate ? monthsUntil(now, goal.targetDate, payPeriod) : null;
     const requiredPerMonth =
       monthsLeft === null ? null : monthsLeft > 0 ? remaining / monthsLeft : remaining;
 
@@ -107,12 +118,12 @@ export class GoalPlanService {
     // pace; zero observed months reports no pace at all rather than a fake one.
     // A followed account has its own history, which starts with the account.
     const since = progress.get(goal.id)?.since ?? goal.createdAt;
-    const monthsObserved = Math.min(HISTORY_MONTHS, monthsSinceStart(since, now));
+    const monthsObserved = Math.min(HISTORY_MONTHS, monthsSinceStart(since, now, payPeriod));
     const moved = await this.progressService.movedBetween(
       workspaceId,
       [goal],
       toDateOnly(history.start),
-      toDateOnly(startOfMonth(now)),
+      toDateOnly(periodBefore(payPeriod, now, 0).start),
     );
     const contributedInHistory = moved.get(goal.id) ?? 0;
     const perMonth =
@@ -125,11 +136,11 @@ export class GoalPlanService {
     const forecastMonth =
       monthsNeeded === null
         ? null
-        : toMonthKey(addMonths(startOfMonth(now), Math.max(monthsNeeded - 1, 0)));
+        : shiftMonth(periodKeyAt(payPeriod, now), Math.max(monthsNeeded - 1, 0));
     const monthsLate =
       monthsNeeded === null || monthsLeft === null ? null : Math.max(monthsNeeded - monthsLeft, 0);
 
-    const monthWindow = computeMonthRange(now);
+    const monthWindow = computeMonthRange(now, payPeriod);
     const committed = budgets
       .filter(budget => overlapsWindow(monthWindow, budget))
       .reduce(
@@ -224,12 +235,15 @@ function resolveStatus(
   return requiredPerMonth > free * TIGHT_RATIO ? 'tight' : 'on_track';
 }
 
-/** The last `months` complete calendar months, current month excluded. */
-function historyWindow(now: Date, months: number): { start: Date; end: Date } {
-  const firstOfThisMonth = startOfMonth(now);
+/** The last `months` complete months, current month excluded. */
+function historyWindow(
+  now: Date,
+  months: number,
+  payPeriod?: PayPeriodContext,
+): { start: Date; end: Date } {
   return {
-    start: addMonths(firstOfThisMonth, -months),
-    end: new Date(firstOfThisMonth.getFullYear(), firstOfThisMonth.getMonth(), 0),
+    start: periodBefore(payPeriod, now, months).start,
+    end: periodBefore(payPeriod, now, 1).end,
   };
 }
 
@@ -237,22 +251,15 @@ function historyWindow(now: Date, months: number): { start: Date; end: Date } {
  * Months from now to the target, counting the current one. A date inside this
  * month leaves one month, not zero; a date already past leaves none.
  */
-function monthsUntil(now: Date, targetDate: string): number {
-  const [year, month] = targetDate.split('-').map(Number);
-  const diff = (year - now.getFullYear()) * 12 + (month - 1 - now.getMonth()) + 1;
-  return Math.max(diff, 0);
+function monthsUntil(now: Date, targetDate: string, payPeriod?: PayPeriodContext): number {
+  const target = periodOf(orCalendar(payPeriod), targetDate);
+  return Math.max(monthsBetweenKeys(periodKeyAt(payPeriod, now), target) + 1, 0);
 }
 
 /** Complete months of history the goal itself has, counting the current one. */
-function monthsSinceStart(createdAt: Date, now: Date): number {
-  const created = new Date(createdAt);
-  return (now.getFullYear() - created.getFullYear()) * 12 + (now.getMonth() - created.getMonth());
-}
-
-function startOfMonth(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
-}
-
-function addMonths(date: Date, months: number): Date {
-  return new Date(date.getFullYear(), date.getMonth() + months, 1);
+function monthsSinceStart(createdAt: Date, now: Date, payPeriod?: PayPeriodContext): number {
+  return monthsBetweenKeys(
+    periodKeyAt(payPeriod, new Date(createdAt)),
+    periodKeyAt(payPeriod, now),
+  );
 }

@@ -60,7 +60,15 @@ export class ManualRowDuplicateService {
     // already standing in for a row an earlier import flagged.
     const booked = await this.transactionRepository
       .createQueryBuilder('t')
-      .select(['t.id', 't.transactionDate', 't.currency', 't.debit', 't.credit'])
+      .select([
+        't.id',
+        't.transactionDate',
+        't.currency',
+        't.debit',
+        't.credit',
+        't.walletId',
+        't.loanInterestOfId',
+      ])
       .where('t.workspaceId = :workspaceId', { workspaceId })
       .andWhere('t.statementId IS NULL')
       .andWhere('t.cryptoWalletId IS NULL')
@@ -81,6 +89,9 @@ export class ManualRowDuplicateService {
       // The closest date wins: two payments of one price are two payments.
       const match = booked
         .filter(row => !taken.has(row.id) && row.currency === draft.currency)
+        // Interest split off a loan payment is the loan account's own charge:
+        // only that account's statement can repeat it, not any row of the price.
+        .filter(row => !row.loanInterestOfId || row.walletId === draft.walletId)
         .filter(row => {
           const rowSide = sideOf(row);
           return rowSide?.side === draftSide?.side && rowSide?.cents === draftSide?.cents;

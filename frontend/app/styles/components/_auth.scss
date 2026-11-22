@@ -182,7 +182,23 @@
   }
 }
 
-// "or" between the password form and single sign-on: a hairline on each side.
+// A second way in (a passkey): outlined, in ink, under the main button.
+.seneca-auth-secondary.MuiButton-root {
+  padding: 11px 16px;
+  border-radius: 8px;
+  border-color: var(--border);
+  color: var(--foreground);
+  font-size: 15px;
+  font-weight: 500;
+  text-transform: none;
+
+  &:hover {
+    border-color: var(--border);
+    background-color: var(--surface-soft);
+  }
+}
+
+// "or" between two ways to sign in, on a hairline.
 .seneca-auth-divider {
   display: flex;
   align-items: center;

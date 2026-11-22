@@ -57,6 +57,14 @@ export type CompleteBankSyncLinkBody = Wire<typeof CompleteBankSyncLinkBody>;
 export const UpdateBankSyncConnectionBody = Schema.Struct({
   label: optionalNullable(Label),
   autoSync: optionalNullable(Schema.Boolean),
+  /** How often auto-sync pulls this connection, in whole hours. */
+  syncIntervalHours: optionalNullable(
+    Schema.Number.check(
+      Schema.isInt(),
+      Schema.isGreaterThanOrEqualTo(1),
+      Schema.isLessThanOrEqualTo(24),
+    ),
+  ),
 });
 export type UpdateBankSyncConnectionBody = Wire<typeof UpdateBankSyncConnectionBody>;
 

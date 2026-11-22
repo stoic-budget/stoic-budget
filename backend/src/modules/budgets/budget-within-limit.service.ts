@@ -5,13 +5,7 @@ import { flowsSql } from '../../common/utils/counted-transactions.util';
 import { Budget, BudgetRolloverMode } from '../../entities/budget.entity';
 import { Category } from '../../entities/category.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
-import {
-  clampToWindow,
-  computePeriodRange,
-  localDay,
-  overlapsWindow,
-  parseDateOnly,
-} from './budget-period.util';
+import { clampToWindow, localDay, overlapsWindow, parseDateOnly } from './budget-period.util';
 import { resolveAvailable } from './budget-rollover.util';
 import {
   allocateWithinLimit,
@@ -59,7 +53,7 @@ export class BudgetWithinLimitService {
       budgets.map(async budget => {
         const categoryIds = await this.budgets.categoryIdsFor(workspaceId, budget.categoryId);
         const periods: WithinLimitBudget['periods'] = [];
-        let range = computePeriodRange(budget.periodType, from);
+        let range = await this.budgets.periodRange(budget, from);
         while (range.start.getTime() <= to.getTime()) {
           const period = clampToWindow(range, budget);
           if (period) {
@@ -83,8 +77,8 @@ export class BudgetWithinLimitService {
               remaining: availableAmount - spentBefore,
             });
           }
-          range = computePeriodRange(
-            budget.periodType,
+          range = await this.budgets.periodRange(
+            budget,
             new Date(range.end.getFullYear(), range.end.getMonth(), range.end.getDate() + 1),
           );
         }

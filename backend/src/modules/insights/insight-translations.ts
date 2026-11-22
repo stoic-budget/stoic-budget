@@ -15,7 +15,10 @@ type BaseMessageKey =
   | 'pattern.unbudgeted_top_category'
   | 'trend.savings_rate_up'
   | 'trend.savings_rate_down'
-  | 'pattern.risky_allocation';
+  | 'pattern.risky_allocation'
+  | 'trend.category_anomaly'
+  | 'pattern.idle_cash'
+  | 'pattern.net_worth_milestone';
 
 /** Stoic keys have five wordings each and live in stoic-texts/. */
 export type InsightMessageKey = BaseMessageKey | StoicMessageKey;
@@ -66,6 +69,21 @@ const ru: TranslationMap = {
     message:
       '{{percent}}% активов в среднем и высоком риске — больше порога в {{threshold}}%. Держите большую часть того, чем владеете, вне власти случая.',
   },
+  'trend.category_anomaly': {
+    title: 'Необычные траты: "{{category}}"',
+    message:
+      'Уже {{currentAmount}}, хотя обычный месяц из последних {{months}} обходился в {{usualAmount}}. Исключение допустимо, если оно выбрано; спросите себя, было ли выбрано это.',
+  },
+  'pattern.idle_cash': {
+    title: 'Деньги лежат без дела',
+    message:
+      'На повседневных счетах {{cashAmount}} — около {{months}} мес. ваших трат. Оставьте запас в {{reserveAmount}}, а остальному дайте задачу: цель или вложение.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Капитал превысил {{milestoneAmount}}',
+    message:
+      'То, чем вы владеете, за вычетом долгов перешло отметку {{milestoneAmount}} {{date}}. Отметьте это спокойно: привычки, которые привели сюда, важнее числа.',
+  },
 };
 
 const en: TranslationMap = {
@@ -108,6 +126,21 @@ const en: TranslationMap = {
     message:
       "{{percent}}% of assets sit in medium or high risk — above the {{threshold}}% limit. Keep most of what you own out of fortune's reach.",
   },
+  'trend.category_anomaly': {
+    title: 'Unusual spending on "{{category}}"',
+    message:
+      '{{currentAmount}} so far, where a typical month of the last {{months}} came to {{usualAmount}}. An exception is fine when it is chosen; ask whether this one was.',
+  },
+  'pattern.idle_cash': {
+    title: 'Money resting without a task',
+    message:
+      'Your everyday accounts hold {{cashAmount}}, about {{months}} months of your spending. Keep a reserve of {{reserveAmount}} and give the rest a purpose: a goal or an investment.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Net worth passed {{milestoneAmount}}',
+    message:
+      'What you own minus what you owe crossed {{milestoneAmount}} on {{date}}. Note it calmly: the habits that brought you here matter more than the number.',
+  },
 };
 
 const kk: TranslationMap = {
@@ -148,6 +181,21 @@ const kk: TranslationMap = {
     title: 'Тым көп нәрсе сәттілікке байланысты',
     message:
       'Активтердің {{percent}}%-ы орташа және жоғары тәуекелде — {{threshold}}% шегінен жоғары. Иелігіңіздің басым бөлігін кездейсоқтықтың қолынан тыс ұстаңыз.',
+  },
+  'trend.category_anomaly': {
+    title: 'Әдеттен тыс шығын: "{{category}}"',
+    message:
+      'Қазірдің өзінде {{currentAmount}}, ал соңғы {{months}} айдың әдеттегі айы {{usualAmount}} болған. Таңдалған ерекшелік — қалыпты; бұл таңдалды ма, өзіңізден сұраңыз.',
+  },
+  'pattern.idle_cash': {
+    title: 'Ақша іссіз жатыр',
+    message:
+      'Күнделікті шоттарда {{cashAmount}} — шығындарыңыздың шамамен {{months}} айы. {{reserveAmount}} қор қалдырыңыз, ал қалғанына міндет беріңіз: мақсат не инвестиция.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Капитал {{milestoneAmount}} асты',
+    message:
+      'Қарызды шегергендегі мүлкіңіз {{date}} {{milestoneAmount}} белесінен асты. Мұны сабырмен атап өтіңіз: мұнда жеткізген әдеттер саннан маңыздырақ.',
   },
 };
 
@@ -192,6 +240,21 @@ const de: TranslationMap = {
     message:
       '{{percent}}% der Vermögenswerte liegen im mittleren oder hohen Risiko — über der Grenze von {{threshold}}%. Halten Sie das meiste, was Sie besitzen, außer Reichweite des Zufalls.',
   },
+  'trend.category_anomaly': {
+    title: 'Ungewöhnliche Ausgaben für „{{category}}“',
+    message:
+      'Bisher {{currentAmount}}, während ein typischer Monat der letzten {{months}} bei {{usualAmount}} lag. Eine Ausnahme ist in Ordnung, wenn sie gewählt ist; fragen Sie sich, ob diese es war.',
+  },
+  'pattern.idle_cash': {
+    title: 'Geld ruht ohne Aufgabe',
+    message:
+      'Ihre Alltagskonten halten {{cashAmount}}, etwa {{months}} Monate Ihrer Ausgaben. Behalten Sie eine Reserve von {{reserveAmount}} und geben Sie dem Rest einen Zweck: ein Ziel oder eine Anlage.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Nettovermögen über {{milestoneAmount}}',
+    message:
+      'Was Sie besitzen, abzüglich Ihrer Schulden, hat am {{date}} {{milestoneAmount}} überschritten. Nehmen Sie es gelassen zur Kenntnis: Die Gewohnheiten, die Sie hierher gebracht haben, zählen mehr als die Zahl.',
+  },
 };
 
 const fr: TranslationMap = {
@@ -234,6 +297,21 @@ const fr: TranslationMap = {
     message:
       "{{percent}}% des actifs sont en risque moyen ou élevé — au-delà du seuil de {{threshold}}%. Gardez l'essentiel de ce que vous possédez hors de portée du hasard.",
   },
+  'trend.category_anomaly': {
+    title: 'Dépenses inhabituelles : « {{category}} »',
+    message:
+      "Déjà {{currentAmount}}, alors qu'un mois ordinaire parmi les {{months}} derniers coûtait {{usualAmount}}. Une exception va bien si elle est choisie ; demandez-vous si celle-ci l'a été.",
+  },
+  'pattern.idle_cash': {
+    title: "De l'argent qui dort sans mission",
+    message:
+      'Vos comptes courants contiennent {{cashAmount}}, environ {{months}} mois de vos dépenses. Gardez une réserve de {{reserveAmount}} et donnez au reste un but : un objectif ou un placement.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Patrimoine net au-delà de {{milestoneAmount}}',
+    message:
+      'Ce que vous possédez moins ce que vous devez a franchi {{milestoneAmount}} le {{date}}. Notez-le avec calme : les habitudes qui vous ont mené ici comptent plus que le chiffre.',
+  },
 };
 
 const es: TranslationMap = {
@@ -273,6 +351,21 @@ const es: TranslationMap = {
     title: 'Demasiado depende de la fortuna',
     message:
       'El {{percent}}% de los activos está en riesgo medio o alto, por encima del límite del {{threshold}}%. Mantén la mayor parte de lo que posees fuera del alcance del azar.',
+  },
+  'trend.category_anomaly': {
+    title: 'Gasto inusual en "{{category}}"',
+    message:
+      'Ya van {{currentAmount}}, cuando un mes típico de los últimos {{months}} rondaba {{usualAmount}}. Una excepción está bien si se elige; pregúntese si esta lo fue.',
+  },
+  'pattern.idle_cash': {
+    title: 'Dinero quieto sin tarea',
+    message:
+      'Sus cuentas del día a día guardan {{cashAmount}}, unos {{months}} meses de sus gastos. Conserve una reserva de {{reserveAmount}} y dé al resto un propósito: una meta o una inversión.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Patrimonio neto por encima de {{milestoneAmount}}',
+    message:
+      'Lo que posee menos lo que debe superó {{milestoneAmount}} el {{date}}. Anótelo con calma: los hábitos que le trajeron hasta aquí importan más que la cifra.',
   },
 };
 
@@ -315,6 +408,21 @@ const pt: TranslationMap = {
     message:
       '{{percent}}% dos ativos estão em risco médio ou alto — acima do limite de {{threshold}}%. Mantenha a maior parte do que possui fora do alcance do acaso.',
   },
+  'trend.category_anomaly': {
+    title: 'Gasto invulgar em "{{category}}"',
+    message:
+      'Já vão {{currentAmount}}, quando um mês típico dos últimos {{months}} ficava em {{usualAmount}}. Uma exceção está bem quando é escolhida; pergunte-se se esta foi.',
+  },
+  'pattern.idle_cash': {
+    title: 'Dinheiro parado sem tarefa',
+    message:
+      'As suas contas do dia a dia guardam {{cashAmount}}, cerca de {{months}} meses dos seus gastos. Mantenha uma reserva de {{reserveAmount}} e dê ao resto um propósito: uma meta ou um investimento.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Património líquido acima de {{milestoneAmount}}',
+    message:
+      'O que possui menos o que deve passou {{milestoneAmount}} em {{date}}. Registe-o com calma: os hábitos que o trouxeram até aqui contam mais do que o número.',
+  },
 };
 
 const tr: TranslationMap = {
@@ -354,6 +462,21 @@ const tr: TranslationMap = {
     title: 'Çok şey talihe bağlı',
     message:
       'Varlıkların %{{percent}} kadarı orta veya yüksek riskte — %{{threshold}} sınırının üzerinde. Sahip olduklarınızın çoğunu tesadüfün erişiminden uzak tutun.',
+  },
+  'trend.category_anomaly': {
+    title: '"{{category}}" için olağan dışı harcama',
+    message:
+      'Şimdiden {{currentAmount}}; oysa son {{months}} ayın tipik bir ayı {{usualAmount}} tutuyordu. Seçilmiş bir istisna yerindedir; bunun seçilip seçilmediğini kendinize sorun.',
+  },
+  'pattern.idle_cash': {
+    title: 'Para görevsiz bekliyor',
+    message:
+      'Günlük hesaplarınızda {{cashAmount}} var; bu, harcamalarınızın yaklaşık {{months}} ayı. {{reserveAmount}} tutarında bir yedek ayırın, geri kalanına bir görev verin: bir hedef ya da bir yatırım.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Net varlık {{milestoneAmount}} eşiğini geçti',
+    message:
+      'Sahip olduklarınızdan borçlarınız düşüldüğünde kalan, {{date}} tarihinde {{milestoneAmount}} eşiğini aştı. Bunu sakince not edin: sizi buraya getiren alışkanlıklar sayıdan daha önemlidir.',
   },
 };
 
@@ -396,6 +519,21 @@ const uk: TranslationMap = {
     message:
       '{{percent}}% активів у середньому та високому ризику — більше за поріг {{threshold}}%. Тримайте більшу частину того, чим володієте, поза владою випадку.',
   },
+  'trend.category_anomaly': {
+    title: 'Незвичні витрати: "{{category}}"',
+    message:
+      'Уже {{currentAmount}}, хоча звичайний місяць з останніх {{months}} коштував {{usualAmount}}. Виняток доречний, якщо його обрано; запитайте себе, чи обрано цей.',
+  },
+  'pattern.idle_cash': {
+    title: 'Гроші лежать без діла',
+    message:
+      'На повсякденних рахунках {{cashAmount}} — близько {{months}} міс. ваших витрат. Залиште запас у {{reserveAmount}}, а решті дайте завдання: ціль чи вкладення.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Капітал перевищив {{milestoneAmount}}',
+    message:
+      'Те, чим ви володієте, за вирахуванням боргів перейшло позначку {{milestoneAmount}} {{date}}. Відзначте це спокійно: звички, що привели сюди, важать більше за число.',
+  },
 };
 
 const zh: TranslationMap = {
@@ -434,6 +572,21 @@ const zh: TranslationMap = {
     title: '太多东西取决于运气',
     message:
       '{{percent}}% 的资产处于中高风险，超过 {{threshold}}% 的上限。让您拥有的大部分东西远离偶然的支配。',
+  },
+  'trend.category_anomaly': {
+    title: '“{{category}}”的支出异常',
+    message:
+      '目前已达 {{currentAmount}}，而过去 {{months}} 个月中的典型月份约为 {{usualAmount}}。经过选择的例外无妨；问问自己，这一次是否是你的选择。',
+  },
+  'pattern.idle_cash': {
+    title: '闲置无用的钱',
+    message:
+      '你的日常账户中有 {{cashAmount}}，约合 {{months}} 个月的支出。留出 {{reserveAmount}} 作为储备，其余的给它一项任务：一个目标或一笔投资。',
+  },
+  'pattern.net_worth_milestone': {
+    title: '净资产超过 {{milestoneAmount}}',
+    message:
+      '你所拥有的减去所欠的，在 {{date}} 越过了 {{milestoneAmount}}。平静地记下它：带你走到这里的习惯比数字更重要。',
   },
 };
 
@@ -477,6 +630,21 @@ const pl: TranslationMap = {
     message:
       '{{percent}}% aktywów jest w średnim lub wysokim ryzyku — powyżej progu {{threshold}}%. Trzymaj większość tego, co posiadasz, poza zasięgiem przypadku.',
   },
+  'trend.category_anomaly': {
+    title: 'Nietypowe wydatki: „{{category}}”',
+    message:
+      'Już {{currentAmount}}, choć typowy miesiąc z ostatnich {{months}} kosztował {{usualAmount}}. Wyjątek jest w porządku, gdy jest wybrany; zapytaj siebie, czy ten był.',
+  },
+  'pattern.idle_cash': {
+    title: 'Pieniądze leżą bez zadania',
+    message:
+      'Na kontach codziennych masz {{cashAmount}}, około {{months}} mies. Twoich wydatków. Zostaw rezerwę {{reserveAmount}}, a resztę zaprzęgnij do zadania: celu lub inwestycji.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Majątek netto przekroczył {{milestoneAmount}}',
+    message:
+      'To, co posiadasz, minus to, co jesteś winien, przekroczyło {{milestoneAmount}} dnia {{date}}. Odnotuj to spokojnie: nawyki, które Cię tu przywiodły, znaczą więcej niż liczba.',
+  },
 };
 
 const it: TranslationMap = {
@@ -517,6 +685,21 @@ const it: TranslationMap = {
     title: 'Troppo dipende dalla fortuna',
     message:
       'Il {{percent}}% degli asset è a rischio medio o alto, oltre la soglia del {{threshold}}%. Tieni la maggior parte di ciò che possiedi fuori dalla portata del caso.',
+  },
+  'trend.category_anomaly': {
+    title: 'Spesa insolita per "{{category}}"',
+    message:
+      "Già {{currentAmount}}, mentre un mese tipico degli ultimi {{months}} si fermava a {{usualAmount}}. Un'eccezione va bene se è scelta; chiediti se questa lo è stata.",
+  },
+  'pattern.idle_cash': {
+    title: 'Denaro fermo senza un compito',
+    message:
+      'I tuoi conti di tutti i giorni contengono {{cashAmount}}, circa {{months}} mesi delle tue spese. Tieni una riserva di {{reserveAmount}} e dai al resto uno scopo: un obiettivo o un investimento.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Patrimonio netto oltre {{milestoneAmount}}',
+    message:
+      'Ciò che possiedi meno ciò che devi ha superato {{milestoneAmount}} il {{date}}. Prendine nota con calma: le abitudini che ti hanno portato qui contano più del numero.',
   },
 };
 
@@ -560,6 +743,21 @@ const sk: TranslationMap = {
     message:
       '{{percent}}% aktív je v strednom alebo vysokom riziku — nad hranicou {{threshold}}%. Väčšinu toho, čo vlastníte, držte mimo dosahu náhody.',
   },
+  'trend.category_anomaly': {
+    title: 'Nezvyčajné výdavky: „{{category}}“',
+    message:
+      'Už {{currentAmount}}, hoci typický mesiac z posledných {{months}} stál {{usualAmount}}. Výnimka je v poriadku, keď je zvolená; opýtajte sa, či bola zvolená táto.',
+  },
+  'pattern.idle_cash': {
+    title: 'Peniaze ležia bez úlohy',
+    message:
+      'Na bežných účtoch máte {{cashAmount}}, asi {{months}} mesiacov vašich výdavkov. Nechajte si rezervu {{reserveAmount}} a zvyšku dajte účel: cieľ alebo investíciu.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Čistý majetok prekročil {{milestoneAmount}}',
+    message:
+      'To, čo vlastníte, mínus to, čo dlhujete, prekročilo {{date}} hranicu {{milestoneAmount}}. Zaznamenajte to pokojne: návyky, ktoré vás sem priviedli, sú dôležitejšie než číslo.',
+  },
 };
 
 const ja: TranslationMap = {
@@ -599,6 +797,21 @@ const ja: TranslationMap = {
     title: '運に左右されるものが多すぎます',
     message:
       '資産の {{percent}}% が中〜高リスクにあり、上限の {{threshold}}% を超えています。持っているものの大半を、偶然の手の届かない所に置きましょう。',
+  },
+  'trend.category_anomaly': {
+    title: '「{{category}}」の支出がいつもと違います',
+    message:
+      'すでに {{currentAmount}}。直近 {{months}} か月の典型的な月は {{usualAmount}} でした。選んだ例外なら構いません。今回が選んだものだったか、自分に問いかけてください。',
+  },
+  'pattern.idle_cash': {
+    title: '役目のないまま眠るお金',
+    message:
+      '日常の口座に {{cashAmount}}、支出のおよそ {{months}} か月分があります。{{reserveAmount}} を備えとして残し、残りには目標か投資という役目を与えましょう。',
+  },
+  'pattern.net_worth_milestone': {
+    title: '純資産が {{milestoneAmount}} を超えました',
+    message:
+      '持っているものから負っているものを引いた額が、{{date}}に {{milestoneAmount}} を越えました。静かに受け止めましょう。ここへ導いた習慣こそ、数字より大切です。',
   },
 };
 
@@ -640,6 +853,21 @@ const ko: TranslationMap = {
     message:
       '자산의 {{percent}}%가 중간 또는 높은 위험에 있어 {{threshold}}% 한도를 넘습니다. 가진 것의 대부분을 우연의 손이 닿지 않는 곳에 두세요.',
   },
+  'trend.category_anomaly': {
+    title: '"{{category}}" 지출이 평소와 다릅니다',
+    message:
+      '벌써 {{currentAmount}}입니다. 최근 {{months}}개월의 보통 달은 {{usualAmount}}였습니다. 스스로 고른 예외라면 괜찮습니다. 이번이 그랬는지 자신에게 물어보세요.',
+  },
+  'pattern.idle_cash': {
+    title: '할 일 없이 쉬고 있는 돈',
+    message:
+      '일상 계좌에 {{cashAmount}}, 지출의 약 {{months}}개월분이 있습니다. {{reserveAmount}}는 비상금으로 남기고, 나머지에는 목표나 투자라는 할 일을 주세요.',
+  },
+  'pattern.net_worth_milestone': {
+    title: '순자산이 {{milestoneAmount}}를 넘었습니다',
+    message:
+      '가진 것에서 빚을 뺀 금액이 {{date}}에 {{milestoneAmount}}를 넘었습니다. 담담하게 기록해 두세요. 여기까지 이끈 습관이 숫자보다 중요합니다.',
+  },
 };
 
 const hi: TranslationMap = {
@@ -679,6 +907,21 @@ const hi: TranslationMap = {
     title: 'बहुत कुछ भाग्य पर निर्भर है',
     message:
       '{{percent}}% संपत्तियाँ मध्यम या उच्च जोखिम में हैं — {{threshold}}% सीमा से अधिक। अपनी अधिकांश चीज़ें संयोग की पहुँच से दूर रखें।',
+  },
+  'trend.category_anomaly': {
+    title: '"{{category}}" पर असामान्य खर्च',
+    message:
+      'अब तक {{currentAmount}}, जबकि पिछले {{months}} महीनों का एक सामान्य महीना {{usualAmount}} का था। चुना हुआ अपवाद ठीक है; ख़ुद से पूछिए कि क्या यह चुना गया था।',
+  },
+  'pattern.idle_cash': {
+    title: 'बिना काम के पड़ा पैसा',
+    message:
+      'आपके रोज़मर्रा के खातों में {{cashAmount}} हैं, यानी लगभग {{months}} महीनों का खर्च। {{reserveAmount}} का भंडार रखिए और बाक़ी को एक काम दीजिए: कोई लक्ष्य या निवेश।',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'शुद्ध संपत्ति {{milestoneAmount}} से ऊपर',
+    message:
+      'आपकी संपत्ति में से कर्ज़ घटाकर जो बचता है, वह {{date}} को {{milestoneAmount}} के पार गया। इसे शांति से दर्ज कीजिए: यहाँ तक लाने वाली आदतें संख्या से ज़्यादा मायने रखती हैं।',
   },
 };
 
@@ -722,6 +965,21 @@ const nl: TranslationMap = {
     message:
       '{{percent}}% van de activa zit in middel of hoog risico — boven de grens van {{threshold}}%. Houd het meeste van wat je bezit buiten bereik van het toeval.',
   },
+  'trend.category_anomaly': {
+    title: 'Ongewone uitgaven aan "{{category}}"',
+    message:
+      'Al {{currentAmount}}, terwijl een gewone maand van de laatste {{months}} op {{usualAmount}} uitkwam. Een uitzondering is prima als ze gekozen is; vraag je af of deze dat was.',
+  },
+  'pattern.idle_cash': {
+    title: 'Geld dat rust zonder taak',
+    message:
+      'Je dagelijkse rekeningen bevatten {{cashAmount}}, ongeveer {{months}} maanden aan uitgaven. Houd een reserve van {{reserveAmount}} aan en geef de rest een doel: een spaardoel of een belegging.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Nettovermogen boven {{milestoneAmount}}',
+    message:
+      'Wat je bezit min wat je schuldig bent, ging op {{date}} over {{milestoneAmount}}. Neem het kalm ter kennis: de gewoonten die je hier brachten, tellen meer dan het getal.',
+  },
 };
 
 const sv: TranslationMap = {
@@ -762,6 +1020,21 @@ const sv: TranslationMap = {
     title: 'För mycket hänger på turen',
     message:
       '{{percent}}% av tillgångarna ligger i medel eller hög risk — över gränsen på {{threshold}}%. Håll det mesta av det du äger utom räckhåll för slumpen.',
+  },
+  'trend.category_anomaly': {
+    title: 'Ovanliga utgifter för "{{category}}"',
+    message:
+      'Redan {{currentAmount}}, medan en vanlig månad av de senaste {{months}} landade på {{usualAmount}}. Ett undantag är rätt när det är valt; fråga dig om detta var det.',
+  },
+  'pattern.idle_cash': {
+    title: 'Pengar som vilar utan uppgift',
+    message:
+      'Dina vardagskonton rymmer {{cashAmount}}, omkring {{months}} månaders utgifter. Behåll en reserv på {{reserveAmount}} och ge resten ett syfte: ett mål eller en investering.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Nettoförmögenheten passerade {{milestoneAmount}}',
+    message:
+      'Det du äger minus det du är skyldig passerade {{milestoneAmount}} den {{date}}. Notera det lugnt: vanorna som förde dig hit betyder mer än siffran.',
   },
 };
 
@@ -804,6 +1077,21 @@ const vi: TranslationMap = {
     message:
       '{{percent}}% tài sản ở mức rủi ro trung bình hoặc cao — vượt ngưỡng {{threshold}}%. Hãy giữ phần lớn những gì bạn sở hữu ngoài tầm với của may rủi.',
   },
+  'trend.category_anomaly': {
+    title: 'Chi tiêu bất thường cho "{{category}}"',
+    message:
+      'Đã {{currentAmount}}, trong khi một tháng điển hình trong {{months}} tháng qua là {{usualAmount}}. Một ngoại lệ được chọn thì không sao; hãy tự hỏi lần này có phải do bạn chọn.',
+  },
+  'pattern.idle_cash': {
+    title: 'Tiền nằm yên không có nhiệm vụ',
+    message:
+      'Tài khoản thường ngày của bạn đang giữ {{cashAmount}}, khoảng {{months}} tháng chi tiêu. Hãy giữ {{reserveAmount}} làm dự phòng và giao cho phần còn lại một nhiệm vụ: một mục tiêu hoặc một khoản đầu tư.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Tài sản ròng vượt {{milestoneAmount}}',
+    message:
+      'Những gì bạn sở hữu trừ đi những gì bạn nợ đã vượt {{milestoneAmount}} vào {{date}}. Hãy ghi nhận điều đó một cách điềm tĩnh: những thói quen đưa bạn đến đây quan trọng hơn con số.',
+  },
 };
 
 const id: TranslationMap = {
@@ -844,6 +1132,21 @@ const id: TranslationMap = {
     title: 'Terlalu banyak bergantung pada nasib',
     message:
       '{{percent}}% aset berada di risiko menengah atau tinggi — di atas batas {{threshold}}%. Jaga sebagian besar milik Anda di luar jangkauan kebetulan.',
+  },
+  'trend.category_anomaly': {
+    title: 'Pengeluaran tak biasa untuk "{{category}}"',
+    message:
+      'Sudah {{currentAmount}}, padahal bulan biasa dari {{months}} bulan terakhir sekitar {{usualAmount}}. Pengecualian tidak apa-apa bila dipilih; tanyakan pada diri sendiri apakah yang ini dipilih.',
+  },
+  'pattern.idle_cash': {
+    title: 'Uang diam tanpa tugas',
+    message:
+      'Rekening harian Anda menyimpan {{cashAmount}}, sekitar {{months}} bulan pengeluaran. Sisihkan cadangan {{reserveAmount}} dan beri sisanya tujuan: sebuah target atau investasi.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Kekayaan bersih melewati {{milestoneAmount}}',
+    message:
+      'Apa yang Anda miliki dikurangi utang melewati {{milestoneAmount}} pada {{date}}. Catat dengan tenang: kebiasaan yang membawa Anda ke sini lebih penting daripada angkanya.',
   },
 };
 
@@ -887,6 +1190,21 @@ const da: TranslationMap = {
     message:
       '{{percent}} % af aktiverne ligger i mellem eller høj risiko — over grænsen på {{threshold}} %. Hold det meste af det, du ejer, uden for heldets rækkevidde.',
   },
+  'trend.category_anomaly': {
+    title: 'Usædvanligt forbrug på "{{category}}"',
+    message:
+      'Allerede {{currentAmount}}, mens en typisk måned af de seneste {{months}} lå på {{usualAmount}}. En undtagelse er i orden, når den er valgt; spørg dig selv, om denne var.',
+  },
+  'pattern.idle_cash': {
+    title: 'Penge, der hviler uden opgave',
+    message:
+      'Dine hverdagskonti rummer {{cashAmount}}, omkring {{months}} måneders forbrug. Behold en reserve på {{reserveAmount}}, og giv resten et formål: et mål eller en investering.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Nettoformuen passerede {{milestoneAmount}}',
+    message:
+      'Det, du ejer, minus det, du skylder, passerede {{milestoneAmount}} den {{date}}. Notér det roligt: vanerne, der bragte dig hertil, betyder mere end tallet.',
+  },
 };
 
 const nb: TranslationMap = {
@@ -928,6 +1246,21 @@ const nb: TranslationMap = {
     title: 'For mye avhenger av flaks',
     message:
       '{{percent}} % av eiendelene ligger i middels eller høy risiko — over grensen på {{threshold}} %. Hold det meste av det du eier utenfor flaksens rekkevidde.',
+  },
+  'trend.category_anomaly': {
+    title: 'Uvanlig forbruk på "{{category}}"',
+    message:
+      'Allerede {{currentAmount}}, mens en vanlig måned av de siste {{months}} lå på {{usualAmount}}. Et unntak er greit når det er valgt; spør deg selv om dette var det.',
+  },
+  'pattern.idle_cash': {
+    title: 'Penger som hviler uten oppgave',
+    message:
+      'Hverdagskontoene dine har {{cashAmount}}, omtrent {{months}} måneders forbruk. Behold en reserve på {{reserveAmount}}, og gi resten et formål: et mål eller en investering.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Nettoformuen passerte {{milestoneAmount}}',
+    message:
+      'Det du eier minus det du skylder, passerte {{milestoneAmount}} den {{date}}. Merk deg det med ro: vanene som brakte deg hit, betyr mer enn tallet.',
   },
 };
 
@@ -971,6 +1304,21 @@ const nn: TranslationMap = {
     message:
       '{{percent}} % av eigedelane ligg i middels eller høg risiko — over grensa på {{threshold}} %. Hald det meste av det du eig utanfor rekkjevidda til flaksen.',
   },
+  'trend.category_anomaly': {
+    title: 'Uvanleg forbruk på "{{category}}"',
+    message:
+      'Alt {{currentAmount}}, medan ein vanleg månad av dei siste {{months}} låg på {{usualAmount}}. Eit unntak er greitt når det er valt; spør deg sjølv om dette var det.',
+  },
+  'pattern.idle_cash': {
+    title: 'Pengar som kviler utan oppgåve',
+    message:
+      'Kvardagskontoane dine har {{cashAmount}}, om lag {{months}} månader med forbruk. Behald ein reserve på {{reserveAmount}}, og gje resten eit føremål: eit mål eller ei investering.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Nettoformuen passerte {{milestoneAmount}}',
+    message:
+      'Det du eig minus det du skuldar, passerte {{milestoneAmount}} den {{date}}. Merk deg det med ro: vanane som førte deg hit, tyder meir enn talet.',
+  },
 };
 
 const fi: TranslationMap = {
@@ -1013,6 +1361,21 @@ const fi: TranslationMap = {
     message:
       '{{percent}} % varoista on keskisuuressa tai korkeassa riskissä — yli {{threshold}} %:n rajan. Pidä suurin osa omaisuudestasi onnen ulottumattomissa.',
   },
+  'trend.category_anomaly': {
+    title: 'Poikkeuksellista kulutusta: "{{category}}"',
+    message:
+      'Jo {{currentAmount}}, kun tavallinen kuukausi viimeisistä {{months}} kuukaudesta oli {{usualAmount}}. Poikkeus on hyvä, kun se on valittu; kysy itseltäsi, oliko tämä.',
+  },
+  'pattern.idle_cash': {
+    title: 'Rahaa levossa ilman tehtävää',
+    message:
+      'Arkitileilläsi on {{cashAmount}}, noin {{months}} kuukauden kulutus. Pidä {{reserveAmount}} varana ja anna lopulle tehtävä: tavoite tai sijoitus.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Nettovarallisuus ylitti {{milestoneAmount}}',
+    message:
+      'Omistamasi miinus velkasi ylitti {{milestoneAmount}} {{date}}. Pane se merkille tyynesti: tänne tuoneet tavat merkitsevät enemmän kuin luku.',
+  },
 };
 
 const is: TranslationMap = {
@@ -1053,6 +1416,21 @@ const is: TranslationMap = {
     title: 'Of margt hangir á gæfunni',
     message:
       '{{percent}} % eigna liggja í miðlungs eða mikilli hættu — yfir markinu {{threshold}} %. Haltu mestu af því sem þú eigur utan seilingar gæfunnar.',
+  },
+  'trend.category_anomaly': {
+    title: 'Óvenjuleg útgjöld í „{{category}}“',
+    message:
+      'Nú þegar {{currentAmount}}, en dæmigerður mánuður síðustu {{months}} mánaða var {{usualAmount}}. Undantekning er í lagi þegar hún er valin; spyrðu þig hvort þessi var það.',
+  },
+  'pattern.idle_cash': {
+    title: 'Peningar í hvíld án verkefnis',
+    message:
+      'Hversdagsreikningar þínir geyma {{cashAmount}}, um {{months}} mánaða útgjöld. Haltu varasjóði upp á {{reserveAmount}} og gefðu afganginum tilgang: markmið eða fjárfestingu.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Hrein eign fór yfir {{milestoneAmount}}',
+    message:
+      'Það sem þú átt að frádregnu því sem þú skuldar fór yfir {{milestoneAmount}} þann {{date}}. Taktu eftir því í rólegheitum: venjurnar sem komu þér hingað skipta meira máli en talan.',
   },
 };
 
@@ -1096,6 +1474,21 @@ const fo: TranslationMap = {
     message:
       '{{percent}} % av eignunum liggja í miðal ella høgum vanda — yvir markinum {{threshold}} %. Hav tað mesta av tí tú eigur uttan fyri rák happsins.',
   },
+  'trend.category_anomaly': {
+    title: 'Óvanlig útreiðsla til „{{category}}“',
+    message:
+      'Longu {{currentAmount}}, meðan ein vanligur mánaður av teimum seinastu {{months}} lá á {{usualAmount}}. Eitt undantak er í lagi, tá ið tað er valt; spyr teg sjálvan, um hetta var tað.',
+  },
+  'pattern.idle_cash': {
+    title: 'Pengar, sum hvíla uttan uppgávu',
+    message:
+      'Gerandiskontur tínar hava {{cashAmount}}, umleið {{months}} mánaðar útreiðslur. Varðveit ein varagrunn uppá {{reserveAmount}}, og gev restini eitt endamál: eitt mál ella eina íløgu.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Nettoognin fór upp um {{milestoneAmount}}',
+    message:
+      'Tað, sum tú eigur, frádrigið tí, sum tú skyldar, fór upp um {{milestoneAmount}} {{date}}. Legg merki til tað í friði: vanarnir, sum førdu teg higar, hava meira at siga enn talið.',
+  },
 };
 
 const cs: TranslationMap = {
@@ -1136,6 +1529,21 @@ const cs: TranslationMap = {
     title: 'Příliš mnoho závisí na náhodě',
     message:
       '{{percent}} % aktiv leží ve středním nebo vysokém riziku — nad limitem {{threshold}} %. Většinu toho, co máte, držte mimo dosah náhody.',
+  },
+  'trend.category_anomaly': {
+    title: 'Neobvyklé výdaje: „{{category}}“',
+    message:
+      'Už {{currentAmount}}, ačkoli typický měsíc z posledních {{months}} stál {{usualAmount}}. Výjimka je v pořádku, když je zvolená; zeptejte se, zda byla zvolená tato.',
+  },
+  'pattern.idle_cash': {
+    title: 'Peníze leží bez úkolu',
+    message:
+      'Na běžných účtech máte {{cashAmount}}, asi {{months}} měsíců vašich výdajů. Ponechte si rezervu {{reserveAmount}} a zbytku dejte účel: cíl nebo investici.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Čisté jmění překročilo {{milestoneAmount}}',
+    message:
+      'To, co vlastníte, minus to, co dlužíte, překročilo {{date}} hranici {{milestoneAmount}}. Zaznamenejte to klidně: návyky, které vás sem přivedly, jsou důležitější než číslo.',
   },
 };
 
@@ -1180,6 +1588,21 @@ const bg: TranslationMap = {
     message:
       '{{percent}} % от активите са в среден или висок риск — над лимита от {{threshold}} %. Дръжте по-голямата част от онова, което притежавате, извън обсега на случайността.',
   },
+  'trend.category_anomaly': {
+    title: 'Необичайни разходи за „{{category}}“',
+    message:
+      'Вече {{currentAmount}}, докато обичайният месец от последните {{months}} е струвал {{usualAmount}}. Изключението е наред, когато е избрано; запитайте се дали това е било.',
+  },
+  'pattern.idle_cash': {
+    title: 'Пари, които лежат без задача',
+    message:
+      'По ежедневните ви сметки има {{cashAmount}} — около {{months}} месеца от разходите ви. Оставете резерв от {{reserveAmount}}, а на останалото дайте задача: цел или инвестиция.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Нетното имущество надмина {{milestoneAmount}}',
+    message:
+      'Това, което притежавате, минус това, което дължите, надмина {{milestoneAmount}} на {{date}}. Отбележете го спокойно: навиците, които ви доведоха дотук, са по-важни от числото.',
+  },
 };
 
 const hr: TranslationMap = {
@@ -1220,6 +1643,21 @@ const hr: TranslationMap = {
     title: 'Previše ovisi o sreći',
     message:
       '{{percent}} % imovine je u srednjem ili visokom riziku — iznad ograničenja od {{threshold}} %. Većinu onoga što imate držite izvan dosega sreće.',
+  },
+  'trend.category_anomaly': {
+    title: 'Neobična potrošnja: "{{category}}"',
+    message:
+      'Već {{currentAmount}}, dok je tipičan mjesec od posljednjih {{months}} iznosio {{usualAmount}}. Iznimka je u redu kad je odabrana; zapitajte se je li ova bila.',
+  },
+  'pattern.idle_cash': {
+    title: 'Novac miruje bez zadatka',
+    message:
+      'Na svakodnevnim računima imate {{cashAmount}}, oko {{months}} mjeseci vaše potrošnje. Zadržite pričuvu od {{reserveAmount}}, a ostatku dajte svrhu: cilj ili ulaganje.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Neto imovina prešla je {{milestoneAmount}}',
+    message:
+      'Ono što posjedujete umanjeno za ono što dugujete prešlo je {{milestoneAmount}} {{date}}. Zabilježite to mirno: navike koje su vas dovele ovamo važnije su od broja.',
   },
 };
 
@@ -1262,6 +1700,21 @@ const sr: TranslationMap = {
     message:
       '{{percent}} % активе је у средњем или високом ризику — изнад ограничења од {{threshold}} %. Већину онога што имате држите изван домашаја среће.',
   },
+  'trend.category_anomaly': {
+    title: 'Необична потрошња: „{{category}}“',
+    message:
+      'Већ {{currentAmount}}, док је типичан месец од последњих {{months}} износио {{usualAmount}}. Изузетак је у реду када је изабран; запитајте се да ли је овај био.',
+  },
+  'pattern.idle_cash': {
+    title: 'Новац мирује без задатка',
+    message:
+      'На свакодневним рачунима имате {{cashAmount}}, око {{months}} месеци ваше потрошње. Задржите резерву од {{reserveAmount}}, а остатку дајте сврху: циљ или улагање.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Нето имовина је прешла {{milestoneAmount}}',
+    message:
+      'Оно што поседујете умањено за оно што дугујете прешло је {{milestoneAmount}} {{date}}. Забележите то мирно: навике које су вас довеле овде важније су од броја.',
+  },
 };
 
 const sl: TranslationMap = {
@@ -1302,6 +1755,21 @@ const sl: TranslationMap = {
     title: 'Preveč je odvisno od sreče',
     message:
       '{{percent}} % sredstev je v srednjem ali visokem tveganju — nad omejitvijo {{threshold}} %. Večino tega, kar imate, držite zunaj dosega sreče.',
+  },
+  'trend.category_anomaly': {
+    title: 'Nenavadna poraba: »{{category}}«',
+    message:
+      'Že {{currentAmount}}, medtem ko je tipičen mesec zadnjih {{months}} znašal {{usualAmount}}. Izjema je v redu, ko je izbrana; vprašajte se, ali je bila ta.',
+  },
+  'pattern.idle_cash': {
+    title: 'Denar miruje brez naloge',
+    message:
+      'Na vsakdanjih računih imate {{cashAmount}}, približno {{months}} mesecev vaše porabe. Obdržite rezervo {{reserveAmount}}, ostanku pa dajte namen: cilj ali naložbo.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Neto premoženje je preseglo {{milestoneAmount}}',
+    message:
+      'Kar imate, zmanjšano za to, kar dolgujete, je {{date}} preseglo {{milestoneAmount}}. Zabeležite to mirno: navade, ki so vas pripeljale sem, so pomembnejše od številke.',
   },
 };
 
@@ -1345,6 +1813,21 @@ const mk: TranslationMap = {
     message:
       '{{percent}} % од активата е во среден или висок риск — над лимитот од {{threshold}} %. Повеќето од тоа што го имате држете го надвор од дофатот на среќата.',
   },
+  'trend.category_anomaly': {
+    title: 'Невообичаено трошење: „{{category}}“',
+    message:
+      'Веќе {{currentAmount}}, додека типичен месец од последните {{months}} изнесувал {{usualAmount}}. Исклучокот е во ред кога е избран; запрашајте се дали овој бил.',
+  },
+  'pattern.idle_cash': {
+    title: 'Пари што мируваат без задача',
+    message:
+      'На секојдневните сметки имате {{cashAmount}}, околу {{months}} месеци од вашето трошење. Задржете резерва од {{reserveAmount}}, а на остатокот дајте му цел: цел за штедење или инвестиција.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Нето имотот ја надмина {{milestoneAmount}}',
+    message:
+      'Она што го поседувате, намалено за она што го должите, ја надмина {{milestoneAmount}} на {{date}}. Забележете го тоа смирено: навиките што ве донесоа тука се поважни од бројот.',
+  },
 };
 
 const be: TranslationMap = {
@@ -1385,6 +1868,21 @@ const be: TranslationMap = {
     title: 'Залішне многае залежыць ад выпадку',
     message:
       '{{percent}} % актываў у сярэдняй або высокай рызыцы — вышэй за ліміт {{threshold}} %. Трымайце большую частку свайго па-за дасяжнасцю выпадку.',
+  },
+  'trend.category_anomaly': {
+    title: 'Незвычайныя выдаткі: "{{category}}"',
+    message:
+      'Ужо {{currentAmount}}, хоць звычайны месяц з апошніх {{months}} каштаваў {{usualAmount}}. Выключэнне дапушчальнае, калі яно абранае; спытайце сябе, ці абранае гэтае.',
+  },
+  'pattern.idle_cash': {
+    title: 'Грошы ляжаць без справы',
+    message:
+      'На штодзённых рахунках {{cashAmount}} — каля {{months}} мес. вашых выдаткаў. Пакіньце запас у {{reserveAmount}}, а астатняму дайце задачу: мэту ці ўкладанне.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Капітал перавысіў {{milestoneAmount}}',
+    message:
+      'Тое, чым вы валодаеце, за вылікам даўгоў перайшло адзнаку {{milestoneAmount}} {{date}}. Адзначце гэта спакойна: звычкі, што прывялі сюды, важнейшыя за лік.',
   },
 };
 
@@ -1427,6 +1925,21 @@ const bs: TranslationMap = {
     message:
       '{{percent}} % imovine je u srednjem ili visokom riziku — iznad ograničenja od {{threshold}} %. Većinu onoga što imate držite izvan dosega sreće.',
   },
+  'trend.category_anomaly': {
+    title: 'Neobična potrošnja: "{{category}}"',
+    message:
+      'Već {{currentAmount}}, dok je tipičan mjesec od posljednjih {{months}} iznosio {{usualAmount}}. Izuzetak je u redu kad je odabran; zapitajte se da li je ovaj bio.',
+  },
+  'pattern.idle_cash': {
+    title: 'Novac miruje bez zadatka',
+    message:
+      'Na svakodnevnim računima imate {{cashAmount}}, oko {{months}} mjeseci vaše potrošnje. Zadržite rezervu od {{reserveAmount}}, a ostatku dajte svrhu: cilj ili ulaganje.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Neto imovina je prešla {{milestoneAmount}}',
+    message:
+      'Ono što posjedujete umanjeno za ono što dugujete prešlo je {{milestoneAmount}} {{date}}. Zabilježite to mirno: navike koje su vas dovele ovdje važnije su od broja.',
+  },
 };
 
 const hsb: TranslationMap = {
@@ -1468,6 +1981,21 @@ const hsb: TranslationMap = {
     title: 'Přewjele wot zbožá wotwisuje',
     message:
       '{{percent}} % aktiwow leži w srjedźnym abo wysokim riziku — nad limitom {{threshold}} %. Dźeržće najwjetši dźěl toho, což maće, zwonka dosaha zbožá.',
+  },
+  'trend.category_anomaly': {
+    title: 'Njewšědne wudawki za "{{category}}"',
+    message:
+      'Hižo {{currentAmount}}, hdźež je typiski měsac z poslednich {{months}} {{usualAmount}} płaćił. Wuwzaće je w porjadku, hdyž je wuzwolene; prašejće so, hač bě tute wuzwolene.',
+  },
+  'pattern.idle_cash': {
+    title: 'Pjenjezy wotpočuja bjez nadawka',
+    message:
+      'Na wšědnych kontach maće {{cashAmount}}, něhdźe {{months}} měsacow wašich wudawkow. Wobchowajće sej rezerwu {{reserveAmount}} a dajće zbytkej zaměr: cil abo inwesticiju.',
+  },
+  'pattern.net_worth_milestone': {
+    title: 'Čiste wobsydstwo je {{milestoneAmount}} překročiło',
+    message:
+      'Štož wobsedźiće, mjenje toho, štož dołžiće, je {{date}} hranicu {{milestoneAmount}} překročiło. Zwobjedźće to měrnje: přiwučenja, kotrež su was sem přiwjedli, su wažniše hač ličba.',
   },
 };
 

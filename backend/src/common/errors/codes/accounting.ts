@@ -49,6 +49,18 @@ export const ACCOUNTING_ERRORS = {
     'The last payment would fall after 31 December 9999: start earlier or shorten the term',
   LOAN_TERMS_ROUNDING:
     'At this rate and term a payment rounded to the cent no longer repays the loan on time: shorten the term',
+  LOAN_PAYMENT_NOT_FOUND: 'Payment not found on this loan account',
+  LOAN_PAYMENT_CURRENCY:
+    'The payment is in {{currency}} and the loan in {{loanCurrency}}; only a payment in the loan currency can be split',
+  LOAN_PAYMENT_BEFORE_START: 'The payment is dated before the loan starts on {{startDate}}',
+  LOAN_PAYMENT_SPLIT_PART:
+    'The payment is divided into parts; join them before splitting off the interest',
+  LOAN_PAYMENT_ALREADY_SPLIT: 'The payment is already split into principal and interest',
+  LOAN_PAYMENT_INTEREST_TOO_LARGE: 'The interest cannot be more than the payment, {{amount}}',
+  LOAN_PAYMENT_SPLIT_FIRST_JOIN:
+    'The payment is split into principal and interest: join the principal and interest back first',
+  LOAN_INTEREST_STAYS_ON_LOAN:
+    'Interest split off a loan payment stays an expense on the loan account: join the payment back first',
   WALLET_CREDIT_LIMIT_CARD_ONLY: 'Only a credit card account can have a credit limit',
   TRANSFER_SAME_ACCOUNT: 'The transaction is already in this account',
   // Payables
@@ -186,6 +198,19 @@ export const ACCOUNTING_ERRORS = {
   INVESTMENTS_EXPENSE_ONLY_CONTRIBUTION: 'An expense can only be a contribution',
   INVESTMENTS_INCOME_ROLE_REQUIRED: 'Say whether this income is a withdrawal or a dividend',
   INVESTMENTS_HOLDING_NOT_FOUND: 'Holding not found',
+  INVESTMENTS_TRADE_NOT_FOUND: 'Trade not found',
+  INVESTMENTS_TRADE_QUANTITY_REQUIRED: 'This trade needs a quantity above zero',
+  INVESTMENTS_TRADE_AMOUNT_REQUIRED: 'A dividend needs the amount it paid',
+  INVESTMENTS_TRADE_RATIO_REQUIRED: 'A split needs both sides of its ratio',
+  INVESTMENTS_TRADE_EXCEEDS_HOLDING:
+    'This would sell or move out more than the holding has on that day',
+  INVESTMENTS_TRADE_CURRENCY_MISMATCH: 'All trades of a holding are in one currency ({{currency}})',
+  INVESTMENTS_TRADES_NOT_FOR_METALS: 'Metal lots are bought and sold on the metals card',
+  INVESTMENTS_QUANTITY_FROM_TRADES: 'This holding takes its quantity from its trades',
+  INVESTMENTS_HOLDING_NO_SYMBOL: 'Give the holding a symbol to keep its daily closes',
+  INVESTMENTS_CLOSE_IN_FUTURE: 'A close cannot be dated after today',
+  INVESTMENTS_CLOSE_NOT_FOUND: 'Close not found',
+  INVESTMENTS_LOOK_THROUGH_FUNDS_ONLY: 'Only an ETF or a fund can be split by weights',
   // ── metals ──────────────────────────────────────────────────────
   METALS_LOT_METAL_REQUIRED: 'A lot needs a metal',
   METALS_WEIGHT_REQUIRED: 'A lot needs the weight of one piece',
