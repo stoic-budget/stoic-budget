@@ -26,6 +26,11 @@ export interface CoverageInput {
   balanceEnd: number | null;
   counted: number;
   pending: number;
+  /**
+   * Rows dedupe set aside as copies of rows already booked: printed by the
+   * bank all the same, so part of the statement's movement.
+   */
+  copies: number;
   rowCount: number;
   fileHash: string;
   sourceAccountIndex: number | null;
@@ -186,16 +191,17 @@ function chainBreaksOf(live: Dated[]): CoverageChainBreak[] {
 
 /**
  * Opening balance plus every row of the statement against its closing
- * balance. Rows still waiting in Review are the statement's rows all the
- * same, so they explain their share; only what no row explains is a mismatch.
+ * balance. Rows still waiting in Review, and rows set aside as copies of rows
+ * already booked, are the statement's rows all the same, so they explain their
+ * share; only what no row explains is a mismatch.
  */
 function movementMismatchesOf(live: Dated[]): CoverageMovementMismatch[] {
   return live.flatMap(({ input, from, to }) => {
-    const { balanceStart: opening, balanceEnd: closing, counted, pending } = input;
+    const { balanceStart: opening, balanceEnd: closing, counted, pending, copies } = input;
     if (opening === null || closing === null) {
       return [];
     }
-    const difference = cents(closing - opening - counted - pending);
+    const difference = cents(closing - opening - counted - pending - copies);
     return Math.abs(difference) < CENT
       ? []
       : [

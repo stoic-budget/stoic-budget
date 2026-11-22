@@ -23,6 +23,7 @@ interface StatementRow {
   createdAt: Date | string;
   counted: string;
   pending: string;
+  copies: string;
   rowCount: string;
   synced: boolean;
 }
@@ -50,7 +51,7 @@ const STATEMENTS_SQL = `
     s.status, s.balance_start AS "balanceStart", s.balance_end AS "balanceEnd",
     s.file_hash AS "fileHash", s.source_account_index AS "sourceAccountIndex",
     s.created_at AS "createdAt",
-    rows."rowsFrom", rows."rowsTo", rows.counted, rows.pending, rows."rowCount",
+    rows."rowsFrom", rows."rowsTo", rows.counted, rows.pending, rows.copies, rows."rowCount",
     (s.file_type = 'ofx' AND rows.synced) AS synced
   FROM statements s
   CROSS JOIN LATERAL (
@@ -61,6 +62,8 @@ const STATEMENTS_SQL = `
         FILTER (WHERE ${countedSql('r')}), 0) AS counted,
       COALESCE(SUM(COALESCE(r.credit, 0) - COALESCE(r.debit, 0))
         FILTER (WHERE r.is_verified = false AND r.is_duplicate = false), 0) AS pending,
+      COALESCE(SUM(COALESCE(r.credit, 0) - COALESCE(r.debit, 0))
+        FILTER (WHERE r.is_duplicate = true), 0) AS copies,
       COALESCE(bool_or(s.account_number IS NOT NULL
         AND left(r.document_number, length(s.account_number) + 1) = s.account_number || ':'), false) AS synced
     FROM transactions r
@@ -116,6 +119,7 @@ export class StatementCoverageService {
         balanceEnd: amount(row.balanceEnd),
         counted: Number(row.counted) || 0,
         pending: Number(row.pending) || 0,
+        copies: Number(row.copies) || 0,
         rowCount: Number(row.rowCount) || 0,
         fileHash: row.fileHash,
         sourceAccountIndex: row.sourceAccountIndex,

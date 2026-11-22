@@ -19,6 +19,7 @@ const statement = (overrides: Partial<CoverageInput> & { id: string }): Coverage
   balanceEnd: null,
   counted: 0,
   pending: 0,
+  copies: 0,
   rowCount: 0,
   fileHash: `hash-${overrides.id}`,
   sourceAccountIndex: null,
@@ -247,12 +248,14 @@ describe('computeCoverage', () => {
     expect(result.chainBreaks).toEqual([]);
   });
 
-  it('checks each statement opening plus its rows against its closing, rows in Review included', () => {
+  it('checks each statement opening plus its rows against its closing, rows in Review and copies included', () => {
     const result = coverage([
       // Every row confirmed: adds up.
       statement({ id: 'ok', from: '2026-01-01', to: '2026-01-31', balanceStart: 100, balanceEnd: 80, counted: -20 }),
       // Half its rows still in Review: they explain their share.
       statement({ id: 'review', from: '2026-02-01', to: '2026-02-28', balanceStart: 80, balanceEnd: 50, counted: -10, pending: -20 }),
+      // A row set aside as a copy of one booked by hand: the bank printed it all the same.
+      statement({ id: 'copy', from: '2026-02-01', to: '2026-02-28', balanceStart: 100, balanceEnd: 70, counted: -10, copies: -20 }),
       // A row missing: 12.34 nobody explains.
       statement({ id: 'short', from: '2026-03-01', to: '2026-03-31', balanceStart: 50, balanceEnd: 37.66, counted: 0 }),
     ]);

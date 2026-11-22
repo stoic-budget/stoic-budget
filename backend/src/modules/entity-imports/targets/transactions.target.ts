@@ -255,6 +255,15 @@ export class TransactionsTarget implements ImportTarget {
     const totalCredit = items
       .filter(item => item.type === TransactionType.INCOME)
       .reduce((sum, item) => sum + item.amount, 0);
+    const from = new Date(
+      reaches.before && ctx.period?.from ? ctx.period.from : Math.min(...dates),
+    );
+    const to = new Date(reaches.after && ctx.period?.to ? ctx.period.to : Math.max(...dates));
+    // The period goes into the hash too: two quiet periods have the same
+    // (header-only) sheet, and must not read as one file uploaded twice.
+    const fileHash = createHash('sha256')
+      .update(`${csv}\n${from.toISOString()}/${to.toISOString()}`)
+      .digest('hex');
     const baseName = (ctx.fileName || 'import').replace(/\.[^.]+$/, '');
     const fileName = normalizeFilename(`${baseName}-import.csv`);
     const filePath = path.join(resolveUploadsDir(), `${randomUUID()}.csv`);
@@ -268,16 +277,12 @@ export class TransactionsTarget implements ImportTarget {
         filePath,
         fileType: FileType.CSV,
         fileSize: csv.length,
-        fileHash: createHash('sha256').update(csv).digest('hex'),
+        fileHash,
         bankName: BankName.OTHER,
         status: StatementStatus.COMPLETED,
         processedAt: new Date(),
-        statementDateFrom: new Date(
-          reaches.before && ctx.period?.from ? ctx.period.from : Math.min(...dates),
-        ),
-        statementDateTo: new Date(
-          reaches.after && ctx.period?.to ? ctx.period.to : Math.max(...dates),
-        ),
+        statementDateFrom: from,
+        statementDateTo: to,
         totalTransactions: items.length,
         totalDebit,
         totalCredit,

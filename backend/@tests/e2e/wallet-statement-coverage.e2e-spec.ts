@@ -317,47 +317,52 @@ describe('Account statement coverage (e2e)', () => {
     expect(coverage.gaps).toEqual([]);
   });
 
-  it('closes a gap no money moved in with a sheet reaching past both ends of it', async () => {
+  it('closes gaps no money moved in with a sheet reaching past both ends of each', async () => {
     const savings = await newWallet('Savings');
-    await seedStatement(owner, {
-      walletId: savings,
-      statementDateFrom: new Date('2026-01-01'),
-      statementDateTo: new Date('2026-01-30'),
-    });
-    await seedStatement(owner, {
-      walletId: savings,
-      statementDateFrom: new Date('2026-02-01'),
-      statementDateTo: new Date('2026-02-28'),
-    });
+    for (const [from, to] of [
+      ['2026-01-01', '2026-01-30'],
+      ['2026-02-01', '2026-02-27'],
+      ['2026-03-01', '2026-03-31'],
+    ]) {
+      await seedStatement(owner, {
+        walletId: savings,
+        statementDateFrom: new Date(from),
+        statementDateTo: new Date(to),
+      });
+    }
     expect((await coverageOf(owner, savings)).gaps).toEqual([
       { from: '2026-01-31', to: '2026-01-31', days: 1 },
+      { from: '2026-02-28', to: '2026-02-28', days: 1 },
     ]);
 
-    const imported = await as(
-      owner,
-      request(server())
-        .post('/entity-imports')
-        .send({
-          target: 'transactions',
-          mapping: { date: 0, merchant: 1, amount: 2 },
-          rows: [
-            ['2026-01-29', 'Interest One', '0.10'],
-            ['2026-02-02', 'Interest One', '0.10'],
-          ],
-          headers: ['Date', 'Merchant', 'Amount'],
-          fileName: 'savings-export.csv',
-          options: { currency, categorize: false, walletId: savings, dateFrom: '2026-01-31', dateTo: '2026-01-31' },
-        }),
-    ).expect(201);
-    expect(imported.body.counts).toMatchObject({ created: 0, skipped: 2 });
+    // The same sheet for each quiet day: the two empty statements are not one file twice.
+    for (const day of ['2026-01-31', '2026-02-28']) {
+      const imported = await as(
+        owner,
+        request(server())
+          .post('/entity-imports')
+          .send({
+            target: 'transactions',
+            mapping: { date: 0, merchant: 1, amount: 2 },
+            rows: [
+              ['2026-01-29', 'Interest One', '0.10'],
+              ['2026-03-02', 'Interest One', '0.10'],
+            ],
+            headers: ['Date', 'Merchant', 'Amount'],
+            fileName: 'savings-export.csv',
+            options: { currency, categorize: false, walletId: savings, dateFrom: day, dateTo: day },
+          }),
+      ).expect(201);
+      expect(imported.body.counts).toMatchObject({ created: 0, skipped: 2 });
+    }
 
     const coverage = await coverageOf(owner, savings);
     expect(coverage.gaps).toEqual([]);
-    expect(coverage.periods.find(period => period.fileName.startsWith('savings-export'))).toMatchObject({
-      from: '2026-01-31',
-      to: '2026-01-31',
-      rowCount: 0,
-    });
+    const quiet = coverage.periods.filter(period => period.fileName.startsWith('savings-export'));
+    expect(quiet).toEqual([
+      expect.objectContaining({ from: '2026-01-31', to: '2026-01-31', rowCount: 0, duplicateOf: null }),
+      expect.objectContaining({ from: '2026-02-28', to: '2026-02-28', rowCount: 0, duplicateOf: null }),
+    ]);
   });
 
   it('takes a statement whose rows dedupe flagged as copies for a copy, only within this workspace', async () => {
