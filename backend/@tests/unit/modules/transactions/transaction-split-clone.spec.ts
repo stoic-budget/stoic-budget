@@ -1,8 +1,6 @@
 import type { Transaction } from '@/entities/transaction.entity';
-import {
-  assertSplitAllowed,
-  cloneForSplit,
-} from '@/modules/transactions/helpers/transaction-split-clone';
+import { assertSplittable } from '@/modules/transactions/helpers/split-guards';
+import { cloneForSplit } from '@/modules/transactions/helpers/transaction-split-clone';
 
 describe('cloneForSplit', () => {
   it('hands the payment type to every part', () => {
@@ -24,18 +22,20 @@ describe('cloneForSplit', () => {
   });
 });
 
-describe('assertSplitAllowed', () => {
-  it('refuses a row the bank has not booked yet', () => {
-    const pending = { workspaceId: 'ws-1', isPending: true } as Transaction;
+describe('assertSplittable', () => {
+  const parts = { parts: [{ amount: '6' }, { amount: '4' }] } as never;
 
-    expect(() => assertSplitAllowed(pending)).toThrow(
+  it('refuses a row the bank has not booked yet', () => {
+    const pending = { workspaceId: 'ws-1', amount: '10', isPending: true } as Transaction;
+
+    expect(() => assertSplittable(pending, parts, null)).toThrow(
       expect.objectContaining({ response: expect.objectContaining({ code: 'TRANSACTION_SPLIT_PENDING' }) }),
     );
   });
 
   it('lets a booked row through', () => {
-    const booked = { workspaceId: 'ws-1', isPending: false } as Transaction;
+    const booked = { workspaceId: 'ws-1', amount: '10', isPending: false } as Transaction;
 
-    expect(() => assertSplitAllowed(booked)).not.toThrow();
+    expect(() => assertSplittable(booked, parts, null)).not.toThrow();
   });
 });

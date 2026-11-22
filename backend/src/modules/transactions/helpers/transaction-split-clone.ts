@@ -1,6 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-import { appError } from '../../../common/errors/app-error';
-import type { Transaction } from '../../../entities/transaction.entity';
+import { type Transaction, TransactionCategorySource } from '../../../entities/transaction.entity';
 
 /**
  * Builds the sibling template: every column a split part inherits verbatim from
@@ -13,7 +11,7 @@ import type { Transaction } from '../../../entities/transaction.entity';
  * amountForeign) and the split markers, which `split()` assigns itself;
  * `fingerprint`, which backfill recomputes from the post-split amount; and the
  * duplicate-flag columns and `isPending`, unreachable because a flagged or a
- * pending row cannot be split (`assertSplitAllowed`).
+ * pending row cannot be split (`assertSplittable`).
  */
 export function cloneForSplit(source: Transaction): Partial<Transaction> {
   return {
@@ -45,6 +43,9 @@ export function cloneForSplit(source: Transaction): Partial<Transaction> {
     // Each part starts on the same person as the whole; splitting a shared
     // purchase between two people is done by reassigning the parts afterwards.
     ownerMemberId: source.ownerMemberId,
+    // A private row's parts stay private, each keeping the real category behind the Private one.
+    isPrivate: source.isPrivate,
+    privateCategoryId: source.privateCategoryId,
     article: source.article,
     activityType: source.activityType,
     vendorNormalized: source.vendorNormalized,
@@ -62,29 +63,23 @@ export function cloneForSplit(source: Transaction): Partial<Transaction> {
   };
 }
 
-/** Refuses a row that may not be split, whatever the parts would be. */
-export function assertSplitAllowed(transaction: Transaction): void {
-  if (transaction.splitGroupId) {
-    throw new BadRequestException(appError('TRANSACTION_ALREADY_SPLIT'));
+/**
+ * A part's own category, else what it inherited. A private row stays in the
+ * Private category for everyone; the part's own goes behind it, for its owner.
+ */
+export function applyPartCategory(
+  row: Transaction,
+  categoryId: string | null | undefined,
+  isPrivate: boolean,
+): void {
+  if (!categoryId) {
+    return;
   }
-
-  // A duplicate-flagged row is excluded from dashboards and reports. Splitting it
-  // would produce siblings that default to isDuplicate=false, so the sibling
-  // amounts would reappear in those totals. Refuse instead.
-  if (transaction.isDuplicate) {
-    throw new BadRequestException(appError('TRANSACTION_SPLIT_DUPLICATE'));
-  }
-
-  // A pending row counts nowhere, and its parts would default to booked rows
-  // that count. Its booked version replaces it in place; split that one.
-  if (transaction.isPending) {
-    throw new BadRequestException(appError('TRANSACTION_SPLIT_PENDING'));
-  }
-
-  // A locked row has already been reported on a filed return. Splitting it
-  // re-assesses the tax across the parts, which would change figures that
-  // have been submitted to a tax authority.
-  if (transaction.taxLocked) {
-    throw new BadRequestException(appError('TRANSACTION_SPLIT_TAX_LOCKED'));
+  if (isPrivate) {
+    row.privateCategoryId = categoryId;
+  } else if (categoryId !== row.categoryId) {
+    row.categoryId = categoryId;
+    row.categorySource = TransactionCategorySource.MANUAL;
+    row.categoryReason = null;
   }
 }

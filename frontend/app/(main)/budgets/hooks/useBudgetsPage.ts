@@ -14,6 +14,7 @@ import { getApiErrorMessage } from '@/app/lib/api-error';
 import type { ContractInput } from '@/app/lib/query-fn-schema';
 import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
+import { dayKeyIn } from '../helpers/left-per-day';
 
 export interface BudgetItem {
   id: string;
@@ -42,6 +43,9 @@ export interface BudgetItem {
   endsOn?: string | null;
   /** Whether today falls inside that window. */
   isActive?: boolean;
+  /** First and last day of the period the figures cover, cut to the window; null outside it. */
+  periodStart?: string | null;
+  periodEnd?: string | null;
   /** Spending in currencies with no rate to the budget's: left out of spentAmount. */
   unconvertedSpending?: Array<{ currency: string; amount: number }>;
   /** The category's spending this period before `startsOn`: outside the budget. */
@@ -129,11 +133,15 @@ export function normalizeBudgetItem(budget: BudgetRow): BudgetItem {
  * `GET /budgets` as the app holds it. Every reader of `queryKeys.budgets` must
  * use this, so the cache never mixes raw rows with normalized ones.
  */
-/** `date` (`YYYY-MM-DD`) measures spending for the period that day falls in; today by default. */
+/**
+ * `date` (`YYYY-MM-DD`) measures spending for the period that day falls in;
+ * by default the reader's today, sent rather than left to the server, whose
+ * clock (UTC) is on another day for hours around midnight elsewhere.
+ */
 export async function fetchBudgets(signal?: AbortSignal, date?: string): Promise<BudgetItem[]> {
   const rows = await apiQueryDecoded({
     url: '/budgets',
-    params: date ? { date } : undefined,
+    params: { date: date ?? dayKeyIn(new Date()) },
     signal,
     contract: 'BudgetList',
   });
@@ -327,6 +335,8 @@ export function useBudgetsPage() {
 
   return {
     budgets: query.data ?? [],
+    /** The periods we are in, not a past or future `?month=`: only then is there a "per day". */
+    isCurrentPeriod: date === null,
     isPending: query.isPending,
     isFetching: query.isFetching || deleteMutation.isPending,
     error: query.isError ? text.loadFailed.value : null,

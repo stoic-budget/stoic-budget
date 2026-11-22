@@ -21,7 +21,6 @@ import { Transaction, TransactionType } from '../../../entities/transaction.enti
 import { User } from '../../../entities/user.entity';
 import { countWithoutCategory } from '../../categories/uncategorized-category';
 import { extractTaxFromPurpose } from '../../classification/helpers/tax-extractor.util';
-import { ClassificationService } from '../../classification/services/classification.service';
 import { ImportSessionService } from '../../import/services/import-session.service';
 import type {
   ImportCommittedEvent,
@@ -41,6 +40,8 @@ import {
   takeStatementAccount,
 } from '../helpers/statement-account.helper';
 import { fileExtensionOf } from '../helpers/statement-file.helper';
+import { statementRowFingerprint } from '../helpers/statement-row-fingerprint.helper';
+import { pairStatementTransfers } from '../helpers/statement-transfer-pairing.helper';
 import {
   type ValidationReasonCode,
   validateParsedStatement,
@@ -50,6 +51,7 @@ import { LayoutTemplateService } from './layout-template.service';
 import { MetadataExtractionService } from './metadata-extraction.service';
 import { OcrService } from './ocr.service';
 import { ParserFactoryService } from './parser-factory.service';
+import { StatementRowHintsService, transferHint } from './statement-row-hints.service';
 
 interface StatementImportPreview {
   sessionId?: string;
@@ -104,7 +106,7 @@ export class StatementProcessingService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private parserFactory: ParserFactoryService,
-    private classificationService: ClassificationService,
+    private rowHints: StatementRowHintsService,
     private metadataExtractionService: MetadataExtractionService,
     private importSessionService: ImportSessionService,
     private transactionFingerprintService: TransactionFingerprintService,
@@ -418,24 +420,6 @@ export class StatementProcessingService {
       }
     }
 
-    // After dedupe on purpose: a duplicate leg must not take the pair.
-    if (this.transferPairingService && statement.workspaceId) {
-      try {
-        const pairing = await this.transferPairingService.detectAndApply(
-          statement.workspaceId,
-          statement.id,
-        );
-        if (pairing.paired > 0) {
-          statement.parsingDetails = {
-            ...(statement.parsingDetails || {}),
-            transferPairs: pairing,
-          };
-        }
-      } catch (pairingError) {
-        this.logger.warn(`Transfer pairing failed: ${this.getErrorMessage(pairingError)}`);
-      }
-    }
-
     const committedTransactions = await this.transactionRepository.find({
       where: { statementId: statement.id },
     });
@@ -450,6 +434,10 @@ export class StatementProcessingService {
     } as unknown as Statement['parsingDetails'];
 
     await this.statementRepository.save(statement);
+    // After dedupe, and once COMPLETED is stored: pairing takes finished imports only.
+    if (await pairStatementTransfers(this.transferPairingService, statement, this.logger)) {
+      await this.statementRepository.save(statement);
+    }
 
     return statement;
   }
@@ -805,6 +793,11 @@ export class StatementProcessingService {
       statement.processedAt = new Date();
       statement.parsingDetails = parsingDetails;
       await this.statementRepository.save(statement);
+      // Only now: the matcher reads the stored account number and status, and
+      // pairs nothing of a statement held for review.
+      if (await pairStatementTransfers(this.transferPairingService, statement, this.logger)) {
+        await this.statementRepository.save(statement);
+      }
 
       if (this.eventEmitter && statement.workspaceId) {
         const actorName = await this.resolveActorName(statement.userId);
@@ -949,16 +942,13 @@ export class StatementProcessingService {
         ...accountFields(account, {}),
       } as Transaction;
 
-      const classification = await this.classificationService.classifyTransaction(
+      // The file's own category where no rule decided one; none when the user picks by hand.
+      const classification = await this.rowHints.classify(
         tempTransaction,
         userId,
+        parsed,
+        manualCategorySelectionRequired,
       );
-
-      if (manualCategorySelectionRequired) {
-        classification.categoryId = undefined;
-        classification.categorySource = null;
-        classification.categoryReason = null;
-      }
 
       const taxDetected = extractTaxFromPurpose(paymentPurpose).taxMentioned;
 
@@ -980,7 +970,7 @@ export class StatementProcessingService {
         ...classification,
         ...accountFields(account, classification),
         vendorNormalized: null,
-        categoryHint: null,
+        categoryHint: transferHint(parsed),
         transactionNature: null,
         taxDetected,
         enrichmentConfidence: null,
@@ -1013,7 +1003,12 @@ export class StatementProcessingService {
       transaction.taxReverseCharge = taxAssignment.taxReverseCharge;
       transaction.taxNotionalAmount = taxAssignment.taxNotionalAmount;
 
-      transaction.fingerprint = this.buildFingerprint(transaction, statement, log, i);
+      transaction.fingerprint = statementRowFingerprint(
+        this.transactionFingerprintService,
+        { transaction, parsed, index: i },
+        statement.accountNumber || '',
+        log,
+      );
       drafts.push(transaction);
 
       const missing: string[] = [];
@@ -1068,43 +1063,14 @@ export class StatementProcessingService {
 
     // Single atomic write. A half-imported statement marked COMPLETED is worse
     // than a failed one: totals and balance checks would silently be wrong.
-    const transactions = await this.dataSource.transaction(manager =>
+    const saved = await this.dataSource.transaction(manager =>
       manager.save(Transaction, drafts, { chunk: 200 }),
     );
+    const transactions = await this.rowHints.applySplits(statement, saved, deduped, log);
 
     log('info', `Successfully created ${transactions.length}/${deduped.length} transactions`);
     const duplicatesSkipped = parsedTransactions.length - deduped.length;
     return { transactions, duplicatesSkipped, duplicatesFlagged };
-  }
-
-  /**
-   * Fingerprints feed the partial unique index
-   * `(workspace_id, fingerprint) WHERE is_duplicate = false`, which is what makes
-   * re-uploading an overlapping period idempotent.
-   */
-  private buildFingerprint(
-    transaction: Transaction,
-    statement: Statement,
-    log: (level: string, message: string) => void,
-    index: number,
-  ): string | null {
-    // A pending row is matched to its booked version by the bank-sync pull, by
-    // the provider's id. Its fingerprint would only mark that booked version a
-    // duplicate of a row about to be replaced.
-    if (transaction.isPending) return null;
-    try {
-      return this.transactionFingerprintService.generateFingerprint(
-        transaction,
-        statement.accountNumber || '',
-      );
-    } catch (error) {
-      // A missing fingerprint only costs dedup, so never fail the import over it.
-      log(
-        'warn',
-        `Fingerprint generation failed for transaction ${index + 1}: ${this.getErrorMessage(error)}`,
-      );
-      return null;
-    }
   }
 
   /**

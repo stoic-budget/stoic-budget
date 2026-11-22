@@ -7,6 +7,13 @@ import type { ListedRow } from '../all-transactions';
 import { AllTransactionsTable } from './AllTransactionsTable';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
+// The bulk bar's tag and comment actions read the user and the workspace.
+vi.mock('@/app/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'user-1' } }) }));
+vi.mock('@/app/contexts/WorkspaceContext', () => ({
+  useWorkspace: () => ({ currentWorkspace: { id: 'w1' } }),
+}));
+// The row menu offers Duplicate, which reads the workspace.
+vi.mock('@/app/hooks/useWorkspaceId', () => ({ useWorkspaceId: () => 'ws-1' }));
 vi.mock('@/app/components/item-images/ItemImageBadge', () => ({
   ItemImageBadge: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -29,6 +36,7 @@ function renderTable(onSetExcluded = vi.fn()) {
       onToggleAll={vi.fn()}
       onSetCategory={vi.fn()}
       onSetExcluded={onSetExcluded}
+      onBulkDone={vi.fn()}
       onOpen={vi.fn()}
     />,
   );
@@ -75,6 +83,7 @@ describe('AllTransactionsTable pending rows', () => {
         onToggleAll={vi.fn()}
         onSetCategory={vi.fn()}
         onSetExcluded={vi.fn()}
+        onBulkDone={vi.fn()}
         onOpen={vi.fn()}
       />,
     );

@@ -11,6 +11,7 @@ import {
 } from '@/entities';
 import { AuditAction, EntityType, Severity } from '@/entities/audit-event.entity';
 import { AuditService } from '@/modules/audit/audit.service';
+import { CalendarFeedRevocationService } from '@/modules/calendar-feed/calendar-feed-revocation.service';
 import { AuthService } from '@/modules/auth/auth.service';
 import { TwoFactorService } from '@/modules/auth/two-factor.service';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
@@ -37,6 +38,7 @@ describe('AuthService', () => {
   let authSessionRepository: Repository<AuthSession>;
   let jwtService: JwtService;
   const auditService = { createEvent: vi.fn() };
+  const calendarFeeds = { revokeAllOf: vi.fn() };
 
   const mockUser: Partial<User> = {
     id: '1',
@@ -132,6 +134,7 @@ describe('AuthService', () => {
           },
         },
         { provide: AuditService, useValue: auditService },
+        { provide: CalendarFeedRevocationService, useValue: calendarFeeds },
       ],
     }).compile();
 
@@ -605,6 +608,12 @@ describe('AuthService', () => {
       vi
         .spyOn(authSessionRepository, 'update')
         .mockResolvedValue({ affected: 1, generatedMaps: [], raw: [] });
+    });
+
+    it('ends the calendar feed links of every workspace on logout-all', async () => {
+      calendarFeeds.revokeAllOf.mockClear();
+      await service.logoutAll('1');
+      expect(calendarFeeds.revokeAllOf).toHaveBeenCalledWith('1');
     });
 
     it('logs logout-all into the home workspace', async () => {

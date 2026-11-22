@@ -1,10 +1,10 @@
-import { AddTransactionIsPending1788200000000 } from '@/migrations/1788200000000-AddTransactionIsPending';
+import { AddTransactionIsPending1789080000000 } from '@/migrations/1789080000000-AddTransactionIsPending';
 import type { QueryRunner } from 'typeorm';
 
-describe('AddTransactionIsPending1788200000000', () => {
+describe('AddTransactionIsPending1789080000000', () => {
   const run = async (step: 'up' | 'down') => {
     const query = vi.fn().mockResolvedValue(undefined);
-    await new AddTransactionIsPending1788200000000()[step]({
+    await new AddTransactionIsPending1789080000000()[step]({
       query,
     } as unknown as QueryRunner);
     return query;

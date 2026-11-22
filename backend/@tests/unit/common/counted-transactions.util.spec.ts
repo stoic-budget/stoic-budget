@@ -37,6 +37,17 @@ describe('counted transactions', () => {
       expect(clauses).not.toContain('t.isVerified = true');
     });
 
+    it('stay in a balance built with onlyFlows, which keeps every other rule', () => {
+      const { query, clauses } = recorder();
+
+      onlyFlows(query, 't', { includeExcluded: true });
+
+      expect(clauses.join(' ')).not.toMatch(/excluded/i);
+      expect(clauses).toContain('t.isVerified = true');
+      expect(clauses.join(' ')).toMatch(/statements unread/);
+      expect(clauses.join(' ')).toMatch(/cryptoWalletId IS NULL/);
+    });
+
     it('drop out of raw flows SQL, by column name and alias', () => {
       expect(flowsSql('tx')).toContain('tx.excluded_from_budgets = false');
     });

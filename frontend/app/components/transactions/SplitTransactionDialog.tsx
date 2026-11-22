@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { CategoryPickerField } from '@/app/components/categories/CategoryPickerField';
+import { DemoNotice } from '@/app/components/demo/DemoNotice';
 import { fillTemplateNodes } from '@/app/components/ui/private-amount';
 import { useIntlayer } from '@/app/i18n';
 import type { StatementCategorySource } from '@/app/lib/statement-categories';
@@ -105,6 +106,7 @@ export function SplitTransactionDialog(props: SplitTransactionDialogProps): Reac
       <DialogContent
         sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}
       >
+        <DemoNotice />
         <Typography
           variant="body2"
           sx={{

@@ -69,7 +69,8 @@ export function reviewHoldsStatementRows(
  * not: the "categorised" step of the month close. Only rows that count once
  * confirmed (no duplicates, transfers, rows of a trashed or unread statement,
  * crypto that settles nothing), so every row here changes a number when it
- * gets one.
+ * gets one. A row left out of budgets stays: tax, DATEV and UStVA still read
+ * its category, and the statement lists count it as waiting for one too.
  */
 export function uncategorizedRowsQuery(
   transactions: Repository<Transaction>,
@@ -81,7 +82,7 @@ export function uncategorizedRowsQuery(
     .where('t.workspaceId = :workspaceId', { workspaceId })
     .andWhere(awaitingCategorySql('t'), UNCATEGORIZED_SQL_PARAMS)
     .andWhere('t.transferPairId IS NULL');
-  return onlyFlows(query, 't', { includeUnconfirmed: true });
+  return onlyFlows(query, 't', { includeUnconfirmed: true, includeExcluded: true });
 }
 
 /**

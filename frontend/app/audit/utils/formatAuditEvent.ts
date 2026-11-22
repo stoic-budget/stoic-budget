@@ -52,6 +52,7 @@ const ENTITY_LABELS: Record<EntityType, string> = {
   tax_return: 'Tax return',
   workspace_member: 'Workspace member',
   api_key: 'API key',
+  calendar_feed: 'Calendar link',
   webhook: 'Webhook',
   backup: 'Backup',
   user: 'User account',

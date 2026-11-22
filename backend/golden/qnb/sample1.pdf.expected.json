@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "accountNumber": "QA12QNBA639888676342822800470",
+    "currency": "QAR",
+    "dateFrom": "2024-07-03T00:00:00",
+    "dateTo": "2024-07-12T00:00:00",
+    "balanceStart": 7.49,
+    "balanceEnd": 457.24
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-07-03T00:00:00",
+      "counterpartyName": "FUND TRANSFER MEMBER AMBER 9660483427269 NMB MS372999483046098887 212883755N",
+      "paymentPurpose": "FUND TRANSFER MEMBER AMBER 9660483427269 NMB MS372999483046098887 212883755N",
+      "credit": 11670,
+      "currency": "QAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-07-03T00:00:00",
+      "counterpartyName": "QNBI323690006197 67670585389 30000001 MS9353276116 QNB QT BP AT NMB MS9353276116 218737362N",
+      "paymentPurpose": "QNBI323690006197 67670585389 30000001 MS9353276116 QNB QT BP AT NMB MS9353276116 218737362N",
+      "debit": 120,
+      "currency": "QAR"
+    },
+    {
+      "transactionDate": "2024-07-03T00:00:00",
+      "counterpartyName": "ATM CASH 215054369XXXXXX0004 ATM VEHICLE ATM 11",
+      "paymentPurpose": "ATM CASH 215054369XXXXXX0004 ATM VEHICLE ATM 11",
+      "debit": 5000,
+      "currency": "QAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-07-03T00:00:00",
+      "counterpartyName": "ATM CASH 215054369XXXXXX0004 ATM VEHICLE ATM 11",
+      "paymentPurpose": "ATM CASH 215054369XXXXXX0004 ATM VEHICLE ATM 11",
+      "debit": 6500,
+      "currency": "QAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-07-08T00:00:00",
+      "counterpartyName": "FUND TRANSFER MEMBER AMBER 9660483427269 NMB MS209326695394225557 330257787N",
+      "paymentPurpose": "FUND TRANSFER MEMBER AMBER 9660483427269 NMB MS209326695394225557 330257787N",
+      "credit": 10000,
+      "currency": "QAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-07-08T00:00:00",
+      "counterpartyName": "CASH WITHDRAWAL-NAPS 215054369XXXXXX0004 ATM COMM. BANK OF QATAR",
+      "paymentPurpose": "CASH WITHDRAWAL-NAPS 215054369XXXXXX0004 ATM COMM. BANK OF QATAR",
+      "debit": 9500,
+      "currency": "QAR"
+    },
+    {
+      "transactionDate": "2024-07-08T00:00:00",
+      "counterpartyName": "NAPS-PURCHASE 215054369XXXXXX0004 POS FAHES- Wakra",
+      "paymentPurpose": "NAPS-PURCHASE 215054369XXXXXX0004 POS FAHES- Wakra",
+      "debit": 150,
+      "currency": "QAR"
+    },
+    {
+      "transactionDate": "2024-07-10T00:00:00",
+      "counterpartyName": "NAPS-PURCHASE 215054369XXXXXX0004 POS Almeera Qpay",
+      "paymentPurpose": "NAPS-PURCHASE 215054369XXXXXX0004 POS Almeera Qpay",
+      "debit": 110,
+      "currency": "QAR"
+    },
+    {
+      "transactionDate": "2024-07-11T00:00:00",
+      "counterpartyName": "BIN MEHMAOUD",
+      "paymentPurpose": "POS-PURCHASE 215054369XXXXXX0004 POS BIN MEHMAOUD",
+      "debit": 44,
+      "currency": "QAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-07-12T00:00:00",
+      "counterpartyName": "FUND TRANSFER MEMBER AMBER 3186657336900 NMB MS517923530867860747 025012217N",
+      "paymentPurpose": "FUND TRANSFER MEMBER AMBER 3186657336900 NMB MS517923530867860747 025012217N",
+      "credit": 4078,
+      "currency": "QAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-07-12T00:00:00",
+      "counterpartyName": "CASH WITHDRAWAL-NAPS 215054369XXXXXX0004 ATM QATAR ISLAMIC BANK",
+      "paymentPurpose": "CASH WITHDRAWAL-NAPS 215054369XXXXXX0004 ATM QATAR ISLAMIC BANK",
+      "debit": 3800,
+      "currency": "QAR"
+    },
+    {
+      "transactionDate": "2024-07-12T00:00:00",
+      "counterpartyName": "CARREFOUR - WAKRA",
+      "paymentPurpose": "POS-PURCHASE 215054369XXXXXX0004 POS CARREFOUR - WAKRA P.O.BOX",
+      "debit": 74.25,
+      "currency": "QAR",
+      "paymentType": "card"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ describe('TransferToAccountService and pending bank rows', () => {
     const findOne = vi.fn(async () => ({ id: 'wallet-cash', workspaceId: 'ws-1' }));
     const service = new TransferToAccountService(
       { save, create: vi.fn(), manager: { getRepository: () => ({ findOne }) } } as never,
+      { find: vi.fn(async () => []) } as never,
       {
         findOwned: vi.fn(async () => ({
           id: 'tx-pending',

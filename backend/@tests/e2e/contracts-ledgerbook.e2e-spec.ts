@@ -9,6 +9,8 @@ import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import {
+  BalanceAdjustmentResult,
+  BalanceCheckResult,
   BranchItem,
   CategoryItem,
   ForecastResponse,
@@ -16,6 +18,7 @@ import {
   PayeeMerge,
   PayeeRecord,
   SharedLinkItem,
+  StorageFileDetails,
   StorageFolder,
   StorageTag,
   StorageViewItem,
@@ -167,10 +170,54 @@ describe('API contracts: ledger book (e2e)', () => {
       expect(created.body.initialBalance).toBe('12.50');
       const id = created.body.id;
       matches(WalletItem, (await call('get', `/wallets/${id}`).expect(200)).body);
-      const updated = await call('put', `/wallets/${id}`, { initialBalance: 20 }).expect(200);
+      expect(created.body.includeInNetWorth).toBe(true);
+      const updated = await call('put', `/wallets/${id}`, {
+        initialBalance: 20,
+        includeInNetWorth: false,
+      }).expect(200);
       matches(WalletItem, updated.body);
       expect(updated.body.initialBalance).toBe('20.00');
+      expect(updated.body.includeInNetWorth).toBe(false);
       matches(MessageResult, (await call('delete', `/wallets/${id}`).expect(200)).body);
+    });
+
+    it('check a wallet against the bank, book the difference, and read the check back', async () => {
+      const created = await call('post', '/wallets', {
+        name: 'Checked box',
+        currency: 'EUR',
+        initialBalance: 40,
+      }).expect(201);
+      const id = created.body.id;
+      const date = '2026-09-10';
+      const off = await call('post', `/wallets/${id}/balance-check`, {
+        date,
+        balance: 52.25,
+      }).expect(200);
+      matches(BalanceCheckResult, off.body);
+      expect(off.body).toMatchObject({ ourBalance: 40, difference: 12.25, matches: false });
+
+      const booked = await call('post', `/wallets/${id}/balance-adjustment`, {
+        date,
+        balance: 52.25,
+      }).expect(200);
+      matches(BalanceAdjustmentResult, booked.body);
+      expect(booked.body.transactionId).toEqual(expect.any(String));
+      expect(booked.body.check).toMatchObject({ matches: true, reasons: [] });
+
+      const confirmed = await call('post', `/wallets/${id}/balance-check/confirm`, {
+        date,
+        balance: 52.25,
+      }).expect(200);
+      matches(BalanceCheckResult, confirmed.body);
+
+      const read = await call('get', `/wallets/${id}`).expect(200);
+      matches(WalletItem, read.body);
+      expect(read.body.balanceCheck).toEqual({ date, bankBalance: 52.25, stillMatches: true });
+      const rows = await call('get', `/transactions?walletId=${id}`).expect(200);
+      matches(TransactionListPage, rows.body);
+      expect(rows.body.data).toEqual([
+        expect.objectContaining({ id: booked.body.transactionId, transferPairKind: 'adjustment' }),
+      ]);
     });
 
     it('create, read, update and delete a category, with its parent', async () => {
@@ -252,6 +299,30 @@ describe('API contracts: ledger book (e2e)', () => {
       matches(TransactionRecordList, parts.body);
       expect(parts.body).toHaveLength(2);
       expect(parts.body[1].amount).toBe('22.50');
+      // The lists the drawer opens a row from carry its group, so it can offer to undo the split.
+      const { statementId, splitGroupId } = parts.body[0];
+      const page = await call('get', `/transactions?statementId=${statementId}`).expect(200);
+      matches(TransactionListPage, page.body);
+      const file = await call('get', `/storage/files/${statementId}`).expect(200);
+      matches(StorageFileDetails, file.body);
+      for (const rows of [page.body.data, file.body.transactions]) {
+        const inGroup = rows.filter(
+          (row: { splitGroupId: string | null }) => row.splitGroupId === splitGroupId,
+        );
+        expect(inGroup.map((row: { splitIndex: number }) => row.splitIndex).sort()).toEqual([0, 1]);
+      }
+      // A public link's page cannot undo a split: its rows leave without the group.
+      const link = await call('post', `/storage/files/${statementId}/share`, {
+        permission: 'download',
+      }).expect(201);
+      const shared = await request(app.getHttpServer())
+        .get(`/storage/shared/${link.body.token}`)
+        .expect(200);
+      expect(shared.body.transactions.length).toBeGreaterThan(0);
+      for (const row of shared.body.transactions) {
+        expect(row).not.toHaveProperty('splitGroupId');
+        expect(row).not.toHaveProperty('splitIndex');
+      }
       const listed = await call('get', `/transactions/${id}/split`).expect(200);
       matches(TransactionRecordList, listed.body);
       const merged = await call('post', `/transactions/${id}/unsplit`).expect(200);

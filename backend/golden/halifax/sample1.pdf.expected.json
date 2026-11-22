@@ -1,0 +1,460 @@
+{
+  "metadata": {
+    "accountNumber": "10000001",
+    "currency": "GBP",
+    "dateFrom": "2023-12-01T00:00:00",
+    "dateTo": "2023-12-25T00:00:00",
+    "balanceStart": 21.53,
+    "balanceEnd": 148.69
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-12-01T00:00:00",
+      "counterpartyName": "MACH RECRUITMENT L",
+      "paymentPurpose": "MACH RECRUITMENT L BGC",
+      "credit": 520.87,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-01T00:00:00",
+      "counterpartyName": "MS MEMBER TWO",
+      "paymentPurpose": "MS MEMBER TWO FPO",
+      "debit": 50,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-04T00:00:00",
+      "counterpartyName": "PAYPAL *AFRICALL",
+      "paymentPurpose": "PAYPAL *AFRICALL DEB",
+      "debit": 16.53,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-04T00:00:00",
+      "counterpartyName": "WORLDREMIT LTD.",
+      "paymentPurpose": "WORLDREMIT LTD. DEB",
+      "debit": 308.34,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-04T00:00:00",
+      "counterpartyName": "MS MEMBER TWO",
+      "paymentPurpose": "MS MEMBER TWO FPO",
+      "debit": 30,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-04T00:00:00",
+      "counterpartyName": "BET365",
+      "paymentPurpose": "BET365 DEB",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-08T00:00:00",
+      "counterpartyName": "MACH RECRUITMENT L",
+      "paymentPurpose": "MACH RECRUITMENT L BGC",
+      "credit": 399.7,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-08T00:00:00",
+      "counterpartyName": "MEMBER TWO SAMPLE",
+      "paymentPurpose": "MEMBER TWO SAMPLE FPO",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-11T00:00:00",
+      "counterpartyName": "MEMBER TWO SAMPLE",
+      "paymentPurpose": "MEMBER TWO SAMPLE FPO",
+      "debit": 50,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-11T00:00:00",
+      "counterpartyName": "Airpay 49430750-Am",
+      "paymentPurpose": "Airpay 49430750-Am DEB",
+      "debit": 21.7,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-11T00:00:00",
+      "counterpartyName": "MEMBER TWO SAMPLE",
+      "paymentPurpose": "MEMBER TWO SAMPLE FPO",
+      "debit": 163,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-11T00:00:00",
+      "counterpartyName": "BET365",
+      "paymentPurpose": "BET365 DEB",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-11T00:00:00",
+      "counterpartyName": "WORLDREMIT LTD.",
+      "paymentPurpose": "WORLDREMIT LTD. DEB",
+      "debit": 84.38,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-11T00:00:00",
+      "counterpartyName": "BET365",
+      "paymentPurpose": "BET365 DEB",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-11T00:00:00",
+      "counterpartyName": "MEMBER FIVE",
+      "paymentPurpose": "MEMBER FIVE FPO",
+      "debit": 15,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-12T00:00:00",
+      "counterpartyName": "SKY TV",
+      "paymentPurpose": "SKY TV DEB",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-13T00:00:00",
+      "counterpartyName": "SKY TV",
+      "paymentPurpose": "SKY TV DEB",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-15T00:00:00",
+      "counterpartyName": "MACH RECRUITMENT L",
+      "paymentPurpose": "MACH RECRUITMENT L BGC",
+      "credit": 523.25,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-15T00:00:00",
+      "counterpartyName": "MEMBER TWO SAMPLE",
+      "paymentPurpose": "MEMBER TWO SAMPLE FPO",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-15T00:00:00",
+      "counterpartyName": "MEMBER TWO SAMPLE",
+      "paymentPurpose": "MEMBER TWO SAMPLE FPO",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-15T00:00:00",
+      "counterpartyName": "MCDONALDS",
+      "paymentPurpose": "MCDONALDS DEB",
+      "debit": 6.89,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "Wise",
+      "paymentPurpose": "Wise DEB",
+      "debit": 7,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "CHAPEL CNTL SUPERS",
+      "paymentPurpose": "CHAPEL CNTL SUPERS DEB",
+      "debit": 7.42,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "PAYPAL *AFRICALL",
+      "paymentPurpose": "PAYPAL *AFRICALL DEB",
+      "debit": 16.52,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "Wise",
+      "paymentPurpose": "Wise DEB",
+      "debit": 20.08,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "WORLDREMIT LTD.",
+      "paymentPurpose": "WORLDREMIT LTD. DEB",
+      "debit": 83.32,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "SQ *HENNIE PENNIES",
+      "paymentPurpose": "SQ *HENNIE PENNIES DEB",
+      "debit": 1,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "SQ *HENNIE PENNIES",
+      "paymentPurpose": "SQ *HENNIE PENNIES DEB",
+      "debit": 6.49,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "BET365",
+      "paymentPurpose": "BET365 DEB",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "SHELL ROOLEY LANE",
+      "paymentPurpose": "SHELL ROOLEY LANE DEB",
+      "debit": 55,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "LEGENDSHAREHILLS",
+      "paymentPurpose": "LEGENDSHAREHILLS DEB",
+      "debit": 10.2,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "MEMBER THREE",
+      "paymentPurpose": "MEMBER THREE FPO",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "S K Tasty Fried Ch",
+      "paymentPurpose": "S K Tasty Fried Ch DEB",
+      "debit": 2,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "SQ *HENNIE PENNIES",
+      "paymentPurpose": "SQ *HENNIE PENNIES DEB",
+      "debit": 4.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "Wise",
+      "paymentPurpose": "Wise DEB",
+      "debit": 15.06,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-19T00:00:00",
+      "counterpartyName": "MEMBER ONE SAMPLE",
+      "paymentPurpose": "MEMBER ONE SAMPLE FPI",
+      "credit": 18,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-19T00:00:00",
+      "counterpartyName": "MEMBER FOUR",
+      "paymentPurpose": "MEMBER FOUR FPO",
+      "debit": 68.64,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-19T00:00:00",
+      "counterpartyName": "SQ *HENNIE PENNIES",
+      "paymentPurpose": "SQ *HENNIE PENNIES DEB",
+      "debit": 5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-19T00:00:00",
+      "counterpartyName": "K R PACKAGING SOLU",
+      "paymentPurpose": "K R PACKAGING SOLU FPI",
+      "credit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-21T00:00:00",
+      "counterpartyName": "SKY TV",
+      "paymentPurpose": "SKY TV DD",
+      "debit": 95,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2023-12-21T00:00:00",
+      "counterpartyName": "SMITHIES SVS STN",
+      "paymentPurpose": "SMITHIES SVS STN DEB",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-21T00:00:00",
+      "counterpartyName": "SQ *HENNIE PENNIES",
+      "paymentPurpose": "SQ *HENNIE PENNIES DEB",
+      "debit": 4,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-22T00:00:00",
+      "counterpartyName": "MACH RECRUITMENT L",
+      "paymentPurpose": "MACH RECRUITMENT L BGC",
+      "credit": 191.53,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-22T00:00:00",
+      "counterpartyName": "MEMBER EIGHT",
+      "paymentPurpose": "MEMBER EIGHT FPO",
+      "debit": 102.82,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-22T00:00:00",
+      "counterpartyName": "RHOS POINT RETAIL",
+      "paymentPurpose": "RHOS POINT RETAIL DEB",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-22T00:00:00",
+      "counterpartyName": "BP GLEDHOW S/STN",
+      "paymentPurpose": "BP GLEDHOW S/STN DEB",
+      "debit": 24.35,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "MEMBER SIX",
+      "paymentPurpose": "MEMBER SIX FPI",
+      "credit": 200,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "MEMBER SEVEN",
+      "paymentPurpose": "MEMBER SEVEN FPI",
+      "credit": 190,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "MEMBER TWO SAMPLE",
+      "paymentPurpose": "MEMBER TWO SAMPLE FPO",
+      "debit": 50,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "MCDONALDS",
+      "paymentPurpose": "MCDONALDS DEB",
+      "debit": 6.58,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "WM MORRISONS STORE",
+      "paymentPurpose": "WM MORRISONS STORE DEB",
+      "debit": 10.5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "WORLDREMIT LTD.",
+      "paymentPurpose": "WORLDREMIT LTD. DEB",
+      "debit": 83.4,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "WORLDREMIT LTD.",
+      "paymentPurpose": "WORLDREMIT LTD. DEB",
+      "debit": 179.9,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "SUBWAY CLECKHEATON",
+      "paymentPurpose": "SUBWAY CLECKHEATON DEB",
+      "debit": 3,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "SUBWAY CLECKHEATON",
+      "paymentPurpose": "SUBWAY CLECKHEATON DEB",
+      "debit": 14.18,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "CO-OP GROUP 014294",
+      "paymentPurpose": "CO-OP GROUP 014294 DEB",
+      "debit": 23.9,
+      "currency": "GBP",
+      "paymentType": "card"
+    }
+  ]
+}

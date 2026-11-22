@@ -8,6 +8,7 @@ import { ChevronRight } from '@/app/components/icons';
 import { PRIVATE_CLASS, PrivateAmount } from '@/app/components/ui/private-amount';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer, useLocale } from '@/app/i18n';
+import type { CryptoSummary } from '@/app/lib/contracts';
 import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { useIsWideSection } from './section-span';
@@ -16,6 +17,22 @@ import { useIsWideSection } from './section-span';
 const WIDE_HOLDINGS = 8;
 /** Holdings listed under the value when the card shares its row. */
 const HALF_HOLDINGS = 5;
+
+/**
+ * The card is on the Overview for everyone, so it draws itself only for a
+ * linked wallet that holds something (priced or not) or moved something in the
+ * month shown.
+ */
+function hasSomethingToShow(summary: CryptoSummary): boolean {
+  return (
+    summary.walletCount > 0 &&
+    (summary.holdings.length > 0 ||
+      summary.unpriced.length > 0 ||
+      summary.portfolioValue !== 0 ||
+      summary.income !== 0 ||
+      summary.expense !== 0)
+  );
+}
 
 type CryptoPortfolioCardProps = {
   formatAmount: (value: number) => string;
@@ -56,7 +73,7 @@ export function CryptoPortfolioCard({
       previousQuery?.queryKey[2] === workspaceId ? previous : undefined,
   });
 
-  if (!summary || summary.walletCount === 0) {
+  if (!(summary && hasSomethingToShow(summary))) {
     return null;
   }
 

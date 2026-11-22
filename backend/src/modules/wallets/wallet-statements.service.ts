@@ -3,10 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, type Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import type { AccountStatement } from '../../contracts';
-import { Statement, StatementStatus } from '../../entities/statement.entity';
+import { Statement } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { normalizeCurrencyCode } from '../exchange-rates/currency-converter';
+import { onlyBankStatements } from './bank-statements';
 import { linkedSources, sourceOfStatement } from './linked-sources';
 import {
   pickWalletBySource,
@@ -14,13 +15,6 @@ import {
   realAccountNumber,
 } from './wallet-account-match';
 import { WalletsService } from './wallets.service';
-
-/** Statements whose rows are read and real; the same set the balance sheet trusts. */
-const LIVE_STATEMENT_STATUSES = [
-  StatementStatus.PARSED,
-  StatementStatus.VALIDATED,
-  StatementStatus.COMPLETED,
-];
 
 const toDateOnly = (value: string | Date | null): string | null =>
   value ? new Date(value).toISOString().slice(0, 10) : null;
@@ -57,17 +51,12 @@ export class WalletStatementsService {
    */
   async unlinked(workspaceId: string): Promise<AccountStatement[]> {
     const [statements, wallets, linked] = await Promise.all([
-      this.statementRepository
-        .createQueryBuilder('statement')
-        .where('statement.workspaceId = :workspaceId', { workspaceId })
-        .andWhere('statement.walletId IS NULL')
-        .andWhere('statement.deletedAt IS NULL')
-        .andWhere('statement.status IN (:...statuses)', { statuses: LIVE_STATEMENT_STATUSES })
-        .andWhere("statement.fileType <> 'image'")
-        .andWhere("statement.fileName NOT LIKE 'manual-expense-%'")
-        .andWhere(
-          "((statement.accountNumber IS NOT NULL AND statement.accountNumber <> 'Unknown') OR statement.balanceEnd IS NOT NULL OR statement.totalTransactions > 1)",
-        )
+      onlyBankStatements(
+        this.statementRepository
+          .createQueryBuilder('statement')
+          .where('statement.workspaceId = :workspaceId', { workspaceId })
+          .andWhere('statement.walletId IS NULL'),
+      )
         .orderBy('statement.statementDateTo', 'DESC', 'NULLS LAST')
         .addOrderBy('statement.createdAt', 'DESC')
         .getMany(),
