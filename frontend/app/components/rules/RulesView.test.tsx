@@ -36,7 +36,11 @@ vi.mock('@/app/components/payees/offer-action-toast', () => ({
   },
 }));
 
-import type { CategorizationRule, CategorizationRuleSuggestionList } from '@/app/lib/contracts';
+import type {
+  CategorizationRule,
+  CategorizationRuleSuggestionList,
+  RuleGroup,
+} from '@/app/lib/contracts';
 import { queryKeys } from '@/app/lib/query-keys';
 import { apiResponse } from '@/app/test/api-response';
 import { categoryItem, walletItem } from '@/app/test/fixtures/contracts';
@@ -80,6 +84,7 @@ function rule(overrides: Partial<CategorizationRule> = {}): CategorizationRule {
     result: { categoryId: ELECTRONICS.id },
     priority: 0,
     isActive: true,
+    groupId: null,
     matchCount: 3,
     lastMatchedAt: '2026-10-01T10:00:00.000Z',
     createdAt: '2026-09-01T10:00:00.000Z',
@@ -98,10 +103,15 @@ const suggestion: CategorizationRuleSuggestionList['data'][number] = {
 
 function mockApi(
   rules: CategorizationRule[],
-  options: { suggestions?: CategorizationRuleSuggestionList['data']; dismissed?: string[] } = {},
+  options: {
+    suggestions?: CategorizationRuleSuggestionList['data'];
+    dismissed?: string[];
+    folders?: RuleGroup[];
+  } = {},
 ) {
   get.mockImplementation(async (url: string) => {
     if (url === '/categorization-rules') return apiResponse({ data: rules, total: rules.length });
+    if (url === '/categorization-rule-groups') return apiResponse({ data: options.folders ?? [] });
     if (url === '/categorization-rules/suggestions')
       return apiResponse({ data: options.suggestions ?? [] });
     if (url === '/view-preferences/rules')
@@ -125,7 +135,7 @@ describe('RulesView', () => {
     put.mockResolvedValue(apiResponse(rule()));
     del.mockResolvedValue(apiResponse(null));
     offers.last = null;
-    post.mockResolvedValue(apiResponse({ applied: 2, skippedManual: 1, tagged: 3, moved: 0, commented: 0, renamed: 0 }));
+    post.mockResolvedValue(apiResponse({ applied: 2, skippedManual: 1, tagged: 3, moved: 0, commented: 0, renamed: 0, excluded: 0 }));
   });
 
   it('lays each rule out as a row: what it matches, what it sets, how often it fired', async () => {
@@ -260,6 +270,7 @@ describe('RulesView', () => {
             moved: 2,
             commented: 0,
             renamed: 0,
+            excluded: 0,
           }),
     );
     renderWithQuery(<RulesView />);
@@ -387,5 +398,67 @@ describe('reordering rules', () => {
     expect(
       (queryClient.getQueryData(key) as { data: CategorizationRule[] }).data.map(r => r.id),
     ).toEqual(['rule-a', 'rule-b']);
+  });
+});
+
+describe('rule folders', () => {
+  const SHOPS: RuleGroup = {
+    id: '00000000-0000-4000-8000-0000000000f1',
+    name: 'Shops',
+    position: 0,
+    createdAt: '2026-09-01T10:00:00.000Z',
+    updatedAt: '2026-09-01T10:00:00.000Z',
+  };
+  const loose = rule({ id: 'rule-loose', name: 'Loose rule' });
+  const filed = rule({ id: 'rule-filed', name: 'Filed rule', groupId: SHOPS.id });
+  const filedToo = rule({ id: 'rule-filed-2', name: 'Filed too', groupId: SHOPS.id });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    permissions.allowed = true;
+    search.params = new URLSearchParams();
+    put.mockResolvedValue(apiResponse(rule()));
+  });
+
+  it('shows each folder as a section that opens and closes, and says folders do not decide', async () => {
+    mockApi([filed, loose, filedToo], { folders: [SHOPS] });
+    renderWithQuery(<RulesView />);
+
+    expect(await screen.findByRole('heading', { name: 'Not in a folder' })).toBeTruthy();
+    const toggle = await screen.findByRole('button', { name: 'Show or hide the rules in “Shops”' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByText(/Which rule wins a row is still the order of the whole list/)).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Filed rule' })).toBeTruthy();
+
+    await userEvent.click(toggle);
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByRole('link', { name: 'Filed rule' })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Loose rule' })).toBeTruthy();
+  });
+
+  it('moves a rule into a folder and out of it from its menu', async () => {
+    mockApi([filed, loose], { folders: [SHOPS] });
+    renderWithQuery(<RulesView />);
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Rule actions: Loose rule' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Move to “Shops”' }));
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith('/categorization-rules/rule-loose', { groupId: SHOPS.id }),
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Rule actions: Filed rule' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Take out of the folder' }));
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith('/categorization-rules/rule-filed', { groupId: null }),
+    );
+  });
+
+  it('keeps the plain list, with no section titles, while there are no folders', async () => {
+    mockApi([loose]);
+    renderWithQuery(<RulesView />);
+
+    await screen.findByRole('link', { name: 'Loose rule' });
+    expect(screen.queryByRole('heading', { name: 'Not in a folder' })).toBeNull();
   });
 });

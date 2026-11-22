@@ -36,6 +36,10 @@ const holding: InvestmentHolding = {
   value: 156,
   hasTrades: true,
   priceHealth: { status: 'ok', lastCloseOn: '2026-03-09', failures: 0 },
+  sector: null,
+  region: null,
+  country: null,
+  lookThrough: null,
 };
 
 const point = (date: string, value: number | null, costBasis: number | null) => ({

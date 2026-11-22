@@ -1,6 +1,7 @@
 import type { InvestmentHolding as HoldingView, PriceHealth } from '../../contracts';
 import type { InvestmentHolding } from '../../entities';
 import type { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { readClassification } from './holding-classification';
 import { pricedUnits } from './metal-weight.util';
 
 /** What the holding is worth in `to`, or null when no rate is known. */
@@ -40,5 +41,6 @@ export async function holdingView(
     value: Math.round(value * 100) / 100,
     hasTrades,
     priceHealth: holding.symbol ? priceHealth : null,
+    ...readClassification(holding),
   };
 }

@@ -15,6 +15,7 @@ type Applied = Pick<Rule, 'id' | 'result'>;
  */
 export function useRuleApply(walletName: (id: string) => string | null) {
   const t = useIntlayer('categorizationRules');
+  const actions = useIntlayer('ruleActions');
   const apply = useApplyRule();
   const nameOf = (rule: Applied) =>
     (rule.result.walletId && walletName(rule.result.walletId)) || t.result.unknown.value;
@@ -31,6 +32,7 @@ export function useRuleApply(walletName: (id: string) => string | null) {
               movedPart: t.toast.movedPart.value,
               commentedPart: t.toast.commentedPart.value,
               renamedPart: t.toast.renamedPart.value,
+              excludedPart: actions.excludedPart.value,
             },
             nameOf(rule),
           ),

@@ -210,6 +210,7 @@ export const ACCOUNTING_ERRORS = {
   INVESTMENTS_HOLDING_NO_SYMBOL: 'Give the holding a symbol to keep its daily closes',
   INVESTMENTS_CLOSE_IN_FUTURE: 'A close cannot be dated after today',
   INVESTMENTS_CLOSE_NOT_FOUND: 'Close not found',
+  INVESTMENTS_LOOK_THROUGH_FUNDS_ONLY: 'Only an ETF or a fund can be split by weights',
   // ── metals ──────────────────────────────────────────────────────
   METALS_LOT_METAL_REQUIRED: 'A lot needs a metal',
   METALS_WEIGHT_REQUIRED: 'A lot needs the weight of one piece',

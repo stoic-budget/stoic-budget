@@ -42,6 +42,8 @@ export const queryKeys = {
   ) => ['categorization-rules', workspaceId, 'preview', conditions, ruleId, walletId] as const,
   categorizationRuleSuggestions: (workspaceId: string | null) =>
     ['categorization-rules', workspaceId, 'suggestions'] as const,
+  categorizationRuleGroups: (workspaceId: string | null) =>
+    ['categorization-rule-groups', workspaceId] as const,
   reviewInbox: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
     ['review-inbox', o.workspaceId, o.params] as const,
   reviewInboxCounts: (workspaceId: string | null, reviewer?: string) =>
@@ -205,6 +207,9 @@ export const queryKeys = {
     ['investments', o.workspaceId, 'history', o.holdingId] as const,
   holdingCloses: (o: { workspaceId: string | null; holdingId: string }) =>
     ['investments', o.workspaceId, 'closes', o.holdingId] as const,
+  // Under net worth: holdings, trades and metal lots all re-read net worth, and this with it.
+  investmentAllocation: (workspaceId: string | null) =>
+    ['net-worth', workspaceId, 'investment-allocation'] as const,
   metals: (workspaceId: string | null) => ['metals', workspaceId] as const,
   reconciliation: (workspaceId: string | null) => ['reconciliation', workspaceId] as const,
   cashFlowMap: (o: { workspaceId: string | null; params: string }) =>

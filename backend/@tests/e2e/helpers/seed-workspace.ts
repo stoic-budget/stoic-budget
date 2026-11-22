@@ -136,10 +136,14 @@ export async function seedWorkspace(
     { interest: 4 },
   );
   await send('branch', 'post', '/branches', { name: `${marker} branch` });
+  const ruleFolder = await send('rule folder', 'post', '/categorization-rule-groups', {
+    name: `${marker} rule folder`,
+  });
   await send('rule', 'post', '/categorization-rules', {
     name: `${marker} rule`,
     conditions: [{ field: 'counterparty_name', operator: 'contains', value: marker }],
     result: { categoryId: category.body.id },
+    groupId: ruleFolder.body.id,
   });
   await send('tax rate', 'post', '/tax-rates', { name: `${marker} 5%`, rate: 5 });
   await send('exchange rate', 'post', '/exchange-rates/manual', {
@@ -306,6 +310,12 @@ export async function seedWorkspace(
     quantity: 1,
     price: 10,
     priceCurrency: 'USD',
+  });
+  await send('holding classification', 'patch', `/investments/holdings/${holding.body.id}/classification`, {
+    sector: 'financials',
+    region: 'europe',
+    country: 'DE',
+    lookThrough: { region: [{ key: 'europe', weight: 70 }, { key: 'other', weight: 30 }] },
   });
   await send('investment trade', 'post', `/investments/holdings/${holding.body.id}/trades`, {
     kind: 'buy',

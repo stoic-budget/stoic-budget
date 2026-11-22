@@ -52,6 +52,8 @@ export const NON_FINANCIAL_QUERY_ROOTS = [
   'audit-events',
   'branches',
   'calendar-feed',
+  // Folders of rules: names only, no figures.
+  'categorization-rule-groups',
   'clients',
   'crypto',
   'custom-tables',

@@ -54,6 +54,10 @@ const pension: InvestmentAccount = {
       value: 1205,
       hasTrades: false,
       priceHealth: { status: 'ok', lastCloseOn: '2026-09-30', failures: 0 },
+      sector: null,
+      region: null,
+      country: null,
+      lookThrough: null,
     },
   ],
 };

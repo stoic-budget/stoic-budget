@@ -201,6 +201,7 @@ DATA:OFXSGML
       moved: 1,
       commented: 0,
       renamed: 0,
+      excluded: 0,
     });
     expect((await walletOf('CHARITY FUND')).wallet_id).toBe(giving);
   });

@@ -72,6 +72,7 @@ export * from './receipt-processing-job.entity';
 export * from './reference-data.entity';
 export * from './report-history.entity';
 export * from './report-schedule.entity';
+export * from './rule-group.entity';
 export * from './security-price.entity';
 export * from './security-price-symbol.entity';
 export * from './shared-link.entity';

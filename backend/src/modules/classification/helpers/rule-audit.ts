@@ -45,7 +45,7 @@ export function toRuleAuditSnapshot(rule: CategorizationRule): CategorizationRul
 
 /**
  * One event per row an apply changed, with what it was before: the category,
- * the account, the comment and the payee can be put back from it. A row that only got tags has no
+ * the account, the comment, the payee and the budgets flag can be put back from it. A row that only got tags has no
  * diff, since tags are added and nothing is taken away.
  */
 export function ruleApplyEvents(
@@ -59,12 +59,14 @@ export function ruleApplyEvents(
   const moved = idsOf(plan.moved);
   const commented = idsOf(plan.commented);
   const renamed = idsOf(plan.renamed);
+  const excluded = idsOf(plan.excluded);
   const touched = idsOf([
     ...plan.refiled,
     ...plan.moved,
     ...plan.tagged,
     ...plan.commented,
     ...plan.renamed,
+    ...plan.excluded,
   ]);
   return plan.matches
     .filter(row => touched.has(row.id))
@@ -86,6 +88,10 @@ export function ruleApplyEvents(
       if (renamed.has(row.id)) {
         before.payeeId = row.payeeId;
         after.payeeId = payeeId;
+      }
+      if (excluded.has(row.id)) {
+        before.excludedFromBudgets = false;
+        after.excludedFromBudgets = true;
       }
       return {
         workspaceId: rule.workspaceId,

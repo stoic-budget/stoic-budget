@@ -15,6 +15,7 @@ import { WorkspaceServiceSettings } from '../../entities/workspace-service-setti
 import { BalanceModule } from '../balance/balance.module';
 import { CryptoModule } from '../crypto/crypto.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
+import { HoldingClassificationService } from './holding-classification.service';
 import { HoldingHistoryService } from './holding-history.service';
 import { InvestmentFlowsService } from './investment-flows.service';
 import { InvestmentReturnsService } from './investment-returns.service';
@@ -29,6 +30,7 @@ import { MetalsService } from './metals.service';
 import { PriceHistoryController } from './price-history.controller';
 import { SecurityClosesService } from './security-closes.service';
 import { SecurityPricesService } from './security-prices.service';
+import { SecuritySectorService } from './security-sector.service';
 import { StockPriceService } from './stock-price.service';
 
 @Module({
@@ -59,6 +61,7 @@ import { StockPriceService } from './stock-price.service';
   ],
   providers: [
     HoldingHistoryService,
+    HoldingClassificationService,
     InvestmentFlowsService,
     InvestmentReturnsService,
     InvestmentSettingsService,
@@ -68,6 +71,7 @@ import { StockPriceService } from './stock-price.service';
     MetalsService,
     SecurityClosesService,
     SecurityPricesService,
+    SecuritySectorService,
     StockPriceService,
   ],
   exports: [
