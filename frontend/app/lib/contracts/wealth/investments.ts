@@ -2,8 +2,8 @@
 
 import * as Schema from 'effect/Schema';
 import { Timestamp, type Wire } from '../common/wire';
-import { PriceHealth } from './price-history';
 import { HoldingCountry, HoldingLookThrough, HoldingRegion, HoldingSector } from './allocation';
+import { PriceHealth } from './price-history';
 
 /** Crypto is deliberately absent: coins live in crypto wallets, nowhere else. */
 export const InvestmentAssetClass = Schema.Literals([
