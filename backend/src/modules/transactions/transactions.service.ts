@@ -24,12 +24,7 @@ import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.e
 import { Branch } from '../../entities/branch.entity';
 import { Category, CategoryType } from '../../entities/category.entity';
 import { Statement } from '../../entities/statement.entity';
-import {
-  TaxSource,
-  Transaction,
-  TransactionCategorySource,
-  TransactionType,
-} from '../../entities/transaction.entity';
+import { TaxSource, Transaction, TransactionType } from '../../entities/transaction.entity';
 import { User } from '../../entities/user.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
