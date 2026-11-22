@@ -21,6 +21,8 @@ import { TaxPackService } from '../tax-pack/tax-pack.service';
 import { TaxDeadlinesService } from '../tax-reminders/tax-deadlines.service';
 import { TransactionsService } from '../transactions/transactions.service';
 import { WalletsService } from '../wallets/wallets.service';
+import { McpConfirmService } from './confirm/mcp-confirm.service';
+import { TransactionChangePlanner } from './confirm/transaction-change-planner.service';
 import type { McpTool } from './mcp-tool';
 import { categoryTools } from './tools/categories.tools';
 import { dashboardTools } from './tools/dashboard.tools';
@@ -63,13 +65,16 @@ export class McpToolRegistry {
     payees: PayeesService,
     deadlines: TaxDeadlinesService,
     taxPack: TaxPackService,
+    confirm: McpConfirmService,
+    planner: TransactionChangePlanner,
   ) {
+    const bulk = { confirm, planner };
     this.tools = [
-      ...transactionTools(transactions),
+      ...transactionTools(transactions, bulk),
       ...categoryTools(categories),
       ...statementTools(statements, receiptStatements),
       ...searchTools(search),
-      ...reviewTools(review),
+      ...reviewTools(review, bulk),
       ...receiptTools(receipts),
       ...planningTools({ budgets, stoicLedger, goals, forecast }),
       ...moneyTools({ netWorth, wallets, invoices, invoiceAgeing, payables }),

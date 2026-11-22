@@ -33,6 +33,13 @@ export function useReviewDateFilter(
   const [dateApplied, setDateApplied] = useState<StatementFilterDate | null>(
     state.initialDateFilter,
   );
+  // A link's month read again once the workspace's month rule loaded.
+  const [seenInitial, setSeenInitial] = useState(state.initialDateFilter);
+  if (seenInitial !== state.initialDateFilter) {
+    setSeenInitial(state.initialDateFilter);
+    setDateDraft(state.initialDateFilter);
+    setDateApplied(state.initialDateFilter);
+  }
 
   const applyDate = (next: StatementFilterDate | null): void => {
     const range = dateFilterToRange(next, new Date());

@@ -327,7 +327,7 @@ export class AuthService {
     return invitation;
   }
 
-  private async createOwnedWorkspaceForUser(user: User, workspaceName: string) {
+  async createOwnedWorkspaceForUser(user: User, workspaceName: string) {
     const workspace = this.workspaceRepository.create({
       name: workspaceName,
       ownerId: user.id,

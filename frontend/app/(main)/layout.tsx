@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { AlertBanner } from '@/app/components/insights/AlertBanner';
 import { DailyQuoteBanner } from '@/app/components/insights/DailyQuoteBanner';
 import { MainSidePanelLayout } from '@/app/components/side-panel/MainSidePanelLayout';
+import { SystemHealthBanner } from '@/app/components/system-health/SystemHealthBanner';
 
 export default function MainLayout({ children }: { children: ReactNode }): React.JSX.Element {
   return (
@@ -10,6 +11,7 @@ export default function MainLayout({ children }: { children: ReactNode }): React
       {/* Spacing and the page gutter live on the wrapper (.seneca-page-banners), so
           the banners line up with the page below whichever of them shows. */}
       <div className="seneca-page-banners">
+        <SystemHealthBanner />
         <AlertBanner />
         <DailyQuoteBanner />
       </div>

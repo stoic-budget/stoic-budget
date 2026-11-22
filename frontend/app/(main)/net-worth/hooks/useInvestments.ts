@@ -131,5 +131,7 @@ export function useInvestments() {
     updateHolding,
     deleteHolding,
     refreshPrices,
+    /** Re-reads the accounts after something else changed them (an import). */
+    reload: invalidate,
   };
 }

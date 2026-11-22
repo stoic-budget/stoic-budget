@@ -13,9 +13,11 @@ import { AuthSession } from '../../entities/auth-session.entity';
 import { PasskeyCredential } from '../../entities/passkey-credential.entity';
 import { PasswordResetToken } from '../../entities/password-reset-token.entity';
 import { User } from '../../entities/user.entity';
+import { UserIdentity } from '../../entities/user-identity.entity';
 import { AuditService } from '../audit/audit.service';
 import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-revocation.service';
 import { MailerService } from '../mailer/mailer.service';
+import { recordOidcEvent } from './oidc/oidc-audit';
 import { deleteOwnPasskeys, toPasskey } from './passkeys/passkey-helpers';
 import { PasskeysService } from './passkeys/passkeys.service';
 import { recordSecurityEvent } from './security-audit.util';
@@ -134,10 +136,12 @@ export class PasswordResetService {
   ): Promise<void> {
     const { record, user } = await this.redeemable(token);
     const passwordHash = await hashPassword(newPassword);
+    const hadPassword = user.passwordSet !== false;
 
     // One transaction: the link is spent, the password changed, every session
-    // revoked and the chosen passkeys removed, or none of it happens.
-    const removed = await this.userRepository.manager.transaction(async manager => {
+    // revoked, the chosen passkeys removed and single sign-on unlinked, or none
+    // of it happens.
+    const { removed, unlinked } = await this.userRepository.manager.transaction(async manager => {
       // Claimed with a conditional update, so two submits of one link cannot both pass.
       const claimed = await manager.update(
         PasswordResetToken,
@@ -150,7 +154,7 @@ export class PasswordResetService {
       // Bump the token version and revoke sessions: whoever forced the reset —
       // the owner recovering, or someone kicking out an intruder — expects every
       // existing login to stop working.
-      await manager.update(User, { id: user.id }, { passwordHash });
+      await manager.update(User, { id: user.id }, { passwordHash, passwordSet: true });
       await manager.increment(User, { id: user.id }, 'tokenVersion', 1);
       // IsNull(), not `revokedAt: null` — TypeORM renders a literal null
       // comparison for the latter, which never matches, so nothing was revoked.
@@ -159,7 +163,18 @@ export class PasswordResetService {
         { userId: user.id, revokedAt: IsNull() },
         { revokedAt: new Date() },
       );
-      return deleteOwnPasskeys(manager, user.id, removePasskeyIds);
+      // A provider account linked to an account with a password may be the
+      // intruder's, so the reset that shuts them out unlinks it too. An account
+      // made by single sign-on keeps its own: without a password it could link
+      // nothing more, so what it has is its owner's.
+      const identities = hadPassword
+        ? await manager.find(UserIdentity, { where: { userId: user.id } })
+        : [];
+      if (identities.length > 0) await manager.delete(UserIdentity, { userId: user.id });
+      return {
+        removed: await deleteOwnPasskeys(manager, user.id, removePasskeyIds),
+        unlinked: identities,
+      };
     });
 
     await recordSecurityEvent(this.auditService, this.logger, {
@@ -169,8 +184,19 @@ export class PasswordResetService {
       entityId: user.id,
       action: AuditAction.UPDATE,
       severity: Severity.WARN,
-      meta: { password: 'reset', sessions: 'all-revoked' },
+      meta: {
+        password: 'reset',
+        sessions: 'all-revoked',
+        ...(unlinked.length > 0 ? { singleSignOn: 'all-unlinked' } : {}),
+      },
     });
+    for (const identity of unlinked) {
+      await recordOidcEvent(this.auditService, this.logger, 'unlinked', {
+        user,
+        issuer: identity.issuer,
+        identityId: identity.id,
+      });
+    }
     if (removed.length > 0) {
       await this.passkeysService.reportRemoved(user, removed, 'password-reset');
     }

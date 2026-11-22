@@ -22,6 +22,10 @@ function createService(
     accounts?: AccountSeed[];
     flows?: Array<Omit<InvestmentFlow, 'currency'>>;
     history?: Record<string, Array<{ date: string; amount: number }>>;
+    /** What the trades and the daily closes say an account was worth on a day. */
+    priced?: Record<string, (date: string) => number | null>;
+    /** The money the holdings' trades moved, asked for accounts kept by linked bank rows. */
+    trades?: Array<Omit<InvestmentFlow, 'currency'>>;
     metals?: {
       accountId: string;
       value: number;
@@ -52,6 +56,11 @@ function createService(
     ),
     loadFlows: vi.fn(async () =>
       (options.flows ?? []).map(flow => ({ ...flow, currency: 'EUR' })),
+    ),
+    tradeFlows: vi.fn(async (_ws: string, accountIds: string[]) =>
+      (options.trades ?? [])
+        .filter(flow => accountIds.includes(flow.accountId))
+        .map(flow => ({ ...flow, currency: 'EUR', fromTrades: true })),
     ),
     // Everything is already in euros: the dated conversion has its own tests.
     valueFlows: vi.fn(async (_ws: string, flows: InvestmentFlow[]) => ({
@@ -88,6 +97,11 @@ function createService(
     crypto as never,
     balance as never,
     exchangeRates as never,
+    {
+      accountValuer: vi.fn(
+        async () => (accountId: string, date: string) => options.priced?.[accountId]?.(date) ?? null,
+      ),
+    } as never,
   );
 }
 
@@ -323,6 +337,122 @@ describe('InvestmentReturnsService', () => {
       date: daysAgo(0),
       value: 1300,
       netContributed: 1200,
+    });
+  });
+
+  describe('past prices', () => {
+    it('opens a window at what the trades held at that day\'s close when nothing was entered', async () => {
+      const service = createService({
+        accounts: [{ id: 'broker', value: 1050 }],
+        flows: [{ accountId: 'broker', date: daysAgo(400), amount: 1000, kind: 'contribution' }],
+        trades: [{ accountId: 'broker', date: daysAgo(400), amount: 1000, kind: 'contribution' }],
+        priced: { broker: () => 980 },
+      });
+
+      const result = await service.getReturns('ws', '30d');
+
+      const broker = result.sources.find(source => source.id === 'broker');
+      expect(broker).toMatchObject({ includedInReturn: true, startValue: 980 });
+      expect(broker?.flags).not.toContain('opening_value_unknown');
+      expect(result.summary).toMatchObject({ startValue: 980, endValue: 1050, gain: 70 });
+    });
+
+    it('keeps the balance entered by then over the priced value', async () => {
+      const service = createService({
+        accounts: [{ id: 'broker', value: 1200 }],
+        flows: [{ accountId: 'broker', date: daysAgo(100), amount: 1000, kind: 'contribution' }],
+        history: { broker: [{ date: daysAgo(40), amount: 1100 }] },
+        priced: { broker: () => 999 },
+      });
+
+      const result = await service.getReturns('ws', '30d');
+
+      expect(result.summary.startValue).toBe(1100);
+    });
+
+    it('says the opening is unknown when money paid in was invested only inside the window', async () => {
+      const bought = daysAgo(20);
+      const service = createService({
+        accounts: [{ id: 'broker', value: 900 }],
+        flows: [{ accountId: 'broker', date: daysAgo(40), amount: 900, kind: 'contribution' }],
+        trades: [{ accountId: 'broker', date: bought, amount: 900, kind: 'contribution' }],
+        // Nothing was held yet when the window opened: the 900 waited as cash.
+        priced: { broker: date => (date < bought ? 0 : 900) },
+      });
+
+      const result = await service.getReturns('ws', '30d');
+
+      expect(result.flags).toContainEqual({ code: 'opening_value_unknown', sourceId: 'broker' });
+      expect(result.sources[0]).toMatchObject({ includedInReturn: false });
+      expect(result.summary.gain).toBe(0);
+    });
+
+    it('says the opening is unknown when part of the money paid in was still uninvested', async () => {
+      const second = daysAgo(20);
+      const service = createService({
+        accounts: [{ id: 'broker', value: 1800 }],
+        flows: [{ accountId: 'broker', date: daysAgo(40), amount: 1800, kind: 'contribution' }],
+        trades: [
+          { accountId: 'broker', date: daysAgo(35), amount: 900, kind: 'contribution' },
+          { accountId: 'broker', date: second, amount: 900, kind: 'contribution' },
+        ],
+        priced: { broker: date => (date < second ? 900 : 1800) },
+      });
+
+      const result = await service.getReturns('ws', '30d');
+
+      expect(result.flags).toContainEqual({ code: 'opening_value_unknown', sourceId: 'broker' });
+    });
+
+    it('opens at nothing held when the trades are the money moves themselves', async () => {
+      const bought = daysAgo(20);
+      const service = createService({
+        accounts: [{ id: 'broker', value: 950 }],
+        flows: [
+          { accountId: 'broker', date: daysAgo(60), amount: 500, kind: 'contribution', fromTrades: true },
+          { accountId: 'broker', date: daysAgo(45), amount: 520, kind: 'withdrawal', fromTrades: true },
+          { accountId: 'broker', date: bought, amount: 900, kind: 'contribution', fromTrades: true },
+        ],
+        // Sold out before the window, bought again inside it.
+        priced: { broker: date => (date < daysAgo(45) ? 500 : date < bought ? 0 : 900) },
+      });
+
+      const result = await service.getReturns('ws', '30d');
+
+      expect(result.sources[0]).toMatchObject({ includedInReturn: true, startValue: 0 });
+      expect(result.summary).toMatchObject({ startValue: 0, endValue: 950, gain: 50 });
+    });
+
+    it('still says the opening is unknown when the closes cannot tell', async () => {
+      const service = createService({
+        accounts: [{ id: 'broker', value: 1050 }],
+        flows: [{ accountId: 'broker', date: daysAgo(400), amount: 1000, kind: 'contribution' }],
+        priced: { broker: () => null },
+      });
+
+      const result = await service.getReturns('ws', '30d');
+
+      expect(result.flags).toContainEqual({ code: 'opening_value_unknown', sourceId: 'broker' });
+    });
+
+    it('draws the days before the first entry at their priced value, not at zero', async () => {
+      const firstEntry = daysAgo(10);
+      const service = createService({
+        accounts: [{ id: 'broker', value: 1200 }],
+        flows: [{ accountId: 'broker', date: daysAgo(60), amount: 1000, kind: 'contribution' }],
+        trades: [{ accountId: 'broker', date: daysAgo(60), amount: 1000, kind: 'contribution' }],
+        history: { broker: [{ date: firstEntry, amount: 1150 }] },
+        priced: { broker: date => (date < firstEntry ? 1000 : 5) },
+      });
+
+      const result = await service.getReturns('ws', '30d');
+
+      const before = result.series.filter(point => point.date < firstEntry);
+      const after = result.series.filter(point => point.date >= firstEntry && point.date < result.to);
+      expect(before.length).toBeGreaterThan(0);
+      expect(before.every(point => point.value === 1000)).toBe(true);
+      // Once a balance is entered, it is what the line shows.
+      expect(after.every(point => point.value === 1150)).toBe(true);
     });
   });
 });

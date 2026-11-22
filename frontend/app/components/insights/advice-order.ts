@@ -11,7 +11,9 @@ const priorityOf = (item: Insight): number => {
 
 /** Good news: the user is doing well. */
 export const isGoodNews = (item: Insight): boolean =>
-  item.type === 'stoic.praise' || item.messageKey === 'trend.savings_rate_up';
+  item.type === 'stoic.praise' ||
+  item.type === 'pattern.net_worth_milestone' ||
+  item.messageKey === 'trend.savings_rate_up';
 
 /** Advice that asks for something; the rest is information and stays without an accent. */
 export const needsAttention = (item: Insight): boolean =>

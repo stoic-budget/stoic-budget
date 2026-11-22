@@ -5,6 +5,7 @@ vi.mock('franc', () => ({
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import {
+  AdminSystemHealth,
   ApiKeyList,
   ApiKeyScopes,
   AuditEvent,
@@ -69,6 +70,14 @@ describe('API contracts: people feed (e2e)', () => {
   it('health', async () => {
     await answer(HealthStatus, request(ctx.app.getHttpServer()).get('/health'));
     await answer(ReadinessStatus, request(ctx.app.getHttpServer()).get('/health/ready'));
+    // The owner is the instance admin here: queues and setup checks in full.
+    const details = await answer(
+      AdminSystemHealth,
+      call('get', `/system/health?origin=${encodeURIComponent('https://budget.example.co.il')}`),
+    );
+    expect(details.services.length).toBe(2);
+    expect(details.queues.length).toBeGreaterThan(0);
+    expect(details.config.length).toBeGreaterThan(0);
   });
 
   it('api keys', async () => {

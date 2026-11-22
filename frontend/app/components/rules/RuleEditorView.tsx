@@ -21,7 +21,8 @@ import { completeConditions, useRule, useRulePreview, useSaveRule } from './useR
 
 /**
  * How many existing rows applying the rule would file or tag: every match when
- * it adds tags, else the matches nobody filed by hand when it sets a category.
+ * it adds tags or leaves rows out of budgets, else the matches nobody filed by
+ * hand when it sets a category. Telling people is never applied to old rows.
  */
 function rowsToApply(
   result: RuleSeed['result'],
@@ -30,7 +31,7 @@ function rowsToApply(
   if (!preview) {
     return 0;
   }
-  if (result.tagIds?.length) {
+  if (result.tagIds?.length || result.excludeFromBudgets) {
     return preview.matchedTransactions;
   }
   return result.categoryId ? preview.overridable : 0;
@@ -83,7 +84,9 @@ export function RuleEditorView({ id }: { id: string }) {
     Boolean(result.walletId) ||
     result.ownerMemberId !== undefined ||
     Boolean(result.tagIds?.length) ||
-    Boolean(result.comment?.trim() || result.payeeId || result.payeeName);
+    Boolean(result.comment?.trim() || result.payeeId || result.payeeName) ||
+    Boolean(result.excludeFromBudgets) ||
+    result.notify !== undefined;
   const problem =
     conditions.length === 0 ? t.dialog.needsCondition : hasAction ? null : t.dialog.needsAction;
 
@@ -100,7 +103,7 @@ export function RuleEditorView({ id }: { id: string }) {
     // Read before leaving the page: the preview is of what is being saved.
     const pending = rowsToApply(draft.result, preview.data);
     const moving = draft.result.walletId ? (preview.data?.movable ?? 0) : 0;
-    const tags = Boolean(draft.result.tagIds?.length);
+    const tags = Boolean(draft.result.tagIds?.length || draft.result.excludeFromBudgets);
     const rule = await save.mutateAsync({ id: draft.id, body }).catch(() => null);
     if (!rule) {
       toast.error(t.toast.saveFailed.value);
@@ -160,6 +163,7 @@ export function RuleEditorView({ id }: { id: string }) {
             problem={problem && conditions.length === 0 ? problem : null}
             preview={conditions.length > 0 ? preview.data : undefined}
             setsCategory={Boolean(result.categoryId)}
+            notifies={result.notify !== undefined}
             categoryName={names.category}
           />
         </div>

@@ -3,6 +3,7 @@ import { AuditAction, EntityType, Severity } from '@/entities/audit-event.entity
 import { AuthSession } from '@/entities/auth-session.entity';
 import { PasswordResetToken } from '@/entities/password-reset-token.entity';
 import { User } from '@/entities/user.entity';
+import { UserIdentity } from '@/entities/user-identity.entity';
 import { PasswordResetService } from '@/modules/auth/password-reset.service';
 import { BadRequestException } from '@nestjs/common';
 import { IsNull } from 'typeorm';
@@ -10,7 +11,13 @@ import { IsNull } from 'typeorm';
 const SECRET = 'test-reset-secret';
 
 describe('PasswordResetService', () => {
-  let manager: { update: Mock; increment: Mock; createQueryBuilder: Mock };
+  let manager: {
+    update: Mock;
+    increment: Mock;
+    createQueryBuilder: Mock;
+    find: Mock;
+    delete: Mock;
+  };
   let userRepository: {
     findOne: Mock;
     save: Mock;
@@ -43,6 +50,9 @@ describe('PasswordResetService', () => {
       update: vi.fn().mockResolvedValue({ affected: 1 }),
       increment: vi.fn().mockResolvedValue({ affected: 1 }),
       createQueryBuilder: vi.fn(),
+      // Linked provider accounts: none unless a case says so.
+      find: vi.fn().mockResolvedValue([]),
+      delete: vi.fn(),
     };
     userRepository = {
       findOne: vi.fn(),
@@ -160,7 +170,7 @@ describe('PasswordResetService', () => {
       expect(manager.update).toHaveBeenCalledWith(
         User,
         { id: 'user-1' },
-        { passwordHash: expect.stringMatching(/^\$2[aby]\$/) },
+        { passwordHash: expect.stringMatching(/^\$2[aby]\$/), passwordSet: true },
       );
       // Every issued token stops verifying.
       expect(manager.increment).toHaveBeenCalledWith(User, { id: 'user-1' }, 'tokenVersion', 1);
@@ -185,6 +195,57 @@ describe('PasswordResetService', () => {
       );
       expect(manager.update).toHaveBeenCalledTimes(1);
       expect(auditService.createEvent).not.toHaveBeenCalled();
+    });
+
+    it('marks an account made by single sign-on as having a password', async () => {
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser, passwordSet: false });
+
+      await service.resetPassword('plain-token', 'BrandNewPass1');
+
+      // Its last linked identity may be unlinked from now on.
+      expect(manager.update).toHaveBeenCalledWith(
+        User,
+        { id: 'user-1' },
+        expect.objectContaining({ passwordSet: true }),
+      );
+    });
+
+    it('unlinks the provider accounts of an account that had a password', async () => {
+      const linked = [
+        { id: 'identity-1', userId: 'user-1', issuer: 'https://login.example.com' },
+        { id: 'identity-2', userId: 'user-1', issuer: 'https://login.example.com' },
+      ];
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser, passwordSet: true });
+      manager.find.mockResolvedValue(linked);
+
+      await service.resetPassword('plain-token', 'BrandNewPass1');
+
+      // One may be an intruder's, linked while they knew the old password.
+      expect(manager.find).toHaveBeenCalledWith(UserIdentity, { where: { userId: 'user-1' } });
+      expect(manager.delete).toHaveBeenCalledWith(UserIdentity, { userId: 'user-1' });
+      const metas = auditService.createEvent.mock.calls.map(([event]) => event.meta);
+      expect(metas).toContainEqual({
+        password: 'reset',
+        sessions: 'all-revoked',
+        singleSignOn: 'all-unlinked',
+      });
+      expect(metas.filter(meta => meta.oidcEvent === 'unlinked')).toEqual([
+        { oidcEvent: 'unlinked', provider: 'https://login.example.com', identityId: 'identity-1' },
+        { oidcEvent: 'unlinked', provider: 'https://login.example.com', identityId: 'identity-2' },
+      ]);
+    });
+
+    it('keeps the identity of an account made by single sign-on', async () => {
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser, passwordSet: false });
+
+      await service.resetPassword('plain-token', 'BrandNewPass1');
+
+      // Without a password it could link nothing: what it has is its owner's.
+      expect(manager.find).not.toHaveBeenCalled();
+      expect(manager.delete).not.toHaveBeenCalled();
     });
 
     it('ends the calendar feed links of every workspace', async () => {

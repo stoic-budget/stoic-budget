@@ -20,8 +20,11 @@ export function ImportProblems({
     return null;
   }
   const reasonText = (reason: string | undefined) => {
-    if (reason === 'duplicate' || reason === 'unchanged') {
-      return t.reasons[reason].value;
+    if (reason && reason !== 'invalid' && reason in t.reasons) {
+      return t.reasons[reason as keyof typeof t.reasons].value;
+    }
+    if (reason === 'outside_period') {
+      return t.reasons.outsidePeriod.value;
     }
     return fillTemplate(t.reasons.invalid.value, { field: fieldLabel(reason ?? '') });
   };

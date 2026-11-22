@@ -71,6 +71,8 @@ export interface RuleApplyPlan {
   commented: Transaction[];
   /** Matches that take the rule's payee: not theirs already, not picked by a person. */
   renamed: Transaction[];
+  /** Matches still counted in budgets, which the rule leaves out. */
+  excluded: Transaction[];
 }
 
 /**
@@ -93,6 +95,8 @@ export function movesToWallet(
  * Rules add up, best first, so what a rule ranked above sets on a row is that
  * rule's to set: this one leaves the category or the account of such a row.
  * A comment goes only where there is none, and a payee never over a person's pick.
+ * Leaving a row out of budgets takes nothing a rule above could set otherwise,
+ * so every match still counted is left out.
  */
 export function planRuleApply(
   rows: readonly Transaction[],
@@ -110,6 +114,7 @@ export function planRuleApply(
     walletId?: string;
     comment?: string;
     payeeId?: string;
+    excludesFromBudgets?: boolean;
   },
 ): RuleApplyPlan {
   const matching = rowsMatching(rows, rule, input);
@@ -133,6 +138,9 @@ export function planRuleApply(
       ? matches.filter(
           row => row.payeeId !== input.payeeId && !pickedByHand(row) && wins(row, 'payeeId'),
         )
+      : [],
+    excluded: input.excludesFromBudgets
+      ? matches.filter(row => !(row.excludedFromBudgets || row.budgetsSetByHand))
       : [],
   };
 }

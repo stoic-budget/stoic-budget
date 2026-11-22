@@ -2,19 +2,18 @@ import { randomUUID } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, type Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { resolveUploadsDir } from '../../common/utils/uploads.util';
-import { STANDARD_WORKSPACE } from '../../common/workspaces/version-workspaces';
 import { Integration, IntegrationStatus, User } from '../../entities';
 import { StatementsService } from '../statements/statements.service';
 import type { BankSyncAccountSetting, BankSyncHealth } from './bank-sync.config';
 import { linksOf } from './bank-sync.config';
 import { BankSyncService } from './bank-sync.service';
 import { BankSyncDedupeService } from './bank-sync-dedupe.service';
-import { healthOf, recordDrift, sinceOf } from './bank-sync-health';
+import { askedSince, healthOf, recordDrift, sinceOf } from './bank-sync-health';
 import { buildOfxStatement, ofxFileName } from './bank-sync-ofx.util';
+import { BankSyncPendingService } from './bank-sync-pending.service';
 import {
   type BankSyncAccount,
   BankSyncAuthError,
@@ -54,6 +53,7 @@ export class BankSyncPullService {
     private readonly connections: BankSyncService,
     private readonly statementsService: StatementsService,
     private readonly dedupe: BankSyncDedupeService,
+    private readonly pending: BankSyncPendingService,
   ) {}
 
   async sync(user: User, workspaceId: string, connectionId: string): Promise<BankSyncResult> {
@@ -92,41 +92,6 @@ export class BankSyncPullService {
     return result;
   }
 
-  /** Pulls every connected workspace that left auto-sync on, as the user who connected it. */
-  @Cron(CronExpression.EVERY_6_HOURS)
-  async autoSync(): Promise<void> {
-    const keys = this.connections.catalogue().map(item => item.key);
-    const integrations = await this.integrationRepository.find({
-      // A past version pulls nothing new, whatever its copied settings say.
-      where: {
-        provider: In(keys),
-        status: IntegrationStatus.CONNECTED,
-        workspace: STANDARD_WORKSPACE,
-      },
-      relations: { openProtocolSettings: true, connectedByUser: true },
-    });
-    for (const integration of integrations) {
-      const config = this.connections.configOf(integration);
-      if (!(config.autoSync && integration.connectedByUser)) continue;
-      try {
-        const result = await this.sync(
-          integration.connectedByUser,
-          integration.workspaceId,
-          integration.id,
-        );
-        if (result.imported > 0) {
-          this.logger.log(
-            `Bank sync: connection ${integration.id} pulled ${result.imported} rows into ${result.statements} statements`,
-          );
-        }
-      } catch (error) {
-        this.logger.warn(
-          `Bank sync: connection ${integration.id} failed: ${this.messageOf(error)}`,
-        );
-      }
-    }
-  }
-
   private async pullAccount(
     user: User,
     workspaceId: string,
@@ -150,13 +115,22 @@ export class BankSyncPullService {
     }
 
     const floor = sinceOf(account, now).getTime();
-    const candidates = remote.transactions.filter(
-      item => !item.pending && item.posted.getTime() >= floor,
+    // Read before this pull moves `lastSyncAt`: the days the statement stands for.
+    const since = askedSince(account, new Date(floor), now);
+    const candidates = remote.transactions.filter(item => item.posted.getTime() >= floor);
+    // Pending rows come in too, shown but counted nowhere; booked versions
+    // replace them here, before dedupe could drop a booked row as a pending one.
+    const { incoming } = await this.pending.settle(
+      workspaceId,
+      account,
+      candidates,
+      remote.currency,
+      now,
     );
     const fresh = await this.dedupe.withoutKnownRows(
       workspaceId,
       account,
-      candidates,
+      incoming,
       remote.currency,
     );
     let statementId: string | null = null;
@@ -169,6 +143,7 @@ export class BankSyncPullService {
           remote,
           fresh,
           account.walletId,
+          { since, now },
         );
         totals.imported += fresh.length;
         totals.statements += 1;
@@ -179,7 +154,10 @@ export class BankSyncPullService {
     }
 
     if (!error) {
-      const drift = recordDrift(account, remote, candidates, now);
+      // Drift is read against booked rows, as before pending rows were kept: a
+      // pending row may never book, so it explains no move of the balance yet.
+      const booked = candidates.filter(item => !item.pending);
+      const drift = recordDrift(account, remote, booked, now);
       account.lastSyncAt = now.toISOString();
       account.balance = remote.balance;
       account.balanceDate = remote.balanceDate?.toISOString() ?? null;
@@ -189,6 +167,9 @@ export class BankSyncPullService {
       account.health = healthOf(account, drift, now);
       // The floor only ever applies to the pull right after a switch.
       account.syncFrom = null;
+      account.askedFrom = statementId
+        ? null
+        : { walletId: account.walletId, from: since.toISOString() };
     } else {
       account.lastError = error;
     }
@@ -209,10 +190,14 @@ export class BankSyncPullService {
     account: BankSyncAccount,
     transactions: BankSyncTransaction[],
     walletId: string | null,
+    asked: { since: Date; now: Date },
   ): Promise<string> {
     const uploadsDir = resolveUploadsDir();
     await fs.promises.mkdir(uploadsDir, { recursive: true });
-    const content = Buffer.from(buildOfxStatement(account, transactions), 'utf8');
+    const content = Buffer.from(
+      buildOfxStatement(account, transactions, asked.now, asked.since),
+      'utf8',
+    );
     const filePath = path.join(uploadsDir, `${randomUUID()}.ofx`);
     await fs.promises.writeFile(filePath, content);
     const file = {

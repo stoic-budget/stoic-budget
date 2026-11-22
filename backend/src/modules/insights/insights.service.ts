@@ -8,6 +8,7 @@ import type { InsightCandidate } from './analyzers/analyzer.interface';
 import { FinancialAnalyzer } from './analyzers/financial.analyzer';
 import { OperationalAnalyzer } from './analyzers/operational.analyzer';
 import { StoicAnalyzer } from './analyzers/stoic.analyzer';
+import { WealthAnalyzer } from './analyzers/wealth.analyzer';
 import {
   INSIGHT_TRANSLATIONS,
   type InsightMessageKey,
@@ -36,6 +37,7 @@ export class InsightsService {
     private readonly operationalAnalyzer: OperationalAnalyzer,
     private readonly financialAnalyzer: FinancialAnalyzer,
     private readonly stoicAnalyzer: StoicAnalyzer,
+    private readonly wealthAnalyzer: WealthAnalyzer,
   ) {}
 
   /**
@@ -51,12 +53,13 @@ export class InsightsService {
     options: { locale?: string } = {},
   ): Promise<{ created: number; updated: number; total: number; newInsights: Insight[] }> {
     const context = { userId, workspaceId };
-    const [operational, financial, stoic] = await Promise.all([
+    const [operational, financial, stoic, wealth] = await Promise.all([
       this.operationalAnalyzer.analyze(context),
       this.financialAnalyzer.analyze(context),
       this.stoicAnalyzer.analyze(context),
+      this.wealthAnalyzer.analyze(context),
     ]);
-    const candidates = [...operational, ...chooseAdviceCards(financial, stoic)];
+    const candidates = [...operational, ...chooseAdviceCards([...financial, ...wealth], stoic)];
 
     // One refresh writes a handful of insights for the same recipient — read
     // the locale they are phrased in once, not once per insight.
@@ -87,12 +90,7 @@ export class InsightsService {
       candidates.map(candidate => candidate.deduplicationKey),
     );
 
-    return {
-      created,
-      updated,
-      total: candidates.length,
-      newInsights,
-    };
+    return { created, updated, total: candidates.length, newInsights };
   }
 
   /**
