@@ -168,8 +168,21 @@ function clusterDay(cluster: number[]): number {
   return day > 31 ? day - 31 : day;
 }
 
-/** A monthly payer's day; paydays moved back from the 1st to the 30th or 31st still read as the 1st. */
+/** Whether `day` (`YYYY-MM-DD`) is the last day of its month. */
+const isMonthEnd = (day: string): boolean =>
+  new Date(
+    Date.UTC(Number(day.slice(0, 4)), Number(day.slice(5, 7)) - 1, Number(day.slice(8, 10)) + 1),
+  ).getUTCDate() === 1;
+
+/**
+ * A monthly payer's day; paydays moved back from the 1st to the 30th or 31st
+ * still read as the 1st. One paid on the last day of the month mostly is paid
+ * on the last day (31, kept to each month's length), not on the median's 30th.
+ */
 function usualDay(paydays: string[]): number {
+  if (paydays.filter(isMonthEnd).length * 2 > paydays.length) {
+    return 31;
+  }
   const days = paydays.map(day => Number(day.slice(8, 10)));
   const clusters = dayClusters(days);
   return clusters.length === 1 ? clusterDay(clusters[0]) : median(days);

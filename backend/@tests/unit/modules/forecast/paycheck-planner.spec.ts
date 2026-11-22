@@ -165,6 +165,17 @@ describe('paycheck schedule', () => {
   });
 });
 
+describe('paycheck schedule at the month end', () => {
+  it('keeps a payer of the last day on the last day, not the 30th', () => {
+    // The last day each month; May's fell on a Sunday and came on the Friday.
+    const history = ['2026-05-29', '2026-06-30', '2026-07-31', '2026-08-31', '2026-09-30', '2026-10-30'];
+    const { schedule, paydays } = project(history, '2026-11-02');
+
+    expect(schedule).toMatchObject({ cadence: 'monthly', daysOfMonth: [31] });
+    expect(paydays.slice(0, 3).map(day => day.date)).toEqual(['2026-11-30', '2026-12-31', '2027-01-29']);
+  });
+});
+
 describe('planPeriods', () => {
   const periods = [
     { start: '2026-10-25', end: '2026-11-24', nextPayday: '2026-11-25' },
@@ -349,5 +360,18 @@ describe('toPlanCommitments', () => {
     // A single payment with nothing before it is not taken for the next charge either.
     const only = { paymentDates: ['2026-11-12'], frequency: 'monthly' };
     expect(toPlanCommitments([charge('2026-11-25')], new Map([['sub-1', only]]), '2026-11-15')).toHaveLength(1);
+  });
+
+  it('reads a biweekly and a half-yearly subscription by their own interval', () => {
+    // Biweekly, paid on time on 29 Oct and 12 Nov: the 26 Nov charge is still owed.
+    const biweekly = { paymentDates: ['2026-11-12', '2026-10-29'], frequency: 'biweekly' };
+    expect(
+      toPlanCommitments([charge('2026-11-26'), charge('2026-12-10')], new Map([['sub-1', biweekly]]), '2026-11-22').map(
+        item => item.date,
+      ),
+    ).toEqual(['2026-11-26', '2026-12-10']);
+    // Half-yearly, the December charge paid early in November: nothing left to pay.
+    const halfYear = { paymentDates: ['2026-11-10', '2026-06-15'], frequency: 'semiannual' };
+    expect(toPlanCommitments([charge('2026-12-15')], new Map([['sub-1', halfYear]]), '2026-11-22')).toEqual([]);
   });
 });

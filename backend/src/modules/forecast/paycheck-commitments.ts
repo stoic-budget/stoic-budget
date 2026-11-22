@@ -5,8 +5,10 @@ import type { PlanCommitment } from './paycheck-planner';
 /** Each subscription interval in days, roughly: a payment within half of it belongs to that charge. */
 const INTERVAL_DAYS: Record<string, number> = {
   weekly: 7,
+  biweekly: 14,
   monthly: 30,
   quarterly: 91,
+  semiannual: 182,
   annual: 365,
 };
 
