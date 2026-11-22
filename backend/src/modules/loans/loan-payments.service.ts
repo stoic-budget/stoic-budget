@@ -50,7 +50,7 @@ export class LoanPaymentsService {
       totals: {
         interest: sum(split.map(item => item.interest)),
         principal: sum(split.map(item => item.principal)),
-        unsplit: items.filter(item => !item.split && !item.blocked).length,
+        unsplit: items.filter(item => !(item.split || item.blocked)).length,
       },
     };
   }

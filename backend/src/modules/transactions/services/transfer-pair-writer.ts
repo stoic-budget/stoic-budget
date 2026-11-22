@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { In, IsNull, type Repository } from 'typeorm';
+import { appError } from '../../../common/errors/app-error';
 import { StatementStatus } from '../../../entities/statement.entity';
 import {
   type Transaction,
@@ -63,4 +65,24 @@ export async function writeTransferPairs(
     );
   }
   return applied;
+}
+
+/**
+ * Refuses a row that cannot be a leg of a transfer or a reimbursement: a
+ * suspected duplicate, part of a split, already paired, or interest split off
+ * a loan payment (spending on the loan account, never a leg).
+ */
+export function assertFreeLeg(leg: Transaction): void {
+  if (leg.isDuplicate) {
+    throw new BadRequestException(appError('TRANSACTION_LEG_DUPLICATE', { id: leg.id }));
+  }
+  if (leg.splitGroupId) {
+    throw new BadRequestException(appError('TRANSACTION_LEG_SPLIT', { id: leg.id }));
+  }
+  if (leg.loanInterestOfId) {
+    throw new BadRequestException(appError('LOAN_INTEREST_STAYS_ON_LOAN'));
+  }
+  if (leg.transferPairId) {
+    throw new ConflictException(appError('TRANSACTION_LEG_TRANSFERRED', { id: leg.id }));
+  }
 }

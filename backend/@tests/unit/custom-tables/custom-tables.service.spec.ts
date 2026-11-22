@@ -417,6 +417,12 @@ describe("CustomTablesService.convertToStatement", () => {
 				},
 			},
 		]);
+		// Nothing on a filed return: neither the rows nor loan interest split off them.
+		transactionRepository.createQueryBuilder.mockReturnValue({
+			setFindOptions: vi.fn().mockReturnThis(),
+			innerJoin: vi.fn().mockReturnThis(),
+			getCount: vi.fn().mockResolvedValue(0),
+		});
 		statementRepository.createQueryBuilder.mockReturnValue({
 			where: vi.fn().mockReturnThis(),
 			andWhere: vi.fn().mockReturnThis(),

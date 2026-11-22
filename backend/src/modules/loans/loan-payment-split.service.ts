@@ -20,6 +20,7 @@ import type { Wallet } from '../../entities/wallet.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
 import { ensureCanEditStatements } from '../statements/statement-access';
+import { assertMayReshape, memberIdOf } from '../transactions/helpers/split-guards';
 import type { LoanPlanInput } from './engine/loan-plan';
 import { buildInterestRow } from './loan-interest-row';
 import {
@@ -71,6 +72,8 @@ export class LoanPaymentSplitService {
     const { wallet, input } = await this.loanTerms.planOf(walletId, workspaceId);
     const created = await this.transactions.manager.transaction(async manager => {
       const payment = await this.lockPayment(manager, wallet, transactionId);
+      // Another member's private payment is theirs to split, as for any split.
+      assertMayReshape([payment], viewerMemberId);
       this.assertSplittable(payment, wallet, input);
       const amount = toMinor(amountOf(payment));
       if (toMinor(interest) > amount) {
@@ -104,8 +107,10 @@ export class LoanPaymentSplitService {
   ): Promise<void> {
     await ensureCanEditStatements(this.members, userId, workspaceId);
     const { wallet } = await this.loanTerms.planOf(walletId, workspaceId);
+    const viewer = await memberIdOf(this.members, workspaceId, userId);
     const removed = await this.transactions.manager.transaction(async manager => {
       const payment = await this.lockPayment(manager, wallet, transactionId);
+      assertMayReshape([payment], viewer);
       const repo = manager.getRepository(Transaction);
       const interest = (await loadInterest(repo, workspaceId, [payment.id])).get(payment.id);
       if (!interest) {

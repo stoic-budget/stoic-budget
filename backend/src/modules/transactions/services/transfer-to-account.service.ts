@@ -33,6 +33,10 @@ export class TransferToAccountService {
     walletId: string,
   ): Promise<{ transferPairId: string; createdId: string | null }> {
     const row = await this.pairing.findOwned(workspaceId, transactionId);
+    // Interest split off a loan payment stays spending on the loan account.
+    if (row.loanInterestOfId) {
+      throw new BadRequestException(appError('LOAN_INTEREST_STAYS_ON_LOAN'));
+    }
     const wallet = await this.transactionRepository.manager
       .getRepository(Wallet)
       .findOne({ where: { id: walletId, workspaceId } });

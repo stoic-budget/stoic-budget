@@ -1,10 +1,16 @@
 import { randomUUID } from 'node:crypto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable, NotFoundException, Optional } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  Optional,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { type EntityManager, In, type Repository } from 'typeorm';
+import { type EntityManager, In, IsNull, Not, type Repository } from 'typeorm';
 import { appError } from '../../../common/errors/app-error';
 import { ensureCanEdit } from '../../../common/utils/ensure-can-edit.util';
 import { assertRowsRemovable } from '../../../common/utils/tax-lock.util';
@@ -139,6 +145,17 @@ export class TransactionDeleteService {
 
     // A locked row refuses, and so does a payment whose loan interest is locked.
     await assertRowsRemovable(repo, { workspaceId, id: In(ids) });
+    // A split loan payment and its interest go together, by joining them back:
+    // deleted apart, an undo could not put the pair back as it was.
+    const split = await repo.count({
+      where: [
+        { workspaceId, id: In(ids), loanInterestOfId: Not(IsNull()) },
+        { workspaceId, loanInterestOfId: In(ids) },
+      ],
+    });
+    if (split > 0) {
+      throw new BadRequestException(appError('LOAN_PAYMENT_SPLIT_FIRST_JOIN'));
+    }
 
     // The snapshot the audit keeps, as `findOne` reads a row: undo rebuilds from it.
     const rows = await repo.find({

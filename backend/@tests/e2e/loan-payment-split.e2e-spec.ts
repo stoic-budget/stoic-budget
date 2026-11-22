@@ -52,6 +52,7 @@ describe('Loan payment split (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   const stamp = Date.now();
+  let memberAccount: E2eAccount;
   const emails = {
     owner: `loan-split-owner-${stamp}@example.com`,
     other: `loan-split-other-${stamp}@example.com`,
@@ -393,11 +394,17 @@ describe('Loan payment split (e2e)', () => {
     expect(await interestRowsOf(regular.id)).toHaveLength(1);
   });
 
-  it('removes the interest with its payment', async () => {
+  it('deletes a split payment only once it is joined back, so an undo finds the pair whole', async () => {
     const [gone] = await save(incoming(loanId, rows[5].date, rows[5].payment));
     await call('post', `/wallets/${loanId}/loan-payments/${gone.id}/split`, 200, {
       interest: rows[5].interest,
     });
+    const [interest] = await interestRowsOf(gone.id);
+    for (const id of [gone.id, interest.id]) {
+      const refused = await call('delete', `/transactions/${id}`, 400);
+      expect(refused.body.error?.code).toBe('LOAN_PAYMENT_SPLIT_FIRST_JOIN');
+    }
+    await call('delete', `/wallets/${loanId}/loan-payments/${gone.id}/split`, 200);
     await call('delete', `/transactions/${gone.id}`, 204);
     expect(await interestRowsOf(gone.id)).toHaveLength(0);
   });
@@ -506,7 +513,8 @@ describe('Loan payment split (e2e)', () => {
     expect((await interestRowsOf(payment.id)).every(part => part.isDuplicate)).toBe(true);
     expect(await spending(month)).toBe(spentBefore);
 
-    await call('delete', `/transactions/${payment.id}`, 204);
+    // Joined back, every part goes with the split.
+    await call('delete', `/wallets/${loanId}/loan-payments/${payment.id}/split`, 200);
     expect(
       await dataSource.getRepository(Transaction).countBy({ id: In(parts.map(part => part.id)) }),
     ).toBe(0);
@@ -524,6 +532,15 @@ describe('Loan payment split (e2e)', () => {
     const res = await call('get', `/transactions/${lookalike.id}/transfer-candidates`, 200);
     const ids = (res.body.data as Array<{ id: string }>).map(row => row.id);
     expect(ids).not.toContain(interest.id);
+    // Nor by hand: moved to another account or linked to a row there.
+    const moved = await call('post', `/transactions/${interest.id}/transfer-to-account`, 400, {
+      walletId: checkingId,
+    });
+    expect(moved.body.error?.code).toBe('LOAN_INTEREST_STAYS_ON_LOAN');
+    const linked = await call('post', `/transactions/${interest.id}/link-transfer`, 400, {
+      otherId: lookalike.id,
+    });
+    expect(linked.body.error?.code).toBe('LOAN_INTEREST_STAYS_ON_LOAN');
   });
 
   it('keeps another workspace out', async () => {
@@ -586,6 +603,7 @@ describe('Loan payment split (e2e)', () => {
 
   it('hides the interest from the other members with its payment, and shows it again with it', async () => {
     const member = await registerAccount(app, emails.member, 'Member Three');
+    memberAccount = member;
     await dataSource.query(
       `INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ($1, $2, 'member')`,
       [owner.workspaceId, member.userId],
@@ -617,6 +635,29 @@ describe('Loan payment split (e2e)', () => {
     const [shown] = await interestRowsOf(payment.id);
     expect(shown).toMatchObject({ isPrivate: false, categoryId: interest.categoryId, privateCategoryId: null });
     expect((await read(asMember)).paymentPurpose).toBe(purpose);
+  });
+
+  it("lets only the owner split or join back a private payment, even an admin's hands off", async () => {
+    await dataSource.query(
+      `UPDATE workspace_members SET role = 'admin' WHERE workspace_id = $1 AND user_id = $2`,
+      [owner.workspaceId, memberAccount.userId],
+    );
+    const asAdmin = { ...memberAccount, workspaceId: owner.workspaceId };
+    const [{ id: ownerMemberId }] = await dataSource.query(
+      'SELECT id FROM workspace_members WHERE workspace_id = $1 AND user_id = $2',
+      [owner.workspaceId, owner.userId],
+    );
+    const period = rows[11];
+    const [payment] = await save(
+      incoming(loanId, period.date, period.payment, { ownerMemberId, isPrivate: true }),
+    );
+    const url = `/wallets/${loanId}/loan-payments/${payment.id}/split`;
+    const refused = await call('post', url, 403, { interest: period.interest }, asAdmin);
+    expect(refused.body.error?.code).toBe('TRANSACTION_SPLIT_PRIVATE_NOT_OWNER');
+    await splitOff(payment.id, period.interest);
+    const kept = await call('delete', url, 403, undefined, asAdmin);
+    expect(kept.body.error?.code).toBe('TRANSACTION_SPLIT_PRIVATE_NOT_OWNER');
+    expect(await interestRowsOf(payment.id)).toHaveLength(1);
   });
 
   it('keeps the interest an expense on its loan, never more than the payment', async () => {
