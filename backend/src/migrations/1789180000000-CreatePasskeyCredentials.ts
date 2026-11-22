@@ -4,8 +4,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * Passkeys (WebAuthn credentials) people register to sign in with. Per person,
  * not per workspace: no workspace column, so backups and versions leave them out.
  */
-export class CreatePasskeyCredentials1788390000000 implements MigrationInterface {
-  name = 'CreatePasskeyCredentials1788390000000';
+export class CreatePasskeyCredentials1789180000000 implements MigrationInterface {
+  name = 'CreatePasskeyCredentials1789180000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
