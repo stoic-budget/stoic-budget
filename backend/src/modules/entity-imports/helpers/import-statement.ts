@@ -23,6 +23,8 @@ const csvCell = (value: string | number): string => `"${String(value).replace(/"
 /**
  * The statement imported rows belong to, exactly like converting a custom
  * table, so they show up in the statements list and can be deleted together.
+ * `span` stretches its dates to a period the import was held to, so a quiet
+ * period (no rows at all) still stands for the days it covers.
  */
 export async function createImportStatement(
   ctx: Pick<ImportContext, 'manager' | 'userId' | 'workspaceId' | 'fileName'>,
@@ -30,6 +32,7 @@ export async function createImportStatement(
   header: string | undefined,
   walletId: string | null,
   currency: string = items[0]?.currency ?? '',
+  span: { from?: string | null; to?: string | null } = {},
 ): Promise<Statement> {
   const csv = [
     ['date', 'merchant', 'purpose', 'amount', 'type', 'currency', 'category'].join(','),
@@ -54,6 +57,13 @@ export async function createImportStatement(
   const totalCredit = items
     .filter(item => item.type === TransactionType.INCOME)
     .reduce((sum, item) => sum + item.amount, 0);
+  const from = new Date(span.from ? span.from : Math.min(...dates));
+  const to = new Date(span.to ? span.to : Math.max(...dates));
+  // The period goes into the hash too: two quiet periods have the same
+  // (header-only) sheet, and must not read as one file uploaded twice.
+  const fileHash = createHash('sha256')
+    .update(`${csv}\n${from.toISOString()}/${to.toISOString()}`)
+    .digest('hex');
   const baseName = (ctx.fileName || 'import').replace(/\.[^.]+$/, '');
   const fileName = normalizeFilename(`${baseName}-import.csv`);
   const filePath = path.join(resolveUploadsDir(), `${randomUUID()}.csv`);
@@ -67,12 +77,12 @@ export async function createImportStatement(
       filePath,
       fileType: FileType.CSV,
       fileSize: csv.length,
-      fileHash: createHash('sha256').update(csv).digest('hex'),
+      fileHash,
       bankName: BankName.OTHER,
       status: StatementStatus.COMPLETED,
       processedAt: new Date(),
-      statementDateFrom: new Date(Math.min(...dates)),
-      statementDateTo: new Date(Math.max(...dates)),
+      statementDateFrom: from,
+      statementDateTo: to,
       totalTransactions: items.length,
       totalDebit,
       totalCredit,

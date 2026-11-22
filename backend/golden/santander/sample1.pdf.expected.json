@@ -1,0 +1,241 @@
+{
+  "metadata": {
+    "accountNumber": "GB72ABBY00012345720066",
+    "currency": "GBP",
+    "dateFrom": "2024-04-12T00:00:00",
+    "dateTo": "2024-05-11T00:00:00",
+    "balanceStart": 2784.55,
+    "balanceEnd": 3086.37
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-04-15T00:00:00",
+      "counterpartyName": "BCARD PLATINUM",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO BCARD PLATINUM REF 111111111111111 MANDATE NO 0016",
+      "debit": 493.26,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-04-16T00:00:00",
+      "counterpartyName": "1 D DWP EESA, 111111111111111111",
+      "paymentPurpose": "BANK GIRO CREDIT REF AA11111 1 D DWP EESA, 111111111111111111",
+      "credit": 375.9,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-16T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222 YWE44, MANDATE NO 0015",
+      "debit": 7.54,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-04-17T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 9.79,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-04-17T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 9.99,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-04-17T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 31,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-02-18T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 7.99,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-04-19T00:00:00",
+      "counterpartyName": "REFERENTE BABE, MANDATE NO 4 2,540.BB",
+      "paymentPurpose": "BILL PAYMENT VIA FASTER PAYMENT TO REFERENTE BABE, MANDATE NO 4 2,540.BB",
+      "debit": 60,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-04-22T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 15.6,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-04-23T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 1.59,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-04-24T00:00:00",
+      "counterpartyName": "1 D ESA CWP, 1111111111 111111 13",
+      "paymentPurpose": "BANK GIRO CREDIT REF AA11111 1 D ESA CWP, 1111111111 111111 13",
+      "credit": 25,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-04-24T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 17.1,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-04-25T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 1.63,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-04-25T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 16.35,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-04-26T00:00:00",
+      "counterpartyName": "1 D DWP PIP, 11111111111 1111111",
+      "paymentPurpose": "BANK GIRO CREDIT REF AA11111 1 D DWP PIP, 11111111111 1111111",
+      "credit": 451,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-05-01T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 13.99,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-01T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-02T00:00:00",
+      "counterpartyName": "1 D DWP EESA, 1111111111111 11111",
+      "paymentPurpose": "BANK GIRO CREDIT REF AA11111 1 D DWP EESA, 1111111111111 11111",
+      "credit": 375.9,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-05-03T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 5.96,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-03T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 16.5,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-05T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 23.1,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-05T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 23.2,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-06T00:00:00",
+      "counterpartyName": "REFEERENCE BABE, MANDATE NO 4",
+      "paymentPurpose": "BILL PAYMENT VIA FASTER PAYMENT TO REFEERENCE BABE, MANDATE NO 4",
+      "debit": 55,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-05-07T00:00:00",
+      "counterpartyName": "REFERENCE stuff MANDATE NO 5",
+      "paymentPurpose": "BILL PAYMENT VIA FASTER PAYMENT TO REFERENCE stuff MANDATE NO 5",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-05-08T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 6.58,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-08T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 15.62,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-10T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 20.89,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-05-10T00:00:00",
+      "counterpartyName": "PAYPAL",
+      "paymentPurpose": "DIRECT DEBIT PAYMENT TO PAYPAL PAYMENT REF 4M8J2222YWE44, MANDATE NO 0015",
+      "debit": 33.3,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    }
+  ],
+  "failedChecks": [
+    "printed_totals",
+    "printed_balances",
+    "dates_in_period"
+  ]
+}

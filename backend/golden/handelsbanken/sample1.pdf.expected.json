@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "accountNumber": "10000002",
+    "currency": "GBP",
+    "dateFrom": "2020-11-17T00:00:00",
+    "dateTo": "2020-11-23T00:00:00",
+    "balanceStart": 136659.49
+  },
+  "transactions": [
+    {
+      "transactionDate": "2020-11-17T00:00:00",
+      "counterpartyName": "MEMBER ONE",
+      "paymentPurpose": "B/O MEMBER ONE",
+      "credit": 72,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-11-18T00:00:00",
+      "counterpartyName": "HAVEN POWER LIMITE REF D000279882C2011161",
+      "paymentPurpose": "D.DR HAVEN POWER LIMITE REF D000279882C2011161",
+      "debit": 309.51,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2020-11-18T00:00:00",
+      "counterpartyName": "WWW HALLMASTER. CO. 6307",
+      "paymentPurpose": "WWW HALLMASTER. CO. 6307",
+      "debit": 224.4,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2020-11-18T00:00:00",
+      "counterpartyName": "ALLSTAR REF AS60102351",
+      "paymentPurpose": "D.DR ALLSTAR REF AS60102351",
+      "debit": 25,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2020-11-19T00:00:00",
+      "counterpartyName": "Cheque 002726",
+      "paymentPurpose": "CHQ.002726",
+      "debit": 4946.9,
+      "currency": "GBP",
+      "documentNumber": "002726"
+    },
+    {
+      "transactionDate": "2020-11-19T00:00:00",
+      "counterpartyName": "CHGS RE: CLERK SALARY",
+      "paymentPurpose": "CHGS RE: CLERK SALARY",
+      "debit": 1,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2020-11-20T00:00:00",
+      "counterpartyName": "TOTAL GAS POWER REF 1085083",
+      "paymentPurpose": "D.DR TOTAL GAS POWER REF 1085083",
+      "debit": 222.38,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2020-11-20T00:00:00",
+      "counterpartyName": "SWALEC REF 445192041",
+      "paymentPurpose": "D.DR SWALEC REF 445192041",
+      "debit": 93.36,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2020-11-20T00:00:00",
+      "counterpartyName": "AMZNMktplace 6307",
+      "paymentPurpose": "AMZNMktplace 6307",
+      "debit": 48.95,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2020-11-20T00:00:00",
+      "counterpartyName": "Amazon.co.uk*M72606W 6307 rd",
+      "paymentPurpose": "Amazon.co.uk*M72606W 6307 rd",
+      "debit": 29.98,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2020-11-23T00:00:00",
+      "counterpartyName": "TESCO STORES 3076 6307",
+      "paymentPurpose": "TESCO STORES 3076 6307",
+      "debit": 7.4,
+      "currency": "GBP"
+    }
+  ]
+}

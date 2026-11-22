@@ -25,6 +25,7 @@
 **Rule for white replacement:** Every `'white'`, `'#fff'`, `'#ffffff'` background in components must become:
 - In MUI sx: `bgcolor: 'background.paper'` or `bgcolor: 'background.default'`
 - In CSS: `var(--seneca-color-surface)` or `var(--card-bg)`
+- Drawer exception: `DrawerShell` uses `bgcolor: 'var(--background)'` so cards inside stand out against the panel. Leave the shell background unoverridden; cards, fields and code blocks inside keep the card colour. Sticky footers in the statement filters and columns drawers also use `var(--background)`.
 
 ---
 

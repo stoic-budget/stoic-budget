@@ -1,0 +1,132 @@
+{
+  "metadata": {
+    "accountNumber": "0553120144",
+    "currency": "EUR",
+    "dateFrom": "2025-01-01T00:00:00",
+    "dateTo": "2025-01-30T00:00:00",
+    "balanceStart": 1423.95,
+    "balanceEnd": 463.56
+  },
+  "transactions": [
+    {
+      "transactionDate": "2025-01-01T00:00:00",
+      "counterpartyName": "Bet365",
+      "paymentPurpose": "Online Transaction to Bet365 RW9276LD8",
+      "debit": 20,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-05T00:00:00",
+      "counterpartyName": "ATM Withdrawal from Dublin @13:54",
+      "paymentPurpose": "ATM Withdrawal from Dublin @13:54",
+      "debit": 135.67,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2025-01-07T00:00:00",
+      "counterpartyName": "Member A",
+      "paymentPurpose": "Received From Member A Ac.82651830",
+      "credit": 250,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-09T00:00:00",
+      "counterpartyName": "Pure Telecom SD3927",
+      "paymentPurpose": "Online Payment to Pure Telecom SD3927",
+      "debit": 69.45,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-10T00:00:00",
+      "counterpartyName": "MACDONALD’S",
+      "paymentPurpose": "Payment to MACDONALD’S JFK837DKF0838",
+      "debit": 86.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-14T00:00:00",
+      "counterpartyName": "SKRILL",
+      "paymentPurpose": "Transferred to SKRILL SK92727DYEH82",
+      "debit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-01-17T00:00:00",
+      "counterpartyName": "NETELLER",
+      "paymentPurpose": "Received from NETELLER PJ8276AS038",
+      "credit": 50,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-15T00:00:00",
+      "counterpartyName": "Casino Roulette",
+      "paymentPurpose": "Payment to Casino Roulette KHS9273HD",
+      "debit": 114.45,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-18T00:00:00",
+      "counterpartyName": "Nike",
+      "paymentPurpose": "Payment to Nike LD937DF153",
+      "debit": 195.39,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-20T00:00:00",
+      "counterpartyName": "Member C",
+      "paymentPurpose": "Transferred to Member C Ac. 81540482",
+      "debit": 200,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-01-22T00:00:00",
+      "counterpartyName": "Uber",
+      "paymentPurpose": "Payment to Uber LA826CNN389",
+      "debit": 34.78,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-24T00:00:00",
+      "counterpartyName": "Member B",
+      "paymentPurpose": "Received from Member B Ac. 91639472",
+      "debit": 110,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-01-28T00:00:00",
+      "counterpartyName": "Alibaba.com",
+      "paymentPurpose": "Online Payment to Alibaba.com QP83736SA",
+      "debit": 69.76,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-29T00:00:00",
+      "counterpartyName": "Fawry.com",
+      "paymentPurpose": "Payment to Fawry.com ZX8463MCN83",
+      "debit": 23.56,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-01-30T00:00:00",
+      "counterpartyName": "ATM Withdrawal from Dublin @22:59",
+      "paymentPurpose": "ATM Withdrawal from Dublin @22:59",
+      "debit": 150.34,
+      "currency": "USD",
+      "paymentType": "cash"
+    }
+  ]
+}

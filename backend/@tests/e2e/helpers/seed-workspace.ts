@@ -79,11 +79,62 @@ export async function seedWorkspace(
     'SELECT id FROM transactions WHERE workspace_id = $1 ORDER BY created_at DESC LIMIT 1',
     [owner.workspaceId],
   );
+  // A refused transfer pair: unlinking needs an auto-paired pair first, so straight in.
+  // Booked early so the ledger sync it starts is done before the sweep looks at the rows.
+  await ok(
+    'second manual expense',
+    as('post', '/statements/manual-expense')
+      .field('amount', '7.25')
+      .field('currency', 'USD')
+      .field('merchant', `${marker} second merchant`)
+      .field('categoryId', category.body.id)
+      .field('date', today),
+  );
+  const [second] = await dataSource.query(
+    'SELECT id FROM transactions WHERE workspace_id = $1 AND id <> $2 ORDER BY created_at DESC LIMIT 1',
+    [owner.workspaceId, transaction.id],
+  );
+  const [txLowId, txHighId] = [transaction.id, second.id].sort();
+  await dataSource.query(
+    `INSERT INTO transfer_pair_rejections (workspace_id, tx_low_id, tx_high_id) VALUES ($1, $2, $3)`,
+    [owner.workspaceId, txLowId, txHighId],
+  );
   await send('wallet', 'post', '/wallets', {
     name: `${marker} wallet`,
     currency: 'USD',
     initialBalance: 1,
   });
+  const loan = await send('loan wallet', 'post', '/wallets', {
+    name: `${marker} loan`,
+    type: 'loan',
+    currency: 'USD',
+    initialBalance: -1000,
+  });
+  await send('loan terms', 'put', `/wallets/${loan.body.id}/loan-terms`, {
+    principal: 1000,
+    startDate: today,
+    termMonths: 12,
+    paymentDay: 1,
+    method: 'annuity',
+    dayCount: '30/360',
+    annualRate: 5,
+    rateChanges: [{ from: today, annualRate: 4 }],
+    extraPayments: [{ date: today, amount: 10 }],
+    recurringExtra: { amount: 5, from: today },
+  });
+  // A payment into the loan with its interest split off: the interest row points at the payment.
+  const [loanPayment] = await dataSource.query(
+    `INSERT INTO transactions (workspace_id, wallet_id, transaction_date, counterparty_name,
+       payment_purpose, currency, transaction_type, amount, credit, is_verified)
+     VALUES ($1, $2, $3, $4, $5, 'USD', 'income', 100, 100, true) RETURNING id`,
+    [owner.workspaceId, loan.body.id, today, `${marker} loan payment`, `${marker} instalment`],
+  );
+  await send(
+    'loan payment split',
+    'post',
+    `/wallets/${loan.body.id}/loan-payments/${loanPayment.id}/split`,
+    { interest: 4 },
+  );
   await send('branch', 'post', '/branches', { name: `${marker} branch` });
   await send('rule', 'post', '/categorization-rules', {
     name: `${marker} rule`,
@@ -248,7 +299,7 @@ export async function seedWorkspace(
   const investments = await send('investment account', 'post', '/investments/accounts', {
     name: `${marker} broker`,
   });
-  await send('holding', 'post', `/investments/accounts/${investments.body.id}/holdings`, {
+  const holding = await send('holding', 'post', `/investments/accounts/${investments.body.id}/holdings`, {
     symbol: 'SEED',
     name: `${marker} fund`,
     assetClass: 'fund',
@@ -256,6 +307,14 @@ export async function seedWorkspace(
     price: 10,
     priceCurrency: 'USD',
   });
+  await send('investment trade', 'post', `/investments/holdings/${holding.body.id}/trades`, {
+    kind: 'buy',
+    date: `${taxYear}-02-01`,
+    quantity: 2,
+    price: 10,
+    note: `${marker} trade`,
+  });
+  await send('investment settings', 'patch', '/investments/settings', { basisMethod: 'average' });
   const lot = await send('metal lot', 'post', '/metals/lots', {
     metal: 'XAU',
     quantity: 2,
@@ -272,11 +331,31 @@ export async function seedWorkspace(
     proceedsCurrency: 'USD',
     soldOn: today,
   });
-  await send('income tax profile', 'put', '/income-tax/profile', {
-    taxYear,
-    taxpayerType: 'self_employed',
+  // A flat linked to the loan and a car with its details: the household chart
+  // has the real estate and vehicle lines, so the workspace is moved onto it
+  // for the step and back to business afterwards.
+  await send('home profile', 'patch', `/workspaces/${owner.workspaceId}`, { profile: 'home' });
+  await send('personal layout', 'post', '/reports/balance/personal-layout');
+  const sheet = await ok('balance accounts', as('get', '/reports/balance/accounts'));
+  const sectionId = (code: string): string =>
+    (sheet.body.assets as Array<{ id: string; code: string }>).find(line => line.code === code)
+      ?.id as string;
+  await send('flat value', 'put', '/reports/balance/snapshot', {
+    accountId: sectionId('ASSET_REAL_ESTATE'),
+    amount: 1000,
+    currency: 'USD',
   });
-  await send('income tax disclaimer', 'post', '/income-tax/disclaimer');
+  await send('flat details', 'put', `/reports/balance/accounts/${sectionId('ASSET_REAL_ESTATE')}/property`, {
+    attributes: { area: 50, areaUnit: 'm2', address: `${marker} street` },
+    debt: { kind: 'wallet', id: loan.body.id },
+  });
+  await send('car details', 'put', `/reports/balance/accounts/${sectionId('ASSET_VEHICLES')}/property`, {
+    attributes: { make: `${marker} make`, mileage: 1000, mileageUnit: 'km' },
+    depreciationRate: 10,
+  });
+  await send('business profile again', 'patch', `/workspaces/${owner.workspaceId}`, {
+    profile: 'business',
+  });
   await send('jurisdiction', 'put', '/tax/settings/jurisdiction', {
     code: 'DE',
     effectiveFrom: `${taxYear}-01-01`,
@@ -417,6 +496,29 @@ export async function seedWorkspace(
   await send('receipt tag', 'put', `/receipts/${receipt.id}/tags`, { tagIds: [tag.body.id] });
   // A payable_tags row, for the same reason.
   await send('payable tag', 'put', `/payables/${payable.body.id}`, { tagIds: [tag.body.id] });
+  // A repeating bill (its series and a moved occurrence) and "not this payment" refusals.
+  const repeating = await send('repeating payable', 'post', '/payables', {
+    vendor: `${marker} rent`,
+    amount: 40,
+    currency: 'USD',
+    tagIds: [tag.body.id],
+    recurrence: { frequency: 'weekly', interval: 1, startDate: today },
+  });
+  await send('payable occurrence', 'put', `/payables/${repeating.body.id}/occurrence`, {
+    action: 'move',
+    dueDate: today,
+  });
+  await send('payable match rejection', 'post', `/payables/${payable.body.id}/match-rejections`, {
+    transactionId: transaction.id,
+  });
+  await send(
+    'subscription match rejection',
+    'post',
+    `/subscriptions/${subscription.body.id}/match-rejections`,
+    { transactionId: transaction.id },
+  );
+  // The owner's calendar feed (its token hash and choice of kinds).
+  await send('calendar feed', 'post', '/calendar-feed', { invoices: false });
   // Item pictures, one on a transaction and one on a bill: picking one needs Wikidata, so straight in.
   await dataSource.query(
     `INSERT INTO item_images (workspace_id, transaction_id, payable_id, file_name, label, wikidata_id)

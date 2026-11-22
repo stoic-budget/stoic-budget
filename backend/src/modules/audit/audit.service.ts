@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThan, type Repository } from 'typeorm';
+import { type EntityManager, LessThan, type Repository } from 'typeorm';
 import { getAuditActor } from '../../common/audit-actor.context';
 import { appError } from '../../common/errors/app-error';
 import { normalizePagination } from '../../common/utils/pagination.util';
@@ -61,7 +61,7 @@ export class AuditService {
     private readonly descriptionService: AuditDescriptionService,
   ) {}
 
-  async createEvent(dto: CreateAuditEventDto): Promise<AuditEvent> {
+  async createEvent(dto: CreateAuditEventDto, manager?: EntityManager): Promise<AuditEvent> {
     if (!dto.entityId) {
       throw new BadRequestException(appError('AUDIT_ENTITY_ID_REQUIRED'));
     }
@@ -118,7 +118,7 @@ export class AuditService {
       isUndoable,
     });
 
-    return this.auditEventRepository.save(event);
+    return (manager?.getRepository(AuditEvent) ?? this.auditEventRepository).save(event);
   }
 
   async createBatchEvents(
@@ -213,14 +213,15 @@ export class AuditService {
    *
    * Narrower than `findEvents` on purpose — it answers "did you change this?",
    * not "what happened on this account", so it never reaches the events that
-   * only the owner should see. With `month` (`YYYY-MM`), only that month's.
+   * only the owner should see. With `period` (the workspace's month, as days),
+   * only that month's.
    */
   async findWorkspaceActivity(
     workspaceId: string,
     limit = 20,
-    month?: string,
+    period?: { from: string; until: string },
   ): Promise<WorkspaceActivityEntry[]> {
-    return queryWorkspaceActivity(this.auditEventRepository, workspaceId, limit, month);
+    return queryWorkspaceActivity(this.auditEventRepository, workspaceId, limit, period);
   }
 
   async findEventById(id: string, workspaceId?: string): Promise<AuditEvent | null> {

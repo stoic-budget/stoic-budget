@@ -96,6 +96,40 @@ describe('Category source (e2e)', () => {
     expect(row.categorySource).toBe('manual');
   });
 
+  it('keeps the category of a row on a filed tax return through a re-classification', async () => {
+    const repo = dataSource.getRepository(Transaction);
+    await repo.update(
+      { id: transactionId },
+      {
+        categoryId: categoryIds[2],
+        categorySource: TransactionCategorySource.RULE,
+        taxAmount: 0,
+        taxLocked: true,
+      },
+    );
+    try {
+      const res = await as(request(server()).post('/classification/bulk'))
+        .send({ transactionIds: [transactionId] })
+        .expect(200);
+      expect(res.body).toMatchObject({ total: 1, keptManual: 1, successful: 0 });
+      await as(request(server()).post(`/classification/transaction/${transactionId}`)).expect(200);
+
+      const row = await repo.findOneByOrFail({ id: transactionId });
+      expect(row.categoryId).toBe(categoryIds[2]);
+      expect(row.categorySource).toBe(TransactionCategorySource.RULE);
+    } finally {
+      await repo.update(
+        { id: transactionId },
+        {
+          categoryId: categoryIds[1],
+          categorySource: TransactionCategorySource.MANUAL,
+          taxAmount: null,
+          taxLocked: false,
+        },
+      );
+    }
+  });
+
   it('round-trips the processing switches', async () => {
     await as(request(server()).patch(`/workspaces/${owner.workspaceId}`))
       .send({ processing: { merchantLearning: false } })

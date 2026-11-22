@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { GoalLinkField } from '@/app/components/goals/GoalLinkField';
-import { FileText } from '@/app/components/icons';
+import { Copy, FileText } from '@/app/components/icons';
 import { NotesPanel } from '@/app/components/notes/NotesPanel';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { FALLBACK_CURRENCY } from '@/app/lib/currency';
@@ -13,10 +13,16 @@ import { ItemImageBadge } from '../item-images/ItemImageBadge';
 import { DrawerShell } from '../ui/drawer-shell';
 import { PRIVATE_CLASS } from '../ui/private-amount';
 import { TextTabs } from '../ui/text-tabs';
+import { BudgetExclusionToggle } from './BudgetExclusionToggle';
+import { canReadComment } from './helpers/commentAccess';
+import { canDuplicate } from './helpers/duplicate-draft';
 import { formatDate } from './helpers/transactionFormatters';
+import { useDuplicateTransaction } from './hooks/useDuplicateTransaction';
 import { useTransactionReviewActions } from './hooks/useTransactionReviewActions';
+import { useWorkspaceMembers } from './hooks/useWorkspaceMembers';
 import { TransactionCommentSection } from './TransactionCommentSection';
 import { TransactionDetailsTab } from './TransactionDetailsTab';
+import { TransactionFilesSection } from './TransactionFilesSection';
 import { TransactionHistoryTab } from './TransactionHistoryTab';
 import type { Category, Transaction } from './types';
 
@@ -53,6 +59,7 @@ function TransactionSummary({
   source?: TransactionSource;
 }): React.JSX.Element {
   const t = useIntlayer('transactionsDrawer');
+  const tPending = useIntlayer('bankPending');
   const payeeName = usePayeeName();
   const { locale } = useLocale();
   const isIncome = transaction.credit > 0 && !(transaction.debit > 0);
@@ -68,11 +75,17 @@ function TransactionSummary({
           {
             label: t.sheet.status.value,
             // A status is text with a small dot; ochre only where attention is due.
+            // A row the bank still holds says so before anything about its approval.
             value: (
               <span
-                className={`seneca-tx-summary__status${transaction.isVerified ? '' : ' seneca-tx-summary__status--pending'}`}
+                className={`seneca-tx-summary__status${transaction.isVerified && !transaction.isPending ? '' : ' seneca-tx-summary__status--pending'}`}
+                title={transaction.isPending ? tPending.hint.value : undefined}
               >
-                {transaction.isVerified ? t.sheet.confirmed.value : t.sheet.unconfirmed.value}
+                {transaction.isPending
+                  ? tPending.badge.value
+                  : transaction.isVerified
+                    ? t.sheet.confirmed.value
+                    : t.sheet.unconfirmed.value}
               </span>
             ),
           },
@@ -111,18 +124,23 @@ function TransactionSummary({
   );
 }
 
-/** The drawer's main actions, pinned under the tabs: open the source, delete, confirm. */
+/** The drawer's main actions, pinned under the tabs: open the source, duplicate, delete, confirm. */
 function TransactionFooter({
   transaction,
+  categories,
   source,
   onChanged,
+  onClose,
 }: {
   transaction: Transaction;
+  categories: Category[];
   source?: TransactionSource;
   onChanged?: () => void;
+  onClose: () => void;
 }): React.JSX.Element {
   const t = useIntlayer('transactionsDrawer');
   const [askingDelete, setAskingDelete] = useState(false);
+  const duplicate = useDuplicateTransaction(categories);
   const { confirm, remove, busy } = useTransactionReviewActions(
     {
       confirmed: t.sheet.confirmedToast.value,
@@ -166,6 +184,18 @@ function TransactionFooter({
           {t.sheet.openDocument}
         </Link>
       )}
+      {canDuplicate(transaction) && (
+        <button
+          type="button"
+          className="seneca-tx-footer__text-btn"
+          // The form opens on top; this drawer closes so it is not left behind it.
+          onClick={() => void duplicate(transaction).then(opened => opened && onClose())}
+          title={t.sheet.duplicateHint.value}
+        >
+          <Copy size={15} />
+          {t.sheet.duplicate}
+        </button>
+      )}
       <button
         type="button"
         className="seneca-tx-footer__text-btn seneca-tx-footer__text-btn--muted"
@@ -206,6 +236,7 @@ export default function DetailsDrawer({
   const t = useIntlayer('transactionsDrawer');
   const notes = useIntlayer('notes');
   const [activeTab, setActiveTab] = useState<TabId>('details');
+  const selfMemberId = useWorkspaceMembers().find(member => member.isSelf)?.memberId ?? null;
 
   if (!transaction) return null;
 
@@ -225,7 +256,13 @@ export default function DetailsDrawer({
       lockScroll={false}
       footer={
         onChanged ? (
-          <TransactionFooter transaction={transaction} source={source} onChanged={onChanged} />
+          <TransactionFooter
+            transaction={transaction}
+            categories={categories}
+            source={source}
+            onChanged={onChanged}
+            onClose={onClose}
+          />
         ) : undefined
       }
     >
@@ -248,9 +285,12 @@ export default function DetailsDrawer({
               categories={categories}
               onUpdateCategory={onUpdateCategory}
               onMarkIgnored={onMarkIgnored}
-              onSplitDone={onSplitDone}
+              // A pending row is neither split nor paired: its booked version is.
+              onSplitDone={transaction.isPending ? undefined : onSplitDone}
             />
-            {!transaction.isPrivate && (
+            <BudgetExclusionToggle transaction={transaction} />
+            {/* Hidden on someone else's private row; the owner of one sees it, and who edited it. */}
+            {canReadComment(transaction, selfMemberId) && (
               <TransactionCommentSection
                 key={transaction.id}
                 transactionId={transaction.id}
@@ -265,6 +305,10 @@ export default function DetailsDrawer({
                 syncKey={`${transaction.amount}|${transaction.transactionType}|${transaction.currency}`}
               />
             </div>
+            <TransactionFilesSection
+              key={`files-${transaction.id}`}
+              transactionId={transaction.id}
+            />
           </>
         )}
         {activeTab === 'notes' && (

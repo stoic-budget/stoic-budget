@@ -53,6 +53,10 @@ export type CashFlowQuery = Wire<typeof CashFlowQuery>;
 export const CashFlowEntriesQuery = Schema.Struct({ month: Month });
 export type CashFlowEntriesQuery = Wire<typeof CashFlowEntriesQuery>;
 
+/** `GET /wallets/balance-days`. */
+export const WalletBalanceDaysQuery = Schema.Struct({ month: Month });
+export type WalletBalanceDaysQuery = Wire<typeof WalletBalanceDaysQuery>;
+
 /** `GET /forecast`. */
 export const ForecastQuery = Schema.Struct({
   days: Schema.optional(
@@ -78,6 +82,8 @@ export type ChargeCalendarQuery = Wire<typeof ChargeCalendarQuery>;
 export const SubscriptionChargeCandidatesQuery = Schema.Struct({
   vendorName: Schema.optional(Schema.String.check(Schema.isMaxLength(255))),
   statementId: Schema.optional(Schema.String.check(Schema.isUUID())),
+  /** Leaves out the rows refused as this subscription's payment. */
+  subscriptionId: Schema.optional(Schema.String.check(Schema.isUUID())),
 });
 export type SubscriptionChargeCandidatesQuery = Wire<typeof SubscriptionChargeCandidatesQuery>;
 
@@ -380,7 +386,15 @@ export type SpendFlowQuery = Wire<typeof SpendFlowQuery>;
 
 /** `/view-preferences/:scope`: the pages that remember how they were left. */
 export const ViewScopeParams = Schema.Struct({
-  scope: Schema.Literals(['transactions', 'review', 'reports', 'dashboard', 'onboarding', 'rules']),
+  scope: Schema.Literals([
+    'transactions',
+    'review',
+    'reports',
+    'dashboard',
+    'onboarding',
+    'rules',
+    'forecast',
+  ]),
 });
 export type ViewScopeParams = Wire<typeof ViewScopeParams>;
 

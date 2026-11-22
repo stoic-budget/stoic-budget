@@ -181,6 +181,7 @@ const goal = (id: string, name: string) => ({
   isReached: false,
   createdAt: TIMESTAMP,
   cover: null,
+  account: null,
 });
 
 const netWorth = (assetsTotal: number) => ({
@@ -202,11 +203,13 @@ const netWorth = (assetsTotal: number) => ({
   assetLines: [],
   missingRates: [],
   excluded: [],
+  accountsLeftOut: 0,
   attribution: { byAccount: [], byKind: [] },
   savings: { income: 0, kept: 0, rate: null },
   allTimeHigh: null,
   byAssetClass: [],
   groups: [],
+  properties: [],
 });
 
 const key = ({ url, params }: Requested): string =>

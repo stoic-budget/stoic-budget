@@ -5,7 +5,8 @@ import { CategoriesController } from '@/modules/categories/categories.controller
 import { ForecastController } from '@/modules/forecast/forecast.controller';
 import { GoalsController } from '@/modules/goals/goals.controller';
 import { InvoicesController } from '@/modules/invoices/invoices.controller';
-import { toToolInputSchema } from '@/modules/mcp/mcp-json-schema';
+import { toToolInputSchema, toToolObjectSchema } from '@/modules/mcp/mcp-json-schema';
+import type { McpTool } from '@/modules/mcp/mcp-tool';
 import { McpToolRegistry } from '@/modules/mcp/mcp-tool-registry.service';
 import { NetWorthController } from '@/modules/net-worth/net-worth.controller';
 import { PayablesController } from '@/modules/payables/payables.controller';
@@ -125,6 +126,31 @@ describe('McpToolRegistry', () => {
         'upload_statement',
       ].sort(),
     );
+  });
+
+  // The threshold: a tool that takes a list of rows previews first, even for one id;
+  // a tool that changes one record at a time applies at once.
+  it('makes every writing tool that takes a list of rows preview first', () => {
+    const takesList = (tool: McpTool) =>
+      Object.values(
+        (toToolInputSchema(tool.input).properties ?? {}) as Record<string, { type?: string }>,
+      ).some(property => property.type === 'array');
+    const previewing = registry.tools
+      .filter(tool => 'confirmToken' in (toToolInputSchema(tool.input).properties as object))
+      .map(tool => tool.name);
+
+    expect(registry.tools.filter(tool => !tool.readOnly && takesList(tool)).map(t => t.name).sort())
+      .toEqual(['approve_transactions', 'set_transactions_category']);
+    expect(previewing.sort()).toEqual(['approve_transactions', 'set_transactions_category']);
+    for (const name of previewing) {
+      const tool = registry.find(name) as McpTool;
+      expect(tool.structured).toBe(true);
+      const output = toToolObjectSchema(tool.output as McpTool['input']);
+      expect(output).toMatchObject({ type: 'object', additionalProperties: false });
+      expect(output.required).toEqual(
+        expect.arrayContaining(['status', 'tool', 'rows', 'skipped', 'examples', 'next']),
+      );
+    }
   });
 
   it('has a description on every tool', () => {

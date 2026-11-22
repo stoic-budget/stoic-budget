@@ -3,12 +3,13 @@ import { Budget } from '../../../entities/budget.entity';
 import { Client } from '../../../entities/client.entity';
 import type { ImportBatch, ImportCreatedRef } from '../../../entities/import-batch.entity';
 import { InvestmentHolding } from '../../../entities/investment-holding.entity';
+import { InvestmentTrade } from '../../../entities/investment-trade.entity';
 import { Invoice } from '../../../entities/invoice.entity';
 import { Payable } from '../../../entities/payable.entity';
 import { Statement } from '../../../entities/statement.entity';
 import { Subscription } from '../../../entities/subscription.entity';
 import { Transaction } from '../../../entities/transaction.entity';
-import { Wallet } from '../../../entities/wallet.entity';
+import { removeImportedHoldings, restoreUpdatedRefs, type UndoneHoldings } from './undo-holdings';
 
 /** The import batch target of an import from another budgeting app. */
 export const APP_IMPORT_TARGET = 'apps';
@@ -18,11 +19,12 @@ export const APP_IMPORT_TARGET = 'apps';
  * with their rows. Categories, payees and accounts an app import created go
  * too, unless something added since still uses them (a row booked by hand on
  * a new account keeps that account). Other imports keep their categories.
+ * A holding the batch created goes once its trades are gone, unless traded on since.
  */
 export async function removeImportBatch(
   manager: EntityManager,
   batch: ImportBatch,
-): Promise<number> {
+): Promise<{ removed: number; holdings: UndoneHoldings }> {
   const { workspaceId } = batch;
   let count = 0;
   const byKind = (kind: ImportCreatedRef['kind']) =>
@@ -49,6 +51,7 @@ export async function removeImportBatch(
     ['budget', Budget],
     ['client', Client],
     ['metal_lot', InvestmentHolding],
+    ['investment_trade', InvestmentTrade],
   ] as const) {
     const ids = byKind(kind);
     if (ids.length) {
@@ -56,18 +59,9 @@ export async function removeImportBatch(
         (await manager.getRepository(entity).delete({ workspaceId, id: In(ids) })).affected ?? 0;
     }
   }
-  const restored = {
-    payable: Payable,
-    subscription: Subscription,
-    budget: Budget,
-    transaction: Transaction,
-    wallet: Wallet,
-  } as const;
-  for (const ref of batch.updatedRefs) {
-    await manager
-      .getRepository(restored[ref.kind])
-      .update({ id: ref.id, workspaceId }, ref.before as never);
-  }
+  const holdings = await removeImportedHoldings(manager, workspaceId, byKind('investment_holding'));
+  count += holdings.removed;
+  await restoreUpdatedRefs(manager, workspaceId, batch.updatedRefs);
   if (batch.target === APP_IMPORT_TARGET) {
     count += await removeUnused(manager, workspaceId, 'payees', byKind('payee'), ['payee_aliases']);
     // Subcategories were created after their groups: newest first frees the groups.
@@ -80,7 +74,7 @@ export async function removeImportBatch(
     );
     count += await removeUnused(manager, workspaceId, 'wallets', byKind('wallet'), []);
   }
-  return count;
+  return { removed: count, holdings };
 }
 
 /** Single-column foreign keys pointing at `table`, read from the catalogue. */

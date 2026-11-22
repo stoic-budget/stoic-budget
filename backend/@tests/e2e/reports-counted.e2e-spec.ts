@@ -3,7 +3,7 @@ import type { TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
-import { ReportsService } from '../../src/modules/reports/reports.service';
+import { TemplateReportRowsLoader } from '../../src/modules/reports/template-report-rows.loader';
 import {
   deleteUserByEmail,
   type E2eAccount,
@@ -148,20 +148,13 @@ describe('What a report counts (e2e)', () => {
   });
 
   it('template reports load the kept rows only', async () => {
-    const reports = app.get(ReportsService);
-
-    const { rows } = await (
-      reports as unknown as {
-        loadReportRows: (
-          workspaceId: string,
-          dto: object,
-        ) => Promise<{ rows: Array<{ counterparty: string }> }>;
-      }
-    ).loadReportRows(owner.workspaceId, {
-      templateId: 'pnl',
-      dateFrom: '2026-08-01',
-      dateTo: '2026-08-31',
-    });
+    const { rows } = await app
+      .get(TemplateReportRowsLoader)
+      .loadReportRows(owner.workspaceId, {
+        templateId: 'pnl',
+        dateFrom: '2026-08-01',
+        dateTo: '2026-08-31',
+      });
 
     expect(rows.map(row => row.counterparty).sort()).toEqual(['Kept', 'Kept too']);
   });

@@ -1,3 +1,4 @@
+import type { InvestmentHolding as HoldingView } from '../../contracts';
 import type { InvestmentHolding } from '../../entities';
 import type { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { pricedUnits } from './metal-weight.util';
@@ -15,4 +16,27 @@ export async function holdingValueIn(
   if (source === to) return amount;
   const rate = await rates.getRateOrNull(source, to, undefined, holding.workspaceId);
   return rate === null ? null : amount * rate;
+}
+
+/** A holding as the investments page reads it, valued in `currency`. */
+export async function holdingView(
+  holding: InvestmentHolding,
+  currency: string,
+  rates: Pick<ExchangeRatesService, 'getRateOrNull'>,
+  hasTrades: boolean,
+): Promise<HoldingView> {
+  const value = (await holdingValueIn(holding, currency, rates)) ?? 0;
+  return {
+    id: holding.id,
+    symbol: holding.symbol,
+    name: holding.name,
+    assetClass: holding.assetClass,
+    quantity: Number(holding.quantity),
+    price: Number(holding.price),
+    priceCurrency: holding.priceCurrency,
+    priceSource: holding.priceSource,
+    pricedAt: holding.pricedAt?.toISOString() ?? null,
+    value: Math.round(value * 100) / 100,
+    hasTrades,
+  };
 }

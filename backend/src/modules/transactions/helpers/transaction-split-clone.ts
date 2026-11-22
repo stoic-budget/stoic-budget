@@ -1,4 +1,4 @@
-import type { Transaction } from '../../../entities/transaction.entity';
+import { type Transaction, TransactionCategorySource } from '../../../entities/transaction.entity';
 
 /**
  * Builds the sibling template: every column a split part inherits verbatim from
@@ -10,7 +10,8 @@ import type { Transaction } from '../../../entities/transaction.entity';
  * cascades into them; the per-part money columns (amount/debit/credit/
  * amountForeign) and the split markers, which `split()` assigns itself;
  * `fingerprint`, which backfill recomputes from the post-split amount; and the
- * duplicate-flag columns, unreachable because a flagged row cannot be split.
+ * duplicate-flag columns and `isPending`, unreachable because a flagged or a
+ * pending row cannot be split (`assertSplittable`).
  */
 export function cloneForSplit(source: Transaction): Partial<Transaction> {
   return {
@@ -42,6 +43,9 @@ export function cloneForSplit(source: Transaction): Partial<Transaction> {
     // Each part starts on the same person as the whole; splitting a shared
     // purchase between two people is done by reassigning the parts afterwards.
     ownerMemberId: source.ownerMemberId,
+    // A private row's parts stay private, each keeping the real category behind the Private one.
+    isPrivate: source.isPrivate,
+    privateCategoryId: source.privateCategoryId,
     article: source.article,
     activityType: source.activityType,
     vendorNormalized: source.vendorNormalized,
@@ -52,6 +56,33 @@ export function cloneForSplit(source: Transaction): Partial<Transaction> {
     transactionType: source.transactionType,
     comments: source.comments,
     isVerified: source.isVerified,
+    // A row left out of budgets stays out in every part, so a split never
+    // changes a budget or report total.
+    excludedFromBudgets: source.excludedFromBudgets,
     importSessionId: source.importSessionId,
+    // Every part of split interest stays the payment's: it counts, follows and
+    // goes with the payment as the whole did (loans/loan-interest-row).
+    loanInterestOfId: source.loanInterestOfId,
   };
+}
+
+/**
+ * A part's own category, else what it inherited. A private row stays in the
+ * Private category for everyone; the part's own goes behind it, for its owner.
+ */
+export function applyPartCategory(
+  row: Transaction,
+  categoryId: string | null | undefined,
+  isPrivate: boolean,
+): void {
+  if (!categoryId) {
+    return;
+  }
+  if (isPrivate) {
+    row.privateCategoryId = categoryId;
+  } else if (categoryId !== row.categoryId) {
+    row.categoryId = categoryId;
+    row.categorySource = TransactionCategorySource.MANUAL;
+    row.categoryReason = null;
+  }
 }

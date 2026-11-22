@@ -1,6 +1,7 @@
 import * as Schema from 'effect/Schema';
 import { DateOnly, type Wire } from '../common/wire';
 import { Metal } from './metals';
+import { PropertyLine } from './properties';
 
 export const NetWorthRange = Schema.Literals([
   '1d',
@@ -169,6 +170,8 @@ export const NetWorthResponse = Schema.Struct({
   missingRates: Schema.Array(Schema.String),
   /** The account ids left out, echoed back so the page can show what is hidden. */
   excluded: Schema.Array(Schema.String),
+  /** Active accounts set not to count in net worth: left out of every figure here. */
+  accountsLeftOut: Schema.Number,
   /** What made the change over the window, by line and by cause. */
   attribution: NetWorthAttribution,
   savings: NetWorthSavings,
@@ -180,5 +183,7 @@ export const NetWorthResponse = Schema.Struct({
   byAssetClass: Schema.Array(NetWorthClassificationItem),
   /** Assets, then debts, by group, each with its own trend. */
   groups: Schema.Array(NetWorthGroup),
+  /** Real estate and vehicles with what is owed on them; a view, never added to the total. */
+  properties: Schema.Array(PropertyLine),
 });
 export type NetWorthResponse = Wire<typeof NetWorthResponse>;

@@ -1,10 +1,29 @@
 import { randomUUID } from 'node:crypto';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { In, IsNull, type Repository } from 'typeorm';
+import { appError } from '../../../common/errors/app-error';
+import { StatementStatus } from '../../../entities/statement.entity';
 import {
   type Transaction,
   TransactionCategorySource,
   type TransferPairSource,
 } from '../../../entities/transaction.entity';
+
+/**
+ * Which rows pairing may use, for a query joining the row's statement as `s`:
+ * rows without a statement, and rows of a statement that is not in the trash
+ * and has been read. The same rows the income and spending figures count
+ * (`onlyFlows`): a statement held for review counts there, so it pairs here,
+ * or a transfer to it would count twice. A statement still being parsed has
+ * not stored its account yet (it does so with its final status), so two of one
+ * account's statements would look like two accounts; a failed one has no rows
+ * that are real.
+ */
+export const PAIRABLE_STATEMENT = {
+  where:
+    '(t.statementId IS NULL OR (s.deletedAt IS NULL AND s.status NOT IN (:...unreadStatuses)))',
+  params: { unreadStatuses: [StatementStatus.PROCESSING, StatementStatus.ERROR] },
+};
 
 /**
  * Writes the pairs. Each one only lands if both legs are still unpaired, so
@@ -46,4 +65,28 @@ export async function writeTransferPairs(
     );
   }
   return applied;
+}
+
+/**
+ * Refuses a row that cannot be a leg of a transfer or a reimbursement: a
+ * suspected duplicate, a row the bank still holds as pending (it may never
+ * book, and its booked version replaces it), part of a split, already paired,
+ * or interest split off a loan payment (spending on the loan account, never a leg).
+ */
+export function assertFreeLeg(leg: Transaction): void {
+  if (leg.isDuplicate) {
+    throw new BadRequestException(appError('TRANSACTION_LEG_DUPLICATE', { id: leg.id }));
+  }
+  if (leg.isPending) {
+    throw new BadRequestException(appError('TRANSACTION_LEG_PENDING', { id: leg.id }));
+  }
+  if (leg.splitGroupId) {
+    throw new BadRequestException(appError('TRANSACTION_LEG_SPLIT', { id: leg.id }));
+  }
+  if (leg.loanInterestOfId) {
+    throw new BadRequestException(appError('LOAN_INTEREST_STAYS_ON_LOAN'));
+  }
+  if (leg.transferPairId) {
+    throw new ConflictException(appError('TRANSACTION_LEG_TRANSFERRED', { id: leg.id }));
+  }
 }

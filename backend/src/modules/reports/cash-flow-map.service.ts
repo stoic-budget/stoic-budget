@@ -229,6 +229,8 @@ export class CashFlowMapService {
     if (!includeTransfers) {
       qb.andWhere('t.transferPairId IS NULL');
     }
+    // A balance adjustment moved no money anywhere, transfers shown or not.
+    qb.andWhere("COALESCE(t.transferPairKind, '') <> 'adjustment'");
     const raw = await qb.getRawMany<{
       type: TransactionType;
       currency: string;

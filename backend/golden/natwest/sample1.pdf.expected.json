@@ -1,0 +1,540 @@
+{
+  "metadata": {
+    "accountNumber": "GB16NWBK66550050216444",
+    "currency": "GBP",
+    "dateFrom": "2023-12-13T00:00:00",
+    "dateTo": "2024-01-12T00:00:00",
+    "balanceStart": 10250.44,
+    "balanceEnd": 5848.24
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-12-13T00:00:00",
+      "counterpartyName": "Standing Order MEMB TWOOO",
+      "paymentPurpose": "Standing Order MEMB TWOOO",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "standing_order"
+    },
+    {
+      "transactionDate": "2023-12-13T00:00:00",
+      "counterpartyName": "Direct Debit PAYPAL PAYMENT",
+      "paymentPurpose": "Direct Debit PAYPAL PAYMENT",
+      "debit": 63.33,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2023-12-14T00:00:00",
+      "counterpartyName": "TESCO STORES 4357 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 13DEC23 C TESCO STORES 4357 STOURBRIDGE GB",
+      "debit": 27.62,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-14T00:00:00",
+      "counterpartyName": "ALDI 72 772 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 12DEC23 C ALDI 72 772 STOURBRIDGE GB",
+      "debit": 35.4,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-15T00:00:00",
+      "counterpartyName": "Automated Credit F SAMPLE FP 15/12/23 1709 382569459742391772",
+      "paymentPurpose": "Automated Credit F SAMPLE FP 15/12/23 1709 382569459742391772",
+      "credit": 4.49,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "OnLine Transaction SAMPLETON SA CURRY VIA MOBILE - PYMT",
+      "paymentPurpose": "OnLine Transaction SAMPLETON SA CURRY VIA MOBILE - PYMT",
+      "credit": 15,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "OnLine Transaction G SAMPLE MECHANICA A SAMP VIA MOBILE - PYMT FP 18/12/23 10 21217180888597080N",
+      "paymentPurpose": "OnLine Transaction G SAMPLE MECHANICA A SAMP VIA MOBILE - PYMT FP 18/12/23 10 21217180888597080N",
+      "debit": 50,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "ALDI 72 772 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 14DEC23 C ALDI 72 772 STOURBRIDGE GB",
+      "debit": 25.89,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "SAVERS HEALTH & BEAUTY STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 15DEC23 C SAVERS HEALTH & BEAUTY STOURBRIDGE GB",
+      "debit": 0.95,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "SHARMA GARAGES STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 15DEC23 C SHARMA GARAGES STOURBRIDGE GB",
+      "debit": 25.01,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "SHARMA GARAGES STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 15DEC23 C SHARMA GARAGES STOURBRIDGE GB",
+      "debit": 15.48,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "ROADHOUSE FAST FOOD WEST MIDLANDS GB",
+      "paymentPurpose": "Card Transaction 1000 16DEC23 C ROADHOUSE FAST FOOD WEST MIDLANDS GB",
+      "debit": 21.21,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-18T00:00:00",
+      "counterpartyName": "Standing Order ICEC FP 18/12/23 30 11019885893732172N",
+      "paymentPurpose": "Standing Order ICEC FP 18/12/23 30 11019885893732172N",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "standing_order"
+    },
+    {
+      "transactionDate": "2023-12-19T00:00:00",
+      "counterpartyName": "TESCO STORES 4357 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 18DEC23 TESCO STORES 4357 STOURBRIDGE GB",
+      "debit": 39.35,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-19T00:00:00",
+      "counterpartyName": "BOOTS,STOURBRIDGE STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 18DEC23 C BOOTS,STOURBRIDGE STOURBRIDGE GB",
+      "debit": 4.66,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-19T00:00:00",
+      "counterpartyName": "DAY BREAK STOURBRIDGE D GB",
+      "paymentPurpose": "Card Transaction 1000 18DEC23 C DAY BREAK STOURBRIDGE D GB",
+      "debit": 1.58,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-20T00:00:00",
+      "counterpartyName": "PAYPAL *EBAY UK 61381862357 GB",
+      "paymentPurpose": "Card Transaction 1000 19DEC23 PAYPAL *EBAY UK 61381862357 GB",
+      "debit": 18.69,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-21T00:00:00",
+      "counterpartyName": "TESCO STORES 4357 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 20DEC23 C TESCO STORES 4357 STOURBRIDGE GB",
+      "debit": 32.44,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-22T00:00:00",
+      "counterpartyName": "TESCO STORES 4357 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 21DEC23 C TESCO STORES 4357 STOURBRIDGE GB",
+      "debit": 22.59,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-22T00:00:00",
+      "counterpartyName": "TAPTAP SEND UK LTD LONDON GB",
+      "paymentPurpose": "Card Transaction 1000 21DEC23 TAPTAP SEND UK LTD LONDON GB",
+      "debit": 300,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-22T00:00:00",
+      "counterpartyName": "ICELAND STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 21DEC23 C ICELAND STOURBRIDGE GB",
+      "debit": 10,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-22T00:00:00",
+      "counterpartyName": "Direct Debit TV LICENCE QBP1",
+      "paymentPurpose": "Direct Debit TV LICENCE QBP1",
+      "debit": 41,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "OnLine Transaction MEMB TWOOO A SAMP VIA MOBILE - PYMT",
+      "paymentPurpose": "OnLine Transaction MEMB TWOOO A SAMP VIA MOBILE - PYMT",
+      "debit": 150,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "DAY BREAK STOURBRIDGE D GB",
+      "paymentPurpose": "Card Transaction 1000 24DEC23 C DAY BREAK STOURBRIDGE D GB",
+      "debit": 1.25,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "ALDI 72 772 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 22DEC23 C ALDI 72 772 STOURBRIDGE GB",
+      "debit": 31.44,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "TAPTAP SEND UK LTD LONDON GB",
+      "paymentPurpose": "Card Transaction 1000 24DEC23 TAPTAP SEND UK LTD LONDON GB",
+      "debit": 821.92,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "CAKEBOX STOURBRIDGE STOURBRIDGE D GB",
+      "paymentPurpose": "Card Transaction 1000 24DEC23 C CAKEBOX STOURBRIDGE STOURBRIDGE D GB",
+      "debit": 31.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "Standing Order CLOSED ACCOUNT",
+      "paymentPurpose": "Standing Order CLOSED ACCOUNT",
+      "debit": 50,
+      "currency": "GBP",
+      "paymentType": "standing_order"
+    },
+    {
+      "transactionDate": "2023-12-27T00:00:00",
+      "counterpartyName": "Direct Debit O2",
+      "paymentPurpose": "Direct Debit O2",
+      "debit": 13.1,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2023-12-28T00:00:00",
+      "counterpartyName": "TAPTAP SEND UK LTD LONDON GB",
+      "paymentPurpose": "Card Transaction 1000 28DEC23 TAPTAP SEND UK LTD LONDON GB",
+      "debit": 817.44,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-28T00:00:00",
+      "counterpartyName": "MERCHANTS STOURBRIDGE STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 27DEC23 C MERCHANTS STOURBRIDGE STOURBRIDGE GB",
+      "debit": 13.2,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-28T00:00:00",
+      "counterpartyName": "MERCHANTS STOURBRIDGE STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 27DEC23 C MERCHANTS STOURBRIDGE STOURBRIDGE GB",
+      "debit": 2.1,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-28T00:00:00",
+      "counterpartyName": "Direct Debit NATWEST BNPL VIRTU",
+      "paymentPurpose": "Direct Debit NATWEST BNPL VIRTU",
+      "debit": 105,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2023-12-29T00:00:00",
+      "counterpartyName": "TESCO STORES 4357 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 28DEC23 C TESCO STORES 4357 STOURBRIDGE GB",
+      "debit": 38.33,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-12-29T00:00:00",
+      "counterpartyName": "Direct Debit VODAFONE LTD",
+      "paymentPurpose": "Direct Debit VODAFONE LTD",
+      "debit": 11,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-01-02T00:00:00",
+      "counterpartyName": "OnLine Transaction From A/C 10000005 ZED & SAMP Via Mobile Xfer",
+      "paymentPurpose": "OnLine Transaction From A/C 10000005 ZED & SAMP Via Mobile Xfer",
+      "credit": 300,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-02T00:00:00",
+      "counterpartyName": "Charges 12DEC A/C 10000004",
+      "paymentPurpose": "Charges 12DEC A/C 10000004",
+      "debit": 2,
+      "currency": "GBP",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2024-01-02T00:00:00",
+      "counterpartyName": "TAPTAP SEND UK LTD LONDON GB",
+      "paymentPurpose": "Card Transaction 1000 29DEC23 TAPTAP SEND UK LTD LONDON GB",
+      "debit": 200,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-02T00:00:00",
+      "counterpartyName": "Direct Debit NDCS",
+      "paymentPurpose": "Direct Debit NDCS",
+      "debit": 3,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-01-02T00:00:00",
+      "counterpartyName": "Direct Debit DVLA-AB12CDE",
+      "paymentPurpose": "Direct Debit DVLA-AB12CDE",
+      "debit": 13.12,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-01-03T00:00:00",
+      "counterpartyName": "ALDI 72 772 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 02JAN24 ALDI 72 772 STOURBRIDGE GB",
+      "debit": 47.61,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-03T00:00:00",
+      "counterpartyName": "Direct Debit OCTOPUS ENERGY",
+      "paymentPurpose": "Direct Debit OCTOPUS ENERGY",
+      "debit": 276.85,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-01-04T00:00:00",
+      "counterpartyName": "Automated Credit MEMBERS SAMPLEMAN MEMBERS ORDER BDAY FP 04/01/24 1048 PHJ1TTKSF5XFB6NCHR",
+      "paymentPurpose": "Automated Credit MEMBERS SAMPLEMAN MEMBERS ORDER BDAY FP 04/01/24 1048 PHJ1TTKSF5XFB6NCHR",
+      "credit": 50,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-04T00:00:00",
+      "counterpartyName": "ICELAND STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 03JAN24 C ICELAND STOURBRIDGE GB",
+      "debit": 6,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-04T00:00:00",
+      "counterpartyName": "Direct Debit PAYPAL PAYMENT",
+      "paymentPurpose": "Direct Debit PAYPAL PAYMENT",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "OnLine Transaction Membersa Sample Samp VIA MOBILE - PYMT FP 04/01/24 10 62372302796686132N",
+      "paymentPurpose": "OnLine Transaction Membersa Sample Samp VIA MOBILE - PYMT FP 04/01/24 10 62372302796686132N",
+      "debit": 2000,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "TESCO STORES 4357 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 04JAN24 C TESCO STORES 4357 STOURBRIDGE GB",
+      "debit": 37.26,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "SAVERS HEALTH & BEAUTY STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 04JAN24 C SAVERS HEALTH & BEAUTY STOURBRIDGE GB",
+      "debit": 0.95,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "TAPTAP SEND TRANSFER 0808 168 7707 GB",
+      "paymentPurpose": "Card Transaction 1000 04JAN24 TAPTAP SEND TRANSFER 0808 168 7707 GB",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "Standing Order MEMB",
+      "paymentPurpose": "Standing Order MEMB",
+      "debit": 100,
+      "currency": "GBP",
+      "paymentType": "standing_order"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "Direct Debit NHSBSA PPC",
+      "paymentPurpose": "Direct Debit NHSBSA PPC",
+      "debit": 11.16,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "Direct Debit FIRSTCENTRALSERV",
+      "paymentPurpose": "Direct Debit FIRSTCENTRALSERV",
+      "debit": 74.19,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "Automated Credit M SAMPLE SAMPLE FP 08/01/24 1326 793847018425597953",
+      "paymentPurpose": "Automated Credit M SAMPLE SAMPLE FP 08/01/24 1326 793847018425597953",
+      "credit": 1539.53,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "DAY BREAK STOURBRIDGE D GB",
+      "paymentPurpose": "Card Transaction 1000 06JAN24 C DAY BREAK STOURBRIDGE D GB",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "ALDI 72 772 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 06JAN24 C ALDI 72 772 STOURBRIDGE GB",
+      "debit": 21.08,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "SHARMA GARAGES STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 05JAN24 C SHARMA GARAGES STOURBRIDGE GB",
+      "debit": 36.07,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "HOME BARGAINS STOURBRI STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 06JAN24 C HOME BARGAINS STOURBRI STOURBRIDGE GB",
+      "debit": 2.98,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "PAYPAL *EBAY UK 61381862357 GB",
+      "paymentPurpose": "Card Transaction 1000 05JAN24 PAYPAL *EBAY UK 61381862357 GB",
+      "debit": 11.16,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "Direct Debit POSTOFFICE MONEY",
+      "paymentPurpose": "Direct Debit POSTOFFICE MONEY",
+      "debit": 193.9,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-01-08T00:00:00",
+      "counterpartyName": "Direct Debit FIRSTCENTRALSERV",
+      "paymentPurpose": "Direct Debit FIRSTCENTRALSERV",
+      "debit": 65.79,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-01-09T00:00:00",
+      "counterpartyName": "Direct Debit TALKTALK TELECOM T",
+      "paymentPurpose": "Direct Debit TALKTALK TELECOM T",
+      "debit": 26,
+      "currency": "GBP",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2024-01-10T00:00:00",
+      "counterpartyName": "TESCO STORES 4357 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 09JAN24 C TESCO STORES 4357 STOURBRIDGE GB",
+      "debit": 43.84,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-10T00:00:00",
+      "counterpartyName": "DAY BREAK STOURBRIDGE D GB",
+      "paymentPurpose": "Card Transaction 1000 09JAN24 C DAY BREAK STOURBRIDGE D GB",
+      "debit": 1,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-11T00:00:00",
+      "counterpartyName": "Standing Order MEMB SAMP",
+      "paymentPurpose": "Standing Order MEMB SAMP",
+      "debit": 50,
+      "currency": "GBP",
+      "paymentType": "standing_order"
+    },
+    {
+      "transactionDate": "2024-01-12T00:00:00",
+      "counterpartyName": "POUNDBAZAAR PLUS STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 11JAN24 C POUNDBAZAAR PLUS STOURBRIDGE GB",
+      "debit": 2.49,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-12T00:00:00",
+      "counterpartyName": "TESCO STORES 4357 STOURBRIDGE GB",
+      "paymentPurpose": "Card Transaction 1000 11JAN24 C TESCO STORES 4357 STOURBRIDGE GB",
+      "debit": 36.82,
+      "currency": "GBP",
+      "paymentType": "card"
+    }
+  ]
+}

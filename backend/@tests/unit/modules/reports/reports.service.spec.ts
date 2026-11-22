@@ -1,74 +1,44 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import type { CustomTableColumn } from '@/entities';
 import { CustomTableColumnType } from '@/entities/custom-table-column.entity';
 import { WorkspaceExportFormat } from '@/modules/reports/dto/workspace-export.dto';
-import { AuditService } from '@/modules/audit/audit.service';
+import {
+  pickBestColumnKey,
+  scoreAmountColumn,
+} from '@/modules/reports/helpers/custom-table-columns.util';
+import { parseDate, parseNumber, toDateKey } from '@/modules/reports/helpers/report-values.util';
 import { ReportsService } from '@/modules/reports/reports.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-
-function createRepoMock() {
-  return {} as any;
-}
+import { buildReportsService } from './helpers/build-reports-service';
 
 describe('ReportsService (helpers)', () => {
-  let service: ReportsService;
-
-  beforeEach(() => {
-    service = new ReportsService(
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      { get: vi.fn(), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as AuditService,
-      createRepoMock() as any,
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-    );
-  });
-
   it('parseNumber handles spaces and comma decimals', () => {
-    const parseNumber = (service as any).parseNumber.bind(service) as (v: unknown) => number | null;
     expect(parseNumber(' 1 234,50 ')).toBe(1234.5);
     expect(parseNumber('not-a-number')).toBeNull();
     expect(parseNumber(null)).toBeNull();
   });
 
   it('parseDate supports YYYY-MM-DD and DD.MM.YYYY', () => {
-    const parseDate = (service as any).parseDate.bind(service) as (v: unknown) => Date | null;
     expect(parseDate('2025-01-02')?.toISOString()).toContain('2025-01-02');
     expect(parseDate('2.1.2025')?.toISOString()).toContain('2025-01-02');
     expect(parseDate('bad')).toBeNull();
   });
 
   it('toDateKey normalizes date-ish inputs', () => {
-    const toDateKey = (service as any).toDateKey.bind(service) as (v: unknown) => string;
     expect(toDateKey('2025-01-02T10:00:00.000Z')).toBe('2025-01-02');
     expect(toDateKey(new Date('2025-01-02T00:00:00.000Z'))).toBe('2025-01-02');
   });
 
   it('pickBestColumnKey chooses best match based on scorer', () => {
-    const pickBestColumnKey = (service as any).pickBestColumnKey.bind(service) as (
-      cols: CustomTableColumn[],
-      scorer: (c: CustomTableColumn) => number,
-    ) => string | null;
-    const scoreAmount = (service as any).scoreAmountColumn.bind(service) as (
-      c: CustomTableColumn,
-    ) => number;
-
     const columns = [
       { key: 'a', title: 'Дата', type: CustomTableColumnType.DATE } as any,
       { key: 'b', title: 'Сумма', type: CustomTableColumnType.NUMBER } as any,
       { key: 'c', title: 'Год', type: CustomTableColumnType.NUMBER } as any,
     ] as CustomTableColumn[];
 
-    expect(pickBestColumnKey(columns, scoreAmount)).toBe('b');
+    expect(pickBestColumnKey(columns, scoreAmountColumn)).toBe('b');
   });
 
   it('getSpendOverTimeReport fills empty periods', async () => {
@@ -90,22 +60,7 @@ describe('ReportsService (helpers)', () => {
     const transactionRepository = {
       createQueryBuilder: vi.fn(() => qb),
     };
-    const localService = new ReportsService(
-      transactionRepository as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      { get: vi.fn(), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as AuditService,
-      createRepoMock() as any,
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-    );
+    const localService = buildReportsService({ transactionRepository });
 
     const result = await (localService as any).getSpendOverTimeReport('ws-1', {
       groupBy: 'day',
@@ -151,22 +106,7 @@ describe('ReportsService (helpers)', () => {
     const transactionRepository = {
       createQueryBuilder: vi.fn(() => qb),
     };
-    const localService = new ReportsService(
-      transactionRepository as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      { get: vi.fn(), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as AuditService,
-      createRepoMock() as any,
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-    );
+    const localService = buildReportsService({ transactionRepository });
 
     const result = await (localService as any).getSpendOverTimeReport('ws-1', {
       groupBy: 'quarter',
@@ -211,22 +151,7 @@ describe('ReportsService (helpers)', () => {
     const transactionRepository = {
       createQueryBuilder: vi.fn(() => qb),
     };
-    const localService = new ReportsService(
-      transactionRepository as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      { get: vi.fn(), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as AuditService,
-      createRepoMock() as any,
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-    );
+    const localService = buildReportsService({ transactionRepository });
 
     const result = await (localService as any).getSpendOverTimeReport('ws-1', {
       groupBy: 'year',
@@ -304,24 +229,14 @@ describe('generateFromTemplate', () => {
       })),
     };
 
-    service = new ReportsService(
-      mockTransactionRepository as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      { get: vi.fn(), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as AuditService,
-      mockReportHistoryRepo as any,
-      mockWorkspaceRepository as any,
-      mockExchangeRates as any,
-      mockBalanceService as any,
-      {} as any,
-      mockHoldingsSnapshot as any,
-    );
+    service = buildReportsService({
+      transactionRepository: mockTransactionRepository,
+      reportHistoryRepo: mockReportHistoryRepo,
+      workspaceRepository: mockWorkspaceRepository,
+      exchangeRatesService: mockExchangeRates,
+      balanceService: mockBalanceService,
+      holdingsSnapshotReport: mockHoldingsSnapshot,
+    });
   });
 
   afterEach(() => {
@@ -353,22 +268,7 @@ describe('generateFromTemplate', () => {
       find: vi.fn(async () => []),
     };
 
-    const localService = new ReportsService(
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      customTableRepository as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      { get: vi.fn(), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as AuditService,
-      createRepoMock() as any,
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-    );
+    const localService = buildReportsService({ customTableRepository });
 
     await localService.getCustomTablesSummary('ws-1', { days: 30, tableIds: [] } as any);
 
@@ -1105,30 +1005,17 @@ describe('exportWorkspaceTransactions', () => {
     const transactionRepository = {
       createQueryBuilder: vi.fn(() => qb),
     };
-    const service = new ReportsService(
-      transactionRepository as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      createRepoMock() as any,
-      { get: vi.fn(), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as AuditService,
-      createRepoMock() as any,
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-    );
-    const excelSpy = vi
-      .spyOn(service as any, 'generateWorkspaceExcel')
-      .mockResolvedValue(undefined);
+    const service = buildReportsService({ transactionRepository });
+    // The file itself is pinned in reports.exports.spec.ts; here it only has to land.
+    const uploadsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'reports-workspace-export-'));
+    const previousUploadsDir = process.env.UPLOADS_DIR;
+    process.env.UPLOADS_DIR = uploadsDir;
 
-    const result = await (service as any).exportWorkspaceTransactions(
-      'ws-42',
-      WorkspaceExportFormat.EXCEL,
-    );
+    const result = await (service as any)
+      .exportWorkspaceTransactions('ws-42', WorkspaceExportFormat.EXCEL)
+      .finally(() => {
+        process.env.UPLOADS_DIR = previousUploadsDir;
+      });
 
     expect(transactionRepository.createQueryBuilder).toHaveBeenCalledWith('transaction');
     expect(qb.where).toHaveBeenCalledWith('transaction.workspaceId = :workspaceId', {
@@ -1137,10 +1024,13 @@ describe('exportWorkspaceTransactions', () => {
     // Only confirmed rows are exported; a row waiting in Review is not.
     expect(qb.andWhere).toHaveBeenNthCalledWith(1, 'transaction.isVerified = true');
     expect(qb.andWhere).toHaveBeenNthCalledWith(2, 'transaction.isDuplicate = false');
+    // Nor is a row the bank has not booked yet: it goes out once booked.
+    expect(qb.andWhere).toHaveBeenNthCalledWith(3, 'transaction.isPending = false');
     // Trashed statements are left out through a subquery, not a join.
-    expect(qb.andWhere).toHaveBeenNthCalledWith(3, expect.stringContaining('deleted_at IS NOT NULL'));
-    expect(qb.andWhere).toHaveBeenNthCalledWith(4, 'transaction.transferPairId IS NULL');
-    expect(excelSpy).toHaveBeenCalledWith([{ id: 'tx-1' }], expect.stringContaining('workspace-transactions-'));
+    expect(qb.andWhere).toHaveBeenNthCalledWith(4, expect.stringContaining('deleted_at IS NOT NULL'));
+    expect(qb.andWhere).toHaveBeenNthCalledWith(5, 'transaction.transferPairId IS NULL');
+    expect(fs.existsSync(result.filePath)).toBe(true);
+    fs.rmSync(uploadsDir, { recursive: true, force: true });
     expect(result.fileName).toMatch(/^workspace-transactions-.*\.xlsx$/);
     expect(result.mimeType).toBe(
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

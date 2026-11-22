@@ -48,6 +48,10 @@ describe('TagsPage', () => {
     expect(screen.getByText(trip.description ?? '')).toBeInTheDocument();
     expect(screen.getByText('4 uses')).toBeInTheDocument();
     expect(screen.getByText('Not used')).toBeInTheDocument();
+    // Each name opens its tag's page.
+    expect(screen.getByRole('link', { name: trip.name }).getAttribute('href')).toBe(
+      `/tags/${trip.id}`,
+    );
     // Each name carries the tag icon, not a dot.
     for (const name of [trip.name, unused.name]) {
       const cell = screen.getByText(name).parentElement;

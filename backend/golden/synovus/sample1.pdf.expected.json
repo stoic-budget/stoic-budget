@@ -1,0 +1,1364 @@
+{
+  "metadata": {
+    "accountNumber": "100-100-100-1",
+    "currency": "USD",
+    "dateFrom": "2021-12-06T00:00:00",
+    "dateTo": "2022-01-05T00:00:00",
+    "balanceStart": 344.84,
+    "balanceEnd": 260.99
+  },
+  "transactions": [
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "COMENITY PAY UR WEB PYMT 211206",
+      "paymentPurpose": "Preauthorized Wd COMENITY PAY UR WEB PYMT 211206",
+      "debit": 35,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "EASYPAY FINANCE BILLING 211203",
+      "paymentPurpose": "Preauthorized Wd EASYPAY FINANCE BILLING 211203",
+      "debit": 31.01,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "Credit One Bank Payment 211203",
+      "paymentPurpose": "Preauthorized Wd Credit One Bank Payment 211203",
+      "debit": 65,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "Dave, Inc DEBIT 61aabb8a71676bd9a4131fc2/ b65a1294bd 63bc8",
+      "paymentPurpose": "Preauthorized Wd Dave, Inc DEBIT 61aabb8a71676bd9a4131fc2/ b65a1294bd 63bc8",
+      "debit": 1,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "GRID 9 ADV REPMT HTTPSGETG CA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449216 GRID 9 ADV REPMT HTTPSGETG CA TRAN DATE 12-03-21SEQ # 133724000019",
+      "debit": 70,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "ADVANCE FINANCIAL 615 341 5 TN",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 405716 ADVANCE FINANCIAL 615 341 5 TN TRAN DATE 12-03-21SEQ # 133721017054",
+      "debit": 41.79,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "FLOATME FUND I DB 877 73772 TX",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 425362 FLOATME FUND I DB 877 73772 TX TRAN DATE 12-03-21SEQ # 133827000000",
+      "debit": 24,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "000SECURITY FINANCE COM 800 39581 SC",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 438344 000SECURITY FINANCE COM 800 39581 SC TRAN DATE 12-03-21SEQ # 133820015278",
+      "debit": 140,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "WAL WAL-MART SUPER 121 ACWORTH ( GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL 37480046 WAL WAL-MART SUPER 121 ACWORTH ( GA TRAN DATE 12-06-21SEQ # 134061276686",
+      "debit": 25.37,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "PUBLIX ACWORTH GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL P1096108 PUBLIX ACWORTH GA TRAN DATE 12-06-21SEQ # 0088807",
+      "debit": 4.58,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-07T00:00:00",
+      "counterpartyName": "Empower Inc 1000136601 211207",
+      "paymentPurpose": "Preauthorized Wd Empower Inc 1000136601 211207",
+      "debit": 8,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-07T00:00:00",
+      "counterpartyName": "ASSOCU SV WEBXFR TRANSFER 211207",
+      "paymentPurpose": "Preauthorized Wd ASSOCU SV WEBXFR TRANSFER 211207",
+      "debit": 25,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-07T00:00:00",
+      "counterpartyName": "BEVERAGE MART 770 52930 GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 402244 BEVERAGE MART 770 52930 GA TRAN DATE 12-05-21SEQ # 134027900010",
+      "debit": 14.69,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-07T00:00:00",
+      "counterpartyName": "BEVERAGE MART 770 52930 GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 402244 BEVERAGE MART 770 52930 GA TRAN DATE 12-06-21SEQ # 134026900010",
+      "debit": 23.16,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-08T00:00:00",
+      "counterpartyName": "EXXONMOBIL 4815 8901 ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 416405 EXXONMOBIL 4815 8901 ACWORTH GA TRAN DATE 12-05-21SEQ # 134127837000",
+      "debit": 13.39,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-08T00:00:00",
+      "counterpartyName": "COLLINS CORNER ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 405522 COLLINS CORNER ACWORTH GA TRAN DATE 12-07-21SEQ # 134227839009",
+      "debit": 7.03,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-08T00:00:00",
+      "counterpartyName": "ACWORTH TOBACCO LIQUOR ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449398 ACWORTH TOBACCO LIQUOR ACWORTH GA TRAN DATE 12-07-21SEQ # 134127091672",
+      "debit": 22.84,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-09T00:00:00",
+      "counterpartyName": "ACWORTH TOBACCO LIQUOR ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449398 ACWORTH TOBACCO LIQUOR ACWORTH GA TRAN DATE 12-08-21SEQ # 134226091676",
+      "debit": 22.84,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-09T00:00:00",
+      "counterpartyName": "KROGER #634 8876 DALAS ADALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 316808 KROGER #634 8876 DALAS ADALLAS GA TRAN DATE 12-09-21SEQ # 134322808922",
+      "debit": 6.18,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-10T00:00:00",
+      "counterpartyName": "QT 811 ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 469216 QT 811 ACWORTH GA TRAN DATE 12-08-21SEQ # 134322100383",
+      "debit": 15.5,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-13T00:00:00",
+      "counterpartyName": "LEADBANKSELFLEND CC PMT 211213",
+      "paymentPurpose": "Preauthorized Wd LEADBANKSELFLEND CC PMT 211213",
+      "debit": 26,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-13T00:00:00",
+      "counterpartyName": "CASH WITHDRAWAL TERMINAL T165N043 32 E CHURCH ST CARTERSVI GA TRAN DATE 12-13-21SEQ # 000000009789",
+      "paymentPurpose": "ATM Withdrawal CASH WITHDRAWAL TERMINAL T165N043 32 E CHURCH ST CARTERSVI GA TRAN DATE 12-13-21SEQ # 000000009789",
+      "debit": 90,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-12-13T00:00:00",
+      "counterpartyName": "QT 811 ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 469216 QT 811 ACWORTH GA TRAN DATE 12-09-21SEQ # 134424100294",
+      "debit": 5.5,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-13T00:00:00",
+      "counterpartyName": "DD DOORDASH CHILISGRI 855 973 1 CA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449215 DD DOORDASH CHILISGRI 855 973 1 CA TRAN DATE 12-11-21SEQ # 134528719106",
+      "debit": 19.43,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-13T00:00:00",
+      "counterpartyName": "CLEO AI HTTPSWWW DE",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 401134 CLEO AI HTTPSWWW DE TRAN DATE 12-11-21SEQ # 134523000017",
+      "debit": 14.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-13T00:00:00",
+      "counterpartyName": "Amazon Prime MC7C81763 Amzn com WA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 469216 Amazon Prime MC7C81763 Amzn com WA TRAN DATE 12-11-21SEQ # 134521100483",
+      "debit": 12.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-13T00:00:00",
+      "counterpartyName": "KROGER #634 8876 DALAS ADALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 316808 KROGER #634 8876 DALAS ADALLAS GA TRAN DATE 12-11-21SEQ # 134520139186",
+      "debit": 27.05,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-13T00:00:00",
+      "counterpartyName": "DOLLAR GENERAL # DG 1271DALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 319372 DOLLAR GENERAL # DG 1271DALLAS GA TRAN DATE 12-12-21SEQ # 134620124697",
+      "debit": 11.46,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-13T00:00:00",
+      "counterpartyName": "FOOD DEPOT / DALLAS DALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 770446 FOOD DEPOT / DALLAS DALLAS GA TRAN DATE 12-12-21SEQ # 134615480734",
+      "debit": 5.46,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-13T00:00:00",
+      "counterpartyName": "WALGREENS STORE 1762 MARACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 318198 WALGREENS STORE 1762 MARACWORTH GA TRAN DATE 12-13-21SEQ # 134714303651",
+      "debit": 9.31,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-14T00:00:00",
+      "counterpartyName": "TRANSFORM CREDIT 6286482 211212 6286482",
+      "paymentPurpose": "Preauthorized Wd TRANSFORM CREDIT 6286482 211212 6286482",
+      "debit": 5,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-15T00:00:00",
+      "counterpartyName": "BREWSTER S CARTERSVI GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 443565 BREWSTER S CARTERSVI GA TRAN DATE 12-13-21SEQ # 134826200999",
+      "debit": 7.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-16T00:00:00",
+      "counterpartyName": "Assurant INS.PREM 211216",
+      "paymentPurpose": "Preauthorized Wd Assurant INS.PREM 211216",
+      "debit": 32.12,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "TRANSAMERICA INS INSPAYMENT 211217",
+      "paymentPurpose": "Preauthorized Wd TRANSAMERICA INS INSPAYMENT 211217",
+      "debit": 20.86,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "SNAP FINANCE PAYMENT 211217",
+      "paymentPurpose": "Preauthorized Wd SNAP FINANCE PAYMENT 211217",
+      "debit": 28.74,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "A+FINANCIAL SVCS A+GILA82 211217",
+      "paymentPurpose": "Preauthorized Wd A+FINANCIAL SVCS A+GILA82 211217",
+      "debit": 46,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "Brigit.com PROTECTION 211217",
+      "paymentPurpose": "Preauthorized Wd Brigit.com PROTECTION 211217",
+      "debit": 75,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "Empower Inc 1000138921 211217",
+      "paymentPurpose": "Preauthorized Wd Empower Inc 1000138921 211217",
+      "debit": 75,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "ML PLUS MEMBRSHP MONEYLION 211217",
+      "paymentPurpose": "Preauthorized Wd ML PLUS MEMBRSHP MONEYLION 211217",
+      "debit": 9.2,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "ML PLUS LOAN MONEYLION 211217",
+      "paymentPurpose": "Preauthorized Wd ML PLUS LOAN MONEYLION 211217",
+      "debit": 19.91,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "DAVE INC LOS ANGEL CA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 494375 DAVE INC LOS ANGEL CA TRAN DATE 12-17-21SEQ # 135108158372",
+      "debit": 105.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "BATH AND BODY WORKS 4096MARIETTA GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 313183 BATH AND BODY WORKS 4096MARIETTA GA TRAN DATE 12-17-21SEQ # 135112656691",
+      "debit": 17.97,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "CLEO MEMPHIS TN",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 494375 CLEO MEMPHIS TN TRAN DATE 12-17-21SEQ # 135122128241",
+      "debit": 3.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "CLEO MEMPHIS TN",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 494375 CLEO MEMPHIS TN TRAN DATE 12-17-21SEQ # 135122208335",
+      "debit": 35,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "EASYPAY FINANCE BILLING 211217",
+      "paymentPurpose": "Preauthorized Wd EASYPAY FINANCE BILLING 211217",
+      "debit": 31.01,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "APPLDBNK WEB CC PAYMENT 211220",
+      "paymentPurpose": "Preauthorized Wd APPLDBNK WEB CC PAYMENT 211220",
+      "debit": 71,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "VZ WIRELESS VE VZW WEBPAY 211220",
+      "paymentPurpose": "Preauthorized Wd VZ WIRELESS VE VZW WEBPAY 211220",
+      "debit": 75,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "DISH NETWORK DISH NTWRK 211220",
+      "paymentPurpose": "Preauthorized Wd DISH NETWORK DISH NTWRK 211220",
+      "debit": 133.5,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "CASH APP ISHANNA WA 877417455 CA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449215 CASH APP ISHANNA WA 877417455 CA TRAN DATE 12-17-21SEQ # 135128741522",
+      "debit": 25,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "GRID 10 ADV REPM T HTTPSGETG CA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449216 GRID 10 ADV REPM T HTTPSGETG CA TRAN DATE 12-17-21SEQ # 135128000018",
+      "debit": 7,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "GRID MEMBERSHIP FEE HTTPSGETG CA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449216 GRID MEMBERSHIP FEE HTTPSGETG CA TRAN DATE 12-17-21SEQ # 135129000019",
+      "debit": 10,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "ADVANCE FINANCIAL 615 341 5 TN",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 405716 ADVANCE FINANCIAL 615 341 5 TN TRAN DATE 12-17-21SEQ # 135126017055",
+      "debit": 41.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "INSTACASH REPAYMENT 888 659 8 NY",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449398 INSTACASH REPAYMENT 888 659 8 NY TRAN DATE 12-17-21SEQ # 135221026903",
+      "debit": 657.94,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "FLOATME FUND I DB 877 73772 TX",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 425362 FLOATME FUND I DB 877 73772 TX TRAN DATE 12-17-21SEQ # 135225000000",
+      "debit": 24,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "GRID 10 ADV REPM T HTTPSGETG CA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449216 GRID 10 ADV REPM T HTTPSGETG CA TRAN DATE 12-17-21SEQ # 135123000021",
+      "debit": 63,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "TOWNE SQUARE WINE AND SPACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 426979 TOWNE SQUARE WINE AND SPACWORTH GA TRAN DATE 12-17-21SEQ # 135228001314",
+      "debit": 14.83,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "NORTH COBB ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 442733 NORTH COBB ACWORTH GA TRAN DATE 12-17-21SEQ # 135220120003",
+      "debit": 10.72,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "YSI Invitation Homes Pym866 58799 TX",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 490641 YSI Invitation Homes Pym866 58799 TX TRAN DATE 12-17-21SEQ # 135124136681",
+      "debit": 774.9,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "BOJANGLES WOODSTOCK GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 494300 BOJANGLES WOODSTOCK GA TRAN DATE 12-17-21SEQ # 135229207088",
+      "debit": 7.39,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "SUPER AUTO INSURANCE AGE678 407 4 GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 426979 SUPER AUTO INSURANCE AGE678 407 4 GA TRAN DATE 12-17-21SEQ # 135226500918",
+      "debit": 67.56,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "PEARL CHINA RESTAURANT DALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 475542 PEARL CHINA RESTAURANT DALLAS GA TRAN DATE 12-17-21SEQ # 135121293510",
+      "debit": 18.19,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "MARTINS DALLAS II DALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 405522 MARTINS DALLAS II DALLAS GA TRAN DATE 12-18-21SEQ # 135323091173",
+      "debit": 5.17,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "STANLEY STEEMER ATLNTA 770 776 3 GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 469216 STANLEY STEEMER ATLNTA 770 776 3 GA TRAN DATE 12-19-21SEQ # 135328100010",
+      "debit": 168,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "DIXIE BEVERAGE OUTLET WOODSTOCK GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL 88480001 DIXIE BEVERAGE OUTLET WOODSTOCK GA TRAN DATE 12-19-21SEQ # 135300017693",
+      "debit": 18.49,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-21T00:00:00",
+      "counterpartyName": "ASSOCU SV WEBXFR TRANSFER 211221",
+      "paymentPurpose": "Preauthorized Wd ASSOCU SV WEBXFR TRANSFER 211221",
+      "debit": 25,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-21T00:00:00",
+      "counterpartyName": "NORTH COBB ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 442733 NORTH COBB ACWORTH GA TRAN DATE 12-19-21SEQ # 135429120002",
+      "debit": 3.2,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-21T00:00:00",
+      "counterpartyName": "CHEVRON 0205722 CARTERSVI GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 469216 CHEVRON 0205722 CARTERSVI GA TRAN DATE 12-20-21SEQ # 135428100343",
+      "debit": 17.05,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-22T00:00:00",
+      "counterpartyName": "IOF - FORESTERS FORESTERS 211222",
+      "paymentPurpose": "Preauthorized Wd IOF - FORESTERS FORESTERS 211222",
+      "debit": 101.99,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-22T00:00:00",
+      "counterpartyName": "ATT Payment 211222",
+      "paymentPurpose": "Preauthorized Wd ATT Payment 211222",
+      "debit": 158,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-22T00:00:00",
+      "counterpartyName": "DOLLARTREE ACWORTH GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL 04507001 DOLLARTREE ACWORTH GA TRAN DATE 12-22-21SEQ # 135600028033",
+      "debit": 14.76,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-22T00:00:00",
+      "counterpartyName": "TARGET T-2091 ACWORTH GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL 22091172 TARGET T-2091 ACWORTH GA TRAN DATE 12-22-21SEQ # 135600172078",
+      "debit": 69,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-22T00:00:00",
+      "counterpartyName": "KROGER #634 8876 DALAS ADALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 316808 KROGER #634 8876 DALAS ADALLAS GA TRAN DATE 12-22-21SEQ # 135622249237",
+      "debit": 5.87,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-23T00:00:00",
+      "counterpartyName": "CASH WITHDRAWAL TERMINAL A109671 6110 CEDARCREST RD NW ACWORTH GA TRAN DATE 12-23-21SEQ # 006272",
+      "paymentPurpose": "ATM Withdrawal CASH WITHDRAWAL TERMINAL A109671 6110 CEDARCREST RD NW ACWORTH GA TRAN DATE 12-23-21SEQ # 006272",
+      "debit": 60,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-12-23T00:00:00",
+      "counterpartyName": "MCDONALD S F31610 ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 442733 MCDONALD S F31610 ACWORTH GA TRAN DATE 12-22-21SEQ # 135620720228",
+      "debit": 6.14,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-23T00:00:00",
+      "counterpartyName": "USPS KIOSK 12004 ACWORTH GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL 44955199 USPS KIOSK 12004 ACWORTH GA TRAN DATE 12-23-21SEQ # 135700224213",
+      "debit": 5.8,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-23T00:00:00",
+      "counterpartyName": "KROGER #634 8876 DALAS ADALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 316808 KROGER #634 8876 DALAS ADALLAS GA TRAN DATE 12-23-21SEQ # 135717153933",
+      "debit": 41.52,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-23T00:00:00",
+      "counterpartyName": "KROGER #442 1720 MARS HIACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 316808 KROGER #442 1720 MARS HIACWORTH GA TRAN DATE 12-23-21SEQ # 135720909513",
+      "debit": 2.23,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-24T00:00:00",
+      "counterpartyName": "BP 8994782ACWORTH BP ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 412254 BP 8994782ACWORTH BP ACWORTH GA TRAN DATE 12-23-21SEQ # 135823744002",
+      "debit": 15.01,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-24T00:00:00",
+      "counterpartyName": "DOLLARTREE 4486 COBB PARACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 314058 DOLLARTREE 4486 COBB PARACWORTH GA TRAN DATE 12-24-21SEQ # 135817114465",
+      "debit": 5.26,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-24T00:00:00",
+      "counterpartyName": "PUBLIX DALLAS GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL P1184104 PUBLIX DALLAS GA TRAN DATE 12-24-21SEQ # 0044681",
+      "debit": 2.3,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-24T00:00:00",
+      "counterpartyName": "DOLLARTREE 8715 DALLAS ADALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 314058 DOLLARTREE 8715 DALLAS ADALLAS GA TRAN DATE 12-24-21SEQ # 135817424033",
+      "debit": 1.07,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-27T00:00:00",
+      "counterpartyName": "WALGREENS 6461 ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 444500 WALGREENS 6461 ACWORTH GA TRAN DATE 12-23-21SEQ # 135821001333",
+      "debit": 7,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-27T00:00:00",
+      "counterpartyName": "Prime Video RW1WN70H3 888 802 3 WA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 469216 Prime Video RW1WN70H3 888 802 3 WA TRAN DATE 12-24-21SEQ # 135826100832",
+      "debit": 2.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-27T00:00:00",
+      "counterpartyName": "DOLLARTREE 8715 DALLAS ADALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 314058 DOLLARTREE 8715 DALLAS ADALLAS GA TRAN DATE 12-26-21SEQ # 136017433521",
+      "debit": 1.07,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-30T00:00:00",
+      "counterpartyName": "CASH WITHDRAWAL TERMINAL T165N090 75 METROMONT RD HIRAM GA TRAN DATE 12-30-21SEQ # 000000003315",
+      "paymentPurpose": "ATM Withdrawal CASH WITHDRAWAL TERMINAL T165N090 75 METROMONT RD HIRAM GA TRAN DATE 12-30-21SEQ # 000000003315",
+      "debit": 27,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-12-30T00:00:00",
+      "counterpartyName": "WAL SAM’S CLUB 002 HIRAM GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL 48020095 WAL SAM’S CLUB 002 HIRAM GA TRAN DATE 12-30-21SEQ # 136494060135",
+      "debit": 6.16,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-30T00:00:00",
+      "counterpartyName": "KROGER #634 8876 DALAS ADALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 316808 KROGER #634 8876 DALAS ADALLAS GA TRAN DATE 12-30-21SEQ # 136419726693",
+      "debit": 22.41,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "ZELLE ME MBERA S AMP LES 888-796-6887",
+      "paymentPurpose": "Debit ZELLE ME MBERA S AMP LES 888-796-6887",
+      "debit": 5,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "ZELLE ME MBERA S AMP LES 888-796-6887",
+      "paymentPurpose": "Debit ZELLE ME MBERA S AMP LES 888-796-6887",
+      "debit": 455,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "SNAP FINANCE PAYMENT 211231",
+      "paymentPurpose": "Preauthorized Wd SNAP FINANCE PAYMENT 211231",
+      "debit": 14.37,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "Empower Inc 1000141625 211231",
+      "paymentPurpose": "Preauthorized Wd Empower Inc 1000141625 211231",
+      "debit": 105,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "ML PLUS MEMBRSHP MONEYLION 211231",
+      "paymentPurpose": "Preauthorized Wd ML PLUS MEMBRSHP MONEYLION 211231",
+      "debit": 9.2,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "ML PLUS LOAN MONEYLION 211231",
+      "paymentPurpose": "Preauthorized Wd ML PLUS LOAN MONEYLION 211231",
+      "debit": 19.91,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "Prime Video F531H0MM3 888 802 3 WA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 469216 Prime Video F531H0MM3 888 802 3 WA TRAN DATE 12-30-21SEQ # 136428100120",
+      "debit": 4.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "BRIGIT NEW YORK NY",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 494375 BRIGIT NEW YORK NY TRAN DATE 12-31-21SEQ # 136509137725",
+      "debit": 9.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "DAVE INC LOS ANGEL CA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 494375 DAVE INC LOS ANGEL CA TRAN DATE 12-31-21SEQ # 136510147775",
+      "debit": 205.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "CLEO MEMPHIS TN",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 494375 CLEO MEMPHIS TN TRAN DATE 12-31-21SEQ # 136512203514",
+      "debit": 3.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "CLEO MEMPHIS TN",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 494375 CLEO MEMPHIS TN TRAN DATE 12-31-21SEQ # 136512203525",
+      "debit": 35,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "CVS/PHARMACY #04 04668--POWDER SP GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 319509 CVS/PHARMACY #04 04668--POWDER SP GA TRAN DATE 12-31-21SEQ # 136514824609",
+      "debit": 9.68,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "PETSMART # 1259 ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 313164 PETSMART # 1259 ACWORTH GA TRAN DATE 12-31-21SEQ # 136515211539",
+      "debit": 13.77,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "EASYPAY FINANCE BILLING 211231",
+      "paymentPurpose": "Preauthorized Wd EASYPAY FINANCE BILLING 211231",
+      "debit": 31.01,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "FBCS, Inc 8002202018 220103",
+      "paymentPurpose": "Preauthorized Wd FBCS, Inc 8002202018 220103",
+      "debit": 50.1,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "APPLDBNK TEL CC PAYMENT 220103",
+      "paymentPurpose": "Preauthorized Wd APPLDBNK TEL CC PAYMENT 220103",
+      "debit": 73,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "FPB CR CARD INTERNET 220103",
+      "paymentPurpose": "Preauthorized Wd FPB CR CARD INTERNET 220103",
+      "debit": 107,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "CASH WITHDRAWAL TERMINAL A106371 51 E PAULDING DRIVE DALLAS GA TRAN DATE 01-02-22SEQ # 007389",
+      "paymentPurpose": "ATM Withdrawal CASH WITHDRAWAL TERMINAL A106371 51 E PAULDING DRIVE DALLAS GA TRAN DATE 01-02-22SEQ # 007389",
+      "debit": 40,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "INSTACASH REPAYMENT 888 659 8 NY",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449398 INSTACASH REPAYMENT 888 659 8 NY TRAN DATE 12-31-21SEQ # 200128026932",
+      "debit": 661.44,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "ADVANCE FINANCIAL 615 341 5 TN",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 405716 ADVANCE FINANCIAL 615 341 5 TN TRAN DATE 12-31-21SEQ # 136522017051",
+      "debit": 41.35,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "FLOATME FUND I DB 877 73772 TX",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 425362 FLOATME FUND I DB 877 73772 TX TRAN DATE 12-31-21SEQ # 200127000000",
+      "debit": 24,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "REAL PDL HELP 855 413 4 KS",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 422108 REAL PDL HELP 855 413 4 KS TRAN DATE 12-31-21SEQ # 136522900019",
+      "debit": 85.34,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "RED OAK ANIMAL HOSPITAL COLLEGE P GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 400175 RED OAK ANIMAL HOSPITAL COLLEGE P GA TRAN DATE 12-31-21SEQ # 136523206711",
+      "debit": 15,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "SUPER AUTO INSURANCE AGE678 407 4 GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 426979 SUPER AUTO INSURANCE AGE678 407 4 GA TRAN DATE 12-31-21SEQ # 200126500757",
+      "debit": 67.56,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "TARGET COM 800 591 3 MN",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 443106 TARGET COM 800 591 3 MN TRAN DATE 12-31-21SEQ # 136521083060",
+      "debit": 8.14,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "DD DOORDASH CHILISGRI 855 973 1 CA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449215 DD DOORDASH CHILISGRI 855 973 1 CA TRAN DATE 01-02-22SEQ # 200223713704",
+      "debit": 19.04,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "ACWORTH TOBACCO LIQUOR ACWORTH GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 449398 ACWORTH TOBACCO LIQUOR ACWORTH GA TRAN DATE 01-02-22SEQ # 200223091674",
+      "debit": 22.84,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "CVS/PHARMACY #06 DALLAS GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL 30601217 CVS/PHARMACY #06 DALLAS GA TRAN DATE 01-02-22SEQ # 200200174473",
+      "debit": 31.53,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "PUBLIX DALLAS GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL P1184104 PUBLIX DALLAS GA TRAN DATE 01-02-22SEQ # 0047649",
+      "debit": 11.73,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-04T00:00:00",
+      "counterpartyName": "LEADBANKSELFLEND CC PMT 220104",
+      "paymentPurpose": "Preauthorized Wd LEADBANKSELFLEND CC PMT 220104",
+      "debit": 26,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-04T00:00:00",
+      "counterpartyName": "COMENITY PAY UR WEB PYMT 220104",
+      "paymentPurpose": "Preauthorized Wd COMENITY PAY UR WEB PYMT 220104",
+      "debit": 34.24,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-04T00:00:00",
+      "counterpartyName": "ASSOCU SV WEBXFR TRANSFER 220104",
+      "paymentPurpose": "Preauthorized Wd ASSOCU SV WEBXFR TRANSFER 220104",
+      "debit": 25,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-04T00:00:00",
+      "counterpartyName": "GenesisFS Card 8669469545 220104",
+      "paymentPurpose": "Preauthorized Wd GenesisFS Card 8669469545 220104",
+      "debit": 41,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-04T00:00:00",
+      "counterpartyName": "GenesisFS Card 8009582556 220104",
+      "paymentPurpose": "Preauthorized Wd GenesisFS Card 8009582556 220104",
+      "debit": 82.99,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-04T00:00:00",
+      "counterpartyName": "DOLLAR GENERAL # DG 1271DALLAS GA",
+      "paymentPurpose": "Check Card Purchase MERCHANT PURCHASE TERMINAL 319372 DOLLAR GENERAL # DG 1271DALLAS GA TRAN DATE 01-04-22SEQ # 200417454141",
+      "debit": 11.3,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-05T00:00:00",
+      "counterpartyName": "Empower Inc 1000142522 220105",
+      "paymentPurpose": "Preauthorized Wd Empower Inc 1000142522 220105",
+      "debit": 8,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-01-05T00:00:00",
+      "counterpartyName": "SAMS CLUB #4802 HIRAM GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL 48020095 SAMS CLUB #4802 HIRAM GA TRAN DATE 01-05-22SEQ # 200500830220",
+      "debit": 6.79,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-01-05T00:00:00",
+      "counterpartyName": "WAL WAL-MART SUPER 840 HIRAM GA",
+      "paymentPurpose": "POS Purchase POS PURCHASE TERMINAL 06180047 WAL WAL-MART SUPER 840 HIRAM GA TRAN DATE 01-05-22SEQ # 200566381875",
+      "debit": 9.64,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER DAVE INC TRAN DATE 12-04-21SEQ # 133810281596",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER DAVE INC TRAN DATE 12-04-21SEQ # 133810281596",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER BRIGIT TRAN DATE 12-04-21SEQ # 133816242584",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER BRIGIT TRAN DATE 12-04-21SEQ # 133816242584",
+      "credit": 75,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-06T00:00:00",
+      "counterpartyName": "Grid Grid CashB 211206 ST-J0X8F1R1F6J9",
+      "paymentPurpose": "Preauthorized Credit Grid Grid CashB 211206 ST-J0X8F1R1F6J9",
+      "credit": 70,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-07T00:00:00",
+      "counterpartyName": "PAYACTIV OSW7863 211207",
+      "paymentPurpose": "Preauthorized Credit PAYACTIV OSW7863 211207",
+      "credit": 63.45,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-08T00:00:00",
+      "counterpartyName": "MONEYLION P2P 211208 MEMBERS S AMPLES",
+      "paymentPurpose": "Preauthorized Credit MONEYLION P2P 211208 MEMBERS S AMPLES",
+      "credit": 1,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-10T00:00:00",
+      "counterpartyName": "PAYACTIV OSW7894 211210",
+      "paymentPurpose": "Preauthorized Credit PAYACTIV OSW7894 211210",
+      "credit": 176,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-15T00:00:00",
+      "counterpartyName": "DEPOSIT TE RM T165N043 SEQ # 9889",
+      "paymentPurpose": "ATM Cash Deposit DEPOSIT TE RM T165N043 SEQ # 9889",
+      "credit": 40,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-12-16T00:00:00",
+      "counterpartyName": "MONEYLION P2P 211216 MEMBERS S AMPLES",
+      "paymentPurpose": "Preauthorized Credit MONEYLION P2P 211216 MEMBERS S AMPLES",
+      "credit": 0.6,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "PAYACTIV OSW7956 211217",
+      "paymentPurpose": "Preauthorized Credit PAYACTIV OSW7956 211217",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "SYNOVUS BANK DIRECT DEP 211217",
+      "paymentPurpose": "Preauthorized Credit SYNOVUS BANK DIRECT DEP 211217",
+      "credit": 1203.54,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "TERMINAL 401637 VISA TRANSFER CASH APP*CASH OUT TRAN DATE 12-17-21SEQ # 135152618117",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 401637 VISA TRANSFER CASH APP*CASH OUT TRAN DATE 12-17-21SEQ # 135152618117",
+      "credit": 49.25,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112158420",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112158420",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112158601",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112158601",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112240719",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112240719",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112243989",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112243989",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112244318",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112244318",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112244727",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-17-21SEQ # 135112244727",
+      "credit": 95,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "TERMINAL 403846 VISA TRANSFER AF247.COM TRAN DATE 12-17-21SEQ # 135112943837",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 403846 VISA TRANSFER AF247.COM TRAN DATE 12-17-21SEQ # 135112943837",
+      "credit": 75.95,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "TERMINAL 425362 VISA TRANSFER FLOATME FUND I CR TRAN DATE 12-17-21SEQ # 135120864993",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 425362 VISA TRANSFER FLOATME FUND I CR TRAN DATE 12-17-21SEQ # 135120864993",
+      "credit": 20,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-17T00:00:00",
+      "counterpartyName": "Deposit",
+      "paymentPurpose": "Deposit",
+      "credit": 180,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "TERMINAL 493185 VISA TRANSFER EMPOWER FINANCE, INC. TRAN DATE 12-18-21SEQ # 135209268307",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 493185 VISA TRANSFER EMPOWER FINANCE, INC. TRAN DATE 12-18-21SEQ # 135209268307",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER BRIGIT TRAN DATE 12-18-21SEQ # 135210117987",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER BRIGIT TRAN DATE 12-18-21SEQ # 135210117987",
+      "credit": 75,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER DAVE INC TRAN DATE 12-18-21SEQ # 135210298981",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER DAVE INC TRAN DATE 12-18-21SEQ # 135210298981",
+      "credit": 200,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER CLEO TRAN DATE 12-19-21SEQ # 135316119704",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER CLEO TRAN DATE 12-19-21SEQ # 135316119704",
+      "credit": 35,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "Grid Grid CashB 211220 ST-P2W7A9R8Y1R9",
+      "paymentPurpose": "Preauthorized Credit Grid Grid CashB 211220 ST-P2W7A9R8Y1R9",
+      "credit": 80,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-20T00:00:00",
+      "counterpartyName": "Mobile Deposit",
+      "paymentPurpose": "Mobile Deposit",
+      "credit": 100.5,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-21T00:00:00",
+      "counterpartyName": "A PLUS FINANCIAL 12202021 211221",
+      "paymentPurpose": "Preauthorized Credit A PLUS FINANCIAL 12202021 211221",
+      "credit": 201.65,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-21T00:00:00",
+      "counterpartyName": "DEPOSIT TE RM T165N043 SEQ # 0360",
+      "paymentPurpose": "ATM Cash Deposit DEPOSIT TE RM T165N043 SEQ # 0360",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-12-22T00:00:00",
+      "counterpartyName": "Mobile Deposit",
+      "paymentPurpose": "Mobile Deposit",
+      "credit": 90,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-29T00:00:00",
+      "counterpartyName": "ZELLE ME MBERA S AMP LES 888-796-6887",
+      "paymentPurpose": "Credit ZELLE ME MBERA S AMP LES 888-796-6887",
+      "credit": 1,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-29T00:00:00",
+      "counterpartyName": "ZELLE ME MBERA S AMP LES 888-796-6887",
+      "paymentPurpose": "Credit ZELLE ME MBERA S AMP LES 888-796-6887",
+      "credit": 59,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "SYNOVUS BANK DIRECT DEP 211231",
+      "paymentPurpose": "Preauthorized Credit SYNOVUS BANK DIRECT DEP 211231",
+      "credit": 1267,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136513157042",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136513157042",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136513159995",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136513159995",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136515107967",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136515107967",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136515207966",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136515207966",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136515208114",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136515208114",
+      "credit": 100,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136515108795",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER INSTACASH FUNDS TRAN DATE 12-31-21SEQ # 136515108795",
+      "credit": 95,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-12-31T00:00:00",
+      "counterpartyName": "TERMINAL 425362 VISA TRANSFER FLOATME FUND I CR TRAN DATE 12-31-21SEQ # 136519733201",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 425362 VISA TRANSFER FLOATME FUND I CR TRAN DATE 12-31-21SEQ # 136519733201",
+      "credit": 20,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER DAVE INC TRAN DATE 01-01-22SEQ # 200110122695",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER DAVE INC TRAN DATE 01-01-22SEQ # 200110122695",
+      "credit": 200,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "ZELLE MEMBOS AMPLE S 888-796-6887",
+      "paymentPurpose": "Credit ZELLE MEMBOS AMPLE S 888-796-6887",
+      "credit": 5,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "ZELLE MEMBOS AMPLE S 888-796-6887",
+      "paymentPurpose": "Credit ZELLE MEMBOS AMPLE S 888-796-6887",
+      "credit": 295,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-01-03T00:00:00",
+      "counterpartyName": "TERMINAL 494375 VISA TRANSFER CLEO TRAN DATE 01-03-22SEQ # 200313213004",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 494375 VISA TRANSFER CLEO TRAN DATE 01-03-22SEQ # 200313213004",
+      "credit": 45,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-01-05T00:00:00",
+      "counterpartyName": "TERMINAL 493185 VISA TRANSFER EMPOWER FINANCE, INC. TRAN DATE 01-05-22SEQ # 200514117822",
+      "paymentPurpose": "A2A Trsf Credit TERMINAL 493185 VISA TRANSFER EMPOWER FINANCE, INC. TRAN DATE 01-05-22SEQ # 200514117822",
+      "credit": 250,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    }
+  ]
+}

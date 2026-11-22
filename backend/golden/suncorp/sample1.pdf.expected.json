@@ -1,0 +1,111 @@
+{
+  "metadata": {
+    "accountNumber": "1234567130",
+    "currency": "AUD",
+    "dateFrom": "2025-06-01T00:00:00",
+    "dateTo": "2025-06-30T00:00:00",
+    "balanceStart": 858.91
+  },
+  "transactions": [
+    {
+      "transactionDate": "2025-06-01T00:00:00",
+      "counterpartyName": "INTERNET TRANSFER DEBIT TO 197831826 REFERENCE NO 26334560 Mem400 to go",
+      "paymentPurpose": "INTERNET TRANSFER DEBIT TO 197831826 REFERENCE NO 26334560 Mem400 to go",
+      "debit": 480,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-06-01T00:00:00",
+      "counterpartyName": "MEMB SAMPLESO",
+      "paymentPurpose": "OSKO PAYMENT TO MEMB SAMPLESO THANKS MATE. REF NO 71959999",
+      "debit": 350,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-06-05T00:00:00",
+      "counterpartyName": "WOOLWORTHS 1624 STRATHFIELD",
+      "paymentPurpose": "VISA PURCHASE WOOLWORTHS 1624 STRATHFIELD 03/04 AU AUD",
+      "debit": 4.8,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-06-12T00:00:00",
+      "counterpartyName": "PAYPAL *GETUPLIMITE",
+      "paymentPurpose": "PAYPAL *GETUPLIMITE",
+      "debit": 4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-06-15T00:00:00",
+      "counterpartyName": "PAYPAL *INGJURAJMAE",
+      "paymentPurpose": "PAYPAL *INGJURAJMAE",
+      "debit": 2.8,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-06-17T00:00:00",
+      "counterpartyName": "ACM CONSTRUCTIONS",
+      "paymentPurpose": "OSKO PAYMENT FROM ACM CONSTRUCTIONS Salary to Mem REF NO 85886400",
+      "debit": 613,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-06-07T00:00:00",
+      "counterpartyName": "MEMB SAMPLESO",
+      "paymentPurpose": "OSKO PAYMENT TO MEMB SAMPLESO Rent",
+      "debit": 350,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2025-06-17T00:00:00",
+      "counterpartyName": "PAYPAL ETSY IRELAND",
+      "paymentPurpose": "PAYPAL ETSY IRELAND",
+      "debit": 1.67,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2025-06-19T00:00:00",
+      "counterpartyName": "WOOLWORTHS 1318 CROWS NEST",
+      "paymentPurpose": "VISA PURCHASE WOOLWORTHS 1318 CROWS NEST 06/04 AU AUD",
+      "debit": 2.15,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-06-19T00:00:00",
+      "counterpartyName": "WOOLWORTHS 1318 CROWS NEST",
+      "paymentPurpose": "VISA PURCHASE WOOLWORTHS 1318 CROWS NEST 07/04 AU AUD",
+      "debit": 6.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-06-20T00:00:00",
+      "counterpartyName": "PAYPAL *KOBO",
+      "paymentPurpose": "PAYPAL *KOBO",
+      "debit": 3.99,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2025-06-23T00:00:00",
+      "counterpartyName": "PAYPAL *THUNDERBIRD THUND",
+      "paymentPurpose": "PAYPAL *THUNDERBIRD THUND",
+      "debit": 8,
+      "currency": "AUD",
+      "paymentType": "card"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain",
+    "printed_totals",
+    "printed_balances"
+  ]
+}

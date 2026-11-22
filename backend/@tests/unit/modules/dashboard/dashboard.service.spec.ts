@@ -24,6 +24,7 @@ const createQueryBuilderMock = (result: unknown) => ({
   select: vi.fn().mockReturnThis(),
   addSelect: vi.fn().mockReturnThis(),
   where: vi.fn().mockReturnThis(),
+  withDeleted: vi.fn().mockReturnThis(),
   andWhere: vi.fn().mockReturnThis(),
   innerJoin: vi.fn().mockReturnThis(),
   leftJoin: vi.fn().mockReturnThis(),
@@ -73,6 +74,8 @@ describe('DashboardService', () => {
   (transactionRepo as any).query = vi.fn(async () => [{ count: 0 }]);
   const statementRepo = createRepoMock();
   const payableRepo = createRepoMock();
+  // Raw queries: the newest bill of each repeating series (none unless a test says so).
+  payableRepo.query = vi.fn(async () => []);
   const walletRepo = createRepoMock();
   const receiptRepo = createRepoMock();
   const memberRepo = createRepoMock();
@@ -80,6 +83,7 @@ describe('DashboardService', () => {
   const subscriptionRepo = createRepoMock();
   const exchangeRatesService = {
     getRate: vi.fn(),
+    getRateOrNull: vi.fn(),
     coverageForWorkspace: vi.fn(async () => []),
   };
   const budgetsService = { withinLimitSpending: vi.fn() };
@@ -88,6 +92,7 @@ describe('DashboardService', () => {
     vi.resetAllMocks();
     workspaceRepo.findOne.mockResolvedValue({ currency: 'KZT' });
     exchangeRatesService.getRate.mockResolvedValue(1);
+    exchangeRatesService.getRateOrNull.mockResolvedValue(1);
     (transactionRepo as any).query.mockResolvedValue([{ count: 0 }]);
     budgetsService.withinLimitSpending.mockResolvedValue([]);
     service = new DashboardService(
@@ -587,6 +592,7 @@ describe('DashboardService', () => {
     payableRepo.createQueryBuilder.mockReturnValue(payableQb);
     workspaceRepo.findOne.mockResolvedValue({ currency: 'KZT' });
     exchangeRatesService.getRate.mockResolvedValue(500);
+    exchangeRatesService.getRateOrNull.mockResolvedValue(500);
 
     const result = await (service as any).getSnapshot(
       'ws-1',
@@ -605,6 +611,31 @@ describe('DashboardService', () => {
       currency: 'KZT',
     });
     expect(exchangeRatesService.getRate).toHaveBeenCalledWith('USD', 'KZT', undefined, 'ws-1');
+  });
+
+  it("getSnapshot converts each day's income and spending at that day's rate", async () => {
+    const rateOn: Record<string, number> = { '2026-02-03': 400, '2026-02-20': 500 };
+    transactionRepo.createQueryBuilder
+      .mockReturnValueOnce(
+        createQueryBuilderMock([
+          { currency: 'USD', day: '2026-02-03', income: '10', expense: '1', unapprovedCash: '0' },
+          { currency: 'USD', day: '2026-02-20', income: '10', expense: '2', unapprovedCash: '0' },
+        ]),
+      )
+      .mockReturnValueOnce(createQueryBuilderMock([]));
+    payableRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock([]));
+    exchangeRatesService.getRateOrNull.mockImplementation(
+      async (_from: string, _to: string, date: string) => rateOn[date] ?? null,
+    );
+
+    const result = await (service as any).getSnapshot(
+      'ws-1',
+      new Date('2026-02-01'),
+      new Date('2026-03-01'),
+    );
+
+    expect(result.income30d).toBe(10 * rateOn['2026-02-03'] + 10 * rateOn['2026-02-20']);
+    expect(result.expense30d).toBe(1 * rateOn['2026-02-03'] + 2 * rateOn['2026-02-20']);
   });
 
   it('getSnapshot excludes error and processing statements from period totals', async () => {
@@ -1337,6 +1368,107 @@ describe('DashboardService', () => {
       expect(result.shortfallDate).toBeNull();
     });
 
+    it('projects the occurrences of a repeating bill not made yet, at the series amount', async () => {
+      vi.useFakeTimers().setSystemTime(new Date(2026, 0, 15));
+      try {
+        primeBalance('5000');
+        // The January bill exists (changed to 900 for that month alone); February does not yet.
+        const january = {
+          id: 'p-rent',
+          workspaceId: 'ws-1',
+          vendor: 'ACME Rent',
+          amount: '900.00',
+          baseAmount: '1000.00',
+          currency: 'KZT',
+          dueDate: '2026-01-31',
+          occurrenceDate: '2026-01-31',
+          recurrence: { frequency: 'monthly', interval: 1, startDate: '2025-12-31' },
+        };
+        payableRepo.find.mockResolvedValue([january]);
+        payableRepo.query.mockResolvedValueOnce([{ id: 'p-rent' }]);
+        payableRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock([january]));
+        subscriptionRepo.find.mockResolvedValue([]);
+
+        const result = await service.getCommitments('ws-1', 60);
+
+        expect(result.items).toEqual([
+          expect.objectContaining({ date: '2026-01-31', amount: 900, sourceId: 'p-rent' }),
+          // The 31st clamps to 28 February; 31 March is past the horizon.
+          expect.objectContaining({ date: '2026-02-28', amount: 1000, sourceId: 'p-rent' }),
+        ]);
+        expect(result.totalCommitted).toBe(1900);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('places the bill an upgraded series missed on today, then goes on from it', async () => {
+      vi.useFakeTimers().setSystemTime(new Date(2026, 10, 16));
+      try {
+        primeBalance('5000');
+        // Brought over from an old flag: its last bill was paid on 7 October.
+        const october = {
+          id: 'p-gym',
+          workspaceId: 'ws-1',
+          vendor: 'ACME Gym',
+          amount: '40.00',
+          baseAmount: null,
+          currency: 'KZT',
+          status: 'paid',
+          occurrenceDate: '2026-10-07',
+          catchUpOnce: true,
+          recurrence: { frequency: 'monthly', interval: 1, startDate: '2026-10-07' },
+        };
+        payableRepo.find.mockResolvedValue([]);
+        payableRepo.query.mockResolvedValueOnce([{ id: 'p-gym' }]);
+        payableRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock([october]));
+        subscriptionRepo.find.mockResolvedValue([]);
+
+        const result = await service.getCommitments('ws-1', 30);
+
+        expect(result.items).toEqual([
+          // The 7 November bill the job makes, owed already.
+          expect.objectContaining({ date: '2026-11-16', amount: 40, isOverdue: true }),
+          expect.objectContaining({ date: '2026-12-07', amount: 40, isOverdue: false }),
+        ]);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('goes on after a deleted newest occurrence, as the job does', async () => {
+      vi.useFakeTimers().setSystemTime(new Date(2026, 10, 16));
+      try {
+        primeBalance('5000');
+        const deleted = {
+          id: 'p-water',
+          workspaceId: 'ws-1',
+          vendor: 'ACME Water',
+          amount: '25.00',
+          baseAmount: null,
+          currency: 'KZT',
+          occurrenceDate: '2026-11-20',
+          deletedAt: new Date('2026-11-15T09:00:00Z'),
+          catchUpOnce: false,
+          recurrence: { frequency: 'weekly', interval: 1, startDate: '2026-11-06' },
+        };
+        payableRepo.find.mockResolvedValue([]);
+        payableRepo.query.mockResolvedValueOnce([{ id: 'p-water' }]);
+        const builder = createQueryBuilderMock([deleted]);
+        payableRepo.createQueryBuilder.mockReturnValue(builder);
+        subscriptionRepo.find.mockResolvedValue([]);
+
+        const result = await service.getCommitments('ws-1', 14);
+
+        expect(builder.withDeleted).toHaveBeenCalled();
+        expect(result.items.map((item: { date: string }) => item.date)).toEqual(['2026-11-27']);
+        // Only clearing the rule ends a series: the newest is picked deleted or not.
+        expect(String(payableRepo.query.mock.calls[0][0])).not.toContain('deleted_at');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('counts what is left of a partly paid bill', async () => {
       primeBalance('1000');
       payableRepo.find.mockResolvedValue([
@@ -1419,7 +1551,7 @@ describe('DashboardService', () => {
         { date: '2025-06', currency: 'KZT', income: '0', expense: '250.5' },
       ]);
       transactionRepo.createQueryBuilder.mockReturnValue(qb);
-      exchangeRatesService.getRate.mockResolvedValue(500);
+      exchangeRatesService.getRateOrNull.mockResolvedValue(500);
 
       const result = await service.getMonthlyCashFlow('ws-1', '12m');
 

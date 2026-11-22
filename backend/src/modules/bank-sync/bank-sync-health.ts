@@ -28,6 +28,21 @@ export function sinceOf(account: BankSyncAccountSetting, now: Date): Date {
 }
 
 /**
+ * The first day a statement made by this pull stands for: the earliest day any
+ * pull since the account's last statement asked for. A provider keeps about
+ * as much history as a first pull asks for, so a pull reaching further back
+ * (an account switched on again months later) stands only for what it can
+ * have heard about.
+ */
+export function askedSince(account: BankSyncAccountSetting, floor: Date, now: Date): Date {
+  const heard = Math.max(floor.getTime(), now.getTime() - FIRST_SYNC_DAYS * DAY_MS);
+  // A first pull (new link, feed just switched) or another wallet starts a new run of days.
+  const run = account.lastSyncAt && account.askedFrom?.walletId === account.walletId;
+  const earlier = run && account.askedFrom ? new Date(account.askedFrom.from).getTime() : heard;
+  return new Date(Math.min(earlier, heard));
+}
+
+/**
  * Compares how far the provider's balance moved against the rows that arrived
  * to explain the move. A gap that is still there on the next pull is a row
  * that never came: the failure that otherwise hides behind a green dot.

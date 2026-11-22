@@ -25,14 +25,16 @@ export interface ImportCreatedRef {
     | 'category'
     | 'metal_lot'
     | 'wallet'
-    | 'payee';
+    | 'payee'
+    | 'investment_trade'
+    | 'investment_holding';
   id: string;
 }
 
 /** An entity the import changed, with the values it had before. */
 export interface ImportUpdatedRef {
   /** `transaction`: an existing row an app import made a transfer leg; `wallet`: its opening balance. */
-  kind: 'payable' | 'subscription' | 'budget' | 'transaction' | 'wallet';
+  kind: 'payable' | 'subscription' | 'budget' | 'transaction' | 'wallet' | 'investment_holding';
   id: string;
   before: JsonObject;
 }

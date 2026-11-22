@@ -18,9 +18,10 @@ export const DEFAULT_SETTINGS_TAB: SettingsTabId = 'general';
 export const SETTINGS_SECTIONS = {
   general: ['profile', 'appearance'],
   security: ['email', 'password', 'two-factor', 'sessions'],
-  notifications: ['telegram', 'push'],
+  notifications: ['telegram', 'push', 'calendar'],
   data: [
     'workspace-profile',
+    'month-start',
     'processing',
     'exchange-rates',
     'receipt-location',

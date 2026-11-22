@@ -23,7 +23,6 @@ const sidebars: SidebarsConfig = {
         'guides/webhooks',
         'guides/categorization',
         'guides/receipt-maps',
-        'guides/income-tax-declaration',
         'guides/observability',
         'guides/mcp',
         'guides/security-posture',
@@ -47,6 +46,7 @@ const sidebars: SidebarsConfig = {
         'contributing/development-workflow',
         'contributing/testing',
         'contributing/coding-standards',
+        'contributing/reviewing',
         'contributing/adding-a-bank-parser',
       ],
     },
@@ -56,6 +56,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'deployment/docker',
         'deployment/ci-cd',
+        'deployment/demo',
       ],
     },
     {

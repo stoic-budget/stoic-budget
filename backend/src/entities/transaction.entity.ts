@@ -52,6 +52,11 @@ export enum TransferPairKind {
   REIMBURSEMENT = 'reimbursement',
   /** Money moved into an investment or retirement account: a one-leg transfer. */
   INVESTMENT = 'investment',
+  /**
+   * A one-leg row booked to bring an account in line with the balance the bank
+   * shows: it moves the balance and net worth, never spending or income.
+   */
+  ADJUSTMENT = 'adjustment',
 }
 
 /** How the two legs of a transfer came to be linked. */
@@ -74,6 +79,8 @@ const TRIGGER_WRITTEN = { select: false, insert: false, update: false } as const
 @Index('IDX_transactions_workspace_transfer_pair', ['workspaceId', 'transferPairId'], {
   where: '"transfer_pair_id" IS NOT NULL',
 })
+// Partial, matching the migration: the bank-sync pull looks up the few pending rows.
+@Index('IDX_transactions_workspace_pending', ['workspaceId'], { where: '"is_pending" = true' })
 // Makes a crypto sync idempotent: re-reading the chain re-offers rows we already
 // have, and the insert simply loses the race with itself. One on-chain transaction
 // can legitimately produce several rows (a native transfer plus a token transfer,
@@ -224,6 +231,22 @@ export class Transaction {
 
   @Column({ name: 'private_category_id', type: 'uuid', nullable: true })
   privateCategoryId: string | null;
+
+  /**
+   * Left out of every income and spending figure (budgets, reports, dashboard,
+   * forecast, goals, insights) through `onlyFlows`/`flowsSql`, while it keeps
+   * counting in balances, net worth and tax: the money still moved.
+   */
+  @Column({ name: 'excluded_from_budgets', type: 'boolean', default: false })
+  excludedFromBudgets: boolean;
+
+  /**
+   * A bank-sync row the bank still holds as pending. Shown, but counted
+   * nowhere: `onlyCounted`/`countedSql`/`countedWhere` (and so `onlyFlows`)
+   * leave it out until the pull replaces it with the booked version.
+   */
+  @Column({ name: 'is_pending', type: 'boolean', default: false })
+  isPending: boolean;
 
   @ManyToOne(() => CryptoWallet, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'crypto_wallet_id' })
@@ -488,6 +511,16 @@ export class Transaction {
    */
   @Column({ name: 'investment_account_id', type: 'uuid', nullable: true })
   investmentAccountId: string | null;
+
+  /**
+   * On an interest row: the loan payment it was split from. The payment is
+   * left as it came (the whole amount, paired or not); the interest is an
+   * expense on the loan account, so the debt falls by the principal only.
+   * Counts only while the payment counts; deleted with the payment. Every
+   * part of a split interest row keeps the link.
+   */
+  @Column({ name: 'loan_interest_of_id', type: 'uuid', nullable: true })
+  loanInterestOfId: string | null;
 
   @Column({ type: 'varchar', name: 'fingerprint', length: 64, nullable: true })
   fingerprint: string | null;

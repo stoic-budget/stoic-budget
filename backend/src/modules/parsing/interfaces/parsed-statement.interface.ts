@@ -14,6 +14,32 @@ export interface ParsedTransaction {
   currency?: string;
   exchangeRate?: number;
   amountForeign?: number;
+  /**
+   * The bank still holds the row as pending (a bank-sync feed says so). It is
+   * stored, shown and counted nowhere until the booked version replaces it.
+   */
+  pending?: boolean;
+  /** The category the file itself filed the row under; levels joined by ':' ("Food:Groceries"). */
+  categoryName?: string;
+  /**
+   * The parts the file split the row into, each in the row's own direction and
+   * together its whole amount. Absent for a row the file did not split.
+   */
+  splits?: ParsedSplit[];
+  /** The account the file says the money moved to or from, by its name in the file. */
+  transferAccount?: string;
+  /**
+   * What the dedup fingerprint reads in place of the counterparty, for a row
+   * whose payee, date and amount do not tell it apart (a part cut out of a split).
+   */
+  fingerprintMerchant?: string;
+}
+
+export interface ParsedSplit {
+  /** Positive, in the row's currency. */
+  amount: number;
+  categoryName?: string;
+  memo?: string;
 }
 
 export interface ParsedStatementMetadata {
@@ -74,10 +100,12 @@ export interface ParsedStatement {
   checks?: ParseCheck[];
   /** The file's layout as words (pdf-layout-fingerprint.helper), when the parser reads one. */
   layout?: StatementLayout;
+  /** What the parser left out or had to guess, for the statement's warnings. */
+  warnings?: string[];
   /**
    * Further accounts printed in the same file (an HKD and a USD account on one
    * statement), each with its own metadata and rows. `metadata` and
    * `transactions` above are the first account.
    */
-  otherAccounts?: Array<Pick<ParsedStatement, 'metadata' | 'transactions' | 'checks'>>;
+  otherAccounts?: Array<Pick<ParsedStatement, 'metadata' | 'transactions' | 'checks' | 'warnings'>>;
 }

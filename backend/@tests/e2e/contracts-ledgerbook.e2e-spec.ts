@@ -9,16 +9,22 @@ import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import {
+  BalanceAdjustmentResult,
+  BalanceCheckResult,
   BranchItem,
   CategoryItem,
+  ForecastResponse,
   MessageResult,
   PayeeMerge,
   PayeeRecord,
   SharedLinkItem,
+  StatementCoverage,
+  StorageFileDetails,
   StorageFolder,
   StorageTag,
   StorageViewItem,
   TransactionAttachment,
+  TransactionListPage,
   WalletItem,
 } from '../../src/contracts';
 import {
@@ -50,6 +56,7 @@ import {
   TransferLinked,
   TransfersDetected,
 } from '../../src/contracts/transactions/transaction-record';
+import { BankName, FileType, Statement, StatementStatus } from '../../src/entities/statement.entity';
 import { Transaction, TransactionType } from '../../src/entities/transaction.entity';
 import {
   deleteUserByEmail,
@@ -165,10 +172,119 @@ describe('API contracts: ledger book (e2e)', () => {
       expect(created.body.initialBalance).toBe('12.50');
       const id = created.body.id;
       matches(WalletItem, (await call('get', `/wallets/${id}`).expect(200)).body);
-      const updated = await call('put', `/wallets/${id}`, { initialBalance: 20 }).expect(200);
+      expect(created.body.includeInNetWorth).toBe(true);
+      const updated = await call('put', `/wallets/${id}`, {
+        initialBalance: 20,
+        includeInNetWorth: false,
+      }).expect(200);
       matches(WalletItem, updated.body);
       expect(updated.body.initialBalance).toBe('20.00');
+      expect(updated.body.includeInNetWorth).toBe(false);
       matches(MessageResult, (await call('delete', `/wallets/${id}`).expect(200)).body);
+    });
+
+    it('reads which days a wallet’s statements cover, every kind of finding in it', async () => {
+      const walletId = (
+        await call('post', '/wallets', { name: 'Everyday', currency: 'EUR' }).expect(201)
+      ).body.id as string;
+      const statements = dataSource.getRepository(Statement);
+      const seed = async (from: string, to: string, start: number, end: number, rows: number[]) => {
+        const statement = await statements.save(
+          statements.create({
+            userId: owner.userId,
+            workspaceId: owner.workspaceId,
+            walletId,
+            fileName: `statement-${from}.pdf`,
+            filePath: '/dev/null',
+            fileType: FileType.PDF,
+            fileSize: 1,
+            fileHash: `coverage-${stamp}-${Math.random()}`,
+            bankName: BankName.OTHER,
+            currency: 'EUR',
+            status: StatementStatus.COMPLETED,
+            statementDateFrom: new Date(from),
+            statementDateTo: new Date(to),
+            balanceStart: start,
+            balanceEnd: end,
+          }),
+        );
+        const repository = dataSource.getRepository(Transaction);
+        await repository.save(
+          rows.map(amount =>
+            repository.create({
+              workspaceId: owner.workspaceId,
+              statementId: statement.id,
+              walletId,
+              transactionDate: new Date(from),
+              counterpartyName: 'ACME Store - Wireless Buds',
+              paymentPurpose: 'Purchase',
+              currency: 'EUR',
+              transactionType: amount > 0 ? TransactionType.INCOME : TransactionType.EXPENSE,
+              amount: Math.abs(amount),
+              credit: amount > 0 ? amount : null,
+              debit: amount < 0 ? -amount : null,
+              isVerified: true,
+            }),
+          ),
+        );
+      };
+      // A movement 10 short, then a gap and an opening 5 above the close, a copy and an overlap.
+      await seed('2026-01-01', '2026-01-31', 0, 100, [90]);
+      await seed('2026-03-01', '2026-03-31', 105, 105, []);
+      await seed('2026-03-01', '2026-03-31', 105, 105, []);
+      await seed('2026-03-20', '2026-04-10', 105, 105, []);
+
+      const coverage = (await call('get', `/wallets/${walletId}/statement-coverage`).expect(200))
+        .body;
+      matches(StatementCoverage, coverage);
+      expect(coverage.periods).toHaveLength(4);
+      expect(coverage.periods.filter((p: { duplicateOf: unknown }) => p.duplicateOf)).toHaveLength(1);
+      expect(coverage.gaps).toHaveLength(1);
+      expect(coverage.sinceLast).not.toBeNull();
+      expect(coverage.overlaps).toHaveLength(1);
+      expect(coverage.chainBreaks).toHaveLength(1);
+      expect(coverage.movementMismatches).toHaveLength(1);
+      expect(coverage.months.length).toBeGreaterThan(3);
+      expect(coverage.unexplained).toBe(15);
+    });
+
+    it('check a wallet against the bank, book the difference, and read the check back', async () => {
+      const created = await call('post', '/wallets', {
+        name: 'Checked box',
+        currency: 'EUR',
+        initialBalance: 40,
+      }).expect(201);
+      const id = created.body.id;
+      const date = '2026-09-10';
+      const off = await call('post', `/wallets/${id}/balance-check`, {
+        date,
+        balance: 52.25,
+      }).expect(200);
+      matches(BalanceCheckResult, off.body);
+      expect(off.body).toMatchObject({ ourBalance: 40, difference: 12.25, matches: false });
+
+      const booked = await call('post', `/wallets/${id}/balance-adjustment`, {
+        date,
+        balance: 52.25,
+      }).expect(200);
+      matches(BalanceAdjustmentResult, booked.body);
+      expect(booked.body.transactionId).toEqual(expect.any(String));
+      expect(booked.body.check).toMatchObject({ matches: true, reasons: [] });
+
+      const confirmed = await call('post', `/wallets/${id}/balance-check/confirm`, {
+        date,
+        balance: 52.25,
+      }).expect(200);
+      matches(BalanceCheckResult, confirmed.body);
+
+      const read = await call('get', `/wallets/${id}`).expect(200);
+      matches(WalletItem, read.body);
+      expect(read.body.balanceCheck).toEqual({ date, bankBalance: 52.25, stillMatches: true });
+      const rows = await call('get', `/transactions?walletId=${id}`).expect(200);
+      matches(TransactionListPage, rows.body);
+      expect(rows.body.data).toEqual([
+        expect.objectContaining({ id: booked.body.transactionId, transferPairKind: 'adjustment' }),
+      ]);
     });
 
     it('create, read, update and delete a category, with its parent', async () => {
@@ -229,14 +345,17 @@ describe('API contracts: ledger book (e2e)', () => {
       const updated = await call('put', `/transactions/${transactionId}`, {
         comments: 'For the office',
         debit: 42.5,
+        excludedFromBudgets: true,
       }).expect(200);
       matches(TransactionRecord, updated.body);
       expect(updated.body.debit).toBe('42.50');
+      expect(updated.body.excludedFromBudgets).toBe(true);
       const bulk = await call('post', '/transactions/bulk-update', {
-        items: [{ id: transactionId, updates: { comments: 'Checked' } }],
+        items: [{ id: transactionId, updates: { comments: 'Checked', excludedFromBudgets: false } }],
       }).expect(200);
       matches(TransactionRecordList, bulk.body);
       expect(bulk.body[0].comments).toBe('Checked');
+      expect(bulk.body[0].excludedFromBudgets).toBe(false);
     });
 
     it('split, its parts and unsplit', async () => {
@@ -247,11 +366,71 @@ describe('API contracts: ledger book (e2e)', () => {
       matches(TransactionRecordList, parts.body);
       expect(parts.body).toHaveLength(2);
       expect(parts.body[1].amount).toBe('22.50');
+      // The lists the drawer opens a row from carry its group, so it can offer to undo the split.
+      const { statementId, splitGroupId } = parts.body[0];
+      const page = await call('get', `/transactions?statementId=${statementId}`).expect(200);
+      matches(TransactionListPage, page.body);
+      const file = await call('get', `/storage/files/${statementId}`).expect(200);
+      matches(StorageFileDetails, file.body);
+      for (const rows of [page.body.data, file.body.transactions]) {
+        const inGroup = rows.filter(
+          (row: { splitGroupId: string | null }) => row.splitGroupId === splitGroupId,
+        );
+        expect(inGroup.map((row: { splitIndex: number }) => row.splitIndex).sort()).toEqual([0, 1]);
+      }
+      // A public link's page cannot undo a split: its rows leave without the group.
+      const link = await call('post', `/storage/files/${statementId}/share`, {
+        permission: 'download',
+      }).expect(201);
+      const shared = await request(app.getHttpServer())
+        .get(`/storage/shared/${link.body.token}`)
+        .expect(200);
+      expect(shared.body.transactions.length).toBeGreaterThan(0);
+      for (const row of shared.body.transactions) {
+        expect(row).not.toHaveProperty('splitGroupId');
+        expect(row).not.toHaveProperty('splitIndex');
+      }
       const listed = await call('get', `/transactions/${id}/split`).expect(200);
       matches(TransactionRecordList, listed.body);
       const merged = await call('post', `/transactions/${id}/unsplit`).expect(200);
       matches(TransactionRecord, merged.body);
       expect(merged.body.splitGroupId).toBeNull();
+    });
+
+    it('a pending bank row: listed as pending, in the forecast as spent, never split', async () => {
+      const pendingId = await cloneRow(transactionId, {
+        counterpartyName: 'ACME Store - Wireless Buds',
+        documentNumber: 'ACT-1:AUTH-1',
+        // A hold the bank still keeps: the forecast drops older ones.
+        transactionDate: new Date(),
+        isPending: true,
+        isVerified: false,
+      });
+
+      const one = await call('get', `/transactions/${pendingId}`).expect(200);
+      matches(TransactionRecord, one.body);
+      expect(one.body.isPending).toBe(true);
+      const page = await call('get', '/transactions?limit=100').expect(200);
+      matches(TransactionListPage, page.body);
+      const listed = page.body.data.find((row: { id: string }) => row.id === pendingId);
+      expect(listed.isPending).toBe(true);
+      expect(page.body.data.find((row: { id: string }) => row.id === transactionId).isPending).toBe(
+        false,
+      );
+
+      const forecast = await call('get', '/forecast?days=30').expect(200);
+      matches(ForecastResponse, forecast.body);
+      const spent = forecast.body.events.find(
+        (event: { sourceId: string }) => event.sourceId === pendingId,
+      );
+      expect(spent).toMatchObject({ kind: 'pending', label: 'ACME Store - Wireless Buds' });
+      expect(spent.amount).toBeLessThan(0);
+
+      const split = await call('post', `/transactions/${pendingId}/split`, {
+        parts: [{ amount: 20 }, { amount: 22.5 }],
+      }).expect(400);
+      expect(split.body.error.code).toBe('TRANSACTION_SPLIT_PENDING');
+      await dataSource.getRepository(Transaction).delete({ id: pendingId });
     });
 
     it('merge duplicates and unmark one', async () => {

@@ -1,3 +1,4 @@
+import { PendingBadge } from '@/app/components/transactions/PendingBadge';
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
@@ -40,7 +41,8 @@ export function AccountTransactionsCard({
                   <span
                     style={{
                       fontSize: 14,
-                      color: 'var(--foreground)',
+                      // A pending row is in the muted ink: it counts nowhere until it books.
+                      color: row.isPending ? 'var(--text-muted)' : 'var(--foreground)',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
@@ -50,10 +52,17 @@ export function AccountTransactionsCard({
                       ? t.transferWith.value.replace('{{account}}', other)
                       : payeeName(row.counterpartyName)}
                   </span>
-                  <span style={mutedStyle}>{formatDay(row.transactionDate, locale)}</span>
+                  <span style={mutedStyle}>
+                    {formatDay(row.transactionDate, locale)}
+                    {row.isPending ? <PendingBadge /> : null}
+                  </span>
                 </span>
                 <span style={{ display: 'grid', gap: 2, justifyItems: 'end' }}>
-                  <span style={figureStyle}>
+                  <span
+                    style={
+                      row.isPending ? { ...figureStyle, color: 'var(--text-muted)' } : figureStyle
+                    }
+                  >
                     <PrivateAmount>{formatMoney(amount, row.currency, locale)}</PrivateAmount>
                   </span>
                   {row.runningBalance && (

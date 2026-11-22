@@ -20,6 +20,8 @@ export enum WorkspaceServiceSettingsKey {
   APP = 'app',
   /** Precious metals: what a dealer pays below spot, per metal. */
   METALS = 'metals',
+  /** Investments: how a sale is matched to the lots it came from (FIFO or average cost). */
+  INVESTMENTS = 'investments',
   /** Tax reserve: the share of income to set aside, and where tax payments are booked. */
   TAX_RESERVE = 'tax_reserve',
   /** How often the workspace files VAT returns, and whether it holds a standing extension. */

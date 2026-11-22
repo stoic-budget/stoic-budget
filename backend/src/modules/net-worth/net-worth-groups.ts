@@ -22,6 +22,14 @@ export function findRoot(
   return current;
 }
 
+/** The lines that hold values: every account no other account sits under. */
+export function findLeaves(accounts: BalanceAccount[]): BalanceAccount[] {
+  const parentIds = new Set(
+    accounts.map(account => account.parentId).filter((id): id is string => Boolean(id)),
+  );
+  return accounts.filter(account => !parentIds.has(account.id));
+}
+
 /** Asset totals grouped under the top-level section each leaf belongs to. */
 export function buildBreakdown(
   accounts: BalanceAccount[],

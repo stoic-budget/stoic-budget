@@ -4,6 +4,8 @@
  * tree, and a per-category comparison with the previous period.
  */
 
+import { isNettedRefund } from './refund.util';
+
 export interface CashFlowRow {
   /** Positive income, positive expense; direction is in `type`. */
   amount: number;
@@ -98,11 +100,11 @@ export function buildCashFlowMap(
 
   /** Money coming back into a category it was spent from, not earnings. */
   const isRefund = (row: CashFlowRow): boolean =>
-    options.netRefunds === true &&
-    row.type === 'income' &&
-    !row.isTransfer &&
-    row.categoryId !== null &&
-    byId.get(row.categoryId)?.isExpenseCategory === true;
+    isNettedRefund(
+      row,
+      options.netRefunds === true,
+      id => byId.get(id)?.isExpenseCategory === true,
+    );
 
   const sumExpenses = (input: CashFlowRow[]) => {
     const roots = new Map<string, number>();
