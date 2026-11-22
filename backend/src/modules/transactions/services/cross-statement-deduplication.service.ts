@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, type FindOptionsWhere, In, Repository } from 'typeorm';
 import { appError } from '../../../common/errors/app-error';
-import { taxLockedConflict } from '../../../common/utils/tax-lock.util';
+import { assertRowsRemovable } from '../../../common/utils/tax-lock.util';
 import { redactPrivateRows } from '../../../common/utils/transaction-privacy.util';
 import { Statement } from '../../../entities/statement.entity';
 import { Transaction } from '../../../entities/transaction.entity';
@@ -195,10 +195,11 @@ export class CrossStatementDeduplicationService {
 
     const master = transactions.find(row => row.id === transactionIds[0]) ?? transactions[0];
     const duplicates = transactions.filter(row => row.id !== master.id);
-    const locked = duplicates.filter(row => row.taxLocked).length;
-    if (locked > 0) {
-      throw taxLockedConflict(locked);
-    }
+    // A duplicate counts nowhere, nor does loan interest split off it: neither may be filed.
+    await assertRowsRemovable(this.transactionRepository, {
+      workspaceId,
+      id: In(duplicates.map(row => row.id)),
+    });
 
     // Mark duplicates
     for (const duplicate of duplicates) {

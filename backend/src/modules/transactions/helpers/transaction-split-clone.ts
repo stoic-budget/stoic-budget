@@ -60,6 +60,9 @@ export function cloneForSplit(source: Transaction): Partial<Transaction> {
     // changes a budget or report total.
     excludedFromBudgets: source.excludedFromBudgets,
     importSessionId: source.importSessionId,
+    // Every part of split interest stays the payment's: it counts, follows and
+    // goes with the payment as the whole did (loans/loan-interest-row).
+    loanInterestOfId: source.loanInterestOfId,
   };
 }
 

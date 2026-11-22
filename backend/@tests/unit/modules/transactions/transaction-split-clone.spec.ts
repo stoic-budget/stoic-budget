@@ -15,6 +15,12 @@ describe('cloneForSplit', () => {
     expect(cloneForSplit(source).paymentType).toBeNull();
   });
 
+  it('keeps every part of split interest on its loan payment', () => {
+    const source = { workspaceId: 'ws-1', loanInterestOfId: 'payment-1' } as Transaction;
+
+    expect(cloneForSplit(source).loanInterestOfId).toBe('payment-1');
+  });
+
   it('keeps every part out of budgets when the whole was left out', () => {
     const source = { workspaceId: 'ws-1', excludedFromBudgets: true } as Transaction;
 

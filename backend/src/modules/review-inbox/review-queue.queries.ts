@@ -6,6 +6,7 @@ import {
   awaitingCategorySql,
   UNCATEGORIZED_SQL_PARAMS,
 } from '../categories/uncategorized-category';
+import { HELD_FOR_REREAD } from '../loans/loan-interest-carry';
 
 /**
  * What the Review queue holds, as queries the queue and the dashboard share, so
@@ -34,15 +35,23 @@ export function reviewDuplicatesQuery(
   transactions: Repository<Transaction>,
   workspaceId: string,
 ): SelectQueryBuilder<Transaction> {
-  return transactions
-    .createQueryBuilder('t')
-    .leftJoin('t.statement', 's')
-    .where('t.workspaceId = :workspaceId', { workspaceId })
-    .andWhere('t.isDuplicate = true')
-    .andWhere('t.isVerified = false')
-    .andWhere('t.isPending = false')
-    .andWhere("(t.duplicateMatchType IS NULL OR t.duplicateMatchType != 'manual')")
-    .andWhere('(t.statementId IS NULL OR s.deletedAt IS NULL)');
+  return (
+    transactions
+      .createQueryBuilder('t')
+      .leftJoin('t.statement', 's')
+      .where('t.workspaceId = :workspaceId', { workspaceId })
+      .andWhere('t.isDuplicate = true')
+      .andWhere('t.isVerified = false')
+      .andWhere('t.isPending = false')
+      .andWhere("(t.duplicateMatchType IS NULL OR t.duplicateMatchType != 'manual')")
+      // Not a suspected repeat: a split loan payment held while its statement is
+      // read again, and loan interest, which is a duplicate only with its payment.
+      .andWhere('(t.duplicateMatchType IS NULL OR t.duplicateMatchType != :held)', {
+        held: HELD_FOR_REREAD,
+      })
+      .andWhere('t.loanInterestOfId IS NULL')
+      .andWhere('(t.statementId IS NULL OR s.deletedAt IS NULL)')
+  );
 }
 
 /**

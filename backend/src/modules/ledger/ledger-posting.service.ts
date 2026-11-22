@@ -33,7 +33,7 @@ import {
   toLineColumns,
   transactionLegs,
 } from './ledger-posting.rules';
-import { cashHomeOf, mirrorsAStatement } from './moved-rows';
+import { cashHomeOf, interestSkip, mirrorsAStatement } from './moved-rows';
 
 export type LedgerPostingErrorCode =
   | 'LEDGER_DISABLED'
@@ -781,7 +781,7 @@ export class LedgerPostingService {
     baseCurrency: string,
   ): Promise<EntryPlan | { skip: NotBooked }> {
     const facts = factsOf(tx);
-    const early = skipReason(facts);
+    const early = skipReason(facts) ?? (await interestSkip(this.transactionRepository, tx));
     if (early) {
       return { skip: early };
     }

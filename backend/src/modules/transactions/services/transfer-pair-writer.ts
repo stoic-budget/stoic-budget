@@ -70,7 +70,8 @@ export async function writeTransferPairs(
 /**
  * Refuses a row that cannot be a leg of a transfer or a reimbursement: a
  * suspected duplicate, a row the bank still holds as pending (it may never
- * book, and its booked version replaces it), part of a split, or already paired.
+ * book, and its booked version replaces it), part of a split, already paired,
+ * or interest split off a loan payment (spending on the loan account, never a leg).
  */
 export function assertFreeLeg(leg: Transaction): void {
   if (leg.isDuplicate) {
@@ -81,6 +82,9 @@ export function assertFreeLeg(leg: Transaction): void {
   }
   if (leg.splitGroupId) {
     throw new BadRequestException(appError('TRANSACTION_LEG_SPLIT', { id: leg.id }));
+  }
+  if (leg.loanInterestOfId) {
+    throw new BadRequestException(appError('LOAN_INTEREST_STAYS_ON_LOAN'));
   }
   if (leg.transferPairId) {
     throw new ConflictException(appError('TRANSACTION_LEG_TRANSFERRED', { id: leg.id }));
