@@ -103,6 +103,7 @@ function netWorth(groups: NetWorthGroup[]): NetWorthData {
     allTimeHigh: null,
     byAssetClass: [],
     groups,
+    properties: [],
   };
 }
 
