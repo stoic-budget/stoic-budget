@@ -18,6 +18,7 @@ import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { FinancialAnalyzer } from './analyzers/financial.analyzer';
 import { OperationalAnalyzer } from './analyzers/operational.analyzer';
 import { StoicAnalyzer } from './analyzers/stoic.analyzer';
+import { WealthAnalyzer } from './analyzers/wealth.analyzer';
 import { InsightsController } from './insights.controller';
 import { InsightsService } from './insights.service';
 import { DailyQuoteService } from './quotes/daily-quote.service';
@@ -51,6 +52,7 @@ import { StoicBehaviorService } from './stoic/stoic-behavior.service';
     OperationalAnalyzer,
     FinancialAnalyzer,
     StoicAnalyzer,
+    WealthAnalyzer,
     StoicLedgerService,
     StoicBehaviorService,
     DailyQuoteService,
