@@ -168,7 +168,8 @@ export class SecurityClosesService {
         holding.priceSource === InvestmentPriceSource.MANUAL &&
         holding.pricedAt !== null &&
         isoDate(holding.pricedAt) === day &&
-        Math.abs(Number(holding.price) - Number(removed.close)) < 1e-9 &&
+        // The holding keeps 6 decimals, the close 8: compared as the holding stored it.
+        Math.abs(Number(holding.price) - Math.round(Number(removed.close) * 1e6) / 1e6) < 1e-9 &&
         holding.priceCurrency === removed.currency,
     );
     if (fromRemoved.length === 0) return;

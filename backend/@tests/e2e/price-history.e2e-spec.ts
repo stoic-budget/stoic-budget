@@ -297,6 +297,13 @@ describe('Price history (e2e)', () => {
 
     // The feed's newest close is the price again.
     expect(await holdingOf()).toMatchObject({ price: 100, value: 100, priceSource: 'auto' });
+    // A close finer than the holding's 6 decimals is found and taken back off too.
+    const fine = await call(b, 'post', `/investments/holdings/${holdings.b}/closes`)
+      .send({ date: daysAgo(0), close: 1234.56789012 })
+      .expect(201);
+    expect(await holdingOf()).toMatchObject({ priceSource: 'manual' });
+    await call(b, 'delete', `/investments/closes/${fine.body.id}`).expect(204);
+    expect(await holdingOf()).toMatchObject({ price: 100, priceSource: 'auto' });
   });
 
   it('leaves the opening unknown when money paid in waited uninvested until a buy inside the window', async () => {
