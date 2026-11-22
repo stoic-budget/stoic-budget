@@ -19,12 +19,14 @@ export function unconfirmedRowsQuery(
   transactions: Repository<Transaction>,
   workspaceId: string,
 ): SelectQueryBuilder<Transaction> {
+  // A pending row waits for the bank, not for a person: it is asked about once booked.
   return transactions
     .createQueryBuilder('t')
     .leftJoin('t.statement', 's')
     .where('t.workspaceId = :workspaceId', { workspaceId })
     .andWhere('t.isDuplicate = false')
     .andWhere('t.isVerified = false')
+    .andWhere('t.isPending = false')
     .andWhere('(t.statementId IS NULL OR s.deletedAt IS NULL)');
 }
 
@@ -40,6 +42,7 @@ export function reviewDuplicatesQuery(
       .where('t.workspaceId = :workspaceId', { workspaceId })
       .andWhere('t.isDuplicate = true')
       .andWhere('t.isVerified = false')
+      .andWhere('t.isPending = false')
       .andWhere("(t.duplicateMatchType IS NULL OR t.duplicateMatchType != 'manual')")
       // Not a suspected repeat: a split loan payment held while its statement is
       // read again, and loan interest, which is a duplicate only with its payment.

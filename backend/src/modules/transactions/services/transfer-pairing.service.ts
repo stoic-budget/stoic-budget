@@ -73,7 +73,8 @@ export class TransferPairingService {
       .leftJoin('t.statement', 's')
       .addSelect(['s.id', 's.accountNumber', 's.walletId'])
       .where('t.workspaceId = :workspaceId', { workspaceId })
-      .andWhere('t.isDuplicate = false')
+      // A pending row may never book; its booked version is the one to pair.
+      .andWhere('t.isDuplicate = false AND t.isPending = false')
       .andWhere('t.splitGroupId IS NULL')
       // A dividend is linked to its investment account without a pair: it is
       // income, and pairing it with some transfer would make it vanish.
@@ -225,7 +226,7 @@ export class TransferPairingService {
       .where('t.workspaceId = :workspaceId', { workspaceId })
       .andWhere('t.id != :id', { id: income.id })
       .andWhere('t.transactionType = :expense', { expense: TransactionType.EXPENSE })
-      .andWhere('t.isDuplicate = false')
+      .andWhere('t.isDuplicate = false AND t.isPending = false')
       .andWhere('t.splitGroupId IS NULL')
       .andWhere('t.transferPairId IS NULL')
       .andWhere('t.transactionDate BETWEEN :since AND :until', {

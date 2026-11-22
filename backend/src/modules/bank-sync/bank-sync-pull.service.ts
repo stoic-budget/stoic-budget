@@ -15,6 +15,7 @@ import { BankSyncService } from './bank-sync.service';
 import { BankSyncDedupeService } from './bank-sync-dedupe.service';
 import { healthOf, recordDrift, sinceOf } from './bank-sync-health';
 import { buildOfxStatement, ofxFileName } from './bank-sync-ofx.util';
+import { BankSyncPendingService } from './bank-sync-pending.service';
 import {
   type BankSyncAccount,
   BankSyncAuthError,
@@ -54,6 +55,7 @@ export class BankSyncPullService {
     private readonly connections: BankSyncService,
     private readonly statementsService: StatementsService,
     private readonly dedupe: BankSyncDedupeService,
+    private readonly pending: BankSyncPendingService,
   ) {}
 
   async sync(user: User, workspaceId: string, connectionId: string): Promise<BankSyncResult> {
@@ -150,13 +152,20 @@ export class BankSyncPullService {
     }
 
     const floor = sinceOf(account, now).getTime();
-    const candidates = remote.transactions.filter(
-      item => !item.pending && item.posted.getTime() >= floor,
+    const candidates = remote.transactions.filter(item => item.posted.getTime() >= floor);
+    // Pending rows come in too, shown but counted nowhere; booked versions
+    // replace them here, before dedupe could drop a booked row as a pending one.
+    const { incoming } = await this.pending.settle(
+      workspaceId,
+      account,
+      candidates,
+      remote.currency,
+      now,
     );
     const fresh = await this.dedupe.withoutKnownRows(
       workspaceId,
       account,
-      candidates,
+      incoming,
       remote.currency,
     );
     let statementId: string | null = null;
@@ -179,7 +188,10 @@ export class BankSyncPullService {
     }
 
     if (!error) {
-      const drift = recordDrift(account, remote, candidates, now);
+      // Drift is read against booked rows, as before pending rows were kept: a
+      // pending row may never book, so it explains no move of the balance yet.
+      const booked = candidates.filter(item => !item.pending);
+      const drift = recordDrift(account, remote, booked, now);
       account.lastSyncAt = now.toISOString();
       account.balance = remote.balance;
       account.balanceDate = remote.balanceDate?.toISOString() ?? null;
