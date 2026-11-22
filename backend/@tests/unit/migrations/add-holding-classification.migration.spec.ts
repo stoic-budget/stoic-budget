@@ -6,7 +6,7 @@ describe('AddHoldingClassification migration', () => {
     process.cwd(),
     'src',
     'migrations',
-    '1788310000000-AddHoldingClassification.ts',
+    '1789120000000-AddHoldingClassification.ts',
   );
   const source = () => readFileSync(filePath, 'utf8');
   const up = () => source().slice(0, source().indexOf('public async down'));

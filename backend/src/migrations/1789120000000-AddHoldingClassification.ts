@@ -9,8 +9,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * The lists of sectors and regions live in the API contracts, so the columns
  * are plain text; the CHECKs only keep out shapes no code would write.
  */
-export class AddHoldingClassification1788310000000 implements MigrationInterface {
-  name = 'AddHoldingClassification1788310000000';
+export class AddHoldingClassification1789120000000 implements MigrationInterface {
+  name = 'AddHoldingClassification1789120000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
