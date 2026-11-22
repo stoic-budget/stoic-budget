@@ -89,3 +89,37 @@
   flex-shrink: 0;
   opacity: 0.6;
 }
+
+// Holds the avatar and the What's new dot, which sits on the avatar's corner
+// outside its clipped circle.
+.seneca-account__avatar-slot {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+// A release the person has not seen: a small sage dot, ringed in the bar's surface.
+.seneca-account__dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: $seneca-radius-full;
+  background: var(--primary);
+  box-shadow: 0 0 0 2px $seneca-color-surface;
+  pointer-events: none;
+
+  @include dark { box-shadow: 0 0 0 2px $seneca-color-surface-dk; }
+
+  // The menu entry: in line after the label.
+  &--inline {
+    position: static;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 8px;
+    box-shadow: none;
+
+    @include dark { box-shadow: none; }
+  }
+}

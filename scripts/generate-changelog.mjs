@@ -3,11 +3,12 @@
 import { execFile } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
-import { buildReleaseNotes } from './changelog-lib.mjs';
+import { buildReleaseNotes, latestEntry } from './changelog-lib.mjs';
 
 const execFileAsync = promisify(execFile);
 
 const CHANGELOG_PATH = process.env.CHANGELOG_PATH ?? 'frontend/public/changelog.json';
+const LATEST_PATH = process.env.CHANGELOG_LATEST_PATH ?? 'frontend/public/changelog-latest.json';
 const MIN_COMMITS = Number(process.env.CHANGELOG_MIN_COMMITS ?? '5');
 const BRANCH_NAME = process.env.GITHUB_REF_NAME ?? process.env.BRANCH_NAME ?? 'local';
 
@@ -60,6 +61,8 @@ const readChangelog = async () => {
 
 const writeChangelog = async changelog => {
   await writeFile(CHANGELOG_PATH, `${JSON.stringify(changelog, null, 2)}\n`, 'utf8');
+  const latest = { entry: latestEntry(changelog.entries) };
+  await writeFile(LATEST_PATH, `${JSON.stringify(latest, null, 2)}\n`, 'utf8');
 };
 
 const getCommitDetails = async sha => {
