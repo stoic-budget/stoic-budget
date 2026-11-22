@@ -38,6 +38,30 @@ export function isPaymentDay(date: string, paymentDay: number): boolean {
   return paymentDateAfter(date, 0, paymentDay) === date;
 }
 
+/**
+ * The shortest first period, in calendar days. A payment day closer to the
+ * start than this is not the first payment: the one a month later is.
+ */
+export const MIN_FIRST_PERIOD_DAYS = 15;
+
+/**
+ * Months from the start's month to the month of the first payment: the first
+ * payment day after the start that leaves at least MIN_FIRST_PERIOD_DAYS. A
+ * first period so runs from half a month to about a month and a half: 3 March
+ * with payment day 31 first pays on 31 March (28 days, not 30 April's 58), and
+ * 20 January with payment day 1 on 1 March (40 days, not 1 February's 12). A
+ * start on the payment day pays a whole month later.
+ */
+export function firstPaymentMonth(startDate: string, paymentDay: number): number {
+  let months = 0;
+  while (
+    actualDays(startDate, paymentDateAfter(startDate, months, paymentDay)) < MIN_FIRST_PERIOD_DAYS
+  ) {
+    months += 1;
+  }
+  return months;
+}
+
 /** Calendar days from `from` to `to` (the interest days of actual/365). */
 export function actualDays(from: string, to: string): number {
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS);

@@ -1,5 +1,4 @@
 import type { NetWorthAssetLine, NetWorthClassificationItem, NetWorthPoint } from '../../contracts';
-import type { BalanceAccount } from '../../entities';
 import { round2 } from './net-worth-math';
 
 /**
@@ -26,13 +25,6 @@ export function groupBy(
     }))
     .filter(item => item.amount !== 0)
     .sort((a, b) => b.amount - a.amount);
-}
-
-export function findLeaves(accounts: BalanceAccount[]): BalanceAccount[] {
-  const parentIds = new Set(
-    accounts.map(account => account.parentId).filter((id): id is string => Boolean(id)),
-  );
-  return accounts.filter(account => !parentIds.has(account.id));
 }
 
 /** The peak of a series, or null when it never rose above zero. */

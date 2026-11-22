@@ -11,8 +11,8 @@ function ChartSkeleton(): React.JSX.Element {
   return <Skeleton variant="rounded" width="100%" height="100%" />;
 }
 
-export const LazyCashFlowBars = dynamic(
-  () => import('./CashFlowBars').then(module => module.CashFlowBars),
+export const LazyAccountBalanceLines = dynamic(
+  () => import('./AccountBalanceLines').then(module => module.AccountBalanceLines),
   { ssr: false, loading: ChartSkeleton },
 );
 

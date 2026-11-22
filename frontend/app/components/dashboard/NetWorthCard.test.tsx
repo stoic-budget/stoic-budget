@@ -74,6 +74,7 @@ function netWorth(overrides: Partial<NetWorthData> = {}): NetWorthData {
     assetLines: [],
     missingRates: [],
     excluded: [],
+    accountsLeftOut: 0,
     attribution: { byAccount: [], byKind: [] },
     savings: { income: 0, kept: 0, rate: null },
     allTimeHigh: null,

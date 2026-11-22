@@ -6,7 +6,7 @@ describe('AddBalanceAccountPropertyDetails migration', () => {
     process.cwd(),
     'src',
     'migrations',
-    '1788250000000-AddBalanceAccountPropertyDetails.ts',
+    '1789140000000-AddBalanceAccountPropertyDetails.ts',
   );
   const source = () => readFileSync(filePath, 'utf8');
 

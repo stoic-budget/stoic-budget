@@ -1,16 +1,19 @@
-import { fromMinor, roundHalfAwayFromZero, toMinor } from '../../../common/utils/money.util';
+import { fromMinor, toMinor } from '../../../common/utils/money.util';
 import {
   type AmortizationRun,
   amortize,
-  annuityPayment,
   type DayCount,
   type ExtraMode,
   type LoanMethod,
   type MinorRow,
+  quotedPayment,
 } from './loan-amortization';
-import { isPaymentDay, paymentDateAfter } from './loan-calendar';
+import { firstPaymentMonth, isPaymentDay, paymentDateAfter } from './loan-calendar';
 
-/** A loan's terms in major units and percent, as stored. */
+/**
+ * A loan's terms in major units and percent, as stored. An extra payment
+ * without its own mode buys what `extraMode` says.
+ */
 export interface LoanPlanInput {
   principal: number;
   startDate: string;
@@ -21,8 +24,8 @@ export interface LoanPlanInput {
   dayCount: DayCount;
   annualRate: number;
   rateChanges: ReadonlyArray<{ from: string; annualRate: number }>;
-  extraPayments: ReadonlyArray<{ date: string; amount: number }>;
-  recurringExtras: ReadonlyArray<{ from: string; amount: number }>;
+  extraPayments: ReadonlyArray<{ date: string; amount: number; mode?: ExtraMode }>;
+  recurringExtras: ReadonlyArray<{ from: string; amount: number; mode?: ExtraMode }>;
   extraMode: ExtraMode;
 }
 
@@ -56,12 +59,17 @@ export interface Projection extends Schedule {
   startBalance: number;
 }
 
-/** The payment dates of the whole term, oldest first. */
+/**
+ * The payment dates of the whole term, oldest first: the first is the first
+ * payment day at least half a month after the start (see `firstPaymentMonth`).
+ * Past the year 9999 a date no longer has four digits of year.
+ */
 export function paymentDates(
   input: Pick<LoanPlanInput, 'startDate' | 'termMonths' | 'paymentDay'>,
 ) {
+  const first = firstPaymentMonth(input.startDate, input.paymentDay);
   return Array.from({ length: input.termMonths }, (_, index) =>
-    paymentDateAfter(input.startDate, index + 1, input.paymentDay),
+    paymentDateAfter(input.startDate, first + index, input.paymentDay),
   );
 }
 
@@ -77,6 +85,7 @@ function runOf(
     from,
     dates,
     firstIsRegular,
+    paymentDay: input.paymentDay,
     method: input.method,
     dayCount: input.dayCount,
     rates: [
@@ -84,25 +93,18 @@ function runOf(
       ...[...input.rateChanges].sort((a, b) => a.from.localeCompare(b.from)),
     ],
     extras: input.extraPayments
-      .map(extra => ({ date: extra.date, amount: toMinor(extra.amount) }))
+      .map(extra => ({
+        date: extra.date,
+        amount: toMinor(extra.amount),
+        mode: extra.mode ?? input.extraMode,
+      }))
       .sort((a, b) => a.date.localeCompare(b.date)),
     recurring: input.recurringExtras.map(item => ({
       from: item.from,
       amount: toMinor(item.amount),
+      mode: item.mode ?? input.extraMode,
     })),
-    mode: input.extraMode,
   };
-}
-
-function regularPaymentOf(input: LoanPlanInput, principal: number): number {
-  const interest = roundHalfAwayFromZero((principal * input.annualRate) / 1200);
-  if (input.method === 'annuity') {
-    return annuityPayment(principal, input.annualRate, input.termMonths);
-  }
-  if (input.method === 'linear') {
-    return roundHalfAwayFromZero(principal / input.termMonths) + interest;
-  }
-  return interest;
 }
 
 function toSchedule(rows: MinorRow[], regularPayment: number): Schedule {
@@ -125,21 +127,35 @@ function toSchedule(rows: MinorRow[], regularPayment: number): Schedule {
   };
 }
 
-function planRows(input: LoanPlanInput): MinorRow[] {
-  return amortize(
-    runOf(
-      input,
-      toMinor(input.principal),
-      input.startDate,
-      paymentDates(input),
-      isPaymentDay(input.startDate, input.paymentDay),
-    ),
+function planRun(input: LoanPlanInput): AmortizationRun {
+  return runOf(
+    input,
+    toMinor(input.principal),
+    input.startDate,
+    paymentDates(input),
+    isPaymentDay(input.startDate, input.paymentDay),
   );
 }
 
 /** The whole schedule the terms describe, from the start date. */
 export function buildSchedule(input: LoanPlanInput): Schedule {
-  return toSchedule(planRows(input), regularPaymentOf(input, toMinor(input.principal)));
+  const run = planRun(input);
+  return toSchedule(amortize(run), quotedPayment(run));
+}
+
+/**
+ * Whether rounding to the cent keeps an annuity on its term: the plan,
+ * without extra payments (they end a loan early on purpose), must take every
+ * period of it. At a high rate over a long term, cents of rounding carried
+ * with interest can end it a period early; checked on the plan itself, rate
+ * changes included.
+ */
+export function roundsWithinTerm(input: LoanPlanInput): boolean {
+  if (input.method !== 'annuity') {
+    return true;
+  }
+  const plan = amortize(planRun({ ...input, extraPayments: [], recurringExtras: [] }));
+  return plan.length === input.termMonths;
 }
 
 /**
@@ -170,15 +186,19 @@ export function projectSchedule(
   const run = runOf(future, balance, from, remaining, firstIsRegular);
 
   if (input.extraMode === 'reduce_term' && input.method !== 'interest_only') {
-    const planned = planRows(input);
+    const planned = amortize(planRun(input));
     const next = planned[past];
     if (next && past < planned.length - 1) {
-      run.keep = input.method === 'annuity' ? next.payment : next.principal;
+      // Before the first payment date the plan's regular payment, not its
+      // first one (that carries the days of a broken first period).
+      const payment = past === 0 ? quotedPayment(planRun(input)) : next.payment;
+      run.keep = input.method === 'annuity' ? payment : next.principal;
     }
   }
   const rows = amortize(run);
+  const regular = (firstIsRegular ? rows[0] : rows[1]) ?? rows[0];
   return {
-    ...toSchedule(rows, rows[0]?.payment ?? 0),
+    ...toSchedule(rows, regular?.payment ?? 0),
     from,
     startBalance: fromMinor(balance),
   };
@@ -189,26 +209,44 @@ export interface WhatIfResult {
   scenario: ScheduleSummary;
   monthsSaved: number;
   interestSaved: number;
-  /** After the first extra payment: the payment as planned and as it would be. */
+  /** After the what-if's first extra payment: the payment as planned and as it would be. */
   paymentBefore: number | null;
   paymentAfter: number | null;
 }
 
 const summaryOf = ({ rows: _rows, ...summary }: Schedule): ScheduleSummary => summary;
 
-/** The plan against the plan plus some extra payments, all made in `mode`. */
+/**
+ * The plan against the plan plus some extra payments made in `mode`. The
+ * extra payments already in the plan keep buying what they were saved to buy.
+ */
 export function whatIf(
   input: LoanPlanInput,
   extra: Pick<LoanPlanInput, 'extraPayments' | 'recurringExtras' | 'extraMode'>,
 ): WhatIfResult {
+  const mode = extra.extraMode;
+  const tried = {
+    extraPayments: extra.extraPayments.filter(item => item.date >= input.startDate),
+    recurringExtras: extra.recurringExtras,
+  };
   const baseline = buildSchedule(input);
   const scenario = buildSchedule({
     ...input,
-    extraPayments: [...input.extraPayments, ...extra.extraPayments],
-    recurringExtras: [...input.recurringExtras, ...extra.recurringExtras],
-    extraMode: extra.extraMode,
+    extraPayments: [
+      ...input.extraPayments,
+      ...tried.extraPayments.map(item => ({ ...item, mode })),
+    ],
+    recurringExtras: [
+      ...input.recurringExtras,
+      ...tried.recurringExtras.map(item => ({ ...item, mode })),
+    ],
   });
-  const first = scenario.rows.findIndex(row => row.extra > 0);
+  // The period of the what-if's first extra payment: the first one ending on or after it.
+  const firstDay = [
+    ...tried.extraPayments.map(item => item.date),
+    ...tried.recurringExtras.map(item => item.from),
+  ].sort()[0];
+  const first = firstDay === undefined ? -1 : scenario.rows.findIndex(row => row.date >= firstDay);
   const after = first >= 0 ? scenario.rows[first + 1] : undefined;
   return {
     baseline: summaryOf(baseline),

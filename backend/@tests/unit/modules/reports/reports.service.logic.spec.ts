@@ -1,7 +1,6 @@
-import { AuditService } from '@/modules/audit/audit.service';
-import { ReportsService } from '@/modules/reports/reports.service';
 import { ReportGroupBy } from '@/modules/reports/dto/custom-report.dto';
 import { TransactionType } from '@/entities/transaction.entity';
+import { buildReportsService } from './helpers/build-reports-service';
 
 function createRepoMock() {
   return {} as any;
@@ -12,22 +11,7 @@ function makeService(
   transactionRepo: any = createRepoMock(),
   cacheManager: any = { get: vi.fn().mockResolvedValue(null), set: vi.fn(), del: vi.fn() },
 ) {
-  return new ReportsService(
-    transactionRepo,
-    createRepoMock(), // category
-    createRepoMock(), // branch
-    createRepoMock(), // wallet
-    createRepoMock(), // customTable
-    createRepoMock(), // customTableColumn
-    createRepoMock(), // customTableRow
-    createRepoMock(), // user
-    cacheManager,
-    { createEvent: vi.fn() } as unknown as AuditService,
-    createRepoMock(), // reportHistory
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-  );
+  return buildReportsService({ transactionRepository: transactionRepo, cacheManager });
 }
 
 /** Creates a fluent QueryBuilder mock. */

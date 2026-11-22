@@ -32,6 +32,7 @@ const schedule = (patch: Partial<LoanSchedule> = {}): LoanSchedule => ({
   startDate: '2026-01-10',
   principal: 270,
   today: '2026-02-20',
+  unconvertedCurrencies: [],
   plan: {
     ...summary,
     rows: [

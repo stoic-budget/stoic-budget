@@ -34,18 +34,22 @@ export function parseNumber(value: string): number | null {
   return Number.isFinite(number) ? number : null;
 }
 
+/** The API's bounds: `LOAN_AMOUNT_LIMIT` and the four decimals of the rate column. */
+const AMOUNT_LIMIT = 1e12;
+
+const hasDecimals = (number: number, places: number) =>
+  Math.abs(Math.round(number * 10 ** places) - number * 10 ** places) < 1e-6;
+
 const money = (value: string) => {
   const number = parseNumber(value);
-  return number !== null &&
-    number >= 0.01 &&
-    Math.abs(Math.round(number * 100) - number * 100) < 1e-6
+  return number !== null && number >= 0.01 && number < AMOUNT_LIMIT && hasDecimals(number, 2)
     ? number
     : null;
 };
 
 const rate = (value: string) => {
   const number = parseNumber(value);
-  return number !== null && number >= 0 && number <= 100 ? number : null;
+  return number !== null && number >= 0 && number <= 100 && hasDecimals(number, 4) ? number : null;
 };
 
 const whole = (value: string, min: number, max: number) => {

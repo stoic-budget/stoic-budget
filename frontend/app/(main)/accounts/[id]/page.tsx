@@ -11,14 +11,19 @@ import { ModalFooter, ModalShell } from '@/app/components/ui/modal-shell';
 import { ReadOnlyHint } from '@/app/components/versions/ReadOnlyHint';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
-import { accountSubtitle, isDebtType } from '../account-types';
+import { accountSubtitle, countsInNetWorth, isDebtType } from '../account-types';
+import { AccountCreditLimit } from '../components/AccountCreditLimit';
 import { AccountDetailSkeleton } from '../components/AccountDetailSkeleton';
 import { AccountFormDrawer } from '../components/AccountFormDrawer';
-import { AccountReconciliation } from '../components/AccountReconciliation';
+import {
+  AccountBalanceCheckNote,
+  AccountReconciliation,
+} from '../components/AccountReconciliation';
 import { AccountBadge, AccountBalance } from '../components/AccountRow';
 import { AccountStatementsCard } from '../components/AccountStatementsCard';
 import { AccountTransactionsCard } from '../components/AccountTransactionsCard';
 import { cardStyle, mutedStyle, titleStyle } from '../components/account-detail-styles';
+import { BalanceCheckDialog } from '../components/BalanceCheckDialog';
 import { LoanSection } from '../components/loan/LoanSection';
 import { useAccountLabels } from '../components/use-account-labels';
 import {
@@ -33,6 +38,7 @@ export default function AccountPage(): React.JSX.Element {
   const id = params?.id ?? '';
   const router = useRouter();
   const t = useIntlayer('accountsPage');
+  const tCheck = useIntlayer('accountBalanceCheck');
   const { types } = useAccountLabels();
   const { locale } = useLocale();
   const { account, series, statements, transactions, isPending, error } = useAccount(id);
@@ -41,6 +47,7 @@ export default function AccountPage(): React.JSX.Element {
   const [formOpen, setFormOpen] = useState(false);
   const [initialForm, setInitialForm] = useState<AccountForm | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [checking, setChecking] = useState(false);
 
   const openEdit = () => {
     if (account) {
@@ -83,7 +90,12 @@ export default function AccountPage(): React.JSX.Element {
                 {account.name}
               </h1>
               <span style={mutedStyle}>
-                {[types[account.type], accountSubtitle(account), account.currency]
+                {[
+                  types[account.type],
+                  accountSubtitle(account),
+                  account.currency,
+                  !countsInNetWorth(account) && t.notInNetWorth.value,
+                ]
                   .filter(Boolean)
                   .join(' · ')}
               </span>
@@ -97,7 +109,18 @@ export default function AccountPage(): React.JSX.Element {
 
           <div style={{ display: 'grid', gap: 6 }}>
             <AccountBalance account={account} size={32} />
+            <AccountCreditLimit account={account} barWidth={360} />
             <AccountReconciliation account={account} />
+            <AccountBalanceCheckNote account={account} />
+            <ReadOnlyHint>
+              <Button
+                variant="text"
+                sx={{ justifySelf: 'start', px: 0, minWidth: 0 }}
+                onClick={() => setChecking(true)}
+              >
+                {tCheck.action}
+              </Button>
+            </ReadOnlyHint>
             {account.unconvertedCurrencies.length > 0 && (
               <span style={mutedStyle}>
                 {t.unconvertedNote.value.replace(
@@ -163,6 +186,12 @@ export default function AccountPage(): React.JSX.Element {
               }}
             />
           )}
+
+          <BalanceCheckDialog
+            account={account}
+            open={checking}
+            onClose={() => setChecking(false)}
+          />
 
           <ModalShell
             isOpen={deleting}

@@ -25,6 +25,27 @@ export function useTransactionHistory(transactionId: string | undefined, enabled
   });
 }
 
+/**
+ * Who last changed the row's comment, for the line under it. Under the
+ * transactions root as well, so saving the comment refreshes it.
+ */
+export function useTransactionCommentEdit(transactionId: string) {
+  const workspaceId = useWorkspaceId();
+  return useQuery({
+    queryKey: queryKeys.transactions({
+      workspaceId,
+      params: { view: 'comment-edit', transactionId },
+    }),
+    queryFn: ({ signal }) =>
+      apiClient
+        .get(`/transactions/${transactionId}/comment-edit`, { signal })
+        .then(response =>
+          checkContract('TransactionCommentEdit', response.data, '/transactions/:id/comment-edit'),
+        ),
+    enabled: Boolean(workspaceId),
+  });
+}
+
 /** Puts back the fields of one change; it is an edit like any other, so every figure refreshes. */
 export function useUndoHistoryChange(transactionId: string) {
   return useMutation({

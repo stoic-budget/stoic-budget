@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
-import type { LoanSchedule, LoanWhatIf, LoanWhatIfBody } from '../../contracts';
+import {
+  LOAN_AMOUNT_LIMIT,
+  type LoanSchedule,
+  type LoanWhatIf,
+  type LoanWhatIfBody,
+} from '../../contracts';
 import { Transaction } from '../../entities/transaction.entity';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { walletLedgers } from '../wallets/wallet-ledger';
@@ -36,13 +41,16 @@ export class LoanScheduleService {
     const owedToday = owedOn(today);
     const lastPast = [...plan.rows].reverse().find(row => row.date <= today);
     const plannedToday = lastPast ? lastPast.balance : input.principal;
-    const projection = hasActual ? projectSchedule(input, today, owedToday) : null;
+    // A real balance past what a loan can be is no plan to project (and no longer exact in cents).
+    const projection =
+      hasActual && owedToday < LOAN_AMOUNT_LIMIT ? projectSchedule(input, today, owedToday) : null;
 
     return {
       currency: wallet.currency,
       startDate: input.startDate,
       principal: input.principal,
       today,
+      unconvertedCurrencies: ledger?.unconverted ?? [],
       plan: {
         ...plan,
         rows: plan.rows.map(row => ({

@@ -6,7 +6,7 @@ import { assertFound } from '../../common/utils/assert-found.util';
 import type { LoanTermsBody, LoanTermsItem, LoanTermsState } from '../../contracts';
 import { LoanTerms } from '../../entities/loan-terms.entity';
 import { DEBT_WALLET_TYPES, Wallet } from '../../entities/wallet.entity';
-import type { LoanPlanInput } from './engine/loan-plan';
+import { type LoanPlanInput, paymentDates, roundsWithinTerm } from './engine/loan-plan';
 
 const toDay = (value: string | Date): string =>
   typeof value === 'string' ? value.slice(0, 10) : value.toISOString().slice(0, 10);
@@ -26,33 +26,60 @@ export class LoanTermsService {
   }
 
   async put(walletId: string, workspaceId: string, body: LoanTermsBody): Promise<LoanTermsState> {
-    const wallet = await this.walletOf(walletId, workspaceId);
-    if (!DEBT_WALLET_TYPES.includes(wallet.type)) {
-      throw new BadRequestException(appError('LOAN_TERMS_DEBT_ONLY'));
+    // A date past the year 9999 has five digits of year: no `date` the schedule can answer.
+    if (paymentDates(body).at(-1)?.length !== 10) {
+      throw new BadRequestException(appError('LOAN_TERMS_END_TOO_LATE'));
     }
-    // One row per account: a second save of the same account replaces the first.
-    await this.terms.upsert(
-      {
-        workspaceId,
-        walletId: wallet.id,
-        principal: String(body.principal),
-        startDate: body.startDate,
-        termMonths: body.termMonths,
-        paymentDay: body.paymentDay,
-        method: body.method,
-        dayCount: body.dayCount,
-        annualRate: String(body.annualRate),
-        rateChanges: (body.rateChanges ?? []).map(({ from, annualRate }) => ({ from, annualRate })),
-        extraPayments: (body.extraPayments ?? []).map(({ date, amount }) => ({ date, amount })),
-        recurringExtra: body.recurringExtra
-          ? { amount: body.recurringExtra.amount, from: body.recurringExtra.from }
-          : null,
-        extraMode: body.extraMode ?? 'reduce_term',
-        updatedAt: new Date(),
-      },
-      ['walletId'],
-    );
-    return this.get(wallet.id, workspaceId);
+    const rateChanges = (body.rateChanges ?? []).map(({ from, annualRate }) => ({
+      from,
+      annualRate,
+    }));
+    if (
+      !roundsWithinTerm({
+        ...body,
+        rateChanges,
+        extraPayments: [],
+        recurringExtras: [],
+        extraMode: 'reduce_term',
+      })
+    ) {
+      throw new BadRequestException(appError('LOAN_TERMS_ROUNDING'));
+    }
+    // The account row stays locked from the type check to the save: a change
+    // of type waits for it, and then deletes the terms (wallets/wallet-change.ts).
+    await this.wallets.manager.transaction(async manager => {
+      const wallet = await manager.findOne(Wallet, {
+        where: { id: walletId, workspaceId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      assertFound(wallet, 'Wallet');
+      if (!DEBT_WALLET_TYPES.includes(wallet.type)) {
+        throw new BadRequestException(appError('LOAN_TERMS_DEBT_ONLY'));
+      }
+      // One row per account: a second save of the same account replaces the first.
+      await manager.getRepository(LoanTerms).upsert(
+        {
+          workspaceId,
+          walletId: wallet.id,
+          principal: String(body.principal),
+          startDate: body.startDate,
+          termMonths: body.termMonths,
+          paymentDay: body.paymentDay,
+          method: body.method,
+          dayCount: body.dayCount,
+          annualRate: String(body.annualRate),
+          rateChanges,
+          extraPayments: (body.extraPayments ?? []).map(({ date, amount }) => ({ date, amount })),
+          recurringExtra: body.recurringExtra
+            ? { amount: body.recurringExtra.amount, from: body.recurringExtra.from }
+            : null,
+          extraMode: body.extraMode ?? 'reduce_term',
+          updatedAt: new Date(),
+        },
+        ['walletId'],
+      );
+    });
+    return this.get(walletId, workspaceId);
   }
 
   async remove(walletId: string, workspaceId: string): Promise<void> {
