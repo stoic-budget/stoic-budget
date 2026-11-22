@@ -70,6 +70,7 @@ export function CurrencyDrawer({
     (currencyQuery.length === 0 || noneOption.label.toLowerCase().includes(currencyQuery));
   return (
     <DrawerShell
+      demoNotice={false}
       isOpen={isOpen}
       onClose={onClose}
       position="right"

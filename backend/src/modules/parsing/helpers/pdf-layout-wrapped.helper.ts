@@ -25,7 +25,9 @@ export function groupWrappedLines(rows: PdfTextRow[]): PdfTextRow[][] {
     const group = groups[groups.length - 1];
     const last = group?.[group.length - 1];
     const gap = last?.page === row.page ? (row.y - last.y) / rowHeight(last) : null;
-    if (group && gap !== null && gap > WRAPPED_GAP_MIN && gap < WRAPPED_GAP_MAX) {
+    // "(Continued on next page)" under a page's last row is never part of it.
+    const note = PAGE_NOTE.test(row.text.trim());
+    if (group && !note && gap !== null && gap > WRAPPED_GAP_MIN && gap < WRAPPED_GAP_MAX) {
       group.push(row);
     } else {
       groups.push([row]);
@@ -82,6 +84,9 @@ const PAGE_NOTE = /^\(?continued(?: on (?:the )?next page)?\)?$/i;
 /** A line further than this many line heights below the previous one is not a continuation. */
 const CONTINUATION_LINE_HEIGHTS = 2.6;
 
+/** Two or more letters glued to a digit, or a digit to them: a reference or a code. */
+const GLUED_CODE = /[A-Za-z]{2,}\d|\d[A-Za-z]{2,}/;
+
 /**
  * Whether a line without its own date adds to the transaction above it: it
  * sits right under the previous line, carries no money (money anywhere makes
@@ -105,9 +110,11 @@ export function continuesTransaction(
 ) {
   // The row's balance printed again on its wrapped line is not new money.
   const isMoney = (value: number) => value !== 0 && Math.abs(value) !== Math.abs(balance ?? NaN);
+  // A figure glued to letters is a code, not money: "BLZ100708480930.03/21.19UHR".
+  const words = row.items.map(item => item.text).filter(word => !GLUED_CODE.test(word));
   const hasMoney =
     laidOut.amounts.some(amount => isMoney(amount.value)) ||
-    findStatementAmounts(row.items.map(item => item.text).join(' ')).some(isMoney);
+    findStatementAmounts(words.join(' ')).some(isMoney);
   const reachesDateColumn = (laidOut.text.date ?? []).length > 0;
   // "Ending Balance $12,274.35" under the last row states the balance, it is no text of the row.
   return (

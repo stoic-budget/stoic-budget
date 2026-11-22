@@ -2,9 +2,10 @@
 
 import Stack from '@mui/material/Stack';
 import type React from 'react';
-import { Bot, Smartphone } from '@/app/components/icons';
+import { Bot, Calendar, Smartphone } from '@/app/components/icons';
 import { usePermissions } from '@/app/hooks/usePermissions';
 import { useIntlayer } from '@/app/i18n';
+import { CalendarFeedSection } from '@/app/settings/profile/components/CalendarFeedSection';
 import { NotificationsSection } from '@/app/settings/profile/components/NotificationsSection';
 import { PushNotificationsCard } from '@/app/settings/profile/components/PushNotificationsCard';
 import { SettingsAccordion } from '@/app/settings/profile/components/SettingsAccordion';
@@ -18,6 +19,7 @@ export function NotificationsTab({ user }: SettingsTabProps): React.JSX.Element 
   const { hasPermission } = usePermissions();
   const { tx } = useSettingsText();
   const telegramText = useIntlayer('settingsTelegramPage');
+  const calendarText = useIntlayer('settingsCalendarFeedSection');
 
   const {
     notificationSettings,
@@ -67,6 +69,16 @@ export function NotificationsTab({ user }: SettingsTabProps): React.JSX.Element 
           <TelegramSettingsPanel isAdmin={user?.role === 'admin'} />
         </SettingsAccordion>
       ) : null}
+
+      <SettingsAccordion
+        id="calendar"
+        title={calendarText.title.value}
+        description={calendarText.description.value}
+        icon={Calendar}
+        defaultExpanded
+      >
+        <CalendarFeedSection />
+      </SettingsAccordion>
     </Stack>
   );
 }

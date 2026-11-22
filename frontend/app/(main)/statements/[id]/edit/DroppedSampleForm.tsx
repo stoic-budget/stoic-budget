@@ -1,6 +1,7 @@
 import { Box, Button, DialogActions, DialogContent, TextField, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { format, isValid, parseISO } from 'date-fns';
+import { DemoNotice } from '@/app/components/demo/DemoNotice';
 import { useIntlayer } from '@/app/i18n';
 import type { DroppedSampleDraft } from './helpers/warning-formatters';
 
@@ -121,6 +122,7 @@ export function DroppedSampleForm({
   return (
     <>
       <DialogContent dividers>
+        <DemoNotice />
         <Typography
           variant="body2"
           sx={{

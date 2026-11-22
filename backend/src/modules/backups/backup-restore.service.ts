@@ -12,12 +12,15 @@ import type { User } from '../../entities/user.entity';
 import { Workspace, WorkspaceKind } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { BackupArchiveService, type OpenedBackup } from './backup-archive.service';
+import { withLegacyAttachmentFiles, withRestorableAttachments } from './backup-attachment-files';
 import {
   EXCLUDED_TABLES,
   isWorkspaceScoped,
   RELATED_COLLECTIONS,
   SENSITIVE_PROPERTIES,
 } from './backup-data.service';
+import { GROUP_KEY_COLUMNS } from './backup-group-keys';
+import { prepareDocumentPaths } from './backup-restore-documents';
 
 const RESTORE_ORDER = [
   'categories',
@@ -102,18 +105,6 @@ const GLOBAL_REFERENCE_TABLES = new Set(['tax_jurisdictions']);
 
 /** Keys inside JSON values that name such reference data. */
 const GLOBAL_REFERENCE_KEYS = new Set(['jurisdictionId', 'taxJurisdictionId']);
-
-/**
- * uuid columns that are not a reference to one row: a key the rows of a group
- * share, or the subject an audit event names (a member, an import, a row since
- * deleted). Mapped when they name a restored row and kept otherwise.
- */
-const GROUP_KEY_COLUMNS = new Set([
-  'transactions.splitGroupId',
-  'transactions.transferPairId',
-  'audit_events.batchId',
-  'audit_events.entityId',
-]);
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -238,7 +229,11 @@ export class BackupRestoreService {
     options: { name: string; kind?: WorkspaceKind; versionId?: string },
   ): Promise<Workspace> {
     const sourceWorkspace = this.sourceWorkspace(opened);
-    const collections = this.keepResolvableRows(await this.restorableCollections(opened));
+    // Old archives' attachment files, still on this server, that the restorer may read.
+    const { files } = await withLegacyAttachmentFiles(this.dataSource, user.id, opened);
+    const collections = this.keepResolvableRows(
+      await this.restorableCollections(withRestorableAttachments({ ...opened, files })),
+    );
     const workspace = await this.workspaceRepository.save(
       this.workspaceRepository.create({
         name: options.name,
@@ -282,7 +277,7 @@ export class BackupRestoreService {
       const idMap = this.buildIdMap(collections, sourceWorkspace.id, workspace.id);
       const prepared = await this.prepareCollections(
         collections,
-        opened.files,
+        files,
         idMap,
         workspace.id,
         user.id,
@@ -613,74 +608,12 @@ export class BackupRestoreService {
         if (tableName === 'audit_events' && !idMap.has(String(row.entityId))) {
           mapped.isUndoable = false;
         }
-        await this.prepareDocumentPaths(
-          tableName,
-          row,
-          mapped,
-          files,
-          restoreDirectory,
-          stagedFiles,
-        );
+        await prepareDocumentPaths(tableName, row, mapped, files, restoreDirectory, stagedFiles);
         values.push(mapped);
       }
       prepared.push({ metadata, values });
     }
     return prepared;
-  }
-
-  private async prepareDocumentPaths(
-    tableName: string,
-    source: Record<string, unknown>,
-    mapped: Record<string, unknown>,
-    files: Map<string, Buffer>,
-    restoreDirectory: string,
-    stagedFiles: Array<{ stagedPath: string; targetPath: string }>,
-  ): Promise<void> {
-    if (tableName === 'statements') {
-      if (typeof source.filePath === 'string') {
-        mapped.filePath = await this.stageDocument(
-          source.filePath,
-          String(mapped.id),
-          files,
-          restoreDirectory,
-          stagedFiles,
-        );
-      }
-      return;
-    }
-    if (tableName === 'receipts' && Array.isArray(source.attachmentPaths)) {
-      mapped.attachmentPaths = await Promise.all(
-        source.attachmentPaths
-          .filter((value): value is string => typeof value === 'string')
-          .map(portablePath =>
-            this.stageDocument(
-              portablePath,
-              String(mapped.id),
-              files,
-              restoreDirectory,
-              stagedFiles,
-            ),
-          ),
-      );
-    }
-  }
-
-  private async stageDocument(
-    portablePath: string,
-    restoredId: string,
-    files: Map<string, Buffer>,
-    restoreDirectory: string,
-    stagedFiles: Array<{ stagedPath: string; targetPath: string }>,
-  ): Promise<string> {
-    const contents = files.get(portablePath);
-    if (!contents)
-      throw new BadRequestException(appError('BACKUP_DOCUMENT_MISSING', { path: portablePath }));
-    const safeName = path.basename(portablePath);
-    const targetPath = path.join(resolveUploadsDir(), `restored-${restoredId}-${safeName}`);
-    const stagedPath = path.join(restoreDirectory, `${randomUUID()}-${safeName}`);
-    await fs.writeFile(stagedPath, contents, { flag: 'wx' });
-    stagedFiles.push({ stagedPath, targetPath });
-    return targetPath;
   }
 
   /**
