@@ -3,6 +3,7 @@ import {
   accountKey,
   amountsMatch,
   matchTransferPairs,
+  pairKey,
   type RateLookup,
   type TransferLeg,
 } from '../../../../src/modules/transactions/services/transfer-pairing.matcher';
@@ -193,6 +194,69 @@ describe('transfer-pairing matcher', () => {
       const d = inc('d', { statementId: 'stmt-d', transactionDate: new Date('2026-03-12') });
       // a/b and c/d both qualify for each other, so every row sees two counterparts.
       expect(await matchTransferPairs([d, c, b, a], [a, b, c, d], noRates)).toEqual([]);
+    });
+
+    describe('pairs the user unlinked', () => {
+      it('never pairs the two rows again', async () => {
+        const a = out('a');
+        const b = inc('b');
+        const rejected = new Set([pairKey('a', 'b')]);
+        expect(await matchTransferPairs([a], [a, b], noRates, rejected)).toEqual([]);
+        expect(await matchTransferPairs([b], [a, b], noRates, rejected)).toEqual([]);
+      });
+
+      it('pairs each row with its real counterpart, which would otherwise be ambiguous', async () => {
+        const a = out('a');
+        const b = inc('b');
+        const c = inc('c', { statementId: 'stmt-c' });
+        // Without the refusal a sees two counterparts and pairs neither.
+        expect(await matchTransferPairs([a], [a, b, c], noRates)).toEqual([]);
+        const rejected = new Set([pairKey('b', 'a')]);
+        expect(await matchTransferPairs([a], [a, b, c], noRates, rejected)).toEqual([
+          { outgoing: a, incoming: c },
+        ]);
+      });
+
+      it('lets the other leg of a refused pair pair too', async () => {
+        const a = out('a');
+        const b = inc('b');
+        const d = out('d', { statementId: 'stmt-d' });
+        const rejected = new Set([pairKey('a', 'b')]);
+        // d on its own still sees only b; a has nobody left.
+        expect(await matchTransferPairs([a, b, d], [a, b, d], noRates, rejected)).toEqual([
+          { outgoing: d, incoming: b },
+        ]);
+      });
+    });
+
+    describe('with the account the file named ([Account])', () => {
+      const savings = { accountNumber: 'Rainy Day Savings', walletId: null };
+      const other = { accountNumber: 'Holiday Fund', walletId: null };
+
+      it('picks the one of two counterparts whose account the outgoing row named', async () => {
+        const a = out('a', { categoryHint: '[rainy day savings]' });
+        const b = inc('b', { statement: other });
+        const c = inc('c', { statementId: 'stmt-c', statement: savings });
+        expect(await matchTransferPairs([a], [a, b, c], noRates)).toEqual([
+          { outgoing: a, incoming: c },
+        ]);
+      });
+
+      it('picks the counterpart that named the checked row’s account', async () => {
+        const a = out('a', { statement: { accountNumber: 'Everyday Account', walletId: null } });
+        const b = inc('b');
+        const c = inc('c', { statementId: 'stmt-c', categoryHint: '[Everyday Account]' });
+        expect(await matchTransferPairs([a], [a, b, c], noRates)).toEqual([
+          { outgoing: a, incoming: c },
+        ]);
+      });
+
+      it('still pairs nothing when the name fits both counterparts', async () => {
+        const a = out('a', { categoryHint: '[Rainy Day Savings]' });
+        const b = inc('b', { statement: savings });
+        const c = inc('c', { statementId: 'stmt-c', statement: savings });
+        expect(await matchTransferPairs([a], [a, b, c], noRates)).toEqual([]);
+      });
     });
   });
 });

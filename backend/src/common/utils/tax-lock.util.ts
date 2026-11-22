@@ -23,6 +23,31 @@ export async function assertNoTaxLockedTransactions(
   }
 }
 
+/**
+ * The same for rows about to be deleted or taken out of the counts (a
+ * statement read again, trashed or deleted, a row deleted): besides a locked
+ * row of their own, a row whose loan interest (loans/loan-interest-row) is
+ * locked refuses too, since the interest counts and goes with its payment.
+ */
+export async function assertRowsRemovable(
+  repository: Repository<Transaction>,
+  where: FindOptionsWhere<Transaction>,
+): Promise<void> {
+  const own = await repository.count({ where: { ...where, taxLocked: true } });
+  const carrying = await repository
+    .createQueryBuilder('payment')
+    .setFindOptions({ where })
+    .innerJoin(
+      'transactions',
+      'interest',
+      'interest.loan_interest_of_id = payment.id AND interest.workspace_id = payment.workspace_id AND interest.tax_locked',
+    )
+    .getCount();
+  if (own + carrying > 0) {
+    throw taxLockedConflict(own + carrying);
+  }
+}
+
 /** The refusal itself, for callers that already hold the rows. */
 export function taxLockedConflict(locked: number): ConflictException {
   return new ConflictException(appError(TAX_LOCKED_ERROR_CODE, { count: locked }));

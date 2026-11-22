@@ -54,11 +54,41 @@ describe('buildOfxStatement', () => {
     });
   });
 
+  it('marks a row the bank still holds as pending, and only that one, through the parser', () => {
+    const row = {
+      posted: new Date('2026-09-28T00:00:00Z'),
+      amount: -15,
+      description: 'ACME STORE - WIRELESS BUDS',
+    };
+    const text = buildOfxStatement(account, [
+      { ...row, id: 'TRN-P', pending: true },
+      { ...row, id: 'TRN-B', pending: false },
+    ]);
+
+    const [pending, booked] = parseOfx(text).transactions;
+
+    expect(pending).toMatchObject({ documentNumber: 'ACT-1:TRN-P', pending: true });
+    expect(booked.documentNumber).toBe('ACT-1:TRN-B');
+    expect(booked.pending).toBeUndefined();
+  });
+
   it('is still a valid, empty statement without rows', () => {
     const text = buildOfxStatement({ ...account, balance: null }, []);
     const parsed = parseOfx(text);
     expect(parsed.transactions).toEqual([]);
     expect(parsed.metadata.balanceEnd).toBeUndefined();
+  });
+
+  it('takes the days the feed asked for as its period when told, quiet days included', () => {
+    const text = buildOfxStatement(
+      account,
+      [{ id: 'TRN-1', posted: new Date('2026-09-20T00:00:00Z'), amount: -1, description: 'Corner Cafe', pending: false }],
+      new Date('2026-09-25T09:00:00Z'),
+      new Date('2026-09-01T09:00:00Z'),
+    );
+    const parsed = parseOfx(text);
+    expect(parsed.metadata.dateFrom?.toISOString().slice(0, 10)).toBe('2026-09-01');
+    expect(parsed.metadata.dateTo?.toISOString().slice(0, 10)).toBe('2026-09-25');
   });
 
   it('names the file after the institution and account, safely', () => {

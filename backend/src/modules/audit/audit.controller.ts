@@ -1,4 +1,11 @@
-import { Controller, ForbiddenException, Get, Post, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  ForbiddenException,
+  Get,
+  Optional,
+  Post,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Schema } from 'effect';
 import { WorkspaceId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
@@ -27,6 +34,8 @@ import {
 import { ActorType, AuditAction, EntityType, Severity } from '../../entities/audit-event.entity';
 import { type User, UserRole } from '../../entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { PayPeriodService } from '../pay-period/pay-period.service';
+import { periodDaysOfKey } from '../pay-period/pay-period-dates';
 import { AuditService } from './audit.service';
 
 @Controller('audit-events')
@@ -34,7 +43,10 @@ import { AuditService } from './audit.service';
 // Events written before the trail was cleaned still hold account details: strip them on the way out.
 @UseInterceptors(HideInternalColumnsInterceptor, new StripKeysInterceptor(ACCOUNT_KEYS))
 export class AuditController {
-  constructor(private readonly auditService: AuditService) {}
+  constructor(
+    private readonly auditService: AuditService,
+    @Optional() private readonly payPeriods?: PayPeriodService,
+  ) {}
 
   @Get()
   @WorkspaceAuth(Permission.AUDIT_VIEW)
@@ -59,6 +71,8 @@ export class AuditController {
    * Behind `TRANSACTION_VIEW`, not `AUDIT_VIEW`: everyone sharing the money can
    * see each other move it. The full audit — sign-ins, keys, member changes,
    * before/after of every edit — stays with the owner and the admins.
+   * `month` is the workspace's own month (Settings → Start of the month), the
+   * one the Overview names.
    */
   @Get('activity')
   @WorkspaceAuth(Permission.TRANSACTION_VIEW)
@@ -67,7 +81,10 @@ export class AuditController {
     @WorkspaceId() workspaceId: string,
     @SchemaQuery(WorkspaceActivityQuery) { limit, month }: WorkspaceActivityQuery,
   ) {
-    return { items: await this.auditService.findWorkspaceActivity(workspaceId, limit, month) };
+    const period = month && periodDaysOfKey(await this.payPeriods?.contextFor(workspaceId), month);
+    return {
+      items: await this.auditService.findWorkspaceActivity(workspaceId, limit, period || undefined),
+    };
   }
 
   @Get('entity/:entityType/:entityId')

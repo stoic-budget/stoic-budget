@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import apiClient from '@/app/lib/api';
-import type { GoalCover } from '@/app/lib/contracts';
+import type { GoalAccount, GoalCover } from '@/app/lib/contracts';
 import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 
@@ -31,6 +31,8 @@ export interface Goal {
   percent: number;
   isReached: boolean;
   cover: GoalCover | null;
+  /** The account whose balance is the goal's progress, if it follows one. */
+  account: GoalAccount | null;
 }
 
 export interface GoalFormData {
@@ -43,12 +45,15 @@ export interface GoalFormData {
    * the picture the goal already has.
    */
   cover?: GoalCoverSelection | null;
+  /** The account to follow; null counts contributions. Always sent, as shown. */
+  walletId: string | null;
 }
 
 export const EMPTY_GOAL_FORM: GoalFormData = {
   name: '',
   targetAmount: 0,
   targetDate: '',
+  walletId: null,
 };
 
 interface UseGoalsState {
@@ -121,6 +126,7 @@ export function useGoals(): UseGoalsState {
     targetAmount: form.targetAmount,
     // An empty date field means "no deadline", not an empty string.
     targetDate: form.targetDate === '' ? undefined : form.targetDate,
+    walletId: form.walletId,
   });
 
   const createGoal = useCallback(

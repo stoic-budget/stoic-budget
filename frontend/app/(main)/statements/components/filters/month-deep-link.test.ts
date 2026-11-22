@@ -39,4 +39,19 @@ describe('monthDeepLinkFilters', () => {
     const filters = monthDeepLinkFilters('2026-09', now);
     expect(filters).toMatchObject({ keywords: '', statuses: [], type: null, limit: null });
   });
+
+  it('opens the workspace month as an explicit range when it starts on another day', () => {
+    const payPeriod = { monthStart: { kind: 'day', day: 15 } } as const;
+    // Even the running month: the presets name calendar months.
+    expect(monthDeepLinkFilters('2026-09', now, payPeriod)?.date).toEqual({
+      mode: 'on',
+      date: '2026-09-15',
+      dateTo: '2026-10-14',
+    });
+    expect(monthDeepLinkFilters('2025-12', now, payPeriod)?.date).toEqual({
+      mode: 'on',
+      date: '2025-12-15',
+      dateTo: '2026-01-14',
+    });
+  });
 });

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { assertFound } from '../../common/utils/assert-found.util';
@@ -11,7 +11,7 @@ import type {
   GoalFlowNodeKind,
   GoalFlowResponse,
 } from '../../contracts';
-import { Goal, GoalContribution } from '../../entities';
+import { Goal } from '../../entities';
 import { Budget } from '../../entities/budget.entity';
 import type { Category } from '../../entities/category.entity';
 import { DataEntry, DataEntryType } from '../../entities/data-entry.entity';
@@ -19,15 +19,14 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { Workspace } from '../../entities/workspace.entity';
 import {
   clampToWindow,
-  computeMonthRange,
   computePeriodRange,
   normalizeLimitToMonth,
   overlapsWindow,
-  parseMonthKey,
-  toMonthKey,
+  resolveMonth,
 } from '../budgets/budget-period.util';
 import { CategoriesService } from '../categories/categories.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { PayPeriodService, type ResolvedPayPeriod } from '../pay-period/pay-period.service';
 import {
   addMissingRates,
   buildRateMap,
@@ -37,6 +36,7 @@ import {
   toDateOnly,
   toNumber,
 } from './goal-money.util';
+import { GoalProgressService } from './goal-progress.service';
 
 /**
  * How many merchants a category shows before the tail is rolled up. A sankey
@@ -81,8 +81,7 @@ export class GoalFlowService {
   constructor(
     @InjectRepository(Goal)
     private readonly goalRepository: Repository<Goal>,
-    @InjectRepository(GoalContribution)
-    private readonly contributionRepository: Repository<GoalContribution>,
+    private readonly progressService: GoalProgressService,
     @InjectRepository(Budget)
     private readonly budgetRepository: Repository<Budget>,
     @InjectRepository(Transaction)
@@ -93,6 +92,7 @@ export class GoalFlowService {
     private readonly workspaceRepository: Repository<Workspace>,
     private readonly categoriesService: CategoriesService,
     private readonly exchangeRatesService: ExchangeRatesService,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
 
   async getFlow(
@@ -105,11 +105,11 @@ export class GoalFlowService {
     const goal = await this.goalRepository.findOne({ where: { id: goalId, workspaceId } });
     assertFound(goal, 'Goal');
 
-    const anchor = parseMonthKey(month, now);
-    const window = computeMonthRange(anchor);
+    const payPeriod = await this.payPeriods?.contextFor(workspaceId);
+    const { key, anchor, window } = resolveMonth(month, now, payPeriod);
     const currency = await this.getWorkspaceCurrency(workspaceId);
 
-    const [allBudgets, contributed] = await Promise.all([
+    const [allBudgets, progress] = await Promise.all([
       this.budgetRepository.find({
         where: { workspaceId, goalId },
         relations: {
@@ -117,8 +117,9 @@ export class GoalFlowService {
         },
         order: { name: 'ASC' },
       }),
-      this.sumContributions(workspaceId, goalId),
+      this.progressService.progress(workspaceId, [goal]),
     ]);
+    const contributed = progress.get(goal.id)?.amount ?? 0;
 
     // A budget that had ended before this month, or has not started yet, is not
     // part of the month's plan — drawing its limit would inflate `plannedTotal`
@@ -155,7 +156,7 @@ export class GoalFlowService {
       workspaceId,
       budgets,
       descendants,
-      anchor,
+      { anchor, payPeriod },
       rates,
       currency,
     );
@@ -260,7 +261,7 @@ export class GoalFlowService {
         remaining: round2(Math.max(targetAmount - contributed, 0)),
         targetDate: goal.targetDate,
       },
-      month: toMonthKey(anchor),
+      month: key,
       currency,
       plannedTotal: round2(plannedTotal),
       actualTotal: round2(actualTotal),
@@ -481,7 +482,7 @@ export class GoalFlowService {
     workspaceId: string,
     budgets: Budget[],
     descendants: Map<string, string[]>,
-    anchor: Date,
+    { anchor, payPeriod: pay }: { anchor: Date; payPeriod?: ResolvedPayPeriod },
     rates: Map<string, number>,
     currency: string,
   ): Promise<Map<string, { start: Date; end: Date; actual: number }>> {
@@ -500,7 +501,7 @@ export class GoalFlowService {
     await Promise.all(
       [...byPeriod.values()].map(async group => {
         const [first] = group;
-        const period = clampToWindow(computePeriodRange(first.periodType, anchor), first);
+        const period = clampToWindow(computePeriodRange(first.periodType, anchor, pay), first);
         if (!period) {
           return;
         }
@@ -574,17 +575,6 @@ export class GoalFlowService {
       .andWhere('t.is_duplicate = false')
       .andWhere('t.transfer_pair_id IS NULL')
       .andWhere(flowsSql('t'));
-  }
-
-  private async sumContributions(workspaceId: string, goalId: string): Promise<number> {
-    const row = await this.contributionRepository
-      .createQueryBuilder('contribution')
-      .select('COALESCE(SUM(contribution.amount), 0)', 'total')
-      .where('contribution.workspace_id = :workspaceId', { workspaceId })
-      .andWhere('contribution.goal_id = :goalId', { goalId })
-      .getRawOne<{ total: string }>();
-
-    return toNumber(row?.total);
   }
 
   private async getWorkspaceCurrency(workspaceId: string): Promise<string> {

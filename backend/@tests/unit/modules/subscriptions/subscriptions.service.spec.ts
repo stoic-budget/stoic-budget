@@ -35,6 +35,8 @@ describe('SubscriptionsService', () => {
     find: vi.fn(),
     findOne: vi.fn(),
     createQueryBuilder: vi.fn(),
+    // Rows refused as a subscription's payment: none unless a test says so.
+    manager: { query: vi.fn(async () => []) },
   };
   const chargeRepository = {
     create: vi.fn(),
@@ -395,6 +397,64 @@ describe('SubscriptionsService', () => {
     });
   });
 
+  describe("getMonthStatus under the workspace's month", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('splits the running month by its own days, not the calendar month', async () => {
+      // 9 November under day 15: the running month is "October", 15 Oct – 14 Nov.
+      vi.useFakeTimers({ now: new Date(2026, 10, 9, 12), toFake: ['Date'] });
+      const payPeriods = {
+        contextFor: vi.fn(async () => ({
+          monthStart: { kind: 'day', day: 15 },
+          salary: null,
+          holidays: [],
+          holidayCountry: null,
+        })),
+      };
+      const shifted = new SubscriptionsService(
+        subscriptionRepository as any,
+        notificationsService as any,
+        workspaceMemberRepository as any,
+        decisionRepository as any,
+        transactionRepository as any,
+        chargeRepository as any,
+        workspaceRepository as any,
+        exchangeRatesService as any,
+        auditService as any,
+        categoryRepository as any,
+        undefined,
+        undefined,
+        undefined,
+        budgetRepository as any,
+        taxAssignmentService as any,
+        payPeriods as any,
+      );
+      chargeRepository.find.mockResolvedValue([]);
+      workspaceRepository.findOne.mockResolvedValue({ currency: 'USD' });
+      // Monthly on the 20th: 20 October falls in "October" and is paid; by the
+      // calendar it would be 20 November, still to pay.
+      subscriptionRepository.find.mockResolvedValue([
+        {
+          id: 'sub-1',
+          vendorName: 'ACME Cloud - Storage',
+          vendorDomain: null,
+          amount: 9,
+          currency: 'USD',
+          frequency: SubscriptionFrequency.MONTHLY,
+          nextChargeDate: new Date(2026, 10, 20),
+        },
+      ]);
+
+      const result = await shifted.getMonthStatus('workspace-1');
+
+      expect(result.month).toBe('2026-10');
+      expect(result.paidCount).toBe(1);
+      expect(result.unpaidCount).toBe(0);
+    });
+  });
+
   describe('recorded payments', () => {
     const subscription = (over: Record<string, unknown> = {}) => ({
       id: 'sub-1',
@@ -474,6 +534,30 @@ describe('SubscriptionsService', () => {
       );
       expect(subscriptionRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({ nextChargeDate: '2026-10-20', riskStatus: 'price_changed' }),
+      );
+    });
+
+    it("books a receipt from a period back at its own date and currency, leaving the next charge owed", async () => {
+      subscriptionRepository.findOne.mockResolvedValue(subscription());
+
+      const row = await service.recordCharge('sub-1', 'workspace-1', 'user-1', {
+        chargeDate: '2026-09-04',
+        amount: 42,
+        currency: 'ils',
+      });
+
+      expect(row).toEqual(
+        expect.objectContaining({
+          amount: '42.00',
+          currency: 'ILS',
+          chargeDate: '2026-09-04',
+          // The September charge it paid, not October's: that one is still to come.
+          expectedDate: '2026-09-05',
+          matchStatus: 'matched',
+        }),
+      );
+      expect(subscriptionRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ lastChargeDate: '2026-09-05', nextChargeDate: '2026-10-05' }),
       );
     });
 

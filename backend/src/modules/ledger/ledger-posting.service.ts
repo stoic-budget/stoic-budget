@@ -19,6 +19,7 @@ import {
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { LedgerAccountsService, statementCashKey } from './ledger-accounts.service';
 import { LEDGER_ACCOUNT_CODES } from './ledger-default-accounts';
+import { factsOf } from './ledger-facts';
 import {
   type BaseLine,
   fromLineColumns,
@@ -28,12 +29,11 @@ import {
   type SkipReason,
   sameLines,
   skipReason,
-  type TransactionFacts,
   toBaseLines,
   toLineColumns,
   transactionLegs,
 } from './ledger-posting.rules';
-import { cashHomeOf, mirrorsAStatement } from './moved-rows';
+import { cashHomeOf, interestSkip, mirrorsAStatement } from './moved-rows';
 
 export type LedgerPostingErrorCode =
   | 'LEDGER_DISABLED'
@@ -123,23 +123,6 @@ const MEMO_LIMIT = 500;
 /** `date` columns arrive as 'YYYY-MM-DD' strings; tests and callers may pass Dates. */
 function toDateOnly(value: Date | string): string {
   return typeof value === 'string' ? value.slice(0, 10) : value.toISOString().slice(0, 10);
-}
-
-function factsOf(tx: Transaction): TransactionFacts {
-  return {
-    transactionType: tx.transactionType,
-    amount: tx.amount,
-    debit: tx.debit,
-    credit: tx.credit,
-    taxAmount: tx.taxAmount,
-    taxReverseCharge: tx.taxReverseCharge,
-    taxNotionalAmount: tx.taxNotionalAmount,
-    isDuplicate: tx.isDuplicate,
-    isVerified: tx.isVerified,
-    cryptoWalletId: tx.cryptoWalletId,
-    categoryId: tx.categoryId,
-    branchId: tx.branchId,
-  };
 }
 
 /** Everything the entry depends on. A change between plan and lock means re-plan. */
@@ -798,7 +781,7 @@ export class LedgerPostingService {
     baseCurrency: string,
   ): Promise<EntryPlan | { skip: NotBooked }> {
     const facts = factsOf(tx);
-    const early = skipReason(facts);
+    const early = skipReason(facts) ?? (await interestSkip(this.transactionRepository, tx));
     if (early) {
       return { skip: early };
     }

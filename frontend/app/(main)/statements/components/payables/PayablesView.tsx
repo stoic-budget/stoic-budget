@@ -18,10 +18,12 @@ import { dueDateSpan, payableFilterExtras } from '../filters/filter-summary';
 import { TransactionsPageTitle } from '../TransactionsPageTitle';
 import { CreatePayableDrawer } from './CreatePayableDrawer';
 import { usePayableActions } from './hooks/usePayableActions';
+import { usePayableOccurrence } from './hooks/usePayableOccurrence';
 import { PAGE_SIZE, usePayablesData } from './hooks/usePayablesData';
 import { usePayablesFilters } from './hooks/usePayablesFilters';
 import { usePayablesLabels } from './hooks/usePayablesLabels';
 import { MarkPaidDialog } from './MarkPaidDialog';
+import { OccurrenceDialog } from './OccurrenceDialog';
 import PayableFiltersBar from './PayableFiltersBar';
 import PayableSummaryCards from './PayableSummaryCards';
 import { PayablesListLoading } from './PayablesListLoading';
@@ -73,6 +75,7 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
     reload,
     toasts: labels.toasts,
   });
+  const occurrence = usePayableOccurrence(reload);
   useQuickActions([{ id: 'add', label: labels.add, icon: Plus, run: actions.openCreateDrawer }]);
 
   if (authLoading || workspaceLoading) {
@@ -188,6 +191,7 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
             onMarkPaid={actions.handleMarkPaid}
             onArchive={actions.handleArchive}
             onDelete={actions.handleDelete}
+            onOccurrence={occurrence.start}
           />
         </div>
       </div>
@@ -199,6 +203,14 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
         submitting={actions.markingPaidId !== null}
         onClose={() => actions.setPayingPayable(null)}
         onConfirm={(payable, result) => void actions.confirmMarkPaid(payable, result)}
+      />
+
+      <OccurrenceDialog
+        editing={occurrence.editing}
+        saving={occurrence.saving}
+        onClose={occurrence.close}
+        onMove={dueDate => void occurrence.move(dueDate)}
+        onAmount={amount => void occurrence.setAmount(amount)}
       />
 
       <CreatePayableDrawer

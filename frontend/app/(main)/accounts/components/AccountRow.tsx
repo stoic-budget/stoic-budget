@@ -5,8 +5,9 @@ import { fillTemplateNodes, PrivateAmount } from '@/app/components/ui/private-am
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import { tokens } from '@/lib/theme-tokens';
-import { accountIconOf, accountSubtitle, isDebtType } from '../account-types';
+import { accountIconOf, accountSubtitle, countsInNetWorth, isDebtType } from '../account-types';
 import type { Account } from '../hooks/useAccounts';
+import { AccountCreditLimit } from './AccountCreditLimit';
 
 const formatDay = (date: string, locale: string) =>
   new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).format(new Date(date));
@@ -122,7 +123,11 @@ export function AccountBadge({
 }
 
 export function AccountRow({ account }: { account: Account }): React.JSX.Element {
-  const subtitle = accountSubtitle(account);
+  const t = useIntlayer('accountsPage');
+  // A quiet word, not a badge: the account is fine, it only stays off the net worth.
+  const subtitle = [accountSubtitle(account), !countsInNetWorth(account) && t.notInNetWorth.value]
+    .filter(Boolean)
+    .join(' · ');
   return (
     <Link
       href={`/accounts/${account.id}`}
@@ -153,6 +158,7 @@ export function AccountRow({ account }: { account: Account }): React.JSX.Element
           {account.name}
         </span>
         {subtitle && <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{subtitle}</span>}
+        <AccountCreditLimit account={account} barWidth={240} flagUnconverted />
       </span>
       <span style={{ display: 'grid', gap: 2, justifyItems: 'end', textAlign: 'right' }}>
         <AccountBalance account={account} />

@@ -70,12 +70,41 @@ export function findSharedYearPeriod(text: string): { from: Date; to: Date } | n
   return real && from <= to ? { from, to } : null;
 }
 
-const FROM_LABEL = /\bf\s?rom\s+date\s*:?/i;
-const TO_LABEL = /\bto\s+date\s*:?/i;
+// "Open Date" alone is when the account was opened: a period's only beside its "Close Date".
+const DAY_FIRST_RANGE =
+  /\b(\d{1,2})\s+([A-Za-z]{3,9})\s*(?:[-–—]|to)\s*(\d{1,2})\s+([A-Za-z]{3,9}),?\s+(\d{4})\b/;
+
+/**
+ * A period printed day first, the year once at the end: "19 January to 18
+ * February 2025", "1 Dec - 31 Dec 2024". A range that crosses New Year starts
+ * the year before. Null when there is none or a month is not an English one.
+ */
+export function findDayFirstPeriod(text: string): { from: Date; to: Date } | null {
+  const match = DAY_FIRST_RANGE.exec(text);
+  if (!match) {
+    return null;
+  }
+  const fromMonth = MONTHS.indexOf(match[2].slice(0, 3).toLowerCase());
+  const toMonth = MONTHS.indexOf(match[4].slice(0, 3).toLowerCase());
+  const year = Number(match[5]);
+  if (fromMonth < 0 || toMonth < 0) {
+    return null;
+  }
+  const from = new Date(
+    Date.UTC(fromMonth > toMonth ? year - 1 : year, fromMonth, Number(match[1])),
+  );
+  const to = new Date(Date.UTC(year, toMonth, Number(match[3])));
+  const real = from.getUTCMonth() === fromMonth && to.getUTCMonth() === toMonth;
+  return real && from <= to ? { from, to } : null;
+}
+
+const FROM_LABEL = /\bf\s?rom\s+date\s*:?|\bopen(?:ing)? date\s*:?(?=[^\n]*\bclos(?:e|ing) date)/i;
+const TO_LABEL = /\bto\s+date\s*:?|\bclos(?:e|ing) date\s*:?/i;
 
 /**
  * A period printed as two labelled dates that other text may sit between:
- * "From Date: 10/01/2020" and, a line further, "To Date: 09/02/2020". Each
+ * "From Date: 10/01/2020" and, a line further, "To Date: 09/02/2020"; a card's
+ * "Open Date: Sep 15, 2017 - Close Date: Oct 26, 2017". Each
  * takes the first date after its label. Null when a label or its date is
  * missing or the dates run backwards.
  */
@@ -101,6 +130,7 @@ export function findHeaderPeriod(
   return (
     findStatementPeriod(text, order) ??
     findSharedYearPeriod(text) ??
+    findDayFirstPeriod(text) ??
     findLabelledPeriod(text, order)
   );
 }

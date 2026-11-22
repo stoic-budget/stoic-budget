@@ -4,8 +4,14 @@ import { Statement } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
+import { AuditModule } from '../audit/audit.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
+import { LoansModule } from '../loans/loans.module';
 import { WorkspaceCurrencyModule } from '../workspaces/workspace-currency.module';
+import { StatementCoverageService } from './statement-coverage.service';
+import { WalletBalanceCheckController } from './wallet-balance-check.controller';
+import { WalletBalanceCheckService } from './wallet-balance-check.service';
+import { WalletCoverageService } from './wallet-coverage.service';
 import { WalletStatementsService } from './wallet-statements.service';
 import { WalletsController } from './wallets.controller';
 import { WalletsService } from './wallets.service';
@@ -15,9 +21,18 @@ import { WalletsService } from './wallets.service';
     TypeOrmModule.forFeature([Wallet, WorkspaceMember, Transaction, Statement]),
     WorkspaceCurrencyModule,
     ExchangeRatesModule,
+    AuditModule,
+    // Loan terms and schedules live on debt wallets; registered here so the app module stays small.
+    LoansModule,
   ],
-  controllers: [WalletsController],
-  providers: [WalletsService, WalletStatementsService],
+  controllers: [WalletsController, WalletBalanceCheckController],
+  providers: [
+    WalletsService,
+    WalletStatementsService,
+    WalletCoverageService,
+    StatementCoverageService,
+    WalletBalanceCheckService,
+  ],
   exports: [WalletsService],
 })
 export class WalletsModule {}

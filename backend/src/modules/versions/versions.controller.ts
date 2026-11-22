@@ -1,4 +1,5 @@
 import { Controller, Delete, Get, HttpCode, Post } from '@nestjs/common';
+import { RefuseInDemo } from '../../common/decorators/allow-in-demo.decorator';
 import { AllowInVersion } from '../../common/decorators/allow-in-version.decorator';
 import { WorkspaceId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
@@ -16,8 +17,12 @@ import type { User } from '../../entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { VersionsService } from './versions.service';
 
-/** Dated versions of the current workspace; the owner's alone, as they hold every row. */
+/**
+ * Dated versions of the current workspace; the owner's alone, as they hold every row.
+ * A demo refuses all of it: opening or copying a version builds a whole workspace.
+ */
 @Controller('versions')
+@RefuseInDemo()
 export class VersionsController {
   constructor(private readonly versionsService: VersionsService) {}
 

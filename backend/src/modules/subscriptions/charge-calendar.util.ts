@@ -2,6 +2,31 @@ import { SubscriptionFrequency } from '../../entities/subscription.entity';
 
 const bucketOf = (date: Date): number => date.getFullYear() * 12 + date.getMonth();
 
+/**
+ * How far one charge of a subscription is from the next: whole days, or whole
+ * months clamped to the month's length (the shared recurrence rules' daily
+ * and monthly steps).
+ */
+export function subscriptionStep(frequency: SubscriptionFrequency): {
+  unit: 'day' | 'month';
+  count: number;
+} {
+  switch (frequency) {
+    case SubscriptionFrequency.WEEKLY:
+      return { unit: 'day', count: 7 };
+    case SubscriptionFrequency.BIWEEKLY:
+      return { unit: 'day', count: 14 };
+    case SubscriptionFrequency.MONTHLY:
+      return { unit: 'month', count: 1 };
+    case SubscriptionFrequency.QUARTERLY:
+      return { unit: 'month', count: 3 };
+    case SubscriptionFrequency.SEMIANNUAL:
+      return { unit: 'month', count: 6 };
+    case SubscriptionFrequency.ANNUAL:
+      return { unit: 'month', count: 12 };
+  }
+}
+
 /** ~380 years of weekly charges: only a corrupt row can reach this. */
 const MAX_STEPS = 20000;
 
@@ -19,20 +44,14 @@ const MAX_MONTHS = 120;
  * every month and an annual one on Feb 29 falls back to Feb 28.
  */
 export function chargeAt(anchor: Date, frequency: SubscriptionFrequency, index: number): Date {
-  if (frequency === SubscriptionFrequency.WEEKLY) {
-    const weekly = new Date(anchor);
-    weekly.setDate(weekly.getDate() + 7 * index);
-    return weekly;
+  const step = subscriptionStep(frequency);
+  if (step.unit === 'day') {
+    const byDays = new Date(anchor);
+    byDays.setDate(byDays.getDate() + step.count * index);
+    return byDays;
   }
 
-  const monthStep =
-    frequency === SubscriptionFrequency.MONTHLY
-      ? 1
-      : frequency === SubscriptionFrequency.QUARTERLY
-        ? 3
-        : 12;
-
-  const target = bucketOf(anchor) + monthStep * index;
+  const target = bucketOf(anchor) + step.count * index;
   const year = Math.floor(target / 12);
   const month = target % 12;
   // Day 0 of the next month is the last day of this one.
@@ -77,8 +96,10 @@ export function projectMonthlyCharges(
 }
 
 /**
- * The charges of one subscription in the calendar month `today` falls in, split
- * by date: on or before today counts as paid, after it as still to pay.
+ * The charges of one subscription in a month (the calendar month `today` falls
+ * in unless `month` names the workspace's own), split by date: on or before
+ * today counts as paid, after it as still to pay. `month` runs from the local
+ * midnight of its first day to that of its last.
  *
  * Walks back from the next charge as well as forward, because the daily cron
  * has already rolled `nextChargeDate` past the charges made earlier this month.
@@ -87,6 +108,10 @@ export function splitMonthCharges(
   nextChargeDate: Date | null,
   frequency: SubscriptionFrequency,
   today: Date,
+  month: { start: Date; end: Date } = {
+    start: new Date(today.getFullYear(), today.getMonth(), 1),
+    end: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+  },
 ): { paid: number; unpaid: number } {
   const split = { paid: 0, unpaid: 0 };
   if (!nextChargeDate) return split;
@@ -94,7 +119,12 @@ export function splitMonthCharges(
   const anchor = new Date(nextChargeDate);
   if (Number.isNaN(anchor.getTime())) return split;
 
-  const month = bucketOf(today);
+  const first = new Date(month.start.getFullYear(), month.start.getMonth(), month.start.getDate());
+  const afterLast = new Date(
+    month.end.getFullYear(),
+    month.end.getMonth(),
+    month.end.getDate() + 1,
+  );
   const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
   const count = (charge: Date): void => {
     if (charge < endOfToday) split.paid += 1;
@@ -103,14 +133,14 @@ export function splitMonthCharges(
 
   for (let index = -1; index > -MAX_STEPS; index -= 1) {
     const charge = chargeAt(anchor, frequency, index);
-    if (bucketOf(charge) < month) break;
-    if (bucketOf(charge) === month) count(charge);
+    if (charge < first) break;
+    if (charge < afterLast) count(charge);
   }
   // Forward from the anchor itself; a stale one in an earlier month is caught up.
   for (let index = 0; index < MAX_STEPS; index += 1) {
     const charge = chargeAt(anchor, frequency, index);
-    if (bucketOf(charge) > month) break;
-    if (bucketOf(charge) === month) count(charge);
+    if (charge >= afterLast) break;
+    if (charge >= first) count(charge);
   }
 
   return split;
@@ -157,4 +187,29 @@ function dayKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
     date.getDate(),
   ).padStart(2, '0')}`;
+}
+
+/**
+ * The scheduled charge a payment on `chargeDay` settles: the occurrence of the
+ * schedule running through the subscription's next charge that lies nearest to
+ * it. A payment a few days early still settles the next charge; one dated a
+ * period back, such as a receipt added late, settles that period's charge, so
+ * the next one stays owed and reserved. Without a schedule it is the day itself.
+ */
+export function settledDateOf(
+  subscription: { nextChargeDate: Date | string | null; frequency: SubscriptionFrequency },
+  chargeDay: string,
+): Date {
+  const next = subscription.nextChargeDate;
+  if (!next) return chargeDay as unknown as Date;
+  const anchor = localDayOf(next instanceof Date ? next.toISOString() : String(next));
+  const target = localDayOf(chargeDay).getTime();
+  const step = target < anchor.getTime() ? -1 : 1;
+  let best = anchor;
+  for (let index = step; Math.abs(index) < MAX_STEPS; index += step) {
+    const occurrence = chargeAt(anchor, subscription.frequency, index);
+    if (Math.abs(occurrence.getTime() - target) >= Math.abs(best.getTime() - target)) break;
+    best = occurrence;
+  }
+  return dayKey(best) as unknown as Date;
 }

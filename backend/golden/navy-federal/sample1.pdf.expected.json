@@ -1,0 +1,588 @@
+{
+  "accounts": [
+    {
+      "metadata": {
+        "accountNumber": "4651119781",
+        "currency": "USD",
+        "dateFrom": "2021-06-27T00:00:00",
+        "dateTo": "2021-07-26T00:00:00",
+        "balanceStart": 1682.48,
+        "balanceEnd": 2710.7
+      },
+      "transactions": [
+        {
+          "transactionDate": "2021-06-28T00:00:00",
+          "counterpartyName": "Paypal Transfer",
+          "paymentPurpose": "Deposit - ACH Paid From Paypal Transfer 01Afdp",
+          "credit": 25,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-06-28T00:00:00",
+          "counterpartyName": "Petco 1171 Beaumont CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 06-25-21 Petco 1171 Beaumont CA",
+          "debit": 6.22,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-28T00:00:00",
+          "counterpartyName": "Raising Cane's 470 Beaumont CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 06-26-21 Raising Cane's 470 Beaumont CA",
+          "debit": 8.61,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-28T00:00:00",
+          "counterpartyName": "Gotinder.Com/Help 000-0000000 TX",
+          "paymentPurpose": "POS Debit- Debit Card 1000 06-27-21 Gotinder.Com/Help 000-0000000 TX",
+          "debit": 14.99,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-28T00:00:00",
+          "counterpartyName": "Taco Bell 032536 Banning CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 06-24-21 Taco Bell 032536 Banning CA",
+          "debit": 15.89,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-28T00:00:00",
+          "counterpartyName": "Staterbro 1661 E 6TH S Beaumont CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 06-25-21 Staterbro 1661 E 6TH S Beaumont CA",
+          "debit": 33.04,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-28T00:00:00",
+          "counterpartyName": "Domino's 7733 951-849-7770 CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 06-26-21 Domino's 7733 951-849-7770 CA",
+          "debit": 35.48,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-28T00:00:00",
+          "counterpartyName": "Beaumont Safe And Beaumont CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 06-25-21 Beaumont Safe And Beaumont CA",
+          "debit": 44.05,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-28T00:00:00",
+          "counterpartyName": "Chevron 0208457 Banning CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 06-25-21 Chevron 0208457 Banning CA",
+          "debit": 50,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-28T00:00:00",
+          "counterpartyName": "Transfer To Credit Card Member K Sample",
+          "paymentPurpose": "Transfer To Credit Card Member K Sample",
+          "debit": 81.8,
+          "currency": "USD",
+          "paymentType": "bank_transfer_out"
+        },
+        {
+          "transactionDate": "2021-06-29T00:00:00",
+          "counterpartyName": "Playstation Networ 800-345-7669 CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 06-28-21 Playstation Networ 800-345-7669 CA",
+          "debit": 9.99,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-29T00:00:00",
+          "counterpartyName": "Albertsons #351 Banning CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 06-28-21 Albertsons #351 Banning CA",
+          "debit": 30.05,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-29T00:00:00",
+          "counterpartyName": "Paid To - Paypal Transfer Chk 9100001",
+          "paymentPurpose": "Paid To - Paypal Transfer Chk 9100001",
+          "debit": 715.5,
+          "currency": "USD",
+          "paymentType": "bank_transfer_out"
+        },
+        {
+          "transactionDate": "2021-06-30T00:00:00",
+          "counterpartyName": "IN N Out Burger 35 Beaumont CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 06-28-21 IN N Out Burger 35 Beaumont CA",
+          "debit": 11.37,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-30T00:00:00",
+          "counterpartyName": "Staterbro 1430 Beaumon Beaumont CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 06-29-21 Staterbro 1430 Beaumon Beaumont CA",
+          "debit": 13.01,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-06-30T00:00:00",
+          "counterpartyName": "Dividend",
+          "paymentPurpose": "Dividend",
+          "credit": 0.07,
+          "currency": "USD",
+          "paymentType": "interest"
+        },
+        {
+          "transactionDate": "2021-07-01T00:00:00",
+          "counterpartyName": "Paypal Transfer",
+          "paymentPurpose": "Deposit - ACH Paid From Paypal Transfer 01Afdp",
+          "credit": 100,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-07-01T00:00:00",
+          "counterpartyName": "Chipotle 3041 Banning CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 06-30-21 Chipotle 3041 Banning CA",
+          "debit": 9.81,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-01T00:00:00",
+          "counterpartyName": "El Rancho Liquor Beaumont CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 06-30-21 El Rancho Liquor Beaumont CA",
+          "debit": 26.16,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-01T00:00:00",
+          "counterpartyName": "Identogo-Idemia Ts Upland CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 06-30-21 Identogo-Idemia Ts Upland CA",
+          "debit": 105.25,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-02T00:00:00",
+          "counterpartyName": "KFC K312033 Banning CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-01-21 KFC K312033 Banning CA",
+          "debit": 10.01,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Paypal*sample Memb San Jose CA",
+          "paymentPurpose": "POS Credit Adjustment 1000 Transaction 07-06-21 Paypal*sample Memb San Jose CA",
+          "credit": 247.5,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Paypal Transfer",
+          "paymentPurpose": "Deposit - ACH Paid From Paypal Transfer 01Afdp",
+          "credit": 400,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Fedex Offic6780002 Beaumont CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-03-21 Fedex Offic6780002 Beaumont CA",
+          "debit": 0.15,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Arco42320001 Riverside CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-05-21 Arco42320001 Riverside CA",
+          "debit": 5.87,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Rite Aid 05671 Banning CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-03-21 Rite Aid 05671 Banning CA",
+          "debit": 6.98,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Carls Jr 1100605 Banning CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-02-21 Carls Jr 1100605 Banning CA",
+          "debit": 8.39,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Gus Jr No 7 Banning CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-04-21 Gus Jr No 7 Banning CA",
+          "debit": 11.95,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Google*youtubeprem 650-2530000 CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-02-21 Google*youtubeprem 650-2530000 CA",
+          "debit": 11.99,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Del Taco 0039 Banning CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-03-21 Del Taco 0039 Banning CA",
+          "debit": 12.99,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Teso63349001 Beaumont CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-05-21 Teso63349001 Beaumont CA",
+          "debit": 40,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Teso63349001 Beaumont CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-04-21 Teso63349001 Beaumont CA",
+          "debit": 40,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-06T00:00:00",
+          "counterpartyName": "Wal-Mart Super Center Beaumont CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-03-21 Wal-Mart Super Center Beaumont CA",
+          "debit": 113.96,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-07T00:00:00",
+          "counterpartyName": "Hooters Of Costa M Costa Mesa CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-06-21 Hooters Of Costa M Costa Mesa CA",
+          "debit": 56.41,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-08T00:00:00",
+          "counterpartyName": "Pike Long Beach CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-05-21 Pike Long Beach CA",
+          "debit": 3,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-09T00:00:00",
+          "counterpartyName": "Paypal Transfer",
+          "paymentPurpose": "Deposit - ACH Paid From Paypal Transfer 01Afdp",
+          "credit": 1000,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-07-09T00:00:00",
+          "counterpartyName": "Chili's 1333 Ecomm Olo.Com CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-09-21 Chili's 1333 Ecomm Olo.Com CA",
+          "debit": 27.58,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-12T00:00:00",
+          "counterpartyName": "ATM Fee - Withdrawal 07-10-21 P473426 Colton CA",
+          "paymentPurpose": "ATM Fee - Withdrawal 07-10-21 P473426 Colton CA",
+          "debit": 1,
+          "currency": "USD",
+          "paymentType": "fee"
+        },
+        {
+          "transactionDate": "2021-07-12T00:00:00",
+          "counterpartyName": "ATM Withdrawal 07-10-21 P473426 Colton CA",
+          "paymentPurpose": "ATM Withdrawal 07-10-21 P473426 Colton CA",
+          "debit": 43.5,
+          "currency": "USD",
+          "paymentType": "cash"
+        },
+        {
+          "transactionDate": "2021-07-12T00:00:00",
+          "counterpartyName": "Dba Colton Super Colton CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-10-21 Dba Colton Super Colton CA",
+          "debit": 2.63,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-12T00:00:00",
+          "counterpartyName": "Sunset Liquor Banning CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-09-21 Sunset Liquor Banning CA",
+          "debit": 11.88,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-12T00:00:00",
+          "counterpartyName": "Amazon Prime*290Cm Amzn.Com/Bill WA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-11-21 Amazon Prime*290Cm Amzn.Com/Bill WA",
+          "debit": 14,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-12T00:00:00",
+          "counterpartyName": "The Home Depot 8987 Beaumont CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-09-21 The Home Depot 8987 Beaumont CA",
+          "debit": 22.53,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-12T00:00:00",
+          "counterpartyName": "Wal-Mart #5156 Beaumont CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-09-21 Wal-Mart #5156 Beaumont CA",
+          "debit": 70.28,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-12T00:00:00",
+          "counterpartyName": "Dba Colton Super Colton CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-10-21 Dba Colton Super Colton CA",
+          "debit": 80.03,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-12T00:00:00",
+          "counterpartyName": "Cash Withdrawal",
+          "paymentPurpose": "Cash Withdrawal",
+          "debit": 600,
+          "currency": "USD",
+          "paymentType": "cash"
+        },
+        {
+          "transactionDate": "2021-07-14T00:00:00",
+          "counterpartyName": "Paypal Transfer",
+          "paymentPurpose": "Deposit - ACH Paid From Paypal Transfer 01Afdp",
+          "credit": 1000,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-07-14T00:00:00",
+          "counterpartyName": "Panda Express #166 Beaumont CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-13-21 Panda Express #166 Beaumont CA",
+          "debit": 12.77,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-14T00:00:00",
+          "counterpartyName": "Flying J 1009 Jurupa Valley CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-13-21 Flying J 1009 Jurupa Valley CA",
+          "debit": 17.72,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-15T00:00:00",
+          "counterpartyName": "Google*copilot Sat Support.Googl CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-14-21 Google*copilot Sat Support.Googl CA",
+          "debit": 9.99,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-15T00:00:00",
+          "counterpartyName": "Arco42085001 Costa Mesa CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-14-21 Arco42085001 Costa Mesa CA",
+          "debit": 94.29,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-16T00:00:00",
+          "counterpartyName": "Pilot Oil PR PR Payment",
+          "paymentPurpose": "Deposit - ACH Paid From Pilot Oil PR PR Payment 01Afd2",
+          "credit": 432.48,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-07-16T00:00:00",
+          "counterpartyName": "Deposit",
+          "paymentPurpose": "Deposit",
+          "credit": 60,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-07-16T00:00:00",
+          "counterpartyName": "Carls Jr 1101412 Bloomington CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-14-21 Carls Jr 1101412 Bloomington CA",
+          "debit": 11.83,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-16T00:00:00",
+          "counterpartyName": "Cash Withdrawal",
+          "paymentPurpose": "Cash Withdrawal",
+          "debit": 900,
+          "currency": "USD",
+          "paymentType": "cash"
+        },
+        {
+          "transactionDate": "2021-07-19T00:00:00",
+          "counterpartyName": "Deposit 07-17-21 Fcst Redlands, CA Rmt",
+          "paymentPurpose": "Deposit 07-17-21 Fcst Redlands, CA Rmt",
+          "credit": 20,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-07-19T00:00:00",
+          "counterpartyName": "ATM Withdrawal 07-17-21 Fcst Redlands, CA Rmt",
+          "paymentPurpose": "ATM Withdrawal 07-17-21 Fcst Redlands, CA Rmt",
+          "debit": 50,
+          "currency": "USD",
+          "paymentType": "cash"
+        },
+        {
+          "transactionDate": "2021-07-19T00:00:00",
+          "counterpartyName": "ATM Withdrawal 07-17-21 Fcst Redlands, CA Rmt",
+          "paymentPurpose": "ATM Withdrawal 07-17-21 Fcst Redlands, CA Rmt",
+          "debit": 100,
+          "currency": "USD",
+          "paymentType": "cash"
+        },
+        {
+          "transactionDate": "2021-07-19T00:00:00",
+          "counterpartyName": "Tmobile*auto Pay 800-937-8997 WA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-18-21 Tmobile*auto Pay 800-937-8997 WA",
+          "debit": 70,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-21T00:00:00",
+          "counterpartyName": "Deposit 07-20-21 Fcaj March Arb, CA",
+          "paymentPurpose": "Deposit 07-20-21 Fcaj March Arb, CA",
+          "credit": 11.07,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-07-21T00:00:00",
+          "counterpartyName": "Deposit 07-20-21 Fcaj March Arb, CA",
+          "paymentPurpose": "Deposit 07-20-21 Fcaj March Arb, CA",
+          "credit": 620,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-07-21T00:00:00",
+          "counterpartyName": "Intl Transaction Fee 07-20-21 Ccbill.Com *i.M.L LA Massana",
+          "paymentPurpose": "Intl Transaction Fee 07-20-21 Ccbill.Com *i.M.L LA Massana",
+          "debit": 1,
+          "currency": "USD",
+          "paymentType": "fee"
+        },
+        {
+          "transactionDate": "2021-07-21T00:00:00",
+          "counterpartyName": "Esurance Car Insur 800-378-7262 CA",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-20-21 Esurance Car Insur 800-378-7262 CA",
+          "debit": 81.8,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-21T00:00:00",
+          "counterpartyName": "Ccbill.Com *i.M.L LA Massana",
+          "paymentPurpose": "POS Debit- Debit Card 1000 07-18-21 Ccbill.Com *i.M.L LA Massana",
+          "debit": 100,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-21T00:00:00",
+          "counterpartyName": "Paid To - Credit Karma Transfer Chk 5150475",
+          "paymentPurpose": "Paid To - Credit Karma Transfer Chk 5150475",
+          "debit": 5,
+          "currency": "USD",
+          "paymentType": "bank_transfer_out"
+        },
+        {
+          "transactionDate": "2021-07-23T00:00:00",
+          "counterpartyName": "Pilot Oil PR PR Payment",
+          "paymentPurpose": "Deposit - ACH Paid From Pilot Oil PR PR Payment 01Afd2",
+          "credit": 1028.36,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2021-07-23T00:00:00",
+          "counterpartyName": "Teso63349001 Beaumont CA",
+          "paymentPurpose": "POS Debit - Debit Card 1000 Transaction 07-23-21 Teso63349001 Beaumont CA",
+          "debit": 40.01,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2021-07-26T00:00:00",
+          "counterpartyName": "Transfer To Credit Card Member K Sample",
+          "paymentPurpose": "Transfer To Credit Card Member K Sample",
+          "debit": 20,
+          "currency": "USD",
+          "paymentType": "bank_transfer_out"
+        },
+        {
+          "transactionDate": "2021-07-26T00:00:00",
+          "counterpartyName": "ATM Rebate",
+          "paymentPurpose": "ATM Rebate",
+          "credit": 4.5,
+          "currency": "USD",
+          "paymentType": "cash"
+        }
+      ]
+    },
+    {
+      "metadata": {
+        "accountNumber": "3025355419",
+        "currency": "USD",
+        "dateFrom": "2021-06-27T00:00:00",
+        "dateTo": "2021-07-26T00:00:00",
+        "balanceStart": 6,
+        "balanceEnd": 6.02
+      },
+      "transactions": [
+        {
+          "transactionDate": "2021-06-30T00:00:00",
+          "counterpartyName": "Dividend",
+          "paymentPurpose": "Dividend",
+          "credit": 0.02,
+          "currency": "USD",
+          "paymentType": "interest"
+        }
+      ]
+    }
+  ]
+}

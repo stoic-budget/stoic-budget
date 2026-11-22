@@ -6,6 +6,7 @@ import {
   awaitingCategorySql,
   UNCATEGORIZED_SQL_PARAMS,
 } from '../categories/uncategorized-category';
+import { HELD_FOR_REREAD } from '../loans/loan-interest-carry';
 
 /**
  * What the Review queue holds, as queries the queue and the dashboard share, so
@@ -18,12 +19,14 @@ export function unconfirmedRowsQuery(
   transactions: Repository<Transaction>,
   workspaceId: string,
 ): SelectQueryBuilder<Transaction> {
+  // A pending row waits for the bank, not for a person: it is asked about once booked.
   return transactions
     .createQueryBuilder('t')
     .leftJoin('t.statement', 's')
     .where('t.workspaceId = :workspaceId', { workspaceId })
     .andWhere('t.isDuplicate = false')
     .andWhere('t.isVerified = false')
+    .andWhere('t.isPending = false')
     .andWhere('(t.statementId IS NULL OR s.deletedAt IS NULL)');
 }
 
@@ -32,14 +35,23 @@ export function reviewDuplicatesQuery(
   transactions: Repository<Transaction>,
   workspaceId: string,
 ): SelectQueryBuilder<Transaction> {
-  return transactions
-    .createQueryBuilder('t')
-    .leftJoin('t.statement', 's')
-    .where('t.workspaceId = :workspaceId', { workspaceId })
-    .andWhere('t.isDuplicate = true')
-    .andWhere('t.isVerified = false')
-    .andWhere("(t.duplicateMatchType IS NULL OR t.duplicateMatchType != 'manual')")
-    .andWhere('(t.statementId IS NULL OR s.deletedAt IS NULL)');
+  return (
+    transactions
+      .createQueryBuilder('t')
+      .leftJoin('t.statement', 's')
+      .where('t.workspaceId = :workspaceId', { workspaceId })
+      .andWhere('t.isDuplicate = true')
+      .andWhere('t.isVerified = false')
+      .andWhere('t.isPending = false')
+      .andWhere("(t.duplicateMatchType IS NULL OR t.duplicateMatchType != 'manual')")
+      // Not a suspected repeat: a split loan payment held while its statement is
+      // read again, and loan interest, which is a duplicate only with its payment.
+      .andWhere('(t.duplicateMatchType IS NULL OR t.duplicateMatchType != :held)', {
+        held: HELD_FOR_REREAD,
+      })
+      .andWhere('t.loanInterestOfId IS NULL')
+      .andWhere('(t.statementId IS NULL OR s.deletedAt IS NULL)')
+  );
 }
 
 /**
@@ -66,7 +78,8 @@ export function reviewHoldsStatementRows(
  * not: the "categorised" step of the month close. Only rows that count once
  * confirmed (no duplicates, transfers, rows of a trashed or unread statement,
  * crypto that settles nothing), so every row here changes a number when it
- * gets one.
+ * gets one. A row left out of budgets stays: tax, DATEV and UStVA still read
+ * its category, and the statement lists count it as waiting for one too.
  */
 export function uncategorizedRowsQuery(
   transactions: Repository<Transaction>,
@@ -78,7 +91,7 @@ export function uncategorizedRowsQuery(
     .where('t.workspaceId = :workspaceId', { workspaceId })
     .andWhere(awaitingCategorySql('t'), UNCATEGORIZED_SQL_PARAMS)
     .andWhere('t.transferPairId IS NULL');
-  return onlyFlows(query, 't', { includeUnconfirmed: true });
+  return onlyFlows(query, 't', { includeUnconfirmed: true, includeExcluded: true });
 }
 
 /**

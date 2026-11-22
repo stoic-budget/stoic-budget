@@ -65,19 +65,20 @@ import type { CreateAuditEventDto } from '../audit/interfaces/audit-event.interf
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { GoalsService } from '../goals/goals.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PayPeriodService } from '../pay-period/pay-period.service';
 import {
   applyAssignment,
   assignmentInputOf,
   TaxAssignmentService,
 } from '../tax/tax-assignment.service';
-import { projectMonthlyCharges, splitMonthCharges } from './charge-calendar.util';
+import * as calendar from './charge-calendar.util';
 import { CurrencyTotals } from './currency-totals';
 import {
-  type ConvertAt,
   chargesInMonth,
-  dayInMonth,
   isPastMonth,
+  monthInView,
   pastMonthStatus,
+  workspaceMoney,
 } from './month-status-history';
 import { payeeMatchesVendor } from './payee-match.util';
 import type { BusinessSubscriptionsReport } from './subscription-business-report';
@@ -89,6 +90,7 @@ import {
   monthlyCost,
   monthlySetAside,
 } from './subscription-insights.util';
+import { forgetPayeeRule, NOT_REJECTED_FOR_SUBSCRIPTION, rejectedRows } from './subscription-links';
 
 const DEFAULT_CALENDAR_MONTHS = 6;
 /** How far back a bank row can still be picked as a payment. */
@@ -104,6 +106,13 @@ export interface ChargeCalendarRow {
   amounts: number[];
   kind: 'subscription' | 'payable' | 'invoice';
 }
+
+/** Charges far enough apart to save up for: a fund for each is a savings goal. */
+const SINKING_FUND_FREQUENCIES = [
+  SubscriptionFrequency.QUARTERLY,
+  SubscriptionFrequency.SEMIANNUAL,
+  SubscriptionFrequency.ANNUAL,
+];
 
 @Injectable()
 export class SubscriptionsService {
@@ -140,6 +149,7 @@ export class SubscriptionsService {
     private readonly budgetRepository?: Repository<Budget>,
     @Optional()
     private readonly taxAssignmentService?: TaxAssignmentService,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
 
   async create(
@@ -637,7 +647,7 @@ export class SubscriptionsService {
 
     const rows: ChargeCalendarRow[] = await Promise.all(
       active.map(async sub => {
-        const occurrences = projectMonthlyCharges(
+        const occurrences = calendar.projectMonthlyCharges(
           sub.nextChargeDate ? new Date(sub.nextChargeDate) : null,
           sub.frequency,
           from,
@@ -693,15 +703,11 @@ export class SubscriptionsService {
    * still to come; a past `month` (`YYYY-MM`) is what was charged in it.
    */
   async getMonthStatus(workspaceId: string, month?: string): Promise<SubscriptionMonthStatus> {
-    if (isPastMonth(month, new Date())) {
+    const payPeriod = await this.payPeriods?.contextFor(workspaceId);
+    if (isPastMonth(month, new Date(), payPeriod)) {
       const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
-      const currency = workspace?.currency?.toUpperCase() ?? null;
-      const convert: ConvertAt = async (amount, from, day) =>
-        currency
-          ? (await this.exchangeRatesService.convert(amount, from, currency, day, workspaceId))
-              .converted
-          : amount;
-      return pastMonthStatus(this.chargeRepository, convert, workspaceId, month, currency);
+      const money = workspaceMoney(this.exchangeRatesService, workspaceId, workspace?.currency);
+      return pastMonthStatus(this.chargeRepository, money, workspaceId, month, payPeriod);
     }
     const [active, workspace] = await Promise.all([
       this.subscriptionRepository.find({
@@ -711,18 +717,19 @@ export class SubscriptionsService {
     ]);
 
     const workspaceCurrency = workspace?.currency?.toUpperCase() ?? null;
-    const today = dayInMonth(month, new Date());
-    const recordedThisMonth = await chargesInMonth(this.chargeRepository, workspaceId, today);
+    const { key, period, today } = monthInView(month, new Date(), payPeriod);
+    const recordedThisMonth = await chargesInMonth(this.chargeRepository, workspaceId, period);
     const status = { paidAmount: 0, paidCount: 0, unpaidAmount: 0, unpaidCount: 0 };
     const paidByCurrency = new CurrencyTotals();
     const unpaidByCurrency = new CurrencyTotals();
     const items: SubscriptionMonthStatus['items'][number][] = [];
 
     for (const sub of active) {
-      const byDate = splitMonthCharges(
+      const byDate = calendar.splitMonthCharges(
         sub.nextChargeDate ? new Date(sub.nextChargeDate) : null,
         sub.frequency,
         today,
+        period,
       );
       const total = byDate.paid + byDate.unpaid;
       if (total === 0) continue;
@@ -765,7 +772,7 @@ export class SubscriptionsService {
 
     return {
       currency: workspaceCurrency,
-      month: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`,
+      month: key,
       ...status,
       paidAmount: Math.round(status.paidAmount * 100) / 100,
       unpaidAmount: Math.round(status.unpaidAmount * 100) / 100,
@@ -962,7 +969,7 @@ export class SubscriptionsService {
       where: {
         workspaceId,
         status: SubscriptionStatus.ACTIVE,
-        frequency: In([SubscriptionFrequency.QUARTERLY, SubscriptionFrequency.ANNUAL]),
+        frequency: In(SINKING_FUND_FREQUENCIES),
       },
       order: { nextChargeDate: 'ASC' },
     });
@@ -989,10 +996,7 @@ export class SubscriptionsService {
     userId: string,
   ): Promise<{ goalId: string; monthlySetAside: number; created: boolean }> {
     const subscription = await this.findOne(id, workspaceId);
-    if (
-      subscription.frequency !== SubscriptionFrequency.QUARTERLY &&
-      subscription.frequency !== SubscriptionFrequency.ANNUAL
-    ) {
+    if (!SINKING_FUND_FREQUENCIES.includes(subscription.frequency)) {
       throw new BadRequestException(appError('SUBSCRIPTION_SINKING_FUND_CADENCE'));
     }
     const setAside = monthlySetAside(Number(subscription.amount), subscription.nextChargeDate);
@@ -1182,7 +1186,7 @@ export class SubscriptionsService {
       .where('tx.workspaceId = :workspaceId', { workspaceId })
       .andWhere('(tx.statementId IS NULL OR statement.deletedAt IS NULL)')
       .andWhere('tx.transactionType = :type', { type: TransactionType.EXPENSE })
-      .andWhere('tx.amount IS NOT NULL')
+      .andWhere("tx.amount IS NOT NULL AND COALESCE(tx.transferPairKind, '') <> 'adjustment'")
       .andWhere('tx.transactionDate >= :since', { since: localDay(since) })
       .andWhere(
         'NOT EXISTS (SELECT 1 FROM subscription_charges charge WHERE charge.transaction_id = tx.id)',
@@ -1190,6 +1194,9 @@ export class SubscriptionsService {
     // A statement of another workspace has no rows here: the filter above keeps them out.
     if (query.statementId) {
       builder.andWhere('tx.statementId = :statementId', { statementId: query.statementId });
+    }
+    if (query.subscriptionId) {
+      builder.andWhere(NOT_REJECTED_FOR_SUBSCRIPTION, { subscriptionId: query.subscriptionId });
     }
     const rows = await builder.getMany();
 
@@ -1252,7 +1259,7 @@ export class SubscriptionsService {
             transactionId: null,
             chargeDate: body.chargeDate,
             amount: body.amount ?? Number(subscription.amount),
-            currency: subscription.currency,
+            currency: body.currency?.trim().toUpperCase() || subscription.currency,
           };
         }
         const charge = await this.bookCharge(manager, subscription, paid);
@@ -1399,7 +1406,7 @@ export class SubscriptionsService {
         ...paid,
         chargeDate: paid.chargeDate as unknown as Date,
         expectedAmount: subscription.amount,
-        expectedDate: subscription.nextChargeDate,
+        expectedDate: calendar.settledDateOf(subscription, paid.chargeDate),
         matchStatus,
       }),
     );
@@ -1559,32 +1566,22 @@ export class SubscriptionsService {
     switch (frequency) {
       case SubscriptionFrequency.WEEKLY:
         return amount * 4.33;
+      case SubscriptionFrequency.BIWEEKLY:
+        return (amount * 4.33) / 2;
       case SubscriptionFrequency.MONTHLY:
         return amount;
       case SubscriptionFrequency.QUARTERLY:
         return amount / 3;
+      case SubscriptionFrequency.SEMIANNUAL:
+        return amount / 6;
       case SubscriptionFrequency.ANNUAL:
         return amount / 12;
     }
   }
 
+  /** One step on: a month-end clamps to a shorter month (31 Jan, 28 Feb) instead of overflowing. */
   private addInterval(date: Date, frequency: SubscriptionFrequency): Date {
-    const d = new Date(date);
-    switch (frequency) {
-      case SubscriptionFrequency.WEEKLY:
-        d.setDate(d.getDate() + 7);
-        break;
-      case SubscriptionFrequency.MONTHLY:
-        d.setMonth(d.getMonth() + 1);
-        break;
-      case SubscriptionFrequency.QUARTERLY:
-        d.setMonth(d.getMonth() + 3);
-        break;
-      case SubscriptionFrequency.ANNUAL:
-        d.setFullYear(d.getFullYear() + 1);
-        break;
-    }
-    return d;
+    return calendar.chargeAt(date, frequency, 1);
   }
 
   private async recordDetectedCharges(subscription: Subscription): Promise<void> {
@@ -1594,7 +1591,9 @@ export class SubscriptionsService {
     const transactions = await this.transactionRepository.find({
       where: { workspaceId: subscription.workspaceId, id: In(transactionIds) },
     });
+    const rejected = await rejectedRows(this.transactionRepository.manager, subscription);
     for (const transaction of transactions) {
+      if (rejected.has(transaction.id)) continue;
       const existing = await this.chargeRepository.findOne({
         where: { transactionId: transaction.id },
       });
@@ -1694,28 +1693,6 @@ async function learnPayeeRule(
      VALUES ($1, $2, $3)
      ON CONFLICT (subscription_id, payee_id) DO NOTHING`,
     [subscription.workspaceId, subscription.id, transaction.payeeId],
-  );
-}
-
-/** Drops the rule of the row's payee once no payment of the subscription is a row of that payee. */
-async function forgetPayeeRule(
-  manager: EntityManager,
-  subscription: Subscription,
-  transactionId: string,
-): Promise<void> {
-  await manager.query(
-    `DELETE FROM subscription_payees rule
-      WHERE rule.workspace_id = $1
-        AND rule.subscription_id = $2
-        AND rule.payee_id = (SELECT payee_id FROM transactions WHERE id = $3 AND workspace_id = $1)
-        AND NOT EXISTS (
-          SELECT 1 FROM subscription_charges charge
-          JOIN transactions tx ON tx.id = charge.transaction_id AND tx.workspace_id = charge.workspace_id
-          WHERE charge.subscription_id = rule.subscription_id
-            AND charge.workspace_id = rule.workspace_id
-            AND tx.payee_id = rule.payee_id
-        )`,
-    [subscription.workspaceId, subscription.id, transactionId],
   );
 }
 

@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type {
   DataSource,
@@ -12,6 +13,7 @@ import type {
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { AuditService } from '../audit/audit.service';
 import type { CreateAuditEventDto } from '../audit/interfaces/audit-event.interface';
+import type { TransactionsPostedEvent } from '../notifications/events/notification-events';
 import { SubscriptionsService } from './subscriptions.service';
 
 const SAVEPOINT = 'sub_autolink';
@@ -34,7 +36,7 @@ export class SubscriptionAutoLinkSubscriber implements EntitySubscriberInterface
   private readonly logger = new Logger(SubscriptionAutoLinkSubscriber.name);
 
   constructor(
-    @InjectDataSource() dataSource: DataSource,
+    @InjectDataSource() private readonly dataSource: DataSource,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly auditService: AuditService,
   ) {
@@ -47,11 +49,7 @@ export class SubscriptionAutoLinkSubscriber implements EntitySubscriberInterface
 
   async afterInsert(event: InsertEvent<Transaction>): Promise<void> {
     const transaction = event.entity;
-    if (
-      !(transaction?.id && transaction.workspaceId && transaction.payeeId) ||
-      transaction.transactionType !== TransactionType.EXPENSE ||
-      transaction.amount == null
-    ) {
+    if (!linkable(transaction)) {
       return;
     }
     const inTransaction = event.queryRunner.isTransactionActive;
@@ -81,6 +79,33 @@ export class SubscriptionAutoLinkSubscriber implements EntitySubscriberInterface
           error instanceof Error ? error.name : 'unknown error'
         }`,
       );
+    }
+  }
+
+  /**
+   * A pending row the bank booked is updated in place, which no subscriber
+   * sees: it becomes a payment here, as an inserted row would have.
+   */
+  @OnEvent('transactions.posted')
+  async linkPosted(event: TransactionsPostedEvent): Promise<void> {
+    for (const id of event.transactionIds) {
+      try {
+        const audit = await this.dataSource.transaction(async manager => {
+          const row = await manager.findOne(Transaction, {
+            where: { id, workspaceId: event.workspaceId },
+          });
+          return row && linkable(row)
+            ? this.subscriptionsService.autoLinkTransaction(manager, row)
+            : null;
+        });
+        if (audit) await this.writeAudit([audit]);
+      } catch (error) {
+        this.logger.warn(
+          `Could not auto-link posted transaction ${id} in workspace ${event.workspaceId}: ${
+            error instanceof Error ? error.name : 'unknown error'
+          }`,
+        );
+      }
     }
   }
 
@@ -114,6 +139,21 @@ export class SubscriptionAutoLinkSubscriber implements EntitySubscriberInterface
       }
     }
   }
+}
+
+/**
+ * An expense of a known payee, with an amount. A pending row may never book:
+ * it becomes a payment once posted (`linkPosted`), not before.
+ */
+function linkable(transaction: Transaction | undefined): transaction is Transaction {
+  return Boolean(
+    transaction?.id &&
+      transaction.workspaceId &&
+      transaction.payeeId &&
+      !transaction.isPending &&
+      transaction.transactionType === TransactionType.EXPENSE &&
+      transaction.amount != null,
+  );
 }
 
 function pendingLevels(queryRunner: QueryRunner): CreateAuditEventDto[][] {

@@ -1,5 +1,5 @@
 import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
-import { WorkspaceId } from '../../common/decorators/workspace.decorator';
+import { WorkspaceId, WorkspaceMemberId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
 import { SchemaParams, SchemaQuery } from '../../common/effect/schema-query';
@@ -12,6 +12,8 @@ import {
   CategoryItem,
   CategoryList,
   CategoryParams,
+  CategorySummary,
+  CategorySummaryQuery,
   CategoryUsageCount,
   CategoryUsageCounts,
   CreateCategoryBody,
@@ -22,10 +24,14 @@ import { CategoryType } from '../../entities/category.entity';
 import type { User } from '../../entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CategoriesService } from './categories.service';
+import { CategorySummaryService } from './category-summary.service';
 
 @Controller('categories')
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(
+    private readonly categoriesService: CategoriesService,
+    private readonly summaryService: CategorySummaryService,
+  ) {}
 
   @Post()
   @WorkspaceAuth(Permission.CATEGORY_CREATE)
@@ -66,6 +72,19 @@ export class CategoriesController {
     @WorkspaceId() workspaceId: string,
   ) {
     return this.categoriesService.getCategoryUsageCount(id, workspaceId);
+  }
+
+  /** The category page: twelve months of it and its subcategories, counted as the reports count. */
+  @Get(':id/summary')
+  @WorkspaceAuth(Permission.TRANSACTION_VIEW)
+  @SchemaResponse(CategorySummary)
+  async summary(
+    @SchemaParams(CategoryParams) { id }: CategoryParams,
+    @SchemaQuery(CategorySummaryQuery) query: CategorySummaryQuery,
+    @WorkspaceId() workspaceId: string,
+    @WorkspaceMemberId() selfMemberId: string | null,
+  ) {
+    return this.summaryService.summary(workspaceId, id, selfMemberId, query.netRefunds === true);
   }
 
   @Get(':id')
