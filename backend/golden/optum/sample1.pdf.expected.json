@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "accountNumber": "400000001",
+    "currency": "USD",
+    "dateFrom": "2021-06-01T00:00:00",
+    "dateTo": "2021-06-30T00:00:00",
+    "balanceStart": 2144.5,
+    "balanceEnd": 1972.97
+  },
+  "transactions": [
+    {
+      "transactionDate": "2021-06-25T00:00:00",
+      "counterpartyName": "CURRENT YEAR INDIVIDUAL CONTR",
+      "paymentPurpose": "CURRENT YEAR INDIVIDUAL CONTR",
+      "debit": 0,
+      "credit": 19.23,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-06-18T00:00:00",
+      "counterpartyName": "VITALITY SPINE & WE BOCA RATON FL",
+      "paymentPurpose": "578295 POS CHCKING SIG 06/17 02:09 VITALITY SPINE & WE BOCA RATON FL 96900096 57",
+      "debit": 149.99,
+      "credit": 0,
+      "currency": "USD",
+      "documentNumber": "578295",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-06-11T00:00:00",
+      "counterpartyName": "CURRENT YEAR INDIVIDUAL CONTR",
+      "paymentPurpose": "CURRENT YEAR INDIVIDUAL CONTR",
+      "debit": 0,
+      "credit": 19.23,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-06-11T00:00:00",
+      "counterpartyName": "VITALITY SPINE & WE BOCA RATON FL",
+      "paymentPurpose": "327552 POS CHCKING SIG 06/10 02:03 VITALITY SPINE & WE BOCA RATON FL 96400102 32",
+      "debit": 50,
+      "credit": 0,
+      "currency": "USD",
+      "documentNumber": "327552",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-06-11T00:00:00",
+      "counterpartyName": "VITALITY SPINE & WE BOCA RATON FL",
+      "paymentPurpose": "62856 POS CHCKING SIG 06/10 02:08 VITALITY SPINE & WE BOCA RATON FL 96400110 062",
+      "debit": 10,
+      "credit": 0,
+      "currency": "USD",
+      "documentNumber": "62856",
+      "paymentType": "card"
+    }
+  ]
+}

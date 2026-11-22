@@ -38,6 +38,7 @@ import {
   BalanceHistoryImported,
   BalanceHistoryPointDeleted,
   BalanceSheetResponse,
+  BulkAnnotateResult,
   BankSyncConnectionList,
   BudgetImpact,
   BudgetItem,
@@ -45,6 +46,7 @@ import {
   BusinessProfileResponse,
   CashFlowMap,
   CategoryList,
+  CategorySummary,
   CategoryUsageCount,
   Client,
   ClientList,
@@ -88,10 +90,6 @@ import {
   GoalPlanResponse,
   GoalWithProgress,
   ImportSuggestion,
-  IncomeTaxDisclaimer,
-  IncomeTaxDraft,
-  IncomeTaxMappings,
-  IncomeTaxProfile,
   InsightList,
   InvestmentAccountList,
   InvitationPreview,
@@ -182,6 +180,7 @@ import {
   SubscriptionSummary,
   SystemUpdateStatus,
   TagList,
+  TagSummary,
   TransactionTagLinks,
   TaxJurisdictionList,
   TaxRateItem,
@@ -194,6 +193,7 @@ import {
   TelegramReportPage,
   TransactionAttachmentList,
   TransactionCandidates,
+  TransactionCommentEdit,
   TransactionGoalLink,
   TransactionList,
   TrialBalance,
@@ -204,6 +204,9 @@ import {
   UserPermissions,
   UserSessionList,
   UserUpdateResponse,
+  WalletBalanceDays,
+  WalletCoverage,
+  WalletItem,
   WalletList,
   WebhookEndpointList,
   WebhookSubscriptionList,
@@ -406,22 +409,102 @@ describe('API contracts (e2e)', () => {
       expect(res.body.length).toBeGreaterThan(0);
     });
 
+    it('GET /categories/:id/summary, with the row booked in beforeAll', async () => {
+      const categories = await get('/categories?type=expense');
+      const res = await get(`/categories/${categories.body[0].id}/summary`);
+      matches(CategorySummary, res.body);
+      expect(res.body.thisMonth).toBe(42.5);
+      expect(res.body.topPayees).toEqual([
+        expect.objectContaining({ name: 'Contract Coffee', amount: 42.5, count: 1 }),
+      ]);
+    });
+
+    it('GET /tags/:id/summary, with the row booked in beforeAll tagged', async () => {
+      const send = (method: 'post' | 'put', url: string, body: object) =>
+        request(app.getHttpServer())
+          [method](url)
+          .set('Authorization', `Bearer ${owner.token}`)
+          .set('x-workspace-id', owner.workspaceId)
+          .send(body);
+      const tag = await send('post', '/tags', { name: 'Contract Trip' }).expect(201);
+      const rows = await get('/transactions?limit=100');
+      const coffee = rows.body.data.find(
+        (row: { counterpartyName: string }) => row.counterpartyName === 'Contract Coffee',
+      );
+      await send('put', `/transactions/${coffee.id}/tags`, { tagIds: [tag.body.id] }).expect(200);
+      const res = await get(`/tags/${tag.body.id}/summary`);
+      matches(TagSummary, res.body);
+      expect(res.body).toMatchObject({ spent: 42.5, received: 0, direction: 'expense' });
+      expect(res.body.months).toHaveLength(1);
+      expect(res.body.categories).toHaveLength(1);
+      expect(res.body.topPayees).toEqual([
+        expect.objectContaining({ name: 'Contract Coffee', amount: 42.5, count: 1 }),
+      ]);
+      await request(app.getHttpServer())
+        .delete(`/tags/${tag.body.id}`)
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('x-workspace-id', owner.workspaceId)
+        .expect(200);
+    });
+
     it('GET /wallets', async () => {
       await request(app.getHttpServer())
         .post('/wallets')
         .set('Authorization', `Bearer ${owner.token}`)
         .set('x-workspace-id', owner.workspaceId)
-        .send({ name: 'Contract Wallet', currency: 'USD', initialBalance: 12.5 })
+        .send({
+          name: 'Contract Wallet',
+          currency: 'USD',
+          initialBalance: 12.5,
+          includeInNetWorth: false,
+        })
         .expect(201);
+      const card = await request(app.getHttpServer())
+        .post('/wallets')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('x-workspace-id', owner.workspaceId)
+        .send({ name: 'Contract Wallet Card', type: 'credit_card', currency: 'USD', creditLimit: 5000 })
+        .expect(201);
+      matches(WalletItem, card.body);
       const res = await get('/wallets');
       matches(WalletList, res.body);
       expect(res.body[0].initialBalance).toBe('12.50');
+      expect(res.body[0].includeInNetWorth).toBe(false);
+      expect(res.body[0].creditLimit).toBeNull();
+      expect(res.body.find((row: { name: string }) => row.name === 'Contract Wallet Card').creditLimit).toBe('5000.00');
+    });
+
+    it('GET /wallets/coverage, with a bank no account holds', async () => {
+      const [{ id }] = await dataSource.query(
+        `INSERT INTO statements (user_id, workspace_id, file_name, file_path, file_type, file_size, file_hash,
+           bank_name, account_number, currency, statement_date_from, statement_date_to, total_transactions, status)
+         VALUES ($1, $2, 'coverage.csv', '/dev/null', 'csv', 1, $3, 'other', 'DE00 0000 0000 0000 0007',
+           'USD', '2026-01-01', '2026-01-31', 2, 'completed') RETURNING id`,
+        [owner.userId, owner.workspaceId, `coverage-${Date.now()}`],
+      );
+      try {
+        const res = await get('/wallets/coverage');
+        matches(WalletCoverage, res.body);
+        expect(res.body.rows).toContainEqual(
+          expect.objectContaining({ kind: 'bank', accountTail: '0007', dataTo: '2026-01-31' }),
+        );
+      } finally {
+        await dataSource.query('DELETE FROM statements WHERE id = $1', [id]);
+      }
+    });
+
+    it('GET /wallets/balance-days', async () => {
+      const res = await get(`/wallets/balance-days?month=${new Date().toISOString().slice(0, 7)}`);
+      matches(WalletBalanceDays, res.body);
+      expect(res.body.accounts.length).toBeGreaterThan(0);
+      expect(res.body.days.length).toBeGreaterThanOrEqual(28);
     });
   });
 
   describe('budgets and goals', () => {
     const month = new Date().toISOString().slice(0, 7);
     let goalId: string;
+    let followingGoalId: string;
 
     beforeAll(async () => {
       const post = (url: string, body: object) =>
@@ -434,6 +517,21 @@ describe('API contracts (e2e)', () => {
       const goal = await post('/goals', { name: 'Move', targetAmount: 1000, currency: 'USD' });
       goalId = goal.body.id;
       await post(`/goals/${goalId}/contributions`, { amount: 100 });
+      // A goal whose progress is an account's balance, so `account` is exercised with data.
+      const savings = await post('/wallets', {
+        name: 'Goal Savings',
+        type: 'savings',
+        currency: 'USD',
+        initialBalance: 640,
+      });
+      const following = await post('/goals', {
+        name: 'Follows savings',
+        targetAmount: 2000,
+        currency: 'USD',
+        walletId: savings.body.id,
+      });
+      matches(GoalWithProgress, following.body);
+      followingGoalId = following.body.id;
       const categories = await get('/categories?type=expense');
       await post('/budgets', {
         name: 'Food for the move',
@@ -457,10 +555,25 @@ describe('API contracts (e2e)', () => {
       const res = await get('/budgets');
       matches(BudgetList, res.body);
       expect(res.body[0].limitAmount).toBe('250.50');
+      // The monthly budget's own period, which the card counts the days left in.
+      const now = new Date();
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      expect(res.body[0].periodStart).toBe(`${monthKey}-01`);
+      expect(res.body[0].periodEnd).toBe(`${monthKey}-${lastDay}`);
     });
 
     it('GET /goals and /goals?month=', async () => {
-      matches(GoalList, (await get('/goals')).body);
+      const list = (await get('/goals')).body;
+      matches(GoalList, list);
+      expect(list.find((goal: { id: string }) => goal.id === followingGoalId)).toMatchObject({
+        currentAmount: 640,
+        account: { name: 'Goal Savings', currency: 'USD', balance: 640, status: 'following' },
+      });
+      const following = await get(`/goals/${followingGoalId}`);
+      matches(GoalDetail, following.body);
+      expect(following.body.account).toMatchObject({ status: 'following' });
+      matches(GoalPlanResponse, (await get(`/goals/${followingGoalId}/plan`)).body);
       const monthly = await get(`/goals?month=${month}`);
       matches(MonthGoalList, monthly.body);
       expect(monthly.body.length).toBeGreaterThan(0);
@@ -581,6 +694,8 @@ describe('API contracts (e2e)', () => {
       const res = await get('/reports/net-worth?range=30d');
       matches(NetWorthResponse, res.body);
       expect(res.body.assetLines.length).toBeGreaterThan(0);
+      // The wallet made under reference data is set not to count.
+      expect(res.body.accountsLeftOut).toBe(1);
     });
 
     it('GET /reports/balance/sheet', async () => {
@@ -1573,6 +1688,66 @@ describe('API contracts (e2e)', () => {
       expect(payments.body).toHaveLength(1);
       matches(PaymentCandidateList, (await get(`/payables/${payableId}/payment-candidates`)).body);
     });
+
+    it('a repeating bill, its occurrence actions and "not this payment"', async () => {
+      const send = (method: 'post' | 'put', url: string, body: object) =>
+        request(app.getHttpServer())
+          [method](url)
+          .set('Authorization', `Bearer ${owner.token}`)
+          .set('x-workspace-id', owner.workspaceId)
+          .send(body)
+          .expect(method === 'post' ? 201 : 200);
+      const rule = {
+        frequency: 'monthly',
+        interval: 1,
+        startDate: '2027-03-31',
+        monthDay: 'last',
+        shift: 'next',
+        count: 12,
+      };
+      const created = await send('post', '/payables', {
+        vendor: 'Contract Rent',
+        amount: 800,
+        currency: 'USD',
+        remindDaysBefore: 5,
+        recurrence: rule,
+      });
+      matches(Payable, created.body);
+      expect(created.body).toMatchObject({
+        recurrence: rule,
+        seriesId: created.body.id,
+        occurrenceDate: '2027-03-31',
+        baseAmount: null,
+        skippedAt: null,
+        remindDaysBefore: 5,
+      });
+      const id = created.body.id;
+      const moved = await send('put', `/payables/${id}/occurrence`, {
+        action: 'move',
+        dueDate: '2027-04-02',
+      });
+      matches(Payable, moved.body);
+      expect(moved.body).toMatchObject({ dueDate: '2027-04-02', occurrenceDate: '2027-03-31' });
+      const changed = await send('put', `/payables/${id}/occurrence`, {
+        action: 'amount',
+        amount: 850,
+      });
+      matches(Payable, changed.body);
+      expect(changed.body).toMatchObject({ amount: '850.00', baseAmount: '800.00' });
+      const skipped = await send('put', `/payables/${id}/occurrence`, { action: 'skip' });
+      matches(Payable, skipped.body);
+      expect(skipped.body.skippedAt).toEqual(expect.any(String));
+
+      const [row] = await dataSource.query(
+        'SELECT id FROM transactions WHERE workspace_id = $1 LIMIT 1',
+        [owner.workspaceId],
+      );
+      const rejected = await send('post', `/payables/${payableId}/match-rejections`, {
+        transactionId: row.id,
+      });
+      matches(Payable, rejected.body);
+      expect(rejected.body.id).toBe(payableId);
+    });
   });
 
   describe('settings and account', () => {
@@ -1833,6 +2008,9 @@ describe('API contracts (e2e)', () => {
         .expect(200);
       matches(SharedFileAccess, res.body);
       expect(res.body.transactions.length).toBeGreaterThan(0);
+      // The owner's own answer names the split group; the anonymous one leaves it out.
+      expect(details.body.transactions[0]).toHaveProperty('splitGroupId');
+      for (const row of res.body.transactions) expect(row).not.toHaveProperty('splitGroupId');
     });
 
     it('GET /statements/:id', async () => {
@@ -1971,8 +2149,7 @@ describe('API contracts (e2e)', () => {
     });
   });
 
-  describe('tax and income tax', () => {
-    const taxYear = 2025;
+  describe('tax', () => {
     const send = (method: 'post' | 'put', url: string, body: object) =>
       request(app.getHttpServer())
         [method](url)
@@ -1982,11 +2159,6 @@ describe('API contracts (e2e)', () => {
 
     beforeAll(async () => {
       await send('put', '/tax/settings/jurisdiction', { code: 'DE' }).expect(200);
-      await send('put', '/income-tax/profile', {
-        taxYear,
-        taxpayerType: 'self_employed',
-        details: { homeOfficeDays: 120 },
-      }).expect(200);
       const categories = await get('/categories?type=expense');
       const rates = await get('/tax-rates');
       await send('post', '/tax/rules', {
@@ -2101,14 +2273,6 @@ describe('API contracts (e2e)', () => {
       matches(TaxReturnRecord, (await get(`/tax/returns/period?${period}`)).body);
     });
 
-    it('GET the income tax disclaimer, profile, mappings and draft', async () => {
-      matches(IncomeTaxDisclaimer, (await get('/income-tax/disclaimer')).body);
-      const profile = await get(`/income-tax/profile?taxYear=${taxYear}`);
-      matches(IncomeTaxProfile, profile.body);
-      expect(profile.body.filingInfo).not.toBeNull();
-      matches(IncomeTaxMappings, (await get(`/income-tax/mappings?taxYear=${taxYear}`)).body);
-      matches(IncomeTaxDraft, (await get(`/income-tax/returns/${taxYear}`)).body);
-    });
   });
 
   describe('ledger and reconciliation', () => {
@@ -2230,6 +2394,13 @@ describe('API contracts (e2e)', () => {
         AllocationSuggestion,
         (await get(`/payables/allocation-suggestion/${transactionId}`)).body,
       );
+    });
+
+    it('GET who last edited a comment, after an edit', async () => {
+      await send('put', `/transactions/${transactionId}`, { comments: 'Contract comment' }).expect(200);
+      const edit = await get(`/transactions/${transactionId}/comment-edit`);
+      matches(TransactionCommentEdit, edit.body);
+      expect(edit.body.edit).toMatchObject({ by: 'you', name: null });
     });
 
     it('GET the report history and schedules, webhooks and a subscription', async () => {
@@ -2376,6 +2547,15 @@ describe('API contracts (e2e)', () => {
         StorageTagList,
         (await call('put', `/transactions/${transactionId}/tags`, { tagIds: [tag.body.id] }).expect(200)).body,
       );
+      // The selection bar: a second tag and a comment, added to what the row has.
+      const second = await call('post', '/storage/tags', { name: 'Bulk tag' }).expect(201);
+      const annotated = await call('post', '/transactions/bulk-annotate', {
+        ids: [transactionId],
+        addTagIds: [second.body.id],
+        note: 'Checked by Member One',
+      }).expect(200);
+      matches(BulkAnnotateResult, annotated.body);
+      expect(annotated.body).toEqual({ updated: 1, skippedPrivate: 0, skippedTooLong: 0 });
     });
 
     it('the Tags page: create, edit and delete a tag, and tag a receipt', async () => {
@@ -2643,7 +2823,7 @@ describe('API contracts (e2e)', () => {
       );
     });
 
-    it('review approvals, notes, goal contributions and income-tax finalize and reopen', async () => {
+    it('review approvals, notes and goal contributions', async () => {
       const rows = await get('/transactions');
       matches(
         ReviewApproved,
@@ -2676,9 +2856,6 @@ describe('API contracts (e2e)', () => {
         GoalDetail,
         (await call('post', `/goals/${goal.body.id}/contributions`, { amount: 25 }).expect(succeeded)).body,
       );
-      await call('post', '/income-tax/disclaimer').expect(succeeded);
-      matches(IncomeTaxDraft, (await call('post', '/income-tax/returns/2025/finalize').expect(succeeded)).body);
-      matches(IncomeTaxDraft, (await call('post', '/income-tax/returns/2025/reopen').expect(succeeded)).body);
     });
 
     it('imports, a webhook endpoint, a chat, an invoice and semantic search', async () => {

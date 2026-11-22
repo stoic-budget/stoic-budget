@@ -1,18 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
-import { readWorkspaceProfile } from '../../common/utils/workspace-profile.util';
-import { IncomeTaxProfile } from '../../entities/income-tax-profile.entity';
-import { IncomeTaxReturn, IncomeTaxReturnStatus } from '../../entities/income-tax-return.entity';
 import { TaxReturn, TaxReturnStatus } from '../../entities/tax-return.entity';
 import { VatStatus, Workspace, WorkspaceKind } from '../../entities/workspace.entity';
 import {
   WorkspaceServiceSettings,
   WorkspaceServiceSettingsKey,
 } from '../../entities/workspace-service-settings.entity';
-import { filingInfoFor } from '../income-tax/filing-info';
 import type {
   TaxDeadlineResolvedEvent,
   TaxDeadlineUpcomingEvent,
@@ -28,25 +24,12 @@ import {
   vatReturnDueDate,
 } from '../tax/vat-deadlines';
 import { WorkspaceTaxSettingsService } from '../tax/workspace-tax-settings.service';
-
-export interface TaxDeadline {
-  kind: 'vat_return' | 'income_tax';
-  periodStart: string;
-  periodEnd: string;
-  dueDate: string;
-  daysLeft: number;
-  /** Filed (VAT) or finalized (income tax) in the app, or marked as filed outside it. */
-  done: boolean;
-  /** The user said this return was filed outside Seneca. */
-  filedElsewhere: boolean;
-  returnName: string;
-  /**
-   * statute: worked out from the rule in the law; published: the date the
-   * authority announced for this year. `checkedAt` is when that was read.
-   */
-  basis: 'statute' | 'published';
-  checkedAt: string;
-}
+import {
+  daysBetween,
+  TAX_DEADLINE_SOURCE,
+  type TaxDeadline,
+  type TaxDeadlineSource,
+} from './tax-deadline-source';
 
 /** Previous VAT periods looked at: an overdue return stays visible for a while, then drops off. */
 const VAT_LOOKBACK_PERIODS = 2;
@@ -64,17 +47,13 @@ function returnKey(item: { kind: string; periodEnd: string }): string {
   return `${item.kind}:${item.periodEnd}`;
 }
 
-function daysBetween(from: string, to: string): number {
-  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
-}
-
 /**
  * What tax returns are coming up for a workspace, and the daily sweep that
  * reminds its members.
  *
  * Only verified rules are used: a country whose VAT deadline was not checked
- * gets no VAT reminders, and income-tax dates come from the verified filing
- * calendar. "Done" means filed (VAT) or finalized (income tax) here; a return
+ * gets no VAT reminders. Other returns come from a `TAX_DEADLINE_SOURCE` when
+ * an edition provides one. "Done" means filed or finalized here; a return
  * filed elsewhere is unknown to the app, so the reminders stop once it is
  * filed in Seneca too, or once the return falls out of the look-back window.
  */
@@ -87,15 +66,14 @@ export class TaxDeadlinesService {
     private readonly workspaceRepository: Repository<Workspace>,
     @InjectRepository(TaxReturn)
     private readonly taxReturnRepository: Repository<TaxReturn>,
-    @InjectRepository(IncomeTaxReturn)
-    private readonly incomeTaxReturnRepository: Repository<IncomeTaxReturn>,
-    @InjectRepository(IncomeTaxProfile)
-    private readonly incomeTaxProfileRepository: Repository<IncomeTaxProfile>,
     @InjectRepository(WorkspaceServiceSettings)
     private readonly settingsRepository: Repository<WorkspaceServiceSettings>,
     private readonly taxSettingsService: WorkspaceTaxSettingsService,
     private readonly eventEmitter: EventEmitter2,
     private readonly publicHolidaysService: PublicHolidaysService,
+    @Optional()
+    @Inject(TAX_DEADLINE_SOURCE)
+    private readonly otherReturns?: TaxDeadlineSource,
   ) {}
 
   async getUpcoming(
@@ -120,7 +98,7 @@ export class TaxDeadlinesService {
     ]);
     return [
       ...(await this.vatDeadlines(workspace, country, today, holidays)),
-      ...(await this.incomeTaxDeadlines(workspace, country, today, holidays)),
+      ...((await this.otherReturns?.deadlinesFor(workspace, country, today, holidays)) ?? []),
     ]
       .map(item => {
         const filedElsewhere = elsewhere.has(returnKey(item));
@@ -231,53 +209,6 @@ export class TaxDeadlinesService {
         returnName: rule.returnName,
         basis: 'statute',
         checkedAt: VAT_DEADLINES_CHECKED_AT,
-      });
-    }
-    return deadlines;
-  }
-
-  private async incomeTaxDeadlines(
-    workspace: Workspace,
-    country: string,
-    today: string,
-    holidays: ReadonlySet<string>,
-  ): Promise<TaxDeadline[]> {
-    // The declaration is a business feature; a household is not reminded.
-    if (readWorkspaceProfile(workspace) === 'home') {
-      return [];
-    }
-    const deadlines: TaxDeadline[] = [];
-    const thisYear = Number(today.slice(0, 4));
-    for (const taxYear of [thisYear - 1, thisYear]) {
-      const profile = await this.incomeTaxProfileRepository.findOne({
-        where: { workspaceId: workspace.id, taxYear },
-      });
-      const info = filingInfoFor(
-        country,
-        taxYear,
-        profile?.taxpayerType ?? 'self_employed',
-        profile?.details ?? {},
-        holidays,
-      );
-      const standard =
-        info?.deadlines.find(deadline => deadline.kind === 'standard') ?? info?.deadlines[0];
-      if (!(info && standard) || standard.date < today) {
-        continue;
-      }
-      const finalized = await this.incomeTaxReturnRepository.exists({
-        where: { workspaceId: workspace.id, taxYear, status: IncomeTaxReturnStatus.FINALIZED },
-      });
-      deadlines.push({
-        kind: 'income_tax',
-        periodStart: `${taxYear}-01-01`,
-        periodEnd: `${taxYear}-12-31`,
-        dueDate: standard.date,
-        daysLeft: daysBetween(today, standard.date),
-        done: finalized,
-        filedElsewhere: false,
-        returnName: info.formName,
-        basis: info.basis,
-        checkedAt: info.checkedAt,
       });
     }
     return deadlines;

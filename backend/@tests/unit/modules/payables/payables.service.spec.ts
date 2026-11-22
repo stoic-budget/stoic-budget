@@ -891,17 +891,23 @@ describe('PayablesService', () => {
       const queryBuilder = {
         where: vi.fn().mockReturnThis(),
         andWhere: vi.fn().mockReturnThis(),
+        setParameter: vi.fn().mockReturnThis(),
         getMany: vi.fn().mockResolvedValue([payableEntity]),
       };
       vi.spyOn(payableRepository, 'createQueryBuilder').mockReturnValue(queryBuilder as never);
       vi.useFakeTimers().setSystemTime(new Date('2026-03-17T12:00:00.000Z'));
 
       const overdue = await service.findOverduePayables();
-      const dueSoon = await service.findDueSoonPayables(3);
+      const dueSoon = await service.findDueSoonPayables();
 
       expect(overdue).toEqual([payableEntity]);
       expect(dueSoon).toEqual([payableEntity]);
       expect(queryBuilder.andWhere).toHaveBeenCalled();
+      // Each bill's own lead, from today: not a fixed number of days for all.
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        expect.stringContaining('payable.remindDaysBefore'),
+      );
+      expect(queryBuilder.setParameter).toHaveBeenCalledWith('from', '2026-03-17');
       vi.useRealTimers();
     });
 

@@ -1,10 +1,10 @@
-import { AddRuleGroupsAndNotifyMarks1788190000000 } from '@/migrations/1788190000000-AddRuleGroupsAndNotifyMarks';
+import { AddRuleGroupsAndNotifyMarks1789090000000 } from '@/migrations/1789090000000-AddRuleGroupsAndNotifyMarks';
 import type { QueryRunner } from 'typeorm';
 
-describe('AddRuleGroupsAndNotifyMarks1788190000000', () => {
+describe('AddRuleGroupsAndNotifyMarks1789090000000', () => {
   const run = async (step: 'up' | 'down') => {
     const query = vi.fn().mockResolvedValue(undefined);
-    await new AddRuleGroupsAndNotifyMarks1788190000000()[step]({
+    await new AddRuleGroupsAndNotifyMarks1789090000000()[step]({
       query,
     } as unknown as QueryRunner);
     return query.mock.calls.map(([sql]) => String(sql).replace(/\s+/g, ' ').trim());

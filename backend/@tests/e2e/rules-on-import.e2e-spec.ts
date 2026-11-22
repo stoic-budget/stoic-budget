@@ -300,6 +300,30 @@ DATA:OFXSGML
     expect(row).toEqual({ category_id: categoryId, category_source: 'rule' });
   });
 
+  it('files a new import by its payee, which the row gets only as it is saved', async () => {
+    const categories = await as(request(server()).get('/categories?type=expense')).expect(200);
+    const categoryId: string = categories.body[5].id;
+    const [first] = (await importRows(ofx('555000333', 'Y1', 'ACME STORE WIRELESS'))) as Array<{
+      id: string;
+    }>;
+    const [{ payee_id: payeeId }]: Array<{ payee_id: string }> = await dataSource.query(
+      'SELECT payee_id FROM transactions WHERE workspace_id = $1 AND id = $2',
+      [owner.workspaceId, first.id],
+    );
+    expect(payeeId).toBeTruthy();
+    await as(request(server()).post('/categorization-rules'))
+      .send({
+        name: 'By payee',
+        conditions: [{ field: 'payee', operator: 'equals', value: payeeId }],
+        result: { categoryId },
+      })
+      .expect(201);
+
+    const [second] = await importRows(ofx('555000333', 'Y2', 'ACME STORE WIRELESS'));
+
+    expect(second).toMatchObject({ categoryId, categorySource: 'rule' });
+  });
+
   it("refuses a condition naming another workspace's category, tag or payee", async () => {
     const other = await registerAccount(app, otherEmail, 'Member Two');
     const theirs = (req: request.Test) =>

@@ -21,6 +21,7 @@ import {
 } from '../exchange-rates/currency-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
+import { payeeDomains } from './payee-domains';
 import { likelyDuplicateGroups } from './payee-duplicate-groups';
 import {
   AMOUNT_SQL,
@@ -147,6 +148,7 @@ export class PayeesOverviewService {
       [...defaults.values()].map(match => match.categoryId),
     );
     const payeeById = new Map(payees.map(payee => [payee.id, payee]));
+    const domains = await payeeDomains(this.payeeRepository.manager, workspaceId, payees);
     const counts = new Map(monthRows.map(row => [row.month, Number(row.count)]));
 
     return {
@@ -167,6 +169,7 @@ export class PayeesOverviewService {
               categoryId && categoryNames.has(categoryId)
                 ? { id: categoryId, name: categoryNames.get(categoryId) as string }
                 : null,
+            vendorDomain: domains.get(id) ?? null,
             count: totals.count,
             amount: round2(totals.amount),
             lastSeen: totals.lastSeen,
@@ -193,7 +196,7 @@ export class PayeesOverviewService {
     const months = monthsTo(new Date(today)).reverse();
     const target = normalizeCurrencyCode(await this.workspaceCurrency.resolve(workspaceId));
 
-    const [byMonth, span, aliases, subscriptions, undecided] = await Promise.all([
+    const [byMonth, span, aliases, subscriptions, undecided, domains] = await Promise.all([
       payeeFlows(this.transactionRepository, workspaceId, viewerMemberId)
         .select(`to_char(transaction.transactionDate, 'YYYY-MM')`, 'month')
         .addSelect('transaction.transactionType', 'type')
@@ -248,6 +251,7 @@ export class PayeesOverviewService {
           { undecided: UNDECIDED_CATEGORY_SOURCES },
         )
         .getCount(),
+      payeeDomains(this.payeeRepository.manager, workspaceId, [payee]),
     ]);
 
     const converter = await CurrencyConverter.load(
@@ -292,6 +296,7 @@ export class PayeesOverviewService {
       lastSeen: toDateOnly(span?.lastSeen ?? null),
       aliases,
       subscriptions,
+      vendorDomain: domains.get(payee.id) ?? null,
       undecidedCount: undecided,
       missingRates: converter.missing,
     };

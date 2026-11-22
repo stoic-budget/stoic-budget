@@ -27,6 +27,7 @@ import {
 } from './InvestmentLinkActions';
 import { OWNER_SHARED, ownerValueToMemberId } from './OwnerFilterDropdown';
 import { OwnTransferActions } from './OwnTransferActions';
+import { PairBadge } from './PairBadge';
 import { SplitTransactionDialog } from './SplitTransactionDialog';
 import { ActionRow } from './TransactionActionRow';
 import type { Category, Transaction } from './types';
@@ -81,6 +82,7 @@ export function TransactionDetailsTab({
   } = useTransferLink(handleSplitDone);
   const isReimbursementPair = transaction.transferPairKind === 'reimbursement';
   const isInvestmentPair = transaction.transferPairKind === 'investment';
+  const isAdjustment = transaction.transferPairKind === 'adjustment';
   const isInvestmentIncome = linkedAsIncome(transaction);
   const isIncome = transaction.transactionType === 'income';
   const contribution = useContributionLink(handleSplitDone);
@@ -160,17 +162,7 @@ export function TransactionDetailsTab({
   return (
     <div className="seneca-tx-detail">
       {/* Actions */}
-      {transaction.transferPairId && (
-        <div className="seneca-tx-detail__cat-badge" data-testid="transfer-badge">
-          {isInvestmentPair
-            ? isIncome
-              ? t.investment.withdrawalBadge.value
-              : t.investment.badge.value
-            : isReimbursementPair
-              ? t.reimbursement.badge.value
-              : t.transfer.badge.value}
-        </div>
-      )}
+      <PairBadge transaction={transaction} />
       {isInvestmentIncome && (
         <div className="seneca-tx-detail__cat-badge" data-testid="investment-income-badge">
           {t.investment.incomeBadge.value}
@@ -190,8 +182,8 @@ export function TransactionDetailsTab({
       )}
 
       <div className="seneca-tx-detail__actions">
-        {/* Set Category */}
-        {onUpdateCategory && (
+        {/* Set Category; an adjustment takes none */}
+        {onUpdateCategory && !isAdjustment && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <label htmlFor="category-select" className="seneca-tx-detail__field-label">
               {t.splitDialog.category.value}
@@ -271,8 +263,9 @@ export function TransactionDetailsTab({
 
         {/* What can be done to the row: a list, each with a line on what it means. */}
         <div className="seneca-tx-detail__action-list">
-          {/* Split / Undo split */}
+          {/* Split / Undo split; an adjustment is undone by deleting it */}
           {onSplitDone &&
+            !isAdjustment &&
             (transaction.splitGroupId ? (
               <ActionRow
                 label={splitSaving ? t.undoingSplit.value : t.undoSplit.value}
@@ -319,6 +312,8 @@ export function TransactionDetailsTab({
             !isReimbursementPair &&
             !isInvestmentPair &&
             !isInvestmentIncome &&
+            // An adjustment unpaired would turn into spending; deleting it is the undo.
+            !isAdjustment &&
             !transaction.reimbursementOfId &&
             (transaction.transferPairId ? (
               <ActionRow

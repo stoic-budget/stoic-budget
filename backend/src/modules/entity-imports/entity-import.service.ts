@@ -15,7 +15,7 @@ import { ensureCanEdit } from '../../common/utils/ensure-can-edit.util';
 import type { RunEntityImportBody } from '../../contracts';
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
 import { Budget } from '../../entities/budget.entity';
-import { Category, CategorySource, CategoryType } from '../../entities/category.entity';
+import { Category } from '../../entities/category.entity';
 import { Client } from '../../entities/client.entity';
 import {
   ImportBatch,
@@ -34,6 +34,7 @@ import { writeClassification } from '../classification/engine/rule-row-write';
 import { ClassificationService } from '../classification/services/classification.service';
 import { MetalsService } from '../investments/metals.service';
 import type { TransactionsImportedEvent } from '../notifications/events/notification-events';
+import { categoryByName } from './helpers/category-by-name';
 import { nameKey } from './helpers/import-values';
 import { type ImportTargetKind, TARGET_FIELDS } from './target-aliases';
 import { BudgetsTarget } from './targets/budgets.target';
@@ -203,33 +204,17 @@ export class EntityImportService {
           if (cached) {
             return cached;
           }
-          const all = await categoryRepo.find({
-            where: { workspaceId },
-            select: { id: true, name: true, type: true },
+          const found = await categoryByName(categoryRepo, { workspaceId, userId }, name, type, {
+            create: !dryRun,
           });
-          const found =
-            all.find(item => item.type === type && nameKey(item.name) === nameKey(name)) ??
-            all.find(item => nameKey(item.name) === nameKey(name));
-          if (found) {
-            categoryCache.set(key, found.id);
-            return found.id;
-          }
-          if (dryRun) {
+          if (!found) {
             return null;
           }
-          const created = await categoryRepo.save(
-            categoryRepo.create({
-              workspaceId,
-              userId,
-              name: name.trim(),
-              type: type === 'income' ? CategoryType.INCOME : CategoryType.EXPENSE,
-              source: CategorySource.USER,
-              isSystem: false,
-            }),
-          );
-          ctx.created.push({ kind: 'category', id: created.id });
-          categoryCache.set(key, created.id);
-          return created.id;
+          if (found.created) {
+            ctx.created.push({ kind: 'category', id: found.id });
+          }
+          categoryCache.set(key, found.id);
+          return found.id;
         },
         created: [],
         updated: [],

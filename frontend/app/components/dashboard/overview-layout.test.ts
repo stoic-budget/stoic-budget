@@ -4,12 +4,12 @@ import {
   DEFAULT_OVERVIEW_ROWS,
   hideSection,
   isDefaultLayout,
-  KPI_SECTION_IDS,
   moveSection,
   normalizeRows,
   type OverviewRows,
   rowSpans,
   showSection,
+  tellsThePresent,
 } from './overview-layout';
 
 const ROWS: OverviewRows = [['a'], ['b', 'c'], ['d']];
@@ -141,7 +141,7 @@ describe('normalizeRows', () => {
     const rows = normalizeRows({ rows: saved });
 
     expect(rows.slice(0, 3)).toEqual([['getting-started'], ['net-worth'], ['crypto']]);
-    expect(rows.flat().sort()).toEqual([...DEFAULT_OVERVIEW_ROWS.flat(), 'crypto'].sort());
+    expect(rows.flat().sort()).toEqual(DEFAULT_OVERVIEW_ROWS.flat().sort());
   });
 
   it('opens an older saved layout with the setup checklist, and leaves a placed one alone', () => {
@@ -170,7 +170,7 @@ describe('normalizeRows', () => {
       ['kpi-spent', 'kpi-income', 'kpi-net'],
       ['crypto'],
     ]);
-    expect(rows.flat().sort()).toEqual([...DEFAULT_OVERVIEW_ROWS.flat(), 'crypto'].sort());
+    expect(rows.flat().sort()).toEqual(DEFAULT_OVERVIEW_ROWS.flat().sort());
   });
 
   it('keeps a saved row of four KPI tiles whole once the savings rate joined the net tile', () => {
@@ -192,7 +192,6 @@ describe('hidden and optional sections', () => {
 
     expect(rows).not.toContain('taxes');
     expect(rows).not.toContain('money-owed');
-    expect(rows).not.toContain('crypto');
     expect(rows).toContain('safe-to-spend');
     expect(normalizeRows({ rows: [['goals'], ['taxes']] }).flat()).toContain('taxes');
   });
@@ -218,6 +217,32 @@ describe('hidden and optional sections', () => {
     });
   });
 
+  it('puts the crypto card beside the net worth in a layout saved without it', () => {
+    const rows = normalizeRows({ rows: [['getting-started'], ['net-worth'], ['goals']] });
+
+    expect(rows.slice(0, 3)).toEqual([['getting-started'], ['net-worth', 'crypto'], ['goals']]);
+    expect(rows.flat().filter(id => id === 'crypto')).toHaveLength(1);
+  });
+
+  it('puts the crypto card under the net worth when its row is full', () => {
+    const rows = normalizeRows({ rows: [['getting-started'], ['net-worth', 'goals'], ['budgets']] });
+
+    expect(rows.slice(0, 4)).toEqual([
+      ['getting-started'],
+      ['net-worth', 'goals'],
+      ['crypto'],
+      ['budgets'],
+    ]);
+  });
+
+  it('keeps the crypto card off once it was hidden, and where it was put once placed', () => {
+    const hidden = normalizeRows({ rows: [['net-worth']], hidden: ['crypto'] });
+    expect(hidden.flat()).not.toContain('crypto');
+
+    const placed = normalizeRows({ rows: [['getting-started'], ['crypto'], ['net-worth']] });
+    expect(placed.slice(0, 3)).toEqual([['getting-started'], ['crypto'], ['net-worth']]);
+  });
+
   it('hides a section that is both saved in a row and marked hidden', () => {
     expect(normalizeRows({ rows: [['goals', 'crypto']], hidden: ['crypto'] })[1]).toEqual([
       'goals',
@@ -226,19 +251,22 @@ describe('hidden and optional sections', () => {
 });
 
 describe('the shipped layout', () => {
-  // Saved in the Administrator workspace on 2026-11-02, nothing hidden.
-  const administrator = [
-    ['getting-started'],
-    ['kpi-income', 'kpi-spent', 'kpi-net', 'kpi-savings'],
-    ['cash-flow'],
-    ['top-categories', 'recent-transactions'],
-    ['balances', 'safe-to-spend'],
-    ['goals', 'cash-runway'],
-    ['budgets', 'month-close'],
-    ['net-worth'],
-    ['activity'],
-    ['advice'],
-  ];
+  // Saved in the Administrator workspace on 2026-11-15.
+  const administrator = {
+    rows: [
+      ['getting-started'],
+      ['kpi-income', 'kpi-spent', 'kpi-net'],
+      ['cash-flow'],
+      ['top-categories', 'recent-transactions'],
+      ['data-sources', 'advice'],
+      ['balances', 'safe-to-spend'],
+      ['goals', 'cash-runway'],
+      ['budgets', 'month-close'],
+      ['net-worth', 'crypto'],
+      ['activity'],
+    ],
+    hidden: ['money-owed', 'taxes'],
+  };
 
   // The Administrator layout of 2026-10-21, from before two sections were folded into others.
   const older = {
@@ -256,11 +284,10 @@ describe('the shipped layout', () => {
     hidden: [],
   };
 
-  it('is the Administrator layout, its KPI row led by what is left to spend', () => {
-    // The savings rate went into the net tile.
-    expect(DEFAULT_OVERVIEW_ROWS).toEqual(
-      administrator.map(row => (row.includes('kpi-spent') ? [...KPI_SECTION_IDS] : row)),
-    );
+  it('is the Administrator layout, crypto beside the net worth', () => {
+    expect(DEFAULT_OVERVIEW_ROWS).toEqual(administrator.rows);
+    expect(normalizeRows(administrator)).toEqual(DEFAULT_OVERVIEW_ROWS);
+    expect(isDefaultLayout(normalizeRows(administrator))).toBe(true);
     expect(DEFAULT_OVERVIEW_ROWS.flat()).not.toContain('money-owed');
     expect(DEFAULT_OVERVIEW_ROWS.flat()).not.toContain('taxes');
   });
@@ -268,12 +295,17 @@ describe('the shipped layout', () => {
   it('keeps the saved layout as it was, adding a section shipped after it at the end', () => {
     // Less the spending calendar, which is now a view of the cash flow card,
     // upcoming charges, which went into the subscriptions card, and the savings
-    // rate, which went into the net tile.
+    // rate, which went into the net tile; crypto joins the net worth.
     expect(normalizeRows(older)).toEqual([
       ...older.rows
         .filter(row => !row.includes('spend-calendar'))
-        .map(row => row.filter(id => id !== 'upcoming-charges' && id !== 'kpi-savings')),
-      ['balances'],
+        .map(row => row.filter(id => id !== 'upcoming-charges' && id !== 'kpi-savings'))
+        .map(row => (row.includes('net-worth') ? [...row, 'crypto'] : row)),
+      ['balances', 'data-sources'],
     ]);
+  });
+
+  it('tells the present with data freshness, whichever month is shown', () => {
+    expect(tellsThePresent('data-sources')).toBe(true);
   });
 });

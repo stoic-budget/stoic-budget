@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { Select } from '@/app/components/ui/select';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer } from '@/app/i18n';
@@ -10,7 +11,9 @@ import { queryKeys } from '@/app/lib/query-keys';
 /**
  * Which account a manual expense left. Only accounts in the expense's currency
  * are offered (a euro payment cannot leave a dollar account), and nothing is
- * shown while the workspace has none.
+ * shown while the workspace has none. A chosen account the field no longer
+ * offers (the currency changed, the account was closed) is dropped, so the form
+ * never sends an account it does not show.
  */
 export function ExpenseAccountField({
   currency,
@@ -31,6 +34,12 @@ export function ExpenseAccountField({
   const options = (accounts.data ?? []).filter(
     account => account.isActive && account.currency.toUpperCase() === currency.toUpperCase(),
   );
+  const offered = options.some(account => account.id === value);
+  useEffect(() => {
+    if (value && !accounts.isPending && !offered) {
+      onChange(undefined);
+    }
+  }, [value, accounts.isPending, offered, onChange]);
   if (options.length === 0) {
     return null;
   }

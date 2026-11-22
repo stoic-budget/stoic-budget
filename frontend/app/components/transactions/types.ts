@@ -34,6 +34,8 @@ export interface Transaction {
   wallet?: { name: string };
   /** The user's account the row is in; null when it is in none. */
   walletId?: string | null;
+  /** Set when a synced crypto wallet brought the row in, not a statement. */
+  cryptoWalletId?: string | null;
   /** Membership id of whoever this belongs to; null means the household shares it. */
   ownerMemberId?: string | null;
   /** Hidden from the rest of the household: merchant and purpose read as "—". */
@@ -55,7 +57,7 @@ export interface Transaction {
   // Transfer between the user's own accounts (both legs share the id)
   transferPairId?: string | null;
   transferPairSource?: 'auto' | 'manual' | 'rejected' | null;
-  transferPairKind?: 'transfer' | 'reimbursement' | 'investment' | null;
+  transferPairKind?: 'transfer' | 'reimbursement' | 'investment' | 'adjustment' | null;
   // The investment account the row is linked to: an expense moved into it or income taken
   // out of it (a one-leg transfer of kind `investment`), or a dividend it paid (no pair)
   investmentAccountId?: string | null;

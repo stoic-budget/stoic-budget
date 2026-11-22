@@ -1,6 +1,7 @@
 import { User, UserRole } from '@/entities/user.entity';
 import { AuditAction, EntityType, Severity } from '@/entities/audit-event.entity';
 import { AuditService } from '@/modules/audit/audit.service';
+import { CalendarFeedRevocationService } from '@/modules/calendar-feed/calendar-feed-revocation.service';
 import { AuthSession } from '@/entities/auth-session.entity';
 import { WorkspaceMember } from '@/entities/workspace-member.entity';
 import { Workspace } from '@/entities/workspace.entity';
@@ -30,6 +31,7 @@ describe('UsersService', () => {
   let workspaceRepository: Repository<Workspace>;
   let workspacesService: WorkspacesService;
   const auditService = { createEvent: vi.fn() };
+  const calendarFeeds = { revokeAllOf: vi.fn() };
 
   const mockUser: Partial<User> = {
     id: '1',
@@ -92,6 +94,7 @@ describe('UsersService', () => {
           },
         },
         { provide: AuditService, useValue: auditService },
+        { provide: CalendarFeedRevocationService, useValue: calendarFeeds },
       ],
     }).compile();
 
@@ -161,6 +164,22 @@ describe('UsersService', () => {
 
       expect(result.name).toBe(updateDto.name);
       expect(repository.save).toHaveBeenCalled();
+    });
+
+    it("ends a deactivated account's calendar links, so a reactivation does not revive them", async () => {
+      const adminUser = { ...mockUser, id: '2', role: UserRole.ADMIN };
+      vi.spyOn(repository, 'findOne').mockResolvedValue({ ...mockUser } as User);
+      vi.spyOn(repository, 'save').mockImplementation(async user => user as User);
+
+      await service.update('1', { isActive: false }, adminUser as User);
+      expect(calendarFeeds.revokeAllOf).toHaveBeenCalledWith('1');
+
+      calendarFeeds.revokeAllOf.mockClear();
+      vi.spyOn(repository, 'findOne').mockResolvedValue({ ...mockUser, isActive: false } as User);
+      await service.update('1', { isActive: true }, adminUser as User);
+      vi.spyOn(repository, 'findOne').mockResolvedValue({ ...mockUser } as User);
+      await service.update('1', { name: 'Member One' }, adminUser as User);
+      expect(calendarFeeds.revokeAllOf).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if user does not exist', async () => {

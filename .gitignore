@@ -95,3 +95,6 @@ backup_*.sql
 # Python bytecode (skill scripts)
 __pycache__/
 *.pyc
+
+# Local acceptance screenshots
+.claude-shots/

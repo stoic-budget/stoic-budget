@@ -66,8 +66,15 @@ const UNREAD_STATEMENT_STATUSES = "'error', 'processing'";
 export function onlyFlows<T extends { andWhere(where: string): T }>(
   query: T,
   alias: string,
-  /** Data-health counts look at what still waits too: everything but the confirmation check. */
-  { includeUnconfirmed = false }: { includeUnconfirmed?: boolean } = {},
+  {
+    includeUnconfirmed = false,
+    includeExcluded = false,
+  }: {
+    /** Data-health counts look at what still waits too: everything but the confirmation check. */
+    includeUnconfirmed?: boolean;
+    /** A balance keeps rows left out of budgets: the money still moved. */
+    includeExcluded?: boolean;
+  } = {},
 ): T {
   const counted = includeUnconfirmed
     ? query
@@ -76,12 +83,12 @@ export function onlyFlows<T extends { andWhere(where: string): T }>(
           `NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = ${alias}.statementId AND trashed.deleted_at IS NOT NULL)`,
         )
     : onlyCounted(query, alias);
-  return counted
-    .andWhere(
-      `NOT EXISTS (SELECT 1 FROM statements unread WHERE unread.id = ${alias}.statementId AND unread.status IN (${UNREAD_STATEMENT_STATUSES}))`,
-    )
-    .andWhere(`${alias}.excludedFromBudgets = false`)
-    .andWhere(settlesIfCrypto(`${alias}.cryptoWalletId`, `${alias}.id`));
+  const read = counted.andWhere(
+    `NOT EXISTS (SELECT 1 FROM statements unread WHERE unread.id = ${alias}.statementId AND unread.status IN (${UNREAD_STATEMENT_STATUSES}))`,
+  );
+  return (includeExcluded ? read : read.andWhere(`${alias}.excludedFromBudgets = false`)).andWhere(
+    settlesIfCrypto(`${alias}.cryptoWalletId`, `${alias}.id`),
+  );
 }
 
 /** `onlyFlows` for raw SQL over the `transactions` table: `AND ${flowsSql('t')}`. */

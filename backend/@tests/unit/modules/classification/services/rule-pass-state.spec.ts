@@ -1,5 +1,6 @@
 import { CategorizationRule } from '@/entities/categorization-rule.entity';
 import { Payee } from '@/entities/payee.entity';
+import { PayeeAlias } from '@/entities/payee-alias.entity';
 import { Tag } from '@/entities/tag.entity';
 import { type Transaction, TransactionCategorySource } from '@/entities/transaction.entity';
 import { planRuleApply } from '@/modules/classification/engine/rule-apply-plan';
@@ -71,12 +72,15 @@ const groceriesTagged = rule('groceries tagged', {
 });
 
 /** A manager whose workspace owns every id but `FOREIGN`, and whose rows have `tags`. */
-function managerWith(tags: Record<string, string[]> = {}) {
+function managerWith(tags: Record<string, string[]> = {}, aliasPayeeId: string | null = null) {
   return {
-    getRepository: () => ({
-      countBy: async ({ id }: { id: { value: string[] } }) =>
-        id.value.filter(one => one !== FOREIGN).length,
-    }),
+    getRepository: (entity?: unknown) =>
+      entity === PayeeAlias
+        ? { findOne: async () => (aliasPayeeId ? { payeeId: aliasPayeeId } : null) }
+        : {
+            countBy: async ({ id }: { id: { value: string[] } }) =>
+              id.value.filter(one => one !== FOREIGN).length,
+          },
     query: vi.fn(async (_sql: string, [, ids]: [string, string[]]) =>
       ids.flatMap(id => (tags[id] ?? []).map(tag_id => ({ transaction_id: id, tag_id }))),
     ),
@@ -121,6 +125,29 @@ describe('the rules on a row being classified', () => {
     await applicableRules(manager as never, WORKSPACE, [asksTags], row(undefined as never));
     await applicableRules(manager as never, WORKSPACE, [files], row('saved'));
     expect(manager.query).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('a payee condition on a row being imported', () => {
+  const PAYEE = '77777777-7777-4777-8777-777777777777';
+  const isPayee = rule('is the payee', {
+    conditions: [{ field: 'payee', operator: 'equals', value: PAYEE }],
+    result: { categoryId: GADGETS },
+  });
+
+  it('reads the payee the row gets on save from the alias of its descriptor', async () => {
+    const ids = async (aliasPayeeId: string | null) =>
+      (
+        await applicableRules(
+          managerWith({}, aliasPayeeId) as never,
+          WORKSPACE,
+          [isPayee],
+          row(undefined as never),
+        )
+      ).map(one => one.id);
+
+    expect(await ids(PAYEE)).toEqual(['is the payee']);
+    expect(await ids(null)).toEqual([]);
   });
 });
 
@@ -187,6 +214,23 @@ describe('the rules on a row classified again', () => {
     expect(await ids([namesPayee, writesNote], byRule)).toEqual(['names payee', 'writes note']);
     expect(await ids([namesPayee, writesNote], byHand)).toEqual([]);
   });
+
+  it('let a rule below read the comment a rule above writes, as on import', async () => {
+    const writes = rule('writes note', { priority: 2, result: { comment: NOTE } });
+    const reads = rule('reads note', {
+      priority: 1,
+      conditions: [{ field: 'comment', operator: 'equals', value: NOTE }],
+      result: { categoryId: GADGETS },
+    });
+    const filed = row('filed', {
+      comments: NOTE,
+      categoryId: GADGETS,
+      categorySource: TransactionCategorySource.RULE,
+    });
+
+    expect(await ids([writes, reads], row('fresh'))).toEqual(['writes note', 'reads note']);
+    expect(await ids([writes, reads], filed)).toEqual(['writes note', 'reads note']);
+  });
 });
 
 describe('applying a rule whose conditions read what rules above set', () => {
@@ -200,6 +244,46 @@ describe('applying a rule whose conditions read what rules above set', () => {
 
     expect(plan.matches.map(one => one.id)).toEqual(['open']);
     expect(plan.tagged.map(one => one.id)).toEqual(['open']);
+  });
+
+  it('reads a suggested category as blank, as an import does, and refiles the row', () => {
+    const fill = rule('fill blank', {
+      conditions: [
+        { field: 'counterparty_name', operator: 'contains', value: 'acme' },
+        { field: 'category', operator: 'is_empty', value: '' },
+      ],
+      result: { categoryId: GROCERIES },
+    });
+    const suggested = row('suggested', {
+      categoryId: GADGETS,
+      categorySource: TransactionCategorySource.BRAND,
+    });
+
+    const plan = planRuleApply([suggested], fill, {
+      viewerMemberId: null,
+      setsCategory: true,
+      setsTags: false,
+    });
+
+    expect(plan.matches.map(one => one.id)).toEqual(['suggested']);
+    expect(plan.refiled.map(one => one.id)).toEqual(['suggested']);
+  });
+
+  it('reads a category with no recorded source as there, as apply keeps it', () => {
+    const empty = rule('no category', {
+      conditions: [{ field: 'category', operator: 'is_empty', value: '' }],
+      result: { tagIds: [TAG_WORK] },
+    });
+    const older = row('older', { categoryId: GADGETS, categorySource: null });
+
+    const plan = planRuleApply([older], empty, {
+      viewerMemberId: null,
+      setsCategory: false,
+      setsTags: true,
+      written: [empty],
+    });
+
+    expect(plan.matches).toEqual([]);
   });
 
   it('counts a row missing from the loaded tags as having none, not its relation', () => {
@@ -274,6 +358,45 @@ describe('the preview of a rule below others', () => {
     expect(preview.matchedTransactions).toBe(0);
     expect(fresh.matchedTransactions).toBe(1);
   });
+
+  it('does not read a tag a rule below adds as the row’s own', async () => {
+    const draft = rule('draft', {
+      conditions: [{ field: 'tags', operator: 'is_empty', value: '' }],
+      result: { categoryId: GADGETS },
+    });
+    const tagsBelow = rule('tags below', { result: { tagIds: [TAG_WORK] } });
+    const service = previewService([row('tagged')], [draft, tagsBelow], { tagged: [TAG_WORK] });
+
+    const preview = await service.previewRule({
+      workspaceId: WORKSPACE,
+      viewerMemberId: null,
+      conditions: draft.conditions,
+      ruleId: 'draft',
+    });
+
+    expect(preview.matchedTransactions).toBe(1);
+  });
+
+  it('does not see a category a rule below wrote on the row, as on import', async () => {
+    const early = rule('early', {
+      conditions: [{ field: 'category', operator: 'equals', value: GROCERIES }],
+      result: { tagIds: [TAG_WORK] },
+    });
+    const filedBelow = row('filed', {
+      categoryId: GROCERIES,
+      categorySource: TransactionCategorySource.RULE,
+    });
+    const service = previewService([filedBelow], [early, files]);
+
+    const preview = await service.previewRule({
+      workspaceId: WORKSPACE,
+      viewerMemberId: null,
+      conditions: early.conditions,
+      ruleId: 'early',
+    });
+
+    expect(preview.matchedTransactions).toBe(0);
+  });
 });
 
 describe('rule health on rules that ask about the category', () => {
@@ -299,6 +422,42 @@ describe('rule health on rules that ask about the category', () => {
     ).contradictedRules(WORKSPACE, [blankOnly], new Date(2026, 10, 1));
 
     expect(contradicted).toEqual([{ id: 'blank is gadgets', name: 'blank is gadgets', count: 3 }]);
+  });
+
+  it('reads a comment a rule wrote as not there, as an import would', async () => {
+    const NOTE = 'Weekly shop';
+    // It wrote the note on these rows once; it no longer matches them.
+    const writes = rule('writes note', {
+      priority: 2,
+      conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'bakery' }],
+      result: { comment: NOTE },
+    });
+    const noNote = rule('no note is gadgets', {
+      priority: 1,
+      conditions: [{ field: 'comment', operator: 'is_empty', value: '' }],
+      result: { categoryId: GADGETS },
+    });
+    const qb: Record<string, unknown> = {};
+    for (const method of ['where', 'andWhere', 'orderBy', 'take']) {
+      qb[method] = vi.fn(() => qb);
+    }
+    const filedByHand = (id: string) =>
+      row(id, { categoryId: 'fun', categorySource: TransactionCategorySource.MANUAL, comments: NOTE });
+    qb.getMany = vi.fn(async () => [filedByHand('a'), filedByHand('b'), filedByHand('c')]);
+    const service = new RuleHealthService(
+      { manager: managerWith() } as never,
+      { createQueryBuilder: () => qb, manager: managerWith() } as never,
+      {} as never,
+      {} as never,
+    );
+
+    const contradicted = await (
+      service as unknown as {
+        contradictedRules: (ws: string, rules: unknown[], now: Date) => Promise<unknown[]>;
+      }
+    ).contradictedRules(WORKSPACE, [writes, noNote], new Date(2026, 10, 1));
+
+    expect(contradicted).toEqual([{ id: 'no note is gadgets', name: 'no note is gadgets', count: 3 }]);
   });
 });
 

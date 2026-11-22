@@ -289,6 +289,8 @@ describe('validation of the new conditions', () => {
     invalid(when('payee', 'equals', [PAYEE_ACME, 'ACME Store']));
     invalid(when('comment', 'is_empty', 'weekly'));
     invalid(when('tags', 'is_empty', TAG_WORK));
+    // Ids are compared as text, so an upper-case one would never match.
+    invalid(when('payee', 'equals', 'abcdef01-aaaa-4bbb-8ccc-dddddddddddd'.toUpperCase()));
   });
 
   it('checks the conditions inside a group too', () => {
