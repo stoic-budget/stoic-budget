@@ -1,17 +1,17 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { AddBankSyncSchedule1788360000000 } from '../../../src/migrations/1788360000000-AddBankSyncSchedule';
+import { AddBankSyncSchedule1789160000000 } from '../../../src/migrations/1789160000000-AddBankSyncSchedule';
 
 describe('AddBankSyncSchedule migration', () => {
   const source = readFileSync(
-    path.join(process.cwd(), 'src', 'migrations', '1788360000000-AddBankSyncSchedule.ts'),
+    path.join(process.cwd(), 'src', 'migrations', '1789160000000-AddBankSyncSchedule.ts'),
     'utf8',
   );
 
   const run = async (direction: 'up' | 'down'): Promise<string[]> => {
     const queries: string[] = [];
     const runner = { query: vi.fn(async (sql: string) => void queries.push(sql)) };
-    await new AddBankSyncSchedule1788360000000()[direction](runner as never);
+    await new AddBankSyncSchedule1789160000000()[direction](runner as never);
     return queries.map(sql => sql.replace(/\s+/g, ' '));
   };
 

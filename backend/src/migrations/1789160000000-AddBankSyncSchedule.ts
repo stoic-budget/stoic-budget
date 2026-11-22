@@ -9,8 +9,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * hours, the cadence they had: due all at once, the first tick after the deploy
  * would pull every connection of the instance together.
  */
-export class AddBankSyncSchedule1788360000000 implements MigrationInterface {
-  name = 'AddBankSyncSchedule1788360000000';
+export class AddBankSyncSchedule1789160000000 implements MigrationInterface {
+  name = 'AddBankSyncSchedule1789160000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
