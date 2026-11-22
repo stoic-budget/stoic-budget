@@ -19,14 +19,16 @@ const LETTER_SIGNS = new RegExp(LETTER_SIGN.source, 'g');
  * "-1.450,77", "1 200,45", "(12.00)", "100.00-", ".11" for 0.11). Requiring the decimals keeps
  * reference numbers such as "8373579" out.
  */
-const AMOUNT_SHAPE = /^[-+(]?(?:(?:\d{1,3}(?:[ .,  ]\d{3})+|\d+)[.,]\d{2}|\.\d{2})\)?-?$/;
+/** Thousands in threes, or the Indian way (lakhs and crores in twos): "1,02,801.86". */
+const AMOUNT_SHAPE =
+  /^[-+(]?(?:(?:\d{1,2}(?:,\d{2})+,\d{3}|\d{1,3}(?:[ .,  ]\d{3})+|\d+)[.,]\d{2}|\.\d{2})\)?[-+]?$/;
 
 /** Parses a printed amount, currency marks included; null when it is not one. */
 /**
  * The side written after the figure: "1.500,00 (-)", "120.000,00(+)",
- * "1,000.00 Cr", "250.00 DR", "1.95 cr".
+ * "1,000.00 Cr", "250.00 DR", "1.95 cr", glued on too: "3,193.31Cr", or in brackets: "300.00 (Dr)".
  */
-const SIGN_SUFFIX = /\s*(?:\(([+-])\)|\b([CcDd])[Rr]\.?)$/;
+const SIGN_SUFFIX = /\s*(?:\(([+-])\)|\(?(?:\b|(?<=\d))([CcDd])[Rr]\.?\)?)$/;
 
 export function parseStatementAmount(text: string): number | null {
   const suffix = text.trim().match(SIGN_SUFFIX);
@@ -41,30 +43,35 @@ export function parseStatementAmount(text: string): number | null {
     .replace(/\s+/g, ' ')
     .replace(/−/g, '-')
     .trim()
-    // The sign spaced from the figure: "+ $0.05", "- $12.89".
-    .replace(/^([-+])\s+(?=[\d.])/, '$1');
+    // The sign spaced from the figure: "+ $0.05", "- $12.89", "6.22 -".
+    .replace(/^([-+])\s+(?=[\d.])/, '$1')
+    .replace(/(?<=\d)\s+-$/, '-');
   if (!AMOUNT_SHAPE.test(bare)) {
     return null;
   }
-  return normalizeNumber(bare);
+  // "13.53+" keeps its sign after the figure, as "100.00-" does.
+  return normalizeNumber(bare.replace(/\+$/, ''));
 }
 
 /**
  * A currency mark glued to the figure, the sign of the amount before it or
- * not: "$4,082.88", "-$503.00", "S$12.00".
+ * not: "$4,082.88", "-$503.00", "S$12.00"; or after it: "-300,00€".
  */
 const GLUED_SYMBOL = new RegExp(`^([-+(−]?)[A-Z]{0,3}[${CURRENCY_SYMBOLS}](?=\\d)`);
+const TRAILING_SYMBOL = new RegExp(`(?<=\\d)[${CURRENCY_SYMBOLS}]$`);
 
 /** A word that can be part of a printed amount: digits, a sign, or a currency mark. */
 export function isAmountPart(word: string): boolean {
   const figure = word
     .replace(LETTER_SIGNS, '')
     .replace(GLUED_SYMBOL, '$1')
-    .replace(/\([+-]\)$/, '');
+    .replace(TRAILING_SYMBOL, '')
+    .replace(/\([+-]\)$/, '')
+    .replace(/(\d)[CcDd][Rr]\.?$/, '$1');
   return (
-    /^[-+(−]?[\d.,]*\d[\d.,]*\)?-?$/.test(figure) ||
+    /^[-+(−]?[\d.,]*\d[\d.,]*\)?[-+]?$/.test(figure) ||
     new RegExp(
-      `^(?:[A-Z]{0,3}[${CURRENCY_SYMBOLS}]|[A-Z]{3}|[-+=]|\\([+-]\\)|[CcDd][Rr]\\.?)$`,
+      `^(?:[A-Z]{0,3}[${CURRENCY_SYMBOLS}]|[A-Z]{3}|[-+=]|\\([+-]\\)|\\(?[CcDd][Rr]\\.?\\)?)$`,
     ).test(word)
   );
 }
@@ -74,8 +81,9 @@ export function isAmountPart(word: string): boolean {
  * first: "1 janvier 2025 10 750,00 $" would otherwise read "2025 10".
  */
 export function findStatementAmounts(text: string): number[] {
+  // A minus after the figure ("$3.22-") is its sign; not a hyphen into a word ("12.50-ACME").
   const pattern = new RegExp(
-    `[-+]?(?:${LETTER_SIGN.source})?(?:\\d{1,3}(?:[ .,  ]\\d{3})+|\\d+)[.,]\\d{2}(?!\\d)(?:\\s?\\([+-]\\))?`,
+    `[-+]?(?:${LETTER_SIGN.source})?(?:\\d{1,2}(?:,\\d{2})+,\\d{3}|\\d{1,3}(?:[ .,  ]\\d{3})+|\\d+)[.,]\\d{2}(?!\\d)(?:\\s?\\([+-]\\)|-(?![\\w-]))?`,
     'g',
   );
   return Array.from(text.matchAll(pattern), match => parseStatementAmount(match[0])).filter(

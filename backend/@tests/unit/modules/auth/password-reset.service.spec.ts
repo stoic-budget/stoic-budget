@@ -26,6 +26,7 @@ describe('PasswordResetService', () => {
   let passkeysService: { reportRemoved: Mock };
   let mailerService: { send: Mock };
   let auditService: { createEvent: Mock };
+  let calendarFeeds: { revokeAllOf: Mock };
   let service: PasswordResetService;
 
   const activeUser = {
@@ -58,6 +59,7 @@ describe('PasswordResetService', () => {
     passkeysService = { reportRemoved: vi.fn() };
     mailerService = { send: vi.fn().mockResolvedValue(true) };
     auditService = { createEvent: vi.fn().mockResolvedValue({}) };
+    calendarFeeds = { revokeAllOf: vi.fn() };
 
     service = new PasswordResetService(
       userRepository as never,
@@ -67,6 +69,7 @@ describe('PasswordResetService', () => {
       { get: (key: string) => (key === 'JWT_SECRET' ? SECRET : undefined) } as never,
       auditService as never,
       passkeysService as never,
+      calendarFeeds as never,
     );
   });
 
@@ -182,6 +185,33 @@ describe('PasswordResetService', () => {
       );
       expect(manager.update).toHaveBeenCalledTimes(1);
       expect(auditService.createEvent).not.toHaveBeenCalled();
+    });
+
+    it('ends the calendar feed links of every workspace', async () => {
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser });
+
+      await service.resetPassword('plain-token', 'BrandNewPass1');
+
+      expect(calendarFeeds.revokeAllOf).toHaveBeenCalledWith('user-1');
+    });
+
+    it('spends the link as soon as the password changed, so a later failure cannot reuse it', async () => {
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser });
+      calendarFeeds.revokeAllOf.mockRejectedValueOnce(new Error('database went away'));
+
+      await expect(service.resetPassword('plain-token', 'BrandNewPass1')).rejects.toThrow();
+
+      // Claimed inside the transaction that already committed before the feeds failed.
+      expect(manager.update).toHaveBeenCalledWith(
+        PasswordResetToken,
+        { id: 'token-1', usedAt: IsNull() },
+        { usedAt: expect.any(Date) },
+      );
+      expect(calendarFeeds.revokeAllOf.mock.invocationCallOrder[0]).toBeGreaterThan(
+        userRepository.manager.transaction.mock.invocationCallOrder[0],
+      );
     });
 
     it('logs the completed reset without the password, hash or token', async () => {

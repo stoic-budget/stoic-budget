@@ -2,6 +2,7 @@ import { ConflictException, ForbiddenException, Injectable, Logger } from '@nest
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { IsNull, type Repository } from 'typeorm';
+import { shownSession } from '../../../common/demo/demo-mode';
 import { appError } from '../../../common/errors/app-error';
 import {
   AuditAction,
@@ -96,17 +97,19 @@ export class AccountDataService {
         joinedAt: member.createdAt,
       })),
       // Token hashes stay server-side; the export describes the session, not its secret.
-      authSessions: sessions.map(session => ({
-        id: session.id,
-        device: session.device,
-        browser: session.browser,
-        os: session.os,
-        ipAddress: session.ipAddress,
-        userAgent: session.userAgent,
-        createdAt: session.createdAt,
-        lastUsedAt: session.lastUsedAt,
-        revokedAt: session.revokedAt,
-      })),
+      authSessions: sessions.map(session =>
+        shownSession({
+          id: session.id,
+          device: session.device,
+          browser: session.browser,
+          os: session.os,
+          ipAddress: session.ipAddress,
+          userAgent: session.userAgent,
+          createdAt: session.createdAt,
+          lastUsedAt: session.lastUsedAt,
+          revokedAt: session.revokedAt,
+        }),
+      ),
       // The passkey's label and dates; the key and its counter stay server-side.
       passkeys: passkeys.map(passkey => ({
         name: passkey.name,

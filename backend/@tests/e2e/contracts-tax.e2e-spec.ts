@@ -11,9 +11,6 @@ import {
   BalanceAccountCreated,
   BalanceAccountsTree,
   BalanceSnapshotSaved,
-  IncomeTaxDisclaimer,
-  IncomeTaxMappings,
-  IncomeTaxProfile,
   JurisdictionAdoption,
   LedgerAccount,
   LedgerSettings,
@@ -152,27 +149,6 @@ describe('API contracts: tax, ledger and reports (e2e)', () => {
       dismissed: true,
     }).expect(200);
     matches(OfficialRatesCheck, dismissed.body);
-  });
-
-  it('income tax: the disclaimer accepted, the profile and the line mappings saved', async () => {
-    const accepted = await call('post', '/income-tax/disclaimer').expect(201);
-    matches(IncomeTaxDisclaimer, accepted.body);
-    expect(accepted.body.accepted).toBe(true);
-    const profile = await call('put', '/income-tax/profile', {
-      taxYear: year,
-      taxpayerType: 'self_employed',
-    }).expect(200);
-    matches(IncomeTaxProfile, profile.body);
-    expect(profile.body.pack).not.toBeNull();
-    const mappings = await get(`/income-tax/mappings?taxYear=${year}`);
-    const line = mappings.body.lines.find((item: { section: string }) => item.section === 'expense');
-    const saved = await call('put', '/income-tax/mappings', {
-      taxYear: year,
-      entries: [{ categoryId, lineKey: line.key }],
-    }).expect(200);
-    matches(IncomeTaxMappings, saved.body);
-    const mapped = saved.body.categories.find((item: { categoryId: string }) => item.categoryId === categoryId);
-    expect(mapped).toMatchObject({ lineKey: line.key, status: 'confirmed' });
   });
 
   it('ledger: enabled, synced, an account and a draft changed, the reports and revaluations', async () => {

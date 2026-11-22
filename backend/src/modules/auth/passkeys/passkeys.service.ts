@@ -111,13 +111,13 @@ export class PasskeysService {
 
   /** Finishes adding a passkey: the answer must sign the challenge issued to this user. */
   async register(userId: string, name: string, credential: PasskeyAttestation): Promise<Passkey> {
-    const label = this.cleanName(name);
     const user = await this.loadUser(userId);
     // Consumed before anything is checked: whatever the outcome, it cannot be tried twice.
     const challenge = await this.challenges.consume('register', user.id);
     if (!challenge) {
       throw new BadRequestException(appError('AUTH_PASSKEY_REGISTRATION_INVALID'));
     }
+    const label = this.cleanName(name);
 
     const info = (await this.verifyRegistration(credential, challenge)).registrationInfo;
     if (!info) {

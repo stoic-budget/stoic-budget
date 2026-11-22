@@ -265,9 +265,15 @@ export function BalanceReviewAlert({
   return (
     <Alert
       severity="warning"
-      sx={{ mb: 2 }}
+      sx={{
+        mb: 2,
+        // A phone has no room for the buttons beside the text: they go under it.
+        flexWrap: { xs: 'wrap', sm: 'nowrap' },
+        '& .MuiAlert-message': { flex: { xs: '1 1 0', sm: '0 1 auto' }, minWidth: 0 },
+        '& .MuiAlert-action': { width: { xs: '100%', sm: 'auto' }, pl: { xs: 0, sm: 2 }, mr: 0 },
+      }}
       action={
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {canTeach({ ...statement, status, parsingDetails }) ? (
             <TeachAction onTeach={() => setTeaching(true)} />
           ) : null}

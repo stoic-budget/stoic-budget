@@ -1,0 +1,1836 @@
+{
+  "metadata": {
+    "accountNumber": "",
+    "currency": "AUD",
+    "dateFrom": "2023-03-01T00:00:00",
+    "dateTo": "2023-05-30T00:00:00",
+    "balanceStart": 1468.45,
+    "balanceEnd": 12175.76
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-03-02T00:00:00",
+      "counterpartyName": "TT MART BRUNSWICK EA",
+      "paymentPurpose": "Visa Purchase - Receipt 130124 TT MART BRUNSWICK EA Date 30/02/23 Card 9037",
+      "debit": 3.49,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-02T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 130124",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 130124",
+      "credit": 0.07,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-02T00:00:00",
+      "counterpartyName": "CARMELOS CAFE BRUNSWICK EA",
+      "paymentPurpose": "Visa Purchase - Receipt 130125 CARMELOS CAFE BRUNSWICK EA Date 30/02/23 Card 9037",
+      "debit": 19.9,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-02T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 130125",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 130125",
+      "credit": 0.4,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-02T00:00:00",
+      "counterpartyName": "SAMPLE SHOPPERNAME FAULKN CARLTON",
+      "paymentPurpose": "Visa Purchase - Receipt 130126 SAMPLE SHOPPERNAME FAULKN CARLTON Date 29/02/23 Card 9037",
+      "debit": 29,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-02T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 130126",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 130126",
+      "credit": 0.58,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-02T00:00:00",
+      "counterpartyName": "Yarra Valley Water",
+      "paymentPurpose": "BPAY Bill Payment - Receipt 252554 Yarra Valley Water 15507598947 Waterbill",
+      "debit": 66.29,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-03T00:00:00",
+      "counterpartyName": "SAIGON VILLAGE PTY LTD ABBOTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 167717 SAIGON VILLAGE PTY LTD ABBOTSFORD Date 01/03/23 Card 9037",
+      "debit": 8.06,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-03T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 167717",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 167717",
+      "credit": 0.16,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-03T00:00:00",
+      "counterpartyName": "SCHNITZ VICTORIA GARDENS RICHMOND",
+      "paymentPurpose": "Visa Purchase - Receipt 167718 SCHNITZ VICTORIA GARDENS RICHMOND Date 01/03/23 Card 9037",
+      "debit": 16.2,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-03T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 167718",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 167718",
+      "credit": 0.32,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-04T00:00:00",
+      "counterpartyName": "Deposit - Receipt 136703 Selette Gnipierk Water And Grocerie",
+      "paymentPurpose": "Deposit - Receipt 136703 Selette Gnipierk Water And Grocerie",
+      "credit": 60,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-04T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 054645 Electricity Bill Selette Gnipierk Transfer To 10067186 063209",
+      "paymentPurpose": "Pay Anyone - Receipt 054645 Electricity Bill Selette Gnipierk Transfer To 10067186 063209",
+      "debit": 89,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-03-05T00:00:00",
+      "counterpartyName": "ALDI 79 ABBOTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 112049 ALDI 79 ABBOTSFORD Date 01/03/23 Card 9037",
+      "debit": 57.99,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-05T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 112049",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 112049",
+      "credit": 1.16,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-05T00:00:00",
+      "counterpartyName": "ATM Withdrawal - Cash - Receipt 001550",
+      "paymentPurpose": "ATM Withdrawal - Cash - Receipt 001550",
+      "debit": 22.8,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-05T00:00:00",
+      "counterpartyName": "ATM Rebate - Receipt 001550 We paid the ATM fee for you!",
+      "paymentPurpose": "ATM Rebate - Receipt 001550 We paid the ATM fee for you!",
+      "credit": 2.8,
+      "currency": "AUD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-03-06T00:00:00",
+      "counterpartyName": "THE NAPIER HOTEL FITZROY",
+      "paymentPurpose": "Visa Purchase - Receipt 115302 THE NAPIER HOTEL FITZROY Date 03/03/23 Card 9037",
+      "debit": 23.2,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-06T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 115302",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 115302",
+      "credit": 0.46,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-06T00:00:00",
+      "counterpartyName": "SAIGON VILLAGE PTY LTD ABBOTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 115303 SAIGON VILLAGE PTY LTD ABBOTSFORD Date",
+      "debit": 14.83,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-06T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 115303",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 115303",
+      "credit": 0.3,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-06T00:00:00",
+      "counterpartyName": "VIDEO EZY BRUNSWICK NSWICK EASVI",
+      "paymentPurpose": "Visa Purchase - Receipt 115304 VIDEO EZY BRUNSWICK NSWICK EASVI Date Card 9037",
+      "debit": 5.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-06T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 115304",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 115304",
+      "credit": 0.11,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-06T00:00:00",
+      "counterpartyName": "ALDI 79 ABBOTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 115305 ALDI 79 ABBOTSFORD Date 04/03/23 Card 9037",
+      "debit": 25.33,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-06T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 115305",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 115305",
+      "credit": 0.51,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-07T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 161116 FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037",
+      "debit": 4.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-07T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 161116",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 161116",
+      "credit": 0.09,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-08T00:00:00",
+      "counterpartyName": "COLES 0686 RICHMOND",
+      "paymentPurpose": "Visa Purchase - Receipt 117743 COLES 0686 RICHMOND Date 07/03/23 Card 9037",
+      "debit": 14.65,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-08T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 117743",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 117743",
+      "credit": 0.29,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-08T00:00:00",
+      "counterpartyName": "ATM Withdrawal - Cash - Receipt 004445",
+      "paymentPurpose": "ATM Withdrawal - Cash - Receipt 004445",
+      "debit": 43,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-08T00:00:00",
+      "counterpartyName": "ATM Rebate - Receipt 004445 We paid the ATM fee for you!",
+      "paymentPurpose": "ATM Rebate - Receipt 004445 We paid the ATM fee for you!",
+      "credit": 3,
+      "currency": "AUD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-03-09T00:00:00",
+      "counterpartyName": "SAMPLE SHOPPERNAME FAULKN CARLTON",
+      "paymentPurpose": "Visa Purchase - Receipt 170501 SAMPLE SHOPPERNAME FAULKN CARLTON Date 06/03/23 Card 9037",
+      "debit": 56,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-09T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 170501",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 170501",
+      "credit": 1.12,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-09T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 567639 Harrison St Rent Selette Gnipierk Transfer To 10067186 063209",
+      "paymentPurpose": "Pay Anyone - Receipt 567639 Harrison St Rent Selette Gnipierk Transfer To 10067186 063209",
+      "debit": 869,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-03-12T00:00:00",
+      "counterpartyName": "COLES 0686 RICHMOND",
+      "paymentPurpose": "Visa Purchase - Receipt 112147 COLES 0686 RICHMOND Date 11/03/23 Card 9037",
+      "debit": 3.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-12T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 112147",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 112147",
+      "credit": 0.07,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "GM CABS AUSTRALIA MASCOT",
+      "paymentPurpose": "Visa Purchase - Receipt 115294 GM CABS AUSTRALIA MASCOT Date 09/03/23 Card 9037",
+      "debit": 15.86,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 115294",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 115294",
+      "credit": 0.32,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "VIDEO EZY BRUNSWICK NSWICK EASVI",
+      "paymentPurpose": "Visa Purchase - Receipt 115295 VIDEO EZY BRUNSWICK NSWICK EASVI Date Card 9037",
+      "debit": 5.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-13T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 115295",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 115295",
+      "credit": 0.11,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "SCHNITZ VICTORIA GARDENS RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 135740 SCHNITZ VICTORIA GARDENS RESERVOIR Date 12/03/23 Card 9037",
+      "debit": 12.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 135740",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 135740",
+      "credit": 0.25,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 135741 FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037",
+      "debit": 4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 135741",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 135741",
+      "credit": 0.08,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "Salary Deposit - Receipt 100175 Mercy Health 3510931/03/2023",
+      "paymentPurpose": "Salary Deposit - Receipt 100175 Mercy Health 3510931/03/2023",
+      "credit": 3953.25,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "Internal Transfer - Receipt 218100 Savings To Savings Maximiser 10000002",
+      "paymentPurpose": "Internal Transfer - Receipt 218100 Savings To Savings Maximiser 10000002",
+      "debit": 1790.07,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 236755 Bills Sue Sues Transfer To 479348585 083413",
+      "paymentPurpose": "Pay Anyone - Receipt 236755 Bills Sue Sues Transfer To 479348585 083413",
+      "debit": 175.13,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-03-15T00:00:00",
+      "counterpartyName": "COLES 0686 RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 145959 COLES 0686 RESERVOIR Date 14/03/23 Card 9037",
+      "debit": 15.9,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-15T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 145959",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 145959",
+      "credit": 0.32,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-16T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 102444 FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037",
+      "debit": 9,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-16T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 102444",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 102444",
+      "credit": 0.18,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-16T00:00:00",
+      "counterpartyName": "KMART 1163 RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 102445 KMART 1163 RESERVOIR Date 15/03/23 Card 9037",
+      "debit": 15,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-16T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 102445",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 102445",
+      "credit": 0.3,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-17T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 087712 Cashboiby Selette Gnipierk Transfer To 10067186 063209",
+      "paymentPurpose": "Pay Anyone - Receipt 087712 Cashboiby Selette Gnipierk Transfer To 10067186 063209",
+      "debit": 55.55,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-03-19T00:00:00",
+      "counterpartyName": "ATM Withdrawal - Cash - Receipt 001816",
+      "paymentPurpose": "ATM Withdrawal - Cash - Receipt 001816",
+      "debit": 22,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-19T00:00:00",
+      "counterpartyName": "ATM Rebate - Receipt 001816 We paid the ATM fee for you!",
+      "paymentPurpose": "ATM Rebate - Receipt 001816 We paid the ATM fee for you!",
+      "credit": 2,
+      "currency": "AUD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-03-19T00:00:00",
+      "counterpartyName": "COLES 0686 RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 108648 COLES 0686 RESERVOIR Date 18/03/23 Card 9037",
+      "debit": 15.58,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-19T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 108648",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 108648",
+      "credit": 0.31,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-19T00:00:00",
+      "counterpartyName": "Gladysdale Bakehouse Yarra Juncti",
+      "paymentPurpose": "Visa Purchase - Receipt 108649 Gladysdale Bakehouse Yarra Juncti Date 16/03/23 Card 9037",
+      "debit": 20.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-19T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 108649",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 108649",
+      "credit": 0.41,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-20T00:00:00",
+      "counterpartyName": "GANGEMI S FLOWERS NSWICK",
+      "paymentPurpose": "Visa Purchase - Receipt 152134 GANGEMI S FLOWERS NSWICK Date 17/03/23 Card 9037",
+      "debit": 17,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-20T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 152134",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 152134",
+      "credit": 0.34,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-21T00:00:00",
+      "counterpartyName": "1000 POUND BEND BOURNE",
+      "paymentPurpose": "Visa Purchase - Receipt 111398 1000 POUND BEND BOURNE Date 19/03/23 Card 9037",
+      "debit": 15,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-21T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 111398",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 111398",
+      "credit": 0.3,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-21T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 111399 FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037",
+      "debit": 4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-21T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 111399",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 111399",
+      "credit": 0.08,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-21T00:00:00",
+      "counterpartyName": "EFTPOS Purchase with Cashout - Receipt 056377",
+      "paymentPurpose": "EFTPOS Purchase with Cashout - Receipt 056377",
+      "debit": 44.75,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 131375 FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037",
+      "debit": 9,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 131375",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 131375",
+      "credit": 0.18,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-24T00:00:00",
+      "counterpartyName": "SCHNITZ VICTORIA GARDENS RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 168502 SCHNITZ VICTORIA GARDENS RESERVOIR Date 22/03/23 Card 9037",
+      "debit": 12.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-24T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 168502",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 168502",
+      "credit": 0.25,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-24T00:00:00",
+      "counterpartyName": "MCDONALDS VIC GARDENS RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 168503 MCDONALDS VIC GARDENS RESERVOIR Date Card 9037",
+      "debit": 8.2,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-24T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 168503",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 168503",
+      "credit": 0.16,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-24T00:00:00",
+      "counterpartyName": "VICTORIA GARDENS RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 168504 VICTORIA GARDENS RESERVOIR Date 22/03/23 Card 9037",
+      "debit": 15,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-24T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 168504",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 168504",
+      "credit": 0.3,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-24T00:00:00",
+      "counterpartyName": "COLES EXPRESS 6738 BRUNSWICK E",
+      "paymentPurpose": "Visa Purchase - Receipt 168505 COLES EXPRESS 6738 BRUNSWICK E Date 23/03/23 Card 9037",
+      "debit": 5.24,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-24T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 168505",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 168505",
+      "credit": 0.1,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-25T00:00:00",
+      "counterpartyName": "DANCE BROTHERS PTY L ABBOTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 102518 DANCE BROTHERS PTY L ABBOTSFORD Date Card 9037",
+      "debit": 10.6,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-25T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 102518",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 102518",
+      "credit": 0.21,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-26T00:00:00",
+      "counterpartyName": "SILVERTOP VIC 131008 DARLINGHURST",
+      "paymentPurpose": "Visa Purchase - Receipt 106597 SILVERTOP VIC 131008 DARLINGHURST Date",
+      "debit": 26.67,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-26T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 106597",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 106597",
+      "credit": 0.53,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-26T00:00:00",
+      "counterpartyName": "STORE DJ CHMOND",
+      "paymentPurpose": "EFTPOS Purchase - Receipt 001069 STORE DJ CHMOND Date 26/03/23 Card 9037",
+      "debit": 229,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-27T00:00:00",
+      "counterpartyName": "ALDI 79 ABBOTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 115477 ALDI 79 ABBOTSFORD Date 25/03/23 Card 9037",
+      "debit": 72.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-27T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 115477",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 115477",
+      "credit": 1.45,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-28T00:00:00",
+      "counterpartyName": "COLES EXPRESS 6741 COLLINGWOOD",
+      "paymentPurpose": "Visa Purchase - Receipt 114406 COLES EXPRESS 6741 COLLINGWOOD Date Card 9037",
+      "debit": 48.09,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-28T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 114406",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 114406",
+      "credit": 0.96,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-29T00:00:00",
+      "counterpartyName": "ISTANBUL KEBAB SHOP ZROY",
+      "paymentPurpose": "Visa Purchase - Receipt 149345 ISTANBUL KEBAB SHOP ZROY Date 26/03/23 Card 9037",
+      "debit": 14,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-29T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 149345",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 149345",
+      "credit": 0.28,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-29T00:00:00",
+      "counterpartyName": "Yarra Medical RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 149346 Yarra Medical RESERVOIR Date 28/03/23 Card 9037",
+      "debit": 75,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-29T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 149346",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 149346",
+      "credit": 1.5,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-29T00:00:00",
+      "counterpartyName": "COLES 0686 RICHMOND",
+      "paymentPurpose": "Visa Purchase - Receipt 149347 COLES 0686 RICHMOND Date 28/03/23 Card 9037",
+      "debit": 8.42,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-29T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 149347",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 149347",
+      "credit": 0.17,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-03-29T00:00:00",
+      "counterpartyName": "EFTPOS Purchase with Cashout - Receipt 132144",
+      "paymentPurpose": "EFTPOS Purchase with Cashout - Receipt 132144",
+      "debit": 68.16,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-30T00:00:00",
+      "counterpartyName": "HARLEY HOWARD FREEHOUSE P RICHMOND Date 27/03/23 Card 9037 Wave and Save Rebate - Receipt 132689",
+      "paymentPurpose": "HARLEY HOWARD FREEHOUSE P RICHMOND Date 27/03/23 Card 9037 Wave and Save Rebate - Receipt 132689",
+      "debit": 25,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-03-30T00:00:00",
+      "counterpartyName": "Visa Purchase - Receipt 183686",
+      "paymentPurpose": "Visa Purchase - Receipt 183686",
+      "credit": 0.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037 Wave and Save Rebate - Receipt 183686",
+      "paymentPurpose": "FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037 Wave and Save Rebate - Receipt 183686",
+      "debit": 4,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-03-31T00:00:00",
+      "counterpartyName": "Deposit - Receipt 140821",
+      "paymentPurpose": "Deposit - Receipt 140821",
+      "credit": 0.08,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-04-01T00:00:00",
+      "counterpartyName": "Selette Gnipierk Groceries",
+      "paymentPurpose": "Selette Gnipierk Groceries",
+      "credit": 30,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "GM CABS AUSTRALIA MASCOT",
+      "paymentPurpose": "Visa Purchase - Receipt 152818 GM CABS AUSTRALIA MASCOT Date 30/03/23 Card 9037",
+      "debit": 21.21,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-03T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 152818",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 152818",
+      "credit": 0.42,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-04T00:00:00",
+      "counterpartyName": "ATM Withdrawal - Cash - Receipt 207937",
+      "paymentPurpose": "ATM Withdrawal - Cash - Receipt 207937",
+      "debit": 282,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-04-04T00:00:00",
+      "counterpartyName": "ATM Rebate - Receipt 207937 We paid the ATM fee for you!",
+      "paymentPurpose": "ATM Rebate - Receipt 207937 We paid the ATM fee for you!",
+      "credit": 2,
+      "currency": "AUD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-04-05T00:00:00",
+      "counterpartyName": "TREVOR THE BAR PTY LTD CARLTON",
+      "paymentPurpose": "Visa Purchase - Receipt 139897 TREVOR THE BAR PTY LTD CARLTON Date 02/04/23 Card 9037",
+      "debit": 13,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-05T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 139897",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 139897",
+      "credit": 0.26,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-05T00:00:00",
+      "counterpartyName": "COLES EXPRESS 6741 COLLINGWOOD",
+      "paymentPurpose": "Visa Purchase - Receipt 139898 COLES EXPRESS 6741 COLLINGWOOD Date Card 9037",
+      "debit": 13,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-05T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 139898",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 139898",
+      "credit": 0.26,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-06T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 130109 Ap Rent Selette Gnipierk Transfer To 10067186 063209",
+      "paymentPurpose": "Pay Anyone - Receipt 130109 Ap Rent Selette Gnipierk Transfer To 10067186 063209",
+      "debit": 869,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-07T00:00:00",
+      "counterpartyName": "HOUSE OF BREAD AND P BRIGHTON",
+      "paymentPurpose": "Visa Purchase - Receipt 140694 HOUSE OF BREAD AND P BRIGHTON Date 05/04/23 Card 9037",
+      "debit": 5.3,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-07T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 140694",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 140694",
+      "credit": 0.11,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-07T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 140695 FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037",
+      "debit": 4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-07T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 140695",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 140695",
+      "credit": 0.08,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-09T00:00:00",
+      "counterpartyName": "EFTPOS Purchase with Cashout - Receipt 175190",
+      "paymentPurpose": "EFTPOS Purchase with Cashout - Receipt 175190",
+      "debit": 22.29,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-08-12T00:00:00",
+      "counterpartyName": "Mercy Health 3510931/08/2023 Internal Transfer - Receipt 733271",
+      "paymentPurpose": "Mercy Health 3510931/08/2023 Internal Transfer - Receipt 733271",
+      "credit": 3953.25,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-13T00:00:00",
+      "counterpartyName": "To Savings Maximiser 10000002 Deposit - Receipt 129713",
+      "paymentPurpose": "To Savings Maximiser 10000002 Deposit - Receipt 129713",
+      "debit": 2777.7,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-15T00:00:00",
+      "counterpartyName": "Selette Gnipierk Rent Back Visa Purchase - Receipt 145351",
+      "paymentPurpose": "Selette Gnipierk Rent Back Visa Purchase - Receipt 145351",
+      "credit": 804,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-16T00:00:00",
+      "counterpartyName": "COLES 0686 RESERVOIR Date 15/04/23 Card 9037 Wave and Save Rebate - Receipt 145351",
+      "paymentPurpose": "COLES 0686 RESERVOIR Date 15/04/23 Card 9037 Wave and Save Rebate - Receipt 145351",
+      "debit": 7.7,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-16T00:00:00",
+      "counterpartyName": "Visa Purchase - Receipt 125066",
+      "paymentPurpose": "Visa Purchase - Receipt 125066",
+      "credit": 0.15,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-17T00:00:00",
+      "counterpartyName": "COLES 0686 RESERVOIR Date 16/04/23 Card 9037 Wave and Save Rebate - Receipt 125066",
+      "paymentPurpose": "COLES 0686 RESERVOIR Date 16/04/23 Card 9037 Wave and Save Rebate - Receipt 125066",
+      "debit": 13.4,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-17T00:00:00",
+      "counterpartyName": "Visa Purchase - Receipt 125673",
+      "paymentPurpose": "Visa Purchase - Receipt 125673",
+      "credit": 0.27,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-19T00:00:00",
+      "counterpartyName": "1000 POUND BEND BOURNE Date 16/04/23 Card 9037 Wave and Save Rebate - Receipt 125673",
+      "paymentPurpose": "1000 POUND BEND BOURNE Date 16/04/23 Card 9037 Wave and Save Rebate - Receipt 125673",
+      "debit": 15,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-19T00:00:00",
+      "counterpartyName": "Deposit - Receipt 107577",
+      "paymentPurpose": "Deposit - Receipt 107577",
+      "credit": 0.3,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-04-19T00:00:00",
+      "counterpartyName": "Sue Sommers Tax Pay Anyone - Receipt 221635",
+      "paymentPurpose": "Sue Sommers Tax Pay Anyone - Receipt 221635",
+      "credit": 2719.84,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-20T00:00:00",
+      "counterpartyName": "August Rent Selette Gnipierk Transfer To 10067186 063209 Internal Transfer - Receipt 231576 Savings",
+      "paymentPurpose": "August Rent Selette Gnipierk Transfer To 10067186 063209 Internal Transfer - Receipt 231576 Savings",
+      "debit": 869,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-20T00:00:00",
+      "counterpartyName": "To Savings Maximiser 10000002 Pay Anyone - Receipt 238955 Charity Auction",
+      "paymentPurpose": "To Savings Maximiser 10000002 Pay Anyone - Receipt 238955 Charity Auction",
+      "debit": 2000,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-20T00:00:00",
+      "counterpartyName": "Sue Sues Transfer To 752530215 083413",
+      "paymentPurpose": "Sue Sues Transfer To 752530215 083413",
+      "debit": 60,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-04-21T00:00:00",
+      "counterpartyName": "7-ELEVEN 1279 FITZROY",
+      "paymentPurpose": "Visa Purchase - Receipt 127381 7-ELEVEN 1279 FITZROY Date 18/04/23 Card 9037",
+      "debit": 44.81,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-21T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 127381",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 127381",
+      "credit": 0.9,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-21T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 127382 FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037",
+      "debit": 4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-21T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 127382",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 127382",
+      "credit": 0.08,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-22T00:00:00",
+      "counterpartyName": "Tramway Hotel Fitzroy Nort",
+      "paymentPurpose": "Visa Purchase - Receipt 134408 Tramway Hotel Fitzroy Nort Date 21/04/23 Card 9037",
+      "debit": 10,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-22T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 134408",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 134408",
+      "credit": 0.2,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-23T00:00:00",
+      "counterpartyName": "ATM Withdrawal - Cash - Receipt 712461",
+      "paymentPurpose": "ATM Withdrawal - Cash - Receipt 712461",
+      "debit": 42,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-04-23T00:00:00",
+      "counterpartyName": "ATM Rebate - Receipt 712461 We paid the ATM fee for you!",
+      "paymentPurpose": "ATM Rebate - Receipt 712461 We paid the ATM fee for you!",
+      "credit": 2,
+      "currency": "AUD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-04-23T00:00:00",
+      "counterpartyName": "KMART 1163 RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 101906 KMART 1163 RESERVOIR Date 22/04/23 Card 9037",
+      "debit": 15.25,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-23T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 101906",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 101906",
+      "credit": 0.31,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-24T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 115342 FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037",
+      "debit": 4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-24T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 115342",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 115342",
+      "credit": 0.08,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-25T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 117124 FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037",
+      "debit": 4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-25T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 117124",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 117124",
+      "credit": 0.08,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-26T00:00:00",
+      "counterpartyName": "KMART 1163 RESERVOIR",
+      "paymentPurpose": "EFTPOS Purchase with Cashout - Receipt 064597 KMART 1163 RESERVOIR Cash Amount",
+      "debit": 40,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-27T00:00:00",
+      "counterpartyName": "ATM Withdrawal - Cash - Receipt 000795",
+      "paymentPurpose": "ATM Withdrawal - Cash - Receipt 000795",
+      "debit": 52.8,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-04-27T00:00:00",
+      "counterpartyName": "ATM Rebate - Receipt 000795 We paid the ATM fee for you!",
+      "paymentPurpose": "ATM Rebate - Receipt 000795 We paid the ATM fee for you!",
+      "credit": 2.8,
+      "currency": "AUD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-04-28T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 157130 FRANKIE SAYS PTY LTD ABB OTSFORD Date Card 9037",
+      "debit": 4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-28T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 157130",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 157130",
+      "credit": 0.08,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "TOTE HOTEL COLLINGWOOD",
+      "paymentPurpose": "Visa Purchase - Receipt 102551 TOTE HOTEL COLLINGWOOD Date 27/04/23 Card 9037",
+      "debit": 17.85,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 102551",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 102551",
+      "credit": 0.36,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "TOTE HOTEL COLLINGWOOD",
+      "paymentPurpose": "Visa Purchase - Receipt 102552 TOTE HOTEL COLLINGWOOD Date 27/04/23 Card 9037",
+      "debit": 18.36,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 102552",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 102552",
+      "credit": 0.37,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "SOME VELVET MORNING CLIFTON HILL",
+      "paymentPurpose": "Visa Purchase - Receipt 102553 SOME VELVET MORNING CLIFTON HILL Date Card 9037",
+      "debit": 11,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 102553",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 102553",
+      "credit": 0.22,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "SOME VELVET MORNING CLIFTON HILL",
+      "paymentPurpose": "Visa Purchase - Receipt 102554 SOME VELVET MORNING CLIFTON HILL Date Card 9037",
+      "debit": 14.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 102554",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 102554",
+      "credit": 0.29,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "COLES 0686 RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 102555 COLES 0686 RESERVOIR Date 29/04/23 Card 9037",
+      "debit": 9,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 102555",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 102555",
+      "credit": 0.18,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "ANH MINH VIETNAMESE BRUNSWICK EA",
+      "paymentPurpose": "Visa Purchase - Receipt 171084 ANH MINH VIETNAMESE BRUNSWICK EA Date 29/04/23 Card 9037",
+      "debit": 33.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 171084",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 171084",
+      "credit": 0.67,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 171085 FRANKIE SAYS PTY LTD ABB OTSFORD Date 26/04/23 Card 9037",
+      "debit": 4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 171085",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 171085",
+      "credit": 0.08,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "COLES 0686 RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 171086 COLES 0686 RESERVOIR Date 30/04/23 Card 9037",
+      "debit": 15.6,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-04-30T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 171086",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 171086",
+      "credit": 0.31,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-02T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 462516 Groceries Selette Gnipierk Transfer To 10067186 063209",
+      "paymentPurpose": "Pay Anyone - Receipt 462516 Groceries Selette Gnipierk Transfer To 10067186 063209",
+      "debit": 70,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-02T00:00:00",
+      "counterpartyName": "TT MART BRUNSWICK E",
+      "paymentPurpose": "EFTPOS Purchase with Cashout - Receipt 000063 TT MART BRUNSWICK E Cash Amount",
+      "debit": 86.99,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-03T00:00:00",
+      "counterpartyName": "COTTON ON RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 138528 COTTON ON RESERVOIR Date 01/05/23 Card 9037",
+      "debit": 30,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-03T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 138528",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 138528",
+      "credit": 0.6,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-04T00:00:00",
+      "counterpartyName": "RENAE EILEEN MAXWELL BRUNSWICK",
+      "paymentPurpose": "Visa Purchase - Receipt 172213 RENAE EILEEN MAXWELL BRUNSWICK Date 02/05/23 Card 9037",
+      "debit": 40,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-04T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 172213",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 172213",
+      "credit": 0.8,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-04T00:00:00",
+      "counterpartyName": "CARMELOS CAFE BRUNSWICK EA",
+      "paymentPurpose": "Visa Purchase - Receipt 172214 CARMELOS CAFE BRUNSWICK EA Date 02/05/23 Card 9037",
+      "debit": 10.9,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-04T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 172214",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 172214",
+      "credit": 0.22,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-04T00:00:00",
+      "counterpartyName": "SCHNITZ VICTORIA GARDENS RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 172215 SCHNITZ VICTORIA GARDENS RESERVOIR Date Card 9037",
+      "debit": 12.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-04T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 172215",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 172215",
+      "credit": 0.25,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-04T00:00:00",
+      "counterpartyName": "KFC VIC GARDENS RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 172216 KFC VIC GARDENS RESERVOIR Date 02/05/23 Card 9037",
+      "debit": 2.95,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-04T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 172216",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 172216",
+      "credit": 0.06,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-04T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 172217 FRANKIE SAYS PTY LTD ABB OTSFORD Date 01/05/23 Card 9037",
+      "debit": 8,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-04T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 172217",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 172217",
+      "credit": 0.16,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-06T00:00:00",
+      "counterpartyName": "KMART 1163 RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 159887 KMART 1163 RESERVOIR Date 05/05/23 Card 9037",
+      "debit": 26,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-06T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 159887",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 159887",
+      "credit": 0.52,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-06T00:00:00",
+      "counterpartyName": "COLES 0686 RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 159888 COLES 0686 RESERVOIR Date 05/05/23 Card 9037",
+      "debit": 16.8,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-06T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 159888",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 159888",
+      "credit": 0.34,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-07T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 608255 Rent Selette Gnipierk Transfer To 10067186 063209",
+      "paymentPurpose": "Pay Anyone - Receipt 608255 Rent Selette Gnipierk Transfer To 10067186 063209",
+      "debit": 869,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-07T00:00:00",
+      "counterpartyName": "Northcote Social Club Northcote",
+      "paymentPurpose": "Visa Purchase - Receipt 131414 Northcote Social Club Northcote Date 05/05/23 Card 9037",
+      "debit": 30,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-07T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 131414",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 131414",
+      "credit": 0.6,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-07T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 131415 FRANKIE SAYS PTY LTD ABB OTSFORD Date 02/05/23 Card 9037",
+      "debit": 4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-07T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 131415",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 131415",
+      "credit": 0.08,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-08T00:00:00",
+      "counterpartyName": "KMART 1163 RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 189076 KMART 1163 RESERVOIR Date 07/05/23 Card 9037",
+      "debit": 11,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-08T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 189076",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 189076",
+      "credit": 0.22,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-08T00:00:00",
+      "counterpartyName": "EFTPOS Refund - Receipt 025431 KMART 1163 RESERVOIR Date 08/05/23 Card 9037",
+      "paymentPurpose": "EFTPOS Refund - Receipt 025431 KMART 1163 RESERVOIR Date 08/05/23 Card 9037",
+      "credit": 10,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-08T00:00:00",
+      "counterpartyName": "ATM Withdrawal - Cash - Receipt 143180",
+      "paymentPurpose": "ATM Withdrawal - Cash - Receipt 143180",
+      "debit": 22,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-05-08T00:00:00",
+      "counterpartyName": "ATM Rebate - Receipt 143180 We paid the ATM fee for you!",
+      "paymentPurpose": "ATM Rebate - Receipt 143180 We paid the ATM fee for you!",
+      "credit": 2,
+      "currency": "AUD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-05-09T00:00:00",
+      "counterpartyName": "1000 POUND BEND BOURNE",
+      "paymentPurpose": "Visa Purchase - Receipt 122255 1000 POUND BEND BOURNE Date 06/05/23 Card 9037",
+      "debit": 15,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-09T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 122255",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 122255",
+      "credit": 0.3,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-09T00:00:00",
+      "counterpartyName": "BP HIGH BLUFF 3234 HAMPTON",
+      "paymentPurpose": "Visa Purchase - Receipt 122256 BP HIGH BLUFF 3234 HAMPTON Date 07/05/23 Card 9037",
+      "debit": 46.07,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-09T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 122256",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 122256",
+      "credit": 0.92,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-11T00:00:00",
+      "counterpartyName": "AMART RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 127418 AMART RESERVOIR Date 08/05/23 Card 9037",
+      "debit": 14.99,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-11T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 127418",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 127418",
+      "credit": 0.3,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-13T00:00:00",
+      "counterpartyName": "COLES 0686 RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 168848 COLES 0686 RESERVOIR Date 12/05/23 Card 9037",
+      "debit": 18.7,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-13T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 168848",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 168848",
+      "credit": 0.37,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-13T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 172489 Groceries Selette Gnipierk Transfer To 10067186 063209",
+      "paymentPurpose": "Pay Anyone - Receipt 172489 Groceries Selette Gnipierk Transfer To 10067186 063209",
+      "debit": 33,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-14T00:00:00",
+      "counterpartyName": "Internal Transfer - Receipt 291887 Savings From Savings Maximiser 10000002",
+      "paymentPurpose": "Internal Transfer - Receipt 291887 Savings From Savings Maximiser 10000002",
+      "credit": 10000,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-14T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 376564 Savings Part1 Aleksei Plinte Transfer To 479348585 083413",
+      "paymentPurpose": "Pay Anyone - Receipt 376564 Savings Part1 Aleksei Plinte Transfer To 479348585 083413",
+      "debit": 5000,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-14T00:00:00",
+      "counterpartyName": "Salary Deposit - Receipt 114118 Mercy Health 3510930/05/2023",
+      "paymentPurpose": "Salary Deposit - Receipt 114118 Mercy Health 3510930/05/2023",
+      "credit": 3953.25,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-05-15T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 743848 Savings Part2 Sue Sues Transfer To 479348585 083413",
+      "paymentPurpose": "Pay Anyone - Receipt 743848 Savings Part2 Sue Sues Transfer To 479348585 083413",
+      "debit": 5000,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-15T00:00:00",
+      "counterpartyName": "Internal Transfer - Receipt 758869 Savings To Savings Maximiser 10000002",
+      "paymentPurpose": "Internal Transfer - Receipt 758869 Savings To Savings Maximiser 10000002",
+      "debit": 1000,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-16T00:00:00",
+      "counterpartyName": "1000 POUND BEND BOURNE",
+      "paymentPurpose": "Visa Purchase - Receipt 123615 1000 POUND BEND BOURNE Date 13/05/23 Card 9037",
+      "debit": 15,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-16T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 123615",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 123615",
+      "credit": 0.3,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-16T00:00:00",
+      "counterpartyName": "KFC VIC GARDENS RESERVOIR",
+      "paymentPurpose": "Visa Purchase - Receipt 123616 KFC VIC GARDENS RESERVOIR Date 14/05/23 Card 9037",
+      "debit": 4.75,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-16T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 123616",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 123616",
+      "credit": 0.1,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-16T00:00:00",
+      "counterpartyName": "ATM Withdrawal - Cash - Receipt 358701",
+      "paymentPurpose": "ATM Withdrawal - Cash - Receipt 358701",
+      "debit": 152,
+      "currency": "AUD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-05-16T00:00:00",
+      "counterpartyName": "ATM Rebate - Receipt 358701 We paid the ATM fee for you!",
+      "paymentPurpose": "ATM Rebate - Receipt 358701 We paid the ATM fee for you!",
+      "credit": 2,
+      "currency": "AUD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-05-16T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 750988 Billz Sue Sues Transfer To 479348585 083413",
+      "paymentPurpose": "Pay Anyone - Receipt 750988 Billz Sue Sues Transfer To 479348585 083413",
+      "debit": 378.41,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-16T00:00:00",
+      "counterpartyName": "Internal Transfer - Receipt 764662 Savings To Savings Maximiser 10000002",
+      "paymentPurpose": "Internal Transfer - Receipt 764662 Savings To Savings Maximiser 10000002",
+      "debit": 785.25,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-16T00:00:00",
+      "counterpartyName": "Internal Transfer - Receipt 775450 Gahhh To Savings Maximiser 10000002",
+      "paymentPurpose": "Internal Transfer - Receipt 775450 Gahhh To Savings Maximiser 10000002",
+      "debit": 0.5,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-18T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 190862 FRANKIE SAYS PTY LTD ABB OTSFORD Date 15/05/23 Card 9037",
+      "debit": 8,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-18T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 190862",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 190862",
+      "credit": 0.16,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-20T00:00:00",
+      "counterpartyName": "COLES 0686 RICHMOND",
+      "paymentPurpose": "Visa Purchase - Receipt 174072 COLES 0686 RICHMOND Date 19/05/23 Card 9037",
+      "debit": 27.59,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-20T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 174072",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 174072",
+      "credit": 0.55,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-21T00:00:00",
+      "counterpartyName": "THE NAPIER HOTEL FITZROY",
+      "paymentPurpose": "Visa Purchase - Receipt 152436 THE NAPIER HOTEL FITZROY Date 18/05/23 Card 9037",
+      "debit": 25.5,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-21T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 152436",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 152436",
+      "credit": 0.51,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-21T00:00:00",
+      "counterpartyName": "TAHINA PTY LTD NORTHCOTE",
+      "paymentPurpose": "Visa Purchase - Receipt 152437 TAHINA PTY LTD NORTHCOTE Date 19/05/23 Card 9037",
+      "debit": 22,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-21T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 152437",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 152437",
+      "credit": 0.44,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-21T00:00:00",
+      "counterpartyName": "FRANKIE SAYS PTY LTD ABB OTSFORD",
+      "paymentPurpose": "Visa Purchase - Receipt 152438 FRANKIE SAYS PTY LTD ABB OTSFORD Date 16/05/23 Card 9037",
+      "debit": 4,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-21T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 152438",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 152438",
+      "credit": 0.08,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-22T00:00:00",
+      "counterpartyName": "COLES 0686 RICHMOND",
+      "paymentPurpose": "EFTPOS Purchase with Cashout - Receipt 064789 COLES 0686 RICHMOND Cash Amount",
+      "debit": 33.3,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-22T00:00:00",
+      "counterpartyName": "Deposit - Receipt 105442 Beaumont & Assoc Beaumont",
+      "paymentPurpose": "Deposit - Receipt 105442 Beaumont & Assoc Beaumont",
+      "credit": 25000,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-05-23T00:00:00",
+      "counterpartyName": "Internal Transfer - Receipt 701474 Savings To Savings Maximiser 10000002",
+      "paymentPurpose": "Internal Transfer - Receipt 701474 Savings To Savings Maximiser 10000002",
+      "debit": 14000,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-26T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 772600 Groceries Selette Gnipierk Transfer To 10067186 063209",
+      "paymentPurpose": "Pay Anyone - Receipt 772600 Groceries Selette Gnipierk Transfer To 10067186 063209",
+      "debit": 25,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-26T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 138428 Groceries Selette Gnipierk Transfer To 10067186 063209",
+      "paymentPurpose": "Pay Anyone - Receipt 138428 Groceries Selette Gnipierk Transfer To 10067186 063209",
+      "debit": 25,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-26T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 206628 Bills Sue Sues Transfer To 479348585 083413",
+      "paymentPurpose": "Pay Anyone - Receipt 206628 Bills Sue Sues Transfer To 479348585 083413",
+      "debit": 310.1,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-27T00:00:00",
+      "counterpartyName": "COLES 0686 RICHMOND",
+      "paymentPurpose": "Visa Purchase - Receipt 117972 COLES 0686 RICHMOND Date 26/05/23 Card 9037",
+      "debit": 21.53,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-27T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 117972",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 117972",
+      "credit": 0.43,
+      "currency": "AUD",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-05-27T00:00:00",
+      "counterpartyName": "Pay Anyone - Receipt 256006 Bills Sue Sues Transfer To 479348585 083413",
+      "paymentPurpose": "Pay Anyone - Receipt 256006 Bills Sue Sues Transfer To 479348585 083413",
+      "debit": 41,
+      "currency": "AUD"
+    },
+    {
+      "transactionDate": "2023-05-30T00:00:00",
+      "counterpartyName": "CARMELOS CAFE BRUNSWICK EA",
+      "paymentPurpose": "Visa Purchase - Receipt 129538 CARMELOS CAFE BRUNSWICK EA Date 28/05/23 Card 9037",
+      "debit": 19.9,
+      "currency": "AUD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-05-30T00:00:00",
+      "counterpartyName": "Wave and Save Rebate - Receipt 129538",
+      "paymentPurpose": "Wave and Save Rebate - Receipt 129538",
+      "credit": 0.4,
+      "currency": "AUD",
+      "paymentType": "interest"
+    }
+  ],
+  "failedChecks": [
+    "dates_in_period"
+  ]
+}

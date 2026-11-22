@@ -14,6 +14,7 @@ import { PasskeyCredential } from '../../entities/passkey-credential.entity';
 import { PasswordResetToken } from '../../entities/password-reset-token.entity';
 import { User } from '../../entities/user.entity';
 import { AuditService } from '../audit/audit.service';
+import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-revocation.service';
 import { MailerService } from '../mailer/mailer.service';
 import { deleteOwnPasskeys, toPasskey } from './passkeys/passkey-helpers';
 import { PasskeysService } from './passkeys/passkeys.service';
@@ -36,6 +37,7 @@ export class PasswordResetService {
     private readonly configService: ConfigService,
     private readonly auditService: AuditService,
     private readonly passkeysService: PasskeysService,
+    private readonly calendarFeeds: CalendarFeedRevocationService,
   ) {}
 
   /**
@@ -159,6 +161,8 @@ export class PasswordResetService {
       );
       return deleteOwnPasskeys(manager, user.id, removePasskeyIds);
     });
+    // Calendar feed links end too, in every workspace.
+    await this.calendarFeeds.revokeAllOf(user.id);
 
     await recordSecurityEvent(this.auditService, this.logger, {
       workspaceId: user.workspaceId,

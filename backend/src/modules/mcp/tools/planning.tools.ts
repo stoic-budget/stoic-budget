@@ -11,6 +11,7 @@ import { parseDateOnly } from '../../budgets/budget-period.util';
 import type { BudgetsService } from '../../budgets/budgets.service';
 import type { StoicLedgerService } from '../../budgets/stoic/stoic-ledger.service';
 import type { ForecastService } from '../../forecast/forecast.service';
+import { canReadAccounts, withoutAccounts } from '../../goals/goal-account-visibility';
 import type { GoalsService } from '../../goals/goals.service';
 import { defineTool, type McpTool } from '../mcp-tool';
 import { Day, described } from './inputs';
@@ -68,7 +69,11 @@ export function planningTools(deps: {
       permissions: [Permission.GOAL_VIEW],
       output: GoalListAnswer,
       readOnly: true,
-      run: (ctx, args) => deps.goals.findAll(ctx.workspaceId, args.month),
+      // Without `wallet.view` the followed account's name and balance stay out.
+      run: async (ctx, args) => {
+        const goals = await deps.goals.findAll(ctx.workspaceId, args.month);
+        return canReadAccounts(ctx.subject) ? goals : withoutAccounts(goals);
+      },
     }),
     defineTool({
       name: 'get_forecast',

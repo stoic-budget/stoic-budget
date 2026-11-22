@@ -167,12 +167,28 @@ export class TwoFactorService {
     if (!dto.twoFactorCode) {
       // Without a flow to bind it to, no passkey challenge is offered: the code still works.
       const passkeyOptions = flow
-        ? await this.passkeyAuth.secondFactorOptions(userId, flow.issued)
+        ? await this.passkeyOptionsOrNone(userId, flow.issued)
         : undefined;
       return { twoFactorRequired: true, ...(passkeyOptions ? { passkeyOptions } : {}) };
     }
     await this.assertLoginCode(userId, dto.twoFactorCode);
     return null;
+  }
+
+  /**
+   * The passkey challenge to offer beside the code, or none when it cannot be
+   * built (no usable APP_URL, the challenge store not answering): the code
+   * field must still appear, or an account with both could not sign in at all.
+   */
+  private async passkeyOptionsOrNone(userId: string, issued: string) {
+    try {
+      return await this.passkeyAuth.secondFactorOptions(userId, issued);
+    } catch (error) {
+      this.logger.warn(
+        `Passkey options for the second factor unavailable: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return undefined;
+    }
   }
 
   /**

@@ -1,8 +1,10 @@
+import { DEBT_WALLET_TYPES } from '../../entities/wallet.entity';
 import {
   type BalanceService,
   CASH_ACCOUNT_CODE,
   DEBTS_ACCOUNT_CODE,
 } from '../balance/balance.service';
+import { NET_WORTH_SCOPE } from '../balance/balance-cash-series';
 import type { CurrencyAmounts, CurrencyConverter } from '../exchange-rates/currency-converter';
 
 /** Per balance line code, its amounts at each date: the lines kept up from the books rather than from snapshots. */
@@ -15,16 +17,21 @@ export type ComputedLines = Map<string, Map<string, CurrencyAmounts>>;
  */
 export const CARD_DEBTS_CODE = `${DEBTS_ACCOUNT_CODE}:credit_card`;
 
-/** Cash and the debts of cards and loans at each of `dates`. */
+/**
+ * Cash and the debts of cards and loans at each of `dates`, from the accounts
+ * that count in net worth. An account set not to count is left out of every
+ * date, not only from the day it was switched off: nothing about it is
+ * stored per day, so the whole curve follows the setting and does not jump.
+ */
 export async function loadComputedLines(
   balanceService: BalanceService,
   workspaceId: string,
   dates: string[],
 ): Promise<ComputedLines> {
   const [cash, debts, cardDebts] = await Promise.all([
-    balanceService.getCashSeries(workspaceId, dates),
-    balanceService.getDebtSeries(workspaceId, dates),
-    balanceService.getDebtSeries(workspaceId, dates, ['credit_card']),
+    balanceService.getCashSeries(workspaceId, dates, NET_WORTH_SCOPE),
+    balanceService.getDebtSeries(workspaceId, dates, DEBT_WALLET_TYPES, NET_WORTH_SCOPE),
+    balanceService.getDebtSeries(workspaceId, dates, ['credit_card'], NET_WORTH_SCOPE),
   ]);
   return new Map([
     [CASH_ACCOUNT_CODE, cash],

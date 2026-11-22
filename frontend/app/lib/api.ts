@@ -15,7 +15,7 @@ import type {
   ReceiptUploadResult,
 } from '@/app/lib/contracts';
 import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
-import { getApiErrorMessage, isVersionReadOnlyError } from './api-error';
+import { getApiErrorMessage, isReadOnlyError } from './api-error';
 import { CSRF_HEADER, clearCsrfCookie, getCsrfHeaders, getCsrfToken } from './csrf';
 import { isPublicPath } from './public-paths';
 import { getQueryClient } from './query-client';
@@ -195,9 +195,9 @@ rawClient.interceptors.response.use(
     const err = error as Record<string, unknown>;
     const originalRequest = err.config as Record<string, unknown>;
 
-    // Inside a past version every write is refused. One quiet note, not a
-    // lost-access reset: the version is still the workspace being looked at.
-    if (isVersionReadOnlyError(error)) {
+    // Inside a past version, or on a demo server, every write is refused. One
+    // quiet note, not a lost-access reset: the workspace is still there.
+    if (isReadOnlyError(error)) {
       toast(getApiErrorMessage(error), { id: VERSION_READ_ONLY_TOAST_ID });
       return Promise.reject(error);
     }

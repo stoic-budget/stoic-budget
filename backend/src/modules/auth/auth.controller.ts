@@ -2,7 +2,9 @@ import { Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from
 import { Throttle } from '@nestjs/throttler';
 import { randomBytes } from 'crypto';
 import type { Request, Response } from 'express';
+import { AllowInDemo } from '../../common/decorators/allow-in-demo.decorator';
 import { SkipCsrf } from '../../common/decorators/skip-csrf.decorator';
+import { isDemoMode, shownSession } from '../../common/demo/demo-mode';
 import { SchemaBody } from '../../common/effect/schema-body';
 import { SchemaParams } from '../../common/effect/schema-query';
 import { SchemaResponse } from '../../common/effect/schema-response';
@@ -75,6 +77,10 @@ export class AuthController {
   }
 
   private extractSessionContext(req: Request): SessionContext {
+    // On a demo every visitor shares one account and its session list: keep no visitor's address or browser.
+    if (isDemoMode()) {
+      return { userAgent: null, ipAddress: null };
+    }
     return {
       userAgent: req?.headers?.['user-agent'] || null,
       // req.ip, not X-Forwarded-For: with `trust proxy` set in main.ts Express
@@ -106,6 +112,7 @@ export class AuthController {
   @Public()
   @SkipCsrf()
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 attempts per minute
+  @AllowInDemo()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @SchemaResponse(LoginResponse)
@@ -238,6 +245,7 @@ export class AuthController {
 
   @Public()
   @UseGuards(JwtRefreshGuard)
+  @AllowInDemo()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @SchemaResponse(MessageResult)
@@ -257,6 +265,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @AllowInDemo()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @SchemaResponse(MessageResult)
@@ -302,7 +311,8 @@ export class AuthController {
   @SchemaResponse(UserSessionList)
   async getSessions(@CurrentUser() user: User, @Req() req: AuthenticatedRequest) {
     const currentSessionId = req?.user?.currentSessionId || null;
-    return this.authService.getSessions(user.id, currentSessionId);
+    const sessions = await this.authService.getSessions(user.id, currentSessionId);
+    return sessions.map(shownSession);
   }
 
   @UseGuards(JwtAuthGuard)
