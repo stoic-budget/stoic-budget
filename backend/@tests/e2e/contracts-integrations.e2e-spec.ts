@@ -237,19 +237,48 @@ describe('Integration contracts (e2e)', () => {
     );
     expect(connected.config.accounts).toHaveLength(1);
     const base = `/integrations/bank-sync/connections/${connected.id}`;
-    await answer(BankSyncConnection, call('patch', base, { autoSync: false }));
+    const patched = await answer(
+      BankSyncConnection,
+      call('patch', base, { autoSync: false, syncIntervalHours: 3 }),
+    );
+    expect(patched.schedule.intervalHours).toBe(3);
     await answer(BankSyncConnection, call('post', `${base}/accounts/refresh`));
     const listed = await answer(BankSyncConnectionList, call('get', '/integrations/bank-sync/connections'));
     expect(listed.map(item => item.id)).toEqual([connected.id]);
     const synced = await answer(BankSyncResult, call('post', `${base}/sync`));
     expect(synced.imported).toBe(2);
+    // A connection backing off answers every schedule field with a value.
+    await dataSource.query(
+      `UPDATE open_protocol_settings
+       SET consecutive_failures = 2, backoff_until = now() + interval '1 hour', backoff_reason = 'provider_busy'
+       WHERE integration_id = $1`,
+      [connected.id],
+    );
+    const [backingOff] = await answer(
+      BankSyncConnectionList,
+      call('get', '/integrations/bank-sync/connections'),
+    );
+    expect(backingOff.schedule).toMatchObject({
+      intervalHours: 3,
+      consecutiveFailures: 2,
+      backoffReason: 'provider_busy',
+      nextPullAt: expect.any(String),
+      lastAttemptAt: expect.any(String),
+      backoffUntil: expect.any(String),
+    });
     await answer(IntegrationDisconnected, call('delete', base));
   });
 
   it('workspace service settings: SMTP, app URL, Telegram bot', async () => {
     const smtp = await answer(
       IntegrationConnection,
-      call('put', '/settings/email/smtp', { host: '1.1.1.1', port: 587, from: 'member-1@example.com', pass: 'smtp-pass' }),
+      call('put', '/settings/email/smtp', {
+        host: '1.1.1.1',
+        port: 587,
+        from: 'member-1@example.com',
+        pass: 'smtp-pass',
+        currentPassword: 'Test123!@#',
+      }),
     );
     expect(smtp.settings).toMatchObject({ host: '1.1.1.1', passConfigured: true });
     await answer(IntegrationConnection, call('get', '/settings/email/smtp'));

@@ -17,11 +17,14 @@ import {
   ForgotPasswordBody,
   LoginBody,
   LoginResponse,
+  LogoutAllBody,
   MessageResult,
+  PasskeyList,
   RecoveryCodes,
   RegisterBody,
   RegisterResponse,
   ResetPasswordBody,
+  ResetTokenBody,
   TwoFactorCodeBody,
   TwoFactorPasswordBody,
   TwoFactorSetup,
@@ -32,9 +35,12 @@ import type { User } from '../../entities/user.entity';
 import { AuthService, type SessionContext } from './auth.service';
 import {
   clearAuthCookies,
+  clearPasskeyFlowCookie,
+  PASSKEY_2FA_COOKIE,
   REFRESH_TOKEN_COOKIE,
   setAuthCookies,
   setCsrfCookie,
+  setPasskeyFlowCookie,
 } from './auth-cookies';
 import { toCurrentUser } from './current-user.view';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -42,6 +48,8 @@ import { Public } from './decorators/public.decorator';
 import type { AuthResponseDto, TwoFactorChallengeDto } from './dto/auth-response.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { RegistrationOpenGuard } from './guards/registration-open.guard';
+import { PASSKEY_CHALLENGE_TTL_MS } from './passkeys/passkey-challenge.store';
+import { PasskeysService } from './passkeys/passkeys.service';
 import { PasswordResetService } from './password-reset.service';
 import type { TwoFactorSetupDto, TwoFactorStatusDto } from './two-factor.service';
 import { TwoFactorService } from './two-factor.service';
@@ -52,6 +60,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly twoFactorService: TwoFactorService,
     private readonly passwordResetService: PasswordResetService,
+    private readonly passkeysService: PasskeysService,
   ) {}
 
   /**
@@ -112,13 +121,25 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ user: AuthResponseDto['user'] } | TwoFactorChallengeDto> {
-    const result = await this.authService.login(loginDto, this.extractSessionContext(req));
+    // A passkey answer must come from the browser its challenge was issued to.
+    const passkeyFlow = {
+      presented: req.cookies?.[PASSKEY_2FA_COOKIE] as string | undefined,
+      issued: randomBytes(32).toString('base64url'),
+    };
+    const result = await this.authService.login(loginDto, {
+      ...this.extractSessionContext(req),
+      passkeyFlow,
+    });
 
     // The 2FA challenge carries no tokens — no session to issue yet.
     if ('twoFactorRequired' in result) {
+      if (result.passkeyOptions) {
+        setPasskeyFlowCookie(res, passkeyFlow.issued, PASSKEY_CHALLENGE_TTL_MS, PASSKEY_2FA_COOKIE);
+      }
       return result;
     }
 
+    clearPasskeyFlowCookie(res, PASSKEY_2FA_COOKIE);
     this.setSession(res, result);
     return { user: result.user };
   }
@@ -204,11 +225,22 @@ export class AuthController {
     @SchemaBody(ResetPasswordBody) dto: ResetPasswordBody,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ message: string }> {
-    await this.passwordResetService.resetPassword(dto.token, dto.newPassword);
+    await this.passwordResetService.resetPassword(dto.token, dto.newPassword, dto.removePasskeyIds);
     // The reset revoked every session; drop this browser's cookies too so it
     // is not left holding credentials the server no longer honours.
     clearAuthCookies(res);
     return { message: 'Password updated. Please sign in with your new password.' };
+  }
+
+  /** The reset link's account passkeys; the link stays unspent. POST keeps the token out of URLs. */
+  @Public()
+  @SkipCsrf()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('reset-password/passkeys')
+  @HttpCode(HttpStatus.OK)
+  @SchemaResponse(PasskeyList)
+  async resetPasswordPasskeys(@SchemaBody(ResetTokenBody) dto: ResetTokenBody) {
+    return this.passwordResetService.listPasskeys(dto.token);
   }
 
   @Public()
@@ -249,13 +281,26 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  // Checks the password when passkeys are removed with it: as tight as a single remove.
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('logout-all')
   @HttpCode(HttpStatus.OK)
   @SchemaResponse(MessageResult)
   async logoutAll(
     @CurrentUser() user: User,
+    @SchemaBody(LogoutAllBody) dto: LogoutAllBody,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ message: string }> {
+    // Passkeys chosen for removal need the password, as a single remove does;
+    // a wrong one stops here, before any session is touched.
+    if (dto.removePasskeyIds?.length) {
+      await this.passkeysService.removeMany(
+        user.id,
+        dto.removePasskeyIds,
+        dto.password ?? '',
+        'logout-all',
+      );
+    }
     const result = await this.authService.logoutAll(user.id);
     clearAuthCookies(res);
     return result;

@@ -19,6 +19,7 @@ export const queryKeys = {
     ['dashboard', 'wallet-coverage', workspaceId] as const,
   dashboardSetupProgress: (workspaceId: string | null) =>
     ['dashboard', 'setup-progress', workspaceId] as const,
+  payPeriods: (workspaceId: string | null) => ['pay-periods', workspaceId] as const,
   statements: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
     ['statements', o.workspaceId, o.params] as const,
   receiptDocuments: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
@@ -41,6 +42,8 @@ export const queryKeys = {
   ) => ['categorization-rules', workspaceId, 'preview', conditions, ruleId, walletId] as const,
   categorizationRuleSuggestions: (workspaceId: string | null) =>
     ['categorization-rules', workspaceId, 'suggestions'] as const,
+  categorizationRuleGroups: (workspaceId: string | null) =>
+    ['categorization-rule-groups', workspaceId] as const,
   reviewInbox: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
     ['review-inbox', o.workspaceId, o.params] as const,
   reviewInboxCounts: (workspaceId: string | null, reviewer?: string) =>
@@ -101,6 +104,8 @@ export const queryKeys = {
   // The date is part of the key: a new day is a new quote without waiting for staleness.
   dailyQuote: (workspaceId: string | null, date: string, locale: string) =>
     ['daily-quote', workspaceId, date, locale] as const,
+  // The app's own release notes: the same for every workspace.
+  changelogLatest: () => ['changelog-latest'] as const,
   integrationCatalogStatuses: (workspaceId: string | null) =>
     ['integration-status', workspaceId, 'catalog'] as const,
   webhookEndpoints: (workspaceId: string | null) => ['webhook-endpoints', workspaceId] as const,
@@ -187,10 +192,27 @@ export const queryKeys = {
     ['audit-events', o.workspaceId, o.params] as const,
   forecast: (o: { workspaceId: string | null; days: number; scenario: string }) =>
     ['forecast', o.workspaceId, o.days, o.scenario] as const,
+  paycheckPlan: (o: { workspaceId: string | null; params: string }) =>
+    ['forecast', o.workspaceId, 'paychecks', o.params] as const,
   investments: (workspaceId: string | null) => ['investments', workspaceId] as const,
   // Under investments, so a holding or contribution change refreshes the returns page too.
   investmentReturns: (o: { workspaceId: string | null; range: string }) =>
     ['investments', o.workspaceId, 'returns', o.range] as const,
+  // Under investments too: a trade moves the holding, its account and the returns.
+  investmentTrades: (o: { workspaceId: string | null; holdingId: string }) =>
+    ['investments', o.workspaceId, 'trades', o.holdingId] as const,
+  investmentLots: (o: { workspaceId: string | null; holdingId: string }) =>
+    ['investments', o.workspaceId, 'lots', o.holdingId] as const,
+  investmentSettings: (workspaceId: string | null) =>
+    ['investments', workspaceId, 'settings'] as const,
+  // Under investments too: a trade or a close moves the chart and the returns.
+  holdingHistory: (o: { workspaceId: string | null; holdingId: string }) =>
+    ['investments', o.workspaceId, 'history', o.holdingId] as const,
+  holdingCloses: (o: { workspaceId: string | null; holdingId: string }) =>
+    ['investments', o.workspaceId, 'closes', o.holdingId] as const,
+  // Under net worth: holdings, trades and metal lots all re-read net worth, and this with it.
+  investmentAllocation: (workspaceId: string | null) =>
+    ['net-worth', workspaceId, 'investment-allocation'] as const,
   metals: (workspaceId: string | null) => ['metals', workspaceId] as const,
   reconciliation: (workspaceId: string | null) => ['reconciliation', workspaceId] as const,
   cashFlowMap: (o: { workspaceId: string | null; params: string }) =>
@@ -270,6 +292,8 @@ export const queryKeys = {
   systemUpdate: () => ['system-update'] as const,
   /** Instance-wide too: every workspace's statements, as counts per bank and layout. */
   parserHealth: () => ['parser-health'] as const,
+  /** Instance-wide: the server's services, queues and setup, for its admins. */
+  systemHealth: () => ['system-health'] as const,
   workspaceVersions: (workspaceId: string | null) => ['workspace-versions', workspaceId] as const,
   /** The caller's own calendar feed in this workspace. */
   calendarFeed: (workspaceId: string | null) => ['calendar-feed', workspaceId] as const,

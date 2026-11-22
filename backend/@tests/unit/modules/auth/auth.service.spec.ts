@@ -131,6 +131,7 @@ describe('AuthService', () => {
           provide: TwoFactorService,
           useValue: {
             assertLoginCode: vi.fn(),
+            checkLogin: vi.fn().mockResolvedValue(null),
           },
         },
         { provide: AuditService, useValue: auditService },

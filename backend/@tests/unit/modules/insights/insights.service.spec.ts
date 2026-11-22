@@ -56,6 +56,9 @@ describe('InsightsService', () => {
   const stoicAnalyzer = {
     analyze: vi.fn(async () => []),
   } as any;
+  const wealthAnalyzer = {
+    analyze: vi.fn(async () => []),
+  } as any;
 
   let service: InsightsService;
 
@@ -63,6 +66,7 @@ describe('InsightsService', () => {
     vi.clearAllMocks();
     financialAnalyzer.analyze.mockResolvedValue([]);
     stoicAnalyzer.analyze.mockResolvedValue([]);
+    wealthAnalyzer.analyze.mockResolvedValue([]);
     insightRepository.find.mockResolvedValue([]);
     insightRepository.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
     userRepository.findOne.mockResolvedValue({ id: 'user-1', locale: 'ru' });
@@ -72,6 +76,7 @@ describe('InsightsService', () => {
       operationalAnalyzer,
       financialAnalyzer,
       stoicAnalyzer,
+      wealthAnalyzer,
     );
   });
 
@@ -184,6 +189,63 @@ describe('InsightsService', () => {
     expect(result.updated).toBe(0);
     expect(result.total).toBe(2);
     expect(result.newInsights).toHaveLength(2);
+  });
+
+  it('writes the household cards, and lets an unusual category replace its rising card', async () => {
+    const categoryId = 'category-1';
+    operationalAnalyzer.analyze.mockResolvedValue([]);
+    financialAnalyzer.analyze.mockResolvedValue([
+      {
+        type: InsightType.SPENDING_TREND_UP,
+        category: InsightCategory.TREND,
+        severity: InsightSeverity.WARN,
+        messageKey: 'trend.category_rising',
+        messageParams: { category: 'Home Repairs', percent: 80 },
+        deduplicationKey: `financial:category_rising:workspace-1:${categoryId}`,
+        data: { priority: 58, categoryId },
+      },
+    ]);
+    wealthAnalyzer.analyze.mockResolvedValue([
+      {
+        type: InsightType.CATEGORY_ANOMALY,
+        category: InsightCategory.TREND,
+        severity: InsightSeverity.WARN,
+        messageKey: 'trend.category_anomaly',
+        messageParams: {
+          category: 'Home Repairs',
+          currentAmount: 900,
+          usualAmount: 300,
+          months: 6,
+          currency: 'EUR',
+        },
+        deduplicationKey: `financial:category_anomaly:workspace-1:${categoryId}:2026-11`,
+        data: { priority: 60, categoryId },
+      },
+      {
+        type: InsightType.IDLE_CASH,
+        category: InsightCategory.PATTERN,
+        severity: InsightSeverity.INFO,
+        messageKey: 'pattern.idle_cash',
+        messageParams: { cashAmount: 30000, reserveAmount: 12000, months: 15, currency: 'EUR' },
+        deduplicationKey: 'financial:idle_cash:workspace-1',
+        data: { priority: 32 },
+      },
+    ]);
+    insightRepository.findOne.mockResolvedValue(null);
+
+    const result = await service.refresh('user-1', 'workspace-1', { locale: 'en' });
+
+    expect(wealthAnalyzer.analyze).toHaveBeenCalledWith({
+      userId: 'user-1',
+      workspaceId: 'workspace-1',
+    });
+    expect(result.newInsights.map(item => item.messageKey)).toEqual([
+      'trend.category_anomaly',
+      'pattern.idle_cash',
+    ]);
+    const created = insightRepository.create.mock.calls.map(([row]: any[]) => row);
+    expect(created[0].title).toBe('Unusual spending on "Home Repairs"');
+    expect(created[1].message).toContain('€30,000');
   });
 
   it('updates the row a concurrent refresh created first instead of failing', async () => {

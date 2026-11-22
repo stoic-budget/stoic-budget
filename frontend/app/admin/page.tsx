@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Container, Typography } from '@mui/material';
+import { Button, Container, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { useEffect, useMemo, useState } from 'react';
@@ -20,6 +20,7 @@ export default function AdminPage() {
   const c = resolvedTheme === 'dark' ? tokens.dark.color : tokens.color;
   const t = useIntlayer('adminPage');
   const parsing = useIntlayer('adminParsingPage');
+  const health = useIntlayer('adminHealthPage');
   const { user } = useAuth();
 
   const [auditLogs, setAuditLogs] = useState<AuditEvent[]>([]);
@@ -91,9 +92,14 @@ export default function AdminPage() {
         {t.title}
       </Typography>
       {user?.role === 'admin' ? (
-        <Button component={Link} href="/admin/parsing" variant="outlined" size="small">
-          {parsing.title}
-        </Button>
+        <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
+          <Button component={Link} href="/admin/parsing" variant="outlined" size="small">
+            {parsing.title}
+          </Button>
+          <Button component={Link} href="/admin/health" variant="outlined" size="small">
+            {health.title}
+          </Button>
+        </Stack>
       ) : null}
 
       <div className="audit-page" style={{ maxWidth: '100%', padding: '24px 0 0' }}>

@@ -29,14 +29,14 @@ import type { User } from '../../entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { BankSyncService } from './bank-sync.service';
 import { BankSyncErrorFilter } from './bank-sync-error.filter';
-import { BankSyncPullService } from './bank-sync-pull.service';
+import { BankSyncSchedulerService } from './bank-sync-scheduler.service';
 
 @Controller('integrations/bank-sync')
 @UseFilters(BankSyncErrorFilter)
 export class BankSyncController {
   constructor(
     private readonly connections: BankSyncService,
-    private readonly pull: BankSyncPullService,
+    private readonly scheduler: BankSyncSchedulerService,
   ) {}
 
   @Get('providers')
@@ -138,7 +138,7 @@ export class BankSyncController {
     @SchemaParams(BankSyncConnectionParams) params: BankSyncConnectionParams,
     @SchemaBody(UpdateBankSyncConnectionBody) body: UpdateBankSyncConnectionBody,
   ) {
-    return this.connections.updateConnection(workspaceId, params.id, body);
+    return this.scheduler.updateConnection(workspaceId, params.id, body);
   }
 
   @Patch('connections/:id/accounts/:accountId')
@@ -160,7 +160,7 @@ export class BankSyncController {
     @WorkspaceId() workspaceId: string,
     @SchemaParams(BankSyncConnectionParams) params: BankSyncConnectionParams,
   ) {
-    return this.pull.sync(user, workspaceId, params.id);
+    return this.scheduler.syncNow(user, workspaceId, params.id);
   }
 
   /** Moves a wallet's feed to another provider without losing its history. */

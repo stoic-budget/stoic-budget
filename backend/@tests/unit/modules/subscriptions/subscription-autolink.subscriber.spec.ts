@@ -199,6 +199,35 @@ describe('SubscriptionAutoLinkSubscriber', () => {
     expect(manager.query).not.toHaveBeenCalled();
   });
 
+  it('leaves a pending row alone: it may never book', async () => {
+    await insert(row({ isPending: true }));
+
+    expect(manager.query).not.toHaveBeenCalled();
+  });
+
+  it('links a row once the bank booked it, as the insert would have, and audits it', async () => {
+    const findOne = vi.fn(async () => row());
+    const dataSource = {
+      subscribers: [] as unknown[],
+      transaction: vi.fn(async (work: (m: unknown) => unknown) => work({ ...manager, findOne })),
+    };
+    const posted = new SubscriptionAutoLinkSubscriber(
+      dataSource as any,
+      (subscriber as any).subscriptionsService,
+      auditService as any,
+    );
+
+    await posted.linkPosted({ workspaceId, transactionIds: ['tx-new'] });
+
+    expect(findOne).toHaveBeenCalledWith(expect.anything(), {
+      where: { id: 'tx-new', workspaceId },
+    });
+    expect(chargeRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ transactionId: 'tx-new', subscriptionId: 'sub-1' }),
+    );
+    expect(auditService.createEvent).toHaveBeenCalledTimes(1);
+  });
+
   it('skips a row that is already a payment', async () => {
     chargeRepository.findOne.mockResolvedValue({ id: 'charge-other', transactionId: 'tx-new' });
     await insert(row());

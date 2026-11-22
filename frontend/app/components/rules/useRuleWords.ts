@@ -7,6 +7,7 @@ import type { RuleWords } from './rule-text';
 export function useRuleWords(): RuleWords {
   const t = useIntlayer('categorizationRules');
   const types = useIntlayer('paymentTypes');
+  const actions = useIntlayer('ruleActions');
   return {
     field: {
       counterparty_name: t.field.counterparty_name.value,
@@ -64,6 +65,9 @@ export function useRuleWords(): RuleWords {
     tags: t.result.tags.value,
     comment: t.result.comment.value,
     payee: t.result.payee.value,
+    notifyAll: actions.resultNotifyAll.value,
+    notifyMember: actions.resultNotifyMember.value,
+    exclude: actions.resultExclude.value,
     shared: t.result.shared.value,
     unknown: t.result.unknown.value,
   };

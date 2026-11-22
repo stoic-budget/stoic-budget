@@ -118,6 +118,6 @@ src/
 API доступно по адресу: `http://localhost:3001/api/v1`
 
 - Swagger: `http://localhost:3001/api/docs` (не публикуется при `NODE_ENV=production`)
-- Health: `GET /api/v1/health` (liveness), `GET /api/v1/health/ready` (проверка БД)
+- Health: `GET /api/v1/health` (liveness), `GET /api/v1/health/ready` (проверка БД и Redis), `GET /api/v1/system/health` (для админа: очереди, воркеры, настройка)
 
 Браузерный клиент авторизуется HttpOnly-cookies `access_token`/`refresh_token`; изменяющие запросы с такими cookies должны передавать заголовок `x-csrf-token` со значением cookie `csrf_token`. Скрипты и интеграции могут использовать `Authorization: Bearer <token>` или `X-Api-Key` — такие запросы CSRF-проверку не проходят.

@@ -1,22 +1,32 @@
 'use client';
 
+import FingerprintIcon from '@mui/icons-material/FingerprintOutlined';
 import Stack from '@mui/material/Stack';
 import type React from 'react';
+import { useState } from 'react';
 import { Lock, Mail, Shield, ShieldCheck } from '@/app/components/icons';
+import { wrap } from '@/app/components/icons/wrap';
+import { useIntlayer } from '@/app/i18n';
 import { useUserFormat } from '@/app/lib/user-format-store';
 import { EmailSection } from '@/app/settings/profile/components/EmailSection';
+import { LogoutAllDialog } from '@/app/settings/profile/components/LogoutAllDialog';
+import { PasskeysSection } from '@/app/settings/profile/components/PasskeysSection';
 import { PasswordSection } from '@/app/settings/profile/components/PasswordSection';
 import { SessionsSection } from '@/app/settings/profile/components/SessionsSection';
 import { SettingsAccordion } from '@/app/settings/profile/components/SettingsAccordion';
+import { SingleSignOnSection } from '@/app/settings/profile/components/SingleSignOnSection';
 import { TwoFactorSection } from '@/app/settings/profile/components/TwoFactorSection';
 import { resolveOpenSection } from '@/app/settings/profile/helpers/settings-url-state';
 import { useEmailForm } from '@/app/settings/profile/hooks/useEmailForm';
+import { usePasskeys } from '@/app/settings/profile/hooks/usePasskeys';
 import { usePasswordForm } from '@/app/settings/profile/hooks/usePasswordForm';
 import { useSessions } from '@/app/settings/profile/hooks/useSessions';
 import { useSettingsText } from '@/app/settings/profile/hooks/useSettingsText';
 import { useTwoFactor } from '@/app/settings/profile/hooks/useTwoFactor';
 
 import type { SettingsTabProps } from './types';
+
+const Fingerprint = wrap(FingerprintIcon);
 
 export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Element {
   const { t, tx } = useSettingsText();
@@ -60,6 +70,15 @@ export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Elem
     errorFallback: tx(['securityCard', 'errorFallback']),
   });
 
+  const passkeyText = useIntlayer('settingsPasskeysSection');
+  const passkeys = usePasskeys(isAuthenticated, {
+    added: passkeyText.messages.added.value,
+    renamed: passkeyText.messages.renamed.value,
+    removed: passkeyText.messages.removed.value,
+    dismissed: passkeyText.messages.dismissed.value,
+    errorFallback: passkeyText.messages.errorFallback.value,
+  });
+
   const {
     sessions,
     sessionsLoading,
@@ -68,6 +87,8 @@ export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Elem
     logoutSessionLoadingId,
     handleLogoutSession,
     handleLogoutAll,
+    logoutAllConfirmed,
+    logoutAllRemovingPasskeys,
   } = useSessions(isAuthenticated, {
     loadError: tx(['sessionsCard', 'sessionsLoadError']),
     logoutAllConfirm: tx(['sessionsCard', 'logoutAllConfirm']),
@@ -76,6 +97,14 @@ export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Elem
     sessionLogoutSuccess: tx(['sessionsCard', 'sessionLogoutSuccess']),
     sessionLogoutError: tx(['sessionsCard', 'sessionLogoutError']),
   });
+
+  // With passkeys, the confirmation lists them (they outlive the logout); without, it stays a
+  // plain confirm. While the list is still loading the dialog opens too, and fills in.
+  const [logoutAllOpen, setLogoutAllOpen] = useState(false);
+  const confirmLogoutAll =
+    passkeys.loading || passkeys.passkeys.length > 0
+      ? async () => setLogoutAllOpen(true)
+      : handleLogoutAll;
 
   return (
     <Stack spacing={2}>
@@ -131,6 +160,22 @@ export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Elem
         />
       </SettingsAccordion>
 
+      <SingleSignOnSection
+        openSection={openSection}
+        formatPreferences={formatPreferences}
+        tx={tx}
+      />
+
+      <SettingsAccordion
+        id="passkeys"
+        title={passkeyText.title.value}
+        description={passkeyText.description.value}
+        icon={Fingerprint}
+        defaultExpanded={openSection === 'passkeys'}
+      >
+        <PasskeysSection tx={tx} passkeys={passkeys} formatPreferences={formatPreferences} />
+      </SettingsAccordion>
+
       <SettingsAccordion
         id="sessions"
         title={t.sessionsCard.title.value}
@@ -148,10 +193,19 @@ export function SecurityTab({ section, user }: SettingsTabProps): React.JSX.Elem
           userLastLogin={user?.lastLogin}
           logoutSessionLoadingId={logoutSessionLoadingId}
           handleLogoutSession={handleLogoutSession}
-          handleLogoutAll={handleLogoutAll}
+          handleLogoutAll={confirmLogoutAll}
           formatPreferences={formatPreferences}
         />
       </SettingsAccordion>
+      {logoutAllOpen ? (
+        <LogoutAllDialog
+          passkeys={passkeys.passkeys}
+          tx={tx}
+          onClose={() => setLogoutAllOpen(false)}
+          onLogoutAll={logoutAllConfirmed}
+          onLogoutAllRemoving={logoutAllRemovingPasskeys}
+        />
+      ) : null}
     </Stack>
   );
 }

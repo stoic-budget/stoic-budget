@@ -20,6 +20,8 @@ export enum WorkspaceServiceSettingsKey {
   APP = 'app',
   /** Precious metals: what a dealer pays below spot, per metal. */
   METALS = 'metals',
+  /** Investments: how a sale is matched to the lots it came from (FIFO or average cost). */
+  INVESTMENTS = 'investments',
   /** Tax reserve: the share of income to set aside, and where tax payments are booked. */
   TAX_RESERVE = 'tax_reserve',
   /** How often the workspace files VAT returns, and whether it holds a standing extension. */
@@ -60,6 +62,19 @@ export class WorkspaceServiceSettings {
 
   @Column({ name: 'updated_by_user_id', type: 'uuid', nullable: true })
   updatedByUserId: string | null;
+
+  /**
+   * SMTP only: the person whose own account mail (password reset, e-mail
+   * change) this server may send. Set only by a save that confirmed that
+   * person's password; a restore, an import or a row saved before it existed
+   * leaves it null, and their account mail goes through SMTP_*.
+   */
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'account_mail_user_id' })
+  accountMailUser: Relation<User | null>;
+
+  @Column({ name: 'account_mail_user_id', type: 'uuid', nullable: true })
+  accountMailUserId: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

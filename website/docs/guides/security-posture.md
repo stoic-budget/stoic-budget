@@ -13,7 +13,7 @@ turn the outbound parts off.
 |---|---|
 | Another workspace's member reading your data | Every query filters by `workspaceId`; tenant isolation is tested end to end |
 | Strangers signing up on a server open to the internet | Close sign-up under Admin > Users, or with `REGISTRATION_ENABLED=false`: only people with an invitation get in |
-| A stolen session cookie | Short-lived JWT in an `HttpOnly` cookie, refresh rotation, CSRF guard on cookie-authenticated writes, 2FA with recovery codes |
+| A stolen session cookie | Short-lived JWT in an `HttpOnly` cookie, refresh rotation, CSRF guard on cookie-authenticated writes, 2FA with recovery codes; changing the password, the email address or the SMTP server that sends your reset links asks for the current password |
 | An over-reaching script or AI agent | API keys carry scopes; a key never exceeds its owner's role; every write is audited as the key and is undoable |
 | The server being used to reach your network | The egress guard rejects private, loopback and link-local hosts for every outbound URL (SMTP, S3, WebDAV, IMAP, prices, maps) |
 | Uploaded files executing anything | Files are stored, never served as scripts; parsers run on text extracted from them |
@@ -43,6 +43,8 @@ in clear, or a browser extension reading the page.
   and unknown addresses. A password reset ends every session, voids pending MCP OAuth authorization codes and
   revokes the user's OAuth grants in every workspace. Logging out of all devices voids pending codes but
   leaves existing grants untouched.
+- Password reset lets you review and optionally remove the listed passkeys; otherwise they stay registered.
+- Log out everywhere keeps passkeys unless you choose to remove them; removal requires your current password.
 - Bcrypt password hashing (12 rounds by default, `BCRYPT_ROUNDS`).
 - helmet security headers, a CORS allowlist and Redis-backed rate limits. Only the exact OAuth discovery,
   registration, token and revocation paths allow any origin without credentials; the rest of the API,
@@ -58,7 +60,7 @@ in clear, or a browser extension reading the page.
 | Yahoo Finance / CoinGecko | Tickers | "Refresh prices" on the net-worth page | Enter prices by hand |
 | Your map tile server / Nominatim | Receipt coordinates | Receipt maps, if enabled | Do not enable receipt location |
 | Telegram | Reports and replies to the bot | Only if the bot is connected | Disconnect Telegram |
-| SMTP | Invitations, password resets | Only if SMTP is set | Leave SMTP unset |
+| SMTP | Invitations, password resets, passkey addition and removal notices | Only if SMTP is set | Leave SMTP unset |
 
 Nothing is sent to Stoic Budget's authors. There is no telemetry.
 

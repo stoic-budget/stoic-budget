@@ -8,6 +8,7 @@ import { AuditModule } from '../audit/audit.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { LoansModule } from '../loans/loans.module';
 import { WorkspaceCurrencyModule } from '../workspaces/workspace-currency.module';
+import { StatementCoverageService } from './statement-coverage.service';
 import { WalletBalanceCheckController } from './wallet-balance-check.controller';
 import { WalletBalanceCheckService } from './wallet-balance-check.service';
 import { WalletCoverageService } from './wallet-coverage.service';
@@ -29,6 +30,7 @@ import { WalletsService } from './wallets.service';
     WalletsService,
     WalletStatementsService,
     WalletCoverageService,
+    StatementCoverageService,
     WalletBalanceCheckService,
   ],
   exports: [WalletsService],

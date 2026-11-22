@@ -8,12 +8,14 @@ import React, { Suspense, useState } from 'react';
 import { AuthLanguageSwitcher } from '@/app/components/AuthLanguageSwitcher';
 import { BrandLockup } from '@/app/components/BrandLockup';
 import { Check, Eye, EyeOff } from '@/app/components/icons';
+import { PasskeyReviewList } from '@/app/components/passkeys/PasskeyReviewList';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
 import { getApiErrorMessage } from '@/app/lib/api-error';
 import type { ContractInput } from '@/app/lib/query-fn-schema';
 import { AuthHero } from '../AuthHero';
 import AuthLayout from '../AuthLayout';
+import { useResetPasskeys } from './hooks/useResetPasskeys';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -31,6 +33,8 @@ function ResetPasswordContent(): React.JSX.Element {
   // Which field the message is about: the first one, the second, or neither.
   const [errorField, setErrorField] = useState<'password' | 'confirm' | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const passkeys = useResetPasskeys(token);
+  const [removePasskeys, setRemovePasskeys] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
@@ -59,6 +63,10 @@ function ResetPasswordContent(): React.JSX.Element {
       .post('/auth/reset-password', {
         token,
         newPassword: password,
+        // Exactly the passkeys on screen, and only when the box is ticked.
+        ...(removePasskeys && passkeys.length > 0
+          ? { removePasskeyIds: passkeys.map(passkey => passkey.id) }
+          : {}),
       } satisfies ContractInput<'ResetPasswordBody'>)
       .then(() => {
         setDone(true);
@@ -158,6 +166,12 @@ function ResetPasswordContent(): React.JSX.Element {
             />
             {fieldError('confirm')}
           </div>
+          <PasskeyReviewList
+            passkeys={passkeys}
+            remove={removePasskeys}
+            onRemoveChange={setRemovePasskeys}
+            disabled={loading}
+          />
           {error && errorField === null ? (
             <p role="alert" className="seneca-auth-error">
               {error}

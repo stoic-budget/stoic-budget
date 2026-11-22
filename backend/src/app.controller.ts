@@ -1,4 +1,5 @@
 import { Controller, Get, Res, ServiceUnavailableException } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -23,6 +24,9 @@ export class AppController {
   }
 
   @Public()
+  // The throttler counts in Redis: with Redis down it would hang this answer
+  // until its retries ran out, instead of a quick 503.
+  @SkipThrottle()
   @Get('health/ready')
   @SchemaResponse(ReadinessStatus)
   async getReadiness(): Promise<ReadinessResponse> {

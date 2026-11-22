@@ -79,6 +79,8 @@ const TRIGGER_WRITTEN = { select: false, insert: false, update: false } as const
 @Index('IDX_transactions_workspace_transfer_pair', ['workspaceId', 'transferPairId'], {
   where: '"transfer_pair_id" IS NOT NULL',
 })
+// Partial, matching the migration: the bank-sync pull looks up the few pending rows.
+@Index('IDX_transactions_workspace_pending', ['workspaceId'], { where: '"is_pending" = true' })
 // Makes a crypto sync idempotent: re-reading the chain re-offers rows we already
 // have, and the insert simply loses the race with itself. One on-chain transaction
 // can legitimately produce several rows (a native transfer plus a token transfer,
@@ -237,6 +239,21 @@ export class Transaction {
    */
   @Column({ name: 'excluded_from_budgets', type: 'boolean', default: false })
   excludedFromBudgets: boolean;
+
+  /**
+   * A person counted the row in or left it out of budgets: a rule's "leave out
+   * of budgets" then leaves their choice alone, as a picked category stays.
+   */
+  @Column({ name: 'budgets_set_by_hand', type: 'boolean', default: false })
+  budgetsSetByHand: boolean;
+
+  /**
+   * A bank-sync row the bank still holds as pending. Shown, but counted
+   * nowhere: `onlyCounted`/`countedSql`/`countedWhere` (and so `onlyFlows`)
+   * leave it out until the pull replaces it with the booked version.
+   */
+  @Column({ name: 'is_pending', type: 'boolean', default: false })
+  isPending: boolean;
 
   @ManyToOne(() => CryptoWallet, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'crypto_wallet_id' })
@@ -501,6 +518,16 @@ export class Transaction {
    */
   @Column({ name: 'investment_account_id', type: 'uuid', nullable: true })
   investmentAccountId: string | null;
+
+  /**
+   * On an interest row: the loan payment it was split from. The payment is
+   * left as it came (the whole amount, paired or not); the interest is an
+   * expense on the loan account, so the debt falls by the principal only.
+   * Counts only while the payment counts; deleted with the payment. Every
+   * part of a split interest row keeps the link.
+   */
+  @Column({ name: 'loan_interest_of_id', type: 'uuid', nullable: true })
+  loanInterestOfId: string | null;
 
   @Column({ type: 'varchar', name: 'fingerprint', length: 64, nullable: true })
   fingerprint: string | null;

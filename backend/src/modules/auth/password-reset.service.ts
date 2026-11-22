@@ -7,14 +7,20 @@ import { APP_NAME } from '../../common/brand';
 import { appError } from '../../common/errors/app-error';
 import { hashPassword } from '../../common/utils/password-hash.util';
 import { requireSecret } from '../../common/utils/required-secret.util';
+import type { Passkey } from '../../contracts';
 import { AuditAction, EntityType, Severity } from '../../entities/audit-event.entity';
 import { AuthSession } from '../../entities/auth-session.entity';
+import { PasskeyCredential } from '../../entities/passkey-credential.entity';
 import { PasswordResetToken } from '../../entities/password-reset-token.entity';
 import { User } from '../../entities/user.entity';
+import { UserIdentity } from '../../entities/user-identity.entity';
 import { AuditService } from '../audit/audit.service';
 import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-revocation.service';
 import { MailerService } from '../mailer/mailer.service';
 import { McpOAuthGrantsService } from '../mcp-oauth/mcp-oauth-grants.service';
+import { recordOidcEvent } from './oidc/oidc-audit';
+import { deleteOwnPasskeys, toPasskey } from './passkeys/passkey-helpers';
+import { PasskeysService } from './passkeys/passkeys.service';
 import { recordSecurityEvent } from './security-audit.util';
 
 const TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -28,11 +34,12 @@ export class PasswordResetService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(PasswordResetToken)
     private readonly tokenRepository: Repository<PasswordResetToken>,
-    @InjectRepository(AuthSession)
-    private readonly authSessionRepository: Repository<AuthSession>,
+    @InjectRepository(PasskeyCredential)
+    private readonly passkeyRepository: Repository<PasskeyCredential>,
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
     private readonly auditService: AuditService,
+    private readonly passkeysService: PasskeysService,
     private readonly mcpOAuthGrants: McpOAuthGrantsService,
     private readonly calendarFeeds: CalendarFeedRevocationService,
   ) {}
@@ -110,44 +117,67 @@ export class PasswordResetService {
     }
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<void> {
-    const record = await this.tokenRepository.findOne({
-      where: { tokenHash: this.hashToken(token) },
+  /**
+   * The passkeys of the account a reset link belongs to, so the person can see
+   * and drop any they did not add. Reading does not spend the link, and a bad
+   * link gets exactly the answer the reset itself gives.
+   */
+  async listPasskeys(token: string): Promise<Passkey[]> {
+    const { user } = await this.redeemable(token);
+    const rows = await this.passkeyRepository.find({
+      where: { userId: user.id },
+      order: { createdAt: 'ASC' },
     });
+    return rows.map(toPasskey);
+  }
 
-    // One message for every failure mode: expired, already used, never existed.
-    // Distinguishing them tells an attacker which guesses were closer.
-    if (!record || record.usedAt || record.expiresAt.getTime() < Date.now()) {
-      throw new BadRequestException(appError('AUTH_RESET_LINK_INVALID'));
-    }
+  async resetPassword(
+    token: string,
+    newPassword: string,
+    removePasskeyIds: readonly string[] = [],
+  ): Promise<void> {
+    const { record, user } = await this.redeemable(token);
+    const passwordHash = await hashPassword(newPassword);
+    const hadPassword = user.passwordSet !== false;
 
-    const user = await this.userRepository.findOne({ where: { id: record.userId } });
-    if (!(user && user.isActive !== false)) {
-      throw new BadRequestException(appError('AUTH_RESET_LINK_INVALID'));
-    }
-
-    user.passwordHash = await hashPassword(newPassword);
-    // Bump the token version and revoke sessions: whoever forced the reset —
-    // the owner recovering, or someone kicking out an intruder — expects every
-    // existing login to stop working.
-    user.tokenVersion = (user.tokenVersion ?? 0) + 1;
-    await this.userRepository.save(user);
-    // Spent as soon as the password changed: a failure below must not leave
-    // the link usable again.
-    record.usedAt = new Date();
-    await this.tokenRepository.save(record);
-    // IsNull(), not `revokedAt: null` — TypeORM renders a literal null
-    // comparison for the latter, which never matches, so nothing was revoked.
-    await this.authSessionRepository.update(
-      { userId: user.id, revokedAt: IsNull() },
-      { revokedAt: new Date() },
-    );
-    // The same goes for apps connected over OAuth: their tokens are not tied to
-    // the token version, so each grant is revoked, in every workspace, and logged.
-    await this.mcpOAuthGrants.revokeAllOfUser(user.id, 'password_reset');
-
-    // Calendar feed links end too, in every workspace.
-    await this.calendarFeeds.revokeAllOf(user.id);
+    // One transaction: the link is spent, the password changed, every session
+    // revoked, the chosen passkeys removed and single sign-on unlinked, or none
+    // of it happens.
+    const { removed, unlinked } = await this.userRepository.manager.transaction(async manager => {
+      // Claimed with a conditional update, so two submits of one link cannot both pass.
+      const claimed = await manager.update(
+        PasswordResetToken,
+        { id: record.id, usedAt: IsNull() },
+        { usedAt: new Date() },
+      );
+      if (!claimed.affected) {
+        throw new BadRequestException(appError('AUTH_RESET_LINK_INVALID'));
+      }
+      // Bump the token version and revoke sessions: whoever forced the reset —
+      // the owner recovering, or someone kicking out an intruder — expects every
+      // existing login to stop working.
+      await manager.update(User, { id: user.id }, { passwordHash, passwordSet: true });
+      await manager.increment(User, { id: user.id }, 'tokenVersion', 1);
+      // IsNull(), not `revokedAt: null` — TypeORM renders a literal null
+      // comparison for the latter, which never matches, so nothing was revoked.
+      await manager.update(
+        AuthSession,
+        { userId: user.id, revokedAt: IsNull() },
+        { revokedAt: new Date() },
+      );
+      // A provider account linked to an account with a password may be the
+      // intruder's, so the reset that shuts them out unlinks it too. An account
+      // made by single sign-on keeps its own: without a password it could link
+      // nothing more, so what it has is its owner's.
+      const identities = hadPassword
+        ? await manager.find(UserIdentity, { where: { userId: user.id } })
+        : [];
+      if (identities.length > 0) await manager.delete(UserIdentity, { userId: user.id });
+      return {
+        removed: await deleteOwnPasskeys(manager, user.id, removePasskeyIds),
+        unlinked: identities,
+      };
+    });
 
     await recordSecurityEvent(this.auditService, this.logger, {
       workspaceId: user.workspaceId,
@@ -156,8 +186,48 @@ export class PasswordResetService {
       entityId: user.id,
       action: AuditAction.UPDATE,
       severity: Severity.WARN,
-      meta: { password: 'reset', sessions: 'all-revoked' },
+      meta: {
+        password: 'reset',
+        sessions: 'all-revoked',
+        ...(unlinked.length > 0 ? { singleSignOn: 'all-unlinked' } : {}),
+      },
     });
+    for (const identity of unlinked) {
+      await recordOidcEvent(this.auditService, this.logger, 'unlinked', {
+        user,
+        issuer: identity.issuer,
+        identityId: identity.id,
+      });
+    }
+    if (removed.length > 0) {
+      await this.passkeysService.reportRemoved(user, removed, 'password-reset');
+    }
+    // The same goes for apps connected over OAuth: their tokens are not tied to
+    // the token version, so each grant is revoked, in every workspace, and logged.
+    await this.mcpOAuthGrants.revokeAllOfUser(user.id, 'password_reset');
+    // Calendar feed links end too, in every workspace. Last, so a failure here
+    // cannot cost the removed passkeys their audit rows and their notice.
+    await this.calendarFeeds.revokeAllOf(user.id);
+  }
+
+  /**
+   * The live grant behind a reset link and its active user. One message for
+   * every failure mode: expired, already used, never existed. Distinguishing
+   * them tells an attacker which guesses were closer.
+   */
+  private async redeemable(token: string): Promise<{ record: PasswordResetToken; user: User }> {
+    const record = await this.tokenRepository.findOne({
+      where: { tokenHash: this.hashToken(token) },
+    });
+    if (!record || record.usedAt || record.expiresAt.getTime() < Date.now()) {
+      throw new BadRequestException(appError('AUTH_RESET_LINK_INVALID'));
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: record.userId } });
+    if (!(user && user.isActive !== false)) {
+      throw new BadRequestException(appError('AUTH_RESET_LINK_INVALID'));
+    }
+    return { record, user };
   }
 
   /** Housekeeping so spent and stale grants do not accumulate forever. */

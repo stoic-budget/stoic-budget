@@ -84,6 +84,26 @@ export const postJson = <A>(
     return yield* HttpClientResponse.schemaBodyJson(schema)(response);
   }).pipe(Effect.timeout(options.timeout));
 
+/**
+ * POST an `application/x-www-form-urlencoded` body (OAuth token endpoints) and
+ * decode the JSON answer. Not retried, for the same reason as postJson.
+ */
+export const postForm = <A>(
+  url: string,
+  form: Record<string, string>,
+  schema: Schema.Codec<A, unknown>,
+  options: { readonly timeout: Duration.Input; readonly headers?: Record<string, string> },
+) =>
+  Effect.gen(function* () {
+    const client = (yield* HttpClient.HttpClient).pipe(HttpClient.filterStatusOk);
+    const request = HttpClientRequest.post(url).pipe(
+      HttpClientRequest.setHeaders({ accept: 'application/json', ...options.headers }),
+      HttpClientRequest.bodyUrlParams(form),
+    );
+    const response = yield* client.execute(request);
+    return yield* HttpClientResponse.schemaBodyJson(schema)(response);
+  }).pipe(Effect.timeout(options.timeout));
+
 /** The media type of a response, without parameters (`image/png; q=1` → `image/png`). */
 export const contentTypeOf = (response: HttpClientResponse.HttpClientResponse): string =>
   (response.headers['content-type'] ?? '').split(';')[0].trim();

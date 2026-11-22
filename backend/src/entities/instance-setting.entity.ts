@@ -18,6 +18,8 @@ export enum InstanceSettingKey {
   REGISTRATION = 'registration',
   /** Whether MCP clients may register themselves for OAuth (RFC 7591). */
   MCP_CLIENT_REGISTRATION = 'mcp_client_registration',
+  /** The OpenID Connect provider people can sign in with; its client secret is encrypted. */
+  OIDC = 'oidc',
 }
 
 /**

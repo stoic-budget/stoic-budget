@@ -8,6 +8,7 @@ import {
   DEFAULT_STATEMENT_FILTERS,
   type StatementFilters,
 } from '@/app/(main)/statements/components/filters/statement-filters';
+import { usePayPeriods } from '@/app/hooks/usePayPeriods';
 
 /**
  * The statement filters one analytics view applies: its own month and nothing
@@ -19,11 +20,13 @@ export function useMonthFilters(month: Date): StatementFilters {
   const period = useAnalyticsPeriod();
   const from = period?.from;
   const to = period?.to;
+  // The workspace's own month when it starts on another day than the 1st.
+  const { context } = usePayPeriods();
   return useMemo(() => {
     // A period set by the page wins over the section's own month.
     if (from && to) {
       return { ...DEFAULT_STATEMENT_FILTERS, date: { mode: 'on', date: from, dateTo: to } };
     }
-    return monthDeepLinkFilters(monthKey) ?? DEFAULT_STATEMENT_FILTERS;
-  }, [monthKey, from, to]);
+    return monthDeepLinkFilters(monthKey, new Date(), context) ?? DEFAULT_STATEMENT_FILTERS;
+  }, [monthKey, from, to, context]);
 }

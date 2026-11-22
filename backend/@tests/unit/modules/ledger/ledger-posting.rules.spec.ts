@@ -33,6 +33,7 @@ const facts = (overrides: Partial<TransactionFacts> = {}): TransactionFacts => (
   taxNotionalAmount: null,
   isDuplicate: false,
   isVerified: true,
+  isPending: false,
   cryptoWalletId: null,
   categoryId: 'cat-1',
   branchId: null,
@@ -162,6 +163,11 @@ describe('ledger posting rules', () => {
       ['vat-out', 'credit', 1900],
     ]);
     expect(balance(legs)).toBe(0);
+  });
+
+  it('books no row the bank still holds as pending, even an approved one', () => {
+    expect(skipReason(facts({ isPending: true }))).toBe('pending');
+    expect(skipReason(facts({ isPending: false }))).toBeNull();
   });
 
   it('skips zero amounts but not crypto, and falls back to debit/credit when amount is empty', () => {

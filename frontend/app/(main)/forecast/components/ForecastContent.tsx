@@ -23,6 +23,7 @@ import { ForecastEvents } from './ForecastEvents';
 import { FORECAST_CARD_SX, Kpi } from './ForecastKpi';
 import { ForecastSkeleton } from './ForecastSkeleton';
 import { ForecastUpcomingHeader, fill } from './ForecastUpcomingHeader';
+import { PaycheckPlanner } from './PaycheckPlanner';
 
 const formatDate = (date: string): string =>
   formatStoredDateWithOptions(date, { day: 'numeric', month: 'short' });
@@ -245,6 +246,8 @@ export function ForecastContent() {
               formatTick={formatTick}
             />
           </Box>
+
+          <PaycheckPlanner />
 
           <Box sx={FORECAST_CARD_SX}>
             <ForecastUpcomingHeader scenario={scenario} setFactor={setFactor} />

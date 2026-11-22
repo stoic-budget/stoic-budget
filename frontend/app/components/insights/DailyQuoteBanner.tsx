@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Quote, X } from '@/app/components/icons';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useDailyQuote } from '@/app/hooks/useDailyQuote';
@@ -15,8 +15,8 @@ import { tokens } from '@/lib/theme-tokens';
 import { QuoteThumbs } from './QuoteThumbs';
 import { useAttentionItems } from './useAttentionItems';
 
-/** Pages whose own content fills the screen; the quote stays off there. */
-const HIDDEN_ON = new Set(['/reports']);
+/** The quote greets the user on the dashboard only; other pages keep their room. */
+const SHOWN_ON = new Set(['/dashboard']);
 
 /** The quote starts at the larger size and steps down until it fits one line. */
 const QUOTE_MAX_FONT = 19;
@@ -68,13 +68,11 @@ function readDismissed(workspaceId: string | null): string | null {
 
 /**
  * The quote of the day: one verified quote chosen for the user's current
- * situation, with a line saying which advice it answers. Closing it hides it
- * until tomorrow's quote — a per-viewer convenience, so browser storage is enough —
- * and so does leaving the page it first appeared on: it greets the first page of
- * the day, not every page.
+ * situation, with a line saying which advice it answers. Shown on the pages in
+ * SHOWN_ON only, and stays there until closed: closing hides it until tomorrow's
+ * quote — a per-viewer convenience, so browser storage is enough.
  * Hidden while an urgent insight banner is showing, so the two never stack, and
- * for good once the user turns it off in Settings → Appearance. Never shown on
- * the pages listed in HIDDEN_ON.
+ * for good once the user turns it off in Settings → Appearance.
  * Thumbs up or down tell which quotes to show more or less of: a thumbed-down
  * quote never comes back, and from the next day look-alikes of the thumbed
  * ones (same author, same themes) come up more or less often.
@@ -86,7 +84,7 @@ export function DailyQuoteBanner(): React.JSX.Element | null {
   const pathname = usePathname();
   // Off in settings (or on this page) means no banner and no request for a
   // quote nobody will see.
-  const enabled = user?.showDailyQuote !== false && !HIDDEN_ON.has(pathname ?? '');
+  const enabled = user?.showDailyQuote !== false && SHOWN_ON.has(pathname ?? '');
   const { quote } = useDailyQuote({ enabled });
   const [dismissedDate, setDismissedDate] = useState(() => readDismissed(workspaceId));
   // One strip above the page at a time: while AlertBanner shows something left
@@ -100,34 +98,18 @@ export function DailyQuoteBanner(): React.JSX.Element | null {
     urgent.items.length > 0;
   const quoteRef = useOneLineFit(hidden ? null : (quote?.quote.text ?? null));
 
-  const closeForToday = (date: string): void => {
-    try {
-      window.localStorage.setItem(storageKey(workspaceId), date);
-    } catch {
-      // Private mode: the banner still closes for this visit.
-    }
-    setDismissedDate(date);
-  };
-
-  // The quote greets the first page of the day only: once it has been on screen,
-  // moving to another page closes it until tomorrow, as the close button would.
-  const shownOn = useRef<string | null>(null);
-  const shownDate = hidden ? null : (quote?.date ?? null);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: closeForToday only writes storage and state
-  useEffect(() => {
-    if (shownDate && shownOn.current === null) {
-      shownOn.current = pathname;
-    } else if (shownDate && shownOn.current !== pathname) {
-      closeForToday(shownDate);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- closeForToday only writes storage and state
-  }, [shownDate, pathname]);
-
   if (hidden || !quote) {
     return null;
   }
 
-  const dismiss = (): void => closeForToday(quote.date);
+  const dismiss = (): void => {
+    try {
+      window.localStorage.setItem(storageKey(workspaceId), quote.date);
+    } catch {
+      // Private mode: the banner still closes for this visit.
+    }
+    setDismissedDate(quote.date);
+  };
 
   return (
     <Box>

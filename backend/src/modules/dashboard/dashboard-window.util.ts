@@ -1,3 +1,6 @@
+import type { PayPeriodContext } from '../../contracts';
+import { isCalendar, periodRangeAt, periodRangeOfKey } from '../pay-period/pay-period-dates';
+
 export interface DashboardWindow {
   since: Date;
   endDate: Date;
@@ -15,8 +18,30 @@ export function getWindowBounds(days: number, targetDate: Date): DashboardWindow
   return { since, endDate };
 }
 
-/** The calendar month containing `anchorDate`, from day 1 00:00:00 to the last day 23:59:59.999. */
-export function getMonthWindowBounds(anchorDate: Date): DashboardWindow {
+/** A month's first day at 00:00:00 to its last day at 23:59:59.999. */
+function wholeDays(range: { start: Date; end: Date }): DashboardWindow {
+  const endDate = new Date(range.end);
+  endDate.setHours(23, 59, 59, 999);
+  return { since: new Date(range.start), endDate };
+}
+
+/**
+ * The month containing `anchorDate`, from its first day 00:00:00 to its last day 23:59:59.999:
+ * the calendar month, or the workspace's month when `payPeriod` starts it on another day. With
+ * `byName`, the month named after `anchorDate`'s calendar month (a picked month arrives as its
+ * first day, which a month starting on the 15th does not contain).
+ */
+export function getMonthWindowBounds(
+  anchorDate: Date,
+  payPeriod?: PayPeriodContext | null,
+  byName = false,
+): DashboardWindow {
+  if (!isCalendar(payPeriod)) {
+    const key = `${anchorDate.getFullYear()}-${String(anchorDate.getMonth() + 1).padStart(2, '0')}`;
+    return wholeDays(
+      byName ? periodRangeOfKey(payPeriod, key) : periodRangeAt(payPeriod, anchorDate),
+    );
+  }
   const since = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1, 0, 0, 0, 0);
   const endDate = new Date(anchorDate.getFullYear(), anchorDate.getMonth() + 1, 0, 23, 59, 59, 999);
   return { since, endDate };
@@ -24,10 +49,28 @@ export function getMonthWindowBounds(anchorDate: Date): DashboardWindow {
 
 const MONTH_PARAM = /^(\d{4})-(0[1-9]|1[0-2])$/;
 
-/** `YYYY-MM` → that calendar month's window; anything else (including `undefined`) → `null`. */
-export function parseMonthWindow(month: string | undefined): DashboardWindow | null {
+/** `YYYY-MM` → the window of the month it names; anything else (including `undefined`) → `null`. */
+export function parseMonthWindow(
+  month: string | undefined,
+  payPeriod?: PayPeriodContext | null,
+): DashboardWindow | null {
   const match = month ? MONTH_PARAM.exec(month) : null;
-  return match ? getMonthWindowBounds(new Date(Number(match[1]), Number(match[2]) - 1, 1)) : null;
+  const anchor = match ? new Date(Number(match[1]), Number(match[2]) - 1, 1) : null;
+  return anchor ? getMonthWindowBounds(anchor, payPeriod, true) : null;
+}
+
+/**
+ * The dashboard's window ending at `anchor`: its month in month mode (see getMonthWindowBounds),
+ * else the `days` days up to it.
+ */
+export function dashboardWindow(
+  isMonth: boolean,
+  days: number,
+  anchor: Date,
+  payPeriod?: PayPeriodContext | null,
+  byName = false,
+): DashboardWindow {
+  return isMonth ? getMonthWindowBounds(anchor, payPeriod, byName) : getWindowBounds(days, anchor);
 }
 
 export const CASH_FLOW_RANGES = ['12m', 'this_year', '5y', 'all'] as const;
@@ -60,6 +103,21 @@ export function getCashFlowRangeBounds(
     since = new Date(anchor.getFullYear(), anchor.getMonth() - CASH_FLOW_MONTHS_BACK[range], 1);
   }
   return { since, endDate };
+}
+
+/** Number of days a window covers, both ends included. */
+export function daysInWindow(window: DashboardWindow): number {
+  const first = new Date(
+    window.since.getFullYear(),
+    window.since.getMonth(),
+    window.since.getDate(),
+  );
+  const last = new Date(
+    window.endDate.getFullYear(),
+    window.endDate.getMonth(),
+    window.endDate.getDate(),
+  );
+  return Math.round((last.getTime() - first.getTime()) / 86_400_000) + 1;
 }
 
 /** Number of days in the calendar month containing `anchorDate`. */

@@ -1,4 +1,6 @@
+import { THROTTLER_LIMIT, THROTTLER_TTL } from '@nestjs/throttler/dist/throttler.constants';
 import { AuthController } from '@/modules/auth/auth.controller';
+import { PasskeysController } from '@/modules/auth/passkeys/passkeys.controller';
 
 describe('AuthController', () => {
   it('proxies register/login/logout operations', async () => {
@@ -76,7 +78,7 @@ describe('AuthController', () => {
     expect(cookies.access_token).toBeUndefined();
     expect(cookies.refresh_token).toBeUndefined();
 
-    await expect(controller.logoutAll({ id: 'u1' } as any, res as any)).resolves.toEqual({
+    await expect(controller.logoutAll({ id: 'u1' } as any, {}, res as any)).resolves.toEqual({
       message: 'ok-all',
     });
     await expect(controller.getSessions({ id: 'u1' } as any, req)).resolves.toEqual([{ id: 's1' }]);
@@ -96,6 +98,17 @@ describe('AuthController', () => {
 
     expect(authService.logout).toHaveBeenCalledWith('u1', 's1');
     expect(authService.getSessions).toHaveBeenCalledWith('u1', 's1');
+  });
+
+  it('limits log-out-everywhere as tightly as a passkey remove, since both check the password', () => {
+    const limitOf = (handler: object) => ({
+      limit: Reflect.getMetadata(`${THROTTLER_LIMIT}default`, handler),
+      ttl: Reflect.getMetadata(`${THROTTLER_TTL}default`, handler),
+    });
+    expect(limitOf(PasskeysController.prototype.remove)).toEqual({ limit: 5, ttl: 60000 });
+    expect(limitOf(AuthController.prototype.logoutAll)).toEqual(
+      limitOf(PasskeysController.prototype.remove),
+    );
   });
 
   describe('session origin on a demo, where every visitor is one account', () => {
@@ -123,7 +136,7 @@ describe('AuthController', () => {
         getSessions: vi.fn(async () => [storedSession]),
       };
       const controller = new AuthController(authService as any, {} as any);
-      const res = { cookie: vi.fn() };
+      const res = { cookie: vi.fn(), clearCookie: vi.fn() };
       const req = {
         headers: { 'user-agent': visitorAgent },
         cookies: { refresh_token: 'r' },
@@ -139,7 +152,7 @@ describe('AuthController', () => {
       await controller.login({ email: 'a@b.com', password: 'x' } as any, req as any, res as any);
       await controller.refresh(req as any, res as any);
       const none = { userAgent: null, ipAddress: null };
-      expect(authService.login).toHaveBeenCalledWith(expect.anything(), none);
+      expect(authService.login).toHaveBeenCalledWith(expect.anything(), expect.objectContaining(none));
       expect(authService.refreshToken).toHaveBeenCalledWith('r', none);
 
       // A row stored before the instance became a demo is not shown either.
@@ -158,10 +171,10 @@ describe('AuthController', () => {
       process.env.DEMO_MODE = 'false';
       const { authService, controller, res, req } = setup();
       await controller.login({ email: 'a@b.com', password: 'x' } as any, req as any, res as any);
-      expect(authService.login).toHaveBeenCalledWith(expect.anything(), {
+      expect(authService.login).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
         userAgent: visitorAgent,
         ipAddress: visitorAddress,
-      });
+      }));
       await expect(controller.getSessions({ id: 'u1' } as any, req as any)).resolves.toEqual([
         storedSession,
       ]);

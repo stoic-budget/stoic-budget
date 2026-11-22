@@ -38,3 +38,6 @@ export function toToolInputSchema(schema: Schema.Top): ToolInputSchema {
     ...(definitions && Object.keys(definitions).length > 0 ? { $defs: definitions } : {}),
   };
 }
+
+/** The same for a tool's `outputSchema`: an answer is reduced to what its contract declares. */
+export const toToolObjectSchema = toToolInputSchema;
