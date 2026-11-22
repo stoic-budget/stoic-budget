@@ -40,7 +40,7 @@ const render = (passkeys: UsePasskeysReturn) =>
 describe('PasskeysSection', () => {
   it('accepts exactly the names the server accepts', () => {
     const accepts = (name: string) =>
-      Schema.is(PasskeyRenameBody)({ name }) && name.trim().length > 0;
+      Schema.is(PasskeyRenameBody)({ name, password: 'secret' }) && name.trim().length > 0;
     for (const name of ['', '   ', 'a', ' Phone ', 'x'.repeat(60), 'x'.repeat(61), 'é'.repeat(60)]) {
       expect(isValidPasskeyName(name)).toBe(accepts(name));
     }
