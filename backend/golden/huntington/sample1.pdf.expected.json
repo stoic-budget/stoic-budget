@@ -1,0 +1,856 @@
+{
+  "accounts": [
+    {
+      "metadata": {
+        "accountNumber": "82012656716",
+        "currency": "USD",
+        "dateFrom": "2019-11-05T00:00:00",
+        "dateTo": "2019-12-05T00:00:00",
+        "balanceStart": -3.22,
+        "balanceEnd": 853.51
+      },
+      "transactions": [
+        {
+          "transactionDate": "2019-11-07T00:00:00",
+          "counterpartyName": "INTERNETTFR FRM SAVINGS 110719 62071337383",
+          "paymentPurpose": "INTERNETTFR FRM SAVINGS 110719 62071337383",
+          "credit": 1100,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-11-07T00:00:00",
+          "counterpartyName": "PAYPAL TRANSFER 191106 1102885755667",
+          "paymentPurpose": "PAYPAL TRANSFER 191106 1102885755667",
+          "credit": 275,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2019-11-07T00:00:00",
+          "counterpartyName": "PAYPAL TRANSFER 191106 0260582506871",
+          "paymentPurpose": "PAYPAL TRANSFER 191106 0260582506871",
+          "credit": 250,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2019-11-07T00:00:00",
+          "counterpartyName": "PAYPAL TRANSFER 191106 5083275658555",
+          "paymentPurpose": "PAYPAL TRANSFER 191106 5083275658555",
+          "credit": 47.64,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2019-11-13T00:00:00",
+          "counterpartyName": "PAYPAL TRANSFER 191112 1356068830813",
+          "paymentPurpose": "PAYPAL TRANSFER 191112 1356068830813",
+          "credit": 275,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2019-11-13T00:00:00",
+          "counterpartyName": "PAYPAL TRANSFER 191112 3573061208268",
+          "paymentPurpose": "PAYPAL TRANSFER 191112 3573061208268",
+          "credit": 170.9,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2019-11-21T00:00:00",
+          "counterpartyName": "MERCHANDISERET MEIJER # 163 MEIJER # 163 FORT GRATIOT MI 8368761227188818",
+          "paymentPurpose": "MERCHANDISERET MEIJER # 163 MEIJER # 163 FORT GRATIOT MI 8368761227188818",
+          "credit": 21.19,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-11-22T00:00:00",
+          "counterpartyName": "INTERNETTFR FRM SAVINGS 112219 62071337383",
+          "paymentPurpose": "INTERNETTFR FRM SAVINGS 112219 62071337383",
+          "credit": 2000,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-11-25T00:00:00",
+          "counterpartyName": "INTERNETTFR FRM CHECKING 112519 00187580238",
+          "paymentPurpose": "INTERNETTFR FRM CHECKING 112519 00187580238",
+          "credit": 2000,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-11-27T00:00:00",
+          "counterpartyName": "INTERNETTFR FRM CHECKING 112719 00187580238",
+          "paymentPurpose": "INTERNETTFR FRM CHECKING 112719 00187580238",
+          "credit": 1000,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-11-29T00:00:00",
+          "counterpartyName": "INTERNETTFR FRM SAVINGS 112919 62071337383",
+          "paymentPurpose": "INTERNETTFR FRM SAVINGS 112919 62071337383",
+          "credit": 1400,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "PAYPAL TRANSFER 191201 5162727870272",
+          "paymentPurpose": "PAYPAL TRANSFER 191201 5162727870272",
+          "credit": 475,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "PAYPAL TRANSFER 191201 6811281008532",
+          "paymentPurpose": "PAYPAL TRANSFER 191201 6811281008532",
+          "credit": 364.45,
+          "currency": "USD",
+          "paymentType": "bank_transfer_in"
+        },
+        {
+          "transactionDate": "2019-11-25T00:00:00",
+          "counterpartyName": "NON-HUNTINGTONCASH WITHDRAWAL555 E LAFAYETTEST DETROIT MI 8368761227188818",
+          "paymentPurpose": "NON-HUNTINGTONCASH WITHDRAWAL555 E LAFAYETTEST DETROIT MI 8368761227188818",
+          "debit": 304.99,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-11-08T00:00:00",
+          "counterpartyName": "PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI",
+          "paymentPurpose": "PURCHASE PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI 8368761227188818",
+          "debit": 14.27,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "GLACIER POINTEICE C GLACIER POINTEICE C PORTHURON MI",
+          "paymentPurpose": "PURCHASE GLACIER POINTEICE C GLACIER POINTEICE C PORTHURON MI 8368761227188818",
+          "debit": 100,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI",
+          "paymentPurpose": "PURCHASE M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI 8368761227188818",
+          "debit": 22.23,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI",
+          "paymentPurpose": "PURCHASE PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI 8368761227188818",
+          "debit": 27.3,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "CITY OF PORTHURON CITY OF PORTHURON PORTHURON MI",
+          "paymentPurpose": "PURCHASE CITY OF PORTHURON CITY OF PORTHURON PORTHURON MI 8368761227188818",
+          "debit": 11,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "TAILGATORSTAILGATORSPORTHURON MI",
+          "paymentPurpose": "PURCHASE TAILGATORSTAILGATORSPORTHURON MI 8368761227188818",
+          "debit": 13.75,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "TAILGATORSTAILGATORSPORTHURON MI",
+          "paymentPurpose": "PURCHASE TAILGATORSTAILGATORSPORTHURON MI 8368761227188818",
+          "debit": 12,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "TAILGATORSTAILGATORSPORTHURON MI",
+          "paymentPurpose": "PURCHASE TAILGATORSTAILGATORSPORTHURON MI 8368761227188818",
+          "debit": 12.25,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "CJS BAR & GRILL DC P CJS BAR & GRILL DC P PORTHURON MI",
+          "paymentPurpose": "PURCHASE CJS BAR & GRILL DC P CJS BAR & GRILL DC P PORTHURON MI 8368761227188818",
+          "debit": 59.9,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "CHINA WOK CHINA WOK PORTHURON MI",
+          "paymentPurpose": "PURCHASE CHINA WOK CHINA WOK PORTHURON MI 8368761227188818",
+          "debit": 19.77,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI",
+          "paymentPurpose": "PURCHASE TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI 8368761227188818",
+          "debit": 11.09,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "RICH OIL 08824 PORTHU RICH OIL 08824 PORTHU PORTHURON MI",
+          "paymentPurpose": "PURCHASE RICH OIL 08824 PORTHU RICH OIL 08824 PORTHU PORTHURON MI 8368761227188818",
+          "debit": 4.45,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "BP#9331166FREAL FUEQPS BP#9331166FREAL FUEQPS CHESTERFIELDMI",
+          "paymentPurpose": "PURCHASE BP#9331166FREAL FUEQPS BP#9331166FREAL FUEQPS CHESTERFIELDMI 8368761227188818",
+          "debit": 20,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI",
+          "paymentPurpose": "PURCHASE PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI 8368761227188818",
+          "debit": 17.47,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "MCDONALD'S F319 MCDONALD'S F319 PORTHURON MI",
+          "paymentPurpose": "PURCHASE MCDONALD'S F319 MCDONALD'S F319 PORTHURON MI 8368761227188818",
+          "debit": 7.7,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "KROGER FU 1215 24T KROGER FU 1215 24T PORTHURON MI",
+          "paymentPurpose": "PURCHASE KROGER FU 1215 24T KROGER FU 1215 24T PORTHURON MI 8368761227188818",
+          "debit": 47.79,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-13T00:00:00",
+          "counterpartyName": "THE PARTY EXPRESS DC P THE PARTY EXPRESSDC P PORTHURON MI",
+          "paymentPurpose": "PURCHASE THE PARTY EXPRESS DC P THE PARTY EXPRESSDC P PORTHURON MI 8368761227188818",
+          "debit": 23.74,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-13T00:00:00",
+          "counterpartyName": "M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI",
+          "paymentPurpose": "PURCHASE M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI 8368761227188818",
+          "debit": 18.8,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-13T00:00:00",
+          "counterpartyName": "PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI",
+          "paymentPurpose": "PURCHASE PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI 8368761227188818",
+          "debit": 12.98,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-14T00:00:00",
+          "counterpartyName": "TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI",
+          "paymentPurpose": "PURCHASE TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI 8368761227188818",
+          "debit": 10.56,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-14T00:00:00",
+          "counterpartyName": "M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI",
+          "paymentPurpose": "PURCHASE M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI 8368761227188818",
+          "debit": 18.8,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-14T00:00:00",
+          "counterpartyName": "COMCASTCOMCAST800-934-6489MI",
+          "paymentPurpose": "PURCHASE COMCASTCOMCAST800-934-6489MI 8368761227188818",
+          "debit": 89.98,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-14T00:00:00",
+          "counterpartyName": "PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI",
+          "paymentPurpose": "PURCHASE PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI 8368761227188818",
+          "debit": 4.77,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-15T00:00:00",
+          "counterpartyName": "PORTHURON LANES PORTHURON LANES PORTHURON MI",
+          "paymentPurpose": "PURCHASE PORTHURON LANES PORTHURON LANES PORTHURON MI 8368761227188818",
+          "debit": 11.65,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-15T00:00:00",
+          "counterpartyName": "TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI",
+          "paymentPurpose": "PURCHASE TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI 8368761227188818",
+          "debit": 10.45,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-15T00:00:00",
+          "counterpartyName": "PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI",
+          "paymentPurpose": "PURCHASE PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI 8368761227188818",
+          "debit": 6.57,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-15T00:00:00",
+          "counterpartyName": "M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI",
+          "paymentPurpose": "PURCHASE M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI 8368761227188818",
+          "debit": 14.82,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-18T00:00:00",
+          "counterpartyName": "MCDONALD'S F319 MCDONALD'S F319 PORTHURON MI",
+          "paymentPurpose": "PURCHASE MCDONALD'S F319 MCDONALD'S F319 PORTHURON MI 8368761227188818",
+          "debit": 9.3,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-18T00:00:00",
+          "counterpartyName": "ICI*FEE SEMCO WEB PMT ICI*FEE SEMCO WEB PMT 866-342-9267MA",
+          "paymentPurpose": "PURCHASE ICI*FEE SEMCO WEB PMT ICI*FEE SEMCO WEB PMT 866-342-9267MA 8368761227188818",
+          "debit": 3.5,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-18T00:00:00",
+          "counterpartyName": "ICI*SEMCOENERGYINCICI*SEMCOENERGYINC800-624-2019MI",
+          "paymentPurpose": "PURCHASE ICI*SEMCOENERGYINCICI*SEMCOENERGYINC800-624-2019MI 8368761227188818",
+          "debit": 65.11,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-18T00:00:00",
+          "counterpartyName": "DTE ENERGY DTE ENERGY 800-4774747MI",
+          "paymentPurpose": "PURCHASE DTE ENERGY DTE ENERGY 800-4774747MI 8368761227188818",
+          "debit": 145.69,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-18T00:00:00",
+          "counterpartyName": "M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI",
+          "paymentPurpose": "PURCHASE M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI 8368761227188818",
+          "debit": 14.82,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-18T00:00:00",
+          "counterpartyName": "KROGER FU 1215 24T KROGER FU 1215 24T PORTHURON MI",
+          "paymentPurpose": "PURCHASE KROGER FU 1215 24T KROGER FU 1215 24T PORTHURON MI 8368761227188818",
+          "debit": 4.78,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-18T00:00:00",
+          "counterpartyName": "KROGER FU 1215 24T KROGER FU 1215 24T PORTHURON MI",
+          "paymentPurpose": "PURCHASE KROGER FU 1215 24T KROGER FU 1215 24T PORTHURON MI 8368761227188818",
+          "debit": 44.36,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-18T00:00:00",
+          "counterpartyName": "BEVERAGE BARRELBEVERAGE BARRELPORTHURON MI",
+          "paymentPurpose": "PURCHASE BEVERAGE BARRELBEVERAGE BARRELPORTHURON MI 8368761227188818",
+          "debit": 13.9,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-18T00:00:00",
+          "counterpartyName": "TAILGATORSTAILGATORSPORTHURON MI",
+          "paymentPurpose": "PURCHASE TAILGATORSTAILGATORSPORTHURON MI 8368761227188818",
+          "debit": 19,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-18T00:00:00",
+          "counterpartyName": "TST* LYNCH S IRISH TAV TST* LYNCH S IRISH TAV PORTHURON MI",
+          "paymentPurpose": "PURCHASE TST* LYNCH S IRISH TAV TST* LYNCH S IRISH TAV PORTHURON MI 8368761227188818",
+          "debit": 12,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-20T00:00:00",
+          "counterpartyName": "CLARKSTOBACCO CLARKSTOBACCO PORTHURON MI",
+          "paymentPurpose": "PURCHASE CLARKSTOBACCO CLARKSTOBACCO PORTHURON MI 8368761227188818",
+          "debit": 21.19,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-21T00:00:00",
+          "counterpartyName": "PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI",
+          "paymentPurpose": "PURCHASE PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI 8368761227188818",
+          "debit": 24.79,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-22T00:00:00",
+          "counterpartyName": "TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI",
+          "paymentPurpose": "PURCHASE TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI 8368761227188818",
+          "debit": 14.16,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-22T00:00:00",
+          "counterpartyName": "M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI",
+          "paymentPurpose": "PURCHASE M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI 8368761227188818",
+          "debit": 7.94,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-25T00:00:00",
+          "counterpartyName": "TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI",
+          "paymentPurpose": "PURCHASE TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI 8368761227188818",
+          "debit": 6.97,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-25T00:00:00",
+          "counterpartyName": "DETROIT HOCKEY-CON DETROIT HOCKEY-CON DETROIT MI",
+          "paymentPurpose": "PURCHASE DETROIT HOCKEY-CON DETROIT HOCKEY-CON DETROIT MI 8368761227188818",
+          "debit": 13.25,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-25T00:00:00",
+          "counterpartyName": "CLARKSTOBACCO CLARKSTOBACCO PORTHURON MI",
+          "paymentPurpose": "PURCHASE CLARKSTOBACCO CLARKSTOBACCO PORTHURON MI 8368761227188818",
+          "debit": 21.19,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-25T00:00:00",
+          "counterpartyName": "NICK'S FOUR ROSES FAMI NICK'S FOUR ROSES FAMI PORTHURON MI",
+          "paymentPurpose": "PURCHASE NICK'S FOUR ROSES FAMI NICK'S FOUR ROSES FAMI PORTHURON MI 8368761227188818",
+          "debit": 21,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-25T00:00:00",
+          "counterpartyName": "KROGER FU 1215 24T KROGER FU 1215 24T PORTHURON MI",
+          "paymentPurpose": "PURCHASE KROGER FU 1215 24T KROGER FU 1215 24T PORTHURON MI 8368761227188818",
+          "debit": 36.5,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-25T00:00:00",
+          "counterpartyName": "DAIRY QUEEN #41069 QPS DAIRY QUEEN #41069 QPS FRASERMI",
+          "paymentPurpose": "PURCHASE DAIRY QUEEN #41069 QPS DAIRY QUEEN #41069 QPS FRASERMI 8368761227188818",
+          "debit": 4.65,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-25T00:00:00",
+          "counterpartyName": "RITE AID STORE RITE AID STORE PORTHURON MI",
+          "paymentPurpose": "PURCHASE RITE AID STORE RITE AID STORE PORTHURON MI 8368761227188818",
+          "debit": 10.59,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-26T00:00:00",
+          "counterpartyName": "GRAND AZTECAIII GRAND AZTECAIII FRASERMI",
+          "paymentPurpose": "PURCHASE GRAND AZTECAIII GRAND AZTECAIII FRASERMI 8368761227188818",
+          "debit": 31.8,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-26T00:00:00",
+          "counterpartyName": "WENDY'S 8337 WENDY'S 8337 PORTHURON MI",
+          "paymentPurpose": "PURCHASE WENDY'S 8337 WENDY'S 8337 PORTHURON MI 8368761227188818",
+          "debit": 11.69,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-27T00:00:00",
+          "counterpartyName": "HARBOR FREIGHTTOOLS 3 HARBOR FREIGHTTOOLS 3 FORT GRATIOT MI",
+          "paymentPurpose": "PURCHASE HARBOR FREIGHTTOOLS 3 HARBOR FREIGHTTOOLS 3 FORT GRATIOT MI 8368761227188818",
+          "debit": 34.96,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-27T00:00:00",
+          "counterpartyName": "PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI",
+          "paymentPurpose": "PURCHASE PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI 8368761227188818",
+          "debit": 10.27,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-27T00:00:00",
+          "counterpartyName": "CLARKSTOBACCO CLARKSTOBACCO PORTHURON MI",
+          "paymentPurpose": "PURCHASE CLARKSTOBACCO CLARKSTOBACCO PORTHURON MI 8368761227188818",
+          "debit": 21.19,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-27T00:00:00",
+          "counterpartyName": "MCDONALD'S F319 MCDONALD'S F319 PORTHURON MI",
+          "paymentPurpose": "PURCHASE MCDONALD'S F319 MCDONALD'S F319 PORTHURON MI 8368761227188818",
+          "debit": 9.72,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-27T00:00:00",
+          "counterpartyName": "MCDONALD'S F319 MCDONALD'S F319 PORTHURON MI",
+          "paymentPurpose": "PURCHASE MCDONALD'S F319 MCDONALD'S F319 PORTHURON MI 8368761227188818",
+          "debit": 4.76,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-29T00:00:00",
+          "counterpartyName": "MENARDS PORTHURON MI MENARDS PORTHURON MI PORTHURON MI",
+          "paymentPurpose": "PURCHASE MENARDS PORTHURON MI MENARDS PORTHURON MI PORTHURON MI 8368761227188818",
+          "debit": 156.64,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-29T00:00:00",
+          "counterpartyName": "NEW ERA DENTAL - FORT NEW ERA DENTAL - FORT FORT GRATIOT MI",
+          "paymentPurpose": "PURCHASE NEW ERA DENTAL - FORT NEW ERA DENTAL - FORT FORT GRATIOT MI 8368761227188818",
+          "debit": 360,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-29T00:00:00",
+          "counterpartyName": "ARBYS #1229 PORTHURON ARBYS #1229 PORTHURON PORTHURON MI",
+          "paymentPurpose": "PURCHASE ARBYS #1229 PORTHURON ARBYS #1229 PORTHURON PORTHURON MI 8368761227188818",
+          "debit": 11.63,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-29T00:00:00",
+          "counterpartyName": "PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI",
+          "paymentPurpose": "PURCHASE PORTHURON LIQUOR PORTHURON LIQUOR PORTHURON MI 8368761227188818",
+          "debit": 10.76,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-29T00:00:00",
+          "counterpartyName": "RICH OIL 08824 PORTHU RICH OIL 08824 PORTHU PORTHURON MI",
+          "paymentPurpose": "PURCHASE RICH OIL 08824 PORTHU RICH OIL 08824 PORTHU PORTHURON MI 8368761227188818",
+          "debit": 51.97,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-29T00:00:00",
+          "counterpartyName": "BEST BUY 00004150 BEST BUY 00004150 FT GRATIOT MI",
+          "paymentPurpose": "PURCHASE BEST BUY 00004150 BEST BUY 00004150 FT GRATIOT MI 8368761227188818",
+          "debit": 509.78,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-29T00:00:00",
+          "counterpartyName": "WM SUPERCENTER#1611 WM SUPERCENTER#1611 FORT GRATIOT MI",
+          "paymentPurpose": "PURCHASE WM SUPERCENTER#1611 WM SUPERCENTER#1611 FORT GRATIOT MI 8368761227188818",
+          "debit": 69.96,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-29T00:00:00",
+          "counterpartyName": "CLARKSTOBACCO CLARKSTOBACCO PORTHURON MI",
+          "paymentPurpose": "PURCHASE CLARKSTOBACCO CLARKSTOBACCO PORTHURON MI 8368761227188818",
+          "debit": 21.19,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "CHAMA INC CHAMA INC PORTHURON MI",
+          "paymentPurpose": "PURCHASE CHAMA INC CHAMA INC PORTHURON MI 8368761227188818",
+          "debit": 9.9,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "MEIJER # 163 MEIJER # 163 FORT GRATIOT MI",
+          "paymentPurpose": "PURCHASE MEIJER # 163 MEIJER # 163 FORT GRATIOT MI 8368761227188818",
+          "debit": 60.3,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "WM SUPERCENTER#1611 WM SUPERCENTER#1611 FORT GRATIOT MI",
+          "paymentPurpose": "PURCHASE WM SUPERCENTER#1611 WM SUPERCENTER#1611 FORT GRATIOT MI 8368761227188818",
+          "debit": 31.72,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "MARATHON PETRO47076MARATHON PETRO47076PORTHURON MI",
+          "paymentPurpose": "PURCHASE MARATHON PETRO47076MARATHON PETRO47076PORTHURON MI 8368761227188818",
+          "debit": 2.79,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "MEIJER # 163 MEIJER # 163 FORT GRATIOT MI",
+          "paymentPurpose": "PURCHASE MEIJER # 163 MEIJER # 163 FORT GRATIOT MI 8368761227188818",
+          "debit": 14.56,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "KOHL'S #37 KOHL'S #37 FORT GRATIOT MI",
+          "paymentPurpose": "PURCHASE KOHL'S #37 KOHL'S #37 FORT GRATIOT MI 8368761227188818",
+          "debit": 113.53,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "KOHL'S #37 KOHL'S #37 FORT GRATIOT MI",
+          "paymentPurpose": "PURCHASE KOHL'S #37 KOHL'S #37 FORT GRATIOT MI 8368761227188818",
+          "debit": 35.14,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "APPLEBEES870806722122 APPLEBEES870806722122 PORTHURON MI",
+          "paymentPurpose": "PURCHASE APPLEBEES870806722122 APPLEBEES870806722122 PORTHURON MI 8368761227188818",
+          "debit": 100.2,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "SAMS CLUB #6660 SAMS CLUB #6660 PORTHURON MI",
+          "paymentPurpose": "PURCHASE SAMS CLUB #6660 SAMS CLUB #6660 PORTHURON MI 8368761227188818",
+          "debit": 1.37,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI",
+          "paymentPurpose": "PURCHASE TACO BELL #'023045 TACO BELL #'023045 PORTHURON MI 8368761227188818",
+          "debit": 13.73,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "MENARDS PORTHURON MI MENARDS PORTHURON MI PORTHURON MI",
+          "paymentPurpose": "PURCHASE MENARDS PORTHURON MI MENARDS PORTHURON MI PORTHURON MI 8368761227188818",
+          "debit": 137.28,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "MENARDS PORTHURON MI MENARDS PORTHURON MI PORTHURON MI",
+          "paymentPurpose": "PURCHASE MENARDS PORTHURON MI MENARDS PORTHURON MI PORTHURON MI 8368761227188818",
+          "debit": 44.2,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "KROGER #7 1215 24T KROGER #7 1215 24T PORTHURON MI",
+          "paymentPurpose": "PURCHASE KROGER #7 1215 24T KROGER #7 1215 24T PORTHURON MI 8368761227188818",
+          "debit": 11.52,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "KROGER #7 1215 24T KROGER #7 1215 24T PORTHURON MI",
+          "paymentPurpose": "PURCHASE KROGER #7 1215 24T KROGER #7 1215 24T PORTHURON MI 8368761227188818",
+          "debit": 1,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "MCDONALD'S F19386 MCDONALD'S F19386 STERLINGHTS MI",
+          "paymentPurpose": "PURCHASE MCDONALD'S F19386 MCDONALD'S F19386 STERLINGHTS MI 8368761227188818",
+          "debit": 7.21,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "RICH OIL 08824 PORTHU RICH OIL 08824 PORTHU PORTHURON MI",
+          "paymentPurpose": "PURCHASE RICH OIL 08824 PORTHU RICH OIL 08824 PORTHU PORTHURON MI 8368761227188818",
+          "debit": 36.04,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "MEIJER # 163 MEIJER # 163 FORT GRATIOT MI",
+          "paymentPurpose": "PURCHASE MEIJER # 163 MEIJER # 163 FORT GRATIOT MI 8368761227188818",
+          "debit": 3,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-03T00:00:00",
+          "counterpartyName": "GRAND AZETECA I GRAND AZETECA I MADISON HTS MI",
+          "paymentPurpose": "PURCHASE GRAND AZETECA I GRAND AZETECA I MADISON HTS MI 8368761227188818",
+          "debit": 36.03,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-04T00:00:00",
+          "counterpartyName": "M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI",
+          "paymentPurpose": "PURCHASE M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI 8368761227188818",
+          "debit": 14.82,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-04T00:00:00",
+          "counterpartyName": "M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI",
+          "paymentPurpose": "PURCHASE M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI 8368761227188818",
+          "debit": 3.98,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-12-04T00:00:00",
+          "counterpartyName": "M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI",
+          "paymentPurpose": "PURCHASE M & S SMOKE SHOP LLC M & S SMOKE SHOP LLC MARYSVILLE MI 8368761227188818",
+          "debit": 21.04,
+          "currency": "USD",
+          "paymentType": "card"
+        },
+        {
+          "transactionDate": "2019-11-07T00:00:00",
+          "counterpartyName": "Zelle Transaction 233812855002 H66736611562 Money Sent to SHUBA BARUA Payment ID H66736611562",
+          "paymentPurpose": "Zelle Transaction 233812855002 H66736611562 Money Sent to SHUBA BARUA Payment ID H66736611562",
+          "debit": 1000,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-11-12T00:00:00",
+          "counterpartyName": "Zelle Transaction 557226201870 H82517788180 Money Sent to BRUCE ARNETTPayment ID H82517788180",
+          "paymentPurpose": "Zelle Transaction 557226201870 H82517788180 Money Sent to BRUCE ARNETTPayment ID H82517788180",
+          "debit": 60,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-12-02T00:00:00",
+          "counterpartyName": "Zelle Transaction 021832855583 H73623526528 Money Sent to SHUBA BARUA Payment ID H73623526528",
+          "paymentPurpose": "Zelle Transaction 021832855583 H73623526528 Money Sent to SHUBA BARUA Payment ID H73623526528",
+          "debit": 1000,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-12-05T00:00:00",
+          "counterpartyName": "NON-HUNTINGTONATM CASH WITHDRAWALFEE",
+          "paymentPurpose": "NON-HUNTINGTONATM CASH WITHDRAWALFEE",
+          "debit": 3,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-11-25T00:00:00",
+          "counterpartyName": "Check 727068",
+          "paymentPurpose": "CHECK 727068",
+          "debit": 3000,
+          "currency": "USD",
+          "documentNumber": "727068"
+        }
+      ]
+    },
+    {
+      "metadata": {
+        "accountNumber": "70632308857",
+        "currency": "USD",
+        "dateFrom": "2019-11-05T00:00:00",
+        "dateTo": "2019-12-05T00:00:00",
+        "balanceStart": -7.68,
+        "balanceEnd": 17.33
+      },
+      "transactions": [
+        {
+          "transactionDate": "2019-11-25T00:00:00",
+          "counterpartyName": "INTERNETTFR FRM CHECKING 112519 00187580238",
+          "paymentPurpose": "INTERNETTFR FRM CHECKING 112519 00187580238",
+          "credit": 25,
+          "currency": "USD"
+        },
+        {
+          "transactionDate": "2019-12-05T00:00:00",
+          "counterpartyName": "INTEREST PAYMENT",
+          "paymentPurpose": "INTEREST PAYMENT",
+          "credit": 0.01,
+          "currency": "USD",
+          "paymentType": "interest"
+        }
+      ]
+    }
+  ]
+}

@@ -171,6 +171,8 @@ export const NetWorthResponse = Schema.Struct({
   missingRates: Schema.Array(Schema.String),
   /** The account ids left out, echoed back so the page can show what is hidden. */
   excluded: Schema.Array(Schema.String),
+  /** Active accounts set not to count in net worth: left out of every figure here. */
+  accountsLeftOut: Schema.Number,
   /** What made the change over the window, by line and by cause. */
   attribution: NetWorthAttribution,
   savings: NetWorthSavings,

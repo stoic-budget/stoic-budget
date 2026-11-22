@@ -30,7 +30,9 @@ import {
 import { Workspace } from '../../entities/workspace.entity';
 import { AuditService } from '../audit/audit.service';
 import { recordSecurityEvent } from '../auth/security-audit.util';
+import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-revocation.service';
 import { WorkspacesService } from '../workspaces/workspaces.service';
+import { snapshotAdminFields } from './admin-fields';
 import { CURRENT_DISCLAIMER_VERSION } from './disclaimer.constant';
 import { EmailChangeService } from './services/email-change.service';
 import { USER_PROFILE_SELECT, USER_WITH_PASSWORD_SELECT } from './user-selects';
@@ -50,6 +52,7 @@ export class UsersService {
     private readonly workspacesService: WorkspacesService,
     private readonly emailChangeService: EmailChangeService,
     private readonly auditService: AuditService,
+    private readonly calendarFeeds: CalendarFeedRevocationService,
   ) {}
 
   private getUserFindAllOptions(workspaceId: string, limit = 20) {
@@ -140,9 +143,11 @@ export class UsersService {
       }
     }
 
-    const before = this.snapshotAdminFields(user);
+    const before = snapshotAdminFields(user);
     Object.assign(user, updateUserDto);
     const saved = await this.userRepository.save(user);
+    // A deactivated account loses its calendar links, so a reactivation does not revive them.
+    if (before.isActive && !saved.isActive) await this.calendarFeeds.revokeAllOf(id);
 
     // Logged into the target's home workspace, like every other account event:
     // this route carries no workspace of its own.
@@ -153,22 +158,10 @@ export class UsersService {
       entityId: id,
       action: AuditAction.UPDATE,
       severity: Severity.WARN,
-      diff: { before, after: this.snapshotAdminFields(saved) },
+      diff: { before, after: snapshotAdminFields(saved) },
     });
 
     return saved;
-  }
-
-  /** The fields UpdateUserDto can change — nothing credential-bearing. */
-  private snapshotAdminFields(user: User) {
-    return {
-      email: user.email,
-      name: user.name,
-      company: user.company,
-      role: user.role,
-      isActive: user.isActive,
-      permissions: user.permissions ?? null,
-    };
   }
 
   async remove(id: string, currentUser: User): Promise<void> {
@@ -293,15 +286,15 @@ export class UsersService {
   async changePassword(userId: string, dto: ChangePasswordBody): Promise<void> {
     const user = await this.findOneWithPassword(userId);
 
-    const isPasswordValid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
-
-    if (!isPasswordValid) {
+    if (!(await bcrypt.compare(dto.currentPassword, user.passwordHash))) {
       throw new ForbiddenException(appError('AUTH_CURRENT_PASSWORD_INCORRECT'));
     }
 
     user.passwordHash = await hashPassword(dto.newPassword);
     user.tokenVersion = (user.tokenVersion ?? 0) + 1;
     await this.userRepository.save(user);
+    // Signed out everywhere, as after a reset: calendar feed links end too.
+    await this.calendarFeeds.revokeAllOf(user.id);
 
     await recordSecurityEvent(this.auditService, this.logger, {
       workspaceId: user.workspaceId,

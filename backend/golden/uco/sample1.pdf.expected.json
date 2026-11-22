@@ -1,0 +1,516 @@
+{
+  "metadata": {
+    "accountNumber": "20250100000001",
+    "currency": "INR",
+    "dateFrom": "2020-05-02T00:00:00",
+    "dateTo": "2020-07-27T00:00:00",
+    "balanceStart": 30004.24,
+    "balanceEnd": 38492.24
+  },
+  "transactions": [
+    {
+      "transactionDate": "2020-07-27T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022513331882/VI JB/nlcoh.earors@nd/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/022513331882/VI JB/nlcoh.earors@nd/U",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-25T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022513103901/S BIN/adgkkrpcghsgbht/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/022513103901/S BIN/adgkkrpcghsgbht/U",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-22T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022522232470/P YTM/6574021396@ihr/Pa",
+      "paymentPurpose": "MPAY/UPI/TRTR/022522232470/P YTM/6574021396@ihr/Pa",
+      "debit": 1200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-07-21T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022508244129/VI JB/nlcoh.earors@nd/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/022508244129/VI JB/nlcoh.earors@nd/U",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-20T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022422913036/U TIB/goog-payment@ok/R",
+      "paymentPurpose": "MPAY/UPI/TRTR/022422913036/U TIB/goog-payment@ok/R",
+      "credit": 6,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-19T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022420280761/IC IC/480734012050@NT/P",
+      "paymentPurpose": "MPAY/UPI/TRTR/022420280761/IC IC/480734012050@NT/P",
+      "debit": 2600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-07-18T00:00:00",
+      "counterpartyName": "MPAY/IMPSI/TRTR/022416144954/ CMHMHNBS TCA/IB260119",
+      "paymentPurpose": "MPAY/IMPSI/TRTR/022416144954/ CMHMHNBS TCA/IB260119",
+      "credit": 1100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-17T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022416382423/U TIB/goog-payment@ok/R",
+      "paymentPurpose": "MPAY/UPI/TRTR/022416382423/U TIB/goog-payment@ok/R",
+      "credit": 5,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-16T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022416373737/S BIN/moeulle.pegkgme/J",
+      "paymentPurpose": "MPAY/UPI/TRTR/022416373737/S BIN/moeulle.pegkgme/J",
+      "debit": 1100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-07-15T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022416304900/IC IC/billdesk.tata-s/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/022416304900/IC IC/billdesk.tata-s/U",
+      "debit": 260,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-07-13T00:00:00",
+      "counterpartyName": "MPAY/IMPSI/TRTR/022416140954/ CMHMHNBS TCA/IB260119",
+      "paymentPurpose": "MPAY/IMPSI/TRTR/022416140954/ CMHMHNBS TCA/IB260119",
+      "credit": 300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-12T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022422609786/U BIN/0825442854@otc/Pa",
+      "paymentPurpose": "MPAY/UPI/TRTR/022422609786/U BIN/0825442854@otc/Pa",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-11T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022408665579/IN DB/mglgcrikoumi58@/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/022408665579/IN DB/mglgcrikoumi58@/U",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-10T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022380049320/U TIB/3372973182@dae/Pa",
+      "paymentPurpose": "MPAY/UPI/TRTR/022380049320/U TIB/3372973182@dae/Pa",
+      "credit": 100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-08T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022216664630/U BIN/0437977616@ecb/Pa",
+      "paymentPurpose": "MPAY/UPI/TRTR/022216664630/U BIN/0437977616@ecb/Pa",
+      "credit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-06T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022216058382/VI JB/nlcoh.earors@nd/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/022216058382/VI JB/nlcoh.earors@nd/U",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-04T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022252265437/B KID/3409203771@ern/Pa",
+      "paymentPurpose": "MPAY/UPI/TRTR/022252265437/B KID/3409203771@ern/Pa",
+      "debit": 510,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-07-03T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022201719526/H DFC/uhoulmcrn@crlgk/R",
+      "paymentPurpose": "MPAY/UPI/TRTR/022201719526/H DFC/uhoulmcrn@crlgk/R",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-02T00:00:00",
+      "counterpartyName": "MPAY/IMPSI/TRTR/022120790936/ EKO INDIA FI/UB334758",
+      "paymentPurpose": "MPAY/IMPSI/TRTR/022120790936/ EKO INDIA FI/UB334758",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-07-01T00:00:00",
+      "counterpartyName": "MPAY/IMPSI/TRTR/022120790769/ DNKPGRS LIIN/RB641106 Page 1 of",
+      "paymentPurpose": "MPAY/IMPSI/TRTR/022120790769/ DNKPGRS LIIN/RB641106 Page 1 of",
+      "credit": 1,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-30T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022139290362/FI NO/O92045124@gdh/Pay",
+      "paymentPurpose": "MPAY/UPI/TRTR/022139290362/FI NO/O92045124@gdh/Pay",
+      "debit": 23,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-06-27T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022110654705/S BIN/adgkkrpcghsgbht/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/022110654705/S BIN/adgkkrpcghsgbht/U",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-25T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022013603580/VI JB/8307683021@ogb/Pa",
+      "paymentPurpose": "MPAY/UPI/TRTR/022013603580/VI JB/8307683021@ogb/Pa",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-24T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022011520373/H DFC/otdksarkrrckkoh/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/022011520373/H DFC/otdksarkrrckkoh/U",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-23T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022020351420/S BIN/2455587593@daa/Pa",
+      "paymentPurpose": "MPAY/UPI/TRTR/022020351420/S BIN/2455587593@daa/Pa",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-21T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022020015260/S BIN/2234772164@ocg/Pa",
+      "paymentPurpose": "MPAY/UPI/TRTR/022020015260/S BIN/2234772164@ocg/Pa",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-19T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022030104705/U BIN/571794347530447/P",
+      "paymentPurpose": "MPAY/UPI/TRTR/022030104705/U BIN/571794347530447/P",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-06-18T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022010674581/IN DB/mglgcrikoumi58@/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/022010674581/IN DB/mglgcrikoumi58@/U",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-17T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/022007485873/S BIN/adgkkrpcghsgbht/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/022007485873/S BIN/adgkkrpcghsgbht/U",
+      "credit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-16T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/021916554380/Y ESB/K01246438@bhd/Pay",
+      "paymentPurpose": "MPAY/UPI/TRTR/021916554380/Y ESB/K01246438@bhd/Pay",
+      "debit": 167,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-06-14T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/021930056236/P UNB/rgmndbrcdat9@ep/P",
+      "paymentPurpose": "MPAY/UPI/TRTR/021930056236/P UNB/rgmndbrcdat9@ep/P",
+      "credit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-13T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/021914393476/U TIB/amazon@apl/Reques",
+      "paymentPurpose": "MPAY/UPI/TRTR/021914393476/U TIB/amazon@apl/Reques",
+      "debit": 599,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-06-12T00:00:00",
+      "counterpartyName": "MPAY/IMPSI/TRTR/021900359783/ CMHMHNBS TCA/IB260119",
+      "paymentPurpose": "MPAY/IMPSI/TRTR/021900359783/ CMHMHNBS TCA/IB260119",
+      "credit": 550,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-11T00:00:00",
+      "counterpartyName": "MPAY/IMPSI/TRTR/021900359627/ CMHMHNBS TCA/IB260119",
+      "paymentPurpose": "MPAY/IMPSI/TRTR/021900359627/ CMHMHNBS TCA/IB260119",
+      "credit": 50,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-10T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/021216233075/P YTM/7276247165@utgl/P",
+      "paymentPurpose": "MPAY/UPI/TRTR/021216233075/P YTM/7276247165@utgl/P",
+      "debit": 50,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-06-09T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/021154941143/S BIN/9100107691@tek/Pa",
+      "paymentPurpose": "MPAY/UPI/TRTR/021154941143/S BIN/9100107691@tek/Pa",
+      "debit": 630,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-06-07T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/020679714504/P YTM/mdroaa5702@sism/O",
+      "paymentPurpose": "MPAY/UPI/TRTR/020679714504/P YTM/mdroaa5702@sism/O",
+      "debit": 10,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-06-05T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/020660373354/P UNB/S86254513@guh/Pay",
+      "paymentPurpose": "MPAY/UPI/TRTR/020660373354/P UNB/S86254513@guh/Pay",
+      "debit": 60,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-06-04T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/020660573768/U CBA/N71362704@glg/Pay",
+      "paymentPurpose": "MPAY/UPI/TRTR/020660573768/U CBA/N71362704@glg/Pay",
+      "debit": 40,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-06-03T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/020522033658/H DFC/lgkimtksiebs374/R",
+      "paymentPurpose": "MPAY/UPI/TRTR/020522033658/H DFC/lgkimtksiebs374/R",
+      "debit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-06-03T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/020568513398/P YTM/pkpetrakhbsipps/N",
+      "paymentPurpose": "MPAY/UPI/TRTR/020568513398/P YTM/pkpetrakhbsipps/N",
+      "credit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-06-02T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/020457157935/P YTM/gab-gahep@rdtss/O",
+      "paymentPurpose": "MPAY/UPI/TRTR/020457157935/P YTM/gab-gahep@rdtss/O",
+      "debit": 250,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-06-01T00:00:00",
+      "counterpartyName": "MPAY/IMPSI/TRTR/020318204863/ WUNDERBAKED /UK235630",
+      "paymentPurpose": "MPAY/IMPSI/TRTR/020318204863/ WUNDERBAKED /UK235630",
+      "credit": 2800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-05-31T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/020219239918/P UNB/rgmndbrcdat9@ep/P",
+      "paymentPurpose": "MPAY/UPI/TRTR/020219239918/P UNB/rgmndbrcdat9@ep/P",
+      "debit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-29T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/020254631347/P UNB/rgmndbrcdat9@ep/P",
+      "paymentPurpose": "MPAY/UPI/TRTR/020254631347/P UNB/rgmndbrcdat9@ep/P",
+      "debit": 140,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-27T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/020119427687/P YTM/gab-gahep@rdtss/O",
+      "paymentPurpose": "MPAY/UPI/TRTR/020119427687/P YTM/gab-gahep@rdtss/O",
+      "debit": 40,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-25T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/019723203498/U TIB/goog-payment@ok/R",
+      "paymentPurpose": "MPAY/UPI/TRTR/019723203498/U TIB/goog-payment@ok/R",
+      "credit": 5,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-05-24T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/019723198627/H DFC/gmegohegeto4280/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/019723198627/H DFC/gmegohegeto4280/U",
+      "debit": 250,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-22T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/019423084939/IC IC/cashfree.pay@ic/r",
+      "paymentPurpose": "MPAY/UPI/TRTR/019423084939/IC IC/cashfree.pay@ic/r",
+      "debit": 100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-21T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/019256719061/B ARB/9127057007@orb/Pa",
+      "paymentPurpose": "MPAY/UPI/TRTR/019256719061/B ARB/9127057007@orb/Pa",
+      "credit": 400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-05-20T00:00:00",
+      "counterpartyName": "38505610194960:Int.Pd:01-04-2020 to 30-06-2020",
+      "paymentPurpose": "38505610194960:Int.Pd:01-04-2020 to 30-06-2020",
+      "credit": 1,
+      "currency": "INR",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2020-05-19T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/018601854841/U TIB/goog-payment@ok/R Page 2 of",
+      "paymentPurpose": "MPAY/UPI/TRTR/018601854841/U TIB/goog-payment@ok/R Page 2 of",
+      "credit": 5,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-05-18T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/018457637230/H DFC/3899815223@nue/Pa",
+      "paymentPurpose": "MPAY/UPI/TRTR/018457637230/H DFC/3899815223@nue/Pa",
+      "debit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-16T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/018418981750/K KBK/mhnkoau5128@omc/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/018418981750/K KBK/mhnkoau5128@omc/U",
+      "debit": 50,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-14T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/018117022771/S BIN/pneldabtdkus409/P",
+      "paymentPurpose": "MPAY/UPI/TRTR/018117022771/S BIN/pneldabtdkus409/P",
+      "debit": 600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-13T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/018054204715/AI RP/t733331r@horthk/P",
+      "paymentPurpose": "MPAY/UPI/TRTR/018054204715/AI RP/t733331r@horthk/P",
+      "debit": 60,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-12T00:00:00",
+      "counterpartyName": "MPAY/IMPSI/TRTR/018016752790/ WUNDERBAKED /UK235630",
+      "paymentPurpose": "MPAY/IMPSI/TRTR/018016752790/ WUNDERBAKED /UK235630",
+      "credit": 2049,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-05-10T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/017918422030/U TIB/goog-payment@ok/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/017918422030/U TIB/goog-payment@ok/U",
+      "credit": 10,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-05-08T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/017918409984/IC IC/billdesk.relian/U",
+      "paymentPurpose": "MPAY/UPI/TRTR/017918409984/IC IC/billdesk.relian/U",
+      "debit": 555,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-07T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/017717232658/IC IC/bekmi746htch@lr/N",
+      "paymentPurpose": "MPAY/UPI/TRTR/017717232658/IC IC/bekmi746htch@lr/N",
+      "credit": 700,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-05-05T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/017713134969/K VBL/wrx@upi/800490107",
+      "paymentPurpose": "MPAY/UPI/TRTR/017713134969/K VBL/wrx@upi/800490107",
+      "debit": 3900,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-04T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/017713071554/K VBL/wrx@upi/Eth",
+      "paymentPurpose": "MPAY/UPI/TRTR/017713071554/K VBL/wrx@upi/Eth",
+      "debit": 100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2020-05-02T00:00:00",
+      "counterpartyName": "MPAY/UPI/TRTR/017713362977/IC IC/bekmi746htch@lr/N",
+      "paymentPurpose": "MPAY/UPI/TRTR/017713362977/IC IC/bekmi746htch@lr/N",
+      "credit": 4000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    }
+  ]
+}

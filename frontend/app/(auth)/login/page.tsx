@@ -4,10 +4,11 @@ import { Box, Button, IconButton, InputAdornment, TextField, Typography } from '
 import CircularProgress from '@mui/material/CircularProgress';
 import NextLink from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { AuthLanguageSwitcher } from '@/app/components/AuthLanguageSwitcher';
 import { BrandLockup } from '@/app/components/BrandLockup';
 import { Eye, EyeOff } from '@/app/components/icons';
+import { useDemoStatus } from '@/app/hooks/useDemoStatus';
 import { useRegistrationStatus } from '@/app/hooks/useRegistrationStatus';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
@@ -55,6 +56,16 @@ function LoginPageContent(): React.JSX.Element {
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const demo = useDemoStatus();
+
+  // A demo server offers its shared account: filled in, one click to sign in.
+  useEffect(() => {
+    const account = demo?.account;
+    if (account) {
+      setEmail(current => current || account.email);
+      setPassword(current => current || account.password);
+    }
+  }, [demo]);
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
@@ -134,9 +145,11 @@ function LoginPageContent(): React.JSX.Element {
               <label htmlFor="password" className="seneca-auth-field__label">
                 {t.passwordLabel}
               </label>
-              <NextLink href="/forgot-password" className="seneca-auth-link">
-                {t.forgotPassword}
-              </NextLink>
+              {demo?.enabled ? null : (
+                <NextLink href="/forgot-password" className="seneca-auth-link">
+                  {t.forgotPassword}
+                </NextLink>
+              )}
             </div>
             <TextField
               required

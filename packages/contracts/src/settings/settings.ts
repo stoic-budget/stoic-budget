@@ -67,6 +67,16 @@ export type InstanceTelegramBotStatus = Wire<typeof InstanceTelegramBotStatus>;
 export const RegistrationStatus = Schema.Struct({ open: Schema.Boolean });
 export type RegistrationStatus = Wire<typeof RegistrationStatus>;
 
+/**
+ * `GET /auth/demo` (public): whether this is a read-only demo instance, and
+ * the shared account its login page offers (public on purpose; null when none).
+ */
+export const DemoStatus = Schema.Struct({
+  enabled: Schema.Boolean,
+  account: Schema.NullOr(Schema.Struct({ email: Schema.String, password: Schema.String })),
+});
+export type DemoStatus = Wire<typeof DemoStatus>;
+
 export const TelegramReport = Schema.Struct({
   id: Schema.String,
   chatId: Schema.String,
