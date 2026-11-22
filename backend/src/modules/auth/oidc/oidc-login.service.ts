@@ -45,6 +45,8 @@ interface TicketRecord {
   userId: string;
   identityId: string;
   issuer: string;
+  /** The account's token version at the callback: a reset or log-out-everywhere since voids it. */
+  tokenVersion: number;
 }
 
 const random = () => randomBytes(32).toString('base64url');
@@ -61,7 +63,9 @@ export function safeNextPath(value: unknown): string | null {
   try {
     const base = 'https://app.invalid';
     const url = new URL(value, base);
-    return url.origin === base ? `${url.pathname}${url.search}${url.hash}` : null;
+    const path = `${url.pathname}${url.search}${url.hash}`;
+    // Normalising can fold '/.//host' into '//host', a link to another site.
+    return url.origin === base && !path.startsWith('//') ? path : null;
   } catch {
     return null;
   }
@@ -213,6 +217,7 @@ export class OidcLoginService {
       userId: signedIn.user.id,
       identityId: signedIn.identityId,
       issuer: config.issuer,
+      tokenVersion: signedIn.user.tokenVersion ?? 0,
     };
     await this.store.put('ticket', ticket, record, FLOW_TTL_SECONDS);
     return { ticket, next: flow.next };
@@ -240,6 +245,15 @@ export class OidcLoginService {
       });
       throw new UnauthorizedException(appError('AUTH_ACCOUNT_INACTIVE'));
     }
+    if (!(await this.ticketStillHolds(record, user))) {
+      await this.store.take('ticket', ticket);
+      await recordOidcEvent(this.auditService, this.logger, 'refused', {
+        user,
+        issuer: record.issuer,
+        reason: 'OIDC_SIGN_IN_EXPIRED',
+      });
+      throw new UnauthorizedException(appError('OIDC_SIGN_IN_EXPIRED'));
+    }
     if (user.twoFactorEnabledAt) {
       if (!twoFactorCode?.trim()) return { twoFactorRequired: true };
       try {
@@ -263,5 +277,18 @@ export class OidcLoginService {
       identityId: record.identityId,
     });
     return this.authService.generateTokens(user, context);
+  }
+
+  /**
+   * A ticket waits up to ten minutes. Whatever happened to the account since the
+   * callback wins: the identity unlinked (a reset unlinks it), the password reset
+   * or every session ended (token version), sign-on switched off or moved to
+   * another provider.
+   */
+  private async ticketStillHolds(record: TicketRecord, user: User): Promise<boolean> {
+    if ((user.tokenVersion ?? 0) !== record.tokenVersion) return false;
+    const config = await this.settings.active();
+    if (config?.issuer !== record.issuer) return false;
+    return this.identities.exists({ where: { id: record.identityId, userId: user.id } });
   }
 }
