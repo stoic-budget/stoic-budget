@@ -21,6 +21,8 @@ import { AuthHero } from '../AuthHero';
 import AuthLayout from '../AuthLayout';
 import { completeSignIn } from './complete-sign-in';
 import { usePasskeySignIn } from './hooks/usePasskeySignIn';
+import { OidcCompletion } from './OidcCompletion';
+import { OidcSignInButton } from './OidcSignInButton';
 import { PasskeyButton } from './PasskeyButton';
 
 type SecondFactor = Pick<ContractInput<'LoginBody'>, 'twoFactorCode' | 'twoFactorPasskey'>;
@@ -152,139 +154,144 @@ function LoginPageContent(): React.JSX.Element {
         {t.title}
       </Typography>
 
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        className="seneca-auth-form"
-        sx={{ width: '100%' }}
-      >
-        <div className="seneca-auth-field">
-          <label htmlFor="email" className="seneca-auth-field__label">
-            {t.emailLabel}
-          </label>
-          <TextField
-            required
-            fullWidth
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            autoFocus
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            error={Boolean(error)}
-            slotProps={{ htmlInput: { 'aria-describedby': error ? 'login-error' : undefined } }}
-          />
-        </div>
-        <div className="seneca-auth-field">
-          <div className="seneca-auth-field__head">
-            <label htmlFor="password" className="seneca-auth-field__label">
-              {t.passwordLabel}
-            </label>
-            {demo?.enabled ? null : (
-              <NextLink href="/forgot-password" className="seneca-auth-link">
-                {t.forgotPassword}
-              </NextLink>
-            )}
-          </div>
-          <TextField
-            required
-            fullWidth
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            error={Boolean(error)}
-            slotProps={{
-              htmlInput: { 'aria-describedby': error ? 'login-error' : undefined },
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      edge="end"
-                      size="small"
-                      aria-label={(showPassword ? t.hidePassword : t.showPassword).value}
-                      aria-pressed={showPassword}
-                      onClick={() => setShowPassword(prev => !prev)}
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
-          {error && !twoFactorRequired ? (
-            <p id="login-error" role="alert" className="seneca-auth-error">
-              {error}
-            </p>
-          ) : null}
-        </div>
-        {twoFactorRequired && (
+      {searchParams.get('oidc') === 'complete' ? (
+        <OidcCompletion nextPath={nextPath} inviteToken={inviteToken} />
+      ) : (
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          className="seneca-auth-form"
+          sx={{ width: '100%' }}
+        >
           <div className="seneca-auth-field">
-            <label htmlFor="twoFactorCode" className="seneca-auth-field__label">
-              {t.twoFactorLabel}
+            <label htmlFor="email" className="seneca-auth-field__label">
+              {t.emailLabel}
             </label>
             <TextField
               required
               fullWidth
-              id="twoFactorCode"
-              name="twoFactorCode"
-              autoComplete="one-time-code"
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
               autoFocus
-              value={twoFactorCode}
-              onChange={e => setTwoFactorCode(e.target.value)}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               error={Boolean(error)}
+              slotProps={{ htmlInput: { 'aria-describedby': error ? 'login-error' : undefined } }}
             />
-            {error ? (
+          </div>
+          <div className="seneca-auth-field">
+            <div className="seneca-auth-field__head">
+              <label htmlFor="password" className="seneca-auth-field__label">
+                {t.passwordLabel}
+              </label>
+              {demo?.enabled ? null : (
+                <NextLink href="/forgot-password" className="seneca-auth-link">
+                  {t.forgotPassword}
+                </NextLink>
+              )}
+            </div>
+            <TextField
+              required
+              fullWidth
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              error={Boolean(error)}
+              slotProps={{
+                htmlInput: { 'aria-describedby': error ? 'login-error' : undefined },
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        edge="end"
+                        size="small"
+                        aria-label={(showPassword ? t.hidePassword : t.showPassword).value}
+                        aria-pressed={showPassword}
+                        onClick={() => setShowPassword(prev => !prev)}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+            {error && !twoFactorRequired ? (
               <p id="login-error" role="alert" className="seneca-auth-error">
                 {error}
               </p>
-            ) : (
-              <p className="seneca-auth-field__hint">{t.twoFactorHint}</p>
-            )}
+            ) : null}
           </div>
-        )}
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          size="large"
-          className="seneca-auth-submit"
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={24} color="inherit" /> : t.submit}
-        </Button>
-        {twoFactorRequired && hasPasskey && passkeySignIn.supported ? (
-          <PasskeyButton
-            label={t.usePasskey.value}
-            disabled={loading}
-            onClick={answerWithPasskey}
-          />
-        ) : null}
-        {!twoFactorRequired && passkeySignIn.supported ? (
-          <>
-            <div className="seneca-auth-divider" aria-hidden="true">
-              {t.orDivider}
+          {twoFactorRequired && (
+            <div className="seneca-auth-field">
+              <label htmlFor="twoFactorCode" className="seneca-auth-field__label">
+                {t.twoFactorLabel}
+              </label>
+              <TextField
+                required
+                fullWidth
+                id="twoFactorCode"
+                name="twoFactorCode"
+                autoComplete="one-time-code"
+                autoFocus
+                value={twoFactorCode}
+                onChange={e => setTwoFactorCode(e.target.value)}
+                error={Boolean(error)}
+              />
+              {error ? (
+                <p id="login-error" role="alert" className="seneca-auth-error">
+                  {error}
+                </p>
+              ) : (
+                <p className="seneca-auth-field__hint">{t.twoFactorHint}</p>
+              )}
             </div>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            size="large"
+            className="seneca-auth-submit"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : t.submit}
+          </Button>
+          {twoFactorRequired && hasPasskey && passkeySignIn.supported ? (
             <PasskeyButton
-              label={t.passkeySignIn.value}
+              label={t.usePasskey.value}
               disabled={loading}
-              onClick={signInWithPasskey}
+              onClick={answerWithPasskey}
             />
-          </>
-        ) : null}
-        {registrationOpen !== false || inviteToken ? (
-          <p className="seneca-auth-footnote">
-            {t.noAccountPrompt}{' '}
-            <NextLink href={registerHref} className="seneca-auth-link seneca-auth-link--accent">
-              {t.signUp}
-            </NextLink>
-          </p>
-        ) : null}
-      </Box>
+          ) : null}
+          {!twoFactorRequired && passkeySignIn.supported ? (
+            <>
+              <div className="seneca-auth-divider" aria-hidden="true">
+                {t.orDivider}
+              </div>
+              <PasskeyButton
+                label={t.passkeySignIn.value}
+                disabled={loading}
+                onClick={signInWithPasskey}
+              />
+            </>
+          ) : null}
+          <OidcSignInButton nextPath={nextPath} />
+          {registrationOpen !== false || inviteToken ? (
+            <p className="seneca-auth-footnote">
+              {t.noAccountPrompt}{' '}
+              <NextLink href={registerHref} className="seneca-auth-link seneca-auth-link--accent">
+                {t.signUp}
+              </NextLink>
+            </p>
+          ) : null}
+        </Box>
+      )}
     </AuthLayout>
   );
 }

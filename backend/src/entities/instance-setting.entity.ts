@@ -16,6 +16,8 @@ export enum InstanceSettingKey {
   TELEGRAM = 'telegram',
   /** Whether someone without an invitation can create an account. */
   REGISTRATION = 'registration',
+  /** The OpenID Connect provider people can sign in with; its client secret is encrypted. */
+  OIDC = 'oidc',
 }
 
 /**

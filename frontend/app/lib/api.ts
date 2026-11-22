@@ -149,6 +149,7 @@ const AUTH_RETRY_EXCLUDED_PATHS = new Set([
   '/auth/login',
   '/auth/register',
   '/auth/refresh',
+  '/auth/oidc/complete',
   '/auth/passkey-login',
 ]);
 

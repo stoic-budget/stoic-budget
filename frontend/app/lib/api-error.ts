@@ -58,7 +58,7 @@ const ERROR_DICTIONARIES = [
   'apiErrorsCustomTables',
 ] as const;
 
-function translateErrorCode(
+export function translateErrorCode(
   code: string | undefined,
   params: Record<string, string | number> | undefined,
 ): string | undefined {

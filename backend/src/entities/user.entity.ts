@@ -56,6 +56,10 @@ export class User {
   @Column({ name: 'password_hash', select: false })
   passwordHash: string;
 
+  /** False for an account made by single sign-on until its owner sets a password by reset. */
+  @Column({ name: 'password_set', type: 'boolean', default: true })
+  passwordSet: boolean;
+
   @Column()
   name: string;
 

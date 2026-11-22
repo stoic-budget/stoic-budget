@@ -3,7 +3,7 @@ import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
 import { syncLocaleFromUser } from '@/app/lib/locale';
 
 /**
- * After any sign-in (password or passkey): the tokens already sit in httpOnly
+ * After any sign-in (password, passkey or single sign-on): the tokens already sit in httpOnly
  * cookies, so only the profile for the first render is kept, then the browser
  * goes where the person was heading.
  */
