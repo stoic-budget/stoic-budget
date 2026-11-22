@@ -55,6 +55,12 @@ export function assertSplittable(
     throw new BadRequestException(appError('TRANSACTION_SPLIT_DUPLICATE'));
   }
 
+  // A pending row counts nowhere, and its parts would default to booked rows
+  // that count. Its booked version replaces it in place; split that one.
+  if (transaction.isPending) {
+    throw new BadRequestException(appError('TRANSACTION_SPLIT_PENDING'));
+  }
+
   // A locked row has already been reported on a filed return. Splitting it
   // re-assesses the tax across the parts, which would change figures that
   // have been submitted to a tax authority.

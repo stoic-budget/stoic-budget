@@ -1,25 +1,40 @@
 'use client';
 
-import { createContext, useCallback, useContext } from 'react';
+import type React from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useMemo } from 'react';
 import { resolveLocale } from '@/app/(main)/dashboard/helpers/dashboard-helpers';
 import { useLocale } from '@/app/i18n';
 import { withAsOf } from '@/app/lib/as-of-month';
-import { currentMonthKey } from './month-end';
+import { usePresentPeriod } from './use-period-label';
 
 /**
- * The `YYYY-MM` month the Overview shows. Outside the Overview a card has no
+ * The `YYYY-MM` month the Overview shows, beside the one we are in by the
+ * workspace's month rule (`present`). Outside the Overview a card has no
  * month strip above it, which reads as the month we are in.
  */
-const OverviewMonthContext = createContext<string | null>(null);
+const OverviewMonthContext = createContext<{ month: string; present: string } | null>(null);
 
-export const OverviewMonthProvider = OverviewMonthContext.Provider;
+export function OverviewMonthProvider({
+  value,
+  children,
+}: {
+  value: string | null;
+  children: ReactNode;
+}): React.JSX.Element {
+  const { current } = usePresentPeriod();
+  const shown = useMemo(
+    () => (value ? { month: value, present: current } : null),
+    [value, current],
+  );
+  return <OverviewMonthContext.Provider value={shown}>{children}</OverviewMonthContext.Provider>;
+}
 
 /**
  * The month the Overview shows, `YYYY-MM`, and its name ("August 2026"), for a
  * card that follows it. Null outside the Overview.
  */
 export function useOverviewMonth(): { month: string; label: string } | null {
-  const month = useContext(OverviewMonthContext);
+  const month = useContext(OverviewMonthContext)?.month;
   const { locale } = useLocale();
   if (!month) {
     return null;
@@ -47,18 +62,20 @@ function namesMonth(href: string, month: string): boolean {
  * pages that show no month stay as they are: the warning would not be true there.
  */
 export function useOverviewHrefMarker(): <T extends string | undefined>(href: T) => T {
-  const month = useContext(OverviewMonthContext);
+  const shown = useContext(OverviewMonthContext);
   return useCallback(
     href =>
-      (href && month && namesMonth(href, month) ? withAsOf(href, month) : href) as typeof href,
-    [month],
+      (href && shown && namesMonth(href, shown.month)
+        ? withAsOf(href, shown.month, shown.present)
+        : href) as typeof href,
+    [shown],
   );
 }
 
-/** The Overview shows a month other than the one we are in. */
+/** The Overview shows a month other than the one we are in (by the workspace's month rule). */
 export function useShowsOtherMonth(): boolean {
-  const month = useContext(OverviewMonthContext);
-  return month !== null && month !== currentMonthKey();
+  const shown = useContext(OverviewMonthContext);
+  return shown !== null && shown.month !== shown.present;
 }
 
 /**

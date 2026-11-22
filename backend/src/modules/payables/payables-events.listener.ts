@@ -8,8 +8,9 @@ import { PayableRecurrenceService } from './payable-recurrence.service';
 import { UnbookedPaymentsService } from './unbooked-payments.service';
 
 /**
- * A statement just brought rows in: a bill or receivable marked paid without
- * a wallet or a bank row may have its money among them, and is linked to it.
+ * A statement just brought rows in, or the bank booked rows that were pending:
+ * a bill or receivable marked paid without a wallet or a bank row may have its
+ * money among them, and is linked to it.
  * A repeating bill just got paid: its next occurrence is made now.
  */
 @Injectable()
@@ -38,7 +39,8 @@ export class PayablesEventsListener {
   }
 
   @OnEvent('import.committed')
-  async handleImportCommitted(event: ImportCommittedEvent): Promise<void> {
+  @OnEvent('transactions.posted')
+  async handleImportCommitted(event: Pick<ImportCommittedEvent, 'workspaceId'>): Promise<void> {
     try {
       const linked = await this.unbookedPayments.linkUnbooked(event.workspaceId);
       if (linked > 0) {

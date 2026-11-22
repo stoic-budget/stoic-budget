@@ -19,6 +19,7 @@ import { BalanceModule } from '../balance/balance.module';
 import { CryptoModule } from '../crypto/crypto.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { InvestmentsModule } from '../investments/investments.module';
+import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { BudgetVsActualReport } from './budget-vs-actual.report';
 import { CashFlowMapService } from './cash-flow-map.service';
 import { CustomReportGenerator } from './custom-report.report';
@@ -66,6 +67,7 @@ import { WorkspaceExportReport } from './workspace-export.report';
     CryptoModule,
     ExchangeRatesModule,
     InvestmentsModule,
+    PayPeriodModule,
   ],
   controllers: [ReportsController, ReportSchedulesController],
   providers: [

@@ -5,8 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import type React from 'react';
 import { SubscriptionsMonthWidget } from '@/app/(main)/dashboard/components/SubscriptionsMonthWidget';
 import { parseMonthParam } from '@/app/(main)/dashboard/helpers/dashboard-url-state';
-import { currentMonthKey } from '@/app/components/dashboard/month-end';
 import { OverviewMonthProvider } from '@/app/components/dashboard/overview-month';
+import { usePresentPeriod } from '@/app/components/dashboard/use-period-label';
 import { useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 
@@ -21,7 +21,8 @@ export function SubscriptionsPastMonth({
 }): React.JSX.Element | null {
   const month = useSearchParams()?.get('month') ?? null;
   const { locale } = useLocale();
-  if (!(month && parseMonthParam(month)) || month === currentMonthKey()) {
+  const present = usePresentPeriod().current;
+  if (!(month && parseMonthParam(month)) || month === present) {
     return null;
   }
   return (

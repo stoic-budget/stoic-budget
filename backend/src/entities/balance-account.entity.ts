@@ -162,6 +162,31 @@ export class BalanceAccount {
   @Column({ name: 'account_kind', type: 'varchar', length: 16, nullable: true })
   accountKind: BalanceAccountKind | null;
 
+  /**
+   * What a real estate or vehicle line is (area, make, mileage…), checked
+   * against its kind on write. Null on every other line.
+   */
+  @Column({ type: 'jsonb', nullable: true })
+  attributes: Record<string, unknown> | null;
+
+  /** The loan account a property was bought with; at most one property per loan. */
+  @Column({ name: 'debt_wallet_id', type: 'uuid', nullable: true })
+  debtWalletId: string | null;
+
+  /** Or the debt line of the sheet it was bought with; never both. */
+  @Column({ name: 'debt_account_id', type: 'uuid', nullable: true })
+  debtAccountId: string | null;
+
+  /** Percent a year a vehicle loses between the values entered for it (declining balance). */
+  @Column({
+    name: 'depreciation_rate',
+    type: 'decimal',
+    precision: 5,
+    scale: 2,
+    nullable: true,
+  })
+  depreciationRate: string | null;
+
   @Column({ default: 0 })
   position: number;
 

@@ -1,5 +1,5 @@
 import * as Schema from 'effect/Schema';
-import { optionalNullable } from '../common/requests';
+import { DateOnlyInput, optionalNullable } from '../common/requests';
 import type { Wire } from '../common/wire';
 
 export const SuggestImportBody = Schema.Struct({
@@ -21,6 +21,13 @@ export const EntityImportOptionsInput = Schema.Struct({
   investmentAccountId: optionalNullable(Schema.String.check(Schema.isUUID())),
   /** Trades only: create a holding a row names but the account does not have. */
   createMissingHoldings: optionalNullable(Schema.Boolean),
+  /**
+   * Transactions only: import just the rows dated in this period, both ends
+   * included (filling a gap between an account's statements). Rows outside it
+   * are skipped as `outside_period`.
+   */
+  dateFrom: optionalNullable(DateOnlyInput),
+  dateTo: optionalNullable(DateOnlyInput),
 });
 export type EntityImportOptionsInput = Wire<typeof EntityImportOptionsInput>;
 

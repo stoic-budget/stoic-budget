@@ -33,4 +33,18 @@ describe('ForecastEvents', () => {
     // A later year names itself; this one does not.
     expect(titles).toEqual(['This week', 'October', 'November', 'January 2027']);
   });
+
+  it('names a pending bank row as counted today', () => {
+    render(
+      <ForecastEvents
+        events={[{ ...event('2026-10-15', 'ACME Store - Wireless Buds'), kind: 'pending' }]}
+        excluded={[]}
+        onToggle={vi.fn()}
+        formatAmount={String}
+        today={new Date(2026, 9, 15)}
+      />,
+    );
+
+    expect(screen.getByText(/pending, counted today/)).toBeInTheDocument();
+  });
 });

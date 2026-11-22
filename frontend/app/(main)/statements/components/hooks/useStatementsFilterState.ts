@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   DEFAULT_STATEMENT_COLUMNS,
   loadStatementColumns,
@@ -17,6 +17,7 @@ import {
   saveStatementFilters,
 } from '@/app/(main)/statements/components/filters/statement-filters';
 import { useClearAsOf } from '@/app/hooks/useClearAsOf';
+import { usePayPeriods } from '@/app/hooks/usePayPeriods';
 import { monthDeepLinkFilters } from '../filters/month-deep-link';
 import { reconcileFiltersWithColumns } from '../StatementsListView.utils';
 
@@ -75,10 +76,24 @@ export function useStatementsFilterState({
   const [draftColumns, setDraftColumns] = useState<StatementColumn[]>(DEFAULT_STATEMENT_COLUMNS);
   // Filters picked here replace the dashboard month a link opened the list on.
   const clearAsOf = useClearAsOf();
+  // A link's month is the workspace's own month; when the rule loads after the
+  // list opened on a link, the link's month is read again with it, once.
+  const { context } = usePayPeriods();
+  const linkedMonth = useRef<string | null>(null);
+  useEffect(() => {
+    const linked = context && linkedMonth.current;
+    const filters = linked ? monthDeepLinkFilters(linked, new Date(), context) : null;
+    linkedMonth.current = null;
+    if (filters) {
+      setDraftFilters(filters);
+      setAppliedFilters(filters);
+    }
+  }, [context]);
 
   const initFromStorage = (deepLinkMonth?: string | null, ignoreStored = false): void => {
+    linkedMonth.current = context ? null : (deepLinkMonth ?? null);
     const storedFilters =
-      monthDeepLinkFilters(deepLinkMonth) ??
+      monthDeepLinkFilters(deepLinkMonth, new Date(), context) ??
       (ignoreStored ? DEFAULT_STATEMENT_FILTERS : loadStatementFilters());
     setDraftFilters(storedFilters);
     setAppliedFilters(storedFilters);

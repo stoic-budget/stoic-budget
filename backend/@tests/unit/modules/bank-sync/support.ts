@@ -58,6 +58,7 @@ export const accountConfig = (overrides: Record<string, unknown> = {}) => ({
   balanceDate: null,
   consentExpiresAt: null,
   syncFrom: null,
+  askedFrom: null,
   health: 'never_synced',
   lastError: null,
   balanceDrift: null,

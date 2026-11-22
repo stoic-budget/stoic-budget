@@ -19,6 +19,7 @@ export const queryKeys = {
     ['dashboard', 'wallet-coverage', workspaceId] as const,
   dashboardSetupProgress: (workspaceId: string | null) =>
     ['dashboard', 'setup-progress', workspaceId] as const,
+  payPeriods: (workspaceId: string | null) => ['pay-periods', workspaceId] as const,
   statements: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
     ['statements', o.workspaceId, o.params] as const,
   receiptDocuments: (o: { workspaceId: string | null; params: Record<string, unknown> }) =>
@@ -186,6 +187,8 @@ export const queryKeys = {
     ['audit-events', o.workspaceId, o.params] as const,
   forecast: (o: { workspaceId: string | null; days: number; scenario: string }) =>
     ['forecast', o.workspaceId, o.days, o.scenario] as const,
+  paycheckPlan: (o: { workspaceId: string | null; params: string }) =>
+    ['forecast', o.workspaceId, 'paychecks', o.params] as const,
   investments: (workspaceId: string | null) => ['investments', workspaceId] as const,
   // Under investments, so a holding or contribution change refreshes the returns page too.
   investmentReturns: (o: { workspaceId: string | null; range: string }) =>

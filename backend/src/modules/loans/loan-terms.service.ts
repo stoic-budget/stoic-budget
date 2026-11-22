@@ -74,6 +74,7 @@ export class LoanTermsService {
             ? { amount: body.recurringExtra.amount, from: body.recurringExtra.from }
             : null,
           extraMode: body.extraMode ?? 'reduce_term',
+          autoSplit: body.autoSplit ?? false,
           updatedAt: new Date(),
         },
         ['walletId'],
@@ -136,6 +137,7 @@ export class LoanTermsService {
       extraPayments: row.extraPayments,
       recurringExtra: row.recurringExtra,
       extraMode: row.extraMode,
+      autoSplit: row.autoSplit,
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
     };

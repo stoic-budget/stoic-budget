@@ -2,7 +2,8 @@ import type { ReceiptDocument, Transaction } from '../types/statement-types';
 
 /**
  * Only what a person confirmed counts in the numbers. A transaction counts once
- * it was confirmed in Review; a receipt counts once approved (its transaction
+ * it was confirmed in Review and is no longer pending at the bank; a receipt
+ * counts once approved (its transaction
  * then carries it, and the record mappers drop the duplicate).
  */
 export function keepConfirmed(data: { transactions: Transaction[]; receipts: ReceiptDocument[] }): {
@@ -10,7 +11,9 @@ export function keepConfirmed(data: { transactions: Transaction[]; receipts: Rec
   receipts: ReceiptDocument[];
 } {
   return {
-    transactions: data.transactions.filter(transaction => transaction.isVerified === true),
+    transactions: data.transactions.filter(
+      transaction => transaction.isVerified === true && transaction.isPending !== true,
+    ),
     receipts: data.receipts.filter(receipt => receipt.status === 'approved'),
   };
 }
