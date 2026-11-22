@@ -67,4 +67,29 @@ describe('HttpExceptionFilter', () => {
     expect(status).toBe(500);
     expect(body.error).toMatchObject({ code: 'INTERNAL_SERVER_ERROR' });
   });
+
+  it('keeps the token of a public link out of what it logs', () => {
+    const token = 'shareTokenForClientOne_0123456789ab';
+    const error = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    for (const [url, route] of [
+      [`/public/invoices/${token}/pdf`, '/public/invoices/:token/pdf'],
+      [`/storage/shared/${token}`, '/storage/shared/:token'],
+    ]) {
+      const host = {
+        switchToHttp: () => ({
+          getResponse: () => ({ status: () => ({ json: vi.fn() }) }),
+          getRequest: () => ({ url, method: 'GET', baseUrl: '', route: { path: route } }),
+        }),
+      } as unknown as ArgumentsHost;
+      new HttpExceptionFilter().catch(new Error('boom'), host);
+      new HttpExceptionFilter().catch(queryFailed('22003', 'numeric field overflow'), host);
+    }
+    const lines = JSON.stringify([error.mock.calls, warn.mock.calls]);
+    expect(lines).toContain('/public/invoices/:token/pdf');
+    expect(lines).toContain('/storage/shared/:token');
+    expect(lines).not.toContain(token);
+    error.mockRestore();
+    warn.mockRestore();
+  });
 });

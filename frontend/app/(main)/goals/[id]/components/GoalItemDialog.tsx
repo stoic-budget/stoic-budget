@@ -12,6 +12,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { format, isValid as isValidDate, parse } from 'date-fns';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { DemoNotice } from '@/app/components/demo/DemoNotice';
 import { CurrencyDrawer } from '@/app/components/receipts/components/CurrencyDrawer';
 import { useCurrencyPickerState } from '@/app/hooks/useCurrencyPickerState';
 import { useIntlayer } from '@/app/i18n';
@@ -106,6 +107,7 @@ export function GoalItemDialog({
           pt: '16px !important',
         }}
       >
+        <DemoNotice />
         <TextField
           label={t.itemName.value}
           value={form.name}

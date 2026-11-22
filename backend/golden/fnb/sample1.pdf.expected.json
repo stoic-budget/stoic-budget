@@ -1,0 +1,544 @@
+{
+  "metadata": {
+    "accountNumber": "62000000108",
+    "currency": "ZAR",
+    "dateFrom": "2023-07-01T00:00:00",
+    "dateTo": "2023-08-01T00:00:00",
+    "balanceStart": 3400,
+    "balanceEnd": 11705.2
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-07-04T00:00:00",
+      "counterpartyName": "Superspar Karaglen",
+      "paymentPurpose": "POS Purchase Superspar Karaglen 400000*1000 01 Jul",
+      "debit": 206.69,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-05T00:00:00",
+      "counterpartyName": "KFC Edenglen",
+      "paymentPurpose": "POS Purchase KFC Edenglen 400000*1000 02 Jul",
+      "debit": 184.5,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-05T00:00:00",
+      "counterpartyName": "Highway Gardens Sup",
+      "paymentPurpose": "POS Purchase Highway Gardens Sup 400000*1000 03 Jul",
+      "debit": 200,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-05T00:00:00",
+      "counterpartyName": "Shein Cr",
+      "paymentPurpose": "POS Purchase Shein Cr 400000*1000 01 Jul",
+      "debit": 785,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "Donation",
+      "paymentPurpose": "FNB App Payment From Donation",
+      "credit": 2500,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-07T00:00:00",
+      "counterpartyName": "Shein",
+      "paymentPurpose": "POS Purchase Shein 400000*1000 04 Jul",
+      "debit": 610,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "Ann Mosey Sam",
+      "paymentPurpose": "FNB App Payment To Ann Mosey Sam",
+      "debit": 200,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "ATM Cash 09222159 400000*1000",
+      "paymentPurpose": "ATM Cash 09222159 400000*1000",
+      "debit": 500,
+      "currency": "ZAR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "Buffalo Logistics",
+      "paymentPurpose": "POS Purchase Buffalo Logistics 400000*1000 05 Jul",
+      "debit": 97.2,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "Cipc",
+      "paymentPurpose": "POS Purchase Cipc 400000*1000 05 Jul",
+      "debit": 175,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-08T00:00:00",
+      "counterpartyName": "Byc Debit 62000000801",
+      "paymentPurpose": "Byc Debit 62000000801",
+      "debit": 36.61,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-10T00:00:00",
+      "counterpartyName": "Total Hyper C",
+      "paymentPurpose": "POS Purchase Total Hyper C 400000*1000 07 Jul",
+      "debit": 111.2,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-10T00:00:00",
+      "counterpartyName": "FNB App Prepaid Airtime 0600000001",
+      "paymentPurpose": "FNB App Prepaid Airtime 0600000001",
+      "debit": 35,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-11T00:00:00",
+      "counterpartyName": "FNB App Prepaid Airtime 0600000001",
+      "paymentPurpose": "FNB App Prepaid Airtime 0600000001",
+      "debit": 20,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-11T00:00:00",
+      "counterpartyName": "Pep 6206 Edenvale",
+      "paymentPurpose": "POS Purchase Pep 6206 Edenvale 400000*1000 08 Jul",
+      "debit": 371.92,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-11T00:00:00",
+      "counterpartyName": "Checkershyper Edenv",
+      "paymentPurpose": "POS Purchase Checkershyper Edenv 400000*1000 08 Jul",
+      "debit": 921.26,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-11T00:00:00",
+      "counterpartyName": "FNB App Prepaid Airtime 0600000002",
+      "paymentPurpose": "FNB App Prepaid Airtime 0600000002",
+      "debit": 20,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-12T00:00:00",
+      "counterpartyName": "Buffalo Logistics",
+      "paymentPurpose": "POS Purchase Buffalo Logistics 400000*1000 08 Jul",
+      "debit": 86.66,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-12T00:00:00",
+      "counterpartyName": "Romans Pizza Edenva",
+      "paymentPurpose": "POS Purchase Romans Pizza Edenva 400000*1000 09 Jul",
+      "debit": 106.6,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-12T00:00:00",
+      "counterpartyName": "Total Perth Road",
+      "paymentPurpose": "Fuel Purchase Total Perth Road 400000*1000 09 Jul",
+      "debit": 500,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-13T00:00:00",
+      "counterpartyName": "FNB App Prepaid Airtime 0600000001",
+      "paymentPurpose": "FNB App Prepaid Airtime 0600000001",
+      "debit": 35,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-14T00:00:00",
+      "counterpartyName": "Http://Www.Builders",
+      "paymentPurpose": "POS Purchase Http://Www.Builders 400000*1000 12 Jul",
+      "debit": 369,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-15T00:00:00",
+      "counterpartyName": "Highway Gardens Sup",
+      "paymentPurpose": "POS Purchase Highway Gardens Sup 400000*1000 13 Jul",
+      "debit": 229.5,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "Thomo Sam",
+      "paymentPurpose": "FNB App Payment To Thomo Sam",
+      "debit": 150,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "FNB App Prepaid Airtime 0600000001",
+      "paymentPurpose": "FNB App Prepaid Airtime 0600000001",
+      "debit": 30,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "FNB App Prepaid Airtime 0600000001",
+      "paymentPurpose": "FNB App Prepaid Airtime 0600000001",
+      "debit": 35,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "Donation",
+      "paymentPurpose": "FNB App Payment From Donation",
+      "credit": 2500,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "Highway Gardens Sup",
+      "paymentPurpose": "POS Purchase Highway Gardens Sup 400000*1000 14 Jul",
+      "debit": 34,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-17T00:00:00",
+      "counterpartyName": "Uber Rides",
+      "paymentPurpose": "POS Purchase Uber Rides 400000*1000 11 Jul",
+      "debit": 36,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-20T00:00:00",
+      "counterpartyName": "House Sam",
+      "paymentPurpose": "FNB App Payment To House Sam",
+      "debit": 400,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-22T00:00:00",
+      "counterpartyName": "Send Money App Dr Send 27600000001",
+      "paymentPurpose": "Send Money App Dr Send 27600000001",
+      "debit": 800,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-22T00:00:00",
+      "counterpartyName": "Gold Valley",
+      "paymentPurpose": "FNB App Payment To Gold Valley 0600000001",
+      "debit": 110,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-22T00:00:00",
+      "counterpartyName": "Byc Debit 62000000801",
+      "paymentPurpose": "Byc Debit 62000000801",
+      "debit": 10,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-24T00:00:00",
+      "counterpartyName": "Gold Valley",
+      "paymentPurpose": "FNB App Payment To Gold Valley 0600000001",
+      "debit": 110,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-24T00:00:00",
+      "counterpartyName": "Gold Valley",
+      "paymentPurpose": "FNB App Payment To Gold Valley 0600000001",
+      "debit": 110,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-24T00:00:00",
+      "counterpartyName": "Gold Valley",
+      "paymentPurpose": "FNB App Payment To Gold Valley 0600000001",
+      "debit": 120,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-24T00:00:00",
+      "counterpartyName": "Puppy Sam Puppy",
+      "paymentPurpose": "FNB App Payment To Puppy Sam Puppy",
+      "debit": 200,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-25T00:00:00",
+      "counterpartyName": "FNB App Prepaid Airtime 0600000001",
+      "paymentPurpose": "FNB App Prepaid Airtime 0600000001",
+      "debit": 35,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "Gold Valley",
+      "paymentPurpose": "FNB App Payment To Gold Valley 0600000001",
+      "debit": 110,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "Rick 06E18D2700",
+      "paymentPurpose": "Rtc Credit Rick 06E18D2700",
+      "credit": 250,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "Send Money App Dr Send 27600000001",
+      "paymentPurpose": "Send Money App Dr Send 27600000001",
+      "debit": 250,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "Send Money App Dr Send 27600000003",
+      "paymentPurpose": "Send Money App Dr Send 27600000003",
+      "debit": 50,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "FNB App Prepaid Airtime 0600000001",
+      "paymentPurpose": "FNB App Prepaid Airtime 0600000001",
+      "debit": 25,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "Gold Valley",
+      "paymentPurpose": "FNB App Payment To Gold Valley 0600000001",
+      "debit": 110,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-26T00:00:00",
+      "counterpartyName": "ABSA Bank Ann",
+      "paymentPurpose": "Magtape Credit ABSA Bank Ann",
+      "credit": 20,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-28T00:00:00",
+      "counterpartyName": "FNB App Prepaid Airtime 0600000001",
+      "paymentPurpose": "FNB App Prepaid Airtime 0600000001",
+      "debit": 10,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-28T00:00:00",
+      "counterpartyName": "Rick Eeca373F56",
+      "paymentPurpose": "Rtc Credit Rick Eeca373F56",
+      "credit": 300,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-28T00:00:00",
+      "counterpartyName": "Gold Valley",
+      "paymentPurpose": "FNB App Payment To Gold Valley 0600000001",
+      "debit": 110,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-28T00:00:00",
+      "counterpartyName": "Sam",
+      "paymentPurpose": "FNB App Transfer From Sam",
+      "credit": 46,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-28T00:00:00",
+      "counterpartyName": "Betway",
+      "paymentPurpose": "POS Purchase Betway 400000*1000 26 Jul",
+      "debit": 100,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-29T00:00:00",
+      "counterpartyName": "Donation",
+      "paymentPurpose": "FNB App Payment From Donation",
+      "credit": 2000,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-29T00:00:00",
+      "counterpartyName": "Gold Valley",
+      "paymentPurpose": "FNB App Payment To Gold Valley 0600000001",
+      "debit": 150,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-29T00:00:00",
+      "counterpartyName": "Byc Debit 62000000801",
+      "paymentPurpose": "Byc Debit 62000000801",
+      "debit": 5,
+      "currency": "ZAR"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "Sign Serve Outdoor S",
+      "paymentPurpose": "Int-Banking Pmt Frm Sign Serve Outdoor S",
+      "credit": 6743.26,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "Paigy School Paige School",
+      "paymentPurpose": "FNB App Payment To Paigy School Paige School",
+      "debit": 2000,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "Car Sam Car",
+      "paymentPurpose": "FNB App Payment To Car Sam Car",
+      "debit": 1500,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "Betway",
+      "paymentPurpose": "POS Purchase Betway 400000*1000 28 Jul",
+      "debit": 40,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "Betway",
+      "paymentPurpose": "POS Purchase Betway 400000*1000 27 Jul",
+      "debit": 75,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-07-31T00:00:00",
+      "counterpartyName": "Betway",
+      "paymentPurpose": "POS Purchase Betway 400000*1000 28 Jul",
+      "debit": 150,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "Rick C20Db97882",
+      "paymentPurpose": "Rtc Credit Rick C20Db97882",
+      "credit": 300,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "Puppy Sam Puppy",
+      "paymentPurpose": "FNB App Payment To Puppy Sam Puppy",
+      "debit": 300,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "Sign Serve Outdoor S",
+      "paymentPurpose": "FNB OB Pmt Sign Serve Outdoor S",
+      "credit": 7076.48,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "Oli Sam",
+      "paymentPurpose": "FNB App Payment To Oli Sam",
+      "debit": 50,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "Gold Valley",
+      "paymentPurpose": "FNB App Payment To Gold Valley 0600000001",
+      "debit": 150,
+      "currency": "ZAR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "Betway",
+      "paymentPurpose": "POS Purchase Betway 400000*1000 29 Jul",
+      "debit": 50,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "Betway",
+      "paymentPurpose": "POS Purchase Betway 400000*1000 29 Jul",
+      "debit": 100,
+      "currency": "ZAR",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "#Monthly Account Fee",
+      "paymentPurpose": "#Monthly Account Fee",
+      "debit": 110,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "#Service Fees",
+      "paymentPurpose": "#Service Fees",
+      "debit": 4.4,
+      "currency": "ZAR",
+      "paymentType": "fee"
+    }
+  ]
+}

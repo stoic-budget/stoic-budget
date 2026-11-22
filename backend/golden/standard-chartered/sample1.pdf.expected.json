@@ -1,0 +1,228 @@
+{
+  "metadata": {
+    "accountNumber": "2222853402848",
+    "currency": "BND",
+    "dateFrom": "2022-08-15T00:00:00",
+    "dateTo": "2022-10-29T00:00:00",
+    "balanceStart": 3.92,
+    "balanceEnd": 0.01
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-08-15T00:00:00",
+      "counterpartyName": "SALARY PAYMENT",
+      "paymentPurpose": "SALARY PAYMENT",
+      "credit": 1119,
+      "currency": "BND",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-08-15T00:00:00",
+      "counterpartyName": "CDM CASH DEPOSIT AT 2012 08:25:05",
+      "paymentPurpose": "CDM CASH DEPOSIT AT 2012 08:25:05",
+      "credit": 3,
+      "currency": "BND",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-08-15T00:00:00",
+      "counterpartyName": "ATM WDR AT 2010 08:28:09",
+      "paymentPurpose": "ATM WDR AT 2010 08:28:09",
+      "debit": 460,
+      "currency": "BND",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-08-25T00:00:00",
+      "counterpartyName": "SALARY PAYMENT",
+      "paymentPurpose": "SALARY PAYMENT",
+      "credit": 1119,
+      "currency": "BND",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-08-29T00:00:00",
+      "counterpartyName": "INSTALLMENT PAYMEN00274038",
+      "paymentPurpose": "INSTALLMENT PAYMEN00274038",
+      "debit": 1170.26,
+      "currency": "BND",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-08-29T00:00:00",
+      "counterpartyName": "INSTALLMENT PAYMEN00274011",
+      "paymentPurpose": "INSTALLMENT PAYMEN00274011",
+      "debit": 161.05,
+      "currency": "BND",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-08-31T00:00:00",
+      "counterpartyName": "ACMESAM INC SDN BHD",
+      "paymentPurpose": "POS PRCSE ACMESAM INC SDN BHD 5995 BSB BN BND 82.6",
+      "debit": 82.6,
+      "currency": "BND",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2022-09-01T00:00:00",
+      "counterpartyName": "ATM WDR AT 2010 21:31:25",
+      "paymentPurpose": "ATM WDR AT 2010 21:31:25",
+      "debit": 370,
+      "currency": "BND",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-09-14T00:00:00",
+      "counterpartyName": "SALARY PAYMENT",
+      "paymentPurpose": "SALARY PAYMENT",
+      "credit": 1119,
+      "currency": "BND",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-09-14T00:00:00",
+      "counterpartyName": "CDM CASH DEPOSIT AT 2009 20:32:15",
+      "paymentPurpose": "CDM CASH DEPOSIT AT 2009 20:32:15",
+      "credit": 7,
+      "currency": "BND",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-09-14T00:00:00",
+      "counterpartyName": "ATM WDR AT 2010 20:35:27",
+      "paymentPurpose": "ATM WDR AT 2010 20:35:27",
+      "debit": 460,
+      "currency": "BND",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-09-19T00:00:00",
+      "counterpartyName": "CDM CASH DEPOSIT AT 2009 09:38:24",
+      "paymentPurpose": "CDM CASH DEPOSIT AT 2009 09:38:24",
+      "credit": 9,
+      "currency": "BND",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-09-19T00:00:00",
+      "counterpartyName": "ATM WDR AT 2010 09:39:33",
+      "paymentPurpose": "ATM WDR AT 2010 09:39:33",
+      "debit": 10,
+      "currency": "BND",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-09-28T00:00:00",
+      "counterpartyName": "SALARY PAYMENT",
+      "paymentPurpose": "SALARY PAYMENT",
+      "credit": 1119,
+      "currency": "BND",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-09-29T00:00:00",
+      "counterpartyName": "INSTALLMENT PAYMEN00274038",
+      "paymentPurpose": "INSTALLMENT PAYMEN00274038",
+      "debit": 1170.26,
+      "currency": "BND",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-09-29T00:00:00",
+      "counterpartyName": "INSTALLMENT PAYMEN00274011",
+      "paymentPurpose": "INSTALLMENT PAYMEN00274011",
+      "debit": 161.05,
+      "currency": "BND",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-09-29T00:00:00",
+      "counterpartyName": "IBANKING CREDIT CARD PAYMENT PAYMENT OF 4751209441488424",
+      "paymentPurpose": "IBANKING CREDIT CARD PAYMENT PAYMENT OF 4751209441488424",
+      "debit": 50,
+      "currency": "BND",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-09-29T00:00:00",
+      "counterpartyName": "IBANKING CREDIT CARD PAYMENT PAYMENT OF 4751209441488424",
+      "paymentPurpose": "IBANKING CREDIT CARD PAYMENT PAYMENT OF 4751209441488424",
+      "debit": 3.69,
+      "currency": "BND",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-09-29T00:00:00",
+      "counterpartyName": "ATM WDR AT 2011 14:19:49",
+      "paymentPurpose": "ATM WDR AT 2011 14:19:49",
+      "debit": 400,
+      "currency": "BND",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-10-13T00:00:00",
+      "counterpartyName": "SALARY PAYMENT",
+      "paymentPurpose": "SALARY PAYMENT",
+      "credit": 1119,
+      "currency": "BND",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-10-13T00:00:00",
+      "counterpartyName": "IBANKING CREDIT CARD PAYMENT PAYMENT OF 4751209441488424",
+      "paymentPurpose": "IBANKING CREDIT CARD PAYMENT PAYMENT OF 4751209441488424",
+      "debit": 53.35,
+      "currency": "BND",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-10-13T00:00:00",
+      "counterpartyName": "ATM WDR AT 2011 10:32:38",
+      "paymentPurpose": "ATM WDR AT 2011 10:32:38",
+      "debit": 400,
+      "currency": "BND",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-10-27T00:00:00",
+      "counterpartyName": "SALARY PAYMENT",
+      "paymentPurpose": "SALARY PAYMENT",
+      "credit": 1119,
+      "currency": "BND",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-10-27T00:00:00",
+      "counterpartyName": "IBANKING CREDIT CARD PAYMENT PAYMENT OF 4751209441488424",
+      "paymentPurpose": "IBANKING CREDIT CARD PAYMENT PAYMENT OF 4751209441488424",
+      "debit": 53.34,
+      "currency": "BND",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-10-27T00:00:00",
+      "counterpartyName": "ATM WDR AT 1009 07:59:12",
+      "paymentPurpose": "ATM WDR AT 1009 07:59:12",
+      "debit": 400,
+      "currency": "BND",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2022-10-29T00:00:00",
+      "counterpartyName": "INSTALLMENT PAYMEN00274038",
+      "paymentPurpose": "INSTALLMENT PAYMEN00274038",
+      "debit": 1170.26,
+      "currency": "BND",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2022-10-29T00:00:00",
+      "counterpartyName": "INSTALLMENT PAYMEN00274011",
+      "paymentPurpose": "INSTALLMENT PAYMEN00274011",
+      "debit": 161.05,
+      "currency": "BND",
+      "paymentType": "direct_debit"
+    }
+  ]
+}

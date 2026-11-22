@@ -1,3 +1,4 @@
+import { dayKeyIn } from '@/app/(main)/budgets/helpers/left-per-day';
 import { getApiErrorStatus } from '@/app/lib/api-error';
 import type {
   BudgetList,
@@ -57,8 +58,13 @@ export const fetchCashFlowEntries = (month: string): Promise<DashboardCashFlowEn
     contract: 'DashboardCashFlowEntriesResponse',
   });
 
+// The reader's today, as the budgets page asks: the server's clock may be on another day.
 export const fetchBudgets = (): Promise<BudgetList> =>
-  apiQueryDecoded({ url: '/budgets', contract: 'BudgetList' });
+  apiQueryDecoded({
+    url: '/budgets',
+    params: { date: dayKeyIn(new Date()) },
+    contract: 'BudgetList',
+  });
 
 export const fetchGoals = (): Promise<GoalList> =>
   apiQueryDecoded({ url: '/goals', contract: 'GoalList' });

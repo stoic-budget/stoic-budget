@@ -1,0 +1,151 @@
+{
+  "metadata": {
+    "accountNumber": "10-000-0001",
+    "currency": "AUD",
+    "dateFrom": "2022-12-06T00:00:00",
+    "dateTo": "2022-12-20T00:00:00",
+    "balanceStart": 26659.01
+  },
+  "transactions": [
+    {
+      "transactionDate": "2022-12-06T00:00:00",
+      "counterpartyName": "Interest Rate Brought Forward Is 0.11% Internet Transfer t",
+      "paymentPurpose": "Interest Rate Brought Forward Is 0.11% Internet Transfer t",
+      "debit": 20,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-06T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 100,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-06T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 150,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-07T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 23.4,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-07T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 20.9,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-07T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 40,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-08T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 17.59,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-10T00:00:00",
+      "counterpartyName": "Internet Transfer Linked Acc Trns",
+      "paymentPurpose": "Internet Transfer Linked Acc Trns",
+      "debit": 2,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-10T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 20,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-10T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 58.98,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-12T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 90,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-12T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 1620,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-15T00:00:00",
+      "counterpartyName": "Internet Transfer Linked Acc Trns",
+      "paymentPurpose": "Internet Transfer Linked Acc Trns",
+      "debit": 41.5,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-15T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 185,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-15T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "debit": 220,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2022-12-18T00:00:00",
+      "counterpartyName": "Internet Transfer t",
+      "paymentPurpose": "Internet Transfer t",
+      "credit": 12240,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2022-12-20T00:00:00",
+      "counterpartyName": "Interest Internet Transfer t",
+      "paymentPurpose": "Interest Internet Transfer t",
+      "credit": 2.57,
+      "currency": "AUD",
+      "paymentType": "bank_transfer_in"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain",
+    "printed_totals"
+  ]
+}

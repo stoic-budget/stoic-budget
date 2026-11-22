@@ -1,0 +1,204 @@
+{
+  "metadata": {
+    "accountNumber": "38-1000-0001",
+    "currency": "USD",
+    "dateFrom": "2024-02-29T00:00:00",
+    "dateTo": "2024-03-28T00:00:00",
+    "balanceStart": 770.78,
+    "balanceEnd": -7
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-03-01T00:00:00",
+      "counterpartyName": "Walgreens Stor Oakland Ca",
+      "paymentPurpose": "POS Purchase Walgreens Stor Oakland Ca",
+      "debit": 13.41,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-01T00:00:00",
+      "counterpartyName": "Walgreens Stor Oakland Ca",
+      "paymentPurpose": "POS Purchase Walgreens Stor Oakland Ca",
+      "debit": 69.34,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-04T00:00:00",
+      "counterpartyName": "Tmobile*Prepaid Web",
+      "paymentPurpose": "1000 Debit Card Purchase Tmobile*Prepaid Web",
+      "debit": 58.08,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-04T00:00:00",
+      "counterpartyName": "McDonald's F7498",
+      "paymentPurpose": "1000 Debit Card Purchase McDonald's F7498",
+      "debit": 19.89,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-11T00:00:00",
+      "counterpartyName": "Google *Google Storage",
+      "paymentPurpose": "1000 Debit Card Purchase Google *Google Storage",
+      "debit": 19.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-11T00:00:00",
+      "counterpartyName": "EPC*Fortnite",
+      "paymentPurpose": "1000 Debit Card Purchase EPC*Fortnite",
+      "debit": 8.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-11T00:00:00",
+      "counterpartyName": "Amzn Mktp US*R63Bw1Ba0",
+      "paymentPurpose": "1000 Debit Card Purchase Amzn Mktp US*R63Bw1Ba0",
+      "debit": 22.04,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-13T00:00:00",
+      "counterpartyName": "Mta Meter Mta McKay",
+      "paymentPurpose": "1000 Debit Card Purchase Mta Meter Mta McKay",
+      "debit": 4.41,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-15T00:00:00",
+      "counterpartyName": "Amazon.com*Rh45L6Ff0",
+      "paymentPurpose": "1000 Debit Card Purchase Amazon.com*Rh45L6Ff0",
+      "debit": 11.46,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-15T00:00:00",
+      "counterpartyName": "Michaels S Emeryville Ca",
+      "paymentPurpose": "POS Purchase Michaels S Emeryville Ca",
+      "debit": 74.01,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-15T00:00:00",
+      "counterpartyName": "Target T-2767 Emeryville Ca",
+      "paymentPurpose": "POS Purchase Target T-2767 Emeryville Ca",
+      "debit": 130.97,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-18T00:00:00",
+      "counterpartyName": "U-Haulwhite Horse Liqu",
+      "paymentPurpose": "1000 Debit Card Purchase U-Haulwhite Horse Liqu",
+      "debit": 142.61,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-18T00:00:00",
+      "counterpartyName": "The Home Depot Emeryville Ca",
+      "paymentPurpose": "POS Purchase The Home Depot Emeryville Ca",
+      "debit": 50.76,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-18T00:00:00",
+      "counterpartyName": "7-Eleven Oakland Ca",
+      "paymentPurpose": "POS Purchase 7-Eleven Oakland Ca",
+      "debit": 10.46,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-18T00:00:00",
+      "counterpartyName": "Safeway #3132 Oakland Ca",
+      "paymentPurpose": "POS Purchase Safeway #3132 Oakland Ca",
+      "debit": 6.48,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "Chevron 0356700 Oakla",
+      "paymentPurpose": "1000 Debit Card Purchase Chevron 0356700 Oakla",
+      "debit": 22.34,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-20T00:00:00",
+      "counterpartyName": "Uber Help.Uber.C Ca",
+      "paymentPurpose": "1000 Recurring Debit Card Uber Help.Uber.C Ca",
+      "debit": 9.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-20T00:00:00",
+      "counterpartyName": "Amazon Prime*Rh1B539N0",
+      "paymentPurpose": "1000 Debit Card Purchase Amazon Prime*Rh1B539N0",
+      "debit": 7.59,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-22T00:00:00",
+      "counterpartyName": "Domino's 8276 Stockto",
+      "paymentPurpose": "1000 Debit Card Purchase Domino's 8276 Stockto",
+      "debit": 22.03,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-22T00:00:00",
+      "counterpartyName": "Imdbpro 206- 2662425",
+      "paymentPurpose": "1000 Recurring Debit Card Imdbpro 206- 2662425",
+      "debit": 19.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-22T00:00:00",
+      "counterpartyName": "Visible 866- 3313527",
+      "paymentPurpose": "1000 Recurring Debit Card Visible 866- 3313527",
+      "debit": 35,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-25T00:00:00",
+      "counterpartyName": "Dad & Sons Market",
+      "paymentPurpose": "1000 Debit Card Purchase Dad & Sons Market",
+      "debit": 6.23,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-25T00:00:00",
+      "counterpartyName": "Safeway #1119 Oakland Ca",
+      "paymentPurpose": "POS Purchase Safeway #1119 Oakland Ca",
+      "debit": 4.71,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-28T00:00:00",
+      "counterpartyName": "Monthly Service Charge Vr",
+      "paymentPurpose": "Monthly Service Charge Vr",
+      "debit": 7,
+      "currency": "USD",
+      "paymentType": "fee"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "accountNumber": "",
+    "currency": "GBP",
+    "dateFrom": "2025-03-14T00:00:00",
+    "dateTo": "2025-03-15T00:00:00",
+    "balanceStart": 0.13,
+    "balanceEnd": 0.31
+  },
+  "transactions": [
+    {
+      "transactionDate": "2025-03-14T00:00:00",
+      "counterpartyName": "Inbound domestic payment within UK PAYWARD LTD 8368347191966480 29901323 Ref : -",
+      "paymentPurpose": "Inbound domestic payment within UK PAYWARD LTD 8368347191966480 29901323 Ref : -",
+      "credit": 53.18,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2025-03-15T00:00:00",
+      "counterpartyName": "Outbound domestic payment within UK acme 2064760564547935 EZYRGB2LDPB00074625 Ref : -",
+      "paymentPurpose": "Outbound domestic payment within UK acme 2064760564547935 EZYRGB2LDPB00074625 Ref : -",
+      "debit": 53,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    }
+  ]
+}
