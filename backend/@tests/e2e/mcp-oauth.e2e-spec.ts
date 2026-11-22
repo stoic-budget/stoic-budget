@@ -503,6 +503,24 @@ describe('MCP OAuth (e2e)', () => {
       expect(JSON.stringify(oauth)).not.toMatch(/mcp_(at|rt|ac)_/);
     });
 
+    it('lets one of three parallel exchanges of a code through, and treats the others as replays', async () => {
+      const { code, verifier } = await approve(member, readScopes, owner.workspaceId);
+      const results = await Promise.all([0, 1, 2].map(() => exchange(code, verifier)));
+      expect(results.map(res => res.status).sort()).toEqual([200, 400, 400]);
+      const winner = results.find(res => res.status === 200)?.body as { access_token: string };
+      // The losers are second exchanges of a spent code: the grant is revoked.
+      await rpc(winner.access_token, 'tools/list').expect(401);
+    });
+
+    it('lets one of parallel refreshes of one refresh token through, and revokes the grant', async () => {
+      const tokens = await connect(member, readScopes, owner.workspaceId);
+      const grant = await grantOf(tokens.access_token);
+      const results = await Promise.all([0, 1, 2, 3].map(() => refresh(tokens.refresh_token)));
+      expect(results.map(res => res.status).sort()).toEqual([200, 400, 400, 400]);
+      const after = await dataSource.getRepository(McpOAuthGrant).findOneBy({ id: grant?.id });
+      expect(after?.revokedReason).toBe('refresh_reuse');
+    });
+
     it('stores tokens only as hashes', async () => {
       const { access_token, refresh_token } = await connect(owner, readScopes);
       const rows = await dataSource.query(
@@ -772,6 +790,18 @@ describe('MCP OAuth (e2e)', () => {
         token: tokens.access_token,
         client_id: second.body.client_id,
       }).expect(200);
+      await rpc(tokens.access_token, 'tools/list').expect(200);
+    });
+
+    it('when the server moves to another address, for tokens issued at the old one', async () => {
+      const tokens = await connect(member, readScopes, owner.workspaceId);
+      const before = process.env.FRONTEND_URL;
+      process.env.FRONTEND_URL = 'https://moved.example.com';
+      try {
+        await rpc(tokens.access_token, 'tools/list').expect(401);
+      } finally {
+        process.env.FRONTEND_URL = before;
+      }
       await rpc(tokens.access_token, 'tools/list').expect(200);
     });
 
