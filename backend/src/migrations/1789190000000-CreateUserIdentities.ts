@@ -7,8 +7,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * made by single sign-on has a random one until a reset sets theirs, and its
  * last identity cannot be unlinked before that.
  */
-export class CreateUserIdentities1788400000000 implements MigrationInterface {
-  name = 'CreateUserIdentities1788400000000';
+export class CreateUserIdentities1789190000000 implements MigrationInterface {
+  name = 'CreateUserIdentities1789190000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`

@@ -6,7 +6,7 @@ describe('CreateUserIdentities migration', () => {
     process.cwd(),
     'src',
     'migrations',
-    '1788400000000-CreateUserIdentities.ts',
+    '1789190000000-CreateUserIdentities.ts',
   );
   const source = () => readFileSync(filePath, 'utf8');
 
