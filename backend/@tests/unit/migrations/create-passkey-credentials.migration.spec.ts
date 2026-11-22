@@ -6,7 +6,7 @@ describe('CreatePasskeyCredentials migration', () => {
     process.cwd(),
     'src',
     'migrations',
-    '1788390000000-CreatePasskeyCredentials.ts',
+    '1789180000000-CreatePasskeyCredentials.ts',
   );
   const source = () => readFileSync(filePath, 'utf8');
   const up = () => source().slice(source().indexOf('public async up'), source().indexOf('public async down'));
