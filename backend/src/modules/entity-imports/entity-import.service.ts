@@ -1,5 +1,7 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   BadRequestException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -7,36 +9,32 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, type Repository } from 'typeorm';
+import { Cache } from 'cache-manager';
+import { DataSource, type Repository } from 'typeorm';
 import { assertApiKeyScopes, type PermissionSubject } from '../../common/authz/request-permissions';
 import { appError } from '../../common/errors/app-error';
 import { ensureCanEdit } from '../../common/utils/ensure-can-edit.util';
 import type { RunEntityImportBody } from '../../contracts';
-import { ActorType, AuditAction } from '../../entities/audit-event.entity';
-import { Budget } from '../../entities/budget.entity';
-import { Client } from '../../entities/client.entity';
+import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
 import {
   ImportBatch,
   type ImportCreatedRef,
   type ImportUpdatedRef,
 } from '../../entities/import-batch.entity';
-import { InvestmentHolding } from '../../entities/investment-holding.entity';
-import { InvestmentTrade } from '../../entities/investment-trade.entity';
-import { Invoice } from '../../entities/invoice.entity';
-import { Payable } from '../../entities/payable.entity';
-import { Statement } from '../../entities/statement.entity';
-import { Subscription } from '../../entities/subscription.entity';
-import { Transaction } from '../../entities/transaction.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
-import { writeClassification } from '../classification/engine/rule-row-write';
 import { ClassificationService } from '../classification/services/classification.service';
 import { InvestmentTradesService } from '../investments/investment-trades.service';
 import { MetalsService } from '../investments/metals.service';
-import type { TransactionsImportedEvent } from '../notifications/events/notification-events';
+import { ensureAppImportPermission } from './apps/app-import-permission';
 import { importCategoryResolver } from './helpers/import-category';
+import {
+  announceImported,
+  categorizeImported,
+  invalidateCategoryCache,
+} from './helpers/import-follow-up';
+import { APP_IMPORT_TARGET, removeImportBatch } from './helpers/import-undo';
 import { importPeriod } from './helpers/import-values';
-import { removeImportedHoldings, restoreUpdatedRefs } from './helpers/undo-holdings';
 import { type ImportTargetKind, TARGET_FIELDS } from './target-aliases';
 import { BudgetsTarget } from './targets/budgets.target';
 import { InvoicesTarget } from './targets/invoices.target';
@@ -81,31 +79,8 @@ export class EntityImportService {
     @Optional() private readonly metalsService?: MetalsService,
     @Optional() private readonly eventEmitter?: EventEmitter2,
     @Optional() private readonly tradesService?: InvestmentTradesService,
+    @Optional() @Inject(CACHE_MANAGER) private readonly cache?: Cache,
   ) {}
-
-  /** One `transactions.imported` per statement the import created, after the commit. */
-  private async announceImportedTransactions(
-    workspaceId: string,
-    created: ImportCreatedRef[],
-  ): Promise<void> {
-    if (!this.eventEmitter) {
-      return;
-    }
-    for (const ref of created.filter(item => item.kind === 'statement')) {
-      const rows = await this.dataSource.getRepository(Transaction).find({
-        select: { id: true },
-        where: { workspaceId, statementId: ref.id },
-      });
-      if (rows.length > 0) {
-        this.eventEmitter.emit('transactions.imported', {
-          workspaceId,
-          source: 'entity_import',
-          statementId: ref.id,
-          transactionIds: rows.map(row => row.id),
-        } satisfies TransactionsImportedEvent);
-      }
-    }
-  }
 
   /** Importing into `target` (and remembering a mapping for it) needs these rights. */
   async ensurePermission(
@@ -238,11 +213,18 @@ export class EntityImportService {
         target: dto.target,
         ...counts,
       });
+      const statementIds = ctx.created.filter(ref => ref.kind === 'statement').map(ref => ref.id);
       if (dto.target === 'transactions' && ctx.categorize) {
-        await this.categorize(userId, workspaceId, ctx.created);
+        const deps = { dataSource: this.dataSource, logger: this.logger };
+        await categorizeImported(
+          { ...deps, classification: this.classificationService },
+          userId,
+          workspaceId,
+          statementIds,
+        );
       }
       if (dto.target === 'transactions') {
-        await this.announceImportedTransactions(workspaceId, ctx.created);
+        await announceImported(this.dataSource, this.eventEmitter, workspaceId, statementIds);
       }
       // Imported lots land without a price; one pass quotes them all.
       if (dto.target === 'metals' && this.metalsService) {
@@ -255,33 +237,6 @@ export class EntityImportService {
       .filter(ref => ref.kind === CREATED_KIND[dto.target])
       .map(ref => ref.id);
     return { batchId, target: dto.target, dryRun, counts, rows: results, createdIds };
-  }
-
-  /**
-   * Rows without a category get one the same way an imported statement does:
-   * rules first, then what the user taught about the payee.
-   */
-  private async categorize(userId: string, workspaceId: string, created: ImportCreatedRef[]) {
-    const statementIds = created.filter(ref => ref.kind === 'statement').map(ref => ref.id);
-    if (!(this.classificationService && statementIds.length)) {
-      return;
-    }
-    try {
-      const repo = this.dataSource.getRepository(Transaction);
-      const pending = await repo.find({ where: { workspaceId, statementId: In(statementIds) } });
-      const uncategorized = pending.filter(tx => !tx.categoryId);
-      if (!uncategorized.length) {
-        return;
-      }
-      for (const tx of uncategorized) {
-        const result = await this.classificationService.classifyTransaction(tx, userId);
-        await writeClassification(this.dataSource.manager, tx, result);
-      }
-    } catch (error) {
-      this.logger.warn(
-        `Categorization after import failed: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
   }
 
   async undo(
@@ -297,57 +252,37 @@ export class EntityImportService {
     if (batch.undoneAt) {
       throw new BadRequestException(appError('IMPORT_BATCH_ALREADY_UNDONE'));
     }
-    await this.ensurePermission(userId, workspaceId, batch.target as ImportTargetKind, apiKey);
+    if (batch.target === APP_IMPORT_TARGET) {
+      const withBudgets = [...batch.createdRefs, ...batch.updatedRefs].some(
+        ref => ref.kind === 'budget',
+      );
+      await ensureAppImportPermission(
+        this.workspaceMemberRepository,
+        userId,
+        workspaceId,
+        apiKey,
+        withBudgets,
+      );
+    } else {
+      await this.ensurePermission(userId, workspaceId, batch.target as ImportTargetKind, apiKey);
+    }
     const tradeIds = batch.createdRefs.filter(r => r.kind === 'investment_trade').map(r => r.id);
     const { removed, holdings } = await this.dataSource.transaction(async manager => {
       // Under the holdings' locks, so a sale entered meanwhile either waits
       // for the undo or is counted in this check.
       await this.tradesService?.assertRemovable(workspaceId, tradeIds, manager);
-      let count = 0;
-      const byKind = (kind: ImportCreatedRef['kind']) =>
-        batch.createdRefs.filter(ref => ref.kind === kind).map(ref => ref.id);
-      const statements = byKind('statement');
-      if (statements.length) {
-        await manager
-          .getRepository(Transaction)
-          .delete({ workspaceId, statementId: In(statements) });
-        count +=
-          (await manager.getRepository(Statement).delete({ workspaceId, id: In(statements) }))
-            .affected ?? 0;
-      }
-      for (const [kind, entity] of [
-        ['invoice', Invoice],
-        ['payable', Payable],
-        ['subscription', Subscription],
-        ['budget', Budget],
-        ['client', Client],
-        ['metal_lot', InvestmentHolding],
-        ['investment_trade', InvestmentTrade],
-      ] as const) {
-        const ids = byKind(kind);
-        if (ids.length) {
-          count +=
-            (await manager.getRepository(entity).delete({ workspaceId, id: In(ids) })).affected ??
-            0;
-        }
-      }
-      // Its trades gone, a holding it created goes too unless traded on since.
-      const holdings = await removeImportedHoldings(
-        manager,
-        workspaceId,
-        byKind('investment_holding'),
-      );
-      count += holdings.removed;
-      // Categories created by the import may already be in use elsewhere; they stay.
-      await restoreUpdatedRefs(manager, workspaceId, batch.updatedRefs as ImportUpdatedRef[]);
+      const { removed: count, holdings } = await removeImportBatch(manager, batch);
       await manager.getRepository(ImportBatch).update(batch.id, { undoneAt: new Date() });
       return { removed: count, holdings };
     });
+    if (batch.target === APP_IMPORT_TARGET && this.cache) {
+      await invalidateCategoryCache(this.cache, workspaceId);
+    }
     await this.audit(
       userId,
       workspaceId,
       batch.id,
-      batch.target as ImportTargetKind,
+      batch.target as ImportTargetKind | typeof APP_IMPORT_TARGET,
       AuditAction.DELETE,
       { target: batch.target, removed },
     );
@@ -364,11 +299,12 @@ export class EntityImportService {
     userId: string,
     workspaceId: string,
     batchId: string,
-    target: ImportTargetKind,
+    target: ImportTargetKind | typeof APP_IMPORT_TARGET,
     action: AuditAction,
     meta: Record<string, unknown>,
   ) {
-    const entityType = AUDIT_ENTITY[target];
+    // An app import's batch books statements.
+    const entityType = target === APP_IMPORT_TARGET ? EntityType.STATEMENT : AUDIT_ENTITY[target];
     if (!entityType) {
       return;
     }

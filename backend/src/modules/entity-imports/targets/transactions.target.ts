@@ -1,13 +1,9 @@
-import { createHash, randomUUID } from 'node:crypto';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
 import { In } from 'typeorm';
-import { normalizeFilename } from '../../../common/utils/filename.util';
 import { generateTransactionFingerprint } from '../../../common/utils/fingerprint.util';
-import { resolveUploadsDir } from '../../../common/utils/uploads.util';
-import { BankName, FileType, Statement, StatementStatus } from '../../../entities/statement.entity';
+import { BankName } from '../../../entities/statement.entity';
 import { Transaction, TransactionType } from '../../../entities/transaction.entity';
 import { statementSource } from '../../wallets/wallet-account-match';
+import { createImportStatement } from '../helpers/import-statement';
 import {
   detectDateOrder,
   isBlank,
@@ -34,8 +30,6 @@ interface ParsedTx {
 /** A row dated before or after the period the import is held to. */
 const outsidePeriod = (period: ImportContext['period'], date: string): boolean =>
   Boolean(period && ((period.from && date < period.from) || (period.to && date > period.to)));
-
-const csvCell = (value: string | number): string => `"${String(value).replace(/"/g, '""')}"`;
 
 /**
  * Money out (`amount`) and money in (`credit`) in separate columns, as many
@@ -186,7 +180,17 @@ export class TransactionsTarget implements ImportTarget {
       fresh[0]?.currency ?? ctx.currency,
       statementSource(BankName.OTHER, null, header),
     );
-    const statement = await this.createStatement(ctx, fresh, header, account?.id ?? null, reaches);
+    const statement = await createImportStatement(
+      ctx,
+      fresh,
+      header,
+      account?.id ?? null,
+      fresh[0]?.currency ?? ctx.currency,
+      {
+        from: reaches.before ? ctx.period?.from : null,
+        to: reaches.after ? ctx.period?.to : null,
+      },
+    );
     ctx.created.push({ kind: 'statement', id: statement.id });
     const txRepo = ctx.manager.getRepository(Transaction);
     const entities: Transaction[] = [];
@@ -223,85 +227,5 @@ export class TransactionsTarget implements ImportTarget {
       results.push({ index: item.index, status: 'created', id: saved[position]?.id });
     }
     return results.sort((a, b) => a.index - b.index);
-  }
-
-  private async createStatement(
-    ctx: ImportContext,
-    items: ParsedTx[],
-    header: string | undefined,
-    walletId: string | null,
-    reaches: { before: boolean; after: boolean },
-  ): Promise<Statement> {
-    const csv = [
-      ['date', 'merchant', 'purpose', 'amount', 'type', 'currency', 'category'].join(','),
-      ...items.map(item =>
-        [
-          item.date,
-          item.merchant,
-          item.purpose,
-          item.amount,
-          item.type,
-          item.currency,
-          item.categoryName,
-        ]
-          .map(csvCell)
-          .join(','),
-      ),
-    ].join('\n');
-    const dates = items.map(item => new Date(item.date).getTime());
-    const totalDebit = items
-      .filter(item => item.type === TransactionType.EXPENSE)
-      .reduce((sum, item) => sum + item.amount, 0);
-    const totalCredit = items
-      .filter(item => item.type === TransactionType.INCOME)
-      .reduce((sum, item) => sum + item.amount, 0);
-    const from = new Date(
-      reaches.before && ctx.period?.from ? ctx.period.from : Math.min(...dates),
-    );
-    const to = new Date(reaches.after && ctx.period?.to ? ctx.period.to : Math.max(...dates));
-    // The period goes into the hash too: two quiet periods have the same
-    // (header-only) sheet, and must not read as one file uploaded twice.
-    const fileHash = createHash('sha256')
-      .update(`${csv}\n${from.toISOString()}/${to.toISOString()}`)
-      .digest('hex');
-    const baseName = (ctx.fileName || 'import').replace(/\.[^.]+$/, '');
-    const fileName = normalizeFilename(`${baseName}-import.csv`);
-    const filePath = path.join(resolveUploadsDir(), `${randomUUID()}.csv`);
-    await fs.promises.writeFile(filePath, csv);
-    const repo = ctx.manager.getRepository(Statement);
-    const statement = await repo.save(
-      repo.create({
-        userId: ctx.userId,
-        workspaceId: ctx.workspaceId,
-        fileName,
-        filePath,
-        fileType: FileType.CSV,
-        fileSize: csv.length,
-        fileHash,
-        bankName: BankName.OTHER,
-        status: StatementStatus.COMPLETED,
-        processedAt: new Date(),
-        statementDateFrom: from,
-        statementDateTo: to,
-        totalTransactions: items.length,
-        totalDebit,
-        totalCredit,
-        currency: items[0]?.currency ?? ctx.currency,
-        walletId,
-        deletedAt: null,
-        parsingDetails: {
-          detectedBy: 'entity-import',
-          parserUsed: 'entity-import',
-          parserVersion: '1',
-          transactionsFound: items.length,
-          transactionsCreated: items.length,
-          importPreview: { source: 'entity-import', fileName: ctx.fileName },
-          // The header row tells the next export of this bank to the same account.
-          metadataExtracted: { normalizedHeader: header },
-        },
-      }),
-    );
-    await repo.update(statement.id, { fileData: Buffer.from(csv) });
-    return statement;
   }
 }

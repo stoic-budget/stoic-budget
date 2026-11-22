@@ -8,6 +8,7 @@ import { useIntlayer, useLocale } from '@/app/i18n';
 import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { formatDate } from '@/app/lib/user-format';
+import { AppImportButton } from './app-import/AppImportButton';
 import type { ImportChoices } from './import-choices';
 import { fillTemplate } from './import-wizard-utils';
 
@@ -28,6 +29,7 @@ export function TransactionImportOptions({
 }): React.JSX.Element {
   const { categorize, walletId, period, heldToPeriod } = choices;
   const t = useIntlayer('importWizard');
+  const fromApp = useIntlayer('appImport');
   const { locale } = useLocale();
   const expense = useIntlayer('statementsCreateExpenseDrawer');
   const workspaceId = useWorkspaceId();
@@ -86,6 +88,16 @@ export function TransactionImportOptions({
       <div className="seneca-iw__check">
         <Checkbox checked={categorize} onCheckedChange={value => onChange({ categorize: value })} />
         <span>{t.categorize}</span>
+      </div>
+      <div className="seneca-iw__hint seneca-iw__banner">
+        <span>{fromApp.offer}</span>
+        <AppImportButton
+          renderTrigger={(open, label) => (
+            <button type="button" className="seneca-iw__banner-action" onClick={open}>
+              {label}
+            </button>
+          )}
+        />
       </div>
     </>
   );

@@ -5,6 +5,8 @@ import { InvestmentHolding } from '../../../entities/investment-holding.entity';
 import { InvestmentTrade } from '../../../entities/investment-trade.entity';
 import { Payable } from '../../../entities/payable.entity';
 import { Subscription } from '../../../entities/subscription.entity';
+import { Transaction } from '../../../entities/transaction.entity';
+import { Wallet } from '../../../entities/wallet.entity';
 
 export interface UndoneHoldings {
   removed: number;
@@ -82,7 +84,13 @@ export async function restoreUpdatedRefs(
       await restoreHolding(manager, workspaceId, ref);
       continue;
     }
-    const entity = { subscription: Subscription, budget: Budget, payable: Payable }[ref.kind];
+    const entity = {
+      subscription: Subscription,
+      budget: Budget,
+      payable: Payable,
+      transaction: Transaction,
+      wallet: Wallet,
+    }[ref.kind];
     await manager.getRepository(entity).update({ id: ref.id, workspaceId }, ref.before as never);
   }
 }
