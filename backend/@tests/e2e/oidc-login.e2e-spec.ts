@@ -323,7 +323,14 @@ describe('Sign-in through an OpenID Connect provider (e2e)', () => {
     });
 
     it('goes back only to a path on this site', async () => {
-      for (const next of ['//elsewhere.example.com/x', 'https://elsewhere.example.com', '/\\elsewhere']) {
+      for (const next of [
+        '//elsewhere.example.com/x',
+        'https://elsewhere.example.com',
+        '/\\elsewhere',
+        // Folded into '//elsewhere.example.com' once the dots are resolved.
+        '/.//elsewhere.example.com',
+        '/a/..//elsewhere.example.com',
+      ]) {
         const flow = await startLogin(app, next);
         const res = await callback(app, flow, provider.authorize(flow.location, sub('member')));
         expect(landing(res).origin).toBe(APP_ORIGIN);
@@ -416,6 +423,73 @@ describe('Sign-in through an OpenID Connect provider (e2e)', () => {
       const again = await signIn(app, provider, sub('member'));
       expect(`${sub('member')}@example.com`).toBe(memberEmail);
       expect(errorOf(again.callback)).toBe('OIDC_ACCOUNT_EXISTS');
+    });
+
+    describe('a ticket waiting to be completed', () => {
+      /** A fresh account linked to `subject`, and a ticket from signing in with it. */
+      const ticketFor = async (name: string) => {
+        const email = `${sub(name)}-owner@example.com`;
+        createdEmails.push(email);
+        const account = await registerAccount(app, email, 'Member Three');
+        await link(account, sub(name));
+        const flow = await startLogin(app);
+        const back = await callback(app, flow, provider.authorize(flow.location, sub(name)));
+        return { account, ticket: responseCookie(back, 'oidc_ticket') };
+      };
+
+      it('signs nobody in once its identity is unlinked', async () => {
+        const { account, ticket } = await ticketFor('unlink-ticket');
+        const own = await as(account).get('/auth/oidc/identities').expect(200);
+        await as(account).del(`/auth/oidc/identities/${own.body.identities[0].id}`).expect(200);
+        const res = await complete(app, ticket);
+        expect(res.status).toBe(401);
+        expect(responseCookie(res, 'access_token')).toBeUndefined();
+      });
+
+      it('signs nobody in once the account logged out everywhere', async () => {
+        const { account, ticket } = await ticketFor('logout-ticket');
+        await request(app.getHttpServer())
+          .post('/auth/logout-all')
+          .set('Authorization', `Bearer ${account.token}`)
+          .send({})
+          .expect(200);
+        const res = await complete(app, ticket);
+        expect(res.status).toBe(401);
+        expect(responseCookie(res, 'access_token')).toBeUndefined();
+      });
+
+      it('signs nobody in once sign-on is switched off', async () => {
+        const { ticket } = await ticketFor('off-ticket');
+        await configure({ enabled: false });
+        try {
+          const res = await complete(app, ticket);
+          expect(res.status).toBe(401);
+          expect(responseCookie(res, 'access_token')).toBeUndefined();
+        } finally {
+          await configure();
+        }
+      });
+    });
+
+    it('keeps one identity when an account without a password unlinks two at once', async () => {
+      const email = `${sub('two-ways')}-owner@example.com`;
+      createdEmails.push(email);
+      const account = await registerAccount(app, email, 'Member Four');
+      await link(account, sub('two-ways-a'));
+      await link(account, sub('two-ways-b'));
+      await dataSource.query('UPDATE users SET password_set = false WHERE id = $1', [account.userId]);
+      const own = await as(account).get('/auth/oidc/identities').expect(200);
+      expect(own.body.identities).toHaveLength(2);
+      const results = await Promise.all(
+        own.body.identities.map((identity: { id: string }) =>
+          as(account).del(`/auth/oidc/identities/${identity.id}`),
+        ),
+      );
+      expect(results.map(res => res.status).sort()).toEqual([200, 409]);
+      const left = await dataSource.query('SELECT id FROM user_identities WHERE user_id = $1', [
+        account.userId,
+      ]);
+      expect(left).toHaveLength(1);
     });
 
     it('never hands out the client secret, a token or the provider’s own error text', async () => {
