@@ -17,18 +17,6 @@ export const CHART_TICK = {
 /** A forecast is a guess: the same colours as the facts, and much fainter. */
 export const FORECAST_OPACITY = 0.35;
 
-/**
- * Income and spending bars: the sage and terracotta of the chart tones. Spending
- * is not an alarm, so neither is the bright green and red of a status.
- */
-export const INCOME_FILL = 'var(--cat-tone-1)';
-export const EXPENSE_FILL = 'var(--cat-tone-2)';
-/** The part of spending a budget still had room for: the dusty blue, under the terracotta. */
-export const BUDGETED_FILL = 'var(--cat-tone-4)';
-
-/** The column under the pointer: a faint wash, lighter than any bar. */
-export const HOVER_CURSOR = { fill: 'var(--surface-soft)' };
-
 /** Thin horizontal guides behind bars, two or three of them. */
 export const GRID_STROKE = 'var(--border)';
 

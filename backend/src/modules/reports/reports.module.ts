@@ -22,14 +22,27 @@ import { InvestmentsModule } from '../investments/investments.module';
 import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { BudgetVsActualReport } from './budget-vs-actual.report';
 import { CashFlowMapService } from './cash-flow-map.service';
+import { CustomReportGenerator } from './custom-report.report';
+import { CustomTablesDrillDownReport } from './custom-tables-drilldown.report';
+import { CustomTablesReport } from './custom-tables-report.report';
+import { CustomTablesSummaryReport } from './custom-tables-summary.report';
+import { DailyReportGenerator } from './daily-report.report';
 import { HoldingsSnapshotReport } from './holdings-snapshot.report';
+import { MonthlyReportGenerator } from './monthly-report.report';
+import { ReportHistoryService } from './report-history.service';
 import { ReportRetentionService } from './report-retention.service';
 import { ReportSchedulesController } from './report-schedules.controller';
 import { ReportSchedulesScheduler } from './report-schedules.scheduler';
 import { ReportSchedulesService } from './report-schedules.service';
+import { ReportTemplateGenerator } from './report-templates.report';
 import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 import { SpendFlowService } from './spend-flow.service';
+import { SpendOverTimeReport } from './spend-over-time.report';
+import { StatementsSummaryReport } from './statements-summary.report';
+import { TemplateReportRowsLoader } from './template-report-rows.loader';
+import { TopCategoriesReport } from './top-categories.report';
+import { WorkspaceExportReport } from './workspace-export.report';
 
 @Module({
   imports: [
@@ -66,6 +79,19 @@ import { SpendFlowService } from './spend-flow.service';
     CashFlowMapService,
     BudgetVsActualReport,
     HoldingsSnapshotReport,
+    CustomTablesSummaryReport,
+    CustomTablesReport,
+    CustomTablesDrillDownReport,
+    DailyReportGenerator,
+    MonthlyReportGenerator,
+    CustomReportGenerator,
+    StatementsSummaryReport,
+    ReportHistoryService,
+    WorkspaceExportReport,
+    TopCategoriesReport,
+    SpendOverTimeReport,
+    TemplateReportRowsLoader,
+    ReportTemplateGenerator,
   ],
   exports: [ReportsService, ReportSchedulesService],
 })

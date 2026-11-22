@@ -128,7 +128,11 @@ export default function PayeePage(): React.JSX.Element {
       {data && (
         <>
           <header style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <VendorIcon vendorName={data.name} size={44} />
+            <VendorIcon
+              vendorName={data.name}
+              vendorDomain={summary.data?.vendorDomain}
+              size={44}
+            />
             {renaming === null ? (
               <h1 style={{ margin: 0, fontSize: 20, fontWeight: 500, flex: 1, minWidth: 0 }}>
                 {data.name}

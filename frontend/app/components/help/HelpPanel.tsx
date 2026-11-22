@@ -41,6 +41,7 @@ export function HelpPanel(): React.JSX.Element {
 
   return (
     <DrawerShell
+      demoNotice={false}
       isOpen={panel === 'help'}
       onClose={closeAppPanel}
       position="right"

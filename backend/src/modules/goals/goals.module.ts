@@ -5,6 +5,7 @@ import { Budget } from '../../entities/budget.entity';
 import { DataEntry } from '../../entities/data-entry.entity';
 import { GoalItem } from '../../entities/goal-item.entity';
 import { Transaction } from '../../entities/transaction.entity';
+import { Wallet } from '../../entities/wallet.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { AuditModule } from '../audit/audit.module';
 import { CategoriesModule } from '../categories/categories.module';
@@ -15,6 +16,7 @@ import { GoalCoversService } from './goal-covers.service';
 import { GoalFlowService } from './goal-flow.service';
 import { GoalItemsService } from './goal-items.service';
 import { GoalPlanService } from './goal-plan.service';
+import { GoalProgressService } from './goal-progress.service';
 import { GoalTransactionLinkController } from './goal-transaction-link.controller';
 import { GoalTransactionLinkService } from './goal-transaction-link.service';
 import { GoalsController } from './goals.controller';
@@ -30,6 +32,7 @@ import { GoalsService } from './goals.service';
       Transaction,
       DataEntry,
       Workspace,
+      Wallet,
     ]),
     CategoriesModule,
     ExchangeRatesModule,
@@ -45,6 +48,7 @@ import { GoalsService } from './goals.service';
     GoalPlanService,
     GoalCoversService,
     GoalTransactionLinkService,
+    GoalProgressService,
   ],
   exports: [GoalsService, GoalFlowService, GoalItemsService, GoalPlanService, GoalCoversService],
 })

@@ -29,11 +29,7 @@ import type {
 import { Payable, PayableDirection, PayableStatus } from '../../entities/payable.entity';
 import { Receipt, ReceiptStatus } from '../../entities/receipt.entity';
 import { BankName, Statement, StatementStatus } from '../../entities/statement.entity';
-import {
-  Subscription,
-  SubscriptionFrequency,
-  SubscriptionStatus,
-} from '../../entities/subscription.entity';
+import { Subscription, SubscriptionStatus } from '../../entities/subscription.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
@@ -47,19 +43,25 @@ import {
   uncategorizedRowsQuery,
   unconfirmedRowsQuery,
 } from '../review-inbox/review-queue.queries';
+import { allTimeBalance } from './all-time-balance';
 import { BANK_DISPLAY_NAMES } from './bank-display-names';
 import { recentRowHrefs } from './bill-hrefs';
+import {
+  newestRecurringPayables,
+  projectedOccurrences,
+  projectSubscriptionCharges,
+} from './commitment-projections';
 import {
   type CashFlowRange,
   type DashboardWindow,
   dashboardWindow,
-  daysInMonth,
   daysInWindow,
   getCashFlowRangeBounds,
   getWindowBounds,
   parseMonthWindow,
 } from './dashboard-window.util';
-import { spendableBalance, sumConverted } from './opening-balance';
+import { DAY_SQL, type DayRow, loadDayConverter } from './day-converter';
+import { spendableBalance } from './opening-balance';
 
 /** How many individual categories the donut shows before folding the rest into "Other". */
 const TOP_CATEGORIES_LIMIT = 8;
@@ -227,13 +229,14 @@ export class DashboardService {
     });
     const targetCurrency = this.normalizeCurrency(workspace?.currency);
 
-    // Group income/expense by currency so we can convert each group
+    // Grouped by currency and day, so each sum converts at its own day's rate.
     const txRows = await this.transactionRepo
       .createQueryBuilder('t')
       // Rows without a statement (a cash payment, an approved receipt) count too.
       .leftJoin('t.statement', 's')
       .select([
         't.currency AS currency',
+        `${DAY_SQL} AS day`,
         // Income and expense count confirmed rows only; unapproved cash below is
         // what still waits, so it keeps the unconfirmed ones on purpose.
         `COALESCE(SUM(CASE WHEN t.transactionType = :income AND ${flowsSql('t')} THEN t.credit ELSE 0 END), 0) AS income`,
@@ -258,30 +261,23 @@ export class DashboardService {
         StatementStatus.VALIDATED,
       ])
       .groupBy('t.currency')
-      .getRawMany<{ currency: string; income: string; expense: string; unapprovedCash: string }>();
+      .addGroupBy(DAY_SQL)
+      .getRawMany<DayRow<'income' | 'expense' | 'unapprovedCash'>>();
 
+    const rows = txRows.map(row => ({ ...row, currency: this.normalizeCurrency(row.currency) }));
+    const day = await loadDayConverter(
+      this.exchangeRatesService,
+      targetCurrency,
+      rows,
+      workspaceId,
+    );
     let income = 0;
     let expense = 0;
     let unapprovedCash = 0;
-    for (const row of txRows) {
-      income += await this.convertDashboardAmount(
-        row.income,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
-      expense += await this.convertDashboardAmount(
-        row.expense,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
-      unapprovedCash += await this.convertDashboardAmount(
-        row.unapprovedCash,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
+    for (const row of rows) {
+      income += day.convert(Number(row.income), row.currency, row.day);
+      expense += day.convert(Number(row.expense), row.currency, row.day);
+      unapprovedCash += day.convert(Number(row.unapprovedCash), row.currency, row.day);
     }
 
     const totalBalance = await this.getAllTimeBalance(workspaceId, targetCurrency);
@@ -337,21 +333,8 @@ export class DashboardService {
   }
 
   /** All-time net of every approved transaction, converted into `targetCurrency`. */
-  private async getAllTimeBalance(workspaceId: string, targetCurrency: string): Promise<number> {
-    const balanceQuery = this.transactionRepo.createQueryBuilder('t').leftJoin('t.statement', 's');
-    this.applyWorkspaceStatementFilters(balanceQuery, workspaceId, true);
-
-    const balanceRows = await balanceQuery
-      .select([
-        't.currency AS currency',
-        `COALESCE(SUM(CASE WHEN t.transactionType = :balIncome THEN t.credit WHEN t.transactionType = :balExpense THEN -t.debit ELSE 0 END), 0) AS "balance"`,
-      ])
-      .setParameter('balIncome', TransactionType.INCOME)
-      .setParameter('balExpense', TransactionType.EXPENSE)
-      .groupBy('t.currency')
-      .getRawMany<{ currency: string; balance: string }>();
-
-    return sumConverted(balanceRows, (amount, from) =>
+  private getAllTimeBalance(workspaceId: string, targetCurrency: string): Promise<number> {
+    return allTimeBalance(this.transactionRepo, workspaceId, (amount, from) =>
       this.convertDashboardAmount(amount, from, targetCurrency, workspaceId),
     );
   }
@@ -607,6 +590,7 @@ export class DashboardService {
 
     const result = await query
       .select(`TO_CHAR(t.transactionDate, ${groupFormat})`, 'date')
+      .addSelect(DAY_SQL, 'day')
       .addSelect('t.currency', 'currency')
       .addSelect(
         'COALESCE(SUM(CASE WHEN t.transactionType = :income THEN t.credit ELSE 0 END), 0)',
@@ -617,27 +601,26 @@ export class DashboardService {
         'expense',
       )
       .groupBy(`TO_CHAR(t.transactionDate, ${groupFormat})`)
+      .addGroupBy(DAY_SQL)
       .addGroupBy('t.currency')
       .orderBy(`TO_CHAR(t.transactionDate, ${groupFormat})`, 'ASC')
       .setParameter('income', TransactionType.INCOME)
       .setParameter('expense', TransactionType.EXPENSE)
-      .getRawMany<{ date: string; currency: string; income: string; expense: string }>();
+      .getRawMany<DayRow<'date' | 'income' | 'expense'>>();
 
+    // Each day's sums convert at that day's rate, as the Reports flow does.
+    const rows = result.map(row => ({ ...row, currency: this.normalizeCurrency(row.currency) }));
+    const day = await loadDayConverter(
+      this.exchangeRatesService,
+      targetCurrency,
+      rows,
+      workspaceId,
+    );
     const points = new Map<string, DashboardCashFlowPoint>();
-    for (const row of result) {
+    for (const row of rows) {
       const point = points.get(row.date) ?? { date: row.date, income: 0, expense: 0, budgeted: 0 };
-      point.income += await this.convertDashboardAmount(
-        row.income,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
-      point.expense += await this.convertDashboardAmount(
-        row.expense,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
+      point.income += day.convert(Number(row.income), row.currency, row.day);
+      point.expense += day.convert(Number(row.expense), row.currency, row.day);
       points.set(row.date, point);
     }
 
@@ -1207,7 +1190,7 @@ export class DashboardService {
     const horizonEnd = new Date(today);
     horizonEnd.setDate(horizonEnd.getDate() + horizonDays - 1);
 
-    const [openingBalance, payables, subscriptions] = await Promise.all([
+    const [openingBalance, payables, subscriptions, series] = await Promise.all([
       spendableBalance(this.transactionRepo, workspaceId, {
         convert: (amount, from) => this.convertDashboardAmount(amount, from, currency, workspaceId),
         allTime: () => this.getAllTimeBalance(workspaceId, currency),
@@ -1228,10 +1211,11 @@ export class DashboardService {
       this.subscriptionRepo.find({
         where: { workspaceId, status: SubscriptionStatus.ACTIVE },
       }),
+      newestRecurringPayables(this.payableRepo, workspaceId),
     ]);
 
     const [payableItems, subscriptionItems] = await Promise.all([
-      this.collectPayableCommitments(payables, currency, today, horizonEnd),
+      this.collectPayableCommitments(payables, series, currency, today, horizonEnd),
       this.collectSubscriptionCommitments(subscriptions, currency, today, horizonEnd),
     ]);
 
@@ -1250,9 +1234,14 @@ export class DashboardService {
     };
   }
 
-  /** Unpaid payables placed on their due date, with undated ones split out. */
+  /**
+   * Unpaid payables placed on their due date, with undated ones split out, and
+   * the occurrences of repeating ones not made yet (`series`: the newest bill
+   * of each) on the days their rule gives them.
+   */
   private async collectPayableCommitments(
     payables: Payable[],
+    series: Payable[],
     currency: string,
     today: Date,
     horizonEnd: Date,
@@ -1291,6 +1280,23 @@ export class DashboardService {
         isOverdue,
       });
     }
+    for (const newest of series) {
+      for (const next of projectedOccurrences(newest, today, horizonEnd)) {
+        const amount = await this.convertDashboardAmount(
+          next.amount,
+          newest.currency,
+          currency,
+          newest.workspaceId,
+        );
+        items.push({
+          ...next,
+          amount,
+          label: newest.vendor,
+          source: 'payable',
+          sourceId: newest.id,
+        });
+      }
+    }
 
     return { items, unscheduledCommitted };
   }
@@ -1314,7 +1320,13 @@ export class DashboardService {
       if (amount === 0) {
         continue;
       }
-      for (const chargeDate of this.projectSubscriptionCharges(subscription, today, horizonEnd)) {
+      for (const chargeDate of projectSubscriptionCharges(
+        this.parseDateOnly(subscription.nextChargeDate),
+        subscription.frequency,
+        today,
+        horizonEnd,
+        MAX_COMMITMENT_HORIZON_DAYS,
+      )) {
         items.push({
           date: this.formatDateOnly(chargeDate),
           label: subscription.vendorName,
@@ -1372,57 +1384,6 @@ export class DashboardService {
     }
 
     return { days, totalCommitted, lowestBalance, lowestBalanceDate, shortfallDate };
-  }
-
-  /** Every charge date of `subscription` that falls inside [today, horizonEnd]. */
-  private projectSubscriptionCharges(
-    subscription: Subscription,
-    today: Date,
-    horizonEnd: Date,
-  ): Date[] {
-    let cursor = this.parseDateOnly(subscription.nextChargeDate);
-    if (!cursor) {
-      return [];
-    }
-
-    // A next-charge date left in the past means the charge was never reconciled;
-    // roll it forward so the projection starts from the next real occurrence.
-    let guard = 0;
-    while (cursor < today && guard < MAX_COMMITMENT_HORIZON_DAYS) {
-      cursor = this.advanceByFrequency(cursor, subscription.frequency);
-      guard += 1;
-    }
-
-    const charges: Date[] = [];
-    while (cursor <= horizonEnd && charges.length < MAX_COMMITMENT_HORIZON_DAYS) {
-      charges.push(new Date(cursor));
-      cursor = this.advanceByFrequency(cursor, subscription.frequency);
-    }
-    return charges;
-  }
-
-  private advanceByFrequency(date: Date, frequency: SubscriptionFrequency): Date {
-    switch (frequency) {
-      case SubscriptionFrequency.WEEKLY: {
-        const next = new Date(date);
-        next.setDate(next.getDate() + 7);
-        return next;
-      }
-      case SubscriptionFrequency.QUARTERLY:
-        return this.addMonths(date, 3);
-      case SubscriptionFrequency.ANNUAL:
-        return this.addMonths(date, 12);
-      default:
-        return this.addMonths(date, 1);
-    }
-  }
-
-  /** Month arithmetic that clamps to the last day instead of overflowing (Jan 31 + 1m = Feb 28). */
-  private addMonths(date: Date, months: number): Date {
-    const dayOfMonth = date.getDate();
-    const result = new Date(date.getFullYear(), date.getMonth() + months, 1);
-    result.setDate(Math.min(dayOfMonth, daysInMonth(result)));
-    return result;
   }
 
   /** Postgres `date` columns arrive as 'YYYY-MM-DD' strings; parse them in local time. */

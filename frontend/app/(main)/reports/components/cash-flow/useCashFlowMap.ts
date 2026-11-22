@@ -72,7 +72,7 @@ type SavedSwitches = Pick<CashFlowFilters, 'includeTransfers' | 'netRefunds'>;
  * The switches the page remembers: transfers on unless this person turned them
  * off, refunds netted only when they asked, so the figures match the dashboard.
  */
-function readReportsView(saved: Readonly<Record<string, unknown>>): SavedSwitches {
+export function readReportsView(saved: Readonly<Record<string, unknown>>): SavedSwitches {
   return {
     includeTransfers: typeof saved.includeTransfers === 'boolean' ? saved.includeTransfers : true,
     netRefunds: saved.netRefunds === true,

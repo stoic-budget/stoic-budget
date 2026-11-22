@@ -3,6 +3,7 @@
 import { type Dispatch, type SetStateAction, useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import type { User } from '@/app/hooks/useAuth';
+import { isDemoInstance } from '@/app/hooks/useDemoStatus';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
 import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
@@ -53,6 +54,12 @@ export function useThemePreference({
           detail: { themePreference: nextThemePreference },
         }),
       );
+
+      // A demo account is shared: the choice holds for this visit (until the page
+      // reloads, when /auth/me brings back the shared value); the server is not asked.
+      if (isDemoInstance()) {
+        return;
+      }
 
       await (async () => {
         const response = await apiClient.patch('/users/me/preferences', {

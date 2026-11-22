@@ -68,6 +68,16 @@ export function usePullToRefresh({
     (event: TouchEvent) => {
       if (!enabled || isRefreshing) return;
       if (event.touches.length !== 1) return;
+      // A touch in a modal reaches the page's handlers through its portal: marking
+      // a statement or scrolling a preview is no pull on the page underneath.
+      const { currentTarget, target } = event;
+      if (
+        currentTarget instanceof Node &&
+        target instanceof Node &&
+        !currentTarget.contains(target)
+      ) {
+        return;
+      }
       if (!isAtTop()) return;
 
       touchStartYRef.current = event.touches[0]?.clientY ?? null;

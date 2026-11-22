@@ -7,6 +7,7 @@ import { Payable } from '../../entities/payable.entity';
 import { Subscription } from '../../entities/subscription.entity';
 import { SubscriptionCharge } from '../../entities/subscription-charge.entity';
 import { SubscriptionDecision } from '../../entities/subscription-decision.entity';
+import { SubscriptionMatchRejection } from '../../entities/subscription-match-rejection.entity';
 import { SubscriptionPayee } from '../../entities/subscription-payee.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
@@ -21,6 +22,8 @@ import { SubscriptionAutoLinkSubscriber } from './subscription-autolink.subscrib
 import { SubscriptionDetectionScheduler } from './subscription-detection.scheduler';
 import { SubscriptionDetectionService } from './subscription-detection.service';
 import { SubscriptionEventsListener } from './subscription-events.listener';
+import { SubscriptionMatchRejectionsController } from './subscription-match-rejections.controller';
+import { SubscriptionMatchRejectionsService } from './subscription-match-rejections.service';
 import { SubscriptionsController } from './subscriptions.controller';
 import { SubscriptionsService } from './subscriptions.service';
 
@@ -32,6 +35,7 @@ import { SubscriptionsService } from './subscriptions.service';
       Subscription,
       SubscriptionCharge,
       SubscriptionDecision,
+      SubscriptionMatchRejection,
       SubscriptionPayee,
       Transaction,
       Workspace,
@@ -46,13 +50,14 @@ import { SubscriptionsService } from './subscriptions.service';
     TaxModule,
     PayPeriodModule,
   ],
-  controllers: [SubscriptionsController],
+  controllers: [SubscriptionsController, SubscriptionMatchRejectionsController],
   providers: [
     SubscriptionsService,
     SubscriptionDetectionService,
     SubscriptionDetectionScheduler,
     SubscriptionEventsListener,
     SubscriptionAutoLinkSubscriber,
+    SubscriptionMatchRejectionsService,
   ],
   exports: [SubscriptionsService],
 })

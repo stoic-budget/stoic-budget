@@ -1,0 +1,227 @@
+{
+  "metadata": {
+    "accountNumber": "7467738678",
+    "currency": "USD",
+    "dateFrom": "2023-02-28T00:00:00",
+    "dateTo": "2023-03-25T00:00:00",
+    "balanceStart": 10559.52,
+    "balanceEnd": 985.37
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-03-02T00:00:00",
+      "counterpartyName": "ACH DEP 020222 VENMO CASHOUT ***********4276",
+      "paymentPurpose": "ACH DEP 020222 VENMO CASHOUT ***********4276",
+      "credit": 143.45,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-02T00:00:00",
+      "counterpartyName": "ACH PAYMENT 020122 USAA CREDIT CARD PAYMENT ***********9126",
+      "paymentPurpose": "ACH PAYMENT 020122 USAA CREDIT CARD PAYMENT ***********9126",
+      "debit": 5.76,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-03T00:00:00",
+      "counterpartyName": "Members Sampler",
+      "paymentPurpose": "USAA CREDIT Zelle: Members Sampler 3489031551",
+      "credit": 10,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-03T00:00:00",
+      "counterpartyName": "ACH DEP 020422 VANGUARD SELL INVESTMENT ***********3340",
+      "paymentPurpose": "ACH DEP 020422 VANGUARD SELL INVESTMENT ***********3340",
+      "credit": 6068.19,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-03T00:00:00",
+      "counterpartyName": "Members Sampler",
+      "paymentPurpose": "USAA DEBIT Zelle: Members Sampler 3489031551",
+      "debit": 10,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-03T00:00:00",
+      "counterpartyName": "Members Sampler",
+      "paymentPurpose": "USAA DEBIT Zelle: Members Sampler 6377341581",
+      "debit": 15,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-03T00:00:00",
+      "counterpartyName": "Members Sampler",
+      "paymentPurpose": "USAA DEBIT Zelle: Members Sampler 4396159695",
+      "debit": 975,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-03T00:00:00",
+      "counterpartyName": "ACH WITHDRAWAL 020322 TD BANK ACCT FUND ***********4415",
+      "paymentPurpose": "ACH WITHDRAWAL 020322 TD BANK ACCT FUND ***********4415",
+      "debit": 2500,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-04T00:00:00",
+      "counterpartyName": "Members Sampler",
+      "paymentPurpose": "USAA DEBIT Zelle: Members Sampler 4373745930",
+      "debit": 1000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-04T00:00:00",
+      "counterpartyName": "ACH WITHDRAWAL 020422 VENMO PAYMENT ***********2924",
+      "paymentPurpose": "ACH WITHDRAWAL 020422 VENMO PAYMENT ***********2924",
+      "debit": 2000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-07T00:00:00",
+      "counterpartyName": "Members Sampler",
+      "paymentPurpose": "USAA DEBIT Zelle: Members Sampler 3828396305",
+      "debit": 510,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-07T00:00:00",
+      "counterpartyName": "ACH WITHDRAWAL 020722 VENMO PAYMENT ***********8423",
+      "paymentPurpose": "ACH WITHDRAWAL 020722 VENMO PAYMENT ***********8423",
+      "debit": 128.12,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-07T00:00:00",
+      "counterpartyName": "ACH WITHDRAWAL 020722 VENMO PAYMENT ***********5900",
+      "paymentPurpose": "ACH WITHDRAWAL 020722 VENMO PAYMENT ***********5900",
+      "debit": 2000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-07T00:00:00",
+      "counterpartyName": "ACH WITHDRAWAL 020722 CHASE CREDIT CRD AUTOPAY ***********8836",
+      "paymentPurpose": "ACH WITHDRAWAL 020722 CHASE CREDIT CRD AUTOPAY ***********8836",
+      "debit": 3626.64,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-08T00:00:00",
+      "counterpartyName": "ACH DEP 020922 Ticketmaster 365ACEC ***********5086",
+      "paymentPurpose": "ACH DEP 020922 Ticketmaster 365ACEC ***********5086",
+      "credit": 0.02,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-08T00:00:00",
+      "counterpartyName": "ACH DEP 020922 Ticketmaster 365ACE2 ***********5085",
+      "paymentPurpose": "ACH DEP 020922 Ticketmaster 365ACE2 ***********5085",
+      "credit": 0.57,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "ATM REBATE",
+      "paymentPurpose": "ATM REBATE",
+      "credit": 2.5,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "ATM WITHDRAWAL 021322 6011021322 PAI ISO166 QUIL ST ALBANY NY",
+      "paymentPurpose": "ATM WITHDRAWAL 021322 6011021322 PAI ISO166 QUIL ST ALBANY NY",
+      "debit": 102.5,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-14T00:00:00",
+      "counterpartyName": "ACH WITHDRAWAL 021422 VENMO PAYMENT ***********1066",
+      "paymentPurpose": "ACH WITHDRAWAL 021422 VENMO PAYMENT ***********1066",
+      "debit": 2999,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-15T00:00:00",
+      "counterpartyName": "ACH DEP 021622 Ticketmaster 36558C8 ***********8314",
+      "paymentPurpose": "ACH DEP 021622 Ticketmaster 36558C8 ***********8314",
+      "credit": 128.12,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-17T00:00:00",
+      "counterpartyName": "ACH WITHDRAWAL 021722 VENMO PAYMENT ***********9497",
+      "paymentPurpose": "ACH WITHDRAWAL 021722 VENMO PAYMENT ***********9497",
+      "debit": 65,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-03-22T00:00:00",
+      "counterpartyName": "ATM REBATE",
+      "paymentPurpose": "ATM REBATE",
+      "credit": 2.99,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-22T00:00:00",
+      "counterpartyName": "ATM WITHDRAWAL 022022 6011022022 GINGERS363 5th Ave BROOKLYN NY",
+      "paymentPurpose": "ATM WITHDRAWAL 022022 6011022022 GINGERS363 5th Ave BROOKLYN NY",
+      "debit": 82.99,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "ACH DEP 022322 GUSTO EBV 826489 ***********acr9",
+      "paymentPurpose": "ACH DEP 022322 GUSTO EBV 826489 ***********acr9",
+      "credit": 0.01,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-23T00:00:00",
+      "counterpartyName": "ACH DEP 022322 VENMO CASHOUT ***********0550",
+      "paymentPurpose": "ACH DEP 022322 VENMO CASHOUT ***********0550",
+      "credit": 89.99,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-03-25T00:00:00",
+      "counterpartyName": "WITHHOLDING TAX",
+      "paymentPurpose": "WITHHOLDING TAX",
+      "debit": 0.01,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2023-03-25T00:00:00",
+      "counterpartyName": "INTEREST PAID",
+      "paymentPurpose": "INTEREST PAID",
+      "credit": 0.03,
+      "currency": "USD",
+      "paymentType": "interest"
+    }
+  ]
+}

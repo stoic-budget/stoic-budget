@@ -6,6 +6,7 @@ import type { PayPeriodContext } from '@/app/lib/contracts';
 import { SectionSpanProvider } from '@/app/components/dashboard/section-span';
 import { budgetItem, categoryRef } from '@/app/test/fixtures/contracts';
 import { renderWithQuery } from '@/app/test/query-wrapper';
+import { dayKeyIn } from '../../budgets/helpers/left-per-day';
 import { BudgetSummaryWidget, budgetTone } from './BudgetSummaryWidget';
 
 const apiGet = vi.hoisted(() => vi.fn());
@@ -85,11 +86,15 @@ describe('BudgetSummaryWidget', () => {
     expect(screen.getAllByText(wholeLine('$60.00 left'))).toHaveLength(6);
   });
 
-  it('asks for this month without a date, sharing the budgets page cache', async () => {
+  it("asks for this month on the reader's today, sharing the budgets page cache", async () => {
     renderWithQuery(<BudgetSummaryWidget month={THIS_MONTH} monthLabel="This month" />);
 
     await screen.findAllByText(/^Budget \d$/);
-    expect(apiGet).toHaveBeenCalledWith('/budgets', expect.objectContaining({ params: undefined }));
+    // The reader's own day, not the server's clock, as the budgets page asks.
+    expect(apiGet).toHaveBeenCalledWith(
+      '/budgets',
+      expect.objectContaining({ params: { date: dayKeyIn(new Date()) } }),
+    );
   });
 
   it('measures another month on its last day', async () => {
