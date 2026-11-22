@@ -38,6 +38,7 @@ const ALLOWED = new Set([
   'modules/auth/registration-settings.service.ts',
   'modules/users/services/account-data.service.ts',
   'modules/users/services/email-change.service.ts',
+  'modules/users/password-changed.ts',
 ]);
 
 const SRC = path.join(process.cwd(), 'src');
