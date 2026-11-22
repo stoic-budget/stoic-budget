@@ -227,6 +227,34 @@ describe('MCP preview and confirm (e2e)', () => {
     expect(await auditCount()).toBe(audits + rowIds.length);
   });
 
+  it('applies only the first of two previews of the same rows confirmed at once', async () => {
+    const other = await as(owner, request(server()).post('/categories'))
+      .send({ name: `Confirm other ${stamp}`, type: 'expense' })
+      .expect(201);
+    const into = (id: string) => ({ transactionIds: rowIds, categoryId: id });
+    const first = (await callTool(ownerKey, 'set_transactions_category', into(categoryId))).body;
+    const second = (await callTool(ownerKey, 'set_transactions_category', into(other.body.id))).body;
+
+    const results = await Promise.all([
+      callTool(ownerKey, 'set_transactions_category', { ...into(categoryId), confirmToken: first.confirmToken }),
+      callTool(ownerKey, 'set_transactions_category', {
+        ...into(other.body.id),
+        confirmToken: second.confirmToken,
+      }),
+    ]);
+
+    // Whichever ran second found the rows no longer as it previewed them.
+    expect(results.map(r => (r.body.status === 'applied' ? 'applied' : r.body.code)).sort()).toEqual([
+      'MCP_CONFIRM_ROWS_CHANGED',
+      'applied',
+    ]);
+    const winner = results[0].body.status === 'applied' ? categoryId : other.body.id;
+    const after = await snapshot();
+    for (const id of rowIds) {
+      expect(after.find((row: { id: string }) => row.id === id).category_id).toBe(winner);
+    }
+  });
+
   it('accepts transaction ids in upper case', async () => {
     const args = { transactionIds: rowIds.map(id => id.toUpperCase()), categoryId };
     const preview = await callTool(ownerKey, 'set_transactions_category', args);

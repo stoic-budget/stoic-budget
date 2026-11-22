@@ -1,5 +1,6 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DataSource } from 'typeorm';
 import { appError, type ErrorCode } from '../../../common/errors/app-error';
 import { devDefault } from '../../../common/utils/dev-defaults';
 import { requireSecret } from '../../../common/utils/required-secret.util';
@@ -66,6 +67,7 @@ export class McpConfirmService {
   constructor(
     private readonly config: ConfigService,
     private readonly used: ConfirmReplayStore,
+    @Optional() private readonly dataSource?: DataSource,
   ) {}
 
   async run(ctx: McpToolContext, call: BulkCall): Promise<McpBulkChange> {
@@ -83,13 +85,23 @@ export class McpConfirmService {
     if (check && !check.ok) {
       return refuse(check.reason, call.tool);
     }
-    const plan = await call.plan();
-    const rows: RowsBinding = { rowsHash: hashRows(plan.rows), rows: plan.rows.length };
-    const answer = { tool: call.tool, skipped: plan.skipped, examples: plan.examples };
-
     if (!check) {
-      return this.preview(caller, rows, answer);
+      const plan = await call.plan();
+      return this.preview(caller, this.rowsOf(plan), this.answerOf(call, plan));
     }
+    // One confirm at a time per workspace: two tokens previewed on the same
+    // rows (say, each into another category) would otherwise both find the
+    // rows as previewed and both write, the second over the first.
+    return this.oneAtATime(ctx.workspaceId, () => this.confirm(call, check));
+  }
+
+  private async confirm(
+    call: BulkCall,
+    check: Extract<ConfirmTokenCheck, { ok: true }>,
+  ): Promise<McpBulkChange> {
+    const plan = await call.plan();
+    const rows = this.rowsOf(plan);
+    const answer = this.answerOf(call, plan);
     // Spent first: once applied, the rows always differ from the preview.
     if (await this.used.isUsed(check.jti)) {
       return refuse('used', call.tool);
@@ -108,6 +120,31 @@ export class McpConfirmService {
       ...answer,
       next: 'Applied. Each change is logged as this API key and can be undone from the activity log.',
     };
+  }
+
+  private rowsOf(plan: ChangePlan): RowsBinding {
+    return { rowsHash: hashRows(plan.rows), rows: plan.rows.length };
+  }
+
+  private answerOf(call: BulkCall, plan: ChangePlan) {
+    return { tool: call.tool, skipped: plan.skipped, examples: plan.examples };
+  }
+
+  /** Runs `work` holding a lock per workspace; without a database (unit tests), as is. */
+  private async oneAtATime<T>(workspaceId: string, work: () => Promise<T>): Promise<T> {
+    if (!this.dataSource) {
+      return work();
+    }
+    const runner = this.dataSource.createQueryRunner();
+    await runner.connect();
+    const key = `mcp-confirm:${workspaceId}`;
+    try {
+      await runner.query('SELECT pg_advisory_lock(hashtext($1))', [key]);
+      return await work();
+    } finally {
+      await runner.query('SELECT pg_advisory_unlock(hashtext($1))', [key]).catch(() => undefined);
+      await runner.release();
+    }
   }
 
   private preview(

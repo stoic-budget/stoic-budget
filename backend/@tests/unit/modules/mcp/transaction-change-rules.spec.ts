@@ -13,6 +13,7 @@ const row = (id: string, overrides: Partial<PlannedRow> = {}): PlannedRow => ({
   taxLocked: false,
   isPrivate: false,
   ownerMemberId: me,
+  transferPairKind: null,
   ...overrides,
 });
 const target = { name: 'Gadgets' };
@@ -151,5 +152,16 @@ describe('planTransactionChange', () => {
     expect(plan.rows).toHaveLength(8);
     expect(plan.examples).toHaveLength(5);
     expect(plan.examples[0]).toMatchObject({ date: '2026-10-07', amount: '3' });
+  });
+
+  it('skips a balance adjustment when a category is sent, as the write refuses one, but clears or approves it', () => {
+    const rows = [row('adjust', { transferPairKind: 'adjustment', categoryId: null }), row('plain')];
+
+    const filing = planTransactionChange(['adjust', 'plain'], rows, { categoryId: 'cat-gadgets' }, target, me);
+    expect(filing.rows.map(one => one.id)).toEqual(['plain']);
+    expect(filing.skipped).toEqual([{ reason: 'adjustment', ids: ['adjust'] }]);
+
+    const approving = planTransactionChange(['adjust'], rows, { approve: true }, target, me);
+    expect(approving.rows.map(one => one.id)).toEqual(['adjust']);
   });
 });

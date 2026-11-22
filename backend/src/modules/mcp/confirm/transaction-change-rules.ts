@@ -27,6 +27,7 @@ export interface PlannedRow {
   taxLocked: boolean;
   isPrivate: boolean;
   ownerMemberId: string | null;
+  transferPairKind: string | null;
 }
 
 /** The rows a bulk call changes, each with the state the preview showed, and the rest by reason. */
@@ -37,7 +38,7 @@ export interface ChangePlan {
 }
 
 type SkipReason = McpSkippedRows['reason'];
-const REASONS: SkipReason[] = ['not_found', 'unchanged', 'private', 'tax_locked'];
+const REASONS: SkipReason[] = ['not_found', 'unchanged', 'private', 'tax_locked', 'adjustment'];
 
 const dayOf = (value: string | Date): string =>
   value instanceof Date ? value.toISOString().slice(0, 10) : String(value).slice(0, 10);
@@ -60,6 +61,10 @@ function skipReason(
   // Which category another member's private row had is theirs to decide.
   if (recategorises && !canReadPrivate(row, viewerMemberId)) {
     return 'private';
+  }
+  // A balance adjustment takes no category (`assertEditAllowed`); clearing one is allowed.
+  if (change.categoryId && row.transferPairKind === 'adjustment') {
+    return 'adjustment';
   }
   // A filed return freezes the category; the update refuses any category in the body.
   if (change.categoryId !== undefined && row.taxLocked) {

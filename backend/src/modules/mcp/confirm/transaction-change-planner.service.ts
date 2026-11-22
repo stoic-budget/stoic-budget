@@ -55,6 +55,7 @@ export class TransactionChangePlanner {
       taxLocked: row.taxLocked,
       isPrivate: row.isPrivate,
       ownerMemberId: row.ownerMemberId,
+      transferPairKind: row.transferPairKind ?? null,
     }));
     return planTransactionChange(ids, rows, change, { name: target?.name ?? null }, ctx.memberId);
   }

@@ -23,10 +23,11 @@ export type McpChangeExample = Wire<typeof McpChangeExample>;
 
 /**
  * Ids the call leaves alone, by reason: not in this workspace, already as
- * asked, another member's private row, or a row a filed tax return locks.
+ * asked, another member's private row, a row a filed tax return locks, or a
+ * balance adjustment, which takes no category.
  */
 export const McpSkippedRows = Schema.Struct({
-  reason: Schema.Literals(['not_found', 'unchanged', 'private', 'tax_locked']),
+  reason: Schema.Literals(['not_found', 'unchanged', 'private', 'tax_locked', 'adjustment']),
   ids: Schema.Array(Schema.String),
 });
 export type McpSkippedRows = Wire<typeof McpSkippedRows>;
