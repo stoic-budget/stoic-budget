@@ -220,6 +220,12 @@ describe('API contracts: property and vehicles (e2e)', () => {
     expect(estimated?.debt).toMatchObject({ kind: 'wallet', id: ids.loan, name: 'ACME Bank - Car loan', amount: loanOwed });
     expect(estimated?.equity).toBeCloseTo(car * 0.85 - loanOwed, 2);
 
+    // A loan left out of net worth is not subtracted from it, so not from equity either.
+    await mine('put', `/wallets/${ids.loan}`, 200, { includeInNetWorth: false });
+    const outOfNetWorth = (await propertiesOf()).find(line => line.accountId === ids.vehicles);
+    expect(outOfNetWorth?.equity).toBeCloseTo(car * 0.85, 2);
+    await mine('put', `/wallets/${ids.loan}`, 200, { includeInNetWorth: true });
+
     await mine('put', '/reports/balance/snapshot', 200, {
       accountId: ids.vehicles,
       amount: 18_000,

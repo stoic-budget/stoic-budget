@@ -312,7 +312,7 @@ export class NetWorthService {
         valuation,
         walletDebts: await this.propertyService.linkedWalletDebts(
           workspaceId,
-          linkedWalletIds(leaves),
+          linkedWalletIds(accounts, leaves),
           to,
         ),
         converter,

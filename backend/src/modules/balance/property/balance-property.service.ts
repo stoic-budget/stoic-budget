@@ -169,14 +169,23 @@ export class BalancePropertyService {
     if (walletIds.length === 0) return result;
     const wallets = await this.wallets.find({
       where: { id: In(walletIds), workspaceId },
-      select: { id: true, name: true, isActive: true, initialBalance: true, currency: true },
+      select: {
+        id: true,
+        name: true,
+        isActive: true,
+        includeInNetWorth: true,
+        initialBalance: true,
+        currency: true,
+      },
     });
     for (const wallet of wallets) {
-      const owed = wallet.isActive
-        ? (negateSeries(
-            await walletCashSeries(this.transactions, workspaceId, [wallet], [date]),
-          ).get(date) ?? new Map())
-        : null;
+      // A loan left out of net worth is not subtracted from it, so not from equity either.
+      const owed =
+        wallet.isActive && wallet.includeInNetWorth !== false
+          ? (negateSeries(
+              await walletCashSeries(this.transactions, workspaceId, [wallet], [date]),
+            ).get(date) ?? new Map())
+          : null;
       result.set(wallet.id, { name: wallet.name, owed });
     }
     return result;

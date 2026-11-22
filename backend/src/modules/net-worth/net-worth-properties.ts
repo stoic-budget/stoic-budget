@@ -9,7 +9,11 @@ import { round2 } from './net-worth-math';
 import type { Valuation } from './net-worth-values';
 
 /** The loan accounts the properties among `leaves` are linked to. */
-export function linkedWalletIds(leaves: BalanceAccount[]): string[] {
+export function linkedWalletIds(accounts: BalanceAccount[], leaves: BalanceAccount[]): string[] {
+  // The accounts' debts taken off the page (`?exclude=`) are not subtracted
+  // from net worth, so no loan is subtracted from equity either.
+  const debtsLine = accounts.find(account => account.code === 'LIABILITY_ACCOUNT_DEBTS');
+  if (debtsLine && !leaves.some(leaf => leaf.id === debtsLine.id)) return [];
   return [
     ...new Set(leaves.map(leaf => leaf.debtWalletId).filter((id): id is string => Boolean(id))),
   ];
