@@ -1,0 +1,221 @@
+{
+  "metadata": {
+    "accountNumber": "123456789",
+    "currency": "USD",
+    "dateFrom": "2020-02-01T00:00:00",
+    "dateTo": "2020-02-29T00:00:00",
+    "balanceStart": 353060.27
+  },
+  "transactions": [
+    {
+      "transactionDate": "2020-02-20T00:00:00",
+      "counterpartyName": "CASH DEPOSIT, AUT 112719 3275 NW 79TH ST",
+      "paymentPurpose": "CASH DEPOSIT, AUT 112719 3275 NW 79TH ST",
+      "credit": 2500,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "CASH DEPOSIT, AUT 112719 3275 NW 79TH ST",
+      "paymentPurpose": "CASH DEPOSIT, AUT 112719 3275 NW 79TH ST",
+      "credit": 2000,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-17T00:00:00",
+      "counterpartyName": "CASH DEPOSIT, AUT 112719 3275 NW 79TH ST",
+      "paymentPurpose": "CASH DEPOSIT, AUT 112719 3275 NW 79TH ST",
+      "credit": 2540,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-20T00:00:00",
+      "counterpartyName": "CASH DEPOSIT, AUT 112719 3275 NW 79TH ST",
+      "paymentPurpose": "CASH DEPOSIT, AUT 112719 3275 NW 79TH ST",
+      "credit": 2000,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-27T00:00:00",
+      "counterpartyName": "CASH DEPOSIT, AUT 112719 3275 NW 79TH ST",
+      "paymentPurpose": "CASH DEPOSIT, AUT 112719 3275 NW 79TH ST",
+      "credit": 2500,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "TX TLR Transfer",
+      "paymentPurpose": "TX TLR Transfer",
+      "credit": 18000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-15T00:00:00",
+      "counterpartyName": "TX TLR Transfer",
+      "paymentPurpose": "TX TLR Transfer",
+      "credit": 14000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-18T00:00:00",
+      "counterpartyName": "Online Banking Transfer Conf#:415ec6291 ; OPTIMUM TELECARE HEALTH, LLC",
+      "paymentPurpose": "Online Banking Transfer Conf#:415ec6291 ; OPTIMUM TELECARE HEALTH, LLC",
+      "credit": 5000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-18T00:00:00",
+      "counterpartyName": "Online Banking Transfer Conf#:415ec6291 ; OPTIMUM TELECARE HEALTH, LLC",
+      "paymentPurpose": "Online Banking Transfer Conf#:415ec6291 ; OPTIMUM TELECARE HEALTH, LLC",
+      "credit": 5000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-22T00:00:00",
+      "counterpartyName": "TX TLR Transfer Online Banking Transfer Conf#:415ec6291 ; OPTIMUM TELECARE HEALTH, LLC",
+      "paymentPurpose": "TX TLR Transfer Online Banking Transfer Conf#:415ec6291 ; OPTIMUM TELECARE HEALTH, LLC",
+      "credit": 60000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-22T00:00:00",
+      "counterpartyName": "TX TLR Transfer",
+      "paymentPurpose": "TX TLR Transfer",
+      "credit": 54360,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-02-04T00:00:00",
+      "counterpartyName": "DEBIT CARD PURCHASE, AUT 120319 VISA DOA PUR",
+      "paymentPurpose": "DEBIT CARD PURCHASE, AUT 120319 VISA DOA PUR",
+      "debit": 6599.98,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-02-15T00:00:00",
+      "counterpartyName": "ATM CASH WITHDRAW AUT122419",
+      "paymentPurpose": "ATM CASH WITHDRAW AUT122419",
+      "debit": 9560.02,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-18T00:00:00",
+      "counterpartyName": "DEBIT CARD PURCHASE, AUT 121719VISA DOA PUR",
+      "paymentPurpose": "DEBIT CARD PURCHASE, AUT 121719VISA DOA PUR",
+      "debit": 14099.99,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-02-18T00:00:00",
+      "counterpartyName": "ACH DEBIT, HARLAND CLARKE CHK ORDERS 1LIX098866966L4",
+      "paymentPurpose": "ACH DEBIT, HARLAND CLARKE CHK ORDERS 1LIX098866966L4",
+      "debit": 2500,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2020-02-22T00:00:00",
+      "counterpartyName": "SHELLS CORP CORAL SPRINGS* FL 2363276499355550",
+      "paymentPurpose": "SHELLS CORP CORAL SPRINGS* FL 2363276499355550",
+      "debit": 70,
+      "currency": "USD"
+    },
+    {
+      "transactionDate": "2020-02-22T00:00:00",
+      "counterpartyName": "DOA WITHDRAW TW04A280 7999 PINES BLVD",
+      "paymentPurpose": "DOA WITHDRAW TW04A280 7999 PINES BLVD",
+      "debit": 8000,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-25T00:00:00",
+      "counterpartyName": "ATM CASH WITHDRAW AUT122419",
+      "paymentPurpose": "ATM CASH WITHDRAW AUT122419",
+      "debit": 2500,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-26T00:00:00",
+      "counterpartyName": "DOA WITHDRAW PM4622 318600 CASH APP",
+      "paymentPurpose": "DOA WITHDRAW PM4622 318600 CASH APP",
+      "debit": 500,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-27T00:00:00",
+      "counterpartyName": "ACH DEBIT TEL-SINGLE PCS SVC T-MOBILE TEL",
+      "paymentPurpose": "ACH DEBIT TEL-SINGLE PCS SVC T-MOBILE TEL",
+      "debit": 863,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2020-02-27T00:00:00",
+      "counterpartyName": "DEBIT CARD PURCHASE, AUT 122619 VISA DOA PUR",
+      "paymentPurpose": "DEBIT CARD PURCHASE, AUT 122619 VISA DOA PUR",
+      "debit": 32000,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-02-27T00:00:00",
+      "counterpartyName": "DOA WITHDRAW PM4622 318600 CASH APP",
+      "paymentPurpose": "DOA WITHDRAW PM4622 318600 CASH APP",
+      "debit": 500,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-27T00:00:00",
+      "counterpartyName": "DEBIT CARD PURCHASE, AUT 083772 SAFETY COURSES",
+      "paymentPurpose": "DEBIT CARD PURCHASE, AUT 083772 SAFETY COURSES",
+      "debit": 2299,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-02-27T00:00:00",
+      "counterpartyName": "ACH DEBIT, HARLAND CLARKE CHK ORDERS 1LIX098866966L4",
+      "paymentPurpose": "ACH DEBIT, HARLAND CLARKE CHK ORDERS 1LIX098866966L4",
+      "debit": 39108.01,
+      "currency": "USD",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2020-02-15T00:00:00",
+      "counterpartyName": "WITHDRAW PM4595 PM4595 7375 NW 79TH",
+      "paymentPurpose": "WITHDRAW PM4595 PM4595 7375 NW 79TH",
+      "debit": 3000,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2020-02-24T00:00:00",
+      "counterpartyName": "WITHDRAW PM4595 PM4595 3275 NW 79TH",
+      "paymentPurpose": "WITHDRAW PM4595 PM4595 3275 NW 79TH",
+      "debit": 60.69,
+      "currency": "USD",
+      "paymentType": "cash"
+    }
+  ],
+  "failedChecks": [
+    "section_totals"
+  ]
+}

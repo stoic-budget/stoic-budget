@@ -1,0 +1,660 @@
+{
+  "metadata": {
+    "accountNumber": "0000-1234-5678-90",
+    "currency": "USD",
+    "dateFrom": "2021-01-11T00:00:00",
+    "dateTo": "2021-02-10T00:00:00",
+    "balanceStart": 0,
+    "balanceEnd": 1210.64
+  },
+  "transactions": [
+    {
+      "transactionDate": "2021-01-11T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-11T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 300,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-12T00:00:00",
+      "counterpartyName": "PAI ISO2350 8TH AVENUE",
+      "paymentPurpose": "PAI ISO2350 8TH AVENUE ATM Withdrawal NEW YORK NY",
+      "debit": 201.79,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-01-12T00:00:00",
+      "counterpartyName": "Out of Network ATM Withdrawal Fee",
+      "paymentPurpose": "Out of Network ATM Withdrawal Fee Fee",
+      "debit": 3,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-01-12T00:00:00",
+      "counterpartyName": "BANK OF AMERICA*145TH STR",
+      "paymentPurpose": "BANK OF AMERICA*145TH STR ATM Withdrawal NEW YORK NY",
+      "debit": 263,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-01-12T00:00:00",
+      "counterpartyName": "Out of Network ATM Withdrawal Fee",
+      "paymentPurpose": "Out of Network ATM Withdrawal Fee Fee",
+      "debit": 3,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "Wells Fargo Ban143 LENOX",
+      "paymentPurpose": "Wells Fargo Ban143 LENOX ATM Withdrawal NEW YORK NY",
+      "debit": 503,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-01-13T00:00:00",
+      "counterpartyName": "Out of Network ATM Withdrawal Fee",
+      "paymentPurpose": "Out of Network ATM Withdrawal Fee Fee",
+      "debit": 3,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-01-15T00:00:00",
+      "counterpartyName": "BANK OF AMERICA*LENOX GAR",
+      "paymentPurpose": "BANK OF AMERICA*LENOX GAR ATM Withdrawal NEW YORK NY",
+      "debit": 503,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-01-15T00:00:00",
+      "counterpartyName": "Out of Network ATM Withdrawal Fee",
+      "paymentPurpose": "Out of Network ATM Withdrawal Fee Fee",
+      "debit": 3,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-01-16T00:00:00",
+      "counterpartyName": "TST* SUGAR BAR",
+      "paymentPurpose": "TST* SUGAR BAR Purchase NEW YORK NY",
+      "debit": 120.85,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-16T00:00:00",
+      "counterpartyName": "Wells Fargo Ban143 LENOX",
+      "paymentPurpose": "Wells Fargo Ban143 LENOX ATM Withdrawal NEW YORK NY",
+      "debit": 503,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-01-16T00:00:00",
+      "counterpartyName": "Out of Network ATM Withdrawal Fee",
+      "paymentPurpose": "Out of Network ATM Withdrawal Fee Fee",
+      "debit": 3,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-01-17T00:00:00",
+      "counterpartyName": "Wells Fargo Ban143 LENOX",
+      "paymentPurpose": "Wells Fargo Ban143 LENOX ATM Withdrawal NEW YORK NY",
+      "debit": 503,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-01-17T00:00:00",
+      "counterpartyName": "Out of Network ATM Withdrawal Fee",
+      "paymentPurpose": "Out of Network ATM Withdrawal Fee Fee",
+      "debit": 3,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-01-18T00:00:00",
+      "counterpartyName": "TST* SUGAR BAR",
+      "paymentPurpose": "TST* SUGAR BAR Purchase NEW YORK NY",
+      "debit": 152.43,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-18T00:00:00",
+      "counterpartyName": "NIKE.COM",
+      "paymentPurpose": "NIKE.COM Purchase 800-806-6453 OR",
+      "debit": 822.01,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-18T00:00:00",
+      "counterpartyName": "Wells Fargo Ban143 LENOX",
+      "paymentPurpose": "Wells Fargo Ban143 LENOX ATM Withdrawal NEW YORK NY",
+      "debit": 503,
+      "currency": "USD",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2021-01-18T00:00:00",
+      "counterpartyName": "Out of Network ATM Withdrawal Fee",
+      "paymentPurpose": "Out of Network ATM Withdrawal Fee Fee",
+      "debit": 3,
+      "currency": "USD",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2021-01-19T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-19T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 300,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-19T00:00:00",
+      "counterpartyName": "67 DELI CORP",
+      "paymentPurpose": "67 DELI CORP Purchase NEW YORK NY",
+      "debit": 6.24,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 600,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-20T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-23T00:00:00",
+      "counterpartyName": "NNT MONCLER 000577",
+      "paymentPurpose": "NNT MONCLER 000577 Purchase NEW YORK NY",
+      "debit": 4213.47,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-23T00:00:00",
+      "counterpartyName": "APPLE STORE #R095767 FIF",
+      "paymentPurpose": "APPLE STORE #R095767 FIF Purchase NEW YORK NY",
+      "debit": 1412.16,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-24T00:00:00",
+      "counterpartyName": "SAKS FIFTH AVE 601611 FIF",
+      "paymentPurpose": "SAKS FIFTH AVE 601611 FIF Purchase NEW YORK NY",
+      "debit": 1110.58,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-25T00:00:00",
+      "counterpartyName": "OMO EL PUERTO SEAFO002906",
+      "paymentPurpose": "OMO EL PUERTO SEAFO002906 Purchase NEW YORK NY",
+      "debit": 12,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-25T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-25T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 300,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-01-27T00:00:00",
+      "counterpartyName": "SAKS FIFTH AVE 601611 FIF",
+      "paymentPurpose": "SAKS FIFTH AVE 601611 FIF Purchase NEW YORK NY",
+      "debit": 2553.22,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-29T00:00:00",
+      "counterpartyName": "BP#97940332978 CROPSEY B",
+      "paymentPurpose": "BP#97940332978 CROPSEY B Purchase BROOKLYN NY",
+      "debit": 39.39,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-30T00:00:00",
+      "counterpartyName": "BP#8264723US AUTO WASH C",
+      "paymentPurpose": "BP#8264723US AUTO WASH C Purchase BROOKLYN NY",
+      "debit": 39.55,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-01-31T00:00:00",
+      "counterpartyName": "US AUTO WASH LLC",
+      "paymentPurpose": "US AUTO WASH LLC Purchase BROOKLYN NY",
+      "debit": 5.43,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-02-02T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-02-02T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 300,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-02-02T00:00:00",
+      "counterpartyName": "BP#8512709EAST SIDE GAS",
+      "paymentPurpose": "BP#8512709EAST SIDE GAS Purchase NEW YORK NY",
+      "debit": 35.11,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-02-05T00:00:00",
+      "counterpartyName": "BP#8512709EAST SIDE GAS",
+      "paymentPurpose": "BP#8512709EAST SIDE GAS Purchase NEW YORK NY",
+      "debit": 37.54,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-02-06T00:00:00",
+      "counterpartyName": "1ST AVENUE CAR WASH & LUB",
+      "paymentPurpose": "1ST AVENUE CAR WASH & LUB Purchase NEW YORK NY",
+      "debit": 36.47,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-02-06T00:00:00",
+      "counterpartyName": "BLOOMYS 001 1000 THIR",
+      "paymentPurpose": "BLOOMYS 001 1000 THIR Purchase NEW YORK NY",
+      "debit": 294.02,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-02-06T00:00:00",
+      "counterpartyName": "BLOOMYS 001 1000 THIR",
+      "paymentPurpose": "BLOOMYS 001 1000 THIR Refund NEW YORK NY",
+      "credit": 294.02,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-02-06T00:00:00",
+      "counterpartyName": "BLOOMYS 001 1000 THIR",
+      "paymentPurpose": "BLOOMYS 001 1000 THIR Purchase NEW YORK NY",
+      "debit": 294.02,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-02-07T00:00:00",
+      "counterpartyName": "SQ *CHOCOLATE DIP",
+      "paymentPurpose": "SQ *CHOCOLATE DIP Purchase NEW YORK NY",
+      "debit": 43.83,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-02-08T00:00:00",
+      "counterpartyName": "OMO EXCLUSIVE FOOTA002533",
+      "paymentPurpose": "OMO EXCLUSIVE FOOTA002533 Purchase NEW YORK NY",
+      "debit": 270,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-02-08T00:00:00",
+      "counterpartyName": "145TH STREET AUTO CENTER",
+      "paymentPurpose": "145TH STREET AUTO CENTER Purchase NEW YORK NY",
+      "debit": 25.05,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2021-02-08T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 182,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-02-08T00:00:00",
+      "counterpartyName": "NYS DOL UI DD-UI DD",
+      "paymentPurpose": "NYS DOL UI DD-UI DD Deposit",
+      "credit": 300,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2021-02-09T00:00:00",
+      "counterpartyName": "1ST AVENUE CAR WASH & LUB",
+      "paymentPurpose": "1ST AVENUE CAR WASH & LUB Purchase NEW YORK NY",
+      "debit": 27.22,
+      "currency": "USD",
+      "paymentType": "card"
+    }
+  ]
+}

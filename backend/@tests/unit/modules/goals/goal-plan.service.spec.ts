@@ -23,8 +23,10 @@ interface Options {
   incomeClauses?: string[];
   /** The workspace's month rule (Settings → Start of the month). */
   payPeriod?: PayPeriodContext;
-  /** Collects the date bounds the contribution queries were given. */
-  contributionBounds?: Array<Record<string, unknown>>;
+  /** When the followed account's history begins; null for a goal counting contributions. */
+  since?: Date | null;
+  /** Collects the [from, before) bounds the pace was read over. */
+  window?: string[];
 }
 
 function createService(options: Options) {
@@ -32,28 +34,20 @@ function createService(options: Options) {
     findOne: vi.fn(async () => options.goal ?? null),
   } as never;
 
-  // Two calls: the lifetime total first, then the windowed one. They are told
-  // apart by whether the caller narrowed the query by date.
-  const contributionRepository = {
-    createQueryBuilder: vi.fn(() => {
-      let windowed = false;
-      const builder: Record<string, unknown> = {
-        select: vi.fn(() => builder),
-        where: vi.fn(() => builder),
-        andWhere: vi.fn((clause: string, params?: Record<string, unknown>) => {
-          if (clause.includes('contribution_date')) {
-            windowed = true;
-            options.contributionBounds?.push(params ?? {});
-          }
-          return builder;
-        }),
-        getRawOne: vi.fn(async () => ({
-          total: windowed
-            ? (options.contributed?.inWindow ?? '0')
-            : (options.contributed?.total ?? '0'),
-        })),
-      };
-      return builder;
+  // What the goal has, and what it moved by inside the history window. The
+  // progress service is what decides between contributions and an account.
+  const progressService = {
+    progress: vi.fn(async () =>
+      new Map([
+        [
+          GOAL_ID,
+          { amount: Number(options.contributed?.total ?? 0), account: null, since: options.since ?? null },
+        ],
+      ]),
+    ),
+    movedBetween: vi.fn(async (_workspaceId: string, _goals: unknown, from: string, before: string) => {
+      options.window?.push(from, before);
+      return new Map([[GOAL_ID, Number(options.contributed?.inWindow ?? 0)]]);
     }),
   } as never;
 
@@ -90,12 +84,12 @@ function createService(options: Options) {
 
   return new GoalPlanService(
     goalRepository,
-    contributionRepository,
     budgetRepository,
     transactionRepository,
     workspaceRepository,
     goalItemsService,
     exchangeRatesService,
+    progressService,
     options.payPeriod
       ? ({ contextFor: vi.fn(async () => options.payPeriod) } as never)
       : undefined,
@@ -147,23 +141,23 @@ describe('GoalPlanService', () => {
   });
 
   it("reads the history over the workspace's last three months", async () => {
-    const calendar: Array<Record<string, unknown>> = [];
-    await createService({ goal: relocation, contributionBounds: calendar }).getPlan(
+    const calendar: string[] = [];
+    await createService({ goal: relocation, window: calendar }).getPlan(
       GOAL_ID,
       WORKSPACE_ID,
       NOW,
     );
-    expect(calendar).toEqual([{ start: '2026-02-01' }, { end: '2026-04-30' }]);
+    expect(calendar).toEqual(['2026-02-01', '2026-05-01']);
 
     // Day 15: 8 May is in "April" (15 Apr – 14 May), so the three before it
-    // run from 15 January to 14 April.
-    const shifted: Array<Record<string, unknown>> = [];
+    // run from 15 January to 14 April, and the window ends where April begins.
+    const shifted: string[] = [];
     await createService({
       goal: relocation,
-      contributionBounds: shifted,
+      window: shifted,
       payPeriod: { monthStart: { kind: 'day', day: 15 } },
     }).getPlan(GOAL_ID, WORKSPACE_ID, NOW);
-    expect(shifted).toEqual([{ start: '2026-01-15' }, { end: '2026-04-14' }]);
+    expect(shifted).toEqual(['2026-01-15', '2026-04-15']);
   });
 
   it('averages the pace over the completed history months', async () => {
@@ -345,5 +339,38 @@ describe('GoalPlanService', () => {
 
     expect(plan.remaining).toBe(0);
     expect(plan.status).toBe('reached');
+  });
+
+  describe('a goal that follows an account', () => {
+    it("reads the pace from the account's history, not from the goal's age", async () => {
+      const window: string[] = [];
+      const service = createService({
+        // The goal was set up last week; the savings account is years old.
+        goal: { ...relocation, createdAt: new Date(2026, 4, 1) },
+        since: new Date(2024, 0, 1),
+        contributed: { total: '1200000', inWindow: '450000' },
+        window,
+      });
+
+      const plan = await service.getPlan(GOAL_ID, WORKSPACE_ID, NOW);
+
+      expect(plan.saved).toBe(1200000);
+      expect(plan.pace).toEqual({ perMonth: 150000, monthsObserved: 3 });
+      // February 1st up to, not including, May 1st: the three complete months.
+      expect(window).toEqual(['2026-02-01', '2026-05-01']);
+    });
+
+    it('averages a young account over the months it has existed', async () => {
+      const service = createService({
+        goal: relocation,
+        since: new Date(2026, 2, 10),
+        contributed: { total: '200000', inWindow: '200000' },
+      });
+
+      const plan = await service.getPlan(GOAL_ID, WORKSPACE_ID, NOW);
+
+      // March and April: two months, so 100k each rather than a third of it.
+      expect(plan.pace).toEqual({ perMonth: 100000, monthsObserved: 2 });
+    });
   });
 });

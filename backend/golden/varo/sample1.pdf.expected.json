@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "accountNumber": "338785936",
+    "currency": "USD",
+    "dateFrom": "2023-06-01T00:00:00",
+    "dateTo": "2023-06-30T00:00:00",
+    "balanceStart": 35725.35
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-06-05T00:00:00",
+      "counterpartyName": "Kroger 225 ct Port charlotte FLUS…",
+      "paymentPurpose": "Debit Card (Purchase) Kroger 225 ct Port charlotte FLUS…",
+      "debit": 1500,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-06-11T00:00:00",
+      "counterpartyName": "Walmart HWY 45 Port charlotte FLUS",
+      "paymentPurpose": "Debit Card (Purchase) Walmart HWY 45 Port charlotte FLUS",
+      "debit": 500,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-06-13T00:00:00",
+      "counterpartyName": "MemberSamp",
+      "paymentPurpose": "Payment MemberSamp",
+      "credit": 2000,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-06-19T00:00:00",
+      "counterpartyName": "Kroger 225 ct Port Charlotte FLUS",
+      "paymentPurpose": "Debit Card (Purchase) Kroger 225 ct Port Charlotte FLUS",
+      "debit": 1000,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2023-06-22T00:00:00",
+      "counterpartyName": "Walmart HWY 45 Port charlotte FLUS",
+      "paymentPurpose": "Debit Card (Purchase) Walmart HWY 45 Port charlotte FLUS",
+      "credit": 1050,
+      "currency": "USD",
+      "paymentType": "card"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain",
+    "printed_balances"
+  ]
+}

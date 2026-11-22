@@ -108,7 +108,7 @@ export function KeyboardShortcutsModal({
   const t = useIntlayer('keyboardShortcutsModal');
 
   return (
-    <ModalShell isOpen={isOpen} onClose={onClose} title={t.title} size="sm">
+    <ModalShell demoNotice={false} isOpen={isOpen} onClose={onClose} title={t.title} size="sm">
       <Box sx={{ p: 1 }}>
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>

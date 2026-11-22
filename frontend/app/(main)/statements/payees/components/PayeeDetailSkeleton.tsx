@@ -1,11 +1,11 @@
 import Button from '@mui/material/Button';
 import Skeleton from '@mui/material/Skeleton';
+import { MonthBarsSkeleton } from '@/app/components/charts/MonthBars';
 import { useIntlayer } from '@/app/i18n';
 import { PayeePeersSkeleton } from './PayeePeersSection';
 import { PayeeTransactions } from './PayeeTransactions';
 
 const FIGURE_KEYS = ['a', 'b', 'c'];
-const MONTH_KEYS = Array.from({ length: 12 }, (_, index) => `m${index}`);
 
 /** The payee's figures while the summary loads: a label and a value each. */
 export function PayeeFiguresSkeleton(): React.JSX.Element {
@@ -27,20 +27,7 @@ export function PayeeMonthsSkeleton(): React.JSX.Element {
   return (
     <section className="seneca-all-tx__card seneca-payees__section" aria-busy="true">
       <h2 className="seneca-all-tx__card-title">{t.monthsTitle}</h2>
-      <div className="seneca-payees__bars">
-        {MONTH_KEYS.map(key => (
-          <div key={key} className="seneca-payees__bar">
-            <Skeleton
-              variant="rectangular"
-              width="100%"
-              height="60%"
-              // The bar's own shape (seneca-payees__bar-fill).
-              sx={{ maxWidth: 28, borderRadius: '4px 4px 0 0' }}
-            />
-            <Skeleton variant="text" width={24} height={16} />
-          </div>
-        ))}
-      </div>
+      <MonthBarsSkeleton />
     </section>
   );
 }

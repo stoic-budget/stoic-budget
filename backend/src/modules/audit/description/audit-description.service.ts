@@ -80,6 +80,7 @@ const ENTITY_LABELS_EN: Record<EntityType, string> = {
   [EntityType.USER]: 'user account',
   [EntityType.PAYEE]: 'payee',
   [EntityType.TAG]: 'tag',
+  [EntityType.CALENDAR_FEED]: 'calendar link',
 };
 
 const FIELD_LABELS_EN: Partial<Record<EntityType, Record<string, string>>> = {

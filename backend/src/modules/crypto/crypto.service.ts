@@ -531,8 +531,9 @@ export class CryptoService {
       .where('t.workspace_id = :workspaceId', { workspaceId })
       .andWhere('t.crypto_wallet_id IS NOT NULL')
       // A swap and a purchase from a bank account are paired moves, not income and
-      // not spending; only their fee legs stay, and those are unpaired.
-      .andWhere('t.transfer_pair_id IS NULL')
+      // not spending; only their fee legs stay, and those are unpaired. A row left
+      // out of budgets is no income or spending figure's either.
+      .andWhere('t.transfer_pair_id IS NULL AND t.excluded_from_budgets = false')
       .andWhere('t.transaction_date >= :since', { since })
       .andWhere(countedSql('t'));
     if (until) {
