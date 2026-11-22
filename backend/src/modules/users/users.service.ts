@@ -34,6 +34,7 @@ import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-re
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { snapshotAdminFields } from './admin-fields';
 import { CURRENT_DISCLAIMER_VERSION } from './disclaimer.constant';
+import { recordPasswordChanged } from './password-changed';
 import { EmailChangeService } from './services/email-change.service';
 
 /** How many pages the page-hint map may name; see markPageHintsSeen. */
@@ -349,16 +350,7 @@ export class UsersService {
     await this.userRepository.save(user);
     // Signed out everywhere, as after a reset: calendar feed links end too.
     await this.calendarFeeds.revokeAllOf(user.id);
-
-    await recordSecurityEvent(this.auditService, this.logger, {
-      workspaceId: user.workspaceId,
-      actorId: user.id,
-      entityType: EntityType.USER,
-      entityId: user.id,
-      action: AuditAction.UPDATE,
-      severity: Severity.WARN,
-      meta: { password: 'changed' },
-    });
+    await recordPasswordChanged(this.userRepository.manager, this.auditService, this.logger, user);
   }
 
   async updateMyPreferences(userId: string, dto: UpdateMyPreferencesBody): Promise<User> {

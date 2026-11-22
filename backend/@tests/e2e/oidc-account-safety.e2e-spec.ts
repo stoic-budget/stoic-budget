@@ -26,8 +26,8 @@ import {
 } from './helpers/oidc-flow';
 
 /**
- * What a borrowed session, a password reset, a half-made account and a
- * changed provider must not leave behind.
+ * What a borrowed session, a password reset or change, a half-made account
+ * and a changed provider must not leave behind.
  */
 describe('Single sign-on account safety (e2e)', () => {
   const stamp = Date.now();
@@ -171,6 +171,30 @@ describe('Single sign-on account safety (e2e)', () => {
       expect(await identitiesOf(made.id)).toEqual([{ subject: sub('sso-made') }]);
       const again = await signIn(app, provider, sub('sso-made'));
       expect(again.completed?.body.user.id).toBe(made.id);
+    });
+  });
+
+  describe('a password change', () => {
+    it('unlinks every provider account, so a linked one opens the account no more', async () => {
+      const email = `oidc-safety-password-owner-${stamp}@example.com`;
+      createdEmails.push(email);
+      const changer = await registerAccount(app, email, 'Member Two');
+      const flow = await startLink(app, changer.token);
+      await callback(app, flow, provider.authorize(flow.location, sub('changer')));
+      expect(await identitiesOf(changer.userId)).toEqual([{ subject: sub('changer') }]);
+
+      await request(app.getHttpServer())
+        .patch('/users/me/password')
+        .set('Authorization', `Bearer ${changer.token}`)
+        .send({ currentPassword: ACCOUNT_PASSWORD, newPassword: 'Brand-new 4th pass' })
+        .expect(200);
+      expect(await identitiesOf(changer.userId)).toEqual([]);
+
+      const after = await signIn(app, provider, sub('changer'));
+      expect(after.completed).toBeNull();
+      expect(errorOf(after.callback)).toBe('OIDC_SIGNUP_NOT_ALLOWED');
+      const metas = (await oidcEvents(changer.userId)).map((row: { meta: object }) => row.meta);
+      expect(metas).toContainEqual(expect.objectContaining({ oidcEvent: 'unlinked' }));
     });
   });
 
