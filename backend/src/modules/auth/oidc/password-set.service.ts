@@ -6,6 +6,7 @@ import { hashPassword } from '../../../common/utils/password-hash.util';
 import { AuthSession, User } from '../../../entities';
 import { AuditAction, EntityType, Severity } from '../../../entities/audit-event.entity';
 import { AuditService } from '../../audit/audit.service';
+import { CalendarFeedRevocationService } from '../../calendar-feed/calendar-feed-revocation.service';
 import { AuthService, type SessionContext } from '../auth.service';
 import type { AuthResponseDto } from '../dto/auth-response.dto';
 import { recordSecurityEvent } from '../security-audit.util';
@@ -19,7 +20,7 @@ import { OidcStepUpService } from './oidc-step-up.service';
  * one. Like a password change (`UsersService.changePassword`), the token
  * version goes up, which ends every session's tokens; unlike it, this device
  * gets a new session at once, so the person carries on here and every other
- * session (a borrowed or stolen one included) is out.
+ * session (a borrowed or stolen one included) is out, with every calendar link.
  */
 @Injectable()
 export class PasswordSetService {
@@ -31,6 +32,7 @@ export class PasswordSetService {
     private readonly stepUp: OidcStepUpService,
     private readonly authService: AuthService,
     private readonly auditService: AuditService,
+    private readonly calendarFeeds: CalendarFeedRevocationService,
   ) {}
 
   async set(
@@ -63,6 +65,8 @@ export class PasswordSetService {
       return true;
     });
     if (!changed) await this.refuse(user, 'AUTH_PASSWORD_ALREADY_SET', HttpStatus.CONFLICT);
+    // A calendar link is a way in that outlives the sessions: it ends with them.
+    await this.calendarFeeds.revokeAllOf(user.id);
 
     const fresh = await this.users.findOneOrFail({ where: { id: user.id } });
     await recordSecurityEvent(this.auditService, this.logger, {

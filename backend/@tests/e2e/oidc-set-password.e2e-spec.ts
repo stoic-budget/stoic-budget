@@ -380,6 +380,24 @@ describe('Single sign-on: set a password (e2e)', () => {
     expect(codeOf(set)).toBe('AUTH_PASSWORD_ALREADY_SET');
   });
 
+  it('ends the calendar links a stolen session could have made', async () => {
+    const account = await ssoAccount('feed');
+    const [{ workspace_id: workspaceId }] = await dataSource.query(
+      'SELECT workspace_id FROM users WHERE id = $1',
+      [account.userId],
+    );
+    const issued = await asUser(account.token)
+      .post('/calendar-feed')
+      .set('x-workspace-id', workspaceId)
+      .expect(201);
+    const feed = `/public/calendar/${issued.body.token}.ics`;
+    await request(app.getHttpServer()).get(feed).expect(200);
+
+    const { stepUp } = await reauth(account.token, sub('feed'));
+    expect((await setPassword(account.token, stepUp)).status).toBe(200);
+    await request(app.getHttpServer()).get(feed).expect(404);
+  });
+
   it('holds the new password to the password-change rule', async () => {
     const account = await ssoAccount('short');
     const { stepUp } = await reauth(account.token, sub('short'));
