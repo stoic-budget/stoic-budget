@@ -31,10 +31,10 @@ import {
 } from '../../entities';
 import { AuditAction, EntityType, Severity } from '../../entities/audit-event.entity';
 import { AuditService } from '../audit/audit.service';
-import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-revocation.service';
 import { CategoriesService } from '../categories/categories.service';
 import type { AuthResponseDto, LoginResultDto } from './dto/auth-response.dto';
 import { recordSecurityEvent } from './security-audit.util';
+import { StandingAccessService } from './standing-access/standing-access.service';
 import type { JwtPayload } from './strategies/jwt.strategy';
 import type { JwtRefreshPayload } from './strategies/jwt-refresh.strategy';
 import { TwoFactorService } from './two-factor.service';
@@ -91,7 +91,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private readonly auditService: AuditService,
-    private readonly calendarFeeds: CalendarFeedRevocationService,
+    private readonly standingAccess: StandingAccessService,
   ) {}
 
   async ensureDevAdminUser(): Promise<void> {
@@ -478,8 +478,8 @@ export class AuthService {
     );
 
     await this.userRepository.increment({ id: userId }, 'tokenVersion', 1);
-    // Calendar links are a way in too: "everywhere" ends them.
-    await this.calendarFeeds.revokeAllOf(userId);
+    // Calendar links and connected apps are ways in too: "everywhere" ends them.
+    await this.standingAccess.endAllOf(userId, 'logout_all');
     await this.recordSessionRevocation(userId, { sessions: 'all-revoked' });
     return { message: 'Logged out from all devices successfully' };
   }

@@ -10,7 +10,7 @@ import { User } from '../../entities/user.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditModule } from '../audit/audit.module';
-import { CalendarFeedRevocationModule } from '../calendar-feed/calendar-feed-revocation.module';
+import { StandingAccessModule } from '../auth/standing-access/standing-access.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { WorkspacesModule } from '../workspaces/workspaces.module';
 import { AccountDataService } from './services/account-data.service';
@@ -34,7 +34,7 @@ import { UsersService } from './users.service';
     WorkspacesModule,
     MailerModule,
     AuditModule,
-    CalendarFeedRevocationModule,
+    StandingAccessModule,
   ],
   controllers: [UsersController],
   providers: [

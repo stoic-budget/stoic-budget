@@ -30,7 +30,7 @@ import {
 import { Workspace } from '../../entities/workspace.entity';
 import { AuditService } from '../audit/audit.service';
 import { recordSecurityEvent } from '../auth/security-audit.util';
-import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-revocation.service';
+import { StandingAccessService } from '../auth/standing-access/standing-access.service';
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { snapshotAdminFields } from './admin-fields';
 import { CURRENT_DISCLAIMER_VERSION } from './disclaimer.constant';
@@ -51,7 +51,7 @@ export class UsersService {
     private readonly workspacesService: WorkspacesService,
     private readonly emailChangeService: EmailChangeService,
     private readonly auditService: AuditService,
-    private readonly calendarFeeds: CalendarFeedRevocationService,
+    private readonly standingAccess: StandingAccessService,
   ) {}
 
   private getUserFindAllOptions(workspaceId: string, limit = 20) {
@@ -200,8 +200,9 @@ export class UsersService {
     const before = snapshotAdminFields(user);
     Object.assign(user, updateUserDto);
     const saved = await this.userRepository.save(user);
-    // A deactivated account loses its calendar links, so a reactivation does not revive them.
-    if (before.isActive && !saved.isActive) await this.calendarFeeds.revokeAllOf(id);
+    // A deactivated account loses its calendar links and connected apps, so a
+    // reactivation does not revive them.
+    if (before.isActive && !saved.isActive) await this.standingAccess.endAllOf(id, 'deactivated');
 
     // Logged into the target's home workspace, like every other account event:
     // this route carries no workspace of its own.
@@ -347,8 +348,8 @@ export class UsersService {
     user.passwordHash = await hashPassword(dto.newPassword);
     user.tokenVersion = (user.tokenVersion ?? 0) + 1;
     await this.userRepository.save(user);
-    // Signed out everywhere, as after a reset: calendar feed links end too.
-    await this.calendarFeeds.revokeAllOf(user.id);
+    // Signed out everywhere, as after a reset: calendar links and connected apps end too.
+    await this.standingAccess.endAllOf(user.id, 'password_changed');
 
     await recordSecurityEvent(this.auditService, this.logger, {
       workspaceId: user.workspaceId,

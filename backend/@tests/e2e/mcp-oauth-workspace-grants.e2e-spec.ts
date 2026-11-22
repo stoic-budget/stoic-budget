@@ -44,6 +44,8 @@ describe('MCP OAuth: workspace grants and password reset (e2e)', () => {
     keyKeeper: `wsg-keys-${stamp}@example.com`,
     other: `wsg-other-${stamp}@example.com`,
     resetter: `wsg-resetter-${stamp}@example.com`,
+    signedOut: `wsg-signed-out-${stamp}@example.com`,
+    changer: `wsg-changer-${stamp}@example.com`,
   };
   const accounts = {} as Record<keyof typeof emails, E2eAccount>;
   let clientId: string;
@@ -153,11 +155,14 @@ describe('MCP OAuth: workspace grants and password reset (e2e)', () => {
       keyKeeper: 'Member Five',
       other: 'Member Six',
       resetter: 'Member Seven',
+      signedOut: 'Member Eight',
+      changer: 'Member Nine',
     };
     for (const key of Object.keys(emails) as Array<keyof typeof emails>) {
       accounts[key] = await registerAccount(app, emails[key], names[key]);
     }
-    const { owner, member, coAdmin, viewer, keyKeeper, other, resetter } = accounts;
+    const { owner, member, coAdmin, viewer, keyKeeper, other, resetter, signedOut, changer } =
+      accounts;
     await join(member, owner.workspaceId, WorkspaceRole.MEMBER);
     await join(coAdmin, owner.workspaceId, WorkspaceRole.ADMIN);
     await join(viewer, owner.workspaceId, WorkspaceRole.VIEWER);
@@ -167,7 +172,7 @@ describe('MCP OAuth: workspace grants and password reset (e2e)', () => {
     await dataSource
       .getRepository(User)
       .update({ id: keyKeeper.userId }, { permissions: ['api_key.manage'] });
-    for (const account of [owner, other, resetter]) {
+    for (const account of [owner, other, resetter, signedOut, changer]) {
       await as(account, request(server()).patch(`/workspaces/${account.workspaceId}`))
         .send({ plugins: { mcp: true } })
         .expect(200);
@@ -417,6 +422,36 @@ describe('MCP OAuth: workspace grants and password reset (e2e)', () => {
       const row = await grantRow(grantId);
       expect(row.revokedReason).toBe('password_reset');
       expect(await liveGrantsOf(resetter.userId)).toEqual([]);
+    });
+  });
+
+  describe('signing out everywhere and changing the password', () => {
+    const expectEnded = async (grant: Awaited<ReturnType<typeof connect>>, reason: string) => {
+      expect((await grantRow(grant.id)).revokedReason).toBe(reason);
+      expect(await callsMcp(grant.access)).toBe(401);
+      const refreshed = await request(server())
+        .post('/oauth/token')
+        .type('form')
+        .send({ grant_type: 'refresh_token', refresh_token: grant.refresh, client_id: clientId });
+      expect(refreshed.body.error).toBe('invalid_grant');
+    };
+
+    it('"log out everywhere" disconnects every app of the account', async () => {
+      const { owner, signedOut } = accounts;
+      const grant = await connect(signedOut);
+      const bystander = await connect(owner);
+      await as(signedOut, request(server()).post('/auth/logout-all')).expect(200);
+      await expectEnded(grant, 'logout_all');
+      expect(await callsMcp(bystander.access)).toBe(200);
+    });
+
+    it('a password change disconnects every app of the account', async () => {
+      const { changer } = accounts;
+      const grant = await connect(changer);
+      await as(changer, request(server()).patch('/users/me/password'))
+        .send({ currentPassword: 'Test123!@#', newPassword: 'N3w-Passphrase!' })
+        .expect(200);
+      await expectEnded(grant, 'password_changed');
     });
   });
 
