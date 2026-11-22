@@ -33,6 +33,7 @@ import { OidcSettingsService } from './oidc/oidc-settings.service';
 import { OidcStateStore } from './oidc/oidc-state.store';
 import { PasskeyAuthService } from './passkeys/passkey-auth.service';
 import { PasskeyChallengeStore } from './passkeys/passkey-challenge.store';
+import { PasskeyNoticeService } from './passkeys/passkey-notice.service';
 import { PasskeysController } from './passkeys/passkeys.controller';
 import { PasskeysService } from './passkeys/passkeys.service';
 import { PasswordResetService } from './password-reset.service';
@@ -88,6 +89,7 @@ import { TwoFactorService } from './two-factor.service';
     PasskeysService,
     PasskeyAuthService,
     PasskeyChallengeStore,
+    PasskeyNoticeService,
     PasswordResetService,
     AuthDevBootstrapService,
     JwtStrategy,

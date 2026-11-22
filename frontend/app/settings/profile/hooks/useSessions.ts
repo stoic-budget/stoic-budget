@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import apiClient from '@/app/lib/api';
-import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
+import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
 import { forgetStoredUser } from '@/app/lib/theme-preference';
 import { getApiErrorMessage, type UserSession } from '@/app/settings/profile/profileHelpers';
 
@@ -25,6 +25,13 @@ export type UseSessionsReturn = {
   loadSessions: () => Promise<void>;
   handleLogoutSession: (session: UserSession) => Promise<void>;
   handleLogoutAll: () => Promise<void>;
+  /** Logs out everywhere once a dialog has confirmed it, without asking again. */
+  logoutAllConfirmed: () => Promise<void>;
+  /**
+   * Removes the chosen passkeys (the password is checked first), then logs out
+   * everywhere. Throws when refused, so the dialog can say why and stay open.
+   */
+  logoutAllRemovingPasskeys: (removePasskeyIds: string[], password: string) => Promise<void>;
 };
 
 export function useSessions(
@@ -57,9 +64,13 @@ export function useSessions(
     loadSessions();
   }, [isAuthenticated, loadSessions]);
 
-  const handleLogoutAll = useCallback(async () => {
-    if (!window.confirm(messages.logoutAllConfirm)) return;
+  const leaveAfterLogoutAll = useCallback(() => {
+    // Cookies are cleared by the server on logout-all.
+    forgetStoredUser();
+    router.push('/login');
+  }, [router]);
 
+  const logoutAllConfirmed = useCallback(async () => {
     await (async () => {
       await apiClient.post('/auth/logout-all');
     })()
@@ -67,11 +78,25 @@ export function useSessions(
         console.error('Logout-all error:', error);
       })
       .finally(async () => {
-        // Cookies are cleared by the server on logout-all.
-        forgetStoredUser();
-        router.push('/login');
+        leaveAfterLogoutAll();
       });
-  }, [messages.logoutAllConfirm, router]);
+  }, [leaveAfterLogoutAll]);
+
+  const handleLogoutAll = useCallback(async () => {
+    if (!window.confirm(messages.logoutAllConfirm)) return;
+    await logoutAllConfirmed();
+  }, [messages.logoutAllConfirm, logoutAllConfirmed]);
+
+  const logoutAllRemovingPasskeys = useCallback(
+    async (removePasskeyIds: string[], password: string) => {
+      await apiClient.post('/auth/logout-all', {
+        removePasskeyIds,
+        password,
+      } satisfies ContractInput<'LogoutAllBody'>);
+      leaveAfterLogoutAll();
+    },
+    [leaveAfterLogoutAll],
+  );
 
   const handleLogoutSession = useCallback(
     async (session: UserSession) => {
@@ -115,5 +140,7 @@ export function useSessions(
     loadSessions,
     handleLogoutSession,
     handleLogoutAll,
+    logoutAllConfirmed,
+    logoutAllRemovingPasskeys,
   };
 }

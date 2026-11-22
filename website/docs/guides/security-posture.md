@@ -41,6 +41,8 @@ in clear, or a browser extension reading the page.
 - Optional TOTP two-factor authentication with recovery codes.
 - Single-use password reset (1 h) and email change (24 h) tokens; the reset endpoint answers the same way for known
   and unknown addresses.
+- Password reset lets you review and optionally remove the listed passkeys; otherwise they stay registered.
+- Log out everywhere keeps passkeys unless you choose to remove them; removal requires your current password.
 - Bcrypt password hashing (12 rounds by default, `BCRYPT_ROUNDS`).
 - helmet security headers, a CORS allowlist and Redis-backed rate limits.
 - Workspace roles are enforced on every request by guards at the controller level.
@@ -54,7 +56,7 @@ in clear, or a browser extension reading the page.
 | Yahoo Finance / CoinGecko | Tickers | "Refresh prices" on the net-worth page | Enter prices by hand |
 | Your map tile server / Nominatim | Receipt coordinates | Receipt maps, if enabled | Do not enable receipt location |
 | Telegram | Reports and replies to the bot | Only if the bot is connected | Disconnect Telegram |
-| SMTP | Invitations, password resets | Only if SMTP is set | Leave SMTP unset |
+| SMTP | Invitations, password resets, passkey addition and removal notices | Only if SMTP is set | Leave SMTP unset |
 
 Nothing is sent to Stoic Budget's authors. There is no telemetry.
 
