@@ -65,8 +65,8 @@ export function usePasskeys(enabled: boolean, messages: UsePasskeysMessages) {
   });
 
   const rename = useMutation({
-    mutationFn: (input: { id: string; name: string }) =>
-      passkeysApi.rename(input.id, input.name.trim()),
+    mutationFn: (input: { id: string; name: string; password: string }) =>
+      passkeysApi.rename(input.id, input.name.trim(), input.password),
     ...settle(messages.renamed),
   });
 
@@ -86,7 +86,8 @@ export function usePasskeys(enabled: boolean, messages: UsePasskeysMessages) {
     error,
     // True when it went through; the failure is already in `error`.
     add: (input: { name: string; password: string }) => done(add.mutateAsync(input)),
-    rename: (input: { id: string; name: string }) => done(rename.mutateAsync(input)),
+    rename: (input: { id: string; name: string; password: string }) =>
+      done(rename.mutateAsync(input)),
     remove: (input: { id: string; password: string }) => done(remove.mutateAsync(input)),
   };
 }

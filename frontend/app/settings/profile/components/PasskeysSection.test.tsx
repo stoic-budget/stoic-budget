@@ -77,16 +77,23 @@ describe('PasskeysSection', () => {
   });
 
   // Without the add form, so the row's own fields are the only ones on screen.
-  it('renames in place and refuses a blank name', async () => {
+  it('renames in place only with the password, and refuses a blank name', async () => {
     const passkeys = hook({ supported: false });
     render(passkeys);
     fireEvent.click(screen.getByRole('button', { name: 'Rename' }));
     const field = screen.getByLabelText(/Name/);
+    fireEvent.change(field, { target: { value: 'Phone' } });
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText(/passwordCard.currentPasswordLabel/), {
+      target: { value: 'secret' },
+    });
     fireEvent.change(field, { target: { value: '   ' } });
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
     fireEvent.change(field, { target: { value: 'Phone' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(passkeys.rename).toHaveBeenCalledWith({ id: 'passkey-1', name: 'Phone' }));
+    await waitFor(() =>
+      expect(passkeys.rename).toHaveBeenCalledWith({ id: 'passkey-1', name: 'Phone', password: 'secret' }),
+    );
   });
 
   it('removes a passkey only after the password', async () => {

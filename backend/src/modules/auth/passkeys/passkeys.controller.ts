@@ -88,6 +88,7 @@ export class PasskeysController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Patch('passkeys/:passkeyId')
   @SchemaResponse(Passkey)
   async rename(
@@ -95,7 +96,7 @@ export class PasskeysController {
     @SchemaParams(PasskeyParams) { passkeyId }: PasskeyParams,
     @SchemaBody(PasskeyRenameBody) dto: PasskeyRenameBody,
   ): Promise<Passkey> {
-    return this.passkeys.rename(user.id, passkeyId, dto.name);
+    return this.passkeys.rename(user.id, passkeyId, dto.name, dto.password);
   }
 
   @UseGuards(JwtAuthGuard)
