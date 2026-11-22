@@ -11,6 +11,7 @@ const createRepoMock = () =>
     count: vi.fn().mockResolvedValue(0),
     update: vi.fn().mockResolvedValue({ affected: 1 }),
     softDelete: vi.fn().mockResolvedValue({ affected: 1 }),
+    delete: vi.fn().mockResolvedValue({ affected: 1 }),
   }) as any;
 
 describe('AccountDataService', () => {
@@ -20,6 +21,7 @@ describe('AccountDataService', () => {
   const preferenceRepo = createRepoMock();
   const notificationRepo = createRepoMock();
   const auditRepo = createRepoMock();
+  const passkeyRepo = createRepoMock();
   const auditService = { createEvent: vi.fn() };
 
   let service: AccountDataService;
@@ -31,6 +33,7 @@ describe('AccountDataService', () => {
     sessionRepo.find.mockResolvedValue([]);
     notificationRepo.find.mockResolvedValue([]);
     auditRepo.find.mockResolvedValue([]);
+    passkeyRepo.find.mockResolvedValue([]);
     preferenceRepo.findOne.mockResolvedValue(null);
     auditService.createEvent.mockResolvedValue({});
     service = new AccountDataService(
@@ -40,6 +43,7 @@ describe('AccountDataService', () => {
       preferenceRepo,
       notificationRepo,
       auditRepo,
+      passkeyRepo,
       auditService as never,
     );
   });
@@ -74,6 +78,36 @@ describe('AccountDataService', () => {
       expect(result.profile.email).toBe('a@b.c');
       expect(result.authSessions).toHaveLength(1);
     });
+
+    it('lists the passkeys by name and dates, never the key or its counter', async () => {
+      passkeyRepo.find.mockResolvedValue([
+        {
+          id: 'passkey-1',
+          userId: 'user-1',
+          credentialId: 'credential-secret-id',
+          publicKey: Buffer.from('public-key-bytes'),
+          signCount: 7,
+          name: 'Work laptop',
+          deviceType: 'multiDevice',
+          backedUp: true,
+          createdAt: new Date('2026-01-02T00:00:00Z'),
+          lastUsedAt: null,
+        },
+      ]);
+
+      const result = await service.exportMyData('user-1');
+
+      expect(result.passkeys).toEqual([
+        {
+          name: 'Work laptop',
+          deviceType: 'multiDevice',
+          backedUp: true,
+          createdAt: new Date('2026-01-02T00:00:00Z'),
+          lastUsedAt: null,
+        },
+      ]);
+      expect(JSON.stringify(result)).not.toContain('credential-secret-id');
+    });
   });
 
   describe('deleteMyAccount', () => {
@@ -88,6 +122,7 @@ describe('AccountDataService', () => {
       );
       expect(userRepo.softDelete).not.toHaveBeenCalled();
       expect(sessionRepo.update).not.toHaveBeenCalled();
+      expect(passkeyRepo.delete).not.toHaveBeenCalled();
       expect(auditService.createEvent).not.toHaveBeenCalled();
     });
 
@@ -120,6 +155,7 @@ describe('AccountDataService', () => {
       await service.deleteMyAccount('user-1', 'right-password');
 
       expect(sessionRepo.update).toHaveBeenCalled();
+      expect(passkeyRepo.delete).toHaveBeenCalledWith({ userId: 'user-1' });
       expect(userRepo.softDelete).toHaveBeenCalledWith('user-1');
     });
 

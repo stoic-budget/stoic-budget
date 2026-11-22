@@ -297,7 +297,7 @@ PostgreSQL и Redis проверяются healthcheck-ами в compose; produc
 
 ```bash
 curl http://localhost:3001/api/v1/health         # liveness
-curl http://localhost:3001/api/v1/health/ready   # проверка БД, 503 при ошибке
+curl http://localhost:3001/api/v1/health/ready   # проверка БД и Redis, 503 при ошибке
 curl http://localhost:3000
 ```
 

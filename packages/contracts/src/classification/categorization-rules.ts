@@ -64,6 +64,10 @@ const ClassificationResult = Schema.Struct({
   comment: Schema.optional(Schema.String),
   /** The payee a matching row is given, unless a person picked one for it. */
   payeeId: Schema.optional(Schema.String),
+  /** A matching row is left out of budgets and every spending figure. */
+  excludeFromBudgets: Schema.optional(Schema.Literal(true)),
+  /** Who hears about a new matching row: one member, or every member with `null`. */
+  notify: Schema.optional(Schema.Struct({ memberId: Schema.NullOr(Schema.String) })),
 });
 
 /** `GET /categorization-rules/:id`, and what creating or updating one answers. */
@@ -81,6 +85,8 @@ export const CategorizationRule = Schema.Struct({
   result: ClassificationResult,
   priority: Schema.Number,
   isActive: Schema.Boolean,
+  /** The folder the rule is shown in, if any. Folders do not change which rule wins. */
+  groupId: Schema.NullOr(Schema.String),
   matchCount: Schema.Number,
   lastMatchedAt: Schema.NullOr(Timestamp),
   createdAt: Timestamp,
@@ -134,7 +140,7 @@ export type CategorizationRuleTestResult = Wire<typeof CategorizationRuleTestRes
 /**
  * `POST /categorization-rules/:id/apply`: rows refiled, rows whose hand-picked
  * category stayed, rows tagged, rows moved to the rule's account, rows that
- * got its comment or its payee.
+ * got its comment or its payee, rows left out of budgets. Nobody is notified.
  */
 export const CategorizationRuleApplyResult = Schema.Struct({
   applied: Schema.Number,
@@ -147,6 +153,8 @@ export const CategorizationRuleApplyResult = Schema.Struct({
   commented: Schema.Number,
   /** Rows given the rule's payee. */
   renamed: Schema.Number,
+  /** Rows now left out of budgets. */
+  excluded: Schema.Number,
 });
 export type CategorizationRuleApplyResult = Wire<typeof CategorizationRuleApplyResult>;
 

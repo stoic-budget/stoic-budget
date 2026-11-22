@@ -38,7 +38,7 @@ export function pickedByHand(row: Pick<Partial<Transaction>, 'payeeSource'>): bo
 export function applyRuleLayers(
   layers: RuleLayers,
   classification: Partial<Transaction>,
-  row: Pick<Partial<Transaction>, 'comments' | 'payeeSource'>,
+  row: Pick<Partial<Transaction>, 'comments' | 'payeeSource' | 'budgetsSetByHand'>,
 ): { ruleSetOwner: boolean } {
   const { setBy } = layers;
   if (setBy.categoryId) {
@@ -64,6 +64,10 @@ export function applyRuleLayers(
   if (setBy.payeeId && !pickedByHand(row)) {
     classification.payeeId = setBy.payeeId.result.payeeId;
     classification.payeeSource = 'rule';
+  }
+  // A person who counted the row in, or left it out, has decided.
+  if (setBy.excludeFromBudgets && !row.budgetsSetByHand) {
+    classification.excludedFromBudgets = true;
   }
   if (!setBy.ownerMemberId) {
     return { ruleSetOwner: false };

@@ -28,5 +28,7 @@ export function toCurrentUser(user: User): CurrentUser {
     welcomeTutorialSeenAt: user.welcomeTutorialSeenAt?.toISOString() ?? null,
     pageHintsSeen: user.pageHintsSeen ?? {},
     passwordSet: user.passwordSet !== false,
+    changelogSeenId: user.changelogSeenId ?? null,
+    changelogSeenAt: user.changelogSeenAt?.toISOString() ?? null,
   };
 }

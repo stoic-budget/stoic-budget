@@ -4,6 +4,8 @@ import {
   type StatementFilterDatePreset,
   type StatementFilters,
 } from '@/app/(main)/statements/components/filters/statement-filters';
+import type { PayPeriodContext } from '@/app/lib/contracts';
+import { periodBounds } from '@/app/lib/contracts/workspaces/pay-period';
 
 const MONTH_PATTERN = /^(\d{4})-(\d{2})$/;
 
@@ -28,9 +30,16 @@ function parseMonth(month: string | null | undefined): ParsedMonth | null {
 }
 
 /** A whole month as an inclusive range, for months no preset covers. */
-function explicitRange({ year, monthIndex }: ParsedMonth): StatementFilterDate {
+function explicitRange(
+  { year, monthIndex }: ParsedMonth,
+  payPeriod?: PayPeriodContext,
+): StatementFilterDate {
   const pad = (value: number): string => String(value).padStart(2, '0');
   const month = pad(monthIndex + 1);
+  if (payPeriod) {
+    const { from, to } = periodBounds(payPeriod, `${year}-${month}`);
+    return { mode: 'on', date: from, dateTo: to };
+  }
   return {
     mode: 'on',
     date: `${year}-${month}-01`,
@@ -45,19 +54,24 @@ function explicitRange({ year, monthIndex }: ParsedMonth): StatementFilterDate {
  * aggregate everything they have; without this the highlighted row shows an
  * all-time total the advice never claimed. Returns null for anything that is
  * not a `YYYY-MM`, so a hand-written insight cannot empty the page.
+ *
+ * With `payPeriod` (a workspace whose month starts on another day than the
+ * 1st, see `usePayPeriods`) the month is that workspace month, always as an
+ * explicit range: the presets name calendar months.
  */
 export function monthDeepLinkFilters(
   month: string | null | undefined,
   now: Date = new Date(),
+  payPeriod?: PayPeriodContext,
 ): StatementFilters | null {
   const parsed = parseMonth(month);
   if (!parsed) {
     return null;
   }
   const monthsBack = (now.getFullYear() - parsed.year) * 12 + (now.getMonth() - parsed.monthIndex);
-  const preset = PRESET_BY_MONTHS_BACK[monthsBack];
+  const preset = payPeriod ? undefined : PRESET_BY_MONTHS_BACK[monthsBack];
   return {
     ...DEFAULT_STATEMENT_FILTERS,
-    date: preset ? { preset } : explicitRange(parsed),
+    date: preset ? { preset } : explicitRange(parsed, payPeriod),
   };
 }

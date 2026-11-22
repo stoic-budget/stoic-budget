@@ -35,6 +35,14 @@ describe('advice order', () => {
     expect(isGoodNews(insight({ messageKey: 'trend.savings_rate_down' }))).toBe(false);
   });
 
+  it('calls a net worth milestone good news, and an unusual category not', () => {
+    const milestone = insight({ type: 'pattern.net_worth_milestone', data: { priority: 26 } });
+    expect(isGoodNews(milestone)).toBe(true);
+    expect(needsAttention(milestone)).toBe(false);
+    expect(isGoodNews(insight({ type: 'trend.category_anomaly', severity: 'warn' }))).toBe(false);
+    expect(isGoodNews(insight({ type: 'pattern.idle_cash' }))).toBe(false);
+  });
+
   it('sorts by importance, the newest first among equals', () => {
     const rows = [
       insight({ id: 'low', data: { priority: 10 } }),

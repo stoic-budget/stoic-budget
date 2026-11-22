@@ -8,9 +8,9 @@ import { TextTabs } from '@/app/components/ui/text-tabs';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import { BalanceGroupRow } from './BalanceGroupRow';
-import { monthEndOrToday } from './month-end';
 import { netWorthHref } from './NetWorthCard';
 import { CardEmpty, CardLink, DashboardCard } from './ui';
+import { usePresentPeriod } from './use-period-label';
 
 /** The trend windows, shortest first; a fixed span is labelled by Intl. */
 const PERIODS: Array<{ range: NetWorthRange; span?: [number, 'month' | 'year'] }> = [
@@ -35,7 +35,8 @@ export function BalancesCard({ month, monthLabel }: BalancesCardProps): React.JS
   const overview = useIntlayer('overviewTab');
   const netWorthText = useIntlayer('netWorthPage');
   const { locale } = useLocale();
-  const asOf = monthEndOrToday(month);
+  // The last day of the shown month by the workspace's month rule; null for the present one.
+  const asOf = usePresentPeriod().measuredOn(month);
   const { data, isFetching, range, setRange } = useNetWorthPreset('30d', asOf);
 
   if (!data) {

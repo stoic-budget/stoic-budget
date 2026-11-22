@@ -24,12 +24,7 @@ import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.e
 import { Branch } from '../../entities/branch.entity';
 import { Category, CategoryType } from '../../entities/category.entity';
 import { Statement } from '../../entities/statement.entity';
-import {
-  TaxSource,
-  Transaction,
-  TransactionCategorySource,
-  TransactionType,
-} from '../../entities/transaction.entity';
+import { TaxSource, Transaction, TransactionType } from '../../entities/transaction.entity';
 import { User } from '../../entities/user.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
@@ -37,6 +32,7 @@ import { AuditService } from '../audit/audit.service';
 import { ensurePrivateCategory } from '../categories/private-category';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
+import { markChoicesByHand } from './helpers/choices-by-hand';
 import { assertEditAllowed } from './helpers/pair-guards';
 import {
   assertFilesKeepTheirReaders,
@@ -238,17 +234,7 @@ export class TransactionsService {
       transaction.ownerMember = undefined as unknown as WorkspaceMember | null;
     }
 
-    // A category the user picked is sticky: re-classification leaves it alone.
-    // Moving in or out of `Private` is not such a pick — it would overwrite the
-    // reason the row was categorised the way it was, which the owner still needs.
-    if (
-      !movedForPrivacy &&
-      updateDto.categoryId !== undefined &&
-      updateDto.categoryId !== previousCategoryId
-    ) {
-      transaction.categorySource = updateDto.categoryId ? TransactionCategorySource.MANUAL : null;
-      transaction.categoryReason = null;
-    }
+    markChoicesByHand(transaction, updateDto, { previousCategoryId, movedForPrivacy });
 
     const saved = await this.transactionRepository.save(transaction);
     await this.invalidateReports(workspaceId);

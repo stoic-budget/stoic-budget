@@ -11,6 +11,7 @@ import { everyDay, isoDate, latestOnOrBefore, presetWindowStart } from '../balan
 import { CryptoHoldingsService } from '../crypto/crypto-holdings.service';
 import { CurrencyConverter, normalizeCurrencyCode } from '../exchange-rates/currency-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { HoldingHistoryService } from './holding-history.service';
 import { InvestmentFlowsService } from './investment-flows.service';
 import { InvestmentsService } from './investments.service';
 import { MetalsService } from './metals.service';
@@ -49,6 +50,7 @@ export class InvestmentReturnsService {
     private readonly cryptoHoldingsService: CryptoHoldingsService,
     private readonly historyService: BalanceHistoryService,
     private readonly exchangeRatesService: ExchangeRatesService,
+    private readonly holdingHistory: HoldingHistoryService,
   ) {}
 
   async getReturns(workspaceId: string, range: ReturnsRange): Promise<ReturnsResponse> {
@@ -89,18 +91,31 @@ export class InvestmentReturnsService {
       days,
       workspaceId,
     );
+    // Before an account's first balance entry, its trades and the daily closes say what it held
+    // and what that was worth; where they cannot, the day stays unknown rather than guessed.
+    const priced = await this.holdingHistory.accountValuer(
+      workspaceId,
+      tracked.flatMap(source =>
+        source.kind === 'account' && source.accountId ? [source.accountId] : [],
+      ),
+      currency,
+      days,
+    );
+    const pricedAt = (source: TrackedSource, date: string): number | null =>
+      source.kind === 'account' && source.accountId ? priced(source.accountId, date) : null;
     const valueAt = (source: TrackedSource, date: string): number => {
       if (date === to) {
         return source.liveValue;
       }
       const point = latestOnOrBefore(histories.get(source.id), date);
-      return point ? converter.convert(point.amount, point.currency, date) : 0;
+      if (point) return converter.convert(point.amount, point.currency, date);
+      return pricedAt(source, date) ?? 0;
     };
 
     const sources: ReturnsSource[] = [];
     const included: Array<{ source: TrackedSource; startValue: number }> = [];
     for (const source of tracked) {
-      const opening = openingValue(source, range, from, histories, valueAt);
+      const opening = openingValue(source, range, from, histories, valueAt, pricedAt);
       const blockers =
         opening === null ? [...source.blockers, 'opening_value_unknown' as const] : source.blockers;
       const row = periodRow(source, opening ?? 0, from, to);
@@ -163,12 +178,24 @@ export class InvestmentReturnsService {
       ),
       currency,
     );
-    for (const code of missing) {
+    // Accounts whose money moves are linked bank rows: their trades say only what was bought.
+    const linked = new Set(
+      flows.filter(flow => flow.kind !== 'income' && !flow.fromTrades).map(flow => flow.accountId),
+    );
+    const traded = await this.flowsService.valueFlows(
+      workspaceId,
+      await this.flowsService.tradeFlows(workspaceId, [...linked]),
+      currency,
+    );
+    for (const code of [...missing, ...traded.missing]) {
       flags.push({ code: 'missing_fx', detail: code });
     }
 
     const tracked: TrackedSource[] = accounts.map(account => {
       const own = flows.filter(flow => flow.accountId === account.id);
+      const tradeMoves = linked.has(account.id)
+        ? traded.flows.filter(flow => flow.accountId === account.id)
+        : undefined;
       const blockers: ReturnsFlagCode[] = [];
       if (account.value > 0 && !own.some(flow => flow.kind === 'contribution')) {
         blockers.push('no_contributions');
@@ -182,6 +209,7 @@ export class InvestmentReturnsService {
         accountId: account.id,
         liveValue: account.value,
         flows: own,
+        tradeMoves,
         blockers,
         notes,
       };

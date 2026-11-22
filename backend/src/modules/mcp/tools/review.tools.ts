@@ -2,22 +2,23 @@ import { Schema } from 'effect';
 import { Permission } from '../../../common/enums/permissions.enum';
 import { parseReviewerFilter } from '../../../common/utils/transaction-owner.util';
 import {
-  ReviewApproved,
+  McpBulkChange,
   ReviewInboxCounts,
   ReviewInboxKind,
   ReviewInboxPage,
   type ReviewInboxQuery,
 } from '../../../contracts';
 import type { ReviewInboxService } from '../../review-inbox/review-inbox.service';
+import type { BulkChangeDeps } from '../confirm/mcp-confirm.service';
 import { defineTool, type McpTool } from '../mcp-tool';
-import { Day, described, Limit, Page, Uuid } from './inputs';
+import { ConfirmToken, Day, described, Limit, Page, Uuid } from './inputs';
 
 const Reviewer = described(
   Schema.Literals(['me', 'anyone']),
   'me: my rows plus the shared ones; anyone: the whole workspace (default)',
 );
 
-export function reviewTools(review: ReviewInboxService): McpTool[] {
+export function reviewTools(review: ReviewInboxService, bulk: BulkChangeDeps): McpTool[] {
   return [
     defineTool({
       name: 'get_review_counts',
@@ -56,18 +57,29 @@ export function reviewTools(review: ReviewInboxService): McpTool[] {
     defineTool({
       name: 'approve_transactions',
       description:
-        'Confirm up to 500 transactions in Review, optionally putting them all into one category. Logged as this API key and undoable from the activity log.',
+        'Confirm up to 500 transactions in Review, optionally putting them all into one category. Two steps: without confirmToken it changes nothing and previews which rows would change and which are skipped; the same call with the preview’s confirmToken applies it. Logged as this API key and undoable from the activity log.',
       input: Schema.Struct({
         ids: Schema.Array(Uuid).check(Schema.isMinLength(1), Schema.isMaxLength(500)),
         categoryId: Schema.optionalKey(
           described(Uuid, 'Category for all of them; omitted keeps each row’s category'),
         ),
+        confirmToken: ConfirmToken,
       }),
       permissions: [Permission.TRANSACTION_EDIT],
-      output: ReviewApproved,
+      output: McpBulkChange,
+      structured: true,
       readOnly: false,
-      run: (ctx, args) =>
-        review.approveTransactions(ctx.workspaceId, ctx.user.id, [...args.ids], args.categoryId),
+      run: (ctx, { confirmToken, ...args }) =>
+        bulk.confirm.run(ctx, {
+          tool: 'approve_transactions',
+          args,
+          confirmToken,
+          plan: () =>
+            bulk.planner.plan(ctx, args.ids, { categoryId: args.categoryId, approve: true }),
+          apply: async ids =>
+            (await review.approveTransactions(ctx.workspaceId, ctx.user.id, ids, args.categoryId))
+              .approved,
+        }),
     }),
   ];
 }

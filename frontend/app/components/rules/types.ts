@@ -33,6 +33,10 @@ export interface RuleDraftBody {
     payeeId?: string;
     /** A payee the workspace does not have yet: made when the rule is saved. */
     payeeName?: string;
+    /** Matching rows leave budgets and every spending figure. */
+    excludeFromBudgets?: true;
+    /** Tells one member, or everyone with `null`, about each new matching row. */
+    notify?: { memberId: string | null };
   };
 }
 

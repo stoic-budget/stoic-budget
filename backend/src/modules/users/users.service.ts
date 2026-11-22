@@ -34,9 +34,10 @@ import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-re
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { snapshotAdminFields } from './admin-fields';
 import { CURRENT_DISCLAIMER_VERSION } from './disclaimer.constant';
+import { OWN_PROFILE_COLUMNS } from './own-profile-columns';
 import { recordPasswordChanged } from './password-changed';
 import { EmailChangeService } from './services/email-change.service';
-import { USER_PROFILE_SELECT, USER_WITH_PASSWORD_SELECT } from './user-selects';
+import { USER_PROFILE_SELECT } from './user-selects';
 
 /** How many pages the page-hint map may name; see markPageHintsSeen. */
 export const PAGE_HINTS_MAX_KEYS = 100;
@@ -65,10 +66,7 @@ export class UsersService {
   }
 
   private async findOneWithPassword(id: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      select: USER_WITH_PASSWORD_SELECT,
-    });
+    const user = await this.userRepository.findOne({ where: { id }, select: OWN_PROFILE_COLUMNS });
 
     if (!user) {
       throw new NotFoundException(appError('USER_NOT_FOUND'));

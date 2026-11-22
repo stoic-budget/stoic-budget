@@ -33,6 +33,7 @@ import { CrossStatementDeduplicationService } from '../../transactions/services/
 import { ManualRowDuplicateService } from '../../transactions/services/manual-row-duplicate.service';
 import { TransactionFingerprintService } from '../../transactions/services/transaction-fingerprint.service';
 import { TransferPairingService } from '../../transactions/services/transfer-pairing.service';
+import { parsedRowFields } from '../helpers/parsed-row-fields.helper';
 import {
   accountFields,
   accountOfStatement,
@@ -927,12 +928,8 @@ export class StatementProcessingService {
 
       // Classify transaction first (before creating entity)
       const tempTransaction = {
-        transactionDate: parsed.transactionDate,
-        documentNumber: parsed.documentNumber,
+        ...parsedRowFields(parsed),
         counterpartyName,
-        counterpartyBin: parsed.counterpartyBin,
-        counterpartyAccount: parsed.counterpartyAccount,
-        counterpartyBank: parsed.counterpartyBank,
         debit: parsed.debit ?? null,
         credit: parsed.credit ?? null,
         amount,
@@ -959,12 +956,8 @@ export class StatementProcessingService {
       const transaction = this.transactionRepository.create({
         statementId: statement.id,
         workspaceId: statement.workspaceId,
-        transactionDate: parsed.transactionDate,
-        documentNumber: parsed.documentNumber,
+        ...parsedRowFields(parsed),
         counterpartyName,
-        counterpartyBin: parsed.counterpartyBin,
-        counterpartyAccount: parsed.counterpartyAccount,
-        counterpartyBank: parsed.counterpartyBank,
         debit: parsed.debit,
         credit: parsed.credit,
         amount,

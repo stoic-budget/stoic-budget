@@ -56,6 +56,14 @@ export const ACCOUNTS_ERRORS = {
   AUTH_STEP_UP_REQUIRED: 'Sign in with your provider again before setting a password',
   AUTH_PASSWORD_ALREADY_SET:
     'This account already has a password. Change it with your current password',
+  AUTH_PASSKEYS_UNAVAILABLE: 'Passkeys need APP_URL to be set on this server',
+  AUTH_PASSKEY_INVALID: 'The passkey could not be verified',
+  AUTH_PASSKEY_COUNTER_REGRESSION:
+    'This passkey reported an older use count than before and was refused',
+  AUTH_PASSKEY_REGISTRATION_INVALID: 'The new passkey could not be verified. Try again',
+  AUTH_PASSKEY_ALREADY_REGISTERED: 'This passkey is already registered',
+  AUTH_PASSKEY_NOT_FOUND: 'Passkey not found',
+  AUTH_PASSKEY_NAME_REQUIRED: 'Give the passkey a name',
   AUTHZ_PERMISSIONS_REQUIRED: 'Insufficient permissions. Required: {{permissions}}',
   AUTHZ_API_KEY_SCOPE_MISSING: 'API key scope missing: {{scopes}}',
   // ── api keys ────────────────────────────────────────────────────────────

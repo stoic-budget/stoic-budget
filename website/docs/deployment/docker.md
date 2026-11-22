@@ -150,7 +150,7 @@ per provider. See [Configuration](../getting-started/configuration#single-sign-o
 
 ```bash
 curl http://localhost:3001/api/v1/health         # liveness
-curl http://localhost:3001/api/v1/health/ready   # also checks the database
+curl http://localhost:3001/api/v1/health/ready   # also checks the database and Redis
 ```
 
 The production backend and frontend images define Docker `HEALTHCHECK`s.

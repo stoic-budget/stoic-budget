@@ -4,10 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiResponse } from '@/app/test/api-response';
 import { authUser } from '@/app/test/fixtures/contracts';
 
-const { apiPost, finishSignIn } = vi.hoisted(() => ({ apiPost: vi.fn(), finishSignIn: vi.fn() }));
+const { apiPost, completeSignIn } = vi.hoisted(() => ({ apiPost: vi.fn(), completeSignIn: vi.fn() }));
 
 vi.mock('@/app/lib/api', () => ({ __esModule: true, default: { post: apiPost } }));
-vi.mock('@/app/lib/finish-sign-in', () => ({ finishSignIn }));
+vi.mock('./complete-sign-in', () => ({ completeSignIn }));
 vi.mock('@/app/i18n', () => ({
   useIntlayer: () => ({
     completing: 'Signing you in…',
@@ -31,7 +31,7 @@ describe('OidcCompletion', () => {
     document.body.appendChild(container);
     root = createRoot(container);
     apiPost.mockReset();
-    finishSignIn.mockReset();
+    completeSignIn.mockReset();
   });
 
   afterEach(() => {
@@ -55,7 +55,7 @@ describe('OidcCompletion', () => {
     await render();
     expect(apiPost).toHaveBeenCalledTimes(1);
     expect(apiPost).toHaveBeenCalledWith('/auth/oidc/complete', {});
-    expect(finishSignIn).toHaveBeenCalledWith(user, { inviteToken: null, nextPath: '/reports' });
+    expect(completeSignIn).toHaveBeenCalledWith(user, { inviteToken: null, nextPath: '/reports' });
   });
 
   it('asks for the second factor and sends it', async () => {
@@ -66,7 +66,7 @@ describe('OidcCompletion', () => {
     await render();
     const input = container.querySelector('#oidcTwoFactorCode') as HTMLInputElement;
     expect(input).not.toBeNull();
-    expect(finishSignIn).not.toHaveBeenCalled();
+    expect(completeSignIn).not.toHaveBeenCalled();
 
     await act(async () => {
       const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
@@ -77,7 +77,7 @@ describe('OidcCompletion', () => {
       container.querySelector('form')?.requestSubmit();
     });
     expect(apiPost).toHaveBeenLastCalledWith('/auth/oidc/complete', { twoFactorCode: '123456' });
-    expect(finishSignIn).toHaveBeenCalledWith(user, { inviteToken: null, nextPath: '/reports' });
+    expect(completeSignIn).toHaveBeenCalledWith(user, { inviteToken: null, nextPath: '/reports' });
   });
 
   it('tells a failure and offers the password instead', async () => {

@@ -1,4 +1,5 @@
 import * as Schema from 'effect/Schema';
+import { PasskeyAssertion } from '../auth/passkeys';
 import { Email, optionalNullable } from '../common/requests';
 import type { Wire } from '../common/wire';
 
@@ -16,6 +17,8 @@ export const LoginBody = Schema.Struct({
   password: Schema.String,
   /** TOTP code or recovery code, required only when the account has 2FA enabled. */
   twoFactorCode: optionalNullable(Schema.String),
+  /** A passkey answering the second-factor challenge the first login attempt returned. */
+  twoFactorPasskey: optionalNullable(PasskeyAssertion),
 });
 export type LoginBody = Wire<typeof LoginBody>;
 

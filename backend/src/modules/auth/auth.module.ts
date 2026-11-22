@@ -8,6 +8,7 @@ import { devDefault } from '../../common/utils/dev-defaults';
 import {
   AuthSession,
   InstanceSetting,
+  PasskeyCredential,
   PasswordResetToken,
   User,
   UserIdentity,
@@ -33,6 +34,10 @@ import { OidcStateStore } from './oidc/oidc-state.store';
 import { OidcStepUpService } from './oidc/oidc-step-up.service';
 import { PasswordSetController } from './oidc/password-set.controller';
 import { PasswordSetService } from './oidc/password-set.service';
+import { PasskeyAuthService } from './passkeys/passkey-auth.service';
+import { PasskeyChallengeStore } from './passkeys/passkey-challenge.store';
+import { PasskeysController } from './passkeys/passkeys.controller';
+import { PasskeysService } from './passkeys/passkeys.service';
 import { PasswordResetService } from './password-reset.service';
 import { RegistrationController } from './registration.controller';
 import { RegistrationSettingsService } from './registration-settings.service';
@@ -51,6 +56,7 @@ import { TwoFactorService } from './two-factor.service';
       AuthSession,
       PasswordResetToken,
       UserIdentity,
+      PasskeyCredential,
     ]),
     AuditModule,
     CalendarFeedRevocationModule,
@@ -77,11 +83,15 @@ import { TwoFactorService } from './two-factor.service';
     OidcController,
     OidcSettingsController,
     PasswordSetController,
+    PasskeysController,
   ],
   providers: [
     AuthService,
     RegistrationSettingsService,
     TwoFactorService,
+    PasskeysService,
+    PasskeyAuthService,
+    PasskeyChallengeStore,
     PasswordResetService,
     AuthDevBootstrapService,
     JwtStrategy,

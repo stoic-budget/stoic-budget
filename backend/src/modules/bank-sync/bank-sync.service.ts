@@ -27,6 +27,7 @@ import {
   type RedirectBankSyncProvider,
   type TokenBankSyncProvider,
 } from './bank-sync-provider.interface';
+import { scheduleOf } from './bank-sync-schedule';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -37,6 +38,7 @@ export interface BankSyncConnection {
   label: string;
   status: IntegrationStatus;
   config: BankSyncConnectionConfig;
+  schedule: ReturnType<typeof scheduleOf>;
 }
 
 /**
@@ -65,10 +67,7 @@ export class BankSyncService {
 
   /** The providers this build can offer, for the "add a connection" screen. */
   catalogue(): Array<{ key: string; linkStyle: 'token' | 'redirect' }> {
-    return this.providers.map(provider => ({
-      key: provider.key,
-      linkStyle: provider.linkStyle,
-    }));
+    return this.providers.map(({ key, linkStyle }) => ({ key, linkStyle }));
   }
 
   async list(workspaceId: string): Promise<BankSyncConnection[]> {
@@ -385,6 +384,7 @@ export class BankSyncService {
       label: config.label || integration.provider,
       status: integration.status,
       config,
+      schedule: scheduleOf(integration.openProtocolSettings),
     };
   }
 

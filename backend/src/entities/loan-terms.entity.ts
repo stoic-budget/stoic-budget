@@ -96,6 +96,10 @@ export class LoanTerms {
   @Column({ name: 'extra_mode', type: 'varchar', length: 16, default: 'reduce_term' })
   extraMode: LoanExtraModeValue;
 
+  /** Split new payments into the account into principal and interest on import. */
+  @Column({ name: 'auto_split', type: 'boolean', default: false })
+  autoSplit: boolean;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

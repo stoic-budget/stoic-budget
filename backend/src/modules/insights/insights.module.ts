@@ -14,9 +14,11 @@ import { ClassificationModule } from '../classification/classification.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { GoalsModule } from '../goals/goals.module';
 import { NetWorthModule } from '../net-worth/net-worth.module';
+import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { FinancialAnalyzer } from './analyzers/financial.analyzer';
 import { OperationalAnalyzer } from './analyzers/operational.analyzer';
 import { StoicAnalyzer } from './analyzers/stoic.analyzer';
+import { WealthAnalyzer } from './analyzers/wealth.analyzer';
 import { InsightsController } from './insights.controller';
 import { InsightsService } from './insights.service';
 import { DailyQuoteService } from './quotes/daily-quote.service';
@@ -42,6 +44,7 @@ import { StoicBehaviorService } from './stoic/stoic-behavior.service';
     ExchangeRatesModule,
     GoalsModule,
     ClassificationModule,
+    PayPeriodModule,
   ],
   controllers: [InsightsController],
   providers: [
@@ -49,6 +52,7 @@ import { StoicBehaviorService } from './stoic/stoic-behavior.service';
     OperationalAnalyzer,
     FinancialAnalyzer,
     StoicAnalyzer,
+    WealthAnalyzer,
     StoicLedgerService,
     StoicBehaviorService,
     DailyQuoteService,

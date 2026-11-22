@@ -24,6 +24,10 @@ import { User } from '../../entities/user.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { NotificationDeliveryService } from './notification-delivery.service';
 import type { NotificationParams } from './notification-params';
+import {
+  NOTIFICATION_PREFERENCE_KEYS,
+  NOTIFICATION_PREFERENCE_MAP,
+} from './notification-preference-keys';
 import { type NotificationMessageKey, renderNotification } from './notification-translations';
 
 /**
@@ -45,65 +49,10 @@ const POINTS_AT_EXISTING_DOCUMENT = `(
   )
 )`;
 
-type NotificationPreferenceKey =
-  | 'statementUploaded'
-  | 'importCommitted'
-  | 'categoryChanges'
-  | 'memberActivity'
-  | 'dataDeleted'
-  | 'workspaceUpdated'
-  | 'parsingErrors'
-  | 'importFailures'
-  | 'uncategorizedItems'
-  | 'subscriptionPrompts';
-
 /** Anything that is not a real boolean leaves the current setting alone — a
  * truthy string must not be able to switch a channel on. */
 const pickBoolean = (value: unknown, fallback: boolean): boolean =>
   typeof value === 'boolean' ? value : fallback;
-
-const NOTIFICATION_PREFERENCE_KEYS: NotificationPreferenceKey[] = [
-  'statementUploaded',
-  'importCommitted',
-  'categoryChanges',
-  'memberActivity',
-  'dataDeleted',
-  'workspaceUpdated',
-  'parsingErrors',
-  'importFailures',
-  'uncategorizedItems',
-  'subscriptionPrompts',
-];
-
-const NOTIFICATION_PREFERENCE_MAP: Record<NotificationType, NotificationPreferenceKey> = {
-  [NotificationType.STATEMENT_UPLOADED]: 'statementUploaded',
-  [NotificationType.IMPORT_COMMITTED]: 'importCommitted',
-  [NotificationType.CATEGORY_CREATED]: 'categoryChanges',
-  [NotificationType.CATEGORY_UPDATED]: 'categoryChanges',
-  [NotificationType.CATEGORY_DELETED]: 'categoryChanges',
-  [NotificationType.NOTE_MENTIONED]: 'memberActivity',
-  [NotificationType.MEMBER_INVITED]: 'memberActivity',
-  [NotificationType.MEMBER_JOINED]: 'memberActivity',
-  [NotificationType.DATA_DELETED]: 'dataDeleted',
-  [NotificationType.WORKSPACE_UPDATED]: 'workspaceUpdated',
-  [NotificationType.PARSING_ERROR]: 'parsingErrors',
-  [NotificationType.IMPORT_FAILED]: 'importFailures',
-  [NotificationType.TRANSACTION_UNCATEGORIZED]: 'uncategorizedItems',
-  [NotificationType.RECEIPT_UNCATEGORIZED]: 'uncategorizedItems',
-  [NotificationType.PAYABLE_DUE_SOON]: 'workspaceUpdated',
-  [NotificationType.PAYABLE_OVERDUE]: 'workspaceUpdated',
-  [NotificationType.PAYABLE_MARKED_PAID]: 'workspaceUpdated',
-  [NotificationType.BUDGET_WARNING]: 'workspaceUpdated',
-  [NotificationType.TAX_THRESHOLD_WARNING]: 'workspaceUpdated',
-  [NotificationType.TAX_THRESHOLD_REACHED]: 'workspaceUpdated',
-  [NotificationType.TAX_DEADLINE_UPCOMING]: 'workspaceUpdated',
-  [NotificationType.TAX_DEADLINE_OVERDUE]: 'workspaceUpdated',
-  [NotificationType.TAX_RATES_OFFICIAL_CHANGED]: 'workspaceUpdated',
-  [NotificationType.BUDGET_EXCEEDED]: 'workspaceUpdated',
-  [NotificationType.SUBSCRIPTION_DETECTED]: 'subscriptionPrompts',
-  [NotificationType.SUBSCRIPTION_UPCOMING]: 'workspaceUpdated',
-  [NotificationType.SUBSCRIPTION_PRICE_CHANGED]: 'workspaceUpdated',
-};
 
 export interface CreateNotificationPayload {
   recipientId: string;

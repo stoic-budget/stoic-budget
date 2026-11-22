@@ -377,6 +377,59 @@ describe('ledger sync (real Postgres)', () => {
     expect((await sync.integrity(workspaceId)).orphanEntries).toBe(0);
   });
 
+  it("books loan interest by its payment: the payment's statement in the trash takes it out", async () => {
+    const loanStatement = await dataSource.getRepository(Statement).save(
+      dataSource.getRepository(Statement).create({
+        userId,
+        workspaceId,
+        fileName: 'loan.pdf',
+        filePath: '/tmp/loan.pdf',
+        fileType: FileType.PDF,
+        fileSize: 1,
+        fileHash: randomUUID(),
+        bankName: BankName.OTHER,
+        status: StatementStatus.COMPLETED,
+        accountNumber: 'DE00 3333 4444',
+        currency: 'EUR',
+      }),
+    );
+    const payment = await insertTransaction({
+      statementId: loanStatement.id,
+      transactionType: TransactionType.INCOME,
+      amount: 300,
+      credit: 300,
+      categoryId: null,
+    });
+    // Interest split off it (loans/loan-interest-row): no statement of its own.
+    const interest = await insertTransaction({
+      statementId: null,
+      amount: 40,
+      debit: 40,
+      loanInterestOfId: payment,
+    });
+    const live = async (id: string) =>
+      (
+        await query<{ count: number }>(
+          `SELECT count(*)::int AS "count" FROM "journal_entries"
+            WHERE "source_transaction_id" = $1 AND "status" = 'posted' AND "reversal_of_id" IS NULL`,
+          [id],
+        )
+      )[0].count;
+    await sync.syncWorkspace(workspaceId);
+    expect([await live(payment), await live(interest)]).toEqual([1, 1]);
+
+    await dataSource.getRepository(Statement).update(loanStatement.id, { deletedAt: new Date() });
+    expect((await flags(interest)).ledger_dirty).toBe(true);
+    await sync.syncWorkspace(workspaceId);
+    // As the reconciliation counts it (countedSql): out with its payment.
+    expect([await live(payment), await live(interest)]).toEqual([0, 0]);
+
+    await dataSource.getRepository(Statement).update(loanStatement.id, { deletedAt: null });
+    expect((await flags(interest)).ledger_dirty).toBe(true);
+    await sync.syncWorkspace(workspaceId);
+    expect([await live(payment), await live(interest)]).toEqual([1, 1]);
+  });
+
   it('fixes the base currency once entries exist', async () => {
     await expect(sync.enable(workspaceId, userId, 'EUR')).resolves.toMatchObject({ baseCurrency: 'EUR' });
     let status: number | undefined;

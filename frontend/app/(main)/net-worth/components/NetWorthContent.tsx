@@ -8,6 +8,7 @@ import { FALLBACK_CURRENCY } from '@/app/lib/currency';
 import { formatMoney } from '@/app/lib/format-money';
 import { useNetWorth } from '../hooks/useNetWorth';
 import { AllocationCard } from './AllocationCard';
+import { AllocationMixCard } from './AllocationMixCard';
 import { AttributionCard } from './AttributionCard';
 import { HoldingsSection } from './HoldingsSection';
 import { ASSET_CLASS_KEYS, InvestmentsCard } from './InvestmentsCard';
@@ -16,6 +17,7 @@ import { NetWorthControls } from './NetWorthControls';
 import { NetWorthHeadline } from './NetWorthHeadline';
 import { NetWorthSkeleton } from './NetWorthSkeleton';
 import { CardTitle, cardSx } from './net-worth-ui';
+import { PropertyCard } from './property/PropertyCard';
 import { RiskCard } from './RiskCard';
 
 export function NetWorthContent() {
@@ -127,6 +129,8 @@ export function NetWorthContent() {
             locale={locale}
           />
 
+          <AllocationMixCard locale={locale} excluded={excluded} />
+
           <RiskCard
             byRisk={data.byRisk}
             byRole={data.byRole}
@@ -154,6 +158,8 @@ export function NetWorthContent() {
             }}
             onClassify={classify}
           />
+
+          <PropertyCard properties={data.properties} currency={currency} locale={locale} />
 
           <Box sx={cardSx}>
             <CardTitle>{t.holdingsTitle}</CardTitle>

@@ -8,7 +8,7 @@ import { useCallback, useState } from 'react';
 import { useOidcCompletion } from '@/app/hooks/useOidcCompletion';
 import { useIntlayer } from '@/app/i18n';
 import type { AuthUser } from '@/app/lib/contracts';
-import { finishSignIn } from '@/app/lib/finish-sign-in';
+import { completeSignIn } from './complete-sign-in';
 
 /**
  * The login page after the provider sent the browser back: signs in, asking
@@ -26,7 +26,7 @@ export function OidcCompletion({
   const [code, setCode] = useState('');
   const [sending, setSending] = useState(false);
   const signedIn = useCallback(
-    (user: AuthUser) => finishSignIn(user, { inviteToken, nextPath }),
+    (user: AuthUser) => completeSignIn(user, { inviteToken, nextPath }),
     [inviteToken, nextPath],
   );
   const { state, submitCode } = useOidcCompletion(signedIn, t.failed.value);

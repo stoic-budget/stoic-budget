@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { assertFound } from '../../common/utils/assert-found.util';
@@ -19,15 +19,14 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { Workspace } from '../../entities/workspace.entity';
 import {
   clampToWindow,
-  computeMonthRange,
   computePeriodRange,
   normalizeLimitToMonth,
   overlapsWindow,
-  parseMonthKey,
-  toMonthKey,
+  resolveMonth,
 } from '../budgets/budget-period.util';
 import { CategoriesService } from '../categories/categories.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { PayPeriodService, type ResolvedPayPeriod } from '../pay-period/pay-period.service';
 import {
   addMissingRates,
   buildRateMap,
@@ -93,6 +92,7 @@ export class GoalFlowService {
     private readonly workspaceRepository: Repository<Workspace>,
     private readonly categoriesService: CategoriesService,
     private readonly exchangeRatesService: ExchangeRatesService,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
 
   async getFlow(
@@ -105,8 +105,8 @@ export class GoalFlowService {
     const goal = await this.goalRepository.findOne({ where: { id: goalId, workspaceId } });
     assertFound(goal, 'Goal');
 
-    const anchor = parseMonthKey(month, now);
-    const window = computeMonthRange(anchor);
+    const payPeriod = await this.payPeriods?.contextFor(workspaceId);
+    const { key, anchor, window } = resolveMonth(month, now, payPeriod);
     const currency = await this.getWorkspaceCurrency(workspaceId);
 
     const [allBudgets, progress] = await Promise.all([
@@ -156,7 +156,7 @@ export class GoalFlowService {
       workspaceId,
       budgets,
       descendants,
-      anchor,
+      { anchor, payPeriod },
       rates,
       currency,
     );
@@ -261,7 +261,7 @@ export class GoalFlowService {
         remaining: round2(Math.max(targetAmount - contributed, 0)),
         targetDate: goal.targetDate,
       },
-      month: toMonthKey(anchor),
+      month: key,
       currency,
       plannedTotal: round2(plannedTotal),
       actualTotal: round2(actualTotal),
@@ -482,7 +482,7 @@ export class GoalFlowService {
     workspaceId: string,
     budgets: Budget[],
     descendants: Map<string, string[]>,
-    anchor: Date,
+    { anchor, payPeriod: pay }: { anchor: Date; payPeriod?: ResolvedPayPeriod },
     rates: Map<string, number>,
     currency: string,
   ): Promise<Map<string, { start: Date; end: Date; actual: number }>> {
@@ -501,7 +501,7 @@ export class GoalFlowService {
     await Promise.all(
       [...byPeriod.values()].map(async group => {
         const [first] = group;
-        const period = clampToWindow(computePeriodRange(first.periodType, anchor), first);
+        const period = clampToWindow(computePeriodRange(first.periodType, anchor, pay), first);
         if (!period) {
           return;
         }

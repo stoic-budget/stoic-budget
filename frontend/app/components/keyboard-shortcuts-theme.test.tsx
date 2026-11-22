@@ -59,6 +59,8 @@ const MEMBER: User = {
   welcomeTutorialSeenAt: null,
   pageHintsSeen: {},
   passwordSet: true,
+  changelogSeenId: null,
+  changelogSeenAt: null,
 } as User;
 
 /** Holds the signed-in user the way AuthProvider does, for every hook below it. */
