@@ -221,6 +221,26 @@ describe('Investment allocation (e2e)', () => {
     expect(amountOf(body.regions, 'unclassified')).toBe(2000 + 1000);
   });
 
+  it('never keeps a breakdown on a holding turned into a share at the same time', async () => {
+    for (let round = 0; round < 10; round += 1) {
+      const id = (
+        await as(owner, request(server()).post(`/investments/accounts/${brokerId}/holdings`))
+          .send({ name: `ACME Race ETF ${round}`, assetClass: 'etf', quantity: 1, price: 1, priceCurrency: 'USD' })
+          .expect(201)
+      ).body.id as string;
+      await Promise.all([
+        classify(owner, id, { lookThrough: FUND_BREAKDOWN }),
+        as(owner, request(server()).patch(`/investments/holdings/${id}`)).send({ assetClass: 'stock' }),
+      ]);
+      const [row] = await dataSource.query(
+        'SELECT asset_class, look_through FROM investment_holdings WHERE id = $1',
+        [id],
+      );
+      expect(row.asset_class === 'stock' && row.look_through !== null).toBe(false);
+      await as(owner, request(server()).delete(`/investments/holdings/${id}`));
+    }
+  });
+
   it('keeps another workspace out', async () => {
     await classify(other, fundId, { sector: 'energy' }).expect(404);
     await as(other, request(server()).get(`/investments/holdings/${fundId}/sector-suggestion`)).expect(

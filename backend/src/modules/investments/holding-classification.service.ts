@@ -1,12 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import type { Repository } from 'typeorm';
+import { In, type Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
-import type {
-  HoldingClassificationBody,
-  HoldingSectorSuggestion,
-  InvestmentHolding as HoldingView,
-  InvestmentAllocation,
+import {
+  type HoldingClassificationBody,
+  type HoldingSectorSuggestion,
+  type InvestmentHolding as HoldingView,
+  type InvestmentAllocation,
+  LOOK_THROUGH_CLASSES,
 } from '../../contracts';
 import { InvestmentHolding } from '../../entities/investment-holding.entity';
 import { InvestmentTrade } from '../../entities/investment-trade.entity';
@@ -56,7 +57,15 @@ export class HoldingClassificationService {
     if (dto.country !== undefined) patch.country = dto.country;
     if (dto.lookThrough !== undefined) patch.lookThrough = toStoredLookThrough(dto.lookThrough);
     if (Object.keys(patch).length > 0) {
-      await this.holdingRepository.update({ id: holding.id, workspaceId }, patch);
+      // A breakdown only while the holding is still a fund: a class change in
+      // between drops it, and must not find it written back after.
+      const where = patch.lookThrough
+        ? { id: holding.id, workspaceId, assetClass: In([...LOOK_THROUGH_CLASSES]) }
+        : { id: holding.id, workspaceId };
+      const { affected } = await this.holdingRepository.update(where, patch);
+      if (!affected) {
+        throw new BadRequestException(appError('INVESTMENTS_LOOK_THROUGH_FUNDS_ONLY'));
+      }
     }
     const saved = await this.requireHolding(workspaceId, holdingId);
     const traded = await tradedHoldingIds(this.tradeRepository, workspaceId, holdingId);

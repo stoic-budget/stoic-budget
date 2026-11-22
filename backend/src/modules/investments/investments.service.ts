@@ -21,7 +21,7 @@ import { Transaction } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { BalanceService } from '../balance/balance.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
-import { setAssetClass } from './holding-classification';
+import { saveHolding, setAssetClass } from './holding-classification';
 import { holdingValueIn, holdingView } from './holding-value';
 import { InvestmentFlowsService } from './investment-flows.service';
 import { round2 } from './returns-sources';
@@ -214,7 +214,7 @@ export class InvestmentsService {
       holding.pricedAt = new Date();
     }
     if (dto.priceCurrency != null) holding.priceCurrency = dto.priceCurrency.toUpperCase();
-    await this.holdingRepository.save(holding);
+    await saveHolding(this.holdingRepository, holding, dto.assetClass != null);
     await this.writeSnapshot(userId, workspaceId, holding.accountId);
     return this.view(holding, await this.workspaceCurrency(workspaceId), hasTrades);
   }

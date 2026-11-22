@@ -1,3 +1,4 @@
+import type { Repository } from 'typeorm';
 import {
   HOLDING_REGIONS,
   HOLDING_SECTORS,
@@ -42,6 +43,25 @@ export function setAssetClass(holding: InvestmentHolding, assetClass: Investment
   holding.assetClass = assetClass;
   if (!takesLookThrough(assetClass)) {
     holding.lookThrough = null;
+  }
+}
+
+/**
+ * Saves a holding. After a class change away from a fund the breakdown is
+ * cleared outright: one saved meanwhile is not in the loaded row, so `save`
+ * alone would keep it.
+ */
+export async function saveHolding(
+  repository: Repository<InvestmentHolding>,
+  holding: InvestmentHolding,
+  classChanged: boolean,
+): Promise<void> {
+  await repository.save(holding);
+  if (classChanged && !takesLookThrough(holding.assetClass)) {
+    await repository.update(
+      { id: holding.id, workspaceId: holding.workspaceId },
+      { lookThrough: null },
+    );
   }
 }
 

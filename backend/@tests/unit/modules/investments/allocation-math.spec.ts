@@ -149,6 +149,20 @@ describe('toSlices', () => {
       170_000,
     );
     expect(slices.map(slice => slice.key)).toEqual(['asia', 'europe', 'other', 'unclassified']);
-    expect(slices[0]).toEqual({ key: 'asia', amount: 200, percent: 11.76 });
+    // 11.7647…: the largest remainder takes the hundredth that makes 100 exactly.
+    expect(slices[0]).toEqual({ key: 'asia', amount: 200, percent: 11.77 });
+    expect(slices.reduce((sum, slice) => sum + slice.percent * 100, 0)).toBe(10_000);
+  });
+
+  it('shows thirds that add up to 100, not 99.99', () => {
+    const slices = toSlices(
+      new Map([
+        ['tech', 10_000],
+        ['health', 10_000],
+        ['energy', 10_000],
+      ]),
+      30_000,
+    );
+    expect(slices.map(slice => slice.percent).sort()).toEqual([33.33, 33.33, 33.34]);
   });
 });

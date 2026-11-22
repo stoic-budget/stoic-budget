@@ -143,8 +143,17 @@ export function toSlices<K extends string>(
   map: Map<string, number>,
   totalCents: number,
 ): Array<{ key: K; amount: number; percent: number }> {
-  return [...map]
-    .filter(([, cents]) => cents !== 0)
+  const kept = [...map].filter(([, cents]) => cents !== 0);
+  // Shares in hundredths of a percent, handed out like the cents, so the
+  // shown percents add up to exactly 100 whenever the cents add up to the total.
+  const adds = kept.reduce((sum, [, cents]) => sum + cents, 0) === totalCents && totalCents > 0;
+  const shares = adds
+    ? spreadCents(
+        10_000,
+        kept.map(([key, cents]) => ({ key, weight: cents / 100 })),
+      )
+    : null;
+  return kept
     .sort(([keyA, a], [keyB, b]) => {
       const lastA = LAST.indexOf(keyA);
       const lastB = LAST.indexOf(keyB);
@@ -154,6 +163,10 @@ export function toSlices<K extends string>(
     .map(([key, cents]) => ({
       key: key as K,
       amount: cents / 100,
-      percent: totalCents > 0 ? Math.round((cents / totalCents) * 10_000) / 100 : 0,
+      percent: shares
+        ? (shares.get(key) ?? 0) / 100
+        : totalCents > 0
+          ? Math.round((cents / totalCents) * 10_000) / 100
+          : 0,
     }));
 }
