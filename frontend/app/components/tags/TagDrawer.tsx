@@ -17,6 +17,12 @@ type TagDrawerProps = {
   /** The complete new set; the caller saves it. */
   onChange: (next: StorageTag[]) => void;
   disabled?: boolean;
+  /**
+   * For picking tags to apply somewhere else (the selection bar): a button
+   * beside "Create a new tag" that hands the picked set over. Without it every
+   * click is saved by the caller at once.
+   */
+  confirm?: { label: string; onConfirm: () => void };
 };
 
 /**
@@ -24,7 +30,7 @@ type TagDrawerProps = {
  * drawer: search, every tag of the workspace with the attached ones checked
  * (a click toggles one), and "Create a new tag" pinned under the list.
  */
-export function TagDrawer({ open, onClose, value, onChange, disabled }: TagDrawerProps) {
+export function TagDrawer({ open, onClose, value, onChange, disabled, confirm }: TagDrawerProps) {
   const t = useIntlayer('tagsPage');
   const { locale } = useLocale();
   const { data: allTags = [], isSuccess } = useTags();
@@ -122,7 +128,14 @@ export function TagDrawer({ open, onClose, value, onChange, disabled }: TagDrawe
               )}
             </div>
           </div>
-          <div className="seneca-cat-drawer__footer">
+          <div
+            className="seneca-cat-drawer__footer"
+            style={
+              confirm
+                ? { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }
+                : undefined
+            }
+          >
             <Button
               className="seneca-cat-drawer__create"
               variant="ghost"
@@ -133,6 +146,15 @@ export function TagDrawer({ open, onClose, value, onChange, disabled }: TagDrawe
               <Plus size={18} aria-hidden />
               {t.createNew.value}
             </Button>
+            {confirm ? (
+              <Button
+                type="button"
+                disabled={disabled || value.length === 0}
+                onClick={confirm.onConfirm}
+              >
+                {confirm.label}
+              </Button>
+            ) : null}
           </div>
         </div>
       </DrawerShell>

@@ -14,7 +14,7 @@ import { useIntlayer } from '@/app/i18n';
 import { RuleSuggestions } from './RuleSuggestions';
 import { RulesSkeleton } from './RulesSkeleton';
 import { RulesTable } from './RulesTable';
-import type { Rule } from './types';
+import { conditionRefs, type Rule } from './types';
 import { useRuleApply } from './useRuleApply';
 import { useRuleNames } from './useRuleNames';
 import {
@@ -38,7 +38,14 @@ export function RulesView() {
   const canDelete = hasPermission('category.delete');
   const rules = useRulesList();
   const list = rules.data?.data ?? [];
-  const payeeIds = [...new Set(list.flatMap(rule => rule.result.payeeId ?? []))];
+  const payeeIds = [
+    ...new Set(
+      list.flatMap(rule => [
+        ...(rule.result.payeeId ? [rule.result.payeeId] : []),
+        ...conditionRefs(rule.conditions, 'payee'),
+      ]),
+    ),
+  ];
   const { words, names } = useRuleNames(payeeIds);
   const toggle = useToggleRule();
   const remove = useDeleteRule();
@@ -62,7 +69,12 @@ export function RulesView() {
   const handleApply = async (rule: Rule) => {
     const { walletId } = rule.result;
     const moving = walletId
-      ? await previewRule({ conditions: rule.conditions, ruleId: rule.id, walletId }).then(
+      ? await previewRule({
+          conditions: rule.conditions,
+          matchMode: rule.matchMode,
+          ruleId: rule.id,
+          walletId,
+        }).then(
           preview => preview.movable,
           () => 0,
         )

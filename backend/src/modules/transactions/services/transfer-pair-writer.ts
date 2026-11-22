@@ -1,10 +1,27 @@
 import { randomUUID } from 'node:crypto';
 import { In, IsNull, type Repository } from 'typeorm';
+import { StatementStatus } from '../../../entities/statement.entity';
 import {
   type Transaction,
   TransactionCategorySource,
   type TransferPairSource,
 } from '../../../entities/transaction.entity';
+
+/**
+ * Which rows pairing may use, for a query joining the row's statement as `s`:
+ * rows without a statement, and rows of a statement that is not in the trash
+ * and has been read. The same rows the income and spending figures count
+ * (`onlyFlows`): a statement held for review counts there, so it pairs here,
+ * or a transfer to it would count twice. A statement still being parsed has
+ * not stored its account yet (it does so with its final status), so two of one
+ * account's statements would look like two accounts; a failed one has no rows
+ * that are real.
+ */
+export const PAIRABLE_STATEMENT = {
+  where:
+    '(t.statementId IS NULL OR (s.deletedAt IS NULL AND s.status NOT IN (:...unreadStatuses)))',
+  params: { unreadStatuses: [StatementStatus.PROCESSING, StatementStatus.ERROR] },
+};
 
 /**
  * Writes the pairs. Each one only lands if both legs are still unpaired, so

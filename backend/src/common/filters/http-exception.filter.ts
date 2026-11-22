@@ -10,6 +10,7 @@ import type { Response } from 'express';
 import { QueryFailedError } from 'typeorm';
 import { type AppErrorBody, isAppErrorBody } from '../errors/app-error';
 import type { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
+import { loggableUrl } from '../observability/loggable-url';
 import { RequestContext } from '../observability/request-context';
 
 type MessageWithDetails = {
@@ -69,16 +70,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // translates by that code and falls back to the English message below.
     const appError: AppErrorBody | undefined = isAppErrorBody(message) ? message : undefined;
 
+    // A public link's token stays out of the logs (`loggableUrl`).
+    const url = loggableUrl(request);
     if (refused) {
       // Kept in the logs: a server-built value can trip it too.
       this.logger.warn(
-        { type: 'refused_by_database', url: request.url, method: request.method },
+        { type: 'refused_by_database', url, method: request.method },
         exception instanceof Error ? exception.message : undefined,
       );
     } else if (!(exception instanceof HttpException)) {
       // Debug log to surface unexpected errors in logs
       this.logger.error(
-        { type: 'unhandled_exception', url: request.url, method: request.method },
+        { type: 'unhandled_exception', url, method: request.method },
         exception instanceof Error ? exception.stack : undefined,
       );
     }

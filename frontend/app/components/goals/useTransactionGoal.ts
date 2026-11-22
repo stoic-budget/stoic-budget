@@ -70,7 +70,11 @@ export function useTransactionGoal(transactionId: string | null, syncKey?: strin
 
   return {
     link: link.data ?? null,
-    goals: goals.data ?? [],
+    // A goal following an account fills from its balance and takes no rows;
+    // the one this row already counts toward stays, so the field shows it.
+    goals: (goals.data ?? []).filter(
+      goal => goal.id === linkedGoalId || !goal.account || goal.account.status === 'archived',
+    ),
     items: items.data?.items ?? [],
     loading: link.isPending || goals.isPending,
     saving: mutation.isPending,

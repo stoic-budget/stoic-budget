@@ -6,7 +6,7 @@ describe('AddUserChangelogSeen migration', () => {
     process.cwd(),
     'src',
     'migrations',
-    '1788380000000-AddUserChangelogSeen.ts',
+    '1789150000000-AddUserChangelogSeen.ts',
   );
   const source = () => readFileSync(filePath, 'utf8');
 

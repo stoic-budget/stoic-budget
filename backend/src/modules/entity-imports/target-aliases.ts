@@ -166,7 +166,7 @@ export const TARGET_FIELDS: Record<ImportTargetKind, TargetField[]> = {
       key: 'frequency',
       type: 'enum',
       required: false,
-      options: ['weekly', 'monthly', 'quarterly', 'annual'],
+      options: ['weekly', 'biweekly', 'monthly', 'quarterly', 'semiannual', 'annual'],
       aliases: [
         'frequency',
         'period',

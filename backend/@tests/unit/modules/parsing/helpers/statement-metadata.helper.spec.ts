@@ -34,6 +34,10 @@ describe('parseStatementAmount', () => {
     ['120.000,00(+)', 120000],
     ['1,000.00 Cr', 1000],
     ['250.00 DR', -250],
+    ['3,193.31Cr', 3193.31],
+    ['1,02,801.86', 102801.86],
+    ['12,34,567.00', 1234567],
+    ['114.40Dr', -114.4],
   ])('reads %s', (text, expected) => {
     expect(parseStatementAmount(text)).toBe(expected);
   });
@@ -44,6 +48,9 @@ describe('parseStatementAmount', () => {
 
   it('keeps the sign of a figure whose currency sign is a letter', () => {
     expect(findStatementAmounts('ATM WITHDRAWAL -R2 000.00 R5 702.73')).toEqual([-2000, 5702.73]);
+    expect(findStatementAmounts('Beginning Balance $3.22- Low 4.00')).toEqual([-3.22, 4]);
+    expect(findStatementAmounts('REF 12.50-ACME')).toEqual([12.5]);
+    expect(findStatementAmounts('14,000.00 1,02,801.86')).toEqual([14000, 102801.86]);
     expect(isAmountPart('-R2')).toBe(true);
     expect(isAmountPart('-$503.00')).toBe(true);
     expect(isAmountPart('$4,082.88')).toBe(true);
@@ -131,6 +138,8 @@ describe('statement-metadata.helper', () => {
     expect(findStatementPeriod('Due 10/24/2025, issued 09/30/2025', 'mdy')).toBeNull();
     const colons = findStatementPeriod('for the period (From : 23-08-2023 To : 24-01-2024)', 'dmy');
     expect([dayMonth(colons?.from), dayMonth(colons?.to)]).toEqual([[23, 8], [24, 1]]);
+    const zoned = findStatementPeriod('1 March 2023 [GMT+07:00] - 8 August 2023 [GMT+07:00]', 'dmy');
+    expect([dayMonth(zoned?.from), dayMonth(zoned?.to)]).toEqual([[1, 3], [8, 8]]);
   });
 
   it('reads the period between dated balance rows, for a month without movements', () => {
@@ -213,6 +222,7 @@ describe('statement-metadata.helper', () => {
     expect(readAccountHeading('Numéro de compte: 00001-002-0000003')).toEqual({
       accountNumber: '00001-002-0000003',
     });
+    expect(readAccountHeading('A/C NO: 10000002')).toEqual({ accountNumber: '10000002' });
     expect(readAccountHeading('EXAMPLE CITY 19850-1423 Account number: XXXX XXXX 0001')).toBeNull();
     expect(readAccountHeading('Account Summary')).toBeNull();
     expect(readAccountHeading('Example Savings - 1234567890')).toEqual({
@@ -242,5 +252,79 @@ describe('statement-metadata.helper', () => {
     expect(isTotalsLabel('Money out:')).toBe(true);
     expect(isTotalsLabel('Card Payment to ACME Store')).toBe(false);
     expect(isTotalsLabel('ACME Totalcare')).toBe(false);
+  });
+});
+
+describe('a previous statement\'s balance', () => {
+  it('opens at "BALANCE - PREVIOUS STATEMENT"', () => {
+    expect(findStatementBalances('BALANCE - PREVIOUS STATEMENT 12.00\nMAY 31 NEW BALANCE 4.00-', 'mdy')).toEqual({
+      start: 12,
+      end: -4,
+    });
+  });
+});
+
+describe('the currency a money column names', () => {
+  it('outranks codes in the rows\' notes', () => {
+    const text = ['Date Description (GBP) Amount (GBP) Balance', 'Amount: EUR -109.40.', 'Amount: EUR -99.17.', 'EUR 1.00'].join(
+      '\n',
+    );
+    expect(detectStatementCurrency(text)).toBe('GBP');
+    expect(detectStatementCurrency('Withdrawal Deposit Balance(INR)\nUSD 1.00 USD 2.00')).toBe('INR');
+  });
+
+  it('is the sign glued to most figures, over the codes of converted amounts', () => {
+    const rows = ['ACME Store -11,64€', 'Original amount 99.00 HKD', 'ACME Cafe -5,00€', 'Original amount 37.00 HKD'];
+    expect(detectStatementCurrency([...rows, 'Member One +400,00€'].join('\n'))).toBe('EUR');
+    // Two signed figures say nothing yet: the codes decide.
+    expect(detectStatementCurrency(rows.join('\n'))).toBe('HKD');
+  });
+});
+
+describe('a currency sign after the figure', () => {
+  it('is part of the amount: "-300,00€"', () => {
+    expect(isAmountPart('-300,00€')).toBe(true);
+    expect(isAmountPart('+400,00€')).toBe(true);
+    expect(parseStatementAmount('-300,00€')).toBe(-300);
+  });
+});
+
+describe('a minus spaced after the figure', () => {
+  it('signs the amount: "6.22 -"', () => {
+    expect(parseStatementAmount('6.22 -')).toBe(-6.22);
+    expect(parseStatementAmount('1,000.00 -')).toBe(-1000);
+  });
+});
+
+describe('a currency named in words', () => {
+  it('after its label: "Currency : Kenyan Shilling"', () => {
+    expect(detectStatementCurrency('From : 01/08/2024\nCurrency : Kenyan Shilling\nUSD 1.00')).toBe('KES');
+  });
+});
+
+describe('Romanian statements', () => {
+  it('name the leu "LEI" after its label', () => {
+    expect(detectStatementCurrency('Tip cont: curent\nValuta: LEI\nEUR 1.00')).toBe('RON');
+  });
+
+  it('open at "Sold initial" and close at "Sold final"', () => {
+    expect(isBalanceLabel('Sold final')).toBe(true);
+    expect(isBalanceLabel('Sold inițial')).toBe(true);
+  });
+});
+
+describe('a plus after the figure', () => {
+  it('is the amount\'s sign: "£13.53+"', () => {
+    expect(parseStatementAmount('£13.53+')).toBe(13.53);
+    expect(isAmountPart('£13.53+')).toBe(true);
+    expect(parseStatementAmount('£67.39-')).toBe(-67.39);
+  });
+});
+
+describe('Dr and Cr in brackets after the figure', () => {
+  it('sign the amount: "300.00 (Dr)", "10000.00 (Cr)"', () => {
+    expect(parseStatementAmount('300.00 (Dr)')).toBe(-300);
+    expect(parseStatementAmount('10000.00 (Cr)')).toBe(10000);
+    expect(isAmountPart('(Dr)')).toBe(true);
   });
 });
