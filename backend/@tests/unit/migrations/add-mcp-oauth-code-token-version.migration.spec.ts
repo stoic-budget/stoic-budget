@@ -3,7 +3,7 @@ import path from 'node:path';
 
 describe('AddMcpOAuthCodeTokenVersion migration', () => {
   const source = readFileSync(
-    path.join(process.cwd(), 'src', 'migrations', '1788331000000-AddMcpOAuthCodeTokenVersion.ts'),
+    path.join(process.cwd(), 'src', 'migrations', '1789171000000-AddMcpOAuthCodeTokenVersion.ts'),
     'utf8',
   );
   const up = source.slice(source.indexOf('public async up'), source.indexOf('public async down'));

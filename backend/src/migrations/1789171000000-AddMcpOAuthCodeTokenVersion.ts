@@ -5,8 +5,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * from a session a password reset (or "log out everywhere") ended is refused
  * at exchange, even one minted while the reset was running.
  */
-export class AddMcpOAuthCodeTokenVersion1788331000000 implements MigrationInterface {
-  name = 'AddMcpOAuthCodeTokenVersion1788331000000';
+export class AddMcpOAuthCodeTokenVersion1789171000000 implements MigrationInterface {
+  name = 'AddMcpOAuthCodeTokenVersion1789171000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
