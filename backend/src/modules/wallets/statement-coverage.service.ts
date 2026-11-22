@@ -61,7 +61,7 @@ const STATEMENTS_SQL = `
       COALESCE(SUM(COALESCE(r.credit, 0) - COALESCE(r.debit, 0))
         FILTER (WHERE ${countedSql('r')}), 0) AS counted,
       COALESCE(SUM(COALESCE(r.credit, 0) - COALESCE(r.debit, 0))
-        FILTER (WHERE r.is_verified = false AND r.is_duplicate = false), 0) AS pending,
+        FILTER (WHERE r.is_verified = false AND r.is_duplicate = false AND r.is_pending = false), 0) AS pending,
       COALESCE(SUM(COALESCE(r.credit, 0) - COALESCE(r.debit, 0))
         FILTER (WHERE r.is_duplicate = true), 0) AS copies,
       COALESCE(bool_or(s.account_number IS NOT NULL

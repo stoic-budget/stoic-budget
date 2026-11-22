@@ -164,6 +164,7 @@ const EVENT_KINDS: Record<ForecastResponse['events'][number]['kind'], string> = 
   goal: 'saving for a goal',
   income: 'expected income',
   scenario: 'scenario',
+  pending: 'pending at the bank, already counted',
 };
 
 /** The next known movements, nearest first, overdue bills marked. */
