@@ -7,6 +7,7 @@ import { Transaction, TransactionType } from '../../entities';
 import type { TransactionsPostedEvent } from '../notifications/events/notification-events';
 import { IntelligentDeduplicationService } from '../parsing/services/intelligent-deduplication.service';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
+import { ManualRowDuplicateService } from '../transactions/services/manual-row-duplicate.service';
 import type { BankSyncAccountSetting } from './bank-sync.config';
 import { asComparable, asParsedTransaction } from './bank-sync-dedupe.service';
 import { providerRowKey } from './bank-sync-ofx.util';
@@ -55,6 +56,7 @@ export class BankSyncPendingService {
     private readonly transactionRepository: Repository<Transaction>,
     private readonly deduplication: IntelligentDeduplicationService,
     private readonly taxAssignment: TaxAssignmentService,
+    private readonly manualRows: ManualRowDuplicateService,
     @Optional() private readonly eventEmitter?: EventEmitter2,
   ) {}
 
@@ -168,9 +170,10 @@ export class BankSyncPendingService {
       direction: money.debit === null ? 'credit' : 'debit',
       merchant: stored.counterpartyName ?? '',
     });
-    // The booked row may already be in the workspace from a statement upload:
-    // then it is a duplicate of that row, as an import would have flagged it.
-    const original = await manager.findOne(Transaction, {
+    // The booked row may already be in the workspace, from a statement upload
+    // (same fingerprint) or booked by hand (same money within a few days): then
+    // it is a duplicate of that row, as an import would have flagged it.
+    const fromStatement = await manager.findOne(Transaction, {
       where: {
         workspaceId,
         fingerprint,
@@ -179,6 +182,13 @@ export class BankSyncPendingService {
       },
       select: { id: true },
     });
+    const draft = { ...money, currency: stored.currency, isDuplicate: false } as Transaction;
+    if (!fromStatement) await this.manualRows.flagRepeats([draft], workspaceId);
+    const original = fromStatement
+      ? { duplicateOfId: fromStatement.id }
+      : draft.isDuplicate
+        ? { duplicateOfId: draft.duplicateOfId, duplicateMatchType: draft.duplicateMatchType }
+        : null;
     const amountMoved = Math.abs(Number(stored.amount) - money.amount) >= 0.005;
     await manager.update(
       Transaction,
@@ -188,7 +198,7 @@ export class BankSyncPendingService {
         isPending: false,
         documentNumber: providerRowKey(accountId, row.id),
         fingerprint,
-        ...(original ? { isDuplicate: true, duplicateOfId: original.id } : {}),
+        ...(original ? { isDuplicate: true, ...original } : {}),
         ...(amountMoved ? { isVerified: false } : {}),
       },
     );

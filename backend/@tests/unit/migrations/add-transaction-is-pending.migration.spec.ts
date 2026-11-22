@@ -13,16 +13,24 @@ describe('AddTransactionIsPending1789080000000', () => {
   it('adds the flag as a NOT NULL column that defaults to a booked row, and a partial index', async () => {
     const query = await run('up');
 
-    expect(query.mock.calls.map(([sql]) => sql)).toEqual([
+    const sql = query.mock.calls.map(([statement]) => statement as string);
+    expect(sql.slice(0, 2)).toEqual([
       'ALTER TABLE "transactions" ADD COLUMN IF NOT EXISTS "is_pending" boolean NOT NULL DEFAULT false',
       'CREATE INDEX IF NOT EXISTS "IDX_transactions_workspace_pending" ON "transactions" ("workspace_id") WHERE "is_pending" = true',
     ]);
+    // The bank booking a row re-queues it for the ledger.
+    expect(sql[2]).toContain('NEW."is_verified", NEW."is_pending")');
+    expect(sql[2]).toContain('OLD."is_verified", OLD."is_pending")');
   });
 
-  it('drops the index and then the column on the way down', async () => {
+  it('restores the trigger function, deletes pending rows, then drops the index and column', async () => {
     const query = await run('down');
+    const sql = query.mock.calls.map(([statement]) => statement as string);
 
-    expect(query.mock.calls.map(([sql]) => sql)).toEqual([
+    expect(sql[0]).toContain('NEW."is_verified")');
+    expect(sql[0]).not.toContain('is_pending');
+    expect(sql.slice(1)).toEqual([
+      'DELETE FROM "transactions" WHERE "is_pending" = true',
       'DROP INDEX IF EXISTS "IDX_transactions_workspace_pending"',
       'ALTER TABLE "transactions" DROP COLUMN IF EXISTS "is_pending"',
     ]);

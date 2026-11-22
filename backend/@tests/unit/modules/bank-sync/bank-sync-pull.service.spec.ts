@@ -120,6 +120,7 @@ function harness(options: {
       transactionRepository as never,
       deduplication,
       { reassess } as never,
+      { flagRepeats: vi.fn(async () => 0) } as never,
       { emit } as never,
     ),
   );

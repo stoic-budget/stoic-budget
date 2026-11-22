@@ -22,4 +22,13 @@ describe('keepConfirmed', () => {
     expect(result.transactions.map(item => item.id)).toEqual(['ok']);
     expect(result.receipts.map(item => item.id)).toEqual(['approved']);
   });
+
+  it('leaves out a row the bank still holds, even an approved one', () => {
+    const result = keepConfirmed({
+      transactions: [{ id: 'held', isVerified: true, isPending: true }, transaction('booked', true)],
+      receipts: [],
+    });
+
+    expect(result.transactions.map(item => item.id)).toEqual(['booked']);
+  });
 });

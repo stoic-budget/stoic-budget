@@ -8,6 +8,7 @@ import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import { BANK_SYNC_FETCH } from '../../src/modules/bank-sync/bank-sync-provider.interface';
+import { LedgerPostingService } from '../../src/modules/ledger/ledger-posting.service';
 import {
   deleteUserByEmail,
   type E2eAccount,
@@ -252,6 +253,39 @@ describe('Bank sync pending rows (e2e)', () => {
     expect(wallet.transactionCount).toBe(1);
   });
 
+  it('keeps an approved hold out of the ledger, a goal and the balance check', async () => {
+    const budsRow = await rowOf(buds.payee);
+    await dataSource.query('UPDATE workspaces SET ledger_base_currency = $1 WHERE id = $2', [
+      'USD',
+      owner.workspaceId,
+    ]);
+    const ledger = app.get(LedgerPostingService);
+    expect(await ledger.postTransaction(owner.workspaceId, budsRow.id as string)).toEqual({
+      status: 'skipped',
+      reason: 'pending',
+    });
+
+    const goal = await as(request(server()).post('/goals'))
+      .send({ name: 'New headphones', targetAmount: 100, currency: 'USD' })
+      .expect(201);
+    await as(request(server()).put(`/transactions/${budsRow.id}/goal`))
+      .send({ goalId: goal.body.id })
+      .expect(200);
+    const progress = await as(request(server()).get(`/goals/${goal.body.id}`)).expect(200);
+    expect(Number(progress.body.currentAmount)).toBe(0);
+
+    // The bank's balance leaves its holds out, and so does ours: they explain
+    // no difference, and Review (empty of holds) is not offered as a reason.
+    const day = new Date().toISOString().slice(0, 10);
+    const check = async (balance: number) =>
+      (await as(request(server()).post(`/wallets/${walletId}/balance-check`)).send({ date: day, balance }).expect(200))
+        .body;
+    expect(await check(opening + 3000)).toMatchObject({ matches: true });
+    const off = await check(opening + 3000 + 1);
+    expect(off.matches).toBe(false);
+    expect(off.reasons).not.toContainEqual(expect.objectContaining({ kind: 'in_review' }));
+  });
+
   it('turns each hold into its booked version, by id or by resemblance, keeping the edits', async () => {
     const before = { buds: await rowOf(buds.payee), hotel: await rowOf(hotel.payee) };
     const kioskRow = await rowOf(kiosk.payee);
@@ -292,6 +326,9 @@ describe('Bank sync pending rows (e2e)', () => {
     // The approved buds now count; the hotel waits in Review like any new row.
     const wallet = await balance();
     expect(wallet.balance).toBe(opening + 3000 - 15);
+    // Booked now, it goes into the ledger like any confirmed row.
+    const booked = await app.get(LedgerPostingService).postTransaction(owner.workspaceId, budsRow.id as string);
+    expect(booked.status).toBe('posted');
     expect(wallet.pendingReviewCount).toBe(1);
   }, 240_000);
 

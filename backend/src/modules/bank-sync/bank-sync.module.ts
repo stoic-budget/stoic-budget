@@ -5,6 +5,7 @@ import { Integration, OpenProtocolSettings, Transaction, Wallet } from '../../en
 import { ImportModule } from '../import/import.module';
 import { StatementsModule } from '../statements/statements.module';
 import { TaxModule } from '../tax/tax.module';
+import { TransactionsModule } from '../transactions/transactions.module';
 import { BankSyncController } from './bank-sync.controller';
 import { BankSyncService } from './bank-sync.service';
 import { BankSyncDedupeService } from './bank-sync-dedupe.service';
@@ -20,6 +21,7 @@ import { SimpleFinProvider } from './simplefin.provider';
     StatementsModule,
     ImportModule,
     TaxModule,
+    TransactionsModule,
   ],
   controllers: [BankSyncController],
   providers: [
