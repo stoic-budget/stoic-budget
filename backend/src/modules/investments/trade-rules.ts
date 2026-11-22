@@ -29,7 +29,18 @@ export type TradeRuleError =
  * everything else a quantity above zero at a price. A kind changed on an edit
  * therefore never carries a stale field of the old kind into the row.
  */
-export function normalizeTrade(draft: TradeDraft): TradeDraft | { error: TradeRuleError } {
+export function normalizeTrade(input: TradeDraft): TradeDraft | { error: TradeRuleError } {
+  // As the columns store them: checked after rounding, so a quantity or a
+  // ratio that rounds to nothing is refused here, not by the database.
+  const draft = {
+    ...input,
+    quantity: toScale(input.quantity, 8),
+    price: toScale(input.price, 8),
+    fee: toScale(input.fee, 6),
+    amount: input.amount === null ? null : toScale(input.amount, 6),
+    splitFrom: input.splitFrom === null ? null : toScale(input.splitFrom, 8),
+    splitTo: input.splitTo === null ? null : toScale(input.splitTo, 8),
+  };
   const base = { kind: draft.kind, date: draft.date, amount: null, splitFrom: null, splitTo: null };
   switch (draft.kind) {
     case 'dividend':
@@ -69,6 +80,12 @@ export function normalizeTrade(draft: TradeDraft): TradeDraft | { error: TradeRu
         acquiredOn: draft.kind === 'transfer_in' ? draft.acquiredOn : null,
       };
   }
+}
+
+/** `value` rounded to `places` decimals, as a `numeric(_, places)` column keeps it. */
+function toScale(value: number, places: number): number {
+  const factor = 10 ** places;
+  return Math.round(value * factor) / factor;
 }
 
 const orNull = (value: number | string | null): number | null =>

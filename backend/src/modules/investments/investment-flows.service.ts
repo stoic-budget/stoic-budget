@@ -291,7 +291,7 @@ export class InvestmentFlowsService {
               : row.kind === 'dividend'
                 ? ['income', (Number(row.amount) || 0) - fee]
                 : [null, 0];
-      if (!kind || !(amount > 0)) {
+      if (!(kind && amount > 0)) {
         continue;
       }
       flows.push({
