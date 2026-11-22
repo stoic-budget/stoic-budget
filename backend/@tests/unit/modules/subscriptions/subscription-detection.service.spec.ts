@@ -150,6 +150,15 @@ describe('SubscriptionDetectionService price changes', () => {
     expect(qb.andWhere).toHaveBeenCalledWith(countedSql('t'));
   });
 
+  it('never reads a charge left out of budgets as a repeating one', async () => {
+    await build([]);
+
+    await service.runDetection('ws-1');
+
+    const qb = transactions.createQueryBuilder.mock.results[0].value;
+    expect(qb.andWhere).toHaveBeenCalledWith('t.excluded_from_budgets = false');
+  });
+
   it('stays quiet while only the latest charge differs, and never repeats a known change', async () => {
     const existing = {
       id: 'sub-1',

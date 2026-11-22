@@ -14,7 +14,6 @@ export const TUTORIAL_PAGES = [
   { id: 'advice', path: '/advice' },
   { id: 'crypto', path: '/crypto' },
   { id: 'roi', path: '/roi' },
-  { id: 'taxDeclaration', path: '/tax-declaration' },
   { id: 'tables', path: '/custom-tables' },
   { id: 'workspaces', path: '/workspaces' },
 ] as const;

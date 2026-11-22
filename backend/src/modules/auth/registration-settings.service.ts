@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
+import { isDemoMode } from '../../common/demo/demo-mode';
 import { InstanceSetting, InstanceSettingKey, User } from '../../entities';
 import { AuditAction, EntityType, Severity } from '../../entities/audit-event.entity';
 import { AuditService } from '../audit/audit.service';
@@ -25,6 +26,8 @@ export class RegistrationSettingsService {
 
   /** Always true for the first account, or a new server could never get an owner. */
   async isOpen(): Promise<boolean> {
+    // A demo instance has one shared account and takes no new ones.
+    if (isDemoMode()) return false;
     if (await this.isConfiguredOpen()) return true;
     return (await this.userRepository.count()) === 0;
   }

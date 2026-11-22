@@ -6,7 +6,7 @@ describe('AddInvestmentTrades migration', () => {
     process.cwd(),
     'src',
     'migrations',
-    '1788290000000-AddInvestmentTrades.ts',
+    '1789100000000-AddInvestmentTrades.ts',
   );
   const source = () => readFileSync(filePath, 'utf8');
   const up = () => source().slice(0, source().indexOf('public async down'));
