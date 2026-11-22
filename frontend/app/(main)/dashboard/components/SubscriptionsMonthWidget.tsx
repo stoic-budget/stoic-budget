@@ -6,7 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
 import type { DonutSlice } from '@/app/components/charts/CategoryDonut';
 import { LazyCategoryDonut } from '@/app/components/charts/lazy-charts';
-import { currentMonthKey } from '@/app/components/dashboard/month-end';
 import { useOverviewMonth } from '@/app/components/dashboard/overview-month';
 import {
   CardEmpty,
@@ -17,6 +16,7 @@ import {
   ListRow,
 } from '@/app/components/dashboard/ui';
 import { ListRowsSkeleton } from '@/app/components/dashboard/ui/card-skeletons';
+import { usePresentPeriod } from '@/app/components/dashboard/use-period-label';
 import { fillTemplateNodes, PrivateAmount } from '@/app/components/ui/private-amount';
 import { VendorIcon } from '@/app/components/VendorIcon';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
@@ -56,10 +56,13 @@ type SubscriptionsMonthWidgetProps = {
   formatAmount: (value: number) => string;
 };
 
-/** The subscriptions page; a past month shows what was charged in it above the list. */
-function subscriptionsHref(month: string, focus?: string): string {
+/**
+ * The subscriptions page; a past month shows what was charged in it above the
+ * list. `present` is the month we are in, by the workspace's month rule.
+ */
+function subscriptionsHref(month: string, present: string, focus?: string): string {
   const params = new URLSearchParams();
-  if (month !== currentMonthKey()) params.set('month', month);
+  if (month !== present) params.set('month', month);
   if (focus) params.set('focus', focus);
   const query = params.toString();
   return query ? `/subscriptions?${query}` : '/subscriptions';
@@ -78,7 +81,8 @@ export function SubscriptionsMonthWidget({
   const t = useIntlayer('subscriptionsMonthWidget');
   const links = useIntlayer('overviewWidgets');
   const shown = useOverviewMonth();
-  const month = shown?.month ?? currentMonthKey();
+  const present = usePresentPeriod().current;
+  const month = shown?.month ?? present;
   const { locale } = useLocale();
   const workspaceId = useWorkspaceId();
   // Cached, so the widget is drawn at once when Overview is opened again.
@@ -109,7 +113,9 @@ export function SubscriptionsMonthWidget({
       <DashboardCard
         title={t.title}
         subtitle={shown?.label}
-        action={<CardLink href={subscriptionsHref(month)}>{links.allSubscriptions}</CardLink>}
+        action={
+          <CardLink href={subscriptionsHref(month, present)}>{links.allSubscriptions}</CardLink>
+        }
       >
         <div className="seneca-dashboard__categories" aria-hidden="true">
           <div
@@ -163,7 +169,7 @@ export function SubscriptionsMonthWidget({
   const relative = new Intl.RelativeTimeFormat(resolveLocale(locale), { numeric: 'auto' });
   // Only the month under way has charges "in 3 days".
   const soon = (value: string | null): string | null => {
-    if (!value || month !== currentMonthKey()) {
+    if (!value || month !== present) {
       return null;
     }
     const days = daysFromToday(value.slice(0, 10));
@@ -179,7 +185,7 @@ export function SubscriptionsMonthWidget({
             count: String(summary.data.priceChangeCount),
           }),
           // Rings every subscription whose price changed (data-attention-group).
-          href: subscriptionsHref(month, 'price-changed'),
+          href: subscriptionsHref(month, present, 'price-changed'),
         },
         summary.data.duplicateCount > 0 && {
           label: fill(links.duplicates.value, { count: String(summary.data.duplicateCount) }),
@@ -192,7 +198,9 @@ export function SubscriptionsMonthWidget({
     <DashboardCard
       title={t.title}
       subtitle={shown?.label}
-      action={<CardLink href={subscriptionsHref(month)}>{links.allSubscriptions}</CardLink>}
+      action={
+        <CardLink href={subscriptionsHref(month, present)}>{links.allSubscriptions}</CardLink>
+      }
     >
       {total === 0 ? (
         <CardEmpty icon={EventRepeatOutlined}>{t.emptyDescription}</CardEmpty>
@@ -206,7 +214,7 @@ export function SubscriptionsMonthWidget({
               <ListRow
                 key={item.subscriptionId}
                 // Rings this subscription's row there (see useAttentionFocus).
-                href={subscriptionsHref(month, `subscription:${item.subscriptionId}`)}
+                href={subscriptionsHref(month, present, `subscription:${item.subscriptionId}`)}
                 leading={
                   <VendorIcon
                     vendorName={item.vendorName}

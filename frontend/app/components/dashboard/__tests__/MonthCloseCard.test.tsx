@@ -7,6 +7,11 @@ import '../test-setup';
 import { MonthCloseCard } from '../MonthCloseCard';
 import { wholeLine } from './whole-line';
 
+// The workspace's month rule is a request of its own; a calendar month here.
+vi.mock('@/app/hooks/usePayPeriods', () => ({
+  usePayPeriods: () => ({ data: undefined, context: undefined }),
+}));
+
 vi.mock('next/link', () => ({
   default: ({ href, children, ...props }: { href: string; children?: React.ReactNode }) => (
     <a href={href} {...props}>

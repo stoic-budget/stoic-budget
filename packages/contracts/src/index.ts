@@ -133,4 +133,6 @@ export * from './wealth/metals';
 export * from './wealth/net-worth';
 export * from './wealth/properties';
 export * from './webhooks/webhooks';
+export * from './workspaces/pay-period';
+export * from './workspaces/pay-periods';
 export * from './workspaces/workspaces';

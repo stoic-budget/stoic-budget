@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { assertFound } from '../../common/utils/assert-found.util';
@@ -7,13 +7,14 @@ import { Goal, GoalContribution } from '../../entities';
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
 import { AuditService } from '../audit/audit.service';
 import type { CreateAuditEventDto } from '../audit/interfaces/audit-event.interface';
+import { PayPeriodService } from '../pay-period/pay-period.service';
+import { periodDaysOfKey } from '../pay-period/pay-period-dates';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { toNumber } from './goal-money.util';
 import { GoalProgressService } from './goal-progress.service';
 import { GoalTransactionLinkService } from './goal-transaction-link.service';
 import {
   contributionSnapshot,
-  firstDayOfNextMonth,
   type GoalDetail,
   type GoalWithProgress,
   goalSnapshot,
@@ -36,6 +37,7 @@ export class GoalsService {
     private readonly workspaceCurrency: WorkspaceCurrencyService,
     private readonly linkService: GoalTransactionLinkService,
     private readonly progressService: GoalProgressService,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
 
   async create(
@@ -75,10 +77,15 @@ export class GoalsService {
       where: { workspaceId },
       order: { createdAt: 'ASC' },
     });
-    // A month narrows the list to the goals that actually moved in it.
-    const end = month ? firstDayOfNextMonth(month) : undefined;
-    const monthly = month
-      ? await this.progressService.movedBetween(workspaceId, all, `${month}-01`, end as string)
+    // A month narrows the list to the goals that actually moved in it. The
+    // month is the workspace's own (Settings → Start of the month), as the
+    // card names it.
+    const period = month
+      ? periodDaysOfKey(await this.payPeriods?.contextFor(workspaceId), month)
+      : null;
+    const end = period?.until;
+    const monthly = period
+      ? await this.progressService.movedBetween(workspaceId, all, period.from, period.until)
       : null;
     const goals = monthly ? all.filter(goal => monthly.has(goal.id)) : all;
 
