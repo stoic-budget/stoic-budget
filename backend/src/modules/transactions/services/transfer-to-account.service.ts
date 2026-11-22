@@ -6,6 +6,7 @@ import { Transaction, TransactionType } from '../../../entities/transaction.enti
 import { TransferPairRejection } from '../../../entities/transfer-pair-rejection.entity';
 import { Wallet } from '../../../entities/wallet.entity';
 import { rejectedPairKeys } from './transfer-pair-rejections';
+import { assertFreeLeg } from './transfer-pair-writer';
 import { absAmount, daysBetween, pairKey } from './transfer-pairing.matcher';
 import { CANDIDATE_WINDOW_DAYS, DAY_MS, TransferPairingService } from './transfer-pairing.service';
 
@@ -33,6 +34,9 @@ export class TransferToAccountService {
     walletId: string,
   ): Promise<{ transferPairId: string; createdId: string | null }> {
     const row = await this.pairing.findOwned(workspaceId, transactionId);
+    // Before anything is booked: a mirror row for a leg `link` then refuses
+    // (a pending row, say) would be left behind on its own.
+    assertFreeLeg(row);
     const wallet = await this.transactionRepository.manager
       .getRepository(Wallet)
       .findOne({ where: { id: walletId, workspaceId } });

@@ -4,7 +4,8 @@
  * Every figure of money in and out (dashboard, reports, forecast, budgets) must
  * count the same rows: confirmed ones of this workspace, from a statement or not
  * (a cash payment, an approved receipt), never a duplicate, a row on a trashed or
- * failed statement, or a transfer between own accounts. A crypto row counts only
+ * failed statement, or a transfer between own accounts. Interest split off a loan
+ * payment counts only while its payment does. A crypto row counts only
  * when it settles a bill or a receivable: a swap or a move between own wallets is
  * not money earned or spent. Seeding one set of rows and asking each service is
  * the only way to see that they agree; the decisions are made in SQL.
@@ -17,6 +18,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test } from '@nestjs/testing';
 import { Client } from 'pg';
 import { DataSource, type Repository } from 'typeorm';
+import { countedSql } from '../../src/common/utils/counted-transactions.util';
 
 import * as entityIndex from '../../src/entities';
 import {
@@ -106,7 +108,7 @@ const DAY = isoDay(new Date(now.getFullYear(), now.getMonth() - 1, 15));
 
 /** What the seeded rows must add up to, wherever they are summed. */
 const INCOME = 1000 + 150 + 40;
-const EXPENSE = 200 + 60;
+const EXPENSE = 200 + 60 + 7;
 
 describe('one rule for income and spending (real Postgres)', () => {
   vi.setConfig({ testTimeout: 180_000 });
@@ -281,20 +283,27 @@ describe('one rule for income and spending (real Postgres)', () => {
     const failed = await statement(StatementStatus.ERROR);
 
     // Counted.
-    await income(1000, { statementId: bank });
+    const paid = await income(1000, { statementId: bank });
     await expense(200, { statementId: bank });
     await income(150, { walletId }); // a cash payment: no statement
     await expense(60, { walletId });
     const settling = await income(40, { cryptoWalletId, cryptoAsset: 'USDT' });
 
     // Not counted.
-    await expense(999, { statementId: bank, isVerified: false });
-    await income(500, { statementId: trashed });
-    await expense(300, { statementId: failed });
-    await expense(80, { statementId: bank, isDuplicate: true });
+    const waiting = await expense(999, { statementId: bank, isVerified: false });
+    const binned = await income(500, { statementId: trashed });
+    const unread = await expense(300, { statementId: failed });
+    const repeated = await expense(80, { statementId: bank, isDuplicate: true });
     await expense(500, { statementId: bank, transferPairId: randomUUID() });
     await income(70, { cryptoWalletId, cryptoAsset: 'ETH' }); // a swap leg
     await expense(25, { cryptoWalletId, cryptoAsset: 'USDT' });
+
+    // Interest split off a payment (no statement of its own): counted with the
+    // first payment, left out with each of the others.
+    await expense(7, { walletId, loanInterestOfId: paid.id });
+    for (const payment of [waiting, binned, unread, repeated]) {
+      await expense(11, { walletId, loanInterestOfId: payment.id });
+    }
     await txRepo.save(
       txRepo.create({
         workspaceId: otherWorkspaceId,
@@ -407,5 +416,54 @@ describe('one rule for income and spending (real Postgres)', () => {
     const limit = EXPENSE - 50;
     await budgets.update(budget.id, workspaceId, userId, { limitAmount: limit });
     expect(await budgeted()).toBe(limit);
+  });
+
+  it('asks the planner next to nothing for the interest check', async () => {
+    // The estimate decides when Postgres compiles a query (jit_above_cost). A
+    // per-row lookup of the payment (`IS NULL OR EXISTS`, or an anti-join) once
+    // raised it by a third to twice and more, so the reports spent their time
+    // compiling. Planned over a workspace as a real one is: a year of rows on
+    // statements (one in the trash), and loan payments with interest split off.
+    const busy = (await dataSource.getRepository(Workspace).save({ name: 'Busy', currency: 'EUR' })).id;
+    const statements: string[] = [];
+    for (let index = 0; index < 12; index++) {
+      statements.push(await statement(StatementStatus.COMPLETED, index === 1 ? new Date() : null));
+    }
+    await dataSource.query('UPDATE statements SET workspace_id = $1 WHERE id = ANY($2)', [busy, statements]);
+    await dataSource.query(
+      `INSERT INTO transactions (workspace_id, statement_id, transaction_date, counterparty_name,
+                                 payment_purpose, currency, transaction_type, amount, debit, is_verified)
+       SELECT $1, ($2::uuid[])[1 + g % 12], date '2025-01-01' + (g % 365), 'ACME Store', 'Purchase',
+              'EUR', 'expense', 5, 5, g % 10 <> 0
+         FROM generate_series(1, 20000) g`,
+      [busy, statements],
+    );
+    await dataSource.query(
+      `WITH paid AS (
+         INSERT INTO transactions (workspace_id, statement_id, transaction_date, counterparty_name,
+                                   payment_purpose, currency, transaction_type, amount, credit, is_verified)
+         SELECT $1, $2, date '2025-01-15' + 30 * m, 'ACME Bank', 'Instalment', 'EUR', 'income', 500, 500, true
+           FROM generate_series(0, 11) m
+         RETURNING id, transaction_date)
+       INSERT INTO transactions (workspace_id, transaction_date, counterparty_name, payment_purpose,
+                                 currency, transaction_type, amount, debit, is_verified, loan_interest_of_id)
+       SELECT $1, transaction_date, 'ACME Bank', 'Interest', 'EUR', 'expense', 40, 40, true, id FROM paid`,
+      [busy, statements[0]],
+    );
+    await dataSource.query('ANALYZE transactions');
+    await dataSource.query('ANALYZE statements');
+    const cost = async (where: string) => {
+      const [{ 'QUERY PLAN': plan }] = await dataSource.query(
+        `EXPLAIN (FORMAT JSON) SELECT sum(t.amount) FROM transactions t
+          WHERE t.workspace_id = $1 AND t.transaction_date BETWEEN '2025-01-01' AND '2025-12-31' AND ${where}`,
+        [busy],
+      );
+      return plan[0].Plan['Total Cost'] as number;
+    };
+    const ownChecks =
+      't.is_verified = true AND t.is_duplicate = false AND NOT EXISTS (SELECT 1 FROM statements trashed WHERE trashed.id = t.statement_id AND trashed.deleted_at IS NOT NULL)';
+    // A list built once (about a hundred) and a hash probe per row; a lookup per
+    // row of the year's 20 000 costs well over a thousand.
+    expect((await cost(countedSql('t'))) - (await cost(ownChecks))).toBeLessThan(600);
   });
 });

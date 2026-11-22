@@ -7,6 +7,7 @@ import {
   optionalNullable,
 } from '../common/requests';
 import type { Wire } from '../common/wire';
+import { PropertyAttributes, PropertyDebtKind } from '../wealth/properties';
 
 const Uuid = Schema.String.check(Schema.isUUID());
 
@@ -32,6 +33,24 @@ export const UpdateAccountClassificationBody = Schema.Struct({
   riskLevel: optionalNullable(Schema.Literals(['low', 'medium', 'high'])),
 });
 export type UpdateAccountClassificationBody = Wire<typeof UpdateAccountClassificationBody>;
+
+/**
+ * `PUT /reports/balance/accounts/:id/property`. A field left out stays as it
+ * is, null clears it. Attributes must be those of the line's kind, and a
+ * depreciation rate is for vehicles only.
+ */
+export const UpdatePropertyBody = Schema.Struct({
+  attributes: optionalNullable(PropertyAttributes),
+  debt: optionalNullable(Schema.Struct({ kind: PropertyDebtKind, id: Uuid })),
+  depreciationRate: optionalNullable(
+    Schema.Finite.check(
+      Schema.isGreaterThan(0),
+      Schema.isLessThanOrEqualTo(100),
+      isAtMostTwoDecimals,
+    ),
+  ),
+});
+export type UpdatePropertyBody = Wire<typeof UpdatePropertyBody>;
 
 export const BalanceAccountParams = Schema.Struct({ id: Uuid });
 export type BalanceAccountParams = Wire<typeof BalanceAccountParams>;

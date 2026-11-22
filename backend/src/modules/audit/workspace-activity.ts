@@ -1,5 +1,6 @@
 import type { Repository } from 'typeorm';
 import { type AuditEvent, EntityType } from '../../entities/audit-event.entity';
+import { localMidnight } from '../pay-period/pay-period-dates';
 
 /**
  * What the household is allowed to see each other do.
@@ -71,26 +72,24 @@ export function toActivityEntry(event: AuditEvent): WorkspaceActivityEntry {
 
 /**
  * The household's latest moves, newest first, at most `limit` (1..100); with
- * `month` (`YYYY-MM`) only that month's.
+ * `period` only that month's: from local midnight of `from` up to, not
+ * including, local midnight of `until` (`YYYY-MM-DD`).
  */
 export async function queryWorkspaceActivity(
   events: Repository<AuditEvent>,
   workspaceId: string,
   limit: number,
-  month?: string,
+  period?: { from: string; until: string },
 ): Promise<WorkspaceActivityEntry[]> {
   const query = events
     .createQueryBuilder('event')
     .leftJoinAndSelect('event.actor', 'actor')
     .where('event.workspaceId = :workspaceId', { workspaceId })
     .andWhere('event.entityType IN (:...entityTypes)', { entityTypes: HOUSEHOLD_ENTITY_TYPES });
-  if (month) {
-    const [year, monthNumber] = month.split('-').map(Number);
+  if (period) {
     query
-      .andWhere('event.createdAt >= :monthStart', {
-        monthStart: new Date(year, monthNumber - 1, 1),
-      })
-      .andWhere('event.createdAt < :monthEnd', { monthEnd: new Date(year, monthNumber, 1) });
+      .andWhere('event.createdAt >= :monthStart', { monthStart: localMidnight(period.from) })
+      .andWhere('event.createdAt < :monthEnd', { monthEnd: localMidnight(period.until) });
   }
   const rows = await query
     .orderBy('event.createdAt', 'DESC')

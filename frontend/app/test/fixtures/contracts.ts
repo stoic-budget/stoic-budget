@@ -392,6 +392,7 @@ export function transactionItem(
     ownerMemberId: null,
     isPrivate: false,
     excludedFromBudgets: false,
+    isPending: false,
     privateCategoryId: null,
     transferPairId: null,
     transferPairSource: null,

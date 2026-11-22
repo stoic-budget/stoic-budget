@@ -10,7 +10,8 @@ import { type Transaction, TransactionCategorySource } from '../../../entities/t
  * cascades into them; the per-part money columns (amount/debit/credit/
  * amountForeign) and the split markers, which `split()` assigns itself;
  * `fingerprint`, which backfill recomputes from the post-split amount; and the
- * duplicate-flag columns, unreachable because a flagged row cannot be split.
+ * duplicate-flag columns and `isPending`, unreachable because a flagged or a
+ * pending row cannot be split (`assertSplittable`).
  */
 export function cloneForSplit(source: Transaction): Partial<Transaction> {
   return {
@@ -59,6 +60,9 @@ export function cloneForSplit(source: Transaction): Partial<Transaction> {
     // changes a budget or report total.
     excludedFromBudgets: source.excludedFromBudgets,
     importSessionId: source.importSessionId,
+    // Every part of split interest stays the payment's: it counts, follows and
+    // goes with the payment as the whole did (loans/loan-interest-row).
+    loanInterestOfId: source.loanInterestOfId,
   };
 }
 

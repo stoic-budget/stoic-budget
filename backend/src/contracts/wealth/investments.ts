@@ -32,6 +32,8 @@ export const InvestmentHolding = Schema.Struct({
   pricedAt: Schema.NullOr(Timestamp),
   /** quantity × price in the workspace currency. */
   value: Schema.Number,
+  /** The quantity comes from the holding's trades and is not typed in. */
+  hasTrades: Schema.Boolean,
 });
 export type InvestmentHolding = Wire<typeof InvestmentHolding>;
 

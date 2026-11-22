@@ -53,6 +53,7 @@ export const DOCUMENTS_ERRORS = {
   TRANSACTION_ALREADY_SPLIT: 'Transaction is already part of a split',
   TRANSACTION_NOT_SPLIT: 'Transaction is not part of a split',
   TRANSACTION_SPLIT_DUPLICATE: 'Cannot split a transaction marked as a duplicate',
+  TRANSACTION_SPLIT_PENDING: 'Cannot split a transaction the bank has not booked yet',
   TRANSACTION_SPLIT_ADJUSTMENT:
     'A balance adjustment cannot be split; delete it and check the balance again',
   TRANSACTION_SPLIT_TAX_LOCKED: 'Cannot split a transaction that is part of a filed tax return',
@@ -71,6 +72,7 @@ export const DOCUMENTS_ERRORS = {
   TRANSACTION_TRANSFER_SAME_LEG: 'A transfer needs two different transactions',
   TRANSACTION_TRANSFER_SAME_DIRECTION: 'The two legs of a transfer must go in opposite directions',
   TRANSACTION_LEG_DUPLICATE: 'Transaction {{id}} is marked as a duplicate',
+  TRANSACTION_LEG_PENDING: 'Transaction {{id}} is not booked by the bank yet',
   TRANSACTION_LEG_SPLIT: 'Transaction {{id}} is part of a split',
   TRANSACTION_LEG_TRANSFERRED: 'Transaction {{id}} is already part of a transfer',
   TRANSACTION_PAIRED_MEANWHILE: 'One of the transactions was paired in the meantime',
@@ -169,4 +171,8 @@ export const DOCUMENTS_ERRORS = {
   BALANCE_HISTORY_EMPTY: 'No dated amounts were found in the file',
   BALANCE_HISTORY_COLUMNS_MISSING:
     'The file needs a date column and an amount column (date, amount)',
+  BALANCE_NOT_PROPERTY: 'Only a real estate or vehicle line has property details',
+  BALANCE_PROPERTY_DETAILS_INVALID: 'These details do not fit this kind of property',
+  BALANCE_PROPERTY_DEBT_INVALID: 'Only a loan account or a debt line can be linked',
+  BALANCE_PROPERTY_DEBT_TAKEN: 'This debt is already linked to another property',
 } as const;

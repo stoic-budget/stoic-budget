@@ -47,6 +47,30 @@ describe('ImportSuggestService (heuristics only)', () => {
     expect(result.target).toBe('transactions');
   });
 
+  it('recognises a broker export as trades', async () => {
+    const result = await service.suggest({
+      headers: ['Trade date', 'Action', 'Ticker', 'Shares', 'Price', 'Commission'],
+      samples: [
+        ['2026-09-01', 'Buy', 'ACME', '10', '101.5', '1'],
+        ['2026-09-20', 'Sell', 'ACME', '4', '110', '1'],
+      ],
+    });
+    expect(result.target).toBe('trades');
+    const roles = Object.fromEntries(result.columns.map(c => [c.index, c.role]));
+    expect(roles).toMatchObject({ 0: 'date', 1: 'kind', 2: 'symbol', 3: 'quantity', 4: 'price', 5: 'fee' });
+  });
+
+  it('does not take a bank export with a type column for trades', async () => {
+    const result = await service.suggest({
+      headers: ['Date', 'Type', 'Merchant', 'Amount'],
+      samples: [
+        ['2026-09-01', 'card', 'ACME Store - Wireless Buds', '-19.99'],
+        ['2026-09-02', 'transfer', 'Employer One', '1500'],
+      ],
+    });
+    expect(result.target).toBe('transactions');
+  });
+
   it('maps separate debit and credit columns of a bank export', async () => {
     const result = await service.suggest({
       headers: ['Date', 'Payee', 'Debit', 'Credit'],

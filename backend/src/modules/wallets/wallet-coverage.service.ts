@@ -42,7 +42,7 @@ export class WalletCoverageService {
           .leftJoin(
             Transaction,
             'waiting',
-            'waiting.statementId = statement.id AND waiting.isVerified = false AND waiting.isDuplicate = false',
+            'waiting.statementId = statement.id AND waiting.isVerified = false AND waiting.isDuplicate = false AND waiting.isPending = false',
           )
           .select('statement.walletId', 'walletId')
           .addSelect('statement.bankName', 'bankName')

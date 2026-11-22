@@ -20,9 +20,7 @@ import { REVIEW_LINK_PARAMS } from '@/app/lib/review-links';
 import { getCategoryDisplayName } from '@/app/lib/statement-categories';
 import {
   cursorAfterRemoval,
-  dateFilterToRange,
   isReviewInboxKind,
-  monthDateFilter,
   moveCursor,
   type ReviewInboxItem,
   type ReviewInboxKind,
@@ -30,6 +28,7 @@ import {
   targetIds,
   toggleSelection,
 } from '../lib/review-inbox-model';
+import { useLinkedMonthRange } from './useLinkedMonthRange';
 
 const PAGE_SIZE = 100;
 const CATEGORIES_STALE_TIME = 5 * 60 * 1000;
@@ -92,13 +91,9 @@ export function useReviewInbox(): UseReviewInboxResult {
   const reviewerParam = searchParams.get('reviewer');
   const reviewer: Reviewer =
     reviewerParam === 'me' || reviewerParam === 'anyone' ? reviewerParam : defaultReviewer;
-  // A link naming a month (the dashboard's month close) opens on that month,
-  // so the list holds exactly what the link counted.
-  const [initialDateFilter] = useState(() =>
-    monthDateFilter(searchParams.get(REVIEW_LINK_PARAMS.month)),
+  const { initialDateFilter, from, to, setFrom, setTo } = useLinkedMonthRange(
+    searchParams.get(REVIEW_LINK_PARAMS.month),
   );
-  const [from, setFrom] = useState(() => dateFilterToRange(initialDateFilter, new Date()).from);
-  const [to, setTo] = useState(() => dateFilterToRange(initialDateFilter, new Date()).to);
   const uncategorized =
     kind === 'transaction' && searchParams.get(REVIEW_LINK_PARAMS.uncategorized) === 'true';
   const [selected, setSelected] = useState<Set<string>>(() => new Set());

@@ -16,12 +16,14 @@ import {
   InvestmentHolding,
   InvestmentPriceSource,
 } from '../../entities/investment-holding.entity';
+import { InvestmentTrade } from '../../entities/investment-trade.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { BalanceService } from '../balance/balance.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
-import { holdingValueIn } from './holding-value';
+import { holdingValueIn, holdingView } from './holding-value';
 import { InvestmentFlowsService } from './investment-flows.service';
+import { round2 } from './returns-sources';
 import { normalizeStockSymbol, StockPriceService } from './stock-price.service';
 
 const INVESTMENTS_SECTION_CODE = 'ASSET_INVESTMENTS';
@@ -51,6 +53,9 @@ export class InvestmentsService {
     private readonly exchangeRatesService: ExchangeRatesService,
     private readonly stockPriceService: StockPriceService,
     private readonly flowsService: InvestmentFlowsService,
+    // Last and optional so a test that builds the service by hand needs no trades.
+    @InjectRepository(InvestmentTrade)
+    private readonly tradeRepository?: Repository<InvestmentTrade>,
   ) {}
 
   async listAccounts(workspaceId: string): Promise<InvestmentAccountView[]> {
@@ -68,6 +73,7 @@ export class InvestmentsService {
       where: { workspaceId, accountId: In(accounts.map(account => account.id)) },
       order: { createdAt: 'ASC' },
     });
+    const traded = await this.tradedHoldingIds(workspaceId);
     const { flows } = await this.flowsService.valueFlows(
       workspaceId,
       await this.flowsService.loadFlows(
@@ -80,7 +86,7 @@ export class InvestmentsService {
     for (const account of accounts) {
       const rows: HoldingView[] = [];
       for (const holding of holdings.filter(item => item.accountId === account.id)) {
-        rows.push(await this.holdingView(holding, currency));
+        rows.push(await this.view(holding, currency, traded.has(holding.id)));
       }
       const value = round2(rows.reduce((sum, row) => sum + row.value, 0));
       const totals = { contribution: 0, withdrawal: 0, income: 0 };
@@ -156,7 +162,7 @@ export class InvestmentsService {
     if (!(dto.name || dto.symbol)) {
       throw new BadRequestException(appError('INVESTMENTS_HOLDING_NAME_REQUIRED'));
     }
-    const symbol = dto.symbol ? this.normalizeSymbol(dto.symbol) : null;
+    const symbol = dto.symbol ? normalizeStockSymbol(dto.symbol) : null;
     const holding = this.holdingRepository.create({
       workspaceId,
       accountId,
@@ -174,7 +180,7 @@ export class InvestmentsService {
       await this.refreshPrices(userId, workspaceId, [saved.id]);
     }
     await this.writeSnapshot(userId, workspaceId, accountId);
-    return this.holdingView(
+    return this.view(
       await this.requireHolding(workspaceId, saved.id),
       await this.workspaceCurrency(workspaceId),
     );
@@ -187,8 +193,13 @@ export class InvestmentsService {
     dto: UpsertHoldingBody,
   ): Promise<HoldingView> {
     const holding = await this.requireHolding(workspaceId, holdingId);
+    const hasTrades = (await this.tradedHoldingIds(workspaceId, holdingId)).size > 0;
+    // Trades say how much is held; a typed number would be undone by the next one.
+    if (dto.quantity != null && hasTrades) {
+      throw new BadRequestException(appError('INVESTMENTS_QUANTITY_FROM_TRADES'));
+    }
     if (dto.symbol !== undefined) {
-      holding.symbol = dto.symbol ? this.normalizeSymbol(dto.symbol) : null;
+      holding.symbol = dto.symbol ? normalizeStockSymbol(dto.symbol) : null;
     }
     if (dto.name != null) holding.name = dto.name;
     if (dto.assetClass != null) holding.assetClass = toEnum(InvestmentAssetClass, dto.assetClass);
@@ -201,7 +212,7 @@ export class InvestmentsService {
     if (dto.priceCurrency != null) holding.priceCurrency = dto.priceCurrency.toUpperCase();
     await this.holdingRepository.save(holding);
     await this.writeSnapshot(userId, workspaceId, holding.accountId);
-    return this.holdingView(holding, await this.workspaceCurrency(workspaceId));
+    return this.view(holding, await this.workspaceCurrency(workspaceId), hasTrades);
   }
 
   async deleteHolding(userId: string, workspaceId: string, holdingId: string): Promise<void> {
@@ -274,32 +285,27 @@ export class InvestmentsService {
       if (excludedAccountIds.has(holding.accountId)) {
         continue;
       }
-      const view = await this.holdingView(holding, currency);
-      totals.set(holding.assetClass, (totals.get(holding.assetClass) ?? 0) + view.value);
+      const { value } = await this.view(holding, currency);
+      totals.set(holding.assetClass, (totals.get(holding.assetClass) ?? 0) + value);
     }
     return totals;
   }
 
-  private normalizeSymbol(symbol: string): string {
-    return normalizeStockSymbol(symbol);
+  private view(holding: InvestmentHolding, currency: string, hasTrades = false) {
+    return holdingView(holding, currency, this.exchangeRatesService, hasTrades);
   }
 
-  private async holdingView(holding: InvestmentHolding, currency: string): Promise<HoldingView> {
-    const quantity = Number(holding.quantity);
-    const price = Number(holding.price);
-    const value = (await holdingValueIn(holding, currency, this.exchangeRatesService)) ?? 0;
-    return {
-      id: holding.id,
-      symbol: holding.symbol,
-      name: holding.name,
-      assetClass: holding.assetClass,
-      quantity,
-      price,
-      priceCurrency: holding.priceCurrency,
-      priceSource: holding.priceSource,
-      pricedAt: holding.pricedAt?.toISOString() ?? null,
-      value: round2(value),
-    };
+  /** Holdings of the workspace (or the one asked about) whose quantity their trades give. */
+  private async tradedHoldingIds(workspaceId: string, holdingId?: string): Promise<Set<string>> {
+    if (!this.tradeRepository) return new Set();
+    const rows = await this.tradeRepository
+      .createQueryBuilder('trade')
+      .select('DISTINCT trade.holdingId', 'holdingId')
+      .where('trade.workspaceId = :workspaceId', { workspaceId })
+      .andWhere("trade.kind <> 'dividend'") // a dividend says nothing about how much is held
+      .andWhere(holdingId ? 'trade.holdingId = :holdingId' : '1=1', { holdingId })
+      .getRawMany<{ holdingId: string }>();
+    return new Set(rows.map(row => row.holdingId));
   }
 
   /**
@@ -358,8 +364,4 @@ export class InvestmentsService {
       .toUpperCase();
     return /^[A-Z]{3}$/.test(normalized) ? normalized : 'KZT';
   }
-}
-
-function round2(value: number): number {
-  return Math.round(value * 100) / 100;
 }
