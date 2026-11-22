@@ -238,6 +238,13 @@ export class Transaction {
   @Column({ name: 'excluded_from_budgets', type: 'boolean', default: false })
   excludedFromBudgets: boolean;
 
+  /**
+   * A person counted the row in or left it out of budgets: a rule's "leave out
+   * of budgets" then leaves their choice alone, as a picked category stays.
+   */
+  @Column({ name: 'budgets_set_by_hand', type: 'boolean', default: false })
+  budgetsSetByHand: boolean;
+
   @ManyToOne(() => CryptoWallet, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'crypto_wallet_id' })
   cryptoWallet: Relation<CryptoWallet | null>;

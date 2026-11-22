@@ -5,7 +5,7 @@ import {
   ruleRowKey,
 } from '@/modules/classification/engine/rule-notify';
 import type { ClassificationRule } from '@/modules/classification/interfaces/classification-rule.interface';
-import { RuleNotifyService } from '@/modules/classification/services/rule-notify.service';
+import { ROWS_TOLD_ONE_BY_ONE, RuleNotifyService } from '@/modules/classification/services/rule-notify.service';
 
 const WORKSPACE = 'workspace-1';
 const STORE = 'ACME Store - Wireless Buds';
@@ -179,5 +179,40 @@ describe('RuleNotifyService', () => {
     const [, event] = emitter.emitAsync.mock.calls[0];
     expect(event.ruleName).toHaveLength(121);
     expect(event.ruleName.endsWith('…')).toBe(true);
+  });
+
+  it('tells about the first rows of an import one by one, and the rest as one count', async () => {
+    const rows = Array.from({ length: 30 }, (_, index) =>
+      row({ id: `row-${index + 1}`, fingerprint: `fp-acme-${index + 1}` }),
+    );
+    const { service, emitter } = build(rows);
+
+    expect(await service.notifyNewRows(WORKSPACE, rows.map(one => one.id))).toBe(
+      ROWS_TOLD_ONE_BY_ONE + 1,
+    );
+    const events = emitter.emitAsync.mock.calls.map(([, event]) => event);
+    expect(events.slice(0, ROWS_TOLD_ONE_BY_ONE).every(event => event.more === undefined)).toBe(true);
+    expect(events.at(-1)).toMatchObject({
+      ruleId: 'rule-notify',
+      statementId: 'statement-1',
+      more: 30 - ROWS_TOLD_ONE_BY_ONE,
+    });
+  });
+
+  it('counts each recipient on its own: a private row still tells its owner', async () => {
+    const rows = [
+      ...Array.from({ length: ROWS_TOLD_ONE_BY_ONE }, (_, index) =>
+        row({ id: `row-${index + 1}`, fingerprint: `fp-acme-${index + 1}` }),
+      ),
+      row({ id: 'row-own', fingerprint: 'fp-own', isPrivate: true, ownerMemberId: MEMBER_ONE }),
+    ];
+    const { service, emitter } = build(rows);
+    await service.notifyNewRows(WORKSPACE, rows.map(one => one.id));
+
+    const events = emitter.emitAsync.mock.calls.map(([, event]) => event);
+    expect(events.filter(event => event.more)).toEqual([]);
+    expect(events.find(event => event.transactionId === 'row-own')).toMatchObject({
+      memberId: MEMBER_ONE,
+    });
   });
 });

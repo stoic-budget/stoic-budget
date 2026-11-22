@@ -43,10 +43,19 @@ describe('AddRuleGroupsAndNotifyMarks1789090000000', () => {
     );
   });
 
-  it('drops the marks, the column and the folders, in that order, on the way down', async () => {
+  it('marks a row whose budgets choice a person made, false for every row before', async () => {
+    const sql = await run('up');
+
+    expect(sql).toContain(
+      'ALTER TABLE "transactions" ADD COLUMN IF NOT EXISTS "budgets_set_by_hand" boolean NOT NULL DEFAULT false',
+    );
+  });
+
+  it('drops the hand mark, the notify marks, the column and the folders, in that order, on the way down', async () => {
     const sql = await run('down');
 
     expect(sql).toEqual([
+      'ALTER TABLE "transactions" DROP COLUMN IF EXISTS "budgets_set_by_hand"',
       'DROP TABLE IF EXISTS "rule_notify_marks"',
       'DROP INDEX IF EXISTS "IDX_categorization_rules_group"',
       'ALTER TABLE "categorization_rules" DROP COLUMN IF EXISTS "group_id"',

@@ -199,7 +199,7 @@ describe('Rule notifications, folders and packs (e2e)', () => {
       .expect(400);
   });
 
-  it('leaves a new matching row out of budgets on import, and old ones on apply', async () => {
+  it('leaves a new matching row out of budgets on import, and old ones on apply, but not one a person counted in', async () => {
     const rule = await as(owner, request(server()).post('/categorization-rules'))
       .send({
         name: 'Gifts are not spending',
@@ -236,6 +236,21 @@ describe('Rule notifications, folders and packs (e2e)', () => {
       before: { excludedFromBudgets: false },
       after: { excludedFromBudgets: true },
     });
+
+    // A person counts it back in: apply does not undo that.
+    const [{ id: giftId }]: Array<{ id: string }> = await dataSource.query(
+      'SELECT id FROM transactions WHERE workspace_id = $1 AND counterparty_name = $2',
+      [owner.workspaceId, 'GIFT SHOP'],
+    );
+    await as(owner, request(server()).put(`/transactions/${giftId}`))
+      .send({ excludedFromBudgets: false })
+      .expect(200);
+    const again = await as(
+      owner,
+      request(server()).post(`/categorization-rules/${rule.body.id}/apply`),
+    ).expect(200);
+    expect(again.body.excluded).toBe(0);
+    expect(await flagOf()).toEqual([false]);
     await as(owner, request(server()).delete(`/categorization-rules/${rule.body.id}`)).expect(204);
   });
 
@@ -378,8 +393,15 @@ describe('Rule notifications, folders and packs (e2e)', () => {
       .expect(200);
     expect(imported.body).toEqual({ created: 1, skipped: 1 });
     const rules = (await as(other, request(server()).get('/categorization-rules')).expect(200)).body
-      .data as Array<{ name: string; result: { categoryId: string; tagIds: string[] }; groupId: string }>;
+      .data as Array<{
+      name: string;
+      result: { categoryId: string; tagIds: string[] };
+      groupId: string;
+      isActive: boolean;
+    }>;
     const made = rules.find(rule => rule.name === 'Pet shop');
+    // Switched off until someone here turns it on.
+    expect(made?.isActive).toBe(false);
     const [{ id: theirCategory }]: Array<{ id: string }> = await dataSource.query(
       'SELECT id FROM categories WHERE workspace_id = $1 AND name = $2',
       [other.workspaceId, 'Pet food'],

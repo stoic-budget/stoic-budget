@@ -35,7 +35,8 @@ export type NotificationMessageKey =
   | 'tax.rates.official'
   | 'review.waiting'
   | 'rule.matched'
-  | 'rule.matched.no_account';
+  | 'rule.matched.no_account'
+  | 'rule.matched.more';
 
 interface TranslationEntry {
   title: string;
@@ -52,6 +53,10 @@ const ru: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Сработало правило «{{rule}}»',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Сработало правило «{{rule}}»',
+    message: 'Ещё новых строк: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Подписка подорожала',
@@ -182,6 +187,10 @@ const en: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Rule “{{rule}}” matched',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Rule “{{rule}}” matched',
+    message: 'More new rows: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Subscription price changed',
@@ -316,6 +325,10 @@ const kk: TranslationMap = {
     title: '«{{rule}}» ережесі іске қосылды',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: '«{{rule}}» ережесі іске қосылды',
+    message: 'Тағы жаңа жолдар: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Жазылым бағасы өзгерді',
     message:
@@ -442,6 +455,10 @@ const de: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Regel „{{rule}}“ hat gegriffen',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Regel „{{rule}}“ hat gegriffen',
+    message: 'Weitere neue Zeilen: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Abo-Preis geändert',
@@ -586,6 +603,10 @@ const fr: TranslationMap = {
     title: 'La règle « {{rule}} » s’est appliquée',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'La règle « {{rule}} » s’est appliquée',
+    message: 'Autres nouvelles lignes : {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Prix d’abonnement modifié',
     message:
@@ -725,6 +746,10 @@ const es: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Se aplicó la regla «{{rule}}»',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Se aplicó la regla «{{rule}}»',
+    message: 'Más filas nuevas: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Cambio de precio de suscripción',
@@ -866,6 +891,10 @@ const pt: TranslationMap = {
     title: 'A regra “{{rule}}” foi aplicada',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'A regra “{{rule}}” foi aplicada',
+    message: 'Mais linhas novas: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Preço da subscrição alterado',
     message:
@@ -1006,6 +1035,10 @@ const tr: TranslationMap = {
     title: '“{{rule}}” kuralı eşleşti',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: '“{{rule}}” kuralı eşleşti',
+    message: 'Diğer yeni satırlar: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Abonelik fiyatı değişti',
     message:
@@ -1138,6 +1171,10 @@ const uk: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Спрацювало правило «{{rule}}»',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Спрацювало правило «{{rule}}»',
+    message: 'Ще нових рядків: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Підписка подорожчала',
@@ -1272,6 +1309,10 @@ const zh: TranslationMap = {
     title: '规则“{{rule}}”已匹配',
     message: '{{payee}}，{{amount}}',
   },
+  'rule.matched.more': {
+    title: '规则“{{rule}}”已匹配',
+    message: '另有新记录：{{count}}',
+  },
   'subscription.price_changed': {
     title: '订阅价格变动',
     message:
@@ -1376,6 +1417,10 @@ const pl: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Zadziałała reguła „{{rule}}”',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Zadziałała reguła „{{rule}}”',
+    message: 'Kolejne nowe wiersze: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Zmiana ceny subskrypcji',
@@ -1519,6 +1564,10 @@ const it: TranslationMap = {
     title: 'La regola «{{rule}}» è scattata',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'La regola «{{rule}}» è scattata',
+    message: 'Altre righe nuove: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Prezzo abbonamento cambiato',
     message:
@@ -1659,6 +1708,10 @@ const sk: TranslationMap = {
     title: 'Uplatnilo sa pravidlo „{{rule}}“',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Uplatnilo sa pravidlo „{{rule}}“',
+    message: 'Ďalšie nové riadky: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Cena predplatného sa zmenila',
     message:
@@ -1794,6 +1847,10 @@ const ja: TranslationMap = {
   'rule.matched.no_account': {
     title: 'ルール「{{rule}}」に一致しました',
     message: '{{payee}}、{{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'ルール「{{rule}}」に一致しました',
+    message: 'ほかの新しい行：{{count}}',
   },
   'subscription.price_changed': {
     title: 'サブスク料金が変わりました',
@@ -1934,6 +1991,10 @@ const ko: TranslationMap = {
     title: '규칙 “{{rule}}”에 해당했습니다',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: '규칙 “{{rule}}”에 해당했습니다',
+    message: '추가 새 행: {{count}}',
+  },
   'subscription.price_changed': {
     title: '구독 가격 변경',
     message:
@@ -2066,6 +2127,10 @@ const hi: TranslationMap = {
     title: 'नियम “{{rule}}” लागू हुआ',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'नियम “{{rule}}” लागू हुआ',
+    message: 'और नई पंक्तियाँ: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'सदस्यता मूल्य बदला',
     message:
@@ -2194,6 +2259,10 @@ const nl: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Regel ‘{{rule}}’ is toegepast',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Regel ‘{{rule}}’ is toegepast',
+    message: 'Meer nieuwe regels: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Abonnementsprijs gewijzigd',
@@ -2338,6 +2407,10 @@ const sv: TranslationMap = {
     title: 'Regeln ”{{rule}}” slog till',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Regeln ”{{rule}}” slog till',
+    message: 'Fler nya rader: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Prenumerationspris ändrat',
     message:
@@ -2475,6 +2548,10 @@ const vi: TranslationMap = {
     title: 'Quy tắc “{{rule}}” đã khớp',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Quy tắc “{{rule}}” đã khớp',
+    message: 'Thêm dòng mới: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Giá đăng ký thay đổi',
     message:
@@ -2611,6 +2688,10 @@ const id: TranslationMap = {
     title: 'Aturan “{{rule}}” cocok',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Aturan “{{rule}}” cocok',
+    message: 'Baris baru lainnya: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Harga langganan berubah',
     message:
@@ -2743,6 +2824,10 @@ const da: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Reglen »{{rule}}« slog til',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Reglen »{{rule}}« slog til',
+    message: 'Flere nye rækker: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Abonnementets pris er ændret',
@@ -2890,6 +2975,10 @@ const nb: TranslationMap = {
     title: 'Regelen «{{rule}}» slo til',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Regelen «{{rule}}» slo til',
+    message: 'Flere nye rader: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Abonnementsprisen er endret',
     message:
@@ -3035,6 +3124,10 @@ const nn: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Regelen «{{rule}}» slo til',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Regelen «{{rule}}» slo til',
+    message: 'Fleire nye rader: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Abonnementsprisen er endra',
@@ -3182,6 +3275,10 @@ const fi: TranslationMap = {
     title: 'Sääntö ”{{rule}}” osui',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Sääntö ”{{rule}}” osui',
+    message: 'Muita uusia rivejä: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Tilauksen hinta muuttui',
     message:
@@ -3327,6 +3424,10 @@ const is: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Reglan „{{rule}}“ átti við',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Reglan „{{rule}}“ átti við',
+    message: 'Fleiri nýjar línur: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Verð áskriftar breyttist',
@@ -3474,6 +3575,10 @@ const fo: TranslationMap = {
     title: 'Reglan „{{rule}}“ hóskaði',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Reglan „{{rule}}“ hóskaði',
+    message: 'Fleiri nýggjar linjur: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Prísurin á haldinum er broyttur',
     message:
@@ -3620,6 +3725,10 @@ const cs: TranslationMap = {
     title: 'Uplatnilo se pravidlo „{{rule}}“',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Uplatnilo se pravidlo „{{rule}}“',
+    message: 'Další nové řádky: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Cena předplatného se změnila',
     message:
@@ -3764,6 +3873,10 @@ const bg: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Задейства се правилото „{{rule}}“',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Задейства се правилото „{{rule}}“',
+    message: 'Още нови редове: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Цената на абонамента се промени',
@@ -3911,6 +4024,10 @@ const hr: TranslationMap = {
     title: 'Primijenjeno je pravilo „{{rule}}”',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Primijenjeno je pravilo „{{rule}}”',
+    message: 'Još novih redaka: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Cijena pretplate se promijenila',
     message:
@@ -4055,6 +4172,10 @@ const sr: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Примењено је правило „{{rule}}”',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Примењено је правило „{{rule}}”',
+    message: 'Још нових редова: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Цена претплате се променила',
@@ -4202,6 +4323,10 @@ const sl: TranslationMap = {
     title: 'Uporabilo se je pravilo »{{rule}}«',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Uporabilo se je pravilo »{{rule}}«',
+    message: 'Še novih vrstic: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Cena naročnine se je spremenila',
     message:
@@ -4346,6 +4471,10 @@ const mk: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Се примени правилото „{{rule}}“',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Се примени правилото „{{rule}}“',
+    message: 'Уште нови редови: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Цената на претплатата се промени',
@@ -4493,6 +4622,10 @@ const be: TranslationMap = {
     title: 'Спрацавала правіла «{{rule}}»',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Спрацавала правіла «{{rule}}»',
+    message: 'Яшчэ новых радкоў: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Кошт падпіскі змяніўся',
     message:
@@ -4638,6 +4771,10 @@ const bs: TranslationMap = {
     title: 'Primijenjeno je pravilo „{{rule}}”',
     message: '{{payee}}, {{amount}}',
   },
+  'rule.matched.more': {
+    title: 'Primijenjeno je pravilo „{{rule}}”',
+    message: 'Još novih redova: {{count}}',
+  },
   'subscription.price_changed': {
     title: 'Cijena pretplate se promijenila',
     message:
@@ -4782,6 +4919,10 @@ const hsb: TranslationMap = {
   'rule.matched.no_account': {
     title: 'Prawidło „{{rule}}“ je so nałožiło',
     message: '{{payee}}, {{amount}}',
+  },
+  'rule.matched.more': {
+    title: 'Prawidło „{{rule}}“ je so nałožiło',
+    message: 'Dalše nowe linki: {{count}}',
   },
   'subscription.price_changed': {
     title: 'Płaćizna abonementa je so změniła',

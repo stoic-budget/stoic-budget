@@ -19,13 +19,20 @@ import { ClassificationService } from './classification.service';
 const PAGE = 500;
 /** A rule's name in a notification title, which holds 255 characters with the words around it. */
 const NAME_LENGTH = 120;
+/**
+ * How many rows of one import a rule tells each recipient about one by one.
+ * The rest come as one more notification with their count, so a year's
+ * statement does not send a message per row.
+ */
+export const ROWS_TOLD_ONE_BY_ONE = 3;
 
 /**
  * Tells people about new rows that match a rule asking for it: rows a
  * statement import or a bank sync booked, rows imported in bulk, a row typed
  * in. Each rule and row is claimed once in `rule_notify_marks` before anything
  * is sent, so a row imported again never notifies twice. Applying a rule to
- * old rows does not come through here and tells nobody.
+ * old rows does not come through here and tells nobody. Past
+ * `ROWS_TOLD_ONE_BY_ONE` rows of one import, a rule's recipient gets a count.
  */
 @Injectable()
 export class RuleNotifyService {
@@ -53,7 +60,7 @@ export class RuleNotifyService {
     await this.safely(event.workspaceId, [event.transactionId]);
   }
 
-  /** @returns how many notifications were asked for (one per rule and row). */
+  /** @returns how many notifications were asked for: one per rule and row, up to the limit, plus the counts. */
   async notifyNewRows(workspaceId: string, transactionIds: readonly string[]): Promise<number> {
     if (transactionIds.length === 0) {
       return 0;
@@ -63,6 +70,8 @@ export class RuleNotifyService {
       return 0;
     }
     let sent = 0;
+    const told = new Map<string, number>();
+    const rest = new Map<string, { match: RuleNotifyMatch; count: number }>();
     for (let offset = 0; offset < transactionIds.length; offset += PAGE) {
       const ids = transactionIds.slice(offset, offset + PAGE);
       // Duplicates are the same purchase again: never news.
@@ -80,9 +89,25 @@ export class RuleNotifyService {
       const claimed = await this.claim(workspaceId, ruleNotifyMatches(rows, rules, tagIds));
       // One at a time: a burst for one person would race on their preferences row.
       for (const match of claimed) {
-        await this.eventEmitter.emitAsync('rule.matched', this.eventOf(workspaceId, match));
+        const recipient = `${match.rule.id}|${match.memberId ?? 'everyone'}`;
+        const count = told.get(recipient) ?? 0;
+        if (count < ROWS_TOLD_ONE_BY_ONE) {
+          told.set(recipient, count + 1);
+          await this.eventEmitter.emitAsync('rule.matched', this.eventOf(workspaceId, match));
+          sent += 1;
+        } else {
+          const more = rest.get(recipient);
+          if (more) more.count += 1;
+          else rest.set(recipient, { match, count: 1 });
+        }
       }
-      sent += claimed.length;
+    }
+    for (const { match, count } of rest.values()) {
+      await this.eventEmitter.emitAsync('rule.matched', {
+        ...this.eventOf(workspaceId, match),
+        more: count,
+      });
+      sent += 1;
     }
     return sent;
   }

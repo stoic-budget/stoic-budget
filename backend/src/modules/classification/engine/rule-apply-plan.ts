@@ -139,6 +139,8 @@ export function planRuleApply(
           row => row.payeeId !== input.payeeId && !pickedByHand(row) && wins(row, 'payeeId'),
         )
       : [],
-    excluded: input.excludesFromBudgets ? matches.filter(row => !row.excludedFromBudgets) : [],
+    excluded: input.excludesFromBudgets
+      ? matches.filter(row => !(row.excludedFromBudgets || row.budgetsSetByHand))
+      : [],
   };
 }

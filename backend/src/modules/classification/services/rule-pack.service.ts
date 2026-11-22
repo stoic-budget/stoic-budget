@@ -178,10 +178,11 @@ export class RulePackService {
   }
 
   /**
-   * Makes the pack's rules that can be made, below the workspace's own (a rule
-   * already there keeps winning its rows), in the pack's order, with the
-   * missing categories, tags and payees when asked, and the folders they
-   * name. Rows already booked are left as they are: applying is a separate step.
+   * Makes the pack's rules that can be made, switched off, below the
+   * workspace's own (a rule already there keeps winning its rows), in the
+   * pack's order, with the missing categories, tags and payees when asked, and
+   * the folders they name. Rows already booked are left as they are: applying
+   * is a separate step.
    */
   async import(input: {
     workspaceId: string;
@@ -226,7 +227,9 @@ export class RulePackService {
           matchMode: resolved.matchMode,
           result: resolved.result,
           priority: below - index,
-          isActive: rule.isActive,
+          // Switched off until a person turns it on: a shared pack must not start
+          // leaving rows out of budgets or messaging everyone on its own.
+          isActive: false,
           groupId: folder ? (folders.get(nameKey(folder)) ?? null) : null,
           matchCount: 0,
           lastMatchedAt: null,

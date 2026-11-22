@@ -37,24 +37,33 @@ export class RuleNotificationListener {
   }
 
   private async send(event: RuleMatchedEvent): Promise<void> {
-    const messageParams: NotificationParams = {
-      rule: event.ruleName,
-      payee: event.payee,
-      amount: { kind: 'money', amount: event.amount, currency: event.currency },
-      ...(event.account ? { account: event.account } : {}),
-    };
+    const messageParams: NotificationParams = event.more
+      ? { rule: event.ruleName, count: event.more }
+      : {
+          rule: event.ruleName,
+          payee: event.payee,
+          amount: { kind: 'money', amount: event.amount, currency: event.currency },
+          ...(event.account ? { account: event.account } : {}),
+        };
+    // The count of rows past the limit opens their statement, when they have one.
+    const toStatement = Boolean(event.more && event.statementId);
     const payload = {
       workspaceId: event.workspaceId,
       type: NotificationType.RULE_MATCHED,
       category: NotificationCategory.WORKSPACE_ACTIVITY,
-      messageKey: event.account ? ('rule.matched' as const) : ('rule.matched.no_account' as const),
+      messageKey: event.more
+        ? ('rule.matched.more' as const)
+        : event.account
+          ? ('rule.matched' as const)
+          : ('rule.matched.no_account' as const),
       messageParams,
-      entityType: 'transaction',
-      entityId: event.transactionId,
+      entityType: toStatement ? 'statement' : 'transaction',
+      entityId: toStatement ? (event.statementId as string) : event.transactionId,
       meta: {
         ruleId: event.ruleId,
         transactionId: event.transactionId,
         statementId: event.statementId,
+        ...(event.more ? { more: event.more } : {}),
       },
     };
     if (event.memberId === null) {

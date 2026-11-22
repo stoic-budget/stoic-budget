@@ -90,6 +90,19 @@ describe('a rule that leaves a new row out of budgets', () => {
     });
   });
 
+  it('leaves alone a row a person counted in or left out of budgets', async () => {
+    const { applyRuleLayers } = await import('@/modules/classification/engine/rule-result');
+    const classification: Partial<Transaction> = {};
+
+    applyRuleLayers(
+      layerRules([rule('leaves out', { excludeFromBudgets: true })]),
+      classification,
+      { ...row, budgetsSetByHand: true },
+    );
+
+    expect(classification).not.toHaveProperty('excludedFromBudgets');
+  });
+
   it('counts the rule as one that added to the row, so its history names it', () => {
     const leaving = rule('leaves out', { excludeFromBudgets: true });
 

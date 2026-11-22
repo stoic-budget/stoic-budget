@@ -13,6 +13,10 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * `ON CONFLICT DO NOTHING` before a notification is sent: the same row imported
  * again never notifies twice, and two imports at once cannot both send. It is
  * bookkeeping, not workspace data to back up, so it has no entity.
+ *
+ * `transactions.budgets_set_by_hand` marks a row a person counted in or left
+ * out of budgets: a rule's "leave out of budgets" leaves it alone. Rows from
+ * before carry false: who set their flag was not recorded.
  */
 export class AddRuleGroupsAndNotifyMarks1789090000000 implements MigrationInterface {
   name = 'AddRuleGroupsAndNotifyMarks1789090000000';
@@ -49,9 +53,15 @@ export class AddRuleGroupsAndNotifyMarks1789090000000 implements MigrationInterf
     await queryRunner.query(
       'CREATE INDEX IF NOT EXISTS "IDX_rule_notify_marks_workspace" ON "rule_notify_marks" ("workspace_id")',
     );
+    await queryRunner.query(
+      'ALTER TABLE "transactions" ADD COLUMN IF NOT EXISTS "budgets_set_by_hand" boolean NOT NULL DEFAULT false',
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      'ALTER TABLE "transactions" DROP COLUMN IF EXISTS "budgets_set_by_hand"',
+    );
     await queryRunner.query('DROP TABLE IF EXISTS "rule_notify_marks"');
     await queryRunner.query('DROP INDEX IF EXISTS "IDX_categorization_rules_group"');
     await queryRunner.query('ALTER TABLE "categorization_rules" DROP COLUMN IF EXISTS "group_id"');
