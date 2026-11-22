@@ -11,7 +11,8 @@ describe('CategoriesController', () => {
       update: vi.fn(async () => ({ id: 'c1', name: 'X' })),
       remove: vi.fn(async () => undefined),
     };
-    const controller = new CategoriesController(categoriesService as any);
+    const summaryService = { summary: vi.fn(async () => ({ thisMonth: 5 })) };
+    const controller = new CategoriesController(categoriesService as any, summaryService as any);
     const user = { id: 'u1' } as any;
     const workspaceId = 'w1';
 
@@ -30,6 +31,12 @@ describe('CategoriesController', () => {
     expect(await controller.update({ id: 'c1' }, { name: 'X' } as any, user, workspaceId)).toEqual({
       id: 'c1',
     }); // read back as stored, not the saved entity
+    expect(await controller.summary({ id: 'c1' }, {}, workspaceId, 'm1')).toEqual({
+      thisMonth: 5,
+    });
+    expect(summaryService.summary).toHaveBeenCalledWith(workspaceId, 'c1', 'm1', false);
+    await controller.summary({ id: 'c1' }, { netRefunds: true }, workspaceId, 'm1');
+    expect(summaryService.summary).toHaveBeenLastCalledWith(workspaceId, 'c1', 'm1', true);
     expect(await controller.remove({ id: 'c1' }, user, workspaceId)).toEqual({
       message: 'Category deleted successfully',
     });

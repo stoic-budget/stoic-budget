@@ -1,7 +1,10 @@
 'use client';
 
+import { CategoryPickerField } from '@/app/components/categories/CategoryPickerField';
 import { Select } from '@/app/components/ui/select';
 import { useIntlayer } from '@/app/i18n';
+import type { CategoryList } from '@/app/lib/contracts';
+import { RulePayeeValue, RuleTagsValue } from './RuleRefValues';
 import { RuleValueChips } from './RuleValueChips';
 import { fill } from './rule-text';
 import { MULTI_VALUE_FIELDS, NUMBER_FIELDS, type RuleCondition, valuesOf } from './types';
@@ -11,14 +14,56 @@ interface RuleConditionValueProps {
   onChange: (condition: RuleCondition) => void;
   /** The list a value is picked from, for a field that has one. */
   choices?: { value: string; label: string }[];
+  /** The workspace's categories, for a condition on the category. */
+  categories: CategoryList;
 }
 
 /** A typed number, or nothing while the box is empty. */
 const numberOf = (text: string): number | undefined => (text === '' ? undefined : Number(text));
 
-/** The value of one condition: picked from a list, a number or a range, or text that can hold several. */
-export function RuleConditionValue({ condition, onChange, choices }: RuleConditionValueProps) {
+/**
+ * The value of one condition: picked from a list, a category, payee or tags of
+ * the workspace, a number or a range, or text that can hold several.
+ */
+export function RuleConditionValue({
+  condition,
+  onChange,
+  choices,
+  categories,
+}: RuleConditionValueProps) {
   const t = useIntlayer('categorizationRules');
+
+  if (condition.field === 'category') {
+    return (
+      <CategoryPickerField
+        size="small"
+        value={String(condition.value)}
+        categories={categories}
+        onChange={categoryId => onChange({ ...condition, value: categoryId })}
+        placeholder={t.dialog.pickCategory.value}
+        ariaLabel={t.dialog.valueLabel.value}
+      />
+    );
+  }
+  if (condition.field === 'payee') {
+    return (
+      <RulePayeeValue
+        payeeId={String(condition.value)}
+        onChange={payeeId => onChange({ ...condition, value: payeeId })}
+      />
+    );
+  }
+  if (condition.field === 'tags') {
+    return (
+      <RuleTagsValue
+        tagIds={valuesOf(condition).filter(Boolean)}
+        // One tag stays a plain value, as a condition with one value is stored.
+        onChange={tagIds =>
+          onChange({ ...condition, value: tagIds.length === 1 ? tagIds[0] : tagIds })
+        }
+      />
+    );
+  }
 
   if (choices) {
     return (

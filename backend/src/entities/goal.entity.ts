@@ -12,6 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Wallet } from './wallet.entity';
 import { Workspace } from './workspace.entity';
 
 /**
@@ -62,6 +63,19 @@ export class Goal {
 
   @Column({ name: 'cover_source_url', type: 'varchar', length: 500, nullable: true })
   coverSourceUrl: string | null;
+
+  /**
+   * The account this goal follows: while it is set and the account is active,
+   * the goal's progress is that account's balance and its contributions are
+   * kept but not counted. Deleting the account sets it back to NULL.
+   */
+  @ManyToOne(() => Wallet, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'wallet_id' })
+  wallet: Relation<Wallet | null>;
+
+  @Index('IDX_goals_wallet', { where: '"wallet_id" IS NOT NULL' })
+  @Column({ name: 'wallet_id', type: 'uuid', nullable: true })
+  walletId: string | null;
 
   @OneToMany(
     () => GoalContribution,

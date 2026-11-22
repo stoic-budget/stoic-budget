@@ -1,0 +1,188 @@
+{
+  "metadata": {
+    "accountNumber": "473450548853",
+    "currency": "USD",
+    "dateFrom": "2020-04-30T00:00:00",
+    "dateTo": "2020-05-13T00:00:00",
+    "balanceStart": 1.79,
+    "balanceEnd": 711
+  },
+  "transactions": [
+    {
+      "transactionDate": "2020-04-30T00:00:00",
+      "counterpartyName": "Irs Treas 310 Tax Ref",
+      "paymentPurpose": "Irs Treas 310 Tax Ref",
+      "credit": 1700,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2020-04-30T00:00:00",
+      "counterpartyName": "Exa Sears Hho Inc Parma OH",
+      "paymentPurpose": "POS Exa Sears Hho Inc Parma OH",
+      "debit": 50,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-04-30T00:00:00",
+      "counterpartyName": "Exa Sears Hho Inc Parma OH",
+      "paymentPurpose": "POS Exa Sears Hho Inc Parma OH",
+      "debit": 120.63,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-04T00:00:00",
+      "counterpartyName": "Cash App*Member 1750191460 CA USA",
+      "paymentPurpose": "Cash App*Member 1750191460 CA USA",
+      "debit": 40,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-04T00:00:00",
+      "counterpartyName": "Clkbank*Com_D5L 800-390-6035 ID USA",
+      "paymentPurpose": "Clkbank*Com_D5L 800-390-6035 ID USA",
+      "debit": 62.93,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-04T00:00:00",
+      "counterpartyName": "X28 Fitness Atlanta GA USA",
+      "paymentPurpose": "X28 Fitness Atlanta GA USA",
+      "debit": 19.97,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-05T00:00:00",
+      "counterpartyName": "Mac Acme Fres 3875 Uniontown OH",
+      "paymentPurpose": "POS Mac Acme Fres 3875 Uniontown OH",
+      "debit": 21.31,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-05T00:00:00",
+      "counterpartyName": "Mac Acme Fres 3875 Uniontown OH",
+      "paymentPurpose": "POS Mac Acme Fres 3875 Uniontown OH",
+      "debit": 21.31,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-05T00:00:00",
+      "counterpartyName": "Mac Sheetz 0296 Stow OH",
+      "paymentPurpose": "POS Mac Sheetz 0296 Stow OH",
+      "debit": 20.25,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-05T00:00:00",
+      "counterpartyName": "Mac Acme No. 2905 Canton OH",
+      "paymentPurpose": "POS Mac Acme No. 2905 Canton OH",
+      "debit": 106.58,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-05T00:00:00",
+      "counterpartyName": "Mac Acme No. 2905 Canton OH",
+      "paymentPurpose": "POS Mac Acme No. 2905 Canton OH",
+      "debit": 21.26,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-06T00:00:00",
+      "counterpartyName": "Chick-Fil-A #02 Cuyahoga Fls OH USA",
+      "paymentPurpose": "Chick-Fil-A #02 Cuyahoga Fls OH USA",
+      "debit": 51.29,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-06T00:00:00",
+      "counterpartyName": "Mac Sheetz 0465 Parma OH",
+      "paymentPurpose": "POS Mac Sheetz 0465 Parma OH",
+      "debit": 23.58,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-06T00:00:00",
+      "counterpartyName": "Mac Sheetz 0465 Parma OH",
+      "paymentPurpose": "POS Mac Sheetz 0465 Parma OH",
+      "debit": 10.78,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-06T00:00:00",
+      "counterpartyName": "Donatos Pizzeri Hudson OH USA",
+      "paymentPurpose": "Donatos Pizzeri Hudson OH USA",
+      "debit": 34.66,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-07T00:00:00",
+      "counterpartyName": "Bed Bath & Beyo 3554298154 NJ USA",
+      "paymentPurpose": "Bed Bath & Beyo 3554298154 NJ USA",
+      "debit": 75.57,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-07T00:00:00",
+      "counterpartyName": "Sheetz 0296 0 Stow OH USA",
+      "paymentPurpose": "Sheetz 0296 0 Stow OH USA",
+      "debit": 9.36,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-07T00:00:00",
+      "counterpartyName": "Sheetz 0296 0 Stow OH USA",
+      "paymentPurpose": "Sheetz 0296 0 Stow OH USA",
+      "debit": 4.19,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-12T00:00:00",
+      "counterpartyName": "Subway 0 Akron OH USA",
+      "paymentPurpose": "Subway 0 Akron OH USA",
+      "debit": 12.38,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-12T00:00:00",
+      "counterpartyName": "Bath & Body Wor 7097344974 OH USA",
+      "paymentPurpose": "Bath & Body Wor 7097344974 OH USA",
+      "debit": 63.39,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-12T00:00:00",
+      "counterpartyName": "Nike.Com 800-806-6453 OR USA",
+      "paymentPurpose": "Nike.Com 800-806-6453 OR USA",
+      "debit": 21.35,
+      "currency": "USD",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2020-05-13T00:00:00",
+      "counterpartyName": "ATM Key 6730 Rockside Rd Independen OH",
+      "paymentPurpose": "ATM Key 6730 Rockside Rd Independen OH",
+      "debit": 200,
+      "currency": "USD",
+      "paymentType": "cash"
+    }
+  ]
+}

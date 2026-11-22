@@ -97,6 +97,7 @@ function netWorth(groups: NetWorthGroup[]): NetWorthData {
     assetLines: [],
     missingRates: [],
     excluded: [],
+    accountsLeftOut: 0,
     attribution: { byAccount: [], byKind: [] },
     savings: { income: 0, kept: 0, rate: null },
     allTimeHigh: null,
@@ -105,9 +106,13 @@ function netWorth(groups: NetWorthGroup[]): NetWorthData {
   };
 }
 
+const HELD = { id: 'held-1', name: 'Held for a friend', currency: 'EUR', balance: 400, includeInNetWorth: false };
+
 function answer(groups: NetWorthGroup[]) {
   apiGet.mockImplementation(async (url: string) =>
-    url.startsWith('/wallets') ? { data: [walletItem(ACCOUNT), walletItem(CARD), walletItem(LOAN)] } : { data: netWorth(groups) },
+    url.startsWith('/wallets')
+      ? { data: [walletItem(ACCOUNT), walletItem(CARD), walletItem(LOAN), walletItem(HELD)] }
+      : { data: netWorth(groups) },
   );
 }
 
@@ -151,6 +156,16 @@ describe('BalancesCard', () => {
     const link = await screen.findByRole('link', { name: new RegExp(ACCOUNT.name) });
     expect(link).toHaveAttribute('href', `/accounts/${ACCOUNT.id}`);
     expect(link).toHaveTextContent('€950');
+  });
+
+  it('leaves an account set not to count out of cash, as the total does', async () => {
+    answer([CASH]);
+    renderWithQuery(<BalancesCard month={THIS_MONTH} monthLabel="This month" />);
+
+    fireEvent.click(await screen.findByRole('button', { expanded: false }));
+
+    expect(await screen.findByRole('link', { name: new RegExp(ACCOUNT.name) })).toBeInTheDocument();
+    expect(screen.queryByText(HELD.name)).not.toBeInTheDocument();
   });
 
   it('opens any other group onto its sheet lines', async () => {

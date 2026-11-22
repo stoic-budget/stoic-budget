@@ -2,9 +2,28 @@
 
 import * as Schema from 'effect/Schema';
 import * as Struct from 'effect/Struct';
-import { optionalNullable } from '../common/requests';
+import { DateOnlyInput, optionalNullable } from '../common/requests';
 import type { Wire } from '../common/wire';
 import { WalletType } from '../reference/reference';
+
+/**
+ * Cents at most, judged on the number as written: the shared
+ * `isAtMostTwoDecimals` compares `value * 100` with a fixed tolerance, which
+ * refuses some valid amounts above about 10^8 (149257142.61).
+ */
+const isCents = Schema.makeFilter<number>(value =>
+  Number(value.toFixed(2)) === value ? undefined : 'Expected at most 2 decimal places',
+);
+
+/**
+ * A credit card's limit in the account's currency: above zero, cents at most,
+ * and below what a `decimal(15,2)` column holds.
+ */
+export const CreditLimit = Schema.Finite.check(
+  isCents,
+  Schema.isGreaterThan(0),
+  Schema.isLessThan(10_000_000_000_000),
+);
 
 export const CreateWalletBody = Schema.Struct({
   name: Schema.String,
@@ -18,6 +37,13 @@ export const CreateWalletBody = Schema.Struct({
    * imported into it start on the same person.
    */
   ownerMemberId: optionalNullable(Schema.String.check(Schema.isUUID())),
+  /** Whether the account counts in net worth; on when left out. */
+  includeInNetWorth: optionalNullable(Schema.Boolean),
+  /**
+   * Credit cards only: any other type is refused with `WALLET_CREDIT_LIMIT_CARD_ONLY`,
+   * and moving a card to another type clears it. `null` clears it.
+   */
+  creditLimit: optionalNullable(CreditLimit),
 });
 export type CreateWalletBody = Wire<typeof CreateWalletBody>;
 
@@ -55,3 +81,15 @@ export const WalletStatementParams = Schema.Struct({
   statementId: Schema.String.check(Schema.isUUID()),
 });
 export type WalletStatementParams = Wire<typeof WalletStatementParams>;
+
+/**
+ * `POST /wallets/:id/balance-check`, `.../balance-check/confirm` and
+ * `.../balance-adjustment`: the balance the bank shows at the end of `date`,
+ * in the account's currency (below zero for a debt). Never a difference: the
+ * server works that out itself.
+ */
+export const BalanceCheckBody = Schema.Struct({
+  date: DateOnlyInput,
+  balance: Schema.Finite.check(Schema.isGreaterThan(-1e13), Schema.isLessThan(1e13)),
+});
+export type BalanceCheckBody = Wire<typeof BalanceCheckBody>;

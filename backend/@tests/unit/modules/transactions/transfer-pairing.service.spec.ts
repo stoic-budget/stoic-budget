@@ -9,6 +9,7 @@ import {
   TransactionType,
   TransferPairSource,
 } from '../../../../src/entities/transaction.entity';
+import { TransferPairRejection } from '../../../../src/entities/transfer-pair-rejection.entity';
 import { ExchangeRatesService } from '../../../../src/modules/exchange-rates/exchange-rates.service';
 import { TransferPairingService } from '../../../../src/modules/transactions/services/transfer-pairing.service';
 
@@ -37,11 +38,20 @@ function row(overrides: Partial<Transaction> & { id: string }): Transaction {
 
 describe('TransferPairingService', () => {
   let service: TransferPairingService;
+  /** What `unlink` does inside its database transaction. */
+  const tx = {
+    find: vi.fn(),
+    update: vi.fn(),
+    insertValues: vi.fn(),
+    createQueryBuilder: vi.fn(),
+  };
   const repository = {
     findOne: vi.fn(),
     update: vi.fn(),
     createQueryBuilder: vi.fn(),
+    manager: { transaction: vi.fn(async (work: (em: typeof tx) => unknown) => work(tx)) },
   };
+  const rejections = { find: vi.fn(async () => []), delete: vi.fn() };
   const exchangeRates = { getRateOrNull: vi.fn(async () => null) };
 
   /** One query builder per call; each resolves `getMany` with the next batch. */
@@ -58,10 +68,22 @@ describe('TransferPairingService', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    const insert = {
+      insert: () => insert,
+      into: () => insert,
+      values: (values: unknown) => {
+        tx.insertValues(values);
+        return insert;
+      },
+      orIgnore: () => insert,
+      execute: vi.fn(),
+    };
+    tx.createQueryBuilder.mockReturnValue(insert);
     const module = await Test.createTestingModule({
       providers: [
         TransferPairingService,
         { provide: getRepositoryToken(Transaction), useValue: repository },
+        { provide: getRepositoryToken(TransferPairRejection), useValue: rejections },
         { provide: ExchangeRatesService, useValue: exchangeRates },
       ],
     }).compile();
@@ -119,6 +141,28 @@ describe('TransferPairingService', () => {
       ]);
     });
 
+    it('skips a pair the user unlinked and pairs the row with its other counterpart', async () => {
+      const a = row({ id: 'a' });
+      const income = { transactionType: TransactionType.INCOME, debit: null, credit: 100 };
+      const b = row({ id: 'b', ...income, statementId: 'stmt-b' });
+      const c = row({ id: 'c', ...income, statementId: 'stmt-c' });
+      queueQueries([a], [a, b, c]);
+      rejections.find.mockResolvedValueOnce([{ txLowId: 'a', txHighId: 'b' }] as never);
+      repository.update.mockResolvedValueOnce({ affected: 2 });
+
+      const result = await service.detectAndApply(WORKSPACE, 'stmt-a');
+
+      expect(result).toEqual({ found: 1, paired: 1 });
+      expect(rejections.find).toHaveBeenCalledWith({
+        where: { workspaceId: WORKSPACE },
+        select: { txLowId: true, txHighId: true },
+      });
+      expect(repository.update.mock.calls[0][0]).toEqual({
+        id: In(['a', 'c']),
+        transferPairId: IsNull(),
+      });
+    });
+
     it('does nothing when the statement has no rows to check', async () => {
       queueQueries([]);
       expect(await service.detectAndApply(WORKSPACE, 'stmt-a')).toEqual({ found: 0, paired: 0 });
@@ -143,6 +187,11 @@ describe('TransferPairingService', () => {
         { id: In(['a', 'b']), workspaceId: WORKSPACE, transferPairId: IsNull() },
         { transferPairId: pairId, transferPairSource: TransferPairSource.MANUAL },
       );
+      // Linking by hand lifts an earlier refusal of the same two rows.
+      expect(rejections.delete).toHaveBeenCalledWith([
+        { workspaceId: WORKSPACE, txLowId: 'a', txHighId: 'b' },
+        { workspaceId: WORKSPACE, txLowId: 'b', txHighId: 'a' },
+      ]);
     });
 
     it('rejects the same row, same direction, duplicates, splits and paired rows', async () => {
@@ -181,17 +230,48 @@ describe('TransferPairingService', () => {
 
       await expect(service.link(WORKSPACE, 'a', 'b')).rejects.toBeInstanceOf(ConflictException);
       expect(repository.update).toHaveBeenCalledTimes(2);
+      expect(rejections.delete).not.toHaveBeenCalled();
     });
   });
 
   describe('unlink', () => {
-    it('separates both legs and marks them rejected', async () => {
+    it('separates both legs and records the pair, not the rows, as refused', async () => {
+      repository.findOne.mockResolvedValueOnce(row({ id: 'b', transferPairId: 'pair-1' }));
+      tx.find.mockResolvedValueOnce([{ id: 'b' }, { id: 'a' }]);
+
+      await service.unlink(WORKSPACE, 'b');
+
+      expect(repository.manager.transaction).toHaveBeenCalledTimes(1);
+      expect(tx.find).toHaveBeenCalledWith(Transaction, {
+        where: { workspaceId: WORKSPACE, transferPairId: 'pair-1' },
+        select: { id: true },
+      });
+      expect(tx.update).toHaveBeenCalledWith(
+        Transaction,
+        { workspaceId: WORKSPACE, transferPairId: 'pair-1' },
+        {
+          transferPairId: null,
+          transferPairSource: null,
+          transferPairKind: null,
+          reimbursementOfId: null,
+        },
+      );
+      expect(tx.insertValues).toHaveBeenCalledWith({
+        workspaceId: WORKSPACE,
+        txLowId: 'a',
+        txHighId: 'b',
+      });
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+
+    it('marks a pair of one rejected, as there is no partner to record', async () => {
       repository.findOne.mockResolvedValueOnce(row({ id: 'a', transferPairId: 'pair-1' }));
-      repository.update.mockResolvedValueOnce({ affected: 2 });
+      tx.find.mockResolvedValueOnce([{ id: 'a' }]);
 
       await service.unlink(WORKSPACE, 'a');
 
-      expect(repository.update).toHaveBeenCalledWith(
+      expect(tx.update).toHaveBeenCalledWith(
+        Transaction,
         { workspaceId: WORKSPACE, transferPairId: 'pair-1' },
         {
           transferPairId: null,
@@ -200,6 +280,7 @@ describe('TransferPairingService', () => {
           reimbursementOfId: null,
         },
       );
+      expect(tx.insertValues).not.toHaveBeenCalled();
     });
 
     it('refuses a row that is not paired', async () => {
@@ -238,6 +319,7 @@ describe('TransferPairingService reimbursements', () => {
       providers: [
         TransferPairingService,
         { provide: getRepositoryToken(Transaction), useValue: repository },
+        { provide: getRepositoryToken(TransferPairRejection), useValue: {} },
         { provide: ExchangeRatesService, useValue: { getRateOrNull: vi.fn(async () => null) } },
       ],
     }).compile();

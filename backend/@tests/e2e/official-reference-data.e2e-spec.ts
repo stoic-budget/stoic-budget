@@ -248,13 +248,19 @@ describe('Official reference data (e2e)', () => {
   });
 
   describe('deadlines and public holidays', () => {
-    it('moves the income tax deadline past a holiday', async () => {
-      // Tax year 2026 is due 31 July 2027, a Saturday: Monday 2 August.
+    it('moves a VAT deadline past a holiday', async () => {
+      await auth(api().put('/tax/settings/vat-status')).send({ status: 'registered' }).expect(200);
+      await auth(api().put('/tax/settings/vat-filing'))
+        .send({ frequency: 'annual', extension: false })
+        .expect(200);
+      const annualReturn = (body: unknown) =>
+        (body as Array<{ kind: string; periodEnd: string; dueDate: string }>).find(
+          item => item.kind === 'vat_return' && item.periodEnd === '2026-12-31',
+        );
+
+      // The 2026 annual return is due 31 July 2027, a Saturday: Monday 2 August.
       const plain = await auth(api().get('/tax/deadlines')).expect(200);
-      const income = (plain.body as Array<{ kind: string; periodEnd: string; dueDate: string }>).find(
-        item => item.kind === 'income_tax' && item.periodEnd === '2026-12-31',
-      );
-      expect(income).toMatchObject({ dueDate: '2027-08-02', basis: 'statute' });
+      expect(annualReturn(plain.body)?.dueDate).toBe('2027-08-02');
 
       // Say Monday 2 August 2027 were a nationwide holiday.
       holidays = [
@@ -263,11 +269,7 @@ describe('Official reference data (e2e)', () => {
       ];
       await dataSource.query(`DELETE FROM reference_data WHERE source = 'openholidays'`);
       const moved = await auth(api().get('/tax/deadlines')).expect(200);
-      expect(
-        (moved.body as Array<{ kind: string; periodEnd: string; dueDate: string }>).find(
-          item => item.kind === 'income_tax' && item.periodEnd === '2026-12-31',
-        )?.dueDate,
-      ).toBe('2027-08-03');
+      expect(annualReturn(moved.body)?.dueDate).toBe('2027-08-03');
     });
   });
 });
