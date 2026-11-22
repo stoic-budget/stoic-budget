@@ -33,6 +33,12 @@ import {
   ClassifiedTransaction,
   ClassifyBulkResult,
 } from '../../src/contracts/classification/categorization-rules';
+import { RuleGroup, RuleGroupList } from '../../src/contracts/classification/rule-groups';
+import {
+  RulePack,
+  RulePackImportResult,
+  RulePackPreview,
+} from '../../src/contracts/classification/rule-packs';
 import {
   CreditNoteDetail,
   CreditNoteListPage,
@@ -58,6 +64,7 @@ import {
   StatementUploadResult,
   StatementWritten,
 } from '../../src/contracts/statements/statement-writes';
+import { TransactionsDeleted } from '../../src/contracts/transactions/transaction-record';
 import { Receipt, ReceiptSource, ReceiptStatus } from '../../src/entities/receipt.entity';
 import { PEPPOL_DOCTYPES } from '../../src/modules/e-invoices/peppol-ubl-writer';
 import { MailerService } from '../../src/modules/mailer/mailer.service';
@@ -172,6 +179,30 @@ describe('API contracts: documents (e2e)', () => {
       );
     });
 
+    it('POST /statements/manual-expense refuses an account in another currency', async () => {
+      const account = (currency: string) =>
+        call('post', '/wallets')
+          .send({ name: `Card ${currency}`, type: 'checking', currency })
+          .expect(201)
+          .then(res => res.body.id as string);
+      const [euro, dollar] = [await account('EUR'), await account('USD')];
+      const expense = (walletId: string) =>
+        call('post', '/statements/manual-expense')
+          .field('amount', '7.20')
+          .field('currency', 'USD')
+          .field('merchant', 'Example Cafe - Flat White')
+          .field('categoryId', categoryId)
+          .field('date', '2026-09-04')
+          .field('walletId', walletId);
+      const refused = await expense(euro).expect(400);
+      expect(refused.body.error.code).toBe('EXPENSE_WALLET_CURRENCY_MISMATCH');
+      const [{ count }] = await dataSource.query(
+        "SELECT count(*)::int AS count FROM transactions WHERE counterparty_name = 'Example Cafe - Flat White'",
+      );
+      expect(count).toBe(0);
+      await expense(dollar).expect(201);
+    });
+
     it('POST /statements/upload, /statements (legacy) and /statements/upload-receipt', async () => {
       const attachOfx = (field: string, fitId: string) =>
         call('post', field === 'file' ? '/statements' : '/statements/upload').attach(
@@ -267,6 +298,90 @@ describe('API contracts: documents (e2e)', () => {
       expect(matches(CategorizationRuleTestResult, tested).matchedTransactions).toBe(2);
     });
 
+    it('rule folders, a rule that tells and leaves rows out, and a rule pack', async () => {
+      const folder = matches(
+        RuleGroup,
+        await send('post', '/categorization-rule-groups', { name: 'Shops' }).expect(201),
+      );
+      const renamed = await send('put', `/categorization-rule-groups/${folder.id}`, {
+        name: 'Online shops',
+      }).expect(200);
+      expect(matches(RuleGroup, renamed).name).toBe('Online shops');
+      const tag = await send('post', '/tags', { name: 'Online' }).expect(201);
+      const created = await send('post', '/categorization-rules', {
+        name: 'ACME is online',
+        conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'ACME' }],
+        result: {
+          categoryId,
+          tagIds: [tag.body.id],
+          excludeFromBudgets: true,
+          notify: { memberId: null },
+        },
+        groupId: folder.id,
+      }).expect(201);
+      const rule = matches(CategorizationRule, created);
+      expect(rule).toMatchObject({
+        groupId: folder.id,
+        result: { excludeFromBudgets: true, notify: { memberId: null } },
+      });
+      const folders = matches(RuleGroupList, await call('get', '/categorization-rule-groups').expect(200));
+      expect(folders.data.map(group => group.id)).toContain(folder.id);
+
+      const exported = await send('post', '/categorization-rule-packs/export', {
+        ruleIds: [rule.id],
+      }).expect(200);
+      const pack = matches(RulePack, exported);
+      expect(pack.rules[0]).toMatchObject({
+        folder: 'Online shops',
+        result: { tags: ['Online'], excludeFromBudgets: true, notify: { member: null } },
+      });
+      // Back into the same workspace as it is: the rule is there already.
+      const again = matches(
+        RulePackPreview,
+        await send('post', '/categorization-rule-packs/preview', {
+          pack,
+          createMissing: true,
+        }).expect(200),
+      );
+      expect(again.rules[0]).toMatchObject({ outcome: 'skip', exists: true });
+      // Under another name, with a tag it lacks: listed, made only on confirm.
+      const renamedPack = {
+        ...pack,
+        rules: [
+          {
+            ...pack.rules[0],
+            name: 'Gift shops',
+            result: { ...pack.rules[0].result, tags: ['Gifts'] },
+          },
+        ],
+      };
+      const preview = matches(
+        RulePackPreview,
+        await send('post', '/categorization-rule-packs/preview', {
+          pack: renamedPack,
+          createMissing: true,
+        }).expect(200),
+      );
+      expect(preview.rules[0]).toMatchObject({
+        outcome: 'create',
+        exists: false,
+        missing: [{ kind: 'tag', name: 'Gifts', creatable: true }],
+      });
+      expect(preview.rules[0].matches).toBeGreaterThan(0);
+      const imported = matches(
+        RulePackImportResult,
+        await send('post', '/categorization-rule-packs/import', {
+          pack: renamedPack,
+          createMissing: true,
+        }).expect(200),
+      );
+      expect(imported).toEqual({ created: 1, skipped: 0 });
+
+      await call('delete', `/categorization-rule-groups/${folder.id}`).expect(204);
+      const after = await call('get', `/categorization-rules/${rule.id}`).expect(200);
+      expect(matches(CategorizationRule, after).groupId).toBeNull();
+    });
+
     it('POST /classification/transaction/:id and /classification/bulk', async () => {
       const one = await call('post', `/classification/transaction/${sampleTransactionId}`).expect(200);
       expect(matches(ClassifiedTransaction, one).id).toBe(sampleTransactionId);
@@ -285,6 +400,26 @@ describe('API contracts: documents (e2e)', () => {
         decision: 'keep',
       }).expect(200);
       expect(matches(DuplicateResolved, res)).toEqual({ id: sampleTransactionId, isDuplicate: false });
+    });
+
+    it('POST /transactions/bulk-delete', async () => {
+      const ids: string[] = [];
+      for (const merchant of ['ACME Store - Desk lamp', 'ACME Store - Desk chair']) {
+        const created = await call('post', '/statements/manual-expense')
+          .field('amount', '7.50')
+          .field('currency', 'USD')
+          .field('merchant', merchant)
+          .field('categoryId', categoryId)
+          .field('date', '2026-09-04')
+          .expect(201);
+        const [{ id }] = await dataSource.query(
+          'SELECT id FROM transactions WHERE statement_id = $1',
+          [matches(ManualExpenseCreated, created).id],
+        );
+        ids.push(id);
+      }
+      const res = await send('post', '/transactions/bulk-delete', { ids }).expect(200);
+      expect(matches(TransactionsDeleted, res)).toEqual({ deleted: 2 });
     });
   });
 

@@ -113,6 +113,10 @@ describe('SimpleFinProvider', () => {
       pending: false,
     });
     expect(accounts[0].transactions[1]).toMatchObject({ id: 'TRN-2', pending: true });
+    // A hold comes as `posted: 0`; its day is the one it was transacted on.
+    expect(accounts[0].transactions[1].posted.toISOString()).toBe(
+      new Date(1758974400 * 1000).toISOString(),
+    );
     expect(accounts[1]).toMatchObject({ org: '', currency: 'EUR', balance: null });
   });
 

@@ -1,7 +1,8 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { FileSpreadsheet, Plus } from '@/app/components/icons';
+import { FileSpreadsheet, FileUp, Plus } from '@/app/components/icons';
+import { AppImportButton } from '@/app/components/import-wizard/app-import/AppImportButton';
 import { ImportFromFileButton } from '@/app/components/import-wizard/ImportFromFileButton';
 import { Button } from '@/app/components/ui/button';
 import { ReadOnlyHint } from '@/app/components/versions/ReadOnlyHint';
@@ -14,7 +15,8 @@ import { useStatementsQueue } from './statements-queue-context';
  * Upload entry point in the statements page header: opens the scan drawer
  * straight away. The drawer's own tabs cover the manual expense. Hidden on a
  * phone, where the bottom bar's "+" offers the same. Beside it, a bank export
- * (CSV, XLSX) goes through the import wizard and becomes one statement.
+ * (CSV, XLSX) goes through the import wizard and becomes one statement, and
+ * the exports of another budgeting app come in through their own dialog.
  */
 export function StatementsUploadButton(): React.JSX.Element {
   const t = useIntlayer('statementsPage');
@@ -30,6 +32,16 @@ export function StatementsUploadButton(): React.JSX.Element {
           <ReadOnlyHint>
             <StatementsToolbarButton onClick={open}>
               <FileSpreadsheet size={14} aria-hidden />
+              {label}
+            </StatementsToolbarButton>
+          </ReadOnlyHint>
+        )}
+      />
+      <AppImportButton
+        renderTrigger={(open, label) => (
+          <ReadOnlyHint>
+            <StatementsToolbarButton onClick={open}>
+              <FileUp size={14} aria-hidden />
               {label}
             </StatementsToolbarButton>
           </ReadOnlyHint>

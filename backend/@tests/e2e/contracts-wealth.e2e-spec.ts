@@ -21,16 +21,29 @@ import {
   GoalDetail,
   GoalItemsResponse,
   GoalWithProgress,
+  HoldingLots,
+  HoldingPriceHistory,
+  ImportClosesResult,
+  HoldingSectorSuggestion,
+  InvestmentAllocation,
   InvestmentAccount,
+  InvestmentAccountList,
   InvestmentContribution,
   InvestmentHolding,
+  InvestmentSettings,
+  InvestmentTrade,
+  InvestmentTradeList,
   MessageResult,
+  SecurityClose,
+  SecurityCloseList,
   MetalLot,
   MetalSaleResult,
   MetalSettings,
+  OkResult,
   PriceRefreshResult,
   SinkingFundList,
   SinkingFundResult,
+  SubscriptionChargeCandidates,
   SubscriptionItem,
   SubscriptionRecord,
   UpcomingSubscriptionList,
@@ -40,7 +53,10 @@ import {
   SubscriptionFrequency,
   SubscriptionStatus,
 } from '../../src/entities/subscription.entity';
+import { Transaction, TransactionType } from '../../src/entities/transaction.entity';
 import { CryptoSyncService } from '../../src/modules/crypto/crypto-sync.service';
+import { StockPriceService } from '../../src/modules/investments/stock-price.service';
+import { SecuritySectorService } from '../../src/modules/investments/security-sector.service';
 import {
   deleteUserByEmail,
   type E2eAccount,
@@ -220,6 +236,178 @@ describe('API contracts: wealth (e2e)', () => {
     expect(unlinked.body.investmentAccountId).toBeNull();
   });
 
+  it('allocation: a classified holding, a fund breakdown and the cuts', async () => {
+    const account = await call('post', '/investments/accounts', 201, { name: 'ACME Allocation' });
+    const fund = await call('post', `/investments/accounts/${account.body.id}/holdings`, 201, {
+      symbol: 'ACMEW',
+      name: 'ACME World ETF',
+      assetClass: 'etf',
+      quantity: 2,
+      price: 100,
+      priceCurrency: 'USD',
+    });
+    const classified = await call('patch', `/investments/holdings/${fund.body.id}/classification`, 200, {
+      sector: 'financials',
+      region: 'europe',
+      country: 'DE',
+      lookThrough: {
+        sector: null,
+        region: [
+          { key: 'north_america', weight: 62.5 },
+          { key: 'other', weight: 37.5 },
+        ],
+        country: [{ key: 'US', weight: 100 }],
+      },
+    });
+    matches(InvestmentHolding, classified.body);
+    expect(classified.body.lookThrough.region).toHaveLength(2);
+    matches(InvestmentAccountList, (await call('get', '/investments', 200)).body);
+
+    vi.spyOn(app.get(SecuritySectorService), 'sectorOf').mockResolvedValueOnce('financials');
+    const suggestion = await call('get', `/investments/holdings/${fund.body.id}/sector-suggestion`, 200);
+    matches(HoldingSectorSuggestion, suggestion.body);
+    expect(suggestion.body.sector).toBe('financials');
+
+    const allocation = await call('get', '/investments/allocation', 200);
+    matches(InvestmentAllocation, allocation.body);
+    expect(allocation.body.classes[0].subclasses.length).toBeGreaterThan(0);
+    expect(allocation.body.regions).toEqual(
+      expect.arrayContaining([expect.objectContaining({ key: 'north_america', amount: 125 })]),
+    );
+    expect(allocation.body.sectors).toEqual(
+      expect.arrayContaining([expect.objectContaining({ key: 'financials' })]),
+    );
+    expect(allocation.body.countries).toEqual(
+      expect.arrayContaining([expect.objectContaining({ key: 'US' })]),
+    );
+  });
+
+  it('investment trades: a buy, a sale, the lots and the basis setting', async () => {
+    const account = await call('post', '/investments/accounts', 201, { name: 'ACME Brokerage' });
+    const holding = await call('post', `/investments/accounts/${account.body.id}/holdings`, 201, {
+      name: 'ACME World ETF',
+      assetClass: 'etf',
+      price: 110,
+      priceCurrency: 'USD',
+    });
+    const buy = await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'buy',
+      date: '2025-01-10',
+      quantity: 5,
+      price: 100,
+      fee: 1,
+      note: 'First lot',
+    });
+    matches(InvestmentTrade, buy.body);
+    const sale = await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'sell',
+      date: '2025-03-10',
+      quantity: 2,
+      price: 120,
+    });
+    const edited = await call('patch', `/investments/trades/${sale.body.id}`, 200, { fee: 1 });
+    matches(InvestmentTrade, edited.body);
+    expect(edited.body.fee).toBe(1);
+    await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'transfer_in',
+      date: '2025-04-01',
+      quantity: 1,
+      price: 50,
+      acquiredOn: '2020-01-02',
+    });
+    await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'split',
+      date: '2025-05-01',
+      splitFrom: 1,
+      splitTo: 2,
+    });
+    await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'dividend',
+      date: '2025-06-01',
+      amount: 4,
+    });
+
+    const list = await call('get', `/investments/holdings/${holding.body.id}/trades`, 200);
+    matches(InvestmentTradeList, list.body);
+    expect(list.body).toHaveLength(5);
+    const lots = await call('get', `/investments/holdings/${holding.body.id}/lots`, 200);
+    matches(HoldingLots, lots.body);
+    expect(lots.body.openLots.length).toBeGreaterThan(0);
+    expect(lots.body.sales).toHaveLength(1);
+    expect(lots.body.years).toHaveLength(1);
+
+    matches(InvestmentSettings, (await call('get', '/investments/settings', 200)).body);
+    const settings = await call('patch', '/investments/settings', 200, { basisMethod: 'average' });
+    matches(InvestmentSettings, settings.body);
+    expect(settings.body.basisMethod).toBe('average');
+    const accounts = await call('get', '/investments', 200);
+    const traded = accounts.body
+      .flatMap((row: { holdings: Array<{ id: string }> }) => row.holdings)
+      .find((row: { id: string }) => row.id === holding.body.id);
+    matches(InvestmentHolding, traded);
+    expect(traded.hasTrades).toBe(true);
+    await call('delete', `/investments/trades/${list.body[4].id}`, 204);
+  });
+
+  it('price history: the chart, the closes a workspace keeps, an import and the health', async () => {
+    const ticker = `CW${String(Date.now()).slice(-8)}`;
+    const day = (back: number) => new Date(Date.now() - back * 86_400_000).toISOString().slice(0, 10);
+    // Yahoo's answer, made up: ten days at 50.
+    const fetched = vi
+      .spyOn(app.get(StockPriceService, { strict: false }), 'fetchDailyCloses')
+      .mockImplementation(async () => ({
+        currency: 'USD',
+        closes: Array.from({ length: 10 }, (_, index) => ({ date: day(10 - index), close: 50 })),
+      }));
+    const account = await call('post', '/investments/accounts', 201, { name: 'ACME Brokerage' });
+    const holding = await call('post', `/investments/accounts/${account.body.id}/holdings`, 201, {
+      symbol: ticker,
+      name: 'ACME Corp',
+      assetClass: 'stock',
+      quantity: 1,
+      price: 52,
+      priceCurrency: 'USD',
+    });
+    await call('post', `/investments/holdings/${holding.body.id}/trades`, 201, {
+      kind: 'buy',
+      date: day(8),
+      quantity: 3,
+      price: 48,
+    });
+
+    const chart = await call('get', `/investments/holdings/${holding.body.id}/history`, 200);
+    matches(HoldingPriceHistory, chart.body);
+    expect(chart.body.basis).toBe('trades');
+    expect(chart.body.health.status).toBe('ok');
+    expect(chart.body.points.some((point: { value: number | null }) => (point.value ?? 0) > 0)).toBe(true);
+
+    const typed = await call('post', `/investments/holdings/${holding.body.id}/closes`, 201, {
+      date: day(3),
+      close: 51.5,
+    });
+    matches(SecurityClose, typed.body);
+    const imported = await call('post', `/investments/holdings/${holding.body.id}/closes/import`, 200, {
+      csv: `Date,Close\n${day(4)},49.75\nnot a day,1`,
+    });
+    matches(ImportClosesResult, imported.body);
+    expect(imported.body.skipped).toHaveLength(1);
+    const list = await call('get', `/investments/holdings/${holding.body.id}/closes`, 200);
+    matches(SecurityCloseList, list.body);
+    expect(list.body).toHaveLength(2);
+
+    const accounts = await call('get', '/investments', 200);
+    const row = accounts.body
+      .flatMap((entry: { holdings: Array<{ id: string }> }) => entry.holdings)
+      .find((entry: { id: string }) => entry.id === holding.body.id);
+    matches(InvestmentHolding, row);
+    expect(row.priceHealth).toMatchObject({ status: 'ok', failures: 0 });
+
+    await call('delete', `/investments/closes/${typed.body.id}`, 204);
+    fetched.mockRestore();
+    await dataSource.query('DELETE FROM security_prices WHERE symbol = $1', [`${ticker}.US`]);
+    await dataSource.query('DELETE FROM security_price_symbols WHERE symbol = $1', [`${ticker}.US`]);
+  });
+
   it('metals: a lot, its photo, a sale, the settings and prices', async () => {
     const lot = await call('post', '/metals/lots', 201, {
       metal: 'XAU',
@@ -363,5 +551,45 @@ describe('API contracts: wealth (e2e)', () => {
     const confirmed = await call('post', `/subscriptions/${detected.id}/confirm`, 201);
     matches(SubscriptionRecord, confirmed.body);
     expect(confirmed.body.status).toBe('active');
+  });
+
+  it('subscriptions: fortnightly charges and "not this payment"', async () => {
+    const next = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
+    const created = await call('post', '/subscriptions', 201, {
+      vendorName: 'ACME Gym - Club',
+      amount: 15,
+      frequency: 'biweekly',
+      currency: 'USD',
+      nextChargeDate: next,
+    });
+    matches(SubscriptionRecord, created.body);
+    expect(created.body.frequency).toBe('biweekly');
+    const row = await dataSource.getRepository(Transaction).save({
+      workspaceId: owner.workspaceId,
+      statementId: null,
+      transactionDate: new Date(),
+      counterpartyName: 'ACME Gym - Club',
+      paymentPurpose: 'ACME Gym - Club',
+      amount: 15,
+      debit: 15,
+      currency: 'USD',
+      transactionType: TransactionType.EXPENSE,
+      isVerified: true,
+    });
+    const url = `/subscriptions/charge-candidates?vendorName=ACME%20Gym&subscriptionId=${created.body.id}`;
+    const offered = await call('get', url, 200);
+    matches(SubscriptionChargeCandidates, offered.body);
+    expect(offered.body.map((item: { transactionId: string }) => item.transactionId)).toContain(
+      row.id,
+    );
+    const refused = await call('post', `/subscriptions/${created.body.id}/match-rejections`, 201, {
+      transactionId: row.id,
+    });
+    matches(OkResult, refused.body);
+    const after = await call('get', url, 200);
+    matches(SubscriptionChargeCandidates, after.body);
+    expect(after.body.map((item: { transactionId: string }) => item.transactionId)).not.toContain(
+      row.id,
+    );
   });
 });

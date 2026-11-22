@@ -7,6 +7,7 @@ import type { RuleWords } from './rule-text';
 export function useRuleWords(): RuleWords {
   const t = useIntlayer('categorizationRules');
   const types = useIntlayer('paymentTypes');
+  const actions = useIntlayer('ruleActions');
   return {
     field: {
       counterparty_name: t.field.counterparty_name.value,
@@ -20,6 +21,10 @@ export function useRuleWords(): RuleWords {
       wallet: t.field.wallet.value,
       currency: t.field.currency.value,
       day_of_month: t.field.day_of_month.value,
+      category: t.field.category.value,
+      payee: t.field.payee.value,
+      tags: t.field.tags.value,
+      comment: t.field.comment.value,
     },
     operator: {
       contains: t.operator.contains.value,
@@ -32,6 +37,14 @@ export function useRuleWords(): RuleWords {
       not_contains: t.operator.not_contains.value,
       not_equals: t.operator.not_equals.value,
       between: t.operator.between.value,
+      is_empty: t.operator.is_empty.value,
+      is_not_empty: t.operator.is_not_empty.value,
+    },
+    tagOperator: {
+      equals: t.tagOperator.equals.value,
+      not_equals: t.tagOperator.not_equals.value,
+      is_empty: t.tagOperator.is_empty.value,
+      is_not_empty: t.tagOperator.is_not_empty.value,
     },
     direction: { income: t.direction.income.value, expense: t.direction.expense.value },
     paymentType: {
@@ -52,6 +65,9 @@ export function useRuleWords(): RuleWords {
     tags: t.result.tags.value,
     comment: t.result.comment.value,
     payee: t.result.payee.value,
+    notifyAll: actions.resultNotifyAll.value,
+    notifyMember: actions.resultNotifyMember.value,
+    exclude: actions.resultExclude.value,
     shared: t.result.shared.value,
     unknown: t.result.unknown.value,
   };

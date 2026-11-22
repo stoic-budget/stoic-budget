@@ -69,6 +69,7 @@ const saved: CategorizationRule = {
   result: { categoryId: ELECTRONICS.id },
   priority: 2,
   isActive: true,
+  groupId: null,
   matchCount: 0,
   lastMatchedAt: null,
   createdAt: '2026-09-01T10:00:00.000Z',
@@ -126,6 +127,7 @@ beforeEach(() => {
         moved: 0,
         commented: 0,
         renamed: 0,
+        excluded: 0,
       });
     throw new Error(`unexpected POST ${url}`);
   });
@@ -385,11 +387,152 @@ describe('RuleEditorView', () => {
     );
   });
 
+  it('adds a group with its own "any of these", and a blank check that sends no value', async () => {
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+    await screen.findByRole('table');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add group' }));
+    const group = screen.getByRole('combobox', { name: 'How this group’s conditions combine' });
+    expect(group.textContent).toContain('Any of these');
+    // The group's first condition: a payee text; then a second one on the comment.
+    fireEvent.change(screen.getAllByLabelText('Value')[1], { target: { value: 'Corner Bakery' } });
+    await userEvent.click(screen.getAllByRole('button', { name: 'Add condition' })[0]);
+    selectOption(screen.getAllByLabelText('Field')[2], 'Comment');
+    selectOption(screen.getAllByLabelText('Check')[2], 'is empty');
+    // Nothing to type for a blank check, and the rule says how such fields are read.
+    expect(screen.getAllByLabelText('Value')).toHaveLength(2);
+    expect(screen.getByText(/read as the rules above this one leave the row/)).toBeTruthy();
+
+    const conditions = [
+      { field: 'counterparty_name', operator: 'contains', value: 'ACME Store' },
+      {
+        matchMode: 'any',
+        conditions: [
+          { field: 'counterparty_name', operator: 'contains', value: 'Corner Bakery' },
+          { field: 'comment', operator: 'is_empty', value: '' },
+        ],
+      },
+    ];
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        '/categorization-rules/test',
+        expect.objectContaining({ conditions, ruleId: 'rule-1' }),
+        expect.anything(),
+      ),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({ conditions }),
+      ),
+    );
+
+    // A group taken away takes its conditions with it.
+    await userEvent.click(screen.getByRole('button', { name: 'Remove group' }));
+    expect(screen.getAllByLabelText('Field')).toHaveLength(1);
+  });
+
+  it('opens a rule on the category and tags by their names, and drops a group left empty', async () => {
+    const tag = { id: '00000000-0000-4000-8000-000000000005', name: 'Gadgets', color: null, usageCount: 1 };
+    get.mockImplementation(async (url: string) => {
+      if (url === '/categorization-rules/rule-1')
+        return apiResponse({
+          ...saved,
+          conditions: [
+            { field: 'category', operator: 'not_equals', value: ELECTRONICS.id },
+            { matchMode: 'all', conditions: [{ field: 'tags', operator: 'equals', value: tag.id }] },
+          ],
+          result: { walletId: CARD.id },
+        });
+      if (url === '/categories') return apiResponse([ELECTRONICS]);
+      if (url === '/wallets') return apiResponse([CARD]);
+      if (url === '/tags') return apiResponse([tag]);
+      if (url.startsWith('/workspaces/')) return apiResponse({ members: [] });
+      throw new Error(`unexpected GET ${url}`);
+    });
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+
+    expect(await screen.findByRole('button', { name: 'Value' })).toBeTruthy();
+    expect(screen.getAllByText('Electronics').length).toBeGreaterThan(0);
+    expect(await screen.findByText('Gadgets')).toBeTruthy();
+    expect(screen.getAllByLabelText('Check')[0].textContent).toContain('is not');
+    expect(screen.getAllByLabelText('Check')[1].textContent).toContain('has any of');
+
+    // The tag taken off leaves the group with nothing to ask: it is not sent.
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Gadgets' }));
+    await waitFor(() =>
+      expect(post).toHaveBeenLastCalledWith(
+        '/categorization-rules/test',
+        expect.objectContaining({
+          conditions: [{ field: 'category', operator: 'not_equals', value: ELECTRONICS.id }],
+        }),
+        expect.anything(),
+      ),
+    );
+  });
+
   it('asks for a condition before it looks anything up', async () => {
     renderWithQuery(<RuleEditorView id="new" />);
 
     expect(await screen.findByText('Fill in at least one condition.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Save rule' })).toHaveProperty('disabled', true);
     expect(post).not.toHaveBeenCalled();
+  });
+});
+
+describe('the notify and leave-out-of-budgets actions', () => {
+  it('tells everyone about new rows, says old ones tell nobody, and leaves rows out of budgets', async () => {
+    search.params = new URLSearchParams({ payee: STORE });
+    renderWithQuery(<RuleEditorView id="new" />);
+    await screen.findByRole('table');
+
+    selectOption(screen.getByRole('combobox', { name: 'Notify' }), 'Everyone in the workspace');
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Leave out of budgets' }));
+
+    expect(screen.getByText(/Only new rows notify/)).toBeTruthy();
+    expect(screen.getByText(/Applying the rule to these rows notifies no one/)).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith('/categorization-rules', {
+        name: `Payee contains “${STORE}”`,
+        conditions: [{ field: 'counterparty_name', operator: 'contains', value: STORE }],
+        matchMode: 'all',
+        result: { notify: { memberId: null }, excludeFromBudgets: true },
+      }),
+    );
+    // Leaving rows out of budgets is offered on the matches already there; telling is not.
+    await waitFor(() => expect(offers.last?.message).toContain('2'));
+  });
+
+  it('keeps both actions when a saved rule is edited', async () => {
+    get.mockImplementation(async (url: string) => {
+      if (url === '/categorization-rules/rule-1')
+        return apiResponse({
+          ...saved,
+          result: { notify: { memberId: null }, excludeFromBudgets: true },
+        });
+      if (url === '/categories') return apiResponse([ELECTRONICS]);
+      if (url === '/wallets') return apiResponse([CARD]);
+      if (url === '/tags') return apiResponse([]);
+      if (url.startsWith('/workspaces/')) return apiResponse({ members: [] });
+      throw new Error(`unexpected GET ${url}`);
+    });
+    renderWithQuery(<RuleEditorView id="rule-1" />);
+    const name = await screen.findByLabelText('Name');
+    await waitFor(() => expect((name as HTMLInputElement).value).toBe('ACME is electronics'));
+    fireEvent.change(name, { target: { value: 'ACME, noted' } });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Save rule' }));
+
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith(
+        '/categorization-rules/rule-1',
+        expect.objectContaining({
+          result: expect.objectContaining({ notify: { memberId: null }, excludeFromBudgets: true }),
+        }),
+      ),
+    );
   });
 });

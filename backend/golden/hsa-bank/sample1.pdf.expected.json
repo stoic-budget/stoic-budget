@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "accountNumber": "xxxxxx1000",
+    "currency": "USD",
+    "dateFrom": "2023-06-01T00:00:00",
+    "dateTo": "2023-06-30T00:00:00",
+    "balanceStart": 0.61,
+    "balanceEnd": 0.61
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-06-01T00:00:00",
+      "counterpartyName": "EFT Participant Contribution",
+      "paymentPurpose": "EFT Participant Contribution",
+      "credit": 34,
+      "currency": "USD",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-06-05T00:00:00",
+      "counterpartyName": "EFT Adjustment Distribution",
+      "paymentPurpose": "EFT Adjustment Distribution",
+      "debit": 34,
+      "currency": "USD",
+      "paymentType": "bank_transfer_out"
+    }
+  ]
+}

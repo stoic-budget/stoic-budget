@@ -3,6 +3,7 @@ import { Effect, Schema } from 'effect';
 import { EffectRuntime } from '../../common/effect/effect-runtime';
 import { describeHttpFailure, getJson } from '../../common/effect/http-json';
 import { assertPublicEgressUrl } from '../../common/utils/egress-url.util';
+import { type FetchedCloses, HUNDREDTHS_OF, readYahooCloses, YahooHistory } from './yahoo-closes';
 
 export interface QuotedPrice {
   symbol: string;
@@ -42,15 +43,6 @@ export function yahooSymbol(symbol: string): string {
   const suffix = YAHOO_SUFFIX[symbol.slice(dot + 1)];
   return suffix === undefined ? symbol : `${symbol.slice(0, dot)}${suffix}`;
 }
-
-/** Quote currencies that are a hundredth of the real one: London in pence, Tel Aviv in agorot. */
-const HUNDREDTHS_OF: Record<string, string> = {
-  GBp: 'GBP',
-  GBX: 'GBP',
-  ZAc: 'ZAR',
-  ZAC: 'ZAR',
-  ILA: 'ILS',
-};
 
 const YahooChart = Schema.Struct({
   chart: Schema.Struct({
@@ -109,6 +101,34 @@ export class StockPriceService {
       }
     }
     return result;
+  }
+
+  /**
+   * A symbol's daily closes over `range` (`1mo` for the daily job, `10y` for
+   * a first backfill: about 2,500 bars), or null (logged) when Yahoo refused,
+   * has none or could not be reached. Not cached: the caller stores them.
+   */
+  async fetchDailyCloses(symbol: string, range: '1mo' | '10y'): Promise<FetchedCloses | null> {
+    const name = encodeURIComponent(yahooSymbol(normalizeStockSymbol(symbol)));
+    const url = `${YAHOO_CHART_URL}${name}?range=${range}&interval=1d&events=split`;
+    const logger = this.logger;
+    try {
+      await assertPublicEgressUrl(url);
+    } catch (error) {
+      logger.warn(`Yahoo history failed: ${String(error)}`);
+      return null;
+    }
+    const chart = await this.effects.run(
+      getJson(url, YahooHistory, { timeout: '20 seconds' }).pipe(
+        Effect.catch(error =>
+          Effect.sync(() => {
+            logger.warn(`Yahoo history for ${symbol} failed: ${describeHttpFailure(error)}`);
+            return null;
+          }),
+        ),
+      ),
+    );
+    return chart ? readYahooCloses(chart) : null;
   }
 
   /** One symbol's quote, or null (logged) when Yahoo refused, has no price or could not be reached. */

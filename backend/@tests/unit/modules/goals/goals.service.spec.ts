@@ -1,8 +1,11 @@
 import { NotFoundException } from '@nestjs/common';
 import type { Goal, GoalContribution } from '@/entities';
 import { AuditAction, EntityType } from '@/entities/audit-event.entity';
+import { GoalProgressService } from '@/modules/goals/goal-progress.service';
 import { GoalsService } from '@/modules/goals/goals.service';
 import { workspaceCurrencyStub } from '../../../helpers/workspace-currency-stub';
+
+vi.mock('@/modules/wallets/wallet-ledger', () => ({ walletLedgers: vi.fn(async () => new Map()) }));
 
 const WORKSPACE_ID = 'workspace-1';
 const USER_ID = 'user-1';
@@ -38,6 +41,10 @@ function createService(options: {
   contributions?: GoalContribution[];
   totals?: Array<{ goalId: string; total: string }>;
   monthlyTotals?: Array<{ goalId: string; total: string }>;
+  /** Accounts a goal may follow, as the wallet repository finds them. */
+  wallets?: Array<Record<string, unknown>>;
+  /** Dated contributions the sums are read from, honouring each query's date bounds. */
+  ledger?: Array<{ goalId: string; amount: number; date: string }>;
 }) {
   const goals = options.goals ?? [];
   const contributions = options.contributions ?? [];
@@ -62,16 +69,58 @@ function createService(options: {
     softRemove: vi.fn(async (data: Goal) => data),
   } as any;
 
+  // With a ledger, every query is its own builder that sums the rows its bounds let in.
+  const ledgerBuilder = () => {
+    const bounds: { from?: string; before?: string } = {};
+    const builder: any = {
+      select: vi.fn(() => builder),
+      addSelect: vi.fn(() => builder),
+      where: vi.fn(() => builder),
+      andWhere: vi.fn((_clause: string, params?: { from?: string; before?: string }) => {
+        Object.assign(bounds, params?.from ? { from: params.from } : {});
+        Object.assign(bounds, params?.before ? { before: params.before } : {});
+        return builder;
+      }),
+      groupBy: vi.fn(() => builder),
+      getRawMany: vi.fn(async () => {
+        const totals = new Map<string, number>();
+        for (const row of options.ledger ?? []) {
+          if ((bounds.from && row.date < bounds.from) || (bounds.before && row.date >= bounds.before)) {
+            continue;
+          }
+          totals.set(row.goalId, (totals.get(row.goalId) ?? 0) + row.amount);
+        }
+        return [...totals].map(([goalId, total]) => ({ goalId, total: String(total) }));
+      }),
+    };
+    return builder;
+  };
+
   const contributionRepository = {
     create: vi.fn((data: Partial<GoalContribution>) => data as GoalContribution),
     save: vi.fn(async (data: GoalContribution) => data),
     find: vi.fn(async () => contributions),
     findOne: vi.fn(async () => contributions[0] ?? null),
     remove: vi.fn(async (data: GoalContribution) => data),
-    createQueryBuilder: vi.fn(() => queryBuilder),
+    createQueryBuilder: vi.fn(() => (options.ledger ? ledgerBuilder() : queryBuilder)),
   } as any;
 
   const auditService = { createEvent: vi.fn(async () => ({})) } as any;
+
+  const wallets = options.wallets ?? [];
+  const walletRepository = {
+    find: vi.fn(async () => wallets),
+    findOne: vi.fn(async ({ where }: any) => wallets.find(w => w.id === where.id) ?? null),
+    exists: vi.fn(async ({ where }: any) =>
+      wallets.some(w => w.id === where.id && w.isActive === where.isActive),
+    ),
+  } as any;
+  const progressService = new GoalProgressService(
+    contributionRepository,
+    walletRepository,
+    { createQueryBuilder: vi.fn() } as never,
+    { getRateOrNull: vi.fn(async () => null) } as never,
+  );
 
   return {
     service: new GoalsService(
@@ -80,8 +129,10 @@ function createService(options: {
       auditService,
       workspaceCurrencyStub() as never,
       { describe: vi.fn(async () => new Map()) } as never,
+      progressService,
     ),
     goalRepository,
+    walletRepository,
     contributionRepository,
     auditService,
     queryBuilder,
@@ -143,11 +194,11 @@ describe('GoalsService', () => {
 
     await service.findAll(WORKSPACE_ID, '2026-12');
 
-    expect(queryBuilder.andWhere).toHaveBeenCalledWith(expect.stringContaining('>= :start'), {
-      start: '2026-12-01',
+    expect(queryBuilder.andWhere).toHaveBeenCalledWith(expect.stringContaining('>= :from'), {
+      from: '2026-12-01',
     });
-    expect(queryBuilder.andWhere).toHaveBeenCalledWith(expect.stringContaining('< :end'), {
-      end: '2027-01-01',
+    expect(queryBuilder.andWhere).toHaveBeenCalledWith(expect.stringContaining('< :before'), {
+      before: '2027-01-01',
     });
   });
 
@@ -163,6 +214,21 @@ describe('GoalsService', () => {
     expect(queryBuilder.andWhere).toHaveBeenCalledWith(expect.stringContaining('< :before'), {
       before: '2026-03-01',
     });
+  });
+
+  it("leaves out of a month's progress what was put aside after that month", async () => {
+    const { service } = createService({
+      goals: [goal()],
+      ledger: [
+        { goalId: 'goal-1', amount: 100, date: '2026-01-20' },
+        { goalId: 'goal-1', amount: 50, date: '2026-02-10' },
+        { goalId: 'goal-1', amount: 700, date: '2026-03-05' },
+      ],
+    });
+
+    const [result] = await service.findAll(WORKSPACE_ID, '2026-02');
+
+    expect(result).toMatchObject({ currentAmount: 150, contributedInMonth: 50 });
   });
 
   it('leaves the plain list untouched by the month filter', async () => {
@@ -203,6 +269,7 @@ describe('GoalsService', () => {
     const { service } = createService({
       goals: [goal()],
       contributions: [contribution(500), contribution(-200)],
+      totals: [{ goalId: 'goal-1', total: '300' }],
     });
 
     const result = await service.findOne('goal-1', WORKSPACE_ID);
@@ -261,6 +328,87 @@ describe('GoalsService', () => {
     expect(goalRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Отпуск', targetAmount: 5000, targetDate: '2026-12-31' }),
     );
+  });
+
+  describe('following an account', () => {
+    const shared = { id: 'wallet-1', workspaceId: WORKSPACE_ID, isActive: true, ownerMemberId: null };
+
+    it('stores the account a new goal follows once it is one the person may link', async () => {
+      const { service, goalRepository } = createService({ wallets: [shared] });
+
+      await service.create(WORKSPACE_ID, USER_ID, { name: 'Lisbon', targetAmount: 500, walletId: 'wallet-1' });
+
+      expect(goalRepository.create).toHaveBeenCalledWith(expect.objectContaining({ walletId: 'wallet-1' }));
+    });
+
+    it("refuses another member's own account, an archived one and one it cannot find", async () => {
+      const { service, goalRepository } = createService({
+        wallets: [
+          { ...shared, id: 'theirs', ownerMemberId: 'member-2' },
+          { ...shared, id: 'archived', isActive: false },
+        ],
+      });
+
+      for (const walletId of ['theirs', 'archived', 'elsewhere']) {
+        await expect(
+          service.create(WORKSPACE_ID, USER_ID, { name: 'Lisbon', targetAmount: 500, walletId }, 'member-1'),
+        ).rejects.toMatchObject({ response: expect.objectContaining({ code: 'GOAL_ACCOUNT_UNAVAILABLE' }) });
+      }
+      expect(goalRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('lets the owner link their own account', async () => {
+      const { service, goalRepository } = createService({
+        wallets: [{ ...shared, ownerMemberId: 'member-1' }],
+      });
+
+      await service.create(WORKSPACE_ID, USER_ID, { name: 'Lisbon', targetAmount: 500, walletId: 'wallet-1' }, 'member-1');
+
+      expect(goalRepository.save).toHaveBeenCalled();
+    });
+
+    it('does not re-check an account the update leaves as it was', async () => {
+      const { service, walletRepository, goalRepository } = createService({
+        goals: [goal({ walletId: 'theirs' })],
+        wallets: [{ ...shared, id: 'theirs', ownerMemberId: 'member-2' }],
+      });
+
+      await service.update('goal-1', WORKSPACE_ID, USER_ID, { name: 'Renamed', walletId: 'theirs' }, 'member-1');
+
+      expect(walletRepository.findOne).not.toHaveBeenCalled();
+      expect(goalRepository.save).toHaveBeenCalledWith(expect.objectContaining({ name: 'Renamed', walletId: 'theirs' }));
+    });
+
+    it('stops following when the update sends null', async () => {
+      const { service, goalRepository } = createService({ goals: [goal({ walletId: 'wallet-1' })] });
+
+      await service.update('goal-1', WORKSPACE_ID, USER_ID, { walletId: null });
+
+      expect(goalRepository.save).toHaveBeenCalledWith(expect.objectContaining({ walletId: null }));
+    });
+
+    it('refuses a contribution while the goal follows an active account', async () => {
+      const { service, contributionRepository } = createService({
+        goals: [goal({ walletId: 'wallet-1' })],
+        wallets: [shared],
+      });
+
+      await expect(
+        service.addContribution('goal-1', WORKSPACE_ID, USER_ID, { amount: 100 }),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(contributionRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('takes contributions again once the followed account is archived', async () => {
+      const { service, contributionRepository } = createService({
+        goals: [goal({ walletId: 'wallet-1' })],
+        wallets: [{ ...shared, isActive: false }],
+      });
+
+      await service.addContribution('goal-1', WORKSPACE_ID, USER_ID, { amount: 100 });
+
+      expect(contributionRepository.save).toHaveBeenCalled();
+    });
   });
 
   describe('audit trail', () => {

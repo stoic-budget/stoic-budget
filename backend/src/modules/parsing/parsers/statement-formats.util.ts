@@ -1,3 +1,4 @@
+import { decodeEntities } from '../helpers/markup-entities.helper';
 import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
 
 /**
@@ -44,20 +45,12 @@ function ofxTag(block: string, tag: string): string | undefined {
   return match ? decodeEntities(match[1].trim()) : undefined;
 }
 
-const NAMED_ENTITIES: Record<string, string> = {
-  amp: '&',
-  lt: '<',
-  gt: '>',
-  quot: '"',
-  apos: "'",
-};
-
-/** One pass, so '&amp;lt;' becomes the text '&lt;' rather than being decoded twice into '<'. */
-function decodeEntities(value: string): string {
-  return value.replace(/&(?:#(\d+)|(amp|lt|gt|quot|apos));/g, (_, code, name) =>
-    code ? String.fromCharCode(Number(code)) : NAMED_ENTITIES[name],
-  );
-}
+/**
+ * A row a bank-sync pull marks as pending (`bank-sync-ofx.util.ts`). OFX has
+ * no word for it, so the mark is a proprietary tag, which the OFX spec writes
+ * with a dotted prefix and other readers skip.
+ */
+const PENDING_MARK = /<BANKSYNC\.PENDING>\s*Y/i;
 
 export function parseOfx(text: string): ParsedStatement {
   const currency = ofxTag(text, 'CURDEF') ?? 'USD';
@@ -79,6 +72,7 @@ export function parseOfx(text: string): ParsedStatement {
       paymentPurpose: memo || name,
       ...(amount < 0 ? { debit: Math.abs(amount) } : { credit: amount }),
       currency,
+      ...(PENDING_MARK.test(block) ? { pending: true } : {}),
     });
   }
   const dates = transactions.map(t => t.transactionDate.getTime());
@@ -103,92 +97,7 @@ export function parseOfx(text: string): ParsedStatement {
 /* QIF                                                                       */
 /* ----------------------------------------------------------------------- */
 
-/**
- * QIF dates are ambiguous (MM/DD/YYYY in the US, DD/MM/YYYY elsewhere); the
- * whole file is read first and the order that makes every date valid wins,
- * US first when both do.
- */
-function qifDateParser(rows: string[]): (value: string) => Date | null {
-  const parts = rows.map(row =>
-    row
-      .replace(/'/g, '/')
-      .split(/[/.-]/)
-      .map(part => part.trim()),
-  );
-  const valid = (order: 'mdy' | 'dmy') =>
-    parts.every(part => {
-      if (part.length !== 3) return false;
-      const [a, b] = part.map(Number);
-      return order === 'mdy'
-        ? a >= 1 && a <= 12 && b >= 1 && b <= 31
-        : b >= 1 && b <= 12 && a >= 1 && a <= 31;
-    });
-  const order: 'mdy' | 'dmy' = valid('mdy') ? 'mdy' : valid('dmy') ? 'dmy' : 'mdy';
-  return value => {
-    const part = value
-      .replace(/'/g, '/')
-      .split(/[/.-]/)
-      .map(piece => piece.trim());
-    if (part.length !== 3) return null;
-    let [a, b, year] = part.map(Number);
-    if (part[0].length === 4) {
-      // ISO-looking: YYYY-MM-DD
-      [year, a, b] = part.map(Number);
-      return new Date(Date.UTC(year, a - 1, b));
-    }
-    if (year < 100) year += year < 70 ? 2000 : 1900;
-    const month = order === 'mdy' ? a : b;
-    const day = order === 'mdy' ? b : a;
-    const date = new Date(Date.UTC(year, month - 1, day));
-    return Number.isNaN(date.getTime()) ? null : date;
-  };
-}
-
-export function parseQif(text: string, currency = 'USD'): ParsedStatement {
-  const lines = text.split(/\r?\n/);
-  const records: Array<Record<string, string>> = [];
-  let current: Record<string, string> = {};
-  for (const raw of lines) {
-    const line = raw.trimEnd();
-    if (!line) continue;
-    if (line.startsWith('!')) continue;
-    if (line === '^') {
-      if (Object.keys(current).length) records.push(current);
-      current = {};
-      continue;
-    }
-    const code = line[0];
-    const value = line.slice(1).trim();
-    current[code] = current[code] ? `${current[code]} ${value}` : value;
-  }
-  if (Object.keys(current).length) records.push(current);
-
-  const parseDate = qifDateParser(records.map(record => record.D ?? '').filter(Boolean));
-  const transactions: ParsedTransaction[] = [];
-  for (const record of records) {
-    const date = record.D ? parseDate(record.D) : null;
-    const amount = Number.parseFloat((record.T ?? record.U ?? '').replace(/,/g, ''));
-    if (!(date && Number.isFinite(amount))) continue;
-    transactions.push({
-      transactionDate: date,
-      documentNumber: record.N,
-      counterpartyName: record.P || record.M || '',
-      paymentPurpose: record.M || record.P || '',
-      ...(amount < 0 ? { debit: Math.abs(amount) } : { credit: amount }),
-      currency,
-    });
-  }
-  const dates = transactions.map(t => t.transactionDate.getTime());
-  return {
-    metadata: {
-      accountNumber: 'Unknown',
-      currency,
-      dateFrom: new Date(dates.length ? Math.min(...dates) : Date.now()),
-      dateTo: new Date(dates.length ? Math.max(...dates) : Date.now()),
-    },
-    transactions,
-  };
-}
+export { parseQif } from './qif-format.util';
 
 /* ----------------------------------------------------------------------- */
 /* camt.053 (ISO 20022)                                                      */

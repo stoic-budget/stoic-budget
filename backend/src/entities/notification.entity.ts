@@ -39,6 +39,8 @@ export enum NotificationType {
   TAX_DEADLINE_UPCOMING = 'tax.deadline.upcoming',
   TAX_DEADLINE_OVERDUE = 'tax.deadline.overdue',
   TAX_RATES_OFFICIAL_CHANGED = 'tax.rates.official_changed',
+  /** A new row matched a rule that asks to be told. */
+  RULE_MATCHED = 'rule.matched',
 }
 
 export enum NotificationCategory {

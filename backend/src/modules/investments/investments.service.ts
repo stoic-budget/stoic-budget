@@ -8,6 +8,7 @@ import type {
   CreateInvestmentAccountBody,
   InvestmentHolding as HoldingView,
   InvestmentAccount as InvestmentAccountView,
+  PriceHealth,
   UpsertHoldingBody,
 } from '../../contracts';
 import { BalanceAccount, BalanceAccountKind } from '../../entities/balance-account.entity';
@@ -16,13 +17,19 @@ import {
   InvestmentHolding,
   InvestmentPriceSource,
 } from '../../entities/investment-holding.entity';
+import { InvestmentTrade } from '../../entities/investment-trade.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { BalanceService } from '../balance/balance.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
-import { holdingValueIn } from './holding-value';
+import { saveHolding, setAssetClass } from './holding-classification';
+import { priceHealthOf, workspaceCurrencyOf } from './holding-queries';
+import { holdingValueIn, holdingView } from './holding-value';
 import { InvestmentFlowsService } from './investment-flows.service';
+import { round2 } from './returns-sources';
+import { SecurityPricesService } from './security-prices.service';
 import { normalizeStockSymbol, StockPriceService } from './stock-price.service';
+import { tradedHoldingIds } from './traded-holdings';
 
 const INVESTMENTS_SECTION_CODE = 'ASSET_INVESTMENTS';
 
@@ -51,6 +58,10 @@ export class InvestmentsService {
     private readonly exchangeRatesService: ExchangeRatesService,
     private readonly stockPriceService: StockPriceService,
     private readonly flowsService: InvestmentFlowsService,
+    // Last and optional so a test that builds the service by hand needs no trades.
+    @InjectRepository(InvestmentTrade)
+    private readonly tradeRepository?: Repository<InvestmentTrade>,
+    private readonly securityPrices?: SecurityPricesService,
   ) {}
 
   async listAccounts(workspaceId: string): Promise<InvestmentAccountView[]> {
@@ -68,6 +79,8 @@ export class InvestmentsService {
       where: { workspaceId, accountId: In(accounts.map(account => account.id)) },
       order: { createdAt: 'ASC' },
     });
+    const traded = await tradedHoldingIds(this.tradeRepository, workspaceId);
+    const health = await priceHealthOf(this.securityPrices, workspaceId, holdings);
     const { flows } = await this.flowsService.valueFlows(
       workspaceId,
       await this.flowsService.loadFlows(
@@ -80,7 +93,7 @@ export class InvestmentsService {
     for (const account of accounts) {
       const rows: HoldingView[] = [];
       for (const holding of holdings.filter(item => item.accountId === account.id)) {
-        rows.push(await this.holdingView(holding, currency));
+        rows.push(await this.view(holding, currency, traded.has(holding.id), health));
       }
       const value = round2(rows.reduce((sum, row) => sum + row.value, 0));
       const totals = { contribution: 0, withdrawal: 0, income: 0 };
@@ -156,7 +169,7 @@ export class InvestmentsService {
     if (!(dto.name || dto.symbol)) {
       throw new BadRequestException(appError('INVESTMENTS_HOLDING_NAME_REQUIRED'));
     }
-    const symbol = dto.symbol ? this.normalizeSymbol(dto.symbol) : null;
+    const symbol = dto.symbol ? normalizeStockSymbol(dto.symbol) : null;
     const holding = this.holdingRepository.create({
       workspaceId,
       accountId,
@@ -174,10 +187,9 @@ export class InvestmentsService {
       await this.refreshPrices(userId, workspaceId, [saved.id]);
     }
     await this.writeSnapshot(userId, workspaceId, accountId);
-    return this.holdingView(
-      await this.requireHolding(workspaceId, saved.id),
-      await this.workspaceCurrency(workspaceId),
-    );
+    const stored = await this.requireHolding(workspaceId, saved.id);
+    const health = await priceHealthOf(this.securityPrices, workspaceId, [stored]);
+    return this.view(stored, await this.workspaceCurrency(workspaceId), false, health);
   }
 
   async updateHolding(
@@ -187,11 +199,19 @@ export class InvestmentsService {
     dto: UpsertHoldingBody,
   ): Promise<HoldingView> {
     const holding = await this.requireHolding(workspaceId, holdingId);
+    const hasTrades =
+      (await tradedHoldingIds(this.tradeRepository, workspaceId, holdingId)).size > 0;
+    // Trades say how much is held; a typed number would be undone by the next one.
+    if (dto.quantity != null && hasTrades) {
+      throw new BadRequestException(appError('INVESTMENTS_QUANTITY_FROM_TRADES'));
+    }
     if (dto.symbol !== undefined) {
-      holding.symbol = dto.symbol ? this.normalizeSymbol(dto.symbol) : null;
+      holding.symbol = dto.symbol ? normalizeStockSymbol(dto.symbol) : null;
     }
     if (dto.name != null) holding.name = dto.name;
-    if (dto.assetClass != null) holding.assetClass = toEnum(InvestmentAssetClass, dto.assetClass);
+    // A breakdown belongs to a fund: another class drops it.
+    if (dto.assetClass != null)
+      setAssetClass(holding, toEnum(InvestmentAssetClass, dto.assetClass));
     if (dto.quantity != null) holding.quantity = dto.quantity;
     if (dto.price != null) {
       holding.price = dto.price;
@@ -199,9 +219,10 @@ export class InvestmentsService {
       holding.pricedAt = new Date();
     }
     if (dto.priceCurrency != null) holding.priceCurrency = dto.priceCurrency.toUpperCase();
-    await this.holdingRepository.save(holding);
+    await saveHolding(this.holdingRepository, holding, dto.assetClass != null);
     await this.writeSnapshot(userId, workspaceId, holding.accountId);
-    return this.holdingView(holding, await this.workspaceCurrency(workspaceId));
+    const health = await priceHealthOf(this.securityPrices, workspaceId, [holding]);
+    return this.view(holding, await this.workspaceCurrency(workspaceId), hasTrades, health);
   }
 
   async deleteHolding(userId: string, workspaceId: string, holdingId: string): Promise<void> {
@@ -274,32 +295,20 @@ export class InvestmentsService {
       if (excludedAccountIds.has(holding.accountId)) {
         continue;
       }
-      const view = await this.holdingView(holding, currency);
-      totals.set(holding.assetClass, (totals.get(holding.assetClass) ?? 0) + view.value);
+      const { value } = await this.view(holding, currency);
+      totals.set(holding.assetClass, (totals.get(holding.assetClass) ?? 0) + value);
     }
     return totals;
   }
 
-  private normalizeSymbol(symbol: string): string {
-    return normalizeStockSymbol(symbol);
-  }
-
-  private async holdingView(holding: InvestmentHolding, currency: string): Promise<HoldingView> {
-    const quantity = Number(holding.quantity);
-    const price = Number(holding.price);
-    const value = (await holdingValueIn(holding, currency, this.exchangeRatesService)) ?? 0;
-    return {
-      id: holding.id,
-      symbol: holding.symbol,
-      name: holding.name,
-      assetClass: holding.assetClass,
-      quantity,
-      price,
-      priceCurrency: holding.priceCurrency,
-      priceSource: holding.priceSource,
-      pricedAt: holding.pricedAt?.toISOString() ?? null,
-      value: round2(value),
-    };
+  private view(
+    holding: InvestmentHolding,
+    currency: string,
+    hasTrades = false,
+    health?: Map<string, PriceHealth>,
+  ) {
+    const own = holding.symbol ? health?.get(holding.symbol) : undefined;
+    return holdingView(holding, currency, this.exchangeRatesService, hasTrades, own ?? null);
   }
 
   /**
@@ -346,20 +355,7 @@ export class InvestmentsService {
   }
 
   /** Public for the metals service, which prices lots in the same currency. */
-  async workspaceCurrency(workspaceId: string): Promise<string> {
-    const workspace = await this.workspaceRepository.findOne({
-      where: { id: workspaceId },
-      select: {
-        currency: true,
-      },
-    });
-    const normalized = String(workspace?.currency || '')
-      .trim()
-      .toUpperCase();
-    return /^[A-Z]{3}$/.test(normalized) ? normalized : 'KZT';
+  workspaceCurrency(workspaceId: string): Promise<string> {
+    return workspaceCurrencyOf(this.workspaceRepository, workspaceId);
   }
-}
-
-function round2(value: number): number {
-  return Math.round(value * 100) / 100;
 }

@@ -2,16 +2,22 @@
 import { screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { wholeLine } from '@/app/components/dashboard/__tests__/whole-line';
+import type { PayPeriodContext } from '@/app/lib/contracts';
 import { SectionSpanProvider } from '@/app/components/dashboard/section-span';
 import { budgetItem, categoryRef } from '@/app/test/fixtures/contracts';
 import { renderWithQuery } from '@/app/test/query-wrapper';
+import { dayKeyIn } from '../../budgets/helpers/left-per-day';
 import { BudgetSummaryWidget, budgetTone } from './BudgetSummaryWidget';
 
 const apiGet = vi.hoisted(() => vi.fn());
 const appLocale = vi.hoisted(() => ({ current: 'en' }));
+const payPeriods = vi.hoisted(() => ({ context: undefined as PayPeriodContext | undefined }));
 
 vi.mock('@/app/lib/api', () => ({ default: { get: apiGet }, apiBaseUrl: '/api/v1' }));
 vi.mock('@/app/hooks/useWorkspaceId', () => ({ useWorkspaceId: () => 'ws-1' }));
+vi.mock('@/app/hooks/usePayPeriods', () => ({
+  usePayPeriods: () => ({ data: undefined, context: payPeriods.context }),
+}));
 vi.mock('@/app/i18n', async () => {
   const { autoDictionary, value } = await import(
     '@/app/components/dashboard/__tests__/intlayer-mock'
@@ -51,6 +57,7 @@ const THIS_MONTH = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2
 describe('BudgetSummaryWidget', () => {
   beforeEach(() => {
     appLocale.current = 'en';
+    payPeriods.context = undefined;
     apiGet.mockReset();
     apiGet.mockImplementation(async () => ({ data: BUDGETS }));
   });
@@ -79,11 +86,15 @@ describe('BudgetSummaryWidget', () => {
     expect(screen.getAllByText(wholeLine('$60.00 left'))).toHaveLength(6);
   });
 
-  it('asks for this month without a date, sharing the budgets page cache', async () => {
+  it("asks for this month on the reader's today, sharing the budgets page cache", async () => {
     renderWithQuery(<BudgetSummaryWidget month={THIS_MONTH} monthLabel="This month" />);
 
     await screen.findAllByText(/^Budget \d$/);
-    expect(apiGet).toHaveBeenCalledWith('/budgets', expect.objectContaining({ params: undefined }));
+    // The reader's own day, not the server's clock, as the budgets page asks.
+    expect(apiGet).toHaveBeenCalledWith(
+      '/budgets',
+      expect.objectContaining({ params: { date: dayKeyIn(new Date()) } }),
+    );
   });
 
   it('measures another month on its last day', async () => {
@@ -95,6 +106,18 @@ describe('BudgetSummaryWidget', () => {
       expect.objectContaining({ params: { date: '2024-02-29' } }),
     );
     expect(screen.getByText('February 2024')).toBeInTheDocument();
+  });
+
+  it("measures another month on the last day of the workspace's month of that name", async () => {
+    // Day 25: "December 2024" runs 25 Nov – 24 Dec; 31 December is already in "January".
+    payPeriods.context = { monthStart: { kind: 'day', day: 25 } };
+    renderWithQuery(<BudgetSummaryWidget month="2024-12" monthLabel="25 Nov – 24 Dec" />);
+
+    await screen.findAllByText(/^Budget \d$/);
+    expect(apiGet).toHaveBeenCalledWith(
+      '/budgets',
+      expect.objectContaining({ params: { date: '2024-12-24' } }),
+    );
   });
 
   it("names a budget by its category in the reader's language", async () => {

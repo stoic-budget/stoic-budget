@@ -18,6 +18,10 @@ const ClassificationCondition = Schema.Struct({
     'wallet',
     'currency',
     'day_of_month',
+    'category',
+    'payee',
+    'tags',
+    'comment',
   ]),
   operator: Schema.Literals([
     'contains',
@@ -30,11 +34,19 @@ const ClassificationCondition = Schema.Struct({
     'not_contains',
     'not_equals',
     'between',
+    'is_empty',
+    'is_not_empty',
   ]),
   /** Several values mean "any of them". */
   value: Schema.Union([Schema.String, Schema.Number, Schema.Array(Schema.String)]),
   /** The upper end of `between`. */
   valueTo: Schema.optional(Schema.Number),
+});
+
+/** Conditions that hold together, all of them or any one, as one condition of the rule. */
+const ClassificationConditionGroup = Schema.Struct({
+  matchMode: RuleMatchMode,
+  conditions: Schema.Array(ClassificationCondition),
 });
 
 /** What a matching rule sets on the transaction; a key it leaves out is left alone. */
@@ -52,6 +64,10 @@ const ClassificationResult = Schema.Struct({
   comment: Schema.optional(Schema.String),
   /** The payee a matching row is given, unless a person picked one for it. */
   payeeId: Schema.optional(Schema.String),
+  /** A matching row is left out of budgets and every spending figure. */
+  excludeFromBudgets: Schema.optional(Schema.Literal(true)),
+  /** Who hears about a new matching row: one member, or every member with `null`. */
+  notify: Schema.optional(Schema.Struct({ memberId: Schema.NullOr(Schema.String) })),
 });
 
 /** `GET /categorization-rules/:id`, and what creating or updating one answers. */
@@ -59,12 +75,18 @@ export const CategorizationRule = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
   description: Schema.NullOr(Schema.String),
-  conditions: Schema.Array(ClassificationCondition),
-  /** Whether a row has to pass all of the conditions or any one of them. */
+  /**
+   * Conditions, and groups of them one level deep. A rule saved before groups
+   * holds plain conditions only.
+   */
+  conditions: Schema.Array(Schema.Union([ClassificationCondition, ClassificationConditionGroup])),
+  /** Whether a row has to pass all of the conditions (and groups) or any one of them. */
   matchMode: RuleMatchMode,
   result: ClassificationResult,
   priority: Schema.Number,
   isActive: Schema.Boolean,
+  /** The folder the rule is shown in, if any. Folders do not change which rule wins. */
+  groupId: Schema.NullOr(Schema.String),
   matchCount: Schema.Number,
   lastMatchedAt: Schema.NullOr(Timestamp),
   createdAt: Timestamp,
@@ -118,7 +140,7 @@ export type CategorizationRuleTestResult = Wire<typeof CategorizationRuleTestRes
 /**
  * `POST /categorization-rules/:id/apply`: rows refiled, rows whose hand-picked
  * category stayed, rows tagged, rows moved to the rule's account, rows that
- * got its comment or its payee.
+ * got its comment or its payee, rows left out of budgets. Nobody is notified.
  */
 export const CategorizationRuleApplyResult = Schema.Struct({
   applied: Schema.Number,
@@ -131,6 +153,8 @@ export const CategorizationRuleApplyResult = Schema.Struct({
   commented: Schema.Number,
   /** Rows given the rule's payee. */
   renamed: Schema.Number,
+  /** Rows now left out of budgets. */
+  excluded: Schema.Number,
 });
 export type CategorizationRuleApplyResult = Wire<typeof CategorizationRuleApplyResult>;
 

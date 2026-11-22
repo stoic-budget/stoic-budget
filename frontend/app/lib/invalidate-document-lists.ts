@@ -32,10 +32,13 @@ export const FINANCIAL_QUERY_ROOTS = [
   'tax-return',
   'tax-settings',
   'tax-year',
+  // The paid edition's income tax declaration; its keys live with its pages.
   'income-tax',
   'datev',
   // How each bank's statements parsed (the instance admin's parser health page).
   'parser-health',
+  // The month rule: a month starting on payday moves with the salary rows.
+  'pay-periods',
 ] as const;
 
 /**
@@ -48,12 +51,15 @@ export const NON_FINANCIAL_QUERY_ROOTS = [
   'api-keys',
   'audit-events',
   'branches',
+  'calendar-feed',
+  // Folders of rules: names only, no figures.
+  'categorization-rule-groups',
   'clients',
   'crypto',
   'custom-tables',
   'daily-quote',
-  'integrations',
   'integration-status',
+  'integrations',
   'investments',
   'invoices',
   'map-styles',
@@ -64,6 +70,7 @@ export const NON_FINANCIAL_QUERY_ROOTS = [
   'system-update',
   'tax-jurisdictions',
   'tax-rates',
+  'transaction-attachment-file',
   'webhook-deliveries',
   'webhook-endpoints',
   'webhook-subscriptions',

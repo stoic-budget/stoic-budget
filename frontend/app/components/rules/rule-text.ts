@@ -1,5 +1,13 @@
 import type { PaymentType } from '@/app/lib/contracts';
-import { type RuleCondition, type RuleDraftBody, type RuleMatchMode, valuesOf } from './types';
+import {
+  isGroup,
+  type RuleCondition,
+  type RuleDraftBody,
+  type RuleMatchMode,
+  type RuleNode,
+  VALUELESS_OPERATORS,
+  valuesOf,
+} from './types';
 
 /** Puts values into a translated line: `fill('Matched {count} times', { count: 3 })`. */
 export function fill(text: string, values: Record<string, string | number>): string {
@@ -13,6 +21,8 @@ export function fill(text: string, values: Record<string, string | number>): str
 export interface RuleWords {
   field: Record<RuleCondition['field'], string>;
   operator: Record<RuleCondition['operator'], string>;
+  /** The checks on tags read as "has any of", "has none of", "has no tags", "has a tag". */
+  tagOperator: Record<'equals' | 'not_equals' | 'is_empty' | 'is_not_empty', string>;
   direction: Record<'income' | 'expense', string>;
   paymentType: Record<PaymentType, string>;
   and: string;
@@ -23,6 +33,10 @@ export interface RuleWords {
   tags: string;
   comment: string;
   payee: string;
+  /** `notify everyone`, `notify {name}`, `leave out of budgets`. */
+  notifyAll: string;
+  notifyMember: string;
+  exclude: string;
   shared: string;
   unknown: string;
 }
@@ -47,6 +61,12 @@ function oneValue(
       return names.owner(value) ?? words.unknown;
     case 'wallet':
       return names.wallet(value) ?? words.unknown;
+    case 'category':
+      return names.category(value) ?? words.unknown;
+    case 'payee':
+      return names.payee(value) ?? words.unknown;
+    case 'tags':
+      return names.tag(value) ?? words.unknown;
     case 'direction':
       return value === 'income' || value === 'expense' ? words.direction[value] : value;
     case 'payment_type':
@@ -71,17 +91,40 @@ function conditionValue(condition: RuleCondition, words: RuleWords, names: RuleN
     .join(` ${words.or} `);
 }
 
-/** `Payee contains "acme" and Amount is more than 20`, for the list and a default name. */
+/** The word for a check: tags have their own ("has any of"), the rest share them. */
+export function operatorWord(
+  condition: Pick<RuleCondition, 'field' | 'operator'>,
+  words: RuleWords,
+): string {
+  const { field, operator } = condition;
+  if (field === 'tags' && operator in words.tagOperator) {
+    return words.tagOperator[operator as keyof RuleWords['tagOperator']];
+  }
+  return words.operator[operator];
+}
+
+function describeCondition(condition: RuleCondition, words: RuleWords, names: RuleNames): string {
+  const check = `${words.field[condition.field]} ${operatorWord(condition, words)}`;
+  return VALUELESS_OPERATORS.includes(condition.operator)
+    ? check
+    : `${check} ${conditionValue(condition, words, names)}`;
+}
+
+/**
+ * `Payee contains "acme" and Amount is more than 20`, for the list and a
+ * default name; a group in brackets: `… and (Tags has no tags or Comment is empty)`.
+ */
 export function describeConditions(
-  conditions: readonly RuleCondition[],
+  conditions: readonly RuleNode[],
   words: RuleWords,
   names: RuleNames,
   matchMode: RuleMatchMode = 'all',
 ): string {
   return conditions
-    .map(
-      condition =>
-        `${words.field[condition.field]} ${words.operator[condition.operator]} ${conditionValue(condition, words, names)}`,
+    .map(node =>
+      isGroup(node)
+        ? `(${describeConditions(node.conditions, words, names, node.matchMode)})`
+        : describeCondition(node, words, names),
     )
     .join(` ${matchMode === 'any' ? words.or : words.and} `);
 }
@@ -118,6 +161,17 @@ export function describeResult(
     const text = result.comment;
     parts.push(fill(words.comment, { text: text.length > 40 ? `${text.slice(0, 40)}…` : text }));
   }
+  if (result.excludeFromBudgets) {
+    parts.push(words.exclude);
+  }
+  if (result.notify) {
+    const { memberId } = result.notify;
+    parts.push(
+      memberId === null
+        ? words.notifyAll
+        : fill(words.notifyMember, { name: names.owner(memberId) ?? words.unknown }),
+    );
+  }
   return parts.join(' · ');
 }
 
@@ -128,16 +182,20 @@ export interface AppliedCounts {
   moved: number;
   commented: number;
   renamed: number;
+  excluded: number;
 }
 
 /** `2 rows refiled, 3 tagged · 1 rows moved to Cash`: what applying a rule did. */
 export function describeApplied(
   done: AppliedCounts,
-  texts: Record<'applied' | 'appliedAll' | 'movedPart' | 'commentedPart' | 'renamedPart', string>,
+  texts: Record<
+    'applied' | 'appliedAll' | 'movedPart' | 'commentedPart' | 'renamedPart' | 'excludedPart',
+    string
+  >,
   wallet: string,
 ): string {
   const parts: string[] = [];
-  const extra = done.moved + done.commented + done.renamed;
+  const extra = done.moved + done.commented + done.renamed + done.excluded;
   if (done.tagged > 0) {
     parts.push(fill(texts.appliedAll, { applied: done.applied, tagged: done.tagged }));
   } else if (done.applied > 0 || extra === 0) {
@@ -151,6 +209,9 @@ export function describeApplied(
   }
   if (done.commented > 0) {
     parts.push(fill(texts.commentedPart, { count: done.commented }));
+  }
+  if (done.excluded > 0) {
+    parts.push(fill(texts.excludedPart, { count: done.excluded }));
   }
   return parts.join(' · ');
 }

@@ -6,7 +6,7 @@ import { Cache } from 'cache-manager';
 import type { Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { FileStorageService } from '../../common/services/file-storage.service';
-import { assertNoTaxLockedTransactions } from '../../common/utils/tax-lock.util';
+import { assertRowsRemovable } from '../../common/utils/tax-lock.util';
 import { WorkspaceMember } from '../../entities';
 import { ActorType, AuditAction, EntityType, Severity } from '../../entities/audit-event.entity';
 import { Statement } from '../../entities/statement.entity';
@@ -42,7 +42,7 @@ export class StatementTrashService {
     await ensureCanModifyStatement(this.workspaceMemberRepository, statement, userId, workspaceId);
     // A trashed statement's rows drop out of every total, including the
     // filed return they were reported on.
-    await assertNoTaxLockedTransactions(this.transactionRepository, {
+    await assertRowsRemovable(this.transactionRepository, {
       statementId: statement.id,
       workspaceId,
     });
@@ -91,7 +91,7 @@ export class StatementTrashService {
     if (!statement) {
       throw new NotFoundException(appError('STATEMENT_NOT_FOUND'));
     }
-    await assertNoTaxLockedTransactions(this.transactionRepository, {
+    await assertRowsRemovable(this.transactionRepository, {
       statementId: statement.id,
       workspaceId,
     });

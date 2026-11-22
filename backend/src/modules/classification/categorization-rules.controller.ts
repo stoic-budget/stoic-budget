@@ -19,6 +19,7 @@ import { SchemaParams } from '../../common/effect/schema-query';
 import { SchemaResponse } from '../../common/effect/schema-response';
 import { Permission } from '../../common/enums/permissions.enum';
 import { appError } from '../../common/errors/app-error';
+import { assertWorkspaceOwned } from '../../common/utils/workspace-refs.util';
 import {
   CategorizationRuleParams,
   CreateCategorizationRuleBody,
@@ -33,6 +34,7 @@ import {
 } from '../../contracts/classification/categorization-rules';
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
 import { CategorizationRule } from '../../entities/categorization-rule.entity';
+import { RuleGroup } from '../../entities/rule-group.entity';
 import type { User } from '../../entities/user.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
@@ -111,6 +113,7 @@ export class CategorizationRulesController {
       // A new rule is usually the more specific one, so it goes on top.
       priority: dto.priority ?? (await this.ruleOrderService.topPriority(workspaceId)),
       isActive: dto.isActive ?? true,
+      groupId: dto.groupId ?? null,
       matchCount: 0,
       lastMatchedAt: null,
     });
@@ -168,6 +171,9 @@ export class CategorizationRulesController {
     }
     if (dto.isActive != null) {
       rule.isActive = dto.isActive;
+    }
+    if (dto.groupId !== undefined) {
+      rule.groupId = dto.groupId;
     }
 
     await this.categorizationRuleRepository.save(rule);
@@ -278,11 +284,15 @@ export class CategorizationRulesController {
     return this.categorizationRuleRepository.manager;
   }
 
-  /** Every id the rule names, in what it matches and what it sets, is this workspace's. */
-  private assertRefs(
+  /**
+   * Every id the rule names, in what it matches and what it sets, is this
+   * workspace's, and so is the folder it goes in.
+   */
+  private async assertRefs(
     workspaceId: string,
-    dto: Pick<UpdateCategorizationRuleBody, 'conditions' | 'result'>,
+    dto: Pick<UpdateCategorizationRuleBody, 'conditions' | 'result' | 'groupId'>,
   ) {
-    return assertRuleRefs(this.manager, this.workspaceMemberRepository, workspaceId, dto);
+    await assertWorkspaceOwned(this.manager, RuleGroup, [dto.groupId], workspaceId);
+    await assertRuleRefs(this.manager, this.workspaceMemberRepository, workspaceId, dto);
   }
 }

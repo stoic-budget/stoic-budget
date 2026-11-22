@@ -43,6 +43,8 @@ export type Transaction = {
   transactionType?: 'income' | 'expense' | null;
   /** Confirmed by a person in Review; only confirmed rows count in any number. */
   isVerified?: boolean;
+  /** The bank still holds it (a card authorisation): no money moved yet, approved or not. */
+  isPending?: boolean;
   createdAt?: string | null;
   workspaceId?: string;
   workspaceName?: string;

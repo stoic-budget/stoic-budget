@@ -7,6 +7,9 @@ import type { Transaction } from './types';
 
 const api = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), delete: vi.fn() }));
 const router = vi.hoisted(() => ({ push: vi.fn() }));
+const household = vi.hoisted(() => ({
+  members: [] as Array<{ memberId: string; label: string; isSelf: boolean }>,
+}));
 
 vi.mock('@/app/lib/api', () => ({ default: api, apiBaseUrl: '/api/v1' }));
 vi.mock('@/app/hooks/useWorkspaceId', () => ({ useWorkspaceId: () => 'ws-1' }));
@@ -26,7 +29,7 @@ vi.mock('next/link', () => ({
 vi.mock('next/navigation', () => ({ useRouter: () => router }));
 vi.mock('@/app/components/notes/NotesPanel', () => ({ NotesPanel: () => <div>notes panel</div> }));
 vi.mock('@/app/components/payees/useOfferPayeeQueue', () => ({ useOfferPayeeQueue: () => vi.fn() }));
-vi.mock('./hooks/useWorkspaceMembers', () => ({ useWorkspaceMembers: () => [] }));
+vi.mock('./hooks/useWorkspaceMembers', () => ({ useWorkspaceMembers: () => household.members }));
 vi.mock('@/app/hooks/usePermissions', () => ({
   usePermissions: () => ({ hasPermission: () => true }),
 }));
@@ -72,6 +75,7 @@ function renderDrawer(tx: Transaction, onChanged = vi.fn()) {
 
 describe('DetailsDrawer', () => {
   beforeEach(() => {
+    household.members = [];
     api.get.mockReset().mockResolvedValue({ data: [] });
     api.post.mockReset().mockResolvedValue({ data: { approved: 1 } });
     api.delete.mockReset().mockResolvedValue({ data: {} });
@@ -85,6 +89,21 @@ describe('DetailsDrawer', () => {
     expect(screen.getByText('october.pdf')).toBeInTheDocument();
     expect(screen.getByText('Chase · ••••1234')).toBeInTheDocument();
     expect(screen.getByText('sheet.unconfirmed')).toBeInTheDocument();
+  });
+
+  it('says a row the bank still holds is pending, whatever its approval', () => {
+    renderDrawer(transaction({ isPending: true, isVerified: true }));
+
+    expect(screen.getByText('badge')).toHaveClass('seneca-tx-summary__status--pending');
+    expect(screen.queryByText('sheet.confirmed')).not.toBeInTheDocument();
+  });
+
+  it('offers no split or pairing for a pending row, as the server refuses them', () => {
+    renderDrawer(transaction({ isPending: true }));
+    expect(screen.queryByText('split')).not.toBeInTheDocument();
+
+    renderDrawer(transaction({ id: 'tx-2' }));
+    expect(screen.getByText('split')).toBeInTheDocument();
   });
 
   it('lists the actions with a line on what each means', () => {
@@ -139,6 +158,7 @@ describe('DetailsDrawer', () => {
                   result: { categoryId: 'cat-1' },
                   priority: 1,
                   isActive: true,
+                  groupId: null,
                   matchCount: 1,
                   lastMatchedAt: null,
                   createdAt: '2026-09-01T10:00:00.000Z',
@@ -206,11 +226,63 @@ describe('DetailsDrawer', () => {
     );
   });
 
+  it('leaves the row out of budgets, or counts it again, from its switch', async () => {
+    renderDrawer(transaction({ excludedFromBudgets: true }));
+    const toggle = screen.getByRole('checkbox', { name: 'toggle' });
+    expect(toggle).toBeChecked();
+
+    fireEvent.click(toggle);
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/transactions/bulk-update', {
+        items: [{ id: 'tx-1', updates: { excludedFromBudgets: false } }],
+      }),
+    );
+  });
+
   it('shows the history of this row on its tab', () => {
     renderDrawer(transaction());
 
     fireEvent.click(screen.getByRole('tab', { name: 'tabHistory' }));
 
     expect(screen.getByText('history of tx-1')).toBeInTheDocument();
+  });
+
+  describe('the comment of a private row', () => {
+    const ME = 'member-self';
+    const PARTNER = 'member-partner';
+    beforeEach(() => {
+      household.members = [
+        { memberId: ME, label: 'Member One', isSelf: true },
+        { memberId: PARTNER, label: 'Member Two', isSelf: false },
+      ];
+      api.get.mockImplementation(async (url: string) =>
+        url === '/transactions/tx-1/comment-edit'
+          ? { data: { edit: { at: '2026-10-13T08:00:00.000Z', by: 'member', name: 'Member Two' } } }
+          : { data: [] },
+      );
+    });
+
+    it('shows its owner the comment, and who in the household rewrote it', async () => {
+      renderDrawer(transaction({ isPrivate: true, ownerMemberId: ME, comments: 'A gift' }));
+
+      expect((screen.getByLabelText('commentLabel') as HTMLInputElement).value).toBe('A gift');
+      expect(await screen.findByText(/^commentEdited · Member Two · /)).toBeInTheDocument();
+    });
+
+    it("hides it on another member's private row, with nothing about who edited it", async () => {
+      renderDrawer(transaction({ isPrivate: true, ownerMemberId: PARTNER, comments: '—' }));
+
+      await waitFor(() => expect(screen.getByText('sheet.splitHint')).toBeInTheDocument());
+      expect(screen.queryByLabelText('commentLabel')).toBeNull();
+      expect(screen.queryByText(/commentEdited/)).toBeNull();
+      expect(api.get).not.toHaveBeenCalledWith('/transactions/tx-1/comment-edit', expect.anything());
+    });
+
+    it('keeps a shared row as it was: anyone reads its comment', () => {
+      renderDrawer(transaction({ ownerMemberId: PARTNER, comments: 'Team coffee' }));
+
+      expect((screen.getByLabelText('commentLabel') as HTMLInputElement).value).toBe('Team coffee');
+    });
   });
 });

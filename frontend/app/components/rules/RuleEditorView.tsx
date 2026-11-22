@@ -14,14 +14,15 @@ import { RuleEditorForm } from './RuleEditorForm';
 import { RuleMatchesTable } from './RuleMatchesTable';
 import { seedFromParams, seedOf } from './rule-seed';
 import { describeConditions, fill } from './rule-text';
-import type { RuleDraftBody, RuleSeed } from './types';
+import { conditionRefs, type RuleDraftBody, type RuleSeed } from './types';
 import { useRuleApply } from './useRuleApply';
 import { useRuleNames } from './useRuleNames';
 import { completeConditions, useRule, useRulePreview, useSaveRule } from './useRules';
 
 /**
  * How many existing rows applying the rule would file or tag: every match when
- * it adds tags, else the matches nobody filed by hand when it sets a category.
+ * it adds tags or leaves rows out of budgets, else the matches nobody filed by
+ * hand when it sets a category. Telling people is never applied to old rows.
  */
 function rowsToApply(
   result: RuleSeed['result'],
@@ -30,7 +31,7 @@ function rowsToApply(
   if (!preview) {
     return 0;
   }
-  if (result.tagIds?.length) {
+  if (result.tagIds?.length || result.excludeFromBudgets) {
     return preview.matchedTransactions;
   }
   return result.categoryId ? preview.overridable : 0;
@@ -48,11 +49,8 @@ export function RuleEditorView({ id }: { id: string }) {
   const params = useSearchParams();
   const { hasPermission } = usePermissions();
   const canEdit = hasPermission('category.edit');
-  const targets = useRuleNames();
-  const { words, names } = targets;
   const saved = useRule(isNew ? null : id);
   const save = useSaveRule();
-  const applying = useRuleApply(names.wallet);
   const [edited, setEdited] = useState<RuleSeed | null>(null);
 
   // The form holds the user's edits; until the first one it shows the rule as loaded.
@@ -60,6 +58,10 @@ export function RuleEditorView({ id }: { id: string }) {
     ? seedFromParams(new URLSearchParams(params.toString()))
     : saved.data && seedOf(saved.data);
   const draft = edited ?? loaded ?? null;
+  // The payees its conditions ask about, so the default name reads them by name.
+  const targets = useRuleNames(conditionRefs(draft?.conditions ?? [], 'payee'));
+  const { words, names } = targets;
+  const applying = useRuleApply(names.wallet);
   const preview = useRulePreview(
     draft?.conditions ?? [],
     isNew ? null : id,
@@ -82,7 +84,9 @@ export function RuleEditorView({ id }: { id: string }) {
     Boolean(result.walletId) ||
     result.ownerMemberId !== undefined ||
     Boolean(result.tagIds?.length) ||
-    Boolean(result.comment?.trim() || result.payeeId || result.payeeName);
+    Boolean(result.comment?.trim() || result.payeeId || result.payeeName) ||
+    Boolean(result.excludeFromBudgets) ||
+    result.notify !== undefined;
   const problem =
     conditions.length === 0 ? t.dialog.needsCondition : hasAction ? null : t.dialog.needsAction;
 
@@ -99,7 +103,7 @@ export function RuleEditorView({ id }: { id: string }) {
     // Read before leaving the page: the preview is of what is being saved.
     const pending = rowsToApply(draft.result, preview.data);
     const moving = draft.result.walletId ? (preview.data?.movable ?? 0) : 0;
-    const tags = Boolean(draft.result.tagIds?.length);
+    const tags = Boolean(draft.result.tagIds?.length || draft.result.excludeFromBudgets);
     const rule = await save.mutateAsync({ id: draft.id, body }).catch(() => null);
     if (!rule) {
       toast.error(t.toast.saveFailed.value);
@@ -159,6 +163,7 @@ export function RuleEditorView({ id }: { id: string }) {
             problem={problem && conditions.length === 0 ? problem : null}
             preview={conditions.length > 0 ? preview.data : undefined}
             setsCategory={Boolean(result.categoryId)}
+            notifies={result.notify !== undefined}
             categoryName={names.category}
           />
         </div>

@@ -260,6 +260,10 @@ function readRow(state: ReadingState, lines: PdfTextRow[]) {
     state.columns = header ?? state.columns;
     if (header) {
       state.layout.headers.push(header);
+      // A table with columns for money in and out is signed by them, not by a section above.
+      const roles = header.map(column => column.role);
+      state.section =
+        roles.includes('debit') && roles.includes('credit') ? undefined : state.section;
     }
     state.current = null;
     return;

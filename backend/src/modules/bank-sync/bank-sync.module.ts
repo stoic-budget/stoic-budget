@@ -4,10 +4,13 @@ import { fetchPublicUrl } from '../../common/utils/egress-url.util';
 import { Integration, OpenProtocolSettings, Transaction, Wallet } from '../../entities';
 import { ImportModule } from '../import/import.module';
 import { StatementsModule } from '../statements/statements.module';
+import { TaxModule } from '../tax/tax.module';
+import { TransactionsModule } from '../transactions/transactions.module';
 import { BankSyncController } from './bank-sync.controller';
 import { BankSyncService } from './bank-sync.service';
 import { BankSyncClaimsService } from './bank-sync-claims.service';
 import { BankSyncDedupeService } from './bank-sync-dedupe.service';
+import { BankSyncPendingService } from './bank-sync-pending.service';
 import { BANK_SYNC_FETCH, BANK_SYNC_PROVIDERS } from './bank-sync-provider.interface';
 import { BankSyncPullService } from './bank-sync-pull.service';
 import { BankSyncSchedulerService } from './bank-sync-scheduler.service';
@@ -19,6 +22,8 @@ import { SimpleFinProvider } from './simplefin.provider';
     TypeOrmModule.forFeature([Integration, OpenProtocolSettings, Transaction, Wallet]),
     StatementsModule,
     ImportModule,
+    TaxModule,
+    TransactionsModule,
   ],
   controllers: [BankSyncController],
   providers: [
@@ -27,6 +32,7 @@ import { SimpleFinProvider } from './simplefin.provider';
     BankSyncClaimsService,
     BankSyncSchedulerService,
     BankSyncDedupeService,
+    BankSyncPendingService,
     SimpleFinProvider,
     EnableBankingProvider,
     { provide: BANK_SYNC_FETCH, useValue: fetchPublicUrl },

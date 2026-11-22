@@ -86,6 +86,16 @@ export const INTEGRATIONS_ERRORS = {
   // ── mcp ─────────────────────────────────────────────────────────
   MCP_API_KEY_REQUIRED: 'The MCP endpoint takes an API key in the X-Api-Key header',
   MCP_RECEIPT_NOT_FOUND: 'Receipt not found',
+  MCP_CONFIRM_TOKEN_INVALID:
+    'This confirmToken is not valid for this workspace and API key. Call {{tool}} again without confirmToken for a new preview',
+  MCP_CONFIRM_TOKEN_EXPIRED:
+    'This confirmToken has expired: it lasts 10 minutes. Call {{tool}} again without confirmToken for a new preview',
+  MCP_CONFIRM_TOKEN_MISMATCH:
+    'This confirmToken was issued for another tool or other arguments. Repeat the previewed {{tool}} call with exactly the same arguments, or call it without confirmToken for a new preview',
+  MCP_CONFIRM_TOKEN_USED:
+    'This confirmToken has been used already. Call {{tool}} again without confirmToken for a new preview',
+  MCP_CONFIRM_ROWS_CHANGED:
+    'The rows {{tool}} would change are no longer the ones the preview showed. Call it again without confirmToken and check the new preview',
   // ── observability ───────────────────────────────────────────────
   OBSERVABILITY_METRICS_TOKEN_REQUIRED: 'Metrics token is required',
   OBSERVABILITY_METRICS_TOKEN_INVALID: 'Invalid metrics token',
@@ -116,7 +126,8 @@ export const INTEGRATIONS_ERRORS = {
   SUBSCRIPTION_BUDGET_NOT_FOUND: 'Budget not found',
   SUBSCRIPTION_NOT_FOUND: 'Subscription not found',
   SUBSCRIPTION_OWNER_NOT_MEMBER: 'Subscription owner must be a workspace member',
-  SUBSCRIPTION_SINKING_FUND_CADENCE: 'Only quarterly and annual subscriptions need a sinking fund',
+  SUBSCRIPTION_SINKING_FUND_CADENCE:
+    'Only quarterly, half-yearly and annual subscriptions need a sinking fund',
   SUBSCRIPTION_GOALS_UNAVAILABLE: 'Goals are not available',
   SUBSCRIPTION_CHARGE_DATE_REQUIRED: 'chargeDate is required without a transactionId',
   SUBSCRIPTION_PAYMENT_NOT_FOUND: 'Subscription payment not found',
@@ -134,6 +145,9 @@ export const INTEGRATIONS_ERRORS = {
   TELEGRAM_TOKEN_REJECTED: '{{reason}}',
   TELEGRAM_API_ERROR: 'Telegram API error: {{reason}}',
   TELEGRAM_FILE_DOWNLOAD_FAILED: 'Failed to download the file from Telegram',
+  // ── calendar feed ───────────────────────────────────────────────
+  CALENDAR_FEED_NOT_FOUND: 'Calendar feed not found',
+  CALENDAR_FEED_CHANGED: 'The calendar link was just changed elsewhere. Reload the page.',
   // ── vendor-icons ────────────────────────────────────────────────
   VENDOR_ICON_DOMAIN_INVALID: 'Not a vendor domain',
   VENDOR_ICON_NOT_FOUND: 'No icon for this vendor',

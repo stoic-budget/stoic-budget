@@ -45,6 +45,7 @@ export const DOCUMENTS_ERRORS = {
   TRANSACTION_MERGE_TOO_FEW: 'At least 2 transactions required for merge',
   TRANSACTION_ATTACHMENT_FILE_MISSING: 'Attachment file is missing from storage',
   TRANSACTION_ATTACHMENT_NOT_FOUND: 'Attachment not found',
+  TRANSACTION_ATTACHMENT_TYPE_UNSUPPORTED: 'Only photos and PDF files can be attached',
   TRANSACTION_TAGS_NOT_FOUND: 'One or more tags do not exist in this workspace',
   TRANSACTION_BULK_UPDATE_FORMAT: 'Invalid bulk update format. Expected {items} or {ids, updates}',
   TRANSACTION_TAX_LOCKED_FIELDS:
@@ -52,6 +53,9 @@ export const DOCUMENTS_ERRORS = {
   TRANSACTION_ALREADY_SPLIT: 'Transaction is already part of a split',
   TRANSACTION_NOT_SPLIT: 'Transaction is not part of a split',
   TRANSACTION_SPLIT_DUPLICATE: 'Cannot split a transaction marked as a duplicate',
+  TRANSACTION_SPLIT_PENDING: 'Cannot split a transaction the bank has not booked yet',
+  TRANSACTION_SPLIT_ADJUSTMENT:
+    'A balance adjustment cannot be split; delete it and check the balance again',
   TRANSACTION_SPLIT_TAX_LOCKED: 'Cannot split a transaction that is part of a filed tax return',
   TRANSACTION_SPLIT_NOT_POSITIVE: 'Cannot split a transaction without a positive amount',
   TRANSACTION_SPLIT_SUM_MISMATCH: 'Split parts must sum to {{total}}, received {{received}}',
@@ -59,13 +63,23 @@ export const DOCUMENTS_ERRORS = {
     'Cannot unsplit a transaction whose parts are part of a filed tax return',
   TRANSACTION_UNSPLIT_DUPLICATE:
     'Cannot unsplit a group containing a transaction marked as a duplicate',
+  TRANSACTION_UNSPLIT_PRIVATE_FILES:
+    'A private part has files of its own that the merged row would show to others; its owner can remove them first',
+  TRANSACTION_UNSPLIT_HIDES_FILES:
+    'A part has files that the merged row, private to one member, would hide from everyone else; remove them or share that row first',
+  TRANSACTION_UNSPLIT_MIXED_BUDGETS:
+    'Before unsplitting, either leave every part out of budgets or count every part in them',
   TRANSACTION_TRANSFER_SAME_LEG: 'A transfer needs two different transactions',
   TRANSACTION_TRANSFER_SAME_DIRECTION: 'The two legs of a transfer must go in opposite directions',
   TRANSACTION_LEG_DUPLICATE: 'Transaction {{id}} is marked as a duplicate',
+  TRANSACTION_LEG_PENDING: 'Transaction {{id}} is not booked by the bank yet',
   TRANSACTION_LEG_SPLIT: 'Transaction {{id}} is part of a split',
   TRANSACTION_LEG_TRANSFERRED: 'Transaction {{id}} is already part of a transfer',
   TRANSACTION_PAIRED_MEANWHILE: 'One of the transactions was paired in the meantime',
   TRANSACTION_NOT_TRANSFER: 'Transaction is not part of a transfer',
+  TRANSACTION_ADJUSTMENT_CATEGORY:
+    'A balance adjustment takes no category or tax mark: it is neither spending nor income',
+  TRANSACTION_UNLINK_ADJUSTMENT: 'A balance adjustment is not a transfer; delete it to undo it',
   TRANSACTION_REIMBURSEMENT_NOT_INCOMING: 'Only an incoming transaction can be a reimbursement',
   TRANSACTION_REIMBURSEMENT_SAME_LEG: 'A reimbursement needs two different transactions',
   TRANSACTION_REIMBURSEMENT_MUST_BE_INCOMING: 'The reimbursement must be an incoming transaction',
@@ -97,6 +111,8 @@ export const DOCUMENTS_ERRORS = {
   EXPENSE_CATEGORY_DISABLED: 'Category is disabled',
   EXPENSE_CATEGORY_NOT_EXPENSE: 'Category must be an expense category',
   EXPENSE_TAX_RATE_NOT_FOUND: 'Tax rate not found',
+  EXPENSE_WALLET_CURRENCY_MISMATCH:
+    'The account holds {{walletCurrency}}; the expense is in {{currency}}',
   // ── receipts ────────────────────────────────────────────────────────────
   RECEIPT_NOT_FOUND: 'Receipt not found',
   RECEIPT_ORIGINAL_NOT_FOUND: 'Original receipt not found',
@@ -132,6 +148,7 @@ export const DOCUMENTS_ERRORS = {
   CATEGORIZATION_RULE_NO_CATEGORY: 'The rule sets nothing to apply to existing rows',
   CATEGORIZATION_RULE_CONDITION_INVALID: 'Invalid condition on {{field}}: {{value}}',
   CATEGORIZATION_RULE_ORDER_STALE: 'The rules changed meanwhile; reload the page and try again',
+  CATEGORIZATION_RULE_GROUP_NOT_FOUND: 'Rule folder not found',
   CLASSIFICATION_TRANSACTION_NOT_FOUND: 'Transaction not found',
   REVIEW_DUPLICATE_NOT_FOUND: 'Suspected duplicate not found',
   // ── dashboard, budgets, goals ───────────────────────────────────────────
@@ -139,6 +156,10 @@ export const DOCUMENTS_ERRORS = {
   BUDGET_ALREADY_EXISTS: 'Budget for this category with period "{{period}}" already exists',
   BUDGET_WINDOW_INVALID: 'Budget "endsOn" must not be earlier than "startsOn"',
   GOAL_COVER_ONE_SOURCE: 'Send exactly one of preset or photoId',
+  GOAL_ACCOUNT_UNAVAILABLE:
+    'A goal can follow only an active account of this workspace that is shared or yours',
+  GOAL_FOLLOWS_ACCOUNT:
+    "This goal follows an account: its progress is the account's balance, so it takes no contributions",
   // ── balance sheet ───────────────────────────────────────────────────────
   BALANCE_DATE_INVALID: 'Invalid date format',
   BALANCE_ACCOUNT_NOT_FOUND: 'Balance account not found',
@@ -150,4 +171,8 @@ export const DOCUMENTS_ERRORS = {
   BALANCE_HISTORY_EMPTY: 'No dated amounts were found in the file',
   BALANCE_HISTORY_COLUMNS_MISSING:
     'The file needs a date column and an amount column (date, amount)',
+  BALANCE_NOT_PROPERTY: 'Only a real estate or vehicle line has property details',
+  BALANCE_PROPERTY_DETAILS_INVALID: 'These details do not fit this kind of property',
+  BALANCE_PROPERTY_DEBT_INVALID: 'Only a loan account or a debt line can be linked',
+  BALANCE_PROPERTY_DEBT_TAKEN: 'This debt is already linked to another property',
 } as const;

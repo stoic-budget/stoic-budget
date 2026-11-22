@@ -2,7 +2,7 @@ import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
 import { WorkspaceId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
-import { SchemaParams } from '../../common/effect/schema-query';
+import { SchemaParams, SchemaQuery } from '../../common/effect/schema-query';
 import { SchemaResponse } from '../../common/effect/schema-response';
 import { Permission } from '../../common/enums/permissions.enum';
 import { deletedResponse } from '../../common/utils/responses.util';
@@ -12,7 +12,11 @@ import {
   AttachStatementsResult,
   CreateWalletRequest,
   MessageResult,
+  StatementCoverage,
   UpdateWalletBody,
+  WalletBalanceDays,
+  WalletBalanceDaysQuery,
+  WalletCoverage,
   WalletItem,
   WalletList,
   WalletParams,
@@ -22,6 +26,8 @@ import {
 } from '../../contracts';
 import type { User } from '../../entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { StatementCoverageService } from './statement-coverage.service';
+import { WalletCoverageService } from './wallet-coverage.service';
 import { WalletStatementsService } from './wallet-statements.service';
 import { WalletsService } from './wallets.service';
 
@@ -30,6 +36,8 @@ export class WalletsController {
   constructor(
     private readonly walletsService: WalletsService,
     private readonly walletStatements: WalletStatementsService,
+    private readonly walletCoverage: WalletCoverageService,
+    private readonly statementCoverageOf: StatementCoverageService,
   ) {}
 
   @Post()
@@ -61,6 +69,24 @@ export class WalletsController {
   @SchemaResponse(WalletSummary)
   async summary(@WorkspaceId() workspaceId: string) {
     return this.walletsService.summary(workspaceId);
+  }
+
+  /** Declared before `:id`, so the literal path is not read as an account id. */
+  @Get('coverage')
+  @WorkspaceAuth(Permission.WALLET_VIEW)
+  @SchemaResponse(WalletCoverage)
+  async coverage(@WorkspaceId() workspaceId: string) {
+    return this.walletCoverage.coverage(workspaceId);
+  }
+
+  @Get('balance-days')
+  @WorkspaceAuth(Permission.WALLET_VIEW)
+  @SchemaResponse(WalletBalanceDays)
+  async balanceDays(
+    @SchemaQuery(WalletBalanceDaysQuery) { month }: WalletBalanceDaysQuery,
+    @WorkspaceId() workspaceId: string,
+  ) {
+    return this.walletsService.balanceDays(workspaceId, month);
   }
 
   @Get('unlinked-statements')
@@ -99,6 +125,16 @@ export class WalletsController {
     @WorkspaceId() workspaceId: string,
   ) {
     return this.walletStatements.of(id, workspaceId);
+  }
+
+  @Get(':id/statement-coverage')
+  @WorkspaceAuth(Permission.WALLET_VIEW)
+  @SchemaResponse(StatementCoverage)
+  async statementCoverage(
+    @SchemaParams(WalletParams) { id }: WalletParams,
+    @WorkspaceId() workspaceId: string,
+  ) {
+    return this.statementCoverageOf.coverage(id, workspaceId);
   }
 
   @Post(':id/statements')

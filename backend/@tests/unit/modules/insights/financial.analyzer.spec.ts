@@ -136,6 +136,54 @@ describe('FinancialAnalyzer', () => {
     expect(rising?.data).toMatchObject({ month, categoryName: 'Такси' });
   });
 
+  it("buckets the categories by the workspace's month when it starts on another day", async () => {
+    // 9 November under day 15: the running month is "October", 15 Oct – 14 Nov.
+    vi.useFakeTimers({ now: new Date(2026, 10, 9, 12), toFake: ['Date'] });
+    try {
+      const row = (day: string, total: number) => ({
+        categoryId: 'cat-1',
+        categoryName: 'Taxi',
+        month: day,
+        currency: 'USD',
+        total: String(total),
+      });
+      const payPeriods = {
+        contextFor: vi.fn(async () => ({
+          monthStart: { kind: 'day', day: 15 },
+          salary: null,
+          holidays: [],
+          holidayCountry: null,
+        })),
+      } as any;
+      const analyzer = new FinancialAnalyzer(
+        createTransactionRepository({
+          categoryRows: [
+            // 300 in the running month (200 of it on 20 October), 100 in each before.
+            row('2026-10-20', 200),
+            row('2026-11-05', 100),
+            row('2026-09-20', 100),
+            row('2026-08-20', 100),
+            row('2026-07-20', 100),
+          ],
+        }),
+        createBudgetRepository(['cat-1']),
+        createNetWorthService(),
+        createRates(),
+        createWorkspaceRepository(),
+        payPeriods,
+      );
+
+      const results = await analyzer.analyze(CONTEXT);
+      const rising = results.find(item => item.type === InsightType.SPENDING_TREND_UP);
+
+      // By calendar month it would be 100 in November against 133 before: no rise.
+      expect(rising?.messageParams).toMatchObject({ category: 'Taxi', percent: 200 });
+      expect(rising?.data).toMatchObject({ month: '2026-10' });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('reads 500 UAH at its rate, not as 500 of the workspace currency', async () => {
     const analyzer = new FinancialAnalyzer(
       createTransactionRepository({
