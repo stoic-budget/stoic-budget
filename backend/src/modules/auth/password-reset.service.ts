@@ -161,8 +161,6 @@ export class PasswordResetService {
       );
       return deleteOwnPasskeys(manager, user.id, removePasskeyIds);
     });
-    // Calendar feed links end too, in every workspace.
-    await this.calendarFeeds.revokeAllOf(user.id);
 
     await recordSecurityEvent(this.auditService, this.logger, {
       workspaceId: user.workspaceId,
@@ -176,6 +174,9 @@ export class PasswordResetService {
     if (removed.length > 0) {
       await this.passkeysService.reportRemoved(user, removed, 'password-reset');
     }
+    // Calendar feed links end too, in every workspace. Last, so a failure here
+    // cannot cost the removed passkeys their audit rows and their notice.
+    await this.calendarFeeds.revokeAllOf(user.id);
   }
 
   /**

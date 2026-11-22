@@ -214,6 +214,34 @@ describe('PasswordResetService', () => {
       );
     });
 
+    it('audits and reports the removed passkeys even when ending the feeds fails', async () => {
+      const passkeyId = '00000000-0000-4000-8000-000000000001';
+      const chain = {
+        delete: () => chain,
+        from: () => chain,
+        where: () => chain,
+        returning: () => chain,
+        execute: async () => ({
+          raw: [{ id: passkeyId, name: 'Work laptop', device_type: 'multiDevice' }],
+        }),
+      };
+      manager.createQueryBuilder.mockReturnValue(chain);
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser });
+      calendarFeeds.revokeAllOf.mockRejectedValueOnce(new Error('database went away'));
+
+      await expect(
+        service.resetPassword('plain-token', 'BrandNewPass1', [passkeyId]),
+      ).rejects.toThrow();
+
+      expect(passkeysService.reportRemoved).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'user-1' }),
+        [{ id: passkeyId, name: 'Work laptop', deviceType: 'multiDevice' }],
+        'password-reset',
+      );
+      expect(auditService.createEvent).toHaveBeenCalled();
+    });
+
     it('logs the completed reset without the password, hash or token', async () => {
       tokenRepository.findOne.mockResolvedValue(validRecord());
       userRepository.findOne.mockResolvedValue({ ...activeUser });
