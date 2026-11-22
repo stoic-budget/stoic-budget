@@ -4,6 +4,7 @@ export * from './actions/answers';
 export * from './api-keys/api-keys';
 export * from './audit/activity';
 export * from './auth/current-user';
+export * from './auth/passkeys';
 export * from './auth/security';
 export * from './budgets/budgets';
 export * from './classification/categorization-rules';

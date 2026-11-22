@@ -13,6 +13,7 @@ import {
 import { AuthSession } from '../../../entities/auth-session.entity';
 import { Notification } from '../../../entities/notification.entity';
 import { NotificationPreference } from '../../../entities/notification-preference.entity';
+import { PasskeyCredential } from '../../../entities/passkey-credential.entity';
 import { User } from '../../../entities/user.entity';
 import { WorkspaceMember, WorkspaceRole } from '../../../entities/workspace-member.entity';
 import { AuditService } from '../../audit/audit.service';
@@ -28,6 +29,7 @@ export interface AccountExport {
   profile: Record<string, unknown>;
   workspaceMemberships: Array<Record<string, unknown>>;
   authSessions: Array<Record<string, unknown>>;
+  passkeys: Array<Record<string, unknown>>;
   notificationPreferences: Record<string, unknown> | null;
   notifications: Array<Record<string, unknown>>;
   auditEvents: Array<Record<string, unknown>>;
@@ -55,11 +57,13 @@ export class AccountDataService {
     private readonly notificationRepository: Repository<Notification>,
     @InjectRepository(AuditEvent)
     private readonly auditRepository: Repository<AuditEvent>,
+    @InjectRepository(PasskeyCredential)
+    private readonly passkeyRepository: Repository<PasskeyCredential>,
     private readonly auditService: AuditService,
   ) {}
 
   async exportMyData(userId: string): Promise<AccountExport> {
-    const [user, memberships, sessions, preferences, notifications, auditEvents] =
+    const [user, memberships, sessions, preferences, notifications, auditEvents, passkeys] =
       await Promise.all([
         this.userRepository.findOne({ where: { id: userId } }),
         this.memberRepository.find({
@@ -78,6 +82,7 @@ export class AccountDataService {
           order: { createdAt: 'DESC' },
           take: EXPORT_AUDIT_LIMIT,
         }),
+        this.passkeyRepository.find({ where: { userId }, order: { createdAt: 'ASC' } }),
       ]);
 
     return {
@@ -105,6 +110,14 @@ export class AccountDataService {
           revokedAt: session.revokedAt,
         }),
       ),
+      // The passkey's label and dates; the key and its counter stay server-side.
+      passkeys: passkeys.map(passkey => ({
+        name: passkey.name,
+        deviceType: passkey.deviceType,
+        backedUp: passkey.backedUp,
+        createdAt: passkey.createdAt,
+        lastUsedAt: passkey.lastUsedAt,
+      })),
       notificationPreferences: preferences ? { ...preferences, id: undefined } : null,
       notifications: notifications.map(notification => ({ ...notification })),
       auditEvents: auditEvents.map(event => ({ ...event })),
@@ -150,6 +163,8 @@ export class AccountDataService {
     });
 
     await this.sessionRepository.update({ userId, revokedAt: IsNull() }, { revokedAt: new Date() });
+    // Credentials, like the sessions: a deleted account keeps no way back in.
+    await this.passkeyRepository.delete({ userId });
     await this.userRepository.softDelete(userId);
 
     this.logger.log(`Account ${userId} deleted on the owner's request`);

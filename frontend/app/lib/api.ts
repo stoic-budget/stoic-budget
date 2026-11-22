@@ -144,7 +144,13 @@ async function refreshAccessToken(originalRequest: Record<string, unknown>): Pro
   return rawClient(originalRequest);
 }
 
-const AUTH_RETRY_EXCLUDED_PATHS = new Set(['/auth/login', '/auth/register', '/auth/refresh']);
+// Sign-in answers: a 401 there is a wrong password or passkey, not an expired session.
+const AUTH_RETRY_EXCLUDED_PATHS = new Set([
+  '/auth/login',
+  '/auth/register',
+  '/auth/refresh',
+  '/auth/passkey-login',
+]);
 
 function isAuthRetryExcludedRequest(originalRequest: Record<string, unknown>): boolean {
   const url = typeof originalRequest.url === 'string' ? originalRequest.url : '';

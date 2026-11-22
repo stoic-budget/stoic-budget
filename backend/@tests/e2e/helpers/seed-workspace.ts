@@ -510,6 +510,12 @@ export async function seedWorkspace(
   await send('receipt tag', 'put', `/receipts/${receipt.id}/tags`, { tagIds: [tag.body.id] });
   // A payable_tags row, for the same reason.
   await send('payable tag', 'put', `/payables/${payable.body.id}`, { tagIds: [tag.body.id] });
+  // A passkey of the owner's: per person, not per workspace, but the sweep reaches it through users.
+  await dataSource.query(
+    `INSERT INTO passkey_credentials (user_id, credential_id, public_key, device_type, name)
+     VALUES ($1, $2, $3, 'singleDevice', $4)`,
+    [owner.userId, `seed-${marker}`, Buffer.from('seed-key'), `${marker} passkey`],
+  );
   // A repeating bill (its series and a moved occurrence) and "not this payment" refusals.
   const repeating = await send('repeating payable', 'post', '/payables', {
     vendor: `${marker} rent`,

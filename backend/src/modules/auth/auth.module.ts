@@ -8,6 +8,7 @@ import { devDefault } from '../../common/utils/dev-defaults';
 import {
   AuthSession,
   InstanceSetting,
+  PasskeyCredential,
   PasswordResetToken,
   User,
   Workspace,
@@ -21,6 +22,10 @@ import { MailerModule } from '../mailer/mailer.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthDevBootstrapService } from './auth-dev-bootstrap.service';
+import { PasskeyAuthService } from './passkeys/passkey-auth.service';
+import { PasskeyChallengeStore } from './passkeys/passkey-challenge.store';
+import { PasskeysController } from './passkeys/passkeys.controller';
+import { PasskeysService } from './passkeys/passkeys.service';
 import { PasswordResetService } from './password-reset.service';
 import { RegistrationController } from './registration.controller';
 import { RegistrationSettingsService } from './registration-settings.service';
@@ -38,6 +43,7 @@ import { TwoFactorService } from './two-factor.service';
       WorkspaceMember,
       AuthSession,
       PasswordResetToken,
+      PasskeyCredential,
     ]),
     AuditModule,
     CalendarFeedRevocationModule,
@@ -58,11 +64,14 @@ import { TwoFactorService } from './two-factor.service';
       inject: [ConfigService],
     }),
   ],
-  controllers: [AuthController, RegistrationController],
+  controllers: [AuthController, RegistrationController, PasskeysController],
   providers: [
     AuthService,
     RegistrationSettingsService,
     TwoFactorService,
+    PasskeysService,
+    PasskeyAuthService,
+    PasskeyChallengeStore,
     PasswordResetService,
     AuthDevBootstrapService,
     JwtStrategy,
