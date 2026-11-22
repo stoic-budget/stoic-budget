@@ -3,6 +3,7 @@ import { AuditAction, EntityType, Severity } from '@/entities/audit-event.entity
 import { AuditService } from '@/modules/audit/audit.service';
 import { CalendarFeedRevocationService } from '@/modules/calendar-feed/calendar-feed-revocation.service';
 import { AuthSession } from '@/entities/auth-session.entity';
+import { UserIdentity } from '@/entities/user-identity.entity';
 import { WorkspaceMember } from '@/entities/workspace-member.entity';
 import { Workspace } from '@/entities/workspace.entity';
 import { EmailChangeService } from '@/modules/users/services/email-change.service';
@@ -32,6 +33,7 @@ describe('UsersService', () => {
   let workspacesService: WorkspacesService;
   const auditService = { createEvent: vi.fn() };
   const calendarFeeds = { revokeAllOf: vi.fn() };
+  const identities = { find: vi.fn(async () => [] as UserIdentity[]), delete: vi.fn() };
 
   const mockUser: Partial<User> = {
     id: '1',
@@ -54,6 +56,7 @@ describe('UsersService', () => {
         {
           provide: getRepositoryToken(User),
           useValue: {
+            manager: { getRepository: () => identities },
             find: vi.fn(),
             findOne: vi.fn(),
             findAndCount: vi.fn(),
@@ -313,6 +316,29 @@ describe('UsersService', () => {
 
       const savedUser = saveSpy.mock.calls[0][0];
       expect(savedUser.tokenVersion).toBe(initialTokenVersion + 1);
+    });
+
+    it('unlinks every provider account and audits each one', async () => {
+      const issuer = 'https://login.example.com';
+      identities.find.mockResolvedValueOnce([
+        { id: 'identity-1', issuer },
+        { id: 'identity-2', issuer },
+      ] as UserIdentity[]);
+      vi.spyOn<any, any>(service as any, 'findOneWithPassword').mockResolvedValue({
+        ...mockUser,
+      } as User);
+      vi.spyOn(repository, 'save').mockResolvedValue(mockUser as User);
+      auditService.createEvent.mockClear();
+
+      await service.changePassword('1', { currentPassword: 'old_password', newPassword: 'new_password' });
+
+      expect(identities.delete).toHaveBeenCalledWith({ userId: '1' });
+      const metas = auditService.createEvent.mock.calls.map(([event]) => event.meta);
+      expect(metas).toContainEqual({ password: 'changed', singleSignOn: 'all-unlinked' });
+      expect(metas.filter(meta => meta.oidcEvent === 'unlinked')).toEqual([
+        { oidcEvent: 'unlinked', provider: issuer, identityId: 'identity-1' },
+        { oidcEvent: 'unlinked', provider: issuer, identityId: 'identity-2' },
+      ]);
     });
   });
 

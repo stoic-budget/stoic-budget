@@ -5,7 +5,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 describe('BackupDataService', () => {
-  it('exports workspace-scoped business records but strips encrypted secrets and integrations', async () => {
+  it('exports workspace-scoped business records but strips encrypted secrets, the account-mail grant and integrations', async () => {
     const categories = { find: vi.fn().mockResolvedValue([{ id: 'cat-1', workspaceId: 'ws-1', name: 'Travel' }]) };
     const serviceSettings = {
       find: vi.fn().mockResolvedValue([
@@ -15,6 +15,7 @@ describe('BackupDataService', () => {
           key: 'smtp',
           config: { host: 'mail.example.com' },
           encryptedSecrets: { token: 'enc:secret' },
+          accountMailUserId: 'member-1',
         },
       ]),
     };
@@ -33,6 +34,7 @@ describe('BackupDataService', () => {
           'key',
           'config',
           'encryptedSecrets',
+          'accountMailUserId',
         ]),
         metadata('integrations', 'Integration', ['id', 'workspaceId', 'provider']),
       ],

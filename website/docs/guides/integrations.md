@@ -25,6 +25,16 @@ encrypted. Env variables with the same purpose are only temporary fallback defau
   SMTP relay on a private network goes in `SMTP_HOST`/`SMTP_FROM` on the server instead.
 - Without SMTP, invitation links are still returned by the API, but password reset and email
   change cannot complete — their links travel only by email.
+- Saving SMTP asks for your account password. The SMTP server you save in your own workspace also
+  sends your password reset and email change links, so a stolen session alone must not be able to
+  point it at a server someone else reads. Removing SMTP needs no password: mail then goes through
+  the server's `SMTP_*` settings.
+- Only a save with your password makes a workspace's SMTP server send your own reset and email
+  change links. A server restored from a backup, or saved before this check existed, does not:
+  those links go through the server's `SMTP_*` settings until you save the SMTP form again.
+- The saved SMTP password is kept only while the host, port and user stay the same. Change any of
+  them and enter the SMTP password again: a stored password is never sent to a server it was not
+  saved for.
 - The Telegram webhook needs `TELEGRAM_WEBHOOK_SECRET` on the backend.
 - There is no Gmail, Google Drive or Dropbox integration: mail receipts come in over IMAP, files through
   S3-compatible storage or WebDAV.
@@ -43,7 +53,14 @@ SimpleFIN, North America) exposes your bank accounts over the open
    works once: Stoic Budget exchanges it for an access credential and stores only that, encrypted.
 3. Choose which accounts to pull and, optionally, which Stoic Budget wallet each one lands in. Accounts the
    provider adds later start switched off.
-4. **Pull now**, or leave *Pull automatically every 6 hours* on.
+4. **Pull now**, or leave *Pull automatically* on and pick *How often to pull*: every 1 to 24
+   hours, 6 by default. The card shows when the next automatic pull is due.
+
+Failed automatic pulls back off: half an hour after the first failure, doubling after each one,
+at most a day, and never sooner than the provider's own `Retry-After`. The card says until when
+pulls are paused and why. **Pull now** skips the wait and starts the count over; it is refused for
+a minute after the last pull of the same connection. A rejected credential stops automatic pulls
+until you link the connection again.
 
 Each pull writes the new rows of an account as an OFX statement and hands it to the regular
 statement import, so dedupe, rules, the review inbox and the audit log behave exactly as for a file

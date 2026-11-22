@@ -12,6 +12,14 @@ import type {
  */
 export type BankSyncHealth = 'ok' | 'never_synced' | 'stale' | 'incomplete' | 'needs_reauth';
 
+/**
+ * How often auto-sync pulls a connection, in hours: the user picks within these
+ * bounds per connection, and six is the cadence every connection had before.
+ * Kept in its own column, not in the config below: a pull saves the config it
+ * read when it started and would put back an interval changed meanwhile.
+ */
+export const SYNC_INTERVAL_HOURS = { min: 1, max: 24, default: 6 } as const;
+
 export interface BankSyncAccountSetting {
   /** The provider's account id. */
   id: string;
@@ -34,6 +42,12 @@ export interface BankSyncAccountSetting {
    * everything up to the wallet's last known row is already here.
    */
   syncFrom: string | null;
+  /**
+   * The first day the pulls since this account's last statement asked for, and
+   * the wallet they were for. A pull that brings nothing new makes no
+   * statement; the next one that does stands for those days too.
+   */
+  askedFrom: { walletId: string | null; from: string } | null;
   health: BankSyncHealth;
   lastError: string | null;
   /** Set when the provider's balance moved further than the rows that arrived explain. */
@@ -118,6 +132,7 @@ function normalizeAccount(raw: Partial<BankSyncAccountSetting>): BankSyncAccount
     balanceDate: raw.balanceDate ?? null,
     consentExpiresAt: raw.consentExpiresAt ?? null,
     syncFrom: raw.syncFrom ?? null,
+    askedFrom: typeof raw.askedFrom?.from === 'string' ? raw.askedFrom : null,
     health: raw.health ?? 'never_synced',
     lastError: raw.lastError ?? null,
     balanceDrift: raw.balanceDrift ?? null,

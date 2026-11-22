@@ -40,7 +40,10 @@ export const HealthStatus = Schema.Struct({
 });
 export type HealthStatus = Wire<typeof HealthStatus>;
 
-/** `GET /health/ready`: every dependency answered (anything else is a 503). */
+/**
+ * `GET /health/ready`: the database and Redis answered (anything else is a 503).
+ * Public, so it names no figures: queues and setup are on `GET /system/health`.
+ */
 export const ReadinessStatus = Schema.Struct({
   status: Schema.Literals(['ok', 'error']),
   checks: Schema.Record(Schema.String, Schema.Literals(['ok', 'error'])),

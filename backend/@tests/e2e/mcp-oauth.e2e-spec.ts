@@ -620,6 +620,43 @@ describe('MCP OAuth (e2e)', () => {
       expect(event?.actorLabel).toBe('Connected app "ACME Assistant"');
     });
 
+    it('binds a preview to its grant: confirmed by the same token, refused by another', async () => {
+      const categories = await as(owner, request(server()).get('/categories?type=expense')).expect(200);
+      await as(owner, request(server()).post('/statements/manual-expense'))
+        .field('amount', '7.5')
+        .field('currency', 'EUR')
+        .field('merchant', 'Example Bakery - Rye Loaf')
+        .field('categoryId', categories.body[0].id)
+        .field('date', new Date().toISOString().slice(0, 10))
+        .expect(201);
+      const rowId = (await as(owner, request(server()).get('/transactions')).expect(200)).body
+        .data[0].id as string;
+      const target = await as(owner, request(server()).post('/categories'))
+        .send({ name: 'OAuth confirm target', type: 'expense' })
+        .expect(201);
+      const scopes = [...readScopes, 'transaction.bulk_update'];
+      const args = { transactionIds: [rowId], categoryId: target.body.id };
+      const first = await connect(owner, scopes);
+      const second = await connect(owner, scopes);
+
+      const preview = await callTool(first.access_token, 'set_transactions_category', args);
+      expect(preview.isError).toBe(false);
+      const { confirmToken } = JSON.parse(preview.text);
+
+      const elsewhere = await callTool(second.access_token, 'set_transactions_category', {
+        ...args,
+        confirmToken,
+      });
+      expect(elsewhere.isError).toBe(true);
+      expect(JSON.parse(elsewhere.text)).toMatchObject({ code: 'MCP_CONFIRM_TOKEN_INVALID' });
+
+      const applied = await callTool(first.access_token, 'set_transactions_category', {
+        ...args,
+        confirmToken,
+      });
+      expect(JSON.parse(applied.text)).toMatchObject({ status: 'applied', rows: 1 });
+    });
+
     it('narrows an access token on refresh, and only that token', async () => {
       const writer = await connect(owner, writeScopes);
       const scoped = (refreshToken: string, scope: string) =>

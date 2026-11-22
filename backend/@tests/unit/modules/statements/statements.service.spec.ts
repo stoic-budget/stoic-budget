@@ -689,6 +689,12 @@ describe('StatementsService', () => {
       vi.spyOn(workspaceMemberRepository, 'findOne').mockResolvedValue({
         role: WorkspaceRole.ADMIN,
       } as WorkspaceMember);
+      // Earlier tests swap the query builder out; the tax-lock check counts with one.
+      (transactionRepository as any).createQueryBuilder = vi.fn(() => ({
+        setFindOptions: vi.fn().mockReturnThis(),
+        innerJoin: vi.fn().mockReturnThis(),
+        getCount: vi.fn(async () => 0),
+      }));
     });
 
     it('should delete statement and related transactions', async () => {
@@ -797,10 +803,14 @@ describe('StatementsService', () => {
       vi.spyOn(statementRepository, 'findOne').mockResolvedValue(mockStatement as Statement);
       vi.spyOn(statementParsingQueue, 'enqueue').mockResolvedValue(undefined);
       const at = new Date('2026-03-01T10:00:00Z');
-      vi.spyOn(transactionRepository, 'find').mockResolvedValue([
-        { id: 'tx-plain', createdAt: at, updatedAt: at, taxLocked: false },
-        { id: 'tx-with-file', createdAt: at, updatedAt: at, taxLocked: false },
-      ] as Transaction[]);
+      vi.spyOn(transactionRepository, 'find')
+        // The statement's rows, then the ones to delete, then loan interest split off them: none.
+        .mockResolvedValueOnce([
+          { id: 'tx-plain', createdAt: at, updatedAt: at, taxLocked: false },
+          { id: 'tx-with-file', createdAt: at, updatedAt: at, taxLocked: false },
+        ] as Transaction[])
+        .mockResolvedValueOnce([{ id: 'tx-plain' }] as Transaction[])
+        .mockResolvedValueOnce([]);
       const attachmentFind = vi.fn().mockResolvedValue([{ id: 'att-1', transactionId: 'tx-with-file' }]);
       (transactionRepository as any).manager = { getRepository: () => ({ find: attachmentFind }) };
       const deleteSpy = vi
@@ -810,7 +820,9 @@ describe('StatementsService', () => {
       await service.reprocess('1', '1', 'ws-1');
 
       expect(attachmentFind.mock.calls[0][0].where.workspaceId).toBe('ws-1');
-      expect(deleteSpy).toHaveBeenCalledWith(['tx-plain']);
+      const [where] = deleteSpy.mock.calls[0] as [{ workspaceId: string; id: { value: string[] } }];
+      expect(where.workspaceId).toBe('ws-1');
+      expect(where.id.value).toEqual(['tx-plain']);
     });
 
     it('should skip reprocess when already processing', async () => {

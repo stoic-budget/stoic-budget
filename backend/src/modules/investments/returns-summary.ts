@@ -41,9 +41,10 @@ export function historyStart(
 }
 
 /**
- * What the line was worth at the end of the window's first day. Unknown —
- * null — when nothing was entered by then although money had already gone
- * in: zero would turn everything held into a gain made inside the window.
+ * What the line was worth at the end of the window's first day: the balance
+ * entered by then, else what its trades held at that day's closes. Unknown —
+ * null — when neither says and money had already gone in: zero would turn
+ * everything held into a gain made inside the window.
  */
 export function openingValue(
   source: TrackedSource,
@@ -51,6 +52,7 @@ export function openingValue(
   from: string,
   histories: Map<string, Array<{ date: string }>>,
   valueAt: (source: TrackedSource, date: string) => number,
+  pricedAt: (source: TrackedSource, date: string) => number | null = () => null,
 ): number | null {
   if (range === 'all') {
     return 0;
@@ -59,8 +61,34 @@ export function openingValue(
   if (entered) {
     return valueAt(source, from);
   }
+  const fromPrices = pricedAt(source, from);
+  if (fromPrices !== null && tradesSpentTheMoney(source, from)) {
+    return fromPrices;
+  }
   const movedBefore = source.flows.some(flow => flow.kind !== 'income' && flow.date <= from);
   return movedBefore ? null : 0;
+}
+
+/**
+ * Whether what the trades held is all the line had on `from`. When its money
+ * moves are bank rows, the trades must have spent what those rows put in by
+ * then: money paid in and not yet invested is held somewhere the closes do
+ * not see, and leaving it out would count it as a gain once it is invested.
+ */
+function tradesSpentTheMoney(source: TrackedSource, from: string): boolean {
+  if (!source.tradeMoves) {
+    return true;
+  }
+  const netBy = (flows: Flow[]) =>
+    flows
+      .filter(flow => flow.kind !== 'income' && flow.date <= from)
+      .reduce((sum, flow) => sum + portfolioFlow(flow).amount, 0);
+  const paidIn = netBy(source.flows);
+  const spent = netBy(source.tradeMoves);
+  // Fees and the two sides' exchange rates keep them from matching to the cent.
+  return (
+    Math.abs(paidIn - spent) <= Math.max(1, 0.01 * Math.max(Math.abs(paidIn), Math.abs(spent)))
+  );
 }
 
 export function periodRow(

@@ -7,8 +7,12 @@ import { SchemaResponse } from '../../common/effect/schema-response';
 import { Permission } from '../../common/enums/permissions.enum';
 import {
   CreateInvestmentAccountBody,
+  HoldingClassificationBody,
+  HoldingSectorSuggestion,
   InvestmentAccount,
   InvestmentAccountList,
+  InvestmentAllocation,
+  InvestmentAllocationQuery,
   InvestmentContribution,
   InvestmentContributionParams,
   InvestmentHolding,
@@ -21,6 +25,7 @@ import {
 } from '../../contracts';
 import type { User } from '../../entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { HoldingClassificationService } from './holding-classification.service';
 import { InvestmentFlowsService } from './investment-flows.service';
 import { InvestmentReturnsService } from './investment-returns.service';
 import { InvestmentsService } from './investments.service';
@@ -35,6 +40,7 @@ export class InvestmentsController {
     private readonly investmentsService: InvestmentsService,
     private readonly flowsService: InvestmentFlowsService,
     private readonly returnsService: InvestmentReturnsService,
+    private readonly classificationService: HoldingClassificationService,
   ) {}
 
   @Get()
@@ -52,6 +58,17 @@ export class InvestmentsController {
     @SchemaQuery(InvestmentReturnsQuery) query: InvestmentReturnsQuery,
   ) {
     return this.returnsService.getReturns(workspaceId, query.range ?? '1y');
+  }
+
+  /** Every holding by class, sector, region and country, funds spread by their breakdown. */
+  @Get('allocation')
+  @WorkspaceAuth(Permission.REPORT_VIEW)
+  @SchemaResponse(InvestmentAllocation)
+  async allocation(
+    @WorkspaceId() workspaceId: string,
+    @SchemaQuery(InvestmentAllocationQuery) query: InvestmentAllocationQuery,
+  ) {
+    return this.classificationService.allocation(workspaceId, query.exclude ?? []);
   }
 
   @Post('accounts')
@@ -98,6 +115,28 @@ export class InvestmentsController {
     @SchemaBody(UpsertHoldingBody) dto: UpsertHoldingBody,
   ) {
     return this.investmentsService.updateHolding(user.id, workspaceId, id, dto);
+  }
+
+  @Patch('holdings/:id/classification')
+  @WorkspaceAuth(Permission.WALLET_EDIT)
+  @SchemaResponse(InvestmentHolding)
+  async classifyHolding(
+    @WorkspaceId() workspaceId: string,
+    @SchemaParams(InvestmentParams) { id }: InvestmentParams,
+    @SchemaBody(HoldingClassificationBody) dto: HoldingClassificationBody,
+  ) {
+    return this.classificationService.classify(workspaceId, id, dto);
+  }
+
+  /** Asks the quote source for a share's sector; the answer is only a suggestion. */
+  @Get('holdings/:id/sector-suggestion')
+  @WorkspaceAuth(Permission.WALLET_EDIT)
+  @SchemaResponse(HoldingSectorSuggestion)
+  async suggestSector(
+    @WorkspaceId() workspaceId: string,
+    @SchemaParams(InvestmentParams) { id }: InvestmentParams,
+  ) {
+    return this.classificationService.suggestSector(workspaceId, id);
   }
 
   @Delete('holdings/:id')

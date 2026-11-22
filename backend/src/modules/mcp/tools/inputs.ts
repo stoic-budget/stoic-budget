@@ -16,3 +16,11 @@ export const Limit = (max: number) =>
 
 export const described = <S extends Schema.Top>(schema: S, description: string): S =>
   schema.annotate({ description }) as S;
+
+/** The second step of a tool that previews first. */
+export const ConfirmToken = Schema.optionalKey(
+  described(
+    Schema.String.check(Schema.isMaxLength(1000)),
+    'Leave out: the call then only previews and answers a confirmToken. Repeat the same call with that token to apply it.',
+  ),
+);

@@ -55,6 +55,15 @@ const connection = (overrides: Record<string, unknown> = {}, accounts = [account
     ...((overrides.config as Record<string, unknown>) ?? {}),
   },
   ...overrides,
+  schedule: {
+    intervalHours: 6,
+    nextPullAt: null,
+    lastAttemptAt: null,
+    consecutiveFailures: 0,
+    backoffUntil: null,
+    backoffReason: null,
+    ...((overrides.schedule as Record<string, unknown>) ?? {}),
+  },
 });
 
 const providers = [
@@ -260,6 +269,110 @@ describe('BankSyncPanel', () => {
     expect(container.querySelector('[data-testid="bank-sync-token"]')).toBeNull();
     expect(container.querySelector('[data-testid="bank-sync-application-id"]')).not.toBeNull();
     expect(container.querySelector('[data-testid="bank-sync-private-key"]')).not.toBeNull();
+
+    unmount();
+  });
+
+  it('sends exactly the interval picked and shows when the next pull is due', async () => {
+    const due = new Date(Date.now() + 3 * 3600_000).toISOString();
+    serveConnections([connection({ schedule: { nextPullAt: due } })]);
+    apiPatch.mockResolvedValue(apiResponse(connection()));
+    const { container, unmount } = await mount();
+
+    const select = container.querySelector(
+      '[data-testid="bank-sync-interval-c1"]',
+    ) as HTMLSelectElement;
+    expect(select.value).toBe('6');
+    expect(Array.from(select.options).map(option => Number(option.value))).toEqual([
+      1, 2, 3, 4, 6, 8, 12, 24,
+    ]);
+    expect(container.textContent).toContain('Next automatic pull around');
+
+    const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
+    await act(async () => {
+      setter?.call(select, '12');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      await flushPromises();
+    });
+    expect(apiPatch).toHaveBeenCalledWith('/integrations/bank-sync/connections/c1', {
+      syncIntervalHours: 12,
+    });
+
+    unmount();
+  });
+
+  it('lists an interval set elsewhere among the choices instead of showing another one', async () => {
+    serveConnections([connection({ schedule: { intervalHours: 5 } })]);
+    const { container, unmount } = await mount();
+    const select = container.querySelector(
+      '[data-testid="bank-sync-interval-c1"]',
+    ) as HTMLSelectElement;
+    expect(select.value).toBe('5');
+    unmount();
+  });
+
+  it('says a connection is paused after failed pulls, until when and why', async () => {
+    const until = new Date(Date.now() + 2 * 3600_000).toISOString();
+    serveConnections([
+      connection({
+        schedule: {
+          consecutiveFailures: 3,
+          backoffUntil: until,
+          nextPullAt: until,
+          backoffReason: 'provider_busy',
+        },
+      }),
+    ]);
+    const { container, unmount } = await mount();
+
+    const paused = container.querySelector('[data-testid="bank-sync-paused-c1"]');
+    expect(paused?.textContent).toContain('(3)');
+    // The reason in the page's language, never the code or the provider's raw words.
+    expect(paused?.textContent).toContain('the provider asked to wait or is unavailable');
+    expect(paused?.textContent).not.toContain('provider_busy');
+    // Paused is not "next pull soon".
+    expect(container.textContent).not.toContain('Next automatic pull');
+
+    unmount();
+  });
+
+  it('leaves the reconnect state to speak for a refused credential, and an ended backoff unsaid', async () => {
+    const until = new Date(Date.now() + 3600_000).toISOString();
+    const past = new Date(Date.now() - 3600_000).toISOString();
+    serveConnections([
+      connection({
+        status: 'needs_reauth',
+        schedule: { consecutiveFailures: 1, backoffUntil: until, backoffReason: 'credential_refused' },
+      }),
+      connection({
+        id: 'c2',
+        label: 'Bridge B',
+        schedule: { consecutiveFailures: 2, backoffUntil: past, backoffReason: 'pull_failed' },
+      }),
+    ]);
+    const { container, unmount } = await mount();
+
+    expect(container.querySelector('[data-testid="bank-sync-paused-c1"]')).toBeNull();
+    expect(container.querySelector('[data-testid="bank-sync-paused-c2"]')).toBeNull();
+    expect(container.textContent).toContain('Needs a new token');
+
+    unmount();
+  });
+
+  it('reloads the connection after a failed pull, so the pause it caused shows at once', async () => {
+    serveConnections([connection()]);
+    apiPost.mockRejectedValue(new Error('HTTP 503'));
+    const { container, unmount } = await mount();
+    const listCalls = () =>
+      apiGet.mock.calls.filter(([url]) => String(url).endsWith('/connections')).length;
+    const before = listCalls();
+
+    await act(async () => {
+      buttonWith(container, 'Pull now').click();
+      await flushPromises();
+    });
+    expect(listCalls()).toBe(before + 1);
+    expect(container.textContent).toContain('HTTP 503');
 
     unmount();
   });

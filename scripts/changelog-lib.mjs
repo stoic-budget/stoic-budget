@@ -212,3 +212,22 @@ export const buildReleaseNotes = ({ branchName, commits, headSha, releaseDate })
     commits,
   };
 };
+
+/**
+ * The newest entry without its commit list, for `changelog-latest.json`: the app
+ * reads that small file on every load to tell whether there is something new,
+ * instead of the whole changelog with every commit's file list.
+ */
+export const latestEntry = entries => {
+  let latest = null;
+  for (const entry of entries) {
+    if (!latest || Date.parse(entry.date) > Date.parse(latest.date)) {
+      latest = entry;
+    }
+  }
+  if (!latest) {
+    return null;
+  }
+  const { commits: _commits, ...summary } = latest;
+  return summary;
+};

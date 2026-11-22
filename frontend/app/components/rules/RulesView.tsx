@@ -3,7 +3,7 @@
 import { Box, Button } from '@mui/material';
 import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { EmptyState } from '@/app/components/ui/EmptyState';
 import { ArrowsLineIcon } from '@/app/components/ui/empty-state-icons';
@@ -11,12 +11,18 @@ import { LoadError } from '@/app/components/ui/load-error';
 import { PageTitle } from '@/app/components/ui/page-title';
 import { usePermissions } from '@/app/hooks/usePermissions';
 import { useIntlayer } from '@/app/i18n';
+import type { RuleGroup } from '@/app/lib/contracts';
+import { RuleFolderDeleteDialog, RuleFolderDialog } from './RuleFolderDialog';
+import { RulePackExportDialog } from './RulePackExportDialog';
+import { RulePackImportButton } from './RulePackImportButton';
 import { RuleSuggestions } from './RuleSuggestions';
+import { RulesSections } from './RulesSections';
 import { RulesSkeleton } from './RulesSkeleton';
-import { RulesTable } from './RulesTable';
 import { conditionRefs, type Rule } from './types';
 import { useRuleApply } from './useRuleApply';
+import { useMoveRuleToFolder, useRuleFolders } from './useRuleFolders';
 import { useRuleNames } from './useRuleNames';
+import { useExportRulePack } from './useRulePacks';
 import {
   previewRule,
   useDeleteRule,
@@ -52,6 +58,15 @@ export function RulesView() {
   const reorder = useReorderRules();
   const applying = useRuleApply(names.wallet);
   const focusId = useSearchParams().get('focus');
+  const folderWords = useIntlayer('ruleFolders');
+  const packWords = useIntlayer('rulePacks');
+  const folders = useRuleFolders().data ?? [];
+  const move = useMoveRuleToFolder();
+  const exportPack = useExportRulePack();
+  // A folder being named (`null`: a new one), one being deleted, the export picker.
+  const [naming, setNaming] = useState<RuleGroup | null | undefined>(undefined);
+  const [deleting, setDeleting] = useState<RuleGroup | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (focusId) {
@@ -89,6 +104,16 @@ export function RulesView() {
   const handleReorder = (next: Rule[]) =>
     void reorder.mutateAsync(next).catch(() => toast.error(t.toast.orderFailed.value));
 
+  const handleMove = (rule: Rule, groupId: string | null) =>
+    void move
+      .mutateAsync({ ruleId: rule.id, groupId })
+      .catch(() => toast.error(folderWords.moveFailed.value));
+
+  const handleExport = (rules: Rule[]) =>
+    void exportPack
+      .mutateAsync(rules.map(rule => rule.id))
+      .catch(() => toast.error(packWords.exportFailed.value));
+
   const newRuleButton = (
     <Button component={NextLink} href="/rules/new" variant="contained">
       {t.page.newRule}
@@ -110,7 +135,20 @@ export function RulesView() {
         }}
       >
         <PageTitle path="/rules" />
-        {canEdit && list.length > 0 && newRuleButton}
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 1 }}>
+          {canEdit && list.length > 0 && (
+            <Button variant="outlined" onClick={() => setNaming(null)}>
+              {folderWords.newFolder}
+            </Button>
+          )}
+          {canEdit && <RulePackImportButton />}
+          {list.length > 0 && (
+            <Button variant="outlined" onClick={() => setExporting(true)}>
+              {packWords.export}
+            </Button>
+          )}
+          {canEdit && list.length > 0 && newRuleButton}
+        </Box>
       </Box>
       <p className="seneca-rules__intro">{t.page.intro}</p>
 
@@ -135,8 +173,14 @@ export function RulesView() {
           <p className="seneca-rules__order-hint">
             {canEdit ? t.page.orderHint : t.page.orderHintReadOnly}
           </p>
-          <RulesTable
+          {folders.length > 0 && <p className="seneca-rules__order-hint">{folderWords.hint}</p>}
+          <RulesSections
             rules={list}
+            folders={folders}
+            onMove={handleMove}
+            onRenameFolder={setNaming}
+            onDeleteFolder={setDeleting}
+            onExportRules={handleExport}
             words={words}
             names={names}
             canEdit={canEdit}
@@ -148,6 +192,13 @@ export function RulesView() {
             onEdit={rule => router.push(`/rules/${rule.id}`)}
           />
         </>
+      )}
+      {naming !== undefined && (
+        <RuleFolderDialog folder={naming} onClose={() => setNaming(undefined)} />
+      )}
+      {deleting && <RuleFolderDeleteDialog folder={deleting} onClose={() => setDeleting(null)} />}
+      {exporting && (
+        <RulePackExportDialog rules={list} folders={folders} onClose={() => setExporting(false)} />
       )}
     </Box>
   );

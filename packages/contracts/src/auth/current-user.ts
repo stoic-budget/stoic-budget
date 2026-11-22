@@ -1,5 +1,6 @@
 import * as Schema from 'effect/Schema';
 import { Timestamp, type Wire } from '../common/wire';
+import { PasskeyRequestOptions } from './passkeys';
 
 export const UserRole = Schema.Literals(['admin', 'user', 'viewer']);
 export type UserRole = Wire<typeof UserRole>;
@@ -45,6 +46,10 @@ export const CurrentUser = Schema.Struct({
   welcomeTutorialSeenAt: Schema.NullOr(Timestamp),
   /** Page hints closed so far: page id → the highest hint version seen there. */
   pageHintsSeen: Schema.Record(Schema.String, Schema.Number),
+  /** The newest changelog entry seen (its id in changelog.json); null when none was. */
+  changelogSeenId: Schema.NullOr(Schema.String),
+  /** That entry's date, or the sign-up time: entries dated after it are new. */
+  changelogSeenAt: Schema.NullOr(Timestamp),
 });
 export type CurrentUser = Wire<typeof CurrentUser>;
 
@@ -81,6 +86,10 @@ export type RegisterResponse = Wire<typeof RegisterResponse>;
 /** `POST /auth/login`: the user, or a request for the second factor. */
 export const LoginResponse = Schema.Union([
   Schema.Struct({ user: AuthUser }),
-  Schema.Struct({ twoFactorRequired: Schema.Literal(true) }),
+  Schema.Struct({
+    twoFactorRequired: Schema.Literal(true),
+    /** Present when the account has a passkey: the challenge to answer instead of a code. */
+    passkeyOptions: Schema.optional(PasskeyRequestOptions),
+  }),
 ]);
 export type LoginResponse = Wire<typeof LoginResponse>;

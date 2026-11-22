@@ -11,9 +11,11 @@ import { AuditAction, EntityType, Severity } from '../../entities/audit-event.en
 import { AuthSession } from '../../entities/auth-session.entity';
 import { PasswordResetToken } from '../../entities/password-reset-token.entity';
 import { User } from '../../entities/user.entity';
+import { UserIdentity } from '../../entities/user-identity.entity';
 import { AuditService } from '../audit/audit.service';
 import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-revocation.service';
 import { MailerService } from '../mailer/mailer.service';
+import { recordOidcEvent } from './oidc/oidc-audit';
 import { recordSecurityEvent } from './security-audit.util';
 
 const TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -32,6 +34,8 @@ export class PasswordResetService {
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
     private readonly auditService: AuditService,
+    @InjectRepository(UserIdentity)
+    private readonly identityRepository: Repository<UserIdentity>,
     private readonly calendarFeeds: CalendarFeedRevocationService,
   ) {}
 
@@ -124,7 +128,9 @@ export class PasswordResetService {
       throw new BadRequestException(appError('AUTH_RESET_LINK_INVALID'));
     }
 
+    const hadPassword = user.passwordSet !== false;
     user.passwordHash = await hashPassword(newPassword);
+    user.passwordSet = true;
     // Bump the token version and revoke sessions: whoever forced the reset —
     // the owner recovering, or someone kicking out an intruder — expects every
     // existing login to stop working.
@@ -140,6 +146,16 @@ export class PasswordResetService {
       { userId: user.id, revokedAt: IsNull() },
       { revokedAt: new Date() },
     );
+
+    // A provider account linked to an account with a password may be the
+    // intruder's, so the reset that shuts them out unlinks it too. An account
+    // made by single sign-on keeps its own: without a password it could link
+    // nothing more, so what it has is its owner's.
+    const unlinked = hadPassword
+      ? await this.identityRepository.find({ where: { userId: user.id } })
+      : [];
+    if (unlinked.length > 0) await this.identityRepository.delete({ userId: user.id });
+
     // Calendar feed links end too, in every workspace.
     await this.calendarFeeds.revokeAllOf(user.id);
 
@@ -150,8 +166,19 @@ export class PasswordResetService {
       entityId: user.id,
       action: AuditAction.UPDATE,
       severity: Severity.WARN,
-      meta: { password: 'reset', sessions: 'all-revoked' },
+      meta: {
+        password: 'reset',
+        sessions: 'all-revoked',
+        ...(unlinked.length > 0 ? { singleSignOn: 'all-unlinked' } : {}),
+      },
     });
+    for (const identity of unlinked) {
+      await recordOidcEvent(this.auditService, this.logger, 'unlinked', {
+        user,
+        issuer: identity.issuer,
+        identityId: identity.id,
+      });
+    }
   }
 
   /** Housekeeping so spent and stale grants do not accumulate forever. */

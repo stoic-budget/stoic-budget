@@ -1,0 +1,29 @@
+@use '../abstracts' as *;
+
+// A row the bank still holds as pending: text with a small ochre dot, and the
+// row itself in the muted ink, since it counts nowhere until it books.
+.seneca-pending-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  font-size: $seneca-font-size-xs;
+  font-weight: 400;
+  color: var(--text-muted);
+  white-space: nowrap;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--attention);
+  }
+}
+
+.is-pending-row,
+.is-pending-row .seneca-all-tx__link,
+.is-pending-row .seneca-all-tx__income,
+.is-pending-row .seneca-all-tx__spend {
+  color: var(--text-muted);
+}

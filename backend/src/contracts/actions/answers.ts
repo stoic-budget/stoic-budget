@@ -81,6 +81,13 @@ export const PageHintsSeen = Schema.Struct({
 });
 export type PageHintsSeen = Wire<typeof PageHintsSeen>;
 
+/** `POST /users/me/changelog-seen`: the marker as stored, which only ever moves forward. */
+export const ChangelogSeen = Schema.Struct({
+  changelogSeenId: Schema.NullOr(Schema.String),
+  changelogSeenAt: Schema.NullOr(Timestamp),
+});
+export type ChangelogSeen = Wire<typeof ChangelogSeen>;
+
 /** `POST /receipts/place-suggestions`: shops near a fix, when the scan still needs a place. */
 export const PlaceSuggestions = Schema.Union([
   Schema.Struct({ needed: Schema.Literal(false) }),

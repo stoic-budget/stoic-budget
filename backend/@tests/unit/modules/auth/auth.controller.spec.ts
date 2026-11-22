@@ -123,7 +123,7 @@ describe('AuthController', () => {
         getSessions: vi.fn(async () => [storedSession]),
       };
       const controller = new AuthController(authService as any, {} as any);
-      const res = { cookie: vi.fn() };
+      const res = { cookie: vi.fn(), clearCookie: vi.fn() };
       const req = {
         headers: { 'user-agent': visitorAgent },
         cookies: { refresh_token: 'r' },
@@ -139,7 +139,7 @@ describe('AuthController', () => {
       await controller.login({ email: 'a@b.com', password: 'x' } as any, req as any, res as any);
       await controller.refresh(req as any, res as any);
       const none = { userAgent: null, ipAddress: null };
-      expect(authService.login).toHaveBeenCalledWith(expect.anything(), none);
+      expect(authService.login).toHaveBeenCalledWith(expect.anything(), expect.objectContaining(none));
       expect(authService.refreshToken).toHaveBeenCalledWith('r', none);
 
       // A row stored before the instance became a demo is not shown either.
@@ -158,10 +158,10 @@ describe('AuthController', () => {
       process.env.DEMO_MODE = 'false';
       const { authService, controller, res, req } = setup();
       await controller.login({ email: 'a@b.com', password: 'x' } as any, req as any, res as any);
-      expect(authService.login).toHaveBeenCalledWith(expect.anything(), {
+      expect(authService.login).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
         userAgent: visitorAgent,
         ipAddress: visitorAddress,
-      });
+      }));
       await expect(controller.getSessions({ id: 'u1' } as any, req as any)).resolves.toEqual([
         storedSession,
       ]);

@@ -53,6 +53,8 @@ export const INTEGRATIONS_ERRORS = {
     'That wallet already has a bank feed: switch it instead of adding a second one',
   BANK_SYNC_NEEDS_REAUTH: 'The provider no longer accepts this connection: link it again',
   BANK_SYNC_UNAVAILABLE: 'The provider asked to try again later; the connection itself is fine',
+  BANK_SYNC_TOO_SOON:
+    'This connection is being pulled now or was pulled moments ago: try again in {{seconds}} s',
   BANK_SYNC_SIMPLEFIN_TOKEN_REJECTED:
     'SimpleFIN did not accept the setup token: it may have been used already (a token works once)',
   BANK_SYNC_SIMPLEFIN_CLAIM_FAILED: 'SimpleFIN claim failed with HTTP {{status}}',
@@ -91,6 +93,16 @@ export const INTEGRATIONS_ERRORS = {
   MCP_OAUTH_GRANT_NOT_FOUND: 'Connected app not found',
   MCP_OAUTH_UNAVAILABLE: 'Connecting apps needs APP_URL or FRONTEND_URL set on the server',
   MCP_RECEIPT_NOT_FOUND: 'Receipt not found',
+  MCP_CONFIRM_TOKEN_INVALID:
+    'This confirmToken is not valid for this workspace and API key. Call {{tool}} again without confirmToken for a new preview',
+  MCP_CONFIRM_TOKEN_EXPIRED:
+    'This confirmToken has expired: it lasts 10 minutes. Call {{tool}} again without confirmToken for a new preview',
+  MCP_CONFIRM_TOKEN_MISMATCH:
+    'This confirmToken was issued for another tool or other arguments. Repeat the previewed {{tool}} call with exactly the same arguments, or call it without confirmToken for a new preview',
+  MCP_CONFIRM_TOKEN_USED:
+    'This confirmToken has been used already. Call {{tool}} again without confirmToken for a new preview',
+  MCP_CONFIRM_ROWS_CHANGED:
+    'The rows {{tool}} would change are no longer the ones the preview showed. Call it again without confirmToken and check the new preview',
   // ── observability ───────────────────────────────────────────────
   OBSERVABILITY_METRICS_TOKEN_REQUIRED: 'Metrics token is required',
   OBSERVABILITY_METRICS_TOKEN_INVALID: 'Invalid metrics token',

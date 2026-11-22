@@ -1,5 +1,5 @@
 import * as Schema from 'effect/Schema';
-import { IsoDateString, NumericInput, optionalNullable } from '../common/requests';
+import { IsoDateString, NumericInput, optionalNullable, StringListInput } from '../common/requests';
 import type { Wire } from '../common/wire';
 
 const Uuid = Schema.String.check(Schema.isUUID());
@@ -125,3 +125,12 @@ export const InvestmentReturnsQuery = Schema.Struct({
   range: Schema.optional(Schema.Literals(['30d', 'ytd', '1y', '3y', '5y', 'all'])),
 });
 export type InvestmentReturnsQuery = Wire<typeof InvestmentReturnsQuery>;
+
+/**
+ * `GET /investments/allocation`: account ids the net-worth page leaves out
+ * (its own `exclude`), so the mix adds up to the same holdings as the page.
+ */
+export const InvestmentAllocationQuery = Schema.Struct({
+  exclude: Schema.optional(StringListInput),
+});
+export type InvestmentAllocationQuery = Wire<typeof InvestmentAllocationQuery>;

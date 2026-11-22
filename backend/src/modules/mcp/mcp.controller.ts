@@ -19,6 +19,9 @@ import type { McpToolContext } from './mcp-tool';
 const toolContextOf = (request: AuthenticatedRequest): McpToolContext => ({
   user: request.user as User,
   workspaceId: (request.apiKeyWorkspaceId ?? request.mcpGrant?.workspaceId) as string,
+  // A confirm token is bound to the key or the OAuth grant it was issued to;
+  // the prefix keeps a grant id from ever matching a key id.
+  apiKeyId: request.apiKey?.id ?? `oauth-grant:${request.mcpGrant?.id}`,
   memberId: request.workspaceMemberId ?? null,
   subject: {
     user: request.user as User,

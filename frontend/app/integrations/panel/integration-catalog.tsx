@@ -1,5 +1,4 @@
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
-import AlternateEmailOutlinedIcon from '@mui/icons-material/AlternateEmailOutlined';
 import CloudQueueOutlinedIcon from '@mui/icons-material/CloudQueueOutlined';
 import DnsOutlinedIcon from '@mui/icons-material/DnsOutlined';
 import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined';
@@ -9,12 +8,12 @@ import TelegramIcon from '@mui/icons-material/Telegram';
 import type React from 'react';
 import { useMemo } from 'react';
 import { useIntlayer } from '@/app/i18n';
-import { APP_NAME } from '@/app/lib/brand';
 import type { ProtocolIntegrationPageProps } from '../open-protocol-page';
+import { smtpIntegrationEntry } from './smtp-entry';
 
 export type IntegrationCategoryKey = 'application' | 'bank' | 'storage' | 'email' | 'messaging';
 
-type CatalogText = ReturnType<typeof useIntlayer<'integrationCatalog'>>;
+export type CatalogText = ReturnType<typeof useIntlayer<'integrationCatalog'>>;
 type PeppolText = ReturnType<typeof useIntlayer<'peppol'>>;
 
 type ProtocolConfig = Omit<ProtocolIntegrationPageProps, 'embedded' | 'onConnectionStatusChange'>;
@@ -50,51 +49,7 @@ function buildIntegrationCatalog(t: CatalogText, peppol: PeppolText): Integratio
   const e = t.entries;
 
   return [
-    {
-      key: 'smtp',
-      name: e.smtp.name.value,
-      description: e.smtp.description.value,
-      badge: 'Open protocol',
-      category: 'email',
-      recommended: true,
-      icon: <AlternateEmailOutlinedIcon sx={{ fontSize: 22 }} aria-hidden="true" />,
-      statusPath: '/settings/email/smtp',
-      docsUrl: 'https://datatracker.ietf.org/doc/html/rfc5321',
-      detail: {
-        kind: 'protocol',
-        config: {
-          title: e.smtp.name.value,
-          description: e.smtp.detailDescription.value,
-          statusPath: '/settings/email/smtp',
-          settingsPath: '/settings/email/smtp',
-          settingsMethod: 'put',
-          disconnectPath: '/settings/email/smtp',
-          icon: <AlternateEmailOutlinedIcon sx={{ fontSize: 24 }} aria-hidden="true" />,
-          workflow: e.smtp.workflow.value,
-          fields: [
-            { name: 'host', label: f.host.value, placeholder: 'mail.example.com', required: true },
-            {
-              name: 'port',
-              label: f.port.value,
-              type: 'number',
-              placeholder: '587',
-              required: true,
-            },
-            { name: 'secure', label: f.useTls.value, type: 'checkbox' },
-            { name: 'user', label: f.username.value, placeholder: 'seneca@example.com' },
-            { name: 'pass', label: f.password.value, type: 'password' },
-            {
-              name: 'from',
-              label: f.from.value,
-              placeholder: `${APP_NAME} <noreply@example.com>`,
-              required: true,
-            },
-            { name: 'replyTo', label: f.replyTo.value, placeholder: 'support@example.com' },
-            { name: 'timeoutMs', label: f.timeoutMs.value, type: 'number', placeholder: '10000' },
-          ],
-        },
-      },
-    },
+    smtpIntegrationEntry(t),
     {
       key: 'app-url',
       name: e.appUrl.name.value,

@@ -1,13 +1,9 @@
-import { createHash, randomUUID } from 'node:crypto';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
 import { In } from 'typeorm';
-import { normalizeFilename } from '../../../common/utils/filename.util';
 import { generateTransactionFingerprint } from '../../../common/utils/fingerprint.util';
-import { resolveUploadsDir } from '../../../common/utils/uploads.util';
-import { BankName, FileType, Statement, StatementStatus } from '../../../entities/statement.entity';
+import { BankName } from '../../../entities/statement.entity';
 import { Transaction, TransactionType } from '../../../entities/transaction.entity';
 import { statementSource } from '../../wallets/wallet-account-match';
+import { createImportStatement } from '../helpers/import-statement';
 import {
   detectDateOrder,
   isBlank,
@@ -31,7 +27,9 @@ interface ParsedTx {
   fingerprint: string;
 }
 
-const csvCell = (value: string | number): string => `"${String(value).replace(/"/g, '""')}"`;
+/** A row dated before or after the period the import is held to. */
+const outsidePeriod = (period: ImportContext['period'], date: string): boolean =>
+  Boolean(period && ((period.from && date < period.from) || (period.to && date > period.to)));
 
 /**
  * Money out (`amount`) and money in (`credit`) in separate columns, as many
@@ -70,6 +68,10 @@ export class TransactionsTarget implements ImportTarget {
     }> = [];
     const dateOrder = detectDateOrder(rows.map(row => ctx.cell(row, 'date')));
     const splitColumns = rows.some(row => !isBlank(ctx.cell(row, 'credit')));
+    // Rows on either side of the period: the sheet then covers that end of it.
+    const reaches = { before: false, after: false };
+    // Signs of every row, those outside the period too: the sheet decides how they read.
+    const signs = new Set<number>();
     for (const [index, row] of rows.entries()) {
       const date = parseImportDate(ctx.cell(row, 'date'), dateOrder);
       const { value, currency: cellCurrency } = splitColumns
@@ -78,6 +80,13 @@ export class TransactionsTarget implements ImportTarget {
       const merchant = ctx.cell(row, 'merchant').trim();
       if (!date) {
         results.push({ index, status: 'error', reason: 'date' });
+        continue;
+      }
+      if (outsidePeriod(ctx.period, date)) {
+        results.push({ index, status: 'skipped', reason: 'outside_period' });
+        reaches.before ||= Boolean(ctx.period?.from && date < ctx.period.from);
+        reaches.after ||= Boolean(ctx.period?.to && date > ctx.period.to);
+        signs.add(Math.sign(value ?? 0));
         continue;
       }
       if (value === null || value === 0) {
@@ -89,12 +98,11 @@ export class TransactionsTarget implements ImportTarget {
         continue;
       }
       parsedValues.push({ index, date, value, cellCurrency, merchant, row });
+      signs.add(Math.sign(value));
     }
     // Without a type column the sign decides only when the file mixes signs or
     // keeps money in and out apart; an all-positive expense sheet must not turn into income.
-    const mixedSigns =
-      splitColumns ||
-      (parsedValues.some(item => item.value < 0) && parsedValues.some(item => item.value > 0));
+    const mixedSigns = splitColumns || (signs.has(-1) && signs.has(1));
     for (const { index, date, value, cellCurrency, merchant, row } of parsedValues) {
       const typeAlias = resolveEnumAlias('type', ctx.cell(row, 'type'));
       const type =
@@ -155,7 +163,11 @@ export class TransactionsTarget implements ImportTarget {
       seen.add(item.fingerprint);
       fresh.push(item);
     }
-    if (dryRun || !fresh.length) {
+    // A sheet reaching past both ends of the period with nothing new inside it
+    // still shows the period was quiet: an empty statement records that.
+    const quiet =
+      reaches.before && reaches.after && !results.some(result => result.status === 'error');
+    if (dryRun || !(fresh.length || quiet)) {
       for (const item of fresh) {
         results.push({ index: item.index, status: 'created' });
       }
@@ -168,7 +180,17 @@ export class TransactionsTarget implements ImportTarget {
       fresh[0]?.currency ?? ctx.currency,
       statementSource(BankName.OTHER, null, header),
     );
-    const statement = await this.createStatement(ctx, fresh, header, account?.id ?? null);
+    const statement = await createImportStatement(
+      ctx,
+      fresh,
+      header,
+      account?.id ?? null,
+      fresh[0]?.currency ?? ctx.currency,
+      {
+        from: reaches.before ? ctx.period?.from : null,
+        to: reaches.after ? ctx.period?.to : null,
+      },
+    );
     ctx.created.push({ kind: 'statement', id: statement.id });
     const txRepo = ctx.manager.getRepository(Transaction);
     const entities: Transaction[] = [];
@@ -205,75 +227,5 @@ export class TransactionsTarget implements ImportTarget {
       results.push({ index: item.index, status: 'created', id: saved[position]?.id });
     }
     return results.sort((a, b) => a.index - b.index);
-  }
-
-  private async createStatement(
-    ctx: ImportContext,
-    items: ParsedTx[],
-    header: string | undefined,
-    walletId: string | null,
-  ): Promise<Statement> {
-    const csv = [
-      ['date', 'merchant', 'purpose', 'amount', 'type', 'currency', 'category'].join(','),
-      ...items.map(item =>
-        [
-          item.date,
-          item.merchant,
-          item.purpose,
-          item.amount,
-          item.type,
-          item.currency,
-          item.categoryName,
-        ]
-          .map(csvCell)
-          .join(','),
-      ),
-    ].join('\n');
-    const dates = items.map(item => new Date(item.date).getTime());
-    const totalDebit = items
-      .filter(item => item.type === TransactionType.EXPENSE)
-      .reduce((sum, item) => sum + item.amount, 0);
-    const totalCredit = items
-      .filter(item => item.type === TransactionType.INCOME)
-      .reduce((sum, item) => sum + item.amount, 0);
-    const baseName = (ctx.fileName || 'import').replace(/\.[^.]+$/, '');
-    const fileName = normalizeFilename(`${baseName}-import.csv`);
-    const filePath = path.join(resolveUploadsDir(), `${randomUUID()}.csv`);
-    await fs.promises.writeFile(filePath, csv);
-    const repo = ctx.manager.getRepository(Statement);
-    const statement = await repo.save(
-      repo.create({
-        userId: ctx.userId,
-        workspaceId: ctx.workspaceId,
-        fileName,
-        filePath,
-        fileType: FileType.CSV,
-        fileSize: csv.length,
-        fileHash: createHash('sha256').update(csv).digest('hex'),
-        bankName: BankName.OTHER,
-        status: StatementStatus.COMPLETED,
-        processedAt: new Date(),
-        statementDateFrom: new Date(Math.min(...dates)),
-        statementDateTo: new Date(Math.max(...dates)),
-        totalTransactions: items.length,
-        totalDebit,
-        totalCredit,
-        currency: items[0]?.currency ?? ctx.currency,
-        walletId,
-        deletedAt: null,
-        parsingDetails: {
-          detectedBy: 'entity-import',
-          parserUsed: 'entity-import',
-          parserVersion: '1',
-          transactionsFound: items.length,
-          transactionsCreated: items.length,
-          importPreview: { source: 'entity-import', fileName: ctx.fileName },
-          // The header row tells the next export of this bank to the same account.
-          metadataExtracted: { normalizedHeader: header },
-        },
-      }),
-    );
-    await repo.update(statement.id, { fileData: Buffer.from(csv) });
-    return statement;
   }
 }

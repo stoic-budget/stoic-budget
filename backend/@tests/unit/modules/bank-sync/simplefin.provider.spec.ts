@@ -113,6 +113,10 @@ describe('SimpleFinProvider', () => {
       pending: false,
     });
     expect(accounts[0].transactions[1]).toMatchObject({ id: 'TRN-2', pending: true });
+    // A hold comes as `posted: 0`; its day is the one it was transacted on.
+    expect(accounts[0].transactions[1].posted.toISOString()).toBe(
+      new Date(1758974400 * 1000).toISOString(),
+    );
     expect(accounts[1]).toMatchObject({ org: '', currency: 'EUR', balance: null });
   });
 
@@ -215,9 +219,35 @@ describe('SimpleFinProvider', () => {
       ).fetchAccounts(context),
     ).rejects.toBeInstanceOf(BankSyncTemporaryError);
 
-    // Still rate-limited after the retries.
     await expect(
       providerWith(async () => new Response('', { status: 429 })).fetchAccounts(context),
     ).rejects.toBeInstanceOf(BankSyncTemporaryError);
+  });
+
+  it('does not ask again on a 429 and hands its Retry-After to the scheduler', async () => {
+    const fetchUrl = vi.fn(
+      async () => new Response('', { status: 429, headers: { 'retry-after': '3600' } }),
+    );
+    const failure = await providerWith(fetchUrl)
+      .fetchAccounts(context)
+      .catch((error: unknown) => error);
+
+    expect(failure).toBeInstanceOf(BankSyncTemporaryError);
+    expect((failure as BankSyncTemporaryError).retryAfterSeconds).toBe(3600);
+    // Asking again within the hour would spend the quota the bridge is protecting.
+    expect(fetchUrl).toHaveBeenCalledTimes(1);
+  });
+
+  it('still retries a 5xx, and keeps its Retry-After once the retries are spent', async () => {
+    const fetchUrl = vi.fn(
+      async () => new Response('', { status: 503, headers: { 'retry-after': '120' } }),
+    );
+    const failure = await providerWith(fetchUrl)
+      .fetchAccounts(context)
+      .catch((error: unknown) => error);
+
+    expect(failure).toBeInstanceOf(BankSyncTemporaryError);
+    expect((failure as BankSyncTemporaryError).retryAfterSeconds).toBe(120);
+    expect(fetchUrl).toHaveBeenCalledTimes(3);
   });
 });
