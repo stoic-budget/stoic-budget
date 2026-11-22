@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 describe('AddSecurityPrices migration', () => {
-  const filePath = path.join(process.cwd(), 'src', 'migrations', '1788300000000-AddSecurityPrices.ts');
+  const filePath = path.join(process.cwd(), 'src', 'migrations', '1789110000000-AddSecurityPrices.ts');
   const source = () => readFileSync(filePath, 'utf8');
   const up = () => source().slice(0, source().indexOf('public async down'));
   const down = () => source().slice(source().indexOf('public async down'));

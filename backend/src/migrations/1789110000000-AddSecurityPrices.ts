@@ -12,8 +12,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * Nothing is backfilled here: the daily job and the first read of a symbol
  * fetch its history.
  */
-export class AddSecurityPrices1788300000000 implements MigrationInterface {
-  name = 'AddSecurityPrices1788300000000';
+export class AddSecurityPrices1789110000000 implements MigrationInterface {
+  name = 'AddSecurityPrices1789110000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
