@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
+import { getApiErrorMessage } from '@/app/lib/api-error';
 import { invalidateFinancialData } from '@/app/lib/invalidate-document-lists';
 import type { ContractInput } from '@/app/lib/query-fn-schema';
 
@@ -18,15 +19,6 @@ export interface UseTransactionSplitResult {
   split: (transactionId: string, parts: SplitPartInput[]) => Promise<void>;
   unsplit: (transactionId: string) => Promise<void>;
   saving: boolean;
-}
-
-function errorMessage(error: unknown, fallback: string): string {
-  const message = (error as { response?: { data?: { message?: string | string[] } } })?.response
-    ?.data?.message;
-  if (Array.isArray(message)) {
-    return message[0] ?? fallback;
-  }
-  return message ?? fallback;
 }
 
 export function useTransactionSplit(onDone: () => void | Promise<void>): UseTransactionSplitResult {
@@ -52,7 +44,7 @@ export function useTransactionSplit(onDone: () => void | Promise<void>): UseTran
           await onDone();
         })
         .catch((error: unknown) => {
-          toast.error(errorMessage(error, failedText));
+          toast.error(getApiErrorMessage(error, failedText));
         });
       setSaving(false);
     },
@@ -70,7 +62,7 @@ export function useTransactionSplit(onDone: () => void | Promise<void>): UseTran
           await onDone();
         })
         .catch((error: unknown) => {
-          toast.error(errorMessage(error, undoFailedText));
+          toast.error(getApiErrorMessage(error, undoFailedText));
         });
       setSaving(false);
     },

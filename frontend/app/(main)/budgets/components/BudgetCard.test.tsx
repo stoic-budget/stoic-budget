@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { budgetItem, categoryRef } from '@/app/test/fixtures/contracts';
 import { renderWithQuery } from '@/app/test/query-wrapper';
 import { normalizeBudgetItem } from '../hooks/useBudgetsPage';
@@ -13,9 +13,12 @@ vi.mock('@/app/i18n', async importOriginal => ({
   useLocale: () => ({ locale: appLocale.current }),
 }));
 
-const card = (overrides: Parameters<typeof budgetItem>[0]) =>
+const card = (overrides: Parameters<typeof budgetItem>[0], showPerDay = true) =>
   renderWithQuery(<BudgetCard
-      budget={normalizeBudgetItem(budgetItem(overrides))} onEdit={vi.fn()} onDelete={vi.fn()} />);
+      budget={normalizeBudgetItem(budgetItem(overrides))}
+      showPerDay={showPerDay}
+      onEdit={vi.fn()}
+      onDelete={vi.fn()} />);
 
 describe('BudgetCard', () => {
   it('says which spending is left out for want of a rate, instead of hiding it', () => {
@@ -101,5 +104,94 @@ describe('BudgetCard', () => {
     const { container } = card({ id: 'b-open', name: 'Charity' });
 
     expect(container.textContent).not.toMatch(/from |Not counted/);
+  });
+
+  describe('what is left per day', () => {
+    const may = { periodStart: '2026-05-01', periodEnd: '2026-05-31' };
+    // Sixty of a hundred left.
+    const spentForty = { availableAmount: 100, spentAmount: 40, percentUsed: 40 };
+    const on = (day: Date) => vi.useFakeTimers({ toFake: ['Date'] }).setSystemTime(day);
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('spreads what is left over the days left, today included', () => {
+      on(new Date(2026, 4, 22, 9, 0));
+      card({ id: 'b-day', name: 'Groceries', ...may, ...spentForty });
+
+      const line = screen.getByText(/a day for the next 10 days/);
+      expect(line.textContent).toBe('About $6.00 a day for the next 10 days');
+      // The amount hides in privacy mode like the card's other figures.
+      expect(screen.getByText('$6.00')).toHaveClass('seneca-private');
+    });
+
+    it('says what is left for today on the last day', () => {
+      on(new Date(2026, 4, 31, 23, 50));
+      const { container } = card({ id: 'b-day', name: 'Groceries', ...may, ...spentForty });
+
+      expect(container.textContent).toContain('$60.00 left for today');
+    });
+
+    it('says nothing per day once the budget is overspent', () => {
+      on(new Date(2026, 4, 22, 9, 0));
+      const { container } = card({
+        id: 'b-over',
+        name: 'Groceries',
+        ...may,
+        availableAmount: 100,
+        spentAmount: 120,
+        percentUsed: 120,
+      });
+
+      expect(container.textContent).not.toMatch(/a day|for today/);
+    });
+
+    it('says nothing per day for a past month', () => {
+      on(new Date(2026, 5, 3, 9, 0));
+      const { container } = card({ id: 'b-past', name: 'Groceries', ...may, ...spentForty });
+
+      expect(container.textContent).not.toMatch(/a day|for today/);
+    });
+
+    // October viewed later is measured on Oct 31; the quarter, year or week the
+    // server answers for that day can still contain today.
+    it.each([
+      ['quarterly', '2026-10-01', '2026-12-31', 13],
+      ['annual', '2026-01-01', '2026-12-31', 13],
+      // Oct 31 is a Saturday: its week runs to Sunday, Nov 1.
+      ['weekly', '2026-10-26', '2026-11-01', 1],
+    ] as const)('says nothing per day for a %s budget on a past month view', (periodType, periodStart, periodEnd, novemberDay) => {
+      on(new Date(2026, 10, novemberDay, 9, 0));
+      const budget = { id: 'b-long', name: 'Insurance', periodType, periodStart, periodEnd, ...spentForty };
+
+      const pastView = card(budget, false);
+      expect(pastView.container.textContent).not.toMatch(/a day|for today/);
+      pastView.unmount();
+      // The same answer on the current view does get the line: the hiding is the view's doing.
+      expect(card(budget, true).container.textContent).toMatch(
+        /a day for the next \d+ days|left for today/,
+      );
+    });
+
+    it('counts down to where the budget ends, carried leftover included', () => {
+      on(new Date(2026, 4, 16, 9, 0));
+      card({
+        id: 'b-ends',
+        name: 'Moving costs',
+        periodStart: '2026-05-01',
+        periodEnd: '2026-05-20',
+        endsOn: '2026-05-20',
+        limitAmount: '100.00',
+        availableAmount: 150,
+        carriedAmount: 50,
+        spentAmount: 50,
+        percentUsed: 33,
+      });
+
+      expect(screen.getByText(/a day for the next 5 days/).textContent).toBe(
+        'About $20.00 a day for the next 5 days',
+      );
+    });
   });
 });

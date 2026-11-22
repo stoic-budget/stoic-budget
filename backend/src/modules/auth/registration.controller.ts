@@ -1,8 +1,9 @@
 import { Controller, Get, Put, UseGuards } from '@nestjs/common';
+import { demoCredentials, isDemoMode } from '../../common/demo/demo-mode';
 import { SchemaBody } from '../../common/effect/schema-body';
 import { SchemaResponse } from '../../common/effect/schema-response';
 import { InstanceAdminGuard } from '../../common/guards/instance-admin.guard';
-import { RegistrationStatus, SaveRegistrationBody } from '../../contracts';
+import { DemoStatus, RegistrationStatus, SaveRegistrationBody } from '../../contracts';
 import type { User } from '../../entities';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
@@ -18,6 +19,14 @@ export class RegistrationController {
   @SchemaResponse(RegistrationStatus)
   async status() {
     return { open: await this.registrationSettings.isOpen() };
+  }
+
+  /** Public: the login page offers the shared account on a demo instance. */
+  @Public()
+  @Get('auth/demo')
+  @SchemaResponse(DemoStatus)
+  demo() {
+    return { enabled: isDemoMode(), account: demoCredentials() };
   }
 
   @Put('settings/instance/registration')

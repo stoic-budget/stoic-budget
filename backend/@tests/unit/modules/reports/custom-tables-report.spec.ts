@@ -2,8 +2,8 @@ import {
   CustomTableColumnType,
   type CustomTableColumn,
 } from '../../../../src/entities/custom-table-column.entity';
-import { AuditService } from '../../../../src/modules/audit/audit.service';
 import { ReportsService } from '../../../../src/modules/reports/reports.service';
+import { buildReportsService } from './helpers/build-reports-service';
 
 function createRepoMock() {
   return {
@@ -21,22 +21,13 @@ describe('ReportsService custom tables report', () => {
   let service: ReportsService;
 
   beforeEach(() => {
-    service = new ReportsService(
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
-      { get: vi.fn(), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as unknown as AuditService,
-      createRepoMock(),
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-    );
+    service = buildReportsService({
+      transactionRepository: createRepoMock(),
+      customTableRepository: createRepoMock(),
+      customTableColumnRepository: createRepoMock(),
+      customTableRowRepository: createRepoMock(),
+      reportHistoryRepo: createRepoMock(),
+    });
   });
 
   it('returns proper shape for empty workspace', async () => {
@@ -191,22 +182,14 @@ describe('ReportsService custom tables report', () => {
         .mockReturnValueOnce(qbPrevious),
     } as any;
 
-    const localService = new ReportsService(
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
+    const localService = buildReportsService({
+      transactionRepository: createRepoMock(),
       customTableRepository,
       customTableColumnRepository,
       customTableRowRepository,
-      createRepoMock(),
-      { get: vi.fn().mockResolvedValue(null), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as unknown as AuditService,
-      createRepoMock(),
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-    );
+      cacheManager: { get: vi.fn().mockResolvedValue(null), set: vi.fn() },
+      reportHistoryRepo: createRepoMock(),
+    });
 
     const result = await localService.getCustomTablesReport('workspace-1', {
       days: 30,
@@ -330,22 +313,14 @@ describe('ReportsService custom tables report', () => {
       createQueryBuilder: vi.fn().mockReturnValue(qb),
     } as any;
 
-    const localService = new ReportsService(
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
+    const localService = buildReportsService({
+      transactionRepository: createRepoMock(),
       customTableRepository,
       customTableColumnRepository,
       customTableRowRepository,
-      createRepoMock(),
-      { get: vi.fn().mockResolvedValue(null), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as unknown as AuditService,
-      createRepoMock(),
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-    );
+      cacheManager: { get: vi.fn().mockResolvedValue(null), set: vi.fn() },
+      reportHistoryRepo: createRepoMock(),
+    });
 
     const result = await localService.getCustomTablesReportDrillDown('workspace-1', {
       counterparty: 'Vendor A',
@@ -388,22 +363,13 @@ describe('ReportsService custom tables report', () => {
         .mockResolvedValueOnce(7),
     } as any;
 
-    const localService = new ReportsService(
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
-      createRepoMock(),
+    const localService = buildReportsService({
+      transactionRepository: createRepoMock(),
       customTableRepository,
-      createRepoMock(),
+      customTableColumnRepository: createRepoMock(),
       customTableRowRepository,
-      createRepoMock(),
-      { get: vi.fn(), set: vi.fn() } as any,
-      { createEvent: vi.fn() } as unknown as AuditService,
-      createRepoMock(),
-      { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-      { getRate: vi.fn(async () => 1) } as any,
-      { exportBalanceSheet: vi.fn() } as any,
-    );
+      reportHistoryRepo: createRepoMock(),
+    });
 
     const result = await localService.getAvailableCustomTables('workspace-1');
 

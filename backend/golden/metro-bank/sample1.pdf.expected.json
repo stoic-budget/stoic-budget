@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "accountNumber": "GB00MYMB10000010000001",
+    "currency": "GBP",
+    "dateFrom": "2019-06-01T00:00:00",
+    "dateTo": "2019-06-30T00:00:00",
+    "balanceStart": 37756.11
+  },
+  "transactions": [
+    {
+      "transactionDate": "2019-06-01T00:00:00",
+      "counterpartyName": "Member Oneone",
+      "paymentPurpose": "Inward Payments Member Oneone",
+      "credit": 380.15,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-06-02T00:00:00",
+      "counterpartyName": "STAPLES",
+      "paymentPurpose": "Card Purchase 02/06/19 09:15:48 STAPLES",
+      "debit": 312.48,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-06-02T00:00:00",
+      "counterpartyName": "Member Twotwo",
+      "paymentPurpose": "Inward Payments Member Twotwo",
+      "credit": 2830.15,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2019-06-03T00:00:00",
+      "counterpartyName": "Member Threeeeee",
+      "paymentPurpose": "Outward Fast Payments Member Threeeeee",
+      "debit": 567.59,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-03T00:00:00",
+      "counterpartyName": "FRANK'S NURSERY & CRAFTS",
+      "paymentPurpose": "Card Purchase 03/06/19 11:15:48 FRANK'S NURSERY & CRAFTS",
+      "debit": 132.15,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-06-05T00:00:00",
+      "counterpartyName": "MARGOLIS FURNITURE",
+      "paymentPurpose": "Outward Fast Payments MARGOLIS FURNITURE",
+      "debit": 2502.52,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2019-06-05T00:00:00",
+      "counterpartyName": "Card Purchase 05/06/19 12:15:48",
+      "paymentPurpose": "Card Purchase 05/06/19 12:15:48",
+      "debit": 184.35,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2019-06-06T00:00:00",
+      "counterpartyName": "Screwfix Enfield",
+      "paymentPurpose": "Outward Fast Payments Screwfix Enfield",
+      "debit": 55.2,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    }
+  ],
+  "failedChecks": [
+    "printed_totals",
+    "printed_balances"
+  ]
+}
