@@ -135,6 +135,12 @@ describe('Bank sync pending rows (e2e)', () => {
     throw new Error(`statement ${statementId} never finished parsing`);
   };
   const pull = async () => {
+    // A manual pull is refused within a minute of the last one: pretend that minute passed.
+    await dataSource.query(
+      `UPDATE open_protocol_settings SET last_pull_attempt_at = now() - interval '5 minutes'
+       WHERE integration_id = $1`,
+      [connectionId],
+    );
     const res = await as(
       request(server()).post(`/integrations/bank-sync/connections/${connectionId}/sync`),
     ).expect(201);

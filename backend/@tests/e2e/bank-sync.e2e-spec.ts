@@ -125,6 +125,14 @@ describe('Bank sync (e2e)', () => {
     throw new Error(`statement ${statementId} never finished parsing`);
   };
 
+  /** A manual pull is refused within a minute of the last one: pretend that minute passed. */
+  const coolDown = (connectionId: string) =>
+    dataSource.query(
+      `UPDATE open_protocol_settings SET last_pull_attempt_at = now() - interval '5 minutes'
+       WHERE integration_id = $1`,
+      [connectionId],
+    );
+
   const rowsOf = async (statementId: string): Promise<string[]> => {
     const res = await as(
       owner,
@@ -213,6 +221,7 @@ describe('Bank sync (e2e)', () => {
     expect(statement.fileName).toMatch(/^demo-bank-checking-\d{8}\.ofx$/);
     expect(await rowsOf(statementId)).toEqual(['ACT-A:A-1', 'ACT-A:A-2']);
 
+    await coolDown(connectionA);
     const second = await as(
       owner,
       request(server()).post(`/integrations/bank-sync/connections/${connectionA}/sync`),
@@ -282,6 +291,7 @@ describe('Bank sync (e2e)', () => {
       .send({ enabled: false })
       .expect(200);
 
+    await coolDown(connectionB);
     const sync = await as(
       owner,
       request(server()).post(`/integrations/bank-sync/connections/${connectionB}/sync`),

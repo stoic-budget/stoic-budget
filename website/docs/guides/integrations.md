@@ -43,7 +43,14 @@ SimpleFIN, North America) exposes your bank accounts over the open
    works once: Stoic Budget exchanges it for an access credential and stores only that, encrypted.
 3. Choose which accounts to pull and, optionally, which Stoic Budget wallet each one lands in. Accounts the
    provider adds later start switched off.
-4. **Pull now**, or leave *Pull automatically every 6 hours* on.
+4. **Pull now**, or leave *Pull automatically* on and pick *How often to pull*: every 1 to 24
+   hours, 6 by default. The card shows when the next automatic pull is due.
+
+Failed automatic pulls back off: half an hour after the first failure, doubling after each one,
+at most a day, and never sooner than the provider's own `Retry-After`. The card says until when
+pulls are paused and why. **Pull now** skips the wait and starts the count over; it is refused for
+a minute after the last pull of the same connection. A rejected credential stops automatic pulls
+until you link the connection again.
 
 Each pull writes the new rows of an account as an OFX statement and hands it to the regular
 statement import, so dedupe, rules, the review inbox and the audit log behave exactly as for a file
