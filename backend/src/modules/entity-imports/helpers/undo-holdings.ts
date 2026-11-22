@@ -1,6 +1,10 @@
 import { type EntityManager, In } from 'typeorm';
+import { Budget } from '../../../entities/budget.entity';
+import type { ImportUpdatedRef } from '../../../entities/import-batch.entity';
 import { InvestmentHolding } from '../../../entities/investment-holding.entity';
 import { InvestmentTrade } from '../../../entities/investment-trade.entity';
+import { Payable } from '../../../entities/payable.entity';
+import { Subscription } from '../../../entities/subscription.entity';
 
 export interface UndoneHoldings {
   removed: number;
@@ -45,4 +49,40 @@ export async function removeImportedHoldings(
     kept: [...kept],
     accountIds: [...new Set(gone.map(holding => holding.accountId))],
   };
+}
+
+/** A holding an import changed: its typed quantity back, and its price as if the import's splits never were. */
+async function restoreHolding(
+  manager: EntityManager,
+  workspaceId: string,
+  ref: ImportUpdatedRef,
+): Promise<void> {
+  const before = ref.before as { quantity: number | string; priceRatio?: number };
+  const repo = manager.getRepository(InvestmentHolding);
+  const holding = await repo.findOne({
+    where: { id: ref.id, workspaceId },
+    select: { id: true, price: true },
+  });
+  if (!holding) return;
+  const ratio = Number(before.priceRatio ?? 1) || 1;
+  await repo.update(
+    { id: ref.id, workspaceId },
+    { quantity: Number(before.quantity), price: Number(holding.price) / ratio },
+  );
+}
+
+/** Every record an import changed, put back as it was before it. */
+export async function restoreUpdatedRefs(
+  manager: EntityManager,
+  workspaceId: string,
+  refs: ImportUpdatedRef[],
+): Promise<void> {
+  for (const ref of refs) {
+    if (ref.kind === 'investment_holding') {
+      await restoreHolding(manager, workspaceId, ref);
+      continue;
+    }
+    const entity = { subscription: Subscription, budget: Budget, payable: Payable }[ref.kind];
+    await manager.getRepository(entity).update({ id: ref.id, workspaceId }, ref.before as never);
+  }
 }
