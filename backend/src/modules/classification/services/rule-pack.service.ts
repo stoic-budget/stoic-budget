@@ -191,6 +191,11 @@ export class RulePackService {
   }): Promise<RulePackImportResult> {
     const { workspaceId, userId, pack } = input;
     const { created, madeCategory } = await this.manager.transaction(async manager => {
+      // One import at a time per workspace: two in flight (a double click, a
+      // retry) would each find the pack's rules missing and make them twice.
+      await manager.query('SELECT pg_advisory_xact_lock(hashtext($1))', [
+        `rule-pack:${workspaceId}`,
+      ]);
       const ids = await idsByName(manager, workspaceId);
       const existing = await ruleNames(manager, workspaceId);
       const wanted = plan(pack, ids, input.createMissing, existing)

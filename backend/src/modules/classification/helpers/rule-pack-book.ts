@@ -55,7 +55,9 @@ export async function namesById(manager: EntityManager, workspaceId: string): Pr
 
 /**
  * The workspace's ids by lower-cased name, for an import. Of two records with
- * one name the older wins. A member is found by their name or their e-mail.
+ * one name the older wins. A member is found by their name or their e-mail; a
+ * name two members share finds nobody, since a rule must not notify or file
+ * rows under the wrong person.
  */
 export async function idsByName(
   manager: EntityManager,
@@ -69,7 +71,12 @@ export async function idsByName(
     }
     return ids;
   };
-  const member = book(records.member);
+  const shared = new Set(
+    records.member
+      .map(one => nameKey(one.name))
+      .filter((key, index, keys) => keys.indexOf(key) !== index),
+  );
+  const member = book(records.member.filter(one => !shared.has(nameKey(one.name))));
   for (const [email, id] of book(records.email.filter(one => one.name))) {
     if (!member.has(email)) member.set(email, id);
   }

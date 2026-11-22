@@ -468,6 +468,33 @@ describe('Rule notifications, folders and packs (e2e)', () => {
     }
   });
 
+  it('makes a pack once when two imports of it run at the same time', async () => {
+    const rule = await as(owner, request(server()).post('/categorization-rules'))
+      .send({
+        name: 'Double click',
+        conditions: [{ field: 'counterparty_name', operator: 'contains', value: 'double' }],
+        result: { comment: 'Once' },
+      })
+      .expect(201);
+    const pack = (
+      await as(owner, request(server()).post('/categorization-rule-packs/export'))
+        .send({ ruleIds: [rule.body.id] })
+        .expect(200)
+    ).body;
+    const importOnce = () =>
+      as(other, request(server()).post('/categorization-rule-packs/import'))
+        .send({ pack, createMissing: true })
+        .expect(200);
+    const results = await Promise.all([importOnce(), importOnce()]);
+    expect(results.map(res => res.body.created).sort()).toEqual([0, 1]);
+    const [{ count }]: Array<{ count: string }> = await dataSource.query(
+      'SELECT count(*) FROM categorization_rules WHERE workspace_id = $1 AND name = $2',
+      [other.workspaceId, 'Double click'],
+    );
+    expect(Number(count)).toBe(1);
+    await as(owner, request(server()).delete(`/categorization-rules/${rule.body.id}`)).expect(204);
+  });
+
   it('refuses a pack that is not one', async () => {
     await as(other, request(server()).post('/categorization-rule-packs/preview'))
       .send({ pack: { kind: 'something-else', version: 1, exportedAt: '', rules: [] }, createMissing: false })
