@@ -120,6 +120,18 @@ const nextConfig = phase => {
           source: '/uploads/:path*',
           destination: `${apiProxyTarget}/uploads/:path*`,
         },
+        // OAuth discovery for MCP clients (RFC 9728, RFC 8414) lives at the origin root;
+        // the API serves it under its prefix. The path-inserted form names the MCP endpoint.
+        ...['', '/:path*'].flatMap(suffix => [
+          {
+            source: `/.well-known/oauth-protected-resource${suffix}`,
+            destination: `${apiProxyTarget}/api/v1/oauth/protected-resource`,
+          },
+          {
+            source: `/.well-known/oauth-authorization-server${suffix}`,
+            destination: `${apiProxyTarget}/api/v1/oauth/authorization-server`,
+          },
+        ]),
       ];
     },
   };

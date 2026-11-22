@@ -1,0 +1,52 @@
+import * as Schema from 'effect/Schema';
+import { Timestamp, type Wire } from '../common/wire';
+import { ApiKeyScope } from '../requests/api-keys';
+
+/** One workspace the person could connect the app to, with what their role there allows. */
+export const McpOAuthConsentWorkspace = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  /** Off: the app could not be used there, so it cannot be picked. */
+  mcpEnabled: Schema.Boolean,
+  /** The read-only preset, already cut to the person's role. */
+  read: Schema.Array(ApiKeyScope),
+  /** Every scope the person's role allows; also the read-and-write preset. */
+  write: Schema.Array(ApiKeyScope),
+});
+export type McpOAuthConsentWorkspace = Wire<typeof McpOAuthConsentWorkspace>;
+
+/**
+ * `GET /oauth/consent`: what to ask the person, or the app's own address with
+ * the error of a request it got wrong. That address is offered as a link, never
+ * followed on its own: anyone may register a client (RFC 9700 §4.11.2).
+ */
+export const McpOAuthConsent = Schema.Union([
+  Schema.Struct({
+    kind: Schema.Literal('consent'),
+    clientName: Schema.String,
+    redirectHost: Schema.String,
+    /** The scopes the app asked for that exist here; empty when it asked for none. */
+    requestedScopes: Schema.Array(ApiKeyScope),
+    workspaces: Schema.Array(McpOAuthConsentWorkspace),
+  }),
+  Schema.Struct({ kind: Schema.Literal('redirect'), redirectTo: Schema.String }),
+]);
+export type McpOAuthConsent = Wire<typeof McpOAuthConsent>;
+
+/** `POST /oauth/consent`: the app's address with a code, or with `error=access_denied`. */
+export const McpOAuthRedirect = Schema.Struct({ redirectTo: Schema.String });
+export type McpOAuthRedirect = Wire<typeof McpOAuthRedirect>;
+
+/** One row of `GET /mcp-oauth/grants`: an app the caller connected to this workspace. */
+export const McpOAuthGrantItem = Schema.Struct({
+  id: Schema.String,
+  clientName: Schema.String,
+  redirectHosts: Schema.Array(Schema.String),
+  scopes: Schema.Array(Schema.String),
+  createdAt: Timestamp,
+  lastUsedAt: Schema.NullOr(Timestamp),
+});
+export type McpOAuthGrantItem = Wire<typeof McpOAuthGrantItem>;
+
+export const McpOAuthGrantList = Schema.Array(McpOAuthGrantItem);
+export type McpOAuthGrantList = Wire<typeof McpOAuthGrantList>;

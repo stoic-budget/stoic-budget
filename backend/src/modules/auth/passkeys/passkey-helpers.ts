@@ -2,7 +2,7 @@ import type { Logger } from '@nestjs/common';
 import type { AuthenticatorTransport } from '@simplewebauthn/server';
 import type { EntityManager } from 'typeorm';
 import type { Passkey } from '../../../contracts';
-import { type PasskeyCredential, WorkspaceMember, WorkspaceRole } from '../../../entities';
+import { PasskeyCredential, WorkspaceMember, WorkspaceRole } from '../../../entities';
 import { AuditAction, EntityType, Severity } from '../../../entities/audit-event.entity';
 import type { AuditService } from '../../audit/audit.service';
 import { recordSecurityEvent } from '../security-audit.util';
@@ -36,6 +36,37 @@ export const toPasskey = (row: PasskeyCredential): Passkey => ({
 });
 
 export type PasskeyEvent = 'added' | 'removed' | 'counter_regression';
+
+/** Where a passkey was removed in bulk: cleaning up after a compromise. */
+export type PasskeyCleanup = 'password-reset' | 'logout-all';
+
+export type RemovedPasskey = Pick<PasskeyCredential, 'id' | 'name' | 'deviceType'>;
+
+/**
+ * Deletes the listed passkeys of one user in a single statement and answers the
+ * rows it deleted. An id of someone else's passkey, or one already gone, matches
+ * nothing, so it is neither removed nor reported.
+ */
+export async function deleteOwnPasskeys(
+  manager: EntityManager,
+  userId: string,
+  ids: readonly string[],
+): Promise<RemovedPasskey[]> {
+  if (ids.length === 0) return [];
+  const result = await manager
+    .createQueryBuilder()
+    .delete()
+    .from(PasskeyCredential)
+    .where('user_id = :userId AND id IN (:...ids)', { userId, ids: [...new Set(ids)] })
+    .returning(['id', 'name', 'device_type'])
+    .execute();
+  const rows = result.raw as Array<{ id: string; name: string; device_type: string }>;
+  return rows.map(row => ({
+    id: row.id,
+    name: row.name,
+    deviceType: row.device_type === 'multiDevice' ? 'multiDevice' : 'singleDevice',
+  }));
+}
 
 /**
  * The workspace a passkey event is filed in: the home workspace, or, once the
@@ -73,6 +104,7 @@ export async function recordPasskeyEvent(
   user: { id: string; workspaceId?: string | null },
   passkey: PasskeyEvent,
   passkeyId: string,
+  via?: PasskeyCleanup,
 ): Promise<void> {
   const workspaceId = await auditWorkspaceOf(manager, user);
   if (!workspaceId) {
@@ -88,6 +120,6 @@ export async function recordPasskeyEvent(
     entityId: user.id,
     action: AuditAction.UPDATE,
     severity: passkey === 'added' ? Severity.WARN : Severity.CRITICAL,
-    meta: { passkey, passkeyId },
+    meta: { passkey, passkeyId, ...(via ? { via } : {}) },
   });
 }

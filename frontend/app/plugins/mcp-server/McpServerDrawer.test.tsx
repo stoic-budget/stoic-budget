@@ -28,6 +28,10 @@ vi.mock('./useApiKeys', () => ({
   }),
 }));
 
+vi.mock('./useConnectedApps', () => ({
+  useConnectedApps: () => ({ apps: [], loading: false, disconnect: vi.fn(), disconnecting: false }),
+}));
+
 describe('McpServerDrawer', () => {
   beforeEach(() => {
     state.role = 'admin';
@@ -66,5 +70,13 @@ describe('McpServerDrawer', () => {
     render(<McpServerDrawer isOpen onClose={vi.fn()} />);
 
     expect(document.body.textContent).toMatch(/Only an instance administrator can create API keys/);
+  });
+
+  it('shows everyone the apps they connected over OAuth', () => {
+    state.role = 'user';
+    render(<McpServerDrawer isOpen onClose={vi.fn()} />);
+
+    expect(document.body.textContent).toContain('Connected apps');
+    expect(document.body.textContent).toContain('No apps connected yet');
   });
 });

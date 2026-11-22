@@ -3,11 +3,13 @@
 import FingerprintIcon from '@mui/icons-material/FingerprintOutlined';
 import Stack from '@mui/material/Stack';
 import type React from 'react';
+import { useState } from 'react';
 import { Lock, Mail, Shield, ShieldCheck } from '@/app/components/icons';
 import { wrap } from '@/app/components/icons/wrap';
 import { useIntlayer } from '@/app/i18n';
 import { useUserFormat } from '@/app/lib/user-format-store';
 import { EmailSection } from '@/app/settings/profile/components/EmailSection';
+import { LogoutAllDialog } from '@/app/settings/profile/components/LogoutAllDialog';
 import { PasskeysSection } from '@/app/settings/profile/components/PasskeysSection';
 import { PasswordSection } from '@/app/settings/profile/components/PasswordSection';
 import { SessionsSection } from '@/app/settings/profile/components/SessionsSection';
@@ -93,6 +95,8 @@ export function SecurityTab({ section, user, setUser }: SettingsTabProps): React
     logoutSessionLoadingId,
     handleLogoutSession,
     handleLogoutAll,
+    logoutAllConfirmed,
+    logoutAllRemovingPasskeys,
   } = useSessions(isAuthenticated, {
     loadError: tx(['sessionsCard', 'sessionsLoadError']),
     logoutAllConfirm: tx(['sessionsCard', 'logoutAllConfirm']),
@@ -101,6 +105,14 @@ export function SecurityTab({ section, user, setUser }: SettingsTabProps): React
     sessionLogoutSuccess: tx(['sessionsCard', 'sessionLogoutSuccess']),
     sessionLogoutError: tx(['sessionsCard', 'sessionLogoutError']),
   });
+
+  // With passkeys, the confirmation lists them (they outlive the logout); without, it stays a
+  // plain confirm. While the list is still loading the dialog opens too, and fills in.
+  const [logoutAllOpen, setLogoutAllOpen] = useState(false);
+  const confirmLogoutAll =
+    passkeys.loading || passkeys.passkeys.length > 0
+      ? async () => setLogoutAllOpen(true)
+      : handleLogoutAll;
 
   return (
     <Stack spacing={2}>
@@ -193,10 +205,19 @@ export function SecurityTab({ section, user, setUser }: SettingsTabProps): React
           userLastLogin={user?.lastLogin}
           logoutSessionLoadingId={logoutSessionLoadingId}
           handleLogoutSession={handleLogoutSession}
-          handleLogoutAll={handleLogoutAll}
+          handleLogoutAll={confirmLogoutAll}
           formatPreferences={formatPreferences}
         />
       </SettingsAccordion>
+      {logoutAllOpen ? (
+        <LogoutAllDialog
+          passkeys={passkeys.passkeys}
+          tx={tx}
+          onClose={() => setLogoutAllOpen(false)}
+          onLogoutAll={logoutAllConfirmed}
+          onLogoutAllRemoving={logoutAllRemovingPasskeys}
+        />
+      ) : null}
     </Stack>
   );
 }

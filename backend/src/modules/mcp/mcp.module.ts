@@ -10,6 +10,7 @@ import { ForecastModule } from '../forecast/forecast.module';
 import { GoalsModule } from '../goals/goals.module';
 import { InsightsModule } from '../insights/insights.module';
 import { InvoicesModule } from '../invoices/invoices.module';
+import { McpOAuthModule } from '../mcp-oauth/mcp-oauth.module';
 import { NetWorthModule } from '../net-worth/net-worth.module';
 import { PayablesModule } from '../payables/payables.module';
 import { PayeesModule } from '../payees/payees.module';
@@ -36,6 +37,7 @@ import { McpToolRegistry } from './mcp-tool-registry.service';
   imports: [
     TypeOrmModule.forFeature([Transaction, Category, WorkspaceMember]),
     WorkspacePluginsModule,
+    McpOAuthModule,
     TransactionsModule,
     CategoriesModule,
     DashboardModule,

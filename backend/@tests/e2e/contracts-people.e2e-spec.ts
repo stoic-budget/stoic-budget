@@ -234,6 +234,23 @@ describe('API contracts: people (e2e)', () => {
           twoFactorPasskey: authenticator.assert(challenge.passkeyOptions.challenge),
         }),
       );
+      // The reset link's passkey list, read without a session.
+      await answer(
+        MessageResult,
+        request(app.getHttpServer()).post('/auth/forgot-password').send({ email: holder.email }),
+      );
+      const resetToken = randomUUID();
+      await dataSource.query(
+        'UPDATE password_reset_tokens SET token_hash = $1 WHERE user_id = $2',
+        [app.get(PasswordResetService)['hashToken'](resetToken), holder.userId],
+      );
+      const onReset = await answer(
+        PasskeyList,
+        request(app.getHttpServer())
+          .post('/auth/reset-password/passkeys')
+          .send({ token: resetToken }),
+      );
+      expect(onReset).toEqual([expect.objectContaining({ id: created.id, name: 'Phone' })]);
       await answer(
         MessageResult,
         as(holder, 'delete', `/auth/passkeys/${created.id}`, { password: PASSWORD }),
