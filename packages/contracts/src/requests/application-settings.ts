@@ -13,7 +13,7 @@ import type { Wire } from '../common/wire';
  * boundary check those helpers never replaced — it rejects unknown properties
  * and returns a proper 400 instead of surfacing a coercion error later.
  */
-export const SaveSmtpSettingsBody = Schema.Struct({
+export const SmtpServerSettings = Schema.Struct({
   host: Schema.String,
   port: optionalNullable(
     NumericInput.check(
@@ -28,6 +28,17 @@ export const SaveSmtpSettingsBody = Schema.Struct({
   from: Schema.String,
   replyTo: optionalNullable(Schema.String),
   timeoutMs: optionalNullable(NumericInput.check(Schema.isInt(), Schema.isGreaterThanOrEqualTo(1))),
+});
+export type SmtpServerSettings = Wire<typeof SmtpServerSettings>;
+
+/**
+ * `PUT /settings/email/smtp`. The workspace's SMTP server can send the saver's
+ * own password-reset mail, so a save asks for the caller's account password:
+ * a session alone must not be able to point it at a server it reads.
+ */
+export const SaveSmtpSettingsBody = Schema.Struct({
+  ...SmtpServerSettings.fields,
+  currentPassword: Schema.String.check(Schema.isMinLength(1)),
 });
 export type SaveSmtpSettingsBody = Wire<typeof SaveSmtpSettingsBody>;
 
