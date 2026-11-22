@@ -202,6 +202,11 @@ export const queryKeys = {
     ['investments', o.workspaceId, 'lots', o.holdingId] as const,
   investmentSettings: (workspaceId: string | null) =>
     ['investments', workspaceId, 'settings'] as const,
+  // Under investments too: a trade or a close moves the chart and the returns.
+  holdingHistory: (o: { workspaceId: string | null; holdingId: string }) =>
+    ['investments', o.workspaceId, 'history', o.holdingId] as const,
+  holdingCloses: (o: { workspaceId: string | null; holdingId: string }) =>
+    ['investments', o.workspaceId, 'closes', o.holdingId] as const,
   // Under net worth: holdings, trades and metal lots all re-read net worth, and this with it.
   investmentAllocation: (workspaceId: string | null) =>
     ['net-worth', workspaceId, 'investment-allocation'] as const,

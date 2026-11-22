@@ -21,8 +21,8 @@ import {
 } from '../hooks/useInvestments';
 import { AddAccountDialog } from './AddAccountDialog';
 import { HoldingTradesDrawer } from './HoldingTradesDrawer';
-import { isStaleQuote } from './investment-price';
 import { CardTitle, cardSx } from './net-worth-ui';
+import { PriceNote } from './PriceNote';
 
 /**
  * Labels for every asset class net worth can show. `crypto` is not a holding
@@ -362,16 +362,7 @@ export function InvestmentsCard({ currency, locale, embedded = false }: Investme
                     </td>
                     <td>
                       <PrivateAmount>{holding.price}</PrivateAmount> {holding.priceCurrency}
-                      {(holding.priceSource === 'manual' || isStaleQuote(holding)) && (
-                        <Typography
-                          component="span"
-                          variant="caption"
-                          sx={{ color: 'text.secondary' }}
-                        >
-                          {' '}
-                          · {holding.priceSource === 'manual' ? t.manualPrice : t.stalePrice}
-                        </Typography>
-                      )}
+                      <PriceNote holding={holding} locale={locale} />
                     </td>
                     <td className={PRIVATE_CLASS}>{money(holding.value)}</td>
                     <td>

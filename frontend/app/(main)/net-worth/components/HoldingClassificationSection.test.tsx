@@ -25,6 +25,7 @@ const fund: InvestmentHolding = {
   pricedAt: '2026-10-01T00:00:00Z',
   value: 400,
   hasTrades: false,
+  priceHealth: null,
   sector: null,
   region: null,
   country: 'IE',

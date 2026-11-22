@@ -13,6 +13,18 @@ const hookMock = vi.hoisted(() => ({
   setBasisMethod: vi.fn(async () => undefined),
 }));
 
+vi.mock('../hooks/usePriceHistory', () => ({
+  usePriceHistory: () => ({
+    history: null,
+    closes: [],
+    isPending: false,
+    saving: false,
+    addClose: vi.fn(),
+    deleteClose: vi.fn(),
+    importCloses: vi.fn(),
+  }),
+}));
+
 vi.mock('../hooks/useHoldingClassification', () => ({
   useHoldingClassification: () => ({
     save: vi.fn(async () => undefined),
@@ -37,6 +49,7 @@ const holding: InvestmentHolding = {
   pricedAt: '2025-03-01T00:00:00Z',
   value: 780,
   hasTrades: true,
+  priceHealth: null,
   sector: null,
   region: null,
   country: null,

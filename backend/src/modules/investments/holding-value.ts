@@ -1,4 +1,4 @@
-import type { InvestmentHolding as HoldingView } from '../../contracts';
+import type { InvestmentHolding as HoldingView, PriceHealth } from '../../contracts';
 import type { InvestmentHolding } from '../../entities';
 import type { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { readClassification } from './holding-classification';
@@ -25,6 +25,7 @@ export async function holdingView(
   currency: string,
   rates: Pick<ExchangeRatesService, 'getRateOrNull'>,
   hasTrades: boolean,
+  priceHealth: PriceHealth | null = null,
 ): Promise<HoldingView> {
   const value = (await holdingValueIn(holding, currency, rates)) ?? 0;
   return {
@@ -39,6 +40,7 @@ export async function holdingView(
     pricedAt: holding.pricedAt?.toISOString() ?? null,
     value: Math.round(value * 100) / 100,
     hasTrades,
+    priceHealth: holding.symbol ? priceHealth : null,
     ...readClassification(holding),
   };
 }

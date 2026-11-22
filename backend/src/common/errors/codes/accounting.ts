@@ -207,6 +207,9 @@ export const ACCOUNTING_ERRORS = {
   INVESTMENTS_TRADE_CURRENCY_MISMATCH: 'All trades of a holding are in one currency ({{currency}})',
   INVESTMENTS_TRADES_NOT_FOR_METALS: 'Metal lots are bought and sold on the metals card',
   INVESTMENTS_QUANTITY_FROM_TRADES: 'This holding takes its quantity from its trades',
+  INVESTMENTS_HOLDING_NO_SYMBOL: 'Give the holding a symbol to keep its daily closes',
+  INVESTMENTS_CLOSE_IN_FUTURE: 'A close cannot be dated after today',
+  INVESTMENTS_CLOSE_NOT_FOUND: 'Close not found',
   INVESTMENTS_LOOK_THROUGH_FUNDS_ONLY: 'Only an ETF or a fund can be split by weights',
   // ── metals ──────────────────────────────────────────────────────
   METALS_LOT_METAL_REQUIRED: 'A lot needs a metal',
