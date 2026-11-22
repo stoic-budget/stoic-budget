@@ -13,6 +13,13 @@ describe('CrossStatementDeduplicationService', () => {
     findBy: vi.fn(),
     findOneBy: vi.fn(),
     update: vi.fn(),
+    // The tax-lock check of a merge: no row, nor loan interest split off one, is filed.
+    count: vi.fn(async () => 0),
+    createQueryBuilder: vi.fn(() => ({
+      setFindOptions: vi.fn().mockReturnThis(),
+      innerJoin: vi.fn().mockReturnThis(),
+      getCount: vi.fn(async () => 0),
+    })),
   };
 
   const createMockTransaction = (
@@ -153,6 +160,20 @@ describe('CrossStatementDeduplicationService', () => {
 
       expect(groups.length).toBe(1);
       expect(groups[0].duplicates[0].transaction.id).toBe('tx2');
+    });
+
+    it('never pairs a pending row with its booked look-alike, either way round', async () => {
+      const date = new Date('2024-01-15');
+      const pending = {
+        ...createMockTransaction('pending', date, 1500, 'ACME Store', 'Wireless Buds', 'stmt1'),
+        isPending: true,
+      };
+      const booked = createMockTransaction('booked', date, 1500, 'ACME Store', 'Wireless Buds', 'stmt2');
+
+      mockRepository.find.mockResolvedValueOnce([pending, booked]);
+      mockRepository.find.mockResolvedValueOnce([pending, booked]);
+
+      expect(await service.findDuplicates('workspace-123')).toEqual([]);
     });
 
     it('should find fuzzy duplicates with similar counterparty names', async () => {

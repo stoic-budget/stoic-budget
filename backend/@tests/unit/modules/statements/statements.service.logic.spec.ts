@@ -107,6 +107,8 @@ describe('StatementsService — business logic', () => {
             save: vi.fn(),
             delete: vi.fn(),
             count: vi.fn(),
+            // The tax-lock check also counts payments whose loan interest is locked.
+            createQueryBuilder: vi.fn(() => ({ setFindOptions: vi.fn().mockReturnThis(), innerJoin: vi.fn().mockReturnThis(), getCount: vi.fn(async () => 0) })),
           },
         },
         {

@@ -69,8 +69,8 @@ describe('DailyQuoteBanner', () => {
     auth.user = { showDailyQuote: true };
   });
 
-  it('stays off on top spenders without asking for a quote', async () => {
-    route.pathname = '/reports';
+  it('stays off pages other than the dashboard without asking for a quote', async () => {
+    route.pathname = '/budgets';
     renderWithQuery(<DailyQuoteBanner />);
     await new Promise(resolve => setTimeout(resolve, 50));
 
@@ -91,26 +91,26 @@ describe('DailyQuoteBanner', () => {
     expect(localStorage.getItem('seneca:daily-quote-dismissed:ws-1')).toBe(quote.date);
   });
 
-  it('greets only the first page of the day: leaving it closes the quote until tomorrow', async () => {
+  it('is back on the dashboard after a visit to another page: only closing hides it', async () => {
     const client = createTestQueryClient();
-    const view = render(
+    // A fresh element each time, so React renders the banner again for the new path.
+    const banner = (): React.JSX.Element => (
       <QueryClientProvider client={client}>
         <DailyQuoteBanner />
-      </QueryClientProvider>,
+      </QueryClientProvider>
     );
+    // The layout keeps the banner mounted while the page under it changes.
+    const view = render(banner());
     expect(await screen.findByText(quote.quote.text)).toBeTruthy();
 
-    // The layout keeps the banner mounted while the page under it changes.
     route.pathname = '/budgets';
-    view.rerender(
-      <QueryClientProvider client={client}>
-        <DailyQuoteBanner />
-      </QueryClientProvider>,
-    );
-
+    view.rerender(banner());
     await waitFor(() => expect(screen.queryByText(quote.quote.text)).toBeNull());
-    expect(localStorage.getItem('seneca:daily-quote-dismissed:ws-1')).toBe(quote.date);
+
     route.pathname = '/dashboard';
+    view.rerender(banner());
+    expect(await screen.findByText(quote.quote.text)).toBeTruthy();
+    expect(localStorage.getItem('seneca:daily-quote-dismissed:ws-1')).toBeNull();
   });
 
   it('waits while the strip of things to do is showing', async () => {

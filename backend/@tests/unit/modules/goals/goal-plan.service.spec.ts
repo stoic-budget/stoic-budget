@@ -1,6 +1,7 @@
 import { flowsSql } from '@/common/utils/counted-transactions.util';
 import { NotFoundException } from '@nestjs/common';
 import { BudgetPeriodType } from '@/entities/budget.entity';
+import type { PayPeriodContext } from '@/contracts';
 import { GoalPlanService } from '@/modules/goals/goal-plan.service';
 
 const WORKSPACE_ID = 'workspace-1';
@@ -20,6 +21,8 @@ interface Options {
   rate?: number;
   /** Collects the conditions the income query was given. */
   incomeClauses?: string[];
+  /** The workspace's month rule (Settings → Start of the month). */
+  payPeriod?: PayPeriodContext;
   /** When the followed account's history begins; null for a goal counting contributions. */
   since?: Date | null;
   /** Collects the [from, before) bounds the pace was read over. */
@@ -87,6 +90,9 @@ function createService(options: Options) {
     goalItemsService,
     exchangeRatesService,
     progressService,
+    options.payPeriod
+      ? ({ contextFor: vi.fn(async () => options.payPeriod) } as never)
+      : undefined,
   );
 }
 
@@ -132,6 +138,26 @@ describe('GoalPlanService', () => {
 
     expect(plan.monthsLeft).toBe(0);
     expect(plan.requiredPerMonth).toBe(2000000);
+  });
+
+  it("reads the history over the workspace's last three months", async () => {
+    const calendar: string[] = [];
+    await createService({ goal: relocation, window: calendar }).getPlan(
+      GOAL_ID,
+      WORKSPACE_ID,
+      NOW,
+    );
+    expect(calendar).toEqual(['2026-02-01', '2026-05-01']);
+
+    // Day 15: 8 May is in "April" (15 Apr – 14 May), so the three before it
+    // run from 15 January to 14 April, and the window ends where April begins.
+    const shifted: string[] = [];
+    await createService({
+      goal: relocation,
+      window: shifted,
+      payPeriod: { monthStart: { kind: 'day', day: 15 } },
+    }).getPlan(GOAL_ID, WORKSPACE_ID, NOW);
+    expect(shifted).toEqual(['2026-01-15', '2026-04-15']);
   });
 
   it('averages the pace over the completed history months', async () => {

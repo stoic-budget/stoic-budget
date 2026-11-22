@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useMonthLabel } from '@/app/components/dashboard/use-month-label';
+import { useShownMonth } from '@/app/components/dashboard/use-period-label';
 import { PageTitle } from '@/app/components/ui/page-title';
 import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
 import { MonthStrip, type MonthStripLabels } from './MonthStrip';
@@ -27,7 +27,7 @@ export function DashboardHeader({
   periodBanner,
   labels,
 }: DashboardHeaderProps): React.JSX.Element {
-  const monthLabel = useMonthLabel(displayMonth);
+  const monthLabel = useShownMonth(displayMonth).label;
   return (
     <div className="seneca-dashboard-header">
       <div className="seneca-dashboard-header__title">

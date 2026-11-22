@@ -209,6 +209,7 @@ const netWorth = (assetsTotal: number) => ({
   allTimeHigh: null,
   byAssetClass: [],
   groups: [],
+  properties: [],
 });
 
 const key = ({ url, params }: Requested): string =>

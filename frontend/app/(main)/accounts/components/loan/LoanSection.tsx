@@ -11,6 +11,7 @@ import { formatMoney } from '@/app/lib/format-money';
 import type { Account } from '../../hooks/useAccounts';
 import { useLoan, useLoanMutations } from '../../hooks/useLoan';
 import { cardStyle, titleStyle } from '../account-detail-styles';
+import { LoanPaymentsCard } from './LoanPaymentsCard';
 import { LoanScheduleTable } from './LoanScheduleTable';
 import { LoanTermsCard } from './LoanTermsCard';
 import { LoanTermsDrawer } from './LoanTermsDrawer';
@@ -96,6 +97,8 @@ export function LoanSection({
           </div>
         </section>
       )}
+
+      {terms && <LoanPaymentsCard walletId={account.id} money={money} locale={locale} />}
 
       {schedule && (
         <LoanWhatIfPanel walletId={account.id} schedule={schedule} money={money} locale={locale} />

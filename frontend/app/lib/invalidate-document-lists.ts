@@ -37,6 +37,8 @@ export const FINANCIAL_QUERY_ROOTS = [
   'datev',
   // How each bank's statements parsed (the instance admin's parser health page).
   'parser-health',
+  // The month rule: a month starting on payday moves with the salary rows.
+  'pay-periods',
 ] as const;
 
 /**
@@ -51,6 +53,8 @@ export const NON_FINANCIAL_QUERY_ROOTS = [
   'branches',
   'calendar-feed',
   'changelog-latest',
+  // Folders of rules: names only, no figures.
+  'categorization-rule-groups',
   'clients',
   'crypto',
   'custom-tables',
@@ -64,6 +68,7 @@ export const NON_FINANCIAL_QUERY_ROOTS = [
   'notes',
   'notifications',
   'storage-files',
+  'system-health',
   'system-update',
   'tax-jurisdictions',
   'tax-rates',

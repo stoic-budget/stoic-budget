@@ -22,6 +22,7 @@ import NextLink from 'next/link';
 import { GripVertical } from '@/app/components/icons';
 import { formatDate } from '@/app/components/transactions/helpers/transactionFormatters';
 import { useIntlayer, useLocale } from '@/app/i18n';
+import type { RuleGroup } from '@/app/lib/contracts';
 import { RuleRowMenu } from './RuleRowMenu';
 import {
   describeConditions,
@@ -39,6 +40,9 @@ export interface RuleRowActions {
   onApply: (rule: Rule) => void;
   onDelete: (rule: Rule) => void;
   onEdit: (rule: Rule) => void;
+  /** The workspace's folders, and how a rule moves between them; absent, rules do not move. */
+  folders?: readonly RuleGroup[];
+  onMove?: (rule: Rule, groupId: string | null) => void;
 }
 
 interface RulesTableProps extends RuleRowActions {
@@ -61,7 +65,23 @@ function RuleRow({
   actions: RuleRowActions;
 }) {
   const t = useIntlayer('categorizationRules');
+  const folderWords = useIntlayer('ruleFolders');
   const { locale } = useLocale();
+  const { onMove } = actions;
+  const moves = onMove
+    ? [
+        ...(actions.folders ?? [])
+          .filter(folder => folder.id !== rule.groupId)
+          .map(folder => ({
+            key: folder.id,
+            label: fill(folderWords.moveTo.value, { name: folder.name }),
+            onSelect: () => onMove(rule, folder.id),
+          })),
+        ...(rule.groupId
+          ? [{ key: 'out', label: folderWords.moveOut.value, onSelect: () => onMove(rule, null) }]
+          : []),
+      ]
+    : [];
   const {
     attributes,
     listeners,
@@ -71,8 +91,10 @@ function RuleRow({
     transition,
     isDragging,
   } = useSortable({ id: rule.id, disabled: !actions.canEdit });
-  const { categoryId, walletId, tagIds, comment, payeeId } = rule.result;
-  const settable = Boolean(categoryId || walletId || tagIds?.length || comment || payeeId);
+  const { categoryId, walletId, tagIds, comment, payeeId, excludeFromBudgets } = rule.result;
+  const settable = Boolean(
+    categoryId || walletId || tagIds?.length || comment || payeeId || excludeFromBudgets,
+  );
 
   return (
     <tr
@@ -136,6 +158,7 @@ function RuleRow({
           onEdit={actions.canEdit ? () => actions.onEdit(rule) : undefined}
           onApply={actions.canEdit && settable ? () => actions.onApply(rule) : undefined}
           onDelete={actions.canDelete ? () => actions.onDelete(rule) : undefined}
+          moves={actions.canEdit ? moves : []}
         />
       </td>
     </tr>

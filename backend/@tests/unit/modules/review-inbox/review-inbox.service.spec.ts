@@ -94,6 +94,20 @@ describe('ReviewInboxService', () => {
     );
   });
 
+  it('approves a whole statement without its pending rows: they wait for the bank', async () => {
+    const find = vi.fn(async () => []);
+    Object.assign(transactionRepository, { find });
+    (service as any).statementRepository.findOne = vi.fn(async () => ({ id: 'stmt-1' }));
+
+    await service.approveStatement('ws-1', 'user-1', 'stmt-1');
+
+    expect(find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ workspaceId: 'ws-1', statementId: 'stmt-1', isPending: false }),
+      }),
+    );
+  });
+
   it('does not see suspected duplicates of another workspace', async () => {
     transactionRepository.findOne.mockResolvedValue(null);
     await expect(service.resolveDuplicate('ws-2', 'd', DuplicateDecision.KEEP)).rejects.toBeInstanceOf(

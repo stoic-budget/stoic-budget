@@ -1241,6 +1241,7 @@ describe('API contracts (e2e)', () => {
           moved: 0,
           commented: 0,
           renamed: 0,
+          excluded: 0,
         });
       } finally {
         for (const id of ids) {
@@ -1403,6 +1404,7 @@ describe('API contracts (e2e)', () => {
           moved: 0,
           commented: 0,
           renamed: 0,
+          excluded: 0,
         });
       } finally {
         await send('delete', `/categorization-rules/${created.body.id}`).expect(204);

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import nodemailer from 'nodemailer';
 import { attemptWithRetry } from '../../common/effect/attempt-with-retry';
 import type { User } from '../../entities/user.entity';
@@ -6,6 +6,7 @@ import {
   ApplicationSettingsService,
   smtpConnectTarget,
 } from '../application-settings/application-settings.service';
+import { HealthRedisService } from '../system-health/health-redis.service';
 
 export interface MailAttachment {
   filename: string;
@@ -46,7 +47,11 @@ export type SendMailParams = MailContent &
 export class MailerService {
   private readonly logger = new Logger(MailerService.name);
 
-  constructor(private readonly applicationSettingsService: ApplicationSettingsService) {}
+  constructor(
+    private readonly applicationSettingsService: ApplicationSettingsService,
+    // Optional so unit tests can build the service with settings alone.
+    @Optional() private readonly health?: HealthRedisService,
+  ) {}
 
   async isConfigured(workspaceId: string): Promise<boolean> {
     const smtp = await this.applicationSettingsService.getSmtpSettings(workspaceId);
@@ -76,26 +81,34 @@ export class MailerService {
       auth: user && pass ? { user, pass } : undefined,
     });
 
-    await attemptWithRetry(
-      () =>
-        transporter.sendMail({
-          from,
-          to: params.to,
-          subject: params.subject,
-          text: params.text,
-          html: params.html,
-          attachments: params.attachments,
-          replyTo: smtp?.replyTo || process.env.SMTP_REPLY_TO || undefined,
-        }),
-      {
-        timeoutMs: Number.isFinite(timeoutMs) ? timeoutMs : 10000,
-        timeoutMessage: 'SMTP request timed out',
-        retries: 1,
-        baseDelayMs: 300,
-        maxDelayMs: 2000,
-      },
-    );
-
+    // The server's own SMTP (SMTP_* variables) is what the admin's health page
+    // reports on; a workspace's own mail server is that workspace's business.
+    const serverSmtp = smtp?.source !== 'workspace';
+    try {
+      await attemptWithRetry(
+        () =>
+          transporter.sendMail({
+            from,
+            to: params.to,
+            subject: params.subject,
+            text: params.text,
+            html: params.html,
+            attachments: params.attachments,
+            replyTo: smtp?.replyTo || process.env.SMTP_REPLY_TO || undefined,
+          }),
+        {
+          timeoutMs: Number.isFinite(timeoutMs) ? timeoutMs : 10000,
+          timeoutMessage: 'SMTP request timed out',
+          retries: 1,
+          baseDelayMs: 300,
+          maxDelayMs: 2000,
+        },
+      );
+    } catch (error) {
+      if (serverSmtp) await this.health?.recordSmtpSend(false);
+      throw error;
+    }
+    if (serverSmtp) await this.health?.recordSmtpSend(true);
     return true;
   }
 
