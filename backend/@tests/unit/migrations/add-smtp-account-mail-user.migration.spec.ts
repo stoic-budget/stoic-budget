@@ -3,7 +3,7 @@ import path from 'node:path';
 
 describe('AddSmtpAccountMailUser migration', () => {
   const source = readFileSync(
-    path.join(process.cwd(), 'src', 'migrations', '1788440000000-AddSmtpAccountMailUser.ts'),
+    path.join(process.cwd(), 'src', 'migrations', '1789200000000-AddSmtpAccountMailUser.ts'),
     'utf8',
   );
 

@@ -7,8 +7,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * any password, and nothing tells it apart from a real save, so account mail
  * goes through SMTP_* until the owner saves the server again.
  */
-export class AddSmtpAccountMailUser1788440000000 implements MigrationInterface {
-  name = 'AddSmtpAccountMailUser1788440000000';
+export class AddSmtpAccountMailUser1789200000000 implements MigrationInterface {
+  name = 'AddSmtpAccountMailUser1789200000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
