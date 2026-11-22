@@ -117,7 +117,13 @@ export interface ImportRunPayload {
   headers?: string[];
   fileName?: string;
   dryRun?: boolean;
-  options?: { currency?: string; categorize?: boolean; walletId?: string | null };
+  options?: {
+    currency?: string;
+    categorize?: boolean;
+    walletId?: string | null;
+    dateFrom?: string;
+    dateTo?: string;
+  };
 }
 
 export const suggestImport = async (

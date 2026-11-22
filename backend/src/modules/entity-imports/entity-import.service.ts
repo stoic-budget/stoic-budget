@@ -15,7 +15,6 @@ import { ensureCanEdit } from '../../common/utils/ensure-can-edit.util';
 import type { RunEntityImportBody } from '../../contracts';
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
 import { Budget } from '../../entities/budget.entity';
-import { Category } from '../../entities/category.entity';
 import { Client } from '../../entities/client.entity';
 import {
   ImportBatch,
@@ -34,8 +33,8 @@ import { writeClassification } from '../classification/engine/rule-row-write';
 import { ClassificationService } from '../classification/services/classification.service';
 import { MetalsService } from '../investments/metals.service';
 import type { TransactionsImportedEvent } from '../notifications/events/notification-events';
-import { categoryByName } from './helpers/category-by-name';
-import { nameKey } from './helpers/import-values';
+import { importCategoryResolver } from './helpers/import-category';
+import { importPeriod } from './helpers/import-values';
 import { type ImportTargetKind, TARGET_FIELDS } from './target-aliases';
 import { BudgetsTarget } from './targets/budgets.target';
 import { InvoicesTarget } from './targets/invoices.target';
@@ -180,8 +179,7 @@ export class EntityImportService {
     const currency = (dto.options?.currency ?? 'USD').toUpperCase();
 
     const execute = async (manager: ImportContext['manager']) => {
-      const categoryRepo = manager.getRepository(Category);
-      const categoryCache = new Map<string, string>();
+      const created: ImportCreatedRef[] = [];
       const ctx: ImportContext = {
         workspaceId,
         userId,
@@ -190,33 +188,14 @@ export class EntityImportService {
         fileName: dto.fileName ?? null,
         categorize: dto.options?.categorize !== false,
         walletId: dto.options?.walletId ?? null,
+        period: importPeriod(dto.options),
         headers: [...(dto.headers ?? [])],
         cell: (row, field) => {
           const index = dto.mapping[field];
           return Number.isInteger(index) && index >= 0 ? String(row[index] ?? '') : '';
         },
-        category: async (name, type) => {
-          const key = `${type}|${nameKey(name)}`;
-          if (!nameKey(name)) {
-            return null;
-          }
-          const cached = categoryCache.get(key);
-          if (cached) {
-            return cached;
-          }
-          const found = await categoryByName(categoryRepo, { workspaceId, userId }, name, type, {
-            create: !dryRun,
-          });
-          if (!found) {
-            return null;
-          }
-          if (found.created) {
-            ctx.created.push({ kind: 'category', id: found.id });
-          }
-          categoryCache.set(key, found.id);
-          return found.id;
-        },
-        created: [],
+        category: importCategoryResolver(manager, workspaceId, userId, dryRun, created),
+        created,
         updated: [],
       };
       const results = await target.run(rows, ctx, dryRun);
@@ -241,7 +220,9 @@ export class EntityImportService {
       skipped: results.filter(r => r.status === 'skipped').length,
       errors: results.filter(r => r.status === 'error').length,
     };
-    if (!dryRun && counts.created + counts.updated === 0) {
+    // Nothing written at all. A transactions import of a quiet period writes
+    // only its (empty) statement; other targets write a record per created row.
+    if (!dryRun && counts.created + counts.updated === 0 && !ctx.created.length) {
       throw new BadRequestException(appError('IMPORT_NO_VALID_ROWS'));
     }
     let batchId: string | null = null;

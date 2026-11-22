@@ -23,6 +23,9 @@ export function ImportProblems({
     if (reason === 'duplicate' || reason === 'unchanged') {
       return t.reasons[reason].value;
     }
+    if (reason === 'outside_period') {
+      return t.reasons.outsidePeriod.value;
+    }
     return fillTemplate(t.reasons.invalid.value, { field: fieldLabel(reason ?? '') });
   };
   return (

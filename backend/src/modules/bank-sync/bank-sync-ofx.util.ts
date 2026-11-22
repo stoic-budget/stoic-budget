@@ -14,16 +14,20 @@ export function providerRowKey(accountId: string, transactionId: string): string
  * as a file the user uploads: the OFX parser, dedupe, rules, the review inbox.
  * The aggregator's transaction id travels as FITID, so a row already in the
  * workspace is recognised by its document number. A row the bank still holds
- * as pending carries a mark the OFX parser turns into a pending row.
+ * as pending carries a mark the OFX parser turns into a pending row. Given
+ * `since`, the statement's period is the days the feed asked for, up to `now`:
+ * a quiet day in it was looked at too.
  */
 export function buildOfxStatement(
   account: BankSyncAccount,
   transactions: BankSyncTransaction[],
   now = new Date(),
+  since?: Date,
 ): string {
   const dates = transactions.map(item => item.posted.getTime());
-  const start = dates.length ? new Date(Math.min(...dates)) : now;
-  const end = dates.length ? new Date(Math.max(...dates)) : now;
+  const asked = since ? [since.getTime(), now.getTime()] : [];
+  const start = dates.length || since ? new Date(Math.min(...dates, ...asked)) : now;
+  const end = dates.length || since ? new Date(Math.max(...dates, ...asked)) : now;
   const lines = [
     'OFXHEADER:100',
     'DATA:OFXSGML',
