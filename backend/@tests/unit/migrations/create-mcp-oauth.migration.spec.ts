@@ -3,7 +3,7 @@ import path from 'node:path';
 
 describe('CreateMcpOAuth migration', () => {
   const source = readFileSync(
-    path.join(process.cwd(), 'src', 'migrations', '1788330000000-CreateMcpOAuth.ts'),
+    path.join(process.cwd(), 'src', 'migrations', '1789170000000-CreateMcpOAuth.ts'),
     'utf8',
   );
   const up = source.slice(source.indexOf('public async up'), source.indexOf('public async down'));

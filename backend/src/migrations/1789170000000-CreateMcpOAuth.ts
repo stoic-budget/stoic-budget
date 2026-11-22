@@ -7,8 +7,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * SHA-256 hashes. A grant hangs off the membership it was given under, so
  * leaving the workspace, or the workspace going, takes it and its tokens away.
  */
-export class CreateMcpOAuth1788330000000 implements MigrationInterface {
-  name = 'CreateMcpOAuth1788330000000';
+export class CreateMcpOAuth1789170000000 implements MigrationInterface {
+  name = 'CreateMcpOAuth1789170000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
