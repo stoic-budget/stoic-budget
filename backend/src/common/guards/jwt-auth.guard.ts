@@ -11,6 +11,7 @@ import { IS_PUBLIC_KEY } from '../../modules/auth/decorators/public.decorator';
 import type { AuthenticatedUser } from '../../modules/auth/strategies/jwt.strategy';
 import { API_KEY_ALLOWED_KEY } from '../decorators/api-key-allowed.decorator';
 import { PERMISSIONS_KEY } from '../decorators/require-permission.decorator';
+import { ROUTE_AUTHENTICATES_KEY } from '../decorators/route-authenticates.decorator';
 import type { Permission } from '../enums/permissions.enum';
 import { appError } from '../errors/app-error';
 import type { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
@@ -47,6 +48,15 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     if (apiKey) {
       return this.authenticateWithApiKey(apiKey, request, context);
+    }
+
+    if (
+      this.reflector.getAllAndOverride<boolean>(ROUTE_AUTHENTICATES_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ])
+    ) {
+      return true;
     }
 
     return super.canActivate(context) as Promise<boolean>;

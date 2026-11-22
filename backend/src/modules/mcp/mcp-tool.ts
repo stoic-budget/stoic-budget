@@ -8,7 +8,7 @@ import type { User } from '../../entities/user.entity';
 export interface McpToolContext {
   user: User;
   workspaceId: string;
-  /** The key the call came with: a confirm token works only for the key it was issued to. */
+  /** The key (or OAuth grant) the call came with: a confirm token works only for the one it was issued to. */
   apiKeyId: string;
   /** The caller's membership, which decides whose private rows they see. */
   memberId: string | null;

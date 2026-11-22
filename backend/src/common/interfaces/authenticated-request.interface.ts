@@ -16,6 +16,14 @@ export interface AuthenticatedRequest extends Request {
   apiKeyWorkspaceId?: string;
   /** Set when the request authenticated with an API key; `scopes` null = unrestricted (legacy key). */
   apiKey?: { id: string; name: string; prefix: string; scopes: string[] | null };
+  /** Set when the request came to the MCP endpoint with an OAuth access token. */
+  mcpGrant?: {
+    id: string;
+    clientId: string;
+    clientName: string;
+    workspaceId: string;
+    scopes: string[];
+  };
   requestId?: string;
   traceId?: string;
 }

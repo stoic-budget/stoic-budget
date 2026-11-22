@@ -64,6 +64,7 @@ export const NON_FINANCIAL_QUERY_ROOTS = [
   'investments',
   'invoices',
   'map-styles',
+  'mcp-oauth-grants',
   'metals',
   'notes',
   'notifications',

@@ -29,8 +29,8 @@ const ALLOWED = new Set([
   'modules/telegram/telegram-connection.util.ts',
   'common/utils/seed-demo.util.ts',
   // Account security events (password, 2FA, email, data export, opening or
-  // closing sign-up, single sign-on) belong to the user rather than a
-  // workspace; the audit log files them under the home one.
+  // closing sign-up, single sign-on or MCP app registration) belong to the user
+  // rather than a workspace; the audit log files them under the home one.
   'modules/auth/oidc/oidc-audit.ts',
   'modules/auth/oidc/oidc-settings.service.ts',
   'modules/auth/password-reset.service.ts',
@@ -38,6 +38,7 @@ const ALLOWED = new Set([
   // Adding, removing or a cloned-looking passkey.
   'modules/auth/passkeys/passkey-helpers.ts',
   'modules/auth/registration-settings.service.ts',
+  'modules/mcp-oauth/mcp-oauth-clients.service.ts',
   'modules/users/services/account-data.service.ts',
   'modules/users/services/email-change.service.ts',
   'modules/users/password-changed.ts',
