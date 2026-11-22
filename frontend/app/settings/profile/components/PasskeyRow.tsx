@@ -18,7 +18,7 @@ type Props = {
   tx: Tx;
   busy: boolean;
   formatPreferences: UserFormatPreferences;
-  onRename: (name: string) => Promise<boolean>;
+  onRename: (name: string, password: string) => Promise<boolean>;
   onRemove: (password: string) => Promise<boolean>;
 };
 
@@ -26,20 +26,24 @@ type Props = {
 export const isValidPasskeyName = (name: string): boolean =>
   name.trim().length > 0 && name.length <= PASSKEY_NAME_MAX_LENGTH;
 
-/** One passkey: its name and dates, renamed in place, removed after the password. */
+/** One passkey: its name and dates, renamed in place or removed, each after the password. */
 export function PasskeyRow({ passkey, tx, busy, formatPreferences, onRename, onRemove }: Props) {
   const t = useIntlayer('settingsPasskeysSection');
   const [mode, setMode] = useState<'view' | 'rename' | 'remove'>('view');
   const [name, setName] = useState(passkey.name);
+  const [password, setPassword] = useState('');
 
   const startRename = () => {
     setName(passkey.name);
+    setPassword('');
     setMode('rename');
   };
 
   const submitRename = async (event: FormEvent) => {
     event.preventDefault();
-    if (await onRename(name)) setMode('view');
+    const renamed = await onRename(name, password);
+    setPassword('');
+    if (renamed) setMode('view');
   };
 
   const lastUsed = passkey.lastUsedAt
@@ -71,11 +75,25 @@ export function PasskeyRow({ passkey, tx, busy, formatPreferences, onRename, onR
             required
             fullWidth
           />
+          <TextField
+            type="password"
+            size="small"
+            autoComplete="current-password"
+            label={tx(['passwordCard', 'currentPasswordLabel'])}
+            value={password}
+            onChange={event => setPassword(event.target.value)}
+            required
+            fullWidth
+          />
           <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end' }}>
             <Button onClick={() => setMode('view')} disabled={busy}>
               {tx(['securityCard', 'cancelButton'])}
             </Button>
-            <Button type="submit" variant="contained" disabled={busy || !isValidPasskeyName(name)}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={busy || !password || !isValidPasskeyName(name)}
+            >
               {t.save}
             </Button>
           </Stack>

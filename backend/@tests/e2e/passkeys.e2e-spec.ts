@@ -631,15 +631,24 @@ describe('Passkeys (e2e)', () => {
       const account = await register('rename');
       const other = await register('rename-other');
       const passkey = await addPasskey(account, new SoftAuthenticator(RP_ID, ORIGIN));
-      const renamed = await as(account, 'patch', `/auth/passkeys/${passkey.id}`)
-        .send({ name: 'Phone' })
-        .expect(200);
+      const rename = (who: typeof account, name: string, password = PASSWORD) =>
+        as(who, 'patch', `/auth/passkeys/${passkey.id}`).send({ name, password });
+      const renamed = await rename(account, 'Phone').expect(200);
       expect(renamed.body.name).toBe('Phone');
-      await as(account, 'patch', `/auth/passkeys/${passkey.id}`).send({ name: '   ' }).expect(400);
-      await as(account, 'patch', `/auth/passkeys/${passkey.id}`)
-        .send({ name: 'x'.repeat(61) })
-        .expect(400);
-      await as(other, 'patch', `/auth/passkeys/${passkey.id}`).send({ name: 'Mine now' }).expect(404);
+      await rename(account, '   ').expect(400);
+      await rename(account, 'x'.repeat(61)).expect(400);
+      await rename(other, 'Mine now').expect(404);
+    });
+
+    it('renames only after the password', async () => {
+      const account = await register('rename-password');
+      const passkey = await addPasskey(account, new SoftAuthenticator(RP_ID, ORIGIN));
+      const url = `/auth/passkeys/${passkey.id}`;
+      await as(account, 'patch', url).send({ name: 'Work Laptop' }).expect(400);
+      await as(account, 'patch', url)
+        .send({ name: 'Work Laptop', password: 'wrong-password' })
+        .expect(403);
+      expect((await as(account, 'get', '/auth/passkeys').expect(200)).body[0].name).toBe(passkey.name);
     });
 
     it('removes a passkey after a password check, audits it, and it signs in no more', async () => {

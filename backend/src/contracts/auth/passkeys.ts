@@ -119,8 +119,14 @@ export const PasskeyRegistrationBody = Schema.Struct({
 });
 export type PasskeyRegistrationBody = Wire<typeof PasskeyRegistrationBody>;
 
-/** `PATCH /auth/passkeys/:passkeyId`. */
-export const PasskeyRenameBody = Schema.Struct({ name: PasskeyName });
+/**
+ * `PATCH /auth/passkeys/:passkeyId`. Renaming re-checks the password too: a
+ * stolen session must not dress its own passkey up as the owner's laptop.
+ */
+export const PasskeyRenameBody = Schema.Struct({
+  name: PasskeyName,
+  password: PasskeyPasswordBody.fields.password,
+});
 export type PasskeyRenameBody = Wire<typeof PasskeyRenameBody>;
 
 /** `POST /auth/passkey-login`. */

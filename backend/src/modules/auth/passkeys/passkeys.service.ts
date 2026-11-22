@@ -39,7 +39,7 @@ const SUPPORTED_ALGORITHMS = [-7, -257];
 const isUniqueViolation = (error: unknown): boolean =>
   typeof error === 'object' && error !== null && (error as { code?: unknown }).code === '23505';
 
-/** A person's own passkeys: list, add (after a password check), rename and remove. */
+/** A person's own passkeys: list, and add, rename or remove after a password check. */
 @Injectable()
 export class PasskeysService {
   private readonly logger = new Logger(PasskeysService.name);
@@ -157,8 +157,19 @@ export class PasskeysService {
     return toPasskey(saved);
   }
 
-  async rename(userId: string, passkeyId: string, name: string): Promise<Passkey> {
+  /**
+   * Renames a passkey after a password check, so a stolen session cannot give
+   * its own passkey the name of one the owner trusts.
+   */
+  async rename(
+    userId: string,
+    passkeyId: string,
+    name: string,
+    password: string,
+  ): Promise<Passkey> {
     const label = this.cleanName(name);
+    const user = await this.loadUser(userId);
+    await this.assertPassword(user, password);
     const row = await this.credentials.findOne({ where: { id: passkeyId, userId } });
     if (!row) {
       throw new NotFoundException(appError('AUTH_PASSKEY_NOT_FOUND'));

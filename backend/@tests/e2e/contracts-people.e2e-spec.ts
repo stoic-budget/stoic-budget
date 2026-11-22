@@ -203,7 +203,7 @@ describe('API contracts: people (e2e)', () => {
         }),
       );
       expect(await answer(PasskeyList, as(holder, 'get', '/auth/passkeys'))).toHaveLength(1);
-      await answer(Passkey, as(holder, 'patch', `/auth/passkeys/${created.id}`, { name: 'Phone' }));
+      await answer(Passkey, as(holder, 'patch', `/auth/passkeys/${created.id}`, { name: 'Phone', password: PASSWORD }));
 
       const browser = request.agent(app.getHttpServer());
       const signIn = await answer(PasskeyRequestOptions, browser.post('/auth/passkey-login/options'));

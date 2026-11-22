@@ -95,7 +95,7 @@ export function PasskeysSection({ tx, passkeys, formatPreferences }: Props) {
                 tx={tx}
                 busy={busy}
                 formatPreferences={formatPreferences}
-                onRename={name => passkeys.rename({ id: passkey.id, name })}
+                onRename={(name, password) => passkeys.rename({ id: passkey.id, name, password })}
                 onRemove={password => passkeys.remove({ id: passkey.id, password })}
               />
             ))}

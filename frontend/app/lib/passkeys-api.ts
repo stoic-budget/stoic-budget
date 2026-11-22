@@ -35,10 +35,11 @@ export const passkeysApi = {
     return checkContract('Passkey', data, '/auth/passkeys');
   },
 
-  async rename(id: string, name: string): Promise<Passkey> {
+  async rename(id: string, name: string, password: string): Promise<Passkey> {
     const url = `/auth/passkeys/${id}`;
     const { data } = await apiClient.patch(url, {
       name,
+      password,
     } satisfies ContractInput<'PasskeyRenameBody'>);
     return checkContract('Passkey', data, url);
   },
