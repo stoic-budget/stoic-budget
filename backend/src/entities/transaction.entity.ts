@@ -241,6 +241,13 @@ export class Transaction {
   excludedFromBudgets: boolean;
 
   /**
+   * A person counted the row in or left it out of budgets: a rule's "leave out
+   * of budgets" then leaves their choice alone, as a picked category stays.
+   */
+  @Column({ name: 'budgets_set_by_hand', type: 'boolean', default: false })
+  budgetsSetByHand: boolean;
+
+  /**
    * A bank-sync row the bank still holds as pending. Shown, but counted
    * nowhere: `onlyCounted`/`countedSql`/`countedWhere` (and so `onlyFlows`)
    * leave it out until the pull replaces it with the booked version.
