@@ -9,8 +9,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * read never lands: a dividend has a cash amount and no units, a split a ratio
  * and nothing else, everything else a positive quantity.
  */
-export class AddInvestmentTrades1788290000000 implements MigrationInterface {
-  name = 'AddInvestmentTrades1788290000000';
+export class AddInvestmentTrades1789100000000 implements MigrationInterface {
+  name = 'AddInvestmentTrades1789100000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
