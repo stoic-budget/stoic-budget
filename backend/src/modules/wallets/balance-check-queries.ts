@@ -75,7 +75,9 @@ export async function uncountedUpTo(
     .where('t.workspaceId = :workspaceId', { workspaceId: scope.workspaceId })
     .andWhere('t.walletId = :walletId', { walletId: scope.wallet.id })
     .andWhere('t.transactionDate <= :date', { date: scope.date })
-    .andWhere(NOT_TRASHED('t'));
+    .andWhere(NOT_TRASHED('t'))
+    // A row the bank still holds is in neither the bank's balance nor ours.
+    .andWhere('t.isPending = false');
   if (state === 'in_review') {
     query.andWhere('t.isVerified = false').andWhere('t.isDuplicate = false');
   } else {

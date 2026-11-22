@@ -13,7 +13,8 @@ export function providerRowKey(accountId: string, transactionId: string): string
  * A pulled account becomes an OFX statement and goes through the same import
  * as a file the user uploads: the OFX parser, dedupe, rules, the review inbox.
  * The aggregator's transaction id travels as FITID, so a row already in the
- * workspace is recognised by its document number.
+ * workspace is recognised by its document number. A row the bank still holds
+ * as pending carries a mark the OFX parser turns into a pending row.
  */
 export function buildOfxStatement(
   account: BankSyncAccount,
@@ -54,6 +55,8 @@ export function buildOfxStatement(
       `<FITID>${escapeOfx(providerRowKey(account.id, item.id))}`,
       `<NAME>${escapeOfx(name)}`,
       ...(memo && memo !== name ? [`<MEMO>${escapeOfx(memo)}`] : []),
+      // OFX has no pending state; the import reads this proprietary mark back.
+      ...(item.pending ? ['<BANKSYNC.PENDING>Y'] : []),
       '</STMTTRN>',
     );
   }

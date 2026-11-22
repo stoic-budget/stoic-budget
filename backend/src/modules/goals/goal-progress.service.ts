@@ -221,7 +221,11 @@ export class GoalProgressService {
       .select('contribution.goal_id', 'goalId')
       .addSelect('COALESCE(SUM(contribution.amount), 0)', 'total')
       .where('contribution.workspace_id = :workspaceId', { workspaceId })
-      .andWhere('contribution.goal_id IN (:...goalIds)', { goalIds: goals.map(goal => goal.id) });
+      .andWhere('contribution.goal_id IN (:...goalIds)', { goalIds: goals.map(goal => goal.id) })
+      // A row the bank still holds has moved no money yet; it counts once booked.
+      .andWhere(
+        'NOT EXISTS (SELECT 1 FROM transactions held WHERE held.id = contribution.transaction_id AND held.is_pending = true)',
+      );
     if (from) {
       query.andWhere('contribution.contribution_date >= :from', { from });
     }
