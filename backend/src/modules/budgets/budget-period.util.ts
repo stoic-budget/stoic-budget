@@ -1,4 +1,11 @@
+import type { PayPeriodContext } from '../../contracts';
 import { BudgetPeriodType } from '../../entities/budget.entity';
+import {
+  isCalendar,
+  periodKeyAt,
+  periodRangeAt,
+  periodRangeOfKey,
+} from '../pay-period/pay-period-dates';
 
 /**
  * A budget's own window: the period of its type that contains `date`.
@@ -6,12 +13,19 @@ import { BudgetPeriodType } from '../../entities/budget.entity';
  * Extracted from BudgetsService so the plan-versus-actual aggregate resolves
  * windows exactly the way the budgets page does, rather than growing a second
  * definition of "this period" that drifts from it.
+ *
+ * A monthly budget runs over the workspace's own month when `payPeriod` sets
+ * one (`settings.monthStart`); weeks, quarters and years stay on the calendar.
  */
 export function computePeriodRange(
   periodType: BudgetPeriodType,
   date: Date,
+  payPeriod?: PayPeriodContext | null,
 ): { start: Date; end: Date } {
   const d = new Date(date);
+  if (periodType === BudgetPeriodType.MONTHLY && !isCalendar(payPeriod)) {
+    return periodRangeAt(payPeriod, d);
+  }
 
   switch (periodType) {
     case BudgetPeriodType.WEEKLY: {
@@ -64,8 +78,14 @@ export function normalizeLimitToMonth(limitAmount: number, periodType: BudgetPer
   }
 }
 
-/** First and last day of the calendar month `anchor` falls in. */
-export function computeMonthRange(anchor: Date): { start: Date; end: Date } {
+/** First and last day of the month `anchor` falls in: the workspace's month when one is given. */
+export function computeMonthRange(
+  anchor: Date,
+  payPeriod?: PayPeriodContext | null,
+): { start: Date; end: Date } {
+  if (!isCalendar(payPeriod)) {
+    return periodRangeAt(payPeriod, anchor);
+  }
   return {
     start: new Date(anchor.getFullYear(), anchor.getMonth(), 1),
     end: new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0),
@@ -83,6 +103,29 @@ export function parseMonthKey(month: string | undefined, fallback: Date): Date {
   }
   const [year, monthIndex] = month.split('-').map(Number);
   return new Date(year, monthIndex - 1, 1);
+}
+
+/**
+ * The month a `YYYY-MM` key names, or the month `now` falls in without one:
+ * its name, its range, and the day the budgets' own periods are read at (the
+ * first day for a named month, `now` otherwise). A key is a period's name,
+ * not a day: with a month starting on the 25th, "2026-11" is 25 Oct – 24 Nov,
+ * which the first of November does not even fall in.
+ */
+export function resolveMonth(
+  month: string | undefined,
+  now: Date,
+  payPeriod?: PayPeriodContext | null,
+): { key: string; anchor: Date; window: { start: Date; end: Date } } {
+  if (!month) {
+    return {
+      key: periodKeyAt(payPeriod, now),
+      anchor: now,
+      window: computeMonthRange(now, payPeriod),
+    };
+  }
+  const window = periodRangeOfKey(payPeriod, month);
+  return { key: month, anchor: window.start, window };
 }
 
 /** Formats a date as the `YYYY-MM` key the flow endpoint echoes back. */
@@ -137,6 +180,32 @@ export function clampToWindow(
 /** Whether the budget governs any part of `range`. */
 export function overlapsWindow(range: { start: Date; end: Date }, window: BudgetWindow): boolean {
   return clampToWindow(range, window) !== null;
+}
+
+/**
+ * The budget's periods before the one starting on `currentStart`, oldest
+ * first: at most `lookback` of them, back to the period `began` falls in, each
+ * narrowed to the budget's window (one it does not govern at all is skipped).
+ */
+export function previousPeriods(
+  budget: BudgetWindow & { periodType: BudgetPeriodType },
+  currentStart: Date,
+  began: Date,
+  lookback: number,
+  payPeriod?: PayPeriodContext | null,
+): Array<{ start: Date; end: Date }> {
+  const periods: Array<{ start: Date; end: Date }> = [];
+  const dayBefore = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1);
+  let cursor = dayBefore(currentStart);
+  while (periods.length < lookback) {
+    const range = computePeriodRange(budget.periodType, cursor, payPeriod);
+    if (range.end.getTime() < began.getTime()) break;
+    const clamped = clampToWindow(range, budget);
+    if (clamped) periods.unshift(clamped);
+    cursor = dayBefore(range.start);
+  }
+  return periods;
 }
 
 /** A day in local time, as a `date` column stores it. */

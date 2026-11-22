@@ -22,6 +22,7 @@ import { resolveCurrencyCode } from '@/app/lib/format-money';
 import { formatDate } from '@/app/lib/user-format';
 import { ImportProblems } from './ImportProblems';
 import { ImportTargetOptions } from './ImportTargetOptions';
+import { type ImportChoices, type ImportPeriod, initialImportChoices } from './import-choices';
 import {
   createTableFromImport,
   IMPORT_TARGETS,
@@ -45,7 +46,6 @@ import {
   prepareSheet,
   roleByColumn,
 } from './import-wizard-utils';
-import { useImportOptions } from './useImportOptions';
 import { useImportRequest } from './useImportRequest';
 import { useSavedMapping } from './useSavedMapping';
 
@@ -63,8 +63,8 @@ export interface ImportWizardDialogProps {
   /** When the wizard is opened from a section page the target is not a choice. */
   fixedTarget?: ImportTarget;
   onImported?: (result: ImportRunResult) => void;
-  /** Opened from an account: its rows go there, in its currency. */
-  account?: { id: string; currency: string };
+  /** Opened from an account: its rows go there, in its currency; from a gap, held to its dates. */
+  account?: { id: string; currency: string; period?: ImportPeriod };
 }
 
 type Step = 'reading' | 'mapping' | 'result';
@@ -90,8 +90,10 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
   const [suggestion, setSuggestion] = useState<ImportSuggestion | null>(null);
   const [target, setTarget] = useState<ImportTarget>(fixedTarget ?? 'transactions');
   const [mapping, setMapping] = useState<Record<string, number>>({});
-  const [currency, setCurrency] = useState(props.account?.currency ?? workspaceCurrency);
-  const importOptions = useImportOptions(props.account);
+  const [choices, setChoices] = useState(() =>
+    initialImportChoices(props.account, workspaceCurrency),
+  );
+  const choose = (patch: Partial<ImportChoices>) => setChoices(prev => ({ ...prev, ...patch }));
   const [dryRun, setDryRun] = useState<ImportRunResult | null>(null);
   const [dryRunPending, setDryRunPending] = useState(false);
   const [running, setRunning] = useState(false);
@@ -155,8 +157,8 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
     setDryRun(null);
     setResult(null);
     setUndone(false);
-    setCurrency(workspaceCurrency);
-    importOptions.set('categorize', true);
+    // From an account the sheet is in the account's currency: the server refuses any other.
+    setChoices(initialImportChoices(props.account, workspaceCurrency));
     if (presetRows) {
       void loadRows(presetRows);
       return;
@@ -210,10 +212,7 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
 
   const missing = useMemo(() => missingRequiredFields(target, mapping), [target, mapping]);
 
-  const request = useImportRequest(sheet, target, mapping, fileName ?? file?.name, {
-    currency,
-    ...importOptions.values,
-  });
+  const request = useImportRequest(sheet, target, mapping, fileName ?? file?.name, choices);
 
   // A dry run after every mapping change shows what the import would do before it does it.
   useEffect(() => {
@@ -290,7 +289,7 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
           target: targetLabel(result.target),
           date: formatDate(new Date(), { locale }),
         }),
-        currency,
+        currency: choices.currency,
         columnTitles: buildSourceColumnTitles(tables),
       });
       if (tableId) {
@@ -384,9 +383,9 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
                 <span className="seneca-iw__label">{t.currencyLabel}</span>
                 <input
                   className="seneca-iw__input"
-                  value={currency}
+                  value={choices.currency}
                   maxLength={3}
-                  onChange={event => setCurrency(event.target.value.toUpperCase())}
+                  onChange={event => choose({ currency: event.target.value.toUpperCase() })}
                 />
               </label>
             </div>
@@ -455,11 +454,7 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
               </tbody>
             </table>
 
-            <ImportTargetOptions
-              target={target}
-              options={importOptions}
-              onCurrencyChange={setCurrency}
-            />
+            <ImportTargetOptions target={target} choices={choices} onChange={choose} />
 
             {missing.length > 0 ? (
               <p className="seneca-iw__hint seneca-iw__hint--warning">

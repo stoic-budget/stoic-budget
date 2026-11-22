@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { TABULAR_FILE_ACCEPT } from '@/app/(main)/custom-tables/[id]/utils/tabularFileReader';
 import { useIntlayer } from '@/app/i18n';
 import { ImportWizardDialog } from './ImportWizardDialog';
+import type { ImportPeriod } from './import-choices';
 import type { ImportRunResult, ImportTarget } from './import-wizard-api';
 
 export interface ImportFromFileButtonProps {
@@ -11,8 +12,8 @@ export interface ImportFromFileButtonProps {
   onImported?: (result: ImportRunResult) => void;
   /** Renders the trigger in the page's own button kit; receives the label and the opener. */
   renderTrigger: (open: () => void, label: string) => React.ReactNode;
-  /** Bank exports picked from an account's page go to that account. */
-  account?: { id: string; currency: string };
+  /** Bank exports picked from an account's page go to that account; from a gap, held to its dates. */
+  account?: { id: string; currency: string; period?: ImportPeriod };
 }
 
 /** File picker + wizard for a section page; the page decides how the button looks. */

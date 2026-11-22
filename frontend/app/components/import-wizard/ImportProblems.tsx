@@ -23,6 +23,9 @@ export function ImportProblems({
     if (reason && reason !== 'invalid' && reason in t.reasons) {
       return t.reasons[reason as keyof typeof t.reasons].value;
     }
+    if (reason === 'outside_period') {
+      return t.reasons.outsidePeriod.value;
+    }
     return fillTemplate(t.reasons.invalid.value, { field: fieldLabel(reason ?? '') });
   };
   return (

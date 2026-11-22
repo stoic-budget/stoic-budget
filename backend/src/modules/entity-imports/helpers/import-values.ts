@@ -134,3 +134,18 @@ export const nameKey = (value: string): string =>
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
+
+/**
+ * The period a transactions import is held to, or null for the whole sheet.
+ * One end alone holds only that end; ends given the wrong way round are swapped.
+ */
+export function importPeriod(
+  options: { dateFrom?: string | null; dateTo?: string | null } | null | undefined,
+): { from: string | null; to: string | null } | null {
+  const from = options?.dateFrom || null;
+  const to = options?.dateTo || null;
+  if (!(from || to)) {
+    return null;
+  }
+  return from && to && from > to ? { from: to, to: from } : { from, to };
+}

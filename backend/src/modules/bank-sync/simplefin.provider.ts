@@ -236,7 +236,8 @@ export function parseAccessUrl(accessUrl: string): { url: URL; authorization: st
 function epochToDate(value: number | string | null | undefined): Date | null {
   if (value === undefined || value === null || value === '') return null;
   const seconds = Number(value);
-  if (!Number.isFinite(seconds)) return null;
+  // SimpleFIN sends a hold as `posted: 0`: no day yet, not 1 January 1970.
+  if (!Number.isFinite(seconds) || seconds <= 0) return null;
   return new Date(seconds * 1000);
 }
 

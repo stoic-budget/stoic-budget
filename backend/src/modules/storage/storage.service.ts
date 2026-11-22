@@ -17,7 +17,7 @@ import { appError } from '../../common/errors/app-error';
 import { FileStorageService } from '../../common/services/file-storage.service';
 import { hashPassword } from '../../common/utils/password-hash.util';
 import { neutralizeSpreadsheetFormulaCell } from '../../common/utils/spreadsheet-formula.util';
-import { assertNoTaxLockedTransactions } from '../../common/utils/tax-lock.util';
+import { assertRowsRemovable } from '../../common/utils/tax-lock.util';
 import { redactPrivateRows } from '../../common/utils/transaction-privacy.util';
 import type {
   CreateFolderBody,
@@ -820,7 +820,7 @@ export class StorageService {
     // leaves none trashed. Files already in the trash stay as they are.
     const toTrash = statements.filter(item => !item.deletedAt);
     if (toTrash.length) {
-      await assertNoTaxLockedTransactions(this.transactionRepository, {
+      await assertRowsRemovable(this.transactionRepository, {
         statementId: In(toTrash.map(st => st.id)),
       });
     }

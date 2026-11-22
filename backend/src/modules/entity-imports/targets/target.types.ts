@@ -25,6 +25,8 @@ export interface ImportContext {
   investmentAccountId: string | null;
   /** Trades only: create a holding a row names that the account does not have. */
   createMissingHoldings: boolean;
+  /** Transactions only: just the rows dated in it (`YYYY-MM-DD`, ends included); null takes all. */
+  period: { from: string | null; to: string | null } | null;
   /** The sheet's header row; empty when the client sent none. */
   headers: string[];
   /** Read a mapped cell of a row; '' when the field is not mapped. */

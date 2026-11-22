@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import type { GenerateReportBody } from '../../contracts';
@@ -6,6 +6,7 @@ import { Budget, BudgetPeriodType, BudgetRolloverMode } from '../../entities/bud
 import { Category } from '../../entities/category.entity';
 import { CurrencyConverter, normalizeCurrencyCode } from '../exchange-rates/currency-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { PayPeriodService } from '../pay-period/pay-period.service';
 import { categoryFamily, overlap, plannedForWindow } from './budget-variance.util';
 import type { ReportCell, ReportDocument } from './report-document.util';
 import type { TemplateLabels, TemplateReportRow } from './report-template.types';
@@ -36,6 +37,7 @@ export class BudgetVsActualReport {
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     private readonly exchangeRatesService: ExchangeRatesService,
+    @Optional() private readonly payPeriods?: PayPeriodService,
   ) {}
 
   async build(
@@ -47,6 +49,8 @@ export class BudgetVsActualReport {
     rows: TemplateReportRow[],
   ): Promise<{ document: ReportDocument; missingRates: string[] }> {
     const period = { from: dto.dateFrom, to: dto.dateTo };
+    // A monthly limit covers the workspace's own month when it starts on another day.
+    const payPeriod = await this.payPeriods?.contextFor(workspaceId);
     const [budgets, categories] = await Promise.all([
       this.budgetRepository.find({
         where: { workspaceId },
@@ -98,7 +102,7 @@ export class BudgetVsActualReport {
     const lines: BudgetLine[] = windows.map(({ budget, window }) => {
       const family = categoryFamily(budget.categoryId, parentOf);
       const planned = converter.convert(
-        plannedForWindow(Number(budget.limitAmount), budget.periodType, window),
+        plannedForWindow(Number(budget.limitAmount), budget.periodType, window, payPeriod),
         normalizeCurrencyCode(budget.currency),
         window.to,
       );

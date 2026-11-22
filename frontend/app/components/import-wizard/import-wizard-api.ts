@@ -139,6 +139,8 @@ export interface ImportRunPayload {
     walletId?: string | null;
     investmentAccountId?: string | null;
     createMissingHoldings?: boolean;
+    dateFrom?: string;
+    dateTo?: string;
   };
 }
 
