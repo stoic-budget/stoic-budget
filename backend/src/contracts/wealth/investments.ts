@@ -2,6 +2,7 @@
 
 import * as Schema from 'effect/Schema';
 import { Timestamp, type Wire } from '../common/wire';
+import { HoldingCountry, HoldingLookThrough, HoldingRegion, HoldingSector } from './allocation';
 
 /** Crypto is deliberately absent: coins live in crypto wallets, nowhere else. */
 export const InvestmentAssetClass = Schema.Literals([
@@ -34,6 +35,11 @@ export const InvestmentHolding = Schema.Struct({
   value: Schema.Number,
   /** The quantity comes from the holding's trades and is not typed in. */
   hasTrades: Schema.Boolean,
+  sector: Schema.NullOr(HoldingSector),
+  region: Schema.NullOr(HoldingRegion),
+  country: Schema.NullOr(HoldingCountry),
+  /** A fund's own breakdown; it outweighs the single values above where it has one. */
+  lookThrough: Schema.NullOr(HoldingLookThrough),
 });
 export type InvestmentHolding = Wire<typeof InvestmentHolding>;
 

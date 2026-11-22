@@ -53,6 +53,10 @@ const pension: InvestmentAccount = {
       pricedAt: '2026-10-01T00:00:00Z',
       value: 1205,
       hasTrades: false,
+      sector: null,
+      region: null,
+      country: null,
+      lookThrough: null,
     },
   ],
 };
