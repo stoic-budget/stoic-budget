@@ -1,0 +1,55 @@
+# Public read-only demo, on top of docker-compose.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.demo.yml up -d
+# Visitors reach it only through a Cloudflare Tunnel, so the published ports
+# stay on the host's loopback whatever .env says. The tunnel token lives in
+# .env.tunnel, which only cloudflared reads. Setup: website/docs/deployment/demo.md.
+services:
+  backend:
+    ports: !override
+      - "127.0.0.1:3001:3001"
+    environment:
+      # Every write is refused except signing in and out (DemoReadOnlyGuard).
+      - DEMO_MODE=true
+      # The shared account the login page fills in; scripts/demo-reset.sh seeds it.
+      - DEMO_USER_EMAIL=${DEMO_USER_EMAIL:?DEMO_USER_EMAIL is required}
+      - DEMO_USER_PASSWORD=${DEMO_USER_PASSWORD:?DEMO_USER_PASSWORD is required}
+      - REGISTRATION_ENABLED=false
+      - REFERENCE_DATA_OFFLINE=true
+      - STATEMENT_PARSING_CONCURRENCY=1
+      # cloudflared and the frontend's proxy sit between the visitor and the
+      # backend: trust the private network so the rate limit sees the visitor.
+      - TRUST_PROXY=loopback, linklocal, uniquelocal
+      - NODE_OPTIONS=--max-old-space-size=1024
+    mem_limit: 1536m
+
+  frontend:
+    ports: !override
+      - "127.0.0.1:3000:3000"
+    mem_limit: 768m
+
+  postgres:
+    mem_limit: 768m
+
+  redis:
+    # Under the container's limit with room for Redis itself. Only keys with a
+    # TTL (cache entries, rate-limit counters) are evicted; the parsing queue's
+    # keys have none, so a full Redis refuses new jobs instead of losing them.
+    command: ["redis-server", "--maxmemory", "192mb", "--maxmemory-policy", "volatile-lru"]
+    mem_limit: 256m
+
+  cloudflared:
+    image: cloudflare/cloudflared:2024.12.2
+    container_name: seneca-cloudflared
+    # A remotely managed tunnel: its public hostname and routes live in the
+    # Cloudflare dashboard, the token is all the container needs.
+    command: tunnel --no-autoupdate run
+    # TUNNEL_TOKEN=..., kept out of .env: the backend reads all of .env.
+    env_file:
+      - path: .env.tunnel
+        required: true
+    depends_on:
+      - frontend
+    networks:
+      - finflow-network
+    restart: unless-stopped
+    mem_limit: 128m

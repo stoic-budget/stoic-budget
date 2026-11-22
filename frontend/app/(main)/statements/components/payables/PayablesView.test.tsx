@@ -34,6 +34,7 @@ const apiMocks = vi.hoisted(() => ({
   archive: vi.fn(),
   delete: vi.fn(),
   exportList: vi.fn(),
+  changeOccurrence: vi.fn(),
 }));
 
 const toastMock = vi.hoisted(() => ({
@@ -394,6 +395,75 @@ describe('PayablesView', () => {
 
     expect(window.confirm).toHaveBeenCalledWith('Delete ACME LLC?');
     expect(apiMocks.delete).not.toHaveBeenCalled();
+  });
+
+  describe('an occurrence of a repeating bill', () => {
+    const SERIES_NOTE =
+      'Only this payment goes: the next one will still be made. To end the series, choose Stop repeating.';
+
+    beforeEach(() => {
+      apiMocks.list.mockResolvedValue({
+        data: [
+          {
+            id: 'payable-1',
+            vendor: 'ACME Rent',
+            amount: 500,
+            currency: 'KZT',
+            dueDate: '2026-03-28',
+            status: 'to_pay',
+            source: 'manual',
+            isRecurring: true,
+            seriesId: 'payable-1',
+            occurrenceDate: '2026-03-28',
+            recurrence: { frequency: 'monthly', interval: 1, startDate: '2026-03-28' },
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+      });
+      (window.confirm as unknown as ReturnType<typeof vi.fn>).mockReturnValue(false);
+    });
+
+    const openMenu = async () => {
+      await screen.findByText('ACME Rent');
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Actions' }));
+      });
+    };
+
+    it('says the series goes on before deleting or archiving it', async () => {
+      renderWithQuery(<PayablesView />);
+      await openMenu();
+      fireEvent.click(await screen.findByText('Delete'));
+      expect(window.confirm).toHaveBeenCalledWith(`Delete ACME Rent?\n\n${SERIES_NOTE}`);
+
+      await openMenu();
+      fireEvent.click(await screen.findByText('Archive'));
+      expect(window.confirm).toHaveBeenCalledWith(`Archive ACME Rent?\n\n${SERIES_NOTE}`);
+      expect(apiMocks.delete).not.toHaveBeenCalled();
+      expect(apiMocks.archive).not.toHaveBeenCalled();
+    });
+
+    it('stops repeating once confirmed', async () => {
+      apiMocks.changeOccurrence.mockResolvedValue({});
+      renderWithQuery(<PayablesView />);
+      await openMenu();
+      fireEvent.click(await screen.findByText('Stop repeating'));
+      expect(window.confirm).toHaveBeenCalledWith(
+        'Stop repeating ACME Rent? The bills already made stay; no new ones will be made.',
+      );
+      expect(apiMocks.changeOccurrence).not.toHaveBeenCalled();
+
+      (window.confirm as unknown as ReturnType<typeof vi.fn>).mockReturnValue(true);
+      await openMenu();
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Stop repeating'));
+      });
+      expect(apiMocks.changeOccurrence).toHaveBeenCalledWith('payable-1', { action: 'stop' });
+      await waitFor(() => expect(toastMock.success).toHaveBeenCalledWith('Repeating stopped'));
+    });
   });
 
   it('corrects to the last available page after filtered results shrink', async () => {

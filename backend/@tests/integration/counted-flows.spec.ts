@@ -47,9 +47,19 @@ import { ForecastService } from '../../src/modules/forecast/forecast.service';
 import { GoalsService } from '../../src/modules/goals/goals.service';
 import { NotificationsService } from '../../src/modules/notifications/notifications.service';
 import { CashFlowMapService } from '../../src/modules/reports/cash-flow-map.service';
-import { BudgetVsActualReport } from '../../src/modules/reports/budget-vs-actual.report';
-import { HoldingsSnapshotReport } from '../../src/modules/reports/holdings-snapshot.report';
+import { CustomTablesReport } from '../../src/modules/reports/custom-tables-report.report';
+import { CustomTablesDrillDownReport } from '../../src/modules/reports/custom-tables-drilldown.report';
+import { CustomTablesSummaryReport } from '../../src/modules/reports/custom-tables-summary.report';
+import { CustomReportGenerator } from '../../src/modules/reports/custom-report.report';
+import { DailyReportGenerator } from '../../src/modules/reports/daily-report.report';
+import { MonthlyReportGenerator } from '../../src/modules/reports/monthly-report.report';
+import { ReportHistoryService } from '../../src/modules/reports/report-history.service';
+import { ReportTemplateGenerator } from '../../src/modules/reports/report-templates.report';
 import { ReportsService } from '../../src/modules/reports/reports.service';
+import { SpendOverTimeReport } from '../../src/modules/reports/spend-over-time.report';
+import { StatementsSummaryReport } from '../../src/modules/reports/statements-summary.report';
+import { TopCategoriesReport } from '../../src/modules/reports/top-categories.report';
+import { WorkspaceExportReport } from '../../src/modules/reports/workspace-export.report';
 import { SpendFlowService } from '../../src/modules/reports/spend-flow.service';
 import { SubscriptionsService } from '../../src/modules/subscriptions/subscriptions.service';
 import { TaxReserveService } from '../../src/modules/tax/tax-reserve.service';
@@ -190,6 +200,7 @@ describe('one rule for income and spending (real Postgres)', () => {
         DashboardService,
         CashFlowMapService,
         ReportsService,
+        TopCategoriesReport,
         SpendFlowService,
         ForecastService,
         BudgetsService,
@@ -204,8 +215,19 @@ describe('one rule for income and spending (real Postgres)', () => {
         { provide: TaxReserveService, useValue: { getReserve: vi.fn(async () => null) } },
         { provide: BalanceService, useValue: {} },
         // Template reports this suite does not read.
-        { provide: BudgetVsActualReport, useValue: {} },
-        { provide: HoldingsSnapshotReport, useValue: {} },
+        { provide: ReportTemplateGenerator, useValue: {} },
+        // Custom-table reports read their own tables, not transactions.
+        { provide: CustomTablesSummaryReport, useValue: {} },
+        { provide: CustomTablesReport, useValue: {} },
+        { provide: CustomTablesDrillDownReport, useValue: {} },
+        // Periodic reports, report history, exports and spend over time, which this suite does not call.
+        { provide: DailyReportGenerator, useValue: {} },
+        { provide: MonthlyReportGenerator, useValue: {} },
+        { provide: CustomReportGenerator, useValue: {} },
+        { provide: StatementsSummaryReport, useValue: {} },
+        { provide: ReportHistoryService, useValue: {} },
+        { provide: WorkspaceExportReport, useValue: {} },
+        { provide: SpendOverTimeReport, useValue: {} },
         { provide: AuditService, useValue: { createEvent: vi.fn() } },
         { provide: NotificationsService, useValue: { createForWorkspaceMembers: vi.fn() } },
         { provide: CACHE_MANAGER, useValue: { get: vi.fn(), set: vi.fn(), del: vi.fn() } },

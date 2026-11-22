@@ -9,6 +9,7 @@ import { hasSessionCookie } from '@/app/lib/csrf';
 import { getWorkspaceHeaders } from '@/app/lib/workspace-headers';
 import { downloadFile } from './pdf-preview/download-file';
 import { PreviewMenu } from './pdf-preview/PreviewMenu';
+import { pdfPageWidth } from './pdf-preview/page-width';
 import { configureBundledPdfWorker } from './pdf-preview/pdf-worker';
 import { TeachOverlay } from './pdf-teach/TeachOverlay';
 import { TeachToolbar } from './pdf-teach/TeachToolbar';
@@ -200,10 +201,7 @@ export function PDFPreviewModal({
     const node = viewportRef.current;
 
     const updatePageWidth = () => {
-      // A phone fits the whole page inside the viewport's own 20px gutters: the
-      // 520px floor of wider screens made it wider than the screen, cut off.
-      const width = Math.floor(node.clientWidth - (node.clientWidth < 640 ? 40 : 120));
-      setPageWidth(node.clientWidth < 640 ? width : Math.max(520, Math.min(1080, width)));
+      setPageWidth(pdfPageWidth(node.clientWidth, teaching));
     };
 
     updatePageWidth();
@@ -216,7 +214,7 @@ export function PDFPreviewModal({
     };
     // The viewport is drawn only once the file and react-pdf are in: on open alone
     // there was nothing to measure, and the page kept its 920px on any screen.
-  }, [isOpen, pdfObjectUrl, pdfModule, error]);
+  }, [isOpen, pdfObjectUrl, pdfModule, error, teaching]);
 
   useEffect(() => {
     if (!menuOpen) {

@@ -1,0 +1,1000 @@
+{
+  "metadata": {
+    "accountNumber": "GB00MONZ04000410000003",
+    "currency": "GBP",
+    "dateFrom": "2024-01-01T00:00:00",
+    "dateTo": "2024-03-31T00:00:00",
+    "balanceStart": 815.7
+  },
+  "transactions": [
+    {
+      "transactionDate": "2024-03-31T00:00:00",
+      "counterpartyName": "SHELL Uppingham Road Corby GBR",
+      "paymentPurpose": "SHELL Uppingham Road Corby GBR",
+      "debit": 15.08,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-31T00:00:00",
+      "counterpartyName": "LITTLE EUROPE GROCERIE CORBY GBR",
+      "paymentPurpose": "LITTLE EUROPE GROCERIE CORBY GBR",
+      "debit": 8,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-31T00:00:00",
+      "counterpartyName": "SAMPLE A",
+      "paymentPurpose": "SAMPLE A (Faster Payments) Reference: REFERENC",
+      "credit": 225,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-03-31T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 6,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-31T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 7.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-31T00:00:00",
+      "counterpartyName": "Flex",
+      "paymentPurpose": "Flex",
+      "debit": 9,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-03-30T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-30T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-30T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 17.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-30T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 39.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-30T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 24.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-30T00:00:00",
+      "counterpartyName": "ACM TRANSPORT LTD",
+      "paymentPurpose": "ACM TRANSPORT LTD",
+      "credit": 2141.66,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-30T00:00:00",
+      "counterpartyName": "SHELL Cottingham Road Northamptonsh GBR",
+      "paymentPurpose": "SHELL Cottingham Road Northamptonsh GBR",
+      "debit": 20.02,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-30T00:00:00",
+      "counterpartyName": "Memberbee Sample",
+      "paymentPurpose": "Memberbee Sample (Faster Payments) Reference: Memberbee Sample",
+      "debit": 200,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-03-30T00:00:00",
+      "counterpartyName": "MOTO TEC CORBY GBR",
+      "paymentPurpose": "MOTO TEC CORBY GBR",
+      "debit": 29,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-30T00:00:00",
+      "counterpartyName": "LITTLE EUROPE GROCERIE CORBY GBR",
+      "paymentPurpose": "LITTLE EUROPE GROCERIE CORBY GBR",
+      "debit": 8,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-28T00:00:00",
+      "counterpartyName": "Lebara Mobile Limited London GBR",
+      "paymentPurpose": "Lebara Mobile Limited London GBR",
+      "debit": 15,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-28T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-28T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-28T00:00:00",
+      "counterpartyName": "SHELL Cottingham Road Northamptonsh GBR",
+      "paymentPurpose": "SHELL Cottingham Road Northamptonsh GBR",
+      "debit": 19.88,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-28T00:00:00",
+      "counterpartyName": "MEMBER SAMPLE",
+      "paymentPurpose": "MEMBER SAMPLE (Faster Payments) Reference: member",
+      "credit": 200,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-03-27T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 11.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-27T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 17.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-27T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 7.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-27T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 7.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-27T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-27T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-27T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-27T00:00:00",
+      "counterpartyName": "Kurdish Shawarma Grill Northampton GBR",
+      "paymentPurpose": "Kurdish Shawarma Grill Northampton GBR",
+      "debit": 17,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-27T00:00:00",
+      "counterpartyName": "SAMPLE A",
+      "paymentPurpose": "SAMPLE A (Faster Payments) Reference: REFERENC",
+      "credit": 220,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-03-26T00:00:00",
+      "counterpartyName": "SHELL Cottingham Road Northamptonsh GBR",
+      "paymentPurpose": "SHELL Cottingham Road Northamptonsh GBR",
+      "debit": 36.8,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-25T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 17.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-25T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-25T00:00:00",
+      "counterpartyName": "SHELL Cottingham Road Northamptonsh GBR",
+      "paymentPurpose": "SHELL Cottingham Road Northamptonsh GBR",
+      "debit": 19.03,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-25T00:00:00",
+      "counterpartyName": "W M MORRISONS CORBY GBR",
+      "paymentPurpose": "W M MORRISONS CORBY GBR",
+      "debit": 5.69,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-25T00:00:00",
+      "counterpartyName": "SumUp *FANTUZ LTD Corby GBR",
+      "paymentPurpose": "SumUp *FANTUZ LTD Corby GBR",
+      "debit": 20,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-25T00:00:00",
+      "counterpartyName": "NATIONAL CAR PARKS NORTHAMPTON GBR",
+      "paymentPurpose": "NATIONAL CAR PARKS NORTHAMPTON GBR",
+      "debit": 1.9,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-25T00:00:00",
+      "counterpartyName": "SAMPLE A",
+      "paymentPurpose": "SAMPLE A (Faster Payments) Reference: REFERENC",
+      "credit": 40,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-03-25T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 0.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-24T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 0.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-24T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-24T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-24T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-24T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 5.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-24T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 4.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-24T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 0.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-24T00:00:00",
+      "counterpartyName": "SAMPLE A",
+      "paymentPurpose": "SAMPLE A (Faster Payments) Reference: REFERENC",
+      "credit": 200,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-03-24T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 0.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-23T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-23T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-23T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-23T00:00:00",
+      "counterpartyName": "SHELL Cottingham Road Northamptonsh GBR",
+      "paymentPurpose": "SHELL Cottingham Road Northamptonsh GBR",
+      "debit": 20.02,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-23T00:00:00",
+      "counterpartyName": "Euro Market Corby GBR",
+      "paymentPurpose": "Euro Market Corby GBR",
+      "debit": 12.65,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-23T00:00:00",
+      "counterpartyName": "WM MORRISON PETROL OPT CORBY GBR",
+      "paymentPurpose": "WM MORRISON PETROL OPT CORBY GBR",
+      "credit": 105,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-23T00:00:00",
+      "counterpartyName": "This relates to a previous transaction",
+      "paymentPurpose": "This relates to a previous transaction",
+      "credit": 105,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-03-23T00:00:00",
+      "counterpartyName": "WM MORRISON PETROL OPT CORBY GBR",
+      "paymentPurpose": "WM MORRISON PETROL OPT CORBY GBR",
+      "debit": 120,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-23T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-22T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 7.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-22T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 5.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-22T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 7.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-22T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-22T00:00:00",
+      "counterpartyName": "TESCO PAY AT PUMP 4254 CORBY GBR This relates to a previous transaction",
+      "paymentPurpose": "TESCO PAY AT PUMP 4254 CORBY GBR This relates to a previous transaction",
+      "credit": 105.01,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-03-22T00:00:00",
+      "counterpartyName": "TESCO PAY AT PUMP 4254 CORBY GBR",
+      "paymentPurpose": "TESCO PAY AT PUMP 4254 CORBY GBR",
+      "debit": 120,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-22T00:00:00",
+      "counterpartyName": "SAMPLE A",
+      "paymentPurpose": "SAMPLE A (Faster Payments) Reference: REFERENC",
+      "credit": 100,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-03-21T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL CORK IRL",
+      "paymentPurpose": "APPLE.COM/BILL CORK IRL",
+      "debit": 5.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-21T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 22.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-21T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 7.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-21T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 0.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-21T00:00:00",
+      "counterpartyName": "Mem Sampletw",
+      "paymentPurpose": "Mem Sampletw (Faster Payments) Reference: Ana Sampletw",
+      "debit": 60,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-03-21T00:00:00",
+      "counterpartyName": "MEMBER SAMPLE",
+      "paymentPurpose": "MEMBER SAMPLE (Faster Payments) Reference: member",
+      "credit": 110,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-03-20T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 17.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-20T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-20T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 17.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 17.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 0.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 5.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 7.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 11.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 29.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 17.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 7.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-19T00:00:00",
+      "counterpartyName": "CUV* MOTOR INSURANCE +144853121569 GBR",
+      "paymentPurpose": "CUV* MOTOR INSURANCE +144853121569 GBR",
+      "debit": 16.71,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-18T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 2.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-18T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 4.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-18T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 9.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-18T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL CORK IRL",
+      "paymentPurpose": "APPLE.COM/BILL CORK IRL",
+      "debit": 9.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-18T00:00:00",
+      "counterpartyName": "SAMPLE A",
+      "paymentPurpose": "SAMPLE A (Faster Payments) Reference: REFERENC",
+      "credit": 90,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2024-03-17T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 9.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-17T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 9.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-17T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 5.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-17T00:00:00",
+      "counterpartyName": "CUV* MOTOR INSURANCE +144853121569 GBR",
+      "paymentPurpose": "CUV* MOTOR INSURANCE +144853121569 GBR",
+      "debit": 25.75,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-16T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 5.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-16T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 4.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-16T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 5.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-16T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 4.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-16T00:00:00",
+      "counterpartyName": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "paymentPurpose": "APPLE.COM/BILL APPLE.COM/BIL IRL",
+      "debit": 1.99,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-16T00:00:00",
+      "counterpartyName": "MOTO TEC CORBY GBR",
+      "paymentPurpose": "MOTO TEC CORBY GBR",
+      "debit": 71.5,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-14T00:00:00",
+      "counterpartyName": "CUV* MOTOR INSURANCE +144853121569 GBR",
+      "paymentPurpose": "CUV* MOTOR INSURANCE +144853121569 GBR",
+      "debit": 12.28,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-14T00:00:00",
+      "counterpartyName": "Lebara Mobile Limited London GBR",
+      "paymentPurpose": "Lebara Mobile Limited London GBR",
+      "debit": 15,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-14T00:00:00",
+      "counterpartyName": "Amount: EUR -109.40. Conversion rate: 1.153157.",
+      "paymentPurpose": "Amount: EUR -109.40. Conversion rate: 1.153157.",
+      "debit": 94.87,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-13T00:00:00",
+      "counterpartyName": "Amount: EUR -99.17. Conversion rate: 1.15314.",
+      "paymentPurpose": "Amount: EUR -99.17. Conversion rate: 1.15314.",
+      "debit": 86,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-03-12T00:00:00",
+      "counterpartyName": "W LOOK Union Street",
+      "paymentPurpose": "W LOOK Union Street",
+      "debit": 21,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-03-11T00:00:00",
+      "counterpartyName": "MAXX Refund DD15624",
+      "paymentPurpose": "MAXX Refund DD15624",
+      "credit": 26.96,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-03-04T00:00:00",
+      "counterpartyName": "Northampton Kensington",
+      "paymentPurpose": "Northampton Kensington",
+      "debit": 23.16,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-03-04T00:00:00",
+      "counterpartyName": "Starbucks Market Sqare",
+      "paymentPurpose": "Starbucks Market Sqare",
+      "debit": 5,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-03-04T00:00:00",
+      "counterpartyName": "Michael's Carpark",
+      "paymentPurpose": "Michael's Carpark",
+      "debit": 3,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-03-03T00:00:00",
+      "counterpartyName": "TK MAXX",
+      "paymentPurpose": "TK MAXX",
+      "debit": 26.96,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-03-03T00:00:00",
+      "counterpartyName": "Sainbury's Westgate",
+      "paymentPurpose": "Sainbury's Westgate",
+      "debit": 14.23,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-03-03T00:00:00",
+      "counterpartyName": "Coffee St James Road",
+      "paymentPurpose": "Coffee St James Road",
+      "debit": 8.5,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-03-03T00:00:00",
+      "counterpartyName": "Carpark WDk1456",
+      "paymentPurpose": "Carpark WDk1456",
+      "debit": 3.5,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-02-28T00:00:00",
+      "counterpartyName": "ACM TRANSPORT LTD",
+      "paymentPurpose": "ACM TRANSPORT LTD",
+      "credit": 2060.76,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-02-23T00:00:00",
+      "counterpartyName": "Northampton City Counc s)",
+      "paymentPurpose": "Northampton City Counc s)",
+      "debit": 184,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-02-15T00:00:00",
+      "counterpartyName": "Amount: RON -106.49. Conversion rate:",
+      "paymentPurpose": "Amount: RON -106.49. Conversion rate:",
+      "debit": 18.54,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-02-03T00:00:00",
+      "counterpartyName": "Anglian Water PLC",
+      "paymentPurpose": "Anglian Water PLC",
+      "debit": 77.91,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-19T00:00:00",
+      "counterpartyName": "Mem Sampletw",
+      "paymentPurpose": "Mem Sampletw (Faster Payments)",
+      "debit": 30,
+      "currency": "GBP",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2024-01-14T00:00:00",
+      "counterpartyName": "AUTO TRADER +443451110003 GBR",
+      "paymentPurpose": "AUTO TRADER +443451110003 GBR",
+      "debit": 36.95,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-12T00:00:00",
+      "counterpartyName": "BRD TARGOVISTE ROM",
+      "paymentPurpose": "BRD TARGOVISTE ROM",
+      "debit": 78.15,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-10T00:00:00",
+      "counterpartyName": "Amount: EUR -54.63. Conversion rate: 1.163083.",
+      "paymentPurpose": "Amount: EUR -54.63. Conversion rate: 1.163083.",
+      "debit": 46.97,
+      "currency": "GBP",
+      "paymentType": "card"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "Cash withdrawal",
+      "paymentPurpose": "Cashwithdraw CD53539104756 s)",
+      "debit": 400,
+      "currency": "GBP",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2024-01-05T00:00:00",
+      "counterpartyName": "Member Sampl",
+      "paymentPurpose": "Member Sampl",
+      "credit": 215,
+      "currency": "GBP"
+    },
+    {
+      "transactionDate": "2024-01-02T00:00:00",
+      "counterpartyName": "Amount: RON -305.80. Conversion rate: 5.709485.",
+      "paymentPurpose": "Amount: RON -305.80. Conversion rate: 5.709485.",
+      "debit": 53.56,
+      "currency": "GBP",
+      "paymentType": "card"
+    }
+  ],
+  "failedChecks": [
+    "balance_chain"
+  ]
+}

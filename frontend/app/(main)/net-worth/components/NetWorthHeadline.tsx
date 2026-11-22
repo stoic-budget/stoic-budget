@@ -15,6 +15,7 @@ import type { NetWorthData, NetWorthDenominated, NetWorthView } from '../hooks/u
 import { nextMilestone } from '../milestone';
 import { useNetWorthDisplay } from '../net-worth-display';
 import { ChartDisplayOptions } from './ChartDisplayOptions';
+import { LeftOutAccountsNote } from './LeftOutAccountsNote';
 import { NetWorthChart } from './NetWorthChart';
 import { cardSx, WholeMoney } from './net-worth-ui';
 
@@ -133,6 +134,8 @@ export function NetWorthHeadline({
             )}`}
         </Typography>
       )}
+
+      <LeftOutAccountsNote count={data.accountsLeftOut} />
 
       {data.missingRates.length > 0 && (
         <Alert severity="warning" sx={{ mt: 2 }}>

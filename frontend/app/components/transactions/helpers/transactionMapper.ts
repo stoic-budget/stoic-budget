@@ -54,6 +54,9 @@ export function mapApiRecordToTransaction(tx: TransactionApiRecord): Transaction
     currency: tx.currency,
     exchangeRate: tx.exchangeRate,
     article: tx.article,
+    // The drawer's Comment field starts from it; without it the field showed
+    // blank and saving it replaced what the row had.
+    comments: tx.comments ?? null,
     amountForeign: tx.amountForeign,
     convertedAmount: tx.convertedAmount,
     conversionRate: tx.conversionRate,
@@ -62,8 +65,10 @@ export function mapApiRecordToTransaction(tx: TransactionApiRecord): Transaction
     branch: tx.branch,
     wallet: tx.wallet,
     walletId: tx.walletId ?? null,
+    cryptoWalletId: tx.cryptoWalletId ?? null,
     ownerMemberId: tx.ownerMemberId ?? null,
     isPrivate: tx.isPrivate ?? false,
+    excludedFromBudgets: tx.excludedFromBudgets ?? false,
     splitGroupId: tx.splitGroupId,
     splitIndex: tx.splitIndex,
     categorySource: tx.categorySource,

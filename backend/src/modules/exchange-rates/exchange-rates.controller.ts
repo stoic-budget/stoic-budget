@@ -1,6 +1,7 @@
 import { Controller, Get, Post } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
+import { AllowInVersion } from '../../common/decorators/allow-in-version.decorator';
 import { WorkspaceId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
@@ -88,6 +89,8 @@ export class ExchangeRatesController {
     );
   }
 
+  // Only reads: answered in a past version and on a demo.
+  @AllowInVersion()
   @Post('convert')
   @WorkspaceAuth(Permission.TRANSACTION_VIEW)
   @SchemaResponse(BulkConversion)

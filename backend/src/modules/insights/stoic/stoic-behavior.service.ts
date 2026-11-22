@@ -59,8 +59,10 @@ export interface StoicBehavior {
 
 const MONTHLY_FACTOR: Record<SubscriptionFrequency, number> = {
   [SubscriptionFrequency.WEEKLY]: 52 / 12,
+  [SubscriptionFrequency.BIWEEKLY]: 26 / 12,
   [SubscriptionFrequency.MONTHLY]: 1,
   [SubscriptionFrequency.QUARTERLY]: 1 / 3,
+  [SubscriptionFrequency.SEMIANNUAL]: 1 / 6,
   [SubscriptionFrequency.ANNUAL]: 1 / 12,
 };
 

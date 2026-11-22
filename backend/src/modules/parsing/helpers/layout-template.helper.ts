@@ -2,8 +2,8 @@ import { createHash } from 'crypto';
 import type { PdfTextItem, PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import type { ParsedStatement } from '../interfaces/parsed-statement.interface';
 import { type LayoutPrint, layoutPrint } from './layout-print.helper';
+import { datedRow } from './layout-template-rows.helper';
 import { type ColumnRole, headingWord, type LayoutColumn } from './pdf-layout-columns.helper';
-import { leadingDate } from './pdf-layout-row-date.helper';
 import type { LayoutReading } from './pdf-layout-table.helper';
 import { findStatementAmounts } from './statement-amount.helper';
 import { foldText } from './statement-date.helper';
@@ -76,9 +76,6 @@ const FORMAT_CHECKS = new Set(['balance_chain', 'printed_totals', 'section_total
 const isColumnTag = (tag: TeachTag): tag is ColumnTag =>
   (COLUMN_TAGS as readonly TeachTag[]).includes(tag);
 const hasDigit = (text: string) => /\d/.test(text);
-/** A transaction row: its first words are a date ("02 Sep"). A label never comes from one. */
-const startsWithDate = (row: PdfTextRow) =>
-  leadingDate([...row.items].sort((a, b) => a.x - b.x)) !== null;
 const right = (item: PdfTextItem) => item.x + item.width;
 
 /** Groups of tags still missing for a reading, each a choice of one ("debit|credit|amount"). */
@@ -208,19 +205,23 @@ const plainLast = (items: PdfTextItem[]) =>
  * else the line right above it, over the figure. An area over no figure or
  * several (a column) has none, and a transaction row is never a label.
  */
-function labelFor(rows: PdfTextRow[], region: TeachRegion): string | undefined {
+function labelFor(
+  rows: PdfTextRow[],
+  region: TeachRegion,
+  dated: (row: PdfTextRow) => boolean,
+): string | undefined {
   const figures = linesIn(rows, region).filter(row =>
     wordsIn([row], region).some(word => hasDigit(word.text)),
   );
   const [line] = figures;
-  if (figures.length !== 1 || startsWithDate(line)) {
+  if (figures.length !== 1 || dated(line)) {
     return undefined;
   }
   const inside = plainLast(wordsIn([line], region));
   const before = plainLast(line.items.filter(item => right(item) <= region.x0));
   const above = rows
     .filter(row => row.page === line.page && row.y < line.y && line.y - row.y <= LABEL_LINE_GAP)
-    .filter(row => !startsWithDate(row))
+    .filter(row => !dated(row))
     .sort((a, b) => b.y - a.y)[0];
   const over = above ? plainLast(inBand(above, region)) : [];
   const words = [inside, before, over].find(found => found.length > 0);
@@ -249,10 +250,11 @@ export function templateFromRegions(
   marked: readonly TeachRegion[],
   rows: PdfTextRow[],
 ): LayoutTemplate {
+  const dated = (row: PdfTextRow) => datedRow(row, marked);
   // A column area crosses a transaction row; one over a title or a summary
   // line ("Brought forward 1,000.00") is no column and teaches nothing.
   const regions = oneOfSingleTags(marked).filter(
-    region => !isColumnTag(region.tag) || linesIn(rows, region).some(startsWithDate),
+    region => !isColumnTag(region.tag) || linesIn(rows, region).some(dated),
   );
   const header = headerLines(rows, regions);
   const columnRegions = regions.filter((region): region is TeachRegion & { tag: ColumnTag } =>
@@ -268,7 +270,7 @@ export function templateFromRegions(
     );
   const balance = (tag: TeachTag) => {
     const region = regions.find(candidate => candidate.tag === tag);
-    return region ? labelFor(rows, region) : undefined;
+    return region ? labelFor(rows, region, dated) : undefined;
   };
   return {
     headings,

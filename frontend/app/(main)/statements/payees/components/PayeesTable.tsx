@@ -56,7 +56,7 @@ export function PayeesTable({
             {rows.map(row => (
               <tr key={row.id}>
                 <td className="seneca-payees__col-icon">
-                  <VendorIcon vendorName={row.name} size={28} />
+                  <VendorIcon vendorName={row.name} vendorDomain={row.vendorDomain} size={28} />
                 </td>
                 <td data-label={t.columnPayee.value}>
                   <Link href={`/statements/payees/${row.id}`} className="seneca-all-tx__link">

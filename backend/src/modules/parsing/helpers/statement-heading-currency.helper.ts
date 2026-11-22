@@ -1,0 +1,74 @@
+/** Currency signs only one currency writes ("$" is many dollars'). */
+export const CURRENCY_SIGNS: [string, string][] = [
+  ['€', 'EUR'],
+  ['£', 'GBP'],
+  ['₸', 'KZT'],
+  ['₽', 'RUB'],
+  ['₪', 'ILS'],
+  ['₹', 'INR'],
+  ['฿', 'THB'],
+  ['¥', 'JPY'],
+];
+
+/**
+ * The currency a table's money column names in its heading: "(GBP) Amount",
+ * "Balance (EUR)", "Amount in USD". It is the statement's own currency, whatever
+ * other codes the rows' notes print ("Amount: EUR -109.40. Conversion rate").
+ */
+const HEADING_CURRENCY =
+  /\(([A-Z]{3})\)\s*(?:Amount|Balance)\b|\b(?:Amount|Balance)\s*(?:\(([A-Z]{3})\)|in ([A-Z]{3})\b)/;
+
+/** "Currency : Kenyan Shilling": a currency named in words after its label. */
+const NAMED_CURRENCY = /\bCurrency\s*:?\s*([A-Z][a-z]+ [A-Z]?[a-z]+)\b/;
+const CURRENCY_NAMES: Record<string, string> = {
+  'kenyan shilling': 'KES',
+  'ugandan shilling': 'UGX',
+  'tanzanian shilling': 'TZS',
+  'nigerian naira': 'NGN',
+  'ghana cedi': 'GHS',
+  'ghanaian cedi': 'GHS',
+  'egyptian pound': 'EGP',
+  'indian rupee': 'INR',
+  'pakistani rupee': 'PKR',
+  'south african rand': 'ZAR',
+  'qatari riyal': 'QAR',
+  'saudi riyal': 'SAR',
+  'pound sterling': 'GBP',
+};
+
+/** "Valuta: LEI": Romanian statements name the leu by its plural. */
+const LEI = /\b(?:Valuta|Moneda)\s*:?\s*(?:LEI|RON)\b/i;
+
+const SIGNS = CURRENCY_SIGNS.map(([sign]) => sign).join('');
+/** "+400,00€", "-£12.50", "€ 1.000,00": a figure with its sign glued on, before or after. */
+const SIGNED_FIGURE = new RegExp(`(?<=\\d)([${SIGNS}])|([${SIGNS}])\\s?(?=\\d)`, 'g');
+/** Fewer signed figures than this say nothing: a fee note, a converted amount. */
+const MIN_SIGNED_FIGURES = 3;
+
+/**
+ * The statement's currency as its money says it: the currency a money
+ * column's heading names or its label names in words ("Currency : Kenyan
+ * Shilling"), else the sign glued to most of its figures (three
+ * or more), over the codes the rows' notes print ("Original amount 99.00
+ * HKD" under every "-11,64€"). Null when the money says nothing.
+ */
+export function printedCurrency(text: string): string | null {
+  const heading = HEADING_CURRENCY.exec(text);
+  if (heading) {
+    return heading[1] ?? heading[2] ?? heading[3];
+  }
+  const named = CURRENCY_NAMES[NAMED_CURRENCY.exec(text)?.[1].toLowerCase() ?? ''];
+  if (named || LEI.test(text)) {
+    return named ?? 'RON';
+  }
+  const counts = new Map<string, number>();
+  for (const match of text.matchAll(SIGNED_FIGURE)) {
+    const sign = match[1] ?? match[2];
+    counts.set(sign, (counts.get(sign) ?? 0) + 1);
+  }
+  const [top, second] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  if (!top || top[1] < MIN_SIGNED_FIGURES || (second && second[1] * 2 > top[1])) {
+    return null;
+  }
+  return CURRENCY_SIGNS.find(([sign]) => sign === top[0])?.[1] ?? null;
+}

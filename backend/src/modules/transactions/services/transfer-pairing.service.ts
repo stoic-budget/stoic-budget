@@ -15,8 +15,11 @@ import {
   TransferPairKind,
   TransferPairSource,
 } from '../../../entities/transaction.entity';
+import { TransferPairRejection } from '../../../entities/transfer-pair-rejection.entity';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
-import { writeTransferPairs } from './transfer-pair-writer';
+import { assertUnlinkAllowed } from '../helpers/pair-guards';
+import { forgetRejection, rejectedPairKeys, unlinkAndRemember } from './transfer-pair-rejections';
+import { PAIRABLE_STATEMENT, writeTransferPairs } from './transfer-pair-writer';
 import {
   absAmount,
   accountKey,
@@ -48,6 +51,8 @@ export class TransferPairingService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    @InjectRepository(TransferPairRejection)
+    private readonly rejections: Repository<TransferPairRejection>,
     private readonly exchangeRatesService: ExchangeRatesService,
   ) {}
 
@@ -57,8 +62,10 @@ export class TransferPairingService {
 
   /**
    * Rows that may still take part in a pair, with the account their statement
-   * came from. Rows the user unlinked stay out of automatic runs but remain
-   * available to the manual picker: that is the one place they belong.
+   * came from. Rows marked `rejected` (unlinked before refusals were kept per
+   * pair, so their partner is unknown) stay out of automatic runs but remain
+   * available to the manual picker. A pair unlinked since then is skipped by
+   * the matcher instead; see `transfer_pair_rejections`.
    */
   unpairedQuery(workspaceId: string, options: { includeRejected?: boolean } = {}) {
     const query = this.transactionRepository
@@ -72,7 +79,7 @@ export class TransferPairingService {
       // income, and pairing it with some transfer would make it vanish.
       .andWhere('t.transferPairId IS NULL AND t.investmentAccountId IS NULL')
       .andWhere('t.reimbursementOfId IS NULL')
-      .andWhere('(t.statementId IS NULL OR s.deletedAt IS NULL)');
+      .andWhere(PAIRABLE_STATEMENT.where, PAIRABLE_STATEMENT.params);
     if (!options.includeRejected) {
       query.andWhere('(t.transferPairSource IS NULL OR t.transferPairSource != :rejected)', {
         rejected: TransferPairSource.REJECTED,
@@ -102,7 +109,8 @@ export class TransferPairingService {
       .andWhere('t.transactionDate BETWEEN :since AND :until', { since, until })
       .getMany();
 
-    return matchTransferPairs(toCheck, pool, this.lookupRateIn(workspaceId));
+    const rejected = await rejectedPairKeys(this.rejections, workspaceId);
+    return matchTransferPairs(toCheck, pool, this.lookupRateIn(workspaceId), rejected);
   }
 
   /** Writes the pairs; see writeTransferPairs. */
@@ -194,23 +202,18 @@ export class TransferPairingService {
       );
       throw new ConflictException(appError('TRANSACTION_PAIRED_MEANWHILE'));
     }
+    await forgetRejection(this.rejections, workspaceId, a.id, b.id);
     return transferPairId;
   }
 
-  /** Separates both legs and remembers the choice so auto-pairing does not redo it. */
+  /** Separates both legs and remembers that this pair is wrong, so auto-pairing does not redo it. */
   async unlink(workspaceId: string, id: string): Promise<void> {
     const row = await this.findOwned(workspaceId, id);
-    if (!row.transferPairId) {
-      throw new BadRequestException(appError('TRANSACTION_NOT_TRANSFER'));
-    }
-    await this.transactionRepository.update(
-      { workspaceId, transferPairId: row.transferPairId },
-      {
-        transferPairId: null,
-        transferPairSource: TransferPairSource.REJECTED,
-        transferPairKind: null,
-        reimbursementOfId: null,
-      },
+    assertUnlinkAllowed(row);
+    await unlinkAndRemember(
+      this.transactionRepository.manager,
+      workspaceId,
+      row.transferPairId as string,
     );
   }
 
