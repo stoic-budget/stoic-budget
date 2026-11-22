@@ -19,4 +19,10 @@ describe('cloneForSplit', () => {
 
     expect(cloneForSplit(source).loanInterestOfId).toBe('payment-1');
   });
+
+  it('keeps every part out of budgets when the whole was left out', () => {
+    const source = { workspaceId: 'ws-1', excludedFromBudgets: true } as Transaction;
+
+    expect(cloneForSplit(source).excludedFromBudgets).toBe(true);
+  });
 });

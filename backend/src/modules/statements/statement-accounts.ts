@@ -1,5 +1,6 @@
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import type { Repository } from 'typeorm';
+import { appError } from '../../common/errors/app-error';
 import type { Wallet } from '../../entities';
 
 const logger = new Logger('StatementAccounts');
@@ -37,4 +38,31 @@ export async function walletOwnerMemberId(
     },
   });
   return wallet?.ownerMemberId ?? null;
+}
+
+/**
+ * Refuses an entry made by hand (a manual expense) on an account that holds
+ * another currency, as a bill paid from a wallet or a statement linked to an
+ * account is refused: a dollar expense cannot leave a euro account. An account
+ * of another workspace is left to `accountOfUpload`, which drops it.
+ */
+export async function assertAccountCurrency(
+  wallets: Repository<Wallet>,
+  walletId: string | null | undefined,
+  workspaceId: string,
+  currency: string,
+): Promise<void> {
+  if (!walletId) {
+    return;
+  }
+  const wallet = await wallets.findOne({
+    where: { id: walletId, workspaceId },
+    select: { id: true, currency: true },
+  });
+  const walletCurrency = wallet?.currency.toUpperCase();
+  if (walletCurrency && walletCurrency !== currency.toUpperCase()) {
+    throw new BadRequestException(
+      appError('EXPENSE_WALLET_CURRENCY_MISMATCH', { walletCurrency, currency }),
+    );
+  }
 }

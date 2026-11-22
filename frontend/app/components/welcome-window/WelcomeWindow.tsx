@@ -143,6 +143,7 @@ export default function WelcomeWindow({ open, onClose }: WelcomeWindowProps): Re
 
   return (
     <ModalShell
+      demoNotice={false}
       isOpen={open}
       onClose={close}
       title={title}

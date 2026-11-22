@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import type React from 'react';
 import { useMemo, useState } from 'react';
+import { DemoNotice } from '@/app/components/demo/DemoNotice';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
 import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
@@ -95,6 +96,7 @@ export function SwitchFeedDialog({
     <Dialog open onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontSize: 16, fontWeight: 700 }}>{t.switchFeedTitle}</DialogTitle>
       <DialogContent>
+        <DemoNotice />
         <Stack spacing={2} data-testid="bank-sync-switch-dialog">
           <Typography sx={{ fontSize: 13, lineHeight: 1.6, color: 'text.secondary' }}>
             {t.switchFeedHelp.value.replace('{wallet}', wallet?.name ?? '')}

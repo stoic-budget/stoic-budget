@@ -8,6 +8,14 @@ import { APP_NAME } from '@/app/lib/brand';
 
 vi.mock('@/app/hooks/useWorkspaceId', () => ({ useWorkspaceId: () => 'workspace-1' }));
 
+const workspaceTags = [
+  { id: 'tag-trips', name: 'Trips', color: null },
+  { id: 'tag-gifts', name: 'Gifts', color: null },
+];
+vi.mock('@/app/hooks/useTags', () => ({
+  useTags: () => ({ data: workspaceTags, isSuccess: true }),
+}));
+
 vi.mock('@/app/lib/query-fn-schema', async importOriginal => ({
   ...(await importOriginal<typeof import('@/app/lib/query-fn-schema')>()),
   apiQueryDecoded: vi.fn(async () => [
@@ -149,6 +157,34 @@ describe('EditableCell', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Travel' }));
     expect(onUpdate).toHaveBeenCalledWith('r1', 'c', 'Travel');
     expect(screen.queryByRole('button', { name: 'Archived' })).toBeNull();
+  });
+
+  it(`picks tags from the app drawer for ${APP_NAME} tag columns, keeping a name that is no tag`, () => {
+    const onUpdate = vi.fn().mockResolvedValue(undefined);
+    renderWithQuery(
+      <EditableCell
+        column={column({
+          type: 'text',
+          title: 'Tags',
+          config: { source: { kind: 'app_field', field: 'tags' } },
+        })}
+        row={row('Trips, Old note')}
+        fallbackCurrency="KZT"
+        missingRequired={false}
+        onUpdate={onUpdate}
+        labels={labels}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Edit: Tags' }));
+
+    // A drawer of the workspace's tags, not a text field to type over.
+    expect(screen.queryByRole('textbox', { name: 'Tags' })).toBeNull();
+    expect(screen.getByRole('button', { name: /Trips/, pressed: true })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Gifts/, pressed: false }));
+    expect(onUpdate).toHaveBeenLastCalledWith('r1', 'c', 'Gifts, Trips, Old note');
+
+    fireEvent.click(screen.getByRole('button', { name: /Trips/, pressed: true }));
+    expect(onUpdate).toHaveBeenLastCalledWith('r1', 'c', 'Gifts, Old note');
   });
 
   describe('tables filled from app data', () => {

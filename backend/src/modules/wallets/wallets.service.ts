@@ -24,9 +24,12 @@ import {
 } from '../exchange-rates/currency-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
+import { balanceCheckOf, reconciliationsFrom } from './wallet-balance-check';
 import { balanceDays, monthDates } from './wallet-balance-days';
 import { saveWalletChange } from './wallet-change';
-import { toDateOnly, type WalletLedger, walletLedgers } from './wallet-ledger';
+import { creditLimitPatch } from './wallet-credit-limit';
+import { type WalletLedger, walletLedgers } from './wallet-ledger';
+import { walletStoredFields } from './wallet-stored-fields';
 
 /** Statements whose rows are read and real; the same set the balance sheet trusts. */
 const LIVE_STATEMENT_STATUSES = [
@@ -34,9 +37,6 @@ const LIVE_STATEMENT_STATUSES = [
   StatementStatus.VALIDATED,
   StatementStatus.COMPLETED,
 ];
-
-/** A closing balance within a cent of the booked one is the same balance. */
-const RECONCILE_TOLERANCE = 0.01;
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
@@ -64,14 +64,18 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       createDto.ownerMemberId,
     );
 
+    const { creditLimit, ...fields } = createDto;
+    const type = fields.type ?? 'checking';
     // wallets.user_id is NOT NULL: without it every create failed with a 500.
     const wallet = this.repository.create({
       workspaceId,
       userId,
-      ...createDto,
-      type: createDto.type ?? 'checking',
+      ...fields,
+      type,
+      ...creditLimitPatch(type, creditLimit),
       currency: await this.workspaceCurrency.resolveFor(workspaceId, createDto.currency),
       initialBalance: createDto.initialBalance || 0,
+      includeInNetWorth: createDto.includeInNetWorth ?? true,
       isActive: true,
     });
 
@@ -84,7 +88,7 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       workspaceId,
       dto.ownerMemberId,
     );
-    return saveWalletChange(this.repository, await this.findOne(id, workspaceId), dto);
+    return saveWalletChange(this.repository, id, workspaceId, dto, this.entityName);
   }
 
   /** Every account of the workspace with its balance, for `GET /wallets`. */
@@ -242,25 +246,14 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
     return wallets.map(wallet => {
       const ledger = ledgers.get(wallet.id);
       return {
-        id: wallet.id,
-        workspaceId: wallet.workspaceId,
-        userId: wallet.userId,
-        name: wallet.name,
-        type: wallet.type,
-        accountNumber: wallet.accountNumber,
-        bankName: wallet.bankName,
-        currency: wallet.currency,
-        initialBalance: String(wallet.initialBalance ?? '0'),
-        isActive: wallet.isActive,
-        ownerMemberId: wallet.ownerMemberId,
+        ...walletStoredFields(wallet),
         balance: round2((Number(wallet.initialBalance) || 0) + (ledger?.net ?? 0)),
         unconvertedCurrencies: ledger?.unconverted ?? [],
         transactionCount: ledger?.count ?? 0,
         pendingReviewCount: pending.get(wallet.id) ?? 0,
         lastActivityAt: ledger?.lastDate ?? null,
         reconciliation: reconciliations.get(wallet.id) ?? null,
-        createdAt: wallet.createdAt.toISOString(),
-        updatedAt: wallet.updatedAt.toISOString(),
+        balanceCheck: balanceCheckOf(wallet, ledger?.days ?? []),
       };
     });
   }
@@ -310,27 +303,6 @@ export class WalletsService extends WorkspaceCrudBaseService<Wallet> {
       .addOrderBy('statement.createdAt', 'DESC')
       .getMany();
 
-    const byId = new Map(wallets.map(wallet => [wallet.id, wallet]));
-    const result = new Map<string, WalletReconciliation>();
-    for (const statement of latest) {
-      const wallet = statement.walletId ? byId.get(statement.walletId) : undefined;
-      const date = toDateOnly(statement.statementDateTo);
-      if (!(wallet && date)) {
-        continue;
-      }
-      const booked = (ledgers.get(wallet.id)?.days ?? [])
-        .filter(day => day.date <= date)
-        .reduce((sum, day) => sum + day.net, 0);
-      const computedBalance = round2((Number(wallet.initialBalance) || 0) + booked);
-      const statementBalance = round2(Number(statement.balanceEnd));
-      result.set(wallet.id, {
-        statementId: statement.id,
-        date,
-        statementBalance,
-        computedBalance,
-        matches: Math.abs(computedBalance - statementBalance) <= RECONCILE_TOLERANCE,
-      });
-    }
-    return result;
+    return reconciliationsFrom(latest, wallets, ledgers);
   }
 }

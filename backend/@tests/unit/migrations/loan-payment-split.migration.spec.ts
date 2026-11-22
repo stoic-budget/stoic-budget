@@ -6,7 +6,7 @@ describe('LoanPaymentSplit migration', () => {
     process.cwd(),
     'src',
     'migrations',
-    '1788240000000-LoanPaymentSplit.ts',
+    '1789130000000-LoanPaymentSplit.ts',
   );
   const source = () => readFileSync(filePath, 'utf8');
 
@@ -30,7 +30,7 @@ describe('LoanPaymentSplit migration', () => {
 
   it('lets the interest row follow its payment into and out of the counted rows', () => {
     expect(source()).toMatch(
-      /AFTER UPDATE OF "is_verified", "is_duplicate", "wallet_id", "transaction_type", "amount", "debit", "credit"\s+ON "transactions"/,
+      /AFTER UPDATE OF "is_verified", "is_duplicate", "wallet_id", "transaction_type", "amount", "debit", "credit",\s+"currency", "transaction_date", "is_private", "owner_member_id"\s+ON "transactions"/,
     );
     // Fires on payments, not on the interest rows it updates.
     expect(source()).toContain('OLD."loan_interest_of_id" IS NULL');

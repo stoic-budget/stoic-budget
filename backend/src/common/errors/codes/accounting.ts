@@ -37,6 +37,13 @@ export const ACCOUNTING_ERRORS = {
   WALLET_STATEMENT_CURRENCY_MISMATCH:
     'The account holds {{walletCurrency}}; the statement is in {{currency}}',
   WALLET_NOT_FOUND: 'Account not found in this workspace',
+  BALANCE_CHECK_FUTURE_DATE: 'A balance can be checked for today or an earlier day',
+  BALANCE_CHECK_UNCONVERTED:
+    'Rows in {{currencies}} have no exchange rate for their day yet; add the rate before booking the difference',
+  BALANCE_CHECK_PENDING_REVIEW:
+    'Rows of this account up to that day still wait in Review or are set aside as duplicates; settle them before booking the difference',
+  BALANCE_CHECK_MISMATCH:
+    'The balance does not match the bank; book the difference or check again later',
   LOAN_TERMS_DEBT_ONLY: 'Loan terms can be set only on a loan or credit card account',
   LOAN_TERMS_END_TOO_LATE:
     'The last payment would fall after 31 December 9999: start earlier or shorten the term',
@@ -54,6 +61,7 @@ export const ACCOUNTING_ERRORS = {
     'The payment is split into principal and interest: join the principal and interest back first',
   LOAN_INTEREST_STAYS_ON_LOAN:
     'Interest split off a loan payment stays an expense on the loan account: join the payment back first',
+  WALLET_CREDIT_LIMIT_CARD_ONLY: 'Only a credit card account can have a credit limit',
   TRANSFER_SAME_ACCOUNT: 'The transaction is already in this account',
   // Payables
   PAYABLE_PAYMENT_NOT_POSITIVE: 'A payment must be more than zero',
@@ -71,6 +79,12 @@ export const ACCOUNTING_ERRORS = {
   PAYABLE_PAYMENT_SHORT:
     'That transaction is less than what is still owed; record it as a partial payment',
   PAYABLE_CATEGORY_NOT_FOUND: 'Category not found in this workspace',
+  PAYABLE_NOT_RECURRING: 'This bill does not repeat',
+  PAYABLE_OCCURRENCE_SETTLED:
+    'This payment is already paid, skipped or partly paid; change it as a whole bill instead',
+  PAYABLE_RECURRENCE_NEVER_FIRES: 'This repeat rule has no date on or after its start',
+  PAYABLE_REJECT_OWN_PAYMENT:
+    'This transaction is the payment recorded with this bill; it cannot be refused here',
   // ── invoices ─────────────────────────────────────────────────────────────
   INVOICE_NOT_DRAFT: 'Only a draft invoice can be edited',
   INVOICE_ALREADY_SENT: 'This invoice was already sent',

@@ -66,7 +66,8 @@ describe('CashFlowCard', () => {
     window.localStorage.clear();
   });
 
-  it("opens on the accounts' balances for the picked month, linking to Accounts", () => {
+  it("shows the accounts' balances for the picked month, linking to Accounts", () => {
+    window.localStorage.setItem('seneca.cashFlowView', 'chart');
     render(
       <CashFlowCard
         formatAmount={String}
@@ -85,6 +86,7 @@ describe('CashFlowCard', () => {
   });
 
   it('shows the accounts even in a month with no money in or out', () => {
+    window.localStorage.setItem('seneca.cashFlowView', 'chart');
     render(
       <CashFlowCard
         formatAmount={String}
@@ -277,13 +279,11 @@ describe('CashFlowCard', () => {
       });
     });
 
-    it('opens on the accounts on a wider screen when no view was picked', () => {
+    it('opens on the flow on a wider screen when no view was picked', () => {
       render(<CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />);
 
-      expect(screen.getByRole('tab', { name: 'Accounts' })).toHaveAttribute(
-        'aria-selected',
-        'true',
-      );
+      expect(screen.getByRole('tab', { name: 'Flow' })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByTestId('flow')).toBeInTheDocument();
     });
   });
 
@@ -295,7 +295,8 @@ describe('CashFlowCard', () => {
 
     const days = [day('2026-07-01', 900, 4.5)];
 
-    it('asks for the flow only once picked, and links to the same month in Reports', () => {
+    it('asks for the flow only once shown, and links to the same month in Reports', () => {
+      window.localStorage.setItem('seneca.cashFlowView', 'chart');
       render(<CashFlowCard formatAmount={String} activeMonth="2026-07" days={days} />);
       expect(flowProps).not.toHaveBeenCalled();
 

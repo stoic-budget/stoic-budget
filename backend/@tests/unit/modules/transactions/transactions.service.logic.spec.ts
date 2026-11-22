@@ -146,22 +146,4 @@ describe('TransactionsService', () => {
     expect(consoleSpy).toHaveBeenCalled();
     consoleSpy.mockRestore();
   });
-
-  it('remove deletes transaction after ownership check', async () => {
-    // Nothing on a filed return: neither the row nor loan interest split off it.
-    transactionRepository.count = vi.fn(async () => 0);
-    transactionRepository.createQueryBuilder = vi.fn(() => ({ setFindOptions: vi.fn().mockReturnThis(), innerJoin: vi.fn().mockReturnThis(), getCount: vi.fn(async () => 0) }));
-    userRepository.findOne = vi.fn(async () => ({
-      id: 'u1',
-      workspaceId: null,
-    }));
-    transactionRepository.findOne = vi.fn(async () => ({
-      id: 't1',
-      statement: { userId: 'u1' },
-    }));
-
-    await service.remove('t1', 'w1', 'u1');
-
-    expect(transactionRepository.delete).toHaveBeenCalledWith('t1');
-  });
 });

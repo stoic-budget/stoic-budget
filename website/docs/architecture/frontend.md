@@ -11,8 +11,7 @@ in `frontend/dist/standalone`.
 
 - `(auth)` — login, registration, forgot password, reset password, and email verification.
 - `(main)` — the signed-in product UI: dashboard, statements, reports, budgets, goals, net worth, crypto,
-  subscriptions, ROI, advice, custom tables, workspaces, supported banks, and the income tax
-  declaration (`tax-declaration`).
+  subscriptions, ROI, advice, custom tables, workspaces and supported banks.
 - `(onboarding)` — guided setup.
 - Standalone routes: `admin`, `audit`, `categories`, `integrations`, `settings`, `storage/[id]`,
   `transactions/duplicates`, `invite/[token]`, `shared/[token]`, and `plugins`.

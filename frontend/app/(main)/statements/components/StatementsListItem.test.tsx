@@ -194,6 +194,41 @@ describe('StatementsListItem', () => {
     ).toBeTruthy();
   });
 
+  it('keeps the whole name on hover where the column cuts it short', () => {
+    const root = mount();
+    const merchantLabel = 'ACME Leather Folio Case for Tablet Pro Series Twelve Inch';
+
+    act(() => {
+      root.render(
+        <StatementsListItem
+          statement={{
+            id: 'receipt-long',
+            source: 'scan',
+            fileName: 'photo_2026-01-02_10-00-00.jpg',
+            status: 'approved',
+            createdAt: '2026-01-02T10:00:00Z',
+            bankName: 'receipt',
+            fileType: 'receipt',
+          }}
+          viewLabel="View"
+          isReceipt
+          isProcessing={false}
+          merchantLabel={merchantLabel}
+          amountLabel="63.00 USD"
+          dateLabel="01/02/2026"
+          onView={() => undefined}
+          onIconClick={() => undefined}
+          onToggleSelect={() => undefined}
+        />,
+      );
+    });
+
+    const desktop = container.querySelector('[data-testid="statement-column-receipt-long-merchant"]');
+    const mobile = container.querySelector('.seneca-stmt-list-item__mobile-merchant');
+    expect(desktop?.querySelector(`[title="${merchantLabel}"]`)?.textContent).toBe(merchantLabel);
+    expect(mobile?.getAttribute('title')).toBe(merchantLabel);
+  });
+
   it('uses receipt thumbnail source for local receipts', async () => {
     const root = mount();
 

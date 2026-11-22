@@ -36,6 +36,8 @@ export class TransactionFingerprintService {
       currency: string;
       transactionType?: TransactionType;
       counterpartyName: string;
+      /** Read in place of the counterparty when the parser named one (`ParsedTransaction`). */
+      fingerprintMerchant?: string;
     },
     accountNumber?: string,
   ): string {
@@ -61,7 +63,7 @@ export class TransactionFingerprintService {
       amount,
       currency: transaction.currency,
       direction,
-      merchant: transaction.counterpartyName,
+      merchant: transaction.fingerprintMerchant || transaction.counterpartyName,
     });
   }
 

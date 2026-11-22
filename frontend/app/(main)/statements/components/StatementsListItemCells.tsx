@@ -112,6 +112,7 @@ export function MerchantCell(props: {
     <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, pointerEvents: 'auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span
+          title={isProcessing ? undefined : merchantLabel}
           style={{
             overflow: 'hidden',
             textOverflow: 'ellipsis',

@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import type React from 'react';
 import { useState } from 'react';
 import CustomDatePicker from '@/app/components/CustomDatePicker';
+import { DemoNotice } from '@/app/components/demo/DemoNotice';
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer } from '@/app/i18n';
 import { getApiErrorMessage } from '@/app/lib/api-error';
@@ -59,6 +60,7 @@ export function RevaluationButton(): React.ReactElement {
       <Dialog open={open} onClose={close} fullWidth maxWidth="xs">
         <DialogTitle>{t.revalueTitle}</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <DemoNotice />
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             {t.revalueHint}
           </Typography>

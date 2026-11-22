@@ -55,6 +55,7 @@ export enum EntityType {
   USER = 'user',
   PAYEE = 'payee',
   TAG = 'tag',
+  CALENDAR_FEED = 'calendar_feed',
 }
 
 export enum AuditAction {

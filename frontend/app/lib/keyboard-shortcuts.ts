@@ -75,7 +75,6 @@ export const NAV_BINDINGS: Record<string, string> = {
   '/invoices': 'KeyG KeyI',
   '/net-worth': 'KeyG KeyN',
   '/crypto': 'KeyG KeyC',
-  '/tax-declaration': 'KeyG KeyX',
   '/forecast': 'KeyG KeyF',
   '/roi': 'KeyG KeyE',
   '/subscriptions': 'KeyG KeyU',

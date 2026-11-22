@@ -74,7 +74,10 @@ function readSql(alias: string): string {
  *   receipt), but not one on a statement still processing or that failed;
  * - a crypto row counts only when it settles a bill or a receivable: a swap or
  *   a move between one's own wallets is neither income nor spending, and the
- *   crypto card shows those flows on its own.
+ *   crypto card shows those flows on its own;
+ * - a row the user left out of budgets (`excludedFromBudgets`, a one-off such as
+ *   a car bought from savings) is no income or spending figure's, though its
+ *   account balance, net worth and tax still count it through `onlyCounted`.
  *
  * Transfers between own accounts are left to the caller (`transferPairId IS
  * NULL`), as for `onlyCounted`: a few views show them on purpose. The
@@ -84,8 +87,15 @@ function readSql(alias: string): string {
 export function onlyFlows<T extends { andWhere(where: string): T }>(
   query: T,
   alias: string,
-  /** Data-health counts look at what still waits too: everything but the confirmation check. */
-  { includeUnconfirmed = false }: { includeUnconfirmed?: boolean } = {},
+  {
+    includeUnconfirmed = false,
+    includeExcluded = false,
+  }: {
+    /** Data-health counts look at what still waits too: everything but the confirmation check. */
+    includeUnconfirmed?: boolean;
+    /** A balance keeps rows left out of budgets: the money still moved. */
+    includeExcluded?: boolean;
+  } = {},
 ): T {
   const counted = includeUnconfirmed
     ? query
@@ -98,16 +108,17 @@ export function onlyFlows<T extends { andWhere(where: string): T }>(
           )}`,
         )
     : onlyCounted(query, alias);
-  return counted
-    .andWhere(
-      `NOT EXISTS (SELECT 1 FROM statements unread WHERE unread.id = ${alias}.statementId AND unread.status IN (${UNREAD_STATEMENT_STATUSES})) AND ${whilePaymentCounts(`${alias}.loanInterestOfId`, readSql)}`,
-    )
-    .andWhere(settlesIfCrypto(`${alias}.cryptoWalletId`, `${alias}.id`));
+  const read = counted.andWhere(
+    `NOT EXISTS (SELECT 1 FROM statements unread WHERE unread.id = ${alias}.statementId AND unread.status IN (${UNREAD_STATEMENT_STATUSES})) AND ${whilePaymentCounts(`${alias}.loanInterestOfId`, readSql)}`,
+  );
+  return (includeExcluded ? read : read.andWhere(`${alias}.excludedFromBudgets = false`)).andWhere(
+    settlesIfCrypto(`${alias}.cryptoWalletId`, `${alias}.id`),
+  );
 }
 
 /** `onlyFlows` for raw SQL over the `transactions` table: `AND ${flowsSql('t')}`. */
 export function flowsSql(alias: string): string {
-  return `(${countedSql(alias)} AND ${readSql(alias)} AND ${whilePaymentCounts(`${alias}.loan_interest_of_id`, readSql)} AND ${settlesIfCrypto(`${alias}.crypto_wallet_id`, `${alias}.id`)})`;
+  return `(${countedSql(alias)} AND ${readSql(alias)} AND ${whilePaymentCounts(`${alias}.loan_interest_of_id`, readSql)} AND ${alias}.excluded_from_budgets = false AND ${settlesIfCrypto(`${alias}.crypto_wallet_id`, `${alias}.id`)})`;
 }
 
 /**

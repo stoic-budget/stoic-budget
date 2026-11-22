@@ -29,6 +29,7 @@ export function LanguageDrawer({
   const { shell } = useIntlayer('navigation');
   return (
     <DrawerShell
+      demoNotice={false}
       isOpen={isOpen}
       onClose={onClose}
       title={
