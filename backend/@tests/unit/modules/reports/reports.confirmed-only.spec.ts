@@ -1,5 +1,5 @@
-import { AuditService } from '@/modules/audit/audit.service';
 import { ReportsService } from '@/modules/reports/reports.service';
+import { buildReportsService } from './helpers/build-reports-service';
 
 /**
  * What a report counts: confirmed rows that are not suspected duplicates, not
@@ -62,22 +62,15 @@ function emptyRepo() {
 function buildService() {
   const { qb, wheres } = recordingQueryBuilder();
   const transactionRepository = { ...emptyRepo(), createQueryBuilder: vi.fn(() => qb) };
-  const service = new ReportsService(
-    transactionRepository as any,
-    emptyRepo() as any,
-    emptyRepo() as any,
-    emptyRepo() as any,
-    emptyRepo() as any,
-    emptyRepo() as any,
-    emptyRepo() as any,
-    emptyRepo() as any,
-    { get: vi.fn(async () => undefined), set: vi.fn(async () => undefined) } as any,
-    { createEvent: vi.fn() } as unknown as AuditService,
-    emptyRepo() as any,
-    { findOne: vi.fn(async () => ({ currency: 'EUR' })) } as any,
-    { getRate: vi.fn(async () => 1), getRateOrNull: vi.fn(async () => 1) } as any,
-    { exportBalanceSheet: vi.fn() } as any,
-  );
+  const service = buildReportsService({
+    transactionRepository,
+    customTableRepository: emptyRepo(),
+    customTableColumnRepository: emptyRepo(),
+    customTableRowRepository: emptyRepo(),
+    cacheManager: { get: vi.fn(async () => undefined), set: vi.fn(async () => undefined) },
+    reportHistoryRepo: emptyRepo(),
+    exchangeRatesService: { getRate: vi.fn(async () => 1), getRateOrNull: vi.fn(async () => 1) },
+  });
   const conditionsPerQuery = () => {
     const built = transactionRepository.createQueryBuilder.mock.calls.length;
     const counts = Object.fromEntries(
@@ -125,11 +118,12 @@ describe('ReportsService counts only what a report should', () => {
   it('template reports load confirmed rows only', async () => {
     const { service, transactionRepository, conditionsPerQuery } = buildService();
 
-    await (service as any).loadReportRows('ws-1', {
+    await service.previewTemplate('ws-1', {
       templateId: 'pnl',
       dateFrom: '2026-01-01',
       dateTo: '2026-12-31',
-    });
+      format: 'pdf',
+    } as any);
 
     // The same conditions as every other figure, on the one query it builds.
     const { built, counts } = conditionsPerQuery();

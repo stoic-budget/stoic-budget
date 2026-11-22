@@ -45,8 +45,6 @@ The Stoic Budget API is served from the backend at `/api/v1`.
   `reports/balance-sheet`, `reports/accounts/:id`; reports answer `409 LEDGER_NOT_UP_TO_DATE` while transactions are
   still being posted unless `allowStale=true`
 - `/tax/jurisdictions`, `/tax/rules`, `/tax/returns`, `/tax-rates` — VAT
-- `/income-tax` — income tax declaration: disclaimer, profile, line mappings, and `returns/:taxYear` with
-  `finalize`, `reopen`, and `export?format=pdf|xlsx`
 - `/maps` — tile styles and proxied tiles for receipt maps
 - `/audit-events` — audit history
 - `/integrations` — S3-compatible, WebDAV, and IMAP settings

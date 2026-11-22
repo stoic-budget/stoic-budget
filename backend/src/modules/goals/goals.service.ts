@@ -8,48 +8,20 @@ import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.e
 import { AuditService } from '../audit/audit.service';
 import type { CreateAuditEventDto } from '../audit/interfaces/audit-event.interface';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
-import { round2, toNumber } from './goal-money.util';
+import { toNumber } from './goal-money.util';
+import { GoalProgressService } from './goal-progress.service';
+import { GoalTransactionLinkService } from './goal-transaction-link.service';
 import {
-  GoalTransactionLinkService,
-  type LinkedTransaction,
-} from './goal-transaction-link.service';
+  contributionSnapshot,
+  firstDayOfNextMonth,
+  type GoalDetail,
+  type GoalWithProgress,
+  goalSnapshot,
+  today,
+  toProgress,
+} from './goal-view.util';
 
-export interface GoalWithProgress {
-  id: string;
-  name: string;
-  targetAmount: number;
-  currency: string;
-  targetDate: string | null;
-  currentAmount: number;
-  remaining: number;
-  percent: number;
-  isReached: boolean;
-  createdAt: Date;
-  cover: GoalCover | null;
-  /** Only set when the list was asked for one month: what was put aside in it. */
-  contributedInMonth?: number;
-}
-
-/**
- * How the client should draw the goal's picture. `preset` is a bundled tile it
- * draws itself; `photo` carries the URL of the stored file, served as a static
- * upload. The credit line travels with it because a CC image may not be shown
- * without one.
- */
-export type GoalCover =
-  | { kind: 'preset'; preset: string }
-  | { kind: 'photo'; url: string; attribution: string | null; sourceUrl: string | null };
-
-export interface GoalDetail extends GoalWithProgress {
-  contributions: Array<{
-    id: string;
-    amount: number;
-    contributionDate: string;
-    note: string | null;
-    createdAt: Date;
-    transaction: LinkedTransaction | null;
-  }>;
-}
+export type { GoalCover, GoalDetail, GoalWithProgress } from './goal-view.util';
 
 @Injectable()
 export class GoalsService {
@@ -63,13 +35,18 @@ export class GoalsService {
     private readonly auditService: AuditService,
     private readonly workspaceCurrency: WorkspaceCurrencyService,
     private readonly linkService: GoalTransactionLinkService,
+    private readonly progressService: GoalProgressService,
   ) {}
 
   async create(
     workspaceId: string,
     userId: string,
     dto: CreateGoalBody,
+    selfMemberId: string | null = null,
   ): Promise<GoalWithProgress> {
+    if (dto.walletId) {
+      await this.progressService.assertCanFollow(workspaceId, dto.walletId, selfMemberId);
+    }
     const goal = this.goalRepository.create({
       workspaceId,
       createdById: userId,
@@ -77,6 +54,7 @@ export class GoalsService {
       targetAmount: dto.targetAmount,
       currency: await this.workspaceCurrency.resolveFor(workspaceId, dto.currency),
       targetDate: dto.targetDate ?? null,
+      walletId: dto.walletId ?? null,
     });
 
     const saved = await this.goalRepository.save(goal);
@@ -89,18 +67,19 @@ export class GoalsService {
       action: AuditAction.CREATE,
       diff: { before: null, after: goalSnapshot(saved) },
     });
-    return toProgress(saved, 0);
+    return this.withProgress(saved, workspaceId);
   }
 
   async findAll(workspaceId: string, month?: string): Promise<GoalWithProgress[]> {
-    // A month narrows the list to the goals that actually moved in it, so the
-    // filter has to be read before the goals themselves.
-    const monthly = month ? await this.sumContributionsInMonth(workspaceId, month) : null;
-
     const all = await this.goalRepository.find({
       where: { workspaceId },
       order: { createdAt: 'ASC' },
     });
+    // A month narrows the list to the goals that actually moved in it.
+    const end = month ? firstDayOfNextMonth(month) : undefined;
+    const monthly = month
+      ? await this.progressService.movedBetween(workspaceId, all, `${month}-01`, end as string)
+      : null;
     const goals = monthly ? all.filter(goal => monthly.has(goal.id)) : all;
 
     if (goals.length === 0) {
@@ -108,17 +87,13 @@ export class GoalsService {
     }
 
     // A month's list shows each goal as it stood when that month ended, not as it is today.
-    const totals = await this.sumContributions(
-      workspaceId,
-      goals.map(goal => goal.id),
-      month ? firstDayOfNextMonth(month) : undefined,
-    );
+    const progress = await this.progressService.progress(workspaceId, goals, end);
 
     return goals.map(goal => {
-      const progress = toProgress(goal, totals.get(goal.id) ?? 0);
+      const view = toProgress(goal, progress.get(goal.id));
       // The whole-list shape stays exactly as it was; only a month-scoped
       // request grows the extra field.
-      return monthly ? { ...progress, contributedInMonth: monthly.get(goal.id) ?? 0 } : progress;
+      return monthly ? { ...view, contributedInMonth: monthly.get(goal.id) ?? 0 } : view;
     });
   }
 
@@ -131,11 +106,14 @@ export class GoalsService {
       order: { contributionDate: 'DESC', createdAt: 'DESC' },
     });
 
-    const currentAmount = contributions.reduce((sum, row) => sum + toNumber(row.amount), 0);
-    const linked = await this.linkService.describe(workspaceId, contributions);
+    const [progress, linked] = await Promise.all([
+      this.progressService.progress(workspaceId, [goal]),
+      this.linkService.describe(workspaceId, contributions),
+    ]);
 
     return {
-      ...toProgress(goal, currentAmount),
+      // A goal following an account lists its contributions but does not count them.
+      ...toProgress(goal, progress.get(goal.id)),
       contributions: contributions.map(contribution => ({
         id: contribution.id,
         amount: toNumber(contribution.amount),
@@ -152,10 +130,20 @@ export class GoalsService {
     workspaceId: string,
     userId: string,
     dto: UpdateGoalBody,
+    selfMemberId: string | null = null,
   ): Promise<GoalWithProgress> {
     const goal = await this.goalRepository.findOne({ where: { id, workspaceId } });
     assertFound(goal, 'Goal');
     const before = goalSnapshot(goal);
+
+    // Checked only when it changes: someone else editing the name of a goal that
+    // follows its owner's own account must not be refused for the account.
+    if (dto.walletId !== undefined && dto.walletId !== goal.walletId) {
+      if (dto.walletId) {
+        await this.progressService.assertCanFollow(workspaceId, dto.walletId, selfMemberId);
+      }
+      goal.walletId = dto.walletId;
+    }
 
     if (dto.name != null) {
       goal.name = dto.name;
@@ -181,8 +169,7 @@ export class GoalsService {
       diff: { before, after: goalSnapshot(goal) },
       meta: { name: goal.name },
     });
-    const totals = await this.sumContributions(workspaceId, [goal.id]);
-    return toProgress(goal, totals.get(goal.id) ?? 0);
+    return this.withProgress(goal, workspaceId);
   }
 
   /**
@@ -214,6 +201,7 @@ export class GoalsService {
   ): Promise<GoalDetail> {
     const goal = await this.goalRepository.findOne({ where: { id, workspaceId } });
     assertFound(goal, 'Goal');
+    await this.progressService.assertCountsContributions(workspaceId, goal);
 
     const contribution = this.contributionRepository.create({
       goalId: goal.id,
@@ -278,112 +266,8 @@ export class GoalsService {
     }
   }
 
-  /** Totals for many goals in one query, so a list of N goals is not N+1. */
-  /** Every contribution per goal, or only those dated before `before` (`YYYY-MM-DD`, exclusive). */
-  private async sumContributions(
-    workspaceId: string,
-    goalIds: string[],
-    before?: string,
-  ): Promise<Map<string, number>> {
-    const query = this.contributionRepository
-      .createQueryBuilder('contribution')
-      .select('contribution.goal_id', 'goalId')
-      .addSelect('COALESCE(SUM(contribution.amount), 0)', 'total')
-      .where('contribution.workspace_id = :workspaceId', { workspaceId })
-      .andWhere('contribution.goal_id IN (:...goalIds)', { goalIds });
-    if (before) {
-      query.andWhere('contribution.contribution_date < :before', { before });
-    }
-    const rows = await query
-      .groupBy('contribution.goal_id')
-      .getRawMany<{ goalId: string; total: string }>();
-
-    return new Map(rows.map(row => [row.goalId, toNumber(row.total)]));
+  private async withProgress(goal: Goal, workspaceId: string): Promise<GoalWithProgress> {
+    const progress = await this.progressService.progress(workspaceId, [goal]);
+    return toProgress(goal, progress.get(goal.id));
   }
-
-  /**
-   * What each goal received inside one calendar month. A goal missing from the
-   * map had no movement that month, which is what makes it the filter too.
-   */
-  private async sumContributionsInMonth(
-    workspaceId: string,
-    month: string,
-  ): Promise<Map<string, number>> {
-    const rows = await this.contributionRepository
-      .createQueryBuilder('contribution')
-      .select('contribution.goal_id', 'goalId')
-      .addSelect('COALESCE(SUM(contribution.amount), 0)', 'total')
-      .where('contribution.workspace_id = :workspaceId', { workspaceId })
-      .andWhere('contribution.contribution_date >= :start', { start: `${month}-01` })
-      .andWhere('contribution.contribution_date < :end', { end: firstDayOfNextMonth(month) })
-      .groupBy('contribution.goal_id')
-      .getRawMany<{ goalId: string; total: string }>();
-
-    return new Map(rows.map(row => [row.goalId, toNumber(row.total)]));
-  }
-}
-
-/** Half-open upper bound for a `YYYY-MM` month, so no day of it is missed. */
-function firstDayOfNextMonth(month: string): string {
-  const [year, index] = month.split('-').map(Number);
-  return index === 12 ? `${year + 1}-01-01` : `${year}-${String(index + 1).padStart(2, '0')}-01`;
-}
-
-function goalSnapshot(goal: Goal) {
-  return {
-    name: goal.name,
-    targetAmount: toNumber(goal.targetAmount),
-    currency: goal.currency,
-    targetDate: goal.targetDate ?? null,
-  };
-}
-
-function contributionSnapshot(contribution: GoalContribution) {
-  return {
-    id: contribution.id,
-    amount: toNumber(contribution.amount),
-    contributionDate: contribution.contributionDate,
-    note: contribution.note ?? null,
-  };
-}
-
-function toProgress(goal: Goal, currentAmount: number): GoalWithProgress {
-  const targetAmount = toNumber(goal.targetAmount);
-  const current = round2(currentAmount);
-
-  return {
-    id: goal.id,
-    name: goal.name,
-    targetAmount,
-    currency: goal.currency,
-    targetDate: goal.targetDate,
-    currentAmount: current,
-    // A goal can be overshot; what is left to save is never negative.
-    remaining: round2(Math.max(targetAmount - current, 0)),
-    percent: targetAmount > 0 ? round2((current / targetAmount) * 100) : 0,
-    isReached: current >= targetAmount,
-    createdAt: goal.createdAt,
-    cover: toCover(goal),
-  };
-}
-
-function toCover(goal: Goal): GoalCover | null {
-  if (goal.coverPreset) {
-    return { kind: 'preset', preset: goal.coverPreset };
-  }
-  if (goal.coverFile) {
-    // Served statically, like user avatars: the name is a fresh uuid and only
-    // ever reaches a client that was allowed to read this goal.
-    return {
-      kind: 'photo',
-      url: `/uploads/goal-covers/${goal.coverFile}`,
-      attribution: goal.coverAttribution,
-      sourceUrl: goal.coverSourceUrl,
-    };
-  }
-  return null;
-}
-
-function today(): string {
-  return new Date().toISOString().split('T')[0];
 }

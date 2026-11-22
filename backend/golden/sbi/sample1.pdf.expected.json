@@ -1,0 +1,955 @@
+{
+  "metadata": {
+    "accountNumber": "48594186577",
+    "currency": "INR",
+    "dateFrom": "2023-08-01T00:00:00",
+    "dateTo": "2023-10-15T00:00:00",
+    "balanceStart": 6980.04,
+    "balanceEnd": 57089.93
+  },
+  "transactions": [
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "8763*PHYSICSWALLAH",
+      "paymentPurpose": "8763*PHYSICSWALLAH",
+      "credit": 164211,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "COMM OTHER MISC. SERVICES",
+      "paymentPurpose": "COMM OTHER MISC. SERVICES",
+      "debit": 118,
+      "currency": "INR",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "CASH Withdrawn at GCC",
+      "paymentPurpose": "CASH Withdrawn at GCC",
+      "debit": 100,
+      "currency": "INR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "CASH Deposited at GCC",
+      "paymentPurpose": "CASH Deposited at GCC",
+      "credit": 100,
+      "currency": "INR",
+      "paymentType": "cash"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "UPI/DR/414864748281/GIP Park/PYTM/paytm-6453/Oid20",
+      "paymentPurpose": "UPI/DR/414864748281/GIP Park/PYTM/paytm-6453/Oid20",
+      "debit": 25,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-01T00:00:00",
+      "counterpartyName": "/UTIB/mlo.hsah82/UPI",
+      "paymentPurpose": "/UTIB/mlo.hsah82/UPI",
+      "debit": 2519,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-02T00:00:00",
+      "counterpartyName": "7190*PHYSICSWALLAH",
+      "paymentPurpose": "7190*PHYSICSWALLAH",
+      "credit": 15189,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-03T00:00:00",
+      "counterpartyName": "UPI/DR/666444877372/GKAOS",
+      "paymentPurpose": "UPI/DR/666444877372/GKAOS",
+      "debit": 1000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-04T00:00:00",
+      "counterpartyName": "ACHCr HDFC35903631432114",
+      "paymentPurpose": "ACHCr HDFC35903631432114",
+      "credit": 28,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-04T00:00:00",
+      "counterpartyName": "CHEQUE TRANSFER TO 972969 DR",
+      "paymentPurpose": "CHEQUE TRANSFER TO 972969 DR",
+      "debit": 150000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-06T00:00:00",
+      "counterpartyName": "UPI/DR/902251740735/Hare Kri/PYTM/paytmqr9ym/Payme",
+      "paymentPurpose": "UPI/DR/902251740735/Hare Kri/PYTM/paytmqr9ym/Payme",
+      "debit": 20,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-07T00:00:00",
+      "counterpartyName": "UPI/DR/766420218335/R K Serv/PYTM/paytmqr281/Paym",
+      "paymentPurpose": "UPI/DR/766420218335/R K Serv/PYTM/paytmqr281/Paym",
+      "debit": 410,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-07T00:00:00",
+      "counterpartyName": "UPI/DR/003000232476/MD SAKIR/PYTM/2776975449/Pay",
+      "paymentPurpose": "UPI/DR/003000232476/MD SAKIR/PYTM/2776975449/Pay",
+      "debit": 20,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-08T00:00:00",
+      "counterpartyName": "CIC/bsestarmfr/Payvi",
+      "paymentPurpose": "CIC/bsestarmfr/Payvi",
+      "debit": 2000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-09T00:00:00",
+      "counterpartyName": "UPI/DR/408577654523/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "paymentPurpose": "UPI/DR/408577654523/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "debit": 15300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-10T00:00:00",
+      "counterpartyName": "ACHDr HDFC70660782563791",
+      "paymentPurpose": "ACHDr HDFC70660782563791",
+      "debit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-10T00:00:00",
+      "counterpartyName": "ACHCr UTIB89428199425334 Deepak Nitrite",
+      "paymentPurpose": "ACHCr UTIB89428199425334 Deepak Nitrite",
+      "credit": 112.5,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-12T00:00:00",
+      "counterpartyName": "UPI/DR/490325034044/Oncoi n /PYTM/bsbga-0725/Payme",
+      "paymentPurpose": "UPI/DR/490325034044/Oncoi n /PYTM/bsbga-0725/Payme",
+      "debit": 75,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-12T00:00:00",
+      "counterpartyName": "UPI/DR/933662012520/PRTIU JO/ICIC/4436213637/Payme",
+      "paymentPurpose": "UPI/DR/933662012520/PRTIU JO/ICIC/4436213637/Payme",
+      "debit": 100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-14T00:00:00",
+      "counterpartyName": "ACHCr SBIN62964730926021 APSEZ FNLDIV 2",
+      "paymentPurpose": "ACHCr SBIN62964730926021 APSEZ FNLDIV 2",
+      "credit": 60,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-15T00:00:00",
+      "counterpartyName": "/UTIB/mlo.hsah82/UPI",
+      "paymentPurpose": "/UTIB/mlo.hsah82/UPI",
+      "debit": 1265,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-15T00:00:00",
+      "counterpartyName": "INB IMPS362620408575/9577396",
+      "paymentPurpose": "INB IMPS362620408575/9577396",
+      "credit": 1,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-15T00:00:00",
+      "counterpartyName": "INB E mandate",
+      "paymentPurpose": "INB E mandate",
+      "debit": 59,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-15T00:00:00",
+      "counterpartyName": "Canara Robeco asset Manag BILL_CRAMCLT",
+      "paymentPurpose": "Canara Robeco asset Manag BILL_CRAMCLT",
+      "debit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-16T00:00:00",
+      "counterpartyName": "NIPPON I NACH FAIL INSUF BAL SBIN1573080711539626",
+      "paymentPurpose": "NIPPON I NACH FAIL INSUF BAL SBIN1573080711539626",
+      "debit": 295,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-16T00:00:00",
+      "counterpartyName": "UPI/DR/917010417925/Amazon I/YESB/amazon@yap/You",
+      "paymentPurpose": "UPI/DR/917010417925/Amazon I/YESB/amazon@yap/You",
+      "debit": 359,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-16T00:00:00",
+      "counterpartyName": "UPI/CR/515565106536/PRTIU JO/ICIC/4436213637/NA",
+      "paymentPurpose": "UPI/CR/515565106536/PRTIU JO/ICIC/4436213637/NA",
+      "credit": 359,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-17T00:00:00",
+      "counterpartyName": "UPI/CR/206181006538/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "paymentPurpose": "UPI/CR/206181006538/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "credit": 10000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-18T00:00:00",
+      "counterpartyName": "ATMCard AMC 652294*0719",
+      "paymentPurpose": "ATMCard AMC 652294*0719",
+      "debit": 147.5,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-20T00:00:00",
+      "counterpartyName": "UPI/DR/813375385041/LT VIJYA/PYTM/paytm-",
+      "paymentPurpose": "UPI/DR/813375385041/LT VIJYA/PYTM/paytm-",
+      "debit": 410,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-20T00:00:00",
+      "counterpartyName": "/PYTM/lrkdnetaln/Paymen",
+      "paymentPurpose": "/PYTM/lrkdnetaln/Paymen",
+      "debit": 40,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-20T00:00:00",
+      "counterpartyName": "UPI/DR/295756259456/Iskcon S/PYTM/paytmqr281/Payme",
+      "paymentPurpose": "UPI/DR/295756259456/Iskcon S/PYTM/paytmqr281/Payme",
+      "debit": 510,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-20T00:00:00",
+      "counterpartyName": "UPI/DR/328690661255/Iskcon S/PYTM/paytmqr281/Payme",
+      "paymentPurpose": "UPI/DR/328690661255/Iskcon S/PYTM/paytmqr281/Payme",
+      "debit": 40,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-22T00:00:00",
+      "counterpartyName": "4107*NEXTBILLION",
+      "paymentPurpose": "4107*NEXTBILLION",
+      "credit": 345.02,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-23T00:00:00",
+      "counterpartyName": "UPI/DR/133657303331/Oncoi n /PYTM/bsbga-0725/Payme",
+      "paymentPurpose": "UPI/DR/133657303331/Oncoi n /PYTM/bsbga-0725/Payme",
+      "debit": 82,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-24T00:00:00",
+      "counterpartyName": "UPI/DR/098879601348/Oncoi n /PYTM/bsbga-0725/Payme",
+      "paymentPurpose": "UPI/DR/098879601348/Oncoi n /PYTM/bsbga-0725/Payme",
+      "debit": 36,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-26T00:00:00",
+      "counterpartyName": "UPI/DR/311390439575/H P Cent/PYTM/paytmqr281/Paym",
+      "paymentPurpose": "UPI/DR/311390439575/H P Cent/PYTM/paytmqr281/Paym",
+      "debit": 224,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-26T00:00:00",
+      "counterpartyName": "UPI/DR/769500805616/ADMND A/FDRL/BHARATPE.9/Pay t",
+      "paymentPurpose": "UPI/DR/769500805616/ADMND A/FDRL/BHARATPE.9/Pay t",
+      "debit": 80,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-26T00:00:00",
+      "counterpartyName": "UPI/DR/969035129401/Incolg K/PYTM/paytmqr281/Payme",
+      "paymentPurpose": "UPI/DR/969035129401/Incolg K/PYTM/paytmqr281/Payme",
+      "debit": 280,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-26T00:00:00",
+      "counterpartyName": "UPI/DR/597107608948/ONO AS",
+      "paymentPurpose": "UPI/DR/597107608948/ONO AS",
+      "debit": 160,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-26T00:00:00",
+      "counterpartyName": "",
+      "paymentPurpose": "",
+      "debit": 30,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-26T00:00:00",
+      "counterpartyName": "UPI/DR/775381869687/DIAKKS GI/BARB/7996428326/NA",
+      "paymentPurpose": "UPI/DR/775381869687/DIAKKS GI/BARB/7996428326/NA",
+      "debit": 10,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-27T00:00:00",
+      "counterpartyName": "UPI/CR/575685634471/PETNM MA/BARB/6874063315/Paym",
+      "paymentPurpose": "UPI/CR/575685634471/PETNM MA/BARB/6874063315/Paym",
+      "credit": 800,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-27T00:00:00",
+      "counterpartyName": "UPI/CR/361511580892/Paytm/P YTM/walletmone/NA",
+      "paymentPurpose": "UPI/CR/361511580892/Paytm/P YTM/walletmone/NA",
+      "credit": 1290,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-27T00:00:00",
+      "counterpartyName": "UPI/DR/336518660838/EACSHP L",
+      "paymentPurpose": "UPI/DR/336518660838/EACSHP L",
+      "debit": 25,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-28T00:00:00",
+      "counterpartyName": "ACHCr HDFC67117711556653",
+      "paymentPurpose": "ACHCr HDFC67117711556653",
+      "credit": 64,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-08-28T00:00:00",
+      "counterpartyName": "UPI/DR/354596769911/Oncoi n /PYTM/bsbga-0725/Payme",
+      "paymentPurpose": "UPI/DR/354596769911/Oncoi n /PYTM/bsbga-0725/Payme",
+      "debit": 40,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-08-30T00:00:00",
+      "counterpartyName": "/UTIB/mlo.hsah82/UPI",
+      "paymentPurpose": "/UTIB/mlo.hsah82/UPI",
+      "debit": 1501,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-08-31T00:00:00",
+      "counterpartyName": "UPI/CR/713957466075/TTPUG",
+      "paymentPurpose": "UPI/CR/713957466075/TTPUG",
+      "credit": 500,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-09-01T00:00:00",
+      "counterpartyName": "1190*PHYSICSWALLAH",
+      "paymentPurpose": "1190*PHYSICSWALLAH",
+      "credit": 44001,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-01T00:00:00",
+      "counterpartyName": "ACHCr NACH74732034072781 LIFE",
+      "paymentPurpose": "ACHCr NACH74732034072781 LIFE",
+      "credit": 45,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-09-03T00:00:00",
+      "counterpartyName": "UPI/DR/591054257920/SPHSKU S/PYTM/paytmqr18x/Payme",
+      "paymentPurpose": "UPI/DR/591054257920/SPHSKU S/PYTM/paytmqr18x/Payme",
+      "debit": 267,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-04T00:00:00",
+      "counterpartyName": "UPI/DR/508580401318/Puja Rani/AIRP/Q883053546/Pay",
+      "paymentPurpose": "UPI/DR/508580401318/Puja Rani/AIRP/Q883053546/Pay",
+      "debit": 20,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-04T00:00:00",
+      "counterpartyName": "UPI/DR/441159514585/Oncoi n /PYTM/bsbga-0725/Payme",
+      "paymentPurpose": "UPI/DR/441159514585/Oncoi n /PYTM/bsbga-0725/Payme",
+      "debit": 133,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-04T00:00:00",
+      "counterpartyName": "UPI/DR/018949302127/Domnap B/UTIB/gpay-11235/Payme",
+      "paymentPurpose": "UPI/DR/018949302127/Domnap B/UTIB/gpay-11235/Payme",
+      "debit": 70,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-07T00:00:00",
+      "counterpartyName": "ICIC11030637638520 TP ACH NIPPON",
+      "paymentPurpose": "ICIC11030637638520 TP ACH NIPPON",
+      "debit": 4000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-07T00:00:00",
+      "counterpartyName": "30833301",
+      "paymentPurpose": "30833301",
+      "credit": 85168,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-07T00:00:00",
+      "counterpartyName": "ACHCr NACH77317725210255",
+      "paymentPurpose": "ACHCr NACH77317725210255",
+      "credit": 20,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-09-07T00:00:00",
+      "counterpartyName": "UPI/DR/444849116794/CSOBLT H/FDRL/BHARATPE.9/Pay",
+      "paymentPurpose": "UPI/DR/444849116794/CSOBLT H/FDRL/BHARATPE.9/Pay",
+      "debit": 40,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-07T00:00:00",
+      "counterpartyName": "UPI/DR/105080784687/The Zaik/PYTM/paytmqr2n5/Paym",
+      "paymentPurpose": "UPI/DR/105080784687/The Zaik/PYTM/paytmqr2n5/Paym",
+      "debit": 170,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-09T00:00:00",
+      "counterpartyName": "D /PYTM/paytm-",
+      "paymentPurpose": "D /PYTM/paytm-",
+      "debit": 452,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-09T00:00:00",
+      "counterpartyName": "UPI/DR/628608506577/OHIA SAH/BARB/hubsalon@y/Paym",
+      "paymentPurpose": "UPI/DR/628608506577/OHIA SAH/BARB/hubsalon@y/Paym",
+      "debit": 400,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-10T00:00:00",
+      "counterpartyName": "UPI/CR/705844757522/GPGMN J/SBIN/6746141232/Payme",
+      "paymentPurpose": "UPI/CR/705844757522/GPGMN J/SBIN/6746141232/Payme",
+      "credit": 35000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-09-10T00:00:00",
+      "counterpartyName": "UPI/DR/441899226796/PRTIU JO/ICIC/4436213637/Payme",
+      "paymentPurpose": "UPI/DR/441899226796/PRTIU JO/ICIC/4436213637/Payme",
+      "debit": 68000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-10T00:00:00",
+      "counterpartyName": "CMF-BillPay YO",
+      "paymentPurpose": "CMF-BillPay YO",
+      "debit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-10T00:00:00",
+      "counterpartyName": "UPI/DR/936315853302/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "paymentPurpose": "UPI/DR/936315853302/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "debit": 30000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-11T00:00:00",
+      "counterpartyName": "ACHDr HDFC70660782563791",
+      "paymentPurpose": "ACHDr HDFC70660782563791",
+      "debit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-12T00:00:00",
+      "counterpartyName": "INB IMPS170098483752/0000000",
+      "paymentPurpose": "INB IMPS170098483752/0000000",
+      "credit": 1,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-09-13T00:00:00",
+      "counterpartyName": "ROBMFSIP-BillPay",
+      "paymentPurpose": "ROBMFSIP-BillPay",
+      "debit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-13T00:00:00",
+      "counterpartyName": "D /PYTM/paytm-",
+      "paymentPurpose": "D /PYTM/paytm-",
+      "debit": 237.13,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-13T00:00:00",
+      "counterpartyName": "UPI/DR/844297565905/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "paymentPurpose": "UPI/DR/844297565905/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "debit": 21000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-15T00:00:00",
+      "counterpartyName": "UPI/DR/838662207665/Oncoi n /PYTM/bsbga-0725/Payme",
+      "paymentPurpose": "UPI/DR/838662207665/Oncoi n /PYTM/bsbga-0725/Payme",
+      "debit": 47,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-17T00:00:00",
+      "counterpartyName": "YONOABDS926626123884,MIR ASSMFSIP-BillPay",
+      "paymentPurpose": "YONOABDS926626123884,MIR ASSMFSIP-BillPay",
+      "debit": 2500,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-17T00:00:00",
+      "counterpartyName": "UPI/DR/706717757738/Hnbeclr d/PYTM/paytmqr3ql/Pay",
+      "paymentPurpose": "UPI/DR/706717757738/Hnbeclr d/PYTM/paytmqr3ql/Pay",
+      "debit": 60,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-17T00:00:00",
+      "counterpartyName": "",
+      "paymentPurpose": "",
+      "debit": 150,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-17T00:00:00",
+      "counterpartyName": "UPI/DR/610500855895/Hnbeclr d/PYTM/paytmqr1oj/Pay",
+      "paymentPurpose": "UPI/DR/610500855895/Hnbeclr d/PYTM/paytmqr1oj/Pay",
+      "debit": 100,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-17T00:00:00",
+      "counterpartyName": "UPI/DR/933317073839/EPULP",
+      "paymentPurpose": "UPI/DR/933317073839/EPULP",
+      "debit": 120,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-18T00:00:00",
+      "counterpartyName": "ITDTAX REFUND 2023-24 BOPPJ1290F",
+      "paymentPurpose": "ITDTAX REFUND 2023-24 BOPPJ1290F",
+      "credit": 440,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-18T00:00:00",
+      "counterpartyName": "RE/SBIN/7336340282/Pay",
+      "paymentPurpose": "RE/SBIN/7336340282/Pay",
+      "credit": 11,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-18T00:00:00",
+      "counterpartyName": "UPI/DR/283829803373/Oncoi n /PYTM/bsbga-0725/Payme",
+      "paymentPurpose": "UPI/DR/283829803373/Oncoi n /PYTM/bsbga-0725/Payme",
+      "debit": 187,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-20T00:00:00",
+      "counterpartyName": "RE/SBIN/7336340282/Pay",
+      "paymentPurpose": "RE/SBIN/7336340282/Pay",
+      "credit": 11,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-20T00:00:00",
+      "counterpartyName": "UPI/DR/726062714863/3852217 2/SBIN/1563980805/Paym",
+      "paymentPurpose": "UPI/DR/726062714863/3852217 2/SBIN/1563980805/Paym",
+      "debit": 22,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-20T00:00:00",
+      "counterpartyName": "UPI/DR/166902352718/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "paymentPurpose": "UPI/DR/166902352718/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "debit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-21T00:00:00",
+      "counterpartyName": "INB IMPS674458359690/9577396",
+      "paymentPurpose": "INB IMPS674458359690/9577396",
+      "credit": 1,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-09-24T00:00:00",
+      "counterpartyName": "UPI/DR/900442004862/Iskcon S/PYTM/paytmqr281/Payme",
+      "paymentPurpose": "UPI/DR/900442004862/Iskcon S/PYTM/paytmqr281/Payme",
+      "debit": 1814,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-25T00:00:00",
+      "counterpartyName": "INTEREST CREDIT",
+      "paymentPurpose": "INTEREST CREDIT",
+      "credit": 198,
+      "currency": "INR",
+      "paymentType": "interest"
+    },
+    {
+      "transactionDate": "2023-09-26T00:00:00",
+      "counterpartyName": "UPI/CR/433206835745/GCDID SA/SBIN/vs406233@o/UPI",
+      "paymentPurpose": "UPI/CR/433206835745/GCDID SA/SBIN/vs406233@o/UPI",
+      "credit": 949,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-09-26T00:00:00",
+      "counterpartyName": "UPI/DR/418317546753/PETNM MA/BARB/6874063315/Paym",
+      "paymentPurpose": "UPI/DR/418317546753/PETNM MA/BARB/6874063315/Paym",
+      "debit": 529,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-27T00:00:00",
+      "counterpartyName": "I /ICIC/urvashi.si/Payme",
+      "paymentPurpose": "I /ICIC/urvashi.si/Payme",
+      "debit": 10000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-09-27T00:00:00",
+      "counterpartyName": "UPI/DR/680746965284/DKNUBR K/PYTM/paytmqr281/Payme",
+      "paymentPurpose": "UPI/DR/680746965284/DKNUBR K/PYTM/paytmqr281/Payme",
+      "debit": 300,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-30T00:00:00",
+      "counterpartyName": "UPI/DR/975726604905/Delhi Me/YESB/DELHIMETRO/Paym",
+      "paymentPurpose": "UPI/DR/975726604905/Delhi Me/YESB/DELHIMETRO/Paym",
+      "debit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-30T00:00:00",
+      "counterpartyName": "UPI/DR/648244556859/Delhi Me/YESB/DELHIMETRO/Paym",
+      "paymentPurpose": "UPI/DR/648244556859/Delhi Me/YESB/DELHIMETRO/Paym",
+      "debit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-09-30T00:00:00",
+      "counterpartyName": "SI/PYTM/paytmqrdz7/Paym",
+      "paymentPurpose": "SI/PYTM/paytmqrdz7/Paym",
+      "debit": 300,
+      "currency": "INR",
+      "paymentType": "direct_debit"
+    },
+    {
+      "transactionDate": "2023-09-30T00:00:00",
+      "counterpartyName": "UPI/CR/648233159420/TTPUG",
+      "paymentPurpose": "UPI/CR/648233159420/TTPUG",
+      "credit": 5000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-09-30T00:00:00",
+      "counterpartyName": "UPI/DR/540652043324/Ehpcp Le/UTIB/gpay-11201/Payme",
+      "paymentPurpose": "UPI/DR/540652043324/Ehpcp Le/UTIB/gpay-11201/Payme",
+      "debit": 6000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-01T00:00:00",
+      "counterpartyName": "CMF-BillPay YO",
+      "paymentPurpose": "CMF-BillPay YO",
+      "debit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-02T00:00:00",
+      "counterpartyName": "UPI/CR/589082150553/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "paymentPurpose": "UPI/CR/589082150553/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "credit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-10-02T00:00:00",
+      "counterpartyName": "UPI/DR/067997979615/amazon p/YESB/amazonpayg/You",
+      "paymentPurpose": "UPI/DR/067997979615/amazon p/YESB/amazonpayg/You",
+      "debit": 1355,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-07T00:00:00",
+      "counterpartyName": "ICIC11030637638520 TP ACH NIPPON",
+      "paymentPurpose": "ICIC11030637638520 TP ACH NIPPON",
+      "debit": 4000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-07T00:00:00",
+      "counterpartyName": "77312441",
+      "paymentPurpose": "77312441",
+      "credit": 88067,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-08T00:00:00",
+      "counterpartyName": "UPI/DR/703611681144/WOW MOMO/PYTM/paytmqr281/Pay",
+      "paymentPurpose": "UPI/DR/703611681144/WOW MOMO/PYTM/paytmqr281/Pay",
+      "debit": 524,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-08T00:00:00",
+      "counterpartyName": "CMF-BillPay YO",
+      "paymentPurpose": "CMF-BillPay YO",
+      "debit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-09T00:00:00",
+      "counterpartyName": "",
+      "paymentPurpose": "",
+      "debit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-09T00:00:00",
+      "counterpartyName": "UPI/DR/155821736809/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "paymentPurpose": "UPI/DR/155821736809/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "debit": 15000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-10T00:00:00",
+      "counterpartyName": "ACHDr HDFC70660782563791",
+      "paymentPurpose": "ACHDr HDFC70660782563791",
+      "debit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-10T00:00:00",
+      "counterpartyName": "UPI/CR/330003622330/Amazon I/YESB/amazon.ref/Refun",
+      "paymentPurpose": "UPI/CR/330003622330/Amazon I/YESB/amazon.ref/Refun",
+      "credit": 199,
+      "currency": "INR",
+      "paymentType": "bank_transfer_in"
+    },
+    {
+      "transactionDate": "2023-10-11T00:00:00",
+      "counterpartyName": "UPI/DR/999264105119/Hnbeclr d/PYTM/paytmqr3ql/Pay",
+      "paymentPurpose": "UPI/DR/999264105119/Hnbeclr d/PYTM/paytmqr3ql/Pay",
+      "debit": 60,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-11T00:00:00",
+      "counterpartyName": "",
+      "paymentPurpose": "",
+      "debit": 20,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-12T00:00:00",
+      "counterpartyName": "ROBMFSIP-BillPay",
+      "paymentPurpose": "ROBMFSIP-BillPay",
+      "debit": 5000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-12T00:00:00",
+      "counterpartyName": "/YESB/padhdimrke/R02 Ph",
+      "paymentPurpose": "/YESB/padhdimrke/R02 Ph",
+      "credit": 195,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-12T00:00:00",
+      "counterpartyName": "UPI/DR/439396217446/PETNM MA/BARB/6874063315/Paym",
+      "paymentPurpose": "UPI/DR/439396217446/PETNM MA/BARB/6874063315/Paym",
+      "debit": 250,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-12T00:00:00",
+      "counterpartyName": "/UTIB/6141705286/Paid",
+      "paymentPurpose": "/UTIB/6141705286/Paid",
+      "credit": 50000,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-12T00:00:00",
+      "counterpartyName": "UPI/DR/357053986694/MSBIC",
+      "paymentPurpose": "UPI/DR/357053986694/MSBIC",
+      "debit": 87,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-14T00:00:00",
+      "counterpartyName": "UPI/DR/882885748340/JSB EVER/PYTM/paytm-",
+      "paymentPurpose": "UPI/DR/882885748340/JSB EVER/PYTM/paytm-",
+      "debit": 60,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-14T00:00:00",
+      "counterpartyName": "UPI/DR/563981669281/ULPN Hos/UTIB/3548808900/Payme",
+      "paymentPurpose": "UPI/DR/563981669281/ULPN Hos/UTIB/3548808900/Payme",
+      "debit": 290,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-14T00:00:00",
+      "counterpartyName": "UPI/DR/489364441208/BBSTBB",
+      "paymentPurpose": "UPI/DR/489364441208/BBSTBB",
+      "debit": 200,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-15T00:00:00",
+      "counterpartyName": "m/UTIB/myntra.pay/UPI",
+      "paymentPurpose": "m/UTIB/myntra.pay/UPI",
+      "debit": 1549,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-15T00:00:00",
+      "counterpartyName": "/UTIB/mlo.hsah82/UPI",
+      "paymentPurpose": "/UTIB/mlo.hsah82/UPI",
+      "debit": 723,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-15T00:00:00",
+      "counterpartyName": "UPI/DR/907160462399/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "paymentPurpose": "UPI/DR/907160462399/NMDSG JO/ICIC/uolagnmdsg/Payme",
+      "debit": 50000,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-15T00:00:00",
+      "counterpartyName": "UPI/DR/737896727986/Jio Prep/PYTM/paytm-",
+      "paymentPurpose": "UPI/DR/737896727986/Jio Prep/PYTM/paytm-",
+      "debit": 149,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-15T00:00:00",
+      "counterpartyName": "YONOABDS916955580163,MIR ASSMFSIP-BillPay",
+      "paymentPurpose": "YONOABDS916955580163,MIR ASSMFSIP-BillPay",
+      "debit": 2500,
+      "currency": "INR"
+    },
+    {
+      "transactionDate": "2023-10-15T00:00:00",
+      "counterpartyName": "UPI/DR/860272897854/ARBCU",
+      "paymentPurpose": "UPI/DR/860272897854/ARBCU",
+      "debit": 600,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    },
+    {
+      "transactionDate": "2023-10-15T00:00:00",
+      "counterpartyName": "UPI/DR/315099445537/CRSNIT",
+      "paymentPurpose": "UPI/DR/315099445537/CRSNIT",
+      "debit": 290,
+      "currency": "INR",
+      "paymentType": "bank_transfer_out"
+    }
+  ]
+}

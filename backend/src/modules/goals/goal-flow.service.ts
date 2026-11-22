@@ -11,7 +11,7 @@ import type {
   GoalFlowNodeKind,
   GoalFlowResponse,
 } from '../../contracts';
-import { Goal, GoalContribution } from '../../entities';
+import { Goal } from '../../entities';
 import { Budget } from '../../entities/budget.entity';
 import type { Category } from '../../entities/category.entity';
 import { DataEntry, DataEntryType } from '../../entities/data-entry.entity';
@@ -37,6 +37,7 @@ import {
   toDateOnly,
   toNumber,
 } from './goal-money.util';
+import { GoalProgressService } from './goal-progress.service';
 
 /**
  * How many merchants a category shows before the tail is rolled up. A sankey
@@ -81,8 +82,7 @@ export class GoalFlowService {
   constructor(
     @InjectRepository(Goal)
     private readonly goalRepository: Repository<Goal>,
-    @InjectRepository(GoalContribution)
-    private readonly contributionRepository: Repository<GoalContribution>,
+    private readonly progressService: GoalProgressService,
     @InjectRepository(Budget)
     private readonly budgetRepository: Repository<Budget>,
     @InjectRepository(Transaction)
@@ -109,7 +109,7 @@ export class GoalFlowService {
     const window = computeMonthRange(anchor);
     const currency = await this.getWorkspaceCurrency(workspaceId);
 
-    const [allBudgets, contributed] = await Promise.all([
+    const [allBudgets, progress] = await Promise.all([
       this.budgetRepository.find({
         where: { workspaceId, goalId },
         relations: {
@@ -117,8 +117,9 @@ export class GoalFlowService {
         },
         order: { name: 'ASC' },
       }),
-      this.sumContributions(workspaceId, goalId),
+      this.progressService.progress(workspaceId, [goal]),
     ]);
+    const contributed = progress.get(goal.id)?.amount ?? 0;
 
     // A budget that had ended before this month, or has not started yet, is not
     // part of the month's plan — drawing its limit would inflate `plannedTotal`
@@ -574,17 +575,6 @@ export class GoalFlowService {
       .andWhere('t.is_duplicate = false')
       .andWhere('t.transfer_pair_id IS NULL')
       .andWhere(flowsSql('t'));
-  }
-
-  private async sumContributions(workspaceId: string, goalId: string): Promise<number> {
-    const row = await this.contributionRepository
-      .createQueryBuilder('contribution')
-      .select('COALESCE(SUM(contribution.amount), 0)', 'total')
-      .where('contribution.workspace_id = :workspaceId', { workspaceId })
-      .andWhere('contribution.goal_id = :goalId', { goalId })
-      .getRawOne<{ total: string }>();
-
-    return toNumber(row?.total);
   }
 
   private async getWorkspaceCurrency(workspaceId: string): Promise<string> {

@@ -1,4 +1,5 @@
 import * as Schema from 'effect/Schema';
+import * as Struct from 'effect/Struct';
 import { DateOnly, DecimalString, Timestamp, type Wire } from '../common/wire';
 import { StatementStatus } from '../statements/statement-list';
 import { TransactionListItem } from '../transactions/transaction-list';
@@ -165,6 +166,9 @@ export type FilePermissionItem = Wire<typeof FilePermissionItem>;
 export const StatementTransaction = Schema.Struct({
   ...TransactionListItem.fields,
   amount: Schema.NullOr(DecimalString),
+  /** The parts of one split share the group: the drawer offers to undo it. */
+  splitGroupId: Schema.optional(Schema.NullOr(Schema.String)),
+  splitIndex: Schema.optional(Schema.NullOr(Schema.Number)),
 });
 export type StatementTransaction = Wire<typeof StatementTransaction>;
 
@@ -192,7 +196,10 @@ export const SharedFileAccess = Schema.Struct({
     fileSize: Schema.Number,
     accountNumber: Schema.NullOr(Schema.String),
   }),
-  transactions: Schema.Array(StatementTransaction),
+  /** No split markers: an anonymous reader has no use for how the owner filed the rows. */
+  transactions: Schema.Array(
+    StatementTransaction.mapFields(Struct.omit(['splitGroupId', 'splitIndex'])),
+  ),
   permission: SharePermissionLevel,
   canDownload: Schema.Boolean,
 });

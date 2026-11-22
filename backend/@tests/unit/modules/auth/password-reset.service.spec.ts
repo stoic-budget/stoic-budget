@@ -21,6 +21,7 @@ describe('PasswordResetService', () => {
   let mailerService: { send: Mock };
   let auditService: { createEvent: Mock };
   let mcpOAuthGrants: { revokeAllOfUser: Mock };
+  let calendarFeeds: { revokeAllOf: Mock };
   let service: PasswordResetService;
 
   const activeUser = {
@@ -44,6 +45,7 @@ describe('PasswordResetService', () => {
     mailerService = { send: vi.fn().mockResolvedValue(true) };
     auditService = { createEvent: vi.fn().mockResolvedValue({}) };
     mcpOAuthGrants = { revokeAllOfUser: vi.fn().mockResolvedValue(undefined) };
+    calendarFeeds = { revokeAllOf: vi.fn() };
 
     service = new PasswordResetService(
       userRepository as never,
@@ -53,6 +55,7 @@ describe('PasswordResetService', () => {
       { get: (key: string) => (key === 'JWT_SECRET' ? SECRET : undefined) } as never,
       auditService as never,
       mcpOAuthGrants as never,
+      calendarFeeds as never,
     );
   });
 
@@ -145,6 +148,25 @@ describe('PasswordResetService', () => {
       expect(tokenRepository.save.mock.calls[0][0].usedAt).toBeInstanceOf(Date);
       // Apps connected over OAuth hold tokens of their own: they go too, in every workspace.
       expect(mcpOAuthGrants.revokeAllOfUser).toHaveBeenCalledWith('user-1', 'password_reset');
+    });
+
+    it('ends the calendar feed links of every workspace', async () => {
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser });
+
+      await service.resetPassword('plain-token', 'BrandNewPass1');
+
+      expect(calendarFeeds.revokeAllOf).toHaveBeenCalledWith('user-1');
+    });
+
+    it('spends the link as soon as the password changed, so a later failure cannot reuse it', async () => {
+      tokenRepository.findOne.mockResolvedValue(validRecord());
+      userRepository.findOne.mockResolvedValue({ ...activeUser });
+      calendarFeeds.revokeAllOf.mockRejectedValueOnce(new Error('database went away'));
+
+      await expect(service.resetPassword('plain-token', 'BrandNewPass1')).rejects.toThrow();
+
+      expect(tokenRepository.save.mock.calls[0][0].usedAt).toBeInstanceOf(Date);
     });
 
     it('logs the completed reset without the password, hash or token', async () => {

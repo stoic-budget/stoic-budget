@@ -266,6 +266,16 @@
     }
   }
 
+  // A row that ends in a status sentence, not a figure: regular weight, and it
+  // wraps before it pushes the name out of a narrow row.
+  &__row--status &__row-trailing {
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 55%;
+    font-weight: $seneca-font-weight-regular;
+    text-align: right;
+  }
+
   &__amount--positive {
     color: $seneca-color-money-up;
 

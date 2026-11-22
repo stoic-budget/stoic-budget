@@ -15,7 +15,9 @@ import { ContributionDrawer } from './components/ContributionDrawer';
 import { GoalCard } from './components/GoalCard';
 import { GoalCardSkeleton } from './components/GoalCardSkeleton';
 import { GoalFormDrawer } from './components/GoalFormDrawer';
+import { useFollowableAccounts } from './hooks/useFollowableAccounts';
 import { EMPTY_GOAL_FORM, type Goal, type GoalFormData, useGoals } from './hooks/useGoals';
+import { followsAccount } from './lib/goal-account';
 
 export default function GoalsPage() {
   const t = useIntlayer('goalsPage');
@@ -35,6 +37,7 @@ export default function GoalsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Goal | null>(null);
   const [form, setForm] = useState<GoalFormData>(EMPTY_GOAL_FORM);
+  const accounts = useFollowableAccounts(formOpen, editing?.account ?? null);
 
   const [contributing, setContributing] = useState<Goal | null>(null);
   const [amount, setAmount] = useState('');
@@ -53,6 +56,7 @@ export default function GoalsPage() {
       name: goal.name,
       targetAmount: goal.targetAmount,
       targetDate: goal.targetDate ?? '',
+      walletId: goal.account?.id ?? null,
     });
     setFormOpen(true);
   };
@@ -174,9 +178,12 @@ export default function GoalsPage() {
             }}
             actions={
               <>
-                <Button size="small" variant="outlined" onClick={() => openContribution(goal)}>
-                  {t.addContribution}
-                </Button>
+                {/* A goal following an account fills itself; its card says so. */}
+                {!followsAccount(goal) && (
+                  <Button size="small" variant="outlined" onClick={() => openContribution(goal)}>
+                    {t.addContribution}
+                  </Button>
+                )}
                 <Button size="small" onClick={() => openEdit(goal)}>
                   {t.edit}
                 </Button>
@@ -195,6 +202,7 @@ export default function GoalsPage() {
         form={form}
         saving={saving}
         currentCover={editing?.cover ?? null}
+        accounts={accounts}
         labels={{
           name: t.nameLabel.value,
           target: t.targetLabel.value,

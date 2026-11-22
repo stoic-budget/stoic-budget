@@ -68,7 +68,7 @@ export interface SubscriptionWorkspaceMember {
 export interface SubscriptionFormData {
   vendorName: string;
   amount: number | '';
-  frequency: 'weekly' | 'monthly' | 'quarterly' | 'annual';
+  frequency: SubscriptionRow['frequency'];
   currency: string;
   categoryId: string;
   nextChargeDate: string;

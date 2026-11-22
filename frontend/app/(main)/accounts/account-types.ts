@@ -1,3 +1,4 @@
+import { resolveBankLogo } from '@bank-logos';
 import {
   Banknote,
   CreditCard,
@@ -32,6 +33,14 @@ export const accountGroupOf = (type: WalletType): AccountGroup =>
   BY_TYPE.get(type)?.group ?? 'everyday';
 
 export const accountIconOf = (type: WalletType): LucideIcon => BY_TYPE.get(type)?.icon ?? Landmark;
+
+/**
+ * Whether the account counts in net worth. Only an explicit `false` leaves it
+ * out: a list cached from before the setting existed has no field, and those
+ * accounts all counted.
+ */
+export const countsInNetWorth = (account: { includeInNetWorth?: boolean }): boolean =>
+  account.includeInNetWorth !== false;
 
 /** A debt's balance is what is owed, kept below zero; it is shown as a positive "owed". */
 export const isDebtType = (type: WalletType): boolean => accountGroupOf(type) === 'debts';
@@ -86,8 +95,11 @@ const BANK_LABELS: Record<string, string> = {
   dcu: 'DCU',
 };
 
-export const statementBankLabel = (bankName: string): string | null =>
-  BANK_LABELS[bankName] ?? null;
+/** A bank missing above goes by its name in the bank list; "other" says nothing. */
+export const statementBankLabel = (bankName: string): string | null => {
+  const logo = resolveBankLogo(bankName);
+  return BANK_LABELS[bankName] ?? (logo.key === 'other' ? null : logo.displayName);
+};
 
 /** The muted line under an account's name: "ACME Bank · ••0001". */
 export function accountSubtitle(account: Pick<WalletItem, 'bankName' | 'accountNumber'>): string {

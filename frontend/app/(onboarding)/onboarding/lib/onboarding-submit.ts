@@ -59,7 +59,6 @@ async function writeTax(
   api: OnboardingApi,
   data: OnboardingData,
   scoped: RequestConfig,
-  taxYear: number,
 ): Promise<void> {
   if (!data.taxCountry) {
     return;
@@ -69,16 +68,6 @@ async function writeTax(
     { code: data.taxCountry } satisfies ContractInput<'SetJurisdictionBody'>,
     scoped,
   );
-  if (data.taxpayerType) {
-    await api.put(
-      '/income-tax/profile',
-      {
-        taxYear,
-        taxpayerType: data.taxpayerType,
-      } satisfies ContractInput<'UpdateIncomeTaxProfileBody'>,
-      scoped,
-    );
-  }
 }
 
 async function writeBusiness(
@@ -121,12 +110,11 @@ export async function submitOnboarding(
   data: OnboardingData,
   mode: OnboardingMode,
   currentWorkspaceId: string | null,
-  taxYear: number = new Date().getFullYear(),
 ): Promise<OnboardingSubmitResult> {
   const workspaceId = await prepareWorkspace(api, data, mode, currentWorkspaceId);
   const scoped: RequestConfig = { headers: { 'X-Workspace-Id': workspaceId } };
 
-  await writeTax(api, data, scoped, taxYear);
+  await writeTax(api, data, scoped);
   await writeBusiness(api, data, scoped);
 
   if (mode === 'create-workspace') {
