@@ -36,6 +36,8 @@ interface Book {
   events: TradeEvent[];
   /** How many of `events` were stored before this run. */
   stored: number;
+  /** Stored trades a row of this run already matched as the same trade. */
+  matched: Set<string>;
   currency: string | null;
   touched: boolean;
 }
@@ -109,6 +111,15 @@ export class TradesTarget implements ImportTarget {
         draft.currency ?? found.currency ?? found.holding.priceCurrency ?? ctx.currency;
       if (found.currency && found.currency !== currency) {
         results.push({ index, status: 'error', reason: 'currency' });
+        continue;
+      }
+      // The same sheet again: a row that is a trade already stored is skipped.
+      const twin = found.events
+        .slice(0, found.stored)
+        .find(stored => !found.matched.has(stored.id) && sameTrade(stored, normalized));
+      if (twin) {
+        found.matched.add(twin.id);
+        results.push({ index, status: 'skipped', reason: 'duplicate' });
         continue;
       }
       const event: TradeEvent = { ...normalized, id: `row-${index}` };
@@ -216,6 +227,7 @@ export class TradesTarget implements ImportTarget {
       isNew,
       events: existing.map(toTradeEvent),
       stored: existing.length,
+      matched: new Set(),
       currency: existing[0]?.currency ?? null,
       touched: false,
     };
@@ -282,7 +294,10 @@ export class TradesTarget implements ImportTarget {
         ctx.updated.push({
           kind: 'investment_holding',
           id: holding.id,
-          before: { quantity: holding.quantity, price: holding.price },
+          // The quantity as typed, and by how much the import's splits moved the
+          // price: an undo takes that back off whatever the price is by then,
+          // keeping a quote or an edit made since.
+          before: { quantity: holding.quantity, priceRatio: ratio },
         });
       }
       await repo.update({ id: holding.id, workspaceId: ctx.workspaceId }, { quantity, price });
@@ -310,4 +325,20 @@ export function parseRatio(raw: string): { to: number; from: number } | null {
   const to = Number(match[1].replace(',', '.'));
   const from = Number(match[2].replace(',', '.'));
   return to > 0 && from > 0 ? { to, from } : null;
+}
+
+/** Two trades of one holding that say the same thing: kind, day and every figure. */
+function sameTrade(stored: TradeEvent, row: Omit<TradeEvent, 'id'>): boolean {
+  const same = (a: number | null, b: number | null) =>
+    a === null || b === null ? a === b : Math.abs(a - b) < 1e-9;
+  return (
+    stored.kind === row.kind &&
+    stored.date === row.date &&
+    same(stored.quantity, row.quantity) &&
+    same(stored.price, row.price) &&
+    same(stored.fee, row.fee) &&
+    same(stored.amount, row.amount) &&
+    same(stored.splitFrom, row.splitFrom) &&
+    same(stored.splitTo, row.splitTo)
+  );
 }

@@ -474,4 +474,77 @@ describe('Investment trades (e2e)', () => {
     );
     expect(count).toBe(0);
   });
+
+  describe('importing and undoing safely', () => {
+    const sheet = (symbol: string) => ({
+      target: 'trades',
+      mapping: { date: 0, kind: 1, symbol: 2, quantity: 3, price: 4 },
+      rows: [['2025-02-01', 'Buy', symbol, '5', '10']],
+      options: { currency: 'USD', investmentAccountId: accountId },
+    });
+    const newHolding = async (symbol: string, price = 10) =>
+      (
+        await call(owner, 'post', `/investments/accounts/${accountId}/holdings`)
+          .send({ symbol, name: `ACME ${symbol}`, assetClass: 'stock', price, priceCurrency: 'USD' })
+          .expect(201)
+      ).body.id as string;
+
+    it('skips the trades of a sheet imported a second time', async () => {
+      const id = await newHolding('TWICE');
+      await call(owner, 'post', '/entity-imports').send(sheet('TWICE')).expect(201);
+      const dry = await call(owner, 'post', '/entity-imports')
+        .send({ ...sheet('TWICE'), dryRun: true })
+        .expect(201);
+      expect(dry.body.rows[0]).toMatchObject({ status: 'skipped', reason: 'duplicate' });
+      // Nothing new in it: refused like any sheet with no row to import.
+      const again = await call(owner, 'post', '/entity-imports').send(sheet('TWICE')).expect(400);
+      expect(again.body.error.code).toBe('IMPORT_NO_VALID_ROWS');
+      expect(await holding(id)).toMatchObject({ quantity: 5 });
+    });
+
+    it('never leaves a sale uncovered when an undo and a sale race', async () => {
+      // Raced a few times over: a lost race shows only now and then.
+      for (let round = 0; round < 8; round += 1) {
+        const symbol = `RACE${round}`;
+        const id = await newHolding(symbol);
+        const run = await call(owner, 'post', '/entity-imports').send(sheet(symbol)).expect(201);
+        const [undo, sell] = await Promise.all([
+          call(owner, 'delete', `/entity-imports/${run.body.batchId}`),
+          call(owner, 'post', `/investments/holdings/${id}/trades`).send({
+            kind: 'sell',
+            date: '2025-03-01',
+            quantity: 5,
+            price: 12,
+          }),
+        ]);
+        // One of them wins; the holding's trades still replay either way.
+        expect([undo.status, sell.status].filter(status => status < 300)).toHaveLength(1);
+        await call(owner, 'get', `/investments/holdings/${id}/lots`).expect(200);
+      }
+    });
+
+    it('keeps a price changed after the import when the import is undone', async () => {
+      const id = await newHolding('KEEPP');
+      const run = await call(owner, 'post', '/entity-imports').send(sheet('KEEPP')).expect(201);
+      await call(owner, 'patch', `/investments/holdings/${id}`).send({ price: 25 }).expect(200);
+      await call(owner, 'delete', `/entity-imports/${run.body.batchId}`).expect(200);
+      expect(await holding(id)).toMatchObject({ price: 25 });
+    });
+
+    it('answers 400, not 500, for a quantity or a ratio below what is stored', async () => {
+      const id = await newHolding('TINY');
+      for (const body of [
+        { kind: 'buy', date: '2025-02-01', quantity: 0.000000004, price: 10 },
+        { kind: 'split', date: '2025-02-01', splitFrom: 1, splitTo: 1e-9 },
+      ]) {
+        await call(owner, 'post', `/investments/holdings/${id}/trades`).send(body).expect(400);
+      }
+      await call(owner, 'post', `/investments/holdings/${id}/trades`)
+        .send({ kind: 'buy', date: '2025-02-01', quantity: 1.000000004, price: 10 })
+        .expect(201);
+      await call(owner, 'post', `/investments/holdings/${id}/trades`)
+        .send({ kind: 'sell', date: '2025-02-02', quantity: 1.000000004, price: 10 })
+        .expect(201);
+    });
+  });
 });

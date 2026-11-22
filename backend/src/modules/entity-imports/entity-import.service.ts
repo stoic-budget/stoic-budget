@@ -37,7 +37,7 @@ import { MetalsService } from '../investments/metals.service';
 import type { TransactionsImportedEvent } from '../notifications/events/notification-events';
 import { categoryByName } from './helpers/category-by-name';
 import { nameKey } from './helpers/import-values';
-import { removeImportedHoldings } from './helpers/undo-holdings';
+import { removeImportedHoldings, restoreUpdatedRefs } from './helpers/undo-holdings';
 import { type ImportTargetKind, TARGET_FIELDS } from './target-aliases';
 import { BudgetsTarget } from './targets/budgets.target';
 import { InvoicesTarget } from './targets/invoices.target';
@@ -318,8 +318,10 @@ export class EntityImportService {
     }
     await this.ensurePermission(userId, workspaceId, batch.target as ImportTargetKind, apiKey);
     const tradeIds = batch.createdRefs.filter(r => r.kind === 'investment_trade').map(r => r.id);
-    await this.tradesService?.assertRemovable(workspaceId, tradeIds);
     const { removed, holdings } = await this.dataSource.transaction(async manager => {
+      // Under the holdings' locks, so a sale entered meanwhile either waits
+      // for the undo or is counted in this check.
+      await this.tradesService?.assertRemovable(workspaceId, tradeIds, manager);
       let count = 0;
       const byKind = (kind: ImportCreatedRef['kind']) =>
         batch.createdRefs.filter(ref => ref.kind === kind).map(ref => ref.id);
@@ -356,14 +358,7 @@ export class EntityImportService {
       );
       count += holdings.removed;
       // Categories created by the import may already be in use elsewhere; they stay.
-      for (const ref of batch.updatedRefs as ImportUpdatedRef[]) {
-        const entity =
-          { subscription: Subscription, budget: Budget, payable: Payable }[ref.kind as 'payable'] ??
-          InvestmentHolding;
-        await manager
-          .getRepository(entity)
-          .update({ id: ref.id, workspaceId }, ref.before as never);
-      }
+      await restoreUpdatedRefs(manager, workspaceId, batch.updatedRefs as ImportUpdatedRef[]);
       await manager.getRepository(ImportBatch).update(batch.id, { undoneAt: new Date() });
       return { removed: count, holdings };
     });

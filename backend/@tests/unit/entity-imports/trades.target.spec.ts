@@ -103,7 +103,7 @@ describe('TradesTarget', () => {
     // (10 − 4) × 3 after the split.
     expect(updates).toEqual([{ id: 'h-fund', quantity: 18 }]);
     expect(ctx.updated).toEqual([
-      { kind: 'investment_holding', id: 'h-fund', before: { quantity: '0' } },
+      { kind: 'investment_holding', id: 'h-fund', before: { quantity: '0', priceRatio: expect.any(Number) } },
     ]);
   });
 

@@ -177,16 +177,31 @@ export class InvestmentTradesService {
     }
   }
 
-  /** Refuses to take these trades away when what stays would oversell a holding. */
-  async assertRemovable(workspaceId: string, tradeIds: string[]): Promise<void> {
+  /**
+   * Refuses to take these trades away when what stays would oversell a
+   * holding. Inside the caller's transaction (`manager`) each holding is
+   * locked first, as a trade written by hand locks it.
+   */
+  async assertRemovable(
+    workspaceId: string,
+    tradeIds: string[],
+    manager: EntityManager = this.dataSource.manager,
+  ): Promise<void> {
     if (tradeIds.length === 0) return;
     const removed = new Set(tradeIds);
-    const touched = await this.tradeRepository.find({
+    const touched = await manager.find(InvestmentTrade, {
       where: { workspaceId, id: In(tradeIds) },
       select: { id: true, holdingId: true },
     });
-    for (const holdingId of new Set(touched.map(trade => trade.holdingId))) {
-      const kept = (await this.load(this.dataSource.manager, workspaceId, holdingId)).filter(
+    const holdingIds = [...new Set(touched.map(trade => trade.holdingId))].sort();
+    for (const holdingId of holdingIds) {
+      await manager.findOne(InvestmentHolding, {
+        where: { id: holdingId, workspaceId },
+        lock: { mode: 'pessimistic_write' },
+      });
+    }
+    for (const holdingId of holdingIds) {
+      const kept = (await this.load(manager, workspaceId, holdingId)).filter(
         trade => !removed.has(trade.id),
       );
       this.replayOrRefuse(kept, null, 'fifo');
