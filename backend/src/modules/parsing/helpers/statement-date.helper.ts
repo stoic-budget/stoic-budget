@@ -91,21 +91,22 @@ export function parseDateParts(text: string, order: NumericDateOrder): DateParts
   }
 
   const dayFirst = value.match(
-    /^(\d{1,2})(?:er)?[\s-]*([a-z]+)\.?,?(?:[\s-]*((?:19|20)\d{2}|\d{2}))?$/,
+    // "18 May 23." closes with a full stop on some statements; "12th Apr" writes the day's ordinal.
+    /^(\d{1,2})(?:er|st|nd|rd|th)?[\s-]*([a-z]+)\.?,?(?:[\s-]*((?:19|20)\d{2}|\d{2}))?\.?$/,
   );
   if (dayFirst) {
     const month = monthFromName(dayFirst[2]);
     return month ? valid({ day: Number(dayFirst[1]), month, year: fullYear(dayFirst[3]) }) : null;
   }
 
-  // "Sep 3", "Sep 3, 2025", "JAN01", and "September 7,2017" as OCR reads it. A
-  // year is 19xx or 20xx: "Jun 18 4239" is a date and a check number.
+  // "Sep 3", "Sep 3, 2025", "JAN01", "JUL 31/24" and "September 7,2017" as OCR
+  // reads it. A year is 19xx or 20xx: "Jun 18 4239" is a date and a check number.
   const monthFirst = value.match(
-    /^([a-z]+)\.?\s*(\d{1,2})(?:,?\s+((?:19|20)\d{2})|,((?:19|20)\d{2}))?,?$/,
+    /^([a-z]+)\.?\s*(\d{1,2})(?:,?\s+((?:19|20)\d{2})|,((?:19|20)\d{2})|\/(\d{2}))?,?$/,
   );
   if (monthFirst) {
     const month = monthFromName(monthFirst[1]);
-    const year = fullYear(monthFirst[3] ?? monthFirst[4]);
+    const year = fullYear(monthFirst[3] ?? monthFirst[4] ?? monthFirst[5]);
     return month ? valid({ day: Number(monthFirst[2]), month, year }) : null;
   }
 
@@ -167,8 +168,10 @@ const FULL_DATE_PATTERNS = [
   /\b\d{4}-\d{2}-\d{2}\b/g,
   /\b(?:19|20)\d{2}([/.])\d{1,2}\1\d{1,2}\b/g,
   /\b\d{1,2}[./-]\d{1,2}[./-](?:\d{4}|\d{2})\b/g,
-  /\b\d{1,2}(?:er)?[\s-]+[a-z]+\.?[\s-]+\d{4}\b/g,
+  /\b\d{1,2}(?:er|st|nd|rd|th)?[\s-]+[a-z]+\.?[\s-]+\d{4}\b/g,
   /\b[a-z]+\.?\s+\d{1,2}(?:,?\s+|,)\d{4}\b/g,
+  // "JUL 31/24": the month, the day and a two-digit year.
+  /\b[a-z]{3}\.?\s+\d{1,2}\/\d{2}\b/g,
   // Glued, as some banks print them: "31AUG23", "02Jul2024".
   /\b\d{1,2}[a-z]{3}(?:\d{4}|\d{2})\b/g,
 ];

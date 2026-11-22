@@ -4,6 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { authUser } from '@/app/test/fixtures/contracts';
 
 const apiPost = vi.hoisted(() => vi.fn());
+const demo = vi.hoisted(() => ({
+  status: null as null | { enabled: boolean; account: { email: string; password: string } | null },
+}));
+
+vi.mock('@/app/hooks/useDemoStatus', () => ({ useDemoStatus: () => demo.status }));
 
 vi.mock('@/app/lib/api', () => ({
   __esModule: true,
@@ -71,6 +76,7 @@ describe('LoginPage locale persistence', () => {
     document.cookie = 'INTLAYER_LOCALE=en; path=/';
     document.cookie = 'intlayer-locale=en; path=/';
     apiPost.mockReset();
+    demo.status = null;
     locationHref = '';
 
     Object.defineProperty(window, 'location', {
@@ -237,5 +243,29 @@ describe('LoginPage locale persistence', () => {
     expect(error?.getAttribute('role')).toBe('alert');
     expect(passwordInput.getAttribute('aria-describedby')).toBe('login-error');
     expect(container.querySelector('.MuiAlert-root')).toBeNull();
+  });
+  it('fills in the shared account on a demo server and offers no password reset', async () => {
+    const account = { email: 'demo@example.com', password: 'demo-pass' };
+    demo.status = { enabled: true, account };
+    await act(async () => {
+      root.render(<LoginPage />);
+      await Promise.resolve();
+    });
+
+    const emailInput = container.querySelector('input[name="email"]') as HTMLInputElement;
+    const passwordInput = container.querySelector('input[name="password"]') as HTMLInputElement;
+    expect(emailInput.value).toBe(account.email);
+    expect(passwordInput.value).toBe(account.password);
+    expect(container.querySelector('a[href="/forgot-password"]')).toBeNull();
+  });
+
+  it('leaves the fields empty and keeps the password reset elsewhere', async () => {
+    await act(async () => {
+      root.render(<LoginPage />);
+      await Promise.resolve();
+    });
+
+    expect((container.querySelector('input[name="email"]') as HTMLInputElement).value).toBe('');
+    expect(container.querySelector('a[href="/forgot-password"]')).toBeTruthy();
   });
 });

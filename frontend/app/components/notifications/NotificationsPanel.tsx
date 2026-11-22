@@ -170,6 +170,7 @@ export function NotificationsPanel() {
 
   return (
     <DrawerShell
+      demoNotice={false}
       isOpen={open}
       onClose={handleClose}
       position="right"

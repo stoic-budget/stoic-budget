@@ -36,6 +36,8 @@ vi.mock('next-themes', () => ({
 
 vi.mock('react-hot-toast', () => ({
   Toaster: () => <div data-testid="toaster" />,
+  default: { remove: vi.fn() },
+  useToasterStore: () => ({ toasts: [] }),
 }));
 
 vi.mock('react-intlayer', () => ({

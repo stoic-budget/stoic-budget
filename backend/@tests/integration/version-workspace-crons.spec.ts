@@ -282,7 +282,7 @@ describe('background jobs leave a past version alone (real Postgres)', () => {
     const payables = job(PayablesService, { payableRepository: repo(Payable) });
 
     const marked = await payables.markOverduePayables();
-    const soon = await payables.findDueSoonPayables(3);
+    const soon = await payables.findDueSoonPayables();
 
     expect(marked.map(row => row.id)).toEqual([overdue.standard]);
     expect((await repo(Payable).findOneByOrFail({ id: overdue.version })).status).toBe(

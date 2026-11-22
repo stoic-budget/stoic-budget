@@ -11,6 +11,13 @@ Configured in `backend/audit-ci.json` and used by `dependency-scan` job:
   the affected APIs (`extractAllTo`/`extractEntryTo`) are never called. The two
   consumers are `backups/backup-archive.service.ts` and
   `parsing/parsers/docx.parser.ts`.
+- `GHSA-fc5q-39xc-vjpf` (picomatch ReDoS), also in `frontend/audit-ci.json` —
+  added 2026-11-18. Every release up to 4.0.7, the newest, is affected, and
+  GitHub withdrew the advisory the same day; npm's audit still reports it.
+  Not reachable here: the only production path is typeorm's tinyglobby matching
+  the entity and migration paths from our own config, and no user input is ever
+  a glob pattern; the frontend copies are build and test tooling. Remove the
+  entry once audit-ci prints `Consider not allowlisting` for it.
 
 The previous entries (`GHSA-cf4h-3jhx-xvhq` underscore, `GHSA-h6q6-9hqw-rwfv` /
 `GHSA-crh6-fp67-6883` / `GHSA-5fg8-2547-mr8q` xmldom, both via `pdf2json`; and

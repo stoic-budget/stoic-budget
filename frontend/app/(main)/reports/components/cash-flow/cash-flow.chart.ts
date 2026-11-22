@@ -18,6 +18,8 @@ const NODE_GAP = 2 * LINE_HEIGHT + 2;
 const VALUE_SPACE = 320;
 const VERTICAL_PADDING = 24;
 export const CASH_FLOW_MIN_HEIGHT = 440;
+/** The categories a shortened sankey folds into one node; stone, like no category. */
+export const OTHER_CATEGORY_ID = 'cat:__other__';
 
 /** A label-sized gap per node of the busiest column, plus room for the values. */
 export function cashFlowChartHeight(data: Pick<CashFlowMapData, 'sankey'>): number {
@@ -89,7 +91,9 @@ export function buildCashFlowSankey(
         return OTHER_TONE_HEX[theme];
       default:
         // No category is not a category: stone, like "Other", never a tone that reads as a signal.
-        if (id === 'cat:__none__' || id.startsWith('sub:__none__')) return OTHER_TONE_HEX[theme];
+        if (id === 'cat:__none__' || id === OTHER_CATEGORY_ID || id.startsWith('sub:__none__')) {
+          return OTHER_TONE_HEX[theme];
+        }
         return categoryTone.get(id) ?? OTHER_TONE_HEX[theme];
     }
   };

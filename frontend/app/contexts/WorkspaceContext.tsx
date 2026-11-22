@@ -92,7 +92,7 @@ type WorkspaceContextType = WorkspaceData & WorkspaceActions;
 
 // Data and actions live in separate contexts so consumers that only need the
 // (stable) actions do not re-render on every loading/error flip.
-const WorkspaceDataContext = createContext<WorkspaceData | undefined>(undefined);
+export const WorkspaceDataContext = createContext<WorkspaceData | undefined>(undefined);
 const WorkspaceActionsContext = createContext<WorkspaceActions | undefined>(undefined);
 
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>;

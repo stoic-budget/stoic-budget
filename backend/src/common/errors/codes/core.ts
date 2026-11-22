@@ -10,6 +10,8 @@ export const CORE_ERRORS = {
   // any 403 that does as "you lost access" and switches workspaces.
   VERSION_READ_ONLY: 'This is a past version and can only be viewed',
   VERSION_OWNER_ONLY: 'Only the owner can open past versions',
+  // Same rule as above: no "workspace" in the message.
+  DEMO_READ_ONLY: 'This is a demo: you can look around, but nothing can be changed',
   WORKSPACE_ONLY_OWNER_CAN_DELETE: 'Only the owner can delete the workspace',
   WORKSPACE_ONLY_OWNER_CAN_MANAGE_ADMINS: 'Only the owner can manage administrators',
   WORKSPACE_ONLY_OWNER_CAN_MANAGE_ADMINS_AND_OWNER:
@@ -27,6 +29,8 @@ export const CORE_ERRORS = {
   MEMBER_PERMISSIONS_ROLE_INVALID: 'Only members have individual permissions',
   TRANSACTION_PRIVATE_NOT_OWNER:
     'Only the person a transaction belongs to can make it private; assign it to yourself first',
+  TRANSACTION_SPLIT_PRIVATE_NOT_OWNER:
+    'Only the person a private transaction belongs to can split it or undo its split',
   INVITATION_NOT_FOUND: 'Invitation not found',
   INVITATION_NOT_FOUND_OR_USED: 'Invitation not found or already used',
   INVITATION_INVALID: 'Invalid invitation',

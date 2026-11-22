@@ -25,6 +25,7 @@ import apiClient from '@/app/lib/api';
 import type { TagListItem } from '@/app/lib/contracts';
 import { queryKeys } from '@/app/lib/query-keys';
 import { formatStoredDate } from '@/app/lib/user-format-store';
+import { TagNameCell } from './components/TagNameCell';
 
 interface TagLabels {
   name: string;
@@ -115,12 +116,7 @@ function useTagColumns(options: {
             />
           ),
         },
-        cell: ({ row }) => (
-          <span className="seneca-tags__name">
-            <Tag size={16} color="var(--text-muted)" aria-hidden style={{ flexShrink: 0 }} />
-            <span className="seneca-tags__name-text">{row.original.name}</span>
-          </span>
-        ),
+        cell: ({ row }) => <TagNameCell id={row.original.id} name={row.original.name} />,
       },
       {
         id: 'description',

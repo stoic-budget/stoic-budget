@@ -34,6 +34,7 @@ export function TimeZoneDrawer({
   const t = useIntlayer('timeZoneDrawer');
   return (
     <DrawerShell
+      demoNotice={false}
       isOpen={isOpen}
       onClose={onClose}
       title={labels.title}

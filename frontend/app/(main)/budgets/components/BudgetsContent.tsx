@@ -64,6 +64,7 @@ function BudgetCardSkeleton(): React.JSX.Element {
 
 interface BudgetsContentProps {
   budgets: BudgetItem[];
+  isCurrentPeriod: boolean;
   isPending: boolean;
   isFetching: boolean;
   error: string | null;
@@ -82,6 +83,7 @@ interface BudgetsContentProps {
 
 export function BudgetsContent({
   budgets,
+  isCurrentPeriod,
   isPending,
   isFetching,
   error,
@@ -204,6 +206,7 @@ export function BudgetsContent({
             <BudgetCard
               key={budget.id}
               budget={budget}
+              showPerDay={isCurrentPeriod}
               stoicClass={classOf.get(budget.categoryId) ?? null}
               onEdit={openEdit}
               onDelete={handleDelete}

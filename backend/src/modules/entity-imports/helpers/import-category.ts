@@ -1,11 +1,13 @@
-import { Category, CategorySource, CategoryType } from '../../../entities/category.entity';
+import { Category } from '../../../entities/category.entity';
 import type { ImportCreatedRef } from '../../../entities/import-batch.entity';
 import type { ImportContext } from '../targets/target.types';
+import { categoryByName } from './category-by-name';
 import { nameKey } from './import-values';
 
 /**
- * A category by name for one import run, created on first use and noted in
- * `created` so undoing the import removes it. A dry run never creates one.
+ * A category by name for one import run (`categoryByName`), created on first
+ * use and noted in `created` so undoing the import removes it. A dry run
+ * never creates one.
  */
 export function importCategoryResolver(
   manager: ImportContext['manager'],
@@ -25,32 +27,16 @@ export function importCategoryResolver(
     if (cached) {
       return cached;
     }
-    const all = await categoryRepo.find({
-      where: { workspaceId },
-      select: { id: true, name: true, type: true },
+    const found = await categoryByName(categoryRepo, { workspaceId, userId }, name, type, {
+      create: !dryRun,
     });
-    const found =
-      all.find(item => item.type === type && nameKey(item.name) === nameKey(name)) ??
-      all.find(item => nameKey(item.name) === nameKey(name));
-    if (found) {
-      categoryCache.set(key, found.id);
-      return found.id;
-    }
-    if (dryRun) {
+    if (!found) {
       return null;
     }
-    const saved = await categoryRepo.save(
-      categoryRepo.create({
-        workspaceId,
-        userId,
-        name: name.trim(),
-        type: type === 'income' ? CategoryType.INCOME : CategoryType.EXPENSE,
-        source: CategorySource.USER,
-        isSystem: false,
-      }),
-    );
-    created.push({ kind: 'category', id: saved.id });
-    categoryCache.set(key, saved.id);
-    return saved.id;
+    if (found.created) {
+      created.push({ kind: 'category', id: found.id });
+    }
+    categoryCache.set(key, found.id);
+    return found.id;
   };
 }

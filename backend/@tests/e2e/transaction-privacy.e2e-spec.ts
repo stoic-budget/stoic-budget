@@ -364,6 +364,27 @@ describe('Private transactions (e2e)', () => {
       }
     });
 
+    it('does not re-run the rules on it for the partner, who could read its comment and payee by them', async () => {
+      const before = await dataSource.query(
+        'SELECT category_id, comments, payee_id FROM transactions WHERE id = $1',
+        [ids.gift],
+      );
+
+      const bulk = await as(partner, request(server()).post('/classification/bulk'))
+        .send({ transactionIds: [ids.gift] })
+        .expect(200);
+      expect(bulk.body).toMatchObject({ total: 1, notFound: 1, successful: 0 });
+      await as(partner, request(server()).post(`/classification/transaction/${ids.gift}`)).expect(
+        404,
+      );
+
+      expect(
+        await dataSource.query('SELECT category_id, comments, payee_id FROM transactions WHERE id = $1', [
+          ids.gift,
+        ]),
+      ).toEqual(before);
+    });
+
     it('keeps the merchant out of the search box, the receipt picker and the documents list', async () => {
       const search = await both(account =>
         as(account, request(server()).get('/search?q=jewel')),
@@ -586,6 +607,89 @@ describe('Private transactions (e2e)', () => {
         expect(named(res, /pharmacy/i)).toBe(false);
       }
       expect(returns.theirs.body.inputTax).toBe(returns.mine.body.inputTax);
+    });
+  });
+
+  describe('splitting a private row', () => {
+    const codeOf = (res: request.Response) => res.body.error?.code ?? res.body.code;
+    const split = (account: E2eAccount, id: string) =>
+      as(account, request(server()).post(`/transactions/${id}/split`)).send({
+        parts: [{ amount: 25 }, { amount: 15 }],
+      });
+    const unsplit = (account: E2eAccount, id: string) =>
+      as(account, request(server()).post(`/transactions/${id}/unsplit`));
+    const privateRow = async (merchant: string) => {
+      const id = await bookExpense(merchant, '40');
+      await as(owner, request(server()).put(`/transactions/${id}`))
+        .send({ ownerMemberId })
+        .expect(200);
+      await as(owner, request(server()).put(`/transactions/${id}`))
+        .send({ isPrivate: true })
+        .expect(200);
+      return id;
+    };
+
+    it('lets only the owner split it, and keeps every part private', async () => {
+      const id = await privateRow('Example Florist - Bouquet');
+
+      const refused = await split(partner, id).expect(403);
+      expect(codeOf(refused)).toBe('TRANSACTION_SPLIT_PRIVATE_NOT_OWNER');
+
+      const parts = (await split(owner, id).expect(200)).body as Array<{ id: string }>;
+      const partIds = parts.map(part => part.id);
+      const mine = (await listFor(owner)).filter(tx => partIds.includes(tx.id));
+      expect(mine.map(tx => [tx.isPrivate, tx.privateCategoryId])).toEqual([
+        [true, giftsCategoryId],
+        [true, giftsCategoryId],
+      ]);
+      const theirs = (await listFor(partner)).filter(tx => partIds.includes(tx.id));
+      expect(theirs.map(tx => tx.counterpartyName)).toEqual(['—', '—']);
+    });
+
+    it('files a part’s own category behind Private, where only the owner reads it', async () => {
+      const id = await privateRow('Example Pharmacy - Vitamins');
+      const categories = await as(owner, request(server()).get('/categories?type=expense')).expect(
+        200,
+      );
+      const other = categories.body.find((c: { id: string }) => c.id !== giftsCategoryId).id;
+      const before = (await listFor(owner)).find(tx => tx.id === id);
+
+      const parts = (
+        await as(owner, request(server()).post(`/transactions/${id}/split`))
+          .send({ parts: [{ amount: 25, categoryId: other }, { amount: 15 }] })
+          .expect(200)
+      ).body as Array<{ id: string }>;
+      const partIds = parts.map(part => part.id);
+
+      const inSplitOrder = (rows: ListedTransaction[]) =>
+        partIds.map(partId => rows.find(tx => tx.id === partId));
+      const mine = inSplitOrder(await listFor(owner));
+      expect(mine.map(tx => [tx?.categoryId, tx?.privateCategoryId])).toEqual([
+        [before?.categoryId, other],
+        [before?.categoryId, giftsCategoryId],
+      ]);
+      const theirs = inSplitOrder(await listFor(partner));
+      expect(theirs.map(tx => tx?.categoryId)).toEqual([before?.categoryId, before?.categoryId]);
+    });
+
+    it('lets nobody else put a group back together while one part is private', async () => {
+      const id = await bookExpense('Example Hardware - Nails', '40');
+      await as(owner, request(server()).put(`/transactions/${id}`))
+        .send({ ownerMemberId })
+        .expect(200);
+      const [first, second] = (await split(owner, id).expect(200)).body as Array<{ id: string }>;
+      await as(owner, request(server()).put(`/transactions/${first.id}`))
+        .send({ isPrivate: true })
+        .expect(200);
+
+      // Asked through the part the partner can read, the private one is still in the group.
+      const refused = await unsplit(partner, second.id).expect(403);
+      expect(codeOf(refused)).toBe('TRANSACTION_SPLIT_PRIVATE_NOT_OWNER');
+      const parts = await as(owner, request(server()).get(`/transactions/${id}/split`)).expect(200);
+      expect(parts.body).toHaveLength(2);
+
+      const merged = await unsplit(owner, second.id).expect(200);
+      expect(merged.body.splitGroupId).toBeNull();
     });
   });
 
