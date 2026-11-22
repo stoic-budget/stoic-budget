@@ -67,6 +67,7 @@ export const NON_FINANCIAL_QUERY_ROOTS = [
   'notes',
   'notifications',
   'storage-files',
+  'system-health',
   'system-update',
   'tax-jurisdictions',
   'tax-rates',
