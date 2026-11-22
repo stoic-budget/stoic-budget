@@ -14,6 +14,10 @@ export interface ImportChoices {
   period: ImportPeriod | null;
   /** Import only the rows dated in `period`. */
   heldToPeriod: boolean;
+  /** Trades only: the investment account holdings are matched in, '' for all of them. */
+  investmentAccountId: string;
+  /** Trades only: create a holding a row names that the account does not have. */
+  createMissingHoldings: boolean;
 }
 
 /** Opened from an account, its rows go there in its currency, held to its gap when one was picked. */
@@ -26,4 +30,6 @@ export const initialImportChoices = (
   walletId: account?.id ?? '',
   period: account?.period ?? null,
   heldToPeriod: Boolean(account?.period),
+  investmentAccountId: '',
+  createMissingHoldings: false,
 });

@@ -114,6 +114,17 @@ describe('API contracts: data entry and imports (e2e)', () => {
     );
     const undone = await answer(EntityImportUndone, call('delete', `/entity-imports/${run.batchId}`));
     expect(undone.removed).toBe(1);
+    const trades = await answer(
+      EntityImportResult,
+      call('post', '/entity-imports', {
+        target: 'trades',
+        mapping: { date: 0, kind: 1, symbol: 2, quantity: 3, price: 4 },
+        rows: [['2026-01-05', 'Buy', 'ACME', '1', '10']],
+        dryRun: true,
+      }),
+    );
+    expect(trades).toMatchObject({ target: 'trades', dryRun: true });
+    expect(trades.rows[0]).toMatchObject({ status: 'error', reason: 'holding_not_found' });
     const headers = ['Vendor', 'Amount', 'Due date'];
     const remembered = await answer(
       ImportMappingProfile,

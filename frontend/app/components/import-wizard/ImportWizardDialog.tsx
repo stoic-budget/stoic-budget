@@ -21,6 +21,7 @@ import { getApiErrorMessage } from '@/app/lib/api-error';
 import { resolveCurrencyCode } from '@/app/lib/format-money';
 import { formatDate } from '@/app/lib/user-format';
 import { ImportProblems } from './ImportProblems';
+import { ImportTargetOptions } from './ImportTargetOptions';
 import { type ImportChoices, type ImportPeriod, initialImportChoices } from './import-choices';
 import {
   createTableFromImport,
@@ -45,7 +46,6 @@ import {
   prepareSheet,
   roleByColumn,
 } from './import-wizard-utils';
-import { TransactionImportOptions } from './TransactionImportOptions';
 import { useImportRequest } from './useImportRequest';
 import { useSavedMapping } from './useSavedMapping';
 
@@ -454,9 +454,7 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
               </tbody>
             </table>
 
-            {target === 'transactions' && (
-              <TransactionImportOptions choices={choices} onChange={choose} />
-            )}
+            <ImportTargetOptions target={target} choices={choices} onChange={choose} />
 
             {missing.length > 0 ? (
               <p className="seneca-iw__hint seneca-iw__hint--warning">

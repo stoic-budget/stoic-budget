@@ -246,6 +246,8 @@ describe('Backup restore isolation (e2e)', () => {
           .map(([table, rows]) => [table, rows.length]),
       );
     expect(counts(restored)).toEqual(counts(source));
+    // Trades come along with the holdings they belong to.
+    expect(counts(source).investment_trades).toBeGreaterThan(0);
     expect(restored.files.length).toBe(source.files.length);
     // The log keeps what it recorded: the subject an event names (a member or
     // an import of the source workspace, which never come along) and the

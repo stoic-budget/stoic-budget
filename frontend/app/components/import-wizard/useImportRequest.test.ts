@@ -21,6 +21,8 @@ describe('useImportRequest', () => {
       currency: 'EUR',
       categorize: true,
       walletId: 'w-1',
+      investmentAccountId: null,
+      createMissingHoldings: false,
       dateFrom: '2026-02-01',
       dateTo: '2026-02-28',
     });
@@ -33,7 +35,34 @@ describe('useImportRequest', () => {
 
     const held = initialImportChoices(account, 'USD');
     const budgets = renderHook(() => useImportRequest(sheet, 'budgets', mapping, 'export.csv', held));
-    expect(budgets.result.current?.options).toEqual({ currency: 'EUR', categorize: true, walletId: null });
+    expect(budgets.result.current?.options).toEqual({
+      currency: 'EUR',
+      categorize: true,
+      walletId: null,
+      investmentAccountId: null,
+      createMissingHoldings: false,
+    });
+  });
+
+  it('sends the investment account and "create missing" for trades only, never the gap', () => {
+    const choices = {
+      ...initialImportChoices(account, 'USD'),
+      investmentAccountId: 'inv-1',
+      createMissingHoldings: true,
+    };
+    const trades = renderHook(() => useImportRequest(sheet, 'trades', mapping, 'export.csv', choices));
+    expect(trades.result.current?.options).toEqual({
+      currency: 'EUR',
+      categorize: true,
+      walletId: null,
+      investmentAccountId: 'inv-1',
+      createMissingHoldings: true,
+    });
+    const rows = renderHook(() => useImportRequest(sheet, 'transactions', mapping, 'export.csv', choices));
+    expect(rows.result.current?.options).toMatchObject({
+      investmentAccountId: null,
+      createMissingHoldings: false,
+    });
   });
 
   it('opens on the whole sheet without a period', () => {

@@ -8,7 +8,8 @@ import type { PreparedSheet } from './import-wizard-utils';
 /**
  * What the dry run and the import both send for the sheet, or null before it
  * is read. The header row goes along so the server can tell one bank's export
- * from another's; an account and a period apply to transactions only.
+ * from another's; an account and a period apply to transactions only, an
+ * investment account and "create missing holdings" to trades only.
  */
 export function useImportRequest(
   sheet: PreparedSheet | null,
@@ -17,7 +18,15 @@ export function useImportRequest(
   fileName: string | undefined,
   choices: ImportChoices,
 ): ImportRunPayload | null {
-  const { currency, categorize, walletId, period, heldToPeriod } = choices;
+  const {
+    currency,
+    categorize,
+    walletId,
+    period,
+    heldToPeriod,
+    investmentAccountId,
+    createMissingHoldings,
+  } = choices;
   return useMemo(() => {
     const held = target === 'transactions' && heldToPeriod && period;
     return (
@@ -31,9 +40,23 @@ export function useImportRequest(
           currency,
           categorize,
           walletId: (target === 'transactions' && walletId) || null,
+          investmentAccountId: (target === 'trades' && investmentAccountId) || null,
+          createMissingHoldings: target === 'trades' && createMissingHoldings,
           ...(held ? { dateFrom: period.from, dateTo: period.to } : {}),
         },
       }
     );
-  }, [sheet, target, mapping, fileName, currency, categorize, walletId, period, heldToPeriod]);
+  }, [
+    sheet,
+    target,
+    mapping,
+    fileName,
+    currency,
+    categorize,
+    walletId,
+    period,
+    heldToPeriod,
+    investmentAccountId,
+    createMissingHoldings,
+  ]);
 }
