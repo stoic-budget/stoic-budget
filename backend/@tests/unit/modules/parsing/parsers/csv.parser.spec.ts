@@ -23,6 +23,20 @@ describe('CsvParser', () => {
 
   const day = (date: Date) => [date.getFullYear(), date.getMonth() + 1, date.getDate()];
 
+  it('passes a row with an unreadable date on to be counted, not an empty one (#636)', async () => {
+    const result = await parse('bad-date.csv', [
+      'Date,Payee,Amount',
+      '02.03.2026,ACME Store,-12.00',
+      '31.02.2026,Member One,-5.00',
+      ',Total,-17.00',
+      'Total 2026,,-17.00',
+    ]);
+
+    expect(result.transactions).toHaveLength(2);
+    expect(Number.isNaN(result.transactions[1].transactionDate.getTime())).toBe(true);
+    expect(result.metadata.dateFrom.getTime()).not.toBeNaN();
+  });
+
   it('reads every date in a file with one day/month order', async () => {
     // 01/13 can only be month-first, so 01/05 in the same export is January 5th.
     const result = await parse('chase.csv', [

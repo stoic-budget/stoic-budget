@@ -4,6 +4,19 @@ import { BaseParser } from './base.parser';
 
 type TabularColumnMapping = Record<string, number>;
 
+/** Words of total and balance lines, which carry no date of their own. */
+const SUMMARY_WORDS = /total|balance|saldo|summe|итог|сальдо|остаток|всего/i;
+
+/** A date cell with digits that is not a summary line: a date in a shape not read. */
+const looksLikeLostDate = (cell: unknown): boolean => {
+  if (cell instanceof Date) {
+    // The caller saw a date in a known shape that is no real day.
+    return Number.isNaN(cell.getTime());
+  }
+  const text = String(cell ?? '').trim();
+  return /\d/.test(text) && !SUMMARY_WORDS.test(text);
+};
+
 export abstract class BaseTabularParser extends BaseParser {
   /**
    * Converts a raw table cell to a Date. Handles Excel serial dates (numeric
@@ -208,7 +221,18 @@ export abstract class BaseTabularParser extends BaseParser {
         return null;
       }
 
-      const transactionDate = this.normalizeCellDate(getValue(dateIndex));
+      const dateCell = getValue(dateIndex);
+      // A total or balance line is no transaction, whatever its date cell says.
+      if (typeof dateCell === 'string' && SUMMARY_WORDS.test(dateCell)) {
+        return null;
+      }
+      // A date the parser cannot read (it has digits, it is no total line) is a
+      // row lost, not a blank one: it goes on with an invalid date, so the
+      // import counts it and keeps a sample to correct (#636). An empty cell or
+      // a caption ("Total Deposits") is no transaction and stays out quietly.
+      const transactionDate =
+        this.normalizeCellDate(dateCell) ??
+        (looksLikeLostDate(dateCell) ? new Date(Number.NaN) : null);
       if (!transactionDate) {
         return null;
       }

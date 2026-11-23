@@ -87,7 +87,14 @@ function droppedRows(
       warning: `All ${rawCount} parsed rows were rejected during validation — statement produced zero transactions`,
     };
   }
-  if (rawCount > 0 && droppedCount / rawCount > HIGH_DROP_RATIO_THRESHOLD) {
+  // Without balances nothing else would show the loss: any dropped row keeps
+  // the statement for review (#636).
+  const noBalances = metadata.balanceStart == null || metadata.balanceEnd == null;
+  if (
+    rawCount > 0 &&
+    droppedCount > 0 &&
+    (noBalances || droppedCount / rawCount > HIGH_DROP_RATIO_THRESHOLD)
+  ) {
     const percent = Math.round((droppedCount / rawCount) * 100);
     return {
       code: 'rows_dropped',

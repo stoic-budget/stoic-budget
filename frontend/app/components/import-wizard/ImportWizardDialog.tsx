@@ -45,6 +45,7 @@ import {
   type PreparedSheet,
   prepareSheet,
   roleByColumn,
+  rowsLabel,
 } from './import-wizard-utils';
 import { useImportRequest } from './useImportRequest';
 import { useSavedMapping } from './useSavedMapping';
@@ -407,7 +408,7 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
             )}
 
             <p className="seneca-iw__label">
-              {t.mappingTitle} · {fillTemplate(t.rowsTotal.value, { count: sheet.rows.length })}
+              {t.mappingTitle} · {rowsLabel(sheet, t)}
             </p>
             <table className="seneca-iw__table">
               <thead>

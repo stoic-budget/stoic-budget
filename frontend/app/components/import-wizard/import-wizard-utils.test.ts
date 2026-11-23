@@ -4,9 +4,30 @@ import {
   mappingFromSuggestion,
   missingRequiredFields,
   openAsTableFilters,
+  IMPORT_ROWS_MAX,
   prepareSheet,
   problemRows,
+  rowsLabel,
 } from './import-wizard-utils';
+
+describe('rowsLabel', () => {
+  const texts = {
+    rowsTotal: { value: '{{count}} rows' },
+    rowsCut: { value: '{{count}} of {{total}} rows: only the first {{count}} are imported' },
+  };
+
+  it('says when the file had more rows than the import takes (#636)', () => {
+    const rows = Array.from({ length: IMPORT_ROWS_MAX + 2 }, (_, i) => [`2026-02-10`, `ACME ${i}`, '-5']);
+    const sheet = prepareSheet([['Date', 'Merchant', 'Amount'], ...rows]);
+
+    expect(sheet.rows).toHaveLength(IMPORT_ROWS_MAX);
+    expect(sheet.totalRows).toBe(IMPORT_ROWS_MAX + 2);
+    expect(rowsLabel(sheet, texts)).toBe(
+      `${IMPORT_ROWS_MAX} of ${IMPORT_ROWS_MAX + 2} rows: only the first ${IMPORT_ROWS_MAX} are imported`,
+    );
+    expect(rowsLabel({ rows: [['a']], totalRows: 1 }, texts)).toBe('1 rows');
+  });
+});
 
 describe('prepareSheet', () => {
   it('drops report titles above the header and empty rows', () => {

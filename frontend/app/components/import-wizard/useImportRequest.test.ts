@@ -9,6 +9,7 @@ const sheet: PreparedSheet = {
   headers: ['Date', 'Merchant', 'Amount'],
   rows: [['2026-02-10', 'Corner Cafe', '-5']],
   samples: [],
+  totalRows: 1,
 };
 const mapping = { date: 0, merchant: 1, amount: 2 };
 const account = { id: 'w-1', currency: 'EUR', period: { from: '2026-02-01', to: '2026-02-28' } };
