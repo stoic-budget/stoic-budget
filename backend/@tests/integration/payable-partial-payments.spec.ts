@@ -348,6 +348,39 @@ describe('partial payments (real Postgres)', () => {
     expect(Number(reopened.paidAmount)).toBe(0);
   });
 
+  it('closes a bill paid in instalments when the rest is marked paid, each way', async () => {
+    // A first instalment from the wallet: the bill links that transaction.
+    const instalment = { amount: 400, payFromWalletId: walletId, categoryId, paidOn: daysAgo(3) };
+
+    const plain = await bill();
+    await payables.addPayment(plain.id, workspaceId, userId, instalment);
+    const marked = await payables.markAsPaid(plain.id, workspaceId, userId, { paidOn: daysAgo(1) });
+    expect(marked.status).toBe(PayableStatus.PAID);
+    expect(Number(marked.paidAmount)).toBe(1000);
+    // The rest is a payment of its own, with no transaction: not the instalment's.
+    const rest = (await payables.listPayments(plain.id, workspaceId)).find(p => Number(p.amount) === 600);
+    expect(rest?.transactionId).toBeNull();
+
+    const fromWallet = await bill();
+    await payables.addPayment(fromWallet.id, workspaceId, userId, instalment);
+    const cash = await payables.markAsPaid(fromWallet.id, workspaceId, userId, {
+      payFromWalletId: walletId,
+      categoryId,
+      paidOn: daysAgo(1),
+    });
+    expect(cash.status).toBe(PayableStatus.PAID);
+    const restRow = (await payables.listPayments(fromWallet.id, workspaceId)).find(p => Number(p.amount) === 600);
+    const booked = await txRepo.findOneByOrFail({ id: restRow?.transactionId as string });
+    expect(Number(booked.amount)).toBe(600);
+
+    const byRow = await bill();
+    await payables.addPayment(byRow.id, workspaceId, userId, instalment);
+    const wire = await transaction({ amount: 600, debit: 600 });
+    const linked = await payables.markAsPaid(byRow.id, workspaceId, userId, { linkedTransactionId: wire.id });
+    expect(linked.status).toBe(PayableStatus.PAID);
+    expect((await payables.listPayments(byRow.id, workspaceId)).map(p => p.transactionId)).toContain(wire.id);
+  });
+
   it('records a cash instalment as a wallet transaction', async () => {
     const payable = await bill({ amount: 1000 });
 
