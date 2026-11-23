@@ -70,6 +70,18 @@ describe('Tax reserve carries the years before (e2e)', () => {
       }
     };
     return {
+      /** The reserve as if it had been kept since that day. */
+      keptSince: (day: string) =>
+        dataSource.query(
+          "UPDATE workspace_service_settings SET created_at = $1 WHERE workspace_id = $2 AND key = 'tax_reserve'",
+          [day, owner.workspaceId],
+        ),
+      /** A row's date typed wrong, as an edit can leave it. */
+      misdate: (day: string) =>
+        dataSource.query(
+          'UPDATE transactions SET transaction_date = $1 WHERE id = (SELECT id FROM transactions WHERE workspace_id = $2 LIMIT 1)',
+          [day, owner.workspaceId],
+        ),
       earn: (amount: number, date: string) => book(amount, date, true),
       pay: (amount: number, date: string) => book(amount, date, false),
       reserve: async () =>
@@ -103,6 +115,7 @@ describe('Tax reserve carries the years before (e2e)', () => {
 
   it('keeps the balance running when every January pays the year before', async () => {
     const books = await setUp('running');
+    await books.keptSince(`${year - 2}-01-05`);
     await books.earn(1000, `${year - 2}-12-10`); // 300 owed
     await books.pay(300, `${year - 1}-01-15`); // for two years back
     await books.earn(1000, `${year - 1}-12-10`); // 300 owed
@@ -110,6 +123,25 @@ describe('Tax reserve carries the years before (e2e)', () => {
     await books.earn(500, `${year}-01-20`); // 150 owed
 
     expect(await books.reserve()).toMatchObject({ carriedOver: 300, total: 150 });
+  });
+
+  it("does not lay today's share over years before the reserve was kept", async () => {
+    const books = await setUp('late');
+    await books.earn(1000, `${year - 3}-06-10`);
+    await books.earn(1000, `${year - 2}-06-10`);
+    await books.earn(1000, `${year - 1}-06-10`); // only this year counts: 300
+    await books.earn(500, `${year}-01-20`); // 150
+
+    expect(await books.reserve()).toMatchObject({ carriedOver: 300, total: 450 });
+  });
+
+  it('survives a row dated in year 24 by a typo', async () => {
+    const books = await setUp('typo');
+    await books.earn(500, `${year}-01-20`);
+    await books.earn(100, `${year}-01-21`);
+    await books.misdate('0024-02-20');
+
+    expect((await books.reserve()).total).toBeGreaterThan(0);
   });
 
   it('carries nothing when last year paid its own tax', async () => {

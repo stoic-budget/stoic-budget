@@ -159,6 +159,15 @@ export class WorkspaceTaxSettingsService {
     return { percent, paymentsCategoryId: paymentsCategoryId ?? null };
   }
 
+  /** When the reserve was first set up: its settings row's birth, null if never saved. */
+  async reserveSetUpOn(workspaceId: string): Promise<Date | null> {
+    const row = await this.settingsRepository.findOne({
+      where: { workspaceId, key: WorkspaceServiceSettingsKey.TAX_RESERVE },
+      select: { id: true, createdAt: true },
+    });
+    return row?.createdAt ?? null;
+  }
+
   async setReserveSettings(
     workspaceId: string,
     settings: TaxReserveSettings,

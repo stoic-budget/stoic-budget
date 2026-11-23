@@ -87,11 +87,17 @@ export class TaxReserveService {
       convert,
       missing,
     );
-    // One running balance: what the books owed from their first year to last
-    // 31 December, less every payment in that time, is owed now too. So a
-    // January payment of last year's tax settles that first, not this year's,
-    // and the same holds every year after (each January pays the year before).
-    const firstYear = (await this.firstBookYear(workspaceId)) ?? year;
+    // One running balance: what the books owed before this year, less every
+    // payment in that time, is owed now too. So a January payment of last
+    // year's tax settles that first, not this year's, and the same holds every
+    // year after (each January pays the year before). It starts the year before
+    // the reserve was set up (that year's tax may still be due), never before
+    // the books: today's share is not laid over years the user never kept it for.
+    const setUp = await this.settingsService.reserveSetUpOn(workspaceId);
+    const firstYear = Math.max(
+      (await this.firstBookYear(workspaceId)) ?? year,
+      (setUp?.getFullYear() ?? year) - 1,
+    );
     let carriedOver = 0;
     if (firstYear < year) {
       const before = await this.held(
