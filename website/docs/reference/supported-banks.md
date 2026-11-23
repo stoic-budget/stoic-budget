@@ -39,8 +39,8 @@ Column layouts matched by the file's header row:
 - **Germany:** N26, Sparkasse / DKB, Commerzbank
 - **Netherlands:** ING, Rabobank
 - **Nordics:** Nordea
-- **United Kingdom:** Monzo, Starling, Santander UK, Barclays, HSBC, Lloyds
-- **United States:** Chase, Bank of America, Capital One, American Express, Wells Fargo
+- **United Kingdom:** Monzo, Starling, Santander UK, Barclays, Lloyds
+- **United States:** Chase, Bank of America, Capital One, American Express
 - T-Bank (Tinkoff)
 
 ## Generic support

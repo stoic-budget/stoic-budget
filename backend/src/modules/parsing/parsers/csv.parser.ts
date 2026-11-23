@@ -3,6 +3,7 @@ import csv = require('csv-parser');
 import * as fs from 'fs';
 import { appDefaultCurrency } from '../../../common/utils/currency.util';
 import { type BankName, FileType } from '../../../entities/statement.entity';
+import { descriptionAsPayee, mostCommonCurrency } from '../helpers/tabular-columns.helper';
 import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import { BaseTabularParser } from './base-tabular.parser';
 import { type CsvPreset, type DateOrder, findCsvPreset, presetColumnMapping } from './csv-presets';
@@ -59,7 +60,9 @@ export class CsvParser extends BaseTabularParser {
   async parse(filePath: string, cachedText?: string): Promise<ParsedStatement> {
     // Detect currency from raw file content before streaming rows
     const rawContent = fs.readFileSync(filePath, 'utf-8').slice(0, 4096);
-    const detectedCurrency = this.detectCurrency(rawContent) || appDefaultCurrency();
+    // Codes in upper case only: "Try Again Cafe" in a description is not Turkish lira.
+    const detectedCurrency =
+      this.detectCurrency(rawContent, { caseSensitive: true }) || appDefaultCurrency();
 
     const rows = await this.readRows(filePath);
     const { headerIndex, headers, preset, columnMapping } = this.locateHeader(rows);
@@ -107,7 +110,10 @@ export class CsvParser extends BaseTabularParser {
         accountNumber: 'Unknown',
         dateFrom,
         dateTo,
-        currency: preset?.currency ?? detectedCurrency,
+        currency:
+          (columnMapping.currency !== undefined ? mostCommonCurrency(transactions) : null) ??
+          preset?.currency ??
+          detectedCurrency,
         institution: preset?.name,
         rawHeader: headerText || undefined,
         normalizedHeader: normalizedHeader || undefined,
@@ -169,7 +175,7 @@ export class CsvParser extends BaseTabularParser {
       headerIndex,
       headers,
       preset: null,
-      columnMapping: guessed?.mapping ?? this.mapColumns(headers),
+      columnMapping: descriptionAsPayee(headers, guessed?.mapping ?? this.mapColumns(headers)),
     };
   }
 

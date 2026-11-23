@@ -109,14 +109,18 @@ export abstract class BaseParser implements IParser {
     return match ? this.normalizeNumberValue(match[1]) : null;
   }
 
-  protected detectCurrency(text: string): string | null {
+  /** `caseSensitive`: only upper-case codes count, for text full of ordinary words. */
+  protected detectCurrency(text: string, options?: { caseSensitive?: boolean }): string | null {
     if (!text) {
       return null;
     }
 
     // Match ISO 4217 codes at word boundaries — ordered by specificity
     const codeMatch = text.match(
-      /\b(KZT|UZS|GEL|UAH|BYN|AMD|AZN|KGS|TJS|TMT|USD|EUR|RUB|GBP|CNY|TRY|AED|JPY|CHF|CAD|AUD|SEK|NOK|DKK|PLN|CZK|HUF|RON|INR|BRL|MXN|SGD|HKD|NZD|ZAR|THB|MYR|IDR|ILS|SAR|QAR|KWD)\b/i,
+      new RegExp(
+        '\\b(KZT|UZS|GEL|UAH|BYN|AMD|AZN|KGS|TJS|TMT|USD|EUR|RUB|GBP|CNY|TRY|AED|JPY|CHF|CAD|AUD|SEK|NOK|DKK|PLN|CZK|HUF|RON|INR|BRL|MXN|SGD|HKD|NZD|ZAR|THB|MYR|IDR|ILS|SAR|QAR|KWD)\\b',
+        options?.caseSensitive ? '' : 'i',
+      ),
     );
     if (codeMatch) {
       return codeMatch[1].toUpperCase();

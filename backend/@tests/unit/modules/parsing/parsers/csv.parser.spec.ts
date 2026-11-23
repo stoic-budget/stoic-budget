@@ -62,8 +62,20 @@ describe('CsvParser', () => {
     ]);
 
     expect(result.metadata.institution).toBeUndefined();
+    expect(result.metadata.currency).toBe('EUR');
     expect(result.transactions[0].currency).toBe('EUR');
+    expect(result.transactions[0].counterpartyName).toBe('ACME Store');
     expect(day(result.transactions[0].transactionDate)).toEqual([2026, 4, 3]);
+  });
+
+  it('does not read a currency out of an ordinary word in a description', async () => {
+    const result = await parse('plain-try.csv', [
+      'Date,Description,Amount',
+      '03/04/2026,Try Again Cafe,-25.00',
+    ]);
+
+    expect(result.metadata.currency).not.toBe('TRY');
+    expect(result.transactions[0].currency).not.toBe('TRY');
   });
 
   it("lets a file's Currency column beat a bank preset's hint", async () => {
@@ -73,6 +85,7 @@ describe('CsvParser', () => {
     ]);
 
     expect(result.metadata.institution).toBe('Santander UK');
+    expect(result.metadata.currency).toBe('EUR');
     expect(result.transactions[0].currency).toBe('EUR');
   });
 
