@@ -1,3 +1,4 @@
+import { lastDayOf } from '../../common/utils/billing-day.util';
 import { SubscriptionFrequency } from '../../entities/subscription.entity';
 
 const bucketOf = (date: Date): number => date.getFullYear() * 12 + date.getMonth();
@@ -212,4 +213,24 @@ export function settledDateOf(
     best = occurrence;
   }
   return dayKey(best) as unknown as Date;
+}
+
+/**
+ * The charge after `date`: whole days, or whole months on the billing day,
+ * clamped to a shorter month and back on the 31st the month after (31 Jan,
+ * 28 Feb, 31 Mar), not drifting to the 28th for good.
+ */
+export function nextChargeAfter(
+  date: Date,
+  frequency: SubscriptionFrequency,
+  billingDay: number | null,
+): Date {
+  const step = subscriptionStep(frequency);
+  if (step.unit === 'day' || billingDay === null) {
+    return chargeAt(date, frequency, 1);
+  }
+  const target = bucketOf(date) + step.count;
+  const year = Math.floor(target / 12);
+  const month = target % 12;
+  return new Date(year, month, Math.min(billingDay, lastDayOf(year, month)));
 }

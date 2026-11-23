@@ -1,3 +1,4 @@
+import { billingDayAfter } from '../../../common/utils/billing-day.util';
 import {
   Subscription,
   SubscriptionFrequency,
@@ -79,7 +80,13 @@ export class SubscriptionsTarget implements ImportTarget {
             amount,
             frequency,
             currency,
-            ...(nextChargeDate ? { nextChargeDate: new Date(nextChargeDate) } : {}),
+            // A plain update runs no entity hook: the billing day is set here.
+            ...(nextChargeDate
+              ? {
+                  nextChargeDate: new Date(nextChargeDate),
+                  billingDay: billingDayAfter(nextChargeDate, current.billingDay ?? null),
+                }
+              : {}),
           });
         }
         results.push({ index, status: 'updated', id: current.id });
