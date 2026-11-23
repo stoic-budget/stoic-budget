@@ -420,7 +420,7 @@ export class PayablesService {
     /** Null: cash handed over in person and kept in no wallet. */
     walletId: string | null,
     payload: Pick<MarkPayablePaidBody, 'paidOn' | 'categoryId'>,
-    /** What was handed over now; the whole bill when not said otherwise. */
+    /** What was handed over now; all still owed when not said (part may be paid already). */
     paidAmount?: number,
   ): Promise<string> {
     const workspaceId = payable.workspaceId;
@@ -452,7 +452,7 @@ export class PayablesService {
     }
 
     const isIncome = payable.direction === PayableDirection.RECEIVABLE;
-    const amount = this.round2(paidAmount ?? Number(payable.amount));
+    const amount = this.round2(paidAmount ?? this.outstandingOf(payable));
     const transactions = manager.getRepository(Transaction);
     const transaction = await transactions.save(
       transactions.create({
@@ -533,12 +533,13 @@ export class PayablesService {
 
       let transactionId = dto.linkedTransactionId ?? null;
       if (dto.payFromWalletId || dto.inHand) {
+        // What reached the wallet: the payment less the processor's fee, as on booking.
         transactionId = await this.recordCashPayment(
           manager,
           payable,
           dto.payFromWalletId ?? null,
           { paidOn: dto.paidOn, categoryId: dto.categoryId },
-          amount,
+          this.round2(amount - Number(dto.feeAmount ?? 0)),
         );
       }
 
