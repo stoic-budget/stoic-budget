@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { appDefaultCurrency } from '../../../common/utils/currency.util';
 import { findDocumentDate } from '../../../common/utils/document-date.util';
 import { parsePdf } from '../../../common/utils/pdf-text.util';
 import {
@@ -144,7 +143,9 @@ export class UniversalExtractorService {
 
     const amount = await this.extractAmountWithCurrency(lines, text);
     const statedCurrency = amount?.currency || this.extractCurrency(text);
-    const currency = statedCurrency || appDefaultCurrency();
+    // Only what the document states: without it the workspace's currency
+    // applies downstream, not the installation's USD (#685).
+    const currency = statedCurrency;
     const documentDate = findDocumentDate(text, {
       // The currency the page states, not the fallback: that says nothing about the document.
       monthFirst: statedCurrency === 'USD' || US_DOCUMENT_PATTERN.test(text),

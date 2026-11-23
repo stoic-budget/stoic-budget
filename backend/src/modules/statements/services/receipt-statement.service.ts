@@ -12,7 +12,6 @@ import { IsNull, type Repository } from 'typeorm';
 import { workspaceMemberCanEdit } from '../../../common/authz/workspace-permissions';
 import { appError, type ErrorCode } from '../../../common/errors/app-error';
 import type { CaptureLocation } from '../../../common/utils/capture-location.util';
-import { appDefaultCurrency } from '../../../common/utils/currency.util';
 import { calculateFileHash } from '../../../common/utils/file-hash.util';
 import { getFileTypeFromMime } from '../../../common/utils/file-validator.util';
 import { normalizeFilename } from '../../../common/utils/filename.util';
@@ -29,6 +28,7 @@ import type { EInvoiceSummary } from '../../e-invoices/einvoice-summary';
 import { transactionCreatedEvent } from '../../notifications/events/notification-events';
 import { ReceiptsService } from '../../receipts/receipts.service';
 import { TaxAssignmentService } from '../../tax/tax-assignment.service';
+import { WorkspaceCurrencyService } from '../../workspaces/workspace-currency.service';
 
 @Injectable()
 export class ReceiptStatementService {
@@ -48,6 +48,7 @@ export class ReceiptStatementService {
     private readonly receiptsService: ReceiptsService,
     private readonly auditService: AuditService,
     private readonly taxAssignmentService: TaxAssignmentService,
+    private readonly workspaceCurrency: WorkspaceCurrencyService,
     @Optional() private readonly eventEmitter?: EventEmitter2,
   ) {}
 
@@ -252,9 +253,8 @@ export class ReceiptStatementService {
     const merchant =
       String(parsed.vendor || receipt.subject || fileName).trim() || 'Unknown merchant';
     const detectedBankName = ReceiptStatementService.detectBankFromVendor(merchant);
-    const currency = String(parsed.currency || appDefaultCurrency())
-      .trim()
-      .toUpperCase();
+    // No currency on the receipt: the workspace's, not the installation's (#685).
+    const currency = await this.workspaceCurrency.resolveFor(workspaceId, parsed.currency);
     const parsedDate = parsed.date ? new Date(parsed.date) : new Date();
     const transactionDate = new Date(parsedDate.toISOString().slice(0, 10));
 
