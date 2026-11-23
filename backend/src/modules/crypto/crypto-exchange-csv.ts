@@ -161,13 +161,13 @@ function coinbase(columns: Map<string, number>, rows: string[][]): ExchangeEntry
   return entries;
 }
 
-// A send or a withdrawal takes coins off the exchange. Newer exports sign the
-// quantity, older ones do not, so the type decides as well as the sign.
+// Newer exports sign the quantity of a move, older ones do not: there only a
+// plain Send is known to leave. "Exchange Withdrawal" brings coins in from Pro.
 function coinbaseOutgoing(kind: ExchangeEntryKind, type: string, quantity: number): boolean {
   if (kind === 'trade') {
     return /sell|convert/i.test(type);
   }
-  return kind === 'move' && (quantity < 0 || /send|withdraw/i.test(type));
+  return kind === 'move' && (quantity < 0 || /^send$/i.test(type.trim()));
 }
 
 function coinbaseKind(type: string): ExchangeEntryKind {
