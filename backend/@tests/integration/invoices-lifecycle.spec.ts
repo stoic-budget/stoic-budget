@@ -533,7 +533,13 @@ describe('invoice status (real Postgres)', () => {
       expect(view.issuer.bankAccount).toBe('EE471000001020145685');
       expect(view.billedTo.name).toBe('Beta GmbH');
       expect(view.lines).toEqual([
-        { description: 'Consulting', quantity: '1.00', unitPrice: '250.00', amount: '250' },
+        {
+          description: 'Consulting',
+          quantity: '1.00',
+          unitPrice: '250.00',
+          adjustmentPercent: null,
+          amount: '250',
+        },
       ]);
       // Nothing the client has no business seeing.
       const serialized = JSON.stringify(view);
@@ -554,8 +560,15 @@ describe('invoice status (real Postgres)', () => {
       const view = await publicInvoices.view(sent.shareToken as string);
 
       expect(view.lines).toEqual([
-        expect.objectContaining({ description: 'Workshop', unitPrice: '100.00', amount: '180' }),
+        expect.objectContaining({
+          description: 'Workshop',
+          unitPrice: '100.00',
+          adjustmentPercent: '-10',
+          amount: '180',
+        }),
       ]);
+      // The page marks the line as the PDF does.
+      expect(view.labels.discount).toEqual(expect.any(String));
       expect(Number(view.total)).toBe(180);
     });
 

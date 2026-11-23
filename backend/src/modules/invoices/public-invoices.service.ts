@@ -51,6 +51,7 @@ export interface PublicInvoiceView {
     description: string;
     quantity: string;
     unitPrice: string;
+    adjustmentPercent: string | null;
     amount: string;
   }>;
 }
@@ -124,6 +125,9 @@ export class PublicInvoicesService {
         description: item.description,
         quantity: String(item.quantity),
         unitPrice: String(item.unitPrice),
+        adjustmentPercent: Number(item.adjustmentPercent)
+          ? String(Number(item.adjustmentPercent))
+          : null,
         // After the line's discount or surcharge, as the PDF and the e-invoice state it.
         amount: String(lineAmount(item)),
       })),
