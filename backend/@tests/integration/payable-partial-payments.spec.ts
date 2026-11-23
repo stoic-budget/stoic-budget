@@ -381,6 +381,17 @@ describe('partial payments (real Postgres)', () => {
     expect((await payables.listPayments(byRow.id, workspaceId)).map(p => p.transactionId)).toContain(wire.id);
   });
 
+  it('changes nothing when a paid bill is marked paid again, from any source', async () => {
+    const payable = await bill();
+    await payables.markAsPaid(payable.id, workspaceId, userId, {});
+
+    await payables.markAsPaid(payable.id, workspaceId, userId, {});
+    await payables.markAsPaid(payable.id, workspaceId, userId, { payFromWalletId: walletId, categoryId });
+
+    const payments = await payables.listPayments(payable.id, workspaceId);
+    expect(payments.map(p => Number(p.amount))).toEqual([1000]);
+  });
+
   it('records a cash instalment as a wallet transaction', async () => {
     const payable = await bill({ amount: 1000 });
 

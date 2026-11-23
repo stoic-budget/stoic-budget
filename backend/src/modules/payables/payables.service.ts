@@ -314,10 +314,11 @@ export class PayablesService {
     // with its own source, not the first instalment's link (#660).
     const partlyPaid = Number(payable.paidAmount ?? 0) > 0 && this.outstandingOf(payable) > 0;
     let transactionId = partlyPaid ? null : payable.linkedTransactionId;
+    // Paid with nothing left: a repeat (a double click, a retry) changes nothing.
+    if (payable.status === PayableStatus.PAID && this.outstandingOf(payable) <= 0) {
+      return payable;
+    }
     if (payload.payFromWalletId || payload.inHand) {
-      if (payable.status === PayableStatus.PAID && payable.linkedTransactionId) {
-        return payable;
-      }
       if (payable.linkedTransactionId && !partlyPaid) {
         throw new ConflictException(appError('PAYABLE_ALREADY_LINKED'));
       }
