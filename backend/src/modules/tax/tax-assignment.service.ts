@@ -45,7 +45,7 @@ export interface AssignmentInput {
   amountMinor: number;
   categoryId: string | null;
   transactionType: TransactionType;
-  transactionNature: string | null;
+  transactionNature?: string | null;
   /** A rate the user chose explicitly, which always wins. */
   explicitTaxRateId?: string | null;
   /** ISO-3166-1 alpha-2 of the other party, when it is known. */
