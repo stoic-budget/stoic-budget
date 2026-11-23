@@ -130,7 +130,7 @@ function coinbase(columns: Map<string, number>, rows: string[][]): ExchangeEntry
     // "Converted 0.005 BTC to 0.079 ETH": the row states the coin that left, the
     // note states the one that arrived. Without the note only the first is known.
     const converted = /converted\s+[\d.,]+\s+\w+\s+to\s+([\d.,]+)\s+(\w+)/i.exec(notes);
-    const outgoing = kind === 'trade' && /sell|convert/i.test(type);
+    const outgoing = coinbaseOutgoing(kind, type, quantity);
 
     if (!FIAT.has(asset)) {
       entries.push({
@@ -159,6 +159,15 @@ function coinbase(columns: Map<string, number>, rows: string[][]): ExchangeEntry
     }
   }
   return entries;
+}
+
+// A send or a withdrawal takes coins off the exchange. Newer exports sign the
+// quantity, older ones do not, so the type decides as well as the sign.
+function coinbaseOutgoing(kind: ExchangeEntryKind, type: string, quantity: number): boolean {
+  if (kind === 'trade') {
+    return /sell|convert/i.test(type);
+  }
+  return kind === 'move' && (quantity < 0 || /send|withdraw/i.test(type));
 }
 
 function coinbaseKind(type: string): ExchangeEntryKind {
