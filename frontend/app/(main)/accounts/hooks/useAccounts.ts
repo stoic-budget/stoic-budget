@@ -62,7 +62,7 @@ export function accountToForm(account: Account): AccountForm {
   };
 }
 
-function toPayload(form: AccountForm) {
+export function toPayload(form: AccountForm) {
   // The form refuses to save an invalid amount or limit, so 'invalid' never gets here.
   const opening = parseOpeningBalance(form.openingBalance);
   const typed = opening === 'invalid' ? 0 : opening;
