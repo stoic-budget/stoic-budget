@@ -4,8 +4,14 @@
  * single-byte code pages older desktop software writes: Windows-1251 when the
  * high bytes run together the way Cyrillic words do, Windows-1252 (what
  * "latin1" means in practice) when they sit alone inside Latin words.
+ * UTF-16 first, by its byte-order mark or, without one, by the zero byte of
+ * every ASCII character (Excel's "Unicode text" export).
  */
 export function decodeUnlabelledText(bytes: Uint8Array): string {
+  const wide = utf16Of(bytes);
+  if (wide) {
+    return new TextDecoder(wide).decode(bytes);
+  }
   try {
     return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
   } catch {
@@ -60,4 +66,37 @@ function looksCyrillic(bytes: Uint8Array): boolean {
 function touchesLatinLetter(bytes: Uint8Array, start: number, end: number): boolean {
   const before = start >= 2 && isLatinLetter(bytes[start - 1]) && bytes[start - 2] !== 0x0a;
   return before || (end < bytes.length && isLatinLetter(bytes[end]));
+}
+
+/**
+ * UTF-16 by its mark (the decoder drops it), or by zero bytes on one side of
+ * the pairs (every ASCII character has one) and almost none on the other.
+ * Single-byte text never holds a zero, so a quarter is plenty even for text
+ * that is mostly Cyrillic.
+ */
+function utf16Of(bytes: Uint8Array): 'utf-16le' | 'utf-16be' | null {
+  if (bytes[0] === 0xff && bytes[1] === 0xfe) {
+    return 'utf-16le';
+  }
+  if (bytes[0] === 0xfe && bytes[1] === 0xff) {
+    return 'utf-16be';
+  }
+  const sample = bytes.subarray(0, Math.min(bytes.length, 512) & ~1);
+  if (sample.length < 4) {
+    return null;
+  }
+  let lowZeros = 0;
+  let highZeros = 0;
+  for (let index = 0; index < sample.length; index += 2) {
+    if (sample[index + 1] === 0) lowZeros++;
+    if (sample[index] === 0) highZeros++;
+  }
+  const pairs = sample.length / 2;
+  if (lowZeros > pairs * 0.25 && highZeros < pairs * 0.02) {
+    return 'utf-16le';
+  }
+  if (highZeros > pairs * 0.25 && lowZeros < pairs * 0.02) {
+    return 'utf-16be';
+  }
+  return null;
 }

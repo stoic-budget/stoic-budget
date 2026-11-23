@@ -14,6 +14,19 @@ const cp1251 = (text: string) =>
 const cp1252 = (text: string) => Uint8Array.from([...text].map(char => char.charCodeAt(0)));
 
 describe('decodeUnlabelledText', () => {
+  it('reads UTF-16 with and without its byte-order mark (#637)', () => {
+    const text = 'Дата;Описание;Сумма\n02.03.2026;Müller;-10,00';
+    const le = Buffer.from(text, 'utf16le');
+    const be = Buffer.from(le).swap16();
+    expect(decodeUnlabelledText(Uint8Array.from([0xff, 0xfe, ...le]))).toBe(text);
+    expect(decodeUnlabelledText(Uint8Array.from([0xfe, 0xff, ...be]))).toBe(text);
+    expect(decodeUnlabelledText(le)).toBe(text);
+    expect(decodeUnlabelledText(be)).toBe(text);
+    // Mostly Cyrillic, no mark: only spaces and digits carry a zero byte.
+    const cyrillic = 'Покупка в магазине Пример 10,00';
+    expect(decodeUnlabelledText(Buffer.from(cyrillic, 'utf16le'))).toBe(cyrillic);
+  });
+
   it('reads valid UTF-8 as UTF-8 and drops the byte-order mark', () => {
     const text = 'Магазин Пример, Café';
     expect(decodeUnlabelledText(new TextEncoder().encode(`﻿${text}`))).toBe(text);
