@@ -42,4 +42,21 @@ describe('money cells in a table made from transactions (#648)', () => {
     expect(inRowCurrency(CODE, row(5, 'ILS'), key)).toBe(CODE);
     expect(inRowCurrency(AMOUNT, row(5, 'ILS'), rowCurrencyKey([AMOUNT]))).toBe(AMOUNT);
   });
+
+  it('keeps the code of a currency column the user added, and needs a text code column', () => {
+    const planned = {
+      ...AMOUNT,
+      key: 'planned',
+      config: { currency: 'EUR', precision: 2 },
+    } as unknown as CustomTableColumn;
+    expect(inRowCurrency(planned, row(5, 'ILS'), key)).toBe(planned);
+    const picked = { ...CODE, type: 'select' } as unknown as CustomTableColumn;
+    expect(rowCurrencyKey([AMOUNT, picked])).toBeUndefined();
+  });
+
+  it('reads a lower-case or padded code', () => {
+    const padded = row(5, ' ils ');
+    expect(inRowCurrency(AMOUNT, padded, key).config?.currency).toBe('ILS');
+    expect(inRowCurrency(AMOUNT, row(5, 'US$'), key)).toBe(AMOUNT);
+  });
 });

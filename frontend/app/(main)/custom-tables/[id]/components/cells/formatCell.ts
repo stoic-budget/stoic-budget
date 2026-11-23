@@ -32,11 +32,16 @@ export function numberFormatFor(column: CustomTableColumn, fallbackCurrency: str
   };
 }
 
-/** The key of the column holding each row's currency code (a table made from transactions). */
+const sourceOf = (column: CustomTableColumn) =>
+  column.config?.source as { field?: unknown } | undefined;
+
+/**
+ * The key of the text column holding each row's currency code (a table made
+ * from transactions), read as the header total reads it.
+ */
 export function rowCurrencyKey(columns: CustomTableColumn[]): string | undefined {
-  return columns.find(
-    column => (column.config?.source as { field?: unknown } | undefined)?.field === 'currency',
-  )?.key;
+  return columns.find(column => column.type === 'text' && sourceOf(column)?.field === 'currency')
+    ?.key;
 }
 
 /**
@@ -49,7 +54,9 @@ export function inRowCurrency(
   row: CustomTableGridRow,
   currencyKey: string | undefined,
 ): CustomTableColumn {
-  if (column.type !== 'currency' || !currencyKey) {
+  // Only money the source filled, which is in the row's currency: a currency
+  // column the user added keeps the code they chose for it.
+  if (column.type !== 'currency' || !currencyKey || !sourceOf(column)) {
     return column;
   }
   const code = row.data?.[currencyKey];
