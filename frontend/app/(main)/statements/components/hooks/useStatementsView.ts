@@ -93,8 +93,6 @@ export function useStatementsView({
     receiptStatus: routeReceiptStatus,
     search,
     user,
-    page,
-    pageSize: PAGE_SIZE,
     router,
     loadListErrorLabel: t.loadListError.value,
     refreshFailedLabel: t.refreshFailed.value,
