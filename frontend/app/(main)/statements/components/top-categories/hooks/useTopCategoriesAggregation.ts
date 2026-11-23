@@ -123,12 +123,19 @@ export const useTopCategoriesAggregation = ({
   );
   const { convert } = useCurrencyConversion(flowRecordsWithoutDateFilter, workspaceCurrency);
   const convertedFlowRecords = useMemo(
-    () => flowFilteredRecords.map(r => ({ ...r, amount: convert(r.amount, r.currencyValue) })),
+    () =>
+      flowFilteredRecords.map(r => ({
+        ...r,
+        amount: convert(r.amount, r.currencyValue, r.dateValue),
+      })),
     [flowFilteredRecords, convert],
   );
   const convertedRecordsWithoutDateFilter = useMemo(
     () =>
-      flowRecordsWithoutDateFilter.map(r => ({ ...r, amount: convert(r.amount, r.currencyValue) })),
+      flowRecordsWithoutDateFilter.map(r => ({
+        ...r,
+        amount: convert(r.amount, r.currencyValue, r.dateValue),
+      })),
     [flowRecordsWithoutDateFilter, convert],
   );
   const totals = useMemo(() => buildTotals(convertedFlowRecords), [convertedFlowRecords]);

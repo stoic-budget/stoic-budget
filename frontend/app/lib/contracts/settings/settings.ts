@@ -159,11 +159,16 @@ export const ManualExchangeRate = Schema.Struct({
 });
 export type ManualExchangeRate = Wire<typeof ManualExchangeRate>;
 
-/** `POST /exchange-rates/convert`: one result per item, in order. */
+/** `POST /exchange-rates/convert`: one result per item, in order; `missing` when no rate exists (then 1:1). */
 export const BulkConversion = Schema.Struct({
   targetCurrency: Schema.String,
   results: Schema.Array(
-    Schema.Struct({ converted: Schema.Number, rate: Schema.Number, source: Schema.String }),
+    Schema.Struct({
+      converted: Schema.Number,
+      rate: Schema.Number,
+      source: Schema.String,
+      missing: Schema.optional(Schema.Boolean),
+    }),
   ),
 });
 export type BulkConversion = Wire<typeof BulkConversion>;

@@ -98,15 +98,23 @@ export class ExchangeRatesController {
     @WorkspaceId() workspaceId: string,
     @SchemaBody(BulkConvertBody) dto: BulkConvertBody,
   ) {
-    const items = dto.items.map(item => ({
-      amount: item.amount,
-      currency: item.currency,
-      date: item.date ? new Date(item.date) : undefined,
-    }));
-    const results = await this.exchangeRatesService.bulkConvert(
-      items,
-      dto.targetCurrency,
-      workspaceId,
+    // Each item at its own day's rate; a missing rate is said (`missing`), not hidden behind 1:1.
+    const results = await Promise.all(
+      dto.items.map(async ({ amount, currency, date }) => {
+        const rate = await this.exchangeRatesService.getRateOrNull(
+          currency,
+          dto.targetCurrency,
+          date ? new Date(date) : undefined,
+          workspaceId,
+        );
+        const missing = rate === null;
+        return {
+          converted: amount * (rate ?? 1),
+          rate: rate ?? 1,
+          source: 'exchange-rates-service',
+          missing,
+        };
+      }),
     );
     return { targetCurrency: dto.targetCurrency, results };
   }

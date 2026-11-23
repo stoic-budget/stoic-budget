@@ -8,7 +8,6 @@ import { Receipt } from '../../entities/receipt.entity';
 import type { Statement } from '../../entities/statement.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { BudgetWithinLimitService } from '../budgets/budget-within-limit.service';
-import type { WithinLimitAmount } from '../budgets/budget-within-limit.util';
 import { PayPeriodService } from '../pay-period/pay-period.service';
 import { recentRowHrefs } from './bill-hrefs';
 import { DashboardService, round2 } from './dashboard.service';
@@ -94,25 +93,25 @@ export class CashFlowEntriesService {
     ]);
     const budgetedById = new Map(withinLimit.map(row => [row.transactionId, row]));
     const hrefOf = await recentRowHrefs(this.receiptRepo, this.payableRepo, workspaceId, rows);
+    // Each row at its own day's rate, as the bar it sits on.
+    const days = [...rows, ...withinLimit].map(row => ({ currency: row.currency, day: row.date }));
+    const convert = await this.dashboard.dayConverter(currency, days, workspaceId);
 
     const entries: DashboardCashFlowEntry[] = [];
     for (const [index, row] of rows.entries()) {
       const kind = row.transactionType === TransactionType.INCOME ? 'income' : 'expense';
-      const raw = kind === 'income' ? row.credit : row.debit;
       const amount = round2(
-        await this.dashboard.convertDashboardAmount(
-          raw ?? '0',
-          row.currency,
-          currency,
-          workspaceId,
-        ),
+        convert(kind === 'income' ? row.credit : row.debit, row.currency, row.date),
       );
       if (amount <= 0) {
         continue;
       }
       const name = this.cashFlowEntryName(row, viewerMemberId);
       const within = kind === 'expense' ? budgetedById.get(row.id) : undefined;
-      const budgeted = within ? await this.budgetedPart(amount, within, currency, workspaceId) : 0;
+      // The within-limit part, in the workspace currency and never above the expense.
+      const budgeted = within
+        ? Math.min(amount, round2(convert(within.amount, within.currency, row.date)))
+        : 0;
       // Someone else's private row keeps its document to itself, as it keeps its name.
       const href = canReadPrivate(row, viewerMemberId) ? hrefOf(index) : null;
       entries.push({ date: row.date, name, kind, amount, budgeted, href });
@@ -135,21 +134,5 @@ export class CashFlowEntriesService {
       return PRIVATE_PLACEHOLDER;
     }
     return row.counterpartyName?.trim() || row.fileName?.trim() || PRIVATE_PLACEHOLDER;
-  }
-
-  /** The within-limit part of an expense, in the workspace currency and never above it. */
-  private async budgetedPart(
-    amount: number,
-    within: WithinLimitAmount,
-    currency: string,
-    workspaceId: string,
-  ): Promise<number> {
-    const converted = await this.dashboard.convertDashboardAmount(
-      within.amount,
-      within.currency,
-      currency,
-      workspaceId,
-    );
-    return Math.min(amount, round2(converted));
   }
 }

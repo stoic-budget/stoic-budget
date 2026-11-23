@@ -4,6 +4,7 @@ import { type Transaction, TransactionType } from '../../../entities/transaction
 import type { Workspace } from '../../../entities/workspace.entity';
 import { isPrivateCategoryName } from '../../categories/private-category';
 import { UNCATEGORIZED_CATEGORY_NAME } from '../../categories/uncategorized-category';
+import { DAY_SQL } from '../../exchange-rates/day-converter';
 import type { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
 import { toDateOnly } from '../../goals/goal-money.util';
 import { monthBounds, monthsBetween } from './month-bounds';
@@ -125,6 +126,7 @@ function isNamedCategory(name: string | null): boolean {
   );
 }
 
+/** Per day too, so each amount converts at its own day's rate. */
 function loadRows(repository: Repository<Transaction>, workspaceId: string, now: Date) {
   return repository
     .createQueryBuilder('t')
@@ -133,6 +135,7 @@ function loadRows(repository: Repository<Transaction>, workspaceId: string, now:
     .addSelect(BUCKET_NAME, 'categoryName')
     .addSelect(MONTH, 'month')
     .addSelect('t.currency', 'currency')
+    .addSelect(DAY_SQL, 'day')
     .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
     .where('t.workspace_id = :workspaceId', { workspaceId })
     .andWhere('t.transaction_type = :type', { type: TransactionType.EXPENSE })
@@ -145,11 +148,13 @@ function loadRows(repository: Repository<Transaction>, workspaceId: string, now:
     .addGroupBy(BUCKET_NAME)
     .addGroupBy(MONTH)
     .addGroupBy('t.currency')
+    .addGroupBy(DAY_SQL)
     .getRawMany<{
       categoryId: string | null;
       categoryName: string | null;
       month: string | Date;
       currency: string | null;
+      day: string;
       total: string;
     }>();
 }

@@ -1137,8 +1137,9 @@ export class PayablesService {
     });
     const targetCurrency = this.normalizeCurrency(workspace?.currency);
     const rateCache = new Map<string, number>();
-    const convert = (value: number, currency: string | null | undefined) =>
-      this.convertSummaryAmount(value, currency, targetCurrency, rateCache, workspaceId);
+    // What is owed at today's rate; what came in at the rate of the day it came in.
+    const convert = (value: number, currency: string | null | undefined, day?: Date) =>
+      this.convertSummaryAmount(value, currency, targetCurrency, rateCache, workspaceId, day);
 
     const now = new Date();
     const startOfToday = this.startOfDay(now);
@@ -1194,7 +1195,7 @@ export class PayablesService {
       }
 
       if (received > 0 && row.status !== PayableStatus.ARCHIVED) {
-        paidTotal += await convert(received, row.currency);
+        paidTotal += await convert(received, row.currency, paidAt ?? undefined);
         paidTotalCount += 1;
         // Marked received (or paid) with no money in an account yet.
         const notBooked = unbooked.get(row.id) ?? 0;
@@ -1205,7 +1206,7 @@ export class PayablesService {
       }
 
       if (isPaid && paidAt && paidAt >= startOfMonth && paidAt <= endOfMonth) {
-        paidThisMonth += await convert(fullAmount, row.currency);
+        paidThisMonth += await convert(fullAmount, row.currency, paidAt ?? undefined);
       }
     }
 
@@ -1486,6 +1487,7 @@ export class PayablesService {
     targetCurrency: string,
     rateCache: Map<string, number>,
     workspaceId: string,
+    day?: Date,
   ): Promise<number> {
     if (!Number.isFinite(amount) || amount === 0) {
       return 0;
@@ -1496,15 +1498,10 @@ export class PayablesService {
       return amount;
     }
 
-    const cacheKey = `${source}:${targetCurrency}`;
+    const cacheKey = `${source}:${targetCurrency}:${day?.toISOString().slice(0, 10) ?? ''}`;
     let rate = rateCache.get(cacheKey);
     if (rate === undefined) {
-      rate = await this.exchangeRatesService.getRate(
-        source,
-        targetCurrency,
-        undefined,
-        workspaceId,
-      );
+      rate = await this.exchangeRatesService.getRate(source, targetCurrency, day, workspaceId);
       rateCache.set(cacheKey, rate);
     }
 

@@ -98,6 +98,7 @@ function createService(options: {
         where: vi.fn(() => builder),
         andWhere: vi.fn(() => builder),
         groupBy: vi.fn(() => builder),
+        addGroupBy: vi.fn(() => builder),
         getRawMany: vi.fn(async () => options.rows?.cash ?? []),
       };
       return builder;
@@ -207,7 +208,9 @@ describe('GoalFlowService', () => {
       goal,
       budgets: [budget({ currency: 'USD', limitAmount: 100 })],
       categories: [{ id: 'category-1', name: 'Home', parentId: null }],
-      rows: { categories: [{ categoryId: 'category-1', currency: 'USD', total: '10' }] },
+      rows: {
+        categories: [{ categoryId: 'category-1', currency: 'USD', day: '2026-05-04', total: '10' }],
+      },
       workspaceCurrency: 'KZT',
       rate: 500,
     });
@@ -217,8 +220,10 @@ describe('GoalFlowService', () => {
     expect(result.currency).toBe('KZT');
     expect(result.actualTotal).toBe(5000);
     expect(result.plannedTotal).toBe(50000);
-    // One lookup for the single distinct source currency, not one per row.
-    expect(exchangeRatesService.getRateOrNull).toHaveBeenCalledTimes(1);
+    // The limit is a plan, at today's rate; what was spent converts at its own day's rate.
+    const lookups = exchangeRatesService.getRateOrNull.mock.calls;
+    expect(lookups).toContainEqual(['USD', 'KZT', undefined, WORKSPACE_ID]);
+    expect(lookups).toContainEqual(['USD', 'KZT', '2026-05-04', WORKSPACE_ID]);
   });
 
   it('puts a weekly limit on the same monthly axis as a monthly one', async () => {

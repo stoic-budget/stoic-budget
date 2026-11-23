@@ -5,7 +5,7 @@ describe('ExchangeRatesController', () => {
   const exchangeRatesService = {
     getRate: vi.fn(),
     getRateQuote: vi.fn(),
-    bulkConvert: vi.fn(),
+    getRateOrNull: vi.fn(),
   } as any;
   const workspaceRepository = { findOne: vi.fn() } as any;
 
@@ -54,12 +54,9 @@ describe('ExchangeRatesController', () => {
   });
 
   describe('bulkConvert', () => {
-    it('delegates to service with parsed dates', async () => {
-      const mockResults = [
-        { converted: 367, rate: 3.67, source: 'exchange-rates-service' },
-      ];
-      exchangeRatesService.bulkConvert.mockResolvedValue(mockResults);
-
+    it("converts each item at its own day's rate", async () => {
+      const rate = 3.67;
+      exchangeRatesService.getRateOrNull.mockResolvedValue(rate);
       const dto = {
         items: [{ amount: 100, currency: 'USD', date: '2025-06-15' }],
         targetCurrency: 'ILS',
@@ -67,28 +64,31 @@ describe('ExchangeRatesController', () => {
 
       const result = await controller.bulkConvert('ws-1', dto);
 
-      expect(result).toEqual({ targetCurrency: 'ILS', results: mockResults });
-      expect(exchangeRatesService.bulkConvert).toHaveBeenCalledWith(
-        [{ amount: 100, currency: 'USD', date: new Date('2025-06-15') }],
+      expect(result).toEqual({
+        targetCurrency: 'ILS',
+        results: [{ converted: 100 * rate, rate, source: 'exchange-rates-service', missing: false }],
+      });
+      expect(exchangeRatesService.getRateOrNull).toHaveBeenCalledWith(
+        'USD',
         'ILS',
+        new Date('2025-06-15'),
         'ws-1',
       );
     });
 
-    it('handles items without date', async () => {
-      exchangeRatesService.bulkConvert.mockResolvedValue([]);
+    it('says so when no rate exists, and uses the latest rate for an item without a date', async () => {
+      exchangeRatesService.getRateOrNull.mockResolvedValue(null);
       const dto = {
         items: [{ amount: 50, currency: 'EUR' }],
         targetCurrency: 'USD',
       };
 
-      await controller.bulkConvert('ws-1', dto);
+      const result = await controller.bulkConvert('ws-1', dto);
 
-      expect(exchangeRatesService.bulkConvert).toHaveBeenCalledWith(
-        [{ amount: 50, currency: 'EUR', date: undefined }],
-        'USD',
-        'ws-1',
-      );
+      expect(result.results).toEqual([
+        { converted: 50, rate: 1, source: 'exchange-rates-service', missing: true },
+      ]);
+      expect(exchangeRatesService.getRateOrNull).toHaveBeenCalledWith('EUR', 'USD', undefined, 'ws-1');
     });
   });
 });

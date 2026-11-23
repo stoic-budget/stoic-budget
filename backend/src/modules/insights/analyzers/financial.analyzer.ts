@@ -7,6 +7,7 @@ import { InsightCategory, InsightSeverity, InsightType } from '../../../entities
 import { Transaction, TransactionType } from '../../../entities/transaction.entity';
 import { Workspace } from '../../../entities/workspace.entity';
 import { UNCATEGORIZED_CATEGORY_NAME } from '../../categories/uncategorized-category';
+import { DAY_SQL, type DayRow } from '../../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
 import { NetWorthService } from '../../net-worth/net-worth.service';
 import { PayPeriodService, type ResolvedPayPeriod } from '../../pay-period/pay-period.service';
@@ -69,9 +70,9 @@ export class FinancialAnalyzer implements InsightAnalyzer {
   /**
    * Sums `rows` per key in the workspace currency. Rows come per currency, so
    * 500 UAH is never read as 500 of the workspace's money; a currency with no
-   * rate counts as nothing (see `convertWith`).
+   * rate counts as nothing.
    */
-  private async inWorkspaceCurrency<T extends { currency: string | null }>(
+  private async inWorkspaceCurrency<T extends { currency: string | null; day?: string }>(
     workspaceId: string,
     rows: T[],
   ): Promise<(row: T, amount: string | number) => number> {
@@ -167,6 +168,7 @@ export class FinancialAnalyzer implements InsightAnalyzer {
       // Per day, not date_trunc('month'): a month may start on another day than the 1st.
       .addSelect("TO_CHAR(t.transaction_date, 'YYYY-MM-DD')", 'month')
       .addSelect('t.currency', 'currency')
+      .addSelect(DAY_SQL, 'day')
       .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
       .where('t.workspace_id = :workspaceId', { workspaceId })
       .andWhere('t.transaction_type = :type', { type: TransactionType.EXPENSE })
@@ -183,13 +185,8 @@ export class FinancialAnalyzer implements InsightAnalyzer {
       .addGroupBy('category.name')
       .addGroupBy('t.transaction_date')
       .addGroupBy('t.currency')
-      .getRawMany<{
-        categoryId: string;
-        categoryName: string;
-        month: string;
-        currency: string | null;
-        total: string;
-      }>();
+      .addGroupBy(DAY_SQL)
+      .getRawMany<DayRow<'categoryId' | 'categoryName' | 'month' | 'total'>>();
 
     const convert = await this.inWorkspaceCurrency(workspaceId, rows);
     const totals = new Map<string, CategoryMonthTotal>();

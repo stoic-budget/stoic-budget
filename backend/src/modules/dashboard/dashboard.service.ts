@@ -34,6 +34,7 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { Workspace } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { BudgetWithinLimitService } from '../budgets/budget-within-limit.service';
+import { DAY_SQL, type DayRow, loadDayConverter } from '../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { PayPeriodService } from '../pay-period/pay-period.service';
 import {
@@ -60,7 +61,6 @@ import {
   getWindowBounds,
   parseMonthWindow,
 } from './dashboard-window.util';
-import { DAY_SQL, type DayRow, loadDayConverter } from './day-converter';
 import { spendableBalance } from './opening-balance';
 
 /** How many individual categories the donut shows before folding the rest into "Other". */
@@ -264,20 +264,14 @@ export class DashboardService {
       .addGroupBy(DAY_SQL)
       .getRawMany<DayRow<'income' | 'expense' | 'unapprovedCash'>>();
 
-    const rows = txRows.map(row => ({ ...row, currency: this.normalizeCurrency(row.currency) }));
-    const day = await loadDayConverter(
-      this.exchangeRatesService,
-      targetCurrency,
-      rows,
-      workspaceId,
-    );
+    const convert = await this.dayConverter(targetCurrency, txRows, workspaceId);
     let income = 0;
     let expense = 0;
     let unapprovedCash = 0;
-    for (const row of rows) {
-      income += day.convert(Number(row.income), row.currency, row.day);
-      expense += day.convert(Number(row.expense), row.currency, row.day);
-      unapprovedCash += day.convert(Number(row.unapprovedCash), row.currency, row.day);
+    for (const row of txRows) {
+      income += convert(row.income, row.currency, row.day);
+      expense += convert(row.expense, row.currency, row.day);
+      unapprovedCash += convert(row.unapprovedCash, row.currency, row.day);
     }
 
     const totalBalance = await this.getAllTimeBalance(workspaceId, targetCurrency);
@@ -343,6 +337,16 @@ export class DashboardService {
     return currencyCodeOrDefault(currency);
   }
 
+  /** Flows convert at each row's own day, as Reports do; see `loadDayConverter`. */
+  dayConverter(
+    target: string,
+    rows: Array<{ currency: string; day: string }>,
+    workspaceId: string,
+  ) {
+    return loadDayConverter(this.exchangeRatesService, target, rows, workspaceId);
+  }
+
+  /** Today's rate, 1:1 without one: for balances and what is still to come, not for flows. */
   async convertDashboardAmount(
     amount: string | number | null | undefined,
     sourceCurrency: string | null | undefined,
@@ -507,18 +511,14 @@ export class DashboardService {
     targetCurrency: string,
   ): Promise<void> {
     const rows = await this.withinLimit.withinLimitSpending(workspaceId, since, endDate);
+    const days = rows.map(row => ({ currency: row.currency, day: row.date }));
+    const convert = await this.dayConverter(targetCurrency, days, workspaceId);
     for (const row of rows) {
       const point = points.get(row.date);
-      if (!point) {
-        continue;
+      if (point) {
+        const amount = convert(row.amount, row.currency, row.date);
+        point.budgeted = Math.min(point.expense, point.budgeted + amount);
       }
-      const amount = await this.convertDashboardAmount(
-        row.amount,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
-      point.budgeted = Math.min(point.expense, point.budgeted + amount);
     }
   }
 
@@ -608,19 +608,12 @@ export class DashboardService {
       .setParameter('expense', TransactionType.EXPENSE)
       .getRawMany<DayRow<'date' | 'income' | 'expense'>>();
 
-    // Each day's sums convert at that day's rate, as the Reports flow does.
-    const rows = result.map(row => ({ ...row, currency: this.normalizeCurrency(row.currency) }));
-    const day = await loadDayConverter(
-      this.exchangeRatesService,
-      targetCurrency,
-      rows,
-      workspaceId,
-    );
+    const convert = await this.dayConverter(targetCurrency, result, workspaceId);
     const points = new Map<string, DashboardCashFlowPoint>();
-    for (const row of rows) {
+    for (const row of result) {
       const point = points.get(row.date) ?? { date: row.date, income: 0, expense: 0, budgeted: 0 };
-      point.income += day.convert(Number(row.income), row.currency, row.day);
-      point.expense += day.convert(Number(row.expense), row.currency, row.day);
+      point.income += convert(row.income, row.currency, row.day);
+      point.expense += convert(row.expense, row.currency, row.day);
       points.set(row.date, point);
     }
 
@@ -643,6 +636,7 @@ export class DashboardService {
     const result = await query
       .select(name, 'name')
       .addSelect('t.currency', 'currency')
+      .addSelect(DAY_SQL, 'day')
       .addSelect('COALESCE(SUM(t.debit), 0)', 'amount')
       .addSelect('COUNT(t.id)', 'count')
       .andWhere('t.transactionType = :expense', { expense: TransactionType.EXPENSE })
@@ -650,20 +644,16 @@ export class DashboardService {
       .andWhere("t.counterpartyName != ''")
       .groupBy(name)
       .addGroupBy('t.currency')
-      .orderBy('amount', 'DESC')
+      .addGroupBy(DAY_SQL)
       .setParameter(PRIVACY_VIEWER_PARAM, viewerMemberId)
-      .getRawMany<{ name: string; currency: string; amount: string; count: string }>();
+      .getRawMany<DayRow<'name' | 'amount' | 'count'>>();
 
+    const convert = await this.dayConverter(targetCurrency, result, workspaceId);
     const rows = new Map<string, DashboardTopMerchant>();
     for (const row of result) {
       const key = row.name;
       const existing = rows.get(key) ?? { name: key, amount: 0, count: 0 };
-      existing.amount += await this.convertDashboardAmount(
-        row.amount,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
+      existing.amount += convert(row.amount, row.currency, row.day);
       existing.count += Number.parseInt(row.count, 10) || 0;
       rows.set(key, existing);
     }
@@ -692,6 +682,7 @@ export class DashboardService {
       .addSelect('c.color', 'color')
       .addSelect('c.icon', 'icon')
       .addSelect('t.currency', 'currency')
+      .addSelect(DAY_SQL, 'day')
       .addSelect('COALESCE(SUM(t.debit), 0)', 'amount')
       .addSelect('COUNT(t.id)', 'count')
       .andWhere('t.transactionType = :expense', { expense: TransactionType.EXPENSE })
@@ -700,17 +691,12 @@ export class DashboardService {
       .addGroupBy('c.color')
       .addGroupBy('c.icon')
       .addGroupBy('t.currency')
-      .orderBy('amount', 'DESC')
-      .getRawMany<{
-        id: string | null;
-        name: string | null;
-        color: string | null;
-        icon: string | null;
-        currency: string;
-        amount: string;
-        count: string;
-      }>();
+      .addGroupBy(DAY_SQL)
+      .getRawMany<
+        DayRow<'amount' | 'count'> & Record<'id' | 'name' | 'color' | 'icon', string | null>
+      >();
 
+    const convert = await this.dayConverter(targetCurrency, result, workspaceId);
     type Aggregate = Omit<DashboardTopCategory, 'percent'>;
     const rows = new Map<string, Aggregate>();
     for (const row of result) {
@@ -723,12 +709,7 @@ export class DashboardService {
         amount: 0,
         count: 0,
       };
-      existing.amount += await this.convertDashboardAmount(
-        row.amount,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
+      existing.amount += convert(row.amount, row.currency, row.day);
       existing.count += Number.parseInt(row.count, 10) || 0;
       rows.set(key, existing);
     }
@@ -826,16 +807,13 @@ export class DashboardService {
     // A transaction has no page of its own: a click opens its document, or for
     // one entered by hand the bill it settled; with neither it gets no link.
     const hrefOf = await recentRowHrefs(this.receiptRepo, this.payableRepo, workspaceId, rows);
+    const days = rows.map(row => ({ currency: row.currency, day: row.date }));
+    const convert = await this.dayConverter(targetCurrency, days, workspaceId);
 
     return Promise.all(
       rows.map(async (row, index) => {
         const magnitude = row.transactionType === TransactionType.INCOME ? row.credit : row.debit;
-        const converted = await this.convertDashboardAmount(
-          magnitude,
-          row.currency,
-          targetCurrency,
-          workspaceId,
-        );
+        const converted = convert(magnitude, row.currency, row.date);
         const amount = row.transactionType === TransactionType.INCOME ? converted : -converted;
 
         const bankLabel = BANK_DISPLAY_NAMES[row.bankName] ?? BANK_DISPLAY_NAMES[BankName.OTHER];
@@ -981,24 +959,18 @@ export class DashboardService {
       window,
     )
       .select('t.currency', 'currency')
+      .addSelect(DAY_SQL, 'day')
       .addSelect(
         'COALESCE(SUM(CASE WHEN t.transactionType = :income THEN t.credit ELSE -t.debit END), 0)',
         'amount',
       )
       .setParameter('income', TransactionType.INCOME)
       .groupBy('t.currency')
-      .getRawMany<{ currency: string; amount: string }>();
+      .addGroupBy(DAY_SQL)
+      .getRawMany<DayRow<'amount'>>();
     const targetCurrency = await this.getWorkspaceCurrency(workspaceId);
-    let total = 0;
-    for (const row of rows) {
-      total += await this.convertDashboardAmount(
-        row.amount,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
-    }
-    return total;
+    const convert = await this.dayConverter(targetCurrency, rows, workspaceId);
+    return rows.reduce((total, row) => total + convert(row.amount, row.currency, row.day), 0);
   }
 
   /**
@@ -1445,8 +1417,6 @@ export class DashboardService {
     viewerMemberId: string | null,
   ): Promise<TrendRows> {
     const currency = await this.getWorkspaceCurrency(workspaceId);
-    const convert = (amount: string, from: string) =>
-      this.convertDashboardAmount(amount, from, currency, workspaceId);
     // Another member's private income counts under the placeholder, not its payer.
     const incomeSource = redactedSql('t', 't.counterparty_name');
 
@@ -1465,22 +1435,20 @@ export class DashboardService {
         .addSelect('MAX(c.color)', 'color')
         .addSelect('MAX(c.icon)', 'icon')
         .addSelect('t.currency', 'currency')
+        .addSelect(DAY_SQL, 'day')
         .addSelect('COALESCE(SUM(t.debit), 0)', 'amount')
         .addSelect('COUNT(t.id)', 'count')
         .andWhere('t.transactionType = :expense', { expense: TransactionType.EXPENSE })
         .groupBy('c.name')
         .addGroupBy('t.currency')
-        .getRawMany<{
-          name: string;
-          color: string | null;
-          icon: string | null;
-          currency: string;
-          amount: string;
-          count: string;
-        }>(),
+        .addGroupBy(DAY_SQL)
+        .getRawMany<
+          DayRow<'name' | 'amount' | 'count'> & Record<'color' | 'icon', string | null>
+        >(),
       this.createTrendBaseQuery(workspaceId, since, endDate)
         .select(incomeSource, 'name')
         .addSelect('t.currency', 'currency')
+        .addSelect(DAY_SQL, 'day')
         .addSelect('COALESCE(SUM(t.credit), 0)', 'amount')
         .addSelect('COUNT(t.id)', 'count')
         .andWhere('t.transactionType = :income', { income: TransactionType.INCOME })
@@ -1488,26 +1456,28 @@ export class DashboardService {
         .andWhere("t.counterpartyName != ''")
         .groupBy(incomeSource)
         .addGroupBy('t.currency')
+        .addGroupBy(DAY_SQL)
         .setParameter(PRIVACY_VIEWER_PARAM, viewerMemberId)
-        .getRawMany<{ name: string; currency: string; amount: string; count: string }>(),
+        .getRawMany<DayRow<'name' | 'amount' | 'count'>>(),
       this.createTrendBaseQuery(workspaceId, since, endDate)
         .select('COUNT(DISTINCT t.id)', 'rows')
         .getRawOne<{ rows: string }>(),
     ]);
 
-    /** Adds each name's rows across currencies, largest first. */
-    const mergeByName = async <
-      Row extends { name: string; currency: string; amount: string; count: string },
-    >(
-      rows: Row[],
-    ) => {
+    const convert = await this.dayConverter(
+      currency,
+      [...categoryRows, ...counterpartyRows],
+      workspaceId,
+    );
+    /** Adds each name's rows across currencies and days, largest first. */
+    const mergeByName = <Row extends DayRow<'name' | 'amount' | 'count'>>(rows: Row[]) => {
       const merged = new Map<
         string,
-        Omit<Row, 'currency' | 'amount' | 'count'> & { amount: number; count: number }
+        Omit<Row, 'currency' | 'day' | 'amount' | 'count'> & { amount: number; count: number }
       >();
-      for (const { currency: from, amount, count, ...rest } of rows) {
+      for (const { currency: from, day, amount, count, ...rest } of rows) {
         const entry = merged.get(rest.name) ?? { ...rest, amount: 0, count: 0 };
-        entry.amount += await convert(amount, from);
+        entry.amount += convert(amount, from, day);
         entry.count += Number.parseInt(count, 10) || 0;
         merged.set(rest.name, entry);
       }
@@ -1519,14 +1489,14 @@ export class DashboardService {
     const points = [...daily.values()];
     return {
       daily,
-      categories: (await mergeByName(categoryRows)).map(row => ({
+      categories: mergeByName(categoryRows).map(row => ({
         name: row.name,
         color: row.color ?? null,
         icon: row.icon ?? null,
         amount: row.amount,
         count: row.count,
       })),
-      counterparties: await mergeByName(counterpartyRows),
+      counterparties: mergeByName(counterpartyRows),
       totals: {
         income: points.reduce((sum, point) => sum + point.income, 0),
         expense: points.reduce((sum, point) => sum + point.expense, 0),

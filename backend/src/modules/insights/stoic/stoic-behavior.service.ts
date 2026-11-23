@@ -15,6 +15,12 @@ import { Transaction, TransactionType } from '../../../entities/transaction.enti
 import { RESERVE_WALLET_TYPES } from '../../../entities/wallet.entity';
 import { computeMonthRange, toMonthKey } from '../../budgets/budget-period.util';
 import { spendableBalance } from '../../dashboard/opening-balance';
+import {
+  DAY_SQL,
+  type DayConvert,
+  type DayRow,
+  loadDayConverter,
+} from '../../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
 import { buildRateMap, convertWith, round2 } from '../../goals/goal-money.util';
 import { unconfirmedRowsQuery } from '../../review-inbox/review-queue.queries';
@@ -71,6 +77,10 @@ const CASH_FLOW_MONTHS = 8;
 
 const MERCHANT_NAME_SQL = 'COALESCE(payee.name, t.counterparty_name)';
 
+type MerchantRow = DayRow<'name' | 'bankName' | 'total'> & { categoryId: string | null };
+type WeekdayRow = DayRow<'total'> & { categoryId: string | null; weekend: boolean };
+type FlowRow = DayRow<'month' | 'total'> & { type: TransactionType };
+
 @Injectable()
 export class StoicBehaviorService {
   constructor(
@@ -113,39 +123,33 @@ export class StoicBehaviorService {
         .addSelect('t.counterparty_name', 'bankName')
         .addSelect('t.category_id', 'categoryId')
         .addSelect('t.currency', 'currency')
+        .addSelect(DAY_SQL, 'day')
         .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
         .groupBy(MERCHANT_NAME_SQL)
         .addGroupBy('t.counterparty_name')
         .addGroupBy('t.category_id')
         .addGroupBy('t.currency')
-        .getRawMany<{
-          name: string;
-          bankName: string;
-          categoryId: string | null;
-          currency: string;
-          total: string;
-        }>(),
+        .addGroupBy(DAY_SQL)
+        .getRawMany<MerchantRow>(),
       this.purchaseCounts(workspaceId, month),
       this.purchaseCounts(workspaceId, previous),
       this.expenses(workspaceId, month)
         .select('t.category_id', 'categoryId')
         .addSelect('t.currency', 'currency')
+        .addSelect(DAY_SQL, 'day')
         .addSelect('EXTRACT(ISODOW FROM t.transaction_date) IN (6, 7)', 'weekend')
         .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
         .groupBy('t.category_id')
         .addGroupBy('t.currency')
+        .addGroupBy(DAY_SQL)
         .addGroupBy('EXTRACT(ISODOW FROM t.transaction_date) IN (6, 7)')
-        .getRawMany<{
-          categoryId: string | null;
-          currency: string;
-          weekend: boolean;
-          total: string;
-        }>(),
+        .getRawMany<WeekdayRow>(),
       this.transactionRepository
         .createQueryBuilder('t')
         .select("to_char(t.transaction_date, 'YYYY-MM')", 'month')
         .addSelect('t.transaction_type', 'type')
         .addSelect('t.currency', 'currency')
+        .addSelect(DAY_SQL, 'day')
         .addSelect('COALESCE(SUM(ABS(t.amount)), 0)', 'total')
         .where('t.workspace_id = :workspaceId', { workspaceId })
         .andWhere('t.is_duplicate = false')
@@ -156,7 +160,8 @@ export class StoicBehaviorService {
         .groupBy("to_char(t.transaction_date, 'YYYY-MM')")
         .addGroupBy('t.transaction_type')
         .addGroupBy('t.currency')
-        .getRawMany<{ month: string; type: TransactionType; currency: string; total: string }>(),
+        .addGroupBy(DAY_SQL)
+        .getRawMany<FlowRow>(),
       this.subscriptionRepository.find({
         // A detected one is only a guess until the person confirms it in Review.
         where: { workspaceId, status: SubscriptionStatus.ACTIVE },
@@ -173,25 +178,23 @@ export class StoicBehaviorService {
         .getCount(),
     ]);
 
+    // What was spent at each day's rate, as the dashboard; subscriptions to come at today's.
+    const spent = [...merchantRows, ...weekdayRows, ...flowRows];
+    const convert = await loadDayConverter(this.exchangeRatesService, currency, spent, workspaceId);
     const rates = await buildRateMap(
       this.exchangeRatesService,
-      [
-        ...merchantRows.map(row => row.currency),
-        ...weekdayRows.map(row => row.currency),
-        ...flowRows.map(row => row.currency),
-        ...subscriptions.map(item => item.currency),
-      ],
+      subscriptions.map(item => item.currency),
       currency,
       workspaceId,
     );
 
     return {
-      merchants: this.mergeMerchants(merchantRows, currentCounts, rates),
+      merchants: this.mergeMerchants(merchantRows, currentCounts, convert),
       previousCounts: Object.fromEntries(
         previousRows.map(row => [row.name, Number.parseInt(row.count, 10) || 0]),
       ),
-      ...this.splitWeekend(weekdayRows, rates),
-      cashFlow: this.cashFlow(flowRows, rates, monthStart),
+      ...this.splitWeekend(weekdayRows, convert),
+      cashFlow: this.cashFlow(flowRows, convert, monthStart),
       subscriptions: {
         count: subscriptions.length,
         monthlyTotal: round2(
@@ -248,15 +251,9 @@ export class StoicBehaviorService {
 
   /** One row per merchant, filed under the category that carried most of its money. */
   private mergeMerchants(
-    rows: Array<{
-      name: string;
-      bankName: string;
-      categoryId: string | null;
-      currency: string;
-      total: string;
-    }>,
+    rows: MerchantRow[],
     counts: Array<{ name: string; count: string }>,
-    rates: Map<string, number>,
+    convert: DayConvert,
   ): MerchantMonth[] {
     const byName = new Map<
       string,
@@ -272,7 +269,7 @@ export class StoicBehaviorService {
         byCategory: new Map(),
         byBankName: new Map(),
       };
-      const amount = convertWith(rates, row.total, row.currency);
+      const amount = convert(row.total, row.currency, row.day);
       entry.total += amount;
       entry.byCategory.set(row.categoryId, (entry.byCategory.get(row.categoryId) ?? 0) + amount);
       entry.byBankName.set(row.bankName, (entry.byBankName.get(row.bankName) ?? 0) + amount);
@@ -289,14 +286,14 @@ export class StoicBehaviorService {
   }
 
   private splitWeekend(
-    rows: Array<{ categoryId: string | null; currency: string; weekend: boolean; total: string }>,
-    rates: Map<string, number>,
+    rows: WeekdayRow[],
+    convert: DayConvert,
   ): Pick<StoicBehavior, 'weekendByCategory' | 'totalByCategory'> {
     const weekendByCategory: Record<string, number> = {};
     const totalByCategory: Record<string, number> = {};
     for (const row of rows) {
       const key = row.categoryId ?? 'none';
-      const amount = convertWith(rates, row.total, row.currency);
+      const amount = convert(row.total, row.currency, row.day);
       totalByCategory[key] = round2((totalByCategory[key] ?? 0) + amount);
       if (row.weekend === true || String(row.weekend) === 'true') {
         weekendByCategory[key] = round2((weekendByCategory[key] ?? 0) + amount);
@@ -305,11 +302,7 @@ export class StoicBehaviorService {
     return { weekendByCategory, totalByCategory };
   }
 
-  private cashFlow(
-    rows: Array<{ month: string; type: TransactionType; currency: string; total: string }>,
-    rates: Map<string, number>,
-    monthStart: Date,
-  ): CashFlowMonth[] {
+  private cashFlow(rows: FlowRow[], convert: DayConvert, monthStart: Date): CashFlowMonth[] {
     return Array.from({ length: CASH_FLOW_MONTHS }, (_, monthsAgo) => {
       const key = toMonthKey(
         new Date(monthStart.getFullYear(), monthStart.getMonth() - monthsAgo, 1),
@@ -318,7 +311,7 @@ export class StoicBehaviorService {
         round2(
           rows
             .filter(row => row.month === key && row.type === type)
-            .reduce((total, row) => total + convertWith(rates, row.total, row.currency), 0),
+            .reduce((total, row) => total + convert(row.total, row.currency, row.day), 0),
         );
       return {
         month: key,

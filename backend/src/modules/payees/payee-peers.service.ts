@@ -7,17 +7,11 @@ import { Category } from '../../entities/category.entity';
 import { Payee } from '../../entities/payee.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { ClassificationService } from '../classification/services/classification.service';
-import { CurrencyConverter, normalizeCurrencyCode } from '../exchange-rates/currency-converter';
+import { normalizeCurrencyCode } from '../exchange-rates/currency-converter';
+import { type DayRow, loadDayConverter } from '../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
-import {
-  AMOUNT_SQL,
-  categoryNamesOf,
-  lastDayOf,
-  monthsTo,
-  payeeFlows,
-  round2,
-} from './payee-flows';
+import { AMOUNT_SQL, categoryNamesOf, monthsTo, payeeFlows, round2, TX_DAY } from './payee-flows';
 
 /** Other payees drawn against this one: enough to compare, few enough to read. */
 const PEERS_SHOWN = 5;
@@ -84,6 +78,7 @@ export class PayeePeersService {
         .select('transaction.payeeId', 'payeeId')
         .addSelect(`to_char(transaction.transactionDate, 'YYYY-MM')`, 'month')
         .addSelect('transaction.currency', 'currency')
+        .addSelect(TX_DAY, 'day')
         .addSelect(`SUM(${AMOUNT_SQL})`, 'amount')
         .andWhere('transaction.transactionType = :direction', { direction })
         .andWhere('transaction.transactionDate >= :first', { first });
@@ -98,7 +93,8 @@ export class PayeePeersService {
         .groupBy('1')
         .addGroupBy('2')
         .addGroupBy('3')
-        .getRawMany<{ payeeId: string; month: string; currency: string; amount: string }>();
+        .addGroupBy(TX_DAY)
+        .getRawMany<DayRow<'payeeId' | 'month' | 'amount'>>();
     };
     const [own, others] = await Promise.all([
       monthly('self'),
@@ -106,15 +102,8 @@ export class PayeePeersService {
     ]);
 
     const rows = [...own, ...others];
-    const converter = await CurrencyConverter.load(
-      this.exchangeRates,
-      target,
-      rows.map(row => ({
-        currency: normalizeCurrencyCode(row.currency),
-        date: lastDayOf(row.month),
-      })),
-      workspaceId,
-    );
+    // Each day at its own rate, as the payee's own page and Reports.
+    const convert = await loadDayConverter(this.exchangeRates, target, rows, workspaceId);
     const valuesOf = new Map<string, number[]>();
     for (const row of rows) {
       const index = months.indexOf(row.month);
@@ -122,11 +111,7 @@ export class PayeePeersService {
         continue;
       }
       const values = valuesOf.get(row.payeeId) ?? months.map(() => 0);
-      values[index] += converter.convert(
-        Number(row.amount),
-        normalizeCurrencyCode(row.currency),
-        lastDayOf(row.month),
-      );
+      values[index] += convert(row.amount, row.currency, row.day);
       valuesOf.set(row.payeeId, values);
     }
     const sum = (values: number[]) => values.reduce((total, value) => total + value, 0);
@@ -171,7 +156,7 @@ export class PayeePeersService {
             : [],
         ),
       ],
-      missingRates: converter.missing,
+      missingRates: convert.missing,
     };
   }
 }
