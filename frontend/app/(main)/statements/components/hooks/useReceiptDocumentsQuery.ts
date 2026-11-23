@@ -9,6 +9,8 @@ import { queryKeys } from '@/app/lib/query-keys';
 import { hasReceiptAmount, type ReceiptDocument } from '../receipt-document-mapping';
 
 const POLL_INTERVAL_MS = 6000;
+/** While nothing is being read: receipts from e-mail still turn up, every receipt is read again. */
+const IDLE_POLL_INTERVAL_MS = 60_000;
 /** The most the server answers in one request. */
 const RECEIPTS_PER_REQUEST = 100;
 
@@ -62,7 +64,11 @@ export function useReceiptDocumentsQuery({
         return { items: receipts, total: Number.isFinite(total) ? total : receipts.length };
       }),
     enabled: enabled && Boolean(workspaceId),
-    refetchInterval: POLL_INTERVAL_MS,
+    // Quick while a scan is being read ('new'), slow otherwise: each poll reads every receipt.
+    refetchInterval: query =>
+      query.state.data?.some(receipt => receipt.status === 'new')
+        ? POLL_INTERVAL_MS
+        : IDLE_POLL_INTERVAL_MS,
     select: selectByAmount,
   });
 }
