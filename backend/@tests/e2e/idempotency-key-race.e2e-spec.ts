@@ -90,4 +90,23 @@ describe('Idempotency key race (e2e)', () => {
 
     expect(await count(vendor)).toEqual({ bills: 1, payments: 1 });
   });
+
+  it('answers 409 while the same key is still pending, and takes over one that expired', async () => {
+    const vendor = 'ACME Store - Pending';
+    const pending = (key: string, expiresAt: string) =>
+      dataSource.query(
+        `INSERT INTO idempotency_keys (key, user_id, workspace_id, response_hash, response_data, expires_at)
+         VALUES ($1, $2, $3, 'pending', '{}', ${expiresAt})`,
+        [`payable:${key}`, owner.userId, owner.workspaceId],
+      );
+    await pending('held-1', "now() + interval '4 minutes'");
+    const held = await save('held-1', vendor).expect(409);
+    expect(held.body.error.code).toBe('REQUEST_IN_PROGRESS');
+
+    // Expired, with microseconds no JS Date can equal: taken over all the same.
+    await pending('stale-1', "'2020-01-01 00:00:00.123456'");
+    await save('stale-1', vendor).expect(201);
+
+    expect(await count(vendor)).toEqual({ bills: 1, payments: 1 });
+  });
 });

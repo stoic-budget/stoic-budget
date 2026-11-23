@@ -89,9 +89,11 @@ export class IdempotencyService {
       }
       // Expired, or left pending by a request that died: taken over.
       if (existing.expiresAt < new Date()) {
+        // Matched by "already expired", not by the stored instant: a value with
+        // microseconds would never equal its JS Date and stay stuck.
         await this.idempotencyKeyRepository.delete({
           id: existing.id,
-          expiresAt: existing.expiresAt,
+          expiresAt: LessThan(new Date()),
         });
         continue;
       }

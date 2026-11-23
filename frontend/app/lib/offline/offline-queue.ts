@@ -111,8 +111,9 @@ export interface ReplayResult {
 
 /**
  * Sends every queued entry, oldest first. An entry the server rejects (4xx)
- * is dropped as unfixable from here; a network failure keeps it for next time
- * and stops the run, since the rest would fail the same way.
+ * is dropped as unfixable from here; a network failure, or a 409 saying the
+ * same request is still running (its idempotency key is taken), keeps it for
+ * next time and stops the run.
  */
 export async function replay(
   store: OfflineStore,
@@ -130,7 +131,7 @@ export async function replay(
       sent += 1;
       continue;
     }
-    if (isNetworkFailure(result.status)) {
+    if (isNetworkFailure(result.status) || result.status === 409) {
       await store.put({ ...entry, attempts: entry.attempts + 1, lastError: result.error });
       kept += entries.length - sent - kept;
       break;
