@@ -55,6 +55,40 @@ describe('CsvParser', () => {
     expect(day(result.transactions[0].transactionDate)).toEqual([2026, 2, 1]);
   });
 
+  it('reads a plain "Date, Description, Amount" file as no bank, with its own currency', async () => {
+    const result = await parse('plain.csv', [
+      'Date,Description,Amount,Currency',
+      '03/04/2026,ACME Store,-25.00,EUR',
+    ]);
+
+    expect(result.metadata.institution).toBeUndefined();
+    expect(result.metadata.currency).toBe('EUR');
+    expect(result.transactions[0].currency).toBe('EUR');
+    expect(result.transactions[0].counterpartyName).toBe('ACME Store');
+    expect(day(result.transactions[0].transactionDate)).toEqual([2026, 4, 3]);
+  });
+
+  it('does not read a currency out of an ordinary word in a description', async () => {
+    const result = await parse('plain-try.csv', [
+      'Date,Description,Amount',
+      '03/04/2026,Try Again Cafe,-25.00',
+    ]);
+
+    expect(result.metadata.currency).not.toBe('TRY');
+    expect(result.transactions[0].currency).not.toBe('TRY');
+  });
+
+  it("lets a file's Currency column beat a bank preset's hint", async () => {
+    const result = await parse('santander-eur.csv', [
+      'Date,Description,Money In,Money Out,Currency',
+      '03/04/2026,ACME Store,,25.00,EUR',
+    ]);
+
+    expect(result.metadata.institution).toBe('Santander UK');
+    expect(result.metadata.currency).toBe('EUR');
+    expect(result.transactions[0].currency).toBe('EUR');
+  });
+
   it('skips account details printed above the transaction table', async () => {
     const result = await parse('preamble.csv', [
       '﻿Account statement',

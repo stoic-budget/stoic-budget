@@ -25,6 +25,8 @@ export interface CsvPreset {
   dateOrder?: DateOrder;
 }
 
+// A preset names a bank, so its header must be one only that bank prints:
+// "Date, Description, Amount" is every app's export, not Wells Fargo's or HSBC's.
 export const CSV_PRESETS: CsvPreset[] = [
   {
     name: 'Revolut',
@@ -141,13 +143,6 @@ export const CSV_PRESETS: CsvPreset[] = [
     dateOrder: 'mdy',
   },
   {
-    name: 'Wells Fargo',
-    requires: ['date', 'amount', 'description'],
-    columns: { date: 'date', amount: 'amount', description: 'counterparty' },
-    currency: 'USD',
-    dateOrder: 'mdy',
-  },
-  {
     name: 'PayPal',
     requires: ['date', 'name', 'gross', 'currency'],
     columns: {
@@ -233,12 +228,6 @@ export const CSV_PRESETS: CsvPreset[] = [
     currency: 'GBP',
   },
   {
-    name: 'HSBC',
-    requires: ['date', 'description', 'amount'],
-    columns: { date: 'date', description: 'counterparty', amount: 'amount' },
-    currency: 'GBP',
-  },
-  {
     name: 'Lloyds',
     requires: ['transaction date', 'transaction description', 'debit amount', 'credit amount'],
     columns: {
@@ -273,7 +262,9 @@ export function findCsvPreset(headers: string[]): CsvPreset | null {
 export function presetColumnMapping(preset: CsvPreset, headers: string[]): Record<string, number> {
   const mapping: Record<string, number> = {};
   headers.forEach((header, index) => {
-    const key = preset.columns[header.trim().toLowerCase()];
+    const name = header.trim().toLowerCase();
+    // A file's own Currency column beats the preset's hint.
+    const key = preset.columns[name] ?? (name === 'currency' ? 'currency' : undefined);
     if (key && mapping[key] === undefined) mapping[key] = index;
   });
   return mapping;
