@@ -14,9 +14,10 @@ export interface LineTaxing {
  * Rounding every line on its own made the books and the PDF a cent off the
  * XML: three lines of 10.00 including 19 % are 4.79 of tax, not 3 × 1.60.
  *
- * With net prices the nets stay and the tax moves; with tax-inclusive prices
- * the line totals the client was quoted stay and the net moves, to the net
- * whose rounded tax brings back the same total where one exists.
+ * With net prices the nets stay and the tax moves. With tax-inclusive prices
+ * the totals the client was quoted always stay: the net moves to the one whose
+ * rounded tax brings the same total back, and where none exists (a few gross
+ * amounts cannot be reached at a given rate) the lines keep their own rounding.
  */
 export function roundByRateGroup<T extends TaxBreakdown>(lines: T[], taxing: LineTaxing[]): T[] {
   const result = lines.map(line => ({ ...line }));
@@ -32,12 +33,11 @@ export function roundByRateGroup<T extends TaxBreakdown>(lines: T[], taxing: Lin
     const sum = (field: 'netMinor' | 'grossMinor') =>
       indexes.reduce((total, index) => total + result[index][field], 0);
     if (isInclusive) {
-      const gross = sum('grossMinor');
-      const net = inclusiveNet(gross, rate);
+      // The prices the client was quoted stay. Where no net brings the quoted
+      // total back with its tax rounded once, the lines keep their own rounding.
+      const net = inclusiveNet(sum('grossMinor'), rate);
+      if (net === null) continue;
       spread(result, indexes, 'netMinor', net - sum('netMinor'));
-      const tax = Math.round((net * rate) / 100);
-      // Where no net brings the total back, the total follows the tax.
-      spread(result, indexes, 'grossMinor', net + tax - gross);
     } else {
       const tax = Math.round((sum('netMinor') * rate) / 100);
       spread(result, indexes, 'grossMinor', sum('netMinor') + tax - sum('grossMinor'));
@@ -50,14 +50,14 @@ export function roundByRateGroup<T extends TaxBreakdown>(lines: T[], taxing: Lin
   return result;
 }
 
-/** The net whose tax, rounded once, adds back up to `gross`; the nearest one if none does. */
-function inclusiveNet(gross: number, rate: number): number {
+/** The net whose tax, rounded once, adds back up to `gross`; null when none does. */
+function inclusiveNet(gross: number, rate: number): number | null {
   const guess = Math.round((gross * 100) / (100 + rate));
   for (const step of [0, -1, 1, -2, 2]) {
     const net = guess + step;
     if (net + Math.round((net * rate) / 100) === gross) return net;
   }
-  return guess;
+  return null;
 }
 
 /** Moves `cents` across the group's lines, one at a time, largest lines first. */

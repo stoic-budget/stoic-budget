@@ -154,3 +154,28 @@ export function totalsOf(priced: PricedLine[]): {
     total: fromMinor(sums.grossMinor),
   };
 }
+
+/** What lines priced together add up to: the totals an invoice stores. */
+export async function totalsFor(
+  manager: EntityManager,
+  lineItems: PricableLine[],
+  pricesIncludeTax: boolean,
+): Promise<ReturnType<typeof totalsOf>> {
+  return totalsOf(await priceLines(manager, lineItems, pricesIncludeTax));
+}
+
+/**
+ * Lines of several invoices (a credit note's), each invoice's priced on its
+ * own: tax rounded per rate across two invoices would move a cent from one
+ * invoice's credit to the other's.
+ */
+export async function priceEach(
+  manager: EntityManager,
+  groups: Array<{ lines: PricableLine[] }>,
+  pricesIncludeTax: boolean,
+): Promise<PricedLine[]> {
+  const priced = await Promise.all(
+    groups.map(group => priceLines(manager, group.lines, pricesIncludeTax)),
+  );
+  return priced.flat();
+}

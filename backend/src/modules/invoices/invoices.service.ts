@@ -37,7 +37,7 @@ import { BusinessProfileService } from '../business-profile/business-profile.ser
 import { LedgerPostingError, LedgerPostingService } from '../ledger/ledger-posting.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { buildInvoicePdf } from './invoice-document';
-import { documentLines, priceLines, totalsOf } from './invoice-pricing';
+import { documentLines, priceLines, totalsFor } from './invoice-pricing';
 import { advanceIssueDate, shiftDueDate } from './invoice-recurrence.util';
 import { InvoiceSettingsService } from './invoice-settings.service';
 import { InvoiceXRechnungService } from './invoice-xrechnung.service';
@@ -305,6 +305,8 @@ export class InvoicesService {
       }
 
       const { lineItems, client, profile } = await this.sendableOrThrow(manager, invoice);
+      // Priced as it is sent: a draft saved before a pricing change carries old totals.
+      Object.assign(invoice, await totalsFor(manager, lineItems, invoice.pricesIncludeTax));
 
       invoice.invoiceNumber = await this.nextInvoiceNumber(manager, workspaceId);
       // The link's secret. 24 random bytes, so the url cannot be guessed from
@@ -561,11 +563,7 @@ export class InvoicesService {
       where: { id: invoiceId },
     });
 
-    const totals = totalsOf(await priceLines(manager, lineItems, invoice.pricesIncludeTax));
-
-    invoice.subtotal = totals.subtotal;
-    invoice.taxTotal = totals.taxTotal;
-    invoice.total = totals.total;
+    Object.assign(invoice, await totalsFor(manager, lineItems, invoice.pricesIncludeTax));
     const saved = await manager.getRepository(Invoice).save(invoice);
     saved.lineItems = lineItems;
     return saved;

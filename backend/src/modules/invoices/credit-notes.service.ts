@@ -24,7 +24,7 @@ import { BusinessProfileService } from '../business-profile/business-profile.ser
 import { LedgerPostingError, LedgerPostingService } from '../ledger/ledger-posting.service';
 import { PayablesService } from '../payables/payables.service';
 import { buildCreditNotePdf } from './invoice-document';
-import { documentLines, priceLines, totalsOf } from './invoice-pricing';
+import { documentLines, priceEach, totalsOf } from './invoice-pricing';
 import { InvoiceXRechnungService } from './invoice-xrechnung.service';
 
 /** One invoice's share of a credit note, resolved against what it can carry. */
@@ -131,7 +131,7 @@ export class CreditNotesService {
 
       const groups = await this.copyLines(manager, note, resolved);
       const lineItems = groups.flatMap(group => group.lines);
-      const priced = await priceLines(manager, lineItems, note.pricesIncludeTax);
+      const priced = await priceEach(manager, groups, note.pricesIncludeTax);
       const totals = totalsOf(priced);
       if (totals.total <= 0) {
         throw new BadRequestException(appError('CREDIT_NOTE_ZERO_TOTAL'));

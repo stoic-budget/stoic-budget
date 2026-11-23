@@ -52,4 +52,18 @@ describe('roundByRateGroup', () => {
 
     for (const l of priced) expect(l.netMinor + l.taxMinor).toBe(l.grossMinor);
   });
+
+  it('never moves a quoted tax-inclusive price, even where no net reaches it', () => {
+    // 1.10 including 19 %: no net plus its rounded tax makes 1.10.
+    const { gross } = price([line(110, 19, true)]);
+
+    expect(gross).toBe(110);
+  });
+
+  it('gives the moved cent to the largest line first', () => {
+    const { priced } = price([line(100, 19, false), line(1235, 19, false), line(1235, 19, false)]);
+
+    // 25.70 net at 19 %: 4.88 of tax once, against 0.19 + 2.35 + 2.35 = 4.89 per line.
+    expect(priced.map(l => l.taxMinor)).toEqual([19, 234, 235]);
+  });
 });
