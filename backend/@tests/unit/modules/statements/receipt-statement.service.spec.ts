@@ -265,6 +265,8 @@ describe('ReceiptStatementService', () => {
     expect(transactionRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 12, currency: 'EUR' }),
     );
+    // The workspace the scan was made in, not any other.
+    expect(testingModule.get(WorkspaceCurrencyService).resolveFor).toHaveBeenCalledWith('ws-1', undefined);
   });
 
   it('leaves the scan uncategorised when the receipt names no category', async () => {
