@@ -7,9 +7,11 @@ import {
 import type { SubscriptionCharge } from '../../../../src/entities/subscription-charge.entity';
 import { advancePastDue, chargeArrived } from '../../../../src/modules/subscriptions/missed-charge';
 
-/** A charge table holding these days for subscription sub-1 of ws-1. */
-const charged = (...days: string[]) =>
+/** A charge table holding these days for subscription sub-1 of ws-1, which has a payee rule. */
+const charged = (...days: string[]) => withRule(true, days);
+const withRule = (rule: boolean, days: string[]) =>
   ({
+    manager: { query: vi.fn(async () => (rule ? [{ '?column?': 1 }] : [])) },
     exists: vi.fn(async ({ where }: { where: Record<string, unknown> }) => {
       if (where.workspaceId !== 'ws-1' || where.subscriptionId !== 'sub-1') return false;
       const range = where.chargeDate as FindOperator<Date> | undefined;
@@ -77,10 +79,10 @@ describe('advancePastDue', () => {
     expect(sub.riskStatus).toBe(SubscriptionRiskStatus.MISSING_CHARGE);
   });
 
-  it('judges nothing for a subscription whose payments are never linked', async () => {
+  it('judges nothing for a subscription without a payee rule, even with charges from its confirmation', async () => {
     const sub = subscription();
 
-    await advancePastDue(sub, charged());
+    await advancePastDue(sub, withRule(false, ['2026-08-10', '2026-09-10']));
 
     expect(sub.riskStatus).toBe(SubscriptionRiskStatus.NONE);
   });

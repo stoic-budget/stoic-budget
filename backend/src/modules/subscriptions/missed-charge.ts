@@ -15,9 +15,10 @@ const EARLY_DAYS = 14;
  * the one before it is, which has had a whole cycle for its payment to come.
  * "Missing charge" means nothing was charged from a little before that date up
  * to today (two weeks, half a cycle for a weekly one); a charge in that window
- * clears it. Only a subscription whose payments get linked (it has at least
- * one charge) is judged: for the others, no charge says nothing about the
- * money. A price change is left as it is. False when there is no date.
+ * clears it. Only a subscription whose payments link themselves (it has a
+ * payee rule) is judged: for the others — confirmed from detection, or paid
+ * by date only — no linked charge says nothing about the money. A price
+ * change is left as it is. False when there is no date.
  */
 export async function advancePastDue(
   subscription: Subscription,
@@ -33,7 +34,7 @@ export async function advancePastDue(
     subscription.riskStatus === SubscriptionRiskStatus.NONE ||
     subscription.riskStatus === SubscriptionRiskStatus.MISSING_CHARGE;
   const own = { workspaceId: subscription.workspaceId, subscriptionId: subscription.id };
-  if (!(judged && (await charges.exists({ where: own })))) {
+  if (!(judged && (await linksItself(charges, own)))) {
     return true;
   }
   const previous = chargeAt(dueDate, subscription.frequency, -1);
@@ -53,4 +54,16 @@ export function chargeArrived(subscription: Subscription): void {
   if (subscription.riskStatus === SubscriptionRiskStatus.MISSING_CHARGE) {
     subscription.riskStatus = SubscriptionRiskStatus.NONE;
   }
+}
+
+/** A payee rule exists: the subscription's bank rows are linked as they arrive. */
+async function linksItself(
+  charges: Repository<SubscriptionCharge>,
+  own: { workspaceId: string; subscriptionId: string },
+): Promise<boolean> {
+  const rules: unknown[] = await charges.manager.query(
+    'SELECT 1 FROM subscription_payees WHERE workspace_id = $1 AND subscription_id = $2 LIMIT 1',
+    [own.workspaceId, own.subscriptionId],
+  );
+  return rules.length > 0;
 }
