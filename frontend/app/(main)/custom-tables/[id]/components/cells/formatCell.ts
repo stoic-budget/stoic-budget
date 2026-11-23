@@ -32,6 +32,33 @@ export function numberFormatFor(column: CustomTableColumn, fallbackCurrency: str
   };
 }
 
+/** The key of the column holding each row's currency code (a table made from transactions). */
+export function rowCurrencyKey(columns: CustomTableColumn[]): string | undefined {
+  return columns.find(
+    column => (column.config?.source as { field?: unknown } | undefined)?.field === 'currency',
+  )?.key;
+}
+
+/**
+ * A money column as one row shows it: in that row's own currency when the
+ * table keeps a code per row (#648), not the code the column took from the
+ * first row. Any other column, or a row without a valid code, is unchanged.
+ */
+export function inRowCurrency(
+  column: CustomTableColumn,
+  row: CustomTableGridRow,
+  currencyKey: string | undefined,
+): CustomTableColumn {
+  if (column.type !== 'currency' || !currencyKey) {
+    return column;
+  }
+  const code = row.data?.[currencyKey];
+  if (typeof code !== 'string' || !/^[A-Za-z]{3}$/.test(code.trim())) {
+    return column;
+  }
+  return { ...column, config: { ...(column.config ?? {}), currency: code.trim().toUpperCase() } };
+}
+
 export function selectedOptions(
   column: CustomTableColumn,
   value: CustomTableCellValue,
