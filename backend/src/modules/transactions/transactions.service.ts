@@ -39,6 +39,7 @@ import {
   NOTHING_REPOINTED,
   repointSplitParts,
 } from './helpers/repoint-split-parts';
+import { gatherSplitFingerprint } from './helpers/split-fingerprint';
 import { lockSplitGroup } from './helpers/split-group-lock';
 import { assertMayReshape, assertSplittable, memberIdOf } from './helpers/split-guards';
 import { assertTaxEditable } from './helpers/tax-edit-guard';
@@ -617,8 +618,9 @@ export class TransactionsService {
       survivor.amountForeign = foreignTotal;
       survivor.splitGroupId = null;
       survivor.splitIndex = null;
-      // The survivor is part 0 (parts come back by splitIndex), still holding
-      // the whole row's fingerprint: its total is that row's amount again.
+      // The survivor takes the bank row's fingerprint, kept on part 0 or handed
+      // on when that part went: its total is that row's amount again.
+      await gatherSplitFingerprint(repo, workspaceId, survivor, splitGroupId);
 
       const saved = await repo.save(survivor);
 

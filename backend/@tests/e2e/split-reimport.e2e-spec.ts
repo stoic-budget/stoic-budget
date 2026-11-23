@@ -11,6 +11,7 @@ import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import { BankName, FileType, Statement, StatementStatus } from '../../src/entities/statement.entity';
+import { AuditService } from '../../src/modules/audit/audit.service';
 import { StatementProcessingService } from '../../src/modules/parsing/services/statement-processing.service';
 import {
   deleteUserByEmail,
@@ -78,18 +79,68 @@ describe('Split row and re-import (e2e)', () => {
     await app.close();
   });
 
-  it('knows the split row in an overlapping export, and again after unsplit', async () => {
+  /** Spending the books count: live rows only. */
+  const liveSpending = async () =>
+    Number(
+      (
+        await dataSource.query(
+          'SELECT COALESCE(SUM(amount), 0) AS total FROM transactions WHERE workspace_id = $1 AND is_duplicate = false',
+          [owner.workspaceId],
+        )
+      )[0].total,
+    );
+
+  it('knows the split row in an overlapping export, and keeps it known when part 0 goes', async () => {
     const [original] = await importCsv('january', [ROW]);
-    await as(request(server()).post(`/transactions/${original.id}/split`))
+    const split = await as(request(server()).post(`/transactions/${original.id}/split`))
       .send({ parts: [{ amount: 60 }, { amount: 40 }] })
       .expect(200);
+    const second = split.body.find((part: { id: string }) => part.id !== original.id);
 
     const overlap = await importCsv('jan-feb', [ROW, '02.02.2026,Member One,-12.00']);
     expect(overlap[0]).toMatchObject({ is_duplicate: true, duplicate_of_id: original.id });
     expect(overlap[1]).toMatchObject({ is_duplicate: false });
+    expect(await liveSpending()).toBe(112);
 
+    // Deleting the 60 part: the copy of the whole row stays a copy, of the part left.
+    await as(request(server()).delete(`/transactions/${original.id}`)).expect(204);
+    const [copy] = await dataSource.query(
+      'SELECT is_duplicate, duplicate_of_id FROM transactions WHERE id = $1',
+      [overlap[0].id],
+    );
+    expect(copy).toEqual({ is_duplicate: true, duplicate_of_id: second.id });
+    expect(await liveSpending()).toBe(52);
+
+    // Undo: the part comes back with the bank row's fingerprint, its copy too.
+    const [deleted] = await dataSource.query(
+      "SELECT id FROM audit_events WHERE entity_id = $1 AND action = 'delete'",
+      [original.id],
+    );
+    // Undoing a delete is the audit rollback (admins only over HTTP): called directly.
+    await app.get(AuditService).rollback(deleted.id, owner.userId, owner.workspaceId);
+    const parts = await dataSource.query(
+      'SELECT id, fingerprint IS NOT NULL AS holds FROM transactions WHERE id = ANY($1::uuid[]) ORDER BY id = $2 DESC',
+      [[original.id, second.id], original.id],
+    );
+    expect(parts.map((part: { holds: boolean }) => part.holds)).toEqual([true, false]);
+    expect(await liveSpending()).toBe(112);
+
+    // A third export: its row is a copy of the live original, never of a copy.
+    const [third] = await importCsv('january-third', [ROW, '25.01.2026,Member One,-3.00']);
+    expect(third).toMatchObject({ is_duplicate: true, duplicate_of_id: original.id });
+  });
+
+  it('knows the row again after it is split and folded back', async () => {
+    const [original] = await importCsv('march', ['15.03.2026,ACME Store - Wireless Buds,-90.00']);
+    await as(request(server()).post(`/transactions/${original.id}/split`))
+      .send({ parts: [{ amount: 50 }, { amount: 40 }] })
+      .expect(200);
     await as(request(server()).post(`/transactions/${original.id}/unsplit`)).expect(200);
-    const [again] = await importCsv('january-again', [ROW, '20.01.2026,Member One,-5.00']);
+
+    const [again] = await importCsv('march-again', [
+      '15.03.2026,ACME Store - Wireless Buds,-90.00',
+      '20.03.2026,Member One,-5.00',
+    ]);
     expect(again).toMatchObject({ is_duplicate: true, duplicate_of_id: original.id });
   });
 });
