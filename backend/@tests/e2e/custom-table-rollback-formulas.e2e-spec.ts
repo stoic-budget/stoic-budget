@@ -72,4 +72,22 @@ describe('Table formulas after a rollback (e2e)', () => {
 
     expect(await doubledOf()).toBe(20);
   });
+
+  it('lists a table under its old name once a rename is rolled back', async () => {
+    const table = await as(request(server()).post('/custom-tables')).send({ name: 'Groceries' }).expect(201);
+    await as(request(server()).patch(`/custom-tables/${table.body.id}`)).send({ name: 'Food' }).expect(200);
+    const names = async () =>
+      (await as(request(server()).get('/custom-tables')).expect(200)).body.items.map(
+        (item: { name: string }) => item.name,
+      );
+    expect(await names()).toContain('Food');
+
+    const history = await as(
+      request(server()).get(`/audit-events/entity/custom_table/${table.body.id}`),
+    ).expect(200);
+    const rename = history.body.find((entry: { action: string }) => entry.action === 'update');
+    await as(request(server()).post(`/audit-events/${rename.id}/rollback`)).expect(201);
+
+    expect(await names()).toContain('Groceries');
+  });
 });

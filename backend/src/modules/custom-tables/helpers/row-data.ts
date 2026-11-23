@@ -7,7 +7,7 @@ import { CustomTableRow } from '../../../entities/custom-table-row.entity';
 import { type CustomTableAggregateFn } from '../dto/list-custom-table-rows.dto';
 import { formulaColumnsOf } from '../formula-recalc.service';
 import type { SourceValue } from '../sources/source.types';
-import { evaluateFormula, needsTableContext } from './formula-evaluator';
+import { collectFieldRefs, evaluateFormula, needsTableContext } from './formula-evaluator';
 import { orderFormulaColumns } from './table-evaluator';
 
 export type ViewSettingsColumns = Record<
@@ -239,15 +239,22 @@ export function applyFormulaColumns(rows: CustomTableRow[], columns: CustomTable
   for (const row of rows) {
     const data = (row.data ?? {}) as Record<string, unknown>;
     const computed = toRowDataRecord(row.computed);
+    // A total or a running sum needs the whole table: until the recalculation
+    // reaches the row it stays empty, and so does a formula built on it, rather
+    // than showing a plausible wrong number.
+    const waiting = new Set<string>();
     for (const col of formulaColumns) {
-      // A total or a running sum needs the whole table: until the recalculation
-      // reaches the row it stays empty rather than showing a plausible wrong number.
-      data[col.key] =
-        col.key in computed
-          ? computed[col.key]
-          : needsTableContext(col.expression)
-            ? null
-            : evaluateFormula(col.expression, data);
+      if (col.key in computed) {
+        data[col.key] = computed[col.key];
+      } else if (
+        needsTableContext(col.expression) ||
+        collectFieldRefs(col.expression).some(key => waiting.has(key))
+      ) {
+        waiting.add(col.key);
+        data[col.key] = null;
+      } else {
+        data[col.key] = evaluateFormula(col.expression, data);
+      }
     }
     row.data = data;
   }

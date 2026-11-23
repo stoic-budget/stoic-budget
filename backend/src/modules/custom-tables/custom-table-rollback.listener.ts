@@ -42,6 +42,8 @@ export class CustomTableRollbackListener {
     if (!(event.workspaceId && TABLE_ENTITIES.has(event.entityType))) return;
     const workspaceId = event.workspaceId;
     try {
+      // A table renamed, created or deleted back changes the list of tables.
+      if (event.entityType === EntityType.CUSTOM_TABLE) await this.cache.bumpList(workspaceId);
       const tableId = await this.tableOf(event, workspaceId);
       if (!tableId) return;
       await this.recalc.scheduleRecalc(tableId, workspaceId);
