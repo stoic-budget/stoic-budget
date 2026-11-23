@@ -28,6 +28,7 @@ import { BACKUP_FILE_EXTENSION, BackupArchiveService } from './backup-archive.se
 import { BackupDataService } from './backup-data.service';
 import { BackupDestinationService } from './backup-destination.service';
 import { BackupKeyService } from './backup-key.service';
+import { workspaceRecord } from './workspace-record';
 
 export type UpdateBackupConfiguration = Omit<UpdateBackupConfigurationBody, 'destinationKind'> & {
   destinationKind: BackupDestinationKind;
@@ -190,22 +191,7 @@ export class BackupsService {
     try {
       const snapshot = await this.dataService.collect(workspace.id);
       const collections = {
-        workspace: [
-          {
-            id: workspace.id,
-            name: workspace.name,
-            description: workspace.description,
-            icon: workspace.icon,
-            color: workspace.color,
-            backgroundImage: workspace.backgroundImage,
-            currency: workspace.currency,
-            settings: workspace.settings,
-            // The ledger, VAT and tax settings, as a workspace version keeps them.
-            ledgerBaseCurrency: workspace.ledgerBaseCurrency,
-            taxJurisdictionId: workspace.taxJurisdictionId,
-            vatStatus: workspace.vatStatus,
-          },
-        ],
+        workspace: [workspaceRecord(workspace)],
         ...snapshot.collections,
       };
       const archive = await this.archiveService.create({

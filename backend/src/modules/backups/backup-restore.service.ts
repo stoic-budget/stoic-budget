@@ -21,7 +21,7 @@ import {
 } from './backup-data.service';
 import { GROUP_KEY_COLUMNS } from './backup-group-keys';
 import { prepareDocumentPaths } from './backup-restore-documents';
-import { workspaceTaxFields } from './workspace-tax-fields';
+import { workspaceTaxFields } from './workspace-record';
 
 const RESTORE_ORDER = [
   'categories',
