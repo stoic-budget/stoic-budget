@@ -67,4 +67,13 @@ describe('Dashboard owed card and partly paid bills (e2e)', () => {
     ]);
     expect(await snapshot()).toMatchObject({ totalPayable: 0, totalOverdue: 600 });
   });
+
+  it('counts a bill with no due date as owed, never overdue', async () => {
+    const { currency, totalPayable } = await snapshot();
+    await as(request(server()).post('/payables'))
+      .send({ vendor: 'Corner Cafe', amount: 300, currency })
+      .expect(201);
+
+    expect(await snapshot()).toMatchObject({ totalPayable: totalPayable + 300 });
+  });
 });

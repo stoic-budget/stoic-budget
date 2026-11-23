@@ -22,6 +22,7 @@ import { AuditService } from '../audit/audit.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { MailerService } from '../mailer/mailer.service';
 import { PayablesService } from '../payables/payables.service';
+import { OPEN_STATUSES, settleWithRow } from './open-bills';
 import {
   type AgeingRow,
   ageing,
@@ -33,12 +34,6 @@ import {
   type ReconciliationMatch,
 } from './reconciliation.util';
 
-const OPEN_STATUSES = [
-  PayableStatus.TO_PAY,
-  PayableStatus.SCHEDULED,
-  PayableStatus.OVERDUE,
-  PayableStatus.PARTIALLY_PAID,
-];
 const LOOKBACK_DAYS = 120;
 
 export interface ReconciliationResponse {
@@ -121,9 +116,8 @@ export class SmbService {
     payableId: string,
     transactionId: string,
   ): Promise<Payable> {
-    return this.payablesService.markAsPaid(payableId, workspaceId, userId, {
-      linkedTransactionId: transactionId,
-    });
+    const target = { payableId, workspaceId, userId, transactionId };
+    return settleWithRow(this.payableRepository, this.payablesService, target);
   }
 
   async getAgeing(workspaceId: string): Promise<{ currency: string; ageing: AgeingRow[] }> {
@@ -267,8 +261,13 @@ export class SmbService {
       .andWhere('t.transferPairId IS NULL')
       .andWhere(flowsSql('t'))
       .andWhere('t.transactionDate >= :since', { since })
+      // A row already paying a bill, as its link or as one of its part payments.
       .andWhere(
         'NOT EXISTS (SELECT 1 FROM payables p WHERE p.linked_transaction_id = t.id AND p.deleted_at IS NULL)',
+      )
+      .andWhere(
+        `NOT EXISTS (SELECT 1 FROM payable_payments pp JOIN payables p ON p.id = pp.payable_id
+          WHERE pp.transaction_id = t.id AND p.deleted_at IS NULL)`,
       )
       .getRawMany<{
         id: string;
