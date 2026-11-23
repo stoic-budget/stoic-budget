@@ -112,4 +112,28 @@ describe('Budget limit history (e2e)', () => {
     const after = await as(request(server()).get(`/budgets/${id}`)).expect(200);
     expect(after.body.availableAmount).toBe(150);
   });
+
+  it('counts the past at the new limit when the currency changes with it, not old amounts in a new currency', async () => {
+    const id = await spentToLimit('Travel', 100, 'carry');
+    await as(request(server()).put(`/budgets/${id}`)).send({ limitAmount: 150 }).expect(200);
+
+    await as(request(server()).put(`/budgets/${id}`))
+      .send({ limitAmount: 15000, currency: 'JPY' })
+      .expect(200);
+
+    const after = await as(request(server()).get(`/budgets/${id}`)).expect(200);
+    // As before the history existed: no figure built from 100 JPY a month.
+    expect(after.body.availableAmount).toBeGreaterThan(0);
+    const [stored] = await dataSource.query('SELECT limit_history FROM budgets WHERE id = $1', [id]);
+    expect(stored.limit_history).toEqual([]);
+  });
+
+  it('shows a past month at the limit it had, after a raise today', async () => {
+    const id = await spentToLimit('Studio', 100, 'carry');
+    await as(request(server()).put(`/budgets/${id}`)).send({ limitAmount: 200 }).expect(200);
+
+    const list = await as(request(server()).get(`/budgets?date=${tenthOf(1)}`)).expect(200);
+    const lastMonth = (list.body as Array<{ id: string; availableAmount: number }>).find(b => b.id === id);
+    expect(lastMonth?.availableAmount).toBe(100);
+  });
 });

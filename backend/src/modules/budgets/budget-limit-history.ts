@@ -16,7 +16,8 @@ function dayOf(date: Date): string {
  */
 export function limitAt(budget: Pick<Budget, 'limitAmount' | 'limitHistory'>, end: Date): number {
   const last = dayOf(end);
-  const replaced = [...(budget.limitHistory ?? [])]
+  const history = Array.isArray(budget.limitHistory) ? budget.limitHistory : [];
+  const replaced = [...history]
     .sort((a, b) => a.until.localeCompare(b.until))
     .find(change => change.until > last);
   return replaced ? Number(replaced.amount) : Number(budget.limitAmount);
@@ -24,13 +25,19 @@ export function limitAt(budget: Pick<Budget, 'limitAmount' | 'limitHistory'>, en
 
 /**
  * The history to store when an update changes the limit: the old limit, up to
- * today. Empty when the limit stays, so nothing is assigned.
+ * today. Nothing is assigned when the limit stays; a new currency starts over.
  */
 export function limitHistoryAfter(
-  budget: Pick<Budget, 'limitAmount' | 'limitHistory'>,
-  update: { limitAmount?: number | string | null },
+  budget: Pick<Budget, 'limitAmount' | 'limitHistory' | 'currency'>,
+  update: { limitAmount?: number | string | null; currency?: string | null },
   today = new Date(),
 ): Partial<Pick<Budget, 'limitHistory'>> {
+  // Old limits are amounts in the old currency, and spending is converted into
+  // the new one: in another currency the past counts at the current limit, as
+  // before there was a history.
+  if (update.currency && update.currency.toUpperCase() !== budget.currency.toUpperCase()) {
+    return { limitHistory: [] };
+  }
   if (update.limitAmount == null || Number(update.limitAmount) === Number(budget.limitAmount)) {
     return {};
   }

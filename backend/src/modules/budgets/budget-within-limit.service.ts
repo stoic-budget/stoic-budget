@@ -5,6 +5,7 @@ import { flowsSql } from '../../common/utils/counted-transactions.util';
 import { Budget, BudgetRolloverMode } from '../../entities/budget.entity';
 import { Category } from '../../entities/category.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
+import { limitAt } from './budget-limit-history';
 import { clampToWindow, localDay, overlapsWindow, parseDateOnly } from './budget-period.util';
 import { resolveAvailable } from './budget-rollover.util';
 import {
@@ -61,8 +62,9 @@ export class BudgetWithinLimitService {
               budget.rolloverMode && budget.rolloverMode !== BudgetRolloverMode.NONE
                 ? await this.budgets.previousPeriodsSpent(budget, categoryIds, range.start)
                 : [];
+            // Each period at the limit it had: a raise today leaves last month's overspend over.
             const { availableAmount } = resolveAvailable(
-              Number(budget.limitAmount),
+              limitAt(budget, range.end),
               budget.rolloverMode,
               previousSpent,
             );

@@ -133,8 +133,16 @@ describe('BudgetsTarget', () => {
       false,
     );
     expect(results.map(r => r.status)).toEqual(['updated', 'created', 'skipped']);
-    expect(budgets.update).toHaveBeenCalledWith('b-1', { limitAmount: 500 });
-    expect(ctx.updated[0]).toEqual({ kind: 'budget', id: 'b-1', before: { limitAmount: 400, currency: 'USD' } });
+    // The replaced limit is kept, so rollover counts past months at 400.
+    expect(budgets.update).toHaveBeenCalledWith('b-1', {
+      limitAmount: 500,
+      limitHistory: [{ until: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/), amount: 400 }],
+    });
+    expect(ctx.updated[0]).toEqual({
+      kind: 'budget',
+      id: 'b-1',
+      before: { limitAmount: 400, currency: 'USD', limitHistory: [] },
+    });
     expect(budgets.save.mock.calls[0][0]).toMatchObject({ categoryId: 'cat-rent', periodType: 'monthly', limitAmount: 1200 });
   });
 });

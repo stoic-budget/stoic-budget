@@ -36,7 +36,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { PayPeriodService } from '../pay-period/pay-period.service';
 import { countChargesBetween } from '../subscriptions/charge-calendar.util';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
-import { limitHistoryAfter, pastPeriods } from './budget-limit-history';
+import { limitAt, limitHistoryAfter, pastPeriods } from './budget-limit-history';
 import {
   clampToWindow,
   computePeriodRange,
@@ -549,8 +549,9 @@ export class BudgetsService {
       | 'beforeStartSpending'
     >
   > {
-    const limitAmount = Number(budget.limitAmount);
     const range = await this.periodRange(budget, now);
+    // A past period (a budget seen as of an earlier day) at the limit it had then.
+    const limitAmount = limitAt(budget, range.end);
     const period = clampToWindow(range, budget);
     if (!period) {
       return {

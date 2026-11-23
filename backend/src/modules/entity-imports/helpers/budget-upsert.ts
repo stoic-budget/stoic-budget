@@ -56,7 +56,12 @@ export async function upsertBudget(
     ctx.updated.push({
       kind: 'budget',
       id: current.id,
-      before: { limitAmount: Number(current.limitAmount), currency: current.currency },
+      // The history too: an undo puts back exactly what the import replaced.
+      before: {
+        limitAmount: Number(current.limitAmount),
+        currency: current.currency,
+        limitHistory: current.limitHistory ?? [],
+      },
     });
     // The old limit stays in the history, so rollover counts past periods at it.
     await repo.update(current.id, {

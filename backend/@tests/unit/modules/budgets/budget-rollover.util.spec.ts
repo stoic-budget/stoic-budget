@@ -86,6 +86,15 @@ describe('limit history', () => {
     expect(limitAt(budget, new Date(2026, 8, 30))).toBe(300);
   });
 
+  it('gives a period ending on the day of a change the new limit', () => {
+    // Changed on 2026-06-01: May (ended 31 May) had 100; a period ending on 1 June already has 200.
+    expect(limitAt(budget, new Date(2026, 5, 1))).toBe(200);
+  });
+
+  it('reads a malformed history as none', () => {
+    expect(limitAt({ limitAmount: 150, limitHistory: {} as never }, new Date(2020, 0, 31))).toBe(150);
+  });
+
   it('counts at the current limit with no history', () => {
     expect(limitAt({ limitAmount: 150, limitHistory: [] }, new Date(2020, 0, 31))).toBe(150);
   });
@@ -93,10 +102,23 @@ describe('limit history', () => {
   it('records the old limit up to the day it changed, and nothing when it stays', () => {
     const today = new Date(2026, 10, 23);
 
-    expect(limitHistoryAfter({ limitAmount: 100, limitHistory: [] }, { limitAmount: 200 }, today)).toEqual({
+    expect(limitHistoryAfter({ limitAmount: 100, limitHistory: [], currency: 'USD' }, { limitAmount: 200 }, today)).toEqual({
       limitHistory: [{ until: '2026-11-23', amount: 100 }],
     });
-    expect(limitHistoryAfter({ limitAmount: 100, limitHistory: [] }, { limitAmount: '100.00' }, today)).toEqual({});
-    expect(limitHistoryAfter({ limitAmount: 100, limitHistory: [] }, {}, today)).toEqual({});
+    expect(limitHistoryAfter({ limitAmount: 100, limitHistory: [], currency: 'USD' }, { limitAmount: '100.00' }, today)).toEqual({});
+    expect(limitHistoryAfter({ limitAmount: 100, limitHistory: [], currency: 'USD' }, {}, today)).toEqual({});
+  });
+
+  it('starts the history over in a new currency: old limits are amounts in the old one', () => {
+    const usd = { limitAmount: 100, limitHistory: [{ until: '2026-06-01', amount: 80 }], currency: 'USD' };
+
+    expect(limitHistoryAfter(usd, { limitAmount: 15000, currency: 'JPY' })).toEqual({ limitHistory: [] });
+    expect(limitHistoryAfter(usd, { currency: 'JPY' })).toEqual({ limitHistory: [] });
+    expect(limitHistoryAfter(usd, { limitAmount: 120, currency: 'usd' }, new Date(2026, 10, 23))).toEqual({
+      limitHistory: [
+        { until: '2026-06-01', amount: 80 },
+        { until: '2026-11-23', amount: 100 },
+      ],
+    });
   });
 });
