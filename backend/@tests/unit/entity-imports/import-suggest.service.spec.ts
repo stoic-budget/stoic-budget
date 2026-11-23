@@ -128,6 +128,20 @@ describe('aliases and value parsers', () => {
     expect(parseImportNumber('n/a').value).toBeNull();
   });
 
+  it('reads thousands separators by the last separator, not by a fixed locale', () => {
+    expect(parseImportNumber('-1.234,56').value).toBe(-1234.56);
+    expect(parseImportNumber('$1,234')).toEqual({ value: 1234, currency: 'USD' });
+    expect(parseImportNumber('1,234,567').value).toBe(1234567);
+    expect(parseImportNumber('1.500,00 EUR')).toEqual({ value: 1500, currency: 'EUR' });
+    expect(parseImportNumber('12,5').value).toBe(12.5);
+    expect(parseImportNumber('100-').value).toBe(-100);
+  });
+
+  it('keeps a lone dot before three digits a decimal point: weights and share counts', () => {
+    expect(parseImportNumber('31.103').value).toBe(31.103);
+    expect(parseImportNumber('0.125').value).toBe(0.125);
+  });
+
   it('parses ISO, European and Excel-serial dates', () => {
     expect(parseImportDate('2026-10-05')).toBe('2026-10-05');
     expect(parseImportDate('05.10.2026')).toBe('2026-10-05');

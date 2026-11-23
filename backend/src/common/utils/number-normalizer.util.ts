@@ -4,7 +4,12 @@
  * - Removes thousands separators
  * - Converts to number
  */
-export function normalizeNumber(value: string | number | null | undefined): number | null {
+export function normalizeNumber(
+  value: string | number | null | undefined,
+  // A lone dot before three digits: grouping on a bank statement ("1.234"), a
+  // decimal point in a table of weights or share counts ("31.103").
+  { loneDotIsDecimal = false }: { loneDotIsDecimal?: boolean } = {},
+): number | null {
   if (value === null || value === undefined) {
     return null;
   }
@@ -67,8 +72,8 @@ export function normalizeNumber(value: string | number | null | undefined): numb
     // (thousands grouping vs. a 3-decimal currency). This codebase only
     // deals with 2-decimal currencies, so treat it as grouping. Revisit if
     // a 3-decimal currency (e.g. KWD) needs support.
-    normalized =
-      digitsAfter === 3 ? normalized.replace(separator, '') : normalized.replace(separator, '.');
+    const grouping = digitsAfter === 3 && !(separator === '.' && loneDotIsDecimal);
+    normalized = grouping ? normalized.replace(separator, '') : normalized.replace(separator, '.');
   } else if (commaCount > 1) {
     // Multiple commas, no dot: all commas are thousands separators.
     normalized = normalized.replace(/,/g, '');
