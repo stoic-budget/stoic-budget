@@ -1,6 +1,7 @@
-import { IsNull, type Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { Statement } from '../../entities/statement.entity';
 import type { Transaction } from '../../entities/transaction.entity';
+import { statementCashKey } from './ledger-accounts.service';
 import type { SkipReason } from './ledger-posting.rules';
 
 /** What names a statement's cash account. */
@@ -49,11 +50,17 @@ export async function cashHomeOf(
   if (!(statement?.walletId && tx.walletId) || tx.walletId === statement.walletId) {
     return statement;
   }
-  return statements.findOne({
-    where: { workspaceId: tx.workspaceId, walletId: tx.walletId, deletedAt: IsNull() },
-    select: { id: true, bankName: true, accountNumber: true },
-    order: { statementDateTo: 'DESC', createdAt: 'DESC' },
-  });
+  // The account's latest bank statement: its own entries are not one.
+  return statements
+    .createQueryBuilder('statement')
+    .select(['statement.id', 'statement.bankName', 'statement.accountNumber'])
+    .where('statement.workspaceId = :workspaceId', { workspaceId: tx.workspaceId })
+    .andWhere('statement.walletId = :walletId', { walletId: tx.walletId })
+    .andWhere('statement.deletedAt IS NULL')
+    .andWhere(bankStatementSql('statement'))
+    .orderBy('statement.statementDateTo', 'DESC', 'NULLS FIRST')
+    .addOrderBy('statement.createdAt', 'DESC')
+    .getOne();
 }
 
 /**
@@ -119,4 +126,22 @@ export async function interestSkip(
     return 'unconfirmed';
   }
   return payment.trashed ? 'statement_deleted' : null;
+}
+
+/**
+ * The earliest bank statement of each statement cash account, the one whose
+ * opening balance is booked. Statements come sorted by date (undated last in
+ * Postgres), so the first seen per key is the earliest. A manual expense or a
+ * receipt is no bank's statement and carries no opening.
+ */
+export function earliestBankStatements<
+  T extends Pick<Statement, 'bankName' | 'accountNumber' | 'currency' | 'parsingDetails'>,
+>(statements: T[]): Map<string, T> {
+  const earliest = new Map<string, T>();
+  for (const statement of statements) {
+    if (isOwnEntry(statement)) continue;
+    const key = statementCashKey(statement.bankName, statement.accountNumber, statement.currency);
+    if (!earliest.has(key)) earliest.set(key, statement);
+  }
+  return earliest;
 }

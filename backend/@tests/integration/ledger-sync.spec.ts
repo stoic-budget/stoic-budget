@@ -527,11 +527,14 @@ describe('ledger sync (real Postgres)', () => {
       expect(await walletRecon(walletId)).toMatchObject({ ledgerBalance: '-40.00', difference: '0.00' });
     });
 
-    it('keeps the opening of a cash wallet a manual expense was typed in on', async () => {
+    it.each([
+      ['manual-expense', 'manual-expense-acme.png'],
+      ['receipt-scan', 'receipt-acme.jpg'],
+    ])('keeps the opening of a cash wallet a %s was put on', async (detectedBy, fileName) => {
       const wallets = dataSource.getRepository(Wallet);
       const cash = (
         await wallets.save(
-          wallets.create({ userId, workspaceId, name: 'Cash', currency: 'EUR', initialBalance: 500 }),
+          wallets.create({ userId, workspaceId, name: `Cash ${detectedBy}`, currency: 'EUR', initialBalance: 500 }),
         )
       ).id;
       // A manual expense is stored as a statement of its own, on the wallet.
@@ -541,15 +544,15 @@ describe('ledger sync (real Postgres)', () => {
           userId,
           workspaceId,
           walletId: cash,
-          fileName: 'manual-expense-acme.png',
-          filePath: '/tmp/manual-expense-acme.png',
+          fileName,
+          filePath: `/tmp/${fileName}`,
           fileType: FileType.IMAGE,
           fileSize: 1,
           fileHash: randomUUID(),
           bankName: BankName.OTHER,
           status: StatementStatus.COMPLETED,
           currency: 'EUR',
-          parsingDetails: { detectedBy: 'manual-expense' },
+          parsingDetails: { detectedBy },
         }),
       );
       await insertTransaction({ amount: 100, debit: 100, walletId: cash, statementId: manual.id });
