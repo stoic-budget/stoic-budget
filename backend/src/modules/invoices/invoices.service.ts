@@ -40,6 +40,7 @@ import { buildInvoicePdf } from './invoice-document';
 import { documentLines, priceLines, totalsOf } from './invoice-pricing';
 import { advanceIssueDate, shiftDueDate } from './invoice-recurrence.util';
 import { InvoiceSettingsService } from './invoice-settings.service';
+import { invoiceSettled } from './invoice-settled';
 import { InvoiceXRechnungService } from './invoice-xrechnung.service';
 
 /**
@@ -430,7 +431,7 @@ export class InvoicesService {
       // `invoices.status` never says 'paid' — the receivable does — so the
       // stored column alone would let a settled invoice be voided, reversing
       // revenue for money that is already in the bank.
-      if (await this.isSettled(manager, invoice)) {
+      if (await invoiceSettled(manager, invoice)) {
         throw new ConflictException(appError('INVOICE_NOT_VOIDABLE'));
       }
 
@@ -623,20 +624,6 @@ export class InvoicesService {
       [workspaceId],
     );
     return `${rows[0].prefix}${rows[0].invoice_no}`;
-  }
-
-  /** Whether the invoice's receivable has been settled. */
-  private async isSettled(manager: EntityManager, invoice: Invoice): Promise<boolean> {
-    if (!invoice.payableId) {
-      return false;
-    }
-    const payable = await manager.getRepository(Payable).findOne({
-      where: { id: invoice.payableId },
-      select: {
-        status: true,
-      },
-    });
-    return payable?.status === PayableStatus.PAID;
   }
 
   private applyDraftFields(invoice: Invoice, dto: UpdateInvoiceBody): void {

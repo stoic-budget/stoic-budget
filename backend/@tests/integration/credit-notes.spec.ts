@@ -292,6 +292,23 @@ describe('credit notes (real Postgres)', () => {
     expect(read.status).toBe(InvoiceStatus.PARTIALLY_PAID);
   });
 
+  it('refuses to void a part-paid invoice, and one a credit note is applied to', async () => {
+    const paid = await sentInvoice(1000);
+    await payables.addPayment(paid.payable.id, workspaceId, userId, { amount: 300 });
+    const credited = await sentInvoice(1000);
+    await creditNotes.create(workspaceId, userId, {
+      applications: [{ invoiceId: credited.invoice.id, amount: 200 }],
+    });
+
+    for (const { invoice } of [paid, credited]) {
+      expect(await errorOf(invoices.void(invoice.id, workspaceId, userId))).toMatchObject({
+        status: 409,
+        code: 'INVOICE_NOT_VOIDABLE',
+      });
+      expect((await invoices.findOne(invoice.id, workspaceId)).status).not.toBe(InvoiceStatus.VOID);
+    }
+  });
+
   it('closes a part-paid invoice when the credit covers the rest', async () => {
     const { invoice, payable } = await sentInvoice(1000);
     await payables.addPayment(payable.id, workspaceId, userId, { amount: 600 });
