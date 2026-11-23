@@ -43,7 +43,6 @@ import { fileExtensionOf } from '../helpers/statement-file.helper';
 import { statementRowFingerprint } from '../helpers/statement-row-fingerprint.helper';
 import { pairStatementTransfers } from '../helpers/statement-transfer-pairing.helper';
 import {
-  dropInfoOf,
   type ValidationReasonCode,
   validateParsedStatement,
 } from '../helpers/statement-validation.helper';
@@ -757,7 +756,7 @@ export class StatementProcessingService {
         parsedStatement.transactions,
         {
           tolerance: StatementProcessingService.BALANCE_EPS,
-          dropInfo: dropInfoOf(rawTransactionCount, droppedSamples),
+          dropInfo: { rawCount: rawTransactionCount, samples: droppedSamples },
           checks: parsedStatement.checks,
         },
       );

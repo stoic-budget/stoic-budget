@@ -30,21 +30,19 @@ export interface StatementValidation {
   balanceCheck?: BalanceCheck;
 }
 
-/** Rows read and rows dropped; `lostCount` are the dropped ones that carried money. */
+/**
+ * Rows read and rows dropped: a count, or the dropped samples themselves, of
+ * which those that carried money (not "no debit/credit amount") are lost.
+ */
 interface DropInfo {
   rawCount: number;
-  droppedCount: number;
+  droppedCount?: number;
   lostCount?: number;
+  samples?: Array<{ reason: string }>;
 }
 
-/** What the import dropped: every row, and those that carried money (not "no amount"). */
-export function dropInfoOf(rawCount: number, dropped: Array<{ reason: string }>): DropInfo {
-  return {
-    rawCount,
-    droppedCount: dropped.length,
-    lostCount: dropped.filter(sample => !sample.reason.includes('no debit/credit')).length,
-  };
-}
+const lostOf = (samples: Array<{ reason: string }>) =>
+  samples.filter(sample => !sample.reason.includes('no debit/credit')).length;
 
 /** More than this share of parsed rows rejected is a failed parse, not a few bad rows. */
 const HIGH_DROP_RATIO_THRESHOLD = 0.5;
@@ -95,8 +93,10 @@ function checkWarning({ code, detail = {} }: ParseCheck): string {
 function droppedRows(
   metadata: { balanceStart?: number | null; balanceEnd?: number | null },
   validCount: number,
-  { rawCount, droppedCount, lostCount = droppedCount }: DropInfo,
+  { rawCount, samples, ...counts }: DropInfo,
 ): { code: ValidationReasonCode; warning: string } | null {
+  const droppedCount = samples?.length ?? counts.droppedCount ?? 0;
+  const lostCount = samples ? lostOf(samples) : (counts.lostCount ?? droppedCount);
   if (rawCount > 0 && validCount === 0) {
     return {
       code: 'no_rows_kept',
