@@ -324,4 +324,36 @@ describe('MarkPaidDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: 'confirm' }));
     expect(onConfirm).toHaveBeenCalledWith(partlyPaid, { kind: 'full', payload: {} });
   });
+
+  it('stays open and keeps the payment list as it is while a payment is saving', async () => {
+    apiMocks.paymentCandidates.mockResolvedValue([]);
+    apiMocks.payments.mockResolvedValue([
+      {
+        id: 'payment-1',
+        payableId: 'payable-1',
+        amount: '40.00',
+        feeAmount: '0.00',
+        paidOn: '2026-10-16',
+        transactionId: 'tx-1',
+        comment: null,
+        createdAt: '2026-10-16T08:00:00.000Z',
+      },
+    ]);
+    const onClose = vi.fn();
+    const onRemovePayment = vi.fn();
+    renderWithQuery(
+      <MarkPaidDialog
+        payable={{ ...payable, paidAmount: '40.00', status: 'partially_paid' } as Payable}
+        submitting
+        onClose={onClose}
+        onConfirm={vi.fn()}
+        onRemovePayment={onRemovePayment}
+      />,
+    );
+
+    const remove = await screen.findByRole('button', { name: 'removePayment' });
+    expect(remove).toBeDisabled();
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(onClose).not.toHaveBeenCalled();
+  });
 });

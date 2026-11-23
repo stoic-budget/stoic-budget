@@ -34,6 +34,8 @@ describe('useRecordPayment', () => {
 
     expect(api.addPayment).toHaveBeenCalledTimes(1);
     expect(reload).toHaveBeenCalledTimes(1);
+    // Closed, even for a part payment: a late second click has no dialog to land in.
+    expect(setPayingPayable).toHaveBeenLastCalledWith(null);
     expect(result.current.paying).toBe(false);
   });
 });

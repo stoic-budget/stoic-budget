@@ -254,6 +254,8 @@ export function PaymentLog(props: {
   currency: string;
   locale: string;
   removingId: string | null;
+  /** A payment is saving: nothing is removed meanwhile. */
+  busy?: boolean;
   onRemove: (paymentId: string) => void;
 }): React.JSX.Element | null {
   const t = useIntlayer('payableMarkPaid');
@@ -303,7 +305,7 @@ export function PaymentLog(props: {
           <IconButton
             size="small"
             aria-label={String(t.removePayment.value)}
-            disabled={props.removingId === payment.id}
+            disabled={props.busy || props.removingId === payment.id}
             onClick={() => props.onRemove(payment.id)}
           >
             <Trash2 size={16} />

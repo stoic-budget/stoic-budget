@@ -238,7 +238,9 @@ function MarkPaidForm({
   return (
     <ModalShell
       isOpen
-      onClose={onClose}
+      // While a payment is saving, closing would lose sight of it: X, Escape
+      // and the backdrop wait like Cancel does.
+      onClose={submitting ? () => undefined : onClose}
       size="sm"
       title={payable.direction === 'receivable' ? t.titleReceived.value : t.titlePaid.value}
       footer={
@@ -266,6 +268,7 @@ function MarkPaidForm({
           currency={options.currency}
           locale={locale}
           removingId={removingPaymentId ?? null}
+          busy={submitting}
           onRemove={paymentId => onRemovePayment(payable, paymentId)}
         />
 

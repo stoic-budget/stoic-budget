@@ -7,7 +7,7 @@ import { type Payable, payablesApi } from '@/app/lib/payables-api';
 /**
  * Records a payment from the invoice's "Record payment" dialog, once: a second
  * click while the first is on its way is ignored, and `paying` disables the
- * dialog's buttons meanwhile. A bill still short keeps the dialog open.
+ * dialog's buttons meanwhile. The dialog closes once the payment is recorded.
  */
 export function useRecordPayment(
   setPayingPayable: (payable: Payable | null) => void,
@@ -28,9 +28,10 @@ export function useRecordPayment(
           ? payablesApi.bookPayment(payable.id, result.paymentId, result.payload)
           : payablesApi.addPayment(payable.id, result.payload)
       )
-        .then(async updated => {
-          // Still short: the dialog stays open for the next instalment.
-          setPayingPayable(updated.status === 'partially_paid' ? updated : null);
+        .then(async () => {
+          // Closed once recorded: a late second click then has nothing to repeat,
+          // and the next instalment starts from the invoice as it now stands.
+          setPayingPayable(null);
           await reload();
         })
         .catch(error => toast.error(getApiErrorMessage(error, failedText)))
