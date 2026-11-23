@@ -265,9 +265,10 @@ export class BudgetsService {
   }
 
   async checkBudgetAlerts(workspaceId: string, categoryId?: string): Promise<void> {
+    // A spend in a subcategory counts against the budgets up its tree too.
     const where: Record<string, unknown> = { workspaceId };
     if (categoryId) {
-      where.categoryId = categoryId;
+      where.categoryId = In(await this.categoryChainFor(workspaceId, categoryId));
     }
 
     const budgets = await this.budgetRepository.find({

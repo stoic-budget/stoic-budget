@@ -15,7 +15,9 @@ export class BudgetEventsListener {
 
   constructor(private readonly budgetsService: BudgetsService) {}
 
+  // Rows that start counting — approved in Review, or booked by the bank — can push a budget over.
   @OnEvent('import.committed')
+  @OnEvent('transactions.posted')
   async handleImportCommitted(event: ImportCommittedEvent): Promise<void> {
     try {
       await this.budgetsService.checkBudgetAlerts(event.workspaceId);

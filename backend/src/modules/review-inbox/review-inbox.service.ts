@@ -17,16 +17,15 @@ import type {
   ReviewInboxPage,
   ReviewInboxQuery,
 } from '../../contracts';
-import { Receipt, ReceiptStatus } from '../../entities/receipt.entity';
+import { Receipt } from '../../entities/receipt.entity';
 import { Statement } from '../../entities/statement.entity';
 import { Subscription, SubscriptionStatus } from '../../entities/subscription.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { isUncategorizedName } from '../categories/uncategorized-category';
-import type { ReceiptApprovedEvent } from '../notifications/events/notification-events';
 import { CrossStatementDeduplicationService } from '../transactions/services/cross-statement-deduplication.service';
 import { TransactionsService } from '../transactions/transactions.service';
+import { afterApproval } from './after-approval';
 import { DuplicateDecision, ReviewInboxKind } from './dto/review-inbox.dto';
-
 import {
   pendingReceiptsQuery,
   QUEUE_DATE_COLUMN,
@@ -328,40 +327,8 @@ export class ReviewInboxService {
       userId,
       ids.map(id => ({ id, updates })),
     );
-    await this.closeScanReceipts(workspaceId, updated);
+    await afterApproval(this.receiptRepository, this.eventEmitter, workspaceId, updated);
     return { approved: updated.length };
-  }
-
-  /**
-   * A confirmed scan row settles its receipt too, the way approving the
-   * receipt settles the row; otherwise the receipt would still read as waiting.
-   */
-  private async closeScanReceipts(workspaceId: string, rows: Transaction[]): Promise<void> {
-    const rowByStatement = new Map(
-      rows.filter(row => row.statementId).map(row => [row.statementId as string, row.id]),
-    );
-    if (rowByStatement.size === 0) {
-      return;
-    }
-    const receipts = await this.receiptRepository.find({
-      select: { id: true, statementId: true },
-      where: { workspaceId, statementId: In([...rowByStatement.keys()]), transactionId: IsNull() },
-    });
-    for (const receipt of receipts) {
-      await this.receiptRepository.update(
-        { id: receipt.id, workspaceId },
-        {
-          status: ReceiptStatus.APPROVED,
-          transactionId: rowByStatement.get(receipt.statementId as string),
-        },
-      );
-      this.eventEmitter?.emit('receipt.approved', {
-        workspaceId,
-        receiptId: receipt.id,
-        transactionId: rowByStatement.get(receipt.statementId as string) as string,
-        mode: 'confirmed_scan',
-      } satisfies ReceiptApprovedEvent);
-    }
   }
 
   /**
