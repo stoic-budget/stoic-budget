@@ -200,6 +200,10 @@ export class BackupsService {
             backgroundImage: workspace.backgroundImage,
             currency: workspace.currency,
             settings: workspace.settings,
+            // The ledger, VAT and tax settings, as a workspace version keeps them.
+            ledgerBaseCurrency: workspace.ledgerBaseCurrency,
+            taxJurisdictionId: workspace.taxJurisdictionId,
+            vatStatus: workspace.vatStatus,
           },
         ],
         ...snapshot.collections,

@@ -3186,6 +3186,17 @@ describe('API contracts (e2e)', () => {
     });
 
     it('a backup downloaded, previewed and restored', async () => {
+      // The ledger, VAT and tax settings travel with the backup.
+      const [jurisdiction] = await dataSource.query('SELECT id FROM tax_jurisdictions LIMIT 1');
+      const taxBefore = await dataSource.query(
+        'SELECT ledger_base_currency, vat_status, tax_jurisdiction_id FROM workspaces WHERE id = $1',
+        [owner.workspaceId],
+      );
+      await dataSource.query(
+        `UPDATE workspaces SET ledger_base_currency = 'EUR', vat_status = 'small_business',
+           tax_jurisdiction_id = $2 WHERE id = $1`,
+        [owner.workspaceId, jurisdiction?.id ?? null],
+      );
       const run = await call('post', '/backups/runs').expect(succeeded);
       const archive = await request(app.getHttpServer())
         .get(`/backups/runs/${run.body.id}/download`)
@@ -3211,6 +3222,24 @@ describe('API contracts (e2e)', () => {
         succeeded,
       );
       matches(BackupRestoreResult, restored.body);
+      const [tax] = await dataSource.query(
+        'SELECT ledger_base_currency, vat_status, tax_jurisdiction_id FROM workspaces WHERE id = $1',
+        [restored.body.workspaceId],
+      );
+      expect(tax).toEqual({
+        ledger_base_currency: 'EUR',
+        vat_status: 'small_business',
+        tax_jurisdiction_id: jurisdiction?.id ?? null,
+      });
+      await dataSource.query(
+        'UPDATE workspaces SET ledger_base_currency = $2, vat_status = $3, tax_jurisdiction_id = $4 WHERE id = $1',
+        [
+          owner.workspaceId,
+          taxBefore[0].ledger_base_currency,
+          taxBefore[0].vat_status,
+          taxBefore[0].tax_jurisdiction_id,
+        ],
+      );
       // Rows with no workspace column of their own come back with their parents.
       const counts = async (workspaceId: string) => {
         const [row] = await dataSource.query(
