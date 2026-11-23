@@ -3,11 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { fromMinor, toMinor } from '../../common/utils/money.util';
 import { payeeKeyOf } from '../../common/utils/payee-key.util';
-import { TaxRule, TaxRuleDirection } from '../../entities/tax-rule.entity';
+import { TaxRule } from '../../entities/tax-rule.entity';
 import { TaxSource, Transaction, TransactionType } from '../../entities/transaction.entity';
 import { VatStatus, Workspace } from '../../entities/workspace.entity';
 import { findPayeeId } from '../payees/payee-resolution';
 import { isEuCountry } from './eu-membership';
+import { bestRule, ruleDirectionOf } from './rule-direction';
 import { computeTax } from './tax-calculation';
 import { taxPaymentsCategoryId } from './tax-payments-category';
 import { TaxRatesService } from './tax-rates.service';
@@ -451,35 +452,18 @@ export class TaxAssignmentService {
     categoryId: string,
     transactionType: TransactionType,
   ): Promise<TaxRule | null> {
-    const direction =
-      transactionType === TransactionType.INCOME
-        ? TaxRuleDirection.INCOME
-        : TaxRuleDirection.EXPENSE;
+    const direction = await ruleDirectionOf(
+      this.workspaceRepository.manager,
+      workspaceId,
+      categoryId,
+      transactionType,
+    );
 
     const rules = await this.taxRuleRepository.find({
       where: { workspaceId, isEnabled: true },
     });
 
-    const matches = rules.filter(
-      rule =>
-        (rule.direction === TaxRuleDirection.BOTH || rule.direction === direction) &&
-        (rule.categoryId === null || rule.categoryId === categoryId),
-    );
-
-    if (matches.length === 0) {
-      return null;
-    }
-
-    matches.sort((a, b) => {
-      if (a.priority !== b.priority) {
-        return b.priority - a.priority;
-      }
-      const aSpecific = a.categoryId === null ? 0 : 1;
-      const bSpecific = b.categoryId === null ? 0 : 1;
-      return bSpecific - aSpecific;
-    });
-
-    return matches[0];
+    return bestRule(rules, direction, categoryId);
   }
 
   private assess(
