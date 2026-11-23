@@ -1153,6 +1153,8 @@ describe('API contracts (e2e)', () => {
         transactionId,
       ]);
 
+      await send('post', `/classification/transaction/${transactionId}`).expect(200);
+      // The second run changes nothing, so save() leaves undefined keys on the row it answered.
       const classified = await send('post', `/classification/transaction/${transactionId}`).expect(200);
 
       matches(ClassifiedTransaction, classified.body);
