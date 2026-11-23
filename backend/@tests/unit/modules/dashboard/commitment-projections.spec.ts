@@ -36,4 +36,30 @@ describe('projectSubscriptionCharges', () => {
       [2026, 4, 30],
     ]);
   });
+
+  it('counts a charge due today', () => {
+    const charges = projectSubscriptionCharges(
+      new Date(2026, 2, 15),
+      SubscriptionFrequency.MONTHLY,
+      new Date(2026, 2, 15),
+      new Date(2026, 2, 31),
+      400,
+    );
+
+    expect(charges.map(day)).toEqual([[2026, 3, 15]]);
+  });
+
+  it('catches up however long the next charge was left behind', () => {
+    const charges = projectSubscriptionCharges(
+      new Date(2000, 0, 3),
+      SubscriptionFrequency.WEEKLY,
+      new Date(2026, 10, 23),
+      new Date(2026, 11, 7),
+      60,
+    );
+
+    // Mondays: 23 and 30 November, 7 December.
+    expect(charges.length).toBe(3);
+    expect(charges.every(charge => charge.getDay() === 1)).toBe(true);
+  });
 });
