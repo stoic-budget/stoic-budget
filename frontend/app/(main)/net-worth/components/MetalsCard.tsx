@@ -309,7 +309,13 @@ function MetalTotalsRow({
         <Typography variant="body2">
           <strong className={PRIVATE_CLASS}>{money(totals.value)}</strong>
         </Typography>
-        <MetalGain gain={totals.gain} unpricedLots={totals.unpricedLots} money={money} />
+        <MetalGain
+          gain={totals.gain}
+          unpricedLots={totals.unpricedLots}
+          // No cost per ounce with unpriced lots: none of them has a price.
+          known={totals.costPerOunce !== null || totals.unpricedLots === 0}
+          money={money}
+        />
         {totals.costPerOunce !== null && (
           <Typography
             variant="body2"

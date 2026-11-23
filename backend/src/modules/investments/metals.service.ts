@@ -455,18 +455,19 @@ export class MetalsService {
     const value = round2(
       await this.convert(fineOunces * price, lot.priceCurrency, currency, lot.workspaceId),
     );
-    const cost =
+    // No rate for the purchase day: the cost is unknown, and the lot counts as
+    // unpriced rather than bought for nothing (#655).
+    const converted =
       lot.costTotal === null
         ? null
-        : round2(
-            await this.convert(
-              Number(lot.costTotal),
-              lot.costCurrency ?? currency,
-              currency,
-              lot.workspaceId,
-              acquiredOn,
-            ),
+        : await this.convertOrNull(
+            Number(lot.costTotal),
+            lot.costCurrency ?? currency,
+            currency,
+            lot.workspaceId,
+            acquiredOn,
           );
+    const cost = converted === null ? null : round2(converted);
     const discount = context.discounts[metal] ?? 0;
     const premium = await this.premiumAtPurchase(lot, cost, fineOunces, acquiredOn, context);
     const dealerValue = round2(value * (1 - discount / 100));
@@ -742,13 +743,18 @@ export class MetalsService {
    * March amount, and a sale made then fetched what it fetched then. Today's
    * rate belongs only to what is worth something today.
    */
-  private async convert(
+  private async convert(...args: Parameters<MetalsService['convertOrNull']>): Promise<number> {
+    return (await this.convertOrNull(...args)) ?? 0;
+  }
+
+  /** Null when no rate is known: a cost that cannot be converted is unknown, not zero. */
+  private async convertOrNull(
     amount: number,
     from: string,
     to: string,
     workspaceId: string,
     on?: string | null,
-  ): Promise<number> {
+  ): Promise<number | null> {
     if (!Number.isFinite(amount) || amount === 0) return 0;
     const source = (from || to).toUpperCase();
     if (source === to) return amount;
@@ -758,7 +764,7 @@ export class MetalsService {
       on ?? undefined,
       workspaceId,
     );
-    return rate === null ? 0 : amount * rate;
+    return rate === null ? null : amount * rate;
   }
 }
 

@@ -188,6 +188,24 @@ describe('MetalsCard', () => {
     expect(await screen.findByText(/: 2$/)).toBeInTheDocument();
   });
 
+  it('shows a dash, not a zero gain, when no lot of the metal has a price', async () => {
+    hookMock.summary = {
+      ...summary,
+      byMetal: summary.byMetal.map(totals => ({
+        ...totals,
+        gain: 0,
+        cost: 0,
+        costPerOunce: null,
+        unpricedLots: 1,
+      })),
+    };
+    renderWithQuery(<MetalsCard currency="EUR" locale="en" />);
+
+    await screen.findByText(/: 1$/);
+    expect(screen.queryByText('+€0')).toBeNull();
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0);
+  });
+
   it('states the German holding period only for a workspace that files there', () => {
     hookMock.summary = { ...summary, jurisdiction: 'DE' };
     const { unmount } = renderWithQuery(<MetalsCard currency="EUR" locale="en" />);
