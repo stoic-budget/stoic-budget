@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, Injectable } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, type Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
+import { countedSql } from '../../common/utils/counted-transactions.util';
 import type { GoalAccount } from '../../contracts';
 import { type Goal, GoalContribution } from '../../entities';
 import { Transaction } from '../../entities/transaction.entity';
@@ -222,9 +223,11 @@ export class GoalProgressService {
       .addSelect('COALESCE(SUM(contribution.amount), 0)', 'total')
       .where('contribution.workspace_id = :workspaceId', { workspaceId })
       .andWhere('contribution.goal_id IN (:...goalIds)', { goalIds: goals.map(goal => goal.id) })
-      // A row the bank still holds has moved no money yet; it counts once booked.
+      // A contribution made of a row counts while the row does: not once it is
+      // on a trashed statement, flagged a duplicate, still pending at the bank or
+      // waiting in Review (the rule every figure follows). One without a row counts.
       .andWhere(
-        'NOT EXISTS (SELECT 1 FROM transactions held WHERE held.id = contribution.transaction_id AND held.is_pending = true)',
+        `NOT EXISTS (SELECT 1 FROM transactions linked WHERE linked.id = contribution.transaction_id AND NOT ${countedSql('linked')})`,
       );
     if (from) {
       query.andWhere('contribution.contribution_date >= :from', { from });
