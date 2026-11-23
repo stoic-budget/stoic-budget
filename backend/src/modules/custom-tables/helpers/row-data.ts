@@ -7,7 +7,7 @@ import { CustomTableRow } from '../../../entities/custom-table-row.entity';
 import { type CustomTableAggregateFn } from '../dto/list-custom-table-rows.dto';
 import { formulaColumnsOf } from '../formula-recalc.service';
 import type { SourceValue } from '../sources/source.types';
-import { evaluateFormula } from './formula-evaluator';
+import { evaluateFormula, needsTableContext } from './formula-evaluator';
 import { orderFormulaColumns } from './table-evaluator';
 
 export type ViewSettingsColumns = Record<
@@ -228,8 +228,8 @@ export function readSummaries(
 /**
  * Значения формул живут в `computed` и пишутся пересчётом после каждой
  * записи; здесь они подмешиваются в data для выдачи. Строка, которую
- * пересчёт ещё не видел, получает значение на лету — без табличного
- * контекста, но без пустых ячеек.
+ * пересчёт ещё не видел, получает значение на лету, если формуле хватает
+ * самой строки; итогам по таблице — пусто до пересчёта.
  */
 export function applyFormulaColumns(rows: CustomTableRow[], columns: CustomTableColumn[]): void {
   const formulaColumns = orderFormulaColumns(formulaColumnsOf(columns));
@@ -240,8 +240,14 @@ export function applyFormulaColumns(rows: CustomTableRow[], columns: CustomTable
     const data = (row.data ?? {}) as Record<string, unknown>;
     const computed = toRowDataRecord(row.computed);
     for (const col of formulaColumns) {
+      // A total or a running sum needs the whole table: until the recalculation
+      // reaches the row it stays empty rather than showing a plausible wrong number.
       data[col.key] =
-        col.key in computed ? computed[col.key] : evaluateFormula(col.expression, data);
+        col.key in computed
+          ? computed[col.key]
+          : needsTableContext(col.expression)
+            ? null
+            : evaluateFormula(col.expression, data);
     }
     row.data = data;
   }
