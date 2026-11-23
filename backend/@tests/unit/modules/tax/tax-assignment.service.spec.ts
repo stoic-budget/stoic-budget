@@ -215,6 +215,21 @@ describe('TaxAssignmentService', () => {
       );
     });
 
+    it('honours a rule set by hand for the row\'s own direction over the category\'s type', async () => {
+      ruleRepo.find.mockResolvedValue([
+        rule({ id: 'expense-rule', direction: TaxRuleDirection.EXPENSE, taxRateCode: 'KZ_REDUCED' }),
+        rule({ id: 'income-rule', direction: TaxRuleDirection.INCOME }),
+      ]);
+      ratesService.findByCodeForDate.mockResolvedValue(STANDARD_RATE);
+      workspaceRepo.manager.query.mockImplementation(async (sql: string) =>
+        sql.includes('FROM "categories"') ? [{ type: 'expense' }] : [],
+      );
+
+      const result = await service.resolve({ ...base, transactionType: TransactionType.INCOME });
+
+      expect(result.taxRuleId).toBe('income-rule');
+    });
+
     it('ignores a rule for another category', async () => {
       ruleRepo.find.mockResolvedValue([rule({ categoryId: 'cat-other' })]);
       ratesService.findDefaultForDate.mockResolvedValue(REDUCED_RATE);

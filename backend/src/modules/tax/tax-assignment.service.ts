@@ -8,7 +8,7 @@ import { TaxSource, Transaction, TransactionType } from '../../entities/transact
 import { VatStatus, Workspace } from '../../entities/workspace.entity';
 import { findPayeeId } from '../payees/payee-resolution';
 import { isEuCountry } from './eu-membership';
-import { bestRule, ruleDirectionOf } from './rule-direction';
+import { matchingRule } from './rule-direction';
 import { computeTax } from './tax-calculation';
 import { taxPaymentsCategoryId } from './tax-payments-category';
 import { TaxRatesService } from './tax-rates.service';
@@ -304,7 +304,11 @@ export class TaxAssignmentService {
     }
 
     // 4. The best matching rule.
-    const rule = await this.findMatchingRule(workspaceId, categoryId, transactionType);
+    const rule = await matchingRule(this.taxRuleRepository, this.workspaceRepository.manager, {
+      workspaceId,
+      categoryId,
+      transactionType,
+    });
     if (rule) {
       const rate = await this.taxRatesService.findByCodeForDate(
         workspaceId,
@@ -441,29 +445,6 @@ export class TaxAssignmentService {
       [categoryId, workspaceId],
     );
     return category?.parent_id === paymentsCategoryId;
-  }
-
-  /**
-   * Highest priority wins. A rule naming a category beats a catch-all at the
-   * same priority, since it is the more specific statement of intent.
-   */
-  private async findMatchingRule(
-    workspaceId: string,
-    categoryId: string,
-    transactionType: TransactionType,
-  ): Promise<TaxRule | null> {
-    const direction = await ruleDirectionOf(
-      this.workspaceRepository.manager,
-      workspaceId,
-      categoryId,
-      transactionType,
-    );
-
-    const rules = await this.taxRuleRepository.find({
-      where: { workspaceId, isEnabled: true },
-    });
-
-    return bestRule(rules, direction, categoryId);
   }
 
   private assess(
