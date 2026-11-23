@@ -756,7 +756,12 @@ export class StatementProcessingService {
         parsedStatement.transactions,
         {
           tolerance: StatementProcessingService.BALANCE_EPS,
-          dropInfo: { rawCount: rawTransactionCount, droppedCount: droppedSamples.length },
+          dropInfo: {
+            rawCount: rawTransactionCount,
+            droppedCount: droppedSamples.length,
+            lostCount: droppedSamples.filter(sample => !sample.reason.includes('no debit/credit'))
+              .length,
+          },
           checks: parsedStatement.checks,
         },
       );

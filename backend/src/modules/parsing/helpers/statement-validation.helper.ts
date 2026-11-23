@@ -30,6 +30,13 @@ export interface StatementValidation {
   balanceCheck?: BalanceCheck;
 }
 
+/** Rows read and rows dropped; `lostCount` are the dropped ones that carried money. */
+interface DropInfo {
+  rawCount: number;
+  droppedCount: number;
+  lostCount?: number;
+}
+
 /** More than this share of parsed rows rejected is a failed parse, not a few bad rows. */
 const HIGH_DROP_RATIO_THRESHOLD = 0.5;
 
@@ -79,7 +86,7 @@ function checkWarning({ code, detail = {} }: ParseCheck): string {
 function droppedRows(
   metadata: { balanceStart?: number | null; balanceEnd?: number | null },
   validCount: number,
-  { rawCount, droppedCount }: { rawCount: number; droppedCount: number },
+  { rawCount, droppedCount, lostCount = droppedCount }: DropInfo,
 ): { code: ValidationReasonCode; warning: string } | null {
   if (rawCount > 0 && validCount === 0) {
     return {
@@ -87,13 +94,14 @@ function droppedRows(
       warning: `All ${rawCount} parsed rows were rejected during validation — statement produced zero transactions`,
     };
   }
-  // Without balances nothing else would show the loss: any dropped row keeps
-  // the statement for review (#636).
+  // Without balances nothing else would show the loss: any dropped row that
+  // carried money keeps the statement for review (#636). A zero row (a card
+  // check) loses nothing.
   const noBalances = metadata.balanceStart == null || metadata.balanceEnd == null;
   if (
     rawCount > 0 &&
     droppedCount > 0 &&
-    (noBalances || droppedCount / rawCount > HIGH_DROP_RATIO_THRESHOLD)
+    ((noBalances && lostCount > 0) || droppedCount / rawCount > HIGH_DROP_RATIO_THRESHOLD)
   ) {
     const percent = Math.round((droppedCount / rawCount) * 100);
     return {
@@ -127,7 +135,7 @@ export function validateParsedStatement(
   transactions: MovedRow[],
   options: {
     tolerance: number;
-    dropInfo?: { rawCount: number; droppedCount: number };
+    dropInfo?: DropInfo;
     checks?: ParseCheck[];
   },
 ): StatementValidation {

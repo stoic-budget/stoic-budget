@@ -76,6 +76,13 @@ describe('validateParsedStatement', () => {
       }).reasonCodes;
 
     expect(codes({}, 1)).toEqual(['rows_dropped']);
+    // A zero row (a card check) dropped carries no money: nothing to review.
+    expect(
+      validateParsedStatement({} as typeof balances, kept, {
+        tolerance: 0.01,
+        dropInfo: { rawCount: 4, droppedCount: 1, lostCount: 0 },
+      }).reasonCodes,
+    ).toEqual([]);
     expect(codes({}, 0)).toEqual([]);
     // With both balances, one lost row of four shows as a balance gap instead.
     expect(codes({ balanceStart: 1000, balanceEnd: 1300 }, 1)).toEqual([]);

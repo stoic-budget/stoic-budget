@@ -42,7 +42,6 @@ import {
   mappingFromSuggestion,
   missingRequiredFields,
   openAsTableFilters,
-  type PreparedSheet,
   prepareSheet,
   roleByColumn,
   rowsLabel,
@@ -87,7 +86,7 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
   const [step, setStep] = useState<Step>('reading');
   const [workbook, setWorkbook] = useState<TabularWorkbook | null>(null);
   const [sheetIndex, setSheetIndex] = useState(0);
-  const [sheet, setSheet] = useState<PreparedSheet | null>(null);
+  const [sheet, setSheet] = useState<ReturnType<typeof prepareSheet> | null>(null);
   const [suggestion, setSuggestion] = useState<ImportSuggestion | null>(null);
   const [target, setTarget] = useState<ImportTarget>(fixedTarget ?? 'transactions');
   const [mapping, setMapping] = useState<Record<string, number>>({});

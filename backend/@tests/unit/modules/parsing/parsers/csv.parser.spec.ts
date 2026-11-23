@@ -28,12 +28,23 @@ describe('CsvParser', () => {
       'Date,Payee,Amount',
       '02.03.2026,ACME Store,-12.00',
       '31.02.2026,Member One,-5.00',
+      '15 марта 2026,Member One,-7.00',
+      '31.03.2026 Balance transfer,Member One,-2.00',
       ',Total,-17.00',
       'Total 2026,,-17.00',
+      'Page 2 of 5,,',
+      '12:30,Member One,-5.00',
+      '123456,Member One,-5.00',
     ]);
 
-    expect(result.transactions).toHaveLength(2);
-    expect(Number.isNaN(result.transactions[1].transactionDate.getTime())).toBe(true);
+    // Kept: the read rows; lost and counted: 31.02 and "15 марта"; quiet: the rest.
+    expect(result.transactions.map(t => t.debit)).toEqual([12, 5, 7, 2]);
+    expect(result.transactions.map(t => Number.isNaN(t.transactionDate.getTime()))).toEqual([
+      false,
+      true,
+      true,
+      false,
+    ]);
     expect(result.metadata.dateFrom.getTime()).not.toBeNaN();
   });
 
