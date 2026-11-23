@@ -4,6 +4,7 @@ import type {
   DataSource,
   EntitySubscriberInterface,
   InsertEvent,
+  QueryRunner,
   TransactionCommitEvent,
   TransactionRollbackEvent,
   UpdateEvent,
@@ -11,6 +12,10 @@ import type {
 import { Transaction } from '../../entities/transaction.entity';
 import { toDateOnly } from './jurisdictions.service';
 import { applyAssignment, assignmentInputOf, TaxAssignmentService } from './tax-assignment.service';
+
+/** How deep in nested transactions (savepoints) the runner is; TypeORM keeps it, untyped. */
+const depthOf = (runner: QueryRunner): number =>
+  (runner as unknown as { transactionDepth?: number }).transactionDepth ?? 0;
 
 /** What the tax on a row depends on. */
 const TAX_INPUTS = [
@@ -69,7 +74,10 @@ export class TransactionTaxSubscriber implements EntitySubscriberInterface<Trans
 
   /** New rows created without their tax, and the inserts' query runners waiting to commit. */
   private readonly needsTax = new WeakSet<object>();
-  private readonly pending = new WeakMap<object, Array<{ workspaceId: string; id: string }>>();
+  private readonly pending = new WeakMap<
+    QueryRunner,
+    Array<{ workspaceId: string; id: string; depth: number }>
+  >();
   private readonly logger = new Logger(TransactionTaxSubscriber.name);
 
   /**
@@ -98,7 +106,7 @@ export class TransactionTaxSubscriber implements EntitySubscriberInterface<Trans
     }
     const runner = event.queryRunner;
     const rows = this.pending.get(runner) ?? [];
-    rows.push({ workspaceId: entity.workspaceId, id: entity.id });
+    rows.push({ workspaceId: entity.workspaceId, id: entity.id, depth: depthOf(runner) });
     this.pending.set(runner, rows);
     if (!runner.isTransactionActive) {
       this.assessLater(runner);
@@ -106,14 +114,26 @@ export class TransactionTaxSubscriber implements EntitySubscriberInterface<Trans
   }
 
   afterTransactionCommit(event: TransactionCommitEvent): void {
-    this.assessLater(event.queryRunner);
+    // A released savepoint is not the commit: wait for the outermost one.
+    if (!event.queryRunner.isTransactionActive) {
+      this.assessLater(event.queryRunner);
+    }
   }
 
   afterTransactionRollback(event: TransactionRollbackEvent): void {
-    this.pending.delete(event.queryRunner);
+    const runner = event.queryRunner;
+    // A rolled-back savepoint drops only the rows inserted inside it.
+    const kept = runner.isTransactionActive
+      ? (this.pending.get(runner) ?? []).filter(row => row.depth <= depthOf(runner))
+      : [];
+    if (kept.length > 0) {
+      this.pending.set(runner, kept);
+    } else {
+      this.pending.delete(runner);
+    }
   }
 
-  private assessLater(runner: object): void {
+  private assessLater(runner: QueryRunner): void {
     const rows = this.pending.get(runner);
     this.pending.delete(runner);
     if (!rows?.length) {
@@ -124,12 +144,16 @@ export class TransactionTaxSubscriber implements EntitySubscriberInterface<Trans
       byWorkspace.set(row.workspaceId, [...(byWorkspace.get(row.workspaceId) ?? []), row.id]);
     }
     setImmediate(() => {
-      for (const [workspaceId, ids] of byWorkspace) {
-        this.taxAssignmentService.reassess(workspaceId, { ids }).catch((error: unknown) => {
-          this.logger.warn(
-            `Could not assess the tax of ${ids.length} new row(s): ${error instanceof Error ? error.message : String(error)}`,
-          );
-        });
+      for (const [workspaceId, all] of byWorkspace) {
+        // In parts: one query takes at most 65,535 parameters.
+        for (let start = 0; start < all.length; start += 1000) {
+          const ids = all.slice(start, start + 1000);
+          this.taxAssignmentService.reassess(workspaceId, { ids }).catch((error: unknown) => {
+            this.logger.warn(
+              `Could not assess the tax of ${ids.length} new row(s): ${error instanceof Error ? error.message : String(error)}`,
+            );
+          });
+        }
       }
     });
   }

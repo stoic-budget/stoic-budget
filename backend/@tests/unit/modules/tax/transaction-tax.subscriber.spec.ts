@@ -9,15 +9,18 @@ function build() {
     { subscribers: [] } as unknown as DataSource,
     { reassess } as unknown as TaxAssignmentService,
   );
-  const runner = { isTransactionActive: true };
+  const runner = { isTransactionActive: true, transactionDepth: 1 };
   const insert = (entity: Partial<Transaction>, id = 'tx-1') => {
     const event = { entity, queryRunner: runner } as unknown as InsertEvent<Transaction>;
     subscriber.beforeInsert(event);
     entity.id = id;
     subscriber.afterInsert(event);
   };
-  const commit = () =>
+  const commit = () => {
+    runner.isTransactionActive = false;
+    runner.transactionDepth = 0;
     subscriber.afterTransactionCommit({ queryRunner: runner } as unknown as TransactionCommitEvent);
+  };
   const settle = () => new Promise(resolve => setImmediate(resolve));
   return { reassess, insert, commit, runner, subscriber, settle };
 }
@@ -57,6 +60,8 @@ describe('TransactionTaxSubscriber on insert', () => {
     const { reassess, insert, runner, subscriber, settle } = build();
 
     insert(payment());
+    runner.isTransactionActive = false;
+    runner.transactionDepth = 0;
     subscriber.afterTransactionRollback({ queryRunner: runner } as never);
     subscriber.afterTransactionCommit({ queryRunner: runner } as never);
     await settle();
@@ -73,5 +78,33 @@ describe('TransactionTaxSubscriber on insert', () => {
     await settle();
 
     expect(reassess).not.toHaveBeenCalled();
+  });
+
+  it('waits for the outermost commit, past a released savepoint', async () => {
+    const { reassess, insert, commit, runner, subscriber, settle } = build();
+    runner.transactionDepth = 2;
+    insert(payment());
+    // Releasing the savepoint: still inside the outer transaction.
+    runner.transactionDepth = 1;
+    subscriber.afterTransactionCommit({ queryRunner: runner } as never);
+    await settle();
+    expect(reassess).not.toHaveBeenCalled();
+
+    commit();
+    await settle();
+    expect(reassess).toHaveBeenCalledWith('ws-1', { ids: ['tx-1'] });
+  });
+
+  it('drops only the rows of a rolled-back savepoint', async () => {
+    const { reassess, insert, commit, runner, subscriber, settle } = build();
+    insert(payment(), 'outer');
+    runner.transactionDepth = 2;
+    insert(payment(), 'inner');
+    runner.transactionDepth = 1;
+    subscriber.afterTransactionRollback({ queryRunner: runner } as never);
+
+    commit();
+    await settle();
+    expect(reassess).toHaveBeenCalledWith('ws-1', { ids: ['outer'] });
   });
 });
