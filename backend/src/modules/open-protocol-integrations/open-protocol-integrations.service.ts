@@ -48,6 +48,7 @@ import { EmailReceiptParserService } from '../receipts/services/email-receipt-pa
 import { ReceiptCategoryService } from '../receipts/services/receipt-category.service';
 import { ReceiptDuplicateService } from '../receipts/services/receipt-duplicate.service';
 import { StatementsService } from '../statements/statements.service';
+import { openImapBatch } from './imap-cursor';
 
 type ProtocolStatusResponse = {
   connected: boolean;
@@ -522,12 +523,10 @@ export class OpenProtocolIntegrationsService {
 
     try {
       await client.connect();
-      await client.mailboxOpen(config.mailbox);
-      const searchResult = await client.search({});
-      const uids = Array.isArray(searchResult) ? searchResult : [];
-      const limitedUids = uids.slice(0, Number(process.env.IMAP_SYNC_LIMIT ?? 50));
+      // UIDs, not sequence numbers, and the next ones after the last sync (#679).
+      const imap = await openImapBatch(client, config, this.integrationRepository, workspaceId);
 
-      for (const uid of limitedUids) {
+      for (const uid of imap.batch) {
         scanned += 1;
         try {
           const message = await client.fetchOne(
@@ -556,6 +555,7 @@ export class OpenProtocolIntegrationsService {
           );
         }
       }
+      await imap.remember();
     } finally {
       await client.logout().catch(() => undefined);
     }

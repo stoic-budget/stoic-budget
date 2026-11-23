@@ -22,7 +22,7 @@ import { ImapFlow } from 'imapflow';
 import { OpenProtocolIntegrationsService } from '../../../../src/modules/open-protocol-integrations/open-protocol-integrations.service';
 
 const connectMock = vi.fn().mockResolvedValue(undefined);
-const mailboxOpenMock = vi.fn().mockResolvedValue(undefined);
+const mailboxOpenMock = vi.fn().mockResolvedValue({ uidValidity: 7n });
 const searchMock = vi.fn().mockResolvedValue([3]);
 const fetchOneMock = vi.fn().mockResolvedValue({
   uid: 3,
@@ -51,8 +51,10 @@ const receiptRepository = {
   save: vi.fn().mockResolvedValue(savedReceipt),
 };
 
+const settingsRepository = { findOne: vi.fn().mockResolvedValue(null), update: vi.fn() };
 const integrationRepository = {
   findOne: vi.fn().mockResolvedValue(null),
+  manager: { getRepository: () => settingsRepository },
 };
 
 const receiptParserService = {
@@ -104,7 +106,7 @@ describe('OpenProtocolIntegrationsService.syncImap — already-seen messages', (
       IMAP_MAILBOX: 'Folders/Receipts',
     };
     connectMock.mockResolvedValue(undefined);
-    mailboxOpenMock.mockResolvedValue(undefined);
+    mailboxOpenMock.mockResolvedValue({ uidValidity: 7n });
     searchMock.mockResolvedValue([3]);
     fetchOneMock.mockResolvedValue({
       uid: 3,
@@ -135,13 +137,30 @@ describe('OpenProtocolIntegrationsService.syncImap — already-seen messages', (
     expect(receiptRepository.save).toHaveBeenCalled();
   });
 
+  it('remembers the last UID it took, so the next sync goes on from there (#679)', async () => {
+    const user = { id: 'user-1', workspaceId: 'workspace-1' } as never;
+    settingsRepository.findOne.mockResolvedValueOnce({ id: 'settings-1', config: { mailbox: 'INBOX' } });
+    settingsRepository.update.mockClear();
+
+    await createService().syncImap(user, 'workspace-1');
+
+    expect(settingsRepository.update).toHaveBeenCalledWith('settings-1', {
+      config: { mailbox: 'INBOX', imapCursor: { uidValidity: '7', lastUid: 3 } },
+    });
+  });
+
   it('does not search with seen:false filter so already-read emails are included', async () => {
     const user = { id: 'user-1', workspaceId: 'workspace-1' } as never;
 
     await createService().syncImap(user, 'workspace-1');
 
-    const [searchQuery] = searchMock.mock.calls[0] as [Record<string, unknown>];
+    const [searchQuery, options] = searchMock.mock.calls[0] as [
+      Record<string, unknown>,
+      Record<string, unknown>,
+    ];
     expect(searchQuery).not.toHaveProperty('seen');
+    // UIDs, not sequence numbers: fetchOne reads them as UIDs (#679).
+    expect(options).toEqual({ uid: true });
   });
 
   it('imports into the workspace it syncs for, deduplicating within it', async () => {
