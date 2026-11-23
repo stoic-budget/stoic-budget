@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { decodeUnlabelledText } from './decode-text';
 
@@ -20,5 +22,19 @@ describe('decodeUnlabelledText (wizard)', () => {
     );
     const wide = new Uint8Array([0xff, 0xfe, 0x4d, 0, 0xfc, 0, 0x6c, 0, 0x6c, 0, 0x65, 0, 0x72, 0]);
     expect(decodeUnlabelledText(wide)).toBe('Müller');
+  });
+
+  it('reads UTF-16 without a mark', () => {
+    const noMark = new Uint8Array([0x4d, 0, 0xfc, 0, 0x6c, 0, 0x6c, 0, 0x65, 0, 0x72, 0]);
+    expect(decodeUnlabelledText(noMark)).toBe('Müller');
+  });
+
+  it('is the backend decoder, line for line, below its header', () => {
+    const own = readFileSync(resolve(__dirname, 'decode-text.ts'), 'utf-8');
+    const server = readFileSync(
+      resolve(__dirname, '../../../backend/src/modules/parsing/helpers/text-encoding.helper.ts'),
+      'utf-8',
+    );
+    expect(own.split('\n').slice(4).join('\n')).toBe(server);
   });
 });

@@ -14,6 +14,30 @@ const cp1251 = (text: string) =>
 const cp1252 = (text: string) => Uint8Array.from([...text].map(char => char.charCodeAt(0)));
 
 describe('decodeUnlabelledText', () => {
+  it('keeps UTF-8 with one bad byte as UTF-8, losing only that byte', () => {
+    const text = 'Дата;Контрагент;Сумма\n02.03.2026;Магазин Пример;-10,00\n';
+    const cut = Uint8Array.from([...new TextEncoder().encode(text), 0xd0]);
+    expect(decodeUnlabelledText(cut)).toBe(`${text}\uFFFD`);
+    const stray = Uint8Array.from([...new TextEncoder().encode(text), 0x43, 0x61, 0x66, 0xe9]);
+    expect(decodeUnlabelledText(stray)).toBe(`${text}Caf\uFFFD`);
+  });
+
+  it('does not take ASCII padded with zeros, or text with one stray zero, for UTF-16', () => {
+    const padded = Uint8Array.from([...new TextEncoder().encode('Date,Amount\n'), ...new Uint8Array(600)]);
+    expect(decodeUnlabelledText(padded).startsWith('Date,Amount')).toBe(true);
+    const stray = new TextEncoder().encode('Date,Payee,Amount\n02.03.2026,Müller\0,-12.00\n');
+    expect(decodeUnlabelledText(stray)).toContain('Müller');
+  });
+
+  it('reads Japanese and Korean UTF-16 without a mark', () => {
+    for (const text of [
+      '日付,摘要,金額\n2026/03/02,カード　ショッピング　支払,-1000\n',
+      '거래일자,적요,출금액\n2026-03-02,대금 결제 가맹점,-10000\n',
+    ]) {
+      expect(decodeUnlabelledText(Buffer.from(text, 'utf16le'))).toBe(text);
+    }
+  });
+
   it('reads UTF-16 with and without its byte-order mark (#637)', () => {
     const text = 'Дата;Описание;Сумма\n02.03.2026;Müller;-10,00';
     const le = Buffer.from(text, 'utf16le');
