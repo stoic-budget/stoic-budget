@@ -542,6 +542,23 @@ describe('invoice status (real Postgres)', () => {
       expect(serialized).not.toContain(clientId);
     });
 
+    it('states a discounted line at its amount after the discount, as the PDF does', async () => {
+      const draft = await invoices.create(workspaceId, {
+        clientId,
+        issueDate: '2026-03-01',
+        dueDate: '2026-03-15',
+        lineItems: [{ description: 'Workshop', quantity: 2, unitPrice: 100, adjustmentPercent: -10 }],
+      });
+      const sent = await invoices.send(draft.id, workspaceId, userId);
+
+      const view = await publicInvoices.view(sent.shareToken as string);
+
+      expect(view.lines).toEqual([
+        expect.objectContaining({ description: 'Workshop', unitPrice: '100.00', amount: '180' }),
+      ]);
+      expect(Number(view.total)).toBe(180);
+    });
+
     it('marks the first open and counts the rest', async () => {
       const { invoice } = await sentInvoice();
       expect(invoice.viewedAt).toBeNull();
