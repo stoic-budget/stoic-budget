@@ -71,15 +71,30 @@ export function parseExchangeCsv(text: string): ParsedExchangeFile | null {
   const body = rows.slice(index + 1).filter(row => row.some(cell => cell.trim() !== ''));
 
   if (has(columns, ['transaction type', 'asset', 'quantity transacted'])) {
-    return { exchange: 'Coinbase', entries: coinbase(columns, body) };
+    return { exchange: 'Coinbase', entries: numberRepeats(coinbase(columns, body)) };
   }
   if (has(columns, ['operation', 'coin', 'change'])) {
-    return { exchange: 'Binance', entries: binance(columns, body) };
+    return { exchange: 'Binance', entries: numberRepeats(binance(columns, body)) };
   }
   if (has(columns, ['refid', 'type', 'asset', 'amount'])) {
-    return { exchange: 'Kraken', entries: kraken(columns, body) };
+    return { exchange: 'Kraken', entries: numberRepeats(kraken(columns, body)) };
   }
   return null;
+}
+
+/**
+ * Two identical rows of one file (the same buy twice on a day) are two
+ * movements: the second and later ones get `#2`, `#3` on their reference. The
+ * first keeps its reference as before, and the same file gives the same
+ * numbers, so importing it again still writes nothing new.
+ */
+function numberRepeats(entries: ExchangeEntry[]): ExchangeEntry[] {
+  const seen = new Map<string, number>();
+  return entries.map(entry => {
+    const count = (seen.get(entry.reference) ?? 0) + 1;
+    seen.set(entry.reference, count);
+    return count === 1 ? entry : { ...entry, reference: `${entry.reference}#${count}` };
+  });
 }
 
 /**

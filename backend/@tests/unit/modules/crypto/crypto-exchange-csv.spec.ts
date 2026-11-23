@@ -31,6 +31,23 @@ const KRAKEN = [
 ].join('\n');
 
 describe('parseExchangeCsv', () => {
+  it('keeps two identical rows of one file apart, and numbers them the same way every time', () => {
+    const file = [
+      'User_ID,UTC_Time,Account,Operation,Coin,Change,Remark',
+      '123,2026-01-10 08:00:00,Spot,Transaction Buy,ETH,0.5,',
+      '123,2026-01-10 15:30:00,Spot,Transaction Buy,ETH,0.5,',
+    ].join('\n');
+
+    const first = parseExchangeCsv(file)?.entries.map(entry => entry.reference);
+    const again = parseExchangeCsv(file)?.entries.map(entry => entry.reference);
+
+    expect(first).toEqual([
+      '2026-01-10|Transaction Buy|ETH|0.5',
+      '2026-01-10|Transaction Buy|ETH|0.5#2',
+    ]);
+    expect(again).toEqual(first);
+  });
+
   it('refuses a file it does not recognise instead of guessing', () => {
     expect(parseExchangeCsv('date,amount,description\n2026-01-01,10,Coffee')).toBeNull();
   });
