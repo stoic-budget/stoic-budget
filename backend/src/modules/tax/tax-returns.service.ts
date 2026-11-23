@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, IsNull, Not, Repository } from 'typeorm';
@@ -16,6 +16,7 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { AuditService } from '../audit/audit.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { TaxDeadlineResolvedEvent } from '../notifications/events/notification-events';
+import { assertFilable, idsToUnlock } from './filed-periods';
 import { JurisdictionAdoptionService } from './jurisdiction-adoption.service';
 import { JurisdictionsService, toDateOnly } from './jurisdictions.service';
 import {
@@ -278,9 +279,7 @@ export class TaxReturnsService {
       where: { workspaceId, periodStart, periodEnd },
     });
 
-    if (existing?.status === TaxReturnStatus.FILED) {
-      throw new ConflictException(appError('TAX_RETURN_ALREADY_FILED'));
-    }
+    await assertFilable(this.returnRepository, existing, workspaceId, periodStart, periodEnd);
 
     const totals = await this.computeTotals(workspaceId, periodStart, periodEnd);
     if (totals.missingRates.length > 0) {
@@ -360,7 +359,8 @@ export class TaxReturnsService {
       throw new BadRequestException(appError('TAX_RETURN_NOT_FILED'));
     }
 
-    const lockedIds = (existing.snapshot ?? []).map(line => line.transactionId);
+    // Rows another filed return still holds stay locked.
+    const lockedIds = await idsToUnlock(this.returnRepository, existing);
 
     const reopened = await this.returnRepository.manager.transaction(async manager => {
       if (lockedIds.length > 0) {
