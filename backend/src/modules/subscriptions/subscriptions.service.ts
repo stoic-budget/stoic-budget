@@ -73,6 +73,7 @@ import {
 } from '../tax/tax-assignment.service';
 import * as calendar from './charge-calendar.util';
 import { CurrencyTotals } from './currency-totals';
+import { advancePastDue, chargeArrived } from './missed-charge';
 import {
   chargesInMonth,
   isPastMonth,
@@ -1145,13 +1146,10 @@ export class SubscriptionsService {
     });
 
     for (const sub of pastDue) {
-      const currentChargeDate = sub.nextChargeDate;
-      if (!currentChargeDate) continue;
-
-      sub.lastChargeDate = currentChargeDate;
-      sub.nextChargeDate = this.addInterval(new Date(currentChargeDate), sub.frequency);
-      sub.riskStatus = SubscriptionRiskStatus.MISSING_CHARGE;
-      await this.subscriptionRepository.save(sub);
+      // Flags a charge missing only once its due date has had a cycle to arrive.
+      if (await advancePastDue(sub, this.chargeRepository, (d, f) => this.addInterval(d, f))) {
+        await this.subscriptionRepository.save(sub);
+      }
     }
 
     if (pastDue.length > 0) {
@@ -1549,6 +1547,8 @@ export class SubscriptionsService {
 
   /** Last charge is the latest payment; the next one moves past a payment on or after it. */
   private advancePastCharge(subscription: Subscription, chargeDay: string): void {
+    // A charge came: whatever "missing" said about it is over.
+    chargeArrived(subscription);
     const last = toDay(subscription.lastChargeDate);
     if (!last || last < chargeDay) {
       subscription.lastChargeDate = chargeDay as unknown as Date;
