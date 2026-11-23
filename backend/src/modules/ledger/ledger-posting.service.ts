@@ -794,6 +794,7 @@ export class LedgerPostingService {
             accountNumber: true,
             walletId: true,
             deletedAt: true,
+            parsingDetails: true,
           },
         })
       : null;
@@ -822,8 +823,7 @@ export class LedgerPostingService {
        ) AS "settles"`,
       [tx.workspaceId, PayableSource.INVOICE, tx.id],
     );
-    const settlesInvoice = settles;
-    const counterpart = settlesInvoice
+    const counterpart = settles
       ? system[LEDGER_ACCOUNT_CODES.RECEIVABLES]
       : tx.categoryId
         ? await this.accountsService.categoryAccountId(tx.workspaceId, tx.categoryId)
