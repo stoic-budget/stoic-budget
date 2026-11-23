@@ -142,6 +142,12 @@ describe('aliases and value parsers', () => {
     expect(parseImportNumber('0.125').value).toBe(0.125);
   });
 
+  it('reads a comma before three digits after a zero as a decimal, and dotted groups as one integer', () => {
+    expect(parseImportNumber('0,125').value).toBe(0.125);
+    expect(parseImportNumber('1.234.567').value).toBe(1234567);
+    expect(parseImportNumber('1.234.567,89').value).toBe(1234567.89);
+  });
+
   it('parses ISO, European and Excel-serial dates', () => {
     expect(parseImportDate('2026-10-05')).toBe('2026-10-05');
     expect(parseImportDate('05.10.2026')).toBe('2026-10-05');
