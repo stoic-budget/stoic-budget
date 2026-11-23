@@ -31,6 +31,9 @@ import { OidcProviderClient } from './oidc/oidc-provider.client';
 import { OidcSettingsController } from './oidc/oidc-settings.controller';
 import { OidcSettingsService } from './oidc/oidc-settings.service';
 import { OidcStateStore } from './oidc/oidc-state.store';
+import { OidcStepUpService } from './oidc/oidc-step-up.service';
+import { PasswordSetController } from './oidc/password-set.controller';
+import { PasswordSetService } from './oidc/password-set.service';
 import { PasskeyAuthService } from './passkeys/passkey-auth.service';
 import { PasskeyChallengeStore } from './passkeys/passkey-challenge.store';
 import { PasskeyNoticeService } from './passkeys/passkey-notice.service';
@@ -80,6 +83,7 @@ import { TwoFactorService } from './two-factor.service';
     RegistrationController,
     OidcController,
     OidcSettingsController,
+    PasswordSetController,
     PasskeysController,
   ],
   providers: [
@@ -100,6 +104,8 @@ import { TwoFactorService } from './two-factor.service';
     OidcAccountsService,
     OidcIdentitiesService,
     OidcLoginService,
+    OidcStepUpService,
+    PasswordSetService,
   ],
   exports: [AuthService],
 })

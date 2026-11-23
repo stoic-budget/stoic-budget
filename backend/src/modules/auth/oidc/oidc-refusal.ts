@@ -29,7 +29,7 @@ export const refusalCode = (error: unknown): ErrorCode => {
 /** A callback that failed once its state was known: which page to return to, and why. */
 export class OidcCallbackFailure extends Error {
   constructor(
-    readonly mode: 'login' | 'link',
+    readonly mode: 'login' | 'link' | 'reauth',
     readonly code: ErrorCode,
   ) {
     super(code);

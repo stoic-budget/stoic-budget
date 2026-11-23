@@ -22,19 +22,27 @@ const TokenAnswer = Schema.Struct({ id_token: Schema.String });
 const TIMEOUT = '10 seconds';
 const CACHE_MS = 10 * 60 * 1000;
 
+const isProduction = (): boolean => process.env.NODE_ENV === 'production';
+
 /**
- * https only, except outside production where a provider on the developer's
- * machine is plain http. Every address the discovery document names is held
- * to the same rule as the issuer.
+ * OIDC_ALLOW_HTTP=true: the administrator's opt-in to a plain-http provider in
+ * production, for one reached over a private network (a Docker network next
+ * to this API). It changes nothing else about which addresses are refused.
+ */
+const httpAllowedInProduction = (): boolean =>
+  process.env.OIDC_ALLOW_HTTP?.trim().toLowerCase() === 'true';
+
+/**
+ * https only, except outside production (a provider on the developer's
+ * machine) or with OIDC_ALLOW_HTTP. Never credentials in the address. Every
+ * address the discovery document names is held to the same rule as the issuer.
  */
 export function isAllowedProviderUrl(value: string): boolean {
   try {
     const url = new URL(value);
     if (url.username || url.password) return false;
-    return (
-      url.protocol === 'https:' ||
-      (url.protocol === 'http:' && process.env.NODE_ENV !== 'production')
-    );
+    if (url.protocol === 'https:') return true;
+    return url.protocol === 'http:' && (!isProduction() || httpAllowedInProduction());
   } catch {
     return false;
   }
@@ -53,6 +61,8 @@ export class OidcProviderClient {
   private readonly logger = new Logger(OidcProviderClient.name);
   private readonly discoveries = new Map<string, { value: OidcDiscovery; at: number }>();
   private readonly keySets = new Map<string, { value: JSONWebKeySet; at: number }>();
+  /** Issuers already warned about plain http, so a sign-in does not log it again. */
+  private readonly warnedHttp = new Set<string>();
 
   constructor(private readonly effects: EffectRuntime) {}
 
@@ -74,6 +84,7 @@ export class OidcProviderClient {
     if (!endpoints.every(isAllowedProviderUrl)) {
       throw new OidcRefusal('OIDC_ISSUER_INSECURE', HttpStatus.BAD_GATEWAY);
     }
+    this.warnIfHttp(issuer, endpoints);
     const methods = document.code_challenge_methods_supported;
     if (methods && !methods.includes('S256')) {
       throw new OidcRefusal('OIDC_PROVIDER_UNAVAILABLE', HttpStatus.BAD_GATEWAY);
@@ -125,6 +136,20 @@ export class OidcProviderClient {
       postForm(discovery.token_endpoint, form, TokenAnswer, { timeout: TIMEOUT, headers }),
     );
     return answer.id_token;
+  }
+
+  /**
+   * One warning per issuer while this server runs, when it is saved or first
+   * used: plain http in production is allowed only by OIDC_ALLOW_HTTP.
+   */
+  warnIfHttp(issuer: string, endpoints: string[] = []): void {
+    const http = [issuer, ...endpoints].some(value => value.toLowerCase().startsWith('http:'));
+    if (!(isProduction() && http) || this.warnedHttp.has(issuer)) return;
+    this.warnedHttp.add(issuer);
+    this.logger.warn(
+      `OIDC provider ${issuer} is reached over plain http in production (OIDC_ALLOW_HTTP=true). ` +
+        'Tokens and the client secret travel unencrypted: keep it on a private network only.',
+    );
   }
 
   /** Forget cached answers, e.g. after the administrator changed the provider. */

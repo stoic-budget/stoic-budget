@@ -4,13 +4,20 @@ import { AuditAction, EntityType, Severity } from '../../../entities/audit-event
 import type { AuditService } from '../../audit/audit.service';
 import { recordSecurityEvent } from '../security-audit.util';
 
-export type OidcEvent = 'sign_in' | 'account_created' | 'linked' | 'unlinked' | 'refused';
+export type OidcEvent =
+  | 'sign_in'
+  | 'account_created'
+  | 'linked'
+  | 'unlinked'
+  | 'reauthenticated'
+  | 'refused';
 
 const ACTIONS: Record<OidcEvent, AuditAction> = {
   sign_in: AuditAction.UPDATE,
   account_created: AuditAction.CREATE,
   linked: AuditAction.LINK,
   unlinked: AuditAction.UNLINK,
+  reauthenticated: AuditAction.UPDATE,
   refused: AuditAction.UPDATE,
 };
 

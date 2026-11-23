@@ -37,6 +37,7 @@ import { CURRENT_DISCLAIMER_VERSION } from './disclaimer.constant';
 import { OWN_PROFILE_COLUMNS } from './own-profile-columns';
 import { recordPasswordChanged } from './password-changed';
 import { EmailChangeService } from './services/email-change.service';
+import { USER_PROFILE_SELECT } from './user-selects';
 
 /** How many pages the page-hint map may name; see markPageHintsSeen. */
 export const PAGE_HINTS_MAX_KEYS = 100;
@@ -101,30 +102,7 @@ export class UsersService {
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        company: true,
-        role: true,
-        workspaceId: true,
-        telegramId: true,
-        telegramChatId: true,
-        createdAt: true,
-        updatedAt: true,
-        lastLogin: true,
-        isActive: true,
-        permissions: true,
-        locale: true,
-        timeZone: true,
-        themePreference: true,
-        mapStylePreference: true,
-        onboardingCompletedAt: true,
-        disclaimerAcceptedAt: true,
-        disclaimerVersion: true,
-        welcomeTutorialSeenAt: true,
-        pageHintsSeen: true,
-      },
+      select: USER_PROFILE_SELECT,
     });
 
     if (!user) {

@@ -5,6 +5,7 @@ vi.mock('./api-error', () => ({
     ({
       OIDC_ACCOUNT_EXISTS: 'Sign in with your password first',
       AUTH_ACCOUNT_INACTIVE: 'Inactive',
+      AUTH_PASSWORD_ALREADY_SET: 'Already has a password',
       // A real code, but not one the sign-in sends: a crafted link must not pick it.
       AUTH_2FA_CODE_INVALID: 'Invalid two-factor code',
     })[code],
@@ -20,6 +21,8 @@ describe('oidcErrorMessage', () => {
   it('translates our own codes', () => {
     expect(oidcErrorMessage('OIDC_ACCOUNT_EXISTS', 'Fallback')).toBe('Sign in with your password first');
     expect(oidcErrorMessage('AUTH_ACCOUNT_INACTIVE', 'Fallback')).toBe('Inactive');
+    // A re-authentication for a password that was set in the meantime.
+    expect(oidcErrorMessage('AUTH_PASSWORD_ALREADY_SET', 'Fallback')).toBe('Already has a password');
   });
 
   it('never shows text someone put in the link', () => {

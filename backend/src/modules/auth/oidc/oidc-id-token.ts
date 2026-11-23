@@ -33,6 +33,8 @@ export interface IdTokenClaims {
   email: string | null;
   emailVerified: boolean;
   name: string | null;
+  /** When the person last signed in at the provider (seconds), when it says. */
+  authTime: number | null;
 }
 
 export interface IdTokenExpectations {
@@ -118,5 +120,9 @@ export async function verifyIdToken(
     // Only a real boolean true counts; a string or a missing claim does not.
     emailVerified: payload.email_verified === true,
     name: name || null,
+    authTime:
+      typeof payload.auth_time === 'number' && Number.isFinite(payload.auth_time)
+        ? payload.auth_time
+        : null,
   };
 }
