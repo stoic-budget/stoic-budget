@@ -56,7 +56,7 @@ import {
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { ExportFormat, PayablesSortOption } from './dto/filter-payables.dto';
-import { outstandingOf, round2 } from './payable-money';
+import { outstandingOf, round2, startOfDay, toDateString } from './payable-money';
 import { assertOneSource, exactSubset, notRejectedSql } from './payable-payments.util';
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
@@ -269,6 +269,7 @@ export class PayablesService {
       dto.linkedTransactionId === undefined ? undefined : (dto.linkedTransactionId ?? null),
       dto.statementId === undefined ? undefined : (dto.statementId ?? null),
     );
+    const amountBefore = Number(payable.amount);
     Object.assign(payable, this.normalizeUpdateDto(dto, payable));
     // Left out keeps the tags; a list (empty or not) is the whole new set.
     if (dto.tagIds !== undefined) {
@@ -277,10 +278,17 @@ export class PayablesService {
     // A bill of a series is saved with its rule, under the series lock.
     const inSeries = this.recurrence?.applyUpdate(payable, dto);
     const saved = this.asStored(await (inSeries ?? this.payableRepository.save(payable)));
-    // A new amount means a new status: the payment log decides paid, part paid or open.
-    return dto.amount === undefined
-      ? saved
-      : this.inPaymentTransaction(manager => this.applyPaymentTotals(manager, id, workspaceId));
+    if (Number(saved.amount) === amountBefore) return saved;
+    // A new amount means a new status: the payment log decides paid, part paid or
+    // open. Under the row lock, so a payment recorded meanwhile is counted.
+    const recomputed = await this.inPaymentTransaction(async manager => {
+      const locked = await manager.getRepository(Payable).findOneOrFail({
+        where: { id, workspaceId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      return this.applyPaymentTotals(manager, locked, workspaceId);
+    });
+    return Object.assign(recomputed, { tags: saved.tags });
   }
 
   /**
@@ -351,7 +359,7 @@ export class PayablesService {
     // the payment log is the whole truth and the status is derived from it.
     await this.recordPayment(manager, payable, {
       amount: outstandingOf(payable),
-      paidOn: payload.paidOn ?? this.toDateString(new Date()),
+      paidOn: payload.paidOn ?? toDateString(new Date()),
       transactionId: payable.linkedTransactionId,
       ownTransaction: Boolean(payload.payFromWalletId || payload.inHand),
       createdById: userId,
@@ -550,7 +558,7 @@ export class PayablesService {
       await this.recordPayment(manager, payable, {
         amount,
         feeAmount: dto.feeAmount ? round2(dto.feeAmount) : 0,
-        paidOn: dto.paidOn ?? this.toDateString(new Date()),
+        paidOn: dto.paidOn ?? toDateString(new Date()),
         transactionId,
         ownTransaction: Boolean(dto.payFromWalletId || dto.inHand),
         comment: dto.comment ?? null,
@@ -759,7 +767,7 @@ export class PayablesService {
     const empty: AllocationSuggestion = {
       transactionId,
       available,
-      currency: this.normalizeCurrency(transaction.currency),
+      currency: currencyCodeOrDefault(transaction.currency),
       exact: false,
       unallocated: available,
       allocations: [],
@@ -972,7 +980,7 @@ export class PayablesService {
     payable.paidAmount = decimal(payable.paidAmount);
     // A `date` column reads back as YYYY-MM-DD, not as the Date just assigned.
     if (payable.dueDate instanceof Date) {
-      payable.dueDate = this.toDateString(payable.dueDate) as unknown as Date;
+      payable.dueDate = toDateString(payable.dueDate) as unknown as Date;
     }
     return payable;
   }
@@ -982,10 +990,8 @@ export class PayablesService {
     if (payable.status === PayableStatus.SCHEDULED) {
       return PayableStatus.SCHEDULED;
     }
-    const due = payable.dueDate ? this.toDateString(payable.dueDate) : null;
-    return due && due < this.toDateString(new Date())
-      ? PayableStatus.OVERDUE
-      : PayableStatus.TO_PAY;
+    const due = payable.dueDate ? toDateString(payable.dueDate) : null;
+    return due && due < toDateString(new Date()) ? PayableStatus.OVERDUE : PayableStatus.TO_PAY;
   }
 
   async findPaymentCandidates(
@@ -1075,8 +1081,8 @@ export class PayablesService {
           ? TransactionType.INCOME
           : TransactionType.EXPENSE,
         payable.vendor,
-        this.toDateString(anchor),
-        this.toDateString(payable.createdAt),
+        toDateString(anchor),
+        toDateString(payable.createdAt),
         CANDIDATE_LOOKBACK_DAYS,
         payable.id,
         CANDIDATE_LIMIT,
@@ -1092,10 +1098,6 @@ export class PayablesService {
       paymentPurpose: row.payment_purpose,
       vendorMatch: row.vendor_match,
     }));
-  }
-
-  private toDateString(value: Date | string): string {
-    return typeof value === 'string' ? value.slice(0, 10) : value.toISOString().slice(0, 10);
   }
 
   async archive(id: string, workspaceId: string, _userId: string): Promise<Payable> {
@@ -1132,14 +1134,14 @@ export class PayablesService {
         currency: true,
       },
     });
-    const targetCurrency = this.normalizeCurrency(workspace?.currency);
+    const targetCurrency = currencyCodeOrDefault(workspace?.currency);
     const rateCache = new Map<string, number>();
     // What is owed at today's rate; what came in at the rate of the day it came in.
     const convert = (value: number, currency: string | null | undefined, day?: Date) =>
       this.convertSummaryAmount(value, currency, targetCurrency, rateCache, workspaceId, day);
 
     const now = new Date();
-    const startOfToday = this.startOfDay(now);
+    const startOfToday = startOfDay(now);
     const endOfWeek = new Date(startOfToday);
     endOfWeek.setUTCDate(endOfWeek.getUTCDate() + 6);
     const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
@@ -1163,7 +1165,7 @@ export class PayablesService {
     const convertedCurrencies = new Set<string>();
 
     for (const row of rows) {
-      const currency = this.normalizeCurrency(row.currency);
+      const currency = currencyCodeOrDefault(row.currency);
       if (currency !== targetCurrency) {
         convertedCurrencies.add(currency);
       }
@@ -1263,7 +1265,7 @@ export class PayablesService {
       return false;
     }
 
-    return this.startOfDay(payable.dueDate) < this.startOfDay(new Date());
+    return startOfDay(payable.dueDate) < startOfDay(new Date());
   }
 
   /** Across workspaces, for the daily sweep; a past version keeps the statuses it was copied with. */
@@ -1276,7 +1278,7 @@ export class PayablesService {
         statuses: [PayableStatus.TO_PAY, PayableStatus.SCHEDULED],
       })
       .andWhere('payable.dueDate < :today', {
-        today: this.startOfDay(new Date()),
+        today: startOfDay(new Date()),
       })
       .getMany();
   }
@@ -1288,7 +1290,7 @@ export class PayablesService {
    * argument here once those translations exist.
    */
   async findDueSoonPayables(): Promise<Payable[]> {
-    const today = this.startOfDay(new Date());
+    const today = startOfDay(new Date());
     // Each bill's own reminder lead: due within its `remindDaysBefore` days from today.
     const due = 'payable.dueDate BETWEEN :from AND CAST(:from AS date) + payable.remindDaysBefore';
     return this.payableRepository
@@ -1301,7 +1303,7 @@ export class PayablesService {
       })
       .andWhere('payable.dueSoonNotifiedAt IS NULL')
       .andWhere(due)
-      .setParameter('from', this.toDateString(today))
+      .setParameter('from', toDateString(today))
       .getMany();
   }
 
@@ -1325,7 +1327,7 @@ export class PayablesService {
         vendor: saved.vendor,
         outstanding: outstandingOf(saved),
         currency: saved.currency,
-        dueDate: this.toDateString(saved.dueDate as Date),
+        dueDate: toDateString(saved.dueDate as Date),
       } satisfies PayableOverdueEvent);
     }
 
@@ -1468,16 +1470,6 @@ export class PayablesService {
     }
   }
 
-  private startOfDay(date: Date): Date {
-    const copy = new Date(date);
-    copy.setUTCHours(0, 0, 0, 0);
-    return copy;
-  }
-
-  private normalizeCurrency(currency: string | null | undefined): string {
-    return currencyCodeOrDefault(currency);
-  }
-
   private async convertSummaryAmount(
     amount: number,
     sourceCurrency: string | null | undefined,
@@ -1490,7 +1482,7 @@ export class PayablesService {
       return 0;
     }
 
-    const source = this.normalizeCurrency(sourceCurrency);
+    const source = currencyCodeOrDefault(sourceCurrency);
     if (source === targetCurrency) {
       return amount;
     }
