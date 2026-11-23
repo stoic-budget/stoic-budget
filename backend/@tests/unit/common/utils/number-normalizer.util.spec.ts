@@ -189,6 +189,10 @@ describe('normalizeDate', () => {
     expect(day(normalizeDate('2026/01/15'))).toEqual([2026, 1, 15]);
     expect(day(normalizeDate('2026.1.5'))).toEqual([2026, 1, 5]);
     expect(normalizeDate('2026/02/30')).toBeNull();
+    // Not at the start: the short year is not found inside it either.
+    expect(day(normalizeDate('Saldo 2026/01/15'))).toEqual([2026, 1, 15]);
+    // A time after it is kept, as for day-first dates.
+    expect(normalizeDate('2026/01/15 10:30')?.getHours()).toBe(10);
     expect(day(normalizeDate('15/01/26'))).toEqual([2026, 1, 15]);
   });
 

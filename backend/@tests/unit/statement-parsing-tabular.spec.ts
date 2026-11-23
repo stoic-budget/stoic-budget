@@ -113,6 +113,21 @@ describe('ExcelParser text dates (#674)', () => {
     }
   });
 
+  it('keeps a period the sheet prints above the table', async () => {
+    const filePath = await sheet('period', [
+      ['Period: 01.01.2026 - 31.01.2026', '', '', ''],
+      ['DATE', 'DESCRIPTION', 'CHARGES', 'CREDITS'],
+      ['01/13/2026', 'ACME Store', 10, ''],
+    ]);
+    try {
+      const parsed = await new ExcelParser().parse(filePath);
+      expect(day(parsed.metadata.dateFrom)).toEqual([2026, 1, 1]);
+      expect(day(parsed.metadata.dateTo)).toEqual([2026, 1, 31]);
+    } finally {
+      fs.unlinkSync(filePath);
+    }
+  });
+
   it('reads year-first dates as they are written', async () => {
     const filePath = await sheet('iso', [
       ['DATE', 'DESCRIPTION', 'CHARGES', 'CREDITS'],
