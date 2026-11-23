@@ -6,7 +6,7 @@ import { payeeKeyOf } from '../../common/utils/payee-key.util';
 import { TaxRule, TaxRuleDirection } from '../../entities/tax-rule.entity';
 import { TaxSource, Transaction, TransactionType } from '../../entities/transaction.entity';
 import { VatStatus, Workspace } from '../../entities/workspace.entity';
-import { findPayeeId } from '../payees/payee-resolution';
+import { payeeOfKey } from './assignment-party';
 import { isEuCountry } from './eu-membership';
 import { computeTax } from './tax-calculation';
 import { taxPaymentsCategoryId } from './tax-payments-category';
@@ -224,7 +224,7 @@ export class TaxAssignmentService {
     let payeeId = input.payeeId ?? null;
     if (!payeeId) {
       const key = payeeKeyOf(input);
-      payeeId = key ? await findPayeeId(manager, input.workspaceId, key) : null;
+      payeeId = key ? await payeeOfKey(manager, input.workspaceId, key) : null;
     }
     if (!payeeId) {
       return { country: null, vatId: null };

@@ -6,7 +6,12 @@ import { type INestApplication, ValidationPipe } from '@nestjs/common';
 import type { TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { AppModule } from '../../src/app.module';
+import { BankName, FileType, Statement, StatementStatus } from '../../src/entities/statement.entity';
+import { StatementProcessingService } from '../../src/modules/parsing/services/statement-processing.service';
 import {
   deleteUserByEmail,
   type E2eAccount,
@@ -90,6 +95,35 @@ describe('Reverse charge on new rows (e2e)', () => {
       .expect(200);
     for (const part of split.body as Array<{ id: string }>) {
       expect(await taxOf(part.id)).toEqual({ tax_amount: '0.00', tax_reverse_charge: true });
+    }
+  });
+
+  it("reverse-charges an imported row, even the first time the bank cuts the name short", async () => {
+    const qif = '!Type:Bank\nD05/12/2026\nT-100.00\nPACME SOFTWA\n^\n';
+    const filePath = path.join(os.tmpdir(), `reverse-new-${Date.now()}.qif`);
+    fs.writeFileSync(filePath, qif, 'utf-8');
+    try {
+      const saved = await dataSource.getRepository(Statement).save({
+        userId: owner.userId,
+        workspaceId: owner.workspaceId,
+        fileName: 'export.qif',
+        filePath,
+        fileType: FileType.QIF,
+        fileSize: qif.length,
+        fileHash: `reverse-new-${Date.now()}`,
+        bankName: BankName.OTHER,
+        status: StatementStatus.UPLOADED,
+        currency: 'EUR',
+      });
+      await app.get(StatementProcessingService).processStatement(saved.id);
+      const [row] = await dataSource.query(
+        'SELECT id FROM transactions WHERE statement_id = $1',
+        [saved.id],
+      );
+
+      expect(await taxOf(row.id)).toEqual({ tax_amount: '0.00', tax_reverse_charge: true });
+    } finally {
+      fs.rmSync(filePath, { force: true });
     }
   });
 });
