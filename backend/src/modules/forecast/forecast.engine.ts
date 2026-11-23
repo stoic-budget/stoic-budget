@@ -21,8 +21,10 @@
  */
 
 import type { ForecastEventKind } from '../../contracts';
+import { sameParty } from './forecast-parties';
 
 export type { ForecastEventKind };
+export { sameParty };
 
 export interface ForecastEvent {
   /** YYYY-MM-DD */
@@ -34,6 +36,8 @@ export interface ForecastEvent {
   /** The row behind the event; `exclude` in a scenario names these. */
   sourceId: string;
   isOverdue?: boolean;
+  /** An invoice that is a regular payer's next payment: it ends "safe to spend" as a payday. */
+  standsForIncome?: boolean;
 }
 
 export interface ForecastScenario {
@@ -253,28 +257,6 @@ function averageLayer(
 }
 
 /**
- * Whether two counterparty names mean the same payer or payee: the shorter
- * one's words open the longer one ("WeWork" / "WeWork Kurfürstendamm"),
- * ignoring case, accents and punctuation.
- */
-export function sameParty(a: string, b: string): boolean {
-  const left = partyWords(a);
-  const right = partyWords(b);
-  if (left.length === 0 || right.length === 0) return false;
-  const [short, long] = left.length <= right.length ? [left, right] : [right, left];
-  return short.every((word, index) => long[index] === word);
-}
-
-function partyWords(name: string): string[] {
-  return name
-    .normalize('NFKD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase()
-    .split(/[^\p{L}\p{N}]+/u)
-    .filter(Boolean);
-}
-
-/**
  * Cash now, minus every committed outflow before the next payday, plus any
  * committed inflow that lands first. Never below zero: "nothing" is the
  * honest answer, a negative number is not.
@@ -285,7 +267,9 @@ function safeToSpend(
   openingBalance: number,
   events: ForecastEvent[],
 ): ForecastResult['safeToSpend'] {
-  const nextIncome = events.find(event => event.kind === 'income' && event.date > today);
+  const nextIncome = events.find(
+    event => (event.kind === 'income' || event.standsForIncome) && event.date > today,
+  );
   const untilDate = nextIncome ? addDays(nextIncome.date, -1) : horizonEnd;
   let balance = openingBalance;
   let lowest = openingBalance;

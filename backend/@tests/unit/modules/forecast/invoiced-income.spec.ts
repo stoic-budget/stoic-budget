@@ -29,7 +29,7 @@ describe('withoutInvoicedIncome', () => {
   it('matches the client under a longer name and a few days off', () => {
     const income = [payday('2026-11-10', 'ACME Client')];
 
-    expect(withoutInvoicedIncome(income, [invoice('2026-11-14', 'Acme Client GmbH')], monthly)).toEqual([]);
+    expect(withoutInvoicedIncome(income, [invoice('2026-11-16', 'Acme Client GmbH')], monthly)).toEqual([]);
   });
 
   it('keeps the paydays of other payers and those too far from the invoice', () => {
@@ -44,5 +44,26 @@ describe('withoutInvoicedIncome', () => {
     expect(
       withoutInvoicedIncome(income, [invoice('2026-11-10'), invoice('2026-11-12')], monthly),
     ).toEqual([payday('2026-12-10')]);
+  });
+
+  it('marks the invoice to end "safe to spend" as the payday did', () => {
+    const bill = invoice('2026-11-10');
+    withoutInvoicedIncome([payday('2026-11-10')], [bill], monthly);
+    expect(bill.standsForIncome).toBe(true);
+  });
+
+  it('keeps the payday for an overdue invoice, which is the payday it missed', () => {
+    const income = [payday('2026-12-10')];
+    expect(withoutInvoicedIncome(income, [{ ...invoice('2026-12-04'), isOverdue: true }], monthly)).toEqual(income);
+  });
+
+  it('keeps the payday for a much smaller invoice, which is extra money', () => {
+    const income = [payday('2026-11-10')];
+    expect(withoutInvoicedIncome(income, [{ ...invoice('2026-11-10'), amount: 50 }], monthly)).toEqual(income);
+  });
+
+  it('matches within the payer\'s wobble only, like the paycheck planner', () => {
+    const income = [payday('2026-11-10')];
+    expect(withoutInvoicedIncome(income, [invoice('2026-11-20')], monthly)).toEqual(income);
   });
 });
