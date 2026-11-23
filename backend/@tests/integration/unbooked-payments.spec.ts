@@ -361,6 +361,31 @@ describe('payments marked received before the money shows up (real Postgres)', (
         credit: '97.00',
       });
     });
+
+    it('refuses a fee of the whole payment or more', async () => {
+      const bill = await receivable({ vendor: 'Member One', amount: 100 });
+
+      expect(
+        await errorOf(
+          payables.addPayment(bill.id, workspaceId, userId, {
+            amount: 10,
+            feeAmount: 10,
+            payFromWalletId: walletId,
+          }),
+        ),
+      ).toEqual({ status: 400, code: 'PAYABLE_FEE_NOT_BELOW_PAYMENT' });
+    });
+
+    it('takes nothing from a wallet for a bill already paid in full', async () => {
+      const bill = await receivable({ direction: PayableDirection.PAYABLE, vendor: 'ACME Store', amount: 100 });
+      await payables.addPayment(bill.id, workspaceId, userId, { amount: 100 });
+
+      expect(
+        await errorOf(
+          payables.markAsPaid(bill.id, workspaceId, userId, { payFromWalletId: walletId } as never),
+        ),
+      ).toEqual({ status: 400, code: 'PAYABLE_PAYMENT_EXCEEDS_OUTSTANDING' });
+    });
   });
 
   describe('booking the money of a payment marked without it', () => {

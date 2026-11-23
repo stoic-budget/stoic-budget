@@ -60,6 +60,7 @@ import { assertOneSource, exactSubset, notRejectedSql } from './payable-payments
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
 import { PayablesExportService } from './payables-export.service';
+import { assertPaymentFits, assertSomethingOwed } from './payment-guards';
 import { UnbookedPaymentsService } from './unbooked-payments.service';
 
 /** A transaction that may be the payment of a bill. */
@@ -322,6 +323,8 @@ export class PayablesService {
       if (payable.linkedTransactionId) {
         throw new ConflictException(appError('PAYABLE_ALREADY_LINKED'));
       }
+      // Paid in full already (with no money yet): book that payment, not an empty one.
+      assertSomethingOwed(this.outstandingOf(payable));
       payable.linkedTransactionId = await this.recordCashPayment(
         manager,
         payable,
@@ -520,16 +523,7 @@ export class PayablesService {
 
       const outstanding = this.outstandingOf(payable);
       const amount = this.round2(dto.amount);
-      if (amount <= 0) {
-        throw new BadRequestException(appError('PAYABLE_PAYMENT_NOT_POSITIVE'));
-      }
-      if (amount > outstanding + 0.005) {
-        throw new BadRequestException(
-          appError('PAYABLE_PAYMENT_EXCEEDS_OUTSTANDING', {
-            outstanding: outstanding.toFixed(2),
-          }),
-        );
-      }
+      assertPaymentFits(amount, Number(dto.feeAmount ?? 0), outstanding);
 
       let transactionId = dto.linkedTransactionId ?? null;
       if (dto.payFromWalletId || dto.inHand) {
