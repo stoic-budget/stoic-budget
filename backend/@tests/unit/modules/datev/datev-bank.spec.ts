@@ -1,15 +1,15 @@
-import { bankAfterChartChange } from '@/modules/datev/datev-bank';
+import { bankForChart } from '@/modules/datev/datev-bank';
 
-describe('bankAfterChartChange', () => {
-  it("drops the old chart's bank, so the new chart's bank applies", () => {
+describe('bankForChart', () => {
+  it("drops the other chart's bank, so the chart's own bank applies", () => {
     // 1200 is the bank in SKR 03 and receivables in SKR 04.
-    expect(bankAfterChartChange('1200', '03', '04')).toBeNull();
+    expect(bankForChart('1200', '04')).toBeNull();
     // 1800 is the bank in SKR 04 and private withdrawals in SKR 03.
-    expect(bankAfterChartChange('1800', '04', '03')).toBeNull();
+    expect(bankForChart('1800', '03')).toBeNull();
   });
 
-  it('keeps a bank account typed in by hand, and any bank while the chart stays', () => {
-    expect(bankAfterChartChange('1210', '03', '04')).toBe('1210');
-    expect(bankAfterChartChange('1200', '03', '03')).toBe('1200');
+  it("keeps a bank account of one's own, and the chart's own bank", () => {
+    expect(bankForChart('1210', '04')).toBe('1210');
+    expect(bankForChart('1200', '03')).toBe('1200');
   });
 });

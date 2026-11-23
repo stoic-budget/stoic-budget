@@ -115,6 +115,13 @@ describe('DATEV export (e2e)', () => {
     expect((await save('03', '1800')).body).toMatchObject({ chart: '03', bankAccount: '1200' });
     // A number of one's own stays.
     expect((await save('04', '1210')).body.bankAccount).toBe('1210');
+    // Saved so before the fix: read as the chart's own bank.
+    await dataSource.query(
+      `UPDATE workspace_service_settings SET config = config || '{"chart":"04","bankAccount":"1200"}'::jsonb
+        WHERE workspace_id = $1 AND key = 'datev'`,
+      [workspaceId],
+    );
+    expect((await auth(api().get('/tax/datev/settings')).expect(200)).body.bankAccount).toBe('1800');
     await save('03', null);
   });
 

@@ -14,14 +14,12 @@ export function assertBankAccounts(bankAccounts: Record<string, string>): void {
 }
 
 /**
- * The bank account kept on a chart change. The old chart's own bank (1200 in
- * SKR 03) is another account in the new one (receivables in SKR 04): left at
- * it, the new chart's bank applies. A number typed in by hand stays.
+ * The bank account kept for a chart. The other chart's bank is never this
+ * chart's (1200, the bank in SKR 03, is receivables in SKR 04; 1800, the bank
+ * in SKR 04, is private withdrawals in SKR 03): left at it — after a chart
+ * switch, or saved so before this rule — the chart's own bank applies.
  */
-export function bankAfterChartChange(
-  bankAccount: string | null,
-  from: DatevChart,
-  to: DatevChart,
-): string | null {
-  return from !== to && bankAccount === accountFor('bank', from) ? null : bankAccount;
+export function bankForChart(bankAccount: string | null, chart: DatevChart): string | null {
+  const other: DatevChart = chart === '03' ? '04' : '03';
+  return bankAccount === accountFor('bank', other) ? null : bankAccount;
 }

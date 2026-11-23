@@ -28,7 +28,7 @@ import {
   type DatevConceptKey,
   suggestedConcept,
 } from './datev-accounts';
-import { assertBankAccounts, bankAfterChartChange } from './datev-bank';
+import { assertBankAccounts, bankForChart } from './datev-bank';
 import { type DatevBooking, datevFileContent, encodeWindows1252 } from './datev-format';
 
 /** DATEV is a German (and Austrian) adviser system; elsewhere the export is not offered. */
@@ -132,7 +132,7 @@ export class DatevService {
       chart,
       consultantNumber: config.consultantNumber ?? null,
       clientNumber: config.clientNumber ?? null,
-      bankAccount: config.bankAccount ?? accountFor('bank', chart),
+      bankAccount: bankForChart(config.bankAccount ?? null, chart) ?? accountFor('bank', chart),
       accounts: config.accounts ?? {},
       bankAccounts: config.bankAccounts ?? {},
     };
@@ -180,7 +180,7 @@ export class DatevService {
         chart: input.chart,
         consultantNumber: input.consultantNumber,
         clientNumber: input.clientNumber,
-        bankAccount: bankAfterChartChange(input.bankAccount, current.chart, input.chart),
+        bankAccount: bankForChart(input.bankAccount, input.chart),
         accounts,
         bankAccounts,
       },
