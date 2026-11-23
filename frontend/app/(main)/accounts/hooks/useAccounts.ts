@@ -11,6 +11,7 @@ import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/qu
 import { queryKeys } from '@/app/lib/query-keys';
 import { countsInNetWorth, isDebtType } from '../account-types';
 import { parseCreditLimit } from '../credit-limit';
+import { parseOpeningBalance } from '../opening-balance';
 
 export type Account = WalletItem;
 
@@ -62,8 +63,9 @@ export function accountToForm(account: Account): AccountForm {
 }
 
 function toPayload(form: AccountForm) {
-  const typed = Number(form.openingBalance.replace(',', '.')) || 0;
-  // The form refuses to save an invalid limit, so 'invalid' never gets here.
+  // The form refuses to save an invalid amount or limit, so 'invalid' never gets here.
+  const opening = parseOpeningBalance(form.openingBalance);
+  const typed = opening === 'invalid' ? 0 : opening;
   const limit = parseCreditLimit(form.creditLimit);
   return {
     type: form.type,
