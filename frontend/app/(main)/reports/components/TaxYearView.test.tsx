@@ -61,7 +61,6 @@ const REPORT = {
     },
   ],
   total: { income: 0, expense: 300 },
-  carriedOver: 0,
   missingRateCurrencies: [],
 };
 
@@ -133,6 +132,8 @@ describe('TaxYearView', () => {
     expect(screen.getByText('€2,950')).toBeInTheDocument();
     expect(screen.getByText('reserveVat')).toBeInTheDocument();
     expect(screen.getByText('−€1,000')).toBeInTheDocument();
+    // Nothing left from last year: no line for it.
+    expect(screen.queryByText('reserveCarried')).toBeNull();
   });
 
   it("shows what last year left unpaid, only when it did", async () => {

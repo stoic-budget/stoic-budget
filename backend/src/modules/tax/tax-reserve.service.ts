@@ -26,7 +26,7 @@ export interface TaxReserve {
   vat: { net: number; outputTax: number; inputTax: number } | null;
   /** The user's share of the year's earnings, NULL until a share is set. */
   incomeTax: { percent: number; earnings: number; amount: number } | null;
-  /** Last year's tax still unpaid on 31 December: owed this year as well. */
+  /** Tax of the years before still unpaid on last 31 December: owed this year as well. */
   carriedOver: number;
   /** Tax already paid this year, read from the payments category. */
   payments: { categoryId: string | null; amount: number; count: number };
@@ -41,7 +41,8 @@ export interface TaxReserve {
  *
  * Counted over the calendar year so far: the VAT the year collected, plus the
  * user's share of what the year earned, plus what last year left unpaid at its
- * end, minus every tax payment the year has already made. Paying a quarterly VAT return or an income-tax advance lowers
+ * end (a running balance since the books began), minus every tax payment the
+ * year has already made. Paying a quarterly VAT return or an income-tax advance lowers
  * the reserve by exactly what left the account, so the reserve and the
  * balance never count the same money twice.
  *
@@ -86,19 +87,25 @@ export class TaxReserveService {
       convert,
       missing,
     );
-    // Last year's tax still unpaid on 31 December is owed now too: a January
-    // payment of it settles that first, not this year's tax.
-    const lastYear = await this.held(
-      workspaceId,
-      settings,
-      registered,
-      `${year - 1}-01-01`,
-      `${year - 1}-12-31`,
-      convert,
-      missing,
-    );
-    const lastYearOwed = (lastYear.vat?.net ?? 0) + (lastYear.incomeTax?.amount ?? 0);
-    const carriedOver = round(Math.max(0, lastYearOwed - lastYear.payments.amount));
+    // One running balance: what the books owed from their first year to last
+    // 31 December, less every payment in that time, is owed now too. So a
+    // January payment of last year's tax settles that first, not this year's,
+    // and the same holds every year after (each January pays the year before).
+    const firstYear = (await this.firstBookYear(workspaceId)) ?? year;
+    let carriedOver = 0;
+    if (firstYear < year) {
+      const before = await this.held(
+        workspaceId,
+        settings,
+        registered,
+        `${firstYear}-01-01`,
+        `${year - 1}-12-31`,
+        convert,
+        missing,
+      );
+      const owedBefore = (before.vat?.net ?? 0) + (before.incomeTax?.amount ?? 0);
+      carriedOver = round(Math.max(0, owedBefore - before.payments.amount));
+    }
 
     const { vat, incomeTax, payments } = thisYear;
     const owed = (vat?.net ?? 0) + (incomeTax?.amount ?? 0) + carriedOver;
@@ -219,6 +226,21 @@ export class TaxReserveService {
       total += (await convert(amount, row.currency, toDateOnly(row.transactionDate))) ?? 0;
     }
     return { amount: round(total), count: rows.length };
+  }
+
+  /** The year of the first counted row: where the books, and so the balance, begin. */
+  private async firstBookYear(workspaceId: string): Promise<number | null> {
+    const row = await onlyCounted(
+      this.transactionRepository
+        .createQueryBuilder('t')
+        .select('MIN(t.transactionDate)', 'first')
+        .where('t.workspaceId = :workspaceId', { workspaceId }),
+      't',
+    ).getRawOne<{ first: string | Date | null }>();
+    if (!row?.first) {
+      return null;
+    }
+    return Number(toDateOnly(row.first).slice(0, 4));
   }
 
   private yearRows(workspaceId: string, from: string, to: string) {
