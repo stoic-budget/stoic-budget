@@ -115,7 +115,7 @@ export function inCurrency<T extends { amount: number; currency: string | null }
   return Promise.all(
     detected.map(async (income, index) => ({
       ...income,
-      amount: await convert(income.amount, income.currency ?? currency),
+      amount: Math.round((await convert(income.amount, income.currency ?? currency)) * 100) / 100,
       sourceId: `income:${index}`,
     })),
   );
