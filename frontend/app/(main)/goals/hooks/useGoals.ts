@@ -200,7 +200,8 @@ export function useGoals(texts?: GoalFailureTexts): UseGoalsState {
     goals: query.data ?? [],
     isPending: query.isPending,
     isFetching: query.isFetching,
-    error: query.isError || mutation.isError ? 'failed' : null,
+    // A failed write has its own toast; this is the list that could not load.
+    error: query.isError ? 'failed' : null,
     saving: mutation.isPending,
     reload,
     createGoal,
