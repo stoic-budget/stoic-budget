@@ -3,6 +3,8 @@ import { onlyFlows } from '../../common/utils/counted-transactions.util';
 import { PRIVACY_VIEWER_PARAM, redactedSql } from '../../common/utils/transaction-privacy.util';
 import { type Transaction, TransactionType } from '../../entities/transaction.entity';
 import { PENDING_MAX_AGE_DAYS } from '../bank-sync/bank-sync-pending';
+import { daySql, loadDayConverter } from '../exchange-rates/day-converter';
+import type { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { ForecastEvent } from './forecast.engine';
 
 /** What the forecast reads straight from transactions, beside the dashboard's commitments. */
@@ -22,6 +24,8 @@ export function incomeHistory(
     .select([
       `${redactedSql('t', 't.counterparty_name')} AS "counterpartyName"`,
       't.credit AS amount',
+      't.currency AS currency',
+      `${daySql('t')} AS day`,
       't.transactionDate AS "transactionDate"',
     ])
     .where('t.workspaceId = :workspaceId', {
@@ -37,6 +41,8 @@ export function incomeHistory(
     .getRawMany<{
       counterpartyName: string | null;
       amount: string;
+      currency: string | null;
+      day: string;
       transactionDate: string | Date;
     }>();
 }
@@ -96,4 +102,20 @@ export async function pendingEvents(
     });
   }
   return events;
+}
+
+/**
+ * Income rows in the workspace currency, at each row's own day's rate. A row in
+ * a currency with no rate is left out rather than counted 1:1.
+ */
+export async function incomeInCurrency(
+  exchangeRates: ExchangeRatesService,
+  currency: string,
+  rows: Awaited<ReturnType<typeof incomeHistory>>,
+  workspaceId: string,
+) {
+  const convert = await loadDayConverter(exchangeRates, currency, rows, workspaceId);
+  return rows
+    .map(row => ({ ...row, amount: convert(row.amount, row.currency, row.day) }))
+    .filter(row => row.amount > 0);
 }

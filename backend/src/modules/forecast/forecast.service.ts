@@ -27,7 +27,7 @@ import {
 } from './forecast.engine';
 import { firstOfNextMonth, monthsUntil } from './forecast-calendar';
 import { forecastCaveats } from './forecast-caveats';
-import { incomeHistory, pendingEvents } from './forecast-transactions';
+import { incomeHistory, incomeInCurrency, pendingEvents } from './forecast-transactions';
 
 export type { ForecastResponse };
 
@@ -96,7 +96,7 @@ export class ForecastService {
       ]);
 
     const recurring = detectRecurringIncome(
-      incomeRows.map(row => ({ ...row, amount: Number.parseFloat(row.amount) })),
+      await incomeInCurrency(this.exchangeRatesService, currency, incomeRows, workspaceId),
       todayKey,
     ).map((income, index) => ({
       ...income,
