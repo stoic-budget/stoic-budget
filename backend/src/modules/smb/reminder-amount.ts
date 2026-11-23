@@ -25,3 +25,17 @@ export async function amountToRemind(
   }
   return Math.round((Number(owed.amount) - Number(owed.paidAmount ?? 0)) * 100) / 100;
 }
+
+/**
+ * The reminder's line for a partly paid invoice: the total stays the
+ * invoice's, and this says what is left of it. Empty when all of it is open.
+ */
+export function openSentence(locale: string, due: number, invoice: Invoice): string {
+  if (!(due < Number(invoice.total))) {
+    return '';
+  }
+  const amount = `${due.toFixed(2)} ${invoice.currency}`;
+  return locale === 'ru'
+    ? ` Из этой суммы осталось оплатить ${amount}.`
+    : ` Of this, ${amount} is still open.`;
+}
