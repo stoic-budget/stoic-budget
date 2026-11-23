@@ -3,10 +3,7 @@
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import {
-  MarkPaidDialog,
-  type MarkPaidResult,
-} from '@/app/(main)/statements/components/payables/MarkPaidDialog';
+import { MarkPaidDialog } from '@/app/(main)/statements/components/payables/MarkPaidDialog';
 import CustomDatePicker from '@/app/components/CustomDatePicker';
 import { Badge } from '@/app/components/ui/badge';
 import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
@@ -31,6 +28,7 @@ import {
   type SendInvoiceEmailInput,
 } from '@/app/lib/invoices-api';
 import { type Payable, payablesApi } from '@/app/lib/payables-api';
+import { useRecordPayment } from '../hooks/useRecordPayment';
 import { CreditNoteDialog } from './CreditNoteDialog';
 import { InvoiceEmailDrawer } from './InvoiceEmailDrawer';
 import { InvoiceDetailSkeleton } from './InvoicesSkeletons';
@@ -247,20 +245,11 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
       .catch(error => toast.error(getApiErrorMessage(error, t.toasts.genericFailed.value)));
   };
 
-  const confirmMarkPaid = async (payable: Payable, result: MarkPaidResult): Promise<void> => {
-    await (result.kind === 'full'
-      ? payablesApi.markAsPaid(payable.id, result.payload)
-      : result.kind === 'book'
-        ? payablesApi.bookPayment(payable.id, result.paymentId, result.payload)
-        : payablesApi.addPayment(payable.id, result.payload)
-    )
-      .then(async updated => {
-        // Still short: the dialog stays open for the next instalment.
-        setPayingPayable(updated.status === 'partially_paid' ? updated : null);
-        await loadInvoice();
-      })
-      .catch(error => toast.error(getApiErrorMessage(error, t.toasts.genericFailed.value)));
-  };
+  const { paying, confirm: confirmMarkPaid } = useRecordPayment(
+    setPayingPayable,
+    loadInvoice,
+    t.toasts.genericFailed.value,
+  );
 
   const createCreditNote = async (payload: CreateCreditNoteInput): Promise<void> => {
     setActing(true);
@@ -782,7 +771,7 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
 
       <MarkPaidDialog
         payable={payingPayable}
-        submitting={false}
+        submitting={paying}
         removingPaymentId={removingPaymentId}
         onClose={() => setPayingPayable(null)}
         onConfirm={(payable, result) => void confirmMarkPaid(payable, result)}
