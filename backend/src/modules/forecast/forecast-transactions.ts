@@ -3,8 +3,6 @@ import { onlyFlows } from '../../common/utils/counted-transactions.util';
 import { PRIVACY_VIEWER_PARAM, redactedSql } from '../../common/utils/transaction-privacy.util';
 import { type Transaction, TransactionType } from '../../entities/transaction.entity';
 import { PENDING_MAX_AGE_DAYS } from '../bank-sync/bank-sync-pending';
-import { daySql, loadDayConverter } from '../exchange-rates/day-converter';
-import type { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { ForecastEvent } from './forecast.engine';
 
 /** What the forecast reads straight from transactions, beside the dashboard's commitments. */
@@ -25,7 +23,6 @@ export function incomeHistory(
       `${redactedSql('t', 't.counterparty_name')} AS "counterpartyName"`,
       't.credit AS amount',
       't.currency AS currency',
-      `${daySql('t')} AS day`,
       't.transactionDate AS "transactionDate"',
     ])
     .where('t.workspaceId = :workspaceId', {
@@ -42,7 +39,6 @@ export function incomeHistory(
       counterpartyName: string | null;
       amount: string;
       currency: string | null;
-      day: string;
       transactionDate: string | Date;
     }>();
 }
@@ -104,18 +100,23 @@ export async function pendingEvents(
   return events;
 }
 
-/**
- * Income rows in the workspace currency, at each row's own day's rate. A row in
- * a currency with no rate is left out rather than counted 1:1.
- */
-export async function incomeInCurrency(
-  exchangeRates: ExchangeRatesService,
+/** An income row with its amount as a number, in its own currency. */
+export const withAmount = <T extends { amount: string }>(row: T) => ({
+  ...row,
+  amount: Number.parseFloat(row.amount),
+});
+
+/** Detected income in the workspace currency (at today's rate), each with its source id. */
+export function inCurrency<T extends { amount: number; currency: string | null }>(
+  detected: T[],
   currency: string,
-  rows: Awaited<ReturnType<typeof incomeHistory>>,
-  workspaceId: string,
+  convert: (amount: number, from: string) => Promise<number>,
 ) {
-  const convert = await loadDayConverter(exchangeRates, currency, rows, workspaceId);
-  return rows
-    .map(row => ({ ...row, amount: convert(row.amount, row.currency, row.day) }))
-    .filter(row => row.amount > 0);
+  return Promise.all(
+    detected.map(async (income, index) => ({
+      ...income,
+      amount: await convert(income.amount, income.currency ?? currency),
+      sourceId: `income:${index}`,
+    })),
+  );
 }
