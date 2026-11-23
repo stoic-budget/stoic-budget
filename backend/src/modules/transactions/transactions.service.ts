@@ -461,9 +461,9 @@ export class TransactionsService {
         row.amountForeign = foreignAmounts[index];
         row.splitGroupId = splitGroupId;
         row.splitIndex = index;
-        // Part 0 would otherwise keep a fingerprint hashed from the pre-split
-        // amount. Null on every part so backfillFingerprints recomputes them all.
-        row.fingerprint = null;
+        // Part 0 keeps the whole row's fingerprint (the clone never copies it):
+        // it names the bank's row, which a split does not change, so importing
+        // that row again is known as a repeat of it (#633).
 
         applyPartCategory(row, part.categoryId, locked.isPrivate);
         row.paymentPurpose = part.paymentPurpose ?? row.paymentPurpose;
@@ -617,10 +617,8 @@ export class TransactionsService {
       survivor.amountForeign = foreignTotal;
       survivor.splitGroupId = null;
       survivor.splitIndex = null;
-      // The stored hash was computed from the part amount, which just changed.
-      // A stale hash makes a later import treat a genuine transaction as a
-      // duplicate and drop it; null lets backfillFingerprints recompute it.
-      survivor.fingerprint = null;
+      // The survivor is part 0 (parts come back by splitIndex), still holding
+      // the whole row's fingerprint: its total is that row's amount again.
 
       const saved = await repo.save(survivor);
 
