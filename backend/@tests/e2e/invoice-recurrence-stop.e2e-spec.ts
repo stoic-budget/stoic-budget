@@ -23,11 +23,11 @@ describe('Stopping a recurring invoice (e2e)', () => {
   let owner: E2eAccount;
   let clientId: string;
 
-  const send = (method: 'post' | 'put' | 'get', url: string, body?: object) =>
+  const send = (method: 'post' | 'put' | 'get', url: string, body?: object, as?: E2eAccount) =>
     request(app.getHttpServer())
       [method](url)
-      .set('Authorization', `Bearer ${owner.token}`)
-      .set('x-workspace-id', owner.workspaceId)
+      .set('Authorization', `Bearer ${(as ?? owner).token}`)
+      .set('x-workspace-id', (as ?? owner).workspaceId)
       .send(body);
   const drafts = async () =>
     Number(
@@ -78,7 +78,7 @@ describe('Stopping a recurring invoice (e2e)', () => {
   it('issues no more copies once a recurring invoice is stopped', async () => {
     const id = await recurringSent();
 
-    const stopped = await send('post', `/invoices/${id}/stop-recurring`).expect(201);
+    const stopped = await send('put', `/invoices/${id}/stop-recurring`).expect(200);
     expect(stopped.body).toMatchObject({ isRecurring: false, recurrenceInterval: null, nextIssueDate: null });
     const before = await drafts();
     await app.get(InvoicesScheduler).generateRecurringInvoices();
@@ -103,5 +103,16 @@ describe('Stopping a recurring invoice (e2e)', () => {
     await app.get(InvoicesScheduler).generateRecurringInvoices();
 
     expect(await drafts()).toBe(before + 1);
+  });
+
+  it("cannot stop another workspace's invoice", async () => {
+    const id = await recurringSent();
+    const other = await registerAccount(app, `invoice-stop-other-${Date.now()}@example.com`, 'Other Owner');
+
+    await send('put', `/invoices/${id}/stop-recurring`, undefined, other).expect(404);
+
+    const [row] = await dataSource.query('SELECT is_recurring FROM invoices WHERE id = $1', [id]);
+    expect(row.is_recurring).toBe(true);
+    await deleteUserByEmail(dataSource, other.email);
   });
 });

@@ -265,7 +265,7 @@ export class InvoicesController {
   }
 
   /** Stops a recurring invoice issuing copies; it stays as it is otherwise. */
-  @Post(':id/stop-recurring')
+  @Put(':id/stop-recurring')
   @WorkspaceAuth(Permission.INVOICE_EDIT)
   @Audit({ entityType: EntityType.INVOICE, includeDiff: true, isUndoable: false })
   @SchemaResponse(InvoiceWritten)
