@@ -1867,7 +1867,7 @@ describe('DashboardService', () => {
       vi.spyOn(service as any, 'getWorkspaceCurrency').mockResolvedValue('EUR');
       vi.spyOn(service as any, 'sumCashFlowByBucket').mockResolvedValue(
         new Map(
-          ['2026-10-05', '2026-10-20', '2026-11-03'].map(date => [date, { date, income: 0, expense: 1000 }]),
+          ['2026-11-20', '2026-12-01', '2026-12-10'].map(date => [date, { date, income: 0, expense: 1000 }]),
         ),
       );
 
@@ -1879,7 +1879,10 @@ describe('DashboardService', () => {
       );
 
       expect(forecast).toHaveLength(7);
-      for (const day of forecast) expect(day.expense).toBeLessThan(500);
+      // 3,000 over the last 30 days: the week ahead is about 700, not 7,000 or 0.
+      const week = forecast.reduce((sum: number, day: { expense: number }) => sum + day.expense, 0);
+      expect(week).toBeGreaterThan(400);
+      expect(week).toBeLessThan(1000);
     });
   });
 });

@@ -19,4 +19,15 @@ describe('withEmptyDays', () => {
       ['2026-10-08', 1000],
     ]);
   });
+
+  it('keeps the newest days when the window is longer than the cap', () => {
+    const days = withEmptyDays(
+      [{ date: '2026-11-22', income: 0, expense: 100 }],
+      new Date(2020, 0, 1),
+      new Date(2026, 10, 23),
+    );
+
+    expect(days.at(-1)?.date).toBe('2026-11-23');
+    expect(days.find(day => day.date === '2026-11-22')?.expense).toBe(100);
+  });
 });

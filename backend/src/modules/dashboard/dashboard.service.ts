@@ -1644,11 +1644,11 @@ export class DashboardService {
     currentTrend: Array<{ date: string; income: number; expense: number }>,
     forecastDays: number,
   ): Array<{ date: string; income: number; expense: number }> {
-    const windowSize = Math.min(7, history.length);
-    const recent = history.slice(-windowSize);
-
-    const wmaIncome = this.weightedMovingAverage(recent.map(d => d.income));
-    const wmaExpense = this.weightedMovingAverage(recent.map(d => d.expense));
+    // A month's mean of every day, spent on or not: a weighted week of a few
+    // purchases reads as a spike or as nothing.
+    const recent = history.slice(-Math.min(30, history.length));
+    const wmaIncome = recent.reduce((sum, d) => sum + d.income, 0) / recent.length;
+    const wmaExpense = recent.reduce((sum, d) => sum + d.expense, 0) / recent.length;
 
     const dowFactors = this.computeDayOfWeekFactors(history);
 
