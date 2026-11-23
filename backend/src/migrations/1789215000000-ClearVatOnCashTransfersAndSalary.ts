@@ -1,21 +1,42 @@
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
- * Takes the default VAT off rows booked to categories that carry none: cash
- * withdrawals, transfers to people and salary (not a supply), and the
- * Uncategorized fallback (the row's kind is not known). The engine now skips
- * them; this clears what it assessed before. The defaults are found by their
- * `system_key`, so a renamed one counts too.
+ * Takes the default VAT off rows booked to categories the engine now keeps
+ * outside VAT: cash withdrawals, transfers to people and salary (not a
+ * supply), the Uncategorized fallback (the row's kind is not known), and the
+ * interest, payroll, benefits and (outside the UAE) insurance defaults found by
+ * `system_key`, which the earlier ClearVatOnExemptSystemCategories matched by
+ * English name on system rows only. A category one level under one counts too,
+ * as in the engine.
  *
  * Only figures that came from the workspace default go — a rate the user
  * picked or a rule they wrote stays — and rows on a filed return keep what
- * was filed.
+ * was filed. The category set is worked out once, so the update is one pass
+ * over the matching rows.
  */
 export class ClearVatOnCashTransfersAndSalary1789215000000 implements MigrationInterface {
   name = 'ClearVatOnCashTransfersAndSalary1789215000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
+      WITH outside AS (
+        SELECT c."id", c."workspace_id"
+        FROM "categories" c
+        JOIN "workspaces" w ON w."id" = c."workspace_id"
+        LEFT JOIN "tax_jurisdictions" j ON j."id" = w."tax_jurisdiction_id"
+        WHERE c."system_key" IN (
+            'interest_income', 'interest', 'payroll', 'benefits', 'salary', 'cash', 'transfers_people'
+          )
+          OR (c."system_key" = 'insurance' AND COALESCE(UPPER(j."code"), '') <> 'AE')
+          OR LOWER(TRIM(c."name")) = 'uncategorized'
+      ),
+      targets AS (
+        SELECT o."id", o."workspace_id" FROM outside o
+        UNION
+        SELECT child."id", child."workspace_id"
+        FROM "categories" child
+        JOIN outside o ON o."id" = child."parent_id" AND o."workspace_id" = child."workspace_id"
+      )
       UPDATE "transactions" t SET
         "tax_rate_id" = NULL,
         "tax_rule_id" = NULL,
@@ -24,18 +45,11 @@ export class ClearVatOnCashTransfersAndSalary1789215000000 implements MigrationI
         "tax_net_amount" = NULL,
         "tax_notional_amount" = NULL,
         "tax_reverse_charge" = false
-      FROM "categories" c
-      WHERE t."tax_locked" = false
+      FROM targets
+      WHERE t."category_id" = targets."id"
+        AND t."workspace_id" = targets."workspace_id"
+        AND t."tax_locked" = false
         AND t."tax_source" = 'default'
-        AND t."workspace_id" = c."workspace_id"
-        AND (
-          t."category_id" = c."id"
-          OR t."category_id" IN (SELECT child."id" FROM "categories" child WHERE child."parent_id" = c."id")
-        )
-        AND (
-          c."system_key" IN ('cash', 'transfers_people', 'salary')
-          OR LOWER(TRIM(c."name")) = 'uncategorized'
-        )
     `);
   }
 

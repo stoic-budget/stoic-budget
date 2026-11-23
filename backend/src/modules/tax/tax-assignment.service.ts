@@ -312,10 +312,11 @@ export class TaxAssignmentService {
       return NOT_ASSESSED;
     }
 
-    // 4b. Kinds of spending and income outside VAT everywhere we tax: interest
-    //     (exempt financial services), wages (not a supply) and, except in the
-    //     UAE, insurance. Only the workspace default stops here — a rule the
-    //     user wrote for the category was applied above.
+    // 4b. Kinds of spending and income outside VAT everywhere we tax (see
+    //     outside-vat.ts): interest, wages, cash, transfers to people, the
+    //     Uncategorized fallback and, except in the UAE, insurance. Only the
+    //     workspace default stops here — a rule the user wrote for the category
+    //     was applied above.
     const jurisdiction = workspace.taxJurisdiction?.code ?? null;
     if (
       await isOutsideVat(this.workspaceRepository.manager, workspaceId, categoryId, jurisdiction)
