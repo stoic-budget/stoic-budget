@@ -83,7 +83,7 @@ Stoic Budget is a full-stack platform for importing, categorizing and analyzing 
 
 ### Get your data in
 
-- **Any statement file** — PDF, CSV, XLSX / XLS, DOCX, OFX / QFX, QIF, MT940, CAMT.053, or a photo of a statement (OCR). Native PDF parsers for 36 banks, CSV presets for 20+ banks and fintechs, and a generic table reader for any other PDF — see [Supported Banks](#supported-banks).
+- **Any statement file** — PDF, CSV, XLSX / XLS, DOCX, OFX / QFX, QIF, MT940, CAMT.053, or a photo of a statement (OCR). Native PDF parsers for 120+ banks, CSV presets for 20+ banks and fintechs, and a generic table reader for any other PDF — see [Supported Banks](#supported-banks).
 - **Teach the parser** — when a PDF layout is not recognised, mark its columns on the page once; the next statement from that bank is read by itself.
 - **No double imports** — the same file is recognised by its hash, and rows repeated across overlapping statements are flagged as duplicates to merge or dismiss.
 - **Format-change checks** — when a bank changes its statement layout, the import says so instead of quietly reading it wrong.
@@ -162,7 +162,7 @@ Setting expectations upfront:
 | 🇨🇭 Switzerland | UBS | |
 | 🇮🇹 Italy | UniCredit | |
 | 🇿🇦 South Africa | Absa, Capitec, FNB | |
-| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India | UCO Bank, Union Bank of India |
+| 🇮🇳 India | Axis Bank, Citibank, HDFC Bank, ICICI Bank, State Bank of India, UCO Bank, Union Bank of India | |
 | 🇧🇷 Brazil | Banco do Brasil | |
 | 🇭🇰 Hong Kong | Bank of China (Hong Kong) | |
 | 🇵🇭 Philippines | BPI, GoTyme Bank | |
