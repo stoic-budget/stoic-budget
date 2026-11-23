@@ -56,6 +56,7 @@ import {
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { ExportFormat, PayablesSortOption } from './dto/filter-payables.dto';
+import { outstandingOf, round2 } from './payable-money';
 import { assertOneSource, exactSubset, notRejectedSql } from './payable-payments.util';
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
@@ -275,7 +276,11 @@ export class PayablesService {
     }
     // A bill of a series is saved with its rule, under the series lock.
     const inSeries = this.recurrence?.applyUpdate(payable, dto);
-    return this.asStored(await (inSeries ?? this.payableRepository.save(payable)));
+    const saved = this.asStored(await (inSeries ?? this.payableRepository.save(payable)));
+    // A new amount means a new status: the payment log decides paid, part paid or open.
+    return dto.amount === undefined
+      ? saved
+      : this.inPaymentTransaction(manager => this.applyPaymentTotals(manager, id, workspaceId));
   }
 
   /**
@@ -345,7 +350,7 @@ export class PayablesService {
     // Settling in full is one payment for everything still outstanding, so
     // the payment log is the whole truth and the status is derived from it.
     await this.recordPayment(manager, payable, {
-      amount: this.outstandingOf(payable),
+      amount: outstandingOf(payable),
       paidOn: payload.paidOn ?? this.toDateString(new Date()),
       transactionId: payable.linkedTransactionId,
       ownTransaction: Boolean(payload.payFromWalletId || payload.inHand),
@@ -409,7 +414,7 @@ export class PayablesService {
       Number(transaction.debit ?? 0),
       Number(transaction.credit ?? 0),
     );
-    if (Math.round(paid * 100) < Math.round(this.outstandingOf(payable) * 100)) {
+    if (Math.round(paid * 100) < Math.round(outstandingOf(payable) * 100)) {
       throw new BadRequestException(appError('PAYABLE_PAYMENT_SHORT'));
     }
   }
@@ -452,7 +457,7 @@ export class PayablesService {
     }
 
     const isIncome = payable.direction === PayableDirection.RECEIVABLE;
-    const amount = this.round2(paidAmount ?? Number(payable.amount));
+    const amount = round2(paidAmount ?? Number(payable.amount));
     const transactions = manager.getRepository(Transaction);
     const transaction = await transactions.save(
       transactions.create({
@@ -518,8 +523,8 @@ export class PayablesService {
         lock: { mode: 'pessimistic_write' },
       });
 
-      const outstanding = this.outstandingOf(payable);
-      const amount = this.round2(dto.amount);
+      const outstanding = outstandingOf(payable);
+      const amount = round2(dto.amount);
       if (amount <= 0) {
         throw new BadRequestException(appError('PAYABLE_PAYMENT_NOT_POSITIVE'));
       }
@@ -544,7 +549,7 @@ export class PayablesService {
 
       await this.recordPayment(manager, payable, {
         amount,
-        feeAmount: dto.feeAmount ? this.round2(dto.feeAmount) : 0,
+        feeAmount: dto.feeAmount ? round2(dto.feeAmount) : 0,
         paidOn: dto.paidOn ?? this.toDateString(new Date()),
         transactionId,
         ownTransaction: Boolean(dto.payFromWalletId || dto.inHand),
@@ -600,7 +605,7 @@ export class PayablesService {
         throw new ConflictException(appError('PAYABLE_ALREADY_LINKED'));
       }
       // What reached the account: the payment less what the processor kept.
-      const net = this.round2(Number(payment.amount) - Number(payment.feeAmount ?? 0));
+      const net = round2(Number(payment.amount) - Number(payment.feeAmount ?? 0));
 
       let transactionId: string;
       if (dto.payFromWalletId || dto.inHand) {
@@ -740,7 +745,7 @@ export class PayablesService {
       throw new NotFoundException(appError('PAYABLE_TRANSACTION_NOT_FOUND'));
     }
 
-    const total = this.round2(
+    const total = round2(
       Number(transaction.amount ?? transaction.debit ?? transaction.credit ?? 0),
     );
     const spent = await this.paymentRepository
@@ -749,7 +754,7 @@ export class PayablesService {
       .where('payment.transactionId = :transactionId', { transactionId })
       .andWhere('payment.workspaceId = :workspaceId', { workspaceId })
       .getRawOne<{ sum: string }>();
-    const available = this.round2(total - Number(spent?.sum ?? 0));
+    const available = round2(total - Number(spent?.sum ?? 0));
 
     const empty: AllocationSuggestion = {
       transactionId,
@@ -809,7 +814,7 @@ export class PayablesService {
       payableId: row.id,
       vendor: row.vendor,
       dueDate: row.due_date,
-      outstanding: this.round2(Number(row.outstanding)),
+      outstanding: round2(Number(row.outstanding)),
     }));
 
     const exact = exactSubset(
@@ -839,12 +844,12 @@ export class PayablesService {
       const amount = Math.min(left, bill.outstanding);
       allocations.push({
         ...bill,
-        amount: this.round2(amount),
+        amount: round2(amount),
         partial: amount < bill.outstanding - 0.005,
       });
-      left = this.round2(left - amount);
+      left = round2(left - amount);
     }
-    return { ...empty, unallocated: this.round2(left), allocations };
+    return { ...empty, unallocated: round2(left), allocations };
   }
 
   private async recordPayment(
@@ -917,7 +922,7 @@ export class PayablesService {
       .getRepository(PayablePayment)
       .find({ where: { payableId: payable.id, workspaceId } });
 
-    const paid = this.round2(payments.reduce((sum, row) => sum + Number(row.amount), 0));
+    const paid = round2(payments.reduce((sum, row) => sum + Number(row.amount), 0));
     const total = Number(payable.amount);
     const fullyPaid = paid >= total - 0.005;
     const lastPaidOn = payments
@@ -983,14 +988,6 @@ export class PayablesService {
       : PayableStatus.TO_PAY;
   }
 
-  private outstandingOf(payable: Payable): number {
-    return this.round2(Number(payable.amount) - Number(payable.paidAmount ?? 0));
-  }
-
-  private round2(value: number): number {
-    return Math.round(Number(value) * 100) / 100;
-  }
-
   async findPaymentCandidates(
     id: string,
     workspaceId: string,
@@ -999,7 +996,7 @@ export class PayablesService {
     const payable = await this.findOne(id, workspaceId);
     const anchor = payable.dueDate ?? payable.createdAt;
     // A bill paid on paper is looking for the money of its unbooked payment, not for a remainder.
-    const outstanding = this.outstandingOf(payable);
+    const outstanding = outstandingOf(payable);
     const unbookedPayment =
       outstanding > 0
         ? null
@@ -1008,7 +1005,7 @@ export class PayablesService {
             order: { paidOn: 'ASC' },
           });
     const target = unbookedPayment
-      ? this.round2(Number(unbookedPayment.amount) - Number(unbookedPayment.feeAmount ?? 0))
+      ? round2(Number(unbookedPayment.amount) - Number(unbookedPayment.feeAmount ?? 0))
       : outstanding;
     const rows: Array<{
       id: string;
@@ -1326,7 +1323,7 @@ export class PayablesService {
         direction: saved.direction,
         source: saved.source,
         vendor: saved.vendor,
-        outstanding: this.outstandingOf(saved),
+        outstanding: outstandingOf(saved),
         currency: saved.currency,
         dueDate: this.toDateString(saved.dueDate as Date),
       } satisfies PayableOverdueEvent);
