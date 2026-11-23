@@ -110,6 +110,7 @@ export function useStatementsView({
     filterState.initFromStorage(
       searchParams.get('month'),
       Boolean(searchParams.get('transactionsFrom')),
+      searchParams.get('has'),
     );
   });
 

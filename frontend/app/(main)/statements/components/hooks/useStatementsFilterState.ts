@@ -55,7 +55,11 @@ interface UseStatementsFilterStateReturn {
   handleSaveColumns: () => void;
   handleColumnsOpen: () => void;
   /** `deepLinkMonth` (`?month=YYYY-MM`) wins over the stored filters for this visit, unsaved. */
-  initFromStorage: (deepLinkMonth?: string | null, ignoreStored?: boolean) => void;
+  initFromStorage: (
+    deepLinkMonth?: string | null,
+    ignoreStored?: boolean,
+    deepLinkHas?: string | null,
+  ) => void;
 }
 
 export function useStatementsFilterState({
@@ -90,9 +94,18 @@ export function useStatementsFilterState({
     }
   }, [context]);
 
-  const initFromStorage = (deepLinkMonth?: string | null, ignoreStored = false): void => {
+  const initFromStorage = (
+    deepLinkMonth?: string | null,
+    ignoreStored = false,
+    deepLinkHas?: string | null,
+  ): void => {
     linkedMonth.current = context ? null : (deepLinkMonth ?? null);
+    // `?has=warnings` (the dashboard's parsing warnings): only that, for this visit.
+    const hasFilters = deepLinkHas
+      ? { ...DEFAULT_STATEMENT_FILTERS, has: deepLinkHas.split(',').filter(Boolean) }
+      : null;
     const storedFilters =
+      hasFilters ??
       monthDeepLinkFilters(deepLinkMonth, new Date(), context) ??
       (ignoreStored ? DEFAULT_STATEMENT_FILTERS : loadStatementFilters());
     setDraftFilters(storedFilters);

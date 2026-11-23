@@ -130,6 +130,8 @@ const hasCurrency = (s: StatementFilterItem): boolean =>
 
 const HAS_CHECKERS: Record<string, (s: StatementFilterItem) => boolean> = {
   errors: hasErrors,
+  // What the dashboard counts as parsing warnings.
+  warnings: s => Boolean(s.parsingDetails?.warnings?.length),
   processingDetails: hasProcessingDetails,
   transactions: s => (s.totalTransactions || 0) > 0,
   dateRange: s => Boolean(s.statementDateFrom || s.statementDateTo),
