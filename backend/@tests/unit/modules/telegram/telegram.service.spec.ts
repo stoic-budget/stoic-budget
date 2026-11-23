@@ -599,3 +599,30 @@ describe('TelegramService connection', () => {
     );
   });
 });
+
+describe('TelegramService report already sent', () => {
+  it('sends it again when the person asks for it (the /report command, the button)', async () => {
+    const { service, reportsService } = createService({ users: [] });
+    const internals = service as any;
+    vi.spyOn(internals, 'isEnabled').mockResolvedValue(true);
+    vi.spyOn(internals, 'findExisting').mockResolvedValue({ id: 'rep-1', status: 'sent' });
+    vi.spyOn(internals, 'formatMonthlyReportMessage').mockReturnValue('November report');
+    const persistAndSend = vi
+      .spyOn(internals, 'persistAndSend')
+      .mockResolvedValue({ status: 'sent', report: { id: 'rep-1' } });
+    reportsService.generateMonthlyReport.mockResolvedValue({});
+    const owner = { id: 'user-1', telegramChatId: 'chat-1', locale: 'en' } as any;
+
+    const result = await service.sendReport(
+      owner,
+      { reportType: 'monthly', year: 2026, month: 11 } as any,
+      'workspace-1',
+    );
+
+    expect(reportsService.generateMonthlyReport).toHaveBeenCalledWith('workspace-1', 2026, 11);
+    expect(persistAndSend).toHaveBeenCalled();
+    expect(result).toMatchObject({ status: 'sent' });
+    // The schedule is the one that skips a delivered period.
+    expect(await service.wasSent('user-1', 'monthly' as any, '2026-11-01')).toBe(true);
+  });
+});

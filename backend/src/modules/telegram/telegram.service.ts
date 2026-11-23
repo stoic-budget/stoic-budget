@@ -280,13 +280,17 @@ export class TelegramService {
     }
   }
 
+  /** Whether the scheduled report of this period already reached the user. */
+  async wasSent(userId: string, reportType: ReportType, date: string): Promise<boolean> {
+    const existing = await this.findExisting(userId, reportType, this.toDateOnly(date));
+    return existing?.status === ReportStatus.SENT;
+  }
+
   private async handleDailyReport(user: User, workspaceId: string, chatId: string, date: string) {
     const reportDate = this.toDateOnly(date);
+    // Asked for (the /report command, the button), it is built and sent again;
+    // the schedule asks wasSent first and skips a period already delivered.
     const existing = await this.findExisting(user.id, ReportType.DAILY, reportDate);
-
-    if (existing?.status === ReportStatus.SENT) {
-      return { status: 'already_sent', report: existing };
-    }
 
     const dailyReport = await this.reportsService.generateDailyReport(workspaceId, date);
     const message = this.formatDailyReportMessage(user.locale || 'en', date, dailyReport);
@@ -302,11 +306,9 @@ export class TelegramService {
     month: number,
   ) {
     const reportDate = this.toDateOnly(`${year}-${String(month).padStart(2, '0')}-01`);
+    // Asked for (the /report command, the button), it is built and sent again;
+    // the schedule asks wasSent first and skips a period already delivered.
     const existing = await this.findExisting(user.id, ReportType.MONTHLY, reportDate);
-
-    if (existing?.status === ReportStatus.SENT) {
-      return { status: 'already_sent', report: existing };
-    }
 
     const monthlyReport = await this.reportsService.generateMonthlyReport(workspaceId, year, month);
     const message = this.formatMonthlyReportMessage(

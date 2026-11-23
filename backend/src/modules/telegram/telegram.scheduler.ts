@@ -24,8 +24,8 @@ export class TelegramScheduler {
 
   @Cron(CronExpression.EVERY_DAY_AT_8AM)
   async sendDailyReports(): Promise<void> {
-    const today = new Date();
-    const date = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+    // The day that ended: at 8 in the morning today has barely begun.
+    const date = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
 
     const users = await this.loadUsersWithTelegram();
 
@@ -33,6 +33,10 @@ export class TelegramScheduler {
       try {
         const workspaceId = await this.telegramService.resolveWorkspaceId(user);
         if (!workspaceId) {
+          continue;
+        }
+        // Sent once per period: a restart or a second instance does not send it twice.
+        if (await this.telegramService.wasSent(user.id, ReportType.DAILY, date)) {
           continue;
         }
         await this.telegramService.sendReport(
@@ -75,9 +79,12 @@ export class TelegramScheduler {
 
   @Cron('0 9 1 * *')
   async sendMonthlyReports(): Promise<void> {
+    // The month that ended: on the 1st the new one has nothing in it yet.
     const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = now.getUTCMonth() + 1;
+    const previous = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
+    const year = previous.getUTCFullYear();
+    const month = previous.getUTCMonth() + 1;
+    const monthStart = `${year}-${String(month).padStart(2, '0')}-01`;
 
     const users = await this.loadUsersWithTelegram();
 
@@ -85,6 +92,9 @@ export class TelegramScheduler {
       try {
         const workspaceId = await this.telegramService.resolveWorkspaceId(user);
         if (!workspaceId) {
+          continue;
+        }
+        if (await this.telegramService.wasSent(user.id, ReportType.MONTHLY, monthStart)) {
           continue;
         }
         await this.telegramService.sendReport(
