@@ -110,7 +110,7 @@ export class CustomTableExportSchedulesService {
   }
 
   /**
-   * Up to 50 schedules whose interval has elapsed, the longest overdue first.
+   * Up to 50 schedules whose interval has elapsed: never run first, then the oldest last run.
    * Due is decided in SQL: taking 50 and filtering after would starve every
    * schedule past the first 50 enabled ones.
    */
