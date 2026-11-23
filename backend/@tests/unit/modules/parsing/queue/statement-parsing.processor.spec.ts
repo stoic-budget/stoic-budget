@@ -173,15 +173,4 @@ describe('StaleStatementReaper', () => {
     );
     expect(queue.enqueue).not.toHaveBeenCalled();
   });
-
-  it('enqueues an upload that was never picked up, without touching its status', async () => {
-    statementRepository.find.mockResolvedValueOnce([
-      { id: 'stmt-up', status: StatementStatus.UPLOADED, parsingAttempts: 0 },
-    ]);
-
-    await reaper().reap();
-
-    expect(queue.enqueue).toHaveBeenCalledWith('stmt-up');
-    expect(statementRepository.update).not.toHaveBeenCalled();
-  });
 });

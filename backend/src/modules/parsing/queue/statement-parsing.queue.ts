@@ -53,7 +53,9 @@ export class StatementParsingQueue {
       );
     } catch (error) {
       // Redis being down must not lose the upload: the statement is already
-      // persisted as UPLOADED and the reaper below will pick it up.
+      // persisted as UPLOADED, and reprocessing it queues it again. (The reaper
+      // looks at PROCESSING only: an UPLOADED scan without an amount waits on
+      // purpose and must not be fed to the bank parser.)
       this.logger.error(
         `Failed to enqueue statement ${statementId}: ${
           error instanceof Error ? error.message : String(error)
