@@ -97,4 +97,32 @@ describe('Review approval follow-ups (e2e)', () => {
     await until(() => alerted(budgetId));
     expect(await alerted(budgetId)).toBe(true);
   });
+
+  it('sends one "exceeded" for two approvals at once, and no "80%" after it', async () => {
+    const { childId, budgetId } = await budgetWithChild('Kitchen');
+    const ids: string[] = [];
+    for (const merchant of ['ACME Store - Pan', 'ACME Store - Knife']) {
+      const created = await expense(childId, merchant);
+      const [row] = await dataSource.query('SELECT id FROM transactions WHERE statement_id = $1', [created.body.id]);
+      ids.push(row.id);
+    }
+    await dataSource.query('UPDATE transactions SET is_verified = false WHERE id = ANY($1::uuid[])', [ids]);
+    await dataSource.query(
+      'UPDATE budgets SET alert_at_100_sent = false, alert_at_80_sent = false WHERE id = $1',
+      [budgetId],
+    );
+    await dataSource.query("DELETE FROM notifications WHERE entity_id = $1", [budgetId]);
+
+    await Promise.all(
+      ids.map(id => as(request(server()).post('/review-inbox/transactions/approve')).send({ ids: [id] }).expect(200)),
+    );
+    await until(() => alerted(budgetId));
+    await new Promise(r => setTimeout(r, 300));
+
+    const sent = await dataSource.query(
+      'SELECT type, count(*)::int AS n FROM notifications WHERE entity_id = $1 GROUP BY type ORDER BY type',
+      [budgetId],
+    );
+    expect(sent).toEqual([{ type: 'budget.exceeded', n: 1 }]);
+  });
 });

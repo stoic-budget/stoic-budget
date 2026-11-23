@@ -36,6 +36,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { PayPeriodService } from '../pay-period/pay-period.service';
 import { countChargesBetween } from '../subscriptions/charge-calendar.util';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
+import { claimBudgetAlert } from './budget-alert-claim';
 import {
   clampToWindow,
   computePeriodRange,
@@ -288,9 +289,8 @@ export class BudgetsService {
       }
       const { spentAmount, percentUsed } = await this.measure(budget, new Date());
 
-      if (percentUsed >= 100 && !budget.alertAt100Sent) {
-        budget.alertAt100Sent = true;
-        await this.budgetRepository.save(budget);
+      // Each alert claimed by a conditional write: two checks at once send it once.
+      if (percentUsed >= 100 && (await claimBudgetAlert(this.budgetRepository, budget.id, 100))) {
         await this.notificationsService.createForWorkspaceMembers({
           workspaceId,
           type: NotificationType.BUDGET_EXCEEDED,
@@ -319,9 +319,10 @@ export class BudgetsService {
           percentUsed: Math.round(percentUsed),
           currency: budget.currency,
         } satisfies BudgetExceededEvent);
-      } else if (percentUsed >= 80 && !budget.alertAt80Sent) {
-        budget.alertAt80Sent = true;
-        await this.budgetRepository.save(budget);
+      } else if (
+        percentUsed >= 80 &&
+        (await claimBudgetAlert(this.budgetRepository, budget.id, 80))
+      ) {
         await this.notificationsService.createForWorkspaceMembers({
           workspaceId,
           type: NotificationType.BUDGET_WARNING,

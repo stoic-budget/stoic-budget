@@ -42,8 +42,9 @@ export interface TransactionsImportedEvent {
 }
 
 /**
- * Bank-sync rows the bank booked this pull, each turned from its pending row
- * in place: what an import does for a new row (a subscription's payment, a
+ * Rows that start counting now: bank-sync rows the bank booked this pull (each
+ * turned from its pending row in place), or rows confirmed in Review. What an
+ * import does for a new row (a budget alert, a subscription's payment, a
  * bill's money) is owed to these now.
  */
 export interface TransactionsPostedEvent {
