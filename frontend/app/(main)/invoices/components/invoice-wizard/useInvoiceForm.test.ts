@@ -3,9 +3,10 @@ import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { useInvoiceForm } from './useInvoiceForm';
 
+const update = vi.hoisted(() => vi.fn(async () => ({ id: 'invoice-1' })));
 vi.mock('@/app/lib/invoices-api', () => ({
   clientsApi: { list: vi.fn(async () => []) },
-  invoicesApi: {},
+  invoicesApi: { update },
 }));
 vi.mock('@/app/lib/query-fn-schema', () => ({ apiQueryDecoded: vi.fn(async () => []) }));
 vi.mock('@/app/i18n', async () => ({
@@ -26,7 +27,20 @@ describe('useInvoiceForm update payload', () => {
       notes: null,
       deliveryDate: null,
       recurrenceInterval: null,
+      recurrenceEndDate: null,
     });
+  });
+
+  it('saves an edit with the cleared fields as null', async () => {
+    const { result } = renderHook(() => useInvoiceForm(false));
+    act(() => result.current.setNotes(''));
+
+    await result.current.save('invoice-1');
+
+    expect(update).toHaveBeenCalledWith(
+      'invoice-1',
+      expect.objectContaining({ notes: null, deliveryDate: null, recurrenceInterval: null }),
+    );
   });
 
   it('sends what is filled in as it is', () => {

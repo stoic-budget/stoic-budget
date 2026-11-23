@@ -184,6 +184,8 @@ export function useInvoiceForm(isNew: boolean) {
     notes: notes || null,
     deliveryDate: deliveryDate || null,
     recurrenceInterval: recurrenceInterval || null,
+    // A stopped recurrence takes its end date with it.
+    ...(recurrenceInterval ? {} : { recurrenceEndDate: null }),
   });
 
   /** Creates the invoice, or saves the draft `id` with its cleared fields cleared. */
