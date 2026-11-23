@@ -109,7 +109,15 @@ export class StatementRowsService {
       sums,
       balances.balanceStart !== null && balances.balanceEnd !== null,
     );
-    const validation = validateParsedStatement(balances, moved, { tolerance: TOLERANCE, checks });
+    // The rows the parse could not read are still missing: a statement held for
+    // them stays held until enough are added back by hand.
+    const dropped = details.droppedSamples?.length ?? 0;
+    const dropInfo = { rawCount: moved.length + dropped, droppedCount: dropped };
+    const validation = validateParsedStatement(balances, moved, {
+      tolerance: TOLERANCE,
+      checks,
+      dropInfo,
+    });
     const status =
       validation.passed && statement.status === StatementStatus.NEEDS_REVIEW
         ? StatementStatus.COMPLETED
