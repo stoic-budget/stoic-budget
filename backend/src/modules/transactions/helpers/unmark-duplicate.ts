@@ -1,5 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
-import { In, Not, type Repository } from 'typeorm';
+import { In, type Repository } from 'typeorm';
 import { appError } from '../../../common/errors/app-error';
 import { occurrenceFingerprint } from '../../../common/utils/fingerprint.util';
 import { Transaction } from '../../../entities/transaction.entity';
@@ -58,11 +58,16 @@ async function freeFingerprint(
   const candidates = Array.from({ length: MAX_OCCURRENCE }, (_, index) =>
     occurrenceFingerprint(base, index + 1),
   );
+  // Every row holding one of them is locked, this one too and in one order, so
+  // two Keeps of rows sharing a fingerprint queue up instead of both taking it.
   const holders = await transactions.find({
-    where: { workspaceId, fingerprint: In(candidates), id: Not(transactionId) },
+    where: { workspaceId, fingerprint: In(candidates) },
     select: { id: true, fingerprint: true, isDuplicate: true },
+    order: { id: 'ASC' },
     lock: { mode: 'pessimistic_write' },
   });
-  const taken = new Set(holders.filter(row => !row.isDuplicate).map(row => row.fingerprint));
+  const taken = new Set(
+    holders.filter(row => row.id !== transactionId && !row.isDuplicate).map(row => row.fingerprint),
+  );
   return candidates.find(candidate => !taken.has(candidate)) ?? null;
 }

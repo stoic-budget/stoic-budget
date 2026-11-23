@@ -9,6 +9,7 @@ import type { Queue } from 'bullmq';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
+import { occurrenceFingerprint } from '../../src/common/utils/fingerprint.util';
 import { STATEMENT_PARSING_QUEUE } from '../../src/modules/parsing/queue/statement-parsing.queue';
 import {
   deleteUserByEmail,
@@ -139,7 +140,12 @@ describe('Identical rows in one statement (e2e)', () => {
           )
         )[0].n,
       );
-    const [first, second] = await upload(twoCoffees('20260430').replace(/20260310/g, '20260410'));
+    const rows = await upload(twoCoffees('20260430').replace(/20260310/g, '20260410'));
+    // The row holding the base fingerprint, and its numbered twin (row order is not fixed).
+    const [first, second] =
+      occurrenceFingerprint(rows[0].fingerprint as string, 2) === rows[1].fingerprint
+        ? [rows[0], rows[1]]
+        : [rows[1], rows[0]];
     // What the old import left: the second coffee with the first one's fingerprint, no original.
     await dataSource.query(
       'UPDATE transactions SET is_duplicate = true, duplicate_of_id = NULL, fingerprint = $2 WHERE id = $1',
