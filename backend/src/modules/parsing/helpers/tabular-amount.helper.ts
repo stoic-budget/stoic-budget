@@ -13,7 +13,30 @@ export function tabularAmount(value: unknown): number | null {
   if (typeof value !== 'string' || !value.trim()) {
     return null;
   }
-  return parseStatementAmount(value) ?? normalizeNumber(value);
+  return parseStatementAmount(value) ?? sidedFigure(value) ?? normalizeNumber(value);
+}
+
+/** "1200 DR", "12.5 CR": the side after a figure the statement reader does not take. */
+function sidedFigure(value: string): number | null {
+  const match = value.trim().match(/^(.*\d)\s*\(?([CD])R\.?\)?$/i);
+  if (!match) {
+    return null;
+  }
+  const figure = normalizeNumber(match[1]);
+  if (figure === null) {
+    return null;
+  }
+  return match[2].toUpperCase() === 'D' ? -Math.abs(figure) : Math.abs(figure);
+}
+
+/**
+ * A debit or credit column's figure: the column already gives the side, so a
+ * sign printed in it ("$-12.00", "-12.00") is dropped, not read as the
+ * opposite side (a negative debit would be skipped as no amount at all).
+ */
+export function sideFigure(value: unknown): number | undefined {
+  const amount = tabularAmount(value);
+  return amount ? Math.abs(amount) : undefined;
 }
 
 const DEBIT_WORDS = new Set(['af', 'debit', 'dr', 'd', 'out', 'withdrawal']);

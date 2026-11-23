@@ -1,5 +1,10 @@
 import { appDefaultCurrency } from '../../../common/utils/currency.util';
-import { amountSide, compactDate, tabularAmount } from '../helpers/tabular-amount.helper';
+import {
+  amountSide,
+  compactDate,
+  sideFigure,
+  tabularAmount,
+} from '../helpers/tabular-amount.helper';
 import type { ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import { BaseParser } from './base.parser';
 
@@ -237,17 +242,8 @@ export abstract class BaseTabularParser extends BaseParser {
           ? currencyFromColumn
           : defaultCurrency;
 
-      let debit =
-        debitIndex !== undefined
-          ? this.normalizeNumberValue(getValue(debitIndex) as string | number | null | undefined) ||
-            undefined
-          : undefined;
-      let credit =
-        creditIndex !== undefined
-          ? this.normalizeNumberValue(
-              getValue(creditIndex) as string | number | null | undefined,
-            ) || undefined
-          : undefined;
+      let debit = debitIndex !== undefined ? sideFigure(getValue(debitIndex)) : undefined;
+      let credit = creditIndex !== undefined ? sideFigure(getValue(creditIndex)) : undefined;
 
       // Single "Amount" column: sign decides direction; unsigned amounts fall
       // to the caller-provided hint (e.g. a "Withdrawals" section caption).

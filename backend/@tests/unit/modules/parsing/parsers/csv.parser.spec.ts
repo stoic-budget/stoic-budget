@@ -40,6 +40,19 @@ describe('CsvParser', () => {
     ]);
   });
 
+  it('keeps a signed debit-column figure as a debit, not a dropped row', async () => {
+    const result = await parse('debit-signs.csv', [
+      'Date,Details,Debit,Credit',
+      '02.03.2026,ACME Store,$-12.00,',
+      '03.03.2026,ACME Store,1200 DR,',
+    ]);
+
+    expect(result.transactions.map(t => [t.debit, t.credit])).toEqual([
+      [12, undefined],
+      [1200, undefined],
+    ]);
+  });
+
   it('reads the ING side column and its year-first dates', async () => {
     const result = await parse('ing.csv', [
       '"Datum";"Naam / Omschrijving";"Rekening";"Tegenrekening";"Code";"Af Bij";"Bedrag (EUR)";"Mutatiesoort";"Mededelingen"',

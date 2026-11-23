@@ -4,9 +4,22 @@
  * - Removes thousands separators
  * - Converts to number
  */
-/** "$", "S$", "€", or an ISO code such as "USD" at the start or the end of the figure. */
-const CURRENCY_EDGES =
-  /^(?:[A-Z]{0,3}[$€£¥₸₽₪₹฿]|[A-Z]{3}(?=[-+(\d.,]))|(?:[$€£¥₸₽₪₹฿]|(?<=[\d.,)])[A-Z]{3})$/g;
+/** "$", "S$", "€" at the start or the end of the figure. */
+const SYMBOL_EDGES = /^[A-Z]{0,3}[$€£¥₸₽₪₹฿]|[$€£¥₸₽₪₹฿]$/g;
+/** Real ISO codes only: "REF-2026" or "INV(2)" are not amounts with a sign. */
+const ISO_CURRENCIES: ReadonlySet<string> = new Set(Intl.supportedValuesOf('currency'));
+
+/** Takes a currency symbol or ISO code off either end: "USD-12.00", "12- USD". */
+function withoutCurrency(text: string): string {
+  let rest = text.replace(SYMBOL_EDGES, '');
+  if (rest.length > 3 && ISO_CURRENCIES.has(rest.slice(0, 3))) {
+    rest = rest.slice(3);
+  }
+  if (rest.length > 3 && ISO_CURRENCIES.has(rest.slice(-3))) {
+    rest = rest.slice(0, -3);
+  }
+  return rest;
+}
 
 export function normalizeNumber(value: string | number | null | undefined): number | null {
   if (value === null || value === undefined) {
@@ -29,7 +42,7 @@ export function normalizeNumber(value: string | number | null | undefined): numb
 
   // A currency mark at either end goes first, so a sign behind it still
   // counts: "$-12.00", "USD-12.00", "-12.00€".
-  normalized = normalized.replace(CURRENCY_EDGES, '');
+  normalized = withoutCurrency(normalized);
 
   let negative = false;
 
