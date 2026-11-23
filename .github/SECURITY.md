@@ -81,6 +81,7 @@ When deploying Stoic Budget, please follow these security best practices:
 ### API Security
 
 - Always use HTTPS in production — the auth cookies are `Secure` there
+- Set `OIDC_ALLOW_HTTP=true` only for an OIDC provider reached over a private network: tokens and the client secret travel unencrypted. This also allows HTTP for the browser-facing authorization endpoint; keep that endpoint on HTTPS or the provider password travels unencrypted
 - Set `CORS_ORIGINS` (or `FRONTEND_URL`) to exactly the origins that serve the frontend; the backend refuses to start in production without one. The exact OAuth discovery paths `/api/v1/oauth/protected-resource` and `/api/v1/oauth/authorization-server`, plus `/api/v1/oauth/register`, `/api/v1/oauth/token` and `/api/v1/oauth/revoke`, allow any origin without credentials. All other paths, including `/api/v1/mcp`, keep the credentialed allowlist
 - If the frontend and the API sit on different registrable domains, set `AUTH_COOKIE_SAMESITE=none` (HTTPS only)
 - Behind a reverse proxy, forward `X-Forwarded-For` and `X-Forwarded-Proto`: the backend trusts one proxy hop, and rate limits are counted per client IP

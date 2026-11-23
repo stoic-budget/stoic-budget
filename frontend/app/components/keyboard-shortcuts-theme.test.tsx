@@ -58,6 +58,7 @@ const MEMBER: User = {
   onboardingCompletedAt: null,
   welcomeTutorialSeenAt: null,
   pageHintsSeen: {},
+  passwordSet: true,
   changelogSeenId: null,
   changelogSeenAt: null,
 } as User;

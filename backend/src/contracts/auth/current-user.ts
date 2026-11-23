@@ -48,6 +48,8 @@ export const CurrentUser = Schema.Struct({
   welcomeTutorialSeenAt: Schema.NullOr(Timestamp),
   /** Page hints closed so far: page id → the highest hint version seen there. */
   pageHintsSeen: Schema.Record(Schema.String, Schema.Number),
+  /** False for an account made by single sign-on until its owner sets a password. */
+  passwordSet: Schema.Boolean,
   /** The newest changelog entry seen (its id in changelog.json); null when none was. */
   changelogSeenId: Schema.NullOr(Schema.String),
   /** That entry's date, or the sign-up time: entries dated after it are new. */

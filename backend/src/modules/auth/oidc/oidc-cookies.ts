@@ -4,6 +4,8 @@ import type { CookieOptions, Request, Response } from 'express';
 export const OIDC_FLOW_COOKIE = 'oidc_flow';
 /** A checked sign-in waiting for `POST /auth/oidc/complete` (and the second factor). */
 export const OIDC_TICKET_COOKIE = 'oidc_ticket';
+/** A fresh provider sign-in waiting for `POST /auth/password/set`. */
+export const OIDC_STEP_UP_COOKIE = 'oidc_step_up';
 
 const TEN_MINUTES_MS = 10 * 60 * 1000;
 
@@ -23,8 +25,13 @@ const options = (): CookieOptions => {
   };
 };
 
-export function setOidcCookie(res: Response, name: string, value: string): void {
-  res.cookie(name, value, { ...options(), maxAge: TEN_MINUTES_MS });
+export function setOidcCookie(
+  res: Response,
+  name: string,
+  value: string,
+  maxAge = TEN_MINUTES_MS,
+): void {
+  res.cookie(name, value, { ...options(), maxAge });
 }
 
 export function clearOidcCookie(res: Response, name: string): void {

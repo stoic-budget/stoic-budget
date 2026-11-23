@@ -39,5 +39,6 @@ export const OWN_PROFILE_COLUMNS: FindOptionsSelect<User> = {
   pageHintsSeen: true,
   changelogSeenId: true,
   changelogSeenAt: true,
+  passwordSet: true,
   tokenVersion: true,
 };

@@ -60,6 +60,8 @@ export interface User {
   welcomeTutorialSeenAt?: string | null;
   /** Page hints closed so far: page id → highest version seen; absent means unknown. */
   pageHintsSeen?: Record<string, number>;
+  /** False for an account made by single sign-on until its owner sets a password. */
+  passwordSet?: boolean;
   /** What's new: the newest changelog entry seen and its date (or the sign-up time). */
   changelogSeenId?: string | null;
   changelogSeenAt?: string | null;

@@ -136,6 +136,16 @@ TRUST_PROXY=10.0.0.0/8
 Direct clients with a public address are then never believed. Have the proxy replace, not append to, a client's own
 `X-Forwarded-For` (Caddy does this by default; in nginx use `proxy_set_header X-Forwarded-For $remote_addr`).
 
+## Single sign-on provider on the Docker network
+
+An OpenID Connect provider (Authentik, Keycloak…) must be `https` in production. One that runs in the same Docker
+network as the backend may use plain `http` with `OIDC_ALLOW_HTTP=true` in `.env`. Use it for private networks only:
+the ID token and the client secret are not encrypted on the way. Only the addresses the backend calls itself
+(discovery, token and keys) belong on the Docker network. The sign-in page (the authorization endpoint) is opened by
+the person's browser, so it must be reachable from there, and it should stay `https`: the setting allows it to be
+`http` too, and then the person's provider password crosses the network unencrypted. The backend logs a warning once
+per provider. See [Configuration](../getting-started/configuration#single-sign-on-over-http-on-a-private-network).
+
 ## Health checks
 
 ```bash

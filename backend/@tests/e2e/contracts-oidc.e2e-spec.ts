@@ -5,11 +5,13 @@ import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import {
+  CurrentUser,
   LoginResponse,
   OidcIdentityList,
   OidcAuthorization,
   OidcPublicStatus,
   OidcSettingsStatus,
+  UserUpdateResponse,
 } from '../../src/contracts';
 import {
   deleteUserByEmail,
@@ -25,6 +27,7 @@ import {
   callback,
   complete,
   configureProvider,
+  signIn,
   startLink,
   startLogin,
 } from './helpers/oidc-flow';
@@ -33,6 +36,7 @@ import {
 describe('Single sign-on contracts (e2e)', () => {
   const stamp = Date.now();
   const adminEmail = `contracts-oidc-${stamp}@example.com`;
+  const ssoEmail = `contracts-oidc-sso-${stamp}@example.com`;
   const previousAppUrl = process.env.APP_URL;
   let app: INestApplication;
   let dataSource: DataSource;
@@ -59,6 +63,7 @@ describe('Single sign-on contracts (e2e)', () => {
   afterAll(async () => {
     await dataSource.query(`DELETE FROM instance_settings WHERE key = 'oidc'`);
     await deleteUserByEmail(dataSource, adminEmail);
+    await deleteUserByEmail(dataSource, ssoEmail);
     await app.close();
     await provider.close();
     process.env.APP_URL = previousAppUrl;
@@ -110,6 +115,39 @@ describe('Single sign-on contracts (e2e)', () => {
 
     const after = await as('delete', `/auth/oidc/identities/${list.identities[0].id}`).expect(200);
     expect(decode(OidcIdentityList, after.body).identities).toEqual([]);
+  });
+
+  it('re-authentication and the first password of a single sign-on account', async () => {
+    await configureProvider(app, admin.token, provider, { allowSignup: true });
+    const subject = `contracts-oidc-sso-${stamp}`;
+    const made = await signIn(app, provider, subject);
+    const token = made.token as string;
+    const me = await request(app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(decode(CurrentUser, me.body)).toMatchObject({ email: ssoEmail, passwordSet: false });
+
+    const started = await request(app.getHttpServer())
+      .post('/auth/oidc/reauth')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    const url = decode(OidcAuthorization, started.body).url;
+    expect(url).toContain('max_age=0');
+    const flow = { location: url, binding: responseCookie(started, 'oidc_flow') as string };
+    const back = await callback(app, flow, provider.authorize(url, subject));
+    const set = await request(app.getHttpServer())
+      .post('/auth/password/set')
+      .set('Authorization', `Bearer ${token}`)
+      .set('Cookie', `oidc_step_up=${responseCookie(back, 'oidc_step_up')}`)
+      .send({ newPassword: 'Fresh-Passw0rd!' })
+      .expect(200);
+    expect(decode(UserUpdateResponse, set.body).user).toMatchObject({
+      email: ssoEmail,
+      passwordSet: true,
+      name: 'Member One',
+    });
+    await configureProvider(app, admin.token, provider);
   });
 
   it('the second-factor question and clearing the provider', async () => {

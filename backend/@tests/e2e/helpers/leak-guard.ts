@@ -13,6 +13,7 @@ import { ACCOUNT_KEYS } from '../../../src/common/utils/sensitive-keys.util';
  */
 const OWN_ACCOUNT_HANDLERS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['AuthController.getProfile', new Set(['lastLogin', 'telegramId', 'telegramChatId'])],
+  ['PasswordSetController.set', new Set(['lastLogin', 'telegramId', 'telegramChatId'])],
   ['UsersController.getProfile', new Set(['lastLogin', 'telegramId', 'telegramChatId'])],
   ['UsersController.updateMyPreferences', new Set(['lastLogin', 'telegramId', 'telegramChatId'])],
   ['UsersController.acceptDisclaimer', new Set(['lastLogin', 'telegramId', 'telegramChatId'])],

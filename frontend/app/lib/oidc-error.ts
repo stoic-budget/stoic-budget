@@ -7,6 +7,7 @@ import { translateErrorCode } from './api-error';
  */
 export function oidcErrorMessage(code: string | null, fallback: string): string | null {
   if (!code) return null;
-  if (!/^(OIDC_[A-Z_]+|AUTH_ACCOUNT_INACTIVE)$/.test(code)) return fallback;
+  if (!/^(OIDC_[A-Z_]+|AUTH_ACCOUNT_INACTIVE|AUTH_PASSWORD_ALREADY_SET)$/.test(code))
+    return fallback;
   return translateErrorCode(code, undefined) ?? fallback;
 }
