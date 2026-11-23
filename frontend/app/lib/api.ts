@@ -165,13 +165,17 @@ function isAuthRetryExcludedRequest(originalRequest: Record<string, unknown>): b
   }
 }
 
+/**
+ * The caller is no longer a member of the open workspace (removed, or the
+ * workspace is gone): the one refusal that sends them back to the list. A
+ * missing permission or a read-only version is refused too, but the workspace
+ * stays theirs. The error filter answers `{ error: { code, message } }`.
+ */
 function isForbiddenWorkspaceError(error: Record<string, unknown>): boolean {
-  const response = error.response as { status?: number; data?: { message?: string } } | undefined;
-  return (
-    response?.status === 403 &&
-    typeof response?.data?.message === 'string' &&
-    response.data.message.includes('workspace')
-  );
+  const response = error.response as
+    | { status?: number; data?: { error?: { code?: unknown } } }
+    | undefined;
+  return response?.status === 403 && response.data?.error?.code === 'WORKSPACE_NOT_A_MEMBER';
 }
 
 function isUnauthorizedRetryable(
