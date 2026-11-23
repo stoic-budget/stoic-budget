@@ -1,5 +1,8 @@
 import { BudgetRolloverMode } from '../../entities/budget.entity';
 
+/** A settled period: what was spent, and the limit it had. */
+export type PastPeriod = { spent: number; limit: number };
+
 /**
  * How much a period has to spend once the previous periods are settled.
  *
@@ -11,15 +14,16 @@ import { BudgetRolloverMode } from '../../entities/budget.entity';
 export function resolveAvailable(
   limit: number,
   mode: BudgetRolloverMode | undefined,
-  previousSpent: number[],
+  previous: PastPeriod[],
 ): { carriedAmount: number; availableAmount: number } {
   if (!mode || mode === BudgetRolloverMode.NONE) {
     return { carriedAmount: 0, availableAmount: limit };
   }
   let carried = 0;
-  for (const spent of previousSpent) {
-    const available = availableWith(limit, mode, carried);
-    carried = available - spent;
+  for (const period of previous) {
+    // Each past period at the limit it had then, not today's.
+    const available = availableWith(period.limit, mode, carried);
+    carried = available - period.spent;
   }
   const availableAmount = availableWith(limit, mode, carried);
   return {
