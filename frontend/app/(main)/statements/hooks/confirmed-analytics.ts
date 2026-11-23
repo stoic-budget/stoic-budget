@@ -25,11 +25,17 @@ export function keepConfirmed(data: { transactions: Transaction[]; receipts: Rec
   transactions: Transaction[];
   receipts: ReceiptDocument[];
 } {
+  // A receipt of a row that is no income or spending stays out with its row.
+  const notFlows = new Set(data.transactions.filter(row => !isFlow(row)).map(row => row.id));
   return {
     transactions: data.transactions.filter(
       transaction =>
         transaction.isVerified === true && transaction.isPending !== true && isFlow(transaction),
     ),
-    receipts: data.receipts.filter(receipt => receipt.status === 'approved'),
+    receipts: data.receipts.filter(
+      receipt =>
+        receipt.status === 'approved' &&
+        !(receipt.transactionId && notFlows.has(receipt.transactionId)),
+    ),
   };
 }

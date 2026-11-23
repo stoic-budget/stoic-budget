@@ -46,4 +46,13 @@ describe('keepConfirmed', () => {
 
     expect(result.transactions.map(item => item.id)).toEqual(['purchase']);
   });
+
+  it("keeps a receipt out with its row: a reimbursed lunch's receipt is no spending either", () => {
+    const result = keepConfirmed({
+      transactions: [{ id: 'lunch', isVerified: true, transferPairId: 'pair-reimb' }],
+      receipts: [{ ...receipt('rc-lunch', 'approved'), transactionId: 'lunch' }],
+    });
+
+    expect(result.receipts).toEqual([]);
+  });
 });
