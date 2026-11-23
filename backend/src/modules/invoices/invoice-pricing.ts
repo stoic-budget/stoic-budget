@@ -4,6 +4,7 @@ import { fromMinor, toMinor } from '../../common/utils/money.util';
 import { TaxRate } from '../../entities/tax-rate.entity';
 import { computeTax, type TaxBreakdown } from '../tax/tax-calculation';
 import type { InvoiceDocumentLine } from './invoice-document';
+import { roundByRateGroup } from './invoice-tax-groups';
 
 export interface LineTaxRate {
   rate: number;
@@ -88,19 +89,23 @@ export async function priceLines(
   pricesIncludeTax: boolean,
 ): Promise<PricedLine[]> {
   const rateById = await taxRatesByLineItems(manager, lineItems);
-  return lineItems.map(item => {
-    const amountMinor = toMinor(lineAmount(item));
+  const taxing = lineItems.map(item => {
     const rate = item.taxRateId ? rateById.get(item.taxRateId) : undefined;
-    const breakdown = computeTax({
-      amountMinor,
+    return {
       rate: rate?.rate ?? 0,
       // With no tax rate on the line there is nothing to extract, whatever
       // the invoice says about its prices.
       isInclusive: Boolean(rate) && pricesIncludeTax,
       isReverseCharge: rate?.isReverseCharge ?? false,
-    });
-    return { ...breakdown, categoryId: item.categoryId };
+    };
   });
+  const priced = lineItems.map((item, index) => ({
+    ...computeTax({ amountMinor: toMinor(lineAmount(item)), ...taxing[index] }),
+    categoryId: item.categoryId,
+  }));
+  // Tax is rounded once per rate, as the e-invoice does: the books, the PDF and
+  // the XML then show the same total.
+  return roundByRateGroup(priced, taxing);
 }
 
 /** Every figure the document prints for a line, including its tax rate. */
