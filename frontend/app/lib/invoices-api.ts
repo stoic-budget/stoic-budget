@@ -147,6 +147,11 @@ export const invoicesApi = {
     await apiClient.put(`/invoices/${id}/void`);
     return invoicesApi.getOne(id);
   },
+  /** Ends a recurring invoice's series; the invoice itself is unchanged. */
+  async stopRecurring(id: string): Promise<Invoice> {
+    await apiClient.post(`/invoices/${id}/stop-recurring`);
+    return invoicesApi.getOne(id);
+  },
   /** Emails the client a reminder about a sent or overdue invoice. */
   async remind(id: string): Promise<InvoiceReminderResult> {
     const response = await apiClient.post(`/invoices/${id}/remind`);

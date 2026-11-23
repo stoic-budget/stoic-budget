@@ -11,7 +11,7 @@ import CustomDatePicker from '@/app/components/CustomDatePicker';
 import { Badge } from '@/app/components/ui/badge';
 import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { Button } from '@/app/components/ui/button';
-import { FORM_CONTROL_SX, Input } from '@/app/components/ui/input';
+import { Input } from '@/app/components/ui/input';
 import { PRIVATE_CLASS, PrivateAmount } from '@/app/components/ui/private-amount';
 import { Select } from '@/app/components/ui/select';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
@@ -33,6 +33,7 @@ import {
 import { type Payable, payablesApi } from '@/app/lib/payables-api';
 import { CreditNoteDialog } from './CreditNoteDialog';
 import { InvoiceEmailDrawer } from './InvoiceEmailDrawer';
+import { InvoiceRecurrenceField } from './InvoiceRecurrenceField';
 import { InvoiceDetailSkeleton } from './InvoicesSkeletons';
 import { InvoiceWizard } from './invoice-wizard/InvoiceWizard';
 import { lineAmount, useInvoiceForm } from './invoice-wizard/useInvoiceForm';
@@ -458,26 +459,14 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
                 {currency}
               </button>
             </div>
-            <div className="seneca-payable-drawer__field-group">
-              <label className="seneca-payable-drawer__field-label" htmlFor="invoice-recurrence">
-                {t.detail.recurring.value}
-              </label>
-              <Select
-                fullWidth
-                id="invoice-recurrence"
-                sx={FORM_CONTROL_SX}
-                value={recurrenceInterval || 'none'}
-                disabled
-                onChange={() => undefined}
-                options={[
-                  { value: 'none', label: t.actions.cancel.value },
-                  { value: 'weekly', label: t.detail.recurrenceInterval.weekly.value },
-                  { value: 'monthly', label: t.detail.recurrenceInterval.monthly.value },
-                  { value: 'quarterly', label: t.detail.recurrenceInterval.quarterly.value },
-                  { value: 'yearly', label: t.detail.recurrenceInterval.yearly.value },
-                ]}
-              />
-            </div>
+            <InvoiceRecurrenceField
+              invoice={invoice}
+              recurrenceInterval={recurrenceInterval}
+              onStopped={updated => {
+                setInvoice(updated);
+                fillFrom(updated);
+              }}
+            />
           </div>
 
           <label
