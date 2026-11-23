@@ -48,7 +48,7 @@ import { EmailReceiptParserService } from '../receipts/services/email-receipt-pa
 import { ReceiptCategoryService } from '../receipts/services/receipt-category.service';
 import { ReceiptDuplicateService } from '../receipts/services/receipt-duplicate.service';
 import { StatementsService } from '../statements/statements.service';
-import { openImapBatch } from './imap-cursor';
+import { keptImapCursor, openImapBatch } from './imap-cursor';
 
 type ProtocolStatusResponse = {
   connected: boolean;
@@ -268,6 +268,7 @@ export class OpenProtocolIntegrationsService {
         port: config.port,
         secure: config.secure,
         mailbox: config.mailbox,
+        ...keptImapCursor(existing.settings, config),
       },
       secrets: {
         user: config.user,
@@ -534,10 +535,7 @@ export class OpenProtocolIntegrationsService {
             { source: true, envelope: true, flags: true },
             { uid: true },
           );
-          if (!message) {
-            continue;
-          }
-          const source = message.source;
+          const source = message ? message.source : undefined;
           if (!source) {
             continue;
           }
@@ -549,6 +547,7 @@ export class OpenProtocolIntegrationsService {
             await client.messageFlagsAdd(uid, ['\\Seen'], { uid: true });
           }
         } catch (msgError) {
+          imap.failed(uid);
           const e = msgError as Record<string, unknown>;
           this.logger.warn(
             `IMAP: failed to process uid ${uid}: ${String(e.message)} | responseStatus: ${String(e.responseStatus)} | response: ${JSON.stringify(e.response)}`,

@@ -1,5 +1,5 @@
 import type { OpenProtocolSettings } from '@/entities/open-protocol-settings.entity';
-import { imapBatch } from '@/modules/open-protocol-integrations/imap-cursor';
+import { imapBatch, keptImapCursor } from '@/modules/open-protocol-integrations/imap-cursor';
 
 const settings = (imapCursor?: unknown) =>
   ({ id: 's-1', config: imapCursor ? { imapCursor } : {} }) as unknown as OpenProtocolSettings;
@@ -23,5 +23,21 @@ describe('imapBatch (#679)', () => {
 
   it('has nothing to take when no message is newer than the cursor', () => {
     expect(imapBatch(uids, settings({ uidValidity: '7', lastUid: 120 }), 7n, 50)).toEqual([]);
+  });
+});
+
+describe('keptImapCursor', () => {
+  const stored = { id: 's-1', config: { host: 'imap.example.com', mailbox: 'INBOX', imapCursor: { uidValidity: '7', lastUid: 500 } } } as unknown as OpenProtocolSettings;
+
+  it('keeps the cursor when a save keeps the host and the mailbox', () => {
+    expect(keptImapCursor(stored, { host: 'imap.example.com', mailbox: 'INBOX' })).toEqual({
+      imapCursor: { uidValidity: '7', lastUid: 500 },
+    });
+  });
+
+  it('starts afresh for another host or mailbox', () => {
+    expect(keptImapCursor(stored, { host: 'imap.example.com', mailbox: 'Receipts' })).toEqual({});
+    expect(keptImapCursor(stored, { host: 'mail.example.com', mailbox: 'INBOX' })).toEqual({});
+    expect(keptImapCursor(null, { host: 'imap.example.com', mailbox: 'INBOX' })).toEqual({});
   });
 });

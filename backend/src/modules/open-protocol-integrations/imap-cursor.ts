@@ -35,20 +35,50 @@ export function imapBatch(
   return uids.slice(-limit);
 }
 
-/** Remembers the last UID taken, so the next sync goes on from there. */
-export async function saveImapCursor(
+/**
+ * Remembers how far the sync got: up to the message before the first one that
+ * failed (a dropped connection, a parse or database error), so that one is
+ * tried again next time rather than passed for good. Merged into the stored
+ * config, and only while it still names the same host and mailbox: settings
+ * saved meanwhile are not overwritten with the copy read at the start.
+ */
+async function saveImapCursor(
   manager: EntityManager,
   settings: OpenProtocolSettings | null,
   uidValidity: bigint | number | string | undefined,
   batch: number[],
+  failed: Set<number>,
 ): Promise<void> {
-  if (!settings || batch.length === 0 || uidValidity === undefined) {
+  const firstFailure = batch.findIndex(uid => failed.has(uid));
+  const done = firstFailure === -1 ? batch : batch.slice(0, firstFailure);
+  if (!settings || done.length === 0 || uidValidity === undefined) {
     return;
   }
-  const imapCursor: ImapCursor = { uidValidity: String(uidValidity), lastUid: Math.max(...batch) };
-  await manager
-    .getRepository(OpenProtocolSettings)
-    .update(settings.id, { config: { ...settings.config, imapCursor } });
+  const imapCursor: ImapCursor = { uidValidity: String(uidValidity), lastUid: Math.max(...done) };
+  await manager.query(
+    `UPDATE open_protocol_settings SET config = config || jsonb_build_object('imapCursor', $1::jsonb)
+      WHERE id = $2 AND config->>'host' IS NOT DISTINCT FROM $3 AND config->>'mailbox' IS NOT DISTINCT FROM $4`,
+    [
+      JSON.stringify(imapCursor),
+      settings.id,
+      settings.config?.host ?? null,
+      settings.config?.mailbox ?? null,
+    ],
+  );
+}
+
+/**
+ * The cursor a settings save keeps: the same host and mailbox go on from
+ * where they were; another host or mailbox starts afresh.
+ */
+export function keptImapCursor(
+  settings: OpenProtocolSettings | null,
+  next: { host: string; mailbox: string },
+): { imapCursor?: unknown } {
+  const config = settings?.config ?? {};
+  return config.host === next.host && config.mailbox === next.mailbox && config.imapCursor
+    ? { imapCursor: config.imapCursor }
+    : {};
 }
 
 /**
@@ -61,12 +91,17 @@ export async function openImapBatch(
   { mailbox }: { mailbox: string },
   integrations: Repository<Integration>,
   workspaceId: string,
-): Promise<{ batch: number[]; remember: () => Promise<void> }> {
+): Promise<{ batch: number[]; failed: (uid: number) => void; remember: () => Promise<void> }> {
   const manager = integrations.manager;
   const { uidValidity } = await client.mailboxOpen(mailbox);
   const settings = await manager.getRepository(OpenProtocolSettings).findOne({
     where: { integration: { workspaceId, provider: IntegrationProvider.IMAP } },
   });
   const batch = imapBatch(await client.search({}, { uid: true }), settings, uidValidity);
-  return { batch, remember: () => saveImapCursor(manager, settings, uidValidity, batch) };
+  const failed = new Set<number>();
+  return {
+    batch,
+    failed: uid => failed.add(uid),
+    remember: () => saveImapCursor(manager, settings, uidValidity, batch, failed),
+  };
 }

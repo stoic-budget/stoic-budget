@@ -54,7 +54,7 @@ const receiptRepository = {
 const settingsRepository = { findOne: vi.fn().mockResolvedValue(null), update: vi.fn() };
 const integrationRepository = {
   findOne: vi.fn().mockResolvedValue(null),
-  manager: { getRepository: () => settingsRepository },
+  manager: { getRepository: () => settingsRepository, query: vi.fn() },
 };
 
 const receiptParserService = {
@@ -139,14 +139,44 @@ describe('OpenProtocolIntegrationsService.syncImap — already-seen messages', (
 
   it('remembers the last UID it took, so the next sync goes on from there (#679)', async () => {
     const user = { id: 'user-1', workspaceId: 'workspace-1' } as never;
-    settingsRepository.findOne.mockResolvedValueOnce({ id: 'settings-1', config: { mailbox: 'INBOX' } });
-    settingsRepository.update.mockClear();
+    settingsRepository.findOne.mockResolvedValueOnce({
+      id: 'settings-1',
+      config: { host: 'imap.example.com', mailbox: 'INBOX' },
+    });
+    integrationRepository.manager.query.mockClear();
 
     await createService().syncImap(user, 'workspace-1');
 
-    expect(settingsRepository.update).toHaveBeenCalledWith('settings-1', {
-      config: { mailbox: 'INBOX', imapCursor: { uidValidity: '7', lastUid: 3 } },
+    // Merged into the stored config, only while it names the same host and mailbox.
+    expect(integrationRepository.manager.query).toHaveBeenCalledWith(
+      expect.stringContaining("config || jsonb_build_object('imapCursor'"),
+      [JSON.stringify({ uidValidity: '7', lastUid: 3 }), 'settings-1', 'imap.example.com', 'INBOX'],
+    );
+  });
+
+  it('stops the cursor before a message that failed, and saves none when the first did', async () => {
+    const user = { id: 'user-1', workspaceId: 'workspace-1' } as never;
+    const settings = { id: 'settings-1', config: { host: 'imap.example.com', mailbox: 'INBOX' } };
+    searchMock.mockResolvedValueOnce([4, 5, 6]);
+    settingsRepository.findOne.mockResolvedValueOnce(settings);
+    fetchOneMock.mockImplementation(async (uid: number) => {
+      if (uid === 5) throw new Error('Connection not available');
+      return { uid, flags: new Set(), source: Buffer.from('From: a@example.com\r\n\r\nhi') };
     });
+    integrationRepository.manager.query.mockClear();
+
+    await createService().syncImap(user, 'workspace-1');
+    expect(integrationRepository.manager.query.mock.calls[0][1][0]).toBe(
+      JSON.stringify({ uidValidity: '7', lastUid: 4 }),
+    );
+
+    // A dropped connection fails every message: the cursor stays where it was.
+    searchMock.mockResolvedValueOnce([4, 5, 6]);
+    settingsRepository.findOne.mockResolvedValueOnce(settings);
+    fetchOneMock.mockRejectedValue(new Error('Connection not available'));
+    integrationRepository.manager.query.mockClear();
+    await createService().syncImap(user, 'workspace-1');
+    expect(integrationRepository.manager.query).not.toHaveBeenCalled();
   });
 
   it('does not search with seen:false filter so already-read emails are included', async () => {
