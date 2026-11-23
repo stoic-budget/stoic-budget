@@ -405,6 +405,28 @@ describe('applying a rule to existing rows', () => {
     expect(tax.reassess).toHaveBeenCalledWith(WORKSPACE, { ids: ['open'] });
   });
 
+  it('leaves the category a person approved in Review, and files an approved row with none', async () => {
+    const { rulesService, transactions } = build([
+      row('approved-suggested', {
+        isVerified: true,
+        categoryId: 'cat-history',
+        categorySource: TransactionCategorySource.HISTORY,
+      }),
+      row('approved-empty', { isVerified: true }),
+    ]);
+
+    const result = await rulesService.applyRuleToExisting({
+      rule: storeRule,
+      userId: 'user-1',
+      viewerMemberId: ME,
+    });
+
+    expect(result.applied).toBe(1);
+    expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
+      'approved-empty',
+    ]);
+  });
+
   it("never touches another member's private row", async () => {
     const { rulesService, transactions } = build([
       row('theirs', { isPrivate: true, ownerMemberId: PARTNER }),
