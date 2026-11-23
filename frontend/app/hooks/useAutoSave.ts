@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { type RefObject, useEffect, useRef } from 'react';
 
 type UseAutoSaveOptions<T> = {
   data: T;
@@ -21,6 +21,31 @@ const defaultIsEqual = <T>(a: T, b: T): boolean => {
   return keys.every(key => Object.is(left[key], right[key]));
 };
 
+type Pending<T> = { data: T; save: (data: T) => Promise<void> };
+
+type SaveRefs<T> = {
+  pending: RefObject<Pending<T> | null>;
+  lastSaved: RefObject<T>;
+  /** Counts saves sent: only the latest one to succeed says what is stored. */
+  sent: RefObject<number>;
+};
+
+/** Saves the pending value. A failed save is not marked saved, so the next edit retries it. */
+async function flushPending<T>({ pending, lastSaved, sent }: SaveRefs<T>): Promise<void> {
+  const next = pending.current;
+  pending.current = null;
+  if (!next) return;
+  sent.current += 1;
+  const mine = sent.current;
+  try {
+    await next.save(next.data);
+    // An older save answering late must not stand in for a newer value.
+    if (mine === sent.current) lastSaved.current = next.data;
+  } catch {
+    // The caller has told the person; the value stays unsaved.
+  }
+}
+
 export function useAutoSave<T>({
   data,
   onSave,
@@ -30,8 +55,9 @@ export function useAutoSave<T>({
 }: UseAutoSaveOptions<T>): void {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // The value waiting on the timer, sent at once if the page goes away first.
-  const pendingRef = useRef<{ data: T; save: (data: T) => Promise<void> } | null>(null);
+  const pendingRef = useRef<Pending<T> | null>(null);
   const lastSavedRef = useRef(data);
+  const sentRef = useRef(0);
   const initializedRef = useRef(false);
   const wasEnabledRef = useRef(enabled);
 
@@ -41,7 +67,8 @@ export function useAutoSave<T>({
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
-      pendingRef.current = null;
+      // A reload disables the form: what was typed is sent, not dropped.
+      void flushPending({ pending: pendingRef, lastSaved: lastSavedRef, sent: sentRef });
       initializedRef.current = false;
       wasEnabledRef.current = false;
       return;
@@ -63,7 +90,10 @@ export function useAutoSave<T>({
     }
 
     pendingRef.current = { data, save: onSave };
-    timeoutRef.current = setTimeout(() => void flush(), debounceMs);
+    timeoutRef.current = setTimeout(
+      () => void flushPending({ pending: pendingRef, lastSaved: lastSavedRef, sent: sentRef }),
+      debounceMs,
+    );
 
     return () => {
       if (timeoutRef.current) {
@@ -79,20 +109,7 @@ export function useAutoSave<T>({
         clearTimeout(timeoutRef.current);
       }
       // Leaving the page within the debounce still saves what was typed.
-      void flush();
+      void flushPending({ pending: pendingRef, lastSaved: lastSavedRef, sent: sentRef });
     };
   }, []);
-
-  /** Saves the pending value. A failed save is not marked saved, so the next edit retries it. */
-  async function flush(): Promise<void> {
-    const pending = pendingRef.current;
-    pendingRef.current = null;
-    if (!pending) return;
-    try {
-      await pending.save(pending.data);
-      lastSavedRef.current = pending.data;
-    } catch {
-      // The caller has told the person; the value stays unsaved.
-    }
-  }
 }

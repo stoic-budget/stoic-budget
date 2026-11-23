@@ -128,4 +128,47 @@ describe('useAutoSave', () => {
     expect(onSave).toHaveBeenCalledTimes(2);
     expect(onSave).toHaveBeenLastCalledWith({ value: 'updated' });
   });
+  it('sends what was typed when the form is disabled for a reload', async () => {
+    const onSave = vi.fn(async () => undefined);
+
+    await act(async () => {
+      root.render(<Harness data={{ value: 'initial' }} enabled={true} onSave={onSave} />);
+    });
+    await act(async () => {
+      root.render(<Harness data={{ value: 'updated' }} enabled={true} onSave={onSave} />);
+    });
+    await act(async () => {
+      root.render(<Harness data={{ value: 'updated' }} enabled={false} onSave={onSave} />);
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith({ value: 'updated' });
+  });
+
+  it('does not let an older save answering late stand in for a newer value', async () => {
+    let finishFirst: () => void = () => undefined;
+    const onSave = vi
+      .fn<(payload: Payload) => Promise<void>>()
+      .mockImplementationOnce(() => new Promise(resolve => (finishFirst = () => resolve())))
+      .mockResolvedValue(undefined);
+    const show = async (value: string) => {
+      await act(async () => {
+        root.render(<Harness data={{ value }} enabled={true} onSave={onSave} />);
+      });
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+    };
+
+    await act(async () => {
+      root.render(<Harness data={{ value: 'initial' }} enabled={true} onSave={onSave} />);
+    });
+    await show('100');
+    await show('200');
+    await act(async () => finishFirst());
+    await show('100');
+
+    expect(onSave.mock.calls.map(([payload]) => payload.value)).toEqual(['100', '200', '100']);
+  });
 });
