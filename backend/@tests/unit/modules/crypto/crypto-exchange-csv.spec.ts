@@ -31,6 +31,52 @@ const KRAKEN = [
 ].join('\n');
 
 describe('parseExchangeCsv', () => {
+  it('keeps two identical rows of one file apart, and numbers them the same way every time', () => {
+    const file = [
+      'User_ID,UTC_Time,Account,Operation,Coin,Change,Remark',
+      '123,2026-01-10 08:00:00,Spot,Transaction Buy,ETH,0.5,',
+      '123,2026-01-10 15:30:00,Spot,Transaction Buy,ETH,0.5,',
+    ].join('\n');
+
+    const first = parseExchangeCsv(file)?.entries.map(entry => entry.reference);
+    const again = parseExchangeCsv(file)?.entries.map(entry => entry.reference);
+
+    expect(first).toEqual([
+      '2026-01-10|Transaction Buy|ETH|0.5',
+      '2026-01-10|Transaction Buy|ETH|0.5#2',
+    ]);
+    expect(again).toEqual(first);
+  });
+
+  it('numbers repeats of Coinbase and Kraken rows without an id, legs and fees included', () => {
+    const coinbase = [
+      'Timestamp,Transaction Type,Asset,Quantity Transacted,Price Currency,Price at Transaction,Subtotal,Total (inclusive of fees and/or spread),Fees and/or Spread,Notes',
+      '2026-03-05T10:00:00Z,Convert,BTC,0.005,EUR,60000,300.00,300.00,0.00,Converted 0.005 BTC to 0.15 ETH',
+      '2026-03-05T11:00:00Z,Convert,BTC,0.005,EUR,60000,300.00,300.00,0.00,Converted 0.005 BTC to 0.15 ETH',
+    ].join('\n');
+    const kraken = [
+      '"txid","refid","time","type","subtype","aclass","asset","wallet","amount","fee","balance"',
+      '"","R1","2026-01-15 09:00:00","trade","","currency","XXBT","spot",0.03,0.0001,0.03',
+      '"","R2","2026-01-15 10:00:00","trade","","currency","XXBT","spot",0.03,0.0001,0.06',
+    ].join('\n');
+
+    const references = (text: string) =>
+      new Set(parseExchangeCsv(text)?.entries.map(entry => entry.reference));
+
+    expect(references(coinbase).size).toBe(4);
+    expect(references(kraken).size).toBe(4);
+  });
+
+  it('leaves a repeated exchange id alone: the same row twice in a merged file is one row', () => {
+    const file = [
+      'ID,Timestamp,Transaction Type,Asset,Quantity Transacted,Price Currency,Price at Transaction,Subtotal,Total (inclusive of fees and/or spread),Fees and/or Spread,Notes',
+      'aaa,2026-01-05T10:00:00Z,Buy,BTC,0.01,EUR,60000,600.00,606.00,6.00,Bought 0.01 BTC',
+      'aaa,2026-01-05T10:00:00Z,Buy,BTC,0.01,EUR,60000,600.00,606.00,6.00,Bought 0.01 BTC',
+    ].join('\n');
+
+    expect(parseExchangeCsv(file)?.entries.map(entry => entry.reference)).toEqual(['aaa', 'aaa']);
+  });
+
   it('refuses a file it does not recognise instead of guessing', () => {
     expect(parseExchangeCsv('date,amount,description\n2026-01-01,10,Coffee')).toBeNull();
   });

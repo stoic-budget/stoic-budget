@@ -516,6 +516,25 @@ describe('crypto wallet sync (real Postgres)', () => {
     });
   });
 
+  describe('a Binance export with the same buy twice on one day', () => {
+    const CSV = [
+      'User_ID,UTC_Time,Account,Operation,Coin,Change,Remark',
+      '123,2026-01-10 08:00:00,Spot,Transaction Buy,ETH,0.5,',
+      '123,2026-01-10 15:30:00,Spot,Transaction Buy,ETH,0.5,',
+    ].join('\n');
+
+    it('books both buys, and a second import of the file books nothing', async () => {
+      const result = await importer.importCsv(workspaceId, userId, CSV);
+      const wallet = await walletRepo.findOneByOrFail({ id: result.walletId });
+
+      expect(result).toMatchObject({ exchange: 'Binance', imported: 2, skipped: 0 });
+      expect(wallet.balances).toEqual([{ asset: 'ETH', amount: '1' }]);
+
+      const again = await importer.importCsv(workspaceId, userId, CSV);
+      expect(again).toMatchObject({ imported: 0, skipped: 2 });
+    });
+  });
+
   describe('a Bitcoin wallet given as an extended key', () => {
     let btcWallet: CryptoWallet;
 
