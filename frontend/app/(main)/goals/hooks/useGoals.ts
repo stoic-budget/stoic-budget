@@ -2,8 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import toast from 'react-hot-toast';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import apiClient from '@/app/lib/api';
+import { getApiErrorMessage } from '@/app/lib/api-error';
 import type { GoalAccount, GoalCover } from '@/app/lib/contracts';
 import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
@@ -94,7 +96,13 @@ async function applyCover(
   );
 }
 
-export function useGoals(): UseGoalsState {
+/** What the toasts say when a write fails; the server's own message wins when it has one. */
+export interface GoalFailureTexts {
+  saveFailed: string;
+  coverFailed: string;
+}
+
+export function useGoals(texts?: GoalFailureTexts): UseGoalsState {
   // Workspace-scoped: the request itself does not mention the workspace (the
   // server scopes by session), so the key carries it explicitly.
   const workspaceId = useWorkspaceId();
@@ -116,9 +124,21 @@ export function useGoals(): UseGoalsState {
       return await mutation
         .mutateAsync(request)
         .then(() => true)
-        .catch(() => false);
+        .catch(error => {
+          toast.error(getApiErrorMessage(error, texts?.saveFailed));
+          return false;
+        });
     },
-    [mutation.mutateAsync],
+    [mutation.mutateAsync, texts?.saveFailed],
+  );
+
+  // The goal is saved even when its picture is not: say so, without calling the save a failure.
+  const coverOf = useCallback(
+    (goalId: string, cover: GoalFormData['cover']) =>
+      applyCover(goalId, cover).catch(error => {
+        toast.error(getApiErrorMessage(error, texts?.coverFailed));
+      }),
+    [texts?.coverFailed],
   );
 
   const toPayload = (form: GoalFormData) => ({
@@ -137,9 +157,9 @@ export function useGoals(): UseGoalsState {
           toPayload(form) satisfies ContractInput<'CreateGoalBody'>,
         );
         const goal = await checkContract('GoalWithProgress', response.data, '/goals');
-        await applyCover(goal.id, form.cover);
+        await coverOf(goal.id, form.cover);
       }),
-    [submit],
+    [submit, coverOf],
   );
 
   const updateGoal = useCallback(
@@ -149,9 +169,9 @@ export function useGoals(): UseGoalsState {
           `/goals/${id}`,
           toPayload(form) satisfies ContractInput<'UpdateGoalBody'>,
         );
-        await applyCover(id, form.cover);
+        await coverOf(id, form.cover);
       }),
-    [submit],
+    [submit, coverOf],
   );
 
   const deleteGoal = useCallback(
