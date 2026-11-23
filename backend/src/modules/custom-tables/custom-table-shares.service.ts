@@ -13,7 +13,7 @@ import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
 import { CustomTableRelationsService } from './custom-table-relations.service';
 import { applyFormulaColumns } from './helpers/row-data';
-import { onlyColumns, sameWorkspaceRelations } from './shared-rows';
+import { SHARED_PAGE_MAX, sameWorkspaceRelations, sharedValues } from './shared-rows';
 
 /** Срок жизни ссылки по умолчанию: бессрочные ссылки на финданные — плохая идея. */
 const DEFAULT_EXPIRY_DAYS = 30;
@@ -195,7 +195,8 @@ export class CustomTableSharesService {
   ): Promise<{ items: Array<{ rowNumber: number; data: unknown }>; total: number }> {
     const share = await this.resolveActiveShare(token);
 
-    const limit = Math.min(Math.max(params.limit ?? 50, 1), 200);
+    // A page of up to 1000: the public route allows 30 requests a minute.
+    const limit = Math.min(Math.max(params.limit ?? 50, 1), SHARED_PAGE_MAX);
     const query = this.rowRepository
       .createQueryBuilder('r')
       .where('r.tableId = :tableId', { tableId: share.tableId })
@@ -221,7 +222,7 @@ export class CustomTableSharesService {
     return {
       items: rows.map(row => ({
         rowNumber: row.rowNumber,
-        data: onlyColumns(row.data, columns),
+        data: sharedValues(row, columns),
       })),
       total,
     };

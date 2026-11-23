@@ -38,8 +38,8 @@ function formatCell(value: unknown): string {
   return String(value);
 }
 
-/** Rows a request asks for, the server's own cap. */
-const PAGE = 200;
+/** Rows a request asks for, the server's own cap: the public route allows 30 requests a minute. */
+const PAGE = 1000;
 
 /**
  * Публичный просмотр таблицы по ссылке. Страница вне авторизации: доступ
@@ -60,7 +60,7 @@ export default function SharedTablePage() {
 
     async function load(): Promise<void> {
       return await (async () => {
-        // Every row, a page of 200 at a time: the link shows the whole table.
+        // Every row, a page at a time: the link shows the whole table.
         const allRows = async (): Promise<SharedRow[]> => {
           const items: SharedRow[] = [];
           for (let cursor: number | undefined; ; ) {
@@ -74,7 +74,7 @@ export default function SharedTablePage() {
             );
             items.push(...page.items);
             const last = page.items.at(-1);
-            if (!last || page.items.length < PAGE || items.length >= page.meta.total) {
+            if (cancelled || !last || items.length >= page.meta.total) {
               return items;
             }
             cursor = last.rowNumber;

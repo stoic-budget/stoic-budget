@@ -4,12 +4,32 @@ import {
   type CustomTableColumn,
   CustomTableColumnType,
 } from '../../entities/custom-table-column.entity';
+import type { CustomTableRow } from '../../entities/custom-table-row.entity';
 
-/** A row's values for the table's current columns only. */
-export function onlyColumns(data: unknown, columns: CustomTableColumn[]): Record<string, unknown> {
-  const values = (data ?? {}) as Record<string, unknown>;
+/** The largest page of rows a shared link answers. */
+export const SHARED_PAGE_MAX = 1000;
+
+/**
+ * A row as the link shows it: the table's current columns only (a deleted
+ * column's values stay in the stored data), and a relation by its label,
+ * never the related row's id — '—' when there is no label to show.
+ */
+export function sharedValues(
+  row: CustomTableRow,
+  columns: CustomTableColumn[],
+): Record<string, unknown> {
+  const values = (row.data ?? {}) as Record<string, unknown>;
+  const labels =
+    (row as CustomTableRow & { relationLabels?: Record<string, string> }).relationLabels ?? {};
   return Object.fromEntries(
-    columns.filter(col => col.key in values).map(col => [col.key, values[col.key]]),
+    columns
+      .filter(col => col.key in values)
+      .map(col => [
+        col.key,
+        col.type === CustomTableColumnType.RELATION && values[col.key] !== null
+          ? (labels[col.key] ?? '—')
+          : values[col.key],
+      ]),
   );
 }
 

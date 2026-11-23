@@ -76,5 +76,36 @@ describe('Shared table rows (e2e)', () => {
       .get(`/public/custom-tables/${token}/rows?limit=200&cursor=${first.body.items.at(-1).rowNumber}`)
       .expect(200);
     expect(rest.body.items).toHaveLength(50);
+    // The total is the whole table's, whatever page it answers.
+    expect(rest.body.meta.total).toBe(250);
+  });
+
+  it('shows a relation by its label, and never a row id', async () => {
+    const people = await as(request(server()).post('/custom-tables')).send({ name: 'People' }).expect(201);
+    const name = await as(request(server()).post(`/custom-tables/${people.body.id}/columns`))
+      .send({ title: 'Name', type: 'text' })
+      .expect(201);
+    const person = await as(request(server()).post(`/custom-tables/${people.body.id}/rows`))
+      .send({ data: { [name.body.key]: 'Member One' } })
+      .expect(201);
+    const orders = await as(request(server()).post('/custom-tables')).send({ name: 'Orders' }).expect(201);
+    const buyer = await as(request(server()).post(`/custom-tables/${orders.body.id}/columns`))
+      .send({
+        title: 'Buyer',
+        type: 'relation',
+        config: { targetTableId: people.body.id, displayColumnKey: name.body.key },
+      })
+      .expect(201);
+    await as(request(server()).post(`/custom-tables/${orders.body.id}/rows`))
+      .send({ data: { [buyer.body.key]: person.body.id } })
+      .expect(201);
+    const token = (
+      await as(request(server()).post(`/custom-tables/${orders.body.id}/shares`)).send({}).expect(201)
+    ).body.token;
+
+    const shared = await request(server()).get(`/public/custom-tables/${token}/rows`).expect(200);
+
+    expect(shared.body.items[0].data[buyer.body.key]).toBe('Member One');
+    expect(JSON.stringify(shared.body)).not.toContain(person.body.id);
   });
 });
