@@ -32,6 +32,7 @@ import {
   type OpenItem,
   type ReconciliationMatch,
 } from './reconciliation.util';
+import { amountToRemind } from './reminder-amount';
 
 const OPEN_STATUSES = [PayableStatus.TO_PAY, PayableStatus.SCHEDULED, PayableStatus.OVERDUE];
 const LOOKBACK_DAYS = 120;
@@ -144,7 +145,12 @@ export class SmbService {
   ): Promise<{ sent: boolean; to: string; reminderCount: number }> {
     const invoice = await this.invoiceRepository.findOne({ where: { id: invoiceId, workspaceId } });
     if (!invoice) throw new NotFoundException(appError('SMB_INVOICE_NOT_FOUND'));
-    if (invoice.status !== InvoiceStatus.SENT && invoice.status !== InvoiceStatus.OVERDUE) {
+    // What is left to pay; null once the receivable is settled.
+    const due = await amountToRemind(this.payableRepository, invoice, workspaceId);
+    if (
+      (invoice.status !== InvoiceStatus.SENT && invoice.status !== InvoiceStatus.OVERDUE) ||
+      due === null
+    ) {
       throw new BadRequestException(appError('SMB_REMINDER_INVOICE_STATUS'));
     }
     const client = await this.clientRepository.findOne({
@@ -169,7 +175,7 @@ export class SmbService {
     const fill = (template: string) =>
       template
         .replaceAll('{{number}}', invoice.invoiceNumber ?? invoice.id.slice(0, 8))
-        .replaceAll('{{total}}', `${Number(invoice.total).toFixed(2)} ${invoice.currency}`)
+        .replaceAll('{{total}}', `${due.toFixed(2)} ${invoice.currency}`)
         .replaceAll('{{due}}', String(invoice.dueDate).slice(0, 10))
         .replaceAll('{{state}}', state)
         .replaceAll('{{client}}', client.name)

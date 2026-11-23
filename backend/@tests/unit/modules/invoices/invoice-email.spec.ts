@@ -70,4 +70,19 @@ describe('composeInvoiceEmail', () => {
 
     expect(subject).toBe(`Invoice INV-42 from ${APP_NAME} Software OÜ`);
   });
+
+  it('shows what is still owed under the total of a partly paid invoice', () => {
+    const partlyPaid = { ...invoice, amountDue: 700 } as Invoice;
+
+    const { text } = composeInvoiceEmail(partlyPaid, profile, renderInvoiceLabels('en'), { reminderOffset: 3 });
+
+    expect(text).toContain('Total: 1200.00 EUR');
+    expect(text).toContain('Amount due: 700.00 EUR');
+  });
+
+  it('adds no amount due when nothing was paid yet', () => {
+    const { text } = composeInvoiceEmail({ ...invoice, amountDue: 1200 } as Invoice, profile, renderInvoiceLabels('en'));
+
+    expect(text).not.toContain('Amount due');
+  });
 });

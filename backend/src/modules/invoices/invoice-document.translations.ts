@@ -29,6 +29,8 @@ export type InvoiceLabelKey =
   | 'subtotal'
   | 'tax'
   | 'total'
+  /** What is still owed when part was paid or credited. */
+  | 'amountDue'
   | 'paymentDetails'
   | 'bank'
   | 'bankAccount'
@@ -74,6 +76,7 @@ const en: InvoiceLabelMap = {
   subtotal: 'Subtotal',
   tax: 'Tax',
   total: 'Total',
+  amountDue: 'Amount due',
   paymentDetails: 'Payment details',
   bank: 'Bank',
   bankAccount: 'Account / IBAN',
@@ -120,6 +123,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'Zwischensumme',
     tax: 'Steuer',
     total: 'Summe',
+    amountDue: 'Offener Betrag',
     paymentDetails: 'Zahlungsinformationen',
     bankAccount: 'Konto / IBAN',
     bankCode: 'BIC',
@@ -141,6 +145,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     reminderAfter: 'Rechnung {number} war am {due} fällig und ist noch nicht bezahlt.',
   },
   es: {
+    amountDue: 'Importe pendiente',
     invoice: 'Factura',
     creditNote: 'Nota de crédito',
     creditFor: 'Nota de crédito de la factura {number}',
@@ -182,6 +187,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     reminderAfter: 'La factura {number} venció el {due} y sigue sin pagar.',
   },
   fr: {
+    amountDue: 'Montant restant dû',
     invoice: 'Facture',
     creditNote: 'Avoir',
     creditFor: 'Avoir sur la facture {number}',
@@ -243,6 +249,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'उप-योग',
     tax: 'कर',
     total: 'कुल',
+    amountDue: 'बकाया राशि',
     paymentDetails: 'भुगतान विवरण',
     bank: 'बैंक',
     bankAccount: 'खाता / IBAN',
@@ -265,6 +272,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     reminderAfter: 'इनवॉइस {number} की अंतिम तिथि {due} थी और यह अब तक अदत्त है।',
   },
   id: {
+    amountDue: 'Jumlah terutang',
     invoice: 'Faktur',
     creditNote: 'Nota kredit',
     creditFor: 'Nota kredit untuk faktur {number}',
@@ -326,6 +334,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'Subtotale',
     tax: 'Imposta',
     total: 'Totale',
+    amountDue: 'Importo dovuto',
     paymentDetails: 'Dati per il pagamento',
     bank: 'Banca',
     bankAccount: 'Conto / IBAN',
@@ -369,6 +378,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: '小計',
     tax: '税額',
     total: '合計',
+    amountDue: '未払額',
     paymentDetails: 'お支払い情報',
     bank: '銀行',
     bankAccount: '口座 / IBAN',
@@ -412,6 +422,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'Аралық сома',
     tax: 'Салық',
     total: 'Сома',
+    amountDue: 'Төленетін қалдық',
     paymentDetails: 'Төлем деректемелері',
     bank: 'Банк',
     bankAccount: 'Шот / IBAN',
@@ -455,6 +466,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: '소계',
     tax: '세금',
     total: '합계',
+    amountDue: '미결제 금액',
     paymentDetails: '결제 정보',
     bank: '은행',
     bankAccount: '계좌 / IBAN',
@@ -498,6 +510,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'Subtotaal',
     tax: 'Belasting',
     total: 'Totaal',
+    amountDue: 'Openstaand bedrag',
     paymentDetails: 'Betaalgegevens',
     bankAccount: 'Rekening / IBAN',
     bankCode: 'BIC',
@@ -540,6 +553,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'Suma częściowa',
     tax: 'Podatek',
     total: 'Suma',
+    amountDue: 'Kwota do zapłaty',
     paymentDetails: 'Dane do płatności',
     bankAccount: 'Rachunek / IBAN',
     bankCode: 'BIC / SWIFT',
@@ -562,6 +576,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
       'Termin płatności faktury {number} minął {due}, a faktura jest nadal nieopłacona.',
   },
   pt: {
+    amountDue: 'Valor em dívida',
     invoice: 'Fatura',
     creditNote: 'Nota de crédito',
     creditFor: 'Nota de crédito da fatura {number}',
@@ -624,6 +639,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'Подытог',
     tax: 'Налог',
     total: 'Сумма',
+    amountDue: 'К оплате',
     paymentDetails: 'Реквизиты для оплаты',
     bank: 'Банк',
     bankAccount: 'Счёт / IBAN',
@@ -667,6 +683,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'Medzisúčet',
     tax: 'Daň',
     total: 'Celkom',
+    amountDue: 'Zostáva uhradiť',
     paymentDetails: 'Platobné údaje',
     bank: 'Banka',
     bankAccount: 'Účet / IBAN',
@@ -710,6 +727,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'Delsumma',
     tax: 'Skatt',
     total: 'Totalt',
+    amountDue: 'Att betala',
     paymentDetails: 'Betalningsuppgifter',
     bankAccount: 'Konto / IBAN',
     bankCode: 'BIC',
@@ -752,6 +770,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'Ara toplam',
     tax: 'Vergi',
     total: 'Toplam',
+    amountDue: 'Kalan tutar',
     paymentDetails: 'Ödeme bilgileri',
     bank: 'Banka',
     bankAccount: 'Hesap / IBAN',
@@ -795,6 +814,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'Підсумок',
     tax: 'Податок',
     total: 'Сума',
+    amountDue: 'До сплати',
     paymentDetails: 'Реквізити для оплати',
     bank: 'Банк',
     bankAccount: 'Рахунок / IBAN',
@@ -838,6 +858,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: 'Tổng phụ',
     tax: 'Thuế',
     total: 'Tổng cộng',
+    amountDue: 'Số tiền còn nợ',
     paymentDetails: 'Thông tin thanh toán',
     bank: 'Ngân hàng',
     bankAccount: 'Số tài khoản / IBAN',
@@ -881,6 +902,7 @@ const OVERRIDES: Record<string, Partial<InvoiceLabelMap>> = {
     subtotal: '小计',
     tax: '税额',
     total: '总额',
+    amountDue: '应付余额',
     paymentDetails: '付款信息',
     bank: '银行',
     bankAccount: '账户 / IBAN',
