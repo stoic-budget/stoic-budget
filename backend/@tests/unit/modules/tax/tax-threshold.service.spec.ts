@@ -54,6 +54,11 @@ describe('TaxThresholdService', () => {
     workspaceRepo = createRepoMock();
     workspaceRepo.findOne.mockImplementation(async () => workspace);
     workspaceRepo.save.mockImplementation(async (row: unknown) => row);
+    // The re-arm writes the two alert columns: the stored workspace follows.
+    workspaceRepo.update.mockImplementation(async (_where: unknown, patch: object) => {
+      Object.assign(workspace, patch);
+      return { affected: 1 };
+    });
     transactionRepo = createRepoMock();
     transactionRepo.find.mockResolvedValue([]);
     adoption = { getCurrentJurisdiction: vi.fn().mockResolvedValue(GB) };
@@ -266,7 +271,6 @@ describe('TaxThresholdService', () => {
         { id: 'ws-1' },
         expect.objectContaining({ taxThresholdAlertLevel: 0 }),
       );
-      workspace.taxThresholdAlertLevel = 0;
       turnoverOf('73000.00');
       await service.checkWorkspace('ws-1', new Date('2026-08-15T00:00:00.000Z'));
 
