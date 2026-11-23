@@ -29,10 +29,12 @@ export class ReceiptDuplicateService {
         return [];
       }
 
+      // In UTC: the stated day is a UTC midnight, and a local step across a
+      // clock change would land on the wrong day.
       const dateFrom = new Date(receiptDate);
-      dateFrom.setDate(dateFrom.getDate() - 2);
+      dateFrom.setUTCDate(dateFrom.getUTCDate() - 2);
       const dateTo = new Date(receiptDate);
-      dateTo.setDate(dateTo.getDate() + 2);
+      dateTo.setUTCDate(dateTo.getUTCDate() + 2);
 
       const amountMin = amount * 0.99;
       const amountMax = amount * 1.01;

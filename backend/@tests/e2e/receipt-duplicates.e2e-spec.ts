@@ -75,4 +75,19 @@ describe('Receipt duplicates by purchase date (e2e)', () => {
 
     expect(found.map(receipt => receipt.id)).not.toContain(other.id);
   });
+
+  it('falls back to the arrival time for a receipt whose date was not read', async () => {
+    const unread = await insertReceipt(
+      { amount: 7.8, currency: 'EUR', vendor: 'Kiosk Example', date: '' },
+      '2026-11-02T10:00:00Z',
+    );
+    const scanned = await insertReceipt(
+      { amount: 7.8, currency: 'EUR', vendor: 'Kiosk Example', date: '2026-11-01' },
+      '2026-11-20T10:00:00Z',
+    );
+
+    const found = await duplicates.findPotentialDuplicates(scanned);
+
+    expect(found.map(receipt => receipt.id)).toContain(unread.id);
+  });
 });
