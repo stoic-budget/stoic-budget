@@ -508,6 +508,38 @@ describe('background jobs leave a past version alone (real Postgres)', () => {
     );
   });
 
+  it('finds a due export schedule behind more than 50 that are not due', async () => {
+    const table = await insert('custom_tables', {
+      user_id: userId,
+      workspace_id: standardId,
+      name: 'Many exports',
+    });
+    const schedule = (fields: Record<string, unknown>) =>
+      insert('custom_table_export_schedules', {
+        table_id: table.id,
+        workspace_id: standardId,
+        ...fields,
+      });
+    // Many more than one batch of 50, so a batch picked before the due check misses it.
+    await dataSource.query(
+      `INSERT INTO custom_table_export_schedules (table_id, workspace_id, interval_hours, last_run_at)
+       SELECT $1, $2, 168, now() FROM generate_series(1, 1000)`,
+      [table.id, standardId],
+    );
+    const hourly = await schedule({
+      interval_hours: 1,
+      last_run_at: new Date(Date.now() - 2 * 3_600_000),
+    });
+
+    const due = await job(CustomTableExportSchedulesService, {
+      scheduleRepository: repo(CustomTableExportSchedule),
+    }).findDueSchedules();
+
+    const ids = due.map(found => found.id);
+    expect(ids).toContain(hourly.id);
+    expect(due.every(found => found.lastRunAt === null || found.id === hourly.id)).toBe(true);
+  });
+
   it('keeps subscriptions of the version as they were copied, and announces only live charges', async () => {
     const subscription = (workspaceId: string, vendorName: string, nextChargeDate: string) =>
       insert('subscriptions', {

@@ -109,19 +109,29 @@ export class CustomTableExportSchedulesService {
     await this.scheduleRepository.delete({ id: scheduleId });
   }
 
+  /**
+   * Up to 50 schedules whose interval has elapsed, the longest overdue first.
+   * Due is decided in SQL: taking 50 and filtering after would starve every
+   * schedule past the first 50 enabled ones.
+   */
   async findDueSchedules(now: Date = new Date()): Promise<CustomTableExportSchedule[]> {
-    // A past version keeps its copied schedules but never runs them.
-    const candidates = await this.scheduleRepository.find({
-      where: { enabled: true, workspace: STANDARD_WORKSPACE },
-      take: 50,
-    });
-    return candidates.filter(schedule => {
-      if (!schedule.lastRunAt) {
-        return true;
-      }
-      const intervalMs = Math.max(schedule.intervalHours || 168, 1) * 60 * 60 * 1000;
-      return new Date(schedule.lastRunAt).getTime() + intervalMs <= now.getTime();
-    });
+    return (
+      this.scheduleRepository
+        .createQueryBuilder('schedule')
+        // A past version keeps its copied schedules but never runs them.
+        .innerJoin('schedule.workspace', 'workspace', 'workspace.kind = :kind', {
+          kind: STANDARD_WORKSPACE.kind,
+        })
+        .where('schedule.enabled = true')
+        .andWhere(
+          `(schedule.last_run_at IS NULL OR schedule.last_run_at
+            + make_interval(hours => GREATEST(COALESCE(NULLIF(schedule.interval_hours, 0), 168), 1)) <= :now)`,
+          { now },
+        )
+        .orderBy('schedule.lastRunAt', 'ASC', 'NULLS FIRST')
+        .take(50)
+        .getMany()
+    );
   }
 
   async runSchedule(scheduleId: string): Promise<{ fileName: string; rows: number }> {
