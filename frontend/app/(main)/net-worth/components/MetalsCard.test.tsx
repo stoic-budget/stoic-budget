@@ -42,6 +42,7 @@ const summary: MetalsSummary = {
   value: 33745.1,
   cost: 30000,
   gain: 3745.1,
+  unpricedLots: 0,
   dealerValue: 32057.85,
   realized: 0,
   sales: [],
@@ -59,6 +60,7 @@ const summary: MetalsSummary = {
       cost: 30000,
       gain: 3745.1,
       costPerOunce: 3272.72,
+      unpricedLots: 0,
       dealerValue: 32057.85,
       dealerDiscount: 5,
       realized: 0,
@@ -174,6 +176,16 @@ describe('MetalsCard', () => {
     expect(screen.getByText('+6.86%')).toBeInTheDocument();
     // The amount is an element of its own (privacy mode); the percent is beside it.
     expect(screen.getByText(/\(9\.09%\)/).textContent).toMatch(/\+€2,499\.00 \(9\.09%\)/);
+  });
+
+  it('says how many lots without a purchase price are left out of the gain (#655)', async () => {
+    hookMock.summary = {
+      ...summary,
+      byMetal: summary.byMetal.map(totals => ({ ...totals, unpricedLots: 2 })),
+    };
+    renderWithQuery(<MetalsCard currency="EUR" locale="en" />);
+
+    expect(await screen.findByText(/: 2$/)).toBeInTheDocument();
   });
 
   it('states the German holding period only for a workspace that files there', () => {

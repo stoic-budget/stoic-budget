@@ -26,6 +26,7 @@ import {
   type WeightUnit,
 } from '../hooks/useMetals';
 import { LotDetailsDialog } from './LotDetailsDialog';
+import { MetalGain } from './MetalGain';
 import { CardTitle, cardSx } from './net-worth-ui';
 import { SellLotDialog } from './SellLotDialog';
 
@@ -308,15 +309,7 @@ function MetalTotalsRow({
         <Typography variant="body2">
           <strong className={PRIVATE_CLASS}>{money(totals.value)}</strong>
         </Typography>
-        <Typography
-          variant="body2"
-          sx={{ color: totals.gain >= 0 ? 'success.main' : 'error.main' }}
-        >
-          <PrivateAmount>
-            {totals.gain >= 0 ? '+' : '−'}
-            {money(Math.abs(totals.gain))}
-          </PrivateAmount>
-        </Typography>
+        <MetalGain gain={totals.gain} unpricedLots={totals.unpricedLots} money={money} />
         {totals.costPerOunce !== null && (
           <Typography
             variant="body2"
