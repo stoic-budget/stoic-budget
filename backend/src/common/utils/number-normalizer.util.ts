@@ -4,6 +4,10 @@
  * - Removes thousands separators
  * - Converts to number
  */
+/** "$", "S$", "€", or an ISO code such as "USD" at the start or the end of the figure. */
+const CURRENCY_EDGES =
+  /^(?:[A-Z]{0,3}[$€£¥₸₽₪₹฿]|[A-Z]{3}(?=[-+(\d.,]))|(?:[$€£¥₸₽₪₹฿]|(?<=[\d.,)])[A-Z]{3})$/g;
+
 export function normalizeNumber(value: string | number | null | undefined): number | null {
   if (value === null || value === undefined) {
     return null;
@@ -22,6 +26,10 @@ export function normalizeNumber(value: string | number | null | undefined): numb
 
   // Unicode minus sign behaves like ASCII minus
   normalized = normalized.replace(/−/g, '-');
+
+  // A currency mark at either end goes first, so a sign behind it still
+  // counts: "$-12.00", "USD-12.00", "-12.00€".
+  normalized = normalized.replace(CURRENCY_EDGES, '');
 
   let negative = false;
 

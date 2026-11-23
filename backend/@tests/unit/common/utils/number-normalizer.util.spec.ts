@@ -5,6 +5,15 @@ import {
 } from '@/common/utils/number-normalizer.util';
 
 describe('normalizeNumber', () => {
+  it('keeps a sign written after a currency mark (#635)', () => {
+    expect(normalizeNumber('$-12.00')).toBe(-12);
+    expect(normalizeNumber('USD -12.00')).toBe(-12);
+    expect(normalizeNumber('S$-5.50')).toBe(-5.5);
+    expect(normalizeNumber('-12,00€')).toBe(-12);
+    expect(normalizeNumber('12.00 EUR')).toBe(12);
+    expect(normalizeNumber('AB-123')).toBe(123);
+  });
+
   it('returns null for null/undefined', () => {
     expect(normalizeNumber(null)).toBeNull();
     expect(normalizeNumber(undefined)).toBeNull();
