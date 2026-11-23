@@ -63,8 +63,33 @@ describe('Goal contributions follow their rows (e2e)', () => {
 
     await as(request(server()).post(`/statements/${created.body.id}/trash`)).expect(200);
     expect(await saved()).toBe(0);
+    // The goal page lists what it counts: the trashed row's movement is gone too.
+    const detail = await as(request(server()).get(`/goals/${goal.body.id}`)).expect(200);
+    expect(detail.body.contributions).toEqual([]);
 
     await as(request(server()).post(`/statements/${created.body.id}/restore`)).expect(201);
     expect(await saved()).toBe(linked);
+  });
+
+  it('moves the goal at once for a row still waiting in Review', async () => {
+    const goal = await as(request(server()).post('/goals'))
+      .send({ name: 'Camera', targetAmount: 500, currency: 'USD' })
+      .expect(201);
+    const categories = await as(request(server()).get('/categories?type=expense')).expect(200);
+    const category = (categories.body as Array<{ id: string; parentId: string | null }>).find(item => !item.parentId);
+    const created = await as(request(server()).post('/statements/manual-expense'))
+      .field('categoryId', category?.id ?? '')
+      .field('amount', '80')
+      .field('currency', 'USD')
+      .field('merchant', 'ACME Store - Lens')
+      .field('date', new Date().toISOString().slice(0, 10))
+      .expect(201);
+    const [row] = await dataSource.query('SELECT id FROM transactions WHERE statement_id = $1', [created.body.id]);
+    await dataSource.query('UPDATE transactions SET is_verified = false WHERE id = $1', [row.id]);
+
+    await as(request(server()).put(`/transactions/${row.id}/goal`)).send({ goalId: goal.body.id }).expect(200);
+
+    const detail = await as(request(server()).get(`/goals/${goal.body.id}`)).expect(200);
+    expect(Math.abs(detail.body.currentAmount)).toBe(80);
   });
 });

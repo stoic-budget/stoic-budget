@@ -2,13 +2,13 @@ import { BadRequestException, ConflictException, Injectable } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, type Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
-import { countedSql } from '../../common/utils/counted-transactions.util';
 import type { GoalAccount } from '../../contracts';
 import { type Goal, GoalContribution } from '../../entities';
 import { Transaction } from '../../entities/transaction.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { walletLedgers } from '../wallets/wallet-ledger';
+import { countedLinkSql } from './counted-contribution';
 import { normalizeCurrency, round2, toNumber } from './goal-money.util';
 
 export type ProgressGoal = Pick<Goal, 'id' | 'currency' | 'walletId'>;
@@ -223,12 +223,9 @@ export class GoalProgressService {
       .addSelect('COALESCE(SUM(contribution.amount), 0)', 'total')
       .where('contribution.workspace_id = :workspaceId', { workspaceId })
       .andWhere('contribution.goal_id IN (:...goalIds)', { goalIds: goals.map(goal => goal.id) })
-      // A contribution made of a row counts while the row does: not once it is
-      // on a trashed statement, flagged a duplicate, still pending at the bank or
-      // waiting in Review (the rule every figure follows). One without a row counts.
-      .andWhere(
-        `NOT EXISTS (SELECT 1 FROM transactions linked WHERE linked.id = contribution.transaction_id AND NOT ${countedSql('linked')})`,
-      );
+      // A contribution made of a row counts while the row does: not once the row is
+      // on a trashed statement, flagged a duplicate or still pending at the bank.
+      .andWhere(countedLinkSql('contribution.transaction_id', 'contribution.workspace_id'));
     if (from) {
       query.andWhere('contribution.contribution_date >= :from', { from });
     }
