@@ -31,4 +31,19 @@ describe('keepConfirmed', () => {
 
     expect(result.transactions.map(item => item.id)).toEqual(['booked']);
   });
+
+  it('leaves out what is no income or spending, as the tiles beside the tables do', () => {
+    const result = keepConfirmed({
+      transactions: [
+        transaction('purchase', true),
+        { id: 'to-savings', isVerified: true, transferPairId: 'pair-1' },
+        { id: 'from-main', isVerified: true, transferPairId: 'pair-1' },
+        { id: 'car', isVerified: true, excludedFromBudgets: true },
+        { id: 'swap', isVerified: true, cryptoWalletId: 'wallet-1' },
+      ],
+      receipts: [],
+    });
+
+    expect(result.transactions.map(item => item.id)).toEqual(['purchase']);
+  });
 });

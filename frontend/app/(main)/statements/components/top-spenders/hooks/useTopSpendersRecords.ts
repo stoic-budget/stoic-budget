@@ -100,6 +100,18 @@ const buildFromOptions = (allRecords: TopSpenderRecord[], userFallback: string):
   return Array.from(seen.values());
 };
 
+/** Statements read to the end; one still read, failed or not reconciled has no figures yet. */
+const READ_STATUSES = new Set(['parsed', 'validated', 'completed']);
+
+/**
+ * A statement whose figures count here: read to the end, and not the service
+ * statement of a receipt scan — the receipt itself stands for it, once approved.
+ */
+const countsAsCompany = (statement: Params['statements'][number]): boolean =>
+  READ_STATUSES.has(statement.status ?? '') &&
+  statement.source !== 'scan' &&
+  statement.parsingDetails?.importPreview?.source !== 'receipt-scan';
+
 export const useTopSpendersRecords = ({
   statements,
   receipts,
@@ -109,13 +121,10 @@ export const useTopSpendersRecords = ({
   activeFlowType,
 }: Params): RecordsReturn => {
   const allRecords = useMemo<TopSpenderRecord[]>(() => {
-    const mappedStatements = statements.map(item => mapStatementToRecord(item, workspaceCurrency));
-    const existingIds = new Set(
-      mappedStatements.filter(r => r.sourceType === 'receipt').map(r => r.id),
-    );
-    const mappedReceipts = receipts
-      .filter(r => !existingIds.has(r.id))
-      .map(r => mapReceiptToRecord(r, workspaceCurrency));
+    const mappedStatements = statements
+      .filter(countsAsCompany)
+      .map(item => mapStatementToRecord(item, workspaceCurrency));
+    const mappedReceipts = receipts.map(r => mapReceiptToRecord(r, workspaceCurrency));
     return [...mappedStatements, ...mappedReceipts];
   }, [statements, receipts, workspaceCurrency]);
 
