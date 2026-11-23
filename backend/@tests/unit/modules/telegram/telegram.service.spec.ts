@@ -622,7 +622,37 @@ describe('TelegramService report already sent', () => {
     expect(reportsService.generateMonthlyReport).toHaveBeenCalledWith('workspace-1', 2026, 11);
     expect(persistAndSend).toHaveBeenCalled();
     expect(result).toMatchObject({ status: 'sent' });
-    // The schedule is the one that skips a delivered period.
-    expect(await service.wasSent('user-1', 'monthly' as any, '2026-11-01')).toBe(true);
+  });
+});
+
+describe('TelegramService failed resend', () => {
+  it('keeps a report that once reached the user delivered when a resend fails', async () => {
+    const { service, telegramReportRepository } = createService({ users: [] });
+    const internals = service as any;
+    vi.spyOn(internals, 'sendMessage').mockRejectedValue(new Error('Telegram is down'));
+    const delivered = {
+      id: 'rep-1',
+      status: 'sent',
+      sentAt: new Date('2026-11-21T08:00:00Z'),
+      messageId: 'm1',
+    };
+    const saves: Array<{ status: string }> = [];
+    telegramReportRepository.save = vi.fn(async (record: any) => {
+      saves.push({ status: record.status });
+      return record;
+    });
+
+    await expect(
+      internals.persistAndSend(
+        { id: 'user-1' },
+        'chat-1',
+        'daily',
+        new Date('2026-11-20'),
+        'Report of 20 November',
+        delivered,
+      ),
+    ).rejects.toThrow('Telegram is down');
+
+    expect(saves.at(-1)?.status).toBe('sent');
   });
 });

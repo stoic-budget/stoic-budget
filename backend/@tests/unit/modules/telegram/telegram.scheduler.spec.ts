@@ -133,15 +133,16 @@ describe('TelegramScheduler scheduled reports', () => {
     const telegramService = {
       sendReport: vi.fn(async () => ({ status: 'sent' })),
       resolveWorkspaceId: vi.fn(async () => 'workspace-1'),
-      wasSent: vi.fn(async () => false),
     } as any;
+    const reportRepository = { findOne: vi.fn(async (): Promise<unknown> => null) };
     const scheduler = new TelegramScheduler(
       telegramService,
       {} as any,
       createUserRepoMock([{ id: 'user-1', telegramChatId: 'chat-1' }]),
       { createEvent: vi.fn(async () => undefined) } as any,
+      reportRepository as any,
     );
-    return { scheduler, telegramService };
+    return { scheduler, telegramService, reportRepository };
   };
 
   afterEach(() => vi.useRealTimers());
@@ -174,13 +175,31 @@ describe('TelegramScheduler scheduled reports', () => {
     );
   });
 
-  it('skips a period already delivered, so a restart does not send it twice', async () => {
-    const { scheduler, telegramService } = build();
-    telegramService.wasSent.mockResolvedValue(true);
+  it('skips a period already delivered after it ended, so a restart does not send it twice', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-12-01T09:00:00Z'));
+    const { scheduler, telegramService, reportRepository } = build();
+    reportRepository.findOne.mockResolvedValue({ status: 'sent', sentAt: new Date('2026-12-01T08:00:30Z') });
 
     await scheduler.sendMonthlyReports();
     await scheduler.sendDailyReports();
 
     expect(telegramService.sendReport).not.toHaveBeenCalled();
+  });
+
+  it('still sends the period when the only delivery was asked for before it ended', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-12-01T09:00:00Z'));
+    const { scheduler, telegramService, reportRepository } = build();
+    // `/report` on 15 November: a partial month, not the report of November.
+    reportRepository.findOne.mockResolvedValue({ status: 'sent', sentAt: new Date('2026-11-15T10:00:00Z') });
+
+    await scheduler.sendMonthlyReports();
+
+    expect(telegramService.sendReport).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ year: 2026, month: 11 }),
+      'workspace-1',
+    );
   });
 });

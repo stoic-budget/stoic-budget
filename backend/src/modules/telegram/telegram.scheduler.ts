@@ -4,10 +4,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, type Repository } from 'typeorm';
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
 import { InsightSeverity } from '../../entities/insight.entity';
-import { ReportType } from '../../entities/telegram-report.entity';
+import { ReportType, TelegramReport } from '../../entities/telegram-report.entity';
 import { User } from '../../entities/user.entity';
 import { AuditService } from '../audit/audit.service';
 import { InsightsService } from '../insights/insights.service';
+import { deliveredAfterPeriod } from './report-period';
 import { TelegramService } from './telegram.service';
 
 @Injectable()
@@ -20,7 +21,18 @@ export class TelegramScheduler {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly auditService: AuditService,
+    @InjectRepository(TelegramReport)
+    private readonly reportRepository: Repository<TelegramReport>,
   ) {}
+
+  /** Sent once per period: a restart or a second instance does not send it twice. */
+  private async delivered(userId: string, reportType: ReportType, date: string): Promise<boolean> {
+    const report = await this.reportRepository.findOne({
+      where: { userId, reportType, reportDate: date as never },
+      select: { status: true, sentAt: true },
+    });
+    return deliveredAfterPeriod(report, reportType, date);
+  }
 
   @Cron(CronExpression.EVERY_DAY_AT_8AM)
   async sendDailyReports(): Promise<void> {
@@ -35,8 +47,7 @@ export class TelegramScheduler {
         if (!workspaceId) {
           continue;
         }
-        // Sent once per period: a restart or a second instance does not send it twice.
-        if (await this.telegramService.wasSent(user.id, ReportType.DAILY, date)) {
+        if (await this.delivered(user.id, ReportType.DAILY, date)) {
           continue;
         }
         await this.telegramService.sendReport(
@@ -94,7 +105,7 @@ export class TelegramScheduler {
         if (!workspaceId) {
           continue;
         }
-        if (await this.telegramService.wasSent(user.id, ReportType.MONTHLY, monthStart)) {
+        if (await this.delivered(user.id, ReportType.MONTHLY, monthStart)) {
           continue;
         }
         await this.telegramService.sendReport(
