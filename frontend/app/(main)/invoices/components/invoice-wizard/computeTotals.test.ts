@@ -27,4 +27,19 @@ describe('invoice totals in the wizard (#684)', () => {
       total: 35.67,
     });
   });
+
+  it('rounds a half cent the way the server does', () => {
+    expect(computeTotals([line(42.5, 'standard')], [STANDARD], false)).toEqual({
+      subtotal: 42.5,
+      taxTotal: 8.08,
+      total: 50.58,
+    });
+    const twenty: TaxRateOption = { id: 'twenty', name: 'Standard 20%', rate: 20 };
+    // Tax-inclusive: the tax is extracted and the net is what is left.
+    expect(computeTotals([line(0.57, 'twenty')], [twenty], true)).toEqual({
+      subtotal: 0.47,
+      taxTotal: 0.1,
+      total: 0.57,
+    });
+  });
 });

@@ -40,6 +40,8 @@ const addDays = (iso: string, days: number): string => {
 };
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
+/** The server's `roundHalfAwayFromZero`, on minor units. */
+const halfAway = (value: number) => (value < 0 ? -Math.round(-value) : Math.round(value));
 
 /** Quantity × unit price after the line's discount or surcharge, as the backend prices it. */
 export function lineAmount(item: InvoiceLineItemInput): number {
@@ -57,22 +59,24 @@ export function computeTotals(
   taxRates: TaxRateOption[],
   pricesIncludeTax: boolean,
 ) {
-  // A reverse-charge rate charges nothing on the invoice (#684), and each
-  // line's tax is rounded to the cent, as the server stores it.
+  // As the server's computeTax (#684): a reverse-charge rate charges nothing,
+  // and each line's tax is worked out in whole cents, rounded half away from
+  // zero, with the net or gross derived from it by subtraction.
   const rateById = new Map(taxRates.map(rate => [rate.id, rate.isReverseCharge ? 0 : rate.rate]));
-  let subtotal = 0;
-  let taxTotal = 0;
+  let subtotalMinor = 0;
+  let taxMinor = 0;
   for (const item of lineItems) {
-    const amount = lineAmount(item);
+    const amountMinor = halfAway(lineAmount(item) * 100);
     const pct = item.taxRateId ? (rateById.get(item.taxRateId) ?? 0) : 0;
-    const tax = round2(pricesIncludeTax ? (amount * pct) / (100 + pct) : (amount * pct) / 100);
-    subtotal += pricesIncludeTax ? amount - tax : amount;
-    taxTotal += tax;
+    const inclusive = pricesIncludeTax && pct > 0;
+    const tax = halfAway(inclusive ? (amountMinor * pct) / (100 + pct) : (amountMinor * pct) / 100);
+    subtotalMinor += inclusive ? amountMinor - tax : amountMinor;
+    taxMinor += tax;
   }
   return {
-    subtotal: round2(subtotal),
-    taxTotal: round2(taxTotal),
-    total: round2(subtotal + taxTotal),
+    subtotal: subtotalMinor / 100,
+    taxTotal: taxMinor / 100,
+    total: (subtotalMinor + taxMinor) / 100,
   };
 }
 
