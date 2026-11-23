@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { formatInvoiceDate } from '@/app/(main)/invoices/components/invoices-format';
-import { formatDate } from './user-format';
+import { formatDay } from '@/app/(main)/accounts/components/account-detail-styles';
+import { formatDate, toDate } from './user-format';
 
 describe('calendar days west of Greenwich', () => {
   const zone = process.env.TZ;
@@ -24,5 +25,14 @@ describe('calendar days west of Greenwich', () => {
 
   it('still shows a real instant in local time', () => {
     expect(formatDate('2026-03-01T03:00:00.000Z', { dateFormat: 'dmy' })).toBe('28.02.2026');
+  });
+
+  it('shows account and loan days as that day too', () => {
+    expect(formatDay('2026-03-01', 'en-US')).toBe('Mar 1, 2026');
+  });
+
+  it('reads an impossible day as no day, not one rolled into the next month', () => {
+    expect(toDate('2026-13-01')).toBeNull();
+    expect(toDate('2026-02-30')).toBeNull();
   });
 });

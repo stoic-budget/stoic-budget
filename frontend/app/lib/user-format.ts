@@ -62,7 +62,9 @@ export const toDate = (value: Date | string | number | null | undefined): Date |
     : value instanceof Date
       ? value
       : new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
+  // 2026-13-01 or 2026-02-30 is no day, not one rolled over into the next month.
+  const impossible = day && date.getMonth() !== Number(day[2]) - 1;
+  return impossible || Number.isNaN(date.getTime()) ? null : date;
 };
 
 const pad = (value: number) => String(value).padStart(2, '0');
