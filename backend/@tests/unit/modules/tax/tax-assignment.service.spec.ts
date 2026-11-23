@@ -208,6 +208,11 @@ describe('TaxAssignmentService', () => {
 
       expect(result.taxSource).not.toBe(TaxSource.DEFAULT);
       expect(result.taxRateId).toBe(STANDARD_RATE.id);
+      // The category is read in the row's workspace only.
+      expect(workspaceRepo.manager.query).toHaveBeenCalledWith(
+        expect.stringContaining('"workspace_id" = $2'),
+        [base.categoryId, 'ws-1'],
+      );
     });
 
     it('ignores a rule for another category', async () => {
