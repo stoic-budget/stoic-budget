@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transaction } from '../../../../src/entities/transaction.entity';
+import { occurrenceFingerprint } from '../../../../src/common/utils/fingerprint.util';
 import { CrossStatementDeduplicationService } from '../../../../src/modules/transactions/services/cross-statement-deduplication.service';
 
 describe('CrossStatementDeduplicationService', () => {
@@ -13,7 +14,8 @@ describe('CrossStatementDeduplicationService', () => {
     findBy: vi.fn(),
     findOneBy: vi.fn(),
     update: vi.fn(),
-    exists: vi.fn(async () => false),
+    // unmarkDuplicate runs in a transaction on the same repository.
+    manager: { transaction: vi.fn(async (work: any) => work({ getRepository: () => mockRepository })) },
     // The tax-lock check of a merge: no row, nor loan interest split off one, is filed.
     count: vi.fn(async () => 0),
     createQueryBuilder: vi.fn(() => ({
@@ -405,6 +407,7 @@ describe('CrossStatementDeduplicationService', () => {
         ...createMockTransaction('tx1', new Date(), 10000, 'Company A', 'Payment', 'stmt1'),
         isDuplicate: false,
         duplicateOfId: null,
+        fingerprint: null,
       };
 
       mockRepository.update.mockResolvedValue({ affected: 1 });
@@ -423,26 +426,37 @@ describe('CrossStatementDeduplicationService', () => {
           duplicateOfId: null,
           duplicateConfidence: null,
           duplicateMatchType: null,
+          fingerprint: null,
         },
       );
       expect(result.isDuplicate).toBe(false);
     });
 
-    it('gives up the fingerprint when a counted row already holds it', async () => {
-      const transaction = {
-        ...createMockTransaction('tx1', new Date(), 10000, 'Company A', 'Payment', 'stmt1'),
-        isDuplicate: true,
-        fingerprint: 'fp-1',
-      };
+    it('keeps its fingerprint when no counted row holds it', async () => {
       mockRepository.update.mockResolvedValue({ affected: 1 });
-      mockRepository.findOneBy.mockResolvedValue(transaction);
-      mockRepository.exists.mockResolvedValueOnce(true);
+      mockRepository.findOneBy.mockResolvedValue({ id: 'tx1', isDuplicate: true, fingerprint: 'fp-1' });
+      mockRepository.find.mockResolvedValueOnce([]);
 
       await service.unmarkDuplicate('tx1', 'workspace1');
 
       expect(mockRepository.update).toHaveBeenCalledWith(
         { id: 'tx1', workspaceId: 'workspace1' },
-        expect.objectContaining({ isDuplicate: false, fingerprint: null }),
+        expect.objectContaining({ isDuplicate: false, fingerprint: 'fp-1' }),
+      );
+    });
+
+    it('takes the next occurrence fingerprint when a counted row holds its own', async () => {
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+      mockRepository.findOneBy.mockResolvedValue({ id: 'tx1', isDuplicate: true, fingerprint: 'fp-1' });
+      mockRepository.find.mockResolvedValueOnce([
+        { id: 'tx0', fingerprint: 'fp-1', isDuplicate: false },
+      ]);
+
+      await service.unmarkDuplicate('tx1', 'workspace1');
+
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        { id: 'tx1', workspaceId: 'workspace1' },
+        expect.objectContaining({ fingerprint: occurrenceFingerprint('fp-1', 2) }),
       );
     });
 

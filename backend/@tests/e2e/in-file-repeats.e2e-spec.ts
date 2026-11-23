@@ -122,7 +122,53 @@ describe('Identical rows in one statement (e2e)', () => {
       'SELECT id, is_duplicate, duplicate_of_id, fingerprint FROM transactions WHERE id = $1',
       [again[0].id],
     );
-    expect(kept).toMatchObject({ is_duplicate: false, duplicate_of_id: null, fingerprint: null });
+    expect(kept).toMatchObject({ is_duplicate: false, duplicate_of_id: null });
+    expect(kept.fingerprint).not.toBeNull();
+    expect(kept.fingerprint).not.toBe(again[0].fingerprint);
+  });
+
+  it('a repeat flagged by an older import, once kept, is still found by the next upload', async () => {
+    const counted = async () =>
+      Number(
+        (
+          await dataSource.query(
+            `SELECT count(*) AS n FROM transactions
+             WHERE workspace_id = $1 AND counterparty_name = $2 AND is_duplicate = false
+               AND transaction_date = '2026-04-10'`,
+            [owner.workspaceId, COFFEE.payee],
+          )
+        )[0].n,
+      );
+    const [first, second] = await upload(twoCoffees('20260430').replace(/20260310/g, '20260410'));
+    // What the old import left: the second coffee with the first one's fingerprint, no original.
+    await dataSource.query(
+      'UPDATE transactions SET is_duplicate = true, duplicate_of_id = NULL, fingerprint = $2 WHERE id = $1',
+      [second.id, first.fingerprint],
+    );
+    expect(await counted()).toBe(1);
+
+    await keep(second.id).expect(200);
+    expect(await counted()).toBe(2);
+
+    await upload(twoCoffees('20260429').replace(/20260310/g, '20260410'));
+    expect(await counted()).toBe(2);
+  });
+
+  it('two Keeps at once on rows sharing a fingerprint both succeed', async () => {
+    const rows = await upload(twoCoffees('20260531').replace(/20260310/g, '20260510'));
+    await dataSource.query(
+      'UPDATE transactions SET is_duplicate = true, duplicate_of_id = NULL, fingerprint = $2 WHERE id = ANY($1)',
+      [rows.map(row => row.id), rows[0].fingerprint],
+    );
+
+    const answers = await Promise.all(rows.map(row => keep(row.id)));
+
+    expect(answers.map(answer => answer.status)).toEqual([200, 200]);
+    const kept: Row[] = await dataSource.query(
+      'SELECT id, is_duplicate, duplicate_of_id, fingerprint FROM transactions WHERE id = ANY($1)',
+      [rows.map(row => row.id)],
+    );
+    expect(new Set(kept.map(row => row.fingerprint)).size).toBe(2);
   });
 
   it('keeps a row flagged without an original, as older imports left them', async () => {
