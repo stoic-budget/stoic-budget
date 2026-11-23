@@ -324,10 +324,32 @@ export function formatUnits(value: bigint, decimals: number): string {
 }
 
 /** Adds two decimal strings without going through binary floating point. */
-export function addDecimals(a: string, b: string): string {
+export function addDecimals(left: string, right: string): string {
+  const [a, b] = [plainDecimal(left), plainDecimal(right)];
   const scale = Math.max(fractionLength(a), fractionLength(b));
   const sum = toScaledBigInt(a, scale) + toScaledBigInt(b, scale);
   return formatUnits(sum, scale);
+}
+
+/**
+ * "7.5e-7" as "0.00000075": a parsed amount turned into a string writes a
+ * tiny or huge number in exponent form, which BigInt cannot read.
+ */
+function plainDecimal(value: string): string {
+  const match = /^(-?)(\d+)(?:\.(\d+))?e([+-]?\d+)$/i.exec(value.trim());
+  if (!match) {
+    return value;
+  }
+  const [, sign, whole, fraction = '', exponentText] = match;
+  const digits = `${whole}${fraction}`;
+  const point = whole.length + Number(exponentText);
+  const padded =
+    point <= 0
+      ? `0.${'0'.repeat(-point)}${digits}`
+      : point >= digits.length
+        ? `${digits}${'0'.repeat(point - digits.length)}`
+        : `${digits.slice(0, point)}.${digits.slice(point)}`;
+  return `${sign}${padded}`;
 }
 
 function fractionLength(value: string): number {
