@@ -79,6 +79,9 @@ describe('TaxStatusSection', () => {
     await screen.findByText('registeredHelp');
 
     selectOption(screen.getAllByRole('combobox')[0], 'notRegistered');
+    expect(api.put).not.toHaveBeenCalled();
+    // The status's own Save comes first; the reserve has the other.
+    fireEvent.click(screen.getAllByRole('button', { name: 'save' })[0]);
 
     await waitFor(() =>
       expect(api.put).toHaveBeenCalledWith('/tax/settings/vat-status', {
@@ -94,8 +97,10 @@ describe('TaxStatusSection', () => {
     renderWithQuery(<TaxStatusSection />);
     await screen.findByText('notRegisteredHelp');
 
-    fireEvent.change(screen.getByLabelText('effectiveFromLabel'), { target: { value: '2026-07-01' } });
+    // The status first and the day second: nothing goes until Save.
     selectOption(screen.getAllByRole('combobox')[0], 'registered');
+    fireEvent.change(screen.getByLabelText('effectiveFromLabel'), { target: { value: '2026-07-01' } });
+    fireEvent.click(screen.getAllByRole('button', { name: 'save' })[0]);
 
     await waitFor(() =>
       expect(api.put).toHaveBeenCalledWith('/tax/settings/vat-status', {

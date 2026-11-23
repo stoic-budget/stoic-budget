@@ -1,6 +1,7 @@
 import * as Schema from 'effect/Schema';
 import * as Struct from 'effect/Struct';
 import {
+  DateOnlyInput,
   IsoDateString,
   isAtMostTwoDecimals,
   NumericInput,
@@ -82,7 +83,7 @@ export const SetVatStatusBody = Schema.Struct({
    * Day the status applies from: rows before it keep the status they had.
    * Without one it applies to every row not on a filed return.
    */
-  effectiveFrom: optionalNullable(IsoDateString),
+  effectiveFrom: optionalNullable(DateOnlyInput),
 });
 export type SetVatStatusBody = Wire<typeof SetVatStatusBody>;
 

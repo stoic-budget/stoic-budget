@@ -83,6 +83,10 @@ export class WorkspaceTaxSettingsService {
     if (!workspace) {
       throw new NotFoundException(appError('WORKSPACE_NOT_FOUND'));
     }
+    // The status switches now: a day still to come would apply it early to today's rows.
+    if (effectiveFrom && effectiveFrom > new Date().toISOString().slice(0, 10)) {
+      throw new BadRequestException(appError('REQUEST_INVALID'));
+    }
     const previous = workspace.vatStatus;
     if (previous === status) {
       return { vatStatus: status, reassessed: 0 };

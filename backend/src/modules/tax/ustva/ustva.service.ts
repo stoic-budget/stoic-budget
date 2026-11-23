@@ -6,7 +6,7 @@ import { countedWhere } from '../../../common/utils/counted-transactions.util';
 import { canReadPrivate } from '../../../common/utils/transaction-privacy.util';
 import { TaxFilingPeriod } from '../../../entities/tax-jurisdiction.entity';
 import { Transaction, TransactionType } from '../../../entities/transaction.entity';
-import { VatStatus, Workspace } from '../../../entities/workspace.entity';
+import { VatStatus, vatStatusOn, Workspace } from '../../../entities/workspace.entity';
 import { ExchangeRatesService } from '../../exchange-rates/exchange-rates.service';
 import { toDateOnly } from '../jurisdictions.service';
 import { WorkspaceTaxSettingsService } from '../workspace-tax-settings.service';
@@ -68,7 +68,11 @@ export class UstvaService {
     if (workspace?.taxJurisdiction?.code !== 'DE') {
       return result('not_germany');
     }
-    if (workspace.vatStatus !== VatStatus.REGISTERED) {
+    // Registered on either end of the period: a return stays possible for a
+    // quarter registered then, after a later switch away.
+    if (
+      ![periodStart, periodEnd].some(day => vatStatusOn(workspace, day) === VatStatus.REGISTERED)
+    ) {
       return result('not_registered');
     }
     const year = Number(periodStart.slice(0, 4));

@@ -161,6 +161,7 @@ export class VersionSnapshotService {
       ledgerBaseCurrency: workspace.ledgerBaseCurrency,
       taxJurisdictionId: workspace.taxJurisdictionId,
       vatStatus: workspace.vatStatus,
+      vatStatusHistory: workspace.vatStatusHistory,
     };
   }
 }
