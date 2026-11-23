@@ -12,7 +12,8 @@ export const fetchExchangeRate = async (from: string, to: string): Promise<numbe
       params: { from, to },
       contract: 'ExchangeRateQuote',
     });
-    return Number.isFinite(quote.rate) ? quote.rate : null;
+    // The server answers a missing rate as `rate: 1, missing: true`.
+    return quote.missing || !Number.isFinite(quote.rate) ? null : quote.rate;
   } catch {
     return null;
   }
