@@ -187,7 +187,7 @@ describe('Receipt ↔ transaction (e2e)', () => {
     };
     const bank = await addRow('CORNER CAFE 77123');
     // The row the scan booked itself, in the service statement of the scan: it
-    // carries the receipt's own vendor, so it scores higher than the bank row.
+    // carries the receipt's own vendor, so on main it crowds the bank row out of the suggestion.
     const scan = await addRow('Corner Cafe');
     await dataSource.query(
       `UPDATE statements SET parsing_details = jsonb_build_object('detectedBy', 'receipt-scan') WHERE id = $1`,
