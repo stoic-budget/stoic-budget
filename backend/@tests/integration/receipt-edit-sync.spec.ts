@@ -344,6 +344,32 @@ describe('editing an approved receipt reaches the figures (real Postgres)', () =
     await txRepo.delete({ id });
   });
 
+  it('does not put back a category the row was given elsewhere when the form resends it (#688)', async () => {
+    const id = await row({ amount: 12, debit: 12, categoryId: softwareId });
+    const receiptId = await approvedReceipt({
+      source: ReceiptSource.IMAP,
+      transactionId: id,
+      parsedData: { date: LAST_MONTH, amount: 12, currency: 'USD', vendor: 'ACME Stor', categoryId: softwareId },
+    });
+    // Recategorised in Review, after the receipt was approved.
+    await txRepo.update({ id }, { categoryId: travelId });
+
+    // The receipt page resends every field: the same old category with a vendor fix.
+    await receipts.update(
+      receiptId,
+      workspaceId,
+      { parsedData: { vendor: 'ACME Store', amount: 12, categoryId: softwareId } },
+      userId,
+    );
+
+    const edited = await txRepo.findOneByOrFail({ id });
+    expect(edited.categoryId).toBe(travelId);
+    expect(edited.counterpartyName).toBe('ACME Store');
+    const receipt = await receiptRepo.findOneByOrFail({ id: receiptId });
+    expect(receipt.parsedData?.categorySource ?? null).not.toBe('manual');
+    await txRepo.delete({ id });
+  });
+
   it("keeps the bank's date and amount on a bank row and takes only the category", async () => {
     const bank = await statement({ bankName: BankName.OTHER });
     const id = await row({ statementId: bank, amount: 50, debit: 50 });
