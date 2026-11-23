@@ -1147,7 +1147,7 @@ export class SubscriptionsService {
 
     for (const sub of pastDue) {
       // Flags a charge missing only once its due date has had a cycle to arrive.
-      if (await advancePastDue(sub, this.chargeRepository, (d, f) => this.addInterval(d, f))) {
+      if (await advancePastDue(sub, this.chargeRepository)) {
         await this.subscriptionRepository.save(sub);
       }
     }

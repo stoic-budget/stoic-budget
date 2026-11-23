@@ -67,6 +67,7 @@ import { OfficialVatRatesService } from '../../src/modules/tax/official-vat-rate
 import { TaxThresholdService } from '../../src/modules/tax/tax-threshold.service';
 import { TaxDeadlinesService } from '../../src/modules/tax-reminders/tax-deadlines.service';
 import { TelegramService } from '../../src/modules/telegram/telegram.service';
+import { SubscriptionCharge } from '../../src/entities/subscription-charge.entity';
 
 const BASE_URL = process.env.DATABASE_URL || 'postgresql://finflow:finflow@localhost:5434/finflow';
 const SCRATCH_DB = `seneca_version_crons_${process.pid}`;
@@ -524,6 +525,7 @@ describe('background jobs leave a past version alone (real Postgres)', () => {
     const notifications = { createForWorkspaceMembers: vi.fn(async () => 1) };
     const service = job(SubscriptionsService, {
       subscriptionRepository: repo(Subscription),
+      chargeRepository: repo(SubscriptionCharge),
       notificationsService: notifications,
     });
 
