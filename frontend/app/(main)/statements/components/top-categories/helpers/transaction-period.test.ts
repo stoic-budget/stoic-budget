@@ -28,3 +28,11 @@ describe('cash flow tables place a row in the period of its own date', () => {
     expect(resolveStatementDateValue(record as never).slice(0, 10)).toBe('2026-02-20');
   });
 });
+
+describe('a date-only value is its own day in any time zone', () => {
+  it('reads 1 March as 1 March, not the last of February west of Greenwich', async () => {
+    const { toDateOnly } = await import('../../filters/statement-filter-internals');
+    const day = toDateOnly('2026-03-01');
+    expect([day?.getFullYear(), day?.getMonth(), day?.getDate()]).toEqual([2026, 2, 1]);
+  });
+});
