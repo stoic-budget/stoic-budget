@@ -356,9 +356,10 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     const [sale] = await dataSource.query('SELECT id FROM transactions WHERE statement_id = $1', [
       created.body.id,
     ]);
-    const income = await auth(api().get('/categories?type=income')).expect(200);
-    const incomeCategory = (income.body as Array<{ id: string; name: string; parentId: string | null }>)
-      .find(category => !category.parentId && category.name !== 'Uncategorized');
+    const [incomeCategory] = await dataSource.query(
+      `SELECT id FROM categories WHERE workspace_id = $1 AND system_key = 'sales'`,
+      [workspaceId],
+    );
     await auth(api().put(`/transactions/${sale.id}`))
       .send({ debit: 0, credit: 20000, categoryId: incomeCategory?.id })
       .expect(200);
@@ -372,6 +373,26 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     const watched = await auth(api().get('/tax/settings/threshold')).expect(200);
     expect(watched.body).toMatchObject({ threshold: 25000, turnover: 20000, currency: 'EUR' });
     expect(watched.body.percentUsed).toBe(80);
+
+    // Wages, and a loan left in Uncategorized, are no sales.
+    const [salary] = await dataSource.query(
+      `SELECT id FROM categories WHERE workspace_id = $1 AND system_key = 'salary'`,
+      [workspaceId],
+    );
+    const [uncategorized] = await dataSource.query(
+      `SELECT id FROM categories WHERE workspace_id = $1 AND name = 'Uncategorized' AND type = 'income'`,
+      [workspaceId],
+    );
+    for (const categoryId of [salary?.id, uncategorized?.id].filter(Boolean)) {
+      await dataSource.query(
+        `INSERT INTO transactions (workspace_id, transaction_date, counterparty_name, payment_purpose,
+           amount, credit, currency, transaction_type, is_verified, category_id)
+         VALUES ($1, '2026-05-20', 'ACME Employer', 'Salary', 8000, 8000, 'EUR', 'income', true, $2)`,
+        [workspaceId, categoryId],
+      );
+    }
+    const still = await auth(api().get('/tax/settings/threshold')).expect(200);
+    expect(still.body).toMatchObject({ turnover: 20000 });
   });
 
   it('turns VAT off when the workspace becomes a household', async () => {
