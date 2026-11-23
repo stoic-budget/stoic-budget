@@ -61,6 +61,7 @@ const REPORT = {
     },
   ],
   total: { income: 0, expense: 300 },
+  carriedOver: 0,
   missingRateCurrencies: [],
 };
 
@@ -87,6 +88,7 @@ function mockApi({
           incomeTax: null,
           payments: { categoryId: null, amount: 0, count: 0 },
           total: 0,
+          carriedOver: 0,
           missingRateCurrencies: [],
         },
       });
@@ -120,6 +122,7 @@ describe('TaxYearView', () => {
         incomeTax: { percent: 30, earnings: 10000, amount: 3000 },
         payments: { categoryId: 'cat-tax', amount: 1000, count: 2 },
         total: 2950,
+        carriedOver: 0,
         missingRateCurrencies: [],
       },
     });
@@ -132,6 +135,26 @@ describe('TaxYearView', () => {
     expect(screen.getByText('−€1,000')).toBeInTheDocument();
   });
 
+  it("shows what last year left unpaid, only when it did", async () => {
+    mockApi({
+      reserve: {
+        currency: 'EUR',
+        year: YEAR,
+        asOf: `${YEAR}-02-28`,
+        vat: null,
+        incomeTax: { percent: 30, earnings: 500, amount: 150 },
+        payments: { categoryId: 'cat-tax', amount: 300, count: 1 },
+        total: 150,
+        carriedOver: 300,
+        missingRateCurrencies: [],
+      },
+    });
+    renderWithQuery(<TaxYearView />);
+
+    expect(await screen.findByText('reserveCarried')).toBeInTheDocument();
+    expect(screen.getAllByText('€300').length).toBeGreaterThan(0);
+  });
+
   it('calls negative VAT money to reclaim, and puts no minus on a zero', async () => {
     mockApi({
       reserve: {
@@ -142,6 +165,7 @@ describe('TaxYearView', () => {
         incomeTax: null,
         payments: { categoryId: null, amount: 0, count: 0 },
         total: 0,
+        carriedOver: 0,
         missingRateCurrencies: [],
       },
     });

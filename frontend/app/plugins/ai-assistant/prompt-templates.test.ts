@@ -499,6 +499,7 @@ describe('AI assistant prompts', () => {
         },
       ],
       total: { income: 50000, expense: 9600 },
+      carriedOver: 0,
       missingRateCurrencies: [],
     };
     responses.set(`/tax/year-report?year=${year}`, report);
