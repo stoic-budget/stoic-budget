@@ -4,7 +4,7 @@ import {
   TransferPairKind,
   type TransferPairSource,
 } from '../../../entities/transaction.entity';
-import { promoteCopiesOf } from './promote-copies';
+import { deletePromotingCopies } from './promote-copies';
 
 /**
  * What a deleted row was linked to, kept in its audit entry so that undoing the
@@ -138,8 +138,7 @@ export async function deleteAndDetach(
   const repo = manager.getRepository(Transaction);
   const ids = rows.map(row => row.id);
   // One copy becomes the original, the others point to it (one per fingerprint).
-  await promoteCopiesOf(repo, workspaceId, ids);
-  await repo.delete({ workspaceId, id: In(ids) });
+  await deletePromotingCopies(repo, workspaceId, ids);
 
   const pairIds = distinct(rows.map(row => row.transferPairId));
   if (pairIds.length > 0) {
@@ -195,24 +194,23 @@ export async function restoreLinks(
       );
     }
   }
+  // The delete made one copy the original and pointed the others to it; both
+  // come back. A copy split meanwhile is not re-flagged: its parts carry the charge.
+  const copyIds = links.copies.map(copy => copy.id);
+  const flagged = [{ isDuplicate: false, duplicateOfId: IsNull() }, { duplicateOfId: In(copyIds) }];
   for (const copy of links.copies) {
-    await repo.update(
-      // A copy split meanwhile is not re-flagged: its parts carry the charge now.
-      {
-        workspaceId,
-        id: copy.id,
-        isDuplicate: false,
-        duplicateOfId: IsNull(),
-        splitGroupId: IsNull(),
-      },
-      {
-        isDuplicate: true,
-        duplicateOfId: restored.id,
-        duplicateConfidence:
-          copy.duplicateConfidence === null ? null : Number(copy.duplicateConfidence),
-        duplicateMatchType: copy.duplicateMatchType,
-      },
-    );
+    for (const was of flagged) {
+      await repo.update(
+        { workspaceId, id: copy.id, splitGroupId: IsNull(), ...was },
+        {
+          isDuplicate: true,
+          duplicateOfId: restored.id,
+          duplicateConfidence:
+            copy.duplicateConfidence === null ? null : Number(copy.duplicateConfidence),
+          duplicateMatchType: copy.duplicateMatchType,
+        },
+      );
+    }
   }
   for (const sibling of links.splitSiblings) {
     await repo.update(

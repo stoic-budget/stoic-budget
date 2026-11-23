@@ -804,15 +804,22 @@ describe('StatementsService', () => {
       vi.spyOn(statementParsingQueue, 'enqueue').mockResolvedValue(undefined);
       const at = new Date('2026-03-01T10:00:00Z');
       vi.spyOn(transactionRepository, 'find')
-        // The statement's rows, then the ones to delete, then loan interest split off them: none.
+        // The statement's rows, the ones to delete, loan interest split off them
+        // and transfer pairs of the deleted: none.
         .mockResolvedValueOnce([
           { id: 'tx-plain', createdAt: at, updatedAt: at, taxLocked: false },
           { id: 'tx-with-file', createdAt: at, updatedAt: at, taxLocked: false },
         ] as Transaction[])
         .mockResolvedValueOnce([{ id: 'tx-plain' }] as Transaction[])
+        .mockResolvedValueOnce([])
         .mockResolvedValueOnce([]);
       const attachmentFind = vi.fn().mockResolvedValue([{ id: 'att-1', transactionId: 'tx-with-file' }]);
-      (transactionRepository as any).manager = { getRepository: () => ({ find: attachmentFind }) };
+      // The delete runs in its own transaction: no copies to promote.
+      const inner = { query: vi.fn().mockResolvedValue([]), getRepository: () => transactionRepository };
+      (transactionRepository as any).manager = {
+        getRepository: () => ({ find: attachmentFind }),
+        transaction: (work: (manager: typeof inner) => Promise<void>) => work(inner),
+      };
       const deleteSpy = vi
         .spyOn(transactionRepository, 'delete')
         .mockResolvedValue({ affected: 1, raw: [] });
