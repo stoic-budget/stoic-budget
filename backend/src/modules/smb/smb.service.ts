@@ -13,7 +13,7 @@ import { PRIVACY_VIEWER_PARAM, redactedSql } from '../../common/utils/transactio
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
 import { Client } from '../../entities/client.entity';
 import { Invoice, InvoiceStatus } from '../../entities/invoice.entity';
-import { Payable, PayableDirection, PayableStatus } from '../../entities/payable.entity';
+import { Payable, PayableDirection } from '../../entities/payable.entity';
 import { StatementStatus } from '../../entities/statement.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import type { User } from '../../entities/user.entity';
