@@ -20,6 +20,8 @@ export interface TaxRateOption {
   id: string;
   name: string;
   rate: number;
+  /** A reverse-charge rate: the buyer accounts for the tax, the invoice charges none. */
+  isReverseCharge?: boolean;
 }
 
 const emptyLine = (): InvoiceLineItemInput => ({
@@ -50,18 +52,20 @@ export function lineAmount(item: InvoiceLineItemInput): number {
  * The same split the backend does, so the form and the saved invoice agree:
  * a tax-inclusive price has its tax extracted, an exclusive one has it added.
  */
-function computeTotals(
+export function computeTotals(
   lineItems: InvoiceLineItemInput[],
   taxRates: TaxRateOption[],
   pricesIncludeTax: boolean,
 ) {
-  const rateById = new Map(taxRates.map(rate => [rate.id, rate.rate]));
+  // A reverse-charge rate charges nothing on the invoice (#684), and each
+  // line's tax is rounded to the cent, as the server stores it.
+  const rateById = new Map(taxRates.map(rate => [rate.id, rate.isReverseCharge ? 0 : rate.rate]));
   let subtotal = 0;
   let taxTotal = 0;
   for (const item of lineItems) {
     const amount = lineAmount(item);
     const pct = item.taxRateId ? (rateById.get(item.taxRateId) ?? 0) : 0;
-    const tax = pricesIncludeTax ? (amount * pct) / (100 + pct) : (amount * pct) / 100;
+    const tax = round2(pricesIncludeTax ? (amount * pct) / (100 + pct) : (amount * pct) / 100);
     subtotal += pricesIncludeTax ? amount - tax : amount;
     taxTotal += tax;
   }

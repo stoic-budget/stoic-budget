@@ -34,6 +34,7 @@ import { type Payable, payablesApi } from '@/app/lib/payables-api';
 import { CreditNoteDialog } from './CreditNoteDialog';
 import { InvoiceEmailDrawer } from './InvoiceEmailDrawer';
 import { InvoiceDetailSkeleton } from './InvoicesSkeletons';
+import { InvoiceTotalLines, savedTotals } from './InvoiceTotalLines';
 import { InvoiceWizard } from './invoice-wizard/InvoiceWizard';
 import { lineAmount, useInvoiceForm } from './invoice-wizard/useInvoiceForm';
 import { formatInvoiceDate, getInvoiceStatusVariant } from './invoices-format';
@@ -593,29 +594,11 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <div style={{ display: 'grid', gap: 4, minWidth: 220 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-                <span>{t.detail.subtotal.value}</span>
-                <span className={PRIVATE_CLASS}>
-                  {formatMoney(totals.subtotal, currency, locale)}
-                </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-                <span>{t.detail.tax.value}</span>
-                <span className={PRIVATE_CLASS}>
-                  {formatMoney(totals.taxTotal, currency, locale)}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontSize: 16,
-                  fontWeight: 700,
-                }}
-              >
-                <span>{t.columns.total.value}</span>
-                <span className={PRIVATE_CLASS}>{formatMoney(totals.total, currency, locale)}</span>
-              </div>
+              <InvoiceTotalLines
+                totals={invoice ? savedTotals(invoice) : totals}
+                currency={currency}
+                locale={locale}
+              />
               {/* Payments against the invoice: what the client still owes is the
                     number they care about, and it is not the total. */}
               {Number(invoice?.amountPaid ?? 0) > 0 && (
