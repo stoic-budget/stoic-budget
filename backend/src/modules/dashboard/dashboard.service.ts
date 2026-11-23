@@ -62,6 +62,7 @@ import {
   parseMonthWindow,
 } from './dashboard-window.util';
 import { spendableBalance } from './opening-balance';
+import { OPEN_BILL_PARAMS, OPEN_BILL_SQL, OWED_COLUMNS } from './owed-bills';
 
 /** How many individual categories the donut shows before folding the rest into "Other". */
 const TOP_CATEGORIES_LIMIT = 8;
@@ -278,16 +279,11 @@ export class DashboardService {
 
     const payableRows = await this.payableRepo
       .createQueryBuilder('p')
-      .select([
-        'p.currency AS currency',
-        'COALESCE(SUM(CASE WHEN p.status IN (:...payStatuses) THEN p.amount ELSE 0 END), 0) AS "totalPayable"',
-        'COALESCE(SUM(CASE WHEN p.status = :overdue THEN p.amount ELSE 0 END), 0) AS "totalOverdue"',
-      ])
+      .select(['p.currency AS currency', ...OWED_COLUMNS])
       .where('p.workspaceId = :workspaceId', { workspaceId })
       .andWhere('p.deletedAt IS NULL')
       .andWhere('p.direction = :direction', { direction: PayableDirection.PAYABLE })
-      .setParameter('payStatuses', [PayableStatus.TO_PAY, PayableStatus.SCHEDULED])
-      .setParameter('overdue', PayableStatus.OVERDUE)
+      .andWhere(OPEN_BILL_SQL, OPEN_BILL_PARAMS)
       .groupBy('p.currency')
       .getRawMany<{ currency: string; totalPayable: string; totalOverdue: string }>();
 

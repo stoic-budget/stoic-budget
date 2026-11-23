@@ -33,7 +33,12 @@ import {
   type ReconciliationMatch,
 } from './reconciliation.util';
 
-const OPEN_STATUSES = [PayableStatus.TO_PAY, PayableStatus.SCHEDULED, PayableStatus.OVERDUE];
+const OPEN_STATUSES = [
+  PayableStatus.TO_PAY,
+  PayableStatus.SCHEDULED,
+  PayableStatus.OVERDUE,
+  PayableStatus.PARTIALLY_PAID,
+];
 const LOOKBACK_DAYS = 120;
 
 export interface ReconciliationResponse {
@@ -214,7 +219,8 @@ export class SmbService {
     });
     const items: OpenItem[] = [];
     for (const payable of payables) {
-      const amount = Number(payable.amount);
+      // A partly paid bill is matched against what is left of it.
+      const amount = Math.max(Number(payable.amount) - Number(payable.paidAmount ?? 0), 0);
       items.push({
         id: payable.id,
         direction: payable.direction === PayableDirection.RECEIVABLE ? 'receivable' : 'payable',
