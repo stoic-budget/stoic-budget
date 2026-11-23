@@ -85,10 +85,11 @@ export class StatementRowsService {
    * stays so, since a person confirmed it or it read right.
    */
   private async recheckStatement(statement: Statement): Promise<StatementRecheck> {
-    const rows = await this.transactions.find({
-      where: { workspaceId: statement.workspaceId, statementId: statement.id, isDuplicate: false },
-      select: { id: true, debit: true, credit: true, currency: true },
+    const all = await this.transactions.find({
+      where: { workspaceId: statement.workspaceId, statementId: statement.id },
+      select: { id: true, debit: true, credit: true, currency: true, isDuplicate: true },
     });
+    const rows = all.filter(row => !row.isDuplicate);
     const moved = rows.map(row => ({
       debit: toNumber(row.debit),
       credit: toNumber(row.credit),
@@ -111,8 +112,11 @@ export class StatementRowsService {
     );
     // The rows the parse could not read are still missing: a statement held for
     // them stays held until enough are added back by hand.
+    // Counted as the parse counted them: every saved row, a flagged duplicate too.
     const dropped = details.droppedSamples?.length ?? 0;
-    const dropInfo = { rawCount: moved.length + dropped, droppedCount: dropped };
+    const dropInfo = dropped
+      ? { rawCount: all.length + dropped, droppedCount: dropped, keptCount: all.length }
+      : undefined;
     const validation = validateParsedStatement(balances, moved, {
       tolerance: TOLERANCE,
       checks,

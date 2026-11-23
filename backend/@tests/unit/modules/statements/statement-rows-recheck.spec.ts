@@ -22,13 +22,14 @@ const heldStatement = (droppedRows: number) => ({
   },
 });
 
-const service = (statement: ReturnType<typeof heldStatement>, rowCount: number) => {
+const service = (statement: ReturnType<typeof heldStatement>, rowCount: number, duplicates = 0) => {
   const statements = { update: vi.fn(async () => undefined) };
   const rows = Array.from({ length: rowCount }, (_, index) => ({
     id: `tx-${index}`,
     debit: '10.00',
     credit: null,
     currency: 'EUR',
+    isDuplicate: index < duplicates,
   }));
   return {
     statements,
@@ -62,5 +63,27 @@ describe('StatementRowsService recheck', () => {
       status: StatementStatus.COMPLETED,
       passed: true,
     });
+  });
+
+  it('counts the rows as the parse did: half dropped does not hold', async () => {
+    const { rows } = service(heldStatement(5), 5);
+
+    expect(await rows.recheck('st-1', 'u-1', 'ws-1')).toMatchObject({ passed: true });
+  });
+
+  it('counts flagged duplicates among the kept rows, as the parse does', async () => {
+    // 4 of 10 dropped (under half); 3 of the 6 kept are duplicates of an earlier upload.
+    const { rows } = service(heldStatement(4), 6, 3);
+
+    const result = await rows.recheck('st-1', 'u-1', 'ws-1');
+
+    expect(result.reasonCodes).not.toContain('rows_dropped');
+    expect(result.passed).toBe(true);
+  });
+
+  it('never says no row was kept when the kept ones are all duplicates', async () => {
+    const { rows } = service(heldStatement(1), 3, 3);
+
+    expect((await rows.recheck('st-1', 'u-1', 'ws-1')).reasonCodes).not.toContain('no_rows_kept');
   });
 });
