@@ -1,5 +1,5 @@
 import type { Repository } from 'typeorm';
-import { assertNoTaxLockedTransactions } from '../../common/utils/tax-lock.util';
+import { assertRowsRemovable } from '../../common/utils/tax-lock.util';
 import type { Statement } from '../../entities/statement.entity';
 import type { Transaction } from '../../entities/transaction.entity';
 
@@ -16,7 +16,7 @@ export async function trashScanStatement(
 ): Promise<boolean> {
   const statement = await statements.findOne({ where: { id: statementId, workspaceId } });
   if (!statement || statement.deletedAt) return false;
-  await assertNoTaxLockedTransactions(transactions, { statementId: statement.id, workspaceId });
+  await assertRowsRemovable(transactions, { statementId: statement.id, workspaceId });
   statement.deletedAt = new Date();
   await statements.save(statement);
   return true;

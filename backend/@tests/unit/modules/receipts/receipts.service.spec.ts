@@ -31,6 +31,7 @@ describe('ReceiptsService', () => {
   let jobRepository: { create: Mock; save: Mock };
   let transactionRepository: {
     count: Mock;
+    createQueryBuilder: Mock;
     create: Mock;
     save: Mock;
     update: Mock;
@@ -67,6 +68,15 @@ describe('ReceiptsService', () => {
 
     transactionRepository = {
       count: vi.fn().mockResolvedValue(0),
+      // assertRowsRemovable: no locked loan interest carried by the rows.
+      createQueryBuilder: vi.fn(() => {
+        const qb = {
+          setFindOptions: () => qb,
+          innerJoin: () => qb,
+          getCount: async () => 0,
+        };
+        return qb;
+      }),
       create: vi.fn().mockImplementation(payload => payload),
       save: vi.fn().mockImplementation(async payload => ({ id: 'tx-1', ...payload })),
       update: vi.fn().mockResolvedValue({ affected: 1 }),
