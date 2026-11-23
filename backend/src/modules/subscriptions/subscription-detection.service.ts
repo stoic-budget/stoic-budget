@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
+import { billingDayOfCharges } from '../../common/utils/billing-day.util';
 import { countedSql } from '../../common/utils/counted-transactions.util';
 import {
   PRIVACY_VIEWER_PARAM,
@@ -20,7 +21,7 @@ import {
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { NotificationsService } from '../notifications/notifications.service';
-import { chargeAt } from './charge-calendar.util';
+import { nextChargeAfter } from './charge-calendar.util';
 import { dismissedVendorsOf, subscriptionVendorKey } from './subscription-dismissals';
 import { describePriceChange, type PriceChange } from './subscription-insights.util';
 
@@ -102,7 +103,14 @@ export class SubscriptionDetectionService {
             | { current?: number }
             | undefined;
           existing.lastChargeDate = result.lastChargeDate as Date;
-          existing.nextChargeDate = result.nextChargeDate as Date;
+          // Stepped on the billing day it already has, so an upload does not
+          // reset the 31st to the 28th the February charge posted on (#662).
+          existing.billingDay ??= result.billingDay as number | null;
+          existing.nextChargeDate = nextChargeAfter(
+            result.lastChargeDate as Date,
+            existing.frequency,
+            existing.billingDay,
+          );
           existing.detectionMeta = {
             ...(result.detectionMeta as Record<string, unknown>),
             ...(previousChange ? { priceChange: previousChange } : {}),
@@ -138,6 +146,7 @@ export class SubscriptionDetectionService {
         confidence: result.confidence as number,
         lastChargeDate: result.lastChargeDate as Date,
         nextChargeDate: result.nextChargeDate as Date,
+        billingDay: result.billingDay as number | null,
         categoryId: result.categoryId as string | null,
         detectionMeta: result.detectionMeta as Record<string, unknown>,
         status: SubscriptionStatus.DETECTED,
@@ -218,7 +227,8 @@ export class SubscriptionDetectionService {
     );
 
     const lastDate = new Date(txs[txs.length - 1].transactionDate);
-    const nextChargeDate = this.addInterval(lastDate, frequency);
+    const billingDay = billingDayOfCharges(txs.map(tx => new Date(tx.transactionDate)));
+    const nextChargeDate = nextChargeAfter(lastDate, frequency, billingDay);
 
     return {
       vendorName: txs[0].vendorNormalized ?? txs[0].counterpartyName,
@@ -229,6 +239,7 @@ export class SubscriptionDetectionService {
       confidence,
       lastChargeDate: lastDate,
       nextChargeDate,
+      billingDay,
       categoryId: txs[txs.length - 1].categoryId,
       detectionMeta: {
         occurrenceCount: txs.length,
@@ -271,11 +282,6 @@ export class SubscriptionDetectionService {
     if (intVar < 0.15) c += 0.1;
     if (hasNormalized) c += 0.1;
     return Math.min(c, 1.0);
-  }
-
-  /** One step on: a month-end clamps to a shorter month (31 Jan, 28 Feb) instead of overflowing. */
-  private addInterval(date: Date, frequency: SubscriptionFrequency): Date {
-    return chargeAt(date, frequency, 1);
   }
 
   private median(arr: number[]): number {

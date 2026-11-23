@@ -35,3 +35,17 @@ export function billingDayAfter(
   }
   return day;
 }
+
+/**
+ * The billing day a run of charges points to: the latest day of the month
+ * among them when any falls on the 28th or later (a short month clamped the
+ * others: 31 Jan, 28 Feb, 31 Mar is the 31st), else the last charge's day.
+ */
+export function billingDayOfCharges(dates: Date[]): number | null {
+  if (dates.length === 0) {
+    return null;
+  }
+  const days = dates.map(date => date.getDate());
+  const latest = Math.max(...days);
+  return latest >= 28 ? latest : days[days.length - 1];
+}

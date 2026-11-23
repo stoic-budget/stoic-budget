@@ -73,6 +73,8 @@ export class SubscriptionsTarget implements ImportTarget {
               amount: Number(current.amount),
               frequency: current.frequency,
               nextChargeDate: current.nextChargeDate,
+              // Undone together: the date and the billing day the import set.
+              billingDay: current.billingDay,
               currency: current.currency,
             },
           });

@@ -7,6 +7,7 @@ import type { TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
+import { SubscriptionDetectionService } from '../../src/modules/subscriptions/subscription-detection.service';
 import { SubscriptionsService } from '../../src/modules/subscriptions/subscriptions.service';
 import {
   deleteUserByEmail,
@@ -65,6 +66,53 @@ describe('Subscription billing day (e2e)', () => {
     await service.updatePastDueNextDates();
     expect(await stored(created.body.id)).toEqual({ next: '2026-02-28', billing_day: 31 });
     await service.updatePastDueNextDates();
+    expect(await stored(created.body.id)).toEqual({ next: '2026-03-31', billing_day: 31 });
+  });
+
+  it('detects the 31st from charges a short month clamped, and keeps it on the next upload', async () => {
+    const category = await as(request(server()).post('/categories'))
+      .send({ name: 'Music', type: 'expense' })
+      .expect(201);
+    for (const date of ['2026-07-31', '2026-08-31', '2026-09-30']) {
+      await as(request(server()).post('/statements/manual-expense'))
+        .field('amount', '11.99')
+        .field('currency', 'EUR')
+        .field('merchant', 'ACME Music')
+        .field('categoryId', category.body.id)
+        .field('date', date)
+        .expect(201);
+    }
+    const detection = app.get(SubscriptionDetectionService);
+
+    await detection.runDetection(owner.workspaceId);
+    const [found] = await dataSource.query(
+      "SELECT id FROM subscriptions WHERE workspace_id = $1 AND vendor_name ILIKE '%acme music%'",
+      [owner.workspaceId],
+    );
+    expect(await stored(found.id)).toEqual({ next: '2026-10-31', billing_day: 31 });
+
+    await detection.runDetection(owner.workspaceId);
+    expect(await stored(found.id)).toEqual({ next: '2026-10-31', billing_day: 31 });
+  });
+
+  it('steps a row without a billing day (an old backup) from its own day', async () => {
+    const created = await as(request(server()).post('/subscriptions'))
+      .send({
+        vendorName: 'ACME Cloud',
+        amount: 5,
+        currency: 'EUR',
+        frequency: 'monthly',
+        nextChargeDate: '2026-01-31',
+      })
+      .expect(201);
+    await dataSource.query('UPDATE subscriptions SET billing_day = NULL WHERE id = $1', [
+      created.body.id,
+    ]);
+
+    const service = app.get(SubscriptionsService);
+    await service.updatePastDueNextDates();
+    await service.updatePastDueNextDates();
+
     expect(await stored(created.body.id)).toEqual({ next: '2026-03-31', billing_day: 31 });
   });
 

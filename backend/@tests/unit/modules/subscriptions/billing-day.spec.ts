@@ -1,4 +1,4 @@
-import { billingDayAfter } from '@/common/utils/billing-day.util';
+import { billingDayAfter, billingDayOfCharges } from '@/common/utils/billing-day.util';
 import { SubscriptionFrequency } from '@/entities/subscription.entity';
 import { nextChargeAfter } from '@/modules/subscriptions/charge-calendar.util';
 
@@ -33,5 +33,15 @@ describe('billing day (#662)', () => {
     expect(billingDayAfter('2026-02-15', 31)).toBe(15);
     expect(billingDayAfter('2026-03-31', null)).toBe(31);
     expect(billingDayAfter(null, 12)).toBe(12);
+  });
+});
+
+describe('billingDayOfCharges', () => {
+  it('reads the 31st through a clamped month, and a mid-month day as it is', () => {
+    const on = (y: number, m: number, d: number) => new Date(y, m - 1, d);
+    expect(billingDayOfCharges([on(2026, 1, 31), on(2026, 2, 28), on(2026, 3, 31)])).toBe(31);
+    expect(billingDayOfCharges([on(2026, 8, 31), on(2026, 9, 30)])).toBe(31);
+    expect(billingDayOfCharges([on(2026, 1, 14), on(2026, 2, 16), on(2026, 3, 15)])).toBe(15);
+    expect(billingDayOfCharges([])).toBeNull();
   });
 });
