@@ -54,6 +54,8 @@ export const DOCUMENTS_ERRORS = {
   TRANSACTION_NOT_SPLIT: 'Transaction is not part of a split',
   TRANSACTION_SPLIT_DUPLICATE: 'Cannot split a transaction marked as a duplicate',
   TRANSACTION_SPLIT_PENDING: 'Cannot split a transaction the bank has not booked yet',
+  TRANSACTION_SPLIT_LINKED:
+    'A linked transaction cannot be split: unlink the transfer, reimbursement or investment first',
   TRANSACTION_SPLIT_ADJUSTMENT:
     'A balance adjustment cannot be split; delete it and check the balance again',
   TRANSACTION_SPLIT_TAX_LOCKED: 'Cannot split a transaction that is part of a filed tax return',
