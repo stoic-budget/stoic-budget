@@ -29,6 +29,8 @@ export function useAutoSave<T>({
   isEqual = defaultIsEqual,
 }: UseAutoSaveOptions<T>): void {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The value waiting on the timer, sent at once if the page goes away first.
+  const pendingRef = useRef<{ data: T; save: (data: T) => Promise<void> } | null>(null);
   const lastSavedRef = useRef(data);
   const initializedRef = useRef(false);
   const wasEnabledRef = useRef(enabled);
@@ -39,6 +41,7 @@ export function useAutoSave<T>({
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
+      pendingRef.current = null;
       initializedRef.current = false;
       wasEnabledRef.current = false;
       return;
@@ -59,10 +62,8 @@ export function useAutoSave<T>({
       clearTimeout(timeoutRef.current);
     }
 
-    timeoutRef.current = setTimeout(async () => {
-      await onSave(data);
-      lastSavedRef.current = data;
-    }, debounceMs);
+    pendingRef.current = { data, save: onSave };
+    timeoutRef.current = setTimeout(() => void flush(), debounceMs);
 
     return () => {
       if (timeoutRef.current) {
@@ -77,6 +78,21 @@ export function useAutoSave<T>({
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      // Leaving the page within the debounce still saves what was typed.
+      void flush();
     };
   }, []);
+
+  /** Saves the pending value. A failed save is not marked saved, so the next edit retries it. */
+  async function flush(): Promise<void> {
+    const pending = pendingRef.current;
+    pendingRef.current = null;
+    if (!pending) return;
+    try {
+      await pending.save(pending.data);
+      lastSavedRef.current = pending.data;
+    } catch {
+      // The caller has told the person; the value stays unsaved.
+    }
+  }
 }

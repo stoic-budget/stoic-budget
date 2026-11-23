@@ -83,7 +83,7 @@ describe('useAutoSave', () => {
     expect(onSave).toHaveBeenCalledWith({ value: 'updated' });
   });
 
-  it('cancels pending save on unmount', async () => {
+  it('sends the pending save when the page goes away within the debounce', async () => {
     const onSave = vi.fn(async () => undefined);
 
     await act(async () => {
@@ -99,6 +99,33 @@ describe('useAutoSave', () => {
       vi.advanceTimersByTime(500);
     });
 
-    expect(onSave).not.toHaveBeenCalled();
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith({ value: 'updated' });
+  });
+
+  it('retries a value whose save failed when it is typed again', async () => {
+    const onSave = vi
+      .fn<(payload: Payload) => Promise<void>>()
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockResolvedValue(undefined);
+
+    await act(async () => {
+      root.render(<Harness data={{ value: 'initial' }} enabled={true} onSave={onSave} />);
+    });
+    await act(async () => {
+      root.render(<Harness data={{ value: 'updated' }} enabled={true} onSave={onSave} />);
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(500);
+    });
+    await act(async () => {
+      root.render(<Harness data={{ value: 'updated' }} enabled={true} onSave={onSave} />);
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(onSave).toHaveBeenCalledTimes(2);
+    expect(onSave).toHaveBeenLastCalledWith({ value: 'updated' });
   });
 });
