@@ -1,25 +1,25 @@
-import type { DataSource, InsertEvent } from 'typeorm';
+import type { DataSource, InsertEvent, TransactionCommitEvent } from 'typeorm';
 import type { Transaction } from '@/entities/transaction.entity';
 import type { TaxAssignmentService } from '@/modules/tax/tax-assignment.service';
 import { TransactionTaxSubscriber } from '@/modules/tax/transaction-tax.subscriber';
 
-const assessed = {
-  taxRateId: 'rate-19',
-  taxRuleId: null,
-  taxSource: 'category',
-  taxAmount: 19,
-  taxReverseCharge: false,
-} as const;
-
 function build() {
-  const resolve = vi.fn(async () => assessed);
+  const reassess = vi.fn(async () => 1);
   const subscriber = new TransactionTaxSubscriber(
     { subscribers: [] } as unknown as DataSource,
-    { resolve } as unknown as TaxAssignmentService,
+    { reassess } as unknown as TaxAssignmentService,
   );
-  const insert = (entity: Partial<Transaction>) =>
-    subscriber.beforeInsert({ entity } as unknown as InsertEvent<Transaction>);
-  return { resolve, insert };
+  const runner = { isTransactionActive: true };
+  const insert = (entity: Partial<Transaction>, id = 'tx-1') => {
+    const event = { entity, queryRunner: runner } as unknown as InsertEvent<Transaction>;
+    subscriber.beforeInsert(event);
+    entity.id = id;
+    subscriber.afterInsert(event);
+  };
+  const commit = () =>
+    subscriber.afterTransactionCommit({ queryRunner: runner } as unknown as TransactionCommitEvent);
+  const settle = () => new Promise(resolve => setImmediate(resolve));
+  return { reassess, insert, commit, runner, subscriber, settle };
 }
 
 const payment = (): Partial<Transaction> => ({
@@ -30,22 +30,48 @@ const payment = (): Partial<Transaction> => ({
   transactionDate: new Date('2026-11-02'),
 });
 
-describe('TransactionTaxSubscriber.beforeInsert', () => {
-  it('assesses the tax of a row created without it (a payment from a wallet)', async () => {
-    const { resolve, insert } = build();
-    const row = payment();
+describe('TransactionTaxSubscriber on insert', () => {
+  it('assesses a row created without its tax once its transaction commits', async () => {
+    const { reassess, insert, commit, settle } = build();
 
-    await insert(row);
+    insert(payment());
+    await settle();
+    expect(reassess).not.toHaveBeenCalled();
 
-    expect(resolve).toHaveBeenCalledTimes(1);
-    expect(row).toMatchObject({ taxRateId: 'rate-19', taxAmount: 19 });
+    commit();
+    await settle();
+    expect(reassess).toHaveBeenCalledWith('ws-1', { ids: ['tx-1'] });
   });
 
-  it('leaves a row whose creator assessed it already', async () => {
-    const { resolve, insert } = build();
+  it('assesses at once an insert made outside a transaction', async () => {
+    const { reassess, insert, runner, settle } = build();
+    runner.isTransactionActive = false;
 
-    await insert({ ...payment(), taxSource: null, taxRateId: null, taxAmount: null });
+    insert(payment());
+    await settle();
 
-    expect(resolve).not.toHaveBeenCalled();
+    expect(reassess).toHaveBeenCalledWith('ws-1', { ids: ['tx-1'] });
+  });
+
+  it('assesses nothing a rolled-back transaction inserted', async () => {
+    const { reassess, insert, runner, subscriber, settle } = build();
+
+    insert(payment());
+    subscriber.afterTransactionRollback({ queryRunner: runner } as never);
+    subscriber.afterTransactionCommit({ queryRunner: runner } as never);
+    await settle();
+
+    expect(reassess).not.toHaveBeenCalled();
+  });
+
+  it('leaves a row whose creator assessed it, and loan interest', async () => {
+    const { reassess, insert, commit, settle } = build();
+
+    insert({ ...payment(), taxSource: null, taxRateId: null, taxAmount: null }, 'assessed');
+    insert({ ...payment(), loanInterestOfId: 'payment-1' }, 'interest');
+    commit();
+    await settle();
+
+    expect(reassess).not.toHaveBeenCalled();
   });
 });

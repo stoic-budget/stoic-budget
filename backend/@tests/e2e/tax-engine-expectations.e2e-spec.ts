@@ -106,6 +106,30 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     expect(twin).toMatchObject({ isReverseCharge: true, isDefault: false });
   });
 
+  it('assesses the VAT of an invoice paid in cash once the payment is saved', async () => {
+    const bill = await auth(api().post('/payables'))
+      .send({ direction: 'receivable', vendor: 'ACME Client', amount: 119, currency: 'EUR' })
+      .expect(201);
+    const [sales] = await dataSource.query(
+      `SELECT id FROM categories WHERE workspace_id = $1 AND system_key = 'sales'`,
+      [workspaceId],
+    );
+    const paid = await auth(api().put(`/payables/${bill.body.id}/mark-paid`))
+      // Last year: the reserve and threshold below measure this one.
+      .send({ inHand: true, paidOn: '2025-03-12', categoryId: sales.id })
+      .expect(200);
+
+    // Assessed right after the payment's transaction commits.
+    let tax: { tax_amount: string | null } | undefined;
+    for (let attempt = 0; attempt < 20 && !tax?.tax_amount; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      [tax] = await dataSource.query('SELECT tax_amount FROM transactions WHERE id = $1', [
+        paid.body.linkedTransactionId,
+      ]);
+    }
+    expect(Number(tax?.tax_amount)).toBe(19);
+  });
+
   it('assesses the default rate on a new expense', async () => {
     const figures = await row();
     expect(Number(figures.tax_amount)).toBe(19);

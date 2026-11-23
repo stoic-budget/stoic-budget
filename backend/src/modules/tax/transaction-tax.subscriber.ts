@@ -1,6 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import type { DataSource, EntitySubscriberInterface, InsertEvent, UpdateEvent } from 'typeorm';
+import type {
+  DataSource,
+  EntitySubscriberInterface,
+  InsertEvent,
+  TransactionCommitEvent,
+  TransactionRollbackEvent,
+  UpdateEvent,
+} from 'typeorm';
 import { Transaction } from '../../entities/transaction.entity';
 import { toDateOnly } from './jurisdictions.service';
 import { applyAssignment, assignmentInputOf, TaxAssignmentService } from './tax-assignment.service';
@@ -60,20 +67,71 @@ export class TransactionTaxSubscriber implements EntitySubscriberInterface<Trans
     return Transaction;
   }
 
+  /** New rows created without their tax, and the inserts' query runners waiting to commit. */
+  private readonly needsTax = new WeakSet<object>();
+  private readonly pending = new WeakMap<object, Array<{ workspaceId: string; id: string }>>();
+  private readonly logger = new Logger(TransactionTaxSubscriber.name);
+
   /**
    * A row created without its tax (a payment recorded from a wallet, an
-   * approved receipt, a file import) is assessed on the way in. A caller that
-   * assessed it already set the tax fields, and is left alone.
+   * approved receipt, a file import) is assessed once its insert commits. A
+   * creator that assessed it set the tax fields and is left alone, as is loan
+   * interest, which counts only with its payment. Assessed afterwards, on its
+   * own connection: resolving inside the insert would hold one connection and
+   * wait for another, and a burst of such inserts could exhaust the pool.
    */
-  async beforeInsert(event: InsertEvent<Transaction>): Promise<void> {
+  beforeInsert(event: InsertEvent<Transaction>): void {
     const entity = event.entity as Transaction | undefined;
-    if (!entity?.workspaceId || entity.taxLocked) {
+    if (!entity?.workspaceId || entity.taxLocked || entity.loanInterestOfId) {
       return;
     }
     if (TAX_OUTPUTS.some(field => entity[field] !== undefined)) {
       return;
     }
-    applyAssignment(entity, await this.taxAssignmentService.resolve(assignmentInputOf(entity)));
+    this.needsTax.add(entity);
+  }
+
+  afterInsert(event: InsertEvent<Transaction>): void {
+    const entity = event.entity as Transaction | undefined;
+    if (!(entity?.id && this.needsTax.has(entity))) {
+      return;
+    }
+    const runner = event.queryRunner;
+    const rows = this.pending.get(runner) ?? [];
+    rows.push({ workspaceId: entity.workspaceId, id: entity.id });
+    this.pending.set(runner, rows);
+    if (!runner.isTransactionActive) {
+      this.assessLater(runner);
+    }
+  }
+
+  afterTransactionCommit(event: TransactionCommitEvent): void {
+    this.assessLater(event.queryRunner);
+  }
+
+  afterTransactionRollback(event: TransactionRollbackEvent): void {
+    this.pending.delete(event.queryRunner);
+  }
+
+  private assessLater(runner: object): void {
+    const rows = this.pending.get(runner);
+    this.pending.delete(runner);
+    if (!rows?.length) {
+      return;
+    }
+    const byWorkspace = new Map<string, string[]>();
+    for (const row of rows) {
+      byWorkspace.set(row.workspaceId, [...(byWorkspace.get(row.workspaceId) ?? []), row.id]);
+    }
+    setImmediate(() => {
+      for (const [workspaceId, ids] of byWorkspace) {
+        this.taxAssignmentService.reassess(workspaceId, { ids }).catch((error: unknown) => {
+          this.logger.warn(
+            `Could not assess the tax of ${ids.length} new row(s): ${error instanceof Error ? error.message : String(error)}`,
+          );
+        });
+      }
+    });
   }
 
   async beforeUpdate(event: UpdateEvent<Transaction>): Promise<void> {
