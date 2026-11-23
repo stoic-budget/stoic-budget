@@ -74,8 +74,7 @@ export function normalizeNumber(
     // a 3-decimal currency (e.g. KWD) needs support.
     // "0,125" or "0.125" cannot be grouping: nothing is grouped in front of it.
     const wholeIsZero = /^0*$/.test(normalized.slice(0, normalized.indexOf(separator)));
-    const grouping =
-      digitsAfter === 3 && !wholeIsZero && !(separator === '.' && loneDotIsDecimal);
+    const grouping = digitsAfter === 3 && !wholeIsZero && !(separator === '.' && loneDotIsDecimal);
     normalized = grouping ? normalized.replace(separator, '') : normalized.replace(separator, '.');
   } else if (commaCount > 1) {
     // Multiple commas, no dot: all commas are thousands separators.
