@@ -348,6 +348,45 @@ describe('partial payments (real Postgres)', () => {
     expect(Number(reopened.paidAmount)).toBe(0);
   });
 
+  it('takes back the wallet transaction a payment booked when the payment is undone, not a bank row', async () => {
+    const fromWallet = await bill();
+    await payables.addPayment(fromWallet.id, workspaceId, userId, {
+      amount: 300,
+      payFromWalletId: walletId,
+      categoryId,
+      paidOn: daysAgo(1),
+    });
+    const [own] = await payables.listPayments(fromWallet.id, workspaceId);
+
+    await payables.removePayment(fromWallet.id, own.id, workspaceId);
+
+    expect(await txRepo.existsBy({ id: own.transactionId as string })).toBe(false);
+
+    const byBank = await bill();
+    const wire = await transaction({ amount: 300, debit: 300 });
+    await payables.addPayment(byBank.id, workspaceId, userId, { amount: 300, linkedTransactionId: wire.id });
+    const [linked] = await payables.listPayments(byBank.id, workspaceId);
+
+    await payables.removePayment(byBank.id, linked.id, workspaceId);
+
+    expect(await txRepo.existsBy({ id: wire.id })).toBe(true);
+  });
+
+  it('refuses to undo a payment whose own transaction is on a filed return', async () => {
+    const payable = await bill();
+    await payables.addPayment(payable.id, workspaceId, userId, {
+      amount: 200,
+      payFromWalletId: walletId,
+      categoryId,
+      paidOn: daysAgo(1),
+    });
+    const [own] = await payables.listPayments(payable.id, workspaceId);
+    await txRepo.update({ id: own.transactionId as string }, { taxAmount: 0, taxLocked: true });
+
+    expect((await errorOf(payables.removePayment(payable.id, own.id, workspaceId)))?.status).toBe(409);
+    expect(await payables.listPayments(payable.id, workspaceId)).toHaveLength(1);
+  });
+
   it('records a cash instalment as a wallet transaction', async () => {
     const payable = await bill({ amount: 1000 });
 
