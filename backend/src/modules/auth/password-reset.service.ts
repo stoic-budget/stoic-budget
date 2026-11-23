@@ -17,6 +17,7 @@ import { UserIdentity } from '../../entities/user-identity.entity';
 import { AuditService } from '../audit/audit.service';
 import { CalendarFeedRevocationService } from '../calendar-feed/calendar-feed-revocation.service';
 import { MailerService } from '../mailer/mailer.service';
+import { McpOAuthGrantsService } from '../mcp-oauth/mcp-oauth-grants.service';
 import { recordOidcEvent } from './oidc/oidc-audit';
 import { deleteOwnPasskeys, toPasskey } from './passkeys/passkey-helpers';
 import { PasskeysService } from './passkeys/passkeys.service';
@@ -39,6 +40,7 @@ export class PasswordResetService {
     private readonly configService: ConfigService,
     private readonly auditService: AuditService,
     private readonly passkeysService: PasskeysService,
+    private readonly mcpOAuthGrants: McpOAuthGrantsService,
     private readonly calendarFeeds: CalendarFeedRevocationService,
   ) {}
 
@@ -200,6 +202,9 @@ export class PasswordResetService {
     if (removed.length > 0) {
       await this.passkeysService.reportRemoved(user, removed, 'password-reset');
     }
+    // The same goes for apps connected over OAuth: their tokens are not tied to
+    // the token version, so each grant is revoked, in every workspace, and logged.
+    await this.mcpOAuthGrants.revokeAllOfUser(user.id, 'password_reset');
     // Calendar feed links end too, in every workspace. Last, so a failure here
     // cannot cost the removed passkeys their audit rows and their notice.
     await this.calendarFeeds.revokeAllOf(user.id);

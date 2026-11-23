@@ -31,6 +31,7 @@ describe('PasswordResetService', () => {
   };
   let passkeyRepository: { find: Mock };
   let passkeysService: { reportRemoved: Mock };
+  let mcpOAuthGrants: { revokeAllOfUser: Mock };
   let mailerService: { send: Mock };
   let auditService: { createEvent: Mock };
   let calendarFeeds: { revokeAllOf: Mock };
@@ -67,6 +68,7 @@ describe('PasswordResetService', () => {
     };
     passkeyRepository = { find: vi.fn().mockResolvedValue([]) };
     passkeysService = { reportRemoved: vi.fn() };
+    mcpOAuthGrants = { revokeAllOfUser: vi.fn().mockResolvedValue(undefined) };
     mailerService = { send: vi.fn().mockResolvedValue(true) };
     auditService = { createEvent: vi.fn().mockResolvedValue({}) };
     calendarFeeds = { revokeAllOf: vi.fn() };
@@ -79,6 +81,7 @@ describe('PasswordResetService', () => {
       { get: (key: string) => (key === 'JWT_SECRET' ? SECRET : undefined) } as never,
       auditService as never,
       passkeysService as never,
+      mcpOAuthGrants as never,
       calendarFeeds as never,
     );
   });
@@ -183,6 +186,8 @@ describe('PasswordResetService', () => {
       // No passkeys chosen: none touched, none reported.
       expect(manager.createQueryBuilder).not.toHaveBeenCalled();
       expect(passkeysService.reportRemoved).not.toHaveBeenCalled();
+      // Apps connected over OAuth hold tokens of their own: they go too, in every workspace.
+      expect(mcpOAuthGrants.revokeAllOfUser).toHaveBeenCalledWith('user-1', 'password_reset');
     });
 
     it('refuses a link another submit claimed first, before anything is logged', async () => {
@@ -348,6 +353,7 @@ describe('PasswordResetService', () => {
       );
       expect(userRepository.manager.transaction).not.toHaveBeenCalled();
       expect(auditService.createEvent).not.toHaveBeenCalled();
+      expect(mcpOAuthGrants.revokeAllOfUser).not.toHaveBeenCalled();
     });
 
     it('rejects an expired token', async () => {

@@ -36,7 +36,7 @@ import { McpOAuthConsentService } from './mcp-oauth-consent.service';
 import { McpOAuthGrantsService } from './mcp-oauth-grants.service';
 
 /** Consent is given by a person in a session: an API key cannot hand out access of its own. */
-const assertSession = (request: AuthenticatedRequest): void => {
+export const assertSession = (request: AuthenticatedRequest): void => {
   if (request.apiKey) {
     throw new ForbiddenException(appError('AUTH_API_KEY_ROUTE_FORBIDDEN'));
   }

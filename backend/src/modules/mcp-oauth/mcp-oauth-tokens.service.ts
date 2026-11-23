@@ -101,8 +101,17 @@ export class McpOAuthTokensService {
       if (member?.role !== code.grantedRole) {
         return oauthFailure('invalid_grant', 'Your access to the workspace has changed');
       }
-      if (!(await this.isActiveUser(manager, code.userId))) {
+      const user = await manager.findOne(User, {
+        where: { id: code.userId },
+        select: { id: true, isActive: true, tokenVersion: true },
+      });
+      if (user?.isActive !== true) {
         return oauthFailure('invalid_grant', 'The account is disabled');
+      }
+      // A password reset or "log out everywhere" since the approval ends the
+      // session that approved it, and with it the code.
+      if ((user.tokenVersion ?? 0) !== code.tokenVersion) {
+        return oauthFailure('invalid_grant', 'The session that approved the code has ended');
       }
       const grant = await manager.save(
         manager.create(McpOAuthGrant, {

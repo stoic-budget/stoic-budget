@@ -13,6 +13,7 @@ import { AppModule } from './app.module';
 import { APP_NAME } from './common/brand';
 import { AppLogger } from './common/observability/app-logger.service';
 import { requestContextMiddleware } from './common/observability/request-context.middleware';
+import { corsOptionsFor } from './common/utils/cors-options';
 import { resolveAllowedOrigins } from './common/utils/cors-origins';
 import { resolveStaticAssetMounts } from './common/utils/static-assets.util';
 import { resolveTrustProxy } from './common/utils/trust-proxy.util';
@@ -120,13 +121,9 @@ async function bootstrap() {
     throw new Error('Missing required environment variable: FRONTEND_URL (or CORS_ORIGINS)');
   }
 
-  app.enableCors({
-    origin: allowedOrigins,
-    credentials: true,
-    // content-disposition: file downloads read the server's file name from it;
-    // hidden from cross-origin JS, every export fell back to a generic name.
-    exposedHeaders: ['x-request-id', 'x-trace-id', 'content-disposition'],
-  });
+  // The OAuth routes MCP clients call before they hold a token answer any
+  // origin without credentials; everything else keeps the allowlist.
+  app.enableCors(corsOptionsFor(allowedOrigins));
 
   // Swagger / OpenAPI
   const config = new DocumentBuilder()

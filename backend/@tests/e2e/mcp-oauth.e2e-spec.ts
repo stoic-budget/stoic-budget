@@ -349,7 +349,8 @@ describe('MCP OAuth (e2e)', () => {
     it('answers an unknown client or an unregistered redirect on the page, not at the address', async () => {
       const { challenge } = pkcePair();
       for (const extra of [
-        { redirectUri: 'http://127.0.0.1:33419/callback' },
+        // Another port is fine on loopback (RFC 8252 §7.3); another loopback name is not.
+        { redirectUri: 'http://localhost:33418/callback' },
         { redirectUri: 'http://127.0.0.1:33418/callback/evil' },
         { redirectUri: 'https://127.0.0.1:33418/callback' },
         { clientId: '00000000-0000-4000-8000-000000000000' },

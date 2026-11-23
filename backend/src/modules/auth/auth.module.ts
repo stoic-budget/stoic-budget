@@ -20,6 +20,7 @@ import { AuditModule } from '../audit/audit.module';
 import { CalendarFeedRevocationModule } from '../calendar-feed/calendar-feed-revocation.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { MailerModule } from '../mailer/mailer.module';
+import { McpOAuthModule } from '../mcp-oauth/mcp-oauth.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthDevBootstrapService } from './auth-dev-bootstrap.service';
@@ -42,6 +43,7 @@ import { PasskeysService } from './passkeys/passkeys.service';
 import { PasswordResetService } from './password-reset.service';
 import { RegistrationController } from './registration.controller';
 import { RegistrationSettingsService } from './registration-settings.service';
+import { StandingAccessModule } from './standing-access/standing-access.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { TwoFactorService } from './two-factor.service';
@@ -61,8 +63,10 @@ import { TwoFactorService } from './two-factor.service';
     ]),
     AuditModule,
     CalendarFeedRevocationModule,
+    StandingAccessModule,
     CategoriesModule,
     MailerModule,
+    McpOAuthModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

@@ -52,3 +52,17 @@ export type McpOAuthGrantItem = Wire<typeof McpOAuthGrantItem>;
 
 export const McpOAuthGrantList = Schema.Array(McpOAuthGrantItem);
 export type McpOAuthGrantList = Wire<typeof McpOAuthGrantList>;
+
+/**
+ * One row of `GET /mcp-oauth/workspace/grants`: an app any member connected to
+ * this workspace, for whoever manages its MCP access or API keys.
+ */
+export const McpOAuthWorkspaceGrantItem = Schema.Struct({
+  ...McpOAuthGrantItem.fields,
+  /** The member who approved it, by display name. */
+  memberName: Schema.String,
+});
+export type McpOAuthWorkspaceGrantItem = Wire<typeof McpOAuthWorkspaceGrantItem>;
+
+export const McpOAuthWorkspaceGrantList = Schema.Array(McpOAuthWorkspaceGrantItem);
+export type McpOAuthWorkspaceGrantList = Wire<typeof McpOAuthWorkspaceGrantList>;

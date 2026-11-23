@@ -49,7 +49,6 @@ describe('redirect URIs at authorization', () => {
   });
 
   it.each([
-    ['another port', 'http://127.0.0.1:33419/cb'],
     ['another loopback name', 'http://localhost:33418/cb'],
     ['another path', 'https://app.example.com/oauth/callback2'],
     ['a sub-path', 'https://app.example.com/oauth/callback/evil'],
@@ -65,6 +64,56 @@ describe('redirect URIs at authorization', () => {
     ['an encoded slash', 'https://app.example.com%2F@evil.example.com/oauth/callback'],
   ])('refuses %s', (_label, uri) => {
     expect(isRegisteredRedirect(registered, uri)).toBe(false);
+  });
+});
+
+describe('loopback redirect URIs (RFC 8252 §7.3)', () => {
+  const registered = [
+    'http://127.0.0.1:33418/cb',
+    'http://[::1]:8080/cb?tenant=1',
+    'http://localhost/oauth/callback',
+    'https://app.example.com:8443/cb',
+  ];
+
+  it.each([
+    ['another port on 127.0.0.1', 'http://127.0.0.1:51004/cb'],
+    ['no port on 127.0.0.1', 'http://127.0.0.1/cb'],
+    ['another port on [::1], same query', 'http://[::1]:61000/cb?tenant=1'],
+    ['a port on localhost registered without one', 'http://localhost:6274/oauth/callback'],
+  ])('accepts %s', (_label, uri) => {
+    expect(isRegisteredRedirect(registered, uri)).toBe(true);
+  });
+
+  it.each([
+    ['another port on a non-loopback host', 'https://app.example.com:9443/cb'],
+    ['no port on a non-loopback host', 'https://app.example.com/cb'],
+    ['localhost for 127.0.0.1', 'http://localhost:33418/cb'],
+    ['127.0.0.1 for localhost', 'http://127.0.0.1:6274/oauth/callback'],
+    ['127.0.0.1 for [::1]', 'http://127.0.0.1:8080/cb?tenant=1'],
+    ['another path', 'http://127.0.0.1:51004/cb2'],
+    ['a sub-path', 'http://127.0.0.1:51004/cb/evil'],
+    ['a trailing slash', 'http://127.0.0.1:51004/cb/'],
+    ['another query', 'http://[::1]:61000/cb?tenant=2'],
+    ['a dropped query', 'http://[::1]:61000/cb'],
+    ['https on loopback', 'https://127.0.0.1:51004/cb'],
+    ['upper-case scheme', 'HTTP://127.0.0.1:51004/cb'],
+    ['upper-case host', 'http://LOCALHOST:6274/oauth/callback'],
+    ['a fragment', 'http://127.0.0.1:51004/cb#x'],
+    ['user info', 'http://127.0.0.1:51004@evil.example.com/cb'],
+    ['user info before the host', 'http://evil@127.0.0.1:51004/cb'],
+    ['a look-alike host', 'http://localhost.example.com:6274/oauth/callback'],
+    ['a port out of range', 'http://127.0.0.1:99999/cb'],
+    ['an empty port', 'http://127.0.0.1:/cb'],
+    ['a backslash', 'http://127.0.0.1:51004\\@evil.example.com/cb'],
+  ])('refuses %s', (_label, uri) => {
+    expect(isRegisteredRedirect(registered, uri)).toBe(false);
+  });
+
+  it('lets localhost and 127.0.0.1 both through only when both are registered', () => {
+    const both = ['http://127.0.0.1:1/cb', 'http://localhost:1/cb'];
+    expect(isRegisteredRedirect(both, 'http://127.0.0.1:2/cb')).toBe(true);
+    expect(isRegisteredRedirect(both, 'http://localhost:2/cb')).toBe(true);
+    expect(isRegisteredRedirect(both, 'http://[::1]:2/cb')).toBe(false);
   });
 });
 

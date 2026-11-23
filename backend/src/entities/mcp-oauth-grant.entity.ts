@@ -18,7 +18,15 @@ export type McpOAuthRevokeReason =
   | 'client'
   | 'refresh_reuse'
   | 'code_reuse'
-  | 'role_changed';
+  | 'role_changed'
+  /** The account's password was reset: every app it connected goes, in every workspace. */
+  | 'password_reset'
+  /** The user signed out everywhere, changed the password, or was deactivated. */
+  | 'logout_all'
+  | 'password_changed'
+  | 'deactivated'
+  /** Someone who manages the workspace's MCP access disconnected another member's app. */
+  | 'admin';
 
 /**
  * What one person let one MCP client do in one workspace. It hangs off their

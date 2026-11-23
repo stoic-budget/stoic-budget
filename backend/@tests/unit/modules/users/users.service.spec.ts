@@ -1,7 +1,7 @@
 import { User, UserRole } from '@/entities/user.entity';
 import { AuditAction, EntityType, Severity } from '@/entities/audit-event.entity';
 import { AuditService } from '@/modules/audit/audit.service';
-import { CalendarFeedRevocationService } from '@/modules/calendar-feed/calendar-feed-revocation.service';
+import { StandingAccessService } from '@/modules/auth/standing-access/standing-access.service';
 import { AuthSession } from '@/entities/auth-session.entity';
 import { UserIdentity } from '@/entities/user-identity.entity';
 import { WorkspaceMember } from '@/entities/workspace-member.entity';
@@ -32,7 +32,7 @@ describe('UsersService', () => {
   let workspaceRepository: Repository<Workspace>;
   let workspacesService: WorkspacesService;
   const auditService = { createEvent: vi.fn() };
-  const calendarFeeds = { revokeAllOf: vi.fn() };
+  const standingAccess = { endAllOf: vi.fn() };
   const identities = { find: vi.fn(async () => [] as UserIdentity[]), delete: vi.fn() };
 
   const mockUser: Partial<User> = {
@@ -97,7 +97,7 @@ describe('UsersService', () => {
           },
         },
         { provide: AuditService, useValue: auditService },
-        { provide: CalendarFeedRevocationService, useValue: calendarFeeds },
+        { provide: StandingAccessService, useValue: standingAccess },
       ],
     }).compile();
 
@@ -169,20 +169,20 @@ describe('UsersService', () => {
       expect(repository.save).toHaveBeenCalled();
     });
 
-    it("ends a deactivated account's calendar links, so a reactivation does not revive them", async () => {
+    it("ends a deactivated account's calendar links and apps, so a reactivation does not revive them", async () => {
       const adminUser = { ...mockUser, id: '2', role: UserRole.ADMIN };
       vi.spyOn(repository, 'findOne').mockResolvedValue({ ...mockUser } as User);
       vi.spyOn(repository, 'save').mockImplementation(async user => user as User);
 
       await service.update('1', { isActive: false }, adminUser as User);
-      expect(calendarFeeds.revokeAllOf).toHaveBeenCalledWith('1');
+      expect(standingAccess.endAllOf).toHaveBeenCalledWith('1', 'deactivated');
 
-      calendarFeeds.revokeAllOf.mockClear();
+      standingAccess.endAllOf.mockClear();
       vi.spyOn(repository, 'findOne').mockResolvedValue({ ...mockUser, isActive: false } as User);
       await service.update('1', { isActive: true }, adminUser as User);
       vi.spyOn(repository, 'findOne').mockResolvedValue({ ...mockUser } as User);
       await service.update('1', { name: 'Member One' }, adminUser as User);
-      expect(calendarFeeds.revokeAllOf).not.toHaveBeenCalled();
+      expect(standingAccess.endAllOf).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if user does not exist', async () => {
@@ -316,6 +316,18 @@ describe('UsersService', () => {
 
       const savedUser = saveSpy.mock.calls[0][0];
       expect(savedUser.tokenVersion).toBe(initialTokenVersion + 1);
+    });
+
+    it('ends the calendar links and connected apps of every workspace', async () => {
+      vi.spyOn<any, any>(service as any, 'findOneWithPassword').mockResolvedValue({
+        ...mockUser,
+      } as User);
+      vi.spyOn(repository, 'save').mockResolvedValue(mockUser as User);
+      standingAccess.endAllOf.mockClear();
+
+      await service.changePassword('1', { currentPassword: 'old_password', newPassword: 'new_password' });
+
+      expect(standingAccess.endAllOf).toHaveBeenCalledWith('1', 'password_changed');
     });
 
     it('unlinks every provider account and audits each one', async () => {

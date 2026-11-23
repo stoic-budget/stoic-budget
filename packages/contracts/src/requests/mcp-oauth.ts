@@ -34,6 +34,6 @@ export const McpOAuthDecisionBody = Schema.Struct({
 });
 export type McpOAuthDecisionBody = Wire<typeof McpOAuthDecisionBody>;
 
-/** `DELETE /mcp-oauth/grants/:id`. */
+/** `DELETE /mcp-oauth/grants/:id` and `DELETE /mcp-oauth/workspace/grants/:id`. */
 export const McpOAuthGrantIdParams = Schema.Struct({ id: Schema.String.check(Schema.isUUID()) });
 export type McpOAuthGrantIdParams = Wire<typeof McpOAuthGrantIdParams>;

@@ -6,6 +6,15 @@ const state = vi.hoisted(() => ({
   role: 'admin',
   settings: { plugins: { mcp: true } } as Record<string, unknown> | null,
   newKey: null as { key: string } | null,
+  keys: [] as Array<{ id: string; name: string; prefix: string; scopes: string[]; lastUsedAt: null }>,
+  apps: [] as Array<{
+    id: string;
+    clientName: string;
+    redirectHosts: string[];
+    scopes: string[];
+    createdAt: string;
+    lastUsedAt: null;
+  }>,
 }));
 
 vi.mock('@/app/hooks/useAuth', () => ({ useAuth: () => ({ user: { role: state.role } }) }));
@@ -17,7 +26,7 @@ vi.mock('@/app/contexts/WorkspaceContext', () => ({
 }));
 vi.mock('./useApiKeys', () => ({
   useApiKeys: () => ({
-    keys: [],
+    keys: state.keys,
     loading: false,
     newKey: state.newKey,
     isActive: false,
@@ -29,7 +38,13 @@ vi.mock('./useApiKeys', () => ({
 }));
 
 vi.mock('./useConnectedApps', () => ({
-  useConnectedApps: () => ({ apps: [], loading: false, disconnect: vi.fn(), disconnecting: false }),
+  useConnectedApps: () => ({
+    apps: state.apps,
+    workspaceWide: false,
+    loading: false,
+    disconnect: vi.fn(),
+    disconnecting: false,
+  }),
 }));
 
 describe('McpServerDrawer', () => {
@@ -37,6 +52,8 @@ describe('McpServerDrawer', () => {
     state.role = 'admin';
     state.settings = { plugins: { mcp: true } };
     state.newKey = null;
+    state.keys = [];
+    state.apps = [];
   });
 
   it('shows the HTTP endpoint and ready commands instead of a local build', () => {
@@ -78,5 +95,23 @@ describe('McpServerDrawer', () => {
 
     expect(document.body.textContent).toContain('Connected apps');
     expect(document.body.textContent).toContain('No apps connected yet');
+  });
+
+  it('counts apps connected over OAuth as a connection, next to the keys', () => {
+    render(<McpServerDrawer isOpen onClose={vi.fn()} />);
+    expect(document.body.textContent).toContain('Not connected yet');
+
+    state.apps = [
+      {
+        id: 'grant-1',
+        clientName: 'ACME Assistant',
+        redirectHosts: ['127.0.0.1:33418'],
+        scopes: ['transaction.view'],
+        createdAt: '2026-11-01T10:00:00.000Z',
+        lastUsedAt: null,
+      },
+    ];
+    render(<McpServerDrawer isOpen onClose={vi.fn()} />);
+    expect(document.body.textContent).toContain('Connected — API keys: 0, apps: 1');
   });
 });

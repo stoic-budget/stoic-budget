@@ -73,6 +73,10 @@ export class McpOAuthCode {
   @Column({ type: 'text' })
   resource: string;
 
+  /** The approving session's token version: a later reset or "log out everywhere" voids the code. */
+  @Column({ name: 'token_version', type: 'integer', default: 0 })
+  tokenVersion: number;
+
   @Column({ name: 'expires_at', type: 'timestamptz' })
   expiresAt: Date;
 

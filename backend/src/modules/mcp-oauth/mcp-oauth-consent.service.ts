@@ -122,6 +122,9 @@ export class McpOAuthConsentService {
       workspaceMemberId: member.id,
       userId: user.id,
       grantedRole: member.role,
+      // The version the session was checked against, not a fresh read: a reset
+      // landing between that check and this insert still voids the code.
+      tokenVersion: user.tokenVersion ?? 0,
       scopes: [...body.scopes],
       redirectUri: body.redirectUri,
       codeChallenge: body.codeChallenge as string,

@@ -11,6 +11,7 @@ import {
 import { useState } from 'react';
 import { Link2, Trash2 } from '@/app/components/icons';
 import { useIntlayer } from '@/app/i18n';
+import { formatStoredDate } from '@/app/lib/user-format-store';
 import { tokens } from '@/lib/theme-tokens';
 import { timeAgo } from './time-ago';
 import { useConnectedApps } from './useConnectedApps';
@@ -19,19 +20,24 @@ const sectionLabelStyle = { fontSize: 13, fontWeight: 600, color: 'var(--text-se
 const hintStyle = { fontSize: 12, color: 'var(--text-secondary)', mb: 1.5 };
 
 /**
- * "Connected apps": MCP clients the person approved over OAuth in this
- * workspace. Anyone can connect one, so everyone sees their own here.
+ * "Connected apps": MCP clients approved over OAuth in this workspace. Anyone
+ * can connect one, so everyone sees their own here; whoever manages MCP access
+ * sees every member's, each with who connected it.
  */
 export function McpConnectedApps() {
   const t = useIntlayer('mcpServerDrawer');
-  const { apps, loading, disconnect, disconnecting } = useConnectedApps();
+  const { apps, workspaceWide, loading, disconnect, disconnecting } = useConnectedApps();
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const confirming = apps.find(app => app.id === confirmId) ?? null;
 
   return (
     <Box>
-      <Typography sx={sectionLabelStyle}>{t.connectedApps}</Typography>
-      <Typography sx={hintStyle}>{t.connectedAppsHint}</Typography>
+      <Typography sx={sectionLabelStyle}>
+        {workspaceWide ? t.workspaceConnectedApps : t.connectedApps}
+      </Typography>
+      <Typography sx={hintStyle}>
+        {workspaceWide ? t.workspaceConnectedAppsHint : t.connectedAppsHint}
+      </Typography>
       {loading ? (
         <Typography sx={{ fontSize: 13, color: 'var(--text-secondary)' }}>{t.loading}</Typography>
       ) : apps.length === 0 ? (
@@ -63,14 +69,17 @@ export function McpConnectedApps() {
                 <Typography
                   sx={{ fontSize: 12, color: 'var(--text-secondary)', overflowWrap: 'anywhere' }}
                 >
-                  {app.redirectHosts.join(', ')} · {timeAgo(app.lastUsedAt, t)} ·{' '}
+                  {app.memberName ? `${app.memberName} · ` : ''}
+                  {app.redirectHosts.join(', ')} ·{' '}
+                  {t.connectedOn.value.replace('{date}', formatStoredDate(app.createdAt))} ·{' '}
+                  {timeAgo(app.lastUsedAt, t)} ·{' '}
                   {t.scopeCount.value.replace('{count}', String(app.scopes.length))}
                 </Typography>
               </Box>
               <button
                 type="button"
                 onClick={() => setConfirmId(app.id)}
-                aria-label={`${t.disconnect.value}: ${app.clientName}`}
+                aria-label={`${t.disconnect.value}: ${app.clientName}${app.memberName ? ` · ${app.memberName}` : ''}`}
                 title={t.disconnect.value}
                 style={{
                   background: 'transparent',
@@ -89,11 +98,20 @@ export function McpConnectedApps() {
         </Box>
       )}
 
-      <Dialog open={Boolean(confirming)} onClose={() => setConfirmId(null)} maxWidth="xs" fullWidth>
+      {/* Above the drawer, which the plugins panel opens at the popover layer. */}
+      <Dialog
+        open={Boolean(confirming)}
+        onClose={() => setConfirmId(null)}
+        maxWidth="xs"
+        fullWidth
+        sx={{ zIndex: tokens.zIndex.popover + 1 }}
+      >
         <DialogTitle sx={{ fontSize: 15, fontWeight: 500 }}>{t.disconnectTitle}</DialogTitle>
         <DialogContent>
           <Typography sx={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-            {confirming?.clientName} · {t.disconnectHint}
+            {confirming?.memberName ? `${confirming.memberName} · ` : ''}
+            {confirming?.clientName} ·{' '}
+            {workspaceWide ? t.disconnectHintWorkspace : t.disconnectHint}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
