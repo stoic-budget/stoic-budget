@@ -52,6 +52,7 @@ import {
   type ReceiptWithCategory,
 } from './helpers/attach-receipt-categories';
 import { ReceiptProcessorService } from './services/receipt-processor.service';
+import { trashScanStatement } from './trash-scan-statement';
 
 export interface ApproveReceiptOptions {
   /** Bank row to attach to; `null` forces a new transaction; omitted uses the stored suggestion. */
@@ -856,19 +857,14 @@ export class ReceiptsService {
 
   async delete(id: string, workspaceId: string, userId: string) {
     const receipt = await this.receiptRepository.findOne({ where: { id, workspaceId } });
-    let statementDeleted = false;
-
-    if (receipt?.statementId) {
-      const statement = await this.statementRepository.findOne({
-        where: { id: receipt.statementId, workspaceId },
-      });
-
-      if (statement && !statement.deletedAt) {
-        statement.deletedAt = new Date();
-        await this.statementRepository.save(statement);
-        statementDeleted = true;
-      }
-    }
+    const statementDeleted = receipt?.statementId
+      ? await trashScanStatement(
+          this.statementRepository,
+          this.transactionRepository,
+          receipt.statementId,
+          workspaceId,
+        )
+      : false;
 
     for (const attachmentPath of receipt?.attachmentPaths ?? []) {
       try {
