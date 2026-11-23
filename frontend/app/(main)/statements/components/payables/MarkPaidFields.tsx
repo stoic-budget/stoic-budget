@@ -17,13 +17,14 @@ import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { Select } from '@/app/components/ui/select';
 import { useIntlayer } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
+import { localToday } from '@/app/lib/local-today';
 import type { PayablePayment, PaymentCandidate } from '@/app/lib/payables-api';
 import { usePayeeName } from '@/app/lib/use-payee-name';
 import { RejectButton } from './RejectButton';
 
 export type WalletOption = { id: string; name: string; currency: string; isActive?: boolean };
 
-export const today = (): string => new Date().toISOString().slice(0, 10);
+export const today = (): string => localToday();
 
 /** The transactions that may have settled the bill, one to pick. */
 export function CandidateList(props: {

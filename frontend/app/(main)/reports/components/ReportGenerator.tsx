@@ -11,11 +11,13 @@ import CustomDatePicker from '@/app/components/CustomDatePicker';
 import { Download, X } from '@/app/components/icons';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
+import { localToday } from '@/app/lib/local-today';
 import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { tokens } from '@/lib/theme-tokens';
 import { ReportPreview, type ReportPreviewData } from './ReportPreview';
 import { type ReportScope, ReportScopeFilters } from './ReportScopeFilters';
 import type { ReportTemplate } from './ReportTemplateCard';
+import { fieldLabelStyle, pillStyle } from './report-generator-styles';
 import { PERIOD_PRESETS, type PeriodPreset, presetRangeValues } from './report-period-presets';
 
 export interface ReportGenerateParams {
@@ -50,26 +52,6 @@ const GROUP_BY_OPTIONS: Array<{ value: CashFlowGroupBy; labelKey: string; fallba
   { value: 'week', labelKey: 'groupByWeek', fallback: 'Week' },
   { value: 'month', labelKey: 'groupByMonth', fallback: 'Month' },
 ];
-const pillStyle = (selected: boolean): React.CSSProperties => ({
-  height: 32,
-  padding: '0 12px',
-  border: selected ? '1px solid var(--primary)' : '1px solid var(--border)',
-  background: selected ? 'var(--primary-fill)' : 'var(--card)',
-  color: selected ? '#fff' : 'var(--muted-foreground)',
-  fontSize: 11,
-  fontWeight: 600,
-  cursor: 'pointer',
-  borderRadius: tokens.radius.md,
-});
-
-const fieldLabelStyle: React.CSSProperties = {
-  fontSize: 10,
-  fontWeight: 600,
-  textTransform: 'uppercase',
-  letterSpacing: '0.08em',
-  color: 'var(--muted-foreground)',
-};
-
 export function ReportGenerator({
   template,
   onClose,
@@ -85,7 +67,7 @@ export function ReportGenerator({
     d.setMonth(d.getMonth() - 1);
     return d.toISOString().split('T')[0];
   });
-  const [dateTo, setDateTo] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [dateTo, setDateTo] = useState<string>(() => localToday());
   const [format, setFormat] = useState<'pdf' | 'excel' | 'csv'>('excel');
   const [groupBy, setGroupBy] = useState<CashFlowGroupBy>('day');
   const [generating, setGenerating] = useState(false);

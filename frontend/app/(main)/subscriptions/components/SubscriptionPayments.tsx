@@ -14,8 +14,8 @@ import { X } from '@/app/components/icons';
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer, useLocale } from '@/app/i18n';
-import type { SubscriptionChargeCandidates, SubscriptionDetail } from '@/app/lib/contracts';
 import { formatMoney } from '@/app/lib/format-money';
+import { localToday } from '@/app/lib/local-today';
 import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { usePayeeName } from '@/app/lib/use-payee-name';
@@ -23,36 +23,9 @@ import { formatStoredDateWithOptions } from '@/app/lib/user-format-store';
 import { useAliveRef } from '../hooks/useAliveRef';
 import { useSubscriptionMatchRejection } from '../hooks/useSubscriptionMatchRejection';
 import { SubscriptionCandidatePicker } from './SubscriptionCandidatePicker';
+import type { CandidateRow, SubscriptionPaymentsProps } from './subscription-payments.types';
 
-export type CandidateRow = SubscriptionChargeCandidates[number];
-
-/** A payment shown in the list: saved (the card) or still to be saved (the form). */
-export type PaymentEntry = {
-  key: string;
-  date: string;
-  amount: number;
-  currency: string;
-  /** Comes from a bank row rather than typed in. */
-  linked: boolean;
-};
-
-interface SubscriptionPaymentsProps {
-  payments: PaymentEntry[];
-  vendorName: string;
-  /** The saved subscription: its refused rows stay out, and a row can be refused. */
-  subscriptionId?: string;
-  /** Prefills the amount of a payment typed in: the subscription's price. */
-  defaultAmount: number | '';
-  /** Rows picked in the form but not saved yet, kept out of the picker. */
-  pickedTransactionIds?: string[];
-  onAddManual: (date: string, amount: number) => void | Promise<void>;
-  onAddRows: (rows: CandidateRow[]) => void | Promise<void>;
-  /** Payees whose new rows the server adds on its own; the card only. */
-  autoLinkPayees?: SubscriptionDetail['autoLinkPayees'];
-  /** Links a typed-in payment to a bank row; the card only. */
-  onLinkRow?: (paymentKey: string, row: CandidateRow) => void | Promise<void>;
-  onRemove: (key: string) => void | Promise<void>;
-}
+export type { CandidateRow, PaymentEntry } from './subscription-payments.types';
 
 /**
  * Payments of a subscription: typed in with a date and an amount, picked from
@@ -265,7 +238,7 @@ export function SubscriptionPayments({
             id="subscription-payment-date"
             compact
             value={manualDate}
-            maxDate={new Date().toISOString().slice(0, 10)}
+            maxDate={localToday()}
             onChange={setManualDate}
             placeholder={t.date.value}
           />

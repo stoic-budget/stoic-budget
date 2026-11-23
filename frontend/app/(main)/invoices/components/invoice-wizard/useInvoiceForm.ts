@@ -14,6 +14,7 @@ import {
   type InvoiceRecurrenceInterval,
   invoicesApi,
 } from '@/app/lib/invoices-api';
+import { localToday } from '@/app/lib/local-today';
 import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
 
 export interface TaxRateOption {
@@ -29,7 +30,7 @@ const emptyLine = (): InvoiceLineItemInput => ({
   unitCode: 'C62',
 });
 
-const todayIso = (): string => new Date().toISOString().slice(0, 10);
+const todayIso = (): string => localToday();
 
 const addDays = (iso: string, days: number): string => {
   const date = new Date(`${iso}T00:00:00.000Z`);
