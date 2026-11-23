@@ -336,9 +336,10 @@ export function addDecimals(left: string, right: string): string {
  * tiny or huge number in exponent form, which BigInt cannot read.
  */
 function plainDecimal(value: string): string {
-  const match = /^(-?)(\d+)(?:\.(\d+))?e([+-]?\d+)$/i.exec(value.trim());
+  const trimmed = value.trim().replace(/^\+/, '');
+  const match = /^(-?)(\d+)(?:\.(\d+))?e([+-]?\d+)$/i.exec(trimmed);
   if (!match) {
-    return value;
+    return trimmed;
   }
   const [, sign, whole, fraction = '', exponentText] = match;
   const digits = `${whole}${fraction}`;

@@ -293,6 +293,8 @@ describe('addDecimals', () => {
     expect(addDecimals('0', String(-7.5e-7))).toBe('-0.00000075');
     expect(addDecimals('1', String(2e-8))).toBe('1.00000002');
     expect(addDecimals('0', '1.5e+21')).toBe('1500000000000000000000');
+    expect(addDecimals('0', ' +1e-7 ')).toBe('0.0000001');
+    expect(addDecimals('0', ' 1.5 ')).toBe('1.5');
   });
 
   it('adds values with different scales', () => {
