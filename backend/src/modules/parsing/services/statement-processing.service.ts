@@ -43,6 +43,7 @@ import { fileExtensionOf } from '../helpers/statement-file.helper';
 import { statementRowFingerprint } from '../helpers/statement-row-fingerprint.helper';
 import { pairStatementTransfers } from '../helpers/statement-transfer-pairing.helper';
 import {
+  dropInfoOf,
   type ValidationReasonCode,
   validateParsedStatement,
 } from '../helpers/statement-validation.helper';
@@ -756,12 +757,7 @@ export class StatementProcessingService {
         parsedStatement.transactions,
         {
           tolerance: StatementProcessingService.BALANCE_EPS,
-          dropInfo: {
-            rawCount: rawTransactionCount,
-            droppedCount: droppedSamples.length,
-            lostCount: droppedSamples.filter(sample => !sample.reason.includes('no debit/credit'))
-              .length,
-          },
+          dropInfo: dropInfoOf(rawTransactionCount, droppedSamples),
           checks: parsedStatement.checks,
         },
       );

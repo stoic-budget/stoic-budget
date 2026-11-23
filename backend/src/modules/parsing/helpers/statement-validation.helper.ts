@@ -37,6 +37,15 @@ interface DropInfo {
   lostCount?: number;
 }
 
+/** What the import dropped: every row, and those that carried money (not "no amount"). */
+export function dropInfoOf(rawCount: number, dropped: Array<{ reason: string }>): DropInfo {
+  return {
+    rawCount,
+    droppedCount: dropped.length,
+    lostCount: dropped.filter(sample => !sample.reason.includes('no debit/credit')).length,
+  };
+}
+
 /** More than this share of parsed rows rejected is a failed parse, not a few bad rows. */
 const HIGH_DROP_RATIO_THRESHOLD = 0.5;
 
