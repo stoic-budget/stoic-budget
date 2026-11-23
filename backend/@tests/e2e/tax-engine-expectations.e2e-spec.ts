@@ -137,6 +137,27 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     expect(Number((await row()).tax_amount)).toBe(7.79);
   });
 
+  it('leaves the rows before the registration day without VAT, through any later reassessment', async () => {
+    const vatStatus = (body: { status: string; effectiveFrom?: string }) =>
+      auth(api().put('/tax/settings/vat-status')).send(body).expect(200);
+    // The row is dated 2026-03-10; the business registers from 1 July.
+    await vatStatus({ status: 'not_registered' });
+    await vatStatus({ status: 'registered', effectiveFrom: '2026-07-01' });
+    expect((await row()).tax_amount).toBeNull();
+
+    await auth(api().post('/tax/settings/reassess')).send({}).expect(201);
+    expect((await row()).tax_amount).toBeNull();
+
+    // Registered from before the row's day, it is taxed again.
+    await vatStatus({ status: 'not_registered' });
+    await vatStatus({ status: 'registered', effectiveFrom: '2026-03-01' });
+    expect(Number((await row()).tax_amount)).toBe(7.79);
+
+    // Registered for the whole past again, as the cases after this one expect.
+    await vatStatus({ status: 'not_registered' });
+    await vatStatus({ status: 'registered' });
+  });
+
   it("reverse-charges purchases from a payee with an EU VAT id in another country", async () => {
     const { payee_id: payeeId } = await row();
     expect(payeeId).toBeTruthy();

@@ -25,6 +25,21 @@ export enum WorkspaceKind {
   VERSION = 'version',
 }
 
+/** A VAT status that applied until `until` ('YYYY-MM-DD', the day the next one took over). */
+export type VatStatusSpan = { until: string; status: VatStatus };
+
+/** The VAT status a row dated `date` is assessed under. */
+export function vatStatusOn(
+  workspace: Pick<Workspace, 'vatStatus' | 'vatStatusHistory'>,
+  date: Date | string,
+): VatStatus {
+  const day = typeof date === 'string' ? date.slice(0, 10) : date.toISOString().slice(0, 10);
+  const span = [...(workspace.vatStatusHistory ?? [])]
+    .sort((a, b) => a.until.localeCompare(b.until))
+    .find(earlier => earlier.until > day);
+  return span ? span.status : workspace.vatStatus;
+}
+
 @Entity('workspaces')
 export class Workspace {
   @PrimaryGeneratedColumn('uuid')
@@ -89,6 +104,14 @@ export class Workspace {
    */
   @Column({ name: 'vat_status', type: 'varchar', length: 20, default: VatStatus.REGISTERED })
   vatStatus: VatStatus;
+
+  /**
+   * Earlier statuses, each with the day the next one took over. A row is
+   * assessed under the status of its own date (`vatStatusOn`); empty means the
+   * current status has always applied.
+   */
+  @Column({ name: 'vat_status_history', type: 'jsonb', default: () => "'[]'" })
+  vatStatusHistory: VatStatusSpan[];
 
   /** How far the registration-threshold alert has escalated: 0, 80 or 100. */
   @Column({ name: 'tax_threshold_alert_level', type: 'int', default: 0 })

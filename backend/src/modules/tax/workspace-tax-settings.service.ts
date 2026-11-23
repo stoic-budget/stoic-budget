@@ -14,6 +14,7 @@ import { AuditService } from '../audit/audit.service';
 import { TaxAssignmentService } from './tax-assignment.service';
 import { taxPaymentsCategoryId } from './tax-payments-category';
 import { VAT_DEADLINE_RULES } from './vat-deadlines';
+import { historyAfterSwitch } from './vat-status-history';
 
 export interface VatFilingSettings {
   /** How often the workspace files; the jurisdiction's usual frequency until chosen. */
@@ -39,8 +40,9 @@ export interface TaxReserveSettings {
 
 /**
  * A workspace's own tax switches: whether it charges VAT, and how much of its
- * income it sets aside for tax. Changing the VAT status re-assesses every row
- * not on a filed return, so the figures follow the switch at once.
+ * income it sets aside for tax. Changing the VAT status re-assesses the rows
+ * not on a filed return from the day it applies (every such row when no day is
+ * given), so the figures follow the switch at once.
  */
 @Injectable()
 export class WorkspaceTaxSettingsService {
@@ -72,14 +74,31 @@ export class WorkspaceTaxSettingsService {
     workspaceId: string,
     status: VatStatus,
     userId?: string,
+    effectiveFrom?: string | null,
   ): Promise<{ vatStatus: VatStatus; reassessed: number }> {
-    const previous = await this.getVatStatus(workspaceId);
+    const workspace = await this.workspaceRepository.findOne({
+      where: { id: workspaceId },
+      select: { id: true, vatStatus: true, vatStatusHistory: true },
+    });
+    if (!workspace) {
+      throw new NotFoundException(appError('WORKSPACE_NOT_FOUND'));
+    }
+    const previous = workspace.vatStatus;
     if (previous === status) {
       return { vatStatus: status, reassessed: 0 };
     }
 
-    await this.workspaceRepository.update({ id: workspaceId }, { vatStatus: status });
-    const reassessed = await this.taxAssignmentService.reassess(workspaceId);
+    // From a date, rows before it keep the status they had; without one the
+    // status covers every row not on a filed return.
+    const vatStatusHistory = historyAfterSwitch(workspace, effectiveFrom);
+    await this.workspaceRepository.update(
+      { id: workspaceId },
+      { vatStatus: status, vatStatusHistory },
+    );
+    const reassessed = await this.taxAssignmentService.reassess(
+      workspaceId,
+      effectiveFrom ? { from: effectiveFrom } : {},
+    );
 
     try {
       await this.auditService.createEvent({
@@ -89,8 +108,11 @@ export class WorkspaceTaxSettingsService {
         entityType: EntityType.WORKSPACE,
         entityId: workspaceId,
         action: AuditAction.UPDATE,
-        diff: { before: { vatStatus: previous }, after: { vatStatus: status } },
-        meta: { reassessed },
+        diff: {
+          before: { vatStatus: previous, vatStatusHistory: workspace.vatStatusHistory },
+          after: { vatStatus: status, vatStatusHistory },
+        },
+        meta: { reassessed, effectiveFrom: effectiveFrom ?? null },
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);

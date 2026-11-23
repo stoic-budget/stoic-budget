@@ -5,7 +5,7 @@ import { fromMinor, toMinor } from '../../common/utils/money.util';
 import { payeeKeyOf } from '../../common/utils/payee-key.util';
 import { TaxRule, TaxRuleDirection } from '../../entities/tax-rule.entity';
 import { TaxSource, Transaction, TransactionType } from '../../entities/transaction.entity';
-import { VatStatus, Workspace } from '../../entities/workspace.entity';
+import { VatStatus, vatStatusOn, Workspace } from '../../entities/workspace.entity';
 import { findPayeeId } from '../payees/payee-resolution';
 import { isEuCountry } from './eu-membership';
 import { computeTax } from './tax-calculation';
@@ -250,13 +250,14 @@ export class TaxAssignmentService {
       explicitTaxRateId,
     } = input;
 
-    // 0. A workspace that does not charge VAT has none to assess — not even on
+    // 0. A workspace that did not charge VAT then has none to assess — not even on
     //    a rate picked by hand, which it could neither charge nor reclaim.
     const workspace = await this.workspaceRepository.findOne({
       where: { id: workspaceId },
       relations: { taxJurisdiction: true },
     });
-    if (!workspace || workspace.vatStatus !== VatStatus.REGISTERED) {
+    // The status on the row's own day: a business registered from July had no VAT in June.
+    if (!workspace || vatStatusOn(workspace, transactionDate) !== VatStatus.REGISTERED) {
       return NOT_ASSESSED;
     }
 

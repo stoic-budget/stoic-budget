@@ -81,9 +81,28 @@ describe('TaxStatusSection', () => {
     selectOption(screen.getAllByRole('combobox')[0], 'notRegistered');
 
     await waitFor(() =>
-      expect(api.put).toHaveBeenCalledWith('/tax/settings/vat-status', { status: 'not_registered' }),
+      expect(api.put).toHaveBeenCalledWith('/tax/settings/vat-status', {
+        status: 'not_registered',
+        effectiveFrom: null,
+      }),
     );
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('statusSaved'));
+  });
+
+  it('sends the day a new status applies from, so rows before it keep theirs', async () => {
+    mockApi('not_registered');
+    renderWithQuery(<TaxStatusSection />);
+    await screen.findByText('notRegisteredHelp');
+
+    fireEvent.change(screen.getByLabelText('effectiveFromLabel'), { target: { value: '2026-07-01' } });
+    selectOption(screen.getAllByRole('combobox')[0], 'registered');
+
+    await waitFor(() =>
+      expect(api.put).toHaveBeenCalledWith('/tax/settings/vat-status', {
+        status: 'registered',
+        effectiveFrom: '2026-07-01',
+      }),
+    );
   });
 
   it('re-applies the tax rules on request', async () => {

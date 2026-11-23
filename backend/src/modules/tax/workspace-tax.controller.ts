@@ -66,8 +66,9 @@ export class WorkspaceTaxController {
   }
 
   /**
-   * Whether the workspace charges VAT. Every row not on a filed return is
-   * assessed again under the new status, so the change shows at once.
+   * Whether the workspace charges VAT, from a given day or for the whole past.
+   * The rows not on a filed return from that day are assessed again under the
+   * new status, so the change shows at once.
    */
   @Put('vat-status')
   @WorkspaceAuth(Permission.WORKSPACE_SETTINGS_MANAGE)
@@ -77,7 +78,12 @@ export class WorkspaceTaxController {
     @SchemaBody(SetVatStatusBody) dto: SetVatStatusBody,
     @CurrentUser() user: User,
   ) {
-    return this.settingsService.setVatStatus(workspaceId, toEnum(VatStatus, dto.status), user.id);
+    return this.settingsService.setVatStatus(
+      workspaceId,
+      toEnum(VatStatus, dto.status),
+      user.id,
+      dto.effectiveFrom,
+    );
   }
 
   /**
