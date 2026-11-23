@@ -89,7 +89,8 @@ export const ACCOUNTING_ERRORS = {
   INVOICE_NOT_DRAFT: 'Only a draft invoice can be edited',
   INVOICE_ALREADY_SENT: 'This invoice was already sent',
   INVOICE_ZERO_TOTAL: 'An invoice with no line items cannot be sent',
-  INVOICE_NOT_VOIDABLE: 'A paid invoice cannot be voided',
+  INVOICE_NOT_VOIDABLE:
+    'An invoice with a payment or a credit note cannot be voided: remove the payment or void the credit note first',
   INVOICE_CLIENT_NOT_FOUND: 'Client not found in this workspace',
   INVOICE_PROFILE_INCOMPLETE:
     'Fill in your business details before sending an invoice (missing: {{fields}})',

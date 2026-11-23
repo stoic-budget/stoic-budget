@@ -309,6 +309,37 @@ describe('credit notes (real Postgres)', () => {
     }
   });
 
+  it('voids the invoice once its credit note is voided', async () => {
+    const { invoice } = await sentInvoice(1000);
+    const note = await creditNotes.create(workspaceId, userId, {
+      applications: [{ invoiceId: invoice.id, amount: 200 }],
+    });
+
+    await creditNotes.void(note.id, workspaceId, userId);
+    const voided = await invoices.void(invoice.id, workspaceId, userId);
+
+    expect(voided.status).toBe(InvoiceStatus.VOID);
+  });
+
+  it('never leaves a payment on a voided invoice when both arrive at once', async () => {
+    for (let round = 0; round < 5; round += 1) {
+      const { invoice, payable } = await sentInvoice(1000);
+      await Promise.allSettled([
+        payables.addPayment(payable.id, workspaceId, userId, { amount: 300 }),
+        invoices.void(invoice.id, workspaceId, userId),
+      ]);
+
+      const after = await invoices.findOne(invoice.id, workspaceId);
+      const bill = await payableRepo.findOneByOrFail({ id: payable.id });
+      // Either the payment won and the void was refused, or the void won first.
+      if (after.status === InvoiceStatus.VOID) {
+        expect(Number(bill.paidAmount)).toBe(0);
+      } else {
+        expect(Number(bill.paidAmount)).toBe(300);
+      }
+    }
+  });
+
   it('closes a part-paid invoice when the credit covers the rest', async () => {
     const { invoice, payable } = await sentInvoice(1000);
     await payables.addPayment(payable.id, workspaceId, userId, { amount: 600 });
