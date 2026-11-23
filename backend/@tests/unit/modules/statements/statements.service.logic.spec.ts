@@ -103,7 +103,7 @@ describe('StatementsService — business logic', () => {
           provide: getRepositoryToken(Transaction),
           useValue: {
             create: vi.fn(),
-            find: vi.fn(),
+            find: vi.fn().mockResolvedValue([]),
             save: vi.fn(),
             delete: vi.fn(),
             count: vi.fn(),

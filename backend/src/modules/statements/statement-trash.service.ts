@@ -13,6 +13,7 @@ import { Statement } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { AuditService } from '../audit/audit.service';
 import type { DataDeletedEvent } from '../notifications/events/notification-events';
+import { promoteCopiesOf } from '../transactions/helpers/promote-copies';
 import { ensureCanModifyStatement } from './statement-access';
 import { removeStatementFile } from './statement-file-removal.util';
 
@@ -123,7 +124,14 @@ export class StatementTrashService {
       count: 1,
     } satisfies DataDeletedEvent);
 
-    // Delete all related transactions first
+    // Delete all related transactions first; their copies elsewhere get an original.
+    const rowIds = (
+      await this.transactionRepository.find({
+        select: { id: true },
+        where: { statementId: id, workspaceId },
+      })
+    ).map(row => row.id);
+    await promoteCopiesOf(this.transactionRepository, workspaceId, rowIds);
     await this.transactionRepository.delete({ statementId: id });
 
     await removeStatementFile(this.statementRepository, statement, this.logger);

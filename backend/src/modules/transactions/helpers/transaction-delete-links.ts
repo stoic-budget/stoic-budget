@@ -1,9 +1,10 @@
-import { type EntityManager, In, IsNull, Not } from 'typeorm';
+import { type EntityManager, In, IsNull } from 'typeorm';
 import {
   Transaction,
   TransferPairKind,
   type TransferPairSource,
 } from '../../../entities/transaction.entity';
+import { promoteCopiesOf } from './promote-copies';
 
 /**
  * What a deleted row was linked to, kept in its audit entry so that undoing the
@@ -136,15 +137,8 @@ export async function deleteAndDetach(
 ): Promise<void> {
   const repo = manager.getRepository(Transaction);
   const ids = rows.map(row => row.id);
-  await repo.update(
-    { workspaceId, duplicateOfId: In(ids), id: Not(In(ids)) },
-    {
-      isDuplicate: false,
-      duplicateOfId: null,
-      duplicateConfidence: null,
-      duplicateMatchType: null,
-    },
-  );
+  // One copy becomes the original, the others point to it (one per fingerprint).
+  await promoteCopiesOf(repo, workspaceId, ids);
   await repo.delete({ workspaceId, id: In(ids) });
 
   const pairIds = distinct(rows.map(row => row.transferPairId));

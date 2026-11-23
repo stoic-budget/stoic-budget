@@ -1,5 +1,6 @@
 import { type FindOptionsWhere, In, type Repository } from 'typeorm';
 import { Transaction } from '../../entities/transaction.entity';
+import { promoteCopiesOf } from '../transactions/helpers/promote-copies';
 
 /**
  * `duplicate_match_type` of a split loan payment held while its statement is
@@ -44,6 +45,8 @@ export async function deleteKeepingSplits(
   }
   const gone = ids.filter(id => !(kept.has(id) || held.has(id)));
   if (gone.length > 0) {
+    // Their copies elsewhere get an original before they go.
+    await promoteCopiesOf(transactions, workspaceId, gone);
     await transactions.delete({ workspaceId, id: In(gone) });
   }
 }
