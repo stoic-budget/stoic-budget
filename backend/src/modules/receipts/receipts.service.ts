@@ -47,6 +47,7 @@ import { resolvePayeeId } from '../payees/payee-resolution';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
 import { TransactionAttachmentsService } from '../transactions/services/transaction-attachments.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
+import { bookedRowUpdate } from './booked-row-update';
 import {
   attachReceiptCategories,
   type ReceiptWithCategory,
@@ -490,14 +491,13 @@ export class ReceiptsService {
         [fields.categoryId],
         workspaceId,
       );
-      await this.transactionRepository.update(
-        { id: target.id, workspaceId },
-        {
-          ...scanTransactionUpdate(fields, Boolean(receipt.parsedData?.date)),
-          // update() skips the subscriber: the vendor may have changed.
-          payeeId: await resolvePayeeId(this.transactionRepository.manager, workspaceId, fields),
-        },
-      );
+      // update() skips the subscriber: the vendor may have changed. A split row
+      // takes only what its parts share (#686).
+      const { where, set } = bookedRowUpdate(target, workspaceId, {
+        ...scanTransactionUpdate(fields, Boolean(receipt.parsedData?.date)),
+        payeeId: await resolvePayeeId(this.transactionRepository.manager, workspaceId, fields),
+      });
+      await this.transactionRepository.update(where, set);
     } else if (receipt.parsedData?.categoryId && edits.categoryId !== undefined) {
       await this.transactionRepository.update(
         { id: target.id, workspaceId },

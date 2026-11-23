@@ -344,6 +344,31 @@ describe('editing an approved receipt reaches the figures (real Postgres)', () =
     await txRepo.delete({ id });
   });
 
+  it('keeps the amounts of a row split by items and renames every part (#686)', async () => {
+    const group = randomUUID();
+    const first = await row({ amount: 30, debit: 30, splitGroupId: group, splitIndex: 0 });
+    const second = await row({ amount: 20, debit: 20, splitGroupId: group, splitIndex: 1 });
+    const receiptId = await approvedReceipt({
+      source: ReceiptSource.IMAP,
+      transactionId: first,
+      parsedData: { date: LAST_MONTH, amount: 50, currency: 'USD', vendor: 'ACME Stor' },
+    });
+
+    await receipts.update(
+      receiptId,
+      workspaceId,
+      { parsedData: { vendor: 'ACME Store', amount: 50, categoryId: travelId } },
+      userId,
+    );
+
+    const parts = await txRepo.find({ where: { splitGroupId: group }, order: { splitIndex: 'ASC' } });
+    expect(parts.map(part => Number(part.debit))).toEqual([30, 20]);
+    expect(parts.map(part => part.counterpartyName)).toEqual(['ACME Store', 'ACME Store']);
+    // Each part keeps its own category.
+    expect(parts.map(part => part.categoryId)).toEqual([softwareId, softwareId]);
+    await txRepo.delete({ splitGroupId: group });
+  });
+
   it("keeps the bank's date and amount on a bank row and takes only the category", async () => {
     const bank = await statement({ bankName: BankName.OTHER });
     const id = await row({ statementId: bank, amount: 50, debit: 50 });
