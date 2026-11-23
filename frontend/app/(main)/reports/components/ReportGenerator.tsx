@@ -65,7 +65,7 @@ export function ReportGenerator({
   const [dateFrom, setDateFrom] = useState<string>(() => {
     const d = new Date();
     d.setMonth(d.getMonth() - 1);
-    return d.toISOString().split('T')[0];
+    return localToday(d);
   });
   const [dateTo, setDateTo] = useState<string>(() => localToday());
   const [format, setFormat] = useState<'pdf' | 'excel' | 'csv'>('excel');
