@@ -379,11 +379,26 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
       `SELECT id FROM categories WHERE workspace_id = $1 AND system_key = 'salary'`,
       [workspaceId],
     );
+    // The income Uncategorized fallback is made on first need; made here so its rule is tested.
     const [uncategorized] = await dataSource.query(
-      `SELECT id FROM categories WHERE workspace_id = $1 AND name = 'Uncategorized' AND type = 'income'`,
+      `INSERT INTO categories (workspace_id, user_id, name, type)
+       SELECT $1, owner_id, 'Uncategorized', 'income' FROM workspaces WHERE id = $1
+       ON CONFLICT DO NOTHING RETURNING id`,
       [workspaceId],
     );
-    for (const categoryId of [salary?.id, uncategorized?.id].filter(Boolean)) {
+    const [bonus] = await dataSource.query(
+      `INSERT INTO categories (workspace_id, user_id, name, type, parent_id)
+       SELECT $1, owner_id, 'Bonus', 'income', $2 FROM workspaces WHERE id = $1 RETURNING id`,
+      [workspaceId, salary.id],
+    );
+    const [yearEnd] = await dataSource.query(
+      `INSERT INTO categories (workspace_id, user_id, name, type, parent_id)
+       SELECT $1, owner_id, 'Year-end bonus', 'income', $2 FROM workspaces WHERE id = $1 RETURNING id`,
+      [workspaceId, bonus.id],
+    );
+    const reserveBefore = (await auth(api().get('/tax/settings/reserve/amount')).expect(200)).body;
+    // A supplier's refund, filed under the expense category it undoes.
+    for (const categoryId of [salary.id, uncategorized?.id, yearEnd.id, groceries].filter(Boolean)) {
       await dataSource.query(
         `INSERT INTO transactions (workspace_id, transaction_date, counterparty_name, payment_purpose,
            amount, credit, currency, transaction_type, is_verified, category_id)
@@ -393,6 +408,9 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     }
     const still = await auth(api().get('/tax/settings/threshold')).expect(200);
     expect(still.body).toMatchObject({ turnover: 20000 });
+    // Nor are they earnings the reserve holds tax back for.
+    const reserveAfter = (await auth(api().get('/tax/settings/reserve/amount')).expect(200)).body;
+    expect(reserveAfter.incomeTax).toEqual(reserveBefore.incomeTax);
   });
 
   it('turns VAT off when the workspace becomes a household', async () => {

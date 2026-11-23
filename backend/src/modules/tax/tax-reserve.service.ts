@@ -133,8 +133,9 @@ export class TaxReserveService {
       .andWhere('(t.transactionNature IS NULL OR t.transactionNature NOT IN (:...natures))', {
         natures: [...NOT_EARNINGS],
       })
-      // Earned from customers: a loan or a transfer left in Uncategorized is not.
-      .andWhere(salesCategorySql('t'))
+      // Earned: not wages, not a loan or a transfer left in Uncategorized. Interest
+      // is income here, and a client payment recorded with no category counts.
+      .andWhere(salesCategorySql('t', { interest: true, uncategorizedRows: true }))
       .getMany();
 
     let total = 0;
