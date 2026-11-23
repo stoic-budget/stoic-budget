@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import type { DataSource, EntitySubscriberInterface, UpdateEvent } from 'typeorm';
+import type { DataSource, EntitySubscriberInterface, InsertEvent, UpdateEvent } from 'typeorm';
 import { Transaction } from '../../entities/transaction.entity';
 import { toDateOnly } from './jurisdictions.service';
 import { applyAssignment, assignmentInputOf, TaxAssignmentService } from './tax-assignment.service';
@@ -43,7 +43,7 @@ function changed(entity: Transaction, before: Transaction, field: keyof Transact
  * row from "Groceries" to "Office supplies" kept the rate of the old category,
  * and the return carried the stale figure.
  *
- * Only `save()` reaches a subscriber; paths that write with `update()` call
+ * Only `save()` and `insert()` reach a subscriber; paths that write with `update()` call
  * `TaxAssignmentService.reassess` themselves. Rows in a filed return are left
  * alone — the edit guard refuses those changes before they get here.
  */
@@ -58,6 +58,22 @@ export class TransactionTaxSubscriber implements EntitySubscriberInterface<Trans
 
   listenTo() {
     return Transaction;
+  }
+
+  /**
+   * A row created without its tax (a payment recorded from a wallet, an
+   * approved receipt, a file import) is assessed on the way in. A caller that
+   * assessed it already set the tax fields, and is left alone.
+   */
+  async beforeInsert(event: InsertEvent<Transaction>): Promise<void> {
+    const entity = event.entity as Transaction | undefined;
+    if (!entity?.workspaceId || entity.taxLocked) {
+      return;
+    }
+    if (TAX_OUTPUTS.some(field => entity[field] !== undefined)) {
+      return;
+    }
+    applyAssignment(entity, await this.taxAssignmentService.resolve(assignmentInputOf(entity)));
   }
 
   async beforeUpdate(event: UpdateEvent<Transaction>): Promise<void> {

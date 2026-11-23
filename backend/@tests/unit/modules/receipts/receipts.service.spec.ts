@@ -443,9 +443,6 @@ describe('ReceiptsService', () => {
       transactionId: null,
     });
     transactionRepository.findOne.mockResolvedValue({ id: 'bank-row', workspaceId: 'workspace-1' });
-    vi
-      .spyOn(service as any, 'copyFileToTransaction')
-      .mockResolvedValue(undefined);
 
     await service.approve('receipt-attach', 'workspace-1', 'user-1', { attachTo: 'bank-row' });
 
