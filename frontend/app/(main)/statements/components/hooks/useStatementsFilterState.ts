@@ -19,6 +19,7 @@ import {
 import { useClearAsOf } from '@/app/hooks/useClearAsOf';
 import { usePayPeriods } from '@/app/hooks/usePayPeriods';
 import { monthDeepLinkFilters } from '../filters/month-deep-link';
+import { isHasToken } from '../filters/statement-filter-internals';
 import { reconcileFiltersWithColumns } from '../StatementsListView.utils';
 
 interface UseStatementsFilterStateReturn {
@@ -99,11 +100,11 @@ export function useStatementsFilterState({
     ignoreStored = false,
     deepLinkHas?: string | null,
   ): void => {
-    linkedMonth.current = context ? null : (deepLinkMonth ?? null);
     // `?has=warnings` (the dashboard's parsing warnings): only that, for this visit.
-    const hasFilters = deepLinkHas
-      ? { ...DEFAULT_STATEMENT_FILTERS, has: deepLinkHas.split(',').filter(Boolean) }
-      : null;
+    const has = (deepLinkHas ?? '').split(',').filter(isHasToken);
+    const hasFilters = has.length > 0 ? { ...DEFAULT_STATEMENT_FILTERS, has } : null;
+    // It wins over a linked month, also when the pay period loads later.
+    linkedMonth.current = context || hasFilters ? null : (deepLinkMonth ?? null);
     const storedFilters =
       hasFilters ??
       monthDeepLinkFilters(deepLinkMonth, new Date(), context) ??

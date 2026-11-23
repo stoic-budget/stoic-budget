@@ -138,6 +138,9 @@ const HAS_CHECKERS: Record<string, (s: StatementFilterItem) => boolean> = {
   currency: hasCurrency,
 };
 
+/** A "has" value the list knows: a hand-edited `?has=` cannot empty the list. */
+export const isHasToken = (token: string): boolean => Object.hasOwn(HAS_CHECKERS, token);
+
 export const matchesHas = (token: string, statement: StatementFilterItem): boolean =>
   HAS_CHECKERS[token]?.(statement) ?? false;
 
