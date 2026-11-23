@@ -226,6 +226,11 @@ export class NotificationDeliveryService {
     }
     const emailed: Notification[] = [];
     for (const [workspaceId, items] of byWorkspace) {
+      // No mail server for this workspace: no mail will ever go, so none waits.
+      if (!(await this.mailerService.isConfigured(workspaceId))) {
+        emailed.push(...items);
+        continue;
+      }
       const sent = await this.mailerService.send({
         to: user.email,
         subject: `${APP_NAME}: ${items.length}`,
@@ -245,16 +250,22 @@ export class NotificationDeliveryService {
     preference: NotificationPreference,
   ): Promise<void> {
     const channels = [...new Set(pending.flatMap(item => item.pendingChannels ?? []))];
-    const subject = `${APP_NAME}: ${pending.length}`;
-    const body = digestText(pending);
+    // Each channel gets only what still waits for it: never again what it delivered.
+    const waiting = (channel: NotificationChannel) =>
+      pending.filter(item => (item.pendingChannels ?? []).includes(channel));
+    const subjectOf = (items: Notification[]) => `${APP_NAME}: ${items.length}`;
 
     // Each channel on its own: one that fails keeps its notifications for the
     // next digest, the others are done, and a throw in one never stops another.
     const delivered = new Map<NotificationChannel, Notification[]>();
-    const attempt = async (channel: NotificationChannel, send: () => Promise<Notification[]>) => {
-      if (!channels.includes(channel)) return;
+    const attempt = async (
+      channel: NotificationChannel,
+      send: (items: Notification[]) => Promise<Notification[]>,
+    ) => {
+      const items = waiting(channel);
+      if (!channels.includes(channel) || items.length === 0) return;
       try {
-        delivered.set(channel, await send());
+        delivered.set(channel, await send(items));
       } catch (error) {
         this.logger.warn(
           `Digest for ${user.id} not sent by ${channel}: ${error instanceof Error ? error.message : String(error)}`,
@@ -262,30 +273,32 @@ export class NotificationDeliveryService {
       }
     };
 
-    await attempt(NotificationChannel.EMAIL, () => this.mailDigest(pending, user));
-    await attempt(NotificationChannel.TELEGRAM, async () => {
+    await attempt(NotificationChannel.EMAIL, items => this.mailDigest(items, user));
+    await attempt(NotificationChannel.TELEGRAM, async items => {
       // No chat to send to: nothing will ever go there, so nothing waits for it.
       if (user.telegramChatId) {
         await this.telegramService.sendPlainMessage(
           user.telegramChatId,
-          `${subject}\n\n${body}`,
+          `${subjectOf(items)}\n\n${digestText(items)}`,
           user,
         );
       }
-      return pending;
+      return items;
     });
-    await attempt(NotificationChannel.PUSH, async () => {
+    await attempt(NotificationChannel.PUSH, async items => {
+      // Push off on this server: nothing will ever go, so nothing waits for it.
+      if (!this.pushService.isEnabled()) return items;
       // One push for the whole digest; the phone would not want one per item.
       const pushed = await this.pushService.sendToUser(user.id, {
-        title: subject,
-        body: pending
+        title: subjectOf(items),
+        body: items
           .slice(0, 3)
           .map(item => item.title)
           .join(' · '),
         url: '/dashboard',
         tag: 'digest',
       });
-      return pushed ? pending : [];
+      return pushed ? items : [];
     });
 
     // What each notification still waits for, written once per distinct rest.
