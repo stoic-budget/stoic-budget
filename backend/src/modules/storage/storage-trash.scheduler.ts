@@ -45,7 +45,12 @@ export class StorageTrashScheduler {
 
     for (const statement of expired) {
       try {
-        await this.statementsService.remove(statement.id, statement.userId, statement.workspaceId);
+        // Purged, not trashed again: remove only moves to the trash.
+        await this.statementsService.permanentDelete(
+          statement.id,
+          statement.userId,
+          statement.workspaceId,
+        );
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         this.logger.error(

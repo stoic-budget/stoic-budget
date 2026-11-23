@@ -600,7 +600,8 @@ export class StorageService {
     if (!statement.deletedAt) {
       throw new BadRequestException(appError('STORAGE_FILE_NOT_IN_TRASH'));
     }
-    await this.statementsService.remove(statementId, userId, statement.workspaceId);
+    // Out of the trash for good: the rows and the file go (remove only trashes).
+    await this.statementsService.permanentDelete(statementId, userId, statement.workspaceId);
     return { status: 'deleted' };
   }
 
@@ -876,7 +877,7 @@ export class StorageService {
 
     const deletable = statements.filter(st => st.deletedAt);
     for (const st of deletable) {
-      await this.statementsService.remove(st.id, userId, st.workspaceId);
+      await this.statementsService.permanentDelete(st.id, userId, st.workspaceId);
     }
 
     return {
