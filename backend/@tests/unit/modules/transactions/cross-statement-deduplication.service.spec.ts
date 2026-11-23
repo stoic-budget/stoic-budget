@@ -13,6 +13,7 @@ describe('CrossStatementDeduplicationService', () => {
     findBy: vi.fn(),
     findOneBy: vi.fn(),
     update: vi.fn(),
+    exists: vi.fn(async () => false),
     // The tax-lock check of a merge: no row, nor loan interest split off one, is filed.
     count: vi.fn(async () => 0),
     createQueryBuilder: vi.fn(() => ({
@@ -415,13 +416,34 @@ describe('CrossStatementDeduplicationService', () => {
         id: 'tx1',
         workspaceId: 'workspace1',
       });
-      expect(mockRepository.update).toHaveBeenCalledWith('tx1', {
-        isDuplicate: false,
-        duplicateOfId: null,
-        duplicateConfidence: null,
-        duplicateMatchType: null,
-      });
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        { id: 'tx1', workspaceId: 'workspace1' },
+        {
+          isDuplicate: false,
+          duplicateOfId: null,
+          duplicateConfidence: null,
+          duplicateMatchType: null,
+        },
+      );
       expect(result.isDuplicate).toBe(false);
+    });
+
+    it('gives up the fingerprint when a counted row already holds it', async () => {
+      const transaction = {
+        ...createMockTransaction('tx1', new Date(), 10000, 'Company A', 'Payment', 'stmt1'),
+        isDuplicate: true,
+        fingerprint: 'fp-1',
+      };
+      mockRepository.update.mockResolvedValue({ affected: 1 });
+      mockRepository.findOneBy.mockResolvedValue(transaction);
+      mockRepository.exists.mockResolvedValueOnce(true);
+
+      await service.unmarkDuplicate('tx1', 'workspace1');
+
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        { id: 'tx1', workspaceId: 'workspace1' },
+        expect.objectContaining({ isDuplicate: false, fingerprint: null }),
+      );
     });
 
     it('should throw error if transaction not found', async () => {
