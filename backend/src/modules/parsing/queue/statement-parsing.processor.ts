@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { type Job, UnrecoverableError } from 'bullmq';
-import { LessThan, Repository } from 'typeorm';
+import { In, LessThan, Repository } from 'typeorm';
 import { STANDARD_WORKSPACE } from '../../../common/workspaces/version-workspaces';
 import { Statement, StatementStatus } from '../../../entities/statement.entity';
 import { WorkspaceKind } from '../../../entities/workspace.entity';
@@ -122,19 +122,26 @@ export class StaleStatementReaper {
   async reap(): Promise<void> {
     const stale = await this.statementRepository.find({
       where: {
-        status: StatementStatus.PROCESSING,
+        // UPLOADED too: an upload whose enqueue failed (Redis down) waits for this.
+        status: In([StatementStatus.PROCESSING, StatementStatus.UPLOADED]),
         updatedAt: LessThan(new Date(Date.now() - STALE_PROCESSING_MS)),
         // A past version may hold a copy caught mid-parse; it stays that way.
         workspace: STANDARD_WORKSPACE,
       },
       select: {
         id: true,
+        status: true,
         parsingAttempts: true,
       },
       take: 50,
     });
 
     for (const statement of stale) {
+      if (statement.status === StatementStatus.UPLOADED) {
+        // Never picked up: enqueue again (a no-op while a job is still waiting).
+        await this.queue.enqueue(statement.id);
+        continue;
+      }
       if (statement.parsingAttempts >= MAX_PARSING_ATTEMPTS) {
         await this.statementRepository.update(
           { id: statement.id, status: StatementStatus.PROCESSING },
