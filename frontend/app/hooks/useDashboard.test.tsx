@@ -88,7 +88,10 @@ describe('useDashboard', () => {
     expect(apiMocks.get).toHaveBeenCalledTimes(1);
     expect(apiMocks.get).toHaveBeenCalledWith(
       '/dashboard',
-      expect.objectContaining({ params: { range: '30d' } }),
+      // No month picked: the viewer's own day goes along, so "this month" is theirs.
+      expect.objectContaining({
+        params: { range: '30d', today: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) },
+      }),
     );
     expect(result.current.data?.effectiveEndDate).toBe('2025-05-31');
     expect(result.current.targetDate).toBeNull();

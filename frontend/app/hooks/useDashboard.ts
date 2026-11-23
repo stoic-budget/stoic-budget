@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
+import { formatDateOnly } from '@/app/(main)/dashboard/helpers/dashboard-helpers';
 import { useIntlayer } from '@/app/i18n';
 import { getApiErrorMessage } from '@/app/lib/api-error';
 import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
@@ -69,7 +70,9 @@ export function useDashboard(
     queryKey: queryKeys.dashboard({ workspaceId, range, date: targetDate }),
     queryFn: ({ signal }) => {
       const params: Record<string, string> = { range };
+      // No month picked: this month is the viewer's, by their own day (#594).
       if (targetDate) params.date = targetDate;
+      else params.today = formatDateOnly(new Date());
       return apiQueryDecoded({ url: '/dashboard', params, signal, contract: 'DashboardResponse' });
     },
     placeholderData: (previous, previousQuery) =>

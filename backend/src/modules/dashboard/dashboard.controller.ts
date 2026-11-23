@@ -45,6 +45,7 @@ export class DashboardController {
       query.range ?? '30d',
       query.date,
       selfMemberId ?? null,
+      query.today,
     );
   }
 
