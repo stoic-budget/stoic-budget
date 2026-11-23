@@ -83,6 +83,50 @@ describe('ExcelParser header scan', () => {
   });
 });
 
+describe('ExcelParser text dates (#674)', () => {
+  const sheet = async (name: string, rows: unknown[][]) => {
+    const xlsx = await import('xlsx');
+    const wb = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(wb, xlsx.utils.aoa_to_sheet(rows), 'Statement');
+    const filePath = path.join(os.tmpdir(), `parser-test-${process.pid}-${name}.xlsx`);
+    xlsx.writeFile(wb, filePath);
+    return filePath;
+  };
+  const day = (date: Date) => [date.getFullYear(), date.getMonth() + 1, date.getDate()];
+
+  it('reads every text date of the file in one month-first order', async () => {
+    const filePath = await sheet('us', [
+      ['DATE', 'DESCRIPTION', 'CHARGES', 'CREDITS'],
+      ['01/13/2026', 'ACME Store', 10, ''],
+      ['02/05/2026', 'ACME Store', 20, ''],
+    ]);
+    try {
+      const parsed = await new ExcelParser().parse(filePath);
+      expect(parsed.transactions.map(t => day(t.transactionDate))).toEqual([
+        [2026, 1, 13],
+        [2026, 2, 5],
+      ]);
+      // The period is the span of the rows, not today.
+      expect(day(parsed.metadata.dateFrom)).toEqual([2026, 1, 13]);
+    } finally {
+      fs.unlinkSync(filePath);
+    }
+  });
+
+  it('reads year-first dates as they are written', async () => {
+    const filePath = await sheet('iso', [
+      ['DATE', 'DESCRIPTION', 'CHARGES', 'CREDITS'],
+      ['2026/01/15', 'ACME Store', 10, ''],
+    ]);
+    try {
+      const parsed = await new ExcelParser().parse(filePath);
+      expect(day(parsed.transactions[0].transactionDate)).toEqual([2026, 1, 15]);
+    } finally {
+      fs.unlinkSync(filePath);
+    }
+  });
+});
+
 describe('DocxParser', () => {
   function buildDocx(bodyXml: string): string {
     const zip = new AdmZip();

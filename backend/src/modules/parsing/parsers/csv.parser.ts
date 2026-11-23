@@ -3,49 +3,12 @@ import csv = require('csv-parser');
 import * as fs from 'fs';
 import { appDefaultCurrency } from '../../../common/utils/currency.util';
 import { type BankName, FileType } from '../../../entities/statement.entity';
+import { detectDateOrder, parseNumericDate } from '../helpers/numeric-date.helper';
 import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import { BaseTabularParser } from './base-tabular.parser';
-import { type CsvPreset, type DateOrder, findCsvPreset, presetColumnMapping } from './csv-presets';
+import { type CsvPreset, findCsvPreset, presetColumnMapping } from './csv-presets';
 
 const HEADER_SCAN_ROWS = 40;
-const NUMERIC_DATE =
-  /^(\d{1,2})[./-](\d{1,2})[./-](\d{4}|\d{2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/;
-
-/**
- * 'mdy' when some date only makes sense month-first (01/13/2026), 'dmy' when
- * some date only makes sense day-first (13/01/2026), null when every date in
- * the file reads both ways.
- */
-function detectDateOrder(values: string[]): DateOrder | null {
-  for (const value of values) {
-    const match = value.trim().match(NUMERIC_DATE);
-    if (!match) {
-      continue;
-    }
-    const [first, second] = [Number(match[1]), Number(match[2])];
-    if (first > 12 && second <= 12) {
-      return 'dmy';
-    }
-    if (second > 12 && first <= 12) {
-      return 'mdy';
-    }
-  }
-  return null;
-}
-
-function parseNumericDate(value: string, order: DateOrder): Date | null {
-  const match = value.trim().match(NUMERIC_DATE);
-  if (!match) {
-    return null;
-  }
-  const [, a, b, y, hours = '0', minutes = '0', seconds = '0'] = match;
-  const [day, month] = order === 'mdy' ? [Number(b), Number(a)] : [Number(a), Number(b)];
-  const year = y.length === 2 ? (Number(y) <= 49 ? 2000 : 1900) + Number(y) : Number(y);
-  const date = new Date(year, month - 1, day, Number(hours), Number(minutes), Number(seconds));
-  // Reject rollovers such as 31/02 becoming March 3rd.
-  return date.getMonth() === month - 1 && date.getDate() === day ? date : null;
-}
-
 export class CsvParser extends BaseTabularParser {
   async canParse(
     bankName: BankName,

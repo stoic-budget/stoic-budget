@@ -3,6 +3,7 @@ import * as xlsx from 'xlsx';
 import { appDefaultCurrency } from '../../../common/utils/currency.util';
 import { assertSafeZipDecompressionRatio } from '../../../common/utils/zip-bomb-guard.util';
 import { type BankName, FileType } from '../../../entities/statement.entity';
+import { detectDateOrder, parseNumericDate } from '../helpers/numeric-date.helper';
 import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import { BaseTabularParser } from './base-tabular.parser';
 
@@ -81,6 +82,14 @@ export class ExcelParser extends BaseTabularParser {
     // Extract metadata from first few rows or filename
     const metadata = this.extractMetadata(filePath, data, detectedCurrency);
 
+    // Day and month order is the file's, decided once from the whole date
+    // column, as for CSV: text dates are not read row by row (#674).
+    const dateIndex = columnMapping.date;
+    const dateOrder =
+      dateIndex === undefined
+        ? 'dmy'
+        : (detectDateOrder(rows.map(row => String(row?.[dateIndex] ?? ''))) ?? 'dmy');
+
     // Extract transactions
     const transactions: ParsedTransaction[] = [];
 
@@ -92,13 +101,25 @@ export class ExcelParser extends BaseTabularParser {
       const transaction = this.parseRow(
         row,
         columnMapping,
-        index => row[index],
+        index =>
+          index === dateIndex && typeof row[index] === 'string'
+            ? (parseNumericDate(row[index] as string, dateOrder) ?? row[index])
+            : row[index],
         'Excel',
         detectedCurrency,
       );
       if (transaction) {
         transactions.push(transaction);
       }
+    }
+
+    // No period printed above the table: the span of the rows, not today.
+    const times = transactions
+      .map(transaction => transaction.transactionDate.getTime())
+      .filter(time => !Number.isNaN(time));
+    if (!this.extractDateRangeFromData(data).from && times.length) {
+      metadata.dateFrom = new Date(Math.min(...times));
+      metadata.dateTo = new Date(Math.max(...times));
     }
 
     return {
