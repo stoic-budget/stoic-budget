@@ -78,4 +78,5 @@ export const CORE_ERRORS = {
   VERSION_NOT_FOUND: 'This version is not available',
   // ── request validation (SchemaBody / SchemaQuery) ───────────────────────
   REQUEST_INVALID: 'The request is invalid',
+  REQUEST_IN_PROGRESS: 'The same request is still being processed; try again in a moment',
 } as const;

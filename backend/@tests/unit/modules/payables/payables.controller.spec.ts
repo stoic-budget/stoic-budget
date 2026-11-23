@@ -3,6 +3,7 @@ import { PassThrough } from 'stream';
 import { PayableStatus } from '@/entities/payable.entity';
 import { ExportFormat } from '@/modules/payables/dto/filter-payables.dto';
 import { PayablesController } from '@/modules/payables/payables.controller';
+import { fakeIdempotency } from '../../test/fake-idempotency';
 
 vi.mock('fs', async () => {
   const actual = await vi.importActual<typeof import('fs')>('fs');
@@ -19,15 +20,7 @@ describe('PayablesController', () => {
   it('answers a repeated idempotency key with the first bill, without creating another', async () => {
     const first = { id: 'p1' };
     const payablesService = { create: vi.fn(async () => first) };
-    const stored = new Map<string, unknown>();
-    const idempotency = {
-      checkKey: vi.fn(async (key: string) =>
-        stored.has(key) ? { data: stored.get(key), cached: true } : null,
-      ),
-      storeKey: vi.fn(async (key: string, _user: string, _workspace: string, data: unknown) => {
-        stored.set(key, data);
-      }),
-    };
+    const idempotency = fakeIdempotency();
     const controller = new PayablesController(
       payablesService as any,
       idempotency as any,
@@ -42,7 +35,7 @@ describe('PayablesController', () => {
 
     expect(payablesService.create).toHaveBeenCalledTimes(1);
     // The key table is shared: this endpoint's keys cannot collide with another's.
-    expect(idempotency.storeKey).toHaveBeenCalledWith('payable:form-1', 'user-1', 'workspace-1', first);
+    expect(idempotency.once).toHaveBeenCalledWith('payable:form-1', 'user-1', 'workspace-1', expect.any(Function));
   });
 
   it('proxies CRUD, summary, status actions, and export to service', async () => {
@@ -64,7 +57,12 @@ describe('PayablesController', () => {
       remove: vi.fn(async () => undefined),
       exportData: vi.fn(async () => ({ filePath: '/tmp/p.csv', fileName: 'p.csv', contentType: 'text/csv' })),
     };
-    const controller = new PayablesController(payablesService as any, {} as any, recurrence as any, {} as any);
+    const controller = new PayablesController(
+      payablesService as any,
+      fakeIdempotency() as any,
+      recurrence as any,
+      {} as any,
+    );
     const user = { id: 'user-1' } as any;
     const workspaceId = 'workspace-1';
     const res = new PassThrough() as any;

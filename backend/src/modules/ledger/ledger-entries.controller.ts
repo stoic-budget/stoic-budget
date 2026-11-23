@@ -71,17 +71,10 @@ export class LedgerEntriesController {
   ): Promise<JournalEntryResponseDto> {
     // Namespaced: the key table is shared by every endpoint that takes one.
     const key = idempotencyKey ? `ledger-entry:${idempotencyKey}` : null;
-    if (key) {
-      const cached = await this.idempotencyService.checkKey(key, user.id, workspaceId);
-      if (cached) {
-        return cached.data as JournalEntryResponseDto;
-      }
-    }
-    const entry = await this.entriesService.createDraft(workspaceId, user.id, dto);
-    if (key) {
-      await this.idempotencyService.storeKey(key, user.id, workspaceId, entry);
-    }
-    return entry;
+    const { data } = await this.idempotencyService.once(key, user.id, workspaceId, () =>
+      this.entriesService.createDraft(workspaceId, user.id, dto),
+    );
+    return data as JournalEntryResponseDto;
   }
 
   @Patch(':id')

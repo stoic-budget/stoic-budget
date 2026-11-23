@@ -15,6 +15,7 @@ import { StatementsController } from '@/modules/statements/statements.controller
 import type { StatementsService } from '@/modules/statements/statements.service';
 import type { Response } from 'express';
 import type { ConvertDroppedSampleBody, UploadReceiptScanBody, UploadStatementBody } from '../../../../src/contracts';
+import { fakeIdempotency } from '../../test/fake-idempotency';
 
 type MockResponse = {
   headersSent: boolean;
@@ -34,10 +35,7 @@ describe('StatementsController', () => {
     getFileStream: vi.fn(),
   };
 
-  const idempotencyService = {
-    checkKey: vi.fn(),
-    storeKey: vi.fn(),
-  };
+  const idempotencyService = fakeIdempotency();
 
   const scanUploadService = {
     upload: vi.fn(),
@@ -55,8 +53,8 @@ describe('StatementsController', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    idempotencyService.checkKey.mockResolvedValue(null);
-    idempotencyService.storeKey.mockResolvedValue(undefined);
+    // A fresh key table per test; the controller holds this object.
+    Object.assign(idempotencyService, fakeIdempotency());
   });
 
   it('returns uploaded statements immediately without waiting for parsing', async () => {
@@ -103,23 +101,21 @@ describe('StatementsController', () => {
 
     const first = await uploads.createManualExpense([], payload, currentUser, 'ws-1', 'key-1');
     expect(first).toEqual(created);
-    expect(idempotencyService.checkKey).toHaveBeenCalledWith('key-1', 'user-1', 'ws-1');
-    expect(idempotencyService.storeKey).toHaveBeenCalledWith('key-1', 'user-1', 'ws-1', created);
+    expect(idempotencyService.once).toHaveBeenCalledWith('key-1', 'user-1', 'ws-1', expect.any(Function));
 
-    idempotencyService.checkKey.mockResolvedValueOnce({ data: created, cached: true });
     const second = await uploads.createManualExpense([], payload, currentUser, 'ws-1', 'key-1');
     expect(second).toMatchObject({ id: 'stmt-manual-1', cached: true });
     expect(statementsService.createManualExpense).toHaveBeenCalledTimes(1);
   });
 
-  it('manual expense without a key never touches the idempotency service', async () => {
+  it('manual expense without a key runs every time', async () => {
     statementsService.createManualExpense.mockResolvedValue({ id: 'stmt-manual-2' });
     const currentUser = { id: 'user-1' } as User;
 
     await uploads.createManualExpense([], {} as any, currentUser, 'ws-1');
+    await uploads.createManualExpense([], {} as any, currentUser, 'ws-1');
 
-    expect(idempotencyService.checkKey).not.toHaveBeenCalled();
-    expect(idempotencyService.storeKey).not.toHaveBeenCalled();
+    expect(statementsService.createManualExpense).toHaveBeenCalledTimes(2);
   });
 
   it('passes filter dto to findAll and keeps items alias', async () => {

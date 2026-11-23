@@ -66,18 +66,18 @@ export class PayablesController {
   ) {
     // Namespaced: the key table is shared by every endpoint that takes one.
     const key = idempotencyKey ? `payable:${idempotencyKey}` : null;
-    if (key) {
-      const cached = await this.idempotencyService.checkKey(key, user.id, workspaceId);
-      if (cached) {
-        return cached.data;
-      }
-    }
-    const payable = await this.payablesService.create(workspaceId, user.id, createDto);
-    // A rule whose next dates are already near makes those occurrences now.
-    await this.recurrence.ensureSeriesOf(payable);
-    if (key) {
-      await this.idempotencyService.storeKey(key, user.id, workspaceId, payable);
-    }
+    // Reserved first: a second "save as paid" sent while the first runs is a 409, not a second payment.
+    const { data: payable } = await this.idempotencyService.once(
+      key,
+      user.id,
+      workspaceId,
+      async () => {
+        const created = await this.payablesService.create(workspaceId, user.id, createDto);
+        // A rule whose next dates are already near makes those occurrences now.
+        await this.recurrence.ensureSeriesOf(created);
+        return created;
+      },
+    );
     return payable;
   }
 
