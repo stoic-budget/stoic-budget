@@ -379,13 +379,18 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
       `SELECT id FROM categories WHERE workspace_id = $1 AND system_key = 'salary'`,
       [workspaceId],
     );
-    // The income Uncategorized fallback is made on first need; made here so its rule is tested.
-    const [uncategorized] = await dataSource.query(
+    // The income Uncategorized fallback, made here if no import made it yet.
+    await dataSource.query(
       `INSERT INTO categories (workspace_id, user_id, name, type)
        SELECT $1, owner_id, 'Uncategorized', 'income' FROM workspaces WHERE id = $1
-       ON CONFLICT DO NOTHING RETURNING id`,
+       ON CONFLICT DO NOTHING`,
       [workspaceId],
     );
+    const [uncategorized] = await dataSource.query(
+      `SELECT id FROM categories WHERE workspace_id = $1 AND name = 'Uncategorized' AND type = 'income'`,
+      [workspaceId],
+    );
+    expect(uncategorized?.id).toBeTruthy();
     const [bonus] = await dataSource.query(
       `INSERT INTO categories (workspace_id, user_id, name, type, parent_id)
        SELECT $1, owner_id, 'Bonus', 'income', $2 FROM workspaces WHERE id = $1 RETURNING id`,
@@ -398,7 +403,7 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     );
     const reserveBefore = (await auth(api().get('/tax/settings/reserve/amount')).expect(200)).body;
     // A supplier's refund, filed under the expense category it undoes.
-    for (const categoryId of [salary.id, uncategorized?.id, yearEnd.id, groceries].filter(Boolean)) {
+    for (const categoryId of [salary.id, uncategorized.id, yearEnd.id, groceries]) {
       await dataSource.query(
         `INSERT INTO transactions (workspace_id, transaction_date, counterparty_name, payment_purpose,
            amount, credit, currency, transaction_type, is_verified, category_id)
