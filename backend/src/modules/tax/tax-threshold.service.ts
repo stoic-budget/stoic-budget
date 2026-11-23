@@ -57,8 +57,9 @@ export class TaxThresholdService {
   /**
    * The window the threshold is measured over.
    *
-   * A calendar year resets on 1 January; a rolling window always ends today
-   * and is therefore keyed by that date, so it is re-evaluated daily.
+   * A calendar year resets on 1 January. A rolling window always ends today
+   * but is one window that moves: its alerts are kept under one key and
+   * re-armed only when turnover falls back below a level.
    */
   private resolveWindow(
     period: TaxThresholdPeriod,
@@ -80,7 +81,7 @@ export class TaxThresholdService {
     return {
       periodStart: toDateOnly(start),
       periodEnd: toDateOnly(now),
-      window: `r${toDateOnly(now)}`,
+      window: 'rolling',
     };
   }
 
@@ -208,6 +209,13 @@ export class TaxThresholdService {
       workspace.taxThresholdAlertWindow === status.window ? workspace.taxThresholdAlertLevel : 0;
 
     const reachedLevel = status.percentUsed >= 100 ? 100 : status.percentUsed >= 80 ? 80 : 0;
+    if (reachedLevel < sentLevel) {
+      // Turnover fell back below a level it had reached: a rise past it alerts again.
+      workspace.taxThresholdAlertLevel = reachedLevel;
+      workspace.taxThresholdAlertWindow = status.window;
+      await this.workspaceRepository.save(workspace);
+      return status;
+    }
     if (reachedLevel === 0 || reachedLevel <= sentLevel) {
       return status;
     }

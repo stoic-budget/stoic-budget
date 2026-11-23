@@ -247,6 +247,27 @@ describe('TaxThresholdService', () => {
       expect(events.emit).toHaveBeenCalledTimes(1);
     });
 
+    it('does not warn again the next days of a rolling window', async () => {
+      turnoverOf('72000.00');
+
+      await service.checkWorkspace('ws-1', new Date('2026-06-15T00:00:00.000Z'));
+      await service.checkWorkspace('ws-1', new Date('2026-06-16T00:00:00.000Z'));
+      await service.checkWorkspace('ws-1', new Date('2026-06-17T00:00:00.000Z'));
+
+      expect(events.emit).toHaveBeenCalledTimes(1);
+    });
+
+    it('warns again when a rolling turnover fell back below 80% and rises past it', async () => {
+      turnoverOf('72000.00');
+      await service.checkWorkspace('ws-1', new Date('2026-06-15T00:00:00.000Z'));
+      turnoverOf('50000.00');
+      await service.checkWorkspace('ws-1', new Date('2026-07-15T00:00:00.000Z'));
+      turnoverOf('73000.00');
+      await service.checkWorkspace('ws-1', new Date('2026-08-15T00:00:00.000Z'));
+
+      expect(events.emit).toHaveBeenCalledTimes(2);
+    });
+
     it('re-arms in a new measuring window', async () => {
       adoption.getCurrentJurisdiction.mockResolvedValue(DE);
       transactionRepo.find.mockResolvedValue([sale('24000.00', { currency: 'EUR' })]);
