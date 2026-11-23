@@ -71,6 +71,21 @@ describe('Overlapping tax returns (e2e)', () => {
     await file('2026-04-01', '2026-06-30').expect(201);
   });
 
+  it('refuses an overlap of a single day, and files the day after', async () => {
+    await file('2026-07-01', '2026-09-30').expect(201);
+
+    await file('2026-09-30', '2026-10-31').expect(409);
+    await file('2026-10-01', '2026-10-31').expect(201);
+  });
+
+  it('files only one of two overlapping returns sent at the same time, and one of two identical ones', async () => {
+    const [quarter, year] = await Promise.all([file('2027-01-01', '2027-03-31'), file('2027-01-01', '2027-12-31')]);
+    expect([quarter.status, year.status].sort()).toEqual([201, 409]);
+
+    const twins = await Promise.all([file('2028-01-01', '2028-03-31'), file('2028-01-01', '2028-03-31')]);
+    expect(twins.map(answer => answer.status).sort()).toEqual([201, 409]);
+  });
+
   it('keeps a row locked on reopening while another filed return holds it', async () => {
     // A year filed beside its quarter before overlaps were refused.
     await dataSource.query(

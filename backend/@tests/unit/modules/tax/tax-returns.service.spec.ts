@@ -236,6 +236,9 @@ describe('TaxReturnsService', () => {
     const manager = {
       save: vi.fn(async (_entity: unknown, row: unknown) => (stored = row)),
       createQueryBuilder: vi.fn(),
+      // The filing lock, and the returns read under it.
+      query: vi.fn(async () => []),
+      getRepository: () => returnRepo,
     };
 
     beforeEach(() => {
@@ -355,6 +358,9 @@ describe('TaxReturnsService', () => {
     const manager = {
       save: vi.fn(async (_entity: unknown, row: unknown) => (stored = row)),
       createQueryBuilder: vi.fn(),
+      // The filing lock, and the returns read under it.
+      query: vi.fn(async () => []),
+      getRepository: () => returnRepo,
     };
 
     beforeEach(() => {

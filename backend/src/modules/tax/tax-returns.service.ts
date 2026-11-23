@@ -279,8 +279,6 @@ export class TaxReturnsService {
       where: { workspaceId, periodStart, periodEnd },
     });
 
-    await assertFilable(this.returnRepository, existing, workspaceId, periodStart, periodEnd);
-
     const totals = await this.computeTotals(workspaceId, periodStart, periodEnd);
     if (totals.missingRates.length > 0) {
       const currencies = [...new Set(totals.missingRates.map(row => row.currency))].join(', ');
@@ -295,6 +293,8 @@ export class TaxReturnsService {
     const jurisdiction = await this.adoptionService.getCurrentJurisdiction(workspaceId);
 
     const filed = await this.returnRepository.manager.transaction(async manager => {
+      // Checked under the workspace's filing lock: two filings at once cannot both pass.
+      await assertFilable(manager, { workspaceId, periodStart, periodEnd }, existing);
       const saved = await manager.save(TaxReturn, {
         ...(existing ?? {}),
         workspaceId,
@@ -359,10 +359,9 @@ export class TaxReturnsService {
       throw new BadRequestException(appError('TAX_RETURN_NOT_FILED'));
     }
 
-    // Rows another filed return still holds stay locked.
-    const lockedIds = await idsToUnlock(this.returnRepository, existing);
-
     const reopened = await this.returnRepository.manager.transaction(async manager => {
+      // Rows another filed return still holds stay locked (read under the filing lock).
+      const lockedIds = await idsToUnlock(manager, existing);
       if (lockedIds.length > 0) {
         await manager
           .createQueryBuilder()
