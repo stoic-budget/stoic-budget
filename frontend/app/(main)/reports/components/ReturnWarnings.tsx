@@ -35,3 +35,15 @@ export function ReturnWarnings({
     </>
   );
 }
+
+/**
+ * Whether to file: at once when nothing waits in Review, otherwise once the
+ * person agrees that those rows stay out of the return for good.
+ */
+export function mayFile(
+  totals: Pick<TaxReturnPreview, 'awaitingReview'> | null | undefined,
+  question: { value: string },
+): boolean {
+  const waiting = totals?.awaitingReview ?? 0;
+  return waiting === 0 || window.confirm(question.value.replace('{count}', String(waiting)));
+}

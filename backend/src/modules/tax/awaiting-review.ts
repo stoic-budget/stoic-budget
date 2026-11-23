@@ -1,11 +1,12 @@
-import { Between, IsNull, Not, type Repository } from 'typeorm';
+import { Between, IsNull, Raw, type Repository } from 'typeorm';
 import type { Transaction } from '../../entities/transaction.entity';
 
 /**
  * Rows of the period with tax that still wait in Review: unconfirmed, they are
  * not in the return. Filing without them leaves their VAT out, so the return
- * page says how many there are. Duplicates, pending bank holds, transfers and
- * rows on a trashed statement are not waiting for anything.
+ * page says how many there are. Zero-tax rows are left out (approving them
+ * changes nothing), as are pending bank holds, transfers, rows on a trashed
+ * statement and suspected duplicates (a duplicate Review keeps stays out).
  */
 export function countAwaitingReview(
   transactions: Repository<Transaction>,
@@ -21,7 +22,12 @@ export function countAwaitingReview(
       isDuplicate: false,
       isPending: false,
       transferPairId: IsNull(),
-      taxAmount: Not(IsNull()),
+      // Only rows whose approval changes the return: tax, or reverse charge.
+      taxAmount: Raw(column => {
+        // Raw hands over `Alias.taxAmount`, unquoted and by property name.
+        const alias = `"${column.split('.')[0].replace(/"/g, '')}"`;
+        return `(${alias}."tax_amount" <> 0 OR ${alias}."tax_reverse_charge" = true)`;
+      }),
       transactionDate: Between(new Date(periodStart), new Date(periodEnd)),
     })),
   });

@@ -144,8 +144,18 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     await dataSource.query('UPDATE transactions SET is_verified = false WHERE id = $1', [transactionId]);
     try {
       expect((await preview()).body.awaitingReview).toBe(before + 1);
+      // A suspected duplicate, or a row whose tax is zero, changes nothing by approval.
+      await dataSource.query('UPDATE transactions SET is_duplicate = true WHERE id = $1', [transactionId]);
+      expect((await preview()).body.awaitingReview).toBe(before);
+      await dataSource.query(
+        'UPDATE transactions SET is_duplicate = false, tax_amount = 0, tax_reverse_charge = false WHERE id = $1',
+        [transactionId],
+      );
+      expect((await preview()).body.awaitingReview).toBe(before);
     } finally {
+      // Back as it was: confirmed, and reassessed for the cases after this one.
       await dataSource.query('UPDATE transactions SET is_verified = true WHERE id = $1', [transactionId]);
+      await auth(api().post('/tax/settings/reassess')).send({}).expect(201);
     }
   });
 

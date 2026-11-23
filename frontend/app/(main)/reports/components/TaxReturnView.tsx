@@ -27,7 +27,7 @@ import { blobOf } from '@/app/lib/blob-of';
 import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { tokens } from '@/lib/theme-tokens';
-import { ReturnWarnings } from './ReturnWarnings';
+import { mayFile, ReturnWarnings } from './ReturnWarnings';
 import { TaxThresholdCard } from './TaxThresholdCard';
 import {
   exportFileName,
@@ -179,7 +179,7 @@ export function TaxReturnView(): React.ReactElement {
   });
 
   const act = async (action: 'file' | 'reopen') => {
-    actMutation.mutate(action);
+    if (action === 'reopen' || mayFile(totals, t.fileWithAwaiting)) actMutation.mutate(action);
   };
 
   const download = async (format: 'pdf' | 'xlsx' | 'csv') => {
