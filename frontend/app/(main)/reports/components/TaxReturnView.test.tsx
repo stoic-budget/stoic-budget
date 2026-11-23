@@ -187,6 +187,13 @@ describe('TaxReturnView', () => {
     expect(await screen.findByText(/without an exchange rate for their date: 2 \(USD\)/)).toBeInTheDocument();
   });
 
+  it('warns that rows still waiting in Review are not in the return', async () => {
+    mockApi({ totals: { ...TOTALS, awaitingReview: 3 } });
+    renderWithQuery(<TaxReturnView />);
+
+    expect(await screen.findByText(/still waiting in Review: 3/)).toBeInTheDocument();
+  });
+
   it("shows the server's reason when filing is refused", async () => {
     mockApi();
     post.mockRejectedValue({

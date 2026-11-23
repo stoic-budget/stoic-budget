@@ -27,6 +27,7 @@ import { blobOf } from '@/app/lib/blob-of';
 import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { tokens } from '@/lib/theme-tokens';
+import { ReturnWarnings } from './ReturnWarnings';
 import { TaxThresholdCard } from './TaxThresholdCard';
 import {
   exportFileName,
@@ -379,16 +380,7 @@ export function TaxReturnView(): React.ReactElement {
 
           <UstvaCard period={period} lines={totals?.lines ?? []} />
 
-          {!isFiled && totals?.missingRates && totals.missingRates.length > 0 ? (
-            <Alert severity="warning">
-              {t.missingRates.value
-                .replace('{count}', String(totals.missingRates.length))
-                .replace(
-                  '{currencies}',
-                  [...new Set(totals.missingRates.map(row => row.currency))].join(', '),
-                )}
-            </Alert>
-          ) : null}
+          {isFiled ? null : <ReturnWarnings totals={totals} />}
 
           {totals && totals.lines.length > 0 ? (
             <Box sx={{ overflowX: 'auto' }}>

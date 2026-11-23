@@ -137,6 +137,18 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     expect(Number((await row()).tax_amount)).toBe(7.79);
   });
 
+  it('counts the rows with tax still waiting in Review, which the return leaves out', async () => {
+    const preview = () =>
+      auth(api().get('/tax/returns/preview?periodStart=2026-01-01&periodEnd=2026-03-31')).expect(200);
+    const before = (await preview()).body.awaitingReview;
+    await dataSource.query('UPDATE transactions SET is_verified = false WHERE id = $1', [transactionId]);
+    try {
+      expect((await preview()).body.awaitingReview).toBe(before + 1);
+    } finally {
+      await dataSource.query('UPDATE transactions SET is_verified = true WHERE id = $1', [transactionId]);
+    }
+  });
+
   it("reverse-charges purchases from a payee with an EU VAT id in another country", async () => {
     const { payee_id: payeeId } = await row();
     expect(payeeId).toBeTruthy();
