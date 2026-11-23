@@ -257,15 +257,31 @@ describe('TaxThresholdService', () => {
       expect(events.emit).toHaveBeenCalledTimes(1);
     });
 
-    it('warns again when a rolling turnover fell back below 80% and rises past it', async () => {
+    it('warns again when a rolling turnover fell clearly back below 80% and rises past it', async () => {
       turnoverOf('72000.00');
       await service.checkWorkspace('ws-1', new Date('2026-06-15T00:00:00.000Z'));
       turnoverOf('50000.00');
       await service.checkWorkspace('ws-1', new Date('2026-07-15T00:00:00.000Z'));
+      expect(workspaceRepo.update).toHaveBeenCalledWith(
+        { id: 'ws-1' },
+        expect.objectContaining({ taxThresholdAlertLevel: 0 }),
+      );
+      workspace.taxThresholdAlertLevel = 0;
       turnoverOf('73000.00');
       await service.checkWorkspace('ws-1', new Date('2026-08-15T00:00:00.000Z'));
 
       expect(events.emit).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not re-arm on a small dip around 80%', async () => {
+      turnoverOf('72100.00');
+      await service.checkWorkspace('ws-1', new Date('2026-06-15T00:00:00.000Z'));
+      turnoverOf('71900.00');
+      await service.checkWorkspace('ws-1', new Date('2026-06-16T00:00:00.000Z'));
+      turnoverOf('72100.00');
+      await service.checkWorkspace('ws-1', new Date('2026-06-17T00:00:00.000Z'));
+
+      expect(events.emit).toHaveBeenCalledTimes(1);
     });
 
     it('re-arms in a new measuring window', async () => {

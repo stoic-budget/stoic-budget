@@ -64,6 +64,7 @@ export class TaxThresholdService {
   private resolveWindow(
     period: TaxThresholdPeriod,
     now: Date,
+    code: string,
   ): { periodStart: string; periodEnd: string; window: string } {
     if (period === TaxThresholdPeriod.CALENDAR_YEAR) {
       const year = now.getUTCFullYear();
@@ -81,7 +82,7 @@ export class TaxThresholdService {
     return {
       periodStart: toDateOnly(start),
       periodEnd: toDateOnly(now),
-      window: 'rolling',
+      window: `rolling:${code}`,
     };
   }
 
@@ -112,7 +113,7 @@ export class TaxThresholdService {
     }
 
     const period = jurisdiction.thresholdPeriod ?? TaxThresholdPeriod.CALENDAR_YEAR;
-    const { periodStart, periodEnd, window } = this.resolveWindow(period, now);
+    const { periodStart, periodEnd, window } = this.resolveWindow(period, now, jurisdiction.code);
     const threshold =
       jurisdiction.registrationThreshold === null
         ? null
@@ -209,11 +210,20 @@ export class TaxThresholdService {
       workspace.taxThresholdAlertWindow === status.window ? workspace.taxThresholdAlertLevel : 0;
 
     const reachedLevel = status.percentUsed >= 100 ? 100 : status.percentUsed >= 80 ? 80 : 0;
-    if (reachedLevel < sentLevel) {
-      // Turnover fell back below a level it had reached: a rise past it alerts again.
-      workspace.taxThresholdAlertLevel = reachedLevel;
-      workspace.taxThresholdAlertWindow = status.window;
-      await this.workspaceRepository.save(workspace);
+    // A rolling window moves: turnover that fell clearly back (five points below
+    // the level, every sale priced) re-arms it, so a later rise alerts again. A
+    // calendar year re-arms only with the next year.
+    const fellBack =
+      status.window.startsWith('rolling') &&
+      status.missingRateCurrencies.length === 0 &&
+      sentLevel > 0 &&
+      status.percentUsed < sentLevel - 5;
+    if (fellBack) {
+      const level = status.percentUsed >= 80 ? 80 : 0;
+      await this.workspaceRepository.update(
+        { id: workspaceId },
+        { taxThresholdAlertLevel: level, taxThresholdAlertWindow: status.window },
+      );
       return status;
     }
     if (reachedLevel === 0 || reachedLevel <= sentLevel) {
