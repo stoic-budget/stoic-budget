@@ -1586,10 +1586,10 @@ describe('DashboardService', () => {
         expect(result.items.map(item => item.date)).toEqual([
           '2026-01-31',
           '2026-02-28',
-          '2026-03-28',
+          '2026-03-31',
         ]);
         expect(result.totalCommitted).toBe(300);
-        expect(result.shortfallDate).toBe('2026-03-28');
+        expect(result.shortfallDate).toBe('2026-03-31');
         expect(result.lowestBalance).toBe(-50);
       } finally {
         vi.useRealTimers();
