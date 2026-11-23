@@ -175,7 +175,14 @@ function isForbiddenWorkspaceError(error: Record<string, unknown>): boolean {
   const response = error.response as
     | { status?: number; data?: { error?: { code?: unknown } } }
     | undefined;
-  return response?.status === 403 && response.data?.error?.code === 'WORKSPACE_NOT_A_MEMBER';
+  if (response?.status !== 403 || response.data?.error?.code !== 'WORKSPACE_NOT_A_MEMBER') {
+    return false;
+  }
+  // A request pinned to another workspace (analytics over all of them) says
+  // nothing about the one that is open.
+  const headers = (error.config as { headers?: Record<string, unknown> } | undefined)?.headers;
+  const asked = headers?.['X-Workspace-Id'] ?? headers?.['x-workspace-id'];
+  return !asked || asked === localStorage.getItem('currentWorkspaceId');
 }
 
 function isUnauthorizedRetryable(

@@ -275,7 +275,6 @@ describe('api inside a past version', () => {
         response: {
           status: 403,
           data: {
-            success: false,
             error: { code: 'WORKSPACE_NOT_A_MEMBER', message: 'You are not a member of this workspace' },
           },
         },
@@ -288,6 +287,26 @@ describe('api inside a past version', () => {
     expect(window.location.href).toBe('/workspaces');
   });
 
+  it('keeps the open workspace when a request pinned to another one is refused', async () => {
+    localStorage.setItem('currentWorkspaceId', 'mine');
+    apiClient.defaults.adapter = (config =>
+      Promise.reject({
+        config,
+        isAxiosError: true,
+        response: {
+          status: 403,
+          data: { error: { code: 'WORKSPACE_NOT_A_MEMBER', message: 'Not a member' } },
+        },
+      })) as typeof apiClient.defaults.adapter;
+
+    await expect(
+      apiClient.get('/receipts/documents', { headers: { 'X-Workspace-Id': 'other' } }),
+    ).rejects.toBeDefined();
+
+    expect(localStorage.getItem('currentWorkspaceId')).toBe('mine');
+    expect(window.location.href).toBe('/dashboard');
+  });
+
   it('keeps the workspace when only a permission is missing', async () => {
     localStorage.setItem('currentWorkspaceId', 'mine');
     apiClient.defaults.adapter = (config =>
@@ -296,10 +315,7 @@ describe('api inside a past version', () => {
         isAxiosError: true,
         response: {
           status: 403,
-          data: {
-            success: false,
-            error: { code: 'PERMISSION_DENIED', message: 'You may not edit this workspace' },
-          },
+          data: { error: { code: 'PERMISSION_DENIED', message: 'You may not edit this workspace' } },
         },
       })) as typeof apiClient.defaults.adapter;
 
