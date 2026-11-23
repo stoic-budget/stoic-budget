@@ -70,6 +70,16 @@ describe('computeBasis', () => {
     expect(basis?.realized).toBeCloseTo(300, 6);
   });
 
+  it('sells the rest of a big lot to the last coin, though the lot is a million times the sale', () => {
+    const basis = computeBasis([
+      buy('2026-01-01', 1_000_000.1, 1_000_000),
+      sell('2026-02-01', 1_000_000, 1_000_000),
+      sell('2026-03-01', 0.1, 1),
+    ]).get('ETH');
+
+    expect(basis).toMatchObject({ incomplete: false, quantity: 0 });
+  });
+
   it('sorts events by date rather than trusting the order they arrive in', () => {
     const late = computeBasis([
       sell('2026-03-01', 1, 2500),

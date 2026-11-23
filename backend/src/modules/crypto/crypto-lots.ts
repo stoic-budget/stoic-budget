@@ -137,6 +137,9 @@ export function computeBasisWithDisposals(events: LotEvent[]): BasisResult {
         a.date.localeCompare(b.date) ||
         Number(a.direction === 'out') - Number(b.direction === 'out'),
     );
+    // Float noise grows with the largest amount the asset ever moved: 0.3 − 0.1 − 0.2
+    // is not quite zero, nor is what is left of a lot of a million after a big sale.
+    const dust = Math.max(1e-18, Math.max(...ordered.map(event => event.amount)) * 1e-12);
     const lots: Lot[] = [];
     let realized = 0;
     let incomplete = false;
@@ -153,8 +156,7 @@ export function computeBasisWithDisposals(events: LotEvent[]): BasisResult {
       }
 
       const proceedsPerUnit = event.value / event.amount;
-      // Float noise grows with the amounts: 0.3 − 0.1 − 0.2 is not quite zero.
-      const taken = takeFromLots(lots, event.amount, 'fifo', Math.max(1e-18, event.amount * 1e-12));
+      const taken = takeFromLots(lots, event.amount, 'fifo', dust);
       for (const piece of taken.pieces) {
         realized += piece.quantity * (proceedsPerUnit - piece.unitCost);
       }
