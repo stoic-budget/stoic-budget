@@ -81,7 +81,8 @@ export class UnbookedPaymentsService {
       takenPayments.add(candidate.payment_id);
       takenRows.add(candidate.transaction_id);
       await run.query(
-        'UPDATE payable_payments SET transaction_id = $2 WHERE id = $1 AND transaction_id IS NULL',
+        // A bank row now: whatever the payment booked itself is gone, so it is no longer its own.
+        'UPDATE payable_payments SET transaction_id = $2, own_transaction = false WHERE id = $1 AND transaction_id IS NULL',
         [candidate.payment_id, candidate.transaction_id],
       );
       // The bill points at its payment too, unless an earlier one already does.
