@@ -139,3 +139,46 @@ describe('ReceiptTransactionMatch split by items', () => {
     expect(await screen.findByRole('button', { name: 'Split by line items' })).toBeTruthy();
   });
 });
+
+describe('ReceiptTransactionMatch attach', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('attaches the bank row on screen, not whatever the suggestion says by the time of the click', async () => {
+    const draft = {
+      id: 'r2',
+      status: 'draft',
+      transactionId: null,
+      parsedData: {},
+      metadata: { transactionMatch: { kind: 'single', transactionIds: ['bank-row'], score: 1 } },
+    } as unknown as ReceiptRecord;
+    api.transactionMatches.mockResolvedValue({
+      suggestion: null,
+      data: [
+        {
+          id: 'bank-row',
+          transactionDate: '2026-11-01',
+          counterpartyName: 'ACME Store',
+          amount: 80,
+          currency: 'EUR',
+        },
+      ],
+    });
+    const onApprove = vi.fn(async () => undefined);
+    render(
+      <ReceiptTransactionMatch
+        receipt={draft}
+        categories={categories}
+        saving={false}
+        onApprove={onApprove}
+        onChanged={vi.fn(async () => undefined)}
+      />,
+    );
+
+    await screen.findByText(/ACME Store/);
+    fireEvent.click(screen.getByRole('button', { name: 'Approve & attach' }));
+
+    expect(onApprove).toHaveBeenCalledWith({ transactionId: 'bank-row' });
+  });
+});
