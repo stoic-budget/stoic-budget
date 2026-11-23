@@ -124,14 +124,14 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
       return;
     }
     setSaving(true);
-    await (isNew
-      ? invoicesApi.create(form.buildPayload())
-      : invoicesApi.update(invoiceId, form.buildPayload())
-    )
+    await form
+      .save(invoiceId)
       .then(saved => {
         toast.success(isNew ? t.toasts.createSuccess.value : t.toasts.updateSuccess.value);
         router.replace(`/invoices/${saved.id}`);
         setInvoice(saved);
+        // The form shows what was stored, not only what was typed.
+        fillFrom(saved);
       })
       .catch(error => {
         toast.error(getApiErrorMessage(error, t.toasts.genericFailed.value));

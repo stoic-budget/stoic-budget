@@ -74,7 +74,14 @@ export interface CreateInvoiceInput {
   deliveryDate?: string;
 }
 
-export type UpdateInvoiceInput = Partial<CreateInvoiceInput>;
+/** On an edit, `null` clears a field; left out leaves it as it was. */
+export type UpdateInvoiceInput = Partial<
+  Omit<CreateInvoiceInput, 'notes' | 'deliveryDate' | 'recurrenceInterval'>
+> & {
+  notes?: string | null;
+  deliveryDate?: string | null;
+  recurrenceInterval?: InvoiceRecurrenceInterval | null;
+};
 
 export type InvoiceSettingsInput = Partial<InvoiceSettings>;
 
