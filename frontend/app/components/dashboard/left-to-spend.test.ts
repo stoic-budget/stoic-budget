@@ -116,4 +116,25 @@ describe('leftToSpend', () => {
 
     expect(leftToSpend([food, groceries], MONTH)).toEqual([{ currency: 'USD', amount: 300, allowed: 500 }]);
   });
+
+  it("keeps a subcategory's budget when its parent's budget is not one the tile counts", () => {
+    const annualFood = budgetItem({
+      id: 'b-1',
+      name: 'Food',
+      categoryId: 'cat-food',
+      periodType: 'annual',
+      availableAmount: 6000,
+      spentAmount: 200,
+    });
+    const groceries = budgetItem({
+      id: 'b-2',
+      name: 'Groceries',
+      categoryId: 'cat-groceries',
+      availableAmount: 500,
+      spentAmount: 450,
+    });
+    groceries.category = { ...groceries.category, parentId: 'cat-food' };
+
+    expect(leftToSpend([annualFood, groceries], MONTH)).toEqual([{ currency: 'USD', amount: 50, allowed: 500 }]);
+  });
 });

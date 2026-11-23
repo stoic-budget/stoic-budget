@@ -27,16 +27,17 @@ export function leftToSpend(
   const [year, index] = month.split('-').map(Number);
   const first = `${month}-01`;
   const last = `${month}-${String(new Date(year, index, 0).getDate()).padStart(2, '0')}`;
-  // A budget on a parent category already counts its subcategories' spending:
-  // a budget on the subcategory too would count the same money twice.
-  const budgeted = new Set(budgets.map(b => b.categoryId).filter(Boolean));
-  const inMonth = budgets.filter(
+  // Monthly budgets live in the month; only they make a month's figures.
+  const live = budgets.filter(
     b =>
       (b.periodType ?? 'monthly') === 'monthly' &&
-      !(b.category?.parentId && budgeted.has(b.category.parentId)) &&
       (!b.startsOn || b.startsOn <= last) &&
       (!b.endsOn || b.endsOn >= first),
   );
+  // A counted budget on a parent category already counts its subcategories'
+  // spending: a budget on the subcategory too would count the same money twice.
+  const counted = new Set(live.map(b => b.categoryId).filter(Boolean));
+  const inMonth = live.filter(b => !(b.category?.parentId && counted.has(b.category.parentId)));
   if (inMonth.length === 0) {
     return null;
   }
