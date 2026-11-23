@@ -129,6 +129,7 @@ import {
   CategorizationRuleList,
   CategorizationRuleSuggestionList,
   CategorizationRuleTestResult,
+  ClassifiedTransaction,
   PaymentCandidateList,
   PeppolLookup,
   PeppolTransmissionList,
@@ -1142,6 +1143,21 @@ describe('API contracts (e2e)', () => {
         .set('x-workspace-id', owner.workspaceId);
       return body ? req.send(body) : req;
     };
+
+    it('POST /classification/transaction/:id answers the re-filed row', async () => {
+      const files = await get('/storage/files');
+      const rows = await get(`/transactions?statement_id=${files.body[0].id}`);
+      const transactionId = rows.body.data[0].id;
+      // A row the rules may re-file: a hand-picked category is kept as it is.
+      await dataSource.query(`UPDATE transactions SET category_source = 'keyword' WHERE id = $1`, [
+        transactionId,
+      ]);
+
+      const classified = await send('post', `/classification/transaction/${transactionId}`).expect(200);
+
+      matches(ClassifiedTransaction, classified.body);
+      expect(classified.body).toMatchObject({ id: transactionId, branchId: null });
+    });
 
     it('POST, GET, PUT /categorization-rules, /test and /:id/apply', async () => {
       const categories = await get('/categories?type=expense');
