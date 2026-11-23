@@ -83,8 +83,6 @@ export interface UnconvertedSpending {
   amount: number;
 }
 
-/** One row a budget covers, as read: its own amount, currency and day. */
-
 @Injectable()
 export class BudgetsService {
   private readonly logger = new Logger(BudgetsService.name);
@@ -613,10 +611,10 @@ export class BudgetsService {
       const currency = (row.currency || budget.currency).toUpperCase();
       byCurrency.set(currency, (byCurrency.get(currency) ?? 0) + Number.parseFloat(row.amount));
     }
-    return [...byCurrency].map(([currency, amount]) => ({
-      currency,
-      amount: Math.round(amount * 100) / 100,
-    }));
+    // Refunds can net a currency to nothing or below: such a line says nothing.
+    return [...byCurrency]
+      .filter(([, amount]) => amount > 0.005)
+      .map(([currency, amount]) => ({ currency, amount: Math.round(amount * 100) / 100 }));
   }
 
   /** How many settled periods rollover looks back on; a year of months, a quarter of weeks. */
@@ -834,10 +832,9 @@ export class BudgetsService {
         missing.set(row.currency, (missing.get(row.currency) ?? 0) + row.amount);
       }
     }
-    const unconverted = [...missing].map(([currency, amount]) => ({
-      currency,
-      amount: Math.round(amount * 100) / 100,
-    }));
+    const unconverted = [...missing]
+      .filter(([, amount]) => amount > 0.005)
+      .map(([currency, amount]) => ({ currency, amount: Math.round(amount * 100) / 100 }));
     // Refunds may outweigh a period's spending; nothing is spent below zero.
     return { spent: Math.max(0, spent), unconverted };
   }
