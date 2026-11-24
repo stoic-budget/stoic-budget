@@ -100,6 +100,11 @@ export const isWorkspaceScoped = (metadata: EntityMetadata): boolean =>
 type BackupSnapshotData = {
   collections: Record<string, unknown[]>;
   files: Array<{ path: string; contents: Buffer }>;
+  /**
+   * Documents whose file could not be read (#639): left out of the archive,
+   * so one lost file no longer fails every backup and version.
+   */
+  missingFiles: string[];
 };
 
 @Injectable()
@@ -112,6 +117,7 @@ export class BackupDataService {
   async collect(workspaceId: string): Promise<BackupSnapshotData> {
     const collections: Record<string, unknown[]> = {};
     const files: Array<{ path: string; contents: Buffer }> = [];
+    const missingFiles: string[] = [];
     for (const metadata of this.dataSource.entityMetadatas) {
       if (!isWorkspaceScoped(metadata) || EXCLUDED_TABLES.has(metadata.tableName)) continue;
       const repository = this.dataSource.getRepository(metadata.target);
@@ -123,10 +129,10 @@ export class BackupDataService {
       const records = rows.map(row => this.toBackupRecord(metadata, row));
       collections[metadata.tableName] = records;
       if (metadata.tableName === 'statements' && this.fileStorageService) {
-        await this.collectStatementFiles(rows as Statement[], records, files);
+        await this.collectStatementFiles(rows as Statement[], records, files, missingFiles);
       }
       if (metadata.tableName === 'receipts') {
-        await this.collectReceiptAttachments(records, files);
+        await this.collectReceiptAttachments(records, files, missingFiles);
       }
       if (metadata.tableName === 'transaction_attachments') {
         collections[metadata.tableName] = await collectTransactionAttachmentFiles(records, files);
@@ -134,7 +140,7 @@ export class BackupDataService {
     }
     await this.collectRelatedCollections(collections);
     shareIdenticalAttachmentFiles(collections, files);
-    return { collections, files };
+    return { collections, files, missingFiles };
   }
 
   /** The usual columns, plus the hidden ones this table's backup needs. */
@@ -180,11 +186,18 @@ export class BackupDataService {
     statements: Statement[],
     records: Record<string, unknown>[],
     files: Array<{ path: string; contents: Buffer }>,
+    missingFiles: string[],
   ): Promise<void> {
     const recordsById = new Map(records.map(record => [record.id, record]));
     for (const statement of statements) {
-      const file = await this.fileStorageService?.getStatementFileStream(statement);
-      if (!file) continue;
+      // Throws when neither the disk nor the database copy has the file.
+      const file = await this.fileStorageService
+        ?.getStatementFileStream(statement)
+        .catch(() => null);
+      if (!file) {
+        missingFiles.push(`statement ${statement.id} (${statement.fileName})`);
+        continue;
+      }
       const contents = await this.streamToBuffer(file.stream);
       const safeFileName = path.posix.basename(file.fileName);
       const backupPath = `statements/${statement.id}/${safeFileName}`;
@@ -205,6 +218,7 @@ export class BackupDataService {
   private async collectReceiptAttachments(
     records: Record<string, unknown>[],
     files: Array<{ path: string; contents: Buffer }>,
+    missingFiles: string[],
   ): Promise<void> {
     for (const record of records) {
       const paths = Array.isArray(record.attachmentPaths) ? record.attachmentPaths : [];
@@ -213,7 +227,12 @@ export class BackupDataService {
         if (typeof sourcePath !== 'string') continue;
         const safeName = path.posix.basename(sourcePath);
         const backupPath = `receipts/${record.id}/${index}-${safeName}`;
-        files.push({ path: backupPath, contents: await fs.readFile(sourcePath) });
+        const contents = await fs.readFile(sourcePath).catch(() => null);
+        if (!contents) {
+          missingFiles.push(`receipt ${String(record.id)} (${safeName})`);
+          continue;
+        }
+        files.push({ path: backupPath, contents });
         portablePaths.push(backupPath);
       }
       record.attachmentPaths = portablePaths;

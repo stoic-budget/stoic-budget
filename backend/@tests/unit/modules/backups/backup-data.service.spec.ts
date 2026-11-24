@@ -116,6 +116,39 @@ describe('BackupDataService', () => {
     await fs.rm(directory, { recursive: true, force: true });
   });
 
+  it('leaves out a statement and a receipt photo whose files are gone, and names them (#639)', async () => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'seneca-receipt-'));
+    const kept = path.join(directory, 'kept.jpg');
+    await fs.writeFile(kept, 'receipt image');
+    const lost = path.join(directory, 'lost.jpg');
+    const rows: Record<string, unknown[]> = {
+      Statement: [
+        { id: 'statement-1', workspaceId: 'ws-1', fileName: 'bank.csv', filePath: '/uploads/bank.csv' },
+      ],
+      Receipt: [{ id: 'receipt-1', workspaceId: 'ws-1', attachmentPaths: [lost, kept] }],
+    };
+    const service = new BackupDataService(
+      {
+        entityMetadatas: [
+          metadata('statements', 'Statement', ['id', 'workspaceId', 'fileName', 'filePath']),
+          metadata('receipts', 'Receipt', ['id', 'workspaceId', 'attachmentPaths']),
+        ],
+        getRepository: (target: string) => ({ find: vi.fn().mockResolvedValue(rows[target]) }),
+      } as never,
+      // As the storage does when neither the disk nor the database has the file.
+      { getStatementFileStream: vi.fn().mockRejectedValue(new Error('FILE_CONTENT_UNAVAILABLE')) } as never,
+    );
+
+    const snapshot = await service.collect('ws-1');
+
+    expect(snapshot.missingFiles).toEqual(['statement statement-1 (bank.csv)', 'receipt receipt-1 (lost.jpg)']);
+    expect(snapshot.files.map(file => file.path)).toEqual(['receipts/receipt-1/1-kept.jpg']);
+    expect(snapshot.collections.receipts).toEqual([
+      { id: 'receipt-1', workspaceId: 'ws-1', attachmentPaths: ['receipts/receipt-1/1-kept.jpg'] },
+    ]);
+    await fs.rm(directory, { recursive: true, force: true });
+  });
+
   it('includes statement file versions with binary data encoded for JSON', async () => {
     const statements = { find: vi.fn().mockResolvedValue([{ id: 'statement-1', workspaceId: 'ws-1' }]) };
     const versions = {
