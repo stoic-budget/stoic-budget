@@ -96,16 +96,18 @@ describe('ExcelParser header scan', () => {
       [45424, 'TRY FITNESS CLUB', 30, ''],
       [45425, 'ACME Store refund of 12 USD', '', 12],
     ];
-    const unstated = workbook([['ACME Bank'], ...table]);
+    const unstated = workbook([['ACME Bank'], ['in eur'], ...table]);
     const stated = workbook([['ACME Bank'], ['Currency: EUR'], ['', ''], ...table]);
+    const inHeader = workbook([['DATE', 'DESCRIPTION', 'CHARGES (GBP)', 'CREDITS'], ...table.slice(1)]);
 
     try {
-      // None stated: left to the wallet, then the workspace — not lira, not USD.
+      // None stated (a lower-case "eur" is a word): left to the wallet, then the workspace — not lira, not USD.
       expect((await new ExcelParser().parse(unstated)).metadata.currency).toBe('');
       expect((await new ExcelParser().parse(stated)).metadata.currency).toBe('EUR');
+      // A column title states it too.
+      expect((await new ExcelParser().parse(inHeader)).metadata.currency).toBe('GBP');
     } finally {
-      fs.unlinkSync(unstated);
-      fs.unlinkSync(stated);
+      for (const file of [unstated, stated, inHeader]) fs.unlinkSync(file);
     }
   });
 });
@@ -132,6 +134,23 @@ describe('DocxParser', () => {
       )
       .join('')}</w:tbl>`;
   }
+
+  it('reads the currency above its tables, never from a row (#675)', async () => {
+    const rows = table([
+      ['DATE', 'DESCRIPTION', 'AMOUNT'],
+      ['09/15', 'TRY FITNESS CLUB', '-30.00'],
+      ['09/16', 'ACME Store refund of 12 USD', '12.00'],
+    ]);
+    const unstated = buildDocx(`<w:p><w:r><w:t>ACME Bank statement</w:t></w:r></w:p>${rows}`);
+    const parsedUnstated = await new DocxParser().parse(unstated);
+    fs.unlinkSync(unstated);
+    const stated = buildDocx(`<w:p><w:r><w:t>Statement in EUR</w:t></w:r></w:p>${rows}`);
+    const parsedStated = await new DocxParser().parse(stated);
+    fs.unlinkSync(stated);
+
+    expect(parsedUnstated.metadata.currency).toBe('');
+    expect(parsedStated.metadata.currency).toBe('EUR');
+  });
 
   it('extracts transactions from statement tables with section-aware direction', async () => {
     const body =

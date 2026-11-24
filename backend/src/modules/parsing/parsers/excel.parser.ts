@@ -74,7 +74,8 @@ export class ExcelParser extends BaseTabularParser {
     // A currency the file states sits above the table, in upper case: a word in a
     // row is not one (#675). None stated leaves it to the wallet, then the workspace.
     const headerSample = data
-      .slice(0, Math.max(headerIndex, 0))
+      // Through the header row: "AMOUNT (EUR)" states it too.
+      .slice(0, Math.max(headerIndex, 0) + 1)
       .map(r => (r || []).join(' '))
       .join(' ');
     const detectedCurrency = this.detectCurrency(headerSample, { caseSensitive: true }) ?? '';

@@ -60,6 +60,12 @@ describe('parseStatementAmount', () => {
 });
 
 describe('statement-metadata.helper', () => {
+  it('reads a US bank by its deposit insurance when it prints no currency (#675)', () => {
+    expect(detectStatementCurrency('ACME BANK N.A. MEMBER FDIC')).toBe('USD');
+    expect(detectStatementCurrency('Deposits are FDIC-insured')).toBe('USD');
+    expect(detectStatementCurrency('ACME BANK statement')).toBeNull();
+  });
+
   it('takes the ISO code printed most often, upper case only', () => {
     expect(detectStatementCurrency('Try our app. EUR 1.00 and EUR 2.00, once USD')).toBe('EUR');
     expect(detectStatementCurrency('Try our new app today')).toBeNull();

@@ -36,8 +36,10 @@ export class DocxParser extends BaseTabularParser {
 
     const tables = this.extractTables(xml);
     const fullText = this.extractPlainText(xml);
-    // Codes in upper case only, and none stated leaves it to the wallet, then the workspace (#675).
-    const detectedCurrency = this.detectCurrency(fullText, { caseSensitive: true }) ?? '';
+    // A currency the file states sits above its tables, in upper case: a row's
+    // "TRY FITNESS" is not lira. None stated leaves it to the wallet, then the workspace (#675).
+    const above = this.extractPlainText(xml.split('<w:tbl')[0]);
+    const detectedCurrency = this.detectCurrency(above, { caseSensitive: true }) ?? '';
     const contextYear = this.findContextYear(fullText);
 
     const transactions: ParsedTransaction[] = [];
