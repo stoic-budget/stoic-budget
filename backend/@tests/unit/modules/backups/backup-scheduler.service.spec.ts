@@ -81,4 +81,22 @@ describe('BackupSchedulerService', () => {
     );
     expect(ran).not.toHaveBeenCalled();
   });
+
+  it('goes on to the next configuration when a workspace cannot be read', async () => {
+    const due = (id: string) => ({ id, workspaceId: `ws-${id}`, dailyTime: '03:00', timeZone: 'Asia/Jerusalem', enabled: true });
+    const findOne = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('connection reset'))
+      .mockResolvedValueOnce({ id: 'ws-2', name: 'ACME', ownerId: 'owner-2' });
+    const backups = { runConfiguration: vi.fn(async () => undefined) };
+
+    await new BackupSchedulerService(
+      { find: vi.fn().mockResolvedValue([due('1'), due('2')]) } as never,
+      { findOne } as never,
+      backups as never,
+      { create: vi.fn() } as never,
+    ).runDueBackups(new Date('2026-01-01T01:00:00.000Z'));
+
+    expect(backups.runConfiguration).toHaveBeenCalledTimes(1);
+  });
 });

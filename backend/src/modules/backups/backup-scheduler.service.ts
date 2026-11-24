@@ -45,22 +45,26 @@ export class BackupSchedulerService {
       if (this.claimedSlots.has(slotKey)) continue;
       this.claimedSlots.add(slotKey);
 
-      const workspace = await this.workspaceRepository.findOne({
-        where: { id: configuration.workspaceId },
-      });
-      if (!workspace) continue;
+      // A failed lookup or run is logged and the loop goes on: each
+      // configuration's minute comes once a night.
+      let workspace: Workspace | null = null;
       try {
-        await this.backupsService.runConfiguration(
-          workspace,
-          configuration,
-          BackupRunTrigger.SCHEDULED,
-        );
+        workspace = await this.workspaceRepository.findOne({
+          where: { id: configuration.workspaceId },
+        });
+        if (workspace) {
+          await this.backupsService.runConfiguration(
+            workspace,
+            configuration,
+            BackupRunTrigger.SCHEDULED,
+          );
+        }
       } catch (error) {
         this.logger.error(
           `Scheduled backup failed for workspace ${configuration.workspaceId}`,
           error instanceof Error ? error.stack : undefined,
         );
-        await this.tellOwner(workspace);
+        if (workspace) await this.tellOwner(workspace);
       }
     }
   }
