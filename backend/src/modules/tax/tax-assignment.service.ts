@@ -23,12 +23,7 @@ import { TaxRatesService } from './tax-rates.service';
  * These values come from the AI classifier, which is why they are a safety net
  * and not the only guard — see `resolve` for the rest.
  */
-export const NON_TAXABLE_NATURES: ReadonlySet<string> = new Set([
-  'transfer',
-  'salary',
-  'loan',
-  'tax',
-]);
+export const NON_TAXABLE_NATURES = new Set(['transfer', 'salary', 'loan', 'tax']);
 
 /**
  * Seeded system categories whose rows carry no VAT anywhere we tax: interest
