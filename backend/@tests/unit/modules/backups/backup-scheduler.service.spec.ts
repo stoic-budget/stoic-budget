@@ -14,7 +14,7 @@ describe('BackupSchedulerService', () => {
     const configurations = { find: vi.fn().mockResolvedValue([configuration]) };
     const workspaces = { findOne: vi.fn().mockResolvedValue({ id: 'workspace-1' }) };
     const backups = { runConfiguration: vi.fn().mockResolvedValue(undefined) };
-    const scheduler = new BackupSchedulerService(configurations as never, workspaces as never, backups as never);
+    const scheduler = new BackupSchedulerService(configurations as never, workspaces as never, backups as never, { create: vi.fn() } as never);
     const now = new Date('2026-01-01T01:00:00.000Z');
 
     await scheduler.runDueBackups(now);
@@ -37,11 +37,48 @@ describe('BackupSchedulerService', () => {
     };
     const workspaces = { findOne: vi.fn() };
     const backups = { runConfiguration: vi.fn() };
-    const scheduler = new BackupSchedulerService(configurations as never, workspaces as never, backups as never);
+    const scheduler = new BackupSchedulerService(configurations as never, workspaces as never, backups as never, { create: vi.fn() } as never);
 
     await scheduler.runDueBackups(new Date('2026-01-01T01:00:00.000Z'));
 
     expect(workspaces.findOne).not.toHaveBeenCalled();
     expect(backups.runConfiguration).not.toHaveBeenCalled();
+  });
+
+  it('tells the owner when a scheduled backup fails, and nobody when it runs (#639)', async () => {
+    const configuration = {
+      id: 'config-1',
+      workspaceId: 'workspace-1',
+      dailyTime: '03:00',
+      timeZone: 'Asia/Jerusalem',
+      enabled: true,
+    };
+    const workspace = { id: 'workspace-1', name: 'ACME Household', ownerId: 'owner-1' };
+    const run = async (runConfiguration: () => Promise<unknown>) => {
+      const notifications = { create: vi.fn(async () => undefined) };
+      await new BackupSchedulerService(
+        { find: vi.fn().mockResolvedValue([configuration]) } as never,
+        { findOne: vi.fn().mockResolvedValue(workspace) } as never,
+        { runConfiguration: vi.fn(runConfiguration) } as never,
+        notifications as never,
+      ).runDueBackups(new Date('2026-01-01T01:00:00.000Z'));
+      return notifications.create;
+    };
+
+    const failed = await run(async () => {
+      throw new Error('Destination full');
+    });
+    const ran = await run(async () => undefined);
+
+    expect(failed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientId: 'owner-1',
+        workspaceId: 'workspace-1',
+        type: 'backup.failed',
+        messageKey: 'backup.failed',
+        messageParams: { workspace: 'ACME Household' },
+      }),
+    );
+    expect(ran).not.toHaveBeenCalled();
   });
 });
