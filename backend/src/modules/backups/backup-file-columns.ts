@@ -79,7 +79,13 @@ export function withRestorablePictures<
     if (!('rowIsPicture' in spec) || !collections[spec.table]) continue;
     collections[spec.table] = collections[spec.table].filter(row => {
       const stored = (row as Record<string, unknown> | null)?.[spec.column];
-      return typeof stored === 'string' && IMAGE.test(stored) && opened.files.has(stored);
+      // The same test a restore applies, so a row that passes is restored with its picture.
+      return (
+        typeof stored === 'string' &&
+        IMAGE.test(stored) &&
+        stored.startsWith(`${spec.directory}/`) &&
+        opened.files.has(stored)
+      );
     });
   }
   return { ...opened, collections };

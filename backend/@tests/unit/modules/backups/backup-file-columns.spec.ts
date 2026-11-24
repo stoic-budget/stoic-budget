@@ -187,10 +187,32 @@ describe('pictures in a backup', () => {
     expect(staged[0].targetPath).toBe(path.join(uploads, 'item-images', mapped.fileName as string));
   });
 
-  it('applies the picture rule where a restore filters its rows', () => {
-    const kept = withRestorableAttachments({
-      collections: { item_images: [{ id: 'img-2', fileName: 'old.png' }] },
-      files: new Map<string, Buffer>(),
+  it('applies the picture rule where a restore filters its rows, as every real backup has attachments', () => {
+    for (const attachments of [undefined, []]) {
+      const kept = withRestorableAttachments({
+        collections: {
+          ...(attachments ? { transaction_attachments: attachments } : {}),
+          item_images: [{ id: 'img-2', fileName: 'old.png' }],
+        },
+        files: new Map<string, Buffer>(),
+      });
+
+      expect(kept.collections.item_images).toEqual([]);
+    }
+  });
+
+  it('leaves out a picture row that names another folder, or a file that is no image', () => {
+    const kept = withRestorablePictures({
+      collections: {
+        item_images: [
+          { id: 'img-1', fileName: 'goal-covers/goal-1/a.png' },
+          { id: 'img-2', fileName: 'item-images/img-2/page.svg' },
+        ],
+      },
+      files: new Map([
+        ['goal-covers/goal-1/a.png', Buffer.from('x')],
+        ['item-images/img-2/page.svg', Buffer.from('<svg/>')],
+      ]),
     });
 
     expect(kept.collections.item_images).toEqual([]);
