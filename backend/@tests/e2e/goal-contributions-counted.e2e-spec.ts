@@ -1,3 +1,4 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
 vi.mock('franc', () => ({
   franc: () => 'und',
 }));
@@ -123,5 +124,21 @@ describe('Goal contributions follow their rows (e2e)', () => {
       amount = await saved();
     }
     expect(amount).toBe(95);
+    // Still money taken from the goal, as the purchase was.
+    const [stored] = await dataSource.query(
+      'SELECT amount::float AS amount FROM goal_contributions WHERE transaction_id = $1',
+      [row.id],
+    );
+    expect(stored.amount).toBe(-95);
+
+    // update() reaches no subscriber: a receipt's edit synced to its row says so by event.
+    await dataSource.query('UPDATE transactions SET debit = 60, amount = 60 WHERE id = $1', [row.id]);
+    app.get(EventEmitter2).emit('transactions.money-changed', { workspaceId: owner.workspaceId, transactionIds: [row.id] });
+    let followed = await saved();
+    for (let tries = 0; followed !== 60 && tries < 20; tries++) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      followed = await saved();
+    }
+    expect(followed).toBe(60);
   });
 });

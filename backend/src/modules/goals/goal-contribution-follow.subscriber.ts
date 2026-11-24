@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type {
   DataSource,
@@ -9,6 +10,8 @@ import type {
   UpdateEvent,
 } from 'typeorm';
 import { Transaction } from '../../entities/transaction.entity';
+import type { TransactionsPostedEvent } from '../notifications/events/notification-events';
+import { TRANSACTIONS_MONEY_CHANGED } from '../receipts/helpers/booked-row';
 import { GoalTransactionLinkService } from './goal-transaction-link.service';
 
 /** What a goal contribution is computed from: a change to any of them changes it. */
@@ -61,6 +64,23 @@ export class GoalContributionFollowSubscriber implements EntitySubscriberInterfa
       this.queued.set(runner, [...(this.queued.get(runner) ?? []), task]);
     } else {
       task();
+    }
+  }
+
+  /**
+   * Rows whose money changed through `update()`, which reaches no subscriber:
+   * a pending bank row posted at its final amount, a receipt's edit synced to
+   * the row it booked.
+   */
+  @OnEvent('transactions.posted')
+  @OnEvent(TRANSACTIONS_MONEY_CHANGED)
+  async onMoneyChanged(event: TransactionsPostedEvent): Promise<void> {
+    for (const id of event.transactionIds) {
+      await this.links
+        .refresh(event.workspaceId, id)
+        .catch(error =>
+          this.logger.warn(`Goal contribution of ${id} not refreshed: ${String(error)}`),
+        );
     }
   }
 
