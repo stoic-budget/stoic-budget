@@ -2136,6 +2136,47 @@ describe('API contracts (e2e)', () => {
       });
     });
 
+    it('GET /custom-tables/:id/aggregates and /groups: no one money total over several currencies (#648)', async () => {
+      const table = await send('post', '/custom-tables', { name: 'ACME transfers' }).expect(201);
+      const tableId = table.body.id;
+      const amount = await send('post', `/custom-tables/${tableId}/columns`, { title: 'Amount', type: 'currency' }).expect(201);
+      const code = await send('post', `/custom-tables/${tableId}/columns`, { title: 'Currency', type: 'text' }).expect(201);
+      // As a table made from transactions has them: the source fills both, each row in its own currency.
+      for (const [key, field] of [[amount.body.key, 'amount'], [code.body.key, 'currency']]) {
+        await dataSource.query(
+          `UPDATE custom_table_columns SET config = COALESCE(config, '{}'::jsonb) || jsonb_build_object('source', jsonb_build_object('kind', 'app_field', 'field', $1::text))
+            WHERE table_id = $2 AND key = $3`,
+          [field, tableId, key],
+        );
+      }
+      for (const [value, currency] of [[100, 'USD'], [100, 'EUR'], [50, 'USD']] as const) {
+        await send('post', `/custom-tables/${tableId}/rows`, {
+          data: { [amount.body.key]: value, [code.body.key]: currency },
+        }).expect(201);
+      }
+      const aggs = encodeURIComponent(
+        JSON.stringify([
+          { col: amount.body.key, fn: 'sum' },
+          { col: amount.body.key, fn: 'count' },
+        ]),
+      );
+
+      const totals = matches(CustomTableAggregates, (await get(`/custom-tables/${tableId}/aggregates?aggs=${aggs}`)).body);
+      const groups = matches(
+        CustomTableGroups,
+        (await get(`/custom-tables/${tableId}/groups?groupBy=${code.body.key}&aggs=${aggs}`)).body,
+      );
+
+      // 100 USD and 100 EUR are not 250 of anything.
+      expect(totals.items).toEqual([
+        { col: amount.body.key, fn: 'sum', value: null, mixedCurrencies: true },
+        { col: amount.body.key, fn: 'count', value: 3 },
+      ]);
+      // Each group is in one currency, so it keeps its figure.
+      const byCode = Object.fromEntries(groups.items.map(item => [item.key, Number(item.aggregates[0].value)]));
+      expect(byCode).toEqual({ USD: 150, EUR: 100 });
+    });
+
     it('GET the public share and /reports/custom-tables/available', async () => {
       const view = await request(app.getHttpServer())
         .get(`/public/custom-tables/${shareToken}`)

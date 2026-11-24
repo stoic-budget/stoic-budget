@@ -9,7 +9,13 @@ import type { AggregateFn, AggregateSelection } from './useTableAggregates';
 export interface TableGroup {
   key: string | null;
   count: number;
-  aggregates: Array<{ col: string; fn: AggregateFn; value: number | string | null }>;
+  aggregates: Array<{
+    col: string;
+    fn: AggregateFn;
+    value: number | string | null;
+    /** The group's rows are in several currencies: no one figure (#648). */
+    mixedCurrencies?: boolean;
+  }>;
 }
 
 interface UseTableGroupsParams {

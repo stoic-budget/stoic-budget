@@ -39,4 +39,6 @@ export interface CustomTableAggregateResult {
   col: string;
   fn: CustomTableAggregateFn;
   value: number | string | null;
+  /** The rows in scope are in several currencies: no one figure (#648). */
+  mixedCurrencies?: boolean;
 }

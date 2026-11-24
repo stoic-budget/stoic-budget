@@ -13,6 +13,9 @@ export type AggregateSelection = Record<string, AggregateFn>;
 
 export type AggregateValues = Record<string, number | string | null>;
 
+/** A money total over rows in several currencies: no one figure to show (#648). */
+export const MIXED_CURRENCIES = '\u0000mixed-currencies';
+
 interface UseTableAggregatesParams {
   tableId: string | null;
   isAuthenticated: boolean;
@@ -70,7 +73,7 @@ export function useTableAggregates({
       }
       const next: AggregateValues = {};
       for (const item of page.items) {
-        next[item.col] = item.value;
+        next[item.col] = item.mixedCurrencies ? MIXED_CURRENCIES : item.value;
       }
       setValues(next);
     })()

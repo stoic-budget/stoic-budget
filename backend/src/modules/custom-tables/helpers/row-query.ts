@@ -10,6 +10,7 @@ import { CustomTableRow } from '../../../entities/custom-table-row.entity';
 import {
   CUSTOM_TABLE_AGGREGATE_FNS,
   type CustomTableAggregateDto,
+  type CustomTableAggregateResult,
   type CustomTableRowSortDto,
 } from '../dto/list-custom-table-rows.dto';
 
@@ -180,4 +181,42 @@ export function normalizeAggregateValue(value: unknown): number | string | null 
   }
   const num = Number(value);
   return Number.isFinite(num) ? num : String(value);
+}
+
+/** A table that keeps each row's currency code: that column, and the money columns the source fills. */
+export interface RowCurrency {
+  codeKey: string;
+  money: Set<string>;
+}
+
+/**
+ * How many currency codes the rows in scope carry, for a table that keeps
+ * each row's code (a table made from transactions) (#648).
+ */
+export function currencyCodesSelection(
+  query: SelectQueryBuilder<CustomTableRow>,
+  rowCurrency: RowCurrency | null,
+): string[] {
+  if (!rowCurrency) return [];
+  query.setParameter('currency_col', rowCurrency.codeKey);
+  const { textExpr } = buildTypedValueExprs('currency_col');
+  return [`COUNT(DISTINCT NULLIF(UPPER(TRIM(${textExpr})), '')) AS "currency_codes"`];
+}
+
+/**
+ * A sum, average, minimum or maximum of money in several currencies is no one
+ * figure: it is given as none and said so, never the codes added up (#648).
+ * A count stays, and so does a column the user keeps in one currency.
+ */
+export function markMixedCurrencies(
+  items: CustomTableAggregateResult[],
+  codes: unknown,
+  rowCurrency: RowCurrency | null,
+): CustomTableAggregateResult[] {
+  if (!(rowCurrency && Number(codes) > 1)) return items;
+  return items.map(item =>
+    item.fn !== 'count' && rowCurrency.money.has(item.col)
+      ? { ...item, value: null, mixedCurrencies: true }
+      : item,
+  );
 }

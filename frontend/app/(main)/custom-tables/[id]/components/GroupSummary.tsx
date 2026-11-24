@@ -13,7 +13,7 @@ interface GroupSummaryProps {
   loading: boolean;
   fallbackCurrency: string;
   onPick: (key: string | null) => void;
-  labels: { title: string; empty: string; rows: string; loading: string };
+  labels: { title: string; empty: string; rows: string; loading: string; mixedCurrencies: string };
 }
 
 const fill = (template: string, count: number) => template.replace('{{count}}', String(count));
@@ -61,7 +61,9 @@ export function GroupSummary({
               {group.aggregates.map(item => (
                 <span key={`${item.col}:${item.fn}`} className="seneca-ct__group-agg">
                   {columns.find(c => c.key === item.col)?.title ?? item.col}:{' '}
-                  {isMoneyAggregate(item.col, item.value, item.fn) ? (
+                  {item.mixedCurrencies ? (
+                    labels.mixedCurrencies
+                  ) : isMoneyAggregate(item.col, item.value, item.fn) ? (
                     <PrivateAmount>{formatAggregate(item.col, item.value, item.fn)}</PrivateAmount>
                   ) : (
                     formatAggregate(item.col, item.value, item.fn)
