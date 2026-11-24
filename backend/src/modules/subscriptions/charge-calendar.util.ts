@@ -198,12 +198,12 @@ function dayKey(date: Date): string {
  */
 export function settledDateOf(
   subscription: { nextChargeDate: Date | string | null; frequency: SubscriptionFrequency },
-  chargeDay: string,
+  chargeDay: Date | string,
 ): Date {
   const next = subscription.nextChargeDate;
   if (!next) return chargeDay as unknown as Date;
   const anchor = localDayOf(next instanceof Date ? next.toISOString() : String(next));
-  const target = localDayOf(chargeDay).getTime();
+  const target = dayOf(chargeDay).getTime();
   const step = target < anchor.getTime() ? -1 : 1;
   let best = anchor;
   for (let index = step; Math.abs(index) < MAX_STEPS; index += step) {
@@ -212,4 +212,41 @@ export function settledDateOf(
     best = occurrence;
   }
   return dayKey(best) as unknown as Date;
+}
+
+const dayOf = (value: Date | string): Date =>
+  value instanceof Date ? localDayOf(dayKey(value)) : localDayOf(String(value));
+
+/**
+ * Whether a payment settled its charge ahead of time: paid within one interval
+ * before the charge, not a past period's payment that a schedule which had
+ * already moved on recorded against the next one (#608).
+ */
+export function paidAhead(
+  charge: { chargeDate: Date | string; expectedDate: Date | string | null },
+  frequency: SubscriptionFrequency,
+): boolean {
+  if (!charge.expectedDate) return false;
+  const previous = chargeAt(dayOf(charge.expectedDate), frequency, -1);
+  return dayOf(charge.chargeDate).getTime() > previous.getTime();
+}
+
+/** Per subscription, the days of its upcoming charges already paid ahead. */
+export function paidAheadDays(
+  charges: Array<{
+    subscriptionId: string;
+    chargeDate: Date | string;
+    expectedDate: Date | string | null;
+  }>,
+  subscriptions: Array<{ id: string; frequency: SubscriptionFrequency }>,
+): Map<string, Set<string>> {
+  const days = new Map<string, Set<string>>();
+  for (const charge of charges) {
+    const subscription = subscriptions.find(row => row.id === charge.subscriptionId);
+    if (!(subscription && paidAhead(charge, subscription.frequency))) continue;
+    const paid = days.get(charge.subscriptionId) ?? new Set<string>();
+    paid.add(String(charge.expectedDate).slice(0, 10));
+    days.set(charge.subscriptionId, paid);
+  }
+  return days;
 }

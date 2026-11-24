@@ -2,6 +2,7 @@ import { SubscriptionFrequency } from '@/entities/subscription.entity';
 import {
   chargeAt,
   countChargesBetween,
+  paidAhead,
   projectMonthlyCharges,
   settledDateOf,
   splitMonthCharges,
@@ -217,5 +218,20 @@ describe('settledDateOf', () => {
 
   it('is the payment day itself without a next charge', () => {
     expect(settledDateOf(monthly(null), '2026-10-21')).toBe('2026-10-21');
+  });
+});
+
+describe('paidAhead (#608)', () => {
+  const charge = (chargeDate: string) => ({ chargeDate, expectedDate: '2026-11-28' });
+
+  it('is a payment within one interval before its charge', () => {
+    expect(paidAhead(charge('2026-11-20'), SubscriptionFrequency.MONTHLY)).toBe(true);
+    expect(paidAhead(charge('2026-10-29'), SubscriptionFrequency.MONTHLY)).toBe(true);
+  });
+
+  it("is not a past period's payment recorded against the next charge", () => {
+    expect(paidAhead(charge('2026-10-28'), SubscriptionFrequency.MONTHLY)).toBe(false);
+    expect(paidAhead(charge('2026-11-14'), SubscriptionFrequency.WEEKLY)).toBe(false);
+    expect(paidAhead({ chargeDate: '2026-11-20', expectedDate: null }, SubscriptionFrequency.MONTHLY)).toBe(false);
   });
 });

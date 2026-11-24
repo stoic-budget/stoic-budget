@@ -1612,7 +1612,8 @@ export class SubscriptionsService {
           currency: transaction.currency,
           chargeDate: transaction.transactionDate,
           expectedAmount: subscription.amount,
-          expectedDate: subscription.nextChargeDate,
+          // The charge this payment settled: a past row is a past period's, not the next one (#608).
+          expectedDate: calendar.settledDateOf(subscription, transaction.transactionDate),
           matchStatus,
         }),
       );

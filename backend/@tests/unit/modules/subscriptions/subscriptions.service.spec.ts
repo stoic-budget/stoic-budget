@@ -246,7 +246,7 @@ describe('SubscriptionsService', () => {
     it('records the detected transaction evidence as immutable charge history', async () => {
       const subscription = {
         id: 'subscription-1', workspaceId: 'workspace-1', status: SubscriptionStatus.DETECTED,
-        amount: 100, currency: 'USD', nextChargeDate: new Date('2026-09-01'), detectionMeta: { transactionIds: ['tx-1'] },
+        amount: 100, currency: 'USD', frequency: SubscriptionFrequency.MONTHLY, nextChargeDate: new Date('2026-09-01'), detectionMeta: { transactionIds: ['tx-1'] },
       };
       subscriptionRepository.findOne.mockResolvedValue(subscription);
       subscriptionRepository.save.mockResolvedValue({ ...subscription, status: SubscriptionStatus.ACTIVE });
@@ -259,13 +259,15 @@ describe('SubscriptionsService', () => {
 
       expect(chargeRepository.save).toHaveBeenCalledWith(expect.objectContaining({
         transactionId: 'tx-1', subscriptionId: 'subscription-1', matchStatus: 'matched', expectedAmount: 100,
+        // The August payment settles August's charge, not September's (#608).
+        expectedDate: '2026-08-01',
       }));
     });
 
     it('flags a confirmed subscription when its transaction price changes materially', async () => {
       const subscription = {
         id: 'subscription-1', workspaceId: 'workspace-1', status: SubscriptionStatus.DETECTED,
-        amount: 100, currency: 'USD', nextChargeDate: new Date('2026-09-01'), detectionMeta: { transactionIds: ['tx-1'] },
+        amount: 100, currency: 'USD', frequency: SubscriptionFrequency.MONTHLY, nextChargeDate: new Date('2026-09-01'), detectionMeta: { transactionIds: ['tx-1'] },
       };
       subscriptionRepository.findOne.mockResolvedValue(subscription);
       subscriptionRepository.save.mockImplementation(value => value);
