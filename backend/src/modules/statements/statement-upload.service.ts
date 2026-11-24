@@ -73,8 +73,8 @@ export class StatementUploadService {
     // оба проходили check-then-act и создавали дубль выписки с транзакциями.
     // Уникальный индекс тут не подходит — allowDuplicates легально обходит проверку.
     // Parsing replaces it with the currency the file states; until then the
-    // statement carries the workspace's own (the column has no default).
-    const currency = await this.workspaceCurrency.resolve(workspaceId);
+    // statement carries its wallet's, else the workspace's (#675).
+    const currency = await this.currencyFor(walletId ?? null, workspaceId);
     const accountId = await accountOfUpload(this.walletRepository, walletId, workspaceId);
 
     const savedStatement = await this.statementRepository.manager.transaction(async manager => {
@@ -237,5 +237,16 @@ export class StatementUploadService {
 
     await this.cacheManager.del(`statements:thumbnail:${statement.id}`);
     return updatedStatement;
+  }
+
+  /** A statement's currency before its file says otherwise: its wallet's, else the workspace's. */
+  async currencyFor(walletId: string | null, workspaceId: string): Promise<string> {
+    const wallet = walletId
+      ? await this.walletRepository.findOne({
+          where: { id: walletId, workspaceId },
+          select: { currency: true },
+        })
+      : null;
+    return wallet?.currency || this.workspaceCurrency.resolve(workspaceId);
   }
 }

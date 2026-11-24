@@ -155,7 +155,9 @@ export class StatementProcessingService {
         : enrichedMetadata.dateTo,
       balanceStart: parserMetadata.balanceStart ?? enrichedMetadata.balanceStart,
       balanceEnd: parserMetadata.balanceEnd ?? enrichedMetadata.balanceEnd,
-      currency: parserMetadata.currency?.trim() || enrichedMetadata.currency || '',
+      // The file's own, as its parser reads it. The extractor scans every row, where
+      // a word like "TRY" or "USD" in a description is not the currency (#675).
+      currency: parserMetadata.currency?.trim() || '',
       rawHeader: enrichedMetadata.rawHeader || parserMetadata.rawHeader,
       normalizedHeader: enrichedMetadata.normalizedHeader || parserMetadata.normalizedHeader,
       periodLabel: enrichedMetadata.periodLabel || parserMetadata.periodLabel,
@@ -679,7 +681,7 @@ export class StatementProcessingService {
       const enrichedMetadata = this.buildCompleteMetadata(
         parsedStatement,
         parsedStatement.transactions,
-        statement.currency || workspaceCurrency,
+        workspaceCurrency,
       );
       parsingDetails.metadataExtracted = {
         accountNumber: enrichedMetadata.accountNumber || undefined,

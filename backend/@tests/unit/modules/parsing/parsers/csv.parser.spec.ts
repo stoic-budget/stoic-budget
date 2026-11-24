@@ -145,7 +145,7 @@ describe('CsvParser', () => {
     const parsed = await parse('no-currency.csv', [
       'Date,Description,Amount',
       '05/01/2026,Try Fitness,-30.00',
-      '06/01/2026,ACME Store,-12.50',
+      '06/01/2026,TRY FITNESS CLUB - ACME Store refund of 12 USD,-12.50',
     ]);
 
     expect(parsed.metadata.currency).toBe('');
