@@ -23,7 +23,7 @@ import { Payable } from '../../entities/payable.entity';
 import { BusinessProfileService } from '../business-profile/business-profile.service';
 import { LedgerPostingError, LedgerPostingService } from '../ledger/ledger-posting.service';
 import { PayablesService } from '../payables/payables.service';
-import { creditedLines, type ResolvedApplication } from './credit-note-lines';
+import { creditedLines, fitToTarget, type ResolvedApplication } from './credit-note-lines';
 import { buildCreditNotePdf } from './invoice-document';
 import { documentLines, priceLines, totalsOf } from './invoice-pricing';
 import { InvoiceXRechnungService } from './invoice-xrechnung.service';
@@ -133,16 +133,12 @@ export class CreditNotesService {
       note.taxTotal = totals.taxTotal;
       note.total = totals.total;
 
-      // Each invoice is credited with what its own lines add up to, not with
-      // what was asked for: the two differ by cents when part of an invoice is
-      // credited and the scaled lines round. Never more than is left on it (#617).
+      // Each invoice is credited with what its own lines add up to: what was
+      // asked, or a cent below it when a tax step leaves no exact sum (#617).
       const applications = manager.getRepository(CreditNoteApplication);
       let offset = 0;
       for (const group of groups) {
-        const amount = Math.min(
-          totalsOf(priced.slice(offset, offset + group.lines.length)).total,
-          group.application.creditable,
-        );
+        const amount = totalsOf(priced.slice(offset, offset + group.lines.length)).total;
         offset += group.lines.length;
         if (amount <= 0) {
           continue;
@@ -310,7 +306,7 @@ export class CreditNotesService {
         // Crediting part of an invoice scales its lines, so each rate keeps its
         // share of the tax instead of the whole credit landing on one line.
         factor: Number(invoice.total) === 0 ? 0 : requested / Number(invoice.total),
-        creditable,
+        target: Math.min(requested, creditable),
       });
     }
 
@@ -357,6 +353,8 @@ export class CreditNotesService {
       const rows = creditedLines(application, this.linePrefix(application)).map(line =>
         repo.create({ ...line, creditNoteId: note.id, sortOrder: sortOrder++ }),
       );
+      if (application.factor !== 1)
+        await fitToTarget(manager, rows, note.pricesIncludeTax, application.target);
       groups.push({ application, lines: await repo.save(rows) });
     }
     return groups;
