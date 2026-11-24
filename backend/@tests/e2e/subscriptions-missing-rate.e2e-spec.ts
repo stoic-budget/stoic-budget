@@ -73,4 +73,17 @@ describe('Subscriptions summary with a missing rate (e2e)', () => {
     expect(summary.body.missingRates).toEqual(['XTS']);
     expect(summary.body.totalMonthlyCost).toBe(20);
   });
+
+  it('names a bill currency without a rate in the charge calendar (#787)', async () => {
+    // XBB (a bond unit, no rate source), on no plan: only the bill can bring it in.
+    await as(request(server()).post('/payables'))
+      .send({ vendor: 'ACME Vault', amount: 25, currency: 'XBB', dueDate: inDays(5) })
+      .expect(201);
+
+    const calendar = await as(request(server()).get('/subscriptions/charge-calendar?months=2')).expect(200);
+
+    expect(calendar.body.missingRates).toEqual(['XBB', 'XTS']);
+    const bill = calendar.body.rows.find((row: { vendorName: string }) => row.vendorName === 'ACME Vault');
+    expect(bill.amounts[0]).toBe(25);
+  });
 });

@@ -155,7 +155,9 @@ describe('SubscriptionsContent', () => {
     summaryRates.calendarMissing = ['XAU', 'XTS'];
     renderContent();
 
-    expect(screen.getByRole('status')).toHaveTextContent('XAU, XTS');
+    const text = screen.getByRole('status').textContent ?? '';
+    expect(text).toContain('XAU, XTS');
+    expect(text.match(/XTS/g)).toHaveLength(1);
   });
 
   it('says nothing about rates when every currency has one', () => {
