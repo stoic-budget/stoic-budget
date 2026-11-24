@@ -23,6 +23,8 @@ export type ConvertAt = (amount: number, currency: string, day: Date) => Promise
 export interface WorkspaceMoney {
   currency: string | null;
   convert: ConvertAt;
+  /** The currencies `convert` found no rate for, to name on the page (#787); nothing when none. */
+  missing: () => { missingRates?: string[] };
 }
 
 export function workspaceMoney(
@@ -31,15 +33,18 @@ export function workspaceMoney(
   workspaceCurrency: string | null | undefined,
 ): WorkspaceMoney {
   const currency = workspaceCurrency?.toUpperCase() ?? null;
+  const unrated = new Set<string>();
   // Each charge at its own day's rate; a currency with no rate that day is left out, as in Reports.
   const convert: ConvertAt = async (amount, from, day) => {
     if (!currency) {
       return amount;
     }
     const rate = await rates.getRateOrNull(from, currency, day, workspaceId);
+    if (rate === null) unrated.add(from.toUpperCase());
     return rate === null ? 0 : amount * rate;
   };
-  return { currency, convert };
+  const missing = () => (unrated.size > 0 ? { missingRates: [...unrated].sort() } : {});
+  return { currency, convert, missing };
 }
 
 const localDay = dayKey;
@@ -99,7 +104,7 @@ export async function chargesInMonth(
  */
 export async function pastMonthStatus(
   charges: Repository<SubscriptionCharge>,
-  { currency, convert }: WorkspaceMoney,
+  { currency, convert, missing }: WorkspaceMoney,
   workspaceId: string,
   month: string,
   payPeriod?: PayPeriodContext | null,
@@ -148,5 +153,6 @@ export async function pastMonthStatus(
     paidByCurrency: paidByCurrency.list(),
     unpaidByCurrency: [],
     items: [...bySubscription.values()],
+    ...missing(),
   };
 }

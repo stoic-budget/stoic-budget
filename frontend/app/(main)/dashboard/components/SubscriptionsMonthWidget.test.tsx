@@ -153,6 +153,26 @@ describe('SubscriptionsMonthWidget', () => {
     expect(row).toHaveAttribute('href', `/subscriptions?focus=${encodeURIComponent('subscription:sub-2')}`);
   });
 
+  it('names the currencies left out for want of a rate, with the way to set one (#787)', async () => {
+    apiGet.mockResolvedValue({ data: status({ missingRates: ['XTS'] }) });
+    renderWithQuery(<SubscriptionsMonthWidget formatAmount={money} />);
+
+    await screen.findByText('Example Cloud');
+    const links = screen.getAllByRole('link');
+    expect(links.map(link => link.getAttribute('href'))).toContain(
+      '/settings/profile?tab=data&section=exchange-rates',
+    );
+  });
+
+  it('adds no rate line when every currency has a rate', async () => {
+    apiGet.mockResolvedValue({ data: status() });
+    renderWithQuery(<SubscriptionsMonthWidget formatAmount={money} />);
+
+    await screen.findByText('Example Cloud');
+    const hrefs = screen.getAllByRole('link').map(link => link.getAttribute('href'));
+    expect(hrefs).not.toContain('/settings/profile?tab=data&section=exchange-rates');
+  });
+
   it('leaves an empty part out of the ring but keeps the subscription', async () => {
     apiGet.mockResolvedValue({
       data: status({ paidAmount: 0, paidCount: 0, items: [item({ paid: false, amount: UNPAID })] }),

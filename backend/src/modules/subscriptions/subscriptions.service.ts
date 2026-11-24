@@ -716,7 +716,8 @@ export class SubscriptionsService {
       this.workspaceRepository.findOne({ where: { id: workspaceId } }),
     ]);
 
-    const workspaceCurrency = workspace?.currency?.toUpperCase() ?? null;
+    const money = workspaceMoney(this.exchangeRatesService, workspaceId, workspace?.currency);
+    const workspaceCurrency = money.currency;
     const { key, period, today } = monthInView(month, new Date(), payPeriod);
     const recordedThisMonth = await chargesInMonth(this.chargeRepository, workspaceId, period);
     const status = { paidAmount: 0, paidCount: 0, unpaidAmount: 0, unpaidCount: 0 };
@@ -739,17 +740,11 @@ export class SubscriptionsService {
       paidByCurrency.add(sub.currency, Number(sub.amount) * paid);
       unpaidByCurrency.add(sub.currency, Number(sub.amount) * unpaid);
 
-      let amount = Number(sub.amount);
-      if (workspaceCurrency && sub.currency.toUpperCase() !== workspaceCurrency) {
-        const converted = await this.exchangeRatesService.convert(
-          amount,
-          sub.currency,
-          workspaceCurrency,
-          today,
-          workspaceId,
-        );
-        amount = converted.converted;
-      }
+      // At today's rate; a currency with none is left out and named, as for a past month (#787).
+      const amount =
+        workspaceCurrency && sub.currency.toUpperCase() !== workspaceCurrency
+          ? await money.convert(Number(sub.amount), sub.currency, today)
+          : Number(sub.amount);
 
       status.paidAmount += amount * paid;
       status.paidCount += paid;
@@ -779,6 +774,7 @@ export class SubscriptionsService {
       paidByCurrency: paidByCurrency.list(),
       unpaidByCurrency: unpaidByCurrency.list(),
       items,
+      ...money.missing(),
     };
   }
 

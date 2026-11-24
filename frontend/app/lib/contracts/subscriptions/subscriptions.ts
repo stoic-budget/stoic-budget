@@ -104,6 +104,8 @@ export const SubscriptionMonthStatus = Schema.Struct({
   /** The paid and the still-to-pay parts in the currencies the subscriptions are in, unconverted. */
   paidByCurrency: Schema.Array(Schema.Struct({ currency: Schema.String, amount: Schema.Number })),
   unpaidByCurrency: Schema.Array(Schema.Struct({ currency: Schema.String, amount: Schema.Number })),
+  /** Currencies with no rate to the workspace's: their charges are left out of the amounts. Only when there are any. */
+  missingRates: Schema.optionalKey(Schema.Array(Schema.String)),
   /** Each subscription charged this month, still to pay first, then by next charge date. */
   items: Schema.Array(
     Schema.Struct({

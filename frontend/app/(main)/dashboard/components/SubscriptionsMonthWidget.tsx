@@ -80,6 +80,8 @@ export function SubscriptionsMonthWidget({
 }: SubscriptionsMonthWidgetProps): React.JSX.Element | null {
   const t = useIntlayer('subscriptionsMonthWidget');
   const links = useIntlayer('overviewWidgets');
+  // "Not counted: no exchange rate for …", as on a category's page.
+  const rateTexts = useIntlayer('categoryPage');
   const shown = useOverviewMonth();
   const present = usePresentPeriod().current;
   const month = shown?.month ?? present;
@@ -193,6 +195,13 @@ export function SubscriptionsMonthWidget({
         },
       ].filter((flag): flag is { label: string; href: string | undefined } => Boolean(flag))
     : [];
+  // Charges in a currency with no rate are left out of the amounts: say which (#787).
+  if (data?.missingRates?.length) {
+    flags.push({
+      label: fill(rateTexts.missingRates.value, { currencies: data.missingRates.join(', ') }),
+      href: '/settings/profile?tab=data&section=exchange-rates',
+    });
+  }
 
   return (
     <DashboardCard
