@@ -140,4 +140,26 @@ describe('CsvParser', () => {
 
     expect(result.transactions).toHaveLength(1);
   });
+
+  it('reads no currency from a word in a row, and leaves it to the wallet and workspace (#675)', async () => {
+    const parsed = await parse('no-currency.csv', [
+      'Date,Description,Amount',
+      '05/01/2026,Try Fitness,-30.00',
+      '06/01/2026,TRY FITNESS CLUB - ACME Store refund of 12 USD,-12.50',
+    ]);
+
+    expect(parsed.metadata.currency).toBe('');
+    expect(parsed.transactions.map(row => row.currency)).toEqual(['', '']);
+  });
+
+  it('takes a currency the file states above its table', async () => {
+    const parsed = await parse('stated.csv', [
+      'Account statement,EUR',
+      'Date,Description,Amount',
+      '05/01/2026,Try Fitness,-30.00',
+    ]);
+
+    expect(parsed.metadata.currency).toBe('EUR');
+    expect(parsed.transactions[0].currency).toBe('EUR');
+  });
 });
