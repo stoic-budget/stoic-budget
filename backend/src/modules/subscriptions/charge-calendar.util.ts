@@ -218,17 +218,19 @@ const dayOf = (value: Date | string): Date =>
   value instanceof Date ? localDayOf(dayKey(value)) : localDayOf(String(value));
 
 /**
- * Whether a payment settled its charge ahead of time: paid within one interval
- * before the charge, not a past period's payment that a schedule which had
- * already moved on recorded against the next one (#608).
+ * Whether a payment settled its charge ahead of time: by the same rule that
+ * books a payment, the charge nearest to its day is this one. Not a past
+ * period's payment, even posted a day late, that a schedule which had already
+ * moved on recorded against the next charge (#608).
  */
 export function paidAhead(
   charge: { chargeDate: Date | string; expectedDate: Date | string | null },
   frequency: SubscriptionFrequency,
 ): boolean {
   if (!charge.expectedDate) return false;
-  const previous = chargeAt(dayOf(charge.expectedDate), frequency, -1);
-  return dayOf(charge.chargeDate).getTime() > previous.getTime();
+  const expected = dayKey(dayOf(charge.expectedDate));
+  const settled = settledDateOf({ nextChargeDate: expected, frequency }, charge.chargeDate);
+  return String(settled) === expected;
 }
 
 /** Per subscription, the days of its upcoming charges already paid ahead. */

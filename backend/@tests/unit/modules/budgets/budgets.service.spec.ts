@@ -839,7 +839,7 @@ describe('BudgetsService', () => {
 
     it("still reserves the next charge when a past period's payment was recorded against it (#608)", async () => {
       budgetRepository.find.mockResolvedValue([budget()]);
-      // Paid on 20 Apr, linked after the schedule had moved on to 20 May.
+      // Posted on 21 Apr for the 20 Apr charge, linked after the schedule had moved on to 20 May.
       subscriptionRepository.find.mockResolvedValue([
         subscription({
           frequency: SubscriptionFrequency.MONTHLY,
@@ -848,7 +848,7 @@ describe('BudgetsService', () => {
         }),
       ]);
       chargeRepository.find.mockResolvedValue([
-        { subscriptionId: 'sub-music', chargeDate: '2026-04-20', expectedDate: '2026-05-20' },
+        { subscriptionId: 'sub-music', chargeDate: '2026-04-21', expectedDate: '2026-05-20' },
       ]);
 
       const [fun] = await service.findAll(workspaceId);

@@ -3,6 +3,7 @@ import {
   chargeAt,
   countChargesBetween,
   paidAhead,
+  paidAheadDays,
   projectMonthlyCharges,
   settledDateOf,
   splitMonthCharges,
@@ -226,12 +227,29 @@ describe('paidAhead (#608)', () => {
 
   it('is a payment within one interval before its charge', () => {
     expect(paidAhead(charge('2026-11-20'), SubscriptionFrequency.MONTHLY)).toBe(true);
-    expect(paidAhead(charge('2026-10-29'), SubscriptionFrequency.MONTHLY)).toBe(true);
+    expect(paidAhead(charge('2026-11-14'), SubscriptionFrequency.MONTHLY)).toBe(true);
   });
 
   it("is not a past period's payment recorded against the next charge", () => {
     expect(paidAhead(charge('2026-10-28'), SubscriptionFrequency.MONTHLY)).toBe(false);
+    // Posted a day late, and on the 31st for a charge clamped to the 28th.
+    expect(paidAhead(charge('2026-10-29'), SubscriptionFrequency.MONTHLY)).toBe(false);
+    expect(
+      paidAhead({ chargeDate: '2026-01-31', expectedDate: '2026-02-28' }, SubscriptionFrequency.MONTHLY),
+    ).toBe(false);
     expect(paidAhead(charge('2026-11-14'), SubscriptionFrequency.WEEKLY)).toBe(false);
     expect(paidAhead({ chargeDate: '2026-11-20', expectedDate: null }, SubscriptionFrequency.MONTHLY)).toBe(false);
+  });
+});
+
+describe('paidAheadDays (#608)', () => {
+  it("reads each charge by its own subscription's interval", () => {
+    const charge = { subscriptionId: 'weekly', chargeDate: '2026-11-14', expectedDate: '2026-11-28' };
+
+    // Two weeks before: last week's payment for a weekly plan, an early one for a monthly plan.
+    expect(paidAheadDays([charge], [{ id: 'weekly', frequency: SubscriptionFrequency.WEEKLY }]).size).toBe(0);
+    expect(
+      paidAheadDays([{ ...charge, subscriptionId: 'monthly' }], [{ id: 'monthly', frequency: SubscriptionFrequency.MONTHLY }]),
+    ).toEqual(new Map([['monthly', new Set(['2026-11-28'])]]));
   });
 });
