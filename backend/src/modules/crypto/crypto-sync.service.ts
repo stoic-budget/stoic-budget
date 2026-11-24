@@ -328,7 +328,7 @@ export class CryptoSyncService {
     const tickerByContract = TICKER_BY_CONTRACT[wallet.chainId] ?? {};
     const [transactions, tokenTransfers, nativeBalance, tokenBalances, ownAddresses] =
       await Promise.all([
-        withInternalTransfers(action => this.fetchEtherscan(wallet, action)),
+        withInternalTransfers(wallet.address, action => this.fetchEtherscan(wallet, action)),
         this.fetchEtherscan<EtherscanTokenTx>(wallet, 'tokentx'),
         this.fetchNativeBalance(wallet),
         this.fetchTokenBalances(wallet),

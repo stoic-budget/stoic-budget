@@ -316,7 +316,7 @@ describe('a token swapped for ETH', () => {
 
   it('reads the internal ETH next to the transactions, gas left to the outer one', async () => {
     const fetched: string[] = [];
-    const rows = await withInternalTransfers(async action => {
+    const rows = await withInternalTransfers(ME, async action => {
       fetched.push(action);
       return action === 'txlist' ? [outer] : [ethBack('500000000000000000')];
     });
@@ -327,7 +327,7 @@ describe('a token swapped for ETH', () => {
   });
 
   it('sums two internal payments of one swap, and skips a failed one', async () => {
-    const rows = await withInternalTransfers(async action =>
+    const rows = await withInternalTransfers(ME, async action =>
       action === 'txlist'
         ? []
         : [ethBack('300000000000000000'), ethBack('200000000000000000'), { ...ethBack('9'), isError: '1' }],
@@ -337,7 +337,7 @@ describe('a token swapped for ETH', () => {
   });
 
   it('books the swap as a trade, with the ETH bought, not the USDC as a spend', async () => {
-    const transactions = await withInternalTransfers(async action =>
+    const transactions = await withInternalTransfers(ME, async action =>
       action === 'txlist' ? [outer] : [ethBack('500000000000000000')],
     );
     const legs = finalizeTransfers(map({ transactions, tokenTransfers: [usdcOut] })).filter(
@@ -348,5 +348,54 @@ describe('a token swapped for ETH', () => {
       expect.objectContaining({ asset: 'ETH', amount: '0.5', direction: 'in', isTrade: true }),
       expect.objectContaining({ asset: 'USDC', amount: '1000', direction: 'out', isTrade: true }),
     ]);
+  });
+
+  it('reads the hash Blockscout calls transactionHash', async () => {
+    const { hash: _hash, ...row } = ethBack('500000000000000000');
+    const rows = await withInternalTransfers(ME, async action =>
+      action === 'txlist' ? [] : [{ ...row, transactionHash: SWAP } as unknown as EtherscanTx],
+    );
+
+    expect(rows).toEqual([expect.objectContaining({ hash: SWAP, value: '500000000000000000' })]);
+  });
+
+  it('lowers what a payment sent by what came back in it, instead of calling it a trade', async () => {
+    const SHOP = '0x5555555555555555555555555555555555555555';
+    const paid = tx({ hash: '0xpay', from: ME, to: SHOP, value: '500000000000000000' });
+    const change = tx({ hash: '0xpay', from: SHOP, to: ME, value: '100000000000000000' });
+    const transactions = await withInternalTransfers(ME, async action =>
+      action === 'txlist' ? [paid] : [change],
+    );
+    const legs = finalizeTransfers(map({ transactions })).filter(transfer => transfer.leg === 'value');
+
+    expect(legs).toEqual([expect.objectContaining({ asset: 'ETH', amount: '0.4', direction: 'out' })]);
+    expect(legs[0].isTrade).toBeFalsy();
+  });
+
+  it('keeps a swap with unused ETH returned one ETH-for-token trade', async () => {
+    const sent = tx({ hash: SWAP, from: ME, to: ROUTER, value: '1000000000000000000' });
+    const usdcIn = tokenTx({ hash: SWAP, from: ROUTER, to: ME, value: '2000000000' });
+    const transactions = await withInternalTransfers(ME, async action =>
+      action === 'txlist' ? [sent] : [ethBack('50000000000000000')],
+    );
+    const legs = finalizeTransfers(map({ transactions, tokenTransfers: [usdcIn] })).filter(
+      transfer => transfer.leg === 'value',
+    );
+
+    expect(legs).toEqual([
+      expect.objectContaining({ asset: 'ETH', amount: '0.95', direction: 'out', isTrade: true }),
+      expect.objectContaining({ asset: 'USDC', amount: '2000', direction: 'in', isTrade: true }),
+    ]);
+  });
+
+  it('reads only payments to the wallet, and goes on without them when the explorer refuses', async () => {
+    const outgoing = tx({ hash: SWAP, from: ME, to: ROUTER, value: '7' });
+    expect(await withInternalTransfers(ME, async action => (action === 'txlist' ? [] : [outgoing]))).toEqual([]);
+
+    const rows = await withInternalTransfers(ME, async action => {
+      if (action === 'txlistinternal') throw new Error('rate limited');
+      return [outer];
+    });
+    expect(rows).toEqual([outer]);
   });
 });
