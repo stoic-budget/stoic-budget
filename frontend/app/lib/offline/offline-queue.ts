@@ -14,6 +14,12 @@ export interface OfflineEntry {
   /** Form fields, all strings so they survive structured clone. */
   fields: Record<string, string>;
   files: File[];
+  /**
+   * The workspace the photos were taken in (#784): replayed into it, not into
+   * whichever one is open when the network comes back. Entries queued before
+   * this was stored have none and go to the open one.
+   */
+  workspaceId?: string | null;
   attempts: number;
   lastError?: string;
 }
@@ -83,7 +89,7 @@ export function createMemoryStore(initial: OfflineEntry[] = []): OfflineStore {
 
 export async function enqueue(
   store: OfflineStore,
-  input: Pick<OfflineEntry, 'kind' | 'fields' | 'files'>,
+  input: Pick<OfflineEntry, 'kind' | 'fields' | 'files' | 'workspaceId'>,
 ): Promise<OfflineEntry> {
   const entry: OfflineEntry = {
     id:
@@ -110,9 +116,17 @@ export interface ReplayResult {
 }
 
 /**
+ * Not the server judging the entry but the session: signed out (401), or the
+ * signed-in user has no say in that workspace (403). The entry waits for its
+ * owner to sign in again, as for a network failure (#784).
+ */
+const isSessionRefusal = (status: number | undefined) => status === 401 || status === 403;
+
+/**
  * Sends every queued entry, oldest first. An entry the server rejects (4xx)
- * is dropped as unfixable from here; a network failure keeps it for next time
- * and stops the run, since the rest would fail the same way.
+ * is dropped as unfixable from here; a network failure or a refused session
+ * keeps it for next time and stops the run, since the rest would fail the
+ * same way.
  */
 export async function replay(
   store: OfflineStore,
@@ -130,7 +144,7 @@ export async function replay(
       sent += 1;
       continue;
     }
-    if (isNetworkFailure(result.status)) {
+    if (isNetworkFailure(result.status) || isSessionRefusal(result.status)) {
       await store.put({ ...entry, attempts: entry.attempts + 1, lastError: result.error });
       kept += entries.length - sent - kept;
       break;

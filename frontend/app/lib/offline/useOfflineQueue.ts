@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useReadOnlyWorkspace } from '@/app/contexts/WorkspaceContext';
+import { useAuth } from '@/app/hooks/useAuth';
 import apiClient from '@/app/lib/api';
 import { getApiErrorStatus, isReadOnlyError } from '@/app/lib/api-error';
 import {
@@ -32,6 +33,8 @@ export async function sendOfflineEntry(
         'Content-Type': 'multipart/form-data',
         // The same entry may be replayed twice if the app closes mid-send.
         'idempotency-key': entry.id,
+        // Into the workspace the entry was made in, whatever is open now.
+        ...(entry.workspaceId ? { 'X-Workspace-Id': entry.workspaceId } : {}),
       },
     });
     return { ok: true };
@@ -56,6 +59,10 @@ export function useOfflineQueue(store: OfflineStore = indexedDbStore) {
   // mount-time listeners below see the current state.
   const { isReadOnly } = useReadOnlyWorkspace();
   const readOnlyRef = useRef(isReadOnly);
+  // Nobody signed in (the login page): nothing is sent, so nothing is lost.
+  const { user } = useAuth();
+  const signedInRef = useRef(Boolean(user));
+  signedInRef.current = Boolean(user);
 
   const refresh = useCallback(async () => {
     if (!available) return;
@@ -67,7 +74,13 @@ export function useOfflineQueue(store: OfflineStore = indexedDbStore) {
   }, [available, store]);
 
   const flush = useCallback(async () => {
-    if (!available || replaying || readOnlyRef.current || !navigator.onLine) {
+    if (
+      !available ||
+      replaying ||
+      readOnlyRef.current ||
+      !signedInRef.current ||
+      !navigator.onLine
+    ) {
       return { sent: 0, kept: 0 };
     }
     setReplaying(true);
@@ -78,6 +91,11 @@ export function useOfflineQueue(store: OfflineStore = indexedDbStore) {
       await refresh();
     }
   }, [available, replaying, store, refresh]);
+
+  // Signing in sends what waited for the session.
+  useEffect(() => {
+    if (user && navigator.onLine) void flush();
+  }, [user?.id, flush]);
 
   // Leaving a version sends what waited meanwhile.
   useEffect(() => {

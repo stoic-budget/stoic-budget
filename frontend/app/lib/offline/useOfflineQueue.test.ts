@@ -14,9 +14,9 @@ const entry: OfflineEntry = {
   attempts: 0,
 };
 
-const refusal = (code: string) => ({
+const refusal = (code: string, status = 403) => ({
   isAxiosError: true,
-  response: { status: 403, data: { error: { code, message: 'refused' } } },
+  response: { status, data: { error: { code, message: 'refused' } } },
 });
 
 describe('sendOfflineEntry inside a past version', () => {
@@ -30,11 +30,37 @@ describe('sendOfflineEntry inside a past version', () => {
   });
 
   it('still drops an entry the server rejected for good', async () => {
-    post.mockRejectedValue(refusal('FORBIDDEN'));
+    post.mockRejectedValue(refusal('REQUEST_INVALID', 400));
     const store = createMemoryStore([entry]);
 
     await replay(store, sendOfflineEntry);
 
     expect(await store.list()).toEqual([]);
+  });
+
+  it('keeps entries when the session is refused, for their owner to sign in again (#784)', async () => {
+    for (const status of [401, 403]) {
+      post.mockRejectedValue(refusal('UNAUTHORIZED', status));
+      const store = createMemoryStore([entry]);
+
+      await replay(store, sendOfflineEntry);
+
+      expect((await store.list()).map(e => e.id)).toEqual(['e1']);
+    }
+  });
+
+  it('sends an entry into the workspace it was made in (#784)', async () => {
+    post.mockResolvedValue({ data: {} });
+    const store = createMemoryStore([{ ...entry, workspaceId: 'ws-taken-in' }]);
+
+    await replay(store, sendOfflineEntry);
+
+    expect(post).toHaveBeenLastCalledWith(
+      expect.any(String),
+      expect.anything(),
+      expect.objectContaining({
+        headers: expect.objectContaining({ 'X-Workspace-Id': 'ws-taken-in' }),
+      }),
+    );
   });
 });
