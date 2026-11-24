@@ -42,6 +42,7 @@ function createService(
       holdings: Array<{ value: number; cost: number | null; realized: number; basisIncomplete: boolean }>;
       unpriced?: Array<{ asset: string; amount: string }>;
       realizedClosed?: number;
+      closedBasisIncomplete?: boolean;
     };
   } = {},
 ) {
@@ -83,6 +84,7 @@ function createService(
       holdings: options.crypto?.holdings ?? [],
       unpriced: options.crypto?.unpriced ?? [],
       realizedClosed: options.crypto?.realizedClosed ?? 0,
+      closedBasisIncomplete: options.crypto?.closedBasisIncomplete ?? false,
     })),
   };
   const balance = {
@@ -297,6 +299,9 @@ describe('InvestmentReturnsService', () => {
 
     expect(kept).toMatchObject({ contributions: 1600, gain: 1400 });
     expect(sold).toMatchObject({ endValue: 0, contributions: -400, gain: 400 });
+    const partial = createService({ crypto: { holdings: [], realizedClosed: 400, closedBasisIncomplete: true } });
+    const flagged = (await partial.getReturns('ws', 'all')).sources.find(source => source.kind === 'crypto');
+    expect(flagged?.flags).toContain('crypto_basis_incomplete');
   });
 
   it('says which prices the figures stand on are old', async () => {

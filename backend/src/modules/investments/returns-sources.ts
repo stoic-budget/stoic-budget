@@ -94,6 +94,7 @@ export function cryptoSource({
   holdings,
   unpriced,
   realizedClosed = 0,
+  closedBasisIncomplete = false,
 }: CryptoHoldings): { row: ReturnsSource; flags: ReturnsFlag[] } | null {
   if (holdings.length === 0 && unpriced.length === 0 && !realizedClosed) {
     return null;
@@ -106,7 +107,10 @@ export function cryptoSource({
   const netInvested = round2(costHeld - realized);
 
   const codes: ReturnsFlagCode[] = ['crypto_not_in_return'];
-  if (holdings.some(holding => holding.basisIncomplete || holding.cost === null)) {
+  if (
+    closedBasisIncomplete ||
+    holdings.some(holding => holding.basisIncomplete || holding.cost === null)
+  ) {
     codes.push('crypto_basis_incomplete');
   }
   if (unpriced.length > 0) {

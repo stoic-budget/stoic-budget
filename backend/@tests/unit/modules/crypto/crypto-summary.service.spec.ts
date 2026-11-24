@@ -203,6 +203,65 @@ describe('CryptoService.getSummary', () => {
     expect((await gone.holdingsService.getHoldings(WORKSPACE, 'EUR')).holdings).toEqual([]);
   });
 
+  it('counts a held coin\'s realised gain once, and a held coin with no price among the closed (#655)', async () => {
+    const leg = (id: string, asset: string, type: TransactionType, amount: string, day: string) => ({
+      id,
+      transactionDate: new Date(`${day}T00:00:00Z`),
+      cryptoWalletId: 'w-1',
+      transactionType: type,
+      cryptoAsset: asset,
+      cryptoAmount: '1',
+      amount,
+      currency: 'EUR',
+    });
+    // ETH bought, sold at 500 profit, bought again and held: its holding carries the 500.
+    // XYZ (no price source) bought twice, one sold at 100 profit, one held.
+    const { holdingsService } = build({
+      balances: [
+        { asset: 'ETH', amount: '1' },
+        { asset: 'XYZ', amount: '1' },
+      ],
+      current: { ETH: 3000 },
+      transactions: [
+        leg('buy-1', 'ETH', TransactionType.INCOME, '1000', '2026-01-01'),
+        leg('sell', 'ETH', TransactionType.EXPENSE, '1500', '2026-02-01'),
+        leg('buy-2', 'ETH', TransactionType.INCOME, '2000', '2026-03-01'),
+        leg('xyz-1', 'XYZ', TransactionType.INCOME, '100', '2026-01-01'),
+        leg('xyz-2', 'XYZ', TransactionType.INCOME, '100', '2026-01-02'),
+        leg('xyz-sell', 'XYZ', TransactionType.EXPENSE, '200', '2026-02-01'),
+      ],
+    });
+
+    const result = await holdingsService.getHoldings(WORKSPACE, 'EUR');
+
+    expect(result.holdings.find(holding => holding.asset === 'ETH')?.realized).toBe(500);
+    expect(result.realizedClosed).toBe(100);
+    expect(result.closedBasisIncomplete).toBe(false);
+  });
+
+  it('flags a sold-out coin whose sale had no purchase behind it (#655)', async () => {
+    const leg = (id: string, type: TransactionType, coins: string, amount: string, day: string) => ({
+      id,
+      transactionDate: new Date(`${day}T00:00:00Z`),
+      cryptoWalletId: 'w-1',
+      transactionType: type,
+      cryptoAsset: 'ETH',
+      cryptoAmount: coins,
+      amount,
+      currency: 'EUR',
+    });
+    // One ETH bought, two sold: one came from history this app never saw.
+    const { holdingsService } = build({
+      balances: [],
+      transactions: [
+        leg('buy', TransactionType.INCOME, '1', '1000', '2026-01-01'),
+        leg('sell', TransactionType.EXPENSE, '2', '6000', '2026-02-01'),
+      ],
+    });
+
+    expect((await holdingsService.getHoldings(WORKSPACE, 'EUR')).closedBasisIncomplete).toBe(true);
+  });
+
   it('reports the price move since yesterday, weighted by value', async () => {
     const { service } = build({
       balances: [
