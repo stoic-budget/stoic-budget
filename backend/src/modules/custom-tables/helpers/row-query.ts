@@ -190,8 +190,10 @@ export interface RowCurrency {
 }
 
 /**
- * How many currency codes the rows in scope carry, for a table that keeps
- * each row's code (a table made from transactions) (#648).
+ * How many currency codes the rows in scope carry, and the one they share,
+ * for a table that keeps each row's code (a table made from transactions)
+ * (#648). A row without a code counts as a currency of its own: added to
+ * coded rows it would be another currency added up.
  */
 export function currencyCodesSelection(
   query: SelectQueryBuilder<CustomTableRow>,
@@ -199,24 +201,27 @@ export function currencyCodesSelection(
 ): string[] {
   if (!rowCurrency) return [];
   query.setParameter('currency_col', rowCurrency.codeKey);
-  const { textExpr } = buildTypedValueExprs('currency_col');
-  return [`COUNT(DISTINCT NULLIF(UPPER(TRIM(${textExpr})), '')) AS "currency_codes"`];
+  const code = `COALESCE(UPPER(TRIM(${buildTypedValueExprs('currency_col').textExpr})), '')`;
+  return [`COUNT(DISTINCT ${code}) AS "currency_codes"`, `MIN(${code}) AS "currency_code"`];
 }
 
 /**
  * A sum, average, minimum or maximum of money in several currencies is no one
- * figure: it is given as none and said so, never the codes added up (#648).
- * A count stays, and so does a column the user keeps in one currency.
+ * figure: it is given as none and said so, never the codes added up. Over
+ * rows in one currency it carries that code, the one their cells show (#648).
+ * A count stays as it is, and so does a column the user keeps in one currency.
  */
 export function markMixedCurrencies(
   items: CustomTableAggregateResult[],
-  codes: unknown,
+  scope: Record<string, unknown> | undefined,
   rowCurrency: RowCurrency | null,
 ): CustomTableAggregateResult[] {
-  if (!(rowCurrency && Number(codes) > 1)) return items;
-  return items.map(item =>
-    item.fn !== 'count' && rowCurrency.money.has(item.col)
-      ? { ...item, value: null, mixedCurrencies: true }
-      : item,
-  );
+  if (!rowCurrency) return items;
+  const mixed = Number(scope?.currency_codes) > 1;
+  const code = String(scope?.currency_code ?? '');
+  return items.map(item => {
+    if (item.fn === 'count' || !rowCurrency.money.has(item.col)) return item;
+    if (mixed) return { ...item, value: null, mixedCurrencies: true };
+    return /^[A-Z]{3}$/.test(code) ? { ...item, currency: code } : item;
+  });
 }

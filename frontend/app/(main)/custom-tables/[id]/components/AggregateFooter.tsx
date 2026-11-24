@@ -2,7 +2,7 @@
 
 import { PRIVATE_CLASS } from '@/app/components/ui/private-amount';
 import { Select } from '@/app/components/ui/select';
-import { MIXED_CURRENCIES } from '../hooks/useTableAggregates';
+import { aggregateCurrency, MIXED_CURRENCIES } from '../hooks/useTableAggregates';
 import { formatCellNumber } from '../utils/numberFormat';
 import { AGGREGATE_FNS, type AggregateFn, type CustomTableColumn } from '../utils/types';
 import { numberFormatFor } from './cells/formatCell';
@@ -23,7 +23,12 @@ export function AggregateFooter({
 }) {
   const fn = aggregates[column.key] ?? '';
   const raw = aggregateValues[column.key];
-  const format = numberFormatFor(column, fallbackCurrency);
+  // Over rows in one currency, that currency: a filter to ₪ rows shows ₪, not the column's $.
+  const code = aggregateCurrency(aggregateValues, column.key);
+  const format = numberFormatFor(
+    code ? { ...column, config: { ...(column.config ?? {}), currency: code } } : column,
+    fallbackCurrency,
+  );
   const mixed = raw === MIXED_CURRENCIES;
   const value = mixed
     ? labels.mixedCurrencies

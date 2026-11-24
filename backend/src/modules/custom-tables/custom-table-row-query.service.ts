@@ -179,7 +179,7 @@ export class CustomTableRowQueryService {
       value: normalizeAggregateValue(raw?.[`agg_${index}`]),
     }));
 
-    return { items: markMixedCurrencies(items, raw?.currency_codes, rowCurrency), total };
+    return { items: markMixedCurrencies(items, raw, rowCurrency), total };
   }
 
   /**
@@ -255,7 +255,7 @@ export class CustomTableRowQueryService {
           fn: agg.fn,
           value: normalizeAggregateValue(row[`agg_${index}`]),
         })),
-        row.currency_codes,
+        row,
         rowCurrency,
       ),
     }));

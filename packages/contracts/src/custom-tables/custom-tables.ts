@@ -100,6 +100,8 @@ export const CustomTableAggregate = Schema.Struct({
   value: Schema.NullOr(Schema.Union([Schema.String, Schema.Number])),
   /** The rows in scope are in several currencies, so a money total is no one figure (#648). */
   mixedCurrencies: Schema.optionalKey(Schema.Boolean),
+  /** The one currency the rows in scope share, when the table keeps a currency per row (#648). */
+  currency: Schema.optionalKey(Schema.String),
 });
 export type CustomTableAggregate = Wire<typeof CustomTableAggregate>;
 

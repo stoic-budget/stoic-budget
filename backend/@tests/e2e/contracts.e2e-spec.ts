@@ -2139,42 +2139,57 @@ describe('API contracts (e2e)', () => {
     it('GET /custom-tables/:id/aggregates and /groups: no one money total over several currencies (#648)', async () => {
       const table = await send('post', '/custom-tables', { name: 'ACME transfers' }).expect(201);
       const tableId = table.body.id;
-      const amount = await send('post', `/custom-tables/${tableId}/columns`, { title: 'Amount', type: 'currency' }).expect(201);
-      const code = await send('post', `/custom-tables/${tableId}/columns`, { title: 'Currency', type: 'text' }).expect(201);
+      const column = async (title: string, type: string) =>
+        (await send('post', `/custom-tables/${tableId}/columns`, { title, type }).expect(201)).body.key as string;
+      const amount = await column('Amount', 'currency');
+      const code = await column('Currency', 'text');
+      const shop = await column('Shop', 'text');
+      // A money column the user added keeps the one currency they chose for it.
+      const mine = await column('Mine', 'currency');
       // As a table made from transactions has them: the source fills both, each row in its own currency.
-      for (const [key, field] of [[amount.body.key, 'amount'], [code.body.key, 'currency']]) {
+      for (const [key, field] of [[amount, 'amount'], [code, 'currency']]) {
         await dataSource.query(
           `UPDATE custom_table_columns SET config = COALESCE(config, '{}'::jsonb) || jsonb_build_object('source', jsonb_build_object('kind', 'app_field', 'field', $1::text))
             WHERE table_id = $2 AND key = $3`,
           [field, tableId, key],
         );
       }
-      for (const [value, currency] of [[100, 'USD'], [100, 'EUR'], [50, 'USD']] as const) {
+      const rows: Array<[number, string, string]> = [
+        [100, 'USD', 'ACME Store'],
+        [50, ' usd ', 'ACME Store'],
+        [100, 'EUR', 'ACME Market'],
+        [7, '', 'ACME Market'],
+      ];
+      for (const [value, currency, payee] of rows) {
         await send('post', `/custom-tables/${tableId}/rows`, {
-          data: { [amount.body.key]: value, [code.body.key]: currency },
+          data: { [amount]: value, [code]: currency, [shop]: payee, [mine]: 10 },
         }).expect(201);
       }
       const aggs = encodeURIComponent(
         JSON.stringify([
-          { col: amount.body.key, fn: 'sum' },
-          { col: amount.body.key, fn: 'count' },
+          { col: amount, fn: 'sum' },
+          { col: amount, fn: 'count' },
+          { col: mine, fn: 'sum' },
         ]),
       );
+      const groupsBy = async (key: string) =>
+        matches(CustomTableGroups, (await get(`/custom-tables/${tableId}/groups?groupBy=${key}&aggs=${aggs}`)).body).items;
 
       const totals = matches(CustomTableAggregates, (await get(`/custom-tables/${tableId}/aggregates?aggs=${aggs}`)).body);
-      const groups = matches(
-        CustomTableGroups,
-        (await get(`/custom-tables/${tableId}/groups?groupBy=${code.body.key}&aggs=${aggs}`)).body,
-      );
+      const byShop = Object.fromEntries((await groupsBy(shop)).map(group => [group.key, group.aggregates[0]]));
+      const byCode = Object.fromEntries((await groupsBy(code)).map(group => [group.key, group.aggregates[0]]));
 
-      // 100 USD and 100 EUR are not 250 of anything.
+      // 100 USD and 100 EUR are not 257 of anything; the count and the user's own column stay.
       expect(totals.items).toEqual([
-        { col: amount.body.key, fn: 'sum', value: null, mixedCurrencies: true },
-        { col: amount.body.key, fn: 'count', value: 3 },
+        { col: amount, fn: 'sum', value: null, mixedCurrencies: true },
+        { col: amount, fn: 'count', value: 4 },
+        { col: mine, fn: 'sum', value: 40 },
       ]);
-      // Each group is in one currency, so it keeps its figure.
-      const byCode = Object.fromEntries(groups.items.map(item => [item.key, Number(item.aggregates[0].value)]));
-      expect(byCode).toEqual({ USD: 150, EUR: 100 });
+      // " usd " is USD: the store's group is one currency and says which.
+      expect(byShop['ACME Store']).toEqual({ col: amount, fn: 'sum', value: 150, currency: 'USD' });
+      // A row without a code is not added to coded ones.
+      expect(byShop['ACME Market']).toEqual({ col: amount, fn: 'sum', value: null, mixedCurrencies: true });
+      expect(byCode.EUR).toEqual({ col: amount, fn: 'sum', value: 100, currency: 'EUR' });
     });
 
     it('GET the public share and /reports/custom-tables/available', async () => {

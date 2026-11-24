@@ -15,6 +15,8 @@ export interface TableGroup {
     value: number | string | null;
     /** The group's rows are in several currencies: no one figure (#648). */
     mixedCurrencies?: boolean;
+    /** The one currency the group's rows share (#648). */
+    currency?: string;
   }>;
 }
 

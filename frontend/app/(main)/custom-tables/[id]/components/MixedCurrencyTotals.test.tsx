@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { MIXED_CURRENCIES } from '../hooks/useTableAggregates';
+import { aggregateValuesOf, MIXED_CURRENCIES } from '../hooks/useTableAggregates';
 import type { CustomTableColumn } from '../utils/types';
 import { AggregateFooter } from './AggregateFooter';
 import { GroupSummary } from './GroupSummary';
@@ -16,7 +16,7 @@ describe('money totals over several currencies (#648)', () => {
         column={amount}
         fallbackCurrency="USD"
         aggregates={{ amount: 'sum' }}
-        aggregateValues={{ amount: MIXED_CURRENCIES }}
+        aggregateValues={aggregateValuesOf([{ col: 'amount', value: null, mixedCurrencies: true }])}
         onAggregateChange={vi.fn()}
         labels={{ noTotal: 'No total', mixedCurrencies: mixed, aggregates: { sum: 'Sum' } } as never}
       />,
@@ -46,5 +46,32 @@ describe('money totals over several currencies (#648)', () => {
     );
 
     expect(screen.getByText(new RegExp(mixed))).toBeTruthy();
+  });
+
+  it('shows a total over rows in one currency in that currency, not the column\'s', () => {
+    render(
+      <AggregateFooter
+        column={amount}
+        fallbackCurrency="USD"
+        aggregates={{ amount: 'sum' }}
+        aggregateValues={aggregateValuesOf([{ col: 'amount', value: 3500, currency: 'ILS' }])}
+        onAggregateChange={vi.fn()}
+        labels={{ noTotal: 'No total', mixedCurrencies: mixed, aggregates: { sum: 'Sum' } } as never}
+      />,
+    );
+    render(
+      <GroupSummary
+        groupColumn={{ ...amount, key: 'code', title: 'Currency', type: 'text' } as CustomTableColumn}
+        columns={[amount]}
+        groups={[{ key: 'ILS', count: 1, aggregates: [{ col: 'amount', fn: 'sum', value: 3500, currency: 'ILS' }] }]}
+        loading={false}
+        fallbackCurrency="USD"
+        onPick={vi.fn()}
+        labels={{ title: 'Groups', empty: 'Empty', rows: '{{count}} rows', loading: 'Loading', mixedCurrencies: mixed }}
+      />,
+    );
+
+    expect(screen.getAllByText(/₪/)).toHaveLength(2);
+    expect(screen.queryByText(/\$/)).toBeNull();
   });
 });
