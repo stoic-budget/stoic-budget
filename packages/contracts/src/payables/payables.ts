@@ -91,6 +91,8 @@ export const PayablesSummary = Schema.Struct({
   unbookedCount: Schema.Number,
   /** Currencies whose bills were converted into the workspace currency for these totals. */
   convertedCurrencies: Schema.Array(Schema.String),
+  /** Currencies with no rate to the workspace's: counted at face value. Only when there are any. */
+  missingRates: Schema.optionalKey(Schema.Array(Schema.String)),
 });
 export type PayablesSummary = Wire<typeof PayablesSummary>;
 
