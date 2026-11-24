@@ -426,6 +426,8 @@ describe('workspace versions are taken and kept (real Postgres)', () => {
     // A copy opened before its pictures were copied points at the original's file.
     await goal(copy, 'Shared cover', 'shared.jpg');
     await goal(original, 'Shared cover', 'shared.jpg');
+    // The original's own picture is none of the copy's business.
+    await goal(original, 'Their cover', 'theirs.jpg');
 
     const files = await columnFilesOf((query, params) => dataSource.query(query, params), copy);
 
