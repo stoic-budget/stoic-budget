@@ -28,24 +28,25 @@ describe('Exchange imports add up (e2e)', () => {
   let owner: E2eAccount;
 
   const server = () => app.getHttpServer();
-  const importFile = (rows: string[]) =>
+  const importFile = (rows: string[], header = HEADER) =>
     request(server())
       .post('/crypto/import')
       .set('Authorization', `Bearer ${owner.token}`)
       .set('x-workspace-id', owner.workspaceId)
-      .attach('file', Buffer.from([HEADER, ...rows].join('\n')), {
-        filename: 'coinbase.csv',
+      .attach('file', Buffer.from([header, ...rows].join('\n')), {
+        filename: 'export.csv',
         contentType: 'text/csv',
       })
       .expect(201);
-  /** What the exchange wallet holds in BTC, as the import stored it. */
-  const btc = async (): Promise<string | undefined> => {
+  /** What an exchange wallet holds of a coin, as the import stored it. */
+  const held = async (asset: string, label = 'Coinbase'): Promise<string | undefined> => {
     const [wallet] = await dataSource.query(
-      `SELECT balances FROM crypto_wallets WHERE workspace_id = $1 AND kind = 'exchange'`,
-      [owner.workspaceId],
+      `SELECT balances FROM crypto_wallets WHERE workspace_id = $1 AND kind = 'exchange' AND label = $2`,
+      [owner.workspaceId, label],
     );
-    return (wallet?.balances ?? []).find((balance: { asset: string }) => balance.asset === 'BTC')?.amount;
+    return (wallet?.balances ?? []).find((balance: { asset: string }) => balance.asset === asset)?.amount;
   };
+  const btc = () => held('BTC');
   const january = ['buy-1,2026-01-05T10:00:00Z,Buy,BTC,1,USD,40000,40000.00,40000.00,0.00,Bought 1 BTC'];
   const february = ['buy-2,2026-02-05T10:00:00Z,Buy,BTC,0.1,USD,45000,4500.00,4500.00,0.00,Bought 0.1 BTC'];
   const march = ['sell-1,2026-03-05T10:00:00Z,Sell,BTC,0.2,USD,50000,10000.00,10000.00,0.00,Sold 0.2 BTC'];
@@ -84,6 +85,37 @@ describe('Exchange imports add up (e2e)', () => {
     const again = await importFile(february);
 
     expect(again.body.imported).toBe(0);
+    expect(await btc()).toBe('0.9');
+  });
+
+  it('keeps a coin no price is known for in the balance of its file', async () => {
+    // ZZQ is on no price list: the rows cannot be booked, but they are still held.
+    const kraken = 'txid,refid,time,type,subtype,aclass,asset,amount,fee,balance';
+    await importFile(
+      [
+        'LZZ1-A,R1,2026-01-05 10:00:00,deposit,,currency,ZZQ,2.0000000000,0,2',
+        'LZZ1-B,R2,2026-01-06 10:00:00,withdrawal,,currency,ZZQ,-0.5000000000,0.01,1.49',
+      ],
+      kraken,
+    );
+
+    expect(await held('ZZQ', 'Kraken')).toBe('1.49');
+    expect(await held('BTC', 'Kraken')).toBeUndefined();
+    // Another exchange's rows stay out of this one.
+    expect(await btc()).toBe('0.9');
+  });
+
+  it('leaves a coin out once more was sold than held, and does not count a duplicate', async () => {
+    await importFile(['sell-2,2026-04-05T10:00:00Z,Sell,BTC,5,USD,50000,250000.00,250000.00,0.00,Sold 5 BTC']);
+    expect(await btc()).toBeUndefined();
+
+    // Marked a duplicate by hand: the sale no longer counts on the next import.
+    await dataSource.query(
+      `UPDATE transactions SET is_duplicate = true
+        WHERE workspace_id = $1 AND crypto_asset = 'BTC' AND crypto_amount = 5`,
+      [owner.workspaceId],
+    );
+    await importFile(march);
     expect(await btc()).toBe('0.9');
   });
 });

@@ -21,6 +21,10 @@ import { CryptoBalanceService } from './crypto-balance.service';
 import { type ExchangeEntry, type ExchangeName, parseExchangeCsv } from './crypto-exchange-csv';
 import { CryptoHoldingsService } from './crypto-holdings.service';
 import { CryptoPriceService } from './crypto-price.service';
+import { addDecimals } from './crypto-transfer.mapper';
+
+/** A row no price could be found for: not stored, but still held. */
+const UNPRICED = Symbol('unpriced');
 
 export interface ExchangeImportResult {
   exchange: ExchangeName;
@@ -35,7 +39,7 @@ export interface ExchangeImportResult {
  * Brings an exchange account into Seneca from the CSV the exchange exports.
  *
  * Most people's coins are not on a chain we can read. The account becomes a
- * wallet of kind `exchange` whose balances are the running total of the file,
+ * wallet of kind `exchange` whose balances are the net of every row imported,
  * and every row becomes a transaction — so the same cost basis, net worth and
  * reports work on it as on an address we sync.
  *
@@ -72,10 +76,14 @@ export class CryptoImportService {
     const wallet = await this.getOrCreateWallet(workspaceId, userId, parsed.exchange);
 
     const importedIds: string[] = [];
+    const unpriced: ExchangeEntry[] = [];
     let skipped = 0;
     for (const entry of parsed.entries) {
       const writtenId = await this.persist(wallet, entry, parsed.exchange, currency);
-      if (writtenId) {
+      if (writtenId === UNPRICED) {
+        unpriced.push(entry);
+      }
+      if (typeof writtenId === 'string') {
         importedIds.push(writtenId);
       } else {
         skipped += 1;
@@ -85,9 +93,10 @@ export class CryptoImportService {
 
     // What the account holds is every row stored for it, from this file and the
     // ones before: a January and a February export add up instead of the second
-    // replacing the first (#689). All rows of a file are stored (#656).
+    // replacing the first (#689). A row no price was found for is not stored, so
+    // this file's ones are added as they are; an earlier file's are not known.
     await this.walletRepo.update(wallet.id, {
-      balances: await this.storedBalances(wallet),
+      balances: await this.storedBalances(wallet, unpriced),
       lastSyncedAt: new Date(),
       lastSyncError: null,
     });
@@ -103,8 +112,14 @@ export class CryptoImportService {
     return { exchange: parsed.exchange, imported, skipped, walletId: wallet.id };
   }
 
-  /** Each coin's net amount over the wallet's stored rows; what is gone (zero or less) is left out. */
-  private async storedBalances(wallet: CryptoWallet): Promise<CryptoWalletBalance[]> {
+  /**
+   * Each coin's net amount over the wallet's stored rows, plus this file's rows
+   * that could not be priced; what is gone (zero or less) is left out.
+   */
+  private async storedBalances(
+    wallet: CryptoWallet,
+    unpriced: ExchangeEntry[],
+  ): Promise<CryptoWalletBalance[]> {
     const rows: Array<{ asset: string; amount: string }> = await this.transactionRepo.query(
       `SELECT "crypto_asset" AS "asset",
               SUM(CASE WHEN "transaction_type" = 'income' THEN "crypto_amount"::numeric
@@ -116,12 +131,21 @@ export class CryptoImportService {
         ORDER BY "crypto_asset"`,
       [wallet.workspaceId, wallet.id],
     );
+    const byAsset = new Map(rows.map(row => [row.asset, row.amount]));
+    for (const entry of unpriced) {
+      // toFixed, not String: 1e-18 would not parse as a decimal.
+      byAsset.set(
+        entry.asset,
+        addDecimals(byAsset.get(entry.asset) ?? '0', entry.amount.toFixed(18)),
+      );
+    }
     // `numeric` prints every decimal place: 1.500000000000000000 is kept as 1.5.
     const plain = (amount: string) =>
       amount.includes('.') ? amount.replace(/\.?0+$/, '') : amount;
-    return rows
-      .filter(row => Number(row.amount) > 0)
-      .map(row => ({ asset: row.asset, amount: plain(row.amount) }));
+    return [...byAsset.entries()]
+      .filter(([, amount]) => Number(amount) > 0)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([asset, amount]) => ({ asset, amount: plain(amount) }));
   }
 
   /**
@@ -135,7 +159,7 @@ export class CryptoImportService {
     entry: ExchangeEntry,
     exchange: ExchangeName,
     currency: string,
-  ): Promise<string | null> {
+  ): Promise<string | null | typeof UNPRICED> {
     const date = new Date(`${entry.date}T00:00:00.000Z`);
     const amount = Math.abs(entry.amount);
     const stated = await this.statedValue(entry, date, currency, wallet.workspaceId);
@@ -143,7 +167,7 @@ export class CryptoImportService {
       stated ?? (await this.marketValue(entry, amount, date, currency, wallet.workspaceId));
     if (fiatAmount === null) {
       // Priced later rather than booked at zero; a re-import picks it up.
-      return null;
+      return UNPRICED;
     }
     const isIncome = entry.amount > 0;
     const id = reference(exchange, entry.reference);
@@ -261,8 +285,6 @@ export class CryptoImportService {
     );
   }
 }
-
-/** What the account holds after the whole file, asset by asset. */
 
 /**
  * The idempotency key. It goes in the same column an on-chain hash does, so a
