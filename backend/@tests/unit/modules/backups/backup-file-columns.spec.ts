@@ -118,6 +118,9 @@ describe('pictures in a backup', () => {
     }, 'ws-copy');
 
     expect(asked.join(' ')).toMatch(/FROM workspace_business_profiles[\s\S]*FROM goals[\s\S]*ws-copy/);
+    // Each table only for this workspace, and never a file another one still names.
+    expect(asked[0].match(/WHERE t\.workspace_id = \$1/g)).toHaveLength(2);
+    expect(asked[0].match(/o\.workspace_id <> \$1/g)).toHaveLength(2);
     expect(files).toEqual([
       path.join(uploads, 'workspace-logos', 'logo.png'),
       path.join(uploads, 'goal-covers', 'trip.jpg'),

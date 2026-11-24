@@ -80,16 +80,20 @@ export async function restoreColumnFile(
   return true;
 }
 
-/** The pictures a workspace's rows name, as files on disk: what discarding it removes. */
+/** The pictures only this workspace's rows name, as files on disk: what discarding it removes. */
 export async function columnFilesOf(
   query: (sql: string, params: unknown[]) => Promise<Array<{ name: string }>>,
   workspaceId: string,
 ): Promise<string[]> {
-  const sql = FILE_COLUMNS.map(
-    (spec, index) =>
-      `SELECT ${snake(spec.column)} AS name, ${index} AS spec FROM ${spec.table}
-        WHERE workspace_id = $1 AND ${snake(spec.column)} IS NOT NULL`,
-  ).join(' UNION ALL ');
+  // A file another workspace still names stays: a version opened before its
+  // pictures were copied points at the original's, which must survive it.
+  const sql = FILE_COLUMNS.map((spec, index) => {
+    const column = snake(spec.column);
+    return `SELECT t.${column} AS name, ${index} AS spec FROM ${spec.table} t
+        WHERE t.workspace_id = $1 AND t.${column} IS NOT NULL
+          AND NOT EXISTS (SELECT 1 FROM ${spec.table} o
+                           WHERE o.${column} = t.${column} AND o.workspace_id <> $1)`;
+  }).join(' UNION ALL ');
   const rows = (await query(sql, [workspaceId])) as Array<{ name: string; spec: number }>;
   return rows.map(row =>
     path.join(resolveUploadsDir(), FILE_COLUMNS[row.spec].directory, path.basename(row.name)),
