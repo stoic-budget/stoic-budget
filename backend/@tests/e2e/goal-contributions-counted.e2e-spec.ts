@@ -92,4 +92,36 @@ describe('Goal contributions follow their rows (e2e)', () => {
     const detail = await as(request(server()).get(`/goals/${goal.body.id}`)).expect(200);
     expect(Math.abs(detail.body.currentAmount)).toBe(80);
   });
+
+  it("follows a linked row's amount when it is edited outside the drawer (#609)", async () => {
+    const goal = await as(request(server()).post('/goals'))
+      .send({ name: 'Kayak', targetAmount: 900, currency: 'USD' })
+      .expect(201);
+    const categories = await as(request(server()).get('/categories?type=expense')).expect(200);
+    const category = (categories.body as Array<{ id: string; parentId: string | null }>).find(item => !item.parentId);
+    const created = await as(request(server()).post('/statements/manual-expense'))
+      .field('categoryId', category?.id ?? '')
+      .field('amount', '120')
+      .field('currency', 'USD')
+      .field('merchant', 'ACME Store - Paddle')
+      .field('date', new Date().toISOString().slice(0, 10))
+      .expect(201);
+    const [row] = await dataSource.query('SELECT id FROM transactions WHERE statement_id = $1', [created.body.id]);
+    await as(request(server()).put(`/transactions/${row.id}/goal`)).send({ goalId: goal.body.id }).expect(200);
+    const saved = async () => Math.abs((await as(request(server()).get(`/goals/${goal.body.id}`)).expect(200)).body.currentAmount);
+    expect(await saved()).toBe(120);
+
+    // The statement page and a bulk edit both go through the bulk update.
+    await as(request(server()).post('/transactions/bulk-update'))
+      .send({ items: [{ id: row.id, updates: { debit: 95 } }] })
+      .expect(200);
+
+    // Refreshed once the edit commits.
+    let amount = await saved();
+    for (let tries = 0; amount !== 95 && tries < 20; tries++) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      amount = await saved();
+    }
+    expect(amount).toBe(95);
+  });
 });

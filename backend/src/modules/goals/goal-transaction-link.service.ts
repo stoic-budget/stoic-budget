@@ -129,6 +129,37 @@ export class GoalTransactionLinkService {
     return toLink(goal, amount, itemId);
   }
 
+  /**
+   * A linked row edited anywhere (the statement page, a bulk edit, not only
+   * the drawer): its contribution and the cost line it paid follow its new
+   * amount, type, currency and day, in the goal's currency (#609).
+   */
+  async refresh(workspaceId: string, transactionId: string): Promise<void> {
+    const current = await this.contributionRepository.findOne({
+      where: { workspaceId, transactionId },
+    });
+    if (!current) return;
+    const [transaction, goal] = await Promise.all([
+      this.loadTransaction(workspaceId, transactionId),
+      this.goalRepository.findOne({ where: { id: current.goalId, workspaceId } }),
+    ]);
+    if (!goal) return;
+    const sign = transaction.transactionType === TransactionType.INCOME ? 1 : -1;
+    await this.contributionRepository.update(
+      { id: current.id, workspaceId },
+      {
+        amount: sign * (await this.magnitudeIn(transaction, goal.currency)),
+        contributionDate: toDateOnly(new Date(transaction.transactionDate)),
+      },
+    );
+    const items = this.contributionRepository.manager.getRepository(GoalItem);
+    const item = await items.findOne({ where: { workspaceId, transactionId } });
+    if (item) {
+      const actualAmount = await this.magnitudeIn(transaction, item.currency);
+      await items.update({ id: item.id, workspaceId }, { actualAmount });
+    }
+  }
+
   /** What the goal page shows for linked movements, so it can link back to the source. */
   async describe(
     workspaceId: string,

@@ -1,0 +1,76 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import type {
+  DataSource,
+  EntitySubscriberInterface,
+  QueryRunner,
+  TransactionCommitEvent,
+  TransactionRollbackEvent,
+  UpdateEvent,
+} from 'typeorm';
+import { Transaction } from '../../entities/transaction.entity';
+import { GoalTransactionLinkService } from './goal-transaction-link.service';
+
+/** What a goal contribution is computed from: a change to any of them changes it. */
+const MONEY_COLUMNS = new Set([
+  'amount',
+  'debit',
+  'credit',
+  'currency',
+  'transactionType',
+  'transactionDate',
+]);
+
+/**
+ * A row counted toward a goal and then edited on any path keeps its
+ * contribution in step (#609): the drawer linked it again by hand, the
+ * statement page and bulk edits did not. Runs once the edit commits, and a
+ * failure (no exchange rate) is logged, never fails the edit.
+ */
+@Injectable()
+export class GoalContributionFollowSubscriber implements EntitySubscriberInterface<Transaction> {
+  private readonly logger = new Logger(GoalContributionFollowSubscriber.name);
+  private readonly queued = new WeakMap<QueryRunner, Array<() => void>>();
+
+  constructor(
+    @InjectDataSource() dataSource: DataSource,
+    private readonly links: GoalTransactionLinkService,
+  ) {
+    dataSource.subscribers.push(this);
+  }
+
+  listenTo() {
+    return Transaction;
+  }
+
+  afterUpdate(event: UpdateEvent<Transaction>): void {
+    const row = (event.entity ?? event.databaseEntity) as Transaction | undefined;
+    const changed = event.updatedColumns.some(column => MONEY_COLUMNS.has(column.propertyName));
+    if (!(row?.id && row.workspaceId && changed)) return;
+    const { id, workspaceId } = row;
+    const task = () =>
+      void this.links
+        .refresh(workspaceId, id)
+        .catch(error =>
+          this.logger.warn(
+            `Goal contribution of ${id} not refreshed: ${error instanceof Error ? error.message : error}`,
+          ),
+        );
+    const runner = event.queryRunner;
+    if (runner?.isTransactionActive) {
+      this.queued.set(runner, [...(this.queued.get(runner) ?? []), task]);
+    } else {
+      task();
+    }
+  }
+
+  afterTransactionCommit(event: TransactionCommitEvent): void {
+    const tasks = this.queued.get(event.queryRunner);
+    this.queued.delete(event.queryRunner);
+    for (const task of tasks ?? []) task();
+  }
+
+  afterTransactionRollback(event: TransactionRollbackEvent): void {
+    this.queued.delete(event.queryRunner);
+  }
+}
