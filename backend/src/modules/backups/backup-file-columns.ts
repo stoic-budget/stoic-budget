@@ -4,6 +4,7 @@ import * as path from 'node:path';
 import { resolveUploadsDir } from '../../common/utils/uploads.util';
 import { LOGO_DIRECTORY } from '../business-profile/business-profile.service';
 import { COVER_DIRECTORY } from '../goals/goal-cover.constants';
+import { ITEM_IMAGE_DIRECTORY } from '../item-images/item-images.service';
 
 /**
  * Columns that name one picture in a folder of the uploads directory (#677).
@@ -20,6 +21,14 @@ export const FILE_COLUMNS = [
     key: 'workspaceId',
   },
   { table: 'goals', column: 'coverFile', directory: COVER_DIRECTORY, key: 'id' },
+  // The row is the picture: without its file there is nothing to restore.
+  {
+    table: 'item_images',
+    column: 'fileName',
+    directory: ITEM_IMAGE_DIRECTORY,
+    key: 'id',
+    rowIsPicture: true,
+  },
 ] as const;
 
 type FileColumn = (typeof FILE_COLUMNS)[number];
@@ -37,7 +46,7 @@ export async function collectColumnFiles(
 ): Promise<Record<string, unknown>[]> {
   const spec = columnOf(table);
   if (!spec) return records;
-  return Promise.all(
+  const carried = await Promise.all(
     records.map(async record => {
       const stored = record[spec.column];
       if (typeof stored !== 'string') return record;
@@ -51,6 +60,29 @@ export async function collectColumnFiles(
       return { ...record, [spec.column]: portablePath };
     }),
   );
+  // A picture row without its file is left out, not kept without a picture.
+  return 'rowIsPicture' in spec
+    ? carried.filter(record => typeof record[spec.column] === 'string')
+    : carried;
+}
+
+/**
+ * A backup's rows whose picture is the row itself, kept only when the archive
+ * carries that picture: an older archive (or a missing file) names the
+ * original's file, and the row could not be restored with a picture of its own.
+ */
+export function withRestorablePictures<
+  T extends { collections: Record<string, unknown[]>; files: Map<string, Buffer> },
+>(opened: T): T {
+  const collections = { ...opened.collections };
+  for (const spec of FILE_COLUMNS) {
+    if (!('rowIsPicture' in spec) || !collections[spec.table]) continue;
+    collections[spec.table] = collections[spec.table].filter(row => {
+      const stored = (row as Record<string, unknown> | null)?.[spec.column];
+      return typeof stored === 'string' && IMAGE.test(stored) && opened.files.has(stored);
+    });
+  }
+  return { ...opened, collections };
 }
 
 /**
