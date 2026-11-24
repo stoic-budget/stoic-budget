@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { BackupDataService } from '../../../../src/modules/backups/backup-data.service';
 import { Readable } from 'node:stream';
 import * as fs from 'node:fs/promises';
@@ -136,7 +137,7 @@ describe('BackupDataService', () => {
         getRepository: (target: string) => ({ find: vi.fn().mockResolvedValue(rows[target]) }),
       } as never,
       // As the storage does when neither the disk nor the database has the file.
-      { getStatementFileStream: vi.fn().mockRejectedValue(new Error('FILE_CONTENT_UNAVAILABLE')) } as never,
+      { getStatementFileStream: vi.fn().mockRejectedValue(new NotFoundException('FILE_CONTENT_UNAVAILABLE')) } as never,
     );
 
     const snapshot = await service.collect('ws-1');
@@ -146,7 +147,27 @@ describe('BackupDataService', () => {
     expect(snapshot.collections.receipts).toEqual([
       { id: 'receipt-1', workspaceId: 'ws-1', attachmentPaths: ['receipts/receipt-1/1-kept.jpg'] },
     ]);
+    // No server path in the archive, even for a file it does not carry.
+    expect(snapshot.collections.statements).toEqual([
+      expect.objectContaining({ filePath: 'statements/statement-1/bank.csv' }),
+    ]);
     await fs.rm(directory, { recursive: true, force: true });
+  });
+
+  it('still fails when a statement file cannot be read for another reason', async () => {
+    const service = new BackupDataService(
+      {
+        entityMetadatas: [metadata('statements', 'Statement', ['id', 'workspaceId', 'fileName', 'filePath'])],
+        getRepository: () => ({
+          find: vi.fn().mockResolvedValue([
+            { id: 'statement-1', workspaceId: 'ws-1', fileName: 'bank.csv', filePath: '/uploads/bank.csv' },
+          ]),
+        }),
+      } as never,
+      { getStatementFileStream: vi.fn().mockRejectedValue(new Error('Connection terminated unexpectedly')) } as never,
+    );
+
+    await expect(service.collect('ws-1')).rejects.toThrow('Connection terminated unexpectedly');
   });
 
   it('includes statement file versions with binary data encoded for JSON', async () => {

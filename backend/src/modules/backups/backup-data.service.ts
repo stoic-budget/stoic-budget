@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { Injectable, Optional } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { type DataSource, type EntityMetadata, In } from 'typeorm';
 import { FileStorageService } from '../../common/services/file-storage.service';
@@ -190,12 +190,17 @@ export class BackupDataService {
   ): Promise<void> {
     const recordsById = new Map(records.map(record => [record.id, record]));
     for (const statement of statements) {
-      // Throws when neither the disk nor the database copy has the file.
+      // A 404 when neither the disk nor the database copy has the file; any
+      // other failure (the database, say) still fails the backup.
       const file = await this.fileStorageService
         ?.getStatementFileStream(statement)
-        .catch(() => null);
+        .catch(error => onlyIfMissing(error, error instanceof NotFoundException));
       if (!file) {
         missingFiles.push(`statement ${statement.id} (${statement.fileName})`);
+        // A portable path all the same: the archive names no server path.
+        const record = recordsById.get(statement.id);
+        if (record)
+          record.filePath = `statements/${statement.id}/${path.posix.basename(statement.fileName)}`;
         continue;
       }
       const contents = await this.streamToBuffer(file.stream);
@@ -227,7 +232,9 @@ export class BackupDataService {
         if (typeof sourcePath !== 'string') continue;
         const safeName = path.posix.basename(sourcePath);
         const backupPath = `receipts/${record.id}/${index}-${safeName}`;
-        const contents = await fs.readFile(sourcePath).catch(() => null);
+        const contents = await fs
+          .readFile(sourcePath)
+          .catch(error => onlyIfMissing(error, error?.code === 'ENOENT'));
         if (!contents) {
           missingFiles.push(`receipt ${String(record.id)} (${safeName})`);
           continue;
@@ -271,4 +278,10 @@ export class BackupDataService {
       .map(record => (record as Record<string, unknown>).id)
       .filter((id): id is string => typeof id === 'string');
   }
+}
+
+/** A file that is not there is left out; any other failure is rethrown. */
+function onlyIfMissing(error: unknown, missing: boolean): null {
+  if (missing) return null;
+  throw error;
 }
