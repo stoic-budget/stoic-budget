@@ -89,7 +89,12 @@ export function PortfolioSummary({
       }}
     >
       {/* Values counted in USD at face value for want of a rate: say so (#787). */}
-      <MissingRatesBanner currencies={[...(summary.missingRates ?? [])]} />
+      {summary.missingRates?.length ? (
+        // Across the whole card, in line with its padding: not a cell of the grid.
+        <Box sx={{ gridColumn: '1 / -1', '& .seneca-dashboard__rates-banner': { m: 0 } }}>
+          <MissingRatesBanner currencies={[...summary.missingRates]} />
+        </Box>
+      ) : null}
       <Box>
         {/* The page is read for this number and the three beside it, so both are
             sized to be read across a desk, not squinted at. */}
