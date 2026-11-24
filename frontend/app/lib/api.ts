@@ -18,6 +18,9 @@ import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/qu
 import { getApiErrorMessage, isReadOnlyError } from './api-error';
 import { CSRF_HEADER, clearCsrfCookie, getCsrfHeaders, getCsrfToken } from './csrf';
 import { clearOpenWorkspaceId, readOpenWorkspaceId } from './open-workspace';
+
+export { tabWorkspace } from './open-workspace';
+
 import { isPublicPath } from './public-paths';
 import { getQueryClient } from './query-client';
 

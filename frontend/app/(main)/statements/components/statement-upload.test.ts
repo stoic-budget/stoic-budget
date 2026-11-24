@@ -296,6 +296,7 @@ describe('statement-upload helpers', () => {
       expect(config.headers['X-Workspace-Id']).toBe('ws-started');
     }
     localStorage.clear();
+    sessionStorage.clear();
   });
 
   describe('asking for the shop later', () => {
@@ -314,6 +315,7 @@ describe('statement-upload helpers', () => {
 
     beforeEach(() => {
       localStorage.clear();
+      sessionStorage.clear();
       localStorage.setItem('currentWorkspaceId', 'ws-1');
       apiMocks.post.mockResolvedValue({ data: { data: [{ id: 'statement-1' }] } });
     });

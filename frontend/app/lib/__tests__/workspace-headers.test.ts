@@ -11,7 +11,15 @@ const clearCookies = (): void => {
 describe('getWorkspaceHeaders', () => {
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     clearCookies();
+  });
+
+  it("sends this tab's workspace, not the one another tab switched to (#682)", () => {
+    sessionStorage.setItem('currentWorkspaceId', 'ws-home');
+    localStorage.setItem('currentWorkspaceId', 'ws-business');
+
+    expect(getWorkspaceHeaders()['X-Workspace-Id']).toBe('ws-home');
   });
 
   it('returns the CSRF and workspace headers when both are present', () => {

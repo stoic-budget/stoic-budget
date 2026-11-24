@@ -9,10 +9,9 @@ import { enterSx } from '@/app/components/welcome-tutorial/welcome-tutorial.styl
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useLocale } from '@/app/i18n';
-import apiClient from '@/app/lib/api';
+import apiClient, { tabWorkspace } from '@/app/lib/api';
 import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
 import { type AppLocale, normalizeLocale, syncLocaleFromUser } from '@/app/lib/locale';
-import { readOpenWorkspaceId, writeOpenWorkspaceId } from '@/app/lib/open-workspace';
 import { DisclaimerGate, useDisclaimerAcceptance } from './components/DisclaimerGate';
 import { OnboardingLayout } from './components/OnboardingLayout';
 import { OnboardingNavigation } from './components/OnboardingNavigation';
@@ -167,8 +166,8 @@ export default function OnboardingPage() {
     if (!user?.workspaceId) {
       return;
     }
-    if (!readOpenWorkspaceId()) {
-      writeOpenWorkspaceId(user.workspaceId);
+    if (!tabWorkspace.read()) {
+      tabWorkspace.write(user.workspaceId);
     }
   }, [user?.workspaceId]);
 
@@ -201,13 +200,13 @@ export default function OnboardingPage() {
   const handleFinish = async () => {
     setError('');
     setIsSubmitting(true);
-    const workspaceId = user?.workspaceId ?? readOpenWorkspaceId();
+    const workspaceId = user?.workspaceId ?? tabWorkspace.read();
 
     try {
       const result = await submitOnboarding(apiClient, data, flow.mode, workspaceId);
 
       if (isCreateWorkspaceFlow) {
-        writeOpenWorkspaceId(result.workspaceId);
+        tabWorkspace.write(result.workspaceId);
       }
       if (result.user) {
         const updatedUser = result.user as NonNullable<typeof user>;

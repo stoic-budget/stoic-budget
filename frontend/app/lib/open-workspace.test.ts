@@ -23,6 +23,22 @@ describe('the workspace open in this tab (#682)', () => {
     expect(readOpenWorkspaceId()).toBe('ws-business');
   });
 
+  it('keeps a new tab on the default it opened with', () => {
+    localStorage.setItem(KEY, 'ws-business');
+    readOpenWorkspaceId();
+    localStorage.setItem(KEY, 'ws-home');
+
+    expect(readOpenWorkspaceId()).toBe('ws-business');
+  });
+
+  it('keeps a past version to this tab: a new tab never opens in one', () => {
+    writeOpenWorkspaceId('ws-home');
+    writeOpenWorkspaceId('ws-version', { shared: false });
+
+    expect(readOpenWorkspaceId()).toBe('ws-version');
+    expect(localStorage.getItem(KEY)).toBe('ws-home');
+  });
+
   it('forgets both on clear', () => {
     writeOpenWorkspaceId('ws-home');
     clearOpenWorkspaceId();

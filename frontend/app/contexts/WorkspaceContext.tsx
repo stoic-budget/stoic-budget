@@ -14,14 +14,9 @@ import {
 import { getApiErrorMessage } from '@/app/lib/api-error';
 import { hasSessionCookie } from '@/app/lib/csrf';
 import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
-import {
-  clearOpenWorkspaceId,
-  readOpenWorkspaceId,
-  writeOpenWorkspaceId,
-} from '@/app/lib/open-workspace';
 import type { ContractInput } from '@/app/lib/query-fn-schema';
 import { checkContract, reportContractDrift } from '@/app/lib/query-fn-schema';
-import { api } from '../lib/api';
+import { api, tabWorkspace } from '../lib/api';
 import { useWorkspaceSetters } from './use-workspace-setters';
 
 type WorkspaceSettings = Record<string, unknown>;
@@ -128,13 +123,13 @@ async function fetchAndSetWorkspaces({
       '/workspaces',
     );
     setWorkspaces(data);
-    const storedId = readOpenWorkspaceId();
+    const storedId = tabWorkspace.read();
     const found = storedId ? data.find(w => w.id === storedId) : null;
     // A version is only ever entered on purpose: the fallback is a real workspace.
     const workspace = found ?? data.find(w => !isVersion(w)) ?? null;
     if (workspace) {
       setCurrentWorkspace(workspace);
-      writeOpenWorkspaceId(workspace.id);
+      tabWorkspace.write(workspace.id, { shared: !isVersion(workspace) });
     }
   } catch (err) {
     console.error('Failed to fetch workspaces:', err);
@@ -157,9 +152,9 @@ async function apiSwitchWorkspace(
     setters.setError(null);
     await api.post(`/workspaces/${workspaceId}/switch`);
     // Stored first: a workspace the list does not know yet (a version just
-    // opened) is picked up by the refresh through this id.
-    writeOpenWorkspaceId(workspaceId);
+    // opened, kept to this tab) is picked up by the refresh through this id.
     const workspace = workspaces.find(w => w.id === workspaceId);
+    tabWorkspace.write(workspaceId, { shared: workspace ? !isVersion(workspace) : false });
     if (workspace) {
       setters.setCurrentWorkspace(workspace);
     } else {
@@ -307,7 +302,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
   const clearWorkspace = useCallback(() => {
     setCurrentWorkspace(null);
-    clearOpenWorkspaceId();
+    tabWorkspace.clear();
   }, []);
 
   const toggleFavorite = useCallback(

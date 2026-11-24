@@ -48,9 +48,6 @@ type UploadScanDrawerFilesParams = UploadCallbacks & {
   };
 };
 
-// Read once per upload: batches go out one after another, and switching
-// workspace in the meantime must not send the rest of them to the new one.
-
 const chunkFiles = (files: File[], size: number): File[][] => {
   const chunks: File[][] = [];
 
