@@ -7,6 +7,7 @@ import { UNCATEGORIZED_CATEGORY_NAME } from '../categories/uncategorized-categor
 import { countedTransactions } from './helpers/report-query.util';
 import { toDateKey } from './helpers/report-values.util';
 import type { StatementsSummaryResponse } from './interfaces/statements-summary.interface';
+import { TemplateReportRowsLoader } from './template-report-rows.loader';
 
 /** Income, expense and their top categories and counterparties over the last `days`. */
 @Injectable()
@@ -14,6 +15,7 @@ export class StatementsSummaryReport {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    private readonly rowsLoader: TemplateReportRowsLoader,
   ) {}
 
   async getStatementsSummary(
@@ -30,9 +32,10 @@ export class StatementsSummaryReport {
       .leftJoinAndSelect('transaction.category', 'category')
       .andWhere('transaction.transactionDate >= :since', { since })
       .orderBy('transaction.updatedAt', 'DESC')
-      .take(2000)
+      // Every row of the period: a cap on the most recently changed ones understated the totals (#598).
       .getMany();
     redactPrivateRows(transactions, viewerMemberId);
+    const money = await this.rowsLoader.toWorkspaceCurrency(workspaceId, transactions);
 
     const totals = { income: 0, expense: 0, net: 0, rows: transactions.length };
     const timeseriesMap = new Map<string, { income: number; expense: number }>();
@@ -98,6 +101,6 @@ export class StatementsSummaryReport {
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 10);
 
-    return { totals, timeseries, categories, counterparties, recent };
+    return { ...money, totals, timeseries, categories, counterparties, recent };
   }
 }

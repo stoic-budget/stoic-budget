@@ -26,6 +26,7 @@ function createQbMock(getMany: () => Promise<any[]> = async () => [], extra: Rec
     addSelect: vi.fn().mockReturnThis(),
     orderBy: vi.fn().mockReturnThis(),
     groupBy: vi.fn().mockReturnThis(),
+    addGroupBy: vi.fn().mockReturnThis(),
     getMany: vi.fn().mockImplementation(getMany),
     getRawMany: vi.fn().mockResolvedValue([]),
     getRawOne: vi.fn().mockResolvedValue(null),

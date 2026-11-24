@@ -8,7 +8,7 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { Workspace } from '../../entities/workspace.entity';
 import { UNCATEGORIZED_CATEGORY_NAME } from '../categories/uncategorized-category';
 import { CurrencyConverter, normalizeCurrencyCode } from '../exchange-rates/currency-converter';
-import { loadDayConverter } from '../exchange-rates/day-converter';
+import { type DayConvert, loadDayConverter } from '../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { countedTransactions } from './helpers/report-query.util';
 import { round2, toDateKey } from './helpers/report-values.util';
@@ -49,17 +49,26 @@ export class TemplateReportRowsLoader {
     workspaceId: string,
     rows: Transaction[],
   ): Promise<{ currency: string; missingRates: string[] }> {
-    const currency = await this.getWorkspaceCurrency(workspaceId);
-    const convert = await loadDayConverter(
-      this.exchangeRatesService,
-      currency,
-      rows.map(row => ({ currency: row.currency, day: toDateKey(row.transactionDate) })),
+    const { currency, convert } = await this.dayConverter(
       workspaceId,
+      rows.map(row => ({ currency: row.currency, day: toDateKey(row.transactionDate) })),
     );
     for (const row of rows) {
       row.amount = round2(convert(row.amount, row.currency, toDateKey(row.transactionDate)));
     }
     return { currency, missingRates: convert.missing };
+  }
+
+  /** Converts sums read per currency and day into the workspace's currency. */
+  async dayConverter(
+    workspaceId: string,
+    needed: Array<{ currency: string | null | undefined; day: string }>,
+  ): Promise<{ currency: string; convert: DayConvert }> {
+    const currency = await this.getWorkspaceCurrency(workspaceId);
+    return {
+      currency,
+      convert: await loadDayConverter(this.exchangeRatesService, currency, needed, workspaceId),
+    };
   }
 
   async loadReportRows(

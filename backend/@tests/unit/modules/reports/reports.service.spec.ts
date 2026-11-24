@@ -51,6 +51,7 @@ describe('ReportsService (helpers)', () => {
       select: vi.fn().mockReturnThis(),
       addSelect: vi.fn().mockReturnThis(),
       groupBy: vi.fn().mockReturnThis(),
+      addGroupBy: vi.fn().mockReturnThis(),
       orderBy: vi.fn().mockReturnThis(),
       getRawMany: vi.fn(async () => [
         { period: '2025-01-01', income: '100', expense: '0', count: '1' },
@@ -98,6 +99,7 @@ describe('ReportsService (helpers)', () => {
       select: vi.fn().mockReturnThis(),
       addSelect: vi.fn().mockReturnThis(),
       groupBy: vi.fn().mockReturnThis(),
+      addGroupBy: vi.fn().mockReturnThis(),
       orderBy: vi.fn().mockReturnThis(),
       getRawMany: vi.fn(async () => [
         { period: '2025-Q1', income: '100', expense: '40', count: '2' },
@@ -143,6 +145,7 @@ describe('ReportsService (helpers)', () => {
       select: vi.fn().mockReturnThis(),
       addSelect: vi.fn().mockReturnThis(),
       groupBy: vi.fn().mockReturnThis(),
+      addGroupBy: vi.fn().mockReturnThis(),
       orderBy: vi.fn().mockReturnThis(),
       getRawMany: vi.fn(async () => [
         { period: '2025', income: '250', expense: '150', count: '3' },

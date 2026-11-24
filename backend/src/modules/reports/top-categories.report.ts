@@ -8,6 +8,7 @@ import { UNCATEGORIZED_CATEGORY_NAME } from '../categories/uncategorized-categor
 import { applyReportFilters } from './helpers/report-filters.util';
 import { countedTransactions } from './helpers/report-query.util';
 import type { TopCategoriesReport as TopCategoriesResult } from './interfaces/top-categories-report.interface';
+import { TemplateReportRowsLoader } from './template-report-rows.loader';
 
 /** Where the money went: the largest categories, banks and counterparties in a period. */
 @Injectable()
@@ -15,6 +16,7 @@ export class TopCategoriesReport {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    private readonly rowsLoader: TemplateReportRowsLoader,
   ) {}
 
   async getTopCategoriesReport(
@@ -62,10 +64,12 @@ export class TopCategoriesReport {
       }
     }
 
+    // Every row of the period: a cap on the most recently changed ones understated the totals (#598).
     const transactions = redactPrivateRows(
-      await qb.orderBy('transaction.updatedAt', 'DESC').take(5000).getMany(),
+      await qb.orderBy('transaction.updatedAt', 'DESC').getMany(),
       selfMemberId,
     );
+    const money = await this.rowsLoader.toWorkspaceCurrency(workspaceId, transactions);
 
     const totals = {
       income: 0,
@@ -177,6 +181,7 @@ export class TopCategoriesReport {
       }));
 
     return {
+      ...money,
       period: {
         from: from.toISOString().split('T')[0],
         to: to.toISOString().split('T')[0],
