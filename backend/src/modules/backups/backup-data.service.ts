@@ -9,7 +9,7 @@ import {
   collectTransactionAttachmentFiles,
   shareIdenticalAttachmentFiles,
 } from './backup-attachment-files';
-import { collectLogoFiles } from './backup-logo-files';
+import { collectColumnFiles, FILE_COLUMNS } from './backup-file-columns';
 
 export const EXCLUDED_TABLES = new Set([
   'api_keys',
@@ -132,8 +132,12 @@ export class BackupDataService {
       if (metadata.tableName === 'transaction_attachments') {
         collections[metadata.tableName] = await collectTransactionAttachmentFiles(records, files);
       }
-      if (metadata.tableName === 'workspace_business_profiles') {
-        collections[metadata.tableName] = await collectLogoFiles(records, files);
+      if (FILE_COLUMNS.some(spec => spec.table === metadata.tableName)) {
+        collections[metadata.tableName] = await collectColumnFiles(
+          metadata.tableName,
+          records,
+          files,
+        );
       }
     }
     await this.collectRelatedCollections(collections);

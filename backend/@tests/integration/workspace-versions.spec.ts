@@ -13,6 +13,7 @@ import * as path from 'node:path';
 import { ForbiddenException } from '@nestjs/common';
 import { Client } from 'pg';
 import { DataSource } from 'typeorm';
+import { columnFilesOf } from '../../src/modules/backups/backup-file-columns';
 
 import { resolveUploadsDir } from '../../src/common/utils/uploads.util';
 import * as entityIndex from '../../src/entities';
@@ -406,5 +407,30 @@ describe('workspace versions are taken and kept (real Postgres)', () => {
     it('is the owner’s alone', async () => {
       await expect(versions.open(versionId, randomUUID())).rejects.toThrow(ForbiddenException);
     });
+  });
+
+  it('names for removal only the pictures no other workspace still names (#677)', async () => {
+    const [{ id: copy }] = await sql(
+      "INSERT INTO workspaces (name, currency) VALUES ('ACME copy', 'EUR') RETURNING id",
+    );
+    const [{ id: original }] = await sql(
+      "INSERT INTO workspaces (name, currency) VALUES ('ACME original', 'EUR') RETURNING id",
+    );
+    const goal = (workspace: string, name: string, file: string) =>
+      sql("INSERT INTO goals (workspace_id, name, target_amount, currency, cover_file) VALUES ($1, $2, 100, 'EUR', $3)", [
+        workspace,
+        name,
+        file,
+      ]);
+    await goal(copy, 'Own cover', 'own.jpg');
+    // A copy opened before its pictures were copied points at the original's file.
+    await goal(copy, 'Shared cover', 'shared.jpg');
+    await goal(original, 'Shared cover', 'shared.jpg');
+    // The original's own picture is none of the copy's business.
+    await goal(original, 'Their cover', 'theirs.jpg');
+
+    const files = await columnFilesOf((query, params) => dataSource.query(query, params), copy);
+
+    expect(files.map(file => path.basename(file))).toEqual(['own.jpg']);
   });
 });

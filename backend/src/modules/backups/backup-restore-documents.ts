@@ -4,9 +4,8 @@ import * as path from 'node:path';
 import { BadRequestException } from '@nestjs/common';
 import { appError } from '../../common/errors/app-error';
 import { resolveUploadsDir } from '../../common/utils/uploads.util';
-import { LOGO_DIRECTORY } from '../business-profile/business-profile.service';
 import { attachmentsDir } from '../transactions/services/transaction-attachment-files';
-import { LOGO_PORTABLE_PREFIX } from './backup-logo-files';
+import { restoreColumnFile } from './backup-file-columns';
 
 type StagedFile = { stagedPath: string; targetPath: string };
 
@@ -56,28 +55,7 @@ export async function prepareDocumentPaths(
     mapped.storedFileName = path.basename(target);
     return;
   }
-  if (tableName === 'workspace_business_profiles' && typeof source.logoFile === 'string') {
-    // An older archive names the original's file: sharing it is what #677
-    // was, so such a copy starts without a logo rather than with that one.
-    // Only the image types an upload accepts: anything else could never be shown.
-    const image = /\.(jpe?g|png|webp|gif)$/i.test(source.logoFile);
-    mapped.logoFile =
-      image && source.logoFile.startsWith(LOGO_PORTABLE_PREFIX)
-        ? path.basename(
-            await stage(source.logoFile, safeName => {
-              const extension = path
-                .extname(safeName)
-                .toLowerCase()
-                .replace(/[^.a-z0-9]/g, '');
-              return path.join(
-                resolveUploadsDir(),
-                LOGO_DIRECTORY,
-                `${randomUUID()}${extension.slice(0, 8)}`,
-              );
-            }),
-          )
-        : null;
-  }
+  await restoreColumnFile(tableName, source, mapped, stage);
 }
 
 async function stageDocument(
