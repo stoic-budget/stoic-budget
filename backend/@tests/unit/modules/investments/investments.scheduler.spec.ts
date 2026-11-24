@@ -4,18 +4,31 @@ describe('InvestmentsScheduler', () => {
   function createScheduler(overrides: Partial<Record<string, unknown>> = {}) {
     const investments = {
       workspacesWithPricedHoldings: vi.fn(async () => ['ws-1', 'ws-2']),
-      refreshPrices: vi.fn(async () => 2),
+      refreshPrices: vi.fn(async () => ({ updated: 2, asked: 2 })),
       ...overrides,
     } as any;
     const securityPrices = {
       recordDailyCloses: vi.fn(async () => ({ fetched: 3, failed: 0 })),
       ...(overrides.securityPrices as object),
     } as any;
-    const scheduler = new InvestmentsScheduler(investments, securityPrices);
+    const metals = {
+      refreshPrices: vi.fn(async () => 1),
+      ...(overrides.metals as object),
+    } as any;
+    const holdings = {
+      createQueryBuilder: () => ({
+        select: () => ({
+          where: () => ({
+            andWhere: () => ({ getRawMany: async () => [{ workspaceId: 'ws-gold' }] }),
+          }),
+        }),
+      }),
+    } as any;
+    const scheduler = new InvestmentsScheduler(investments, securityPrices, metals, holdings);
     // The logger would print the caught error into the test output.
     vi.spyOn((scheduler as any).logger, 'error').mockImplementation(() => undefined);
     vi.spyOn((scheduler as any).logger, 'log').mockImplementation(() => undefined);
-    return { scheduler, investments, securityPrices };
+    return { scheduler, investments, securityPrices, metals };
   }
 
   it('reprices every workspace that holds something with a price', async () => {
@@ -28,11 +41,19 @@ describe('InvestmentsScheduler', () => {
     expect(investments.refreshPrices).toHaveBeenCalledWith(null, 'ws-2');
   });
 
+  it('reprices precious metals every day too, as the system (#696)', async () => {
+    const { scheduler, metals } = createScheduler();
+
+    await scheduler.refreshMetalPrices();
+
+    expect(metals.refreshPrices).toHaveBeenCalledWith(null, 'ws-gold');
+  });
+
   it('keeps going when one workspace cannot be priced', async () => {
     const refreshPrices = vi
       .fn()
       .mockRejectedValueOnce(new Error('Quotes are down'))
-      .mockResolvedValueOnce(1);
+      .mockResolvedValueOnce({ updated: 1, asked: 1 });
     const { scheduler } = createScheduler({ refreshPrices });
 
     await expect(scheduler.refreshAllPrices()).resolves.toBeUndefined();

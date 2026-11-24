@@ -377,7 +377,7 @@ export class MetalsService {
    * Re-quotes every lot whose price was not hand-entered and rewrites the
    * account's snapshot. Returns how many lots got a price.
    */
-  async refreshPrices(userId: string, workspaceId: string): Promise<number> {
+  async refreshPrices(userId: string | null, workspaceId: string): Promise<number> {
     const lots = await this.holdingRepository.find({
       where: { workspaceId, metal: Not(IsNull()) },
     });
