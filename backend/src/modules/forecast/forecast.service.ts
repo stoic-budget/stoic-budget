@@ -83,7 +83,7 @@ export class ForecastService {
     const todayKey = formatDateOnly(today);
     const projectionDays = Math.max(horizonDays, PROJECTION_DAYS);
     const projectionEnd = addDays(todayKey, projectionDays - 1);
-    this.forecastRates.begin(workspaceId);
+    this.forecastRates.begin();
 
     const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
     const currency = normalizeCurrency(workspace?.currency);
@@ -185,7 +185,7 @@ export class ForecastService {
       caveats: forecastCaveats(history.monthsObserved < HISTORY_MONTHS, everydayMonthly, hasWallet),
       recurringIncome: recurring,
       unscheduledCommitted: commitments.unscheduledCommitted,
-      ...this.forecastRates.finish(workspaceId),
+      ...this.forecastRates.finish(),
     };
   }
 

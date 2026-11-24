@@ -160,4 +160,14 @@ describe('Forecast (e2e)', () => {
     expect(after.body.missingRates).toEqual(['XTS']);
     expect(after.body.totalInflow - before.body.totalInflow).toBe(40);
   });
+
+  it('names it in every one of several forecasts asked at once', async () => {
+    const answers = await Promise.all(
+      [30, 90, 365, 30].map(days =>
+        as(owner, request(server()).get(`/forecast?days=${days}`)).expect(200),
+      ),
+    );
+
+    for (const answer of answers) expect(answer.body.missingRates).toEqual(['XTS']);
+  });
 });
