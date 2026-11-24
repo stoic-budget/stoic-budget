@@ -9,6 +9,7 @@ import {
   collectTransactionAttachmentFiles,
   shareIdenticalAttachmentFiles,
 } from './backup-attachment-files';
+import { carryBackground } from './backup-background';
 import { collectColumnFiles, FILE_COLUMNS } from './backup-file-columns';
 
 export const EXCLUDED_TABLES = new Set([
@@ -101,6 +102,8 @@ export const isWorkspaceScoped = (metadata: EntityMetadata): boolean =>
 type BackupSnapshotData = {
   collections: Record<string, unknown[]>;
   files: Array<{ path: string; contents: Buffer }>;
+  /** The workspace's background as a snapshot keeps it: a carried picture's path (#677). */
+  backgroundImage: string | null;
 };
 
 @Injectable()
@@ -110,7 +113,8 @@ export class BackupDataService {
     @Optional() private readonly fileStorageService?: FileStorageService,
   ) {}
 
-  async collect(workspaceId: string): Promise<BackupSnapshotData> {
+  /** `backgroundImage`: the workspace's own, which the caller holds already. */
+  async collect(workspaceId: string, backgroundImage?: string | null): Promise<BackupSnapshotData> {
     const collections: Record<string, unknown[]> = {};
     const files: Array<{ path: string; contents: Buffer }> = [];
     for (const metadata of this.dataSource.entityMetadatas) {
@@ -142,7 +146,8 @@ export class BackupDataService {
     }
     await this.collectRelatedCollections(collections);
     shareIdenticalAttachmentFiles(collections, files);
-    return { collections, files };
+    const carried = await carryBackground(backgroundImage ?? null, workspaceId, files);
+    return { collections, files, backgroundImage: carried };
   }
 
   /** The usual columns, plus the hidden ones this table's backup needs. */

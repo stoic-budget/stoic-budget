@@ -433,4 +433,32 @@ describe('workspace versions are taken and kept (real Postgres)', () => {
 
     expect(files.map(file => path.basename(file))).toEqual(['own.jpg']);
   });
+
+  it("opens a version with a background and credit of its own, and takes the copy away on close (#677)", async () => {
+    const directory = path.join(resolveUploadsDir(), 'workspace-backgrounds');
+    fs.mkdirSync(directory, { recursive: true });
+    const name = `versions-it-${randomUUID()}.jpg`;
+    fs.writeFileSync(path.join(directory, name), 'ACME lake');
+    await sql(
+      `UPDATE workspaces SET background_image = $1, background_attribution = $2, background_source_url = $3 WHERE id = $4`,
+      [`/uploads/workspace-backgrounds/${name}`, '"Lake" by Member One, CC BY 2.0', 'https://example.com/lake', workspace.id],
+    );
+    const taken = await versions.takeNow(workspace.id, owner.id);
+
+    const opened = await versions.open(taken.id, owner.id);
+
+    expect(opened.backgroundImage).toMatch(/^\/uploads\/workspace-backgrounds\/[0-9a-f-]{36}\.jpg$/);
+    expect(opened.backgroundImage).not.toContain(name);
+    const [row] = await sql('SELECT background_attribution, background_source_url FROM workspaces WHERE id = $1', [opened.id]);
+    expect(row).toEqual({ background_attribution: '"Lake" by Member One, CC BY 2.0', background_source_url: 'https://example.com/lake' });
+    const copy = path.join(directory, path.basename(opened.backgroundImage as string));
+    expect(fs.readFileSync(copy, 'utf8')).toBe('ACME lake');
+
+    await versions.close(taken.id, owner.id);
+
+    expect(fs.existsSync(copy)).toBe(false);
+    expect(fs.existsSync(path.join(directory, name))).toBe(true);
+    await sql('UPDATE workspaces SET background_image = NULL, background_attribution = NULL, background_source_url = NULL WHERE id = $1', [workspace.id]);
+    fs.rmSync(path.join(directory, name), { force: true });
+  });
 });
