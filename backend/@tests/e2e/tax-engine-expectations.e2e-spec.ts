@@ -137,6 +137,28 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     expect(Number((await row()).tax_amount)).toBe(7.79);
   });
 
+  it('counts the rows of the period with no category, for which no tax is worked out (#669)', async () => {
+    const preview = () =>
+      auth(api().get('/tax/returns/preview?periodStart=2026-01-01&periodEnd=2026-03-31')).expect(200);
+    const [{ category_id: categoryId }] = await dataSource.query(
+      'SELECT category_id FROM transactions WHERE id = $1',
+      [transactionId],
+    );
+    const before = (await preview()).body.uncategorized;
+    await dataSource.query('UPDATE transactions SET category_id = NULL WHERE id = $1', [transactionId]);
+    try {
+      expect((await preview()).body.uncategorized).toBe(before + 1);
+      // A row still in Review is counted there, not here.
+      await dataSource.query('UPDATE transactions SET is_verified = false WHERE id = $1', [transactionId]);
+      expect((await preview()).body.uncategorized).toBe(before);
+    } finally {
+      await dataSource.query('UPDATE transactions SET category_id = $1, is_verified = true WHERE id = $2', [
+        categoryId,
+        transactionId,
+      ]);
+    }
+  });
+
   it('counts the rows with tax still waiting in Review, which the return leaves out', async () => {
     const preview = () =>
       auth(api().get('/tax/returns/preview?periodStart=2026-01-01&periodEnd=2026-03-31')).expect(200);

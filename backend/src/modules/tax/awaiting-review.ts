@@ -32,3 +32,43 @@ export function countAwaitingReview(
     })),
   });
 }
+
+/**
+ * Counted rows of the period with no category: no tax is worked out for a
+ * row without one, so it enters neither box of the return and nothing else
+ * says so (#669). Transfers, pending holds, duplicates and trashed
+ * statements are left out, as the return leaves them out.
+ */
+export function countUncategorized(
+  transactions: Repository<Transaction>,
+  workspaceId: string,
+  periodStart: string,
+  periodEnd: string,
+): Promise<number> {
+  return transactions.count({
+    where: [{ statementId: IsNull() }, { statement: { deletedAt: IsNull() } }].map(onStatement => ({
+      ...onStatement,
+      workspaceId,
+      isVerified: true,
+      isDuplicate: false,
+      isPending: false,
+      transferPairId: IsNull(),
+      categoryId: IsNull(),
+      transactionDate: Between(new Date(periodStart), new Date(periodEnd)),
+    })),
+  });
+}
+
+/** What the return of a period leaves out, for its warnings. */
+export async function returnGaps(
+  transactions: Repository<Transaction>,
+  workspaceId: string,
+  periodStart: string,
+  periodEnd: string,
+): Promise<{ awaitingReview: number; uncategorized: number }> {
+  const [awaitingReview, uncategorized] = await Promise.all([
+    countAwaitingReview(transactions, workspaceId, periodStart, periodEnd),
+    countUncategorized(transactions, workspaceId, periodStart, periodEnd),
+  ]);
+  return { awaitingReview, uncategorized };
+}

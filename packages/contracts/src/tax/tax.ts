@@ -128,6 +128,8 @@ export const TaxReturnPreview = Schema.Struct({
   ),
   /** Rows of the period with tax still waiting in Review: not in the return until approved. */
   awaitingReview: Schema.Number,
+  /** Counted rows of the period with no category: no tax is worked out for them. */
+  uncategorized: Schema.Number,
 });
 export type TaxReturnPreview = Wire<typeof TaxReturnPreview>;
 

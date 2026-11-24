@@ -16,7 +16,7 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { AuditService } from '../audit/audit.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { TaxDeadlineResolvedEvent } from '../notifications/events/notification-events';
-import { countAwaitingReview } from './awaiting-review';
+import { returnGaps } from './awaiting-review';
 import { JurisdictionAdoptionService } from './jurisdiction-adoption.service';
 import { JurisdictionsService, toDateOnly } from './jurisdictions.service';
 import { recordStatusChange } from './tax-return-audit';
@@ -41,6 +41,8 @@ export interface ReturnTotals {
   missingRates: Array<{ transactionId: string; date: string; currency: string }>;
   /** Rows of the period with tax still waiting in Review: not in the return. */
   awaitingReview: number;
+  /** Counted rows of the period with no category, so no tax (#669). */
+  uncategorized: number;
 }
 
 /**
@@ -173,12 +175,7 @@ export class TaxReturnsService {
       currency,
       lines,
       missingRates,
-      awaitingReview: await countAwaitingReview(
-        this.transactionRepository,
-        workspaceId,
-        periodStart,
-        periodEnd,
-      ),
+      ...(await returnGaps(this.transactionRepository, workspaceId, periodStart, periodEnd)),
     };
   }
 

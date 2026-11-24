@@ -7,13 +7,17 @@ import type { TaxReturnPreview } from '@/app/lib/contracts';
 
 /**
  * What an unfiled return leaves out: rows with no exchange rate for their day
- * (it cannot be filed with them) and rows still waiting in Review (it can, but
- * their VAT is not in it until they are approved).
+ * (it cannot be filed with them), rows still waiting in Review (it can, but
+ * their VAT is not in it until they are approved) and rows with no category,
+ * for which no tax is worked out at all.
  */
 export function ReturnWarnings({
   totals,
 }: {
-  totals: Pick<TaxReturnPreview, 'missingRates' | 'awaitingReview'> | null | undefined;
+  totals:
+    | Pick<TaxReturnPreview, 'missingRates' | 'awaitingReview' | 'uncategorized'>
+    | null
+    | undefined;
 }): React.ReactElement | null {
   const t = useIntlayer('taxReturnView');
   if (!totals) return null;
@@ -30,6 +34,11 @@ export function ReturnWarnings({
       {totals.awaitingReview > 0 ? (
         <Alert severity="warning">
           {t.awaitingReview.value.replace('{count}', String(totals.awaitingReview))}
+        </Alert>
+      ) : null}
+      {totals.uncategorized > 0 ? (
+        <Alert severity="warning">
+          {t.uncategorized.value.replace('{count}', String(totals.uncategorized))}
         </Alert>
       ) : null}
     </>

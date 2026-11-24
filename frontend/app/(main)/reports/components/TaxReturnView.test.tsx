@@ -110,6 +110,13 @@ describe('TaxReturnView', () => {
     confirm.mockRestore();
   });
 
+  it('says how many rows of the period have no category, so no tax (#669)', async () => {
+    mockApi({ totals: { ...TOTALS, uncategorized: 4 } });
+    renderWithQuery(<TaxReturnView />);
+
+    expect(await screen.findByText(/with no category: 4/)).toBeTruthy();
+  });
+
   it('offers reopening once filed, and says the rows are locked', async () => {
     mockApi({ status: 'filed' });
     renderWithQuery(<TaxReturnView />);
