@@ -12,6 +12,7 @@ import { useLocale } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
 import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
 import { type AppLocale, normalizeLocale, syncLocaleFromUser } from '@/app/lib/locale';
+import { readOpenWorkspaceId, writeOpenWorkspaceId } from '@/app/lib/open-workspace';
 import { DisclaimerGate, useDisclaimerAcceptance } from './components/DisclaimerGate';
 import { OnboardingLayout } from './components/OnboardingLayout';
 import { OnboardingNavigation } from './components/OnboardingNavigation';
@@ -166,8 +167,8 @@ export default function OnboardingPage() {
     if (!user?.workspaceId) {
       return;
     }
-    if (!localStorage.getItem('currentWorkspaceId')) {
-      localStorage.setItem('currentWorkspaceId', user.workspaceId);
+    if (!readOpenWorkspaceId()) {
+      writeOpenWorkspaceId(user.workspaceId);
     }
   }, [user?.workspaceId]);
 
@@ -200,13 +201,13 @@ export default function OnboardingPage() {
   const handleFinish = async () => {
     setError('');
     setIsSubmitting(true);
-    const workspaceId = user?.workspaceId ?? localStorage.getItem('currentWorkspaceId');
+    const workspaceId = user?.workspaceId ?? readOpenWorkspaceId();
 
     try {
       const result = await submitOnboarding(apiClient, data, flow.mode, workspaceId);
 
       if (isCreateWorkspaceFlow) {
-        localStorage.setItem('currentWorkspaceId', result.workspaceId);
+        writeOpenWorkspaceId(result.workspaceId);
       }
       if (result.user) {
         const updatedUser = result.user as NonNullable<typeof user>;

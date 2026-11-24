@@ -62,6 +62,7 @@ describe('WorkspaceProvider and past versions', () => {
 
   afterEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     vi.clearAllMocks();
   });
 

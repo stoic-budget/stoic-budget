@@ -14,6 +14,11 @@ import {
 import { getApiErrorMessage } from '@/app/lib/api-error';
 import { hasSessionCookie } from '@/app/lib/csrf';
 import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
+import {
+  clearOpenWorkspaceId,
+  readOpenWorkspaceId,
+  writeOpenWorkspaceId,
+} from '@/app/lib/open-workspace';
 import type { ContractInput } from '@/app/lib/query-fn-schema';
 import { checkContract, reportContractDrift } from '@/app/lib/query-fn-schema';
 import { api } from '../lib/api';
@@ -123,13 +128,13 @@ async function fetchAndSetWorkspaces({
       '/workspaces',
     );
     setWorkspaces(data);
-    const storedId = localStorage.getItem('currentWorkspaceId');
+    const storedId = readOpenWorkspaceId();
     const found = storedId ? data.find(w => w.id === storedId) : null;
     // A version is only ever entered on purpose: the fallback is a real workspace.
     const workspace = found ?? data.find(w => !isVersion(w)) ?? null;
     if (workspace) {
       setCurrentWorkspace(workspace);
-      localStorage.setItem('currentWorkspaceId', workspace.id);
+      writeOpenWorkspaceId(workspace.id);
     }
   } catch (err) {
     console.error('Failed to fetch workspaces:', err);
@@ -153,7 +158,7 @@ async function apiSwitchWorkspace(
     await api.post(`/workspaces/${workspaceId}/switch`);
     // Stored first: a workspace the list does not know yet (a version just
     // opened) is picked up by the refresh through this id.
-    localStorage.setItem('currentWorkspaceId', workspaceId);
+    writeOpenWorkspaceId(workspaceId);
     const workspace = workspaces.find(w => w.id === workspaceId);
     if (workspace) {
       setters.setCurrentWorkspace(workspace);
@@ -302,7 +307,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
   const clearWorkspace = useCallback(() => {
     setCurrentWorkspace(null);
-    localStorage.removeItem('currentWorkspaceId');
+    clearOpenWorkspaceId();
   }, []);
 
   const toggleFavorite = useCallback(

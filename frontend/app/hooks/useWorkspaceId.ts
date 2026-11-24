@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useWorkspace } from '../contexts/WorkspaceContext';
+import { readOpenWorkspaceId } from '../lib/open-workspace';
 
 function readStoredWorkspaceId(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('currentWorkspaceId');
+  return readOpenWorkspaceId();
 }
 
 /**
