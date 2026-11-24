@@ -146,9 +146,9 @@ export async function subscriptionCommitments(input: {
       where: {
         workspaceId: input.workspaceId,
         subscriptionId: In(subscriptions.map(subscription => subscription.id)),
-        // A year and more back: the charge before a coming one is among them.
+        // 19 months back: the charge before a coming one is among them, an annual one paid early too.
         chargeDate: MoreThanOrEqual(
-          addMonthsClamped(localDay(window.today), -13) as unknown as Date,
+          addMonthsClamped(localDay(window.today), -19) as unknown as Date,
         ),
       },
       select: { subscriptionId: true, expectedDate: true, chargeDate: true },
