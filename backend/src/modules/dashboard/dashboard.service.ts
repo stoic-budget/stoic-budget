@@ -9,7 +9,12 @@ import {
   type SelectQueryBuilder,
 } from 'typeorm';
 import { flowsSql, onlyFlows } from '../../common/utils/counted-transactions.util';
-import { currencyCodeOrDefault } from '../../common/utils/currency.util';
+import {
+  beginMissingRates,
+  currencyCodeOrDefault,
+  noteMissingRate,
+  withMissingRates,
+} from '../../common/utils/currency.util';
 import { PRIVACY_VIEWER_PARAM, redactedSql } from '../../common/utils/transaction-privacy.util';
 import type {
   DashboardActionItem,
@@ -221,6 +226,7 @@ export class DashboardService {
     since: Date,
     endDate: Date,
   ): Promise<DashboardFinancialSnapshot> {
+    beginMissingRates();
     const workspace = await this.workspaceRepo.findOne({
       where: { id: workspaceId },
       select: {
@@ -293,25 +299,19 @@ export class DashboardService {
 
     let totalPayable = 0;
     let totalOverdue = 0;
+    const toTarget = (amount: string, from: string) =>
+      this.convertDashboardAmount(amount, from, targetCurrency, workspaceId);
     for (const row of payableRows) {
-      totalPayable += await this.convertDashboardAmount(
-        row.totalPayable,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
-      totalOverdue += await this.convertDashboardAmount(
-        row.totalOverdue,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
+      totalPayable += await toTarget(row.totalPayable, row.currency);
+      totalOverdue += await toTarget(row.totalOverdue, row.currency);
     }
 
-    // Rows in a currency with no rate were counted at face value above; say so.
+    // Rows and bills in a currency with no rate were counted at face value above; say so.
     const coverage =
       (await this.exchangeRatesService.coverageForWorkspace(workspaceId, targetCurrency)) ?? [];
-    const missingRates = coverage.filter(item => item.rate === null).map(item => item.currency);
+    const missingRates = withMissingRates(
+      coverage.filter(item => item.rate === null).map(item => item.currency),
+    );
 
     return {
       totalBalance,
@@ -361,13 +361,13 @@ export class DashboardService {
     if (source === targetCurrency) {
       return value;
     }
-    const rate = await this.exchangeRatesService.getRate(
+    const rate = await this.exchangeRatesService.getRateOrNull(
       source,
       targetCurrency,
       undefined,
       workspaceId,
     );
-    return value * rate;
+    return value * (rate ?? noteMissingRate(source));
   }
 
   async getWorkspaceCurrency(workspaceId: string): Promise<string> {
