@@ -138,6 +138,23 @@ describe('BackupDataService', () => {
     await fs.rm(uploads, { recursive: true, force: true });
   });
 
+  it("carries the workspace's uploaded background with the snapshot (#677)", async () => {
+    const uploads = await fs.mkdtemp(path.join(os.tmpdir(), 'seneca-bg-'));
+    const previous = process.env.UPLOADS_DIR;
+    process.env.UPLOADS_DIR = uploads;
+    await fs.mkdir(path.join(uploads, 'workspace-backgrounds'), { recursive: true });
+    await fs.writeFile(path.join(uploads, 'workspace-backgrounds', 'lake.jpg'), 'ACME lake');
+    const service = new BackupDataService({ entityMetadatas: [], getRepository: () => ({}) } as never);
+
+    const snapshot = await service.collect('ws-1', '/uploads/workspace-backgrounds/lake.jpg');
+
+    expect(snapshot.backgroundImage).toBe('workspace-backgrounds/ws-1/lake.jpg');
+    expect(snapshot.files.map(file => file.path)).toEqual(['workspace-backgrounds/ws-1/lake.jpg']);
+    if (previous === undefined) delete process.env.UPLOADS_DIR;
+    else process.env.UPLOADS_DIR = previous;
+    await fs.rm(uploads, { recursive: true, force: true });
+  });
+
   it('includes statement file versions with binary data encoded for JSON', async () => {
     const statements = { find: vi.fn().mockResolvedValue([{ id: 'statement-1', workspaceId: 'ws-1' }]) };
     const versions = {
