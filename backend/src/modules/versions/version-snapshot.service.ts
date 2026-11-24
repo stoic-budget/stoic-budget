@@ -98,7 +98,7 @@ export class VersionSnapshotService {
         formatVersion: VERSION_FORMAT,
         workspace: {
           ...this.workspaceRecord(workspace, snapshot.backgroundImage),
-          ownerId: workspace.ownerId,
+          ownerId: snapshot.ownerId,
           ownerMemberId: snapshot.ownerMemberId,
         },
         collections: snapshot.collections,

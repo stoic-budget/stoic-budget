@@ -18,6 +18,7 @@ import { columnFilesOf } from '../../src/modules/backups/backup-file-columns';
 import { resolveUploadsDir } from '../../src/common/utils/uploads.util';
 import * as entityIndex from '../../src/entities';
 import { User, Workspace, WorkspaceMember, WorkspaceVersion } from '../../src/entities';
+import { WorkspaceVersionTrigger } from '../../src/entities/workspace-version.entity';
 import { BackupArchiveService } from '../../src/modules/backups/backup-archive.service';
 import { BackupDataService } from '../../src/modules/backups/backup-data.service';
 import { BackupKeyService } from '../../src/modules/backups/backup-key.service';
@@ -470,13 +471,14 @@ describe('workspace versions are taken and kept (real Postgres)', () => {
         name: 'Member Two',
       }),
     );
-    const [{ id: ownerMember }] = await sql(
-      "INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ($1, $2, 'owner') RETURNING id",
-      [workspace.id, owner.id],
-    );
+    // The other member first, so only the owner condition can pick the owner's membership.
     const [{ id: otherMember }] = await sql(
       "INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ($1, $2, 'viewer') RETURNING id",
       [workspace.id, other.id],
+    );
+    const [{ id: ownerMember }] = await sql(
+      "INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ($1, $2, 'owner') RETURNING id",
+      [workspace.id, owner.id],
     );
     const privateRow = (payee: string, member: string) =>
       sql(
@@ -501,6 +503,13 @@ describe('workspace versions are taken and kept (real Postgres)', () => {
       { payee: 'ACME Store', ownerUser: owner.id },
     ]);
     await versions.close(taken.id, owner.id);
+
+    // Ownership changes hands after the workspace was read and before its snapshot:
+    // the version records the owner of that moment with their own membership.
+    await sql('UPDATE workspaces SET owner_id = $1 WHERE id = $2', [other.id, workspace.id]);
+    const stale = await snapshots.take(workspace, WorkspaceVersionTrigger.MANUAL, owner.id);
+    expect((await payloadOf(stale)).workspace).toMatchObject({ ownerId: other.id, ownerMemberId: otherMember });
+    await sql('UPDATE workspaces SET owner_id = $1 WHERE id = $2', [owner.id, workspace.id]);
     await sql('DELETE FROM transactions WHERE workspace_id = $1 AND is_private', [workspace.id]);
     await sql('DELETE FROM workspace_members WHERE id = ANY($1::uuid[])', [[ownerMember, otherMember]]);
   });

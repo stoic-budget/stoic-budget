@@ -54,7 +54,15 @@ describe('BackupsService', () => {
       expect.objectContaining({
         workspace: expect.objectContaining({ id: 'workspace-1' }),
         collections: {
-          workspace: [expect.objectContaining({ id: 'workspace-1', name: 'Finance' })],
+          // The owner as read with the rows, so a restore by them keeps their private rows (#640).
+          workspace: [
+            expect.objectContaining({
+              id: 'workspace-1',
+              name: 'Finance',
+              ownerId: 'user-1',
+              ownerMemberId: 'owner-member',
+            }),
+          ],
           categories: [{ id: 'category-1' }],
         },
       }),
@@ -229,7 +237,14 @@ function createService(overrides: Record<string, unknown> = {}) {
     encryptDataKey: vi.fn().mockReturnValue('server-wrapped-data-key'),
     decryptDataKey: vi.fn().mockReturnValue(Buffer.alloc(32, 1)),
   };
-  const dataService = { collect: vi.fn().mockResolvedValue({ collections: { categories: [{ id: 'category-1' }] }, files: [] }) };
+  const dataService = {
+    collect: vi.fn().mockResolvedValue({
+      collections: { categories: [{ id: 'category-1' }] },
+      files: [],
+      ownerId: 'user-1',
+      ownerMemberId: 'owner-member',
+    }),
+  };
   const destination = overrides.destination ?? { store: vi.fn() };
   const auditService = overrides.auditService ?? { createEvent: vi.fn().mockResolvedValue({}) };
 

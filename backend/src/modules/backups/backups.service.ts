@@ -202,7 +202,7 @@ export class BackupsService {
             backgroundSourceUrl: workspace.backgroundSourceUrl,
             currency: workspace.currency,
             settings: workspace.settings,
-            ownerId: workspace.ownerId,
+            ownerId: snapshot.ownerId,
             ownerMemberId: snapshot.ownerMemberId,
           },
         ],
