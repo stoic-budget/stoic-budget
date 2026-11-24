@@ -12,6 +12,7 @@ import {
   type OfflineEntry,
   type OfflineStore,
   replay,
+  setOfflineQueueUser,
 } from './offline-queue';
 
 /** Posts one queued entry the way the live form would have. */
@@ -61,8 +62,12 @@ export function useOfflineQueue(store: OfflineStore = indexedDbStore) {
   const readOnlyRef = useRef(isReadOnly);
   // Nobody signed in (the login page): nothing is sent, so nothing is lost.
   const { user } = useAuth();
-  const signedInRef = useRef(Boolean(user));
-  signedInRef.current = Boolean(user);
+  const userId = user?.id ?? null;
+  const signedInRef = useRef(Boolean(userId));
+  signedInRef.current = Boolean(userId);
+  setOfflineQueueUser(userId);
+  // A ref, not the state: two triggers in one render must not both replay.
+  const replayingRef = useRef(false);
 
   const refresh = useCallback(async () => {
     if (!available) return;
@@ -76,26 +81,29 @@ export function useOfflineQueue(store: OfflineStore = indexedDbStore) {
   const flush = useCallback(async () => {
     if (
       !available ||
-      replaying ||
+      replayingRef.current ||
       readOnlyRef.current ||
       !signedInRef.current ||
       !navigator.onLine
     ) {
       return { sent: 0, kept: 0 };
     }
+    replayingRef.current = true;
     setReplaying(true);
     try {
       return await replay(store, sendOfflineEntry);
     } finally {
+      replayingRef.current = false;
       setReplaying(false);
       await refresh();
     }
-  }, [available, replaying, store, refresh]);
+  }, [available, store, refresh]);
 
-  // Signing in sends what waited for the session.
+  // Opening the app signed in, or signing in, sends what waited: once per
+  // person, not again on every render.
   useEffect(() => {
-    if (user && navigator.onLine) void flush();
-  }, [user?.id, flush]);
+    if (userId && navigator.onLine) void flush();
+  }, [userId, flush]);
 
   // Leaving a version sends what waited meanwhile.
   useEffect(() => {
@@ -116,8 +124,6 @@ export function useOfflineQueue(store: OfflineStore = indexedDbStore) {
     window.addEventListener('online', onOnline);
     window.addEventListener('offline', onOffline);
     window.addEventListener(OFFLINE_QUEUE_EVENT, onChanged);
-    // Anything left from a previous session goes as soon as the app opens online.
-    if (navigator.onLine) void flush();
     return () => {
       window.removeEventListener('online', onOnline);
       window.removeEventListener('offline', onOffline);

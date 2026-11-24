@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createMemoryStore, type OfflineEntry, replay } from './offline-queue';
+import { createMemoryStore, type OfflineEntry, replay, setOfflineQueueUser } from './offline-queue';
 import { sendOfflineEntry } from './useOfflineQueue';
 
 const post = vi.hoisted(() => vi.fn());
@@ -30,7 +30,7 @@ describe('sendOfflineEntry inside a past version', () => {
   });
 
   it('still drops an entry the server rejected for good', async () => {
-    post.mockRejectedValue(refusal('REQUEST_INVALID', 400));
+    post.mockRejectedValue(refusal('FORBIDDEN'));
     const store = createMemoryStore([entry]);
 
     await replay(store, sendOfflineEntry);
@@ -38,15 +38,25 @@ describe('sendOfflineEntry inside a past version', () => {
     expect(await store.list()).toEqual([]);
   });
 
-  it('keeps entries when the session is refused, for their owner to sign in again (#784)', async () => {
-    for (const status of [401, 403]) {
-      post.mockRejectedValue(refusal('UNAUTHORIZED', status));
-      const store = createMemoryStore([entry]);
+  it('keeps entries when the session has ended, for their owner to sign in again (#784)', async () => {
+    post.mockRejectedValue(refusal('UNAUTHORIZED', 401));
+    const store = createMemoryStore([entry]);
 
-      await replay(store, sendOfflineEntry);
+    await replay(store, sendOfflineEntry);
 
-      expect((await store.list()).map(e => e.id)).toEqual(['e1']);
-    }
+    expect((await store.list()).map(e => e.id)).toEqual(['e1']);
+  });
+
+  it("leaves another person's entries waiting, unsent (#784)", async () => {
+    post.mockClear();
+    post.mockResolvedValue({ data: {} });
+    setOfflineQueueUser('member-two');
+    const store = createMemoryStore([{ ...entry, userId: 'member-one' }]);
+
+    expect(await replay(store, sendOfflineEntry)).toEqual({ sent: 0, kept: 1 });
+    expect(post).not.toHaveBeenCalled();
+    expect((await store.list()).map(e => e.id)).toEqual(['e1']);
+    setOfflineQueueUser(null);
   });
 
   it('sends an entry into the workspace it was made in (#784)', async () => {

@@ -20,8 +20,22 @@ export interface OfflineEntry {
    * this was stored have none and go to the open one.
    */
   workspaceId?: string | null;
+  /**
+   * Who queued it: only they send it (#784). Another person signing in on the
+   * device leaves it waiting. Older entries have none and go with anyone.
+   */
+  userId?: string | null;
   attempts: number;
   lastError?: string;
+}
+
+/**
+ * The person signed in on this device, kept by `useOfflineQueue`: entries
+ * are stamped with it when queued and sent only while it is the same.
+ */
+let signedInUserId: string | null = null;
+export function setOfflineQueueUser(userId: string | null): void {
+  signedInUserId = userId;
 }
 
 export interface OfflineStore {
@@ -90,6 +104,7 @@ export function createMemoryStore(initial: OfflineEntry[] = []): OfflineStore {
 export async function enqueue(
   store: OfflineStore,
   input: Pick<OfflineEntry, 'kind' | 'fields' | 'files' | 'workspaceId'>,
+  userId: string | null = signedInUserId,
 ): Promise<OfflineEntry> {
   const entry: OfflineEntry = {
     id:
@@ -98,6 +113,7 @@ export async function enqueue(
         : String(Date.now()),
     createdAt: new Date().toISOString(),
     attempts: 0,
+    userId,
     ...input,
   };
   await store.put(entry);
@@ -116,11 +132,10 @@ export interface ReplayResult {
 }
 
 /**
- * Not the server judging the entry but the session: signed out (401), or the
- * signed-in user has no say in that workspace (403). The entry waits for its
- * owner to sign in again, as for a network failure (#784).
+ * Not the server judging the entry but the session: signed out (401). The
+ * entry waits for its owner to sign in again, as for a network failure (#784).
  */
-const isSessionRefusal = (status: number | undefined) => status === 401 || status === 403;
+const isSessionRefusal = (status: number | undefined) => status === 401;
 
 /**
  * Sends every queued entry, oldest first. An entry the server rejects (4xx)
@@ -137,7 +152,13 @@ export async function replay(
   const entries = (await store.list()).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   let sent = 0;
   let kept = 0;
+  let dropped = 0;
   for (const entry of entries) {
+    // Someone else's photos wait for them, untouched.
+    if (entry.userId && entry.userId !== signedInUserId) {
+      kept += 1;
+      continue;
+    }
     const result = await send(entry);
     if (result.ok) {
       await store.remove(entry.id);
@@ -146,11 +167,12 @@ export async function replay(
     }
     if (isNetworkFailure(result.status) || isSessionRefusal(result.status)) {
       await store.put({ ...entry, attempts: entry.attempts + 1, lastError: result.error });
-      kept += entries.length - sent - kept;
+      kept = entries.length - sent - dropped;
       break;
     }
     // The server answered and said no: keeping it would only fail again.
     await store.remove(entry.id);
+    dropped += 1;
   }
   notifyQueueChanged();
   return { sent, kept };
