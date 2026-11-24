@@ -5,6 +5,7 @@ import {
   finalizeTransfers,
   formatUnits,
   mapChainTransfers,
+  withInternalTransfers,
 } from '../../../../src/modules/crypto/crypto-transfer.mapper';
 import { TICKER_BY_CONTRACT } from '../../../../src/modules/crypto/crypto.constants';
 
@@ -299,5 +300,53 @@ describe('addDecimals', () => {
 
   it('avoids the binary floating point error of 0.1 + 0.2', () => {
     expect(addDecimals('0.1', '0.2')).toBe('0.3');
+  });
+});
+
+/**
+ * A token sold for ETH: the router pays the ETH back as an internal transfer,
+ * which `txlist` does not list (#693).
+ */
+describe('a token swapped for ETH', () => {
+  const ROUTER = '0x4444444444444444444444444444444444444444';
+  const SWAP = '0xswap';
+  const outer = tx({ hash: SWAP, from: ME, to: ROUTER, value: '0', gasUsed: '21000', gasPrice: '1000000000' });
+  const usdcOut = tokenTx({ hash: SWAP, from: ME, to: ROUTER, value: '1000000000' });
+  const ethBack = (value: string) => tx({ hash: SWAP, from: ROUTER, to: ME, value, gasUsed: '', gasPrice: '' });
+
+  it('reads the internal ETH next to the transactions, gas left to the outer one', async () => {
+    const fetched: string[] = [];
+    const rows = await withInternalTransfers(async action => {
+      fetched.push(action);
+      return action === 'txlist' ? [outer] : [ethBack('500000000000000000')];
+    });
+
+    expect(fetched.sort()).toEqual(['txlist', 'txlistinternal']);
+    expect(rows).toHaveLength(2);
+    expect(rows[1]).toMatchObject({ hash: SWAP, value: '500000000000000000', gasUsed: '0', gasPrice: '0' });
+  });
+
+  it('sums two internal payments of one swap, and skips a failed one', async () => {
+    const rows = await withInternalTransfers(async action =>
+      action === 'txlist'
+        ? []
+        : [ethBack('300000000000000000'), ethBack('200000000000000000'), { ...ethBack('9'), isError: '1' }],
+    );
+
+    expect(rows).toEqual([expect.objectContaining({ value: '500000000000000000' })]);
+  });
+
+  it('books the swap as a trade, with the ETH bought, not the USDC as a spend', async () => {
+    const transactions = await withInternalTransfers(async action =>
+      action === 'txlist' ? [outer] : [ethBack('500000000000000000')],
+    );
+    const legs = finalizeTransfers(map({ transactions, tokenTransfers: [usdcOut] })).filter(
+      transfer => transfer.leg === 'value',
+    );
+
+    expect(legs).toEqual([
+      expect.objectContaining({ asset: 'ETH', amount: '0.5', direction: 'in', isTrade: true }),
+      expect.objectContaining({ asset: 'USDC', amount: '1000', direction: 'out', isTrade: true }),
+    ]);
   });
 });

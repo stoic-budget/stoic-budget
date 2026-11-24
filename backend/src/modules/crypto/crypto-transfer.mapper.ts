@@ -19,6 +19,33 @@ export interface EtherscanTx {
   isError?: string;
 }
 
+/**
+ * The wallet's transactions and the native coin contracts sent it inside them
+ * (`txlistinternal`), as one list (#693). A swap of a token for ETH pays the
+ * ETH back from the router as an internal transfer: without it only the
+ * token leaving was seen, booked as a spend, and the ETH had no purchase.
+ * An address can only receive internal transfers, so they map as money in;
+ * several in one transaction are summed, being one receipt of that swap.
+ */
+export async function withInternalTransfers(
+  fetch: (action: 'txlist' | 'txlistinternal') => Promise<EtherscanTx[]>,
+): Promise<EtherscanTx[]> {
+  const [transactions, internal] = await Promise.all([fetch('txlist'), fetch('txlistinternal')]);
+  const byHash = new Map<string, EtherscanTx>();
+  for (const row of internal) {
+    if (row.isError === '1') continue;
+    const seen = byHash.get(row.hash);
+    byHash.set(row.hash, {
+      ...row,
+      // Paid by the outer transaction's sender, never by an internal transfer.
+      gasUsed: '0',
+      gasPrice: '0',
+      value: String(toBigInt(row.value) + (seen ? toBigInt(seen.value) : 0n)),
+    });
+  }
+  return [...transactions, ...byHash.values()];
+}
+
 /** A row from Etherscan's `tokentx` action (ERC-20 transfers). */
 export interface EtherscanTokenTx {
   hash: string;

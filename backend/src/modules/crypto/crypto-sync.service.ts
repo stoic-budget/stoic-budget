@@ -44,10 +44,10 @@ import {
   type ChainTransfer,
   type EtherscanTokenBalance,
   type EtherscanTokenTx,
-  type EtherscanTx,
   finalizeTransfers,
   mapChainTransfers,
   mapWalletBalances,
+  withInternalTransfers,
 } from './crypto-transfer.mapper';
 import { fetchJsonWithRetry } from './retry.util';
 import { SolanaRpcClient } from './solana-rpc.client';
@@ -328,7 +328,7 @@ export class CryptoSyncService {
     const tickerByContract = TICKER_BY_CONTRACT[wallet.chainId] ?? {};
     const [transactions, tokenTransfers, nativeBalance, tokenBalances, ownAddresses] =
       await Promise.all([
-        this.fetchEtherscan<EtherscanTx>(wallet, 'txlist'),
+        withInternalTransfers(action => this.fetchEtherscan(wallet, action)),
         this.fetchEtherscan<EtherscanTokenTx>(wallet, 'tokentx'),
         this.fetchNativeBalance(wallet),
         this.fetchTokenBalances(wallet),
@@ -577,7 +577,7 @@ export class CryptoSyncService {
 
   private async fetchEtherscan<T>(
     wallet: AddressedWallet,
-    action: 'txlist' | 'tokentx',
+    action: 'txlist' | 'tokentx' | 'txlistinternal',
   ): Promise<T[]> {
     const params = new URLSearchParams({
       module: 'account',
