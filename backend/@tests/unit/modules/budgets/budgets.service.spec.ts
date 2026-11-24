@@ -821,6 +821,8 @@ describe('BudgetsService', () => {
       ]);
       chargeRepository.find.mockResolvedValue([
         { subscriptionId: 'sub-music', chargeDate: '2026-05-06', expectedDate: '2026-05-20' },
+        // April's charge paid on its day: the May payment is an early one, not April's late one.
+        { subscriptionId: 'sub-music', chargeDate: '2026-04-20', expectedDate: '2026-04-20' },
       ]);
 
       const [fun] = await service.findAll(workspaceId);
@@ -830,7 +832,8 @@ describe('BudgetsService', () => {
           where: {
             workspaceId,
             subscriptionId: In(['sub-music']),
-            expectedDate: MoreThanOrEqual('2026-05-08'),
+            // A year and more of payments: the charge before a coming one is among them.
+            chargeDate: MoreThanOrEqual('2025-04-08'),
           },
         }),
       );

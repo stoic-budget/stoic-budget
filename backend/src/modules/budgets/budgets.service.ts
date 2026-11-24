@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, MoreThanOrEqual, type Repository } from 'typeorm';
 import { toEnum } from '../../common/effect/to-enum';
 import { appError } from '../../common/errors/app-error';
+import { addMonthsClamped } from '../../common/recurrence/date-only';
 import { assertFound } from '../../common/utils/assert-found.util';
 import { countedSql, flowsSql } from '../../common/utils/counted-transactions.util';
 import { STANDARD_WORKSPACE } from '../../common/workspaces/version-workspaces';
@@ -459,11 +460,11 @@ export class BudgetsService {
       where: {
         workspaceId,
         subscriptionId: In(linked.subscriptions.map(subscription => subscription.id)),
-        expectedDate: MoreThanOrEqual(localDay(new Date()) as unknown as Date),
+        chargeDate: MoreThanOrEqual(addMonthsClamped(localDay(new Date()), -13) as unknown as Date),
       },
       select: { subscriptionId: true, expectedDate: true, chargeDate: true },
     });
-    linked.paidAhead = paidAheadDays(charges, linked.subscriptions);
+    linked.paidAhead = paidAheadDays(charges, linked.subscriptions, localDay(new Date()));
     return linked;
   }
 

@@ -233,7 +233,13 @@ export function paidAhead(
   return String(settled) === expected;
 }
 
-/** Per subscription, the days of its upcoming charges already paid ahead. */
+/**
+ * Per subscription, the days of its charges from `today` on already paid
+ * ahead. A payment nearest a coming charge counts only once the charge before
+ * it was paid too: without that it is the earlier charge's late payment, not
+ * an early one, the rule the payday planner uses. `charges` hold the recent
+ * payments, a year and more back, so that earlier charge's is among them.
+ */
 export function paidAheadDays(
   charges: Array<{
     subscriptionId: string;
@@ -241,11 +247,29 @@ export function paidAheadDays(
     expectedDate: Date | string | null;
   }>,
   subscriptions: Array<{ id: string; frequency: SubscriptionFrequency }>,
+  today: string,
 ): Map<string, Set<string>> {
   const days = new Map<string, Set<string>>();
   for (const charge of charges) {
     const subscription = subscriptions.find(row => row.id === charge.subscriptionId);
+    if (!(charge.expectedDate && dayKey(dayOf(charge.expectedDate)) >= today)) continue;
     if (!(subscription && paidAhead(charge, subscription.frequency))) continue;
+    const expected = dayKey(dayOf(charge.expectedDate));
+    const before = dayKey(chargeAt(dayOf(expected), subscription.frequency, -1));
+    const settles = (other: (typeof charges)[number]) =>
+      String(
+        settledDateOf(
+          { nextChargeDate: expected, frequency: subscription.frequency },
+          other.chargeDate,
+        ),
+      ) === before;
+    if (
+      !charges.some(
+        other =>
+          other !== charge && other.subscriptionId === charge.subscriptionId && settles(other),
+      )
+    )
+      continue;
     const paid = days.get(charge.subscriptionId) ?? new Set<string>();
     paid.add(String(charge.expectedDate).slice(0, 10));
     days.set(charge.subscriptionId, paid);
