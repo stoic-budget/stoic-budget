@@ -116,6 +116,28 @@ describe('BackupDataService', () => {
     await fs.rm(directory, { recursive: true, force: true });
   });
 
+  it('carries the business logo, so a restore can give the copy its own (#677)', async () => {
+    const uploads = await fs.mkdtemp(path.join(os.tmpdir(), 'seneca-logo-'));
+    const previous = process.env.UPLOADS_DIR;
+    process.env.UPLOADS_DIR = uploads;
+    await fs.mkdir(path.join(uploads, 'workspace-logos'), { recursive: true });
+    await fs.writeFile(path.join(uploads, 'workspace-logos', 'acme.png'), 'ACME logo');
+    const service = new BackupDataService({
+      entityMetadatas: [metadata('workspace_business_profiles', 'Profile', ['workspaceId', 'logoFile'])],
+      getRepository: () => ({ find: vi.fn().mockResolvedValue([{ workspaceId: 'ws-1', logoFile: 'acme.png' }]) }),
+    } as never);
+
+    const snapshot = await service.collect('ws-1');
+
+    expect(snapshot.collections.workspace_business_profiles).toEqual([
+      { workspaceId: 'ws-1', logoFile: 'workspace-logos/ws-1/acme.png' },
+    ]);
+    expect(snapshot.files.map(file => file.path)).toEqual(['workspace-logos/ws-1/acme.png']);
+    if (previous === undefined) delete process.env.UPLOADS_DIR;
+    else process.env.UPLOADS_DIR = previous;
+    await fs.rm(uploads, { recursive: true, force: true });
+  });
+
   it('includes statement file versions with binary data encoded for JSON', async () => {
     const statements = { find: vi.fn().mockResolvedValue([{ id: 'statement-1', workspaceId: 'ws-1' }]) };
     const versions = {

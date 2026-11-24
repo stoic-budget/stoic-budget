@@ -29,19 +29,19 @@ describe('business logo in a backup', () => {
 
     const records = await collectLogoFiles(
       [
-        { id: 'p-1', logoFile: 'acme.png' },
-        { id: 'p-2', logoFile: 'gone.png' },
-        { id: 'p-3', logoFile: null },
+        { workspaceId: 'ws-1', logoFile: 'acme.png' },
+        { workspaceId: 'ws-2', logoFile: 'gone.png' },
+        { workspaceId: 'ws-3', logoFile: null },
       ],
       files,
     );
 
     expect(records).toEqual([
-      { id: 'p-1', logoFile: 'workspace-logos/p-1/acme.png' },
-      { id: 'p-2', logoFile: null },
-      { id: 'p-3', logoFile: null },
+      { workspaceId: 'ws-1', logoFile: 'workspace-logos/ws-1/acme.png' },
+      { workspaceId: 'ws-2', logoFile: null },
+      { workspaceId: 'ws-3', logoFile: null },
     ]);
-    expect(files).toEqual([{ path: 'workspace-logos/p-1/acme.png', contents: Buffer.from('ACME logo') }]);
+    expect(files).toEqual([{ path: 'workspace-logos/ws-1/acme.png', contents: Buffer.from('ACME logo') }]);
   });
 
   it("restores it under a name of the copy's own", async () => {
@@ -50,9 +50,9 @@ describe('business logo in a backup', () => {
 
     await prepareDocumentPaths(
       'workspace_business_profiles',
-      { logoFile: 'workspace-logos/p-1/acme.png' },
+      { logoFile: 'workspace-logos/ws-1/acme.png' },
       mapped,
-      new Map([['workspace-logos/p-1/acme.png', Buffer.from('ACME logo')]]),
+      new Map([['workspace-logos/ws-1/acme.png', Buffer.from('ACME logo')]]),
       uploads,
       staged,
     );
@@ -65,6 +65,21 @@ describe('business logo in a backup', () => {
     const mapped: Record<string, unknown> = { id: 'new-profile' };
 
     await prepareDocumentPaths('workspace_business_profiles', { logoFile: 'acme.png' }, mapped, new Map(), uploads, []);
+
+    expect(mapped.logoFile).toBeNull();
+  });
+
+  it('restores no logo from a file an upload would not take', async () => {
+    const mapped: Record<string, unknown> = { id: 'new-profile' };
+
+    await prepareDocumentPaths(
+      'workspace_business_profiles',
+      { logoFile: 'workspace-logos/ws-1/page.svg' },
+      mapped,
+      new Map([['workspace-logos/ws-1/page.svg', Buffer.from('<svg/>')]]),
+      uploads,
+      [],
+    );
 
     expect(mapped.logoFile).toBeNull();
   });

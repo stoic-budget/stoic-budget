@@ -1,8 +1,10 @@
 import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, LessThan, Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
+import { resolveUploadsDir } from '../../common/utils/uploads.util';
 import { User } from '../../entities/user.entity';
 import { Workspace, WorkspaceKind } from '../../entities/workspace.entity';
 import { WorkspaceMember, WorkspaceRole } from '../../entities/workspace-member.entity';
@@ -13,6 +15,7 @@ import {
 } from '../../entities/workspace-version.entity';
 import { BackupKeyService } from '../backups/backup-key.service';
 import { BackupRestoreService } from '../backups/backup-restore.service';
+import { LOGO_DIRECTORY } from '../business-profile/business-profile.service';
 import { VersionBlobStore } from './version-blob-store';
 import { decodePayload } from './version-payload';
 import { localDay, selectVersionsToDelete } from './version-retention';
@@ -195,8 +198,19 @@ export class VersionsService {
          UNION ALL SELECT NULL, attachment_paths FROM receipts WHERE workspace_id = $1`,
         [workspace.id],
       );
+    // The logo an opened version restored is its own copy too (#677).
+    const logos: Array<{ name: string }> = await this.workspaceRepository.query(
+      `SELECT logo_file AS name FROM workspace_business_profiles
+        WHERE workspace_id = $1 AND logo_file IS NOT NULL`,
+      [workspace.id],
+    );
     await this.workspaceRepository.delete({ id: workspace.id, kind: WorkspaceKind.VERSION });
-    const files = documents.flatMap(row => [row.path, ...(row.paths ?? [])]).filter(Boolean);
+    const files = [
+      ...documents.flatMap(row => [row.path, ...(row.paths ?? [])]),
+      ...logos.map(logo =>
+        path.join(resolveUploadsDir(), LOGO_DIRECTORY, path.basename(logo.name)),
+      ),
+    ].filter(Boolean);
     for (const file of files) {
       await fs.rm(file as string, { force: true }).catch(error => {
         this.logger.warn(`Could not remove ${file}: ${(error as Error).message}`);

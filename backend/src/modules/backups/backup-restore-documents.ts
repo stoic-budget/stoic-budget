@@ -59,21 +59,24 @@ export async function prepareDocumentPaths(
   if (tableName === 'workspace_business_profiles' && typeof source.logoFile === 'string') {
     // An older archive names the original's file: sharing it is what #677
     // was, so such a copy starts without a logo rather than with that one.
-    mapped.logoFile = source.logoFile.startsWith(LOGO_PORTABLE_PREFIX)
-      ? path.basename(
-          await stage(source.logoFile, safeName => {
-            const extension = path
-              .extname(safeName)
-              .toLowerCase()
-              .replace(/[^.a-z0-9]/g, '');
-            return path.join(
-              resolveUploadsDir(),
-              LOGO_DIRECTORY,
-              `${randomUUID()}${extension.slice(0, 8)}`,
-            );
-          }),
-        )
-      : null;
+    // Only the image types an upload accepts: anything else could never be shown.
+    const image = /\.(jpe?g|png|webp|gif)$/i.test(source.logoFile);
+    mapped.logoFile =
+      image && source.logoFile.startsWith(LOGO_PORTABLE_PREFIX)
+        ? path.basename(
+            await stage(source.logoFile, safeName => {
+              const extension = path
+                .extname(safeName)
+                .toLowerCase()
+                .replace(/[^.a-z0-9]/g, '');
+              return path.join(
+                resolveUploadsDir(),
+                LOGO_DIRECTORY,
+                `${randomUUID()}${extension.slice(0, 8)}`,
+              );
+            }),
+          )
+        : null;
   }
 }
 

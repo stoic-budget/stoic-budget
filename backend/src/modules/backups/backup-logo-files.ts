@@ -24,7 +24,8 @@ export async function collectLogoFiles(
         .readFile(path.join(resolveUploadsDir(), LOGO_DIRECTORY, name))
         .catch(() => null);
       if (!contents) return { ...record, logoFile: null };
-      const portablePath = `${LOGO_PORTABLE_PREFIX}${String(record.id)}/${name}`;
+      // The profile's key is its workspace: one profile, one logo per workspace.
+      const portablePath = `${LOGO_PORTABLE_PREFIX}${String(record.workspaceId)}/${name}`;
       files.push({ path: portablePath, contents });
       return { ...record, logoFile: portablePath };
     }),
