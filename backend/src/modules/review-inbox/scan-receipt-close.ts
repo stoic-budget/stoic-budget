@@ -1,20 +1,25 @@
 import type { EventEmitter2 } from '@nestjs/event-emitter';
-import type { EntityManager } from 'typeorm';
+import { type EntityManager, IsNull } from 'typeorm';
 import { Receipt, ReceiptStatus } from '../../entities/receipt.entity';
 import { Transaction } from '../../entities/transaction.entity';
+import { hasDecidedCategory } from '../classification/engine/category-decision';
 import type { ReceiptApprovedEvent } from '../notifications/events/notification-events';
 
 /**
  * Which row a scan's receipt stands for once its row is confirmed in Review
- * (#687). When the receipt was matched to a bank row already in the books,
- * that row is the real payment: the scan's row is flagged a duplicate of it,
- * as approving on the receipt page does, and the receipt documents the bank
- * row. Otherwise the scan's own row is it. A match that is gone, already
- * documented by another receipt, or a scan row on a filed return, keeps the
- * scan's row.
+ * (#687), as approving on the receipt page decides it. When the receipt was
+ * matched to a bank row already in the books, that row is the real payment:
+ * it is confirmed, takes the category picked in Review unless a person or a
+ * rule chose one, the scan's row becomes its duplicate, and the receipt
+ * documents the bank row. Otherwise the scan's own row is it.
+ *
+ * The match is checked again, under a lock on the bank row, since Review
+ * never shows it: it must still be a live row of the workspace (not a copy, a
+ * transfer leg, a split part, or on a trashed statement) that no other
+ * receipt documents, and the scan's row must not be on a filed return.
  */
 async function scanReceiptTarget(
-  manager: EntityManager,
+  tx: EntityManager,
   workspaceId: string,
   receipt: Pick<Receipt, 'id' | 'metadata'>,
   scanRowId: string,
@@ -24,24 +29,45 @@ async function scanReceiptTarget(
   if (!matched || matched === scanRowId) {
     return own;
   }
-  const transactions = manager.getRepository(Transaction);
-  const [bank, scan, taken] = await Promise.all([
-    transactions.findOne({ where: { id: matched, workspaceId }, select: { id: true } }),
-    transactions.findOne({
-      where: { id: scanRowId, workspaceId },
-      select: { id: true, taxLocked: true },
-    }),
-    manager.getRepository(Receipt).findOne({
-      where: { transactionId: matched, workspaceId },
-      select: { id: true },
-    }),
-  ]);
-  if (!bank || !scan || scan.taxLocked || (taken && taken.id !== receipt.id)) {
+  const transactions = tx.getRepository(Transaction);
+  const bank = await transactions.findOne({
+    where: {
+      id: matched,
+      workspaceId,
+      isDuplicate: false,
+      transferPairId: IsNull(),
+      splitGroupId: IsNull(),
+    },
+    lock: { mode: 'pessimistic_write' },
+  });
+  const scan = await transactions.findOne({ where: { id: scanRowId, workspaceId } });
+  const taken = await tx
+    .getRepository(Receipt)
+    .findOne({ where: { transactionId: matched, workspaceId }, select: { id: true } });
+  const [trashed] = bank?.statementId
+    ? await tx.query(
+        'SELECT 1 FROM statements WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NOT NULL',
+        [bank.statementId, workspaceId],
+      )
+    : [];
+  if (!bank || !scan || scan.taxLocked || trashed || (taken && taken.id !== receipt.id)) {
     return own;
   }
   await transactions.update(
     { id: scanRowId, workspaceId },
     { isDuplicate: true, duplicateOfId: bank.id },
+  );
+  const takesCategory = scan.categoryId && !hasDecidedCategory(bank) && !bank.taxLocked;
+  await transactions.update(
+    { id: bank.id, workspaceId },
+    takesCategory
+      ? {
+          isVerified: true,
+          categoryId: scan.categoryId,
+          categorySource: scan.categorySource ?? null,
+          categoryReason: scan.categoryReason ?? null,
+        }
+      : { isVerified: true },
   );
   return { transactionId: bank.id, mode: 'attached_to_bank_row' };
 }
@@ -54,10 +80,17 @@ export async function approveScanReceipt(
   scanRowId: string,
   eventEmitter?: EventEmitter2,
 ): Promise<void> {
-  const { transactionId, mode } = await scanReceiptTarget(manager, workspaceId, receipt, scanRowId);
-  await manager
-    .getRepository(Receipt)
-    .update({ id: receipt.id, workspaceId }, { status: ReceiptStatus.APPROVED, transactionId });
+  // One transaction: two approvals of receipts matched to one bank row queue on its lock.
+  const { transactionId, mode } = await manager.transaction(async tx => {
+    const target = await scanReceiptTarget(tx, workspaceId, receipt, scanRowId);
+    await tx
+      .getRepository(Receipt)
+      .update(
+        { id: receipt.id, workspaceId },
+        { status: ReceiptStatus.APPROVED, transactionId: target.transactionId },
+      );
+    return target;
+  });
   eventEmitter?.emit('receipt.approved', {
     workspaceId,
     receiptId: receipt.id,

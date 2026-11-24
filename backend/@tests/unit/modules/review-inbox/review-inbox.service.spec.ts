@@ -28,9 +28,12 @@ describe('ReviewInboxService', () => {
     update: vi.fn(),
   };
   // Approving a scan's receipt writes through the manager: the same mocks.
-  receiptRepository.manager = {
+  const fakeManager = {
     getRepository: (entity: unknown) => (entity === Receipt ? receiptRepository : transactionRepository),
+    query: vi.fn(async () => []),
+    transaction: async (work: (manager: unknown) => unknown) => work(fakeManager),
   };
+  receiptRepository.manager = fakeManager;
   const eventEmitter = { emit: vi.fn() };
 
   beforeEach(async () => {
