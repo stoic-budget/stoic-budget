@@ -48,6 +48,7 @@ import { EmailReceiptParserService } from '../receipts/services/email-receipt-pa
 import { ReceiptCategoryService } from '../receipts/services/receipt-category.service';
 import { ReceiptDuplicateService } from '../receipts/services/receipt-duplicate.service';
 import { StatementsService } from '../statements/statements.service';
+import { disconnectProtocol } from './protocol-disconnect';
 
 type ProtocolStatusResponse = {
   connected: boolean;
@@ -303,11 +304,8 @@ export class OpenProtocolIntegrationsService {
   }
 
   async disconnect(workspaceId: string, provider: IntegrationProvider): Promise<{ ok: true }> {
-    const { integration } = await this.findProtocolIntegration(workspaceId, provider);
-    if (integration) {
-      integration.status = IntegrationStatus.DISCONNECTED;
-      await this.integrationRepository.save(integration);
-    }
+    const found = await this.findProtocolIntegration(workspaceId, provider);
+    await disconnectProtocol(this.integrationRepository.manager, found);
     return { ok: true };
   }
 
