@@ -789,6 +789,41 @@ describe('PayablesService', () => {
       vi.useRealTimers();
     });
 
+    it('converts what is owed at today\'s rate and what was paid at its own day\'s', async () => {
+      vi.spyOn(workspaceRepository, 'findOne').mockResolvedValue({ currency: 'USD' } as Workspace);
+      vi.spyOn(payableRepository, 'find').mockResolvedValue([
+        {
+          id: 'paid',
+          status: PayableStatus.PAID,
+          dueDate: new Date('2026-03-05T00:00:00.000Z'),
+          amount: 1000,
+          currency: 'ILS',
+          paidAt: new Date('2026-03-05T10:00:00.000Z'),
+          updatedAt: new Date('2026-03-05T10:00:00.000Z'),
+        },
+        {
+          id: 'open',
+          status: PayableStatus.TO_PAY,
+          dueDate: new Date('2026-03-20T00:00:00.000Z'),
+          amount: 1000,
+          currency: 'ILS',
+          paidAt: null,
+          updatedAt: new Date('2026-03-01T10:00:00.000Z'),
+        },
+      ] as Payable[]);
+      // One currency, two days: a lookup each, never one rate for both.
+      exchangeRatesService.getRateOrNull.mockImplementation(async (_from: string, _to: string, day?: Date) =>
+        day ? 0.3 : 0.25,
+      );
+      vi.useFakeTimers().setSystemTime(new Date('2026-03-17T12:00:00.000Z'));
+
+      const result = await service.getSummary('workspace-1');
+
+      expect(result.paidTotal).toBeCloseTo(300);
+      expect(result.toPay).toBeCloseTo(250);
+      vi.useRealTimers();
+    });
+
     it('names the currencies it converted, so the totals can say so', async () => {
       vi.spyOn(workspaceRepository, 'findOne').mockResolvedValue({ currency: 'USD' } as Workspace);
       vi.spyOn(payableRepository, 'find').mockResolvedValue([
@@ -841,6 +876,8 @@ describe('PayablesService', () => {
 
       expect(result.toPay).toBe(10);
       expect(result.missingRates).toEqual(['XTS']);
+      // Not "converted from XTS" beside "no rate for XTS".
+      expect(result.convertedCurrencies).toEqual([]);
       vi.useRealTimers();
     });
 

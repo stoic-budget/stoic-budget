@@ -1222,7 +1222,7 @@ export class PayablesService {
       dueThisWeekCount,
       unbookedTotal,
       unbookedCount,
-      convertedCurrencies: [...convertedCurrencies].sort(),
+      convertedCurrencies: rates.rated(convertedCurrencies),
       ...rates.missingRates(),
     };
   }

@@ -33,5 +33,8 @@ export function summaryRates(
   /** The currencies without a rate, or nothing when every one had one. */
   const missingRates = (): { missingRates?: string[] } =>
     unrated.size > 0 ? { missingRates: [...unrated].sort() } : {};
-  return { convert, missingRates };
+  /** Of these currencies, the ones that really were converted: not those without a rate. */
+  const rated = (currencies: Iterable<string>): string[] =>
+    [...currencies].filter(currency => !unrated.has(currency)).sort();
+  return { convert, missingRates, rated };
 }
