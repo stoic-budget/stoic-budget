@@ -117,6 +117,14 @@ describe('TaxReturnView', () => {
     expect(await screen.findByText(/with no category: 4/)).toBeTruthy();
   });
 
+  it('says nothing about categories when every row has one', async () => {
+    mockApi({ totals: { ...TOTALS, uncategorized: 0 } });
+    renderWithQuery(<TaxReturnView />);
+
+    await screen.findByRole('button', { name: 'File and lock' });
+    expect(screen.queryByText(/with no category/)).toBeNull();
+  });
+
   it('offers reopening once filed, and says the rows are locked', async () => {
     mockApi({ status: 'filed' });
     renderWithQuery(<TaxReturnView />);

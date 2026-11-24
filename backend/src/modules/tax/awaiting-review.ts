@@ -1,5 +1,8 @@
-import { Between, IsNull, Raw, type Repository } from 'typeorm';
+import { Between, In, IsNull, Not, Or, Raw, type Repository } from 'typeorm';
+import { countedWhere } from '../../common/utils/counted-transactions.util';
 import type { Transaction } from '../../entities/transaction.entity';
+import { VatStatus } from '../../entities/workspace.entity';
+import { NON_TAXABLE_NATURES } from './tax-assignment.service';
 
 /**
  * Rows of the period with tax that still wait in Review: unconfirmed, they are
@@ -34,10 +37,11 @@ export function countAwaitingReview(
 }
 
 /**
- * Counted rows of the period with no category: no tax is worked out for a
- * row without one, so it enters neither box of the return and nothing else
- * says so (#669). Transfers, pending holds, duplicates and trashed
- * statements are left out, as the return leaves them out.
+ * Counted rows of the period that a category would bring into the return:
+ * no category and so no tax worked out, while the workspace is registered for
+ * VAT (#669). Rows that keep a hand-picked rate are in the return already;
+ * transfers, salary, loans and tax payments are never taxable; zero rows
+ * change nothing. The counted rows are the return's own (`countedWhere`).
  */
 export function countUncategorized(
   transactions: Repository<Transaction>,
@@ -46,16 +50,16 @@ export function countUncategorized(
   periodEnd: string,
 ): Promise<number> {
   return transactions.count({
-    where: [{ statementId: IsNull() }, { statement: { deletedAt: IsNull() } }].map(onStatement => ({
-      ...onStatement,
+    where: countedWhere({
       workspaceId,
-      isVerified: true,
-      isDuplicate: false,
-      isPending: false,
+      workspace: { vatStatus: VatStatus.REGISTERED },
       transferPairId: IsNull(),
       categoryId: IsNull(),
+      taxAmount: IsNull(),
+      amount: Not(0),
+      transactionNature: Or(IsNull(), Not(In([...NON_TAXABLE_NATURES]))),
       transactionDate: Between(new Date(periodStart), new Date(periodEnd)),
-    })),
+    }),
   });
 }
 
