@@ -198,6 +198,8 @@ export class BackupsService {
             icon: workspace.icon,
             color: workspace.color,
             backgroundImage: snapshot.backgroundImage,
+            backgroundAttribution: workspace.backgroundAttribution,
+            backgroundSourceUrl: workspace.backgroundSourceUrl,
             currency: workspace.currency,
             settings: workspace.settings,
           },

@@ -11,8 +11,8 @@ import {
  * The workspace's own background picture (#677). Uploaded ones live in the
  * uploads folder and are named by URL, so a backup carried only the URL: a
  * restore elsewhere lost the picture, and a copy on the same server showed
- * the original's file, which changing the background in either deleted.
- * A built-in choice is not a file and travels as it is.
+ * the original's file rather than one of its own. A built-in choice is not a
+ * file and travels as it is. The photo's credit travels with it.
  */
 const UPLOADED = `${BACKGROUND_URL_PREFIX}/`;
 const PORTABLE = `${BACKGROUND_DIRECTORY}/`;
@@ -64,4 +64,25 @@ export async function stageBackground(
     targetPath: path.join(resolveUploadsDir(), BACKGROUND_DIRECTORY, name),
   });
   return `${UPLOADED}${name}`;
+}
+
+/**
+ * The uploaded background only this workspace names, as a file on disk: what
+ * discarding an opened version removes. A copy opened before backgrounds were
+ * carried names the original's file, which stays.
+ */
+export async function ownBackgroundFile(
+  query: (sql: string, params: unknown[]) => Promise<Array<{ name: string }>>,
+  workspaceId: string,
+): Promise<string[]> {
+  const rows = await query(
+    `SELECT w.background_image AS name FROM workspaces w
+      WHERE w.id = $1 AND w.background_image LIKE $2
+        AND NOT EXISTS (SELECT 1 FROM workspaces o
+                         WHERE o.background_image = w.background_image AND o.id <> $1)`,
+    [workspaceId, `${UPLOADED}%`],
+  );
+  return rows.map(row =>
+    path.join(resolveUploadsDir(), BACKGROUND_DIRECTORY, path.basename(row.name)),
+  );
 }

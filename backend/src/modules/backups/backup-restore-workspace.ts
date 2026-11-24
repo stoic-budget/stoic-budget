@@ -34,6 +34,9 @@ export function restoredWorkspace(
     color: stringOrNull(source.color),
     // A built-in background as it is; a carried picture is staged with the files.
     backgroundImage: startingBackground(source.backgroundImage),
+    // The photo's credit, which it may not be shown without.
+    backgroundAttribution: stringOrNull(source.backgroundAttribution),
+    backgroundSourceUrl: stringOrNull(source.backgroundSourceUrl),
     // The column is required; a backup taken before that falls back the same
     // way the RequireWorkspaceCurrency migration backfilled missing ones.
     currency: stringOrNull(source.currency) ?? appDefaultCurrency(),

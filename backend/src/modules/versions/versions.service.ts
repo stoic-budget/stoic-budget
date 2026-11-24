@@ -11,6 +11,7 @@ import {
   WorkspaceVersionStatus,
   WorkspaceVersionTrigger,
 } from '../../entities/workspace-version.entity';
+import { ownBackgroundFile } from '../backups/backup-background';
 import { columnFilesOf } from '../backups/backup-file-columns';
 import { BackupKeyService } from '../backups/backup-key.service';
 import { BackupRestoreService } from '../backups/backup-restore.service';
@@ -200,6 +201,12 @@ export class VersionsService {
     const pictures = await columnFilesOf(
       (sql, params) => this.workspaceRepository.query(sql, params),
       workspace.id,
+    );
+    pictures.push(
+      ...(await ownBackgroundFile(
+        (sql, params) => this.workspaceRepository.query(sql, params),
+        workspace.id,
+      )),
     );
     await this.workspaceRepository.delete({ id: workspace.id, kind: WorkspaceKind.VERSION });
     const files = [

@@ -159,6 +159,8 @@ export class VersionSnapshotService {
       icon: workspace.icon,
       color: workspace.color,
       backgroundImage,
+      backgroundAttribution: workspace.backgroundAttribution,
+      backgroundSourceUrl: workspace.backgroundSourceUrl,
       currency: workspace.currency,
       settings: workspace.settings,
       ledgerBaseCurrency: workspace.ledgerBaseCurrency,
