@@ -18,6 +18,7 @@ import { CryptoBalanceService } from './crypto-balance.service';
 import { CryptoHoldingsService } from './crypto-holdings.service';
 import { CryptoIconsService } from './crypto-icons.service';
 import { CryptoImportService } from './crypto-import.service';
+import { CryptoOwnMovesSubscriber } from './crypto-own-moves.subscriber';
 import { CryptoPriceService } from './crypto-price.service';
 import { CryptoSyncService } from './crypto-sync.service';
 import { SolanaRpcClient } from './solana-rpc.client';
@@ -46,6 +47,7 @@ import { TronGridClient } from './tron-grid.client';
     CryptoPriceService,
     CryptoHoldingsService,
     CryptoBalanceService,
+    CryptoOwnMovesSubscriber,
     CryptoImportService,
     CryptoIconsService,
     TronGridClient,
