@@ -36,6 +36,8 @@ function build(
     update: vi.fn(async () => undefined),
   };
   const holdingRepository = {
+    // No other lot names the photo: a copy of a past version would (#789).
+    exists: vi.fn().mockResolvedValue(false),
     create: vi.fn((lot: Lot) => ({ ...lot, id: 'lot-1' })),
     save: vi.fn(async (lot: Lot) => {
       saved.push(lot);

@@ -53,6 +53,8 @@ function imageResponse(bytes: Buffer, contentType = 'image/jpeg', status = 200):
 
 function createService(stored: Goal = goal()) {
   const goalRepository = {
+    // No other goal names the cover: a copy of a past version would (#789).
+    exists: vi.fn().mockResolvedValue(false),
     findOne: vi.fn(async () => stored),
     save: vi.fn(async (data: Goal) => data),
   } as any;

@@ -48,3 +48,20 @@ export function readUploadedFile(filePath: string): Promise<Buffer> {
   }
   return fs.promises.readFile(resolved);
 }
+
+/**
+ * Whether a row still names a stored file (#789). A copy of a past version
+ * and a backup restored on the same server point at the original's photo,
+ * logo or cover, so a file is removed only once nothing names it any more.
+ * Called after the row being changed has let go of it; soft-deleted rows
+ * count, since they can come back.
+ */
+export async function fileStillNamed(
+  rows: {
+    exists(options: { where: Record<string, string>; withDeleted: boolean }): Promise<boolean>;
+  },
+  column: string,
+  fileName: string,
+): Promise<boolean> {
+  return rows.exists({ where: { [column]: fileName }, withDeleted: true });
+}

@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, Not, type Repository } from 'typeorm';
 import { toEnum } from '../../common/effect/to-enum';
 import { appError } from '../../common/errors/app-error';
-import { resolveUploadsDir } from '../../common/utils/uploads.util';
+import { fileStillNamed, resolveUploadsDir } from '../../common/utils/uploads.util';
 import type {
   Metal,
   MetalLot as MetalLotView,
@@ -718,11 +718,11 @@ export class MetalsService {
 
   private async deletePhotoFile(fileName: string | null, keep: string | null): Promise<void> {
     if (!fileName || fileName === keep) return;
-    try {
-      await fs.unlink(path.join(resolveUploadsDir(), PHOTO_DIRECTORY, path.basename(fileName)));
-    } catch {
-      // Already gone, or never written: nothing left to clean up.
-    }
+    if (await fileStillNamed(this.holdingRepository, 'photoFile', fileName)) return;
+    // Already gone, or never written: nothing left to clean up.
+    await fs
+      .unlink(path.join(resolveUploadsDir(), PHOTO_DIRECTORY, path.basename(fileName)))
+      .catch(() => undefined);
   }
 
   /**
