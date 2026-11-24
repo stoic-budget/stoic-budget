@@ -8,7 +8,11 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { Workspace } from '../../entities/workspace.entity';
 import { UNCATEGORIZED_CATEGORY_NAME } from '../categories/uncategorized-category';
 import { CurrencyConverter, normalizeCurrencyCode } from '../exchange-rates/currency-converter';
-import { type DayConvert, loadDayConverter } from '../exchange-rates/day-converter';
+import {
+  type DayConvert,
+  loadDayConverter,
+  loadDayRangeConverter,
+} from '../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { countedTransactions } from './helpers/report-query.util';
 import { round2, toDateKey } from './helpers/report-values.util';
@@ -65,9 +69,13 @@ export class TemplateReportRowsLoader {
     needed: Array<{ currency: string | null | undefined; day: string }>,
   ): Promise<{ currency: string; convert: DayConvert }> {
     const currency = await this.getWorkspaceCurrency(workspaceId);
+    // Past a month of days, one rate curve per currency: per-day lookups over
+    // years of rows are thousands of round trips.
+    const load =
+      new Set(needed.map(row => row.day)).size > 31 ? loadDayRangeConverter : loadDayConverter;
     return {
       currency,
-      convert: await loadDayConverter(this.exchangeRatesService, currency, needed, workspaceId),
+      convert: await load(this.exchangeRatesService, currency, needed, workspaceId),
     };
   }
 

@@ -86,7 +86,8 @@ describe('ReportsService (helpers)', () => {
     expect(result.totals.expense).toBe(20);
     expect(result.totals.net).toBe(80);
     expect(result.totals.count).toBe(2);
-    expect(result.totals.avgPerPeriod).toBeCloseTo(80 / 3, 5);
+    // To the cent, as every figure of a report in the workspace currency (#598).
+    expect(result.totals.avgPerPeriod).toBe(26.67);
   });
 
   it('getSpendOverTimeReport supports quarterly grouping', async () => {

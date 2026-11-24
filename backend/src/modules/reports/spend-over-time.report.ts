@@ -162,7 +162,7 @@ export class SpendOverTimeReport {
         label,
         income: current.income,
         expense: current.expense,
-        net,
+        net: round2(net),
         count: current.count,
       });
 
@@ -194,12 +194,13 @@ export class SpendOverTimeReport {
       dateFrom: from.toISOString().split('T')[0],
       dateTo: to.toISOString().split('T')[0],
       points,
+      // Converted amounts add up with float tails: every figure is to the cent.
       totals: {
-        income: totals.income,
-        expense: totals.expense,
-        net: totals.net,
+        income: round2(totals.income),
+        expense: round2(totals.expense),
+        net: round2(totals.net),
         count: totals.count,
-        avgPerPeriod,
+        avgPerPeriod: round2(avgPerPeriod),
       },
     };
   }
