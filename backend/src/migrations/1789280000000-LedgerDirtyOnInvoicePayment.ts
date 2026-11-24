@@ -10,7 +10,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
  * These triggers queue the rows on both sides of every such link for the
  * posting worker, as the triggers on `transactions` do for the row's own
  * facts: a payment added, moved or removed, an invoice linked, unlinked,
- * deleted or restored, or turned into another kind of payable.
+ * created already linked, deleted or restored, or turned into another kind
+ * of payable. `up` can run again: each trigger is dropped before it is made.
  */
 export class LedgerDirtyOnInvoicePayment1789280000000 implements MigrationInterface {
   name = 'LedgerDirtyOnInvoicePayment1789280000000';
@@ -39,6 +40,9 @@ export class LedgerDirtyOnInvoicePayment1789280000000 implements MigrationInterf
       END;
       $$
     `);
+    await queryRunner.query(
+      `DROP TRIGGER IF EXISTS "TRG_payable_payments_ledger_dirty" ON "payable_payments"`,
+    );
     await queryRunner.query(`
       CREATE TRIGGER "TRG_payable_payments_ledger_dirty"
       AFTER INSERT OR UPDATE OR DELETE ON "payable_payments"
@@ -48,7 +52,13 @@ export class LedgerDirtyOnInvoicePayment1789280000000 implements MigrationInterf
       CREATE OR REPLACE FUNCTION "ledger_mark_payable_rows_dirty"() RETURNS trigger
       LANGUAGE plpgsql AS $$
       BEGIN
-        IF (NEW."linked_transaction_id", NEW."source", NEW."deleted_at" IS NULL)
+        -- Created already linked, or deleted outright (its payment rows mark
+        -- themselves as the cascade removes them).
+        IF TG_OP = 'INSERT' THEN
+          PERFORM "ledger_mark_rows_dirty"(ARRAY[NEW."linked_transaction_id"]);
+        ELSIF TG_OP = 'DELETE' THEN
+          PERFORM "ledger_mark_rows_dirty"(ARRAY[OLD."linked_transaction_id"]);
+        ELSIF (NEW."linked_transaction_id", NEW."source", NEW."deleted_at" IS NULL)
            IS DISTINCT FROM (OLD."linked_transaction_id", OLD."source", OLD."deleted_at" IS NULL)
         THEN
           PERFORM "ledger_mark_rows_dirty"(
@@ -60,9 +70,10 @@ export class LedgerDirtyOnInvoicePayment1789280000000 implements MigrationInterf
       END;
       $$
     `);
+    await queryRunner.query(`DROP TRIGGER IF EXISTS "TRG_payables_ledger_dirty" ON "payables"`);
     await queryRunner.query(`
       CREATE TRIGGER "TRG_payables_ledger_dirty"
-      AFTER UPDATE ON "payables"
+      AFTER INSERT OR UPDATE OR DELETE ON "payables"
       FOR EACH ROW EXECUTE FUNCTION "ledger_mark_payable_rows_dirty"()
     `);
     // Rows already booked against a category while an invoice says they pay

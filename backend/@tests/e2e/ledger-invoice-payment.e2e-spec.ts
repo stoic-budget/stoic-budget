@@ -137,4 +137,49 @@ describe('Ledger: invoice payment linked to a booked row (e2e)', () => {
     await as(request(server()).delete(`/payables/${invoice.body.id}/payments/${payment.id}`)).expect(200);
     expect(await creditedAccount(secondPart)).not.toBe(RECEIVABLES);
   });
+
+  it('rebuilds a row for an invoice created already linked to it', async () => {
+    const repository = dataSource.getRepository(Transaction);
+    const { id: _id, createdAt: _c, updatedAt: _u, fingerprint: _f, ...first } =
+      await repository.findOneByOrFail({ id: rowId });
+    const paidBefore = (await repository.save({ ...first, credit: 250, amount: 250 })).id;
+    expect(await creditedAccount(paidBefore)).not.toBe(RECEIVABLES);
+
+    await as(request(server()).post('/payables'))
+      .send({
+        direction: 'receivable',
+        vendor: 'ACME Client',
+        amount: 250,
+        currency: 'EUR',
+        source: 'invoice',
+        linkedTransactionId: paidBefore,
+      })
+      .expect(201);
+
+    expect(await creditedAccount(paidBefore)).toBe(RECEIVABLES);
+  });
+
+  it('rebuilds a row paid only by a payment when its invoice is deleted', async () => {
+    const repository = dataSource.getRepository(Transaction);
+    const { id: _id, createdAt: _c, updatedAt: _u, fingerprint: _f, ...first } =
+      await repository.findOneByOrFail({ id: rowId });
+    const linked = (await repository.save({ ...first, credit: 300, amount: 300 })).id;
+    const paymentOnly = (await repository.save({ ...first, credit: 200, amount: 200 })).id;
+    const invoice = await as(request(server()).post('/payables'))
+      .send({ direction: 'receivable', vendor: 'ACME Client', amount: 500, currency: 'EUR', source: 'invoice' })
+      .expect(201);
+    for (const [amount, transaction] of [
+      [300, linked],
+      [200, paymentOnly],
+    ] as const) {
+      await as(request(server()).post(`/payables/${invoice.body.id}/payments`))
+        .send({ amount, linkedTransactionId: transaction })
+        .expect(201);
+    }
+    expect(await creditedAccount(paymentOnly)).toBe(RECEIVABLES);
+
+    await as(request(server()).delete(`/payables/${invoice.body.id}`)).expect(200);
+
+    expect(await creditedAccount(paymentOnly)).not.toBe(RECEIVABLES);
+  });
 });
