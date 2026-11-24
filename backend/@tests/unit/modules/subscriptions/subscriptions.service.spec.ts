@@ -955,19 +955,25 @@ describe('SubscriptionsService', () => {
     it('converts foreign currencies into the workspace currency', async () => {
       subscriptionRepository.find.mockResolvedValue([sub({ currency: 'EUR', amount: 10 })]);
       workspaceRepository.findOne.mockResolvedValue({ currency: 'USD' });
-      exchangeRatesService.convert.mockResolvedValue({ converted: 11 });
+      exchangeRatesService.getRateOrNull.mockResolvedValue(1.1);
 
       const result = await service.getChargeCalendar('workspace-1', 2);
 
-      expect(exchangeRatesService.convert).toHaveBeenCalledWith(
-        10,
-        'EUR',
-        'USD',
-        expect.any(Date),
-        'workspace-1',
-      );
+      expect(exchangeRatesService.getRateOrNull).toHaveBeenCalledWith('EUR', 'USD', expect.any(Date), 'workspace-1');
       expect(result.currency).toBe('USD');
       expect(result.rows[0].amounts).toEqual([11, 11]);
+      expect(result.missingRates).toBeUndefined();
+    });
+
+    it('counts a plan without a rate as it is and names its currency (#787)', async () => {
+      subscriptionRepository.find.mockResolvedValue([sub({ currency: 'xts', amount: 10 })]);
+      workspaceRepository.findOne.mockResolvedValue({ currency: 'USD' });
+      exchangeRatesService.getRateOrNull.mockResolvedValue(null);
+
+      const result = await service.getChargeCalendar('workspace-1', 2);
+
+      expect(result.rows[0].amounts).toEqual([10, 10]);
+      expect(result.missingRates).toEqual(['XTS']);
     });
 
     it('drops subscriptions with no charge date', async () => {

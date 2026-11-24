@@ -20,9 +20,15 @@ vi.mock('@/app/hooks/usePayPeriods', () => ({
   usePayPeriods: () => ({ data: undefined, context: undefined }),
 }));
 // The summary as the page's other parts read it: currencies without a rate (#787).
-const summaryRates = vi.hoisted(() => ({ missing: undefined as string[] | undefined }));
+const summaryRates = vi.hoisted(() => ({
+  missing: undefined as string[] | undefined,
+  calendarMissing: undefined as string[] | undefined,
+}));
 vi.mock('../hooks/useSubscriptionSummary', () => ({
   useSubscriptionSummary: () => ({ data: { missingRates: summaryRates.missing } }),
+}));
+vi.mock('../hooks/useSubscriptionCalendar', () => ({
+  useSubscriptionCalendar: () => ({ data: { missingRates: summaryRates.calendarMissing } }),
 }));
 vi.mock('@/app/hooks/useWorkspaceId', () => ({ useWorkspaceId: () => 'ws-1' }));
 vi.mock('./SubscriptionFormDrawer', () => ({ SubscriptionFormDrawer: () => null }));
@@ -134,6 +140,7 @@ describe('SubscriptionsContent', () => {
   beforeEach(() => {
     appLocale.current = 'en';
     summaryRates.missing = undefined;
+    summaryRates.calendarMissing = undefined;
   });
 
   it('says under the title which currencies count at face value for want of a rate (#787)', () => {
@@ -141,6 +148,14 @@ describe('SubscriptionsContent', () => {
     renderContent();
 
     expect(screen.getByRole('status')).toHaveTextContent('XTS');
+  });
+
+  it('names a bill currency from the calendar too, each currency once (#787)', () => {
+    summaryRates.missing = ['XTS'];
+    summaryRates.calendarMissing = ['XAU', 'XTS'];
+    renderContent();
+
+    expect(screen.getByRole('status')).toHaveTextContent('XAU, XTS');
   });
 
   it('says nothing about rates when every currency has one', () => {
