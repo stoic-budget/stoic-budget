@@ -1,7 +1,6 @@
 import csv = require('csv-parser');
 
 import * as fs from 'fs';
-import { appDefaultCurrency } from '../../../common/utils/currency.util';
 import { type BankName, FileType } from '../../../entities/statement.entity';
 import { descriptionAsPayee, mostCommonCurrency } from '../helpers/tabular-columns.helper';
 import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
@@ -58,14 +57,13 @@ export class CsvParser extends BaseTabularParser {
   }
 
   async parse(filePath: string, cachedText?: string): Promise<ParsedStatement> {
-    // Detect currency from raw file content before streaming rows
-    const rawContent = fs.readFileSync(filePath, 'utf-8').slice(0, 4096);
-    // Codes in upper case only: "Try Again Cafe" in a description is not Turkish lira.
-    const detectedCurrency =
-      this.detectCurrency(rawContent, { caseSensitive: true }) || appDefaultCurrency();
-
     const rows = await this.readRows(filePath);
     const { headerIndex, headers, preset, columnMapping } = this.locateHeader(rows);
+    // A currency the file states sits above the table, in upper case: a word in a
+    // row ("Try Fitness") is not Turkish lira (#675). None stated leaves it empty,
+    // so the statement's own (its wallet's) and then the workspace's apply.
+    const above = rows.slice(0, Math.max(headerIndex, 0)).flat().join(' ');
+    const detectedCurrency = this.detectCurrency(above, { caseSensitive: true }) ?? '';
     const dataRows = rows.slice(headerIndex + 1);
 
     // Day and month order is a property of the file, not of each row: decided

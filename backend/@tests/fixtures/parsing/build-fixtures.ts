@@ -38,7 +38,9 @@ export function buildGenericCsv(outDir: string): ExpectedFixture {
     expectedTransactionCount: 4,
     expectedDebitSum: 2000.50,
     expectedCreditSum: 8000.75,
-    expectedCurrency: 'KZT',
+    // "KZT" appears only inside descriptions, which do not state the file's
+    // currency (#675): none is stated, so the statement's own applies.
+    expectedCurrency: '',
   };
 }
 

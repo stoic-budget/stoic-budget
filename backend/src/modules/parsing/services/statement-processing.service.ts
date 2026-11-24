@@ -155,8 +155,7 @@ export class StatementProcessingService {
         : enrichedMetadata.dateTo,
       balanceStart: parserMetadata.balanceStart ?? enrichedMetadata.balanceStart,
       balanceEnd: parserMetadata.balanceEnd ?? enrichedMetadata.balanceEnd,
-      currency:
-        parserMetadata.currency?.trim() || enrichedMetadata.currency || appDefaultCurrency(),
+      currency: parserMetadata.currency?.trim() || enrichedMetadata.currency || '',
       rawHeader: enrichedMetadata.rawHeader || parserMetadata.rawHeader,
       normalizedHeader: enrichedMetadata.normalizedHeader || parserMetadata.normalizedHeader,
       periodLabel: enrichedMetadata.periodLabel || parserMetadata.periodLabel,
@@ -680,7 +679,7 @@ export class StatementProcessingService {
       const enrichedMetadata = this.buildCompleteMetadata(
         parsedStatement,
         parsedStatement.transactions,
-        workspaceCurrency,
+        statement.currency || workspaceCurrency,
       );
       parsingDetails.metadataExtracted = {
         accountNumber: enrichedMetadata.accountNumber || undefined,
