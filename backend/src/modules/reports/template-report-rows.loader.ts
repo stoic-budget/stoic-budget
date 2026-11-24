@@ -11,7 +11,7 @@ import { CurrencyConverter, normalizeCurrencyCode } from '../exchange-rates/curr
 import { loadDayConverter } from '../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { countedTransactions } from './helpers/report-query.util';
-import { toDateKey } from './helpers/report-values.util';
+import { round2, toDateKey } from './helpers/report-values.util';
 import type { TemplateReportRow } from './report-template.types';
 
 /** The rows a template report reads, converted into the workspace currency. */
@@ -57,7 +57,7 @@ export class TemplateReportRowsLoader {
       workspaceId,
     );
     for (const row of rows) {
-      row.amount = convert(row.amount, row.currency, toDateKey(row.transactionDate));
+      row.amount = round2(convert(row.amount, row.currency, toDateKey(row.transactionDate)));
     }
     return { currency, missingRates: convert.missing };
   }

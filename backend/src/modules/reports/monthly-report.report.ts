@@ -130,7 +130,9 @@ export class MonthlyReportGenerator {
       .andWhere('transaction.transactionDate >= :start', { start: previousStartDate })
       .andWhere('transaction.transactionDate <= :end', { end: previousEndDate })
       .getMany();
-    await this.rowsLoader.toWorkspaceCurrency(workspaceId, previousTransactions);
+    // The comparison's own unrated currencies are named too, not only this month's.
+    const previous = await this.rowsLoader.toWorkspaceCurrency(workspaceId, previousTransactions);
+    money.missingRates = [...new Set([...money.missingRates, ...previous.missingRates])].sort();
 
     const currentIncome = transactions
       .filter(t => t.transactionType === TransactionType.INCOME)

@@ -185,6 +185,30 @@ describe('ReportsService — generateDailyReport', () => {
     expect([monthly.currency, custom.currency]).toEqual(['EUR', 'EUR']);
   });
 
+  it("names a currency with no rate in the month before, and rounds converted rows to the cent (#598)", async () => {
+    const row = (id: string, amount: number, currency: string, date: string) => ({
+      id, amount, currency, transactionType: TransactionType.EXPENSE, transactionDate: new Date(date),
+      counterpartyName: 'ACME Store', category: null, categoryId: null,
+    });
+    let call = 0;
+    const service = buildReportsService({
+      transactionRepository: {
+        createQueryBuilder: vi.fn(() =>
+          createQbMock(async () =>
+            ++call === 1 ? [row('1', 12.34, 'USD', '2025-02-10')] : [row('2', 70, 'QQZ', '2025-01-10')],
+          ),
+        ),
+      },
+      cacheManager: { get: vi.fn().mockResolvedValue(null), set: vi.fn() },
+      exchangeRatesService: { getRateOrNull: vi.fn(async (from: string) => (from === 'USD' ? 0.9 : null)) },
+    });
+
+    const monthly = await service.generateMonthlyReport(WS_ID, 2025, 2);
+
+    expect(monthly.missingRates).toEqual(['QQZ']);
+    expect(monthly.summary.totalExpense).toBe(11.11);
+  });
+
   it('returns correct income/expense totals for a given day', async () => {
     const income1 = {
       id: '1',

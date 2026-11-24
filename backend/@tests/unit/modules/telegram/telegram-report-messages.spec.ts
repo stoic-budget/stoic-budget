@@ -37,13 +37,16 @@ describe('Telegram report messages (#598)', () => {
       month: '10',
       year: 2026,
       currency: 'KZT',
-      missingRates: [],
+      missingRates: ['XAU'],
       dailyTrends: [],
       categoryDistribution: [],
       counterpartyDistribution: [],
       summary: { totalIncome: 1000, totalExpense: 0, difference: 1000, transactionCount: 1 },
     } as unknown as MonthlyReport;
 
-    expect(formatMonthlyReportMessage('en', 2026, 10, monthly)).toContain('1,000.00 KZT');
+    const message = formatMonthlyReportMessage('en', 2026, 10, monthly);
+
+    expect(message).toContain('1,000.00 KZT');
+    expect(message).toContain('Left out, no exchange rate: XAU');
   });
 });
