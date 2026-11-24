@@ -21,7 +21,6 @@ import { CryptoBalanceService } from './crypto-balance.service';
 import { type ExchangeEntry, type ExchangeName, parseExchangeCsv } from './crypto-exchange-csv';
 import { CryptoHoldingsService } from './crypto-holdings.service';
 import { CryptoPriceService } from './crypto-price.service';
-import { addDecimals } from './crypto-transfer.mapper';
 
 export interface ExchangeImportResult {
   exchange: ExchangeName;
@@ -84,10 +83,11 @@ export class CryptoImportService {
     }
     const imported = importedIds.length;
 
-    // The file is the only record of what the account holds, so the balances are
-    // its running total — not a sum of what we managed to book.
+    // What the account holds is every row stored for it, from this file and the
+    // ones before: a January and a February export add up instead of the second
+    // replacing the first (#689). All rows of a file are stored (#656).
     await this.walletRepo.update(wallet.id, {
-      balances: runningBalances(parsed.entries),
+      balances: await this.storedBalances(wallet),
       lastSyncedAt: new Date(),
       lastSyncError: null,
     });
@@ -101,6 +101,27 @@ export class CryptoImportService {
     }
 
     return { exchange: parsed.exchange, imported, skipped, walletId: wallet.id };
+  }
+
+  /** Each coin's net amount over the wallet's stored rows; what is gone (zero or less) is left out. */
+  private async storedBalances(wallet: CryptoWallet): Promise<CryptoWalletBalance[]> {
+    const rows: Array<{ asset: string; amount: string }> = await this.transactionRepo.query(
+      `SELECT "crypto_asset" AS "asset",
+              SUM(CASE WHEN "transaction_type" = 'income' THEN "crypto_amount"::numeric
+                       ELSE -"crypto_amount"::numeric END)::text AS "amount"
+         FROM "transactions"
+        WHERE "workspace_id" = $1 AND "crypto_wallet_id" = $2
+          AND "crypto_asset" IS NOT NULL AND NOT "is_duplicate"
+        GROUP BY "crypto_asset"
+        ORDER BY "crypto_asset"`,
+      [wallet.workspaceId, wallet.id],
+    );
+    // `numeric` prints every decimal place: 1.500000000000000000 is kept as 1.5.
+    const plain = (amount: string) =>
+      amount.includes('.') ? amount.replace(/\.?0+$/, '') : amount;
+    return rows
+      .filter(row => Number(row.amount) > 0)
+      .map(row => ({ asset: row.asset, amount: plain(row.amount) }));
   }
 
   /**
@@ -242,15 +263,6 @@ export class CryptoImportService {
 }
 
 /** What the account holds after the whole file, asset by asset. */
-function runningBalances(entries: ExchangeEntry[]): CryptoWalletBalance[] {
-  const byAsset = new Map<string, string>();
-  for (const entry of entries) {
-    byAsset.set(entry.asset, addDecimals(byAsset.get(entry.asset) ?? '0', String(entry.amount)));
-  }
-  return [...byAsset.entries()]
-    .filter(([, amount]) => Number(amount) > 0)
-    .map(([asset, amount]) => ({ asset, amount }));
-}
 
 /**
  * The idempotency key. It goes in the same column an on-chain hash does, so a
