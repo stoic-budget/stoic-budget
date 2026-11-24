@@ -1,7 +1,7 @@
 {
   "metadata": {
     "accountNumber": "6795539096",
-    "currency": "USD",
+    "currency": "",
     "dateFrom": "2024-06-01T00:00:00",
     "dateTo": "2024-06-30T00:00:00",
     "balanceStart": 446.97,
@@ -16,7 +16,7 @@
       "counterpartyName": "PC TRANSFER CREDIT",
       "paymentPurpose": "PC TRANSFER CREDIT",
       "credit": 200,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "bank_transfer_in"
     },
     {
@@ -24,28 +24,28 @@
       "counterpartyName": "TELLER DEPOSIT",
       "paymentPurpose": "TELLER DEPOSIT",
       "credit": 8246,
-      "currency": "USD"
+      "currency": ""
     },
     {
       "transactionDate": "2024-06-17T00:00:00",
       "counterpartyName": "TELLER DEPOSIT",
       "paymentPurpose": "TELLER DEPOSIT",
       "credit": 9096,
-      "currency": "USD"
+      "currency": ""
     },
     {
       "transactionDate": "2024-06-17T00:00:00",
       "counterpartyName": "TELLER DEPOSIT",
       "paymentPurpose": "TELLER DEPOSIT",
       "credit": 11040,
-      "currency": "USD"
+      "currency": ""
     },
     {
       "transactionDate": "2024-06-03T00:00:00",
       "counterpartyName": "ACME 84139405 ACCT FEE",
       "paymentPurpose": "ACH DEBIT CCD ACME 84139405 ACCT FEE",
       "debit": 20,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "direct_debit"
     },
     {
@@ -53,7 +53,7 @@
       "counterpartyName": "ACME INS GROUP ACMEPAYMNT",
       "paymentPurpose": "ACH DEBIT PPD ACME INS GROUP ACMEPAYMNT",
       "debit": 125.25,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "direct_debit"
     },
     {
@@ -61,7 +61,7 @@
       "counterpartyName": "ACCT ANALYSIS SERV CHG",
       "paymentPurpose": "ACCT ANALYSIS SERV CHG",
       "debit": 28,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "fee"
     },
     {
@@ -69,7 +69,7 @@
       "counterpartyName": "ACMECABLE ACMECABLE",
       "paymentPurpose": "ACH DEBIT TEL ACMECABLE ACMECABLE",
       "debit": 84.99,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "direct_debit"
     },
     {
@@ -77,7 +77,7 @@
       "counterpartyName": "PC TRANSFER DEBIT",
       "paymentPurpose": "PC TRANSFER DEBIT",
       "debit": 1000,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "bank_transfer_out"
     },
     {
@@ -85,7 +85,7 @@
       "counterpartyName": "ACME CITY BANK WEB PAY",
       "paymentPurpose": "ACH DEBIT WEB ACME CITY BANK WEB PAY",
       "debit": 229.09,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "direct_debit"
     },
     {
@@ -93,7 +93,7 @@
       "counterpartyName": "PC TRANSFER DEBIT",
       "paymentPurpose": "PC TRANSFER DEBIT",
       "debit": 500,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "bank_transfer_out"
     },
     {
@@ -101,7 +101,7 @@
       "counterpartyName": "PC TRANSFER DEBIT",
       "paymentPurpose": "PC TRANSFER DEBIT",
       "debit": 500,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "bank_transfer_out"
     },
     {
@@ -109,7 +109,7 @@
       "counterpartyName": "PC TRANSFER DEBIT",
       "paymentPurpose": "PC TRANSFER DEBIT",
       "debit": 1000,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "bank_transfer_out"
     },
     {
@@ -117,7 +117,7 @@
       "counterpartyName": "PC TRANSFER DEBIT",
       "paymentPurpose": "PC TRANSFER DEBIT",
       "debit": 500,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "bank_transfer_out"
     },
     {
@@ -125,7 +125,7 @@
       "counterpartyName": "DIGITAL BANKING CARD PAYMENT *0001",
       "paymentPurpose": "PC TRANSFER DEBIT DIGITAL BANKING CARD PAYMENT *0001",
       "debit": 16.26,
-      "currency": "USD",
+      "currency": "",
       "paymentType": "bank_transfer_out"
     },
     {
@@ -133,35 +133,35 @@
       "counterpartyName": "Check 4239",
       "paymentPurpose": "Check 4239",
       "debit": 2000,
-      "currency": "USD"
+      "currency": ""
     },
     {
       "transactionDate": "2024-06-26T00:00:00",
       "counterpartyName": "Check 4244",
       "paymentPurpose": "Check 4244",
       "debit": 2274,
-      "currency": "USD"
+      "currency": ""
     },
     {
       "transactionDate": "2024-06-25T00:00:00",
       "counterpartyName": "Check 4241",
       "paymentPurpose": "Check 4241",
       "debit": 10603.04,
-      "currency": "USD"
+      "currency": ""
     },
     {
       "transactionDate": "2024-06-26T00:00:00",
       "counterpartyName": "Check 4245",
       "paymentPurpose": "Check 4245",
       "debit": 1000,
-      "currency": "USD"
+      "currency": ""
     },
     {
       "transactionDate": "2024-06-17T00:00:00",
       "counterpartyName": "Check 4242",
       "paymentPurpose": "Check 4242",
       "debit": 129.96,
-      "currency": "USD"
+      "currency": ""
     }
   ],
   "checks": [

@@ -81,6 +81,33 @@ describe('ExcelParser header scan', () => {
       fs.unlinkSync(filePath);
     }
   });
+
+  it('reads the currency only from above the table, never from a word in a row (#675)', async () => {
+    const xlsx = await import('xlsx');
+    const workbook = (rows: unknown[][]) => {
+      const wb = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(wb, xlsx.utils.aoa_to_sheet(rows), 'Statement');
+      const filePath = path.join(os.tmpdir(), `parser-currency-${process.pid}-${rows.length}.xlsx`);
+      xlsx.writeFile(wb, filePath);
+      return filePath;
+    };
+    const table = [
+      ['DATE', 'DESCRIPTION', 'CHARGES', 'CREDITS'],
+      [45424, 'TRY FITNESS CLUB', 30, ''],
+      [45425, 'ACME Store refund of 12 USD', '', 12],
+    ];
+    const unstated = workbook([['ACME Bank'], ...table]);
+    const stated = workbook([['ACME Bank'], ['Currency: EUR'], ['', ''], ...table]);
+
+    try {
+      // None stated: left to the wallet, then the workspace — not lira, not USD.
+      expect((await new ExcelParser().parse(unstated)).metadata.currency).toBe('');
+      expect((await new ExcelParser().parse(stated)).metadata.currency).toBe('EUR');
+    } finally {
+      fs.unlinkSync(unstated);
+      fs.unlinkSync(stated);
+    }
+  });
 });
 
 describe('DocxParser', () => {

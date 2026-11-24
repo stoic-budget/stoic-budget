@@ -52,7 +52,8 @@ function loadExpected(filePath: string): ParsedStatement[] {
     return {
       metadata: {
         accountNumber: metadata.accountNumber || '',
-        currency: metadata.currency || 'KZT',
+        // An explicit '' is a file that states no currency (#675); a fixture that names none is KZT.
+        currency: metadata.currency ?? 'KZT',
         dateFrom: new Date(metadata.dateFrom || metadata.date_from || Date.now()),
         dateTo: new Date(metadata.dateTo || metadata.date_to || metadata.dateFrom || Date.now()),
         balanceStart: metadata.balanceStart ?? metadata.balance_start,

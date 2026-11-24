@@ -1,4 +1,3 @@
-import { appDefaultCurrency } from '../../../common/utils/currency.util';
 import { ocrPdfLayout } from '../../../common/utils/pdf-ocr.util';
 import {
   extractTablesFromPdf,
@@ -84,7 +83,8 @@ export class GenericPdfParser extends BaseParser {
 
     const headerInfo = this.extractHeaderFromText(text);
     const localeInfo = this.detectLocale(text);
-    const detectedCurrency = detectStatementCurrency(text) || appDefaultCurrency();
+    // None stated leaves it to the wallet, then the workspace (#675).
+    const detectedCurrency = detectStatementCurrency(text) || '';
 
     const reading = this.readingFor(text);
     const layoutTransactions = this.checkedReading(layoutRows, reading, text);

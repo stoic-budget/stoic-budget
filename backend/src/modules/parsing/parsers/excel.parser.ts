@@ -71,12 +71,13 @@ export class ExcelParser extends BaseTabularParser {
       this.mapColumns((data[0] || []).map(h => String(h).toLowerCase().trim()));
     const rows = data.slice(headerIndex + 1);
 
-    // Detect currency from header rows before building transactions
+    // A currency the file states sits above the table, in upper case: a word in a
+    // row is not one (#675). None stated leaves it to the wallet, then the workspace.
     const headerSample = data
-      .slice(0, 5)
+      .slice(0, Math.max(headerIndex, 0))
       .map(r => (r || []).join(' '))
       .join(' ');
-    const detectedCurrency = this.detectCurrency(headerSample) || appDefaultCurrency();
+    const detectedCurrency = this.detectCurrency(headerSample, { caseSensitive: true }) ?? '';
 
     // Extract metadata from first few rows or filename
     const metadata = this.extractMetadata(filePath, data, detectedCurrency);

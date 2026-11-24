@@ -112,7 +112,9 @@ export function buildGenericXlsx(outDir: string): ExpectedFixture {
     expectedTransactionCount: 3,
     expectedDebitSum: 5300,
     expectedCreditSum: 7200,
-    expectedCurrency: 'KZT',
+    // "KZT" appears only inside descriptions, which do not state the file's
+    // currency (#675): none is stated, so the statement's own applies.
+    expectedCurrency: '',
   };
 }
 
