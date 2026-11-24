@@ -460,7 +460,7 @@ export class BudgetsService {
       where: {
         workspaceId,
         subscriptionId: In(linked.subscriptions.map(subscription => subscription.id)),
-        chargeDate: MoreThanOrEqual(addMonthsClamped(localDay(new Date()), -13) as unknown as Date),
+        chargeDate: MoreThanOrEqual(addMonthsClamped(localDay(new Date()), -19) as unknown as Date),
       },
       select: { subscriptionId: true, expectedDate: true, chargeDate: true },
     });

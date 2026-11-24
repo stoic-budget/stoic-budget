@@ -238,7 +238,8 @@ export function paidAhead(
  * ahead. A payment nearest a coming charge counts only once the charge before
  * it was paid too: without that it is the earlier charge's late payment, not
  * an early one, the rule the payday planner uses. `charges` hold the recent
- * payments, a year and more back, so that earlier charge's is among them.
+ * payments, 19 months back, so that earlier charge's is among them (an
+ * annual one paid up to half a year early included).
  */
 export function paidAheadDays(
   charges: Array<{

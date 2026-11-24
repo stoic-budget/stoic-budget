@@ -832,8 +832,8 @@ describe('BudgetsService', () => {
           where: {
             workspaceId,
             subscriptionId: In(['sub-music']),
-            // A year and more of payments: the charge before a coming one is among them.
-            chargeDate: MoreThanOrEqual('2025-04-08'),
+            // 19 months of payments: the charge before a coming one, an annual one paid up to half a year early included.
+            chargeDate: MoreThanOrEqual('2024-10-08'),
           },
         }),
       );
