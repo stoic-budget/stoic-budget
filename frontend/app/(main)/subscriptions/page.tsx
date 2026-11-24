@@ -1,7 +1,6 @@
 'use client';
 
 import { Box } from '@mui/material';
-import { MissingRatesBanner } from '@/app/(main)/dashboard/components/MissingRatesBanner';
 import { useAttentionFocus } from '@/app/hooks/useAttentionFocus';
 import { SubscriptionsContent } from './components/SubscriptionsContent';
 import { useReceiptPrefill } from './hooks/useReceiptPrefill';
@@ -20,8 +19,6 @@ export default function SubscriptionsPage() {
         flexDirection: 'column',
       }}
     >
-      {/* Totals with a currency that has no rate count it at face value (#787). */}
-      <MissingRatesBanner currencies={[...(state.summary.missingRates ?? [])]} />
       <SubscriptionsContent {...state} />
     </Box>
   );
