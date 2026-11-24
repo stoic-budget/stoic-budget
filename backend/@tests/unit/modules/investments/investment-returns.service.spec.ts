@@ -41,6 +41,7 @@ function createService(
     crypto?: {
       holdings: Array<{ value: number; cost: number | null; realized: number; basisIncomplete: boolean }>;
       unpriced?: Array<{ asset: string; amount: string }>;
+      realizedClosed?: number;
     };
   } = {},
 ) {
@@ -81,6 +82,7 @@ function createService(
       currency: 'EUR',
       holdings: options.crypto?.holdings ?? [],
       unpriced: options.crypto?.unpriced ?? [],
+      realizedClosed: options.crypto?.realizedClosed ?? 0,
     })),
   };
   const balance = {
@@ -281,6 +283,20 @@ describe('InvestmentReturnsService', () => {
       'crypto_unpriced',
     ]);
     expect(result.summary.endValue).toBe(1000);
+  });
+
+  it('keeps the gain of a coin sold to the last unit in the crypto line (#655)', async () => {
+    const held = createService({
+      crypto: { holdings: [{ value: 3000, cost: 2000, realized: 0, basisIncomplete: false }], realizedClosed: 400 },
+    });
+    // Nothing held any more, everything sold at a profit.
+    const soldOut = createService({ crypto: { holdings: [], realizedClosed: 400 } });
+
+    const kept = (await held.getReturns('ws', 'all')).sources.find(source => source.kind === 'crypto');
+    const sold = (await soldOut.getReturns('ws', 'all')).sources.find(source => source.kind === 'crypto');
+
+    expect(kept).toMatchObject({ contributions: 1600, gain: 1400 });
+    expect(sold).toMatchObject({ endValue: 0, contributions: -400, gain: 400 });
   });
 
   it('says which prices the figures stand on are old', async () => {

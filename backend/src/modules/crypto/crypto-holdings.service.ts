@@ -47,7 +47,13 @@ export interface CryptoHoldingsResult {
    * instead of quietly showing a smaller portfolio than the user has.
    */
   unpriced: { asset: string; amount: string }[];
+  /** Gains realised on coins sold to the last unit, which no holding carries any more (#655). */
+  realizedClosed: number;
 }
+
+/** The gains realised on these assets, together. */
+const realizedOf = (assets: ReadonlyArray<{ realized?: number | null }>): number =>
+  round2(assets.reduce((sum, asset) => sum + (asset.realized ?? 0), 0));
 
 /**
  * What the workspace's wallets are worth right now.
@@ -116,7 +122,14 @@ export class CryptoHoldingsService {
     }
 
     if (amountByAsset.size === 0) {
-      return { currency, holdings: [], unpriced: [] };
+      // Nothing held, maybe all of it sold: no prices are needed, the gains still count.
+      const basis = wallets.length > 0 ? await this.costBasis(workspaceId, wallets) : new Map();
+      return {
+        currency,
+        holdings: [],
+        unpriced: [],
+        realizedClosed: realizedOf([...basis.values()]),
+      };
     }
 
     const [usdPrices, usdToCurrency, basis] = await Promise.all([
@@ -126,6 +139,8 @@ export class CryptoHoldingsService {
     ]);
 
     const held = [...amountByAsset.entries()].filter(([, amount]) => Number(amount) > 0);
+    const isHeld = new Set(held.map(([asset]) => asset));
+    const closed = [...basis.entries()].filter(([asset]) => !isHeld.has(asset));
 
     return {
       currency,
@@ -145,6 +160,7 @@ export class CryptoHoldingsService {
       unpriced: held
         .filter(([asset]) => usdPrices[asset] === undefined)
         .map(([asset, amount]) => ({ asset, amount })),
+      realizedClosed: realizedOf(closed.map(([, asset]) => asset)),
     };
   }
 

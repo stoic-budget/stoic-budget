@@ -93,14 +93,16 @@ export function metalsSource(
 export function cryptoSource({
   holdings,
   unpriced,
+  realizedClosed = 0,
 }: CryptoHoldings): { row: ReturnsSource; flags: ReturnsFlag[] } | null {
-  if (holdings.length === 0 && unpriced.length === 0) {
+  if (holdings.length === 0 && unpriced.length === 0 && !realizedClosed) {
     return null;
   }
 
   const value = round2(holdings.reduce((sum, holding) => sum + holding.value, 0));
   const costHeld = holdings.reduce((sum, holding) => sum + (holding.cost ?? 0), 0);
-  const realized = holdings.reduce((sum, holding) => sum + holding.realized, 0);
+  // A coin sold to the last unit is no holding, but its gain was made (#655).
+  const realized = holdings.reduce((sum, holding) => sum + holding.realized, realizedClosed);
   const netInvested = round2(costHeld - realized);
 
   const codes: ReturnsFlagCode[] = ['crypto_not_in_return'];
