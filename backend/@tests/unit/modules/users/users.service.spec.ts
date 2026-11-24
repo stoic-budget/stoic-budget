@@ -56,7 +56,17 @@ describe('UsersService', () => {
         {
           provide: getRepositoryToken(User),
           useValue: {
-            manager: { getRepository: () => identities },
+            manager: {
+              getRepository: () => identities,
+              // `forgetDeletedAccount`: its soft delete lands on this repository's mock.
+              transaction: (work: (tx: unknown) => Promise<void>) =>
+                work({
+                  delete: vi.fn(),
+                  update: vi.fn(),
+                  softDelete: (_entity: unknown, id: string) =>
+                    (testingModule.get(getRepositoryToken(User)) as { softDelete: (id: string) => unknown }).softDelete(id),
+                }),
+            },
             find: vi.fn(),
             findOne: vi.fn(),
             findAndCount: vi.fn(),

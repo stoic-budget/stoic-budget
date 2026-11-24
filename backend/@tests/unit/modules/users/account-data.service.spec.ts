@@ -4,15 +4,20 @@ import { AccountDataService } from '@/modules/users/services/account-data.servic
 import { ConflictException, ForbiddenException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
-const createRepoMock = () =>
-  ({
+const createRepoMock = () => {
+  const repo = {
     find: vi.fn().mockResolvedValue([]),
     findOne: vi.fn().mockResolvedValue(null),
     count: vi.fn().mockResolvedValue(0),
     update: vi.fn().mockResolvedValue({ affected: 1 }),
     softDelete: vi.fn().mockResolvedValue({ affected: 1 }),
     delete: vi.fn().mockResolvedValue({ affected: 1 }),
-  }) as any;
+  } as any;
+  // `forgetDeletedAccount` runs through the manager; its soft delete lands on the repository mock.
+  const tx = { delete: vi.fn(), update: vi.fn(), softDelete: (_entity: unknown, id: string) => repo.softDelete(id) };
+  repo.manager = { transaction: (work: (m: typeof tx) => Promise<void>) => work(tx), tx };
+  return repo;
+};
 
 describe('AccountDataService', () => {
   const userRepo = createRepoMock();
@@ -157,6 +162,12 @@ describe('AccountDataService', () => {
       expect(sessionRepo.update).toHaveBeenCalled();
       expect(passkeyRepo.delete).toHaveBeenCalledWith({ userId: 'user-1' });
       expect(userRepo.softDelete).toHaveBeenCalledWith('user-1');
+      // The person is forgotten, so the address can register again (#642).
+      expect(userRepo.manager.tx.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'user-1',
+        expect.objectContaining({ email: 'deleted-user-1@deleted.invalid', name: 'Deleted user' }),
+      );
     });
 
     it('logs the deletion as CRITICAL into the home workspace before deleting', async () => {

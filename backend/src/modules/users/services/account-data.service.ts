@@ -18,6 +18,7 @@ import { User } from '../../../entities/user.entity';
 import { WorkspaceMember, WorkspaceRole } from '../../../entities/workspace-member.entity';
 import { AuditService } from '../../audit/audit.service';
 import { recordSecurityEvent } from '../../auth/security-audit.util';
+import { forgetDeletedAccount } from './forget-deleted-account';
 
 /** How many of the user's own audit entries the export carries. */
 const EXPORT_AUDIT_LIMIT = 5000;
@@ -165,7 +166,7 @@ export class AccountDataService {
     await this.sessionRepository.update({ userId, revokedAt: IsNull() }, { revokedAt: new Date() });
     // Credentials, like the sessions: a deleted account keeps no way back in.
     await this.passkeyRepository.delete({ userId });
-    await this.userRepository.softDelete(userId);
+    await forgetDeletedAccount(this.userRepository.manager, userId);
 
     this.logger.log(`Account ${userId} deleted on the owner's request`);
   }
