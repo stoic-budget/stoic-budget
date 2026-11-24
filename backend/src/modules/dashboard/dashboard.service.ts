@@ -226,13 +226,14 @@ export class DashboardService {
     since: Date,
     endDate: Date,
   ): Promise<DashboardFinancialSnapshot> {
-    beginMissingRates();
     const workspace = await this.workspaceRepo.findOne({
       where: { id: workspaceId },
       select: {
         currency: true,
       },
     });
+    // After the first await: the record belongs to this call, not to its caller.
+    beginMissingRates();
     const targetCurrency = this.normalizeCurrency(workspace?.currency);
 
     // Grouped by currency and day, so each sum converts at its own day's rate.

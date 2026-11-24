@@ -48,6 +48,9 @@ function normalize(value: string | null | undefined): string | null {
  * the record; `noteMissingRate` adds a currency and answers the face-value
  * rate (1) the caller used to get silently; `withMissingRates` adds the
  * record to a list already found. Outside a started record, nothing is kept.
+ *
+ * Start it after the function's first `await`: before it, `enterWith` would
+ * also mark the caller's context and the work it starts next.
  */
 const missingRatesStore = new AsyncLocalStorage<Set<string>>();
 
@@ -61,5 +64,7 @@ export function noteMissingRate(currency: string): number {
 }
 
 export function withMissingRates(found: string[]): string[] {
-  return [...new Set([...found, ...(missingRatesStore.getStore() ?? [])])].sort();
+  const noted = [...(missingRatesStore.getStore() ?? [])].filter(code => !found.includes(code));
+  // The list as found keeps its order (most rows first); the noted ones follow.
+  return [...found, ...noted.sort()];
 }

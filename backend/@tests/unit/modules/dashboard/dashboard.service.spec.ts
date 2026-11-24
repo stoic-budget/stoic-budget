@@ -1,3 +1,4 @@
+import { noteMissingRate } from '../../../../src/common/utils/currency.util';
 import type { Mock } from 'vitest';
 import { Between, In, IsNull } from 'typeorm';
 import { PayableStatus } from '../../../../src/entities/payable.entity';
@@ -612,6 +613,20 @@ describe('DashboardService', () => {
       missingRates: [],
     });
     expect(exchangeRatesService.getRateOrNull).toHaveBeenCalledWith('USD', 'KZT', undefined, 'ws-1');
+  });
+
+  it("getSnapshot's list is its own, not its caller's (#787)", async () => {
+    transactionRepo.createQueryBuilder
+      .mockReturnValueOnce(createQueryBuilderMock([]))
+      .mockReturnValueOnce(createQueryBuilderMock([]));
+    payableRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock([]));
+    workspaceRepo.findOne.mockResolvedValue({ currency: 'KZT' });
+
+    const pending = (service as any).getSnapshot('ws-1', new Date('2026-02-01'), new Date('2026-03-01'));
+    // The caller converts something of its own meanwhile.
+    noteMissingRate('LEAK');
+
+    expect((await pending).missingRates).toEqual([]);
   });
 
   it('getSnapshot names a bill currency without a rate, counted at face value (#787)', async () => {
