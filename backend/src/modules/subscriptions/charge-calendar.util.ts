@@ -213,3 +213,35 @@ export function settledDateOf(
   }
   return dayKey(best) as unknown as Date;
 }
+
+/**
+ * A charge date on the subscription's billing day: a month-based step from a
+ * day clamped by a short month (28 Feb) goes back to the 31st, clamped again
+ * where the month is short (#596). Day-based steps and a subscription with no
+ * billing day are left as they are.
+ */
+export function onBillingDay(
+  date: Date,
+  subscription: { frequency: SubscriptionFrequency; billingDay?: number | null },
+): Date {
+  const day = subscription.billingDay;
+  if (!day || subscriptionStep(subscription.frequency).unit !== 'month') return date;
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  return new Date(date.getFullYear(), date.getMonth(), Math.min(day, lastDay));
+}
+
+/**
+ * The billing day after the next charge date changed: kept when the new date
+ * is that day clamped to its month (an advance, or 28 Feb for a 31st), taken
+ * from the new date when a person or detection moved it to another day.
+ */
+export function billingDayFor(
+  nextChargeDate: Date | string | null | undefined,
+  subscription: { frequency: SubscriptionFrequency; billingDay?: number | null },
+): number | null {
+  if (!nextChargeDate || subscriptionStep(subscription.frequency).unit !== 'month') return null;
+  const date = nextChargeDate instanceof Date ? nextChargeDate : localDayOf(String(nextChargeDate));
+  const kept = subscription.billingDay;
+  if (kept && onBillingDay(date, subscription).getDate() === date.getDate()) return kept;
+  return date.getDate();
+}

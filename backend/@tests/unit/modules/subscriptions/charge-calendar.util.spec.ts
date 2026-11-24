@@ -1,7 +1,9 @@
 import { SubscriptionFrequency } from '@/entities/subscription.entity';
 import {
+  billingDayFor,
   chargeAt,
   countChargesBetween,
+  onBillingDay,
   projectMonthlyCharges,
   settledDateOf,
   splitMonthCharges,
@@ -217,5 +219,26 @@ describe('settledDateOf', () => {
 
   it('is the payment day itself without a next charge', () => {
     expect(settledDateOf(monthly(null), '2026-10-21')).toBe('2026-10-21');
+  });
+});
+
+describe('billing day (#596)', () => {
+  const monthly = { frequency: SubscriptionFrequency.MONTHLY, billingDay: 31 };
+
+  it('puts a month-based charge back on its billing day, clamped to short months', () => {
+    expect(onBillingDay(new Date(2026, 2, 28), monthly)).toEqual(new Date(2026, 2, 31));
+    expect(onBillingDay(new Date(2026, 3, 28), monthly)).toEqual(new Date(2026, 3, 30));
+    expect(onBillingDay(new Date(2026, 1, 28), monthly)).toEqual(new Date(2026, 1, 28));
+    // Weekly charges have no day of the month.
+    const weekly = { frequency: SubscriptionFrequency.WEEKLY, billingDay: 31 };
+    expect(onBillingDay(new Date(2026, 2, 28), weekly)).toEqual(new Date(2026, 2, 28));
+  });
+
+  it('keeps the billing day for its clamped date and takes a new one from another day', () => {
+    expect(billingDayFor('2026-02-28', monthly)).toBe(31);
+    expect(billingDayFor('2026-03-31', monthly)).toBe(31);
+    expect(billingDayFor('2026-03-15', monthly)).toBe(15);
+    expect(billingDayFor('2026-01-31', { frequency: SubscriptionFrequency.MONTHLY, billingDay: null })).toBe(31);
+    expect(billingDayFor('2026-01-31', { frequency: SubscriptionFrequency.WEEKLY })).toBeNull();
   });
 });

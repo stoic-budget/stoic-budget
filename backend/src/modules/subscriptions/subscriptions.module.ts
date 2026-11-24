@@ -19,6 +19,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { TaxModule } from '../tax/tax.module';
 import { SubscriptionAutoLinkSubscriber } from './subscription-autolink.subscriber';
+import { SubscriptionBillingDaySubscriber } from './subscription-billing-day.subscriber';
 import { SubscriptionDetectionScheduler } from './subscription-detection.scheduler';
 import { SubscriptionDetectionService } from './subscription-detection.service';
 import { SubscriptionEventsListener } from './subscription-events.listener';
@@ -57,6 +58,7 @@ import { SubscriptionsService } from './subscriptions.service';
     SubscriptionDetectionScheduler,
     SubscriptionEventsListener,
     SubscriptionAutoLinkSubscriber,
+    SubscriptionBillingDaySubscriber,
     SubscriptionMatchRejectionsService,
   ],
   exports: [SubscriptionsService],

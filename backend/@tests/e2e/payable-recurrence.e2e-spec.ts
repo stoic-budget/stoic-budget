@@ -1,3 +1,4 @@
+import { SubscriptionsService } from '../../src/modules/subscriptions/subscriptions.service';
 vi.mock('franc', () => ({
   franc: () => 'und',
 }));
@@ -981,6 +982,36 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
   });
 
   describe('"not this payment" on a subscription', () => {
+    it('advances a charge on the 31st through February and back to the 31st (#596)', async () => {
+      const created = await post('/subscriptions', {
+        vendorName: 'ACME Gym',
+        amount: 30,
+        frequency: 'monthly',
+        currency: 'KZT',
+        nextChargeDate: '2026-01-31',
+      }).expect(201);
+      const stored = async () =>
+        (
+          await dataSource.query(
+            'SELECT next_charge_date::text AS next, billing_day AS day FROM subscriptions WHERE id = $1',
+            [created.body.id],
+          )
+        )[0];
+      expect(await stored()).toEqual({ next: '2026-01-31', day: 31 });
+
+      const advance = () => app.get(SubscriptionsService).updatePastDueNextDates();
+      await advance();
+      expect(await stored()).toEqual({ next: '2026-02-28', day: 31 });
+      await advance();
+      expect(await stored()).toEqual({ next: '2026-03-31', day: 31 });
+
+      // A person moving it to another day moves the billing day too.
+      await as(owner, request(server()).put(`/subscriptions/${created.body.id}`))
+        .send({ nextChargeDate: '2027-04-15' })
+        .expect(200);
+      expect(await stored()).toEqual({ next: '2027-04-15', day: 15 });
+    });
+
     it('drops the row from that subscription\'s candidates and removes it as a payment', async () => {
       const subscription = await post('/subscriptions', {
         vendorName: 'ACME Stream',

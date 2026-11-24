@@ -123,6 +123,13 @@ export class Subscription {
   @Column({ name: 'last_charge_date', type: 'date', nullable: true })
   lastChargeDate: Date | null;
 
+  /**
+   * The day of the month it bills on, for month-based frequencies: a step that
+   * clamped the 31st to 28 February goes back to the 31st after (#596).
+   */
+  @Column({ name: 'billing_day', type: 'smallint', nullable: true })
+  billingDay: number | null;
+
   @ManyToOne(() => Category, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'category_id' })
   category: Relation<Category | null>;
