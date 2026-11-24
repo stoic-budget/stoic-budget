@@ -117,8 +117,10 @@ export function useInvestments() {
           response.data,
           '/investments/refresh-prices',
         );
-        toast.success(pricesUpdated.replaceAll('{{count}}', String(updated)));
         // A source that gave no price is said, not hidden behind a green count (#696).
+        if (updated > 0 || failed === 0) {
+          toast.success(pricesUpdated.replaceAll('{{count}}', String(updated)));
+        }
         if (failed > 0) {
           toast.error(pricesFailed.replaceAll('{{count}}', String(failed)));
         }
