@@ -96,7 +96,11 @@ export class VersionSnapshotService {
       }
       const payload: VersionPayload = {
         formatVersion: VERSION_FORMAT,
-        workspace: this.workspaceRecord(workspace, snapshot.backgroundImage),
+        workspace: {
+          ...this.workspaceRecord(workspace, snapshot.backgroundImage),
+          ownerId: workspace.ownerId,
+          ownerMemberId: snapshot.ownerMemberId,
+        },
         collections: snapshot.collections,
         files,
       };

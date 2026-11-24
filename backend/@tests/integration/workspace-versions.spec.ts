@@ -461,4 +461,47 @@ describe('workspace versions are taken and kept (real Postgres)', () => {
     await sql('UPDATE workspaces SET background_image = NULL, background_attribution = NULL, background_source_url = NULL WHERE id = $1', [workspace.id]);
     fs.rmSync(path.join(directory, name), { force: true });
   });
+
+  it("keeps the owner's private rows theirs in an opened version, and no other member's (#640)", async () => {
+    const other = await dataSource.getRepository(User).save(
+      dataSource.getRepository(User).create({
+        email: `versions-member-${randomUUID()}@example.com`,
+        passwordHash: 'x',
+        name: 'Member Two',
+      }),
+    );
+    const [{ id: ownerMember }] = await sql(
+      "INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ($1, $2, 'owner') RETURNING id",
+      [workspace.id, owner.id],
+    );
+    const [{ id: otherMember }] = await sql(
+      "INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ($1, $2, 'viewer') RETURNING id",
+      [workspace.id, other.id],
+    );
+    const privateRow = (payee: string, member: string) =>
+      sql(
+        `INSERT INTO transactions (workspace_id, transaction_date, counterparty_name, payment_purpose, currency, transaction_type, amount, debit, is_verified, is_private, owner_member_id)
+         VALUES ($1, '2026-10-03', $2::text, $2::text, 'EUR', 'expense', 30, 30, true, true, $3)`,
+        [workspace.id, payee, member],
+      );
+    await privateRow('ACME Store', ownerMember);
+    await privateRow('ACME Pharmacy', otherMember);
+    const taken = await versions.takeNow(workspace.id, owner.id);
+
+    const opened = await versions.open(taken.id, owner.id);
+
+    const rows = await sql(
+      `SELECT t.counterparty_name AS payee, m.user_id AS "ownerUser"
+         FROM transactions t LEFT JOIN workspace_members m ON m.id = t.owner_member_id
+        WHERE t.workspace_id = $1 AND t.is_private ORDER BY payee`,
+      [opened.id],
+    );
+    expect(rows).toEqual([
+      { payee: 'ACME Pharmacy', ownerUser: null },
+      { payee: 'ACME Store', ownerUser: owner.id },
+    ]);
+    await versions.close(taken.id, owner.id);
+    await sql('DELETE FROM transactions WHERE workspace_id = $1 AND is_private', [workspace.id]);
+    await sql('DELETE FROM workspace_members WHERE id = ANY($1::uuid[])', [[ownerMember, otherMember]]);
+  });
 });

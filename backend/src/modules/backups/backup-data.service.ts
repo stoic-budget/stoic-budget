@@ -104,6 +104,8 @@ type BackupSnapshotData = {
   files: Array<{ path: string; contents: Buffer }>;
   /** The workspace's background as a snapshot keeps it: a carried picture's path (#677). */
   backgroundImage: string | null;
+  /** The owner's own member id, so a restore by the same person keeps their private rows theirs (#640). */
+  ownerMemberId: string | null;
 };
 
 @Injectable()
@@ -147,7 +149,13 @@ export class BackupDataService {
     await this.collectRelatedCollections(collections);
     shareIdenticalAttachmentFiles(collections, files);
     const carried = await carryBackground(backgroundImage ?? null, workspaceId, files);
-    return { collections, files, backgroundImage: carried };
+    const [owner] = await this.dataSource.query(
+      `SELECT member.id FROM workspace_members member
+         JOIN workspaces workspace ON workspace.id = member.workspace_id AND workspace.owner_id = member.user_id
+        WHERE member.workspace_id = $1`,
+      [workspaceId],
+    );
+    return { collections, files, backgroundImage: carried, ownerMemberId: owner?.id ?? null };
   }
 
   /** The usual columns, plus the hidden ones this table's backup needs. */

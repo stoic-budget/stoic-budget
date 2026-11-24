@@ -276,6 +276,7 @@ describe('BackupRestoreService', () => {
       metadatas: ReturnType<typeof table>[],
       foreignKeys: Array<{ source: string; column: string; target: string }>,
       collections: Record<string, unknown[]>,
+      archivedWorkspace: Record<string, unknown> = {},
     ) => {
       const inserted: Record<string, Record<string, unknown>[]> = {};
       const workspaceRepository = {
@@ -298,11 +299,17 @@ describe('BackupRestoreService', () => {
           query: vi.fn().mockResolvedValue(foreignKeys),
         } as never,
         workspaceRepository as never,
-        { create: vi.fn().mockImplementation(value => value), save: vi.fn() } as never,
+        {
+          create: vi.fn().mockImplementation(value => value),
+          save: vi.fn(async (value: object) => ({ id: 'new-member', ...value })),
+        } as never,
         {
           open: vi.fn().mockResolvedValue({
             manifest: { collections: {}, files: [] },
-            collections: { workspace: [{ id: 'old-workspace', name: 'Finance' }], ...collections },
+            collections: {
+              workspace: [{ id: 'old-workspace', name: 'Finance', ...archivedWorkspace }],
+              ...collections,
+            },
             files: new Map(),
           }),
         } as never,
@@ -419,6 +426,32 @@ describe('BackupRestoreService', () => {
         },
       });
       expect(inserted.tax_rates[0]).toMatchObject({ jurisdictionId: 'jurisdiction-de' });
+    });
+
+    it("keeps the restorer's own private rows theirs, and no other member's (#640)", async () => {
+      const transactions = workspaceTable(
+        'transactions',
+        column('ownerMemberId', { type: 'uuid' }),
+        column('isPrivate'),
+      );
+      const keys = [{ source: 'transactions', column: 'owner_member_id', target: 'workspace_members' }];
+      const rows = {
+        transactions: [
+          { id: 'mine', workspaceId: 'old-workspace', ownerMemberId: 'owner-member', isPrivate: true },
+          { id: 'theirs', workspaceId: 'old-workspace', ownerMemberId: 'member-2', isPrivate: true },
+        ],
+      };
+      const ownersOf = async (archivedWorkspace: Record<string, unknown>) => {
+        const { result, inserted } = await restoreWith([transactions], keys, rows, archivedWorkspace);
+        await result;
+        return inserted.transactions.map(row => row.ownerMemberId);
+      };
+
+      // The archive's owner restoring it: their rows follow them to their new membership.
+      expect(await ownersOf({ ownerId: 'user-1', ownerMemberId: 'owner-member' })).toEqual(['new-member', null]);
+      // Someone else restoring it, or an archive that names no owner: nobody's rows are handed over.
+      expect(await ownersOf({ ownerId: 'user-2', ownerMemberId: 'owner-member' })).toEqual([null, null]);
+      expect(await ownersOf({})).toEqual([null, null]);
     });
 
     it('keeps the series of a repeating bill together when its first bill is not in the archive', async () => {

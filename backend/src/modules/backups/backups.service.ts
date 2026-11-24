@@ -202,6 +202,8 @@ export class BackupsService {
             backgroundSourceUrl: workspace.backgroundSourceUrl,
             currency: workspace.currency,
             settings: workspace.settings,
+            ownerId: workspace.ownerId,
+            ownerMemberId: snapshot.ownerMemberId,
           },
         ],
         ...snapshot.collections,

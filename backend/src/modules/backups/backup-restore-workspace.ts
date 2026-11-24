@@ -1,6 +1,9 @@
+import type { Repository } from 'typeorm';
 import { appDefaultCurrency } from '../../common/utils/currency.util';
+import { WorkspaceRole } from '../../entities';
 import type { User } from '../../entities/user.entity';
 import { type Workspace, WorkspaceKind } from '../../entities/workspace.entity';
+import type { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { startingBackground } from './backup-background';
 
 const stringOrNull = (value: unknown): string | null => (typeof value === 'string' ? value : null);
@@ -44,4 +47,30 @@ export function restoredWorkspace(
     ownerId: user.id,
     isFavorite: false,
   };
+}
+
+/**
+ * The restorer's owner membership. An archive leaves members out, so a row's
+ * link to the member who owns it is cut, and a private row with no owner is
+ * readable by nobody. When the archive's owner is the person restoring, their
+ * member id in it is answered (old, new): their own private rows stay theirs.
+ * Other members' rows are never handed to the restorer (#640).
+ */
+export async function restoreOwnerMembership(
+  members: Repository<WorkspaceMember>,
+  workspaceId: string,
+  user: Pick<User, 'id'>,
+  source: Record<string, unknown>,
+): Promise<Array<[string, string]>> {
+  const member = await members.save(
+    members.create({
+      workspaceId,
+      userId: user.id,
+      role: WorkspaceRole.OWNER,
+      permissions: null,
+      invitedById: user.id,
+    }),
+  );
+  const own = source.ownerMemberId;
+  return source.ownerId === user.id && typeof own === 'string' ? [[own, member.id]] : [];
 }

@@ -39,6 +39,7 @@ describe('BackupDataService', () => {
         metadata('integrations', 'Integration', ['id', 'workspaceId', 'provider']),
       ],
       getRepository: (target: string) => repositories.get(target),
+      query: vi.fn(async () => [{ id: 'owner-member' }]),
     } as never);
 
     const snapshot = await service.collect('ws-1');
@@ -62,6 +63,7 @@ describe('BackupDataService', () => {
       {
         entityMetadatas: [metadata('statements', 'Statement', ['id', 'workspaceId', 'fileName', 'filePath'])],
         getRepository: () => statements,
+        query: vi.fn(async () => [{ id: 'owner-member' }]),
       } as never,
       {
         getStatementFileStream: vi.fn().mockResolvedValue({
@@ -98,6 +100,7 @@ describe('BackupDataService', () => {
     const service = new BackupDataService({
       entityMetadatas: [metadata('receipts', 'Receipt', ['id', 'workspaceId', 'attachmentPaths', 'subject'])],
       getRepository: () => receipts,
+      query: vi.fn(async () => [{ id: 'owner-member' }]),
     } as never);
 
     const snapshot = await service.collect('ws-1');
@@ -125,6 +128,7 @@ describe('BackupDataService', () => {
     const service = new BackupDataService({
       entityMetadatas: [metadata('workspace_business_profiles', 'Profile', ['workspaceId', 'logoFile'])],
       getRepository: () => ({ find: vi.fn().mockResolvedValue([{ workspaceId: 'ws-1', logoFile: 'acme.png' }]) }),
+      query: vi.fn(async () => [{ id: 'owner-member' }]),
     } as never);
 
     const snapshot = await service.collect('ws-1');
@@ -144,7 +148,7 @@ describe('BackupDataService', () => {
     process.env.UPLOADS_DIR = uploads;
     await fs.mkdir(path.join(uploads, 'workspace-backgrounds'), { recursive: true });
     await fs.writeFile(path.join(uploads, 'workspace-backgrounds', 'lake.jpg'), 'ACME lake');
-    const service = new BackupDataService({ entityMetadatas: [], getRepository: () => ({}) } as never);
+    const service = new BackupDataService({ entityMetadatas: [], getRepository: () => ({}), query: vi.fn(async () => []) } as never);
 
     const snapshot = await service.collect('ws-1', '/uploads/workspace-backgrounds/lake.jpg');
 
@@ -172,6 +176,7 @@ describe('BackupDataService', () => {
         metadata('file_versions', 'FileVersion', ['id', 'statementId', 'createdBy', 'fileData']),
       ],
       getRepository: (target: string) => repositories.get(target),
+      query: vi.fn(async () => [{ id: 'owner-member' }]),
     } as never);
 
     const snapshot = await service.collect('ws-1');
@@ -195,3 +200,15 @@ function metadata(tableName: string, target: string, properties: string[]) {
     primaryColumns: [{ propertyName: 'id' }],
   };
 }
+
+describe('BackupDataService — the owner (#640)', () => {
+  it("names the owner's own member id, so a restore by the same person keeps their private rows theirs", async () => {
+    const query = vi.fn(async () => [{ id: 'owner-member' }]);
+    const service = new BackupDataService({ entityMetadatas: [], getRepository: vi.fn(), query } as never);
+
+    const snapshot = await service.collect('ws-1');
+
+    expect(snapshot.ownerMemberId).toBe('owner-member');
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('owner_id = member.user_id'), ['ws-1']);
+  });
+});

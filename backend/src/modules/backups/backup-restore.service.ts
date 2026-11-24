@@ -6,7 +6,6 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import type { DataSource, EntityManager, EntityMetadata, Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { resolveUploadsDir } from '../../common/utils/uploads.util';
-import { WorkspaceRole } from '../../entities';
 import type { User } from '../../entities/user.entity';
 import { Workspace, WorkspaceKind } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
@@ -21,7 +20,7 @@ import {
 } from './backup-data.service';
 import { GROUP_KEY_COLUMNS } from './backup-group-keys';
 import { prepareDocumentPaths } from './backup-restore-documents';
-import { restoredWorkspace } from './backup-restore-workspace';
+import { restoredWorkspace, restoreOwnerMembership } from './backup-restore-workspace';
 
 const RESTORE_ORDER = [
   'categories',
@@ -253,16 +252,16 @@ export class BackupRestoreService {
         workspace.backgroundImage = background;
         await this.workspaceRepository.update(workspace.id, { backgroundImage: background });
       }
-      await this.workspaceMemberRepository.save(
-        this.workspaceMemberRepository.create({
-          workspaceId: workspace.id,
-          userId: user.id,
-          role: WorkspaceRole.OWNER,
-          permissions: null,
-          invitedById: user.id,
-        }),
+      const own = await restoreOwnerMembership(
+        this.workspaceMemberRepository,
+        workspace.id,
+        user,
+        sourceWorkspace,
       );
-      const idMap = this.buildIdMap(collections, sourceWorkspace.id, workspace.id);
+      const idMap = new Map([
+        ...this.buildIdMap(collections, sourceWorkspace.id, workspace.id),
+        ...own,
+      ]);
       const prepared = await this.prepareCollections(
         collections,
         files,
