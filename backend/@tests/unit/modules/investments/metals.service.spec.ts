@@ -487,6 +487,28 @@ describe('MetalsService', () => {
     expect(summary.sales[0]).toMatchObject({ proceeds: 16000, costBasis: 14400, realized: 1600 });
   });
 
+  it('keeps the photo while another lot still names it, as a copy does (#789)', async () => {
+    const unlink = vi.spyOn(nodeFs.promises, 'unlink').mockResolvedValue(undefined);
+    const shared = build({ lots: [krugerrands({ photoFile: 'shared.jpg' })] });
+    shared.holdingRepository.exists.mockResolvedValueOnce(true);
+
+    await shared.service.deleteLot(USER, WORKSPACE, 'lot-1');
+
+    expect(unlink).not.toHaveBeenCalled();
+    unlink.mockRestore();
+  });
+
+  it('keeps the photo, and the delete, when asking about it fails', async () => {
+    const unlink = vi.spyOn(nodeFs.promises, 'unlink').mockResolvedValue(undefined);
+    const failing = build({ lots: [krugerrands({ photoFile: 'unsure.jpg' })] });
+    failing.holdingRepository.exists.mockRejectedValueOnce(new Error('db down'));
+
+    await expect(failing.service.deleteLot(USER, WORKSPACE, 'lot-1')).resolves.not.toThrow();
+
+    expect(unlink).not.toHaveBeenCalled();
+    unlink.mockRestore();
+  });
+
   it('takes the photo with the lot, whether it is deleted or sold out', async () => {
     const unlink = vi.spyOn(nodeFs.promises, 'unlink').mockResolvedValue(undefined);
 

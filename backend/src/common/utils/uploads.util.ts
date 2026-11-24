@@ -54,7 +54,8 @@ export function readUploadedFile(filePath: string): Promise<Buffer> {
  * and a backup restored on the same server point at the original's photo,
  * logo or cover, so a file is removed only once nothing names it any more.
  * Called after the row being changed has let go of it; soft-deleted rows
- * count, since they can come back.
+ * count, since they can come back. When the question itself fails the file
+ * is kept: the change is done, and an orphaned file beats a lost one.
  */
 export async function fileStillNamed(
   rows: {
@@ -63,5 +64,5 @@ export async function fileStillNamed(
   column: string,
   fileName: string,
 ): Promise<boolean> {
-  return rows.exists({ where: { [column]: fileName }, withDeleted: true });
+  return rows.exists({ where: { [column]: fileName }, withDeleted: true }).catch(() => true);
 }
