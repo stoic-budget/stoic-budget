@@ -3,6 +3,7 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
+import { MissingRatesBanner } from '@/app/(main)/dashboard/components/MissingRatesBanner';
 import { EmptyState } from '@/app/components/ui/EmptyState';
 import { LoadError } from '@/app/components/ui/load-error';
 import { joinSummary, PageTitle } from '@/app/components/ui/page-title';
@@ -133,6 +134,12 @@ export function ForecastContent() {
           }}
         >
           <ForecastCaveats caveats={data.caveats} monthsObserved={data.monthsObserved} />
+          {/* Amounts in a currency with no rate count at face value: say which (#787). */}
+          {data.missingRates?.length ? (
+            <Box sx={{ '& .seneca-dashboard__rates-banner': { m: 0 } }}>
+              <MissingRatesBanner currencies={[...data.missingRates]} />
+            </Box>
+          ) : null}
           <Box
             sx={{
               display: 'grid',

@@ -85,6 +85,20 @@ describe('ForecastContent', () => {
     expect(hookMock.toggleExcluded).toHaveBeenCalledWith('p1');
   });
 
+  it('names the currencies counted at face value for want of a rate (#787)', () => {
+    setState({ missingRates: ['XTS'] });
+    render(<ForecastContent />);
+
+    expect(screen.getByRole('status')).toHaveTextContent('XTS');
+  });
+
+  it('says nothing about rates when every currency has one', () => {
+    setState();
+    render(<ForecastContent />);
+
+    expect(screen.queryByText(/XTS/)).toBeNull();
+  });
+
   it('lists an item once while the previous curve is still on screen after unticking it', () => {
     setState();
     const { rerender } = render(<ForecastContent />);
