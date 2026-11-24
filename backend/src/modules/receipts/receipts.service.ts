@@ -695,15 +695,14 @@ export class ReceiptsService {
       const fields = buildTransaction(receipt);
       await assertWorkspaceOwned(manager, Category, [fields.categoryId], workspaceId);
       if (scanTransaction) {
-        await transactions.update(
-          { id: scanTransaction.id, workspaceId },
-          {
-            ...scanTransactionUpdate(fields, Boolean(receipt.parsedData?.date)),
-            // update() skips the subscriber: the vendor may have been corrected since the upload.
-            payeeId: await resolvePayeeId(manager, workspaceId, fields),
-            isVerified: true,
-          },
-        );
+        // update() skips the subscriber: the vendor may have been corrected since
+        // the upload. A scan row split in Review keeps its parts' money (#686).
+        const { where, set } = bookedRowUpdate(scanTransaction, workspaceId, {
+          ...scanTransactionUpdate(fields, Boolean(receipt.parsedData?.date)),
+          payeeId: await resolvePayeeId(manager, workspaceId, fields),
+          isVerified: true,
+        });
+        await transactions.update(where, set);
         const previousStatus = receipt.status;
         receipt.status = ReceiptStatus.APPROVED;
         receipt.transactionId = scanTransaction.id;
