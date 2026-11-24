@@ -5,12 +5,6 @@ import { Statement } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import type { TaxAssignmentService } from '../tax/tax-assignment.service';
 
-/**
- * The receipt page sends every field on each save, the category included. A
- * category equal to the one stored on the receipt is no choice (#688): left
- * out, so the receipt does not mark it manual or copy it back onto a row whose
- * category was changed in Review or on the transaction since.
- */
 /** The row fields a receipt edit writes, without its category unless the edit chose one. */
 export function categoryIfEdited<T extends Record<string, unknown>>(
   edits: Record<string, unknown>,
@@ -23,6 +17,12 @@ export function categoryIfEdited<T extends Record<string, unknown>>(
   return rest as T;
 }
 
+/**
+ * The receipt page sends every field on each save, the category included. A
+ * category equal to the one stored on the receipt is no choice (#688): left
+ * out, so the receipt does not mark it manual or copy it back onto a row whose
+ * category was changed in Review or on the transaction since.
+ */
 export function categoryChangesOnly(
   edits: Record<string, unknown>,
   stored: Record<string, unknown> | null | undefined,

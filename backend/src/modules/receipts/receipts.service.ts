@@ -662,7 +662,11 @@ export class ReceiptsService {
         await transactions.update(
           { id: scanTransaction.id, workspaceId },
           {
-            ...scanTransactionUpdate(fields, Boolean(receipt.parsedData?.date)),
+            // A category the row was given since (Review, the card) is kept (#688).
+            ...scanTransactionUpdate(
+              hasDecidedCategory(scanTransaction) ? categoryIfEdited({}, fields) : fields,
+              Boolean(receipt.parsedData?.date),
+            ),
             // update() skips the subscriber: the vendor may have been corrected since the upload.
             payeeId: await resolvePayeeId(manager, workspaceId, fields),
             isVerified: true,

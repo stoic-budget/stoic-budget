@@ -30,6 +30,7 @@ import {
   Statement,
   StatementStatus,
   Transaction,
+  TransactionCategorySource,
   TransactionType,
   User,
   Workspace,
@@ -367,6 +368,52 @@ describe('editing an approved receipt reaches the figures (real Postgres)', () =
     expect(edited.counterpartyName).toBe('ACME Store');
     const receipt = await receiptRepo.findOneByOrFail({ id: receiptId });
     expect(receipt.parsedData?.categorySource ?? null).not.toBe('manual');
+    await txRepo.delete({ id });
+  });
+
+  it("keeps a scan row's Review category through an edit and through approval (#688)", async () => {
+    const scan = await statement({
+      fileName: 'scan.jpg',
+      parsingDetails: { detectedBy: 'receipt-scan' } as Statement['parsingDetails'],
+    });
+    const id = await row({ statementId: scan, isVerified: false, categoryId: softwareId });
+    const receiptId = await approvedReceipt({
+      statementId: scan,
+      status: ReceiptStatus.DRAFT,
+      parsedData: { date: LAST_MONTH, amount: 50, currency: 'USD', vendor: 'ACME Stor', categoryId: softwareId },
+    });
+    await txRepo.update({ id }, { categoryId: travelId, categorySource: TransactionCategorySource.MANUAL });
+
+    await receipts.update(
+      receiptId,
+      workspaceId,
+      { parsedData: { vendor: 'ACME Store', amount: 50, categoryId: softwareId } },
+      userId,
+    );
+    expect((await txRepo.findOneByOrFail({ id })).categoryId).toBe(travelId);
+
+    await receipts.approve(receiptId, workspaceId, userId);
+    const approved = await txRepo.findOneByOrFail({ id });
+    expect(approved.categoryId).toBe(travelId);
+    expect(approved.counterpartyName).toBe('ACME Store');
+    await txRepo.delete({ id });
+  });
+
+  it("copies the receipt's category to its scan statement when it is linked", async () => {
+    const scan = await statement({
+      fileName: 'scan.jpg',
+      parsingDetails: { detectedBy: 'receipt-scan' } as Statement['parsingDetails'],
+    });
+    const id = await row({ statementId: scan, isVerified: false, categoryId: softwareId });
+    const receiptId = await approvedReceipt({
+      status: ReceiptStatus.DRAFT,
+      parsedData: { date: LAST_MONTH, amount: 50, currency: 'USD', vendor: 'ACME Store', categoryId: travelId },
+    });
+
+    // The scan linking its own statement passes no user.
+    await receipts.update(receiptId, workspaceId, { statementId: scan });
+
+    expect((await txRepo.findOneByOrFail({ id })).categoryId).toBe(travelId);
     await txRepo.delete({ id });
   });
 
