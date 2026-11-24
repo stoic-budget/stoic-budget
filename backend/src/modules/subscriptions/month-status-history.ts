@@ -31,6 +31,8 @@ export function workspaceMoney(
   rates: Pick<ExchangeRatesService, 'getRateOrNull'>,
   workspaceId: string,
   workspaceCurrency: string | null | undefined,
+  /** Count a charge with no rate as it is (the month under way, like the summary) rather than leave it out. */
+  { faceValue = false } = {},
 ): WorkspaceMoney {
   const currency = workspaceCurrency?.toUpperCase() ?? null;
   const unrated = new Set<string>();
@@ -40,8 +42,9 @@ export function workspaceMoney(
       return amount;
     }
     const rate = await rates.getRateOrNull(from, currency, day, workspaceId);
-    if (rate === null) unrated.add(from.toUpperCase());
-    return rate === null ? 0 : amount * rate;
+    if (rate !== null) return amount * rate;
+    unrated.add(from.toUpperCase());
+    return faceValue ? amount : 0;
   };
   const missing = () => (unrated.size > 0 ? { missingRates: [...unrated].sort() } : {});
   return { currency, convert, missing };

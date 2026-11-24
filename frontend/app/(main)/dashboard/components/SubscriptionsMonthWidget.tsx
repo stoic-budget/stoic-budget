@@ -80,8 +80,10 @@ export function SubscriptionsMonthWidget({
 }: SubscriptionsMonthWidgetProps): React.JSX.Element | null {
   const t = useIntlayer('subscriptionsMonthWidget');
   const links = useIntlayer('overviewWidgets');
-  // "Not counted: no exchange rate for …", as on a category's page.
-  const rateTexts = useIntlayer('categoryPage');
+  // A past month leaves a currency without a rate out ("Not counted…", as on a
+  // category's page); the month under way counts it as it is, as the dashboard says.
+  const notCountedText = useIntlayer('categoryPage').missingRates;
+  const faceValueText = useIntlayer('dashboardHeader').missingRates;
   const shown = useOverviewMonth();
   const present = usePresentPeriod().current;
   const month = shown?.month ?? present;
@@ -195,10 +197,11 @@ export function SubscriptionsMonthWidget({
         },
       ].filter((flag): flag is { label: string; href: string | undefined } => Boolean(flag))
     : [];
-  // Charges in a currency with no rate are left out of the amounts: say which (#787).
+  // Charges in a currency with no rate: say which, and how they were counted (#787).
   if (data?.missingRates?.length) {
+    const rateText = month === present ? faceValueText : notCountedText;
     flags.push({
-      label: fill(rateTexts.missingRates.value, { currencies: data.missingRates.join(', ') }),
+      label: fill(rateText.value, { currencies: data.missingRates.join(', ') }),
       href: '/settings/profile?tab=data&section=exchange-rates',
     });
   }
@@ -256,7 +259,7 @@ export function SubscriptionsMonthWidget({
         </p>
       )}
       {flags.length > 0 && (
-        <ChipGroup>
+        <ChipGroup wrap>
           {flags.map(flag => (
             <Chip key={flag.label} tone="warning" href={flag.href}>
               {flag.label}

@@ -22,7 +22,14 @@ vi.mock('@/app/components/charts/lazy-charts', () => ({
 vi.mock('@/app/i18n', async () => {
   const { autoDictionary } = await import('@/app/components/dashboard/__tests__/intlayer-mock');
   return {
-    useIntlayer: () => autoDictionary({ paid: { value: 'Paid' } }),
+    useIntlayer: (key: string) =>
+      autoDictionary({
+        paid: { value: 'Paid' },
+        // Which sentence the card picks depends on the month (#787).
+        missingRates: {
+          value: key === 'categoryPage' ? 'Not counted: {{currencies}}' : 'At face value: {{currencies}}',
+        },
+      }),
     useLocale: () => ({ locale: 'en' }),
   };
 });
@@ -153,15 +160,30 @@ describe('SubscriptionsMonthWidget', () => {
     expect(row).toHaveAttribute('href', `/subscriptions?focus=${encodeURIComponent('subscription:sub-2')}`);
   });
 
-  it('names the currencies left out for want of a rate, with the way to set one (#787)', async () => {
-    apiGet.mockResolvedValue({ data: status({ missingRates: ['XTS'] }) });
-    renderWithQuery(<SubscriptionsMonthWidget formatAmount={money} />);
-
-    await screen.findByText('Example Cloud');
-    const links = screen.getAllByRole('link');
-    expect(links.map(link => link.getAttribute('href'))).toContain(
-      '/settings/profile?tab=data&section=exchange-rates',
+  it('names the currencies without a rate, how they were counted, and the way to set one (#787)', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 9, 25, 12));
+    serve(status({ missingRates: ['XTS'] }), summary());
+    const { unmount } = renderWithQuery(
+      <OverviewMonthProvider value={MONTH}>
+        <SubscriptionsMonthWidget formatAmount={money} />
+      </OverviewMonthProvider>,
     );
+
+    // The month under way counts it as it is, like the total under the card.
+    const line = await screen.findByRole('link', { name: 'At face value: XTS' });
+    expect(line).toHaveAttribute('href', '/settings/profile?tab=data&section=exchange-rates');
+
+    unmount();
+    vi.setSystemTime(new Date(2026, 10, 25, 12));
+    renderWithQuery(
+      <OverviewMonthProvider value={MONTH}>
+        <SubscriptionsMonthWidget formatAmount={money} />
+      </OverviewMonthProvider>,
+    );
+    // A past month left it out.
+    expect(await screen.findByRole('link', { name: 'Not counted: XTS' })).toBeInTheDocument();
+    vi.useRealTimers();
   });
 
   it('adds no rate line when every currency has a rate', async () => {
