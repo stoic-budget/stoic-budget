@@ -2,11 +2,11 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { collectLogoFiles } from '../../../../src/modules/backups/backup-logo-files';
+import { collectColumnFiles, columnFilesOf } from '../../../../src/modules/backups/backup-file-columns';
 import { prepareDocumentPaths } from '../../../../src/modules/backups/backup-restore-documents';
 
-/** The invoice logo travels with a backup and comes back as the copy's own file (#677). */
-describe('business logo in a backup', () => {
+/** Pictures travel with a backup and come back as the copy's own files (#677). */
+describe('pictures in a backup', () => {
   let uploads: string;
   let previous: string | undefined;
 
@@ -15,6 +15,7 @@ describe('business logo in a backup', () => {
     previous = process.env.UPLOADS_DIR;
     process.env.UPLOADS_DIR = uploads;
     await fs.mkdir(path.join(uploads, 'workspace-logos'), { recursive: true });
+    await fs.mkdir(path.join(uploads, 'goal-covers'), { recursive: true });
   });
 
   afterEach(async () => {
@@ -27,7 +28,8 @@ describe('business logo in a backup', () => {
     await fs.writeFile(path.join(uploads, 'workspace-logos', 'acme.png'), 'ACME logo');
     const files: Array<{ path: string; contents: Buffer }> = [];
 
-    const records = await collectLogoFiles(
+    const records = await collectColumnFiles(
+      'workspace_business_profiles',
       [
         { workspaceId: 'ws-1', logoFile: 'acme.png' },
         { workspaceId: 'ws-2', logoFile: 'gone.png' },
@@ -82,5 +84,43 @@ describe('business logo in a backup', () => {
     );
 
     expect(mapped.logoFile).toBeNull();
+  });
+
+  it("carries a goal's cover and gives the copy its own", async () => {
+    await fs.writeFile(path.join(uploads, 'goal-covers', 'trip.jpg'), 'ACME trip');
+    const files: Array<{ path: string; contents: Buffer }> = [];
+    const [record] = await collectColumnFiles('goals', [{ id: 'goal-1', coverFile: 'trip.jpg' }], files);
+    expect(record).toEqual({ id: 'goal-1', coverFile: 'goal-covers/goal-1/trip.jpg' });
+
+    const mapped: Record<string, unknown> = { id: 'goal-new' };
+    const staged: Array<{ stagedPath: string; targetPath: string }> = [];
+    await prepareDocumentPaths(
+      'goals',
+      record,
+      mapped,
+      new Map(files.map(file => [file.path, file.contents])),
+      uploads,
+      staged,
+    );
+
+    expect(mapped.coverFile).toMatch(/^[0-9a-f-]{36}\.jpg$/);
+    expect(staged[0].targetPath).toBe(path.join(uploads, 'goal-covers', mapped.coverFile as string));
+  });
+
+  it('names every picture a discarded copy owns, in its own folder', async () => {
+    const asked: string[] = [];
+    const files = await columnFilesOf(async (sql, params) => {
+      asked.push(sql, String(params[0]));
+      return [
+        { name: 'logo.png', spec: 0 },
+        { name: 'trip.jpg', spec: 1 },
+      ] as never;
+    }, 'ws-copy');
+
+    expect(asked.join(' ')).toMatch(/FROM workspace_business_profiles[\s\S]*FROM goals[\s\S]*ws-copy/);
+    expect(files).toEqual([
+      path.join(uploads, 'workspace-logos', 'logo.png'),
+      path.join(uploads, 'goal-covers', 'trip.jpg'),
+    ]);
   });
 });
