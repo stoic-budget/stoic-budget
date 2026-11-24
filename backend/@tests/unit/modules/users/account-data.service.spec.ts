@@ -1,3 +1,6 @@
+import { UserIdentity } from '../../../../src/entities/user-identity.entity';
+import { PasskeyCredential } from '../../../../src/entities/passkey-credential.entity';
+import { AuthSession } from '../../../../src/entities/auth-session.entity';
 import { AuditAction, EntityType, Severity } from '@/entities/audit-event.entity';
 import { WorkspaceRole } from '@/entities/workspace-member.entity';
 import { AccountDataService } from '@/modules/users/services/account-data.service';
@@ -126,8 +129,8 @@ describe('AccountDataService', () => {
         ForbiddenException,
       );
       expect(userRepo.softDelete).not.toHaveBeenCalled();
-      expect(sessionRepo.update).not.toHaveBeenCalled();
-      expect(passkeyRepo.delete).not.toHaveBeenCalled();
+      expect(userRepo.manager.tx.update).not.toHaveBeenCalled();
+      expect(userRepo.manager.tx.delete).not.toHaveBeenCalled();
       expect(auditService.createEvent).not.toHaveBeenCalled();
     });
 
@@ -159,14 +162,21 @@ describe('AccountDataService', () => {
 
       await service.deleteMyAccount('user-1', 'right-password');
 
-      expect(sessionRepo.update).toHaveBeenCalled();
-      expect(passkeyRepo.delete).toHaveBeenCalledWith({ userId: 'user-1' });
+      // Sessions and passkeys go in the deletion's own transaction.
+      expect(userRepo.manager.tx.update).toHaveBeenCalledWith(
+        AuthSession,
+        expect.objectContaining({ userId: 'user-1' }),
+        expect.objectContaining({ revokedAt: expect.any(Date) }),
+      );
+      expect(userRepo.manager.tx.delete).toHaveBeenCalledWith(PasskeyCredential, { userId: 'user-1' });
+      expect(userRepo.manager.tx.delete).toHaveBeenCalledWith(UserIdentity, { userId: 'user-1' });
       expect(userRepo.softDelete).toHaveBeenCalledWith('user-1');
       // The person is forgotten, so the address can register again (#642).
       expect(userRepo.manager.tx.update).toHaveBeenCalledWith(
         expect.anything(),
         'user-1',
-        expect.objectContaining({ email: 'deleted-user-1@deleted.invalid', name: 'Deleted user' }),
+        // No "@": the placeholder cannot be registered by anyone first.
+        expect.objectContaining({ email: expect.stringMatching(/^deleted:[0-9a-f-]{36}$/), name: 'Deleted user' }),
       );
     });
 

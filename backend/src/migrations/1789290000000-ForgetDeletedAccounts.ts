@@ -13,12 +13,19 @@ export class ForgetDeletedAccounts1789290000000 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
+      UPDATE "auth_sessions" SET "revoked_at" = now()
+       WHERE "revoked_at" IS NULL AND "user_id" IN (SELECT "id" FROM "users" WHERE "deleted_at" IS NOT NULL)
+    `);
+    await queryRunner.query(
+      `DELETE FROM "passkey_credentials" WHERE "user_id" IN (SELECT "id" FROM "users" WHERE "deleted_at" IS NOT NULL)`,
+    );
+    await queryRunner.query(`
       DELETE FROM "user_identities"
        WHERE "user_id" IN (SELECT "id" FROM "users" WHERE "deleted_at" IS NOT NULL)
     `);
     await queryRunner.query(`
       UPDATE "users"
-         SET "email" = 'deleted-' || "id" || '@deleted.invalid',
+         SET "email" = 'deleted:' || gen_random_uuid(),
              "name" = 'Deleted user',
              "password_hash" = '',
              "company" = NULL,
@@ -28,7 +35,7 @@ export class ForgetDeletedAccounts1789290000000 implements MigrationInterface {
              "telegram_workspace_id" = NULL,
              "two_factor_secret" = NULL,
              "two_factor_recovery_codes" = '[]'::jsonb
-       WHERE "deleted_at" IS NOT NULL AND "email" NOT LIKE 'deleted-%@deleted.invalid'
+       WHERE "deleted_at" IS NOT NULL AND "email" NOT LIKE 'deleted:%'
     `);
   }
 

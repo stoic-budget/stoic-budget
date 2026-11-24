@@ -96,7 +96,8 @@ describe('Deleting a workspace and an account (e2e)', () => {
       'SELECT email, name, deleted_at FROM users WHERE id = $1',
       [member.userId],
     );
-    expect(gone).toMatchObject({ email: `deleted-${member.userId}@deleted.invalid`, name: 'Deleted user' });
+    expect(gone.name).toBe('Deleted user');
+    expect(gone.email).toMatch(/^deleted:/);
     expect(gone.deleted_at).not.toBeNull();
 
     const again = await registerAccount(app, email, 'Member One');

@@ -9,6 +9,7 @@ import type {
   TransactionCommitEvent,
   TransactionRollbackEvent,
 } from 'typeorm';
+import { resolveInUploadsDir } from '../../common/utils/uploads.util';
 import { Workspace } from '../../entities/workspace.entity';
 import { VersionBlobStore } from '../versions/version-blob-store';
 
@@ -62,7 +63,9 @@ export class WorkspaceFilesRemovalSubscriber implements EntitySubscriberInterfac
     const orphaned = paths.filter(filePath => !shared.has(filePath));
     this.defer(event.queryRunner, async () => {
       for (const filePath of orphaned) {
-        await fs.rm(filePath, { force: true }).catch(error => this.warn(filePath, error));
+        // Only what the server wrote under its uploads folder.
+        const inside = resolveInUploadsDir(filePath);
+        if (inside) await fs.rm(inside, { force: true }).catch(error => this.warn(filePath, error));
       }
       await this.versions.removeWorkspace(workspaceId).catch(error => this.warn('versions', error));
     });

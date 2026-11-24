@@ -25,6 +25,8 @@ vi.mock('bcrypt', () => ({
   hash: vi.fn(),
 }));
 
+const adminTx = { delete: vi.fn(), update: vi.fn() };
+
 describe('UsersService', () => {
   let testingModule: TestingModule;
   let service: UsersService;
@@ -61,8 +63,7 @@ describe('UsersService', () => {
               // `forgetDeletedAccount`: its soft delete lands on this repository's mock.
               transaction: (work: (tx: unknown) => Promise<void>) =>
                 work({
-                  delete: vi.fn(),
-                  update: vi.fn(),
+                  ...adminTx,
                   softDelete: (_entity: unknown, id: string) =>
                     (testingModule.get(getRepositoryToken(User)) as { softDelete: (id: string) => unknown }).softDelete(id),
                 }),
@@ -216,6 +217,12 @@ describe('UsersService', () => {
       await service.remove('1', adminUser as User);
 
       expect(softDeleteSpy).toHaveBeenCalledWith('1');
+      // An admin removal forgets the person as self-service deletion does (#642).
+      expect(adminTx.update).toHaveBeenCalledWith(
+        User,
+        '1',
+        expect.objectContaining({ email: expect.stringMatching(/^deleted:/), name: 'Deleted user' }),
+      );
     });
 
     it('should not physically delete from database', async () => {
