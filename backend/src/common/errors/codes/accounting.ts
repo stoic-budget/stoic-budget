@@ -119,6 +119,8 @@ export const ACCOUNTING_ERRORS = {
     'Invoice {{number}} has only {{creditable}} left that can be credited',
   CREDIT_NOTE_MIXED_CLIENTS: 'One credit note covers the invoices of one client',
   CREDIT_NOTE_MIXED_CURRENCIES: 'One credit note covers invoices in one currency',
+  CREDIT_NOTE_MIXED_TAX_MODES:
+    'One credit note covers invoices priced the same way: all with tax included or all without',
   CREDIT_NOTE_ZERO_TOTAL: 'A credit note must credit more than zero',
   CREDIT_NOTE_ALREADY_VOID: 'This credit note is already void',
   // ── tax ─────────────────────────────────────────────────────────────────

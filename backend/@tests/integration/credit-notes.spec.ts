@@ -374,6 +374,91 @@ describe('credit notes (real Postgres)', () => {
     expect((await invoices.findOne(invoice.id, workspaceId)).amountDue).toBe(0);
   });
 
+  /** A sent, tax-free invoice of the given lines. */
+  async function sentLines(
+    lineItems: Array<{ quantity: number; unitPrice: number }>,
+    pricesIncludeTax = false,
+  ): Promise<Invoice> {
+    const draft = await invoices.create(workspaceId, {
+      clientId,
+      issueDate: '2026-03-01',
+      dueDate: '2026-03-15',
+      pricesIncludeTax,
+      lineItems: lineItems.map(line => ({ description: 'Wireless Buds', ...line })),
+    });
+    return invoices.send(draft.id, workspaceId, userId);
+  }
+
+  it('credits part of a large batch at the amount asked, not a rounded unit price (#617)', async () => {
+    const batch = await sentLines([{ quantity: 1000, unitPrice: 0.5 }]);
+    const asked = 125;
+
+    const note = await creditNotes.create(workspaceId, userId, {
+      applications: [{ invoiceId: batch.id, amount: asked }],
+    });
+
+    expect(Number(note.total)).toBe(asked);
+    expect((await invoices.findOne(batch.id, workspaceId)).amountDue).toBe(500 - asked);
+
+    const cheap = await sentLines([{ quantity: 5000, unitPrice: 0.02 }]);
+    for (const amount of [10, 30]) {
+      const small = await creditNotes.create(workspaceId, userId, {
+        applications: [{ invoiceId: cheap.id, amount }],
+      });
+      expect(Number(small.total)).toBe(amount);
+    }
+  });
+
+  it('never credits more than is left: two notes add up to the invoice (#617)', async () => {
+    const invoice = await sentLines([
+      { quantity: 5000, unitPrice: 0.03 },
+      { quantity: 1, unitPrice: 50 },
+    ]);
+
+    const first = await creditNotes.create(workspaceId, userId, {
+      applications: [{ invoiceId: invoice.id, amount: 80 }],
+    });
+    const rest = await creditNotes.create(workspaceId, userId, {
+      applications: [{ invoiceId: invoice.id }],
+    });
+
+    expect(Number(first.total)).toBe(80);
+    expect(Number(first.total) + Number(rest.total)).toBeCloseTo(200, 2);
+    const read = await invoices.findOne(invoice.id, workspaceId);
+    expect(read.amountCredited).toBe(200);
+    expect(read.amountDue).toBe(0);
+    const payable = await payableRepo.findOneByOrFail({ id: invoice.payableId as string });
+    expect(Number(payable.amount)).toBe(0);
+  });
+
+  it('takes no more than is left off an invoice when its scaled lines round up (#617)', async () => {
+    // 0.03 of 0.35 rounds to 0.02 on the lines; the 0.33 left then rounds to 0.34.
+    const invoice = await sentLines([
+      { quantity: 1, unitPrice: 0.05 },
+      { quantity: 1, unitPrice: 0.05 },
+      { quantity: 1, unitPrice: 0.25 },
+    ]);
+    await creditNotes.create(workspaceId, userId, { applications: [{ invoiceId: invoice.id, amount: 0.03 }] });
+
+    await creditNotes.create(workspaceId, userId, { applications: [{ invoiceId: invoice.id }] });
+
+    const read = await invoices.findOne(invoice.id, workspaceId);
+    expect(read.amountCredited).toBe(0.35);
+    const payable = await payableRepo.findOneByOrFail({ id: invoice.payableId as string });
+    expect(Number(payable.amount)).toBe(0);
+  });
+
+  it('refuses a note mixing invoices with tax included and without (#617)', async () => {
+    const gross = await sentLines([{ quantity: 1, unitPrice: 119 }], true);
+    const net = await sentLines([{ quantity: 1, unitPrice: 100 }]);
+
+    expect(await errorOf(
+      creditNotes.create(workspaceId, userId, {
+        applications: [{ invoiceId: gross.id }, { invoiceId: net.id }],
+      }),
+    )).toEqual({ status: 400, code: 'CREDIT_NOTE_MIXED_TAX_MODES' });
+  });
+
   it('refuses a draft invoice and a mix of clients', async () => {
     const draft = await invoices.create(workspaceId, {
       clientId,
