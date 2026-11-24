@@ -26,13 +26,12 @@ import { ClassificationService } from '../classification/services/classification
 import { GoalsService } from '../goals/goals.service';
 import { NetWorthService } from '../net-worth/net-worth.service';
 import { ReceiptsService } from '../receipts/receipts.service';
-import type { DailyReport } from '../reports/interfaces/daily-report.interface';
-import type { MonthlyReport } from '../reports/interfaces/monthly-report.interface';
 import { ReportsService } from '../reports/reports.service';
 import { StatementsService } from '../statements/statements.service';
 import { telegramConnectionOf } from './telegram-connection.util';
 import { parseExpenseText } from './telegram-inbound.util';
 import { TelegramLinkCodes } from './telegram-link-codes';
+import { formatDailyReportMessage, formatMonthlyReportMessage } from './telegram-report-messages';
 import {
   renderTelegramMessage,
   resolveTelegramLocale,
@@ -289,7 +288,7 @@ export class TelegramService {
     }
 
     const dailyReport = await this.reportsService.generateDailyReport(workspaceId, date);
-    const message = this.formatDailyReportMessage(user.locale || 'en', date, dailyReport);
+    const message = formatDailyReportMessage(user.locale || 'en', date, dailyReport);
 
     return this.persistAndSend(user, chatId, ReportType.DAILY, reportDate, message, existing);
   }
@@ -309,12 +308,7 @@ export class TelegramService {
     }
 
     const monthlyReport = await this.reportsService.generateMonthlyReport(workspaceId, year, month);
-    const message = this.formatMonthlyReportMessage(
-      user.locale || 'en',
-      year,
-      month,
-      monthlyReport,
-    );
+    const message = formatMonthlyReportMessage(user.locale || 'en', year, month, monthlyReport);
 
     return this.persistAndSend(user, chatId, ReportType.MONTHLY, reportDate, message, existing);
   }
@@ -1317,119 +1311,6 @@ export class TelegramService {
     }
 
     return payload.result?.file_path || '';
-  }
-
-  private formatDailyReportMessage(locale: string, date: string, report: DailyReport): string {
-    const lines: string[] = [];
-    lines.push(renderTelegramMessage(locale, 'daily_header', { date }));
-    lines.push(
-      renderTelegramMessage(locale, 'income_line', {
-        amount: this.formatAmount(report.income.totalAmount, locale),
-        count: report.income.transactionCount,
-      }),
-    );
-    lines.push(
-      renderTelegramMessage(locale, 'expense_line', {
-        amount: this.formatAmount(report.expense.totalAmount, locale),
-        count: report.expense.transactionCount,
-      }),
-    );
-    lines.push(
-      renderTelegramMessage(locale, 'daily_total', {
-        amount: this.formatAmount(report.summary.difference, locale),
-      }),
-    );
-
-    if (report.income.topCounterparties.length > 0) {
-      lines.push('', renderTelegramMessage(locale, 'top_income_header'));
-      report.income.topCounterparties.slice(0, 5).forEach((item, idx) => {
-        lines.push(
-          renderTelegramMessage(locale, 'list_item', {
-            index: idx + 1,
-            name: item.name,
-            amount: this.formatAmount(item.amount, locale),
-            count: item.count,
-          }),
-        );
-      });
-    }
-
-    if (report.expense.topCategories.length > 0) {
-      lines.push('', renderTelegramMessage(locale, 'top_expense_header'));
-      report.expense.topCategories.slice(0, 5).forEach((item, idx) => {
-        lines.push(
-          renderTelegramMessage(locale, 'list_item', {
-            index: idx + 1,
-            name: item.categoryName,
-            amount: this.formatAmount(item.amount, locale),
-            count: item.count,
-          }),
-        );
-      });
-    }
-
-    return lines.join('\n');
-  }
-
-  private formatMonthlyReportMessage(
-    locale: string,
-    year: number,
-    month: number,
-    report: MonthlyReport,
-  ): string {
-    const lines: string[] = [];
-    const period = `${String(month).padStart(2, '0')}.${year}`;
-    lines.push(renderTelegramMessage(locale, 'monthly_header', { period }));
-    lines.push(
-      renderTelegramMessage(locale, 'monthly_income', {
-        amount: this.formatAmount(report.summary.totalIncome, locale),
-      }),
-    );
-    lines.push(
-      renderTelegramMessage(locale, 'monthly_expense', {
-        amount: this.formatAmount(report.summary.totalExpense, locale),
-      }),
-    );
-    lines.push(
-      renderTelegramMessage(locale, 'monthly_diff', {
-        amount: this.formatAmount(report.summary.difference, locale),
-        count: report.summary.transactionCount,
-      }),
-    );
-
-    if (report.categoryDistribution.length > 0) {
-      lines.push('', renderTelegramMessage(locale, 'top_categories_header'));
-      report.categoryDistribution.slice(0, 5).forEach((item, idx) => {
-        lines.push(
-          renderTelegramMessage(locale, 'category_item', {
-            index: idx + 1,
-            name: item.categoryName,
-            amount: this.formatAmount(item.amount, locale),
-            percent: item.percentage.toFixed(1),
-          }),
-        );
-      });
-    }
-
-    if (report.counterpartyDistribution.length > 0) {
-      lines.push('', renderTelegramMessage(locale, 'top_counterparties_header'));
-      report.counterpartyDistribution.slice(0, 5).forEach((item, idx) => {
-        lines.push(
-          renderTelegramMessage(locale, 'counterparty_item', {
-            index: idx + 1,
-            name: item.counterpartyName,
-            amount: this.formatAmount(item.amount, locale),
-            percent: item.percentage.toFixed(1),
-          }),
-        );
-      });
-    }
-
-    return lines.join('\n');
-  }
-
-  private formatAmount(value: number | null | undefined, locale: string): string {
-    return formatMoney(value || 0, locale);
   }
 
   private toDateOnly(dateLike: string | Date): Date {

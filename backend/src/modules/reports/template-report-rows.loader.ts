@@ -8,6 +8,7 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { Workspace } from '../../entities/workspace.entity';
 import { UNCATEGORIZED_CATEGORY_NAME } from '../categories/uncategorized-category';
 import { CurrencyConverter, normalizeCurrencyCode } from '../exchange-rates/currency-converter';
+import { loadDayConverter } from '../exchange-rates/day-converter';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { countedTransactions } from './helpers/report-query.util';
 import { toDateKey } from './helpers/report-values.util';
@@ -36,6 +37,29 @@ export class TemplateReportRowsLoader {
       },
     });
     return this.normalizeCurrency(workspace?.currency);
+  }
+
+  /**
+   * Puts loaded rows' amounts into the workspace's currency, each at its own
+   * day's rate, so a report sums one currency (#598): 100 USD and 100 EUR are
+   * not "200". A row in a currency with no rate counts 0 and its currency is
+   * named. The rows are the report's own copies and are never saved.
+   */
+  async toWorkspaceCurrency(
+    workspaceId: string,
+    rows: Transaction[],
+  ): Promise<{ currency: string; missingRates: string[] }> {
+    const currency = await this.getWorkspaceCurrency(workspaceId);
+    const convert = await loadDayConverter(
+      this.exchangeRatesService,
+      currency,
+      rows.map(row => ({ currency: row.currency, day: toDateKey(row.transactionDate) })),
+      workspaceId,
+    );
+    for (const row of rows) {
+      row.amount = convert(row.amount, row.currency, toDateKey(row.transactionDate));
+    }
+    return { currency, missingRates: convert.missing };
   }
 
   async loadReportRows(

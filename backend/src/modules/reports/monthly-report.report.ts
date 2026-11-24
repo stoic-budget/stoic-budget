@@ -14,6 +14,7 @@ import {
 } from './helpers/report-query.util';
 import { dayOf } from './helpers/report-values.util';
 import type { MonthlyReport } from './interfaces/monthly-report.interface';
+import { TemplateReportRowsLoader } from './template-report-rows.loader';
 
 /** A calendar month: daily trend, category and counterparty shares, and the change from the month before. */
 @Injectable()
@@ -23,6 +24,7 @@ export class MonthlyReportGenerator {
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
     private readonly auditService: AuditService,
+    private readonly rowsLoader: TemplateReportRowsLoader,
   ) {}
 
   /**
@@ -54,6 +56,7 @@ export class MonthlyReportGenerator {
       .andWhere('transaction.transactionDate <= :end', { end: endDate })
       .getMany();
     redactPrivateRows(transactions, viewerMemberId);
+    const money = await this.rowsLoader.toWorkspaceCurrency(workspaceId, transactions);
 
     // Calculate daily trends
     const dailyMap = new Map<string, { income: number; expense: number }>();
@@ -127,6 +130,7 @@ export class MonthlyReportGenerator {
       .andWhere('transaction.transactionDate >= :start', { start: previousStartDate })
       .andWhere('transaction.transactionDate <= :end', { end: previousEndDate })
       .getMany();
+    await this.rowsLoader.toWorkspaceCurrency(workspaceId, previousTransactions);
 
     const currentIncome = transactions
       .filter(t => t.transactionType === TransactionType.INCOME)
@@ -151,6 +155,7 @@ export class MonthlyReportGenerator {
     const report: MonthlyReport = {
       month: month.toString(),
       year,
+      ...money,
       dailyTrends,
       categoryDistribution,
       counterpartyDistribution,

@@ -124,6 +124,67 @@ describe('ReportsService — generateDailyReport', () => {
     expect(transactionRepo.createQueryBuilder).not.toHaveBeenCalled();
   });
 
+  it("adds a day's rows in the workspace's currency, not as bare numbers (#598)", async () => {
+    const day = new Date('2025-01-10');
+    const row = (id: string, amount: number, currency: string) => ({
+      id,
+      amount,
+      currency,
+      transactionType: TransactionType.EXPENSE,
+      transactionDate: day,
+      counterpartyName: 'ACME Store',
+      category: { name: 'Shopping' },
+      categoryId: 'cat-shopping',
+    });
+    let callCount = 0;
+    const qb = createQbMock(async () => {
+      callCount++;
+      return callCount === 1 ? [] : [row('1', 100, 'USD'), row('2', 100, 'EUR'), row('3', 50, 'XAU')];
+    });
+    // The workspace is in EUR; 1 USD = 0.90 EUR; no rate for XAU.
+    const service = buildReportsService({
+      transactionRepository: { createQueryBuilder: vi.fn().mockReturnValue(qb) },
+      cacheManager: { get: vi.fn().mockResolvedValue(null), set: vi.fn() },
+      exchangeRatesService: {
+        getRateOrNull: vi.fn(async (from: string) => (from === 'USD' ? 0.9 : null)),
+      },
+    });
+
+    const result = await service.generateDailyReport(WS_ID, '2025-01-10');
+
+    expect(result.currency).toBe('EUR');
+    expect(result.expense.totalAmount).toBeCloseTo(190, 2);
+    expect(result.expense.topCategories[0].amount).toBeCloseTo(190, 2);
+    expect(result.missingRates).toEqual(['XAU']);
+  });
+
+  it('converts the monthly report, the month before it and a custom report (#598)', async () => {
+    const day = new Date('2025-01-10');
+    const rows = () => [
+      { id: '1', amount: 100, currency: 'USD', transactionType: TransactionType.EXPENSE, transactionDate: day, counterpartyName: 'ACME Store', category: null, categoryId: null },
+      { id: '2', amount: 100, currency: 'EUR', transactionType: TransactionType.EXPENSE, transactionDate: day, counterpartyName: 'ACME Store', category: null, categoryId: null },
+    ];
+    const service = buildReportsService({
+      transactionRepository: { createQueryBuilder: vi.fn(() => createQbMock(async () => rows())) },
+      cacheManager: { get: vi.fn().mockResolvedValue(null), set: vi.fn() },
+      exchangeRatesService: {
+        getRateOrNull: vi.fn(async (from: string) => (from === 'USD' ? 0.9 : null)),
+      },
+    });
+
+    const monthly = await service.generateMonthlyReport(WS_ID, 2025, 1);
+    const custom = await service.generateCustomReport(WS_ID, {
+      dateFrom: '2025-01-01',
+      dateTo: '2025-01-31',
+      groupBy: ReportGroupBy.DAY,
+    } as never);
+
+    expect(monthly.summary.totalExpense).toBeCloseTo(190, 2);
+    expect(monthly.comparison.previousPeriod.expense).toBeCloseTo(190, 2);
+    expect(custom.summary.totalExpense).toBeCloseTo(190, 2);
+    expect([monthly.currency, custom.currency]).toEqual(['EUR', 'EUR']);
+  });
+
   it('returns correct income/expense totals for a given day', async () => {
     const income1 = {
       id: '1',
