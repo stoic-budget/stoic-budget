@@ -12,11 +12,14 @@ export async function disconnectProtocol(
   manager: EntityManager,
   found: { integration: Integration | null; settings: OpenProtocolSettings | null },
 ): Promise<void> {
-  if (found.settings) {
-    await manager.getRepository(OpenProtocolSettings).delete({ id: found.settings.id });
-  }
-  if (found.integration) {
-    found.integration.status = IntegrationStatus.DISCONNECTED;
-    await manager.getRepository(Integration).save(found.integration);
-  }
+  // Both or neither: a status left connected over deleted settings would mislead.
+  await manager.transaction(async tx => {
+    if (found.settings) {
+      await tx.getRepository(OpenProtocolSettings).delete({ id: found.settings.id });
+    }
+    if (found.integration) {
+      found.integration.status = IntegrationStatus.DISCONNECTED;
+      await tx.getRepository(Integration).save(found.integration);
+    }
+  });
 }
