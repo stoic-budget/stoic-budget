@@ -9,22 +9,26 @@ import { queryKeys } from '@/app/lib/query-keys';
 /** The same cached list other pages read; categories change rarely. */
 const CATEGORIES_STALE_TIME = 5 * 60 * 1000;
 
-/** Each category's parent, by id: enough to walk a category up to its top (#658). */
-export function useCategoryParents(): ReadonlyMap<string, string | null> {
+/**
+ * Each category's parent, by id: enough to walk a category up to its top
+ * (#658), and whether the list is settled (loaded, or failed: then only the
+ * parents the budgets carry are known).
+ */
+export function useCategoryParents(): {
+  parentOf: ReadonlyMap<string, string | null>;
+  settled: boolean;
+} {
   const workspaceId = useWorkspaceId();
-  const { data } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: queryKeys.categories(workspaceId),
     queryFn: ({ signal }) =>
       apiQueryDecoded({ url: '/categories', signal, contract: 'CategoryList' }),
     staleTime: CATEGORIES_STALE_TIME,
     enabled: Boolean(workspaceId),
   });
-  return useMemo(() => {
-    const parents = new Map<string, string | null>();
-    for (const category of data ?? []) {
-      parents.set(category.id, category.parentId);
-      for (const child of category.children) parents.set(child.id, child.parentId);
-    }
-    return parents;
-  }, [data]);
+  const parentOf = useMemo(
+    () => new Map((data ?? []).map(category => [category.id, category.parentId] as const)),
+    [data],
+  );
+  return { parentOf, settled: !isPending || isError };
 }

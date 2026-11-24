@@ -165,4 +165,15 @@ describe('leftToSpend', () => {
 
     expect(leftToSpend([groceries, goal, travel], MONTH)).toEqual([{ currency: 'USD', amount: 260, allowed: 380 }]);
   });
+
+  it('keeps a budget whose categories loop, and counts one of two goals\' budgets on one category (#658)', () => {
+    const looped = budgetItem({ id: 'b-x', name: 'X', categoryId: 'x', availableAmount: 10, spentAmount: 1 });
+    expect(leftToSpend([looped], MONTH, new Map([['x', 'y'], ['y', 'x']]))).toEqual([
+      { currency: 'USD', amount: 9, allowed: 10 },
+    ]);
+
+    const tripA = budgetItem({ id: 'b-a', name: 'Trip A', categoryId: 'food', goalId: 'a', availableAmount: 100, spentAmount: 80 });
+    const tripB = budgetItem({ id: 'b-b', name: 'Trip B', categoryId: 'food', goalId: 'b', availableAmount: 60, spentAmount: 80 });
+    expect(leftToSpend([tripA, tripB], MONTH)).toEqual([{ currency: 'USD', amount: 20, allowed: 100 }]);
+  });
 });

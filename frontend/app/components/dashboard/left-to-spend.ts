@@ -39,15 +39,22 @@ export function leftToSpend(
       (!b.endsOn || b.endsOn >= first),
   );
   // A goal's budget beside a standalone one on the same category counts its money again.
-  const standalone = new Set(live.filter(b => !b.goalId).map(b => b.categoryId));
-  const own = live.filter(b => !(b.goalId && standalone.has(b.categoryId)));
+  // Of several goals' budgets on one category with no standalone budget, one counts.
+  const covered = new Set(live.filter(b => !b.goalId).map(b => b.categoryId));
+  const own = live.filter(b => {
+    if (!b.goalId) return true;
+    if (covered.has(b.categoryId)) return false;
+    covered.add(b.categoryId);
+    return true;
+  });
   // A counted budget on any category above already counts its subcategories'
   // spending: a budget on the subcategory too would count the same money twice.
   const counted = new Set(live.map(b => b.categoryId).filter(Boolean));
   const above = (b: BudgetFigures) => {
     const chain: string[] = [];
     let parent = b.category?.parentId ?? (b.categoryId ? parentOf.get(b.categoryId) : null) ?? null;
-    while (parent && chain.length < 20 && !chain.includes(parent)) {
+    // A cycle in the categories ends the walk, before it reaches the budget's own category.
+    while (parent && parent !== b.categoryId && chain.length < 20 && !chain.includes(parent)) {
       chain.push(parent);
       parent = parentOf.get(parent) ?? null;
     }
