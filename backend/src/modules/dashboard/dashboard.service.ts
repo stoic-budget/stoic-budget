@@ -30,6 +30,7 @@ import { Payable, PayableDirection, PayableStatus } from '../../entities/payable
 import { Receipt, ReceiptStatus } from '../../entities/receipt.entity';
 import { BankName, Statement, StatementStatus } from '../../entities/statement.entity';
 import { Subscription, SubscriptionStatus } from '../../entities/subscription.entity';
+import { SubscriptionCharge } from '../../entities/subscription-charge.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
@@ -50,7 +51,7 @@ import { recentRowHrefs } from './bill-hrefs';
 import {
   newestRecurringPayables,
   projectedOccurrences,
-  projectSubscriptionCharges,
+  subscriptionCommitments,
 } from './commitment-projections';
 import {
   type CashFlowRange,
@@ -1188,7 +1189,15 @@ export class DashboardService {
 
     const [payableItems, subscriptionItems] = await Promise.all([
       this.collectPayableCommitments(payables, series, currency, today, horizonEnd),
-      this.collectSubscriptionCommitments(subscriptions, currency, today, horizonEnd),
+      subscriptionCommitments({
+        charges: this.subscriptionRepo.manager.getRepository(SubscriptionCharge),
+        workspaceId,
+        subscriptions,
+        window: { today, horizonEnd, maxSteps: MAX_COMMITMENT_HORIZON_DAYS },
+        nextChargeOf: subscription => this.parseDateOnly(subscription.nextChargeDate),
+        amountOf: ({ amount, currency: from }) =>
+          this.convertDashboardAmount(amount, from, currency, workspaceId),
+      }),
     ]);
 
     const items = [...payableItems.items, ...subscriptionItems].sort((a, b) =>
@@ -1271,46 +1280,6 @@ export class DashboardService {
     }
 
     return { items, unscheduledCommitted };
-  }
-
-  /** Every charge each active subscription will raise inside the horizon. */
-  private async collectSubscriptionCommitments(
-    subscriptions: Subscription[],
-    currency: string,
-    today: Date,
-    horizonEnd: Date,
-  ): Promise<DashboardCommitmentItem[]> {
-    const items: DashboardCommitmentItem[] = [];
-
-    for (const subscription of subscriptions) {
-      const amount = await this.convertDashboardAmount(
-        subscription.amount,
-        subscription.currency,
-        currency,
-        subscription.workspaceId,
-      );
-      if (amount === 0) {
-        continue;
-      }
-      for (const chargeDate of projectSubscriptionCharges(
-        this.parseDateOnly(subscription.nextChargeDate),
-        subscription.frequency,
-        today,
-        horizonEnd,
-        MAX_COMMITMENT_HORIZON_DAYS,
-      )) {
-        items.push({
-          date: this.formatDateOnly(chargeDate),
-          label: subscription.vendorName,
-          amount,
-          source: 'subscription',
-          sourceId: subscription.id,
-          isOverdue: false,
-        });
-      }
-    }
-
-    return items;
   }
 
   /** Walks the horizon day by day, draining the opening balance as commitments fall due. */

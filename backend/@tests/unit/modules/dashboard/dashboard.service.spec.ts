@@ -81,6 +81,9 @@ describe('DashboardService', () => {
   const memberRepo = createRepoMock();
   const workspaceRepo = createRepoMock();
   const subscriptionRepo = createRepoMock();
+  // A subscription's linked payments, read through the repository's manager.
+  const chargeRepo = { find: vi.fn(async (): Promise<unknown[]> => []) };
+  Object.assign(subscriptionRepo, { manager: { getRepository: () => chargeRepo } });
   const exchangeRatesService = {
     getRate: vi.fn(),
     getRateOrNull: vi.fn(),
@@ -1592,6 +1595,36 @@ describe('DashboardService', () => {
         expect(result.shortfallDate).toBe('2026-03-28');
         expect(result.lowestBalance).toBe(-50);
       } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("leaves out a charge already paid ahead, but not one a past period's payment was recorded against (#601)", async () => {
+      vi.useFakeTimers().setSystemTime(new Date(2026, 10, 5));
+      try {
+        primeBalance('1000');
+        payableRepo.find.mockResolvedValue([]);
+        const cloud = { vendorName: 'ACME Cloud', amount: '100', currency: 'KZT', frequency: 'monthly', nextChargeDate: '2026-11-20' };
+        subscriptionRepo.find.mockResolvedValue([
+          { ...cloud, id: 'paid-ahead' },
+          { ...cloud, id: 'paid-late' },
+        ]);
+        chargeRepo.find.mockResolvedValue([
+          // Paid on 5 Nov for the 20 Nov charge, after paying October's on its day.
+          { subscriptionId: 'paid-ahead', chargeDate: '2026-11-05', expectedDate: '2026-11-20' },
+          { subscriptionId: 'paid-ahead', chargeDate: '2026-10-20', expectedDate: '2026-10-20' },
+          // October's payment, posted a day late and recorded against 20 Nov.
+          { subscriptionId: 'paid-late', chargeDate: '2026-10-21', expectedDate: '2026-11-20' },
+        ]);
+
+        const result = await service.getCommitments('ws-1', 60);
+
+        const datesOf = (id: string) =>
+          result.items.filter(item => item.sourceId === id).map(item => item.date);
+        expect(datesOf('paid-ahead')).toEqual(['2026-12-20']);
+        expect(datesOf('paid-late')).toEqual(['2026-11-20', '2026-12-20']);
+      } finally {
+        chargeRepo.find.mockResolvedValue([]);
         vi.useRealTimers();
       }
     });
