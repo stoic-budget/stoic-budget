@@ -25,13 +25,19 @@ export class CryptoSnapshotScheduler {
 
   @Cron('30 5 * * *')
   async writeDailySnapshots(): Promise<void> {
-    // A past version keeps the value it was copied with.
-    const rows: Array<{ workspaceId: string }> = await this.walletRepo
-      .createQueryBuilder('wallet')
-      .innerJoin('wallet.workspace', 'workspace')
-      .select('DISTINCT wallet.workspaceId', 'workspaceId')
-      .where('workspace.kind = :kind', STANDARD_WORKSPACE)
-      .getRawMany();
+    // Every workspace with crypto wallets, and every one still showing a crypto
+    // line: its last wallet may be gone with a write that failed, and only a
+    // fresh one (0) takes the value out of net worth. A past version keeps the
+    // value it was copied with.
+    const rows: Array<{ workspaceId: string }> = await this.walletRepo.query(
+      `SELECT ids."workspace_id" AS "workspaceId"
+         FROM (SELECT "workspace_id" FROM "crypto_wallets"
+               UNION
+               SELECT "workspace_id" FROM "balance_accounts" WHERE "account_kind" = 'crypto') ids
+         JOIN "workspaces" w ON w."id" = ids."workspace_id"
+        WHERE w."kind" = $1`,
+      [STANDARD_WORKSPACE.kind],
+    );
     for (const { workspaceId } of rows) {
       // One workspace's failure must not stop the others'.
       await this.balanceService

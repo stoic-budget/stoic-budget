@@ -7,6 +7,7 @@ import type { TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
+import { CryptoHoldingsService } from '../../src/modules/crypto/crypto-holdings.service';
 import { CryptoPriceService } from '../../src/modules/crypto/crypto-price.service';
 import { CryptoSnapshotScheduler } from '../../src/modules/crypto/crypto-snapshot.scheduler';
 import {
@@ -72,8 +73,34 @@ describe('Crypto value on the balance sheet (e2e)', () => {
     expect(await cryptoOnSheet()).toBe(4500);
   });
 
-  it('takes a removed wallet off the balance sheet at once', async () => {
+  it('writes the daily value as the system, not as a member', async () => {
+    const [event] = await dataSource.query(
+      `SELECT actor_type FROM audit_events
+        WHERE workspace_id = $1 AND meta->>'kind' = 'balance_snapshot'
+        ORDER BY created_at DESC LIMIT 1`,
+      [owner.workspaceId],
+    );
+    expect(event?.actor_type).toBe('system');
+  });
+
+  it('takes the value off by the next day when the write failed with the last wallet', async () => {
+    // The write after the delete fails once; the delete itself goes through.
+    vi.spyOn(app.get(CryptoHoldingsService), 'portfolioValue').mockRejectedValueOnce(new Error('no rate'));
     await as(request(server()).delete(`/crypto/wallets/${walletId}`)).expect(200);
+    expect(await cryptoOnSheet()).toBe(4500);
+
+    await app.get(CryptoSnapshotScheduler).writeDailySnapshots();
+
+    expect(await cryptoOnSheet()).toBe(0);
+  });
+
+  it('takes a removed wallet off the balance sheet at once', async () => {
+    const holding = await as(request(server()).post('/crypto/holdings'))
+      .send({ asset: 'ETH', amount: '1', costPerUnit: 2000 })
+      .expect(201);
+    expect(await cryptoOnSheet()).toBe(3000);
+
+    await as(request(server()).delete(`/crypto/wallets/${holding.body.id}`)).expect(200);
 
     expect(await cryptoOnSheet()).toBe(0);
   });

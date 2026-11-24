@@ -4,17 +4,14 @@ import { CryptoSnapshotScheduler } from '../../../../src/modules/crypto/crypto-s
 /** Every workspace with crypto gets today's value once a day (#694). */
 describe('CryptoSnapshotScheduler', () => {
   const build = (workspaceIds: string[]) => {
-    const query: Record<string, unknown> = {};
-    for (const method of ['innerJoin', 'select', 'where']) query[method] = vi.fn(() => query);
-    query.getRawMany = vi.fn(async () => workspaceIds.map(workspaceId => ({ workspaceId })));
-    const walletRepo = { createQueryBuilder: vi.fn(() => query) };
+    const walletRepo = { query: vi.fn(async () => workspaceIds.map(workspaceId => ({ workspaceId }))) };
     const balanceService = {
       writePortfolioSnapshot: vi.fn(async (workspaceId: string) => {
         if (workspaceId === 'ws-broken') throw new Error('no price source');
       }),
     };
     const scheduler = new CryptoSnapshotScheduler(walletRepo as never, balanceService as never);
-    return { scheduler, query, balanceService };
+    return { scheduler, walletRepo, balanceService };
   };
 
   it('writes each workspace once, and goes on past one that fails', async () => {
@@ -29,11 +26,13 @@ describe('CryptoSnapshotScheduler', () => {
     ]);
   });
 
-  it('leaves past versions alone', async () => {
-    const { scheduler, query } = build([]);
+  it('asks for standard workspaces only, and for those still showing a crypto line', async () => {
+    const { scheduler, walletRepo } = build([]);
 
     await scheduler.writeDailySnapshots();
 
-    expect(query.where).toHaveBeenCalledWith('workspace.kind = :kind', { kind: 'standard' });
+    const [sql, params] = walletRepo.query.mock.calls[0] as unknown as [string, unknown[]];
+    expect(params).toEqual(['standard']);
+    expect(sql).toContain('"account_kind" = \'crypto\'');
   });
 });
