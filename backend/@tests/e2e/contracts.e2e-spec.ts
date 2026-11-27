@@ -129,6 +129,7 @@ import {
   CategorizationRuleList,
   CategorizationRuleSuggestionList,
   CategorizationRuleTestResult,
+  ClassifiedTransaction,
   PaymentCandidateList,
   PeppolLookup,
   PeppolTransmissionList,
@@ -1142,6 +1143,38 @@ describe('API contracts (e2e)', () => {
         .set('x-workspace-id', owner.workspaceId);
       return body ? req.send(body) : req;
     };
+
+    it('POST /classification/transaction/:id answers the re-filed row', async () => {
+      // A row of its own: re-filing it must not move rows the later tests count on.
+      const categories = await get('/categories?type=expense');
+      const expense = await request(app.getHttpServer())
+        .post('/statements/manual-expense')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('x-workspace-id', owner.workspaceId)
+        .field('amount', '7.25')
+        .field('currency', 'USD')
+        .field('merchant', 'Reclassify Kiosk')
+        .field('categoryId', categories.body[0].id)
+        .field('date', '2026-02-03')
+        .expect(201);
+      const [{ id: transactionId }] = await dataSource.query(
+        'SELECT id FROM transactions WHERE statement_id = $1 AND workspace_id = $2',
+        [expense.body.id, owner.workspaceId],
+      );
+      // A row the rules may re-file: a hand-picked category is kept as it is.
+      await dataSource.query(`UPDATE transactions SET category_source = 'keyword' WHERE id = $1`, [
+        transactionId,
+      ]);
+
+      await send('post', `/classification/transaction/${transactionId}`).expect(200);
+      // The second run changes nothing, so save() leaves undefined keys on the row it answered.
+      const classified = await send('post', `/classification/transaction/${transactionId}`).expect(200);
+
+      matches(ClassifiedTransaction, classified.body);
+      expect(classified.body).toMatchObject({ id: transactionId, branchId: null });
+      await dataSource.query('DELETE FROM transactions WHERE statement_id = $1', [expense.body.id]);
+      await dataSource.query('DELETE FROM statements WHERE id = $1', [expense.body.id]);
+    });
 
     it('POST, GET, PUT /categorization-rules, /test and /:id/apply', async () => {
       const categories = await get('/categories?type=expense');
