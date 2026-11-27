@@ -533,13 +533,43 @@ describe('invoice status (real Postgres)', () => {
       expect(view.issuer.bankAccount).toBe('EE471000001020145685');
       expect(view.billedTo.name).toBe('Beta GmbH');
       expect(view.lines).toEqual([
-        { description: 'Consulting', quantity: '1.00', unitPrice: '250.00', amount: '250' },
+        {
+          description: 'Consulting',
+          quantity: '1.00',
+          unitPrice: '250.00',
+          adjustmentPercent: null,
+          amount: '250',
+        },
       ]);
       // Nothing the client has no business seeing.
       const serialized = JSON.stringify(view);
       expect(serialized).not.toContain(workspaceId);
       expect(serialized).not.toContain(invoice.id);
       expect(serialized).not.toContain(clientId);
+    });
+
+    it('states a discounted line at its amount after the discount, as the PDF does', async () => {
+      const draft = await invoices.create(workspaceId, {
+        clientId,
+        issueDate: '2026-03-01',
+        dueDate: '2026-03-15',
+        lineItems: [{ description: 'Workshop', quantity: 2, unitPrice: 100, adjustmentPercent: -10 }],
+      });
+      const sent = await invoices.send(draft.id, workspaceId, userId);
+
+      const view = await publicInvoices.view(sent.shareToken as string);
+
+      expect(view.lines).toEqual([
+        expect.objectContaining({
+          description: 'Workshop',
+          unitPrice: '100.00',
+          adjustmentPercent: '-10',
+          amount: '180',
+        }),
+      ]);
+      // The page marks the line as the PDF does.
+      expect(view.labels.discount).toEqual(expect.any(String));
+      expect(Number(view.total)).toBe(180);
     });
 
     it('marks the first open and counts the rest', async () => {
