@@ -292,6 +292,54 @@ describe('credit notes (real Postgres)', () => {
     expect(read.status).toBe(InvoiceStatus.PARTIALLY_PAID);
   });
 
+  it('refuses to void a part-paid invoice, and one a credit note is applied to', async () => {
+    const paid = await sentInvoice(1000);
+    await payables.addPayment(paid.payable.id, workspaceId, userId, { amount: 300 });
+    const credited = await sentInvoice(1000);
+    await creditNotes.create(workspaceId, userId, {
+      applications: [{ invoiceId: credited.invoice.id, amount: 200 }],
+    });
+
+    for (const { invoice } of [paid, credited]) {
+      expect(await errorOf(invoices.void(invoice.id, workspaceId, userId))).toMatchObject({
+        status: 409,
+        code: 'INVOICE_NOT_VOIDABLE',
+      });
+      expect((await invoices.findOne(invoice.id, workspaceId)).status).not.toBe(InvoiceStatus.VOID);
+    }
+  });
+
+  it('voids the invoice once its credit note is voided', async () => {
+    const { invoice } = await sentInvoice(1000);
+    const note = await creditNotes.create(workspaceId, userId, {
+      applications: [{ invoiceId: invoice.id, amount: 200 }],
+    });
+
+    await creditNotes.void(note.id, workspaceId, userId);
+    const voided = await invoices.void(invoice.id, workspaceId, userId);
+
+    expect(voided.status).toBe(InvoiceStatus.VOID);
+  });
+
+  it('never leaves a payment on a voided invoice when both arrive at once', async () => {
+    for (let round = 0; round < 5; round += 1) {
+      const { invoice, payable } = await sentInvoice(1000);
+      await Promise.allSettled([
+        payables.addPayment(payable.id, workspaceId, userId, { amount: 300 }),
+        invoices.void(invoice.id, workspaceId, userId),
+      ]);
+
+      const after = await invoices.findOne(invoice.id, workspaceId);
+      const bill = await payableRepo.findOneByOrFail({ id: payable.id });
+      // Either the payment won and the void was refused, or the void won first.
+      if (after.status === InvoiceStatus.VOID) {
+        expect(Number(bill.paidAmount)).toBe(0);
+      } else {
+        expect(Number(bill.paidAmount)).toBe(300);
+      }
+    }
+  });
+
   it('closes a part-paid invoice when the credit covers the rest', async () => {
     const { invoice, payable } = await sentInvoice(1000);
     await payables.addPayment(payable.id, workspaceId, userId, { amount: 600 });

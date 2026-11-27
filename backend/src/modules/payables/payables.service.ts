@@ -56,7 +56,7 @@ import {
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { ExportFormat, PayablesSortOption } from './dto/filter-payables.dto';
-import { assertOneSource, exactSubset, notRejectedSql } from './payable-payments.util';
+import { assertOneSource, exactSubset, isClosed, notRejectedSql } from './payable-payments.util';
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
 import { PayablesExportService } from './payables-export.service';
@@ -518,7 +518,8 @@ export class PayablesService {
         lock: { mode: 'pessimistic_write' },
       });
 
-      const outstanding = this.outstandingOf(payable);
+      // An archived bill (a voided invoice's) is closed: nothing is left to pay on it.
+      const outstanding = isClosed(payable) ? 0 : this.outstandingOf(payable);
       const amount = this.round2(dto.amount);
       if (amount <= 0) {
         throw new BadRequestException(appError('PAYABLE_PAYMENT_NOT_POSITIVE'));
