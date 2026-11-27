@@ -356,7 +356,10 @@ describe('background jobs leave a past version alone (real Postgres)', () => {
     ).purgeExpiredTrash();
 
     expect(statementsService.permanentDelete).toHaveBeenCalledTimes(1);
-    expect(statementsService.permanentDelete).toHaveBeenCalledWith(trashed.standard, userId, standardId);
+    expect(statementsService.permanentDelete).toHaveBeenCalledWith(trashed.standard, userId, standardId, {
+      fromTrash: true,
+      system: true,
+    });
   });
 
   it('re-queues stale parsing in the live workspace only, and never parses a version statement', async () => {
