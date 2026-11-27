@@ -23,6 +23,7 @@ import { countedSql } from '../../src/common/utils/counted-transactions.util';
 import * as entityIndex from '../../src/entities';
 import {
   BankName,
+  Budget,
   Category,
   CategoryType,
   CryptoWallet,
@@ -414,7 +415,15 @@ describe('one rule for income and spending (real Postgres)', () => {
 
     const [budget] = await budgets.findAll(workspaceId, new Date(DAY));
     const limit = EXPENSE - 50;
+    // Lowered today: last month ended under the old limit, which had room for all of it.
     await budgets.update(budget.id, workspaceId, userId, { limitAmount: limit });
+    expect(await budgeted()).toBe(EXPENSE);
+
+    // Last month ended under the lower limit (it was raised only today): the share stops there.
+    await dataSource.getRepository(Budget).update(budget.id, {
+      limitAmount: 1000,
+      limitHistory: [{ until: isoDay(now), amount: limit }],
+    });
     expect(await budgeted()).toBe(limit);
   });
 
