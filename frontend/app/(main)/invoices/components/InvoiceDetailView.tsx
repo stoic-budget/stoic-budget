@@ -203,7 +203,8 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
       .send(invoice.id)
       .then(updated => {
         setInvoice(updated);
-        toast.success(t.toasts.sendSuccess.value);
+        // Issued is not sent: the email dialog takes the next step at once (#665).
+        setEmailOpen(true);
       })
       .catch(error => toast.error(getApiErrorMessage(error, t.toasts.genericFailed.value)))
       .finally(() => setActing(false));
