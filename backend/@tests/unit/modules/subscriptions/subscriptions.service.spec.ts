@@ -69,6 +69,7 @@ describe('SubscriptionsService', () => {
   };
   const exchangeRatesService = {
     convert: vi.fn(),
+    getRateOrNull: vi.fn(),
   };
   const auditService = {
     createEvent: vi.fn(),
@@ -117,7 +118,7 @@ describe('SubscriptionsService', () => {
         .mockResolvedValueOnce([]);
       subscriptionRepository.count.mockResolvedValue(0);
       workspaceRepository.findOne.mockResolvedValue({ currency: 'USD' });
-      exchangeRatesService.convert.mockImplementation(async (amount: number) => ({ converted: amount * 1.1 }));
+      exchangeRatesService.getRateOrNull.mockResolvedValue(1.1);
 
       const result = await service.getSummary('workspace-1');
 
@@ -177,18 +178,42 @@ describe('SubscriptionsService', () => {
         { amount: 100, currency: 'USD', frequency: SubscriptionFrequency.MONTHLY, status: SubscriptionStatus.ACTIVE },
       ]);
       subscriptionRepository.count.mockResolvedValue(0);
-      exchangeRatesService.convert.mockResolvedValue({ converted: 90 });
+      exchangeRatesService.getRateOrNull.mockResolvedValue(0.9);
 
       const result = await service.getSummary('workspace-1');
 
-      expect(exchangeRatesService.convert).toHaveBeenCalledWith(
-        100,
-        'USD',
-        'EUR',
-        expect.any(Date),
-        'workspace-1',
-      );
+      expect(exchangeRatesService.getRateOrNull).toHaveBeenCalledWith('USD', 'EUR', expect.any(Date), 'workspace-1');
       expect(result.totalMonthlyCost).toBe(90);
+      expect(result.missingRates).toBeUndefined();
+    });
+
+    it('counts a currency without a rate at face value everywhere, and names it (#787)', async () => {
+      workspaceRepository.findOne.mockResolvedValue({ currency: 'EUR' });
+      const inTenDays = new Date(Date.now() + 10 * 86_400_000);
+      subscriptionRepository.find.mockImplementation(async ({ where }: { where: { status: string } }) =>
+        where.status === SubscriptionStatus.ACTIVE
+          ? [
+              {
+                amount: 100,
+                currency: 'xts',
+                frequency: SubscriptionFrequency.MONTHLY,
+                status: SubscriptionStatus.ACTIVE,
+                nextChargeDate: inTenDays,
+                riskStatus: 'price_changed',
+                detectionMeta: { priceChange: { yearlyDelta: 120 } },
+              },
+            ]
+          : [],
+      );
+      subscriptionRepository.count.mockResolvedValue(0);
+      exchangeRatesService.getRateOrNull.mockResolvedValue(null);
+
+      const result = await service.getSummary('workspace-1');
+
+      expect(result.totalMonthlyCost).toBe(100);
+      expect(result.upcoming30DaysAmount).toBe(100);
+      expect(result.priceChangeYearlyEffect).toBe(120);
+      expect(result.missingRates).toEqual(['XTS']);
     });
 
     it('returns management KPIs for price changes, overdue reviews, and realized savings', async () => {

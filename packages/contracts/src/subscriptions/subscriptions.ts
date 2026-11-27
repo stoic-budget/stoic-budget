@@ -86,6 +86,8 @@ export const SubscriptionSummary = Schema.Struct({
   duplicateCount: Schema.Number,
   overdueReviewCount: Schema.Number,
   realizedAnnualSavings: Schema.Number,
+  /** Currencies with no rate to the workspace's: their amounts count at face value. Only when there are any. */
+  missingRates: Schema.optionalKey(Schema.Array(Schema.String)),
 });
 export type SubscriptionSummary = Wire<typeof SubscriptionSummary>;
 

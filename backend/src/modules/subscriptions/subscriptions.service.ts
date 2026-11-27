@@ -92,6 +92,7 @@ import {
   monthlySetAside,
 } from './subscription-insights.util';
 import { forgetPayeeRule, NOT_REJECTED_FOR_SUBSCRIPTION, rejectedRows } from './subscription-links';
+import { summaryConverter } from './summary-currency';
 
 const DEFAULT_CALENDAR_MONTHS = 6;
 /** How far back a bank row can still be picked as a payment. */
@@ -514,19 +515,14 @@ export class SubscriptionsService {
 
     const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
     const workspaceCurrency = workspace?.currency?.toUpperCase();
+    const toWorkspace = summaryConverter(this.exchangeRatesService, workspaceCurrency, workspaceId);
     const normalizedMonthlyCosts = await Promise.all(
-      active.map(async sub => {
-        const amount = this.normalizeToMonthly(Number(sub.amount), sub.frequency);
-        if (!workspaceCurrency || sub.currency.toUpperCase() === workspaceCurrency) return amount;
-        const converted = await this.exchangeRatesService.convert(
-          amount,
+      active.map(sub =>
+        toWorkspace.convert(
+          this.normalizeToMonthly(Number(sub.amount), sub.frequency),
           sub.currency,
-          workspaceCurrency,
-          new Date(),
-          workspaceId,
-        );
-        return converted.converted;
-      }),
+        ),
+      ),
     );
     const totalMonthlyCost = normalizedMonthlyCosts.reduce((sum, amount) => sum + amount, 0);
 
@@ -558,18 +554,10 @@ export class SubscriptionsService {
         ) {
           if (charge >= startOfToday) count += 1;
         }
-        const amount = Number(sub.amount) * count;
-        if (!(amount && workspaceCurrency) || sub.currency.toUpperCase() === workspaceCurrency) {
-          return { count, amount };
-        }
-        const converted = await this.exchangeRatesService.convert(
-          amount,
-          sub.currency,
-          workspaceCurrency,
-          new Date(),
-          workspaceId,
-        );
-        return { count, amount: converted.converted };
+        return {
+          count,
+          amount: await toWorkspace.convert(Number(sub.amount) * count, sub.currency),
+        };
       }),
     );
     const upcoming30DaysCount = upcoming30Days.reduce((sum, next) => sum + next.count, 0);
@@ -581,18 +569,7 @@ export class SubscriptionsService {
     const yearlyEffects = await Promise.all(
       priceChanged.map(async sub => {
         const change = sub.detectionMeta?.priceChange as { yearlyDelta?: number } | undefined;
-        const yearly = Number(change?.yearlyDelta ?? 0);
-        if (!(yearly && workspaceCurrency) || sub.currency.toUpperCase() === workspaceCurrency) {
-          return yearly;
-        }
-        const converted = await this.exchangeRatesService.convert(
-          yearly,
-          sub.currency,
-          workspaceCurrency,
-          new Date(),
-          workspaceId,
-        );
-        return converted.converted;
+        return toWorkspace.convert(Number(change?.yearlyDelta ?? 0), sub.currency);
       }),
     );
     const priceChangeYearlyEffect =
@@ -617,6 +594,7 @@ export class SubscriptionsService {
       duplicateCount,
       overdueReviewCount,
       realizedAnnualSavings: Math.round(realizedAnnualSavings * 100) / 100,
+      ...toWorkspace.missingRates(),
     };
   }
 
