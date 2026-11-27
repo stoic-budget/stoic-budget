@@ -1,3 +1,4 @@
+import { noteMissingRate } from '../../../../src/common/utils/currency.util';
 import type { Mock } from 'vitest';
 import { Between, In, IsNull } from 'typeorm';
 import { PayableStatus } from '../../../../src/entities/payable.entity';
@@ -609,8 +610,44 @@ describe('DashboardService', () => {
       totalOverdue: 550,
       unapprovedCash: 500,
       currency: 'KZT',
+      missingRates: [],
     });
-    expect(exchangeRatesService.getRate).toHaveBeenCalledWith('USD', 'KZT', undefined, 'ws-1');
+    expect(exchangeRatesService.getRateOrNull).toHaveBeenCalledWith('USD', 'KZT', undefined, 'ws-1');
+  });
+
+  it("getSnapshot's list is its own, not its caller's (#787)", async () => {
+    transactionRepo.createQueryBuilder
+      .mockReturnValueOnce(createQueryBuilderMock([]))
+      .mockReturnValueOnce(createQueryBuilderMock([]));
+    payableRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock([]));
+    workspaceRepo.findOne.mockResolvedValue({ currency: 'KZT' });
+
+    const pending = (service as any).getSnapshot('ws-1', new Date('2026-02-01'), new Date('2026-03-01'));
+    // The caller converts something of its own meanwhile.
+    noteMissingRate('LEAK');
+
+    expect((await pending).missingRates).toEqual([]);
+  });
+
+  it('getSnapshot names a bill currency without a rate, counted at face value (#787)', async () => {
+    transactionRepo.createQueryBuilder
+      .mockReturnValueOnce(createQueryBuilderMock([]))
+      .mockReturnValueOnce(createQueryBuilderMock([]));
+    payableRepo.createQueryBuilder.mockReturnValue(
+      createQueryBuilderMock([{ currency: 'XTS', totalPayable: '40', totalOverdue: '0' }]),
+    );
+    workspaceRepo.findOne.mockResolvedValue({ currency: 'KZT' });
+    exchangeRatesService.getRateOrNull.mockResolvedValue(null);
+
+    const result = await (service as any).getSnapshot(
+      'ws-1',
+      new Date('2026-02-01'),
+      new Date('2026-03-01'),
+    );
+
+    // No transaction in XTS, so only the bill can tell the banner.
+    expect(result.totalPayable).toBe(40);
+    expect(result.missingRates).toEqual(['XTS']);
   });
 
   it("getSnapshot converts each day's income and spending at that day's rate", async () => {
