@@ -36,6 +36,8 @@ function build(
     update: vi.fn(async () => undefined),
   };
   const holdingRepository = {
+    // No other lot names the photo: a copy of a past version would (#789).
+    exists: vi.fn().mockResolvedValue(false),
     create: vi.fn((lot: Lot) => ({ ...lot, id: 'lot-1' })),
     save: vi.fn(async (lot: Lot) => {
       saved.push(lot);
@@ -493,6 +495,28 @@ describe('MetalsService', () => {
     expect(summary.lots[0].cost).toBe(36000);
     // Proceeds at the September rate, the cost it carried away at the March one.
     expect(summary.sales[0]).toMatchObject({ proceeds: 16000, costBasis: 14400, realized: 1600 });
+  });
+
+  it('keeps the photo while another lot still names it, as a copy does (#789)', async () => {
+    const unlink = vi.spyOn(nodeFs.promises, 'unlink').mockResolvedValue(undefined);
+    const shared = build({ lots: [krugerrands({ photoFile: 'shared.jpg' })] });
+    shared.holdingRepository.exists.mockResolvedValueOnce(true);
+
+    await shared.service.deleteLot(USER, WORKSPACE, 'lot-1');
+
+    expect(unlink).not.toHaveBeenCalled();
+    unlink.mockRestore();
+  });
+
+  it('keeps the photo, and the delete, when asking about it fails', async () => {
+    const unlink = vi.spyOn(nodeFs.promises, 'unlink').mockResolvedValue(undefined);
+    const failing = build({ lots: [krugerrands({ photoFile: 'unsure.jpg' })] });
+    failing.holdingRepository.exists.mockRejectedValueOnce(new Error('db down'));
+
+    await expect(failing.service.deleteLot(USER, WORKSPACE, 'lot-1')).resolves.not.toThrow();
+
+    expect(unlink).not.toHaveBeenCalled();
+    unlink.mockRestore();
   });
 
   it('takes the photo with the lot, whether it is deleted or sold out', async () => {
