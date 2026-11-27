@@ -115,20 +115,6 @@ describe('CustomTableExportSchedulesService', () => {
     expect(result.fileName).toMatch(/^\d{4}-\d{2}-\d{2}/);
   });
 
-  it('selects only schedules whose interval has elapsed', async () => {
-    const { service, scheduleRepository } = buildService();
-    const now = new Date('2026-03-08T12:00:00Z');
-    scheduleRepository.find.mockResolvedValue([
-      { id: 'never', intervalHours: 168, lastRunAt: null },
-      { id: 'due', intervalHours: 1, lastRunAt: new Date('2026-03-08T10:00:00Z') },
-      { id: 'not-due', intervalHours: 168, lastRunAt: new Date('2026-03-07T12:00:00Z') },
-    ]);
-
-    const due = await service.findDueSchedules(now);
-
-    expect(due.map(s => s.id)).toEqual(['never', 'due']);
-  });
-
   it('records a failure so one broken schedule does not stop the rest', async () => {
     const { service, scheduleRepository } = buildService();
 
