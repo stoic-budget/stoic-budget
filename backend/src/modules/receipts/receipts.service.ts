@@ -51,6 +51,7 @@ import {
   attachReceiptCategories,
   type ReceiptWithCategory,
 } from './helpers/attach-receipt-categories';
+import { attachTarget } from './helpers/attach-target';
 import { ReceiptProcessorService } from './services/receipt-processor.service';
 
 export interface ApproveReceiptOptions {
@@ -615,10 +616,7 @@ export class ReceiptsService {
       // Attach to the bank row the receipt documents (the suggestion, or the
       // one the user picked) instead of booking the expense a second time.
       // `attachTo: null` is the explicit "no, this is a new expense".
-      const attachTo =
-        options.attachTo === undefined
-          ? (receipt.metadata?.transactionMatch?.transactionIds?.[0] ?? null)
-          : options.attachTo;
+      const attachTo = attachTarget(options.attachTo, receipt, scanTransaction);
       if (attachTo) {
         const target = await transactions.findOne({ where: { id: attachTo, workspaceId } });
         if (!target) {
