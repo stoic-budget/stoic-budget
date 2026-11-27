@@ -1,3 +1,4 @@
+import { isDemoInstance } from '@/app/hooks/useDemoStatus';
 import { api } from './api';
 import type { AppLocale } from './locale';
 import { type ContractInput, checkContract } from './query-fn-schema';
@@ -14,11 +15,22 @@ export function workspaceLocale(workspace: {
   return savedLocales.get(workspace.id) ?? workspace.memberLocale ?? null;
 }
 
-/** Stores the caller's interface language for one workspace. */
-export async function saveWorkspaceLocale(workspaceId: string, locale: AppLocale): Promise<void> {
+/** Records a language another request already stored, so this session agrees with it. */
+export function rememberWorkspaceLocale(workspaceId: string, locale: string): void {
   savedLocales.set(workspaceId, locale);
-  const response = await api.put(`/workspaces/${workspaceId}/locale`, {
-    locale,
-  } satisfies ContractInput<'SetMyWorkspaceLocaleBody'>);
-  await checkContract('WorkspaceMemberLocale', response.data, '/workspaces/:id/locale');
+}
+
+/**
+ * Stores the caller's interface language for one workspace. A demo server
+ * refuses every write and all its visitors share one account, so there it is
+ * kept for this session only.
+ */
+export async function saveWorkspaceLocale(workspaceId: string, locale: AppLocale): Promise<void> {
+  if (!isDemoInstance()) {
+    const response = await api.put(`/workspaces/${workspaceId}/locale`, {
+      locale,
+    } satisfies ContractInput<'SetMyWorkspaceLocaleBody'>);
+    await checkContract('WorkspaceMemberLocale', response.data, '/workspaces/:id/locale');
+  }
+  rememberWorkspaceLocale(workspaceId, locale);
 }

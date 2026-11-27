@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
+import { getApiErrorMessage } from '@/app/lib/api-error';
 import { DEFAULT_LOCALE, LOCALE_DISPLAY_ORDER, LOCALE_ENDONYMS } from '@/app/lib/locale';
 import { saveWorkspaceLocale } from '@/app/lib/workspace-locale-api';
 import type { AppLanguage } from '../helpers/navigation-config';
@@ -61,25 +62,26 @@ export function useLanguageSelection({
 
   const handleLanguageSelect = useCallback(
     (code: AppLanguage) => {
-      // Saved first: the sync hook must not see the old language as this workspace's.
-      const saved = workspaceId ? saveWorkspaceLocale(workspaceId, code) : Promise.resolve();
-      setLocale(code);
       setLanguageModalOpen(false);
       setLanguageSearch('');
-      const selectedLabel =
-        languages.find(l => l.code === code)?.label ??
-        LOCALE_ENDONYMS[DEFAULT_LOCALE] ??
-        DEFAULT_LOCALE;
-      toast.success(`${languageModal.savedToastPrefix.value}: ${selectedLabel}`);
-      void saved
-        .catch((error: unknown) => {
-          console.error('Failed to save the workspace language:', error);
-        })
-        .finally(() => {
+      // Saved before switching: the next page load takes the workspace's stored language.
+      const saved = workspaceId ? saveWorkspaceLocale(workspaceId, code) : Promise.resolve();
+      saved.then(
+        () => {
+          setLocale(code);
+          const selectedLabel =
+            languages.find(l => l.code === code)?.label ??
+            LOCALE_ENDONYMS[DEFAULT_LOCALE] ??
+            DEFAULT_LOCALE;
+          toast.success(`${languageModal.savedToastPrefix.value}: ${selectedLabel}`);
           setTimeout(() => {
             window.location.reload();
           }, 50);
-        });
+        },
+        (error: unknown) => {
+          toast.error(getApiErrorMessage(error));
+        },
+      );
     },
     [languageModal.savedToastPrefix.value, languages, setLocale, workspaceId],
   );

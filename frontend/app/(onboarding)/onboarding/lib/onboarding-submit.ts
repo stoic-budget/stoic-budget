@@ -1,4 +1,5 @@
 import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
+import { rememberWorkspaceLocale } from '@/app/lib/workspace-locale-api';
 import type { OnboardingData } from '../useOnboardingWizard';
 import type { OnboardingMode } from './onboarding-flow';
 
@@ -53,6 +54,21 @@ async function prepareWorkspace(
     } satisfies ContractInput<'UpdateWorkspaceBody'>);
   }
   return currentWorkspaceId;
+}
+
+/** The language picked in the wizard, stored on the workspace and remembered for this session. */
+async function writeWorkspaceLocale(
+  api: OnboardingApi,
+  workspaceId: string,
+  data: OnboardingData,
+  scoped?: RequestConfig,
+): Promise<void> {
+  await api.put(
+    `/workspaces/${workspaceId}/locale`,
+    { locale: data.locale } satisfies ContractInput<'SetMyWorkspaceLocaleBody'>,
+    scoped,
+  );
+  rememberWorkspaceLocale(workspaceId, data.locale);
 }
 
 async function writeTax(
@@ -119,12 +135,12 @@ export async function submitOnboarding(
 
   if (mode === 'create-workspace') {
     // The language in use is this workspace's own; the account's and the other workspaces' stay.
-    await api.put(`/workspaces/${workspaceId}/locale`, {
-      locale: data.locale,
-    } satisfies ContractInput<'SetMyWorkspaceLocaleBody'>);
+    await writeWorkspaceLocale(api, workspaceId, data);
     return { workspaceId };
   }
 
+  // The language picked here is also this workspace's, or entering it would switch back.
+  await writeWorkspaceLocale(api, workspaceId, data, scoped);
   await api.patch('/users/me/preferences', {
     dateFormat: data.dateFormat,
     firstDayOfWeek: data.firstDayOfWeek,

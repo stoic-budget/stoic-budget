@@ -39,7 +39,7 @@ export const WorkspaceSummary = Schema.Struct({
   updatedAt: Timestamp,
   memberRole: Schema.optional(WorkspaceRole),
   memberPermissions: Schema.optional(Schema.NullOr(WorkspaceMemberPermissions)),
-  /** The caller's interface language here; null means the account's own. */
+  /** The caller's interface language here; null until one is chosen or adopted. */
   memberLocale: Schema.optional(Schema.NullOr(Schema.String)),
   stats: Schema.optional(
     Schema.Struct({

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { currentUser, workspaceSummary } from '@/app/test/fixtures/contracts';
 import { EMPTY_BUSINESS_DETAILS, type OnboardingData } from '../useOnboardingWizard';
+import { workspaceLocale } from '@/app/lib/workspace-locale-api';
 import { type OnboardingApi, submitOnboarding } from './onboarding-submit';
 
 type Call = { method: string; url: string; body?: unknown; headers?: Record<string, string> };
@@ -48,6 +49,7 @@ describe('submitOnboarding', () => {
       'patch /workspaces/ws-1',
       'put /tax/settings/jurisdiction',
       'put /business-profile',
+      'put /workspaces/ws-1/locale',
       'patch /users/me/preferences',
       'patch /users/me/onboarding',
     ]);
@@ -60,8 +62,9 @@ describe('submitOnboarding', () => {
       addressLines: undefined,
       countryCode: 'DE',
     });
-    expect(calls[3].body).toEqual({ dateFormat: 'dmy', firstDayOfWeek: 1 });
-    expect(calls[4].body).toEqual({
+    expect(calls[3].body).toEqual({ locale: base.locale });
+    expect(calls[4].body).toEqual({ dateFormat: 'dmy', firstDayOfWeek: 1 });
+    expect(calls[5].body).toEqual({
       locale: 'de',
       timeZone: 'Europe/Berlin',
       workspaceName: 'Acme',
@@ -140,5 +143,7 @@ describe('submitOnboarding', () => {
     expect(calls[4].body).toEqual({ locale: base.locale });
     expect(calls.map(call => call.url)).not.toContain('/users/me/preferences');
     expect(result).toEqual({ workspaceId: 'ws-new' });
+    // This session agrees with the stored language before the list is fetched again.
+    expect(workspaceLocale({ id: 'ws-new', memberLocale: null })).toBe(base.locale);
   });
 });
