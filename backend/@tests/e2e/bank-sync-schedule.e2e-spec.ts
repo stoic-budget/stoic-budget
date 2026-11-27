@@ -388,7 +388,8 @@ describe('Bank sync schedule (e2e)', () => {
       await makeDue([id]);
       const [claimed] = await claimMine([id]);
       await dataSource.query(
-        `UPDATE open_protocol_settings SET pull_lease_until = now() - interval '1 minute'
+        `UPDATE open_protocol_settings
+         SET pull_lease_until = date_trunc('milliseconds', now() - interval '1 minute')
          WHERE integration_id = $1`,
         [id],
       );
