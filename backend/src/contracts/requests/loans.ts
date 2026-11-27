@@ -73,6 +73,17 @@ export const LoanTermsBody = Schema.Struct({
   extraMode: optionalNullable(LoanExtraMode),
   /** Split new payments into the account on import; off when left out. */
   autoSplit: Schema.optional(Schema.Boolean),
+  /**
+   * Days before each payment date its reminder goes out, as a repeating bill
+   * that follows the schedule; null or left out is no reminders.
+   */
+  remindDaysBefore: optionalNullable(
+    Schema.Finite.check(
+      Schema.isInt(),
+      Schema.isGreaterThanOrEqualTo(0),
+      Schema.isLessThanOrEqualTo(30),
+    ),
+  ),
 });
 export type LoanTermsBody = Wire<typeof LoanTermsBody>;
 

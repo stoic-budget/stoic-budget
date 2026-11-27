@@ -63,6 +63,8 @@ export class PayableOccurrencesService {
       if (!locked) throw new NotFoundException(appError('PAYABLE_NOT_FOUND'));
       if (!locked.seriesId) throw new BadRequestException(appError('PAYABLE_NOT_RECURRING'));
       if (body.action === 'stop') {
+        // A loan's bills stop with its reminders, in the loan terms.
+        if (locked.loanWalletId) throw new BadRequestException(appError('PAYABLE_LOAN_MANAGED'));
         await this.recurrence.stopSeries(workspaceId, locked.seriesId, manager);
         return locked;
       }

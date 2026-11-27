@@ -198,6 +198,16 @@ export function LoanTermsDrawer({
         />
         <span style={mutedStyle}>{tp.autoSplitHint}</span>
       </div>
+      <div style={{ display: 'grid', gap: 2 }}>
+        <Checkbox
+          id="loan-remind"
+          checked={form.remind}
+          onCheckedChange={remind => set({ remind })}
+          label={tp.remind}
+        />
+        <span style={mutedStyle}>{tp.remindHint}</span>
+      </div>
+      {form.remind && text('loan-remind-days', tp.remindDays, 'remindDaysBefore', false)}
       {tried && !body && (
         <span role="alert" style={{ fontSize: 13, color: 'var(--money-down)' }}>
           {t.invalid}

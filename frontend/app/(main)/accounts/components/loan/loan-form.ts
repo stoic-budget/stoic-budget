@@ -22,7 +22,12 @@ export interface LoanForm {
   extraMode: LoanExtraMode;
   /** Split new payments into principal and interest on import. */
   autoSplit: boolean;
+  /** A bill and a reminder before each payment date. */
+  remind: boolean;
+  remindDaysBefore: string;
 }
+
+const DEFAULT_REMIND_DAYS = '3';
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -77,6 +82,8 @@ export function emptyLoanForm(owed: number, today: string): LoanForm {
     monthlyExtraFrom: '',
     extraMode: 'reduce_term',
     autoSplit: false,
+    remind: true,
+    remindDaysBefore: DEFAULT_REMIND_DAYS,
   };
 }
 
@@ -101,6 +108,9 @@ export function termsToForm(terms: LoanTermsItem): LoanForm {
     monthlyExtraFrom: terms.recurringExtra?.from ?? '',
     extraMode: terms.extraMode,
     autoSplit: terms.autoSplit,
+    remind: terms.remindDaysBefore !== null,
+    remindDaysBefore:
+      terms.remindDaysBefore === null ? DEFAULT_REMIND_DAYS : String(terms.remindDaysBefore),
   };
 }
 
@@ -132,7 +142,9 @@ export function formToBody(form: LoanForm): LoanTermsBody | null {
     amount: money(extra.amount),
   }));
   const monthly = form.monthlyExtra.trim() === '' ? null : money(form.monthlyExtra);
+  const remindDaysBefore = form.remind ? whole(form.remindDaysBefore, 0, 30) : null;
   if (
+    (form.remind && remindDaysBefore === null) ||
     rateChanges.some(change => change.from === null || change.annualRate === null) ||
     extraPayments.some(extra => extra.date === null || extra.amount === null) ||
     (form.monthlyExtra.trim() !== '' && (monthly === null || !DATE.test(form.monthlyExtraFrom)))
@@ -158,5 +170,6 @@ export function formToBody(form: LoanForm): LoanTermsBody | null {
     recurringExtra: monthly === null ? null : { amount: monthly, from: form.monthlyExtraFrom },
     extraMode: form.extraMode,
     autoSplit: form.autoSplit,
+    remindDaysBefore,
   };
 }

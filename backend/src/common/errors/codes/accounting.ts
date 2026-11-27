@@ -80,6 +80,8 @@ export const ACCOUNTING_ERRORS = {
     'That transaction is less than what is still owed; record it as a partial payment',
   PAYABLE_CATEGORY_NOT_FOUND: 'Category not found in this workspace',
   PAYABLE_NOT_RECURRING: 'This bill does not repeat',
+  PAYABLE_LOAN_MANAGED:
+    'This bill is a loan payment: it repeats as the loan schedule does; change the loan terms instead',
   PAYABLE_OCCURRENCE_SETTLED:
     'This payment is already paid, skipped or partly paid; change it as a whole bill instead',
   PAYABLE_RECURRENCE_NEVER_FIRES: 'This repeat rule has no date on or after its start',

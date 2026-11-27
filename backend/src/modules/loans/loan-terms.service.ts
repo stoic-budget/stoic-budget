@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
@@ -7,6 +7,8 @@ import type { LoanTermsBody, LoanTermsItem, LoanTermsState } from '../../contrac
 import { LoanTerms } from '../../entities/loan-terms.entity';
 import { DEBT_WALLET_TYPES, Wallet } from '../../entities/wallet.entity';
 import { type LoanPlanInput, paymentDates, roundsWithinTerm } from './engine/loan-plan';
+import { planInputOf } from './loan-plan-input';
+import { LoanRemindersService } from './loan-reminders.service';
 
 const toDay = (value: string | Date): string =>
   typeof value === 'string' ? value.slice(0, 10) : value.toISOString().slice(0, 10);
@@ -14,9 +16,12 @@ const toDay = (value: string | Date): string =>
 /** The terms of a debt account: read, replaced as a whole, removed. */
 @Injectable()
 export class LoanTermsService {
+  private readonly logger = new Logger(LoanTermsService.name);
+
   constructor(
     @InjectRepository(LoanTerms) private readonly terms: Repository<LoanTerms>,
     @InjectRepository(Wallet) private readonly wallets: Repository<Wallet>,
+    private readonly reminders: LoanRemindersService,
   ) {}
 
   async get(walletId: string, workspaceId: string): Promise<LoanTermsState> {
@@ -75,17 +80,32 @@ export class LoanTermsService {
             : null,
           extraMode: body.extraMode ?? 'reduce_term',
           autoSplit: body.autoSplit ?? false,
+          remindDaysBefore: body.remindDaysBefore ?? null,
           updatedAt: new Date(),
         },
         ['walletId'],
       );
     });
+    await this.followReminders(workspaceId, walletId);
     return this.get(walletId, workspaceId);
   }
 
   async remove(walletId: string, workspaceId: string): Promise<void> {
     const wallet = await this.walletOf(walletId, workspaceId);
     await this.terms.delete({ walletId: wallet.id, workspaceId });
+    await this.followReminders(workspaceId, wallet.id);
+  }
+
+  /** The payment bills follow the terms just saved; a failure is retried by the morning job. */
+  private async followReminders(workspaceId: string, walletId: string): Promise<void> {
+    try {
+      await this.reminders.sync(workspaceId, walletId);
+    } catch (error) {
+      this.logger.error(
+        `Failed to bring the payment bills of loan ${walletId} in step`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
   }
 
   /** The account and its terms as the schedule engine takes them; 404 while there are none. */
@@ -96,23 +116,7 @@ export class LoanTermsService {
     const wallet = await this.walletOf(walletId, workspaceId);
     const terms = await this.terms.findOne({ where: { walletId: wallet.id, workspaceId } });
     assertFound(terms, 'Loan terms');
-    return {
-      wallet,
-      terms,
-      input: {
-        principal: Number(terms.principal),
-        startDate: toDay(terms.startDate),
-        termMonths: terms.termMonths,
-        paymentDay: terms.paymentDay,
-        method: terms.method,
-        dayCount: terms.dayCount,
-        annualRate: Number(terms.annualRate),
-        rateChanges: terms.rateChanges,
-        extraPayments: terms.extraPayments,
-        recurringExtras: terms.recurringExtra ? [terms.recurringExtra] : [],
-        extraMode: terms.extraMode,
-      },
-    };
+    return { wallet, terms, input: planInputOf(terms) };
   }
 
   private async walletOf(walletId: string, workspaceId: string): Promise<Wallet> {
@@ -138,6 +142,7 @@ export class LoanTermsService {
       recurringExtra: row.recurringExtra,
       extraMode: row.extraMode,
       autoSplit: row.autoSplit,
+      remindDaysBefore: row.remindDaysBefore,
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
     };

@@ -36,7 +36,8 @@ export function OccurrenceMenuItems({
           </DropdownMenuItem>
         </>
       )}
-      {payable.recurrence && (
+      {/* A loan's series stops with its reminders, in the loan terms. */}
+      {payable.recurrence && !payable.loanWalletId && (
         <DropdownMenuItem onClick={() => onAction(payable, 'stop')}>
           {t.stopRepeating.value}
         </DropdownMenuItem>

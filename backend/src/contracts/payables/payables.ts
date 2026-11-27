@@ -51,6 +51,8 @@ export const Payable = Schema.Struct({
   skippedAt: Schema.NullOr(Timestamp),
   remindDaysBefore: Schema.Number,
   comment: Schema.NullOr(Schema.String),
+  /** The loan account this bill is a payment of; its terms own the rule and the amounts. */
+  loanWalletId: Schema.NullOr(Schema.String),
   statementId: Schema.NullOr(Schema.String),
   /** The workspace tags on the bill; on list rows and single reads. */
   tags: Schema.optional(Schema.Array(StorageTag)),

@@ -4,6 +4,7 @@ import type { DataSource, EntitySubscriberInterface, RemoveEvent } from 'typeorm
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { AuditService } from '../audit/audit.service';
+import { endLoanReminders } from './loan-reminder-series';
 
 interface Unlinked {
   id: string;
@@ -37,6 +38,8 @@ export class LoanAccountRemovalSubscriber implements EntitySubscriberInterface<W
     if (!(wallet?.id && wallet.workspaceId)) {
       return;
     }
+    // Its payment bills stop, and the open ones go; the paid ones stay as plain bills.
+    await endLoanReminders(event.manager, wallet.workspaceId, wallet.id);
     const rows: Unlinked[] = await event.manager.query(
       `SELECT interest."id", interest."loan_interest_of_id" AS "payment_id", interest."workspace_id"
          FROM "transactions" interest

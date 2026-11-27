@@ -63,6 +63,6 @@ import { UnbookedPaymentsService } from './unbooked-payments.service';
     PayableRecurrenceService,
     PayableOccurrencesService,
   ],
-  exports: [PayablesService],
+  exports: [PayablesService, PayableRecurrenceService],
 })
 export class PayablesModule {}

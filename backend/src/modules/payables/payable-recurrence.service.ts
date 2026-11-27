@@ -107,13 +107,20 @@ export class PayableRecurrenceService {
    * occurrences after it and the bill itself change under the series lock.
    */
   async applyUpdate(payable: Payable, dto: UpdatePayableBody): Promise<Payable> {
-    if (dto.amount != null && payable.baseAmount != null) {
+    // A loan's bills repeat as its schedule does: the terms own the rule.
+    if (payable.loanWalletId && dto.recurrence !== undefined) {
+      throw new BadRequestException(appError('PAYABLE_LOAN_MANAGED'));
+    }
+    if (dto.amount != null && (payable.baseAmount != null || payable.loanWalletId)) {
       // The edit is already on the entity: what is stored says whether the amount changed.
       const [stored]: Array<{ amount: string }> = await this.payableRepository.query(
         'SELECT "amount" FROM "payables" WHERE "id" = $1 AND "workspace_id" = $2',
         [payable.id, payable.workspaceId],
       );
-      if (stored && Number(stored.amount) !== Number(dto.amount)) payable.baseAmount = null;
+      // A loan's amounts come from its schedule: one typed in is this bill's own.
+      if (stored && Number(stored.amount) !== Number(dto.amount)) {
+        payable.baseAmount = payable.loanWalletId ? (payable.baseAmount ?? stored.amount) : null;
+      }
     }
     const ruleChanged = dto.recurrence !== undefined;
     if (ruleChanged) {
@@ -304,6 +311,7 @@ export class PayableRecurrenceService {
         occurrenceDate: next,
         remindDaysBefore: template.remindDaysBefore,
         comment: template.comment,
+        loanWalletId: template.loanWalletId,
       })
       .orIgnore()
       .returning(['id'])

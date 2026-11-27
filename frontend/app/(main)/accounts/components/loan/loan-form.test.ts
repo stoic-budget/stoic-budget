@@ -50,7 +50,18 @@ describe('loan form', () => {
       recurringExtra: { amount: 50, from: '2026-04-15' },
       extraMode: 'reduce_payment',
       autoSplit: false,
+      remindDaysBefore: 3,
     });
+  });
+
+  it('reminds by default, sends null when reminders are off, and refuses a day count it would refuse', () => {
+    expect(emptyLoanForm(12_000, '2026-03-15')).toMatchObject({ remind: true, remindDaysBefore: '3' });
+    expect(formToBody(filled({ remind: false }))?.remindDaysBefore).toBeNull();
+    expect(formToBody(filled({ remindDaysBefore: '0' }))?.remindDaysBefore).toBe(0);
+    expect(formToBody(filled({ remindDaysBefore: '31' }))).toBeNull();
+    expect(formToBody(filled({ remindDaysBefore: '' }))).toBeNull();
+    // Off, the days field is not shown, so what it holds is not checked.
+    expect(formToBody(filled({ remind: false, remindDaysBefore: '' }))).not.toBeNull();
   });
 
   it('sends no more than the API keeps: rates to four decimals, amounts under 10^12', () => {
@@ -98,6 +109,7 @@ describe('loan form', () => {
       recurringExtra: { amount: 25, from: '2026-06-30' },
       extraMode: 'reduce_term',
       autoSplit: true,
+      remindDaysBefore: null,
       createdAt: '2026-01-31T10:00:00.000Z',
       updatedAt: '2026-01-31T10:00:00.000Z',
     };
@@ -114,6 +126,7 @@ describe('loan form', () => {
       recurringExtra: { amount: 25, from: '2026-06-30' },
       extraMode: 'reduce_term',
       autoSplit: true,
+      remindDaysBefore: null,
     });
   });
 });

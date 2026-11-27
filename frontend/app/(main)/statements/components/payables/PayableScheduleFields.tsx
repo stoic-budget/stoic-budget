@@ -5,6 +5,7 @@ import CustomDatePicker from '@/app/components/CustomDatePicker';
 import { FORM_CONTROL_SX } from '@/app/components/ui/input';
 import { Select } from '@/app/components/ui/select';
 import type { Payable, PayableSource } from '@/app/lib/payables-api';
+import { LoanManagedNote } from './LoanManagedNote';
 import type { PayableFormState } from './payable-form-state';
 import { RepeatFields } from './RepeatFields';
 
@@ -54,13 +55,17 @@ export function PayableScheduleFields({
           />
         </div>
       </div>
-      <RepeatFields
-        value={form.repeat}
-        onChange={repeat => setForm(prev => ({ ...prev, repeat }))}
-        anchor={payable?.occurrenceDate ?? form.dueDate}
-        remindDaysBefore={form.remindDaysBefore}
-        onRemindChange={remindDaysBefore => setForm(prev => ({ ...prev, remindDaysBefore }))}
-      />
+      {payable?.loanWalletId ? (
+        <LoanManagedNote loanWalletId={payable.loanWalletId} />
+      ) : (
+        <RepeatFields
+          value={form.repeat}
+          onChange={repeat => setForm(prev => ({ ...prev, repeat }))}
+          anchor={payable?.occurrenceDate ?? form.dueDate}
+          remindDaysBefore={form.remindDaysBefore}
+          onRemindChange={remindDaysBefore => setForm(prev => ({ ...prev, remindDaysBefore }))}
+        />
+      )}
     </>
   );
 }

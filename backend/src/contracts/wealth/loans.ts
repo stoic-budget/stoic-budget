@@ -44,6 +44,8 @@ export const LoanTermsItem = Schema.Struct({
   extraMode: LoanExtraMode,
   /** New payments into the account are split into principal and interest on import. */
   autoSplit: Schema.Boolean,
+  /** Days before each payment its reminder goes out; null is no reminders. */
+  remindDaysBefore: Schema.NullOr(Schema.Number),
   createdAt: Timestamp,
   updatedAt: Timestamp,
 });
