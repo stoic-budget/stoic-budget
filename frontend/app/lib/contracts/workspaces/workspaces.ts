@@ -39,6 +39,8 @@ export const WorkspaceSummary = Schema.Struct({
   updatedAt: Timestamp,
   memberRole: Schema.optional(WorkspaceRole),
   memberPermissions: Schema.optional(Schema.NullOr(WorkspaceMemberPermissions)),
+  /** The caller's interface language here; null means the account's own. */
+  memberLocale: Schema.optional(Schema.NullOr(Schema.String)),
   stats: Schema.optional(
     Schema.Struct({
       integrationCount: Schema.Number,
@@ -140,6 +142,10 @@ export type BackgroundSearchPage = Wire<typeof BackgroundSearchPage>;
 /** `PATCH /workspaces/:id/favorite`. */
 export const WorkspaceFavorite = Schema.Struct({ isFavorite: Schema.Boolean });
 export type WorkspaceFavorite = Wire<typeof WorkspaceFavorite>;
+
+/** `PUT /workspaces/:id/locale`: the caller's language as stored for this workspace. */
+export const WorkspaceMemberLocale = Schema.Struct({ locale: Schema.String });
+export type WorkspaceMemberLocale = Wire<typeof WorkspaceMemberLocale>;
 
 /** `PUT /workspaces/:id/background`: the stored picture and its credit. */
 export const WorkspaceBackground = Schema.Struct({

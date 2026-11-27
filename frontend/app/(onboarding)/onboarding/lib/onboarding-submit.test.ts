@@ -127,7 +127,7 @@ describe('submitOnboarding', () => {
       'post /workspaces/ws-new/switch',
       'put /tax/settings/jurisdiction',
       'put /business-profile',
-      'patch /users/me/preferences',
+      'put /workspaces/ws-new/locale',
     ]);
     expect(calls[0].body).toEqual({
       name: 'Acme',
@@ -136,11 +136,9 @@ describe('submitOnboarding', () => {
       profile: 'business',
     });
     expect(calls[2].headers).toEqual({ 'X-Workspace-Id': 'ws-new' });
-    // Only the language: the date format and week start were not asked in this flow.
-    expect(calls[4].body).toEqual({ locale: 'de' });
-    expect(result).toEqual({
-      workspaceId: 'ws-new',
-      user: expect.objectContaining({ id: 'u-1' }),
-    });
+    // The language goes to the new workspace only: the account and other workspaces keep theirs.
+    expect(calls[4].body).toEqual({ locale: base.locale });
+    expect(calls.map(call => call.url)).not.toContain('/users/me/preferences');
+    expect(result).toEqual({ workspaceId: 'ws-new' });
   });
 });

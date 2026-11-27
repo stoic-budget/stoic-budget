@@ -118,16 +118,11 @@ export async function submitOnboarding(
   await writeBusiness(api, data, scoped);
 
   if (mode === 'create-workspace') {
-    // The language is the account's, asked again here because this flow has no language step.
-    const preferences = await api.patch('/users/me/preferences', {
+    // The language in use is this workspace's own; the account's and the other workspaces' stay.
+    await api.put(`/workspaces/${workspaceId}/locale`, {
       locale: data.locale,
-    } satisfies ContractInput<'UpdateMyPreferencesBody'>);
-    const { user: updatedUser } = await checkContract(
-      'UserUpdateResponse',
-      preferences.data,
-      '/users/me/preferences',
-    );
-    return { workspaceId, user: updatedUser };
+    } satisfies ContractInput<'SetMyWorkspaceLocaleBody'>);
+    return { workspaceId };
   }
 
   await api.patch('/users/me/preferences', {

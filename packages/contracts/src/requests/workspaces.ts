@@ -3,6 +3,7 @@ import * as Struct from 'effect/Struct';
 import { Email, optionalNullable } from '../common/requests';
 import type { Wire } from '../common/wire';
 import { MonthStartSetting } from '../workspaces/pay-periods';
+import { AppLocale } from './users';
 
 export const CreateWorkspaceBody = Schema.Struct({
   name: Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(255)),
@@ -114,6 +115,10 @@ export const SetWorkspaceBackgroundBody = Schema.Struct({
   photoId: Schema.String.check(Schema.isUUID()),
 });
 export type SetWorkspaceBackgroundBody = Wire<typeof SetWorkspaceBackgroundBody>;
+
+/** `PUT /workspaces/:id/locale`: the caller's interface language in this workspace. */
+export const SetMyWorkspaceLocaleBody = Schema.Struct({ locale: AppLocale });
+export type SetMyWorkspaceLocaleBody = Wire<typeof SetMyWorkspaceLocaleBody>;
 
 // Route parameters. Workspaces, members (users), invitations and versions all
 // have uuid keys; an invitation token is a value of its own and stays a string.

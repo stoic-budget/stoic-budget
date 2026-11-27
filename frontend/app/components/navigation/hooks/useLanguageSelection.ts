@@ -2,7 +2,9 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { DEFAULT_LOCALE, LOCALE_DISPLAY_ORDER, LOCALE_ENDONYMS } from '@/app/lib/locale';
+import { saveWorkspaceLocale } from '@/app/lib/workspace-locale-api';
 import type { AppLanguage } from '../helpers/navigation-config';
 
 interface Language {
@@ -28,6 +30,9 @@ export function useLanguageSelection({
 }: UseLanguageSelectionParams) {
   const [languageModalOpen, setLanguageModalOpen] = useState(false);
   const [languageSearch, setLanguageSearch] = useState('');
+  const workspace = useWorkspace().currentWorkspace;
+  // The choice is this workspace's; a past version has none of its own.
+  const workspaceId = workspace && workspace.kind !== 'version' ? workspace.id : null;
 
   const languages = useMemo((): Language[] => {
     const available = availableLocales.map(String);
@@ -56,6 +61,8 @@ export function useLanguageSelection({
 
   const handleLanguageSelect = useCallback(
     (code: AppLanguage) => {
+      // Saved first: the sync hook must not see the old language as this workspace's.
+      const saved = workspaceId ? saveWorkspaceLocale(workspaceId, code) : Promise.resolve();
       setLocale(code);
       setLanguageModalOpen(false);
       setLanguageSearch('');
@@ -64,11 +71,17 @@ export function useLanguageSelection({
         LOCALE_ENDONYMS[DEFAULT_LOCALE] ??
         DEFAULT_LOCALE;
       toast.success(`${languageModal.savedToastPrefix.value}: ${selectedLabel}`);
-      setTimeout(() => {
-        window.location.reload();
-      }, 50);
+      void saved
+        .catch((error: unknown) => {
+          console.error('Failed to save the workspace language:', error);
+        })
+        .finally(() => {
+          setTimeout(() => {
+            window.location.reload();
+          }, 50);
+        });
     },
-    [languageModal.savedToastPrefix.value, languages, setLocale],
+    [languageModal.savedToastPrefix.value, languages, setLocale, workspaceId],
   );
 
   const openLanguageMenu = useCallback(() => {
