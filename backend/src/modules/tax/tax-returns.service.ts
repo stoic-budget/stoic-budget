@@ -6,7 +6,7 @@ import { appError } from '../../common/errors/app-error';
 import { countedWhere } from '../../common/utils/counted-transactions.util';
 import { fromMinor, roundHalfAwayFromZero, toMinor } from '../../common/utils/money.util';
 import { redactPrivateRows } from '../../common/utils/transaction-privacy.util';
-import { ActorType, AuditAction, EntityType, Severity } from '../../entities/audit-event.entity';
+import { Severity } from '../../entities/audit-event.entity';
 import {
   TaxReturn,
   type TaxReturnSnapshotLine,
@@ -16,8 +16,10 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { AuditService } from '../audit/audit.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { TaxDeadlineResolvedEvent } from '../notifications/events/notification-events';
+import { countAwaitingReview } from './awaiting-review';
 import { JurisdictionAdoptionService } from './jurisdiction-adoption.service';
 import { JurisdictionsService, toDateOnly } from './jurisdictions.service';
+import { recordStatusChange } from './tax-return-audit';
 import {
   buildFileName,
   buildTaxReturnCsv,
@@ -37,6 +39,8 @@ export interface ReturnTotals {
    * with any of these is incomplete and cannot be filed.
    */
   missingRates: Array<{ transactionId: string; date: string; currency: string }>;
+  /** Rows of the period with tax still waiting in Review: not in the return. */
+  awaitingReview: number;
 }
 
 /**
@@ -64,44 +68,6 @@ export class TaxReturnsService {
     private readonly auditService: AuditService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
-
-  /**
-   * Records a filing-status change against the persisted return row. Audit
-   * failure is logged, never allowed to undo a filing that already committed.
-   */
-  private async recordStatusChange(
-    workspaceId: string,
-    userId: string | undefined,
-    before: TaxReturn | null,
-    after: TaxReturn,
-    severity?: Severity,
-  ): Promise<void> {
-    const snapshot = (row: TaxReturn) => ({
-      status: row.status,
-      filedAt: row.filedAt ?? null,
-      outputTax: row.outputTax,
-      inputTax: row.inputTax,
-      netPayable: row.netPayable,
-      currency: row.currency,
-    });
-
-    try {
-      await this.auditService.createEvent({
-        workspaceId,
-        actorType: ActorType.USER,
-        actorId: userId ?? null,
-        entityType: EntityType.TAX_RETURN,
-        entityId: after.id,
-        action: AuditAction.UPDATE,
-        diff: { before: before ? snapshot(before) : null, after: snapshot(after) },
-        meta: { periodStart: after.periodStart, periodEnd: after.periodEnd, status: after.status },
-        ...(severity ? { severity } : {}),
-      });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`Audit event failed for tax return ${after.id}: ${message}`);
-    }
-  }
 
   /**
    * Totals for a period, in the jurisdiction's currency.
@@ -207,6 +173,12 @@ export class TaxReturnsService {
       currency,
       lines,
       missingRates,
+      awaitingReview: await countAwaitingReview(
+        this.transactionRepository,
+        workspaceId,
+        periodStart,
+        periodEnd,
+      ),
     };
   }
 
@@ -330,7 +302,12 @@ export class TaxReturnsService {
       return saved;
     });
 
-    await this.recordStatusChange(workspaceId, userId, existing, filed);
+    await recordStatusChange(this.auditService, this.logger, {
+      workspaceId,
+      userId,
+      before: existing,
+      after: filed,
+    });
     this.eventEmitter.emit('tax.deadline.resolved', {
       workspaceId,
       kind: 'vat_return',
@@ -382,7 +359,13 @@ export class TaxReturnsService {
 
     // Reopening unlocks transactions and discards what was submitted, so it is
     // flagged for review rather than logged as routine.
-    await this.recordStatusChange(workspaceId, userId, existing, reopened, Severity.WARN);
+    await recordStatusChange(this.auditService, this.logger, {
+      workspaceId,
+      userId,
+      before: existing,
+      after: reopened,
+      severity: Severity.WARN,
+    });
     return reopened;
   }
 
