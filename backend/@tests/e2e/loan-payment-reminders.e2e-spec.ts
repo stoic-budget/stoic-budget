@@ -460,6 +460,32 @@ describe('Loan payment reminders (e2e)', () => {
       expect(Number(owed.paidAmount)).toBe(0);
     });
 
+    it('the next bill made on paying takes the schedule amount of its own date', async () => {
+      // Linear: every payment is a different amount, so the paid one's cannot pass for the next.
+      const id = (
+        await call('post', '/wallets', 201, {
+          name: 'ACME Bank - Linear loan',
+          type: 'loan',
+          currency,
+          initialBalance: -terms.principal,
+        })
+      ).body.id as string;
+      await call('put', `/wallets/${id}/loan-terms`, 200, { ...terms, method: 'linear' });
+      const plan: PlanRow[] = (await call('get', `/wallets/${id}/loan-schedule`, 200)).body.plan
+        .rows;
+      const [bill] = await billsOf(id);
+      await call('put', `/payables/${bill.id}/mark-paid`, 200, {
+        payFromWalletId: checkingId,
+        paidOn: today,
+      });
+      await reminders.afterPaid(owner.workspaceId, bill.id);
+      const next = (await billsOf(id)).find(item => item.id !== bill.id);
+      const row = plan.find(item => item.date === next?.occurrenceDate);
+      expect(row).toBeDefined();
+      expect(Number(next?.amount)).toBeCloseTo((row?.payment ?? 0) + (row?.extra ?? 0), 2);
+      expect(Number(next?.amount)).not.toBeCloseTo(Number(bill.amount), 2);
+    });
+
     it('a refund on a card paid in instalments does not pay the instalment', async () => {
       const id = await newLoan('credit_card');
       const [bill] = await billsOf(id);

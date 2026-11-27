@@ -27,6 +27,18 @@ export class LoanRemindersListener {
     }
   }
 
+  @OnEvent('payable.paid')
+  async billPaid(event: { workspaceId: string; payableId: string }): Promise<void> {
+    try {
+      await this.reminders.afterPaid(event.workspaceId, event.payableId);
+    } catch (error) {
+      this.logger.error(
+        `Failed to bring the next loan bill after ${event.payableId} in step`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
+  }
+
   @OnEvent('data.deleted')
   async rowsDeleted(event: { workspaceId?: string; entityType?: string }): Promise<void> {
     if (!(event.workspaceId && event.entityType === 'transaction')) return;

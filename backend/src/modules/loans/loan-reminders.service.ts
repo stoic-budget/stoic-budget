@@ -88,6 +88,19 @@ export class LoanRemindersService {
     }
   }
 
+  /**
+   * A loan bill just paid: the next one, made from it, takes the schedule's
+   * amount at once rather than the paid one's until the morning.
+   */
+  async afterPaid(workspaceId: string, payableId: string): Promise<void> {
+    const bill = await this.payables.findOne({
+      where: { id: payableId, workspaceId },
+      select: { id: true, loanWalletId: true },
+      withDeleted: true,
+    });
+    if (bill?.loanWalletId) await this.sync(workspaceId, bill.loanWalletId);
+  }
+
   /** Payments that reached the workspace's loan accounts settle the bills they pay. */
   async settleWorkspace(workspaceId: string): Promise<void> {
     const loans = await this.terms.find({
