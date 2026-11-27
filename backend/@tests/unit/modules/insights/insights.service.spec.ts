@@ -92,9 +92,9 @@ describe('InsightsService', () => {
         type: InsightType.LATE_PAYMENTS,
         category: InsightCategory.PATTERN,
         severity: InsightSeverity.INFO,
-        messageKey: 'pattern.late_forgot',
+        messageKey: 'stoic.late_forgot',
         messageParams: { count: 3 },
-        deduplicationKey: 'financial:pattern.late_forgot:workspace-1',
+        deduplicationKey: 'financial:stoic.late_forgot:workspace-1',
         data: { priority: 34, target: 'bills', count: 3 },
       },
     ]);
@@ -106,7 +106,7 @@ describe('InsightsService', () => {
       userId: 'user-1',
       workspaceId: 'workspace-1',
     });
-    expect(result.newInsights.map(item => item.messageKey)).toEqual(['pattern.late_forgot']);
+    expect(result.newInsights.map(item => item.messageKey)).toEqual(['stoic.late_forgot']);
     expect(result.newInsights[0].message).toContain('3 bills');
   });
 

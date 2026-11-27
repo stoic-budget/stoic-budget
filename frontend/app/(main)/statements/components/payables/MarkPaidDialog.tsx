@@ -133,8 +133,10 @@ function MarkPaidForm({
     options.candidates[0]?.id ??
     null;
   // Paid after its due date, by the day the payment carries: the dialog asks why.
-  const paidOn =
-    mode === 'cash'
+  // Booking keeps the day already recorded; it only says where the money went.
+  const paidOn = unbooked
+    ? unbooked.paidOn
+    : mode === 'cash'
       ? selectedCash.paidOn
       : mode === 'match'
         ? options.candidates.find(c => c.id === (transactionId ?? defaultTransaction))

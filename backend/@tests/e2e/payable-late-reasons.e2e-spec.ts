@@ -38,6 +38,7 @@ describe('Payable late reasons (e2e)', () => {
   const emails = {
     owner: `late-owner-${stamp}@example.com`,
     other: `late-other-${stamp}@example.com`,
+    facts: `late-facts-${stamp}@example.com`,
   };
   let owner: E2eAccount;
   let other: E2eAccount;
@@ -186,23 +187,112 @@ describe('Payable late reasons (e2e)', () => {
     });
     // Short before payday once and income late once: the same habit, money after the bill.
     expect(found.map(item => item.messageKey).sort()).toEqual([
-      'pattern.late_forgot',
-      'pattern.late_short',
+      'stoic.late_forgot',
+      'stoic.late_short',
     ]);
-    const advice = found.find(item => item.messageKey === 'pattern.late_forgot');
+    const advice = found.find(item => item.messageKey === 'stoic.late_forgot');
     if (!advice) throw new Error('no advice');
     expect(advice).toMatchObject({
       type: 'pattern.late_payments',
-      messageKey: 'pattern.late_forgot',
-      messageParams: { count: 2 },
+      messageKey: 'stoic.late_forgot',
+      messageParams: { count: 2, variant: expect.any(Number) },
       data: { target: 'bills', count: 2 },
     });
     const text = renderInsight('en', advice.messageKey, advice.messageParams);
-    expect(text.message).toContain('2 bills');
+    expect(text.message).toContain('2');
+    expect(text.message).not.toContain('{{');
     expect(renderInsight('ru', advice.messageKey, advice.messageParams).title).not.toBe(text.title);
     // Another workspace's reasons are not this one's.
     expect(await analyzer.analyze({ userId: other.userId, workspaceId: other.workspaceId })).toEqual(
       [],
     );
+  });
+
+  describe('only the facts make a bill late', () => {
+    let facts: E2eAccount;
+    const as = (method: Method, url: string, status: number, body?: object) =>
+      call(method, url, status, body, facts);
+    const factBill = async (dueDate: string) =>
+      (
+        await as('post', '/payables', 201, {
+          vendor: 'ACME Water',
+          amount: 40,
+          currency: 'EUR',
+          dueDate,
+        })
+      ).body as { id: string };
+    const summaryTotal = async () =>
+      (await as('get', '/late-payments/summary', 200)).body.total as number;
+
+    beforeAll(async () => {
+      facts = await registerAccount(app, emails.facts, 'Member Three');
+    });
+
+    it('a bill matched after its due date to a bank row paid on time is on time', async () => {
+      const { id } = await factBill(day(-5));
+      const [row] = await dataSource.query(
+        `INSERT INTO transactions (workspace_id, transaction_date, counterparty_name,
+                                   payment_purpose, amount, debit, currency, transaction_type,
+                                   is_verified)
+         VALUES ($1, $2, 'ACME Water', 'Water', 40, 40, 'EUR', 'expense', true) RETURNING id`,
+        [facts.workspaceId, day(-10)],
+      );
+      // Unpaid past its due date, it is late, and takes a reason…
+      await as('put', `/payables/${id}/late-reason`, 200, { reason: 'forgot' });
+      expect(await summaryTotal()).toBe(1);
+      // …until the bank row shows it was paid on time: the reason left on it counts nowhere.
+      await as('put', `/payables/${id}/mark-paid`, 200, { linkedTransactionId: row.id });
+      const [payment] = await dataSource.query(
+        'SELECT paid_on::text AS paid_on FROM payable_payments WHERE payable_id = $1',
+        [id],
+      );
+      expect(payment.paid_on).toBe(day(-10));
+      expect(await summaryTotal()).toBe(0);
+      expect(
+        codeOf((await as('put', `/payables/${id}/late-reason`, 400, { reason: 'forgot' })).body),
+      ).toBe('PAYABLE_NOT_LATE');
+    });
+
+    it('a bill due today is not late yet', async () => {
+      const { id } = await factBill(day(0));
+      expect(
+        codeOf((await as('put', `/payables/${id}/late-reason`, 400, { reason: 'forgot' })).body),
+      ).toBe('PAYABLE_NOT_LATE');
+      expect(await summaryTotal()).toBe(0);
+    });
+
+    it('a reason left on a bill no longer late counts nowhere, and can still be taken back', async () => {
+      const ids = [(await factBill(day(-5))).id, (await factBill(day(-8))).id];
+      for (const id of ids) {
+        await as('put', `/payables/${id}/late-reason`, 200, { reason: 'forgot' });
+        await as('put', `/payables/${id}`, 200, { dueDate: day(20) });
+      }
+      expect(await summaryTotal()).toBe(0);
+      const analyzer = app.get(LatePaymentsAnalyzer);
+      expect(await analyzer.analyze({ userId: facts.userId, workspaceId: facts.workspaceId })).toEqual(
+        [],
+      );
+      const cleared = await as('put', `/payables/${ids[0]}/late-reason`, 200, { reason: null });
+      expect(cleared.body.lateReason).toBeNull();
+      // Put back as they were: past due, the reason counts again.
+      for (const id of ids) {
+        await as('put', `/payables/${id}`, 200, { dueDate: day(-5) });
+      }
+      expect(await summaryTotal()).toBe(2);
+    });
+
+    it('reasons older than half a year give no advice', async () => {
+      const ws = facts.workspaceId;
+      await dataSource.query(
+        "UPDATE payables SET late_reason = NULL WHERE workspace_id = $1",
+        [ws],
+      );
+      for (const offset of [-200, -210]) {
+        const { id } = await factBill(day(offset));
+        await as('put', `/payables/${id}/late-reason`, 200, { reason: 'unexpected_expense' });
+      }
+      const analyzer = app.get(LatePaymentsAnalyzer);
+      expect(await analyzer.analyze({ userId: facts.userId, workspaceId: ws })).toEqual([]);
+    });
   });
 });

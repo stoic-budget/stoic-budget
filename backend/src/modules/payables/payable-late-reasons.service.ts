@@ -6,29 +6,17 @@ import { addDays, formatDay } from '../../common/recurrence/date-only';
 import { assertFound } from '../../common/utils/assert-found.util';
 import type { LatePaymentsSummary, LateReason, SetPayableLateReasonBody } from '../../contracts';
 import { Payable, PayableDirection } from '../../entities/payable.entity';
+import { LATE_SQL } from './late-sql';
 import { PayablesService } from './payables.service';
 
 /** The summary looks back this far, by due date. */
 export const SUMMARY_DAYS = 365;
 
 /**
- * SQL, for a bill aliased `p`: it was paid late or is still unpaid past its
- * due date. A payment dated after the due date, or the bill marked paid after
- * it, is late; so is a reason already given. Receivables are owed to the
- * workspace, not by it: none of them is ever late in this sense.
- */
-export const LATE_SQL = `p."direction" = 'payable' AND p."due_date" IS NOT NULL
-  AND (p."late_reason" IS NOT NULL
-    OR (p."status" NOT IN ('paid', 'archived') AND p."skipped_at" IS NULL
-        AND p."due_date" < CURRENT_DATE)
-    OR (p."status" = 'paid' AND p."paid_at"::date > p."due_date")
-    OR EXISTS (SELECT 1 FROM "payable_payments" pp
-                WHERE pp."payable_id" = p."id" AND pp."paid_on" > p."due_date"))`;
-
-/**
  * Why a bill was paid late, as the person says it, and what those reasons
  * add up to over a year. Only a bill to pay that is (or was) late takes one;
- * taking it back is always allowed.
+ * taking it back is always allowed. A reason left on a bill that is no longer
+ * late (its due date moved, its payment re-dated) is counted nowhere.
  */
 @Injectable()
 export class PayableLateReasonsService {

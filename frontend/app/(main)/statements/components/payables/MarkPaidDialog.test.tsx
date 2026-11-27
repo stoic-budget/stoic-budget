@@ -261,6 +261,30 @@ describe('MarkPaidDialog', () => {
     });
   });
 
+  it('booking a payment made on time asks nothing, whatever day it is booked', async () => {
+    apiMocks.paymentCandidates.mockResolvedValue([]);
+    apiMocks.payments.mockResolvedValue([
+      {
+        id: 'payment-1',
+        payableId: 'payable-1',
+        amount: '120.00',
+        feeAmount: '0.00',
+        paidOn: '2026-10-16',
+        transactionId: null,
+        comment: null,
+        createdAt: '2026-10-16T08:00:00.000Z',
+      },
+    ]);
+    renderDialog({
+      ...payable,
+      dueDate: '2026-10-20',
+      paidAmount: '120.00',
+      status: 'paid',
+    } as Payable);
+    expect(await screen.findByText('bookIntro')).toBeInTheDocument();
+    expect(screen.queryByText('question')).toBeNull();
+  });
+
   it('books a sale paid in hand as cash kept in no wallet when no wallet has its currency', async () => {
     apiMocks.paymentCandidates.mockResolvedValue([]);
     apiMocks.payments.mockResolvedValue([

@@ -18,10 +18,7 @@ type BaseMessageKey =
   | 'pattern.risky_allocation'
   | 'trend.category_anomaly'
   | 'pattern.idle_cash'
-  | 'pattern.net_worth_milestone'
-  | 'pattern.late_forgot'
-  | 'pattern.late_short'
-  | 'pattern.late_unexpected';
+  | 'pattern.net_worth_milestone';
 
 /** Stoic keys have five wordings each and live in stoic-texts/. */
 export type InsightMessageKey = BaseMessageKey | StoicMessageKey;
@@ -87,21 +84,6 @@ const ru: TranslationMap = {
     message:
       'То, чем вы владеете, за вычетом долгов перешло отметку {{milestoneAmount}} {{date}}. Отметьте это спокойно: привычки, которые привели сюда, важнее числа.',
   },
-  'pattern.late_forgot': {
-    title: 'Забыть дважды — уже привычка',
-    message:
-      'Счетов за полгода, просроченных потому, что о них забыли: {{count}}. Память — не план: пусть напоминание приходит раньше, пока есть время действовать.',
-  },
-  'pattern.late_short': {
-    title: 'Зарплата приходит после счёта',
-    message:
-      'За полгода {{count}} раз денег ещё не было, когда наступал срок счёта. Перенесите дату на после зарплаты или отложите один платёж: подготовленное не торопит.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Неожиданное повторяется',
-    message:
-      'Просрочек за полгода после непредвиденных трат: {{count}}. С мудрым ничего не случается вопреки ожиданию, пишет Сенека. Запас на непредвиденное — цель, которую стоит поставить.',
-  },
 };
 
 const en: TranslationMap = {
@@ -159,21 +141,6 @@ const en: TranslationMap = {
     message:
       'What you own minus what you owe crossed {{milestoneAmount}} on {{date}}. Note it calmly: the habits that brought you here matter more than the number.',
   },
-  'pattern.late_forgot': {
-    title: 'Forgotten twice is a habit',
-    message:
-      '{{count}} bills in the last half year were late because they slipped your mind. Memory is not a plan: let the reminder come earlier, while there is still time to act.',
-  },
-  'pattern.late_short': {
-    title: 'Payday comes after the bill',
-    message:
-      '{{count}} times in half a year the money was not there yet when a bill fell due. Move its date past your payday, or keep one payment aside: what is prepared does not hurry you.',
-  },
-  'pattern.late_unexpected': {
-    title: 'The unexpected keeps coming',
-    message:
-      '{{count}} late bills in half a year followed an unforeseen expense. Nothing happens to the wise against their expectation, Seneca writes. A reserve for the unforeseen is a goal worth setting.',
-  },
 };
 
 const kk: TranslationMap = {
@@ -229,21 +196,6 @@ const kk: TranslationMap = {
     title: 'Капитал {{milestoneAmount}} асты',
     message:
       'Қарызды шегергендегі мүлкіңіз {{date}} {{milestoneAmount}} белесінен асты. Мұны сабырмен атап өтіңіз: мұнда жеткізген әдеттер саннан маңыздырақ.',
-  },
-  'pattern.late_forgot': {
-    title: 'Екі рет ұмыту — әдет',
-    message:
-      'Соңғы жарты жылда ұмытылғандықтан кешіктірілген шоттар: {{count}}. Есте сақтау — жоспар емес: әрекет етуге уақыт барда еске салу ертерек келсін.',
-  },
-  'pattern.late_short': {
-    title: 'Жалақы шоттан кейін келеді',
-    message:
-      'Жарты жылда {{count}} рет шоттың мерзімі келгенде ақша әлі жоқ еді. Күнін жалақыдан кейінге жылжытыңыз немесе бір төлемді бөлек ұстаңыз: дайындалған нәрсе асықтырмайды.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Күтпеген нәрсе қайталанады',
-    message:
-      'Жарты жылда күтпеген шығыннан кейінгі кешігулер: {{count}}. Данаға ештеңе күткеннен тыс болмайды, дейді Сенека. Күтпегенге арналған қор — қоюға тұрарлық мақсат.',
   },
 };
 
@@ -303,21 +255,6 @@ const de: TranslationMap = {
     message:
       'Was Sie besitzen, abzüglich Ihrer Schulden, hat am {{date}} {{milestoneAmount}} überschritten. Nehmen Sie es gelassen zur Kenntnis: Die Gewohnheiten, die Sie hierher gebracht haben, zählen mehr als die Zahl.',
   },
-  'pattern.late_forgot': {
-    title: 'Zweimal vergessen ist eine Gewohnheit',
-    message:
-      '{{count}} Rechnungen im letzten halben Jahr kamen zu spät, weil sie vergessen wurden. Erinnerung ist kein Plan: Lassen Sie die Erinnerung früher kommen, solange noch Zeit zum Handeln ist.',
-  },
-  'pattern.late_short': {
-    title: 'Der Zahltag kommt nach der Rechnung',
-    message:
-      '{{count}}-mal in einem halben Jahr war das Geld noch nicht da, als eine Rechnung fällig wurde. Verschieben Sie den Termin hinter den Zahltag oder legen Sie eine Rate zurück: Was vorbereitet ist, hetzt nicht.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Das Unerwartete kehrt wieder',
-    message:
-      '{{count}} verspätete Rechnungen in einem halben Jahr folgten einer unvorhergesehenen Ausgabe. Dem Weisen geschieht nichts wider Erwarten, schreibt Seneca. Eine Reserve für das Unvorhergesehene ist ein Ziel, das sich lohnt.',
-  },
 };
 
 const fr: TranslationMap = {
@@ -375,21 +312,6 @@ const fr: TranslationMap = {
     message:
       'Ce que vous possédez moins ce que vous devez a franchi {{milestoneAmount}} le {{date}}. Notez-le avec calme : les habitudes qui vous ont mené ici comptent plus que le chiffre.',
   },
-  'pattern.late_forgot': {
-    title: 'Oublier deux fois, c’est une habitude',
-    message:
-      '{{count}} factures du dernier semestre ont été payées en retard parce qu’elles étaient oubliées. La mémoire n’est pas un plan : faites venir le rappel plus tôt, tant qu’il reste le temps d’agir.',
-  },
-  'pattern.late_short': {
-    title: 'La paie arrive après la facture',
-    message:
-      '{{count}} fois en six mois, l’argent n’était pas encore là à l’échéance. Placez la date après votre paie, ou gardez une échéance de côté : ce qui est préparé ne presse pas.',
-  },
-  'pattern.late_unexpected': {
-    title: 'L’imprévu revient',
-    message:
-      '{{count}} retards en six mois ont suivi une dépense imprévue. Rien n’arrive au sage contre son attente, écrit Sénèque. Une réserve pour l’imprévu est un objectif qui vaut la peine.',
-  },
 };
 
 const es: TranslationMap = {
@@ -444,21 +366,6 @@ const es: TranslationMap = {
     title: 'Patrimonio neto por encima de {{milestoneAmount}}',
     message:
       'Lo que posee menos lo que debe superó {{milestoneAmount}} el {{date}}. Anótelo con calma: los hábitos que le trajeron hasta aquí importan más que la cifra.',
-  },
-  'pattern.late_forgot': {
-    title: 'Olvidar dos veces es un hábito',
-    message:
-      '{{count}} facturas del último medio año se pagaron tarde porque se olvidaron. La memoria no es un plan: que el aviso llegue antes, mientras aún hay tiempo para actuar.',
-  },
-  'pattern.late_short': {
-    title: 'El día de pago llega después de la factura',
-    message:
-      '{{count}} veces en medio año el dinero aún no estaba cuando venció una factura. Mueva la fecha a después del día de pago o aparte un pago: lo preparado no apremia.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Lo inesperado vuelve',
-    message:
-      '{{count}} retrasos en medio año siguieron a un gasto imprevisto. Al sabio nada le sucede contra lo que esperaba, escribe Séneca. Una reserva para lo imprevisto es una meta que vale la pena.',
   },
 };
 
@@ -516,21 +423,6 @@ const pt: TranslationMap = {
     message:
       'O que possui menos o que deve passou {{milestoneAmount}} em {{date}}. Registe-o com calma: os hábitos que o trouxeram até aqui contam mais do que o número.',
   },
-  'pattern.late_forgot': {
-    title: 'Esquecer duas vezes é um hábito',
-    message:
-      '{{count}} contas do último semestre foram pagas com atraso por esquecimento. Memória não é plano: faça o lembrete chegar antes, enquanto ainda há tempo para agir.',
-  },
-  'pattern.late_short': {
-    title: 'O salário chega depois da conta',
-    message:
-      '{{count}} vezes em seis meses o dinheiro ainda não estava lá no vencimento. Mude a data para depois do salário ou guarde um pagamento à parte: o que está preparado não apressa.',
-  },
-  'pattern.late_unexpected': {
-    title: 'O inesperado volta',
-    message:
-      '{{count}} atrasos em seis meses vieram depois de uma despesa imprevista. Nada acontece ao sábio contra a sua expectativa, escreve Sêneca. Uma reserva para o imprevisto é uma meta que vale a pena.',
-  },
 };
 
 const tr: TranslationMap = {
@@ -585,21 +477,6 @@ const tr: TranslationMap = {
     title: 'Net varlık {{milestoneAmount}} eşiğini geçti',
     message:
       'Sahip olduklarınızdan borçlarınız düşüldüğünde kalan, {{date}} tarihinde {{milestoneAmount}} eşiğini aştı. Bunu sakince not edin: sizi buraya getiren alışkanlıklar sayıdan daha önemlidir.',
-  },
-  'pattern.late_forgot': {
-    title: 'İki kez unutmak bir alışkanlıktır',
-    message:
-      'Son altı ayda {{count}} fatura unutulduğu için geç ödendi. Hafıza bir plan değildir: hatırlatma, harekete geçmeye vakit varken daha erken gelsin.',
-  },
-  'pattern.late_short': {
-    title: 'Maaş faturadan sonra geliyor',
-    message:
-      'Altı ayda {{count}} kez fatura vadesinde para henüz yoktu. Tarihi maaş gününün sonrasına alın ya da bir ödemeyi kenara ayırın: hazırlanan şey insanı aceleye getirmez.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Beklenmedik olan tekrar ediyor',
-    message:
-      'Altı aydaki {{count}} gecikme beklenmedik bir harcamanın ardından geldi. Bilgeye beklentisine aykırı hiçbir şey olmaz, diye yazar Seneca. Beklenmedik olana karşı bir yedek, konmaya değer bir hedeftir.',
   },
 };
 
@@ -657,21 +534,6 @@ const uk: TranslationMap = {
     message:
       'Те, чим ви володієте, за вирахуванням боргів перейшло позначку {{milestoneAmount}} {{date}}. Відзначте це спокійно: звички, що привели сюди, важать більше за число.',
   },
-  'pattern.late_forgot': {
-    title: 'Забути двічі — уже звичка',
-    message:
-      'Рахунків за пів року, прострочених через те, що про них забули: {{count}}. Пам’ять — не план: хай нагадування приходить раніше, поки є час діяти.',
-  },
-  'pattern.late_short': {
-    title: 'Зарплата приходить після рахунку',
-    message:
-      'За пів року {{count}} разів грошей ще не було, коли наставав строк рахунку. Перенесіть дату на після зарплати або відкладіть один платіж: підготоване не квапить.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Несподіване повторюється',
-    message:
-      'Прострочень за пів року після непередбачених витрат: {{count}}. З мудрим нічого не стається всупереч очікуванню, пише Сенека. Запас на непередбачене — мета, яку варто поставити.',
-  },
 };
 
 const zh: TranslationMap = {
@@ -725,21 +587,6 @@ const zh: TranslationMap = {
     title: '净资产超过 {{milestoneAmount}}',
     message:
       '你所拥有的减去所欠的，在 {{date}} 越过了 {{milestoneAmount}}。平静地记下它：带你走到这里的习惯比数字更重要。',
-  },
-  'pattern.late_forgot': {
-    title: '忘记两次就是习惯',
-    message:
-      '过去半年有 {{count}} 张账单因为忘记而逾期。记性不是计划：让提醒更早到来，趁还有时间行动。',
-  },
-  'pattern.late_short': {
-    title: '发薪日在账单之后',
-    message:
-      '半年内有 {{count}} 次账单到期时钱还没到。把到期日挪到发薪日之后，或留出一期的钱：有准备就不会仓促。',
-  },
-  'pattern.late_unexpected': {
-    title: '意外一再出现',
-    message:
-      '半年内有 {{count}} 次逾期发生在意外支出之后。塞涅卡写道：智者不会遇到出乎意料之事。为意外留一笔储备，是值得设立的目标。',
   },
 };
 
@@ -798,21 +645,6 @@ const pl: TranslationMap = {
     message:
       'To, co posiadasz, minus to, co jesteś winien, przekroczyło {{milestoneAmount}} dnia {{date}}. Odnotuj to spokojnie: nawyki, które Cię tu przywiodły, znaczą więcej niż liczba.',
   },
-  'pattern.late_forgot': {
-    title: 'Zapomnieć dwa razy to już nawyk',
-    message:
-      '{{count}} rachunków z ostatniego półrocza zapłacono po terminie, bo o nich zapomniano. Pamięć to nie plan: niech przypomnienie przychodzi wcześniej, póki jest czas działać.',
-  },
-  'pattern.late_short': {
-    title: 'Wypłata przychodzi po rachunku',
-    message:
-      '{{count}} razy w pół roku pieniędzy jeszcze nie było, gdy mijał termin rachunku. Przesuń termin za dzień wypłaty albo odłóż jedną płatność: to, co przygotowane, nie pogania.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Nieoczekiwane wraca',
-    message:
-      '{{count}} opóźnień w pół roku nastąpiło po nieprzewidzianym wydatku. Mędrcowi nic nie zdarza się wbrew oczekiwaniu, pisze Seneka. Rezerwa na nieprzewidziane to cel wart wyznaczenia.',
-  },
 };
 
 const it: TranslationMap = {
@@ -868,21 +700,6 @@ const it: TranslationMap = {
     title: 'Patrimonio netto oltre {{milestoneAmount}}',
     message:
       'Ciò che possiedi meno ciò che devi ha superato {{milestoneAmount}} il {{date}}. Prendine nota con calma: le abitudini che ti hanno portato qui contano più del numero.',
-  },
-  'pattern.late_forgot': {
-    title: 'Dimenticare due volte è un’abitudine',
-    message:
-      '{{count}} bollette dell’ultimo semestre sono state pagate in ritardo perché dimenticate. La memoria non è un piano: fai arrivare il promemoria prima, finché c’è tempo per agire.',
-  },
-  'pattern.late_short': {
-    title: 'Lo stipendio arriva dopo la bolletta',
-    message:
-      '{{count}} volte in sei mesi i soldi non c’erano ancora alla scadenza. Sposta la data dopo lo stipendio o tieni da parte una rata: ciò che è preparato non mette fretta.',
-  },
-  'pattern.late_unexpected': {
-    title: 'L’imprevisto ritorna',
-    message:
-      '{{count}} ritardi in sei mesi sono seguiti a una spesa imprevista. Al saggio nulla accade contro le sue attese, scrive Seneca. Una riserva per l’imprevisto è un obiettivo che vale la pena.',
   },
 };
 
@@ -941,21 +758,6 @@ const sk: TranslationMap = {
     message:
       'To, čo vlastníte, mínus to, čo dlhujete, prekročilo {{date}} hranicu {{milestoneAmount}}. Zaznamenajte to pokojne: návyky, ktoré vás sem priviedli, sú dôležitejšie než číslo.',
   },
-  'pattern.late_forgot': {
-    title: 'Zabudnúť dvakrát je už zvyk',
-    message:
-      'Za posledný polrok bolo {{count}} účtov zaplatených neskoro, lebo sa na ne zabudlo. Pamäť nie je plán: nech pripomenutie príde skôr, kým je čas konať.',
-  },
-  'pattern.late_short': {
-    title: 'Výplata prichádza po účte',
-    message:
-      '{{count}}-krát za polrok peniaze ešte neboli, keď bol účet splatný. Posuňte dátum za výplatu alebo si odložte jednu platbu: čo je pripravené, nenaháňa.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Nečakané sa vracia',
-    message:
-      '{{count}} oneskorení za polrok nasledovalo po nepredvídanom výdavku. Múdremu sa nič nestane proti jeho očakávaniu, píše Seneca. Rezerva na nepredvídané je cieľ, ktorý stojí za to.',
-  },
 };
 
 const ja: TranslationMap = {
@@ -1010,21 +812,6 @@ const ja: TranslationMap = {
     title: '純資産が {{milestoneAmount}} を超えました',
     message:
       '持っているものから負っているものを引いた額が、{{date}}に {{milestoneAmount}} を越えました。静かに受け止めましょう。ここへ導いた習慣こそ、数字より大切です。',
-  },
-  'pattern.late_forgot': {
-    title: '二度忘れたら習慣です',
-    message:
-      'この半年で {{count}} 件の請求が、忘れていたために遅れました。記憶は計画ではありません。行動する時間があるうちに、通知を早めましょう。',
-  },
-  'pattern.late_short': {
-    title: '給料日は請求の後に来る',
-    message:
-      '半年で {{count}} 回、請求の期日にまだお金がありませんでした。期日を給料日の後に移すか、1回分を取り分けておきましょう。備えがあれば急かされません。',
-  },
-  'pattern.late_unexpected': {
-    title: '想定外が繰り返す',
-    message:
-      '半年で {{count}} 件の遅れが、予期せぬ出費の後に起きています。賢者には予期に反することは何も起こらない、とセネカは書きました。想定外への備えは、立てる価値のある目標です。',
   },
 };
 
@@ -1081,21 +868,6 @@ const ko: TranslationMap = {
     message:
       '가진 것에서 빚을 뺀 금액이 {{date}}에 {{milestoneAmount}}를 넘었습니다. 담담하게 기록해 두세요. 여기까지 이끈 습관이 숫자보다 중요합니다.',
   },
-  'pattern.late_forgot': {
-    title: '두 번 잊으면 습관입니다',
-    message:
-      '지난 반년 동안 잊어버려서 늦게 낸 청구서가 {{count}}건입니다. 기억은 계획이 아닙니다: 행동할 시간이 있을 때 알림이 더 일찍 오게 하세요.',
-  },
-  'pattern.late_short': {
-    title: '월급날이 청구서보다 늦습니다',
-    message:
-      '반년 동안 {{count}}번, 청구서 기한에 아직 돈이 없었습니다. 기한을 월급날 뒤로 옮기거나 한 번 낼 돈을 따로 두세요: 준비된 것은 서두르게 하지 않습니다.',
-  },
-  'pattern.late_unexpected': {
-    title: '예상 밖의 일이 반복됩니다',
-    message:
-      '반년 동안 {{count}}번의 연체가 예상치 못한 지출 뒤에 있었습니다. 현자에게는 기대에 어긋나는 일이 일어나지 않는다고 세네카는 썼습니다. 예상 밖을 위한 비상금은 세울 만한 목표입니다.',
-  },
 };
 
 const hi: TranslationMap = {
@@ -1150,21 +922,6 @@ const hi: TranslationMap = {
     title: 'शुद्ध संपत्ति {{milestoneAmount}} से ऊपर',
     message:
       'आपकी संपत्ति में से कर्ज़ घटाकर जो बचता है, वह {{date}} को {{milestoneAmount}} के पार गया। इसे शांति से दर्ज कीजिए: यहाँ तक लाने वाली आदतें संख्या से ज़्यादा मायने रखती हैं।',
-  },
-  'pattern.late_forgot': {
-    title: 'दो बार भूलना आदत है',
-    message:
-      'पिछले छह महीनों में {{count}} बिल भूल जाने के कारण देर से चुकाए गए। याद रखना योजना नहीं है: रिमाइंडर पहले आने दें, जब तक कुछ करने का समय है।',
-  },
-  'pattern.late_short': {
-    title: 'वेतन बिल के बाद आता है',
-    message:
-      'छह महीनों में {{count}} बार बिल की तारीख पर पैसे अभी नहीं थे। तारीख वेतन के बाद रखें या एक भुगतान अलग रखें: जो तैयार है, वह जल्दबाज़ी नहीं कराता।',
-  },
-  'pattern.late_unexpected': {
-    title: 'अनपेक्षित बार-बार आता है',
-    message:
-      'छह महीनों में {{count}} देरियाँ किसी अनपेक्षित ख़र्च के बाद हुईं। सेनेका लिखते हैं, ज्ञानी के साथ कुछ भी उसकी अपेक्षा के विरुद्ध नहीं होता। अनपेक्षित के लिए एक भंडार रखने लायक़ लक्ष्य है।',
   },
 };
 
@@ -1223,21 +980,6 @@ const nl: TranslationMap = {
     message:
       'Wat je bezit min wat je schuldig bent, ging op {{date}} over {{milestoneAmount}}. Neem het kalm ter kennis: de gewoonten die je hier brachten, tellen meer dan het getal.',
   },
-  'pattern.late_forgot': {
-    title: 'Twee keer vergeten is een gewoonte',
-    message:
-      '{{count}} rekeningen in het afgelopen halfjaar waren te laat omdat ze vergeten werden. Geheugen is geen plan: laat de herinnering eerder komen, zolang er nog tijd is om te handelen.',
-  },
-  'pattern.late_short': {
-    title: 'Het salaris komt na de rekening',
-    message:
-      '{{count}} keer in een halfjaar was het geld er nog niet toen een rekening vervaldag had. Zet de datum na je salarisdag of houd één betaling apart: wat voorbereid is, jaagt je niet op.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Het onverwachte keert terug',
-    message:
-      '{{count}} keer te laat in een halfjaar volgde op een onvoorziene uitgave. De wijze overkomt niets tegen zijn verwachting in, schrijft Seneca. Een reserve voor het onvoorziene is een doel dat de moeite waard is.',
-  },
 };
 
 const sv: TranslationMap = {
@@ -1293,21 +1035,6 @@ const sv: TranslationMap = {
     title: 'Nettoförmögenheten passerade {{milestoneAmount}}',
     message:
       'Det du äger minus det du är skyldig passerade {{milestoneAmount}} den {{date}}. Notera det lugnt: vanorna som förde dig hit betyder mer än siffran.',
-  },
-  'pattern.late_forgot': {
-    title: 'Att glömma två gånger är en vana',
-    message:
-      '{{count}} räkningar det senaste halvåret betalades sent för att de glömdes bort. Minnet är ingen plan: låt påminnelsen komma tidigare, medan det finns tid att agera.',
-  },
-  'pattern.late_short': {
-    title: 'Lönen kommer efter räkningen',
-    message:
-      '{{count}} gånger på ett halvår fanns pengarna inte än när en räkning förföll. Flytta datumet till efter lönedagen eller lägg undan en betalning: det som är förberett stressar inte.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Det oväntade återkommer',
-    message:
-      '{{count}} förseningar på ett halvår följde på en oförutsedd utgift. Den vise drabbas inte av något mot sin förväntan, skriver Seneca. En reserv för det oförutsedda är ett mål värt att sätta.',
   },
 };
 
@@ -1365,21 +1092,6 @@ const vi: TranslationMap = {
     message:
       'Những gì bạn sở hữu trừ đi những gì bạn nợ đã vượt {{milestoneAmount}} vào {{date}}. Hãy ghi nhận điều đó một cách điềm tĩnh: những thói quen đưa bạn đến đây quan trọng hơn con số.',
   },
-  'pattern.late_forgot': {
-    title: 'Quên hai lần là thói quen',
-    message:
-      'Nửa năm qua có {{count}} hóa đơn trả muộn vì bị quên. Trí nhớ không phải là kế hoạch: hãy để lời nhắc đến sớm hơn, khi vẫn còn thời gian để làm.',
-  },
-  'pattern.late_short': {
-    title: 'Lương về sau hóa đơn',
-    message:
-      'Trong nửa năm, {{count}} lần đến hạn hóa đơn mà tiền chưa về. Dời ngày sang sau ngày lương hoặc để riêng một kỳ thanh toán: điều đã chuẩn bị thì không làm ta vội.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Điều bất ngờ cứ lặp lại',
-    message:
-      'Nửa năm qua có {{count}} lần trả muộn sau một khoản chi bất ngờ. Seneca viết: không gì xảy đến với người khôn trái với điều họ đã liệu trước. Một khoản dự phòng cho điều bất ngờ là mục tiêu đáng đặt ra.',
-  },
 };
 
 const id: TranslationMap = {
@@ -1435,21 +1147,6 @@ const id: TranslationMap = {
     title: 'Kekayaan bersih melewati {{milestoneAmount}}',
     message:
       'Apa yang Anda miliki dikurangi utang melewati {{milestoneAmount}} pada {{date}}. Catat dengan tenang: kebiasaan yang membawa Anda ke sini lebih penting daripada angkanya.',
-  },
-  'pattern.late_forgot': {
-    title: 'Lupa dua kali adalah kebiasaan',
-    message:
-      '{{count}} tagihan dalam setengah tahun terakhir terlambat karena terlupa. Ingatan bukanlah rencana: biarkan pengingat datang lebih awal, selagi masih ada waktu untuk bertindak.',
-  },
-  'pattern.late_short': {
-    title: 'Gajian datang setelah tagihan',
-    message:
-      '{{count}} kali dalam setengah tahun uangnya belum ada saat tagihan jatuh tempo. Pindahkan tanggalnya setelah gajian atau sisihkan satu pembayaran: yang sudah disiapkan tidak membuat terburu-buru.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Hal tak terduga terus datang',
-    message:
-      '{{count}} keterlambatan dalam setengah tahun terjadi setelah pengeluaran tak terduga. Tak ada yang menimpa orang bijak di luar dugaannya, tulis Seneca. Cadangan untuk hal tak terduga adalah tujuan yang layak.',
   },
 };
 
@@ -1508,21 +1205,6 @@ const da: TranslationMap = {
     message:
       'Det, du ejer, minus det, du skylder, passerede {{milestoneAmount}} den {{date}}. Notér det roligt: vanerne, der bragte dig hertil, betyder mere end tallet.',
   },
-  'pattern.late_forgot': {
-    title: 'At glemme to gange er en vane',
-    message:
-      '{{count}} regninger det seneste halve år blev betalt for sent, fordi de blev glemt. Hukommelse er ingen plan: lad påmindelsen komme tidligere, mens der stadig er tid til at handle.',
-  },
-  'pattern.late_short': {
-    title: 'Lønnen kommer efter regningen',
-    message:
-      '{{count}} gange på et halvt år var pengene der endnu ikke, da en regning forfaldt. Flyt datoen til efter lønningsdagen, eller læg én betaling til side: det forberedte jager ikke.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Det uventede vender tilbage',
-    message:
-      '{{count}} forsinkelser på et halvt år fulgte efter en uforudset udgift. Den vise rammes af intet mod sin forventning, skriver Seneca. En reserve til det uforudsete er et mål, der er værd at sætte.',
-  },
 };
 
 const nb: TranslationMap = {
@@ -1579,21 +1261,6 @@ const nb: TranslationMap = {
     title: 'Nettoformuen passerte {{milestoneAmount}}',
     message:
       'Det du eier minus det du skylder, passerte {{milestoneAmount}} den {{date}}. Merk deg det med ro: vanene som brakte deg hit, betyr mer enn tallet.',
-  },
-  'pattern.late_forgot': {
-    title: 'Å glemme to ganger er en vane',
-    message:
-      '{{count}} regninger det siste halvåret ble betalt for sent fordi de ble glemt. Hukommelse er ingen plan: la påminnelsen komme tidligere, mens det fortsatt er tid til å handle.',
-  },
-  'pattern.late_short': {
-    title: 'Lønnen kommer etter regningen',
-    message:
-      '{{count}} ganger på et halvår var pengene ikke der ennå da en regning forfalt. Flytt datoen til etter lønningsdagen, eller sett av én betaling: det som er forberedt, haster ikke.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Det uventede kommer igjen',
-    message:
-      '{{count}} forsinkelser på et halvår fulgte etter en uforutsett utgift. Den vise rammes ikke av noe mot sin forventning, skriver Seneca. En reserve for det uforutsette er et mål verdt å sette.',
   },
 };
 
@@ -1652,21 +1319,6 @@ const nn: TranslationMap = {
     message:
       'Det du eig minus det du skuldar, passerte {{milestoneAmount}} den {{date}}. Merk deg det med ro: vanane som førte deg hit, tyder meir enn talet.',
   },
-  'pattern.late_forgot': {
-    title: 'Å gløyme to gonger er ein vane',
-    message:
-      '{{count}} rekningar det siste halvåret vart betalte for seint fordi dei vart gløymde. Minnet er ingen plan: lat påminninga kome tidlegare, medan det framleis er tid til å handle.',
-  },
-  'pattern.late_short': {
-    title: 'Løna kjem etter rekninga',
-    message:
-      '{{count}} gonger på eit halvår var pengane ikkje der enno då ei rekning forfall. Flytt datoen til etter lønningsdagen, eller set av éi betaling: det som er førebudd, hastar ikkje.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Det uventa kjem att',
-    message:
-      '{{count}} forseinkingar på eit halvår kom etter ei uføresett utgift. Den vise vert ikkje råka av noko mot det han venta, skriv Seneca. Ein reserve for det uføresette er eit mål verdt å setje.',
-  },
 };
 
 const fi: TranslationMap = {
@@ -1724,21 +1376,6 @@ const fi: TranslationMap = {
     message:
       'Omistamasi miinus velkasi ylitti {{milestoneAmount}} {{date}}. Pane se merkille tyynesti: tänne tuoneet tavat merkitsevät enemmän kuin luku.',
   },
-  'pattern.late_forgot': {
-    title: 'Kahdesti unohtaminen on tapa',
-    message:
-      '{{count}} laskua viime puolen vuoden aikana maksettiin myöhässä, koska ne unohtuivat. Muisti ei ole suunnitelma: anna muistutuksen tulla aiemmin, kun vielä ehtii toimia.',
-  },
-  'pattern.late_short': {
-    title: 'Palkka tulee laskun jälkeen',
-    message:
-      '{{count}} kertaa puolessa vuodessa rahaa ei vielä ollut, kun lasku erääntyi. Siirrä eräpäivä palkkapäivän jälkeen tai pane yksi maksu syrjään: valmistautunutta ei hoputeta.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Odottamaton palaa',
-    message:
-      '{{count}} myöhästymistä puolessa vuodessa seurasi odottamatonta menoa. Viisaalle ei tapahdu mitään vastoin hänen odotustaan, kirjoittaa Seneca. Vara odottamattoman varalle on asettamisen arvoinen tavoite.',
-  },
 };
 
 const is: TranslationMap = {
@@ -1794,21 +1431,6 @@ const is: TranslationMap = {
     title: 'Hrein eign fór yfir {{milestoneAmount}}',
     message:
       'Það sem þú átt að frádregnu því sem þú skuldar fór yfir {{milestoneAmount}} þann {{date}}. Taktu eftir því í rólegheitum: venjurnar sem komu þér hingað skipta meira máli en talan.',
-  },
-  'pattern.late_forgot': {
-    title: 'Að gleyma tvisvar er vani',
-    message:
-      '{{count}} reikningar síðasta hálfa árið voru greiddir of seint því þeir gleymdust. Minni er ekki áætlun: láttu áminninguna koma fyrr, meðan enn er tími til að bregðast við.',
-  },
-  'pattern.late_short': {
-    title: 'Launin koma á eftir reikningnum',
-    message:
-      '{{count}} sinnum á hálfu ári voru peningarnir ekki komnir þegar reikningur féll í gjalddaga. Færðu dagsetninguna aftur fyrir útborgunardag eða leggðu eina greiðslu til hliðar: það sem er undirbúið rekur ekki á eftir.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Hið óvænta kemur aftur',
-    message:
-      '{{count}} seinkanir á hálfu ári fylgdu óvæntum útgjöldum. Ekkert hendir hinn vitra gegn væntingum hans, skrifar Seneca. Varasjóður fyrir hið óvænta er markmið sem vert er að setja.',
   },
 };
 
@@ -1867,21 +1489,6 @@ const fo: TranslationMap = {
     message:
       'Tað, sum tú eigur, frádrigið tí, sum tú skyldar, fór upp um {{milestoneAmount}} {{date}}. Legg merki til tað í friði: vanarnir, sum førdu teg higar, hava meira at siga enn talið.',
   },
-  'pattern.late_forgot': {
-    title: 'At gloyma tvær ferðir er ein vani',
-    message:
-      '{{count}} rokningar seinasta hálva árið vórðu goldnar ov seint, tí tær vórðu gloymdar. Minnið er eingin ætlan: lat áminningina koma fyrr, meðan enn er tíð at gera nakað.',
-  },
-  'pattern.late_short': {
-    title: 'Lønin kemur aftan á rokningina',
-    message:
-      '{{count}} ferðir á einum hálvum ári vóru pengarnir ikki komnir, tá ein rokning fall til gjaldingar. Flyt dagin aftur um lønardagin, ella legg eina gjalding til viks: tað, sum er fyrireikað, rekur ikki á.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Tað óvæntaða kemur aftur',
-    message:
-      '{{count}} seinkingar á einum hálvum ári komu aftan á eina óvæntaða útreiðslu. Einki hendir tí vísa ímóti tí, hann væntar, skrivar Seneca. Ein varagrunnur til tað óvæntaða er eitt mál, sum er vert at seta.',
-  },
 };
 
 const cs: TranslationMap = {
@@ -1937,21 +1544,6 @@ const cs: TranslationMap = {
     title: 'Čisté jmění překročilo {{milestoneAmount}}',
     message:
       'To, co vlastníte, minus to, co dlužíte, překročilo {{date}} hranici {{milestoneAmount}}. Zaznamenejte to klidně: návyky, které vás sem přivedly, jsou důležitější než číslo.',
-  },
-  'pattern.late_forgot': {
-    title: 'Zapomenout dvakrát je už zvyk',
-    message:
-      'Za poslední půlrok bylo {{count}} účtů zaplaceno pozdě, protože se na ně zapomnělo. Paměť není plán: ať připomenutí přijde dřív, dokud je čas jednat.',
-  },
-  'pattern.late_short': {
-    title: 'Výplata přichází po účtu',
-    message:
-      '{{count}}krát za půl roku peníze ještě nebyly, když byl účet splatný. Posuňte datum za výplatu nebo si odložte jednu platbu: co je připravené, nehoní.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Nečekané se vrací',
-    message:
-      '{{count}} zpoždění za půl roku následovalo po nečekaném výdaji. Moudrému se nic nestane proti jeho očekávání, píše Seneca. Rezerva na nepředvídané je cíl, který stojí za to.',
   },
 };
 
@@ -2011,21 +1603,6 @@ const bg: TranslationMap = {
     message:
       'Това, което притежавате, минус това, което дължите, надмина {{milestoneAmount}} на {{date}}. Отбележете го спокойно: навиците, които ви доведоха дотук, са по-важни от числото.',
   },
-  'pattern.late_forgot': {
-    title: 'Да забравиш два пъти е навик',
-    message:
-      '{{count}} сметки през последната половин година са платени късно, защото са забравени. Паметта не е план: нека напомнянето идва по-рано, докато има време да се действа.',
-  },
-  'pattern.late_short': {
-    title: 'Заплатата идва след сметката',
-    message:
-      '{{count}} пъти за половин година парите още не са били налице, когато сметката е станала дължима. Преместете датата след заплатата или отделете едно плащане: подготвеното не притиска.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Неочакваното се повтаря',
-    message:
-      '{{count}} закъснения за половин година са след непредвиден разход. На мъдрия нищо не се случва против очакването му, пише Сенека. Резерв за непредвиденото е цел, която си струва да се постави.',
-  },
 };
 
 const hr: TranslationMap = {
@@ -2081,21 +1658,6 @@ const hr: TranslationMap = {
     title: 'Neto imovina prešla je {{milestoneAmount}}',
     message:
       'Ono što posjedujete umanjeno za ono što dugujete prešlo je {{milestoneAmount}} {{date}}. Zabilježite to mirno: navike koje su vas dovele ovamo važnije su od broja.',
-  },
-  'pattern.late_forgot': {
-    title: 'Zaboraviti dvaput već je navika',
-    message:
-      '{{count}} računa u posljednjih pola godine plaćeno je kasno jer su zaboravljeni. Pamćenje nije plan: neka podsjetnik dolazi ranije, dok još ima vremena za djelovanje.',
-  },
-  'pattern.late_short': {
-    title: 'Plaća dolazi nakon računa',
-    message:
-      '{{count}} puta u pola godine novca još nije bilo kad je račun dospio. Pomaknite datum iza dana plaće ili odvojite jednu uplatu: ono što je pripremljeno ne požuruje.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Neočekivano se vraća',
-    message:
-      '{{count}} kašnjenja u pola godine uslijedilo je nakon nepredviđenog troška. Mudracu se ništa ne događa protiv njegova očekivanja, piše Seneka. Pričuva za nepredviđeno cilj je vrijedan postavljanja.',
   },
 };
 
@@ -2153,21 +1715,6 @@ const sr: TranslationMap = {
     message:
       'Оно што поседујете умањено за оно што дугујете прешло је {{milestoneAmount}} {{date}}. Забележите то мирно: навике које су вас довеле овде важније су од броја.',
   },
-  'pattern.late_forgot': {
-    title: 'Заборавити двапут већ је навика',
-    message:
-      '{{count}} рачуна у последњих пола године плаћено је касно јер су заборављени. Памћење није план: нека подсетник стиже раније, док још има времена да се делује.',
-  },
-  'pattern.late_short': {
-    title: 'Плата долази после рачуна',
-    message:
-      '{{count}} пута за пола године новца још није било кад је рачун доспео. Померите датум после дана плате или одвојте једну уплату: оно што је припремљено не пожурује.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Неочекивано се враћа',
-    message:
-      '{{count}} кашњења за пола године уследило је после непредвиђеног трошка. Мудрацу се ништа не дешава против његовог очекивања, пише Сенека. Резерва за непредвиђено циљ је вредан постављања.',
-  },
 };
 
 const sl: TranslationMap = {
@@ -2223,21 +1770,6 @@ const sl: TranslationMap = {
     title: 'Neto premoženje je preseglo {{milestoneAmount}}',
     message:
       'Kar imate, zmanjšano za to, kar dolgujete, je {{date}} preseglo {{milestoneAmount}}. Zabeležite to mirno: navade, ki so vas pripeljale sem, so pomembnejše od številke.',
-  },
-  'pattern.late_forgot': {
-    title: 'Dvakrat pozabiti je že navada',
-    message:
-      '{{count}} računov v zadnjega pol leta je bilo plačanih pozno, ker so bili pozabljeni. Spomin ni načrt: naj opomnik pride prej, dokler je še čas za ukrepanje.',
-  },
-  'pattern.late_short': {
-    title: 'Plača pride po računu',
-    message:
-      '{{count}}-krat v pol leta denarja še ni bilo, ko je račun zapadel. Prestavite datum za dan plače ali prihranite eno plačilo: kar je pripravljeno, ne priganja.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Nepričakovano se vrača',
-    message:
-      '{{count}} zamud v pol leta je sledilo nepredvidenemu izdatku. Modremu se nič ne zgodi proti njegovemu pričakovanju, piše Seneka. Rezerva za nepredvideno je cilj, vreden postavitve.',
   },
 };
 
@@ -2296,21 +1828,6 @@ const mk: TranslationMap = {
     message:
       'Она што го поседувате, намалено за она што го должите, ја надмина {{milestoneAmount}} на {{date}}. Забележете го тоа смирено: навиките што ве донесоа тука се поважни од бројот.',
   },
-  'pattern.late_forgot': {
-    title: 'Да заборавиш двапати е навика',
-    message:
-      '{{count}} сметки во последните половина година се платени доцна затоа што биле заборавени. Меморијата не е план: нека потсетникот доаѓа порано, додека има време за дејствување.',
-  },
-  'pattern.late_short': {
-    title: 'Платата доаѓа по сметката',
-    message:
-      '{{count}} пати за половина година парите уште ги немало кога сметката достасала. Поместете го датумот по денот на платата или одвојте едно плаќање: подготвеното не брза.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Неочекуваното се враќа',
-    message:
-      '{{count}} доцнења за половина година следеле по непредвиден трошок. На мудриот ништо не му се случува спротивно на очекувањето, пишува Сенека. Резерва за непредвиденото е цел вредна за поставување.',
-  },
 };
 
 const be: TranslationMap = {
@@ -2366,21 +1883,6 @@ const be: TranslationMap = {
     title: 'Капітал перавысіў {{milestoneAmount}}',
     message:
       'Тое, чым вы валодаеце, за вылікам даўгоў перайшло адзнаку {{milestoneAmount}} {{date}}. Адзначце гэта спакойна: звычкі, што прывялі сюды, важнейшыя за лік.',
-  },
-  'pattern.late_forgot': {
-    title: 'Забыць двойчы — ужо звычка',
-    message:
-      'Рахункаў за паўгода, пратэрмінаваных таму, што пра іх забыліся: {{count}}. Памяць — не план: хай напамін прыходзіць раней, пакуль ёсць час дзейнічаць.',
-  },
-  'pattern.late_short': {
-    title: 'Зарплата прыходзіць пасля рахунку',
-    message:
-      'За паўгода {{count}} разоў грошай яшчэ не было, калі надыходзіў тэрмін рахунку. Перанясіце дату на пасля зарплаты або адкладзіце адзін плацёж: падрыхтаванае не прыспешвае.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Нечаканае паўтараецца',
-    message:
-      'Пратэрміновак за паўгода пасля непрадбачаных выдаткаў: {{count}}. З мудрым нічога не здараецца насуперак чаканню, піша Сенека. Запас на непрадбачанае — мэта, якую варта паставіць.',
   },
 };
 
@@ -2438,21 +1940,6 @@ const bs: TranslationMap = {
     message:
       'Ono što posjedujete umanjeno za ono što dugujete prešlo je {{milestoneAmount}} {{date}}. Zabilježite to mirno: navike koje su vas dovele ovdje važnije su od broja.',
   },
-  'pattern.late_forgot': {
-    title: 'Zaboraviti dvaput već je navika',
-    message:
-      '{{count}} računa u posljednjih pola godine plaćeno je kasno jer su zaboravljeni. Pamćenje nije plan: neka podsjetnik dolazi ranije, dok još ima vremena za djelovanje.',
-  },
-  'pattern.late_short': {
-    title: 'Plata dolazi nakon računa',
-    message:
-      '{{count}} puta za pola godine novca još nije bilo kad je račun dospio. Pomjerite datum iza dana plate ili odvojite jednu uplatu: ono što je pripremljeno ne požuruje.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Neočekivano se vraća',
-    message:
-      '{{count}} kašnjenja za pola godine uslijedilo je nakon nepredviđenog troška. Mudracu se ništa ne dešava protiv njegovog očekivanja, piše Seneka. Rezerva za nepredviđeno cilj je vrijedan postavljanja.',
-  },
 };
 
 const hsb: TranslationMap = {
@@ -2509,21 +1996,6 @@ const hsb: TranslationMap = {
     title: 'Čiste wobsydstwo je {{milestoneAmount}} překročiło',
     message:
       'Štož wobsedźiće, mjenje toho, štož dołžiće, je {{date}} hranicu {{milestoneAmount}} překročiło. Zwobjedźće to měrnje: přiwučenja, kotrež su was sem přiwjedli, su wažniše hač ličba.',
-  },
-  'pattern.late_forgot': {
-    title: 'Dwójce zabyć je hižo zwučenosć',
-    message:
-      '{{count}} zličbowankow w zańdźenym połlěće bu přepozdźe zapłaćenych, dokelž buchu zabyte. Pomjatk plan njeje: njech dopomnjeće prjedy přińdźe, doniž je hišće čas jednać.',
-  },
-  'pattern.late_short': {
-    title: 'Mzda přińdźe po zličbowance',
-    message:
-      '{{count}} raz w połlěće pjenjezy hišće njeběchu, hdyž bě zličbowanka spadna. Přestajće datum za dźeń mzdy abo połožće jedne zapłaćenje na bok: přihotowane njehoni.',
-  },
-  'pattern.late_unexpected': {
-    title: 'Njewočakowane so wróća',
-    message:
-      '{{count}} komdźenjow w połlěće přińdźe po njewočakowanym wudawku. Mudremu so ničo přećiwo jeho wočakowanju njestanje, piše Seneka. Rezerwa za njewočakowane je cil, kotryž je hódny stajić.',
   },
 };
 

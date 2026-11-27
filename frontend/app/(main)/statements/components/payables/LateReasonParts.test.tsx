@@ -2,7 +2,15 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { Payable } from '@/app/lib/payables-api';
-import { LateReasonNote } from './LateReasonParts';
+import { LateReasonMenuItem, LateReasonNote } from './LateReasonParts';
+
+vi.mock('@/app/components/ui/dropdown-menu', () => ({
+  DropdownMenuItem: ({ children, onClick }: { children: unknown; onClick: () => void }) => (
+    <button type="button" onClick={onClick}>
+      {children as string}
+    </button>
+  ),
+}));
 
 vi.mock('@/app/i18n', () => ({
   useIntlayer: () => new Proxy({}, { get: (_target, key) => ({ value: String(key) }) }),
@@ -46,5 +54,23 @@ describe('LateReasonNote', () => {
       />,
     );
     expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('a reason left on a bill no longer late can still be taken back from the menu', () => {
+    const onSelect = vi.fn();
+    const { rerender, container } = render(
+      <LateReasonMenuItem
+        payable={{ ...overdue, status: 'to_pay', dueDate: '2999-01-01' } as Payable}
+        onSelect={onSelect}
+      />,
+    );
+    expect(container).toBeEmptyDOMElement();
+    rerender(
+      <LateReasonMenuItem
+        payable={{ ...overdue, status: 'to_pay', dueDate: '2999-01-01', lateReason: 'forgot' } as Payable}
+        onSelect={onSelect}
+      />,
+    );
+    expect(container).not.toBeEmptyDOMElement();
   });
 });

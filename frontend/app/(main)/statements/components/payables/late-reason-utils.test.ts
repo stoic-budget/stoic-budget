@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Payable } from '@/app/lib/payables-api';
-import { paidLate, wasLate } from './late-reason-utils';
+import { localToday, paidLate, wasLate } from './late-reason-utils';
+import { isPayableOverdue } from './payables-utils';
 
 const bill = (fields: Partial<Payable>) =>
   ({
@@ -32,8 +33,23 @@ describe('wasLate', () => {
     expect(wasLate(bill({ dueDate: null }), today)).toBe(false);
   });
 
-  it('stays late once a reason is given, so the reason can be changed', () => {
-    expect(wasLate(bill({ status: 'paid', paidAt: null, lateReason: 'forgot' }), today)).toBe(true);
+  it('is only the facts: a reason left on a bill paid on time does not make it late', () => {
+    expect(wasLate(bill({ status: 'paid', paidAt: null, lateReason: 'forgot' }), today)).toBe(false);
+    expect(wasLate(bill({ dueDate: '2026-09-25', lateReason: 'forgot' }), today)).toBe(false);
+  });
+
+  it('a bill due today is not late yet', () => {
+    expect(wasLate(bill({ dueDate: today }), today)).toBe(false);
+  });
+
+  it('counts today on the local calendar, as the row\'s "Overdue" label does', () => {
+    // 23:30 local time on the 10th: the 10th still, whatever UTC says.
+    const lateEvening = new Date(2026, 8, 10, 23, 30);
+    expect(localToday(lateEvening)).toBe('2026-09-10');
+    expect(wasLate(bill({ dueDate: '2026-09-10' }), localToday(lateEvening))).toBe(false);
+    expect(isPayableOverdue(bill({ dueDate: '2026-09-10' }))).toBe(
+      wasLate(bill({ dueDate: '2026-09-10' })),
+    );
   });
 });
 

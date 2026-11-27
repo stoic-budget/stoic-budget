@@ -15,7 +15,8 @@ export function LateReasonMenuItem({
   onSelect?: (payable: Payable) => void;
 }): React.JSX.Element | null {
   const t = useIntlayer('lateReasons');
-  if (!(onSelect && wasLate(payable))) return null;
+  // A reason given can always be changed or taken back, late or not any more.
+  if (!(onSelect && (wasLate(payable) || payable.lateReason))) return null;
   return <DropdownMenuItem onClick={() => onSelect(payable)}>{t.question.value}</DropdownMenuItem>;
 }
 
