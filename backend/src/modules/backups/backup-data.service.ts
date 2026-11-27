@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { Injectable, Optional } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { type DataSource, type EntityMetadata, In } from 'typeorm';
 import { FileStorageService } from '../../common/services/file-storage.service';
@@ -102,6 +102,11 @@ export const isWorkspaceScoped = (metadata: EntityMetadata): boolean =>
 type BackupSnapshotData = {
   collections: Record<string, unknown[]>;
   files: Array<{ path: string; contents: Buffer }>;
+  /**
+   * Documents whose file could not be read (#639): left out of the archive,
+   * so one lost file no longer fails every backup and version.
+   */
+  missingFiles: string[];
 };
 
 @Injectable()
@@ -114,6 +119,7 @@ export class BackupDataService {
   async collect(workspaceId: string): Promise<BackupSnapshotData> {
     const collections: Record<string, unknown[]> = {};
     const files: Array<{ path: string; contents: Buffer }> = [];
+    const missingFiles: string[] = [];
     for (const metadata of this.dataSource.entityMetadatas) {
       if (!isWorkspaceScoped(metadata) || EXCLUDED_TABLES.has(metadata.tableName)) continue;
       const repository = this.dataSource.getRepository(metadata.target);
@@ -125,10 +131,10 @@ export class BackupDataService {
       const records = rows.map(row => this.toBackupRecord(metadata, row));
       collections[metadata.tableName] = records;
       if (metadata.tableName === 'statements' && this.fileStorageService) {
-        await this.collectStatementFiles(rows as Statement[], records, files);
+        await this.collectStatementFiles(rows as Statement[], records, files, missingFiles);
       }
       if (metadata.tableName === 'receipts') {
-        await this.collectReceiptAttachments(records, files);
+        await this.collectReceiptAttachments(records, files, missingFiles);
       }
       if (metadata.tableName === 'transaction_attachments') {
         collections[metadata.tableName] = await collectTransactionAttachmentFiles(records, files);
@@ -136,7 +142,7 @@ export class BackupDataService {
     }
     await this.collectRelatedCollections(collections);
     shareIdenticalAttachmentFiles(collections, files);
-    return { collections, files };
+    return { collections, files, missingFiles };
   }
 
   /** The usual columns, plus the hidden ones this table's backup needs. */
@@ -182,11 +188,23 @@ export class BackupDataService {
     statements: Statement[],
     records: Record<string, unknown>[],
     files: Array<{ path: string; contents: Buffer }>,
+    missingFiles: string[],
   ): Promise<void> {
     const recordsById = new Map(records.map(record => [record.id, record]));
     for (const statement of statements) {
-      const file = await this.fileStorageService?.getStatementFileStream(statement);
-      if (!file) continue;
+      // A 404 when neither the disk nor the database copy has the file; any
+      // other failure (the database, say) still fails the backup.
+      const file = await this.fileStorageService
+        ?.getStatementFileStream(statement)
+        .catch(error => onlyIfMissing(error, error instanceof NotFoundException));
+      if (!file) {
+        missingFiles.push(`statement ${statement.id} (${statement.fileName})`);
+        // A portable path all the same: the archive names no server path.
+        const record = recordsById.get(statement.id);
+        if (record)
+          record.filePath = `statements/${statement.id}/${path.posix.basename(statement.fileName)}`;
+        continue;
+      }
       const contents = await this.streamToBuffer(file.stream);
       const safeFileName = path.posix.basename(file.fileName);
       const backupPath = `statements/${statement.id}/${safeFileName}`;
@@ -207,6 +225,7 @@ export class BackupDataService {
   private async collectReceiptAttachments(
     records: Record<string, unknown>[],
     files: Array<{ path: string; contents: Buffer }>,
+    missingFiles: string[],
   ): Promise<void> {
     for (const record of records) {
       const paths = Array.isArray(record.attachmentPaths) ? record.attachmentPaths : [];
@@ -215,7 +234,14 @@ export class BackupDataService {
         if (typeof sourcePath !== 'string') continue;
         const safeName = path.posix.basename(sourcePath);
         const backupPath = `receipts/${record.id}/${index}-${safeName}`;
-        files.push({ path: backupPath, contents: await fs.readFile(sourcePath) });
+        const contents = await fs
+          .readFile(sourcePath)
+          .catch(error => onlyIfMissing(error, error?.code === 'ENOENT'));
+        if (!contents) {
+          missingFiles.push(`receipt ${String(record.id)} (${safeName})`);
+          continue;
+        }
+        files.push({ path: backupPath, contents });
         portablePaths.push(backupPath);
       }
       record.attachmentPaths = portablePaths;
@@ -254,4 +280,10 @@ export class BackupDataService {
       .map(record => (record as Record<string, unknown>).id)
       .filter((id): id is string => typeof id === 'string');
   }
+}
+
+/** A file that is not there is left out; any other failure is rethrown. */
+function onlyIfMissing(error: unknown, missing: boolean): null {
+  if (missing) return null;
+  throw error;
 }
