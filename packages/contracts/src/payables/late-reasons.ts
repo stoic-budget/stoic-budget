@@ -1,0 +1,33 @@
+import * as Schema from 'effect/Schema';
+import { optionalNullable } from '../common/requests';
+import { DateOnly, type Wire } from '../common/wire';
+
+/** Why a bill was paid late, as the person says it. */
+export const LateReason = Schema.Literals([
+  'forgot',
+  'short_before_payday',
+  'income_late',
+  'unexpected_expense',
+  'bank_or_payment_issue',
+  'other',
+]);
+export type LateReason = Wire<typeof LateReason>;
+
+/** `PUT /payables/:id/late-reason`: the reason, or null to take it back. */
+export const SetPayableLateReasonBody = Schema.Struct({
+  reason: Schema.NullOr(LateReason),
+  note: optionalNullable(Schema.String.check(Schema.isMaxLength(200))),
+});
+export type SetPayableLateReasonBody = Wire<typeof SetPayableLateReasonBody>;
+
+/**
+ * `GET /late-payments/summary`: the bills paid late (or still overdue) that
+ * fell due since `since`, a year back, by the reason given; `unexplained` had none.
+ */
+export const LatePaymentsSummary = Schema.Struct({
+  since: DateOnly,
+  total: Schema.Number,
+  unexplained: Schema.Number,
+  byReason: Schema.Array(Schema.Struct({ reason: LateReason, count: Schema.Number })),
+});
+export type LatePaymentsSummary = Wire<typeof LatePaymentsSummary>;
