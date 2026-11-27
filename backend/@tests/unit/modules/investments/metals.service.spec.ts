@@ -175,6 +175,16 @@ describe('MetalsService', () => {
     expect(investmentsService.writeSnapshot).toHaveBeenCalledWith(USER, WORKSPACE, 'acc-1');
   });
 
+  it('counts a lot bought in a currency with no rate as unpriced, not free (#655)', async () => {
+    const bought = krugerrands({ costTotal: '30000', costCurrency: 'USD' });
+    const { service } = build({ lots: [bought], ratesByDate: { today: 1 } });
+
+    const summary = await service.getSummary(WORKSPACE);
+
+    expect(summary.lots[0].cost).toBeNull();
+    expect(summary).toMatchObject({ gain: 0, unpricedLots: 1 });
+  });
+
   it('names a lot after its metal and weight when no name is given', async () => {
     const { service } = build();
     const lot = await service.addLot(USER, WORKSPACE, {

@@ -7,7 +7,6 @@ import { toEnum } from '../../common/effect/to-enum';
 import { appError } from '../../common/errors/app-error';
 import { resolveUploadsDir } from '../../common/utils/uploads.util';
 import type {
-  Metal,
   MetalLot as MetalLotView,
   MetalReceipt as MetalReceiptView,
   MetalSale as MetalSaleView,
@@ -36,6 +35,7 @@ import {
 import { BalanceService } from '../balance/balance.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { InvestmentsService } from './investments.service';
+import { metalTotals } from './metal-totals';
 import { fineTroyOunces } from './metal-weight.util';
 
 const INVESTMENTS_SECTION_CODE = 'ASSET_INVESTMENTS';
@@ -115,62 +115,21 @@ export class MetalsService {
       },
     });
 
-    const byMetal = new Map<Metal, MetalTotalsView>();
-    const totalsFor = (metal: Metal): MetalTotalsView => {
-      const existing = byMetal.get(metal);
-      if (existing) return existing;
-      const created: MetalTotalsView = {
-        metal,
-        fineOunces: 0,
-        price: 0,
-        pricedAt: null,
-        value: 0,
-        cost: 0,
-        gain: 0,
-        costPerOunce: null,
-        dealerValue: 0,
-        dealerDiscount: context.discounts[metal],
-        realized: 0,
-      };
-      byMetal.set(metal, created);
-      return created;
-    };
-
-    for (const lot of lots) {
-      const totals = totalsFor(lot.metal);
-      totals.fineOunces = round8(totals.fineOunces + lot.fineOunces);
-      totals.value = round2(totals.value + lot.value);
-      totals.cost = round2(totals.cost + (lot.cost ?? 0));
-      totals.dealerValue = round2(totals.dealerValue + lot.dealerValue);
-      totals.gain = round2(totals.value - totals.cost);
-      totals.price = lot.price;
-      // The oldest quote wins: a total is only as fresh as its stalest lot.
-      // ISO timestamps order the same way as the instants they name.
-      if (lot.pricedAt && (!totals.pricedAt || lot.pricedAt < totals.pricedAt)) {
-        totals.pricedAt = lot.pricedAt;
-      }
-    }
-    for (const totals of byMetal.values()) {
-      totals.costPerOunce =
-        totals.fineOunces > 0 && totals.cost > 0 ? round2(totals.cost / totals.fineOunces) : null;
-    }
-    for (const sale of sales) {
-      totalsFor(sale.metal).realized = round2(
-        totalsFor(sale.metal).realized + (sale.realized ?? 0),
-      );
-    }
-
-    const value = round2(lots.reduce((sum, lot) => sum + lot.value, 0));
-    const cost = round2(lots.reduce((sum, lot) => sum + (lot.cost ?? 0), 0));
+    const { byMetal, value, cost, gain, unpricedLots } = metalTotals(
+      lots,
+      sales,
+      context.discounts,
+    );
     return {
       currency,
       value,
       cost,
-      gain: round2(value - cost),
+      gain,
+      unpricedLots,
       dealerValue: round2(lots.reduce((sum, lot) => sum + lot.dealerValue, 0)),
       realized: round2(sales.reduce((sum, sale) => sum + (sale.realized ?? 0), 0)),
       insured: round2(lots.reduce((sum, lot) => sum + (lot.insured ?? 0), 0)),
-      byMetal: [...byMetal.values()].sort((a, b) => b.value - a.value),
+      byMetal,
       lots,
       sales,
       dealerDiscount: context.discounts,
@@ -496,18 +455,19 @@ export class MetalsService {
     const value = round2(
       await this.convert(fineOunces * price, lot.priceCurrency, currency, lot.workspaceId),
     );
-    const cost =
+    // No rate for the purchase day: the cost is unknown, and the lot counts as
+    // unpriced rather than bought for nothing (#655).
+    const converted =
       lot.costTotal === null
         ? null
-        : round2(
-            await this.convert(
-              Number(lot.costTotal),
-              lot.costCurrency ?? currency,
-              currency,
-              lot.workspaceId,
-              acquiredOn,
-            ),
+        : await this.convertOrNull(
+            Number(lot.costTotal),
+            lot.costCurrency ?? currency,
+            currency,
+            lot.workspaceId,
+            acquiredOn,
           );
+    const cost = converted === null ? null : round2(converted);
     const discount = context.discounts[metal] ?? 0;
     const premium = await this.premiumAtPurchase(lot, cost, fineOunces, acquiredOn, context);
     const dealerValue = round2(value * (1 - discount / 100));
@@ -783,13 +743,18 @@ export class MetalsService {
    * March amount, and a sale made then fetched what it fetched then. Today's
    * rate belongs only to what is worth something today.
    */
-  private async convert(
+  private async convert(...args: Parameters<MetalsService['convertOrNull']>): Promise<number> {
+    return (await this.convertOrNull(...args)) ?? 0;
+  }
+
+  /** Null when no rate is known: a cost that cannot be converted is unknown, not zero. */
+  private async convertOrNull(
     amount: number,
     from: string,
     to: string,
     workspaceId: string,
     on?: string | null,
-  ): Promise<number> {
+  ): Promise<number | null> {
     if (!Number.isFinite(amount) || amount === 0) return 0;
     const source = (from || to).toUpperCase();
     if (source === to) return amount;
@@ -799,7 +764,7 @@ export class MetalsService {
       on ?? undefined,
       workspaceId,
     );
-    return rate === null ? 0 : amount * rate;
+    return rate === null ? null : amount * rate;
   }
 }
 
