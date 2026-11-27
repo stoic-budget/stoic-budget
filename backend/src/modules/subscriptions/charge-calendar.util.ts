@@ -1,5 +1,5 @@
 import { lastDayOf } from '../../common/utils/billing-day.util';
-import { SubscriptionFrequency } from '../../entities/subscription.entity';
+import { type Subscription, SubscriptionFrequency } from '../../entities/subscription.entity';
 
 const bucketOf = (date: Date): number => date.getFullYear() * 12 + date.getMonth();
 
@@ -233,4 +233,17 @@ export function nextChargeAfter(
   const year = Math.floor(target / 12);
   const month = target % 12;
   return new Date(year, month, Math.min(billingDay, lastDayOf(year, month)));
+}
+
+/**
+ * The charge after `date` for a subscription row, on its billing day. A row
+ * without one (an old backup) takes the day it is on, not the clamp, and
+ * keeps it from now on.
+ */
+export function nextChargeOf(
+  date: Date,
+  sub: Pick<Subscription, 'frequency' | 'billingDay'>,
+): Date {
+  sub.billingDay ??= date.getDate();
+  return nextChargeAfter(date, sub.frequency, sub.billingDay);
 }

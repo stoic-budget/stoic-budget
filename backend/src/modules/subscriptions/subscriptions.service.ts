@@ -1581,9 +1581,7 @@ export class SubscriptionsService {
 
   /** One step on, back on the billing day after a short month (31 Jan, 28 Feb, 31 Mar). */
   private addInterval(date: Date, sub: Pick<Subscription, 'frequency' | 'billingDay'>): Date {
-    // A row without one (an old backup) takes the day it is on, not the clamp.
-    sub.billingDay ??= date.getDate();
-    return calendar.nextChargeAfter(date, sub.frequency, sub.billingDay);
+    return calendar.nextChargeOf(date, sub);
   }
 
   private async recordDetectedCharges(subscription: Subscription): Promise<void> {
