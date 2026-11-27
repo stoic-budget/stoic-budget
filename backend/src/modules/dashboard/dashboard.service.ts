@@ -138,10 +138,12 @@ export class DashboardService {
     range: '7d' | '30d' | '90d' | 'month' = '30d',
     endDateParam?: string,
     viewerMemberId: string | null = null,
+    /** The viewer's own day: "this month" is theirs, not the server's (UTC). */
+    today?: string,
   ): Promise<DashboardResponse> {
     const isMonth = range === 'month';
     const days = range === '7d' ? 7 : range === '90d' ? 90 : 30;
-    const anchorDate = endDateParam ? new Date(endDateParam) : new Date();
+    const anchorDate = new Date(endDateParam ?? today ?? Date.now());
 
     const payPeriod = await this.payPeriods?.contextFor(workspaceId);
     const requestedWindow = dashboardWindow(isMonth, days, anchorDate, payPeriod, !!endDateParam);
@@ -160,11 +162,8 @@ export class DashboardService {
 
       if (latestTransactionDate) {
         effectiveWindow = dashboardWindow(isMonth, days, latestTransactionDate, payPeriod);
-        snapshot = await this.getSnapshot(
-          workspaceId,
-          effectiveWindow.since,
-          effectiveWindow.endDate,
-        );
+        const { since, endDate } = effectiveWindow;
+        snapshot = await this.getSnapshot(workspaceId, since, endDate);
         autoShifted = true;
       }
     }
