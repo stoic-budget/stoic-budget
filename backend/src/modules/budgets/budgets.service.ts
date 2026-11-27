@@ -12,7 +12,7 @@ import { In, IsNull, MoreThanOrEqual, type Repository } from 'typeorm';
 import { toEnum } from '../../common/effect/to-enum';
 import { appError } from '../../common/errors/app-error';
 import { assertFound } from '../../common/utils/assert-found.util';
-import { countedSql, flowsSql } from '../../common/utils/counted-transactions.util';
+import { countedSql } from '../../common/utils/counted-transactions.util';
 import { STANDARD_WORKSPACE } from '../../common/workspaces/version-workspaces';
 import type { BudgetImpactQuery, CreateBudgetBody, UpdateBudgetBody } from '../../contracts';
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
@@ -26,7 +26,7 @@ import {
 } from '../../entities/notification.entity';
 import { Subscription, SubscriptionStatus } from '../../entities/subscription.entity';
 import { SubscriptionCharge } from '../../entities/subscription-charge.entity';
-import { Transaction, TransactionType } from '../../entities/transaction.entity';
+import { Transaction } from '../../entities/transaction.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { AuditService } from '../audit/audit.service';
 import type { CreateAuditEventDto } from '../audit/interfaces/audit-event.interface';
@@ -46,6 +46,7 @@ import {
 } from './budget-period.util';
 import { type PeriodPosition, periodPosition } from './budget-period-position.util';
 import { percentOf, resolveAvailable } from './budget-rollover.util';
+import { type SpendingRow, spendingRows } from './spending-rows';
 
 export interface BudgetWithSpending extends Budget, PeriodPosition {
   spentAmount: number;
@@ -80,13 +81,6 @@ interface LinkedSubscriptions {
 export interface UnconvertedSpending {
   currency: string;
   amount: number;
-}
-
-/** One row a budget covers, as read: its own amount, currency and day. */
-interface SpendingRow {
-  date: string | Date;
-  currency: string | null;
-  amount: string;
 }
 
 @Injectable()
@@ -605,16 +599,22 @@ export class BudgetsService {
       budgetStart.getMonth(),
       budgetStart.getDate() - 1,
     );
-    const rows = await this.spendingRows(budget.workspaceId, categoryIds, periodStart, dayBefore);
+    const rows = await spendingRows(
+      this.transactionRepository,
+      budget.workspaceId,
+      categoryIds,
+      periodStart,
+      dayBefore,
+    );
     const byCurrency = new Map<string, number>();
     for (const row of rows) {
       const currency = (row.currency || budget.currency).toUpperCase();
       byCurrency.set(currency, (byCurrency.get(currency) ?? 0) + Number.parseFloat(row.amount));
     }
-    return [...byCurrency].map(([currency, amount]) => ({
-      currency,
-      amount: Math.round(amount * 100) / 100,
-    }));
+    // Refunds can net a currency to nothing or below: such a line says nothing.
+    return [...byCurrency]
+      .filter(([, amount]) => amount > 0.005)
+      .map(([currency, amount]) => ({ currency, amount: Math.round(amount * 100) / 100 }));
   }
 
   /** How many settled periods rollover looks back on; a year of months, a quarter of weeks. */
@@ -638,20 +638,25 @@ export class BudgetsService {
     const lookback = BudgetsService.ROLLOVER_LOOKBACK;
     const periods = previousPeriods(budget, currentStart, began, lookback, payPeriod);
     if (periods.length === 0) return [];
-    const rows = await this.spendingRows(
+    const rows = await spendingRows(
+      this.transactionRepository,
       budget.workspaceId,
       categoryIds,
       periods[0].start,
       periods[periods.length - 1].end,
     );
     const converted = await this.inBudgetCurrency(budget, rows);
+    // Each period at least zero, as its own figure is: refunds never carry over as spending.
     return periods.map(period =>
-      converted.reduce((sum, row) => {
-        const at = parseDateOnly(row.date).getTime();
-        return row.value !== null && at >= period.start.getTime() && at <= period.end.getTime()
-          ? sum + row.value
-          : sum;
-      }, 0),
+      Math.max(
+        0,
+        converted.reduce((sum, row) => {
+          const at = parseDateOnly(row.date).getTime();
+          return row.value !== null && at >= period.start.getTime() && at <= period.end.getTime()
+            ? sum + row.value
+            : sum;
+        }, 0),
+      ),
     );
   }
 
@@ -810,7 +815,13 @@ export class BudgetsService {
     start: Date,
     end: Date,
   ): Promise<{ spent: number; unconverted: UnconvertedSpending[] }> {
-    const rows = await this.spendingRows(budget.workspaceId, categoryIds, start, end);
+    const rows = await spendingRows(
+      this.transactionRepository,
+      budget.workspaceId,
+      categoryIds,
+      start,
+      end,
+    );
     const converted = await this.inBudgetCurrency(budget, rows);
     let spent = 0;
     const missing = new Map<string, number>();
@@ -821,36 +832,11 @@ export class BudgetsService {
         missing.set(row.currency, (missing.get(row.currency) ?? 0) + row.amount);
       }
     }
-    const unconverted = [...missing].map(([currency, amount]) => ({
-      currency,
-      amount: Math.round(amount * 100) / 100,
-    }));
-    return { spent, unconverted };
-  }
-
-  /** The budget's rows between two days, summed per currency and day. */
-  private spendingRows(
-    workspaceId: string,
-    categoryIds: string[],
-    start: Date,
-    end: Date,
-  ): Promise<SpendingRow[]> {
-    return this.transactionRepository
-      .createQueryBuilder('t')
-      .select('t.transaction_date', 'date')
-      .addSelect('t.currency', 'currency')
-      .addSelect('SUM(ABS(t.amount))', 'amount')
-      .where('t.workspace_id = :workspaceId', { workspaceId })
-      .andWhere('t.category_id IN (:...categoryIds)', { categoryIds })
-      .andWhere('t.transaction_type = :type', { type: TransactionType.EXPENSE })
-      .andWhere('t.transaction_date >= :start', { start })
-      .andWhere('t.transaction_date <= :end', { end })
-      .andWhere('t.is_duplicate = false')
-      .andWhere('t.transfer_pair_id IS NULL')
-      .andWhere(flowsSql('t'))
-      .groupBy('t.transaction_date')
-      .addGroupBy('t.currency')
-      .getRawMany<SpendingRow>();
+    const unconverted = [...missing]
+      .filter(([, amount]) => amount > 0.005)
+      .map(([currency, amount]) => ({ currency, amount: Math.round(amount * 100) / 100 }));
+    // Refunds may outweigh a period's spending; nothing is spent below zero.
+    return { spent: Math.max(0, spent), unconverted };
   }
 
   /**
