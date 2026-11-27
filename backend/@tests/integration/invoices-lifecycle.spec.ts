@@ -831,6 +831,20 @@ describe('invoice status (real Postgres)', () => {
       expect(rows[0].total).toBe(50);
     });
 
+    it('counts what is left of a partly paid invoice, in the panel and the late fee base', async () => {
+      const part = await overdue(10, 1000);
+      await payableRepo.update(
+        { id: part.payableId as string },
+        { status: PayableStatus.PARTIALLY_PAID, paidAmount: 400 },
+      );
+
+      const { rows } = await ageing.report(workspaceId);
+      const base = await ageing.overdueByCurrency(workspaceId, clientId);
+
+      expect(rows[0]).toMatchObject({ days1to30: 600, total: 600 });
+      expect(base).toEqual([{ currency: 'EUR', amount: 600 }]);
+    });
+
     it('ignores a draft, which nobody owes yet', async () => {
       await invoices.create(workspaceId, {
         clientId,
