@@ -347,6 +347,119 @@ describe('Loan payment reminders (e2e)', () => {
       expect(left[0].recurrence).not.toBeNull();
     });
 
+    it('a bill with the person own comment or tag is kept when reminders end', async () => {
+      const id = await newLoan();
+      const [bill] = await billsOf(id);
+      await call('put', `/payables/${bill.id}`, 200, { comment: 'Paid by the second card' });
+      const { remindDaysBefore: _off, ...withoutReminders } = terms;
+      await call('put', `/wallets/${id}/loan-terms`, 200, withoutReminders);
+      const left = await billsOf(id);
+      expect(left.map(item => item.id)).toEqual([bill.id]);
+      expect(left[0].comment).toBe('Paid by the second card');
+      expect(left[0].recurrence).toBeNull();
+    });
+
+    it('a payment taken back stays taken back: the matcher does not book it again', async () => {
+      const id = await newLoan();
+      const [bill] = await billsOf(id);
+      await call('put', `/payables/${bill.id}/mark-paid`, 200, {
+        payFromWalletId: checkingId,
+        paidOn: today,
+      });
+      const payments = (await call('get', `/payables/${bill.id}/payments`, 200)).body as Array<{
+        id: string;
+      }>;
+      await call('delete', `/payables/${bill.id}/payments/${payments[0].id}`, 200);
+      await reminders.settleWorkspace(owner.workspaceId);
+      await reminders.syncAll();
+      const after = await dataSource.getRepository(Payable).findOneByOrFail({ id: bill.id });
+      expect(after.status).not.toBe(PayableStatus.PAID);
+      expect(Number(after.paidAmount)).toBe(0);
+    });
+
+    it('a loan bill cannot be paid from the loan account itself', async () => {
+      const id = await newLoan();
+      const [bill] = await billsOf(id);
+      const res = await call('put', `/payables/${bill.id}/mark-paid`, 400, {
+        payFromWalletId: id,
+        paidOn: today,
+      });
+      expect(res.body.error?.code ?? res.body.code).toBe('PAYABLE_LOAN_PAID_FROM_ITSELF');
+    });
+
+    it('on a card, even a large refund does not pay the instalment; a transfer from an account does', async () => {
+      const id = await newLoan('credit_card');
+      const [bill] = await billsOf(id);
+      await incomingRow(id, bill.occurrenceDate as string, Number(bill.amount) * 3);
+      await reminders.settleWorkspace(owner.workspaceId);
+      expect((await dataSource.getRepository(Payable).findOneByOrFail({ id: bill.id })).status).toBe(
+        PayableStatus.TO_PAY,
+      );
+      // The card repaid from checking, the two legs paired as a transfer.
+      const amount = Number(bill.amount);
+      const pair = '00000000-0000-4000-8000-000000000001';
+      await dataSource.getRepository(Transaction).save([
+        dataSource.getRepository(Transaction).create({
+          workspaceId: owner.workspaceId,
+          walletId: checkingId,
+          transactionDate: new Date(bill.occurrenceDate as string),
+          transactionType: TransactionType.EXPENSE,
+          amount,
+          debit: amount,
+          credit: null,
+          currency,
+          counterpartyName: 'ACME Bank - Card repayment',
+          paymentPurpose: 'Card repayment',
+          isVerified: true,
+          transferPairId: pair,
+        }),
+        dataSource.getRepository(Transaction).create({
+          workspaceId: owner.workspaceId,
+          walletId: id,
+          transactionDate: new Date(bill.occurrenceDate as string),
+          transactionType: TransactionType.INCOME,
+          amount,
+          credit: amount,
+          debit: null,
+          currency,
+          counterpartyName: 'ACME Bank - Card repayment',
+          paymentPurpose: 'Card repayment',
+          isVerified: true,
+          transferPairId: pair,
+        }),
+      ]);
+      await reminders.settleWorkspace(owner.workspaceId);
+      expect((await dataSource.getRepository(Payable).findOneByOrFail({ id: bill.id })).status).toBe(
+        PayableStatus.PAID,
+      );
+    });
+
+    it('deleting the payment from checking takes its loan leg too, and the bill is owed again', async () => {
+      const id = await newLoan();
+      const [bill] = await billsOf(id);
+      const debt = await balance(id);
+      await call('put', `/payables/${bill.id}/mark-paid`, 200, {
+        payFromWalletId: checkingId,
+        paidOn: today,
+      });
+      const paid = await dataSource.getRepository(Payable).findOneByOrFail({ id: bill.id });
+      const out = await dataSource
+        .getRepository(Transaction)
+        .findOneByOrFail({ id: paid.linkedTransactionId as string });
+      await call('delete', `/transactions/${out.id}`, 204);
+      expect(
+        await dataSource.getRepository(Transaction).countBy({
+          transferPairId: out.transferPairId as string,
+        }),
+      ).toBe(0);
+      expect(await balance(id)).toBeCloseTo(debt, 2);
+      // The event's listener reopens it; asked again here so the test does not race it.
+      await reminders.reopenDeleted(owner.workspaceId);
+      const owed = await dataSource.getRepository(Payable).findOneByOrFail({ id: bill.id });
+      expect(owed.status).not.toBe(PayableStatus.PAID);
+      expect(Number(owed.paidAmount)).toBe(0);
+    });
+
     it('a refund on a card paid in instalments does not pay the instalment', async () => {
       const id = await newLoan('credit_card');
       const [bill] = await billsOf(id);

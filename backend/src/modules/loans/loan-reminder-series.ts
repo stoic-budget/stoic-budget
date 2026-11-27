@@ -5,13 +5,15 @@ import type { ScheduleRow } from './engine/loan-plan';
 
 /**
  * An occurrence nobody has touched yet: still owed in full, no payment against
- * it, not skipped. Only these follow the schedule (amount, dates) or go when
+ * it, not skipped, no comment or tag of the person's. Only these follow the schedule (amount, dates) or go when
  * the reminders stop; one that was paid, part-paid, skipped or given its own
- * amount stays as the person left it.
+ * amount, a comment or a tag stays as the person left it.
  */
 export const UNTOUCHED_SQL = `p."status" IN ('to_pay', 'scheduled', 'overdue')
   AND p."paid_amount" = 0 AND p."base_amount" IS NULL AND p."skipped_at" IS NULL
-  AND NOT EXISTS (SELECT 1 FROM "payable_payments" pp WHERE pp."payable_id" = p."id")`;
+  AND p."comment" IS NULL
+  AND NOT EXISTS (SELECT 1 FROM "payable_payments" pp WHERE pp."payable_id" = p."id")
+  AND NOT EXISTS (SELECT 1 FROM "payable_tags" pt WHERE pt."payable_id" = p."id")`;
 
 /**
  * The rule that puts a bill on every payment date of the schedule: monthly on

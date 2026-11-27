@@ -5,6 +5,7 @@ import { appError } from '../../common/errors/app-error';
 import type { MarkPayablePaidBody } from '../../contracts';
 import { Category } from '../../entities/category.entity';
 import { type Payable, PayableDirection } from '../../entities/payable.entity';
+import { PayablePayment } from '../../entities/payable-payment.entity';
 import {
   Transaction,
   TransactionType,
@@ -52,6 +53,10 @@ export async function recordCashPayment(
     );
   }
   const loan = payable.loanWalletId ? await loanAccountOf(manager, payable) : null;
+  if (loan && wallet?.id === loan.id) {
+    // From the loan to itself: the debt would not move, yet the bill would read paid.
+    throw new BadRequestException(appError('PAYABLE_LOAN_PAID_FROM_ITSELF'));
+  }
   if (payload.categoryId && !loan) {
     const category = await manager.getRepository(Category).exists({
       where: { id: payload.categoryId, workspaceId },
@@ -179,4 +184,29 @@ async function pairWithLoanAccount(
       { id: payment.id, workspaceId: payment.workspaceId },
       { transferPairId, transferPairSource: TransferPairSource.MANUAL },
     );
+}
+
+/**
+ * Takes one payment off its bill. On a loan's bill the rows it stood on (the
+ * transfer the app booked, or a bank row) are refused for that bill, as "not
+ * this payment" does, so the matcher does not settle it with them again.
+ */
+export async function deletePayment(
+  manager: EntityManager,
+  payment: Pick<PayablePayment, 'id' | 'payableId' | 'workspaceId' | 'transactionId'>,
+): Promise<void> {
+  await manager.getRepository(PayablePayment).delete({ id: payment.id });
+  if (!payment.transactionId) return;
+  await manager.query(
+    `INSERT INTO "payable_match_rejections" ("workspace_id", "payable_id", "transaction_id")
+     SELECT t."workspace_id", p."id", t."id"
+       FROM "payables" p
+       JOIN "transactions" t ON t."workspace_id" = p."workspace_id"
+      WHERE p."id" = $2 AND p."workspace_id" = $1 AND p."loan_wallet_id" IS NOT NULL
+        AND (t."id" = $3 OR t."transfer_pair_id" = (
+              SELECT "transfer_pair_id" FROM "transactions"
+               WHERE "id" = $3 AND "workspace_id" = $1 AND "transfer_pair_id" IS NOT NULL))
+     ON CONFLICT DO NOTHING`,
+    [payment.workspaceId, payment.payableId, payment.transactionId],
+  );
 }

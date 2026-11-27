@@ -13,6 +13,7 @@ import {
 } from '../../entities/payable.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { PayableRecurrenceService } from '../payables/payable-recurrence.service';
+import { PayablesService } from '../payables/payables.service';
 import { lockSeries } from '../payables/series-lock';
 import { buildSchedule } from './engine/loan-plan';
 import { LoanPaymentMatcher } from './loan-payment-matcher';
@@ -44,6 +45,7 @@ export class LoanRemindersService {
     @InjectRepository(Payable) private readonly payables: Repository<Payable>,
     private readonly recurrence: PayableRecurrenceService,
     private readonly matcher: LoanPaymentMatcher,
+    private readonly payablesService: PayablesService,
   ) {}
 
   /** Every loan with reminders, and every loan series whose terms are gone or stopped reminding. */
@@ -66,6 +68,23 @@ export class LoanRemindersService {
           error instanceof Error ? error.stack : undefined,
         );
       }
+    }
+  }
+
+  /**
+   * A loan bill's payment whose own row was deleted (the transfer the app
+   * booked, or the cash paid in) is taken off: the bill is owed again.
+   */
+  async reopenDeleted(workspaceId: string): Promise<void> {
+    const orphans: Array<{ id: string; payable_id: string }> = await this.payables.query(
+      `SELECT pp."id", pp."payable_id" FROM "payable_payments" pp
+         JOIN "payables" p ON p."id" = pp."payable_id" AND p."workspace_id" = pp."workspace_id"
+        WHERE pp."workspace_id" = $1 AND pp."own_transaction" AND pp."transaction_id" IS NULL
+          AND p."loan_wallet_id" IS NOT NULL`,
+      [workspaceId],
+    );
+    for (const orphan of orphans) {
+      await this.payablesService.removePayment(orphan.payable_id, orphan.id, workspaceId);
     }
   }
 
@@ -136,7 +155,7 @@ export class LoanRemindersService {
     });
     if (!seriesId) return;
     await this.recurrence.ensureSeries(workspaceId, seriesId, today);
-    await this.followSchedule(workspaceId, walletId, terms.wallet.name, amounts);
+    await this.followSchedule(workspaceId, walletId, amounts);
     await this.matcher.settle(workspaceId, walletId);
   }
 
@@ -172,22 +191,24 @@ export class LoanRemindersService {
     return id;
   }
 
-  /** Untouched bills ask for what the schedule says on their date, under the account's name. */
+  /**
+   * Untouched bills ask for what the schedule says on their date. Their name is
+   * left alone: it is the account's when made, and the person may rename it.
+   */
   private async followSchedule(
     workspaceId: string,
     walletId: string,
-    vendor: string,
     amounts: Map<string, number>,
   ): Promise<void> {
     const dates = [...amounts.keys()];
     await this.payables.query(
       `UPDATE "payables" p
-          SET "amount" = s."amount", "vendor" = $3
-         FROM unnest($4::date[], $5::numeric[]) AS s("date", "amount")
+          SET "amount" = s."amount"
+         FROM unnest($3::date[], $4::numeric[]) AS s("date", "amount")
         WHERE p."workspace_id" = $1 AND p."loan_wallet_id" = $2 AND p."deleted_at" IS NULL
           AND p."occurrence_date" = s."date" AND ${UNTOUCHED_SQL}
-          AND (p."amount" <> s."amount" OR p."vendor" <> $3)`,
-      [workspaceId, walletId, vendor, dates, dates.map(date => amounts.get(date))],
+          AND p."amount" <> s."amount"`,
+      [workspaceId, walletId, dates, dates.map(date => amounts.get(date))],
     );
   }
 }

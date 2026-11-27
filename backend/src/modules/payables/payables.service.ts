@@ -53,7 +53,7 @@ import {
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { ExportFormat, PayablesSortOption } from './dto/filter-payables.dto';
-import { recordCashPayment } from './payable-cash-payment';
+import { deletePayment, recordCashPayment } from './payable-cash-payment';
 import { assertOneSource, exactSubset, notRejectedSql } from './payable-payments.util';
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
@@ -628,7 +628,7 @@ export class PayablesService {
       if (!payment) {
         throw new NotFoundException(appError('PAYABLE_PAYMENT_NOT_FOUND'));
       }
-      await payments.delete({ id: paymentId });
+      await deletePayment(manager, payment);
 
       const remaining = await payments.find({ where: { payableId: id, workspaceId } });
       const payable = await manager

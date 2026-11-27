@@ -33,7 +33,9 @@ interface PaymentRow {
  * alike. Each open bill takes the payment closest to its due date within
  * `MATCH_WINDOW_DAYS` that pays no bill yet (nor does its other leg) and is
  * about the bill's amount or more (`MATCH_SHORTFALL`), unless the person
- * refused that payment for that bill. A smaller one is left for the person. The bill is paid up to what
+ * refused that payment for that bill. A smaller one is left for the person,
+ * and so is any row on a credit card that is not a transfer from an account:
+ * a card's incoming rows are refunds and cashback too. The bill is paid up to what
  * it asks; what the payment has on top (an extra repayment) stays unmatched.
  */
 @Injectable()
@@ -102,6 +104,8 @@ export class LoanPaymentMatcher {
         WHERE t."workspace_id" = $1 AND t."wallet_id" = $2
           AND t."transaction_type" = $3 AND t."loan_interest_of_id" IS NULL
           AND upper(t."currency") = upper(w."currency")
+          -- A card takes refunds and cashback too: only money moved in from an account pays it.
+          AND (w."type" <> 'credit_card' OR t."transfer_pair_id" IS NOT NULL)
           AND ${countedSql('t')}
           AND abs(t."transaction_date"::date - $4::date) <= $5
           -- Paying no bill yet, and neither is the leg it came from.

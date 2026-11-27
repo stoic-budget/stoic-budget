@@ -27,6 +27,19 @@ export class LoanRemindersListener {
     }
   }
 
+  @OnEvent('data.deleted')
+  async rowsDeleted(event: { workspaceId?: string; entityType?: string }): Promise<void> {
+    if (!(event.workspaceId && event.entityType === 'transaction')) return;
+    try {
+      await this.reminders.reopenDeleted(event.workspaceId);
+    } catch (error) {
+      this.logger.error(
+        `Failed to reopen loan bills whose payment was deleted in ${event.workspaceId}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
+  }
+
   @OnEvent('import.committed')
   @OnEvent('transactions.posted')
   async rowsCameIn(event: { workspaceId?: string }): Promise<void> {
