@@ -29,6 +29,7 @@ import type {
   TransactionsUncategorizedEvent,
 } from '../../notifications/events/notification-events';
 import { MetricsService } from '../../observability/metrics.service';
+import { partyOf } from '../../tax/assignment-party';
 import { TaxAssignmentService } from '../../tax/tax-assignment.service';
 import { CrossStatementDeduplicationService } from '../../transactions/services/cross-statement-deduplication.service';
 import { ManualRowDuplicateService } from '../../transactions/services/manual-row-duplicate.service';
@@ -992,8 +993,7 @@ export class StatementProcessingService {
         amountMinor: toMinor(amount ?? 0),
         categoryId: classification.categoryId ?? null,
         transactionType,
-        transactionNature: null,
-        explicitTaxRateId: null,
+        ...partyOf(transaction),
       });
 
       transaction.taxRateId = taxAssignment.taxRateId;

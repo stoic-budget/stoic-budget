@@ -6,7 +6,7 @@ import { payeeKeyOf } from '../../common/utils/payee-key.util';
 import { TaxRule, TaxRuleDirection } from '../../entities/tax-rule.entity';
 import { TaxSource, Transaction, TransactionType } from '../../entities/transaction.entity';
 import { VatStatus, Workspace } from '../../entities/workspace.entity';
-import { findPayeeId } from '../payees/payee-resolution';
+import { payeeOfKey } from './assignment-party';
 import { isEuCountry } from './eu-membership';
 import { isOutsideVat } from './outside-vat';
 import { computeTax } from './tax-calculation';
@@ -33,7 +33,7 @@ export interface AssignmentInput {
   amountMinor: number;
   categoryId: string | null;
   transactionType: TransactionType;
-  transactionNature: string | null;
+  transactionNature?: string | null;
   /** A rate the user chose explicitly, which always wins. */
   explicitTaxRateId?: string | null;
   /** ISO-3166-1 alpha-2 of the other party, when it is known. */
@@ -212,7 +212,7 @@ export class TaxAssignmentService {
     let payeeId = input.payeeId ?? null;
     if (!payeeId) {
       const key = payeeKeyOf(input);
-      payeeId = key ? await findPayeeId(manager, input.workspaceId, key) : null;
+      payeeId = key ? await payeeOfKey(manager, input.workspaceId, key) : null;
     }
     if (!payeeId) {
       return { country: null, vatId: null };

@@ -31,6 +31,7 @@ import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
 import { ensurePrivateCategory } from '../categories/private-category';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { partyOf } from '../tax/assignment-party';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
 import { markChoicesByHand } from './helpers/choices-by-hand';
 import { assertEditAllowed } from './helpers/pair-guards';
@@ -482,8 +483,7 @@ export class TransactionsService {
           transactionType: row.transactionType,
           transactionNature: row.transactionNature,
           explicitTaxRateId: row.taxSource === TaxSource.MANUAL ? row.taxRateId : null,
-          counterpartyCountry: row.counterpartyCountry,
-          counterpartyVatId: row.counterpartyVatId,
+          ...partyOf(row),
         });
 
         row.taxRateId = assignment.taxRateId;

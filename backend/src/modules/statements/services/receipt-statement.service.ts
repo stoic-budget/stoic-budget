@@ -28,6 +28,7 @@ import { AuditService } from '../../audit/audit.service';
 import type { EInvoiceSummary } from '../../e-invoices/einvoice-summary';
 import { transactionCreatedEvent } from '../../notifications/events/notification-events';
 import { ReceiptsService } from '../../receipts/receipts.service';
+import { partyOf } from '../../tax/assignment-party';
 import { TaxAssignmentService } from '../../tax/tax-assignment.service';
 
 @Injectable()
@@ -366,8 +367,7 @@ export class ReceiptStatementService {
         amountMinor: toMinor(amountValue),
         categoryId,
         transactionType,
-        transactionNature: null,
-        explicitTaxRateId: null,
+        ...partyOf({ counterpartyName: merchant, paymentPurpose: merchant }),
       });
 
       const transaction = this.transactionRepository.create({
