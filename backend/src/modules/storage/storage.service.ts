@@ -47,6 +47,7 @@ import {
 import { MetricsService } from '../observability/metrics.service';
 import { StatementsService } from '../statements/statements.service';
 import type { StorageViewFilters } from './interfaces/storage-view-filters.interface';
+import { purgeFromTrash } from './purge-from-trash';
 import { buildStorageCategoryWhere } from './storage-category-scope.util';
 
 type FileAvailability = {
@@ -516,7 +517,9 @@ export class StorageService {
     }
 
     if (deleteFiles) {
-      for (const statement of statements) {
+      // Files already in the trash stay as they are: trashing them again
+      // would restart their 30 days and announce a deletion again.
+      for (const statement of statements.filter(item => !item.deletedAt)) {
         await this.statementsService.remove(statement.id, userId, statement.workspaceId);
       }
     } else if (statements.length > 0) {
@@ -600,7 +603,8 @@ export class StorageService {
     if (!statement.deletedAt) {
       throw new BadRequestException(appError('STORAGE_FILE_NOT_IN_TRASH'));
     }
-    await this.statementsService.remove(statementId, userId, statement.workspaceId);
+    // Out of the trash for good: the rows and the file go (remove only trashes).
+    await purgeFromTrash(this.statementsService, this.transactionRepository, [statement], userId);
     return { status: 'deleted' };
   }
 
@@ -875,10 +879,7 @@ export class StorageService {
     }
 
     const deletable = statements.filter(st => st.deletedAt);
-    for (const st of deletable) {
-      await this.statementsService.remove(st.id, userId, st.workspaceId);
-    }
-
+    await purgeFromTrash(this.statementsService, this.transactionRepository, deletable, userId);
     return {
       deleted: deletable.length,
       missing: uniqueIds.length - statements.length,

@@ -188,8 +188,8 @@ export class StatementsService {
     return this.statementTrash.trash(await this.findOne(id, workspaceId), userId, workspaceId);
   }
 
-  async permanentDelete(id: string, userId: string, workspaceId: string): Promise<void> {
-    await this.statementTrash.permanentDelete(id, userId, workspaceId);
+  async permanentDelete(...args: Parameters<StatementTrashService['permanentDelete']>) {
+    await this.statementTrash.permanentDelete(...args);
   }
 
   async remove(id: string, userId: string, workspaceId: string): Promise<void> {

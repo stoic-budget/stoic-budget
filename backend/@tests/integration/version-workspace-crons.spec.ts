@@ -348,15 +348,19 @@ describe('background jobs leave a past version alone (real Postgres)', () => {
     const trashed = await inBoth(workspaceId =>
       statement(workspaceId, { deleted_at: new Date(Date.now() - 90 * 86_400_000) }),
     );
-    const statementsService = { remove: vi.fn(async () => undefined) };
+    // The purge deletes for good: permanentDelete, not remove (which only trashes).
+    const statementsService = { permanentDelete: vi.fn(async () => undefined) };
 
     await new StorageTrashScheduler(
       repo(Statement),
       statementsService as never,
     ).purgeExpiredTrash();
 
-    expect(statementsService.remove).toHaveBeenCalledTimes(1);
-    expect(statementsService.remove).toHaveBeenCalledWith(trashed.standard, userId, standardId);
+    expect(statementsService.permanentDelete).toHaveBeenCalledTimes(1);
+    expect(statementsService.permanentDelete).toHaveBeenCalledWith(trashed.standard, userId, standardId, {
+      fromTrash: true,
+      system: true,
+    });
   });
 
   it('re-queues stale parsing in the live workspace only, and never parses a version statement', async () => {
