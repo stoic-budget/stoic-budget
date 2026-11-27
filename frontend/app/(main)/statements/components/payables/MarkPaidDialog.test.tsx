@@ -115,6 +115,43 @@ describe('MarkPaidDialog', () => {
     });
   });
 
+  it('asks why a bill paid after its due date was late, and sends the answer with the payment', async () => {
+    apiMocks.paymentCandidates.mockResolvedValue([candidate('tx-1', true)]);
+    const late = { ...payable, dueDate: '2026-09-10' } as Payable;
+    const { onConfirm } = renderDialog(late);
+
+    expect(await screen.findByText('Payee tx-1 — Invoice')).toBeInTheDocument();
+    expect(screen.getByText('question')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: 'forgot' }));
+    fireEvent.click(screen.getByRole('button', { name: 'confirm' }));
+
+    expect(onConfirm).toHaveBeenCalledWith(late, {
+      kind: 'full',
+      payload: { linkedTransactionId: 'tx-1' },
+      lateReason: 'forgot',
+    });
+  });
+
+  it('pays without a reason when the question is skipped', async () => {
+    apiMocks.paymentCandidates.mockResolvedValue([candidate('tx-1', true)]);
+    const late = { ...payable, dueDate: '2026-09-10' } as Payable;
+    const first = renderDialog(late);
+    expect(await screen.findByText('Payee tx-1 — Invoice')).toBeInTheDocument();
+    expect(screen.getByText('question')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'confirm' }));
+    expect(first.onConfirm).toHaveBeenCalledWith(late, {
+      kind: 'full',
+      payload: { linkedTransactionId: 'tx-1' },
+    });
+  });
+
+  it('asks nothing when the payment came before the due date', async () => {
+    apiMocks.paymentCandidates.mockResolvedValue([candidate('tx-1', true)]);
+    renderDialog({ ...payable, dueDate: '2026-09-25' } as Payable);
+    expect(await screen.findByText('Payee tx-1 — Invoice')).toBeInTheDocument();
+    expect(screen.queryByText('question')).toBeNull();
+  });
+
   it('refuses a proposed row for good: "not this payment" asks again without it', async () => {
     apiMocks.paymentCandidates
       .mockResolvedValueOnce([candidate('tx-1', true), candidate('tx-2')])

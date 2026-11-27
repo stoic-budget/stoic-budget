@@ -59,6 +59,9 @@ describe('InsightsService', () => {
   const wealthAnalyzer = {
     analyze: vi.fn(async () => []),
   } as any;
+  const latePaymentsAnalyzer = {
+    analyze: vi.fn(async () => []),
+  } as any;
 
   let service: InsightsService;
 
@@ -67,6 +70,7 @@ describe('InsightsService', () => {
     financialAnalyzer.analyze.mockResolvedValue([]);
     stoicAnalyzer.analyze.mockResolvedValue([]);
     wealthAnalyzer.analyze.mockResolvedValue([]);
+    latePaymentsAnalyzer.analyze.mockResolvedValue([]);
     insightRepository.find.mockResolvedValue([]);
     insightRepository.createQueryBuilder.mockReturnValue(createQueryBuilderMock());
     userRepository.findOne.mockResolvedValue({ id: 'user-1', locale: 'ru' });
@@ -77,7 +81,33 @@ describe('InsightsService', () => {
       financialAnalyzer,
       stoicAnalyzer,
       wealthAnalyzer,
+      latePaymentsAnalyzer,
     );
+  });
+
+  it('writes the late-payment advice beside the rest', async () => {
+    operationalAnalyzer.analyze.mockResolvedValue([]);
+    latePaymentsAnalyzer.analyze.mockResolvedValue([
+      {
+        type: InsightType.LATE_PAYMENTS,
+        category: InsightCategory.PATTERN,
+        severity: InsightSeverity.INFO,
+        messageKey: 'pattern.late_forgot',
+        messageParams: { count: 3 },
+        deduplicationKey: 'financial:pattern.late_forgot:workspace-1',
+        data: { priority: 34, target: 'bills', count: 3 },
+      },
+    ]);
+    insightRepository.findOne.mockResolvedValue(null);
+
+    const result = await service.refresh('user-1', 'workspace-1', { locale: 'en' });
+
+    expect(latePaymentsAnalyzer.analyze).toHaveBeenCalledWith({
+      userId: 'user-1',
+      workspaceId: 'workspace-1',
+    });
+    expect(result.newInsights.map(item => item.messageKey)).toEqual(['pattern.late_forgot']);
+    expect(result.newInsights[0].message).toContain('3 bills');
   });
 
   it('creates a new insight when there is no active insight with same deduplication key', async () => {
