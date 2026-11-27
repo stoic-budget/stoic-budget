@@ -12,6 +12,7 @@ import { DataSource } from 'typeorm';
 import type { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { appError } from '../../../common/errors/app-error';
 import { appDefaultCurrency } from '../../../common/utils/currency.util';
+import { numberRepeats } from '../../../common/utils/fingerprint.util';
 import { toMinor } from '../../../common/utils/money.util';
 import { extractTextFromPdf } from '../../../common/utils/pdf-parser.util';
 import { Semaphore } from '../../../common/utils/semaphore.util';
@@ -887,11 +888,11 @@ export class StatementProcessingService {
 
     const account = await accountOfStatement(this.dataSource, statement, log);
 
-    // In-file duplicates are not dropped here: flagFingerprintDuplicates below
-    // already detects same-batch fingerprint collisions (and cross-statement
-    // ones) and marks them isDuplicate=true instead — still persisted, still
-    // visible/reversible via the duplicates review UI, just excluded from
-    // totals. A row silently dropped here could never be recovered.
+    // In-file repeats are not dropped here: identical rows of one file are
+    // separate payments (flagFingerprintDuplicates numbers them), and a row
+    // seen in an earlier statement is flagged as its duplicate there, still
+    // persisted and reversible in Review. A row silently dropped here could
+    // never be recovered.
     const deduped: ParsedTransaction[] = parsedTransactions;
 
     log(
@@ -1084,6 +1085,7 @@ export class StatementProcessingService {
     statement: Statement,
     log: (level: string, message: string) => void,
   ): Promise<number> {
+    numberRepeats(drafts);
     const fingerprints = drafts
       .map(draft => draft.fingerprint)
       .filter((value): value is string => !!value);
@@ -1104,7 +1106,6 @@ export class StatementProcessingService {
       }
     });
 
-    const seenInBatch = new Set<string>();
     let flagged = 0;
 
     drafts.forEach(draft => {
@@ -1117,16 +1118,7 @@ export class StatementProcessingService {
         draft.isDuplicate = true;
         draft.duplicateOfId = previous.id;
         flagged++;
-        return;
       }
-
-      if (seenInBatch.has(draft.fingerprint)) {
-        draft.isDuplicate = true;
-        flagged++;
-        return;
-      }
-
-      seenInBatch.add(draft.fingerprint);
     });
 
     if (flagged) {
