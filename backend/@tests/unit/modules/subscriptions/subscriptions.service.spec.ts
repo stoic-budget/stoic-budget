@@ -389,7 +389,7 @@ describe('SubscriptionsService', () => {
         sub({ id: 'sub-2', currency: 'EUR', amount: 10, nextChargeDate: daysFromToday(later) }),
       ]);
       workspaceRepository.findOne.mockResolvedValue({ currency: 'USD' });
-      exchangeRatesService.convert.mockResolvedValue({ converted: 11 });
+      exchangeRatesService.getRateOrNull.mockResolvedValue(1.1);
 
       const result = await service.getMonthStatus('workspace-1');
 
@@ -398,6 +398,40 @@ describe('SubscriptionsService', () => {
       expect(result.paidCount).toBe(later ? 1 : 2);
       expect(result.unpaidAmount).toBe(later ? 11 : 0);
       expect(result.unpaidCount).toBe(later);
+      expect(result.missingRates).toBeUndefined();
+    });
+
+    it('counts a currency with no rate at face value this month, as the summary does, and names it (#787)', async () => {
+      subscriptionRepository.find.mockResolvedValue([
+        sub({ amount: 4 }),
+        sub({ id: 'sub-2', currency: 'xts', amount: 10 }),
+      ]);
+      workspaceRepository.findOne.mockResolvedValue({ currency: 'USD' });
+      exchangeRatesService.getRateOrNull.mockResolvedValue(null);
+
+      const result = await service.getMonthStatus('workspace-1');
+
+      // Counted as it is, as the summary under the card does, and named.
+      expect(result.paidAmount + result.unpaidAmount).toBe(14);
+      expect(result.missingRates).toEqual(['XTS']);
+    });
+
+    it('leaves a charge with no rate out of a past month, as Reports do, and names it (#787)', async () => {
+      const now = new Date();
+      const past = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      const month = `${past.getFullYear()}-${String(past.getMonth() + 1).padStart(2, '0')}`;
+      const plan = { vendorName: 'ACME Radio', vendorDomain: null };
+      workspaceRepository.findOne.mockResolvedValue({ currency: 'USD' });
+      chargeRepository.find.mockResolvedValue([
+        { subscriptionId: 'sub-9', subscription: plan, amount: '7.50', currency: 'USD', chargeDate: `${month}-04` },
+        { subscriptionId: 'sub-8', subscription: plan, amount: '10', currency: 'xts', chargeDate: `${month}-18` },
+      ]);
+      exchangeRatesService.getRateOrNull.mockResolvedValue(null);
+
+      const result = await service.getMonthStatus('workspace-1', month);
+
+      expect(result.paidAmount).toBe(7.5);
+      expect(result.missingRates).toEqual(['XTS']);
     });
 
     it('lists each charged subscription, still to pay first', async () => {
