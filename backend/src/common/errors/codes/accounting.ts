@@ -154,6 +154,8 @@ export const ACCOUNTING_ERRORS = {
     'This workspace has no tax jurisdiction. Pick a country before building a return.',
   TAX_RETURN_PERIOD_INVALID: 'Period end must not be before period start',
   TAX_RETURN_ALREADY_FILED: 'This period has already been filed',
+  TAX_RETURN_PERIOD_OVERLAPS:
+    'A filed return already covers part of this period ({{start}} – {{end}}). Reopen it, or file the days it leaves out.',
   TAX_RETURN_NOT_FILED: 'This period is not filed',
   TAX_RATE_NAME_REQUIRED: 'Tax rate name is required',
   TAX_RATE_NAME_TAKEN: 'Tax rate with this name already exists',
