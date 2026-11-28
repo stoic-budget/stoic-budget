@@ -67,13 +67,14 @@ export const useTopSpendersData = ({
   month,
   state,
 }: Params): TopSpendersDataReturn => {
-  const { statements, receipts, loading } = useAnalyticsData({
+  const { statements, transactions, receipts, loading } = useAnalyticsData({
     user,
     currentWorkspace,
     workspaces,
     workspaceFilter: state.workspaceFilter,
     currentWorkspaceLabel: labels.currentWorkspace,
-    includeTransactions: false,
+    // The companies are summed from their confirmed rows, not the files' totals.
+    includeTransactions: true,
     errorToastMessage: labels.loadError,
   });
 
@@ -81,6 +82,7 @@ export const useTopSpendersData = ({
   const { flowFilteredRecords, flowRecordsWithoutDateFilter, fromOptions, currencyOptions } =
     useTopSpendersRecords({
       statements,
+      transactions,
       receipts,
       workspaceCurrency,
       appliedFilters: monthFilters,

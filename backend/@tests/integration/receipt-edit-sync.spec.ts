@@ -351,6 +351,90 @@ describe('editing an approved receipt reaches the figures (real Postgres)', () =
     await txRepo.delete({ id });
   });
 
+  it('keeps the amounts of a row split by items and renames every part (#686)', async () => {
+    const group = randomUUID();
+    const first = await row({ amount: 30, debit: 30, splitGroupId: group, splitIndex: 0 });
+    const second = await row({ amount: 20, debit: 20, splitGroupId: group, splitIndex: 1 });
+    const receiptId = await approvedReceipt({
+      source: ReceiptSource.IMAP,
+      transactionId: first,
+      parsedData: { date: LAST_MONTH, amount: 50, currency: 'USD', vendor: 'ACME Stor' },
+    });
+
+    await receipts.update(
+      receiptId,
+      workspaceId,
+      { parsedData: { vendor: 'ACME Store', amount: 50, categoryId: travelId } },
+      userId,
+    );
+
+    const parts = await txRepo.find({ where: { splitGroupId: group }, order: { splitIndex: 'ASC' } });
+    expect(parts.map(part => Number(part.debit))).toEqual([30, 20]);
+    expect(parts.map(part => part.counterpartyName)).toEqual(['ACME Store', 'ACME Store']);
+    // Each part keeps its own category.
+    expect(parts.map(part => part.categoryId)).toEqual([softwareId, softwareId]);
+    await txRepo.delete({ splitGroupId: group });
+  });
+
+  it("keeps each part's own purpose and leaves a filed part as filed (#686)", async () => {
+    const group = randomUUID();
+    const first = await row({
+      amount: 30,
+      debit: 30,
+      splitGroupId: group,
+      splitIndex: 0,
+      paymentPurpose: 'ACME Stor: Wireless Buds',
+    });
+    await row({
+      amount: 20,
+      debit: 20,
+      splitGroupId: group,
+      splitIndex: 1,
+      paymentPurpose: 'ACME Stor: Cable',
+      counterpartyName: 'Filed Name',
+      taxLocked: true,
+      taxAmount: 0,
+    });
+    const receiptId = await approvedReceipt({
+      source: ReceiptSource.IMAP,
+      transactionId: first,
+      parsedData: { date: LAST_MONTH, amount: 50, currency: 'USD', vendor: 'ACME Stor' },
+    });
+
+    await receipts.update(receiptId, workspaceId, { parsedData: { vendor: 'ACME Store' } }, userId);
+
+    const parts = await txRepo.find({ where: { splitGroupId: group }, order: { splitIndex: 'ASC' } });
+    expect(parts.map(part => part.paymentPurpose)).toEqual([
+      'ACME Stor: Wireless Buds',
+      'ACME Stor: Cable',
+    ]);
+    expect(parts.map(part => part.counterpartyName)).toEqual(['ACME Store', 'Filed Name']);
+    await txRepo.update({ splitGroupId: group }, { taxLocked: false });
+    await txRepo.delete({ splitGroupId: group });
+  });
+
+  it('approves a scan whose row was split in Review without counting the whole on one part (#686)', async () => {
+    const scan = await statement({
+      fileName: 'scan.jpg',
+      parsingDetails: { detectedBy: 'receipt-scan' } as Statement['parsingDetails'],
+    });
+    const group = randomUUID();
+    await row({ statementId: scan, amount: 60, debit: 60, splitGroupId: group, splitIndex: 0, isVerified: false });
+    await row({ statementId: scan, amount: 40, debit: 40, splitGroupId: group, splitIndex: 1, isVerified: false });
+    const receiptId = await approvedReceipt({
+      statementId: scan,
+      status: ReceiptStatus.DRAFT,
+      parsedData: { date: LAST_MONTH, amount: 100, currency: 'USD', vendor: 'ACME Store' },
+    });
+
+    await receipts.approve(receiptId, workspaceId, userId);
+
+    const parts = await txRepo.find({ where: { splitGroupId: group }, order: { splitIndex: 'ASC' } });
+    expect(parts.map(part => Number(part.debit))).toEqual([60, 40]);
+    expect(parts.every(part => part.isVerified)).toBe(true);
+    await txRepo.delete({ splitGroupId: group });
+  });
+
   it("keeps the bank's date and amount on a bank row and takes only the category", async () => {
     const bank = await statement({ bankName: BankName.OTHER });
     const id = await row({ statementId: bank, amount: 50, debit: 50 });

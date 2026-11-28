@@ -118,11 +118,10 @@ export const useTopMerchantsRecords = ({
       const meta = item.statementId ? statementById.get(item.statementId) : undefined;
       return mapTransactionToRecord(item, meta as StatementMeta | undefined, workspaceCurrency);
     });
-    const txStatementIds = new Set(
-      transactions.map(t => t.statementId).filter((id): id is string => Boolean(id)),
-    );
+    // A receipt whose row is already here (an approved scan books one) is that row.
+    const transactionIds = new Set(transactions.map(t => t.id));
     const mappedReceipts = receipts
-      .filter(r => !txStatementIds.has(r.id))
+      .filter(r => !(r.transactionId && transactionIds.has(r.transactionId)))
       .map(r => mapReceiptToMerchantRecord(r, workspaceCurrency));
     return [...mappedTransactions, ...mappedReceipts];
   }, [statements, transactions, receipts, workspaceCurrency]);

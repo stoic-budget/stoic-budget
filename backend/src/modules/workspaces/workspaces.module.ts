@@ -9,6 +9,9 @@ import { TaxModule } from '../tax/tax.module';
 import { DemoWorkspaceService } from './demo-workspace/demo-workspace.service';
 import { WorkspaceBackgroundsController } from './workspace-backgrounds.controller';
 import { WorkspaceBackgroundsService } from './workspace-backgrounds.service';
+import { WorkspaceFilesRemovalSubscriber } from './workspace-files-removal.subscriber';
+import { WorkspaceMemberLocaleController } from './workspace-member-locale.controller';
+import { WorkspaceMemberLocaleService } from './workspace-member-locale.service';
 import { WorkspacesController } from './workspaces.controller';
 import { WorkspacesService } from './workspaces.service';
 
@@ -21,9 +24,19 @@ import { WorkspacesService } from './workspaces.service';
     CategoriesModule,
     TaxModule,
   ],
-  providers: [WorkspacesService, WorkspaceBackgroundsService, DemoWorkspaceService],
+  providers: [
+    WorkspacesService,
+    WorkspaceBackgroundsService,
+    WorkspaceMemberLocaleService,
+    DemoWorkspaceService,
+    WorkspaceFilesRemovalSubscriber,
+  ],
   // Backgrounds first: its literal `backgrounds/...` paths must not be read as a workspace id.
-  controllers: [WorkspaceBackgroundsController, WorkspacesController],
+  controllers: [
+    WorkspaceBackgroundsController,
+    WorkspaceMemberLocaleController,
+    WorkspacesController,
+  ],
   exports: [WorkspacesService],
 })
 export class WorkspacesModule {}

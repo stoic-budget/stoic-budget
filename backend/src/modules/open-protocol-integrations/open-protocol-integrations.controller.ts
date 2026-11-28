@@ -1,4 +1,5 @@
 import { Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
+import { PluginAuth } from '../../common/decorators/plugin-auth.decorator';
 import { WorkspaceId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
@@ -160,7 +161,7 @@ export class OpenProtocolIntegrationsController {
   }
 
   @Post('imap/settings')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('imap', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(IntegrationConnection)
   saveImapSettings(
     @CurrentUser() user: User,
@@ -178,7 +179,7 @@ export class OpenProtocolIntegrationsController {
   }
 
   @Post('imap/folders')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('imap', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BrowseOptionList)
   listImapFolders(@SchemaBody(ListImapFoldersBody) body: ListImapFoldersBody) {
     return this.openProtocolIntegrationsService.listImapFolders({
@@ -191,7 +192,7 @@ export class OpenProtocolIntegrationsController {
   }
 
   @Post('imap/sync')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('imap', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(ProtocolSyncResult)
   syncImap(@CurrentUser() user: User, @WorkspaceId() workspaceId: string) {
     return this.openProtocolIntegrationsService.syncImap(user, workspaceId);

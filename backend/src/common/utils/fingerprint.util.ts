@@ -59,3 +59,27 @@ export function generateTransactionFingerprint(input: FingerprintInput): string 
 export function normalizeForFingerprint(str: string): string {
   return str.toLowerCase().replace(/\s+/g, ' ').trim();
 }
+
+/**
+ * The fingerprint of the n-th identical row of one file (n from 2): two coffees
+ * of 3.50 on the same day are two payments, not one printed twice. Uploading
+ * the same file again yields the same numbers, so both are still recognised.
+ */
+export function occurrenceFingerprint(fingerprint: string, occurrence: number): string {
+  if (occurrence < 2) {
+    return fingerprint;
+  }
+  return createHash('sha256').update(`${fingerprint}#${occurrence}`).digest('hex').substring(0, 32);
+}
+
+/** Gives the second and later identical rows of one file their own fingerprints, in place. */
+export function numberRepeats(rows: Array<{ fingerprint?: string | null }>): void {
+  const occurrences = new Map<string, number>();
+  for (const row of rows) {
+    if (row.fingerprint) {
+      const occurrence = (occurrences.get(row.fingerprint) ?? 0) + 1;
+      occurrences.set(row.fingerprint, occurrence);
+      row.fingerprint = occurrenceFingerprint(row.fingerprint, occurrence);
+    }
+  }
+}

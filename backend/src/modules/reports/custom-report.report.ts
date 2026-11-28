@@ -10,6 +10,7 @@ import { ReportGroupBy } from './dto/custom-report.dto';
 import { countedTransactions, logReportGeneration } from './helpers/report-query.util';
 import { dayOf } from './helpers/report-values.util';
 import type { CustomReport, CustomReportGroup } from './interfaces/custom-report.interface';
+import { TemplateReportRowsLoader } from './template-report-rows.loader';
 
 /** Transactions in a date range, filtered and grouped the way the request asks. */
 @Injectable()
@@ -18,6 +19,7 @@ export class CustomReportGenerator {
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
     private readonly auditService: AuditService,
+    private readonly rowsLoader: TemplateReportRowsLoader,
   ) {}
 
   /**
@@ -51,6 +53,7 @@ export class CustomReportGenerator {
     }
 
     const transactions = redactPrivateRows(await queryBuilder.getMany(), viewerMemberId);
+    const money = await this.rowsLoader.toWorkspaceCurrency(workspaceId, transactions);
 
     // Group transactions
     const groupMap = new Map<string, CustomReportGroup>();
@@ -130,6 +133,7 @@ export class CustomReportGenerator {
       dateFrom: dto.dateFrom,
       dateTo: dto.dateTo,
       groupBy,
+      ...money,
       groups,
       summary: {
         totalIncome,

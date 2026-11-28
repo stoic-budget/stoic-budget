@@ -37,9 +37,10 @@ import { BusinessProfileService } from '../business-profile/business-profile.ser
 import { LedgerPostingError, LedgerPostingService } from '../ledger/ledger-posting.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { buildInvoicePdf } from './invoice-document';
-import { documentLines, priceLines, totalsOf } from './invoice-pricing';
+import { documentLines, priceLines, totalsFor } from './invoice-pricing';
 import { advanceIssueDate, shiftDueDate } from './invoice-recurrence.util';
 import { InvoiceSettingsService } from './invoice-settings.service';
+import { invoiceSettled } from './invoice-settled';
 import { InvoiceXRechnungService } from './invoice-xrechnung.service';
 
 /**
@@ -305,6 +306,8 @@ export class InvoicesService {
       }
 
       const { lineItems, client, profile } = await this.sendableOrThrow(manager, invoice);
+      // Priced as it is sent: a draft saved before a pricing change carries old totals.
+      Object.assign(invoice, await totalsFor(manager, lineItems, invoice.pricesIncludeTax));
 
       invoice.invoiceNumber = await this.nextInvoiceNumber(manager, workspaceId);
       // The link's secret. 24 random bytes, so the url cannot be guessed from
@@ -430,7 +433,7 @@ export class InvoicesService {
       // `invoices.status` never says 'paid' — the receivable does — so the
       // stored column alone would let a settled invoice be voided, reversing
       // revenue for money that is already in the bank.
-      if (await this.isSettled(manager, invoice)) {
+      if (await invoiceSettled(manager, invoice)) {
         throw new ConflictException(appError('INVOICE_NOT_VOIDABLE'));
       }
 
@@ -561,11 +564,7 @@ export class InvoicesService {
       where: { id: invoiceId },
     });
 
-    const totals = totalsOf(await priceLines(manager, lineItems, invoice.pricesIncludeTax));
-
-    invoice.subtotal = totals.subtotal;
-    invoice.taxTotal = totals.taxTotal;
-    invoice.total = totals.total;
+    Object.assign(invoice, await totalsFor(manager, lineItems, invoice.pricesIncludeTax));
     const saved = await manager.getRepository(Invoice).save(invoice);
     saved.lineItems = lineItems;
     return saved;
@@ -623,20 +622,6 @@ export class InvoicesService {
       [workspaceId],
     );
     return `${rows[0].prefix}${rows[0].invoice_no}`;
-  }
-
-  /** Whether the invoice's receivable has been settled. */
-  private async isSettled(manager: EntityManager, invoice: Invoice): Promise<boolean> {
-    if (!invoice.payableId) {
-      return false;
-    }
-    const payable = await manager.getRepository(Payable).findOne({
-      where: { id: invoice.payableId },
-      select: {
-        status: true,
-      },
-    });
-    return payable?.status === PayableStatus.PAID;
   }
 
   private applyDraftFields(invoice: Invoice, dto: UpdateInvoiceBody): void {

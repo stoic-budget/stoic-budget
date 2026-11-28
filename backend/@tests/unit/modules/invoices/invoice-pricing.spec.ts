@@ -29,3 +29,27 @@ describe('line amount with a discount or surcharge', () => {
     expect(lineAmount(line({ adjustmentPercent: null }))).toBe(100);
   });
 });
+
+describe('invoice totals, tax rounded once per rate', () => {
+  const manager = {
+    getRepository: () => ({
+      findBy: async () => [{ id: 'rate-19', rate: '19', name: 'Standard', isReverseCharge: false }],
+    }),
+  } as never;
+
+  it('prices three lines of 10.00 including 19 % as the e-invoice does', async () => {
+    const { totalsFor } = await import('../../../../src/modules/invoices/invoice-pricing');
+    const lines = [1, 2, 3].map(() => line({ unitPrice: 10, taxRateId: 'rate-19' }));
+
+    expect(await totalsFor(manager, lines, true)).toEqual({ subtotal: 25.21, taxTotal: 4.79, total: 30 });
+  });
+
+  it('credits each invoice of a credit note with its own lines', async () => {
+    const { priceEach, totalsOf } = await import('../../../../src/modules/invoices/invoice-pricing');
+    const invoice = [line({ unitPrice: 12.31, taxRateId: 'rate-19' })];
+
+    const priced = await priceEach(manager, [{ lines: invoice }, { lines: invoice }], false);
+
+    expect(totalsOf(priced.slice(0, 1)).total).toBe(totalsOf(priced.slice(1)).total);
+  });
+});

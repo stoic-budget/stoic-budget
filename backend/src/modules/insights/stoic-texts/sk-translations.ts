@@ -1177,4 +1177,85 @@ export const sk: StoicTextMap = {
       message: 'Na {{percent}}%, bez termínu. Vedzte, kam plávate, a mesačný krok príde sám.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Zabudnúť dvakrát je už zvyk',
+      message:
+        'Za posledný polrok bolo {{count}} účtov zaplatených neskoro, lebo sa na ne zabudlo. Pamäť nie je plán: nech pripomenutie príde skôr, kým je čas konať.',
+    },
+    {
+      title: 'Účet na vás nezabudol',
+      message:
+        '{{count}} účtov za posledný polrok čakalo, kým si na ne niekto spomenie. Čo neunesie pamäť, unesie pripomienka: dajte jej pár dní navyše.',
+    },
+    {
+      title: 'Nech si pamätá pripomienka',
+      message:
+        'Zabudnuté {{count}}-krát za pol roka. Myseľ je na súdenie, nie na uchovávanie dátumov: nech pripomienka príde včas.',
+    },
+    {
+      title: 'Malá povinnosť, často prehliadaná',
+      message:
+        '{{count}} oneskorených účtov, každý jednoducho zabudnutý. Pokoj sa začína poriadkom v maličkostiach a skoršia pripomienka nič nestojí.',
+    },
+    {
+      title: 'Zabúdanie má svoj vzorec',
+      message:
+        'Za pol roka prešlo {{count}} účtov svojím termínom bez povšimnutia. Seneca si každý večer prechádzal svoj deň; pripomienka o pár dní skôr to urobí za vás.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Výplata prichádza po účte',
+      message:
+        '{{count}}-krát za polrok peniaze ešte neboli, keď bol účet splatný. Posuňte dátum za výplatu alebo si odložte jednu platbu: čo je pripravené, nenaháňa.',
+    },
+    {
+      title: 'Peniaze prichádzajú po termíne',
+      message:
+        '{{count}}-krát za pol roka prišiel účet skôr ako príjem. Dajte termín tam, kde peniaze už sú, a účet prestane tlačiť.',
+    },
+    {
+      title: 'O jednu platbu vopred',
+      message:
+        '{{count}} oneskorených účtov za pol roka čakalo na výplatu. Odložte jednu platbu bokom a kalendár nad vami stratí moc.',
+    },
+    {
+      title: 'Usporiadajte dátumy, nie starosť',
+      message:
+        '{{count}}-krát za pol roka chýbali peniaze pred výplatou. Liekom nie je starosť, ale poriadok: účet po príjme, alebo rezerva pred ním.',
+    },
+    {
+      title: 'Pripravené neponáhľa',
+      message:
+        '{{count}}-krát bol účet splatný skôr, než prišli peniaze. Čo je pripravené vopred, sa prijíma pokojne: odložte jednu platbu alebo posuňte dátum.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Nečakané sa vracia',
+      message:
+        '{{count}} oneskorení za polrok nasledovalo po nepredvídanom výdavku. Múdremu sa nič nestane proti jeho očakávaniu, píše Seneca. Rezerva na nepredvídané je cieľ, ktorý stojí za to.',
+    },
+    {
+      title: 'Rátajte s nečakaným',
+      message:
+        '{{count}} oneskorených účtov za pol roka nasledovalo po výdavku, ktorý ste nepredvídali. Stoici si nešťastie vopred predstavovali; rezerva je to isté cvičenie v peniazoch.',
+    },
+    {
+      title: 'Vankúš pre nepredvídané',
+      message:
+        'Za pol roka čakalo {{count}} účtov za prekvapivým výdavkom. Malá rezerva premení ďalšie prekvapenie na nepohodlie, nie na oneskorený účet.',
+    },
+    {
+      title: 'Šťastena požičiava a chce späť',
+      message:
+        '{{count}}-krát nepredvídaný výdavok posunul účet za termín. Šťastena si pýta znova; odložte rezervu, nech účet nemusí čakať.',
+    },
+    {
+      title: 'Prekvapenia nie sú vzácne',
+      message:
+        '{{count}} oneskorených účtov nasledovalo po niečom nečakanom. Čo sa stáva často, nie je naozaj nečakané: cieľ rezervy preň urobí miesto.',
+    },
+  ],
 };

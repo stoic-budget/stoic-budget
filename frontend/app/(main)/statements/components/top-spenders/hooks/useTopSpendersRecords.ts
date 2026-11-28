@@ -14,7 +14,7 @@ import type {
   TopSpenderFlowType,
   TopSpenderRecord,
 } from '@/app/(main)/statements/components/top-spenders/top-spenders.types';
-import type { ReceiptDocument } from '@/app/(main)/statements/types/statement-types';
+import type { ReceiptDocument, Transaction } from '@/app/(main)/statements/types/statement-types';
 import { useIntlayer } from '@/app/i18n';
 
 type StatementWithWorkspace = StatementFilterItem & {
@@ -24,6 +24,8 @@ type StatementWithWorkspace = StatementFilterItem & {
 
 type Params = {
   statements: StatementWithWorkspace[];
+  /** Confirmed income and spending rows: a statement counts as the sum of its own. */
+  transactions: Transaction[];
   receipts: ReceiptDocument[];
   workspaceCurrency: string;
   appliedFilters: StatementFilters;
@@ -100,8 +102,36 @@ const buildFromOptions = (allRecords: TopSpenderRecord[], userFallback: string):
   return Array.from(seen.values());
 };
 
+/**
+ * A statement as the rows of it that count: what was confirmed and is income
+ * or spending, not the file's own totals (which hold rows still in Review,
+ * transfers and duplicates). A row an approved receipt stands for is left to
+ * the receipt, so a scan or an attached receipt is counted once. A statement
+ * with no such row is not shown.
+ */
+const asCounted = (
+  statements: Params['statements'],
+  transactions: Transaction[],
+  receipts: ReceiptDocument[],
+): Params['statements'] => {
+  const byReceipt = new Set(receipts.map(receipt => receipt.transactionId).filter(Boolean));
+  const totals = new Map<string, { debit: number; credit: number }>();
+  for (const row of transactions) {
+    if (!row.statementId || byReceipt.has(row.id)) continue;
+    const sum = totals.get(row.statementId) ?? { debit: 0, credit: 0 };
+    sum.debit += Number(row.debit) || 0;
+    sum.credit += Number(row.credit) || 0;
+    totals.set(row.statementId, sum);
+  }
+  return statements.flatMap(statement => {
+    const sum = totals.get(statement.id);
+    return sum ? [{ ...statement, totalDebit: sum.debit, totalCredit: sum.credit }] : [];
+  });
+};
+
 export const useTopSpendersRecords = ({
   statements,
+  transactions,
   receipts,
   workspaceCurrency,
   appliedFilters,
@@ -109,15 +139,12 @@ export const useTopSpendersRecords = ({
   activeFlowType,
 }: Params): RecordsReturn => {
   const allRecords = useMemo<TopSpenderRecord[]>(() => {
-    const mappedStatements = statements.map(item => mapStatementToRecord(item, workspaceCurrency));
-    const existingIds = new Set(
-      mappedStatements.filter(r => r.sourceType === 'receipt').map(r => r.id),
+    const mappedStatements = asCounted(statements, transactions, receipts).map(item =>
+      mapStatementToRecord(item, workspaceCurrency),
     );
-    const mappedReceipts = receipts
-      .filter(r => !existingIds.has(r.id))
-      .map(r => mapReceiptToRecord(r, workspaceCurrency));
+    const mappedReceipts = receipts.map(r => mapReceiptToRecord(r, workspaceCurrency));
     return [...mappedStatements, ...mappedReceipts];
-  }, [statements, receipts, workspaceCurrency]);
+  }, [statements, transactions, receipts, workspaceCurrency]);
 
   const filteredRecords = useMemo(
     () =>
