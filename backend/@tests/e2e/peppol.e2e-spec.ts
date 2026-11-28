@@ -346,6 +346,25 @@ describe('Peppol via Recommand (e2e)', () => {
       .expect(201);
     const notIssued = await auth(api().post(`/invoices/${draft.body.id}/peppol`)).expect(400);
     expect(JSON.stringify(notIssued.body)).toContain('PEPPOL_NOT_ISSUED');
+
+    // A line with no VAT rate would read as "not subject to VAT".
+    const unrated = await auth(api().post('/invoices'))
+      .send({
+        clientId: unknown.body.id,
+        issueDate: '2026-10-13',
+        dueDate: '2026-10-27',
+        currency: 'EUR',
+        buyerReference: 'PO-4711',
+        deliveryDate: '2026-10-10',
+        lineItems: [{ description: 'Consulting', quantity: 1, unitPrice: 100, unitCode: 'HUR' }],
+      })
+      .expect(201);
+    await auth(api().put(`/invoices/${unrated.body.id}/send`)).expect(200);
+    const noRate = await auth(api().post(`/invoices/${unrated.body.id}/peppol`)).expect(400);
+    expect(noRate.body.error).toMatchObject({
+      code: 'PEPPOL_DOCUMENT_INCOMPLETE',
+      details: { missing: ['line_tax_rate'] },
+    });
     expect(sent).toHaveLength(before);
   });
 

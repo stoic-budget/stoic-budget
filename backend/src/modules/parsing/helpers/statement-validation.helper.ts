@@ -120,7 +120,8 @@ export function validateParsedStatement(
   transactions: MovedRow[],
   options: {
     tolerance: number;
-    dropInfo?: { rawCount: number; droppedCount: number };
+    /** `keptCount`: rows kept, when not every one of them is in `transactions` (duplicates). */
+    dropInfo?: { rawCount: number; droppedCount: number; keptCount?: number };
     checks?: ParseCheck[];
   },
 ): StatementValidation {
@@ -157,7 +158,9 @@ export function validateParsedStatement(
     }
   }
 
-  const dropped = options.dropInfo && droppedRows(metadata, transactions.length, options.dropInfo);
+  const dropped =
+    options.dropInfo &&
+    droppedRows(metadata, options.dropInfo.keptCount ?? transactions.length, options.dropInfo);
   if (dropped) {
     raise(dropped.code, dropped.warning);
   }

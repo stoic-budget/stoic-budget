@@ -1,6 +1,6 @@
 /**
  * Dates the way statements print them: "02/06/2025", "09/13" (no year),
- * "1 mei", "02-Mar-2025", "02Jul24", "02 janv. 25", "Sep 3, 2025", "31 janvier 2025", "2025-05-31".
+ * "1 mei", "20. 06. 2023", "02-Mar-2025", "02Jul24", "02 janv. 25", "Sep 3, 2025", "31 janvier 2025", "2025-05-31".
  *
  * Whether "09/01" is the 9th of January or September 1st is a property of the
  * document, not of one date, so callers settle the order once per statement
@@ -83,7 +83,10 @@ export function parseDateParts(text: string, order: NumericDateOrder): DateParts
     return valid({ year: Number(year), month: Number(month), day: Number(day) });
   }
 
-  const numeric = value.match(/^(\d{1,2})[./-](\d{1,2})(?:[./-]((?:19|20)\d{2}|\d{2}))?$/);
+  // Czech and Slovak statements space the parts and close with a dot: "20. 06. 2023", "3.3.".
+  const numeric =
+    value.match(/^(\d{1,2})[./-](\d{1,2})(?:[./-]((?:19|20)\d{2}|\d{2}))?$/) ??
+    value.match(/^(\d{1,2})\. ?(\d{1,2})\.(?: ?((?:19|20)\d{2}))?$/);
   if (numeric) {
     const [first, second] = [Number(numeric[1]), Number(numeric[2])];
     const [day, month] = order === 'mdy' ? [second, first] : [first, second];
@@ -168,6 +171,8 @@ const FULL_DATE_PATTERNS = [
   /\b\d{4}-\d{2}-\d{2}\b/g,
   /\b(?:19|20)\d{2}([/.])\d{1,2}\1\d{1,2}\b/g,
   /\b\d{1,2}[./-]\d{1,2}[./-](?:\d{4}|\d{2})\b/g,
+  // Spaced, as Czech statements print it: "20. 06. 2023".
+  /\b\d{1,2}\. \d{1,2}\. \d{4}\b/g,
   /\b\d{1,2}(?:er|st|nd|rd|th)?[\s-]+[a-z]+\.?[\s-]+\d{4}\b/g,
   /\b[a-z]+\.?\s+\d{1,2}(?:,?\s+|,)\d{4}\b/g,
   // "JUL 31/24": the month, the day and a two-digit year.

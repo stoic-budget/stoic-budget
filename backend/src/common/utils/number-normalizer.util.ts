@@ -21,7 +21,12 @@ function withoutCurrency(text: string): string {
   return rest;
 }
 
-export function normalizeNumber(value: string | number | null | undefined): number | null {
+export function normalizeNumber(
+  value: string | number | null | undefined,
+  // A lone dot before three digits: grouping on a bank statement ("1.234"), a
+  // decimal point in a table of weights or share counts ("31.103").
+  { loneDotIsDecimal = false }: { loneDotIsDecimal?: boolean } = {},
+): number | null {
   if (value === null || value === undefined) {
     return null;
   }
@@ -88,15 +93,20 @@ export function normalizeNumber(value: string | number | null | undefined): numb
     // (thousands grouping vs. a 3-decimal currency). This codebase only
     // deals with 2-decimal currencies, so treat it as grouping. Revisit if
     // a 3-decimal currency (e.g. KWD) needs support.
-    normalized =
-      digitsAfter === 3 ? normalized.replace(separator, '') : normalized.replace(separator, '.');
+    // "0,125" or "0.125" cannot be grouping: nothing is grouped in front of it.
+    const wholeIsZero = /^0*$/.test(normalized.slice(0, normalized.indexOf(separator)));
+    const grouping = digitsAfter === 3 && !wholeIsZero && !(separator === '.' && loneDotIsDecimal);
+    normalized = grouping ? normalized.replace(separator, '') : normalized.replace(separator, '.');
   } else if (commaCount > 1) {
     // Multiple commas, no dot: all commas are thousands separators.
     normalized = normalized.replace(/,/g, '');
   } else if (dotCount > 1) {
-    // Multiple dots, no comma: keep only the last dot as the decimal separator.
     const parts = normalized.split('.');
-    normalized = `${parts.slice(0, -1).join('')}.${parts[parts.length - 1]}`;
+    // "1.234.567": every group after the first has three digits, all dots group.
+    // Otherwise keep only the last dot as the decimal separator.
+    normalized = parts.slice(1).every(part => part.length === 3)
+      ? parts.join('')
+      : `${parts.slice(0, -1).join('')}.${parts[parts.length - 1]}`;
   }
 
   const parsed = Number.parseFloat(normalized);

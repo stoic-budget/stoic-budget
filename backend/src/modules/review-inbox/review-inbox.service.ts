@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, Not, type Repository, type SelectQueryBuilder } from 'typeorm';
+import { In, IsNull, type Repository, type SelectQueryBuilder } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import {
   applyOwnerFilter,
@@ -17,12 +17,11 @@ import type {
   ReviewInboxPage,
   ReviewInboxQuery,
 } from '../../contracts';
-import { Receipt, ReceiptStatus } from '../../entities/receipt.entity';
+import { Receipt } from '../../entities/receipt.entity';
 import { Statement } from '../../entities/statement.entity';
 import { Subscription, SubscriptionStatus } from '../../entities/subscription.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { isUncategorizedName } from '../categories/uncategorized-category';
-import type { ReceiptApprovedEvent } from '../notifications/events/notification-events';
 import { CrossStatementDeduplicationService } from '../transactions/services/cross-statement-deduplication.service';
 import { TransactionsService } from '../transactions/transactions.service';
 import { DuplicateDecision, ReviewInboxKind } from './dto/review-inbox.dto';
@@ -34,6 +33,7 @@ import {
   uncategorizedRowsQuery,
   unconfirmedRowsQuery,
 } from './review-queue.queries';
+import { approveScanReceipt } from './scan-receipt-close';
 
 /** No reviewer asked for: the whole workspace's backlog. */
 const ALL_OWNERS: OwnerFilter = { kind: 'all' };
@@ -344,23 +344,19 @@ export class ReviewInboxService {
       return;
     }
     const receipts = await this.receiptRepository.find({
-      select: { id: true, statementId: true },
+      select: { id: true, statementId: true, metadata: true },
       where: { workspaceId, statementId: In([...rowByStatement.keys()]), transactionId: IsNull() },
     });
     for (const receipt of receipts) {
-      await this.receiptRepository.update(
-        { id: receipt.id, workspaceId },
-        {
-          status: ReceiptStatus.APPROVED,
-          transactionId: rowByStatement.get(receipt.statementId as string),
-        },
-      );
-      this.eventEmitter?.emit('receipt.approved', {
+      // A receipt matched to a bank row documents that row; the scan's is its duplicate (#687).
+      const scanRowId = rowByStatement.get(receipt.statementId as string) as string;
+      await approveScanReceipt(
+        this.receiptRepository.manager,
         workspaceId,
-        receiptId: receipt.id,
-        transactionId: rowByStatement.get(receipt.statementId as string) as string,
-        mode: 'confirmed_scan',
-      } satisfies ReceiptApprovedEvent);
+        receipt,
+        scanRowId,
+        this.eventEmitter,
+      );
     }
   }
 
@@ -404,7 +400,8 @@ export class ReviewInboxService {
     decision: DuplicateDecision,
   ): Promise<{ id: string; isDuplicate: boolean }> {
     const row = await this.transactionRepository.findOne({
-      where: { id, workspaceId, isDuplicate: true, duplicateOfId: Not(IsNull()) },
+      // Rows flagged before in-file repeats were told apart have no original; Keep must still work.
+      where: { id, workspaceId, isDuplicate: true },
     });
     if (!row) {
       throw new NotFoundException(appError('REVIEW_DUPLICATE_NOT_FOUND'));

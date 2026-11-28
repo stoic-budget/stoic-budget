@@ -54,6 +54,7 @@ vi.mock('@/app/i18n', () => {
       saveTransaction: token('Failed to save'),
       deleteTransaction: token('Failed to delete'),
       updateTransactions: token('Failed to update'),
+      updateStatement: token('Failed to update statement data'),
       deleteTransactions: token('Failed to delete'),
       assignCategory: token('Failed to assign'),
     },

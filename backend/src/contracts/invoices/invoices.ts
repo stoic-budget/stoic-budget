@@ -262,6 +262,8 @@ export const PublicInvoiceView = Schema.Struct({
       description: Schema.String,
       quantity: Schema.String,
       unitPrice: Schema.String,
+      /** The line's discount (negative) or surcharge (positive) in percent, null without one. */
+      adjustmentPercent: Schema.NullOr(Schema.String),
       amount: Schema.String,
     }),
   ),

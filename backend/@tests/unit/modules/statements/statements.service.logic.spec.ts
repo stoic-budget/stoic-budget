@@ -19,7 +19,7 @@ import { DroppedSampleService } from '@/modules/statements/dropped-sample.servic
 import { StatementListService } from '@/modules/statements/statement-list.service';
 import { StatementUploadService } from '@/modules/statements/statement-upload.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -52,7 +52,7 @@ describe('StatementsService — business logic', () => {
   const WORKSPACE_ID = 'ws-1';
   const STATEMENT_ID = 'stmt-1';
 
-  const baseStatement = (): Statement =>
+  const baseStatement = (overrides: Partial<Statement> = {}): Statement =>
     ({
       id: STATEMENT_ID,
       fileName: 'report.pdf',
@@ -71,6 +71,7 @@ describe('StatementsService — business logic', () => {
       user: { id: OWNER_ID, name: 'Owner', email: 'owner@example.com' },
       createdAt: new Date(),
       updatedAt: new Date(),
+      ...overrides,
     }) as unknown as Statement;
 
   beforeAll(async () => {
@@ -105,6 +106,7 @@ describe('StatementsService — business logic', () => {
             create: vi.fn(),
             find: vi.fn(),
             save: vi.fn(),
+            update: vi.fn(),
             delete: vi.fn(),
             count: vi.fn(),
             // The tax-lock check also counts payments whose loan interest is locked.
@@ -185,6 +187,13 @@ describe('StatementsService — business logic', () => {
     vi.clearAllMocks();
     // Default: requester is the statement owner → ensureCanModify passes
     workspaceMemberRepo.findOne.mockResolvedValue(null);
+    // The delete runs in one transaction over the same repositories.
+    statementRepo.manager = {
+      transaction: vi.fn(async (work: (manager: unknown) => unknown) =>
+        work({ getRepository: (entity: unknown) => (entity === Statement ? statementRepo : transactionRepo) }),
+      ),
+    };
+    transactionRepo.find.mockResolvedValue([]);
   });
 
   afterAll(() => module.close());
@@ -230,7 +239,7 @@ describe('StatementsService — business logic', () => {
 
       await service.permanentDelete(STATEMENT_ID, OWNER_ID, WORKSPACE_ID);
 
-      expect(statementRepo.remove).toHaveBeenCalledWith(stmt);
+      expect(statementRepo.delete).toHaveBeenCalledWith({ id: stmt.id, workspaceId: WORKSPACE_ID });
     });
 
     it('continues with statement deletion even if file unlink throws', async () => {
@@ -240,7 +249,7 @@ describe('StatementsService — business logic', () => {
       statementRepo.findOne.mockResolvedValue(baseStatement());
 
       await expect(service.permanentDelete(STATEMENT_ID, OWNER_ID, WORKSPACE_ID)).resolves.not.toThrow();
-      expect(statementRepo.remove).toHaveBeenCalled();
+      expect(statementRepo.delete).toHaveBeenCalled();
     });
 
     it('invalidates the thumbnail cache entry', async () => {
@@ -263,7 +272,47 @@ describe('StatementsService — business logic', () => {
           entityId: STATEMENT_ID,
           action: 'delete',
           meta: expect.objectContaining({ source: 'permanent' }),
+          // The rows and the file are gone: an undo would bring back an empty statement.
+          isUndoable: false,
         }),
+      );
+    });
+
+    it('refuses a statement restored from the trash meanwhile', async () => {
+      statementRepo.findOne.mockResolvedValue(baseStatement({ deletedAt: null }));
+
+      await expect(
+        service.permanentDelete(STATEMENT_ID, OWNER_ID, WORKSPACE_ID, { fromTrash: true }),
+      ).rejects.toThrow(BadRequestException);
+      expect(transactionRepo.delete).not.toHaveBeenCalled();
+    });
+
+    it('purges for the workspace though the uploader lost edit rights', async () => {
+      statementRepo.findOne.mockResolvedValue(baseStatement({ deletedAt: new Date() }));
+      workspaceMemberRepo.findOne.mockResolvedValue({ role: WorkspaceRole.VIEWER, permissions: {} });
+      vi.mocked(fs.existsSync).mockReturnValue(false);
+
+      await service.permanentDelete(STATEMENT_ID, OWNER_ID, WORKSPACE_ID, {
+        fromTrash: true,
+        system: true,
+      });
+
+      expect(statementRepo.delete).toHaveBeenCalled();
+      expect(auditService.createEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ actorType: 'system', meta: expect.objectContaining({ source: 'trash-purge' }) }),
+      );
+    });
+
+    it('lets copies of its rows in other statements stand alone again', async () => {
+      statementRepo.findOne.mockResolvedValue(baseStatement());
+      transactionRepo.find.mockResolvedValue([{ id: 'row-1' }, { id: 'row-2' }]);
+      vi.mocked(fs.existsSync).mockReturnValue(false);
+
+      await service.permanentDelete(STATEMENT_ID, OWNER_ID, WORKSPACE_ID);
+
+      expect(transactionRepo.update).toHaveBeenCalledWith(
+        expect.objectContaining({ workspaceId: WORKSPACE_ID }),
+        expect.objectContaining({ isDuplicate: false, duplicateOfId: null }),
       );
     });
 

@@ -527,6 +527,46 @@ describe('ledger sync (real Postgres)', () => {
       expect(await walletRecon(walletId)).toMatchObject({ ledgerBalance: '-40.00', difference: '0.00' });
     });
 
+    it.each([
+      ['manual-expense', 'manual-expense-acme.png'],
+      ['receipt-scan', 'receipt-acme.jpg'],
+    ])('keeps the opening of a cash wallet a %s was put on', async (detectedBy, fileName) => {
+      const wallets = dataSource.getRepository(Wallet);
+      const cash = (
+        await wallets.save(
+          wallets.create({ userId, workspaceId, name: `Cash ${detectedBy}`, currency: 'EUR', initialBalance: 500 }),
+        )
+      ).id;
+      // A manual expense is stored as a statement of its own, on the wallet.
+      const statements = dataSource.getRepository(Statement);
+      const manual = await statements.save(
+        statements.create({
+          userId,
+          workspaceId,
+          walletId: cash,
+          fileName,
+          filePath: `/tmp/${fileName}`,
+          fileType: FileType.IMAGE,
+          fileSize: 1,
+          fileHash: randomUUID(),
+          bankName: BankName.OTHER,
+          status: StatementStatus.COMPLETED,
+          currency: 'EUR',
+          parsingDetails: { detectedBy },
+        }),
+      );
+      await insertTransaction({ amount: 100, debit: 100, walletId: cash, statementId: manual.id });
+
+      await sync.syncWorkspace(workspaceId);
+
+      expect(await walletOpening(cash)).toEqual([expect.objectContaining({ base_debit: '500.00' })]);
+      expect(await walletRecon(cash)).toMatchObject({
+        ledgerBalance: '400.00',
+        statementBalance: '400.00',
+        difference: '0.00',
+      });
+    });
+
     it('leaves a wallet that mirrors a bank account to its statements', async () => {
       const wallets = dataSource.getRepository(Wallet);
       const mirror = (

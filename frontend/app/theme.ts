@@ -386,9 +386,10 @@ const paletteByMode: Record<ThemeMode, ThemeOptions['palette']> = {
       contrastText: '#ffffff',
     },
     error: {
-      main: '#e11d48',
-      light: '#fb7185',
-      dark: '#be123c',
+      // Terracotta (--money-down), as the dark palette already has it.
+      main: '#b4493f',
+      light: '#c96f66',
+      dark: '#933a32',
       contrastText: '#ffffff',
     },
     warning: {
