@@ -21,7 +21,11 @@ function matches(row: Row, where: Row): boolean {
       }
       throw new Error(`memoryRepo: unsupported operator ${expected.type}`);
     }
-    if (expected !== null && typeof expected === 'object' && !(expected instanceof Date)) {
+    if (expected === null || expected === undefined) {
+      // TypeORM's default (invalidWhereValuesBehavior: throw) refuses these too.
+      throw new Error(`memoryRepo: ${String(expected)} for "${key}" in a where`);
+    }
+    if (typeof expected === 'object' && !(expected instanceof Date)) {
       return actual !== null && typeof actual === 'object' && matches(actual, expected);
     }
     return actual === expected;

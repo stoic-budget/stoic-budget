@@ -165,6 +165,13 @@ describe('Shared links — opening one', () => {
     expect(await errorCode(service.accessSharedLink('nope'))).toBe('STORAGE_SHARED_LINK_NOT_FOUND');
   });
 
+  it('refuses a link that needs a signed-in visitor', async () => {
+    const { service, deps } = world({ links: [link({ allowAnonymous: false })] });
+
+    expect(await errorCode(service.accessSharedLink('token-1'))).toBe('STORAGE_SHARED_LINK_AUTH_REQUIRED');
+    expect(deps.sharedLinkRepository.rows[0].accessCount).toBe(0);
+  });
+
   it('refuses a link that is not active', async () => {
     const { service } = world({ links: [link({ status: ShareLinkStatus.REVOKED })] });
     expect(await errorCode(service.accessSharedLink('token-1'))).toBe('STORAGE_SHARED_LINK_INACTIVE');
@@ -238,6 +245,44 @@ describe('File permissions', () => {
       expiresAt: null,
       isActive: true,
     });
+  });
+
+  it('refuses a grantee from another workspace', async () => {
+    const elsewhere = { id: 'm-x', workspaceId: 'ws-other', userId: 'user-x', role: WorkspaceRole.OWNER, permissions: null };
+    const { service, deps } = world({ members: [admin, elsewhere] });
+
+    expect(
+      await errorCode(service.grantPermission(FILE.id, ADMIN, { userId: 'user-x', permissionType: 'viewer' } as any)),
+    ).toBe('STORAGE_USER_NOT_IN_WORKSPACE');
+    expect(deps.filePermissionRepository.rows).toHaveLength(0);
+  });
+
+  it('finds the grantee by the e-mail they sign in with, in the file’s workspace only', async () => {
+    const byMail = { ...member2, user: { email: 'member-2@example.com' } };
+    const elsewhere = { id: 'm-x', workspaceId: 'ws-other', userId: 'user-x', role: WorkspaceRole.OWNER, user: { email: 'member-x@example.com' } };
+    const { service } = world({ members: [admin, byMail, elsewhere] });
+
+    const granted = await service.grantPermission(FILE.id, ADMIN, {
+      userId: ' Member-2@Example.com ',
+      permissionType: 'viewer',
+    } as any);
+    expect(granted.userId).toBe('user-2');
+    expect(
+      await errorCode(
+        service.grantPermission(FILE.id, ADMIN, { userId: 'member-x@example.com', permissionType: 'viewer' } as any),
+      ),
+    ).toBe('STORAGE_USER_NOT_IN_WORKSPACE');
+  });
+
+  it('revokes a grant, and answers not found for one that is gone', async () => {
+    const { service, deps } = world({
+      permissions: [{ id: 'perm-1', statementId: FILE.id, userId: 'user-2', isActive: true }],
+    });
+
+    await service.revokePermission('perm-1', ADMIN);
+
+    expect(deps.filePermissionRepository.rows).toHaveLength(0);
+    expect(await errorCode(service.revokePermission('perm-1', ADMIN))).toBe('STORAGE_PERMISSION_NOT_FOUND');
   });
 
   it('refuses a second grant to the same person', async () => {

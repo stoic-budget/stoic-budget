@@ -67,6 +67,20 @@ describe('Storage file list', () => {
     expect(list.map(f => f.id)).toEqual(expected);
   });
 
+  it('lists the open workspace’s files, and of those shared with me only that workspace’s', async () => {
+    const elsewhere = file('st-elsewhere', { workspaceId: 'ws-other', userId: 'user-peer' });
+    const { service, deps } = listWorld([file('st-mine')], {
+      shared: [{ userId: ME, isActive: true, statementId: elsewhere.id, statement: elsewhere }],
+    });
+
+    const list = await service.getStorageFiles(ME, WS);
+
+    expect(list.map(f => f.id)).toEqual(['st-mine']);
+    const qb = deps.statementRepository.createQueryBuilder.mock.results[0].value;
+    expect(qb.where).toHaveBeenCalledWith('statement.workspaceId = :workspaceId', { workspaceId: WS });
+    expect(deps.filePermissionRepository.find.mock.calls[0][0].where).toEqual({ userId: ME, isActive: true });
+  });
+
   it('marks what each file lets the caller do', async () => {
     const shared = { ...file('st-shared', { userId: 'user-peer' }) };
     const { service } = listWorld([file('st-mine'), file('st-peer', { userId: 'user-peer' })], {
@@ -207,6 +221,18 @@ describe('Storage categories and tags', () => {
       categoryId: null,
       category: null,
     });
+  });
+
+  it('takes a category of the file’s own workspace only', async () => {
+    const { service } = world({
+      categoryRepository: memoryRepo([
+        { id: 'cat-elsewhere', workspaceId: 'ws-other', name: 'Elsewhere' },
+        { id: 'cat-1', workspaceId: WS, name: 'Bills' },
+      ]),
+    });
+
+    expect(await errorCode(service.updateFileCategory('st-1', ME, 'cat-elsewhere'))).toBe('CATEGORY_NOT_FOUND');
+    expect((await service.updateFileCategory('st-1', ME, 'cat-1')).categoryId).toBe('cat-1');
   });
 
   it('refuses an unknown category', async () => {

@@ -76,6 +76,14 @@ describe('Storage access — the uploader', () => {
 
   it('is anyone once they left the workspace, down to an explicit grant', async () => {
     expect(await outcome({}, UPLOADER, 'view')).toBe('STORAGE_ACCESS_DENIED');
+    const permissions = [grant(FilePermissionType.VIEWER, { userId: UPLOADER })];
+    expect(await outcome({ permissions }, UPLOADER, 'view')).toBe('ok');
+    expect(await outcome({ permissions }, UPLOADER, 'edit')).toBe('STORAGE_ACTION_DENIED');
+  });
+
+  it('counts no membership of another workspace', async () => {
+    const elsewhere = { ...member(OTHER, WorkspaceRole.OWNER), workspaceId: 'ws-other' };
+    expect(await outcome({ members: [elsewhere] }, OTHER, 'view')).toBe('STORAGE_ACCESS_DENIED');
   });
 });
 
