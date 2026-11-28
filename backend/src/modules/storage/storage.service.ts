@@ -32,16 +32,13 @@ import {
   FilePermission,
   FilePermissionType,
   FileVersion,
-  Folder,
   SharedLink,
   ShareLinkStatus,
   SharePermissionLevel,
   Statement,
-  StorageView,
   Tag,
   Transaction,
   WorkspaceMember,
-  WorkspaceRole,
 } from '../../entities';
 import { MetricsService } from '../observability/metrics.service';
 import { StatementsService } from '../statements/statements.service';
@@ -49,6 +46,8 @@ import type { StorageViewFilters } from './interfaces/storage-view-filters.inter
 import { purgeFromTrash } from './purge-from-trash';
 import { StorageAccessService, type StorageAction } from './storage-access.service';
 import { buildStorageCategoryWhere } from './storage-category-scope.util';
+import { StorageFilesQueryService } from './storage-files-query.service';
+import { StorageFoldersService } from './storage-folders.service';
 
 type FileAvailability = {
   onDisk: boolean;
@@ -66,9 +65,6 @@ type StorageStatement = Statement & {
   hasFileInDb: boolean;
 };
 
-const getErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
 /**
  * Storage service for managing file storage, sharing, and permissions
  */
@@ -83,10 +79,6 @@ export class StorageService {
     private readonly statementRepository: Repository<Statement>,
     @InjectRepository(FileVersion)
     private readonly fileVersionRepository: Repository<FileVersion>,
-    @InjectRepository(StorageView)
-    private readonly storageViewRepository: Repository<StorageView>,
-    @InjectRepository(Folder)
-    private readonly folderRepository: Repository<Folder>,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     @InjectRepository(WorkspaceMember)
@@ -98,265 +90,18 @@ export class StorageService {
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     private readonly storageAccess: StorageAccessService,
+    private readonly storageFilesQuery: StorageFilesQueryService,
+    private readonly storageFolders: StorageFoldersService,
     @Optional()
     private readonly metricsService?: MetricsService,
   ) {}
 
-  /**
-   * Get all files (statements) of the current workspace
-   */
-  async getStorageFiles(userId: string, workspaceId: string, filters?: StorageViewFilters) {
-    try {
-      // Scoped on the workspace the caller has open (the request header), not on
-      // the user's own `workspaceId`: that is only the workspace they registered
-      // with, so it showed the same files in every workspace they switched to.
-      const ownedStatements = await this.statementRepository
-        .createQueryBuilder('statement')
-        .leftJoinAndSelect('statement.category', 'category')
-        .leftJoinAndSelect('statement.user', 'owner')
-        .leftJoinAndSelect('statement.folder', 'folder')
-        .leftJoinAndSelect('statement.tags', 'tags')
-        .where('statement.workspaceId = :workspaceId', { workspaceId })
-        .orderBy('statement.createdAt', 'DESC')
-        .distinct(true)
-        .getMany();
-
-      // Get all statements shared with user (if permissions table exists)
-      let sharedPermissions: FilePermission[] = [];
-      try {
-        sharedPermissions = await this.filePermissionRepository.find({
-          where: {
-            userId,
-            isActive: true,
-          },
-          relations: {
-            statement: {
-              category: true,
-              user: true,
-              folder: true,
-              tags: true,
-            },
-          },
-        });
-      } catch (error) {
-        // If permissions table doesn't exist yet, just use empty array
-        console.warn('File permissions table may not exist yet:', getErrorMessage(error));
-      }
-
-      // A file is only ever shared with members of its own workspace, so the
-      // ones from other workspaces belong to those workspaces' lists.
-      const sharedStatements = sharedPermissions
-        .map(perm => perm.statement)
-        .filter(stmt => stmt !== null && stmt.workspaceId === workspaceId);
-
-      // Combine and deduplicate
-      const allStatements = [...ownedStatements];
-      const ownedIds = new Set(ownedStatements.map(s => s.id));
-
-      for (const sharedStmt of sharedStatements) {
-        if (!ownedIds.has(sharedStmt.id)) {
-          allStatements.push(sharedStmt);
-        }
-      }
-
-      // Enrich with permissions info
-      const workspaceRole = await this.storageAccess.findMembership(workspaceId, userId);
-
-      const statementsWithFileData = this.fileStorageService.getStatementsWithFileData
-        ? await this.fileStorageService.getStatementsWithFileData(allStatements.map(s => s.id))
-        : new Set<string>();
-
-      const enrichedStatements = await Promise.all(
-        allStatements.map(async statement => {
-          const isOwner = statement.userId === userId;
-          const isWorkspacePeer = statement.workspaceId === workspaceId;
-          let permission = null;
-          let sharedLinks = 0;
-
-          try {
-            permission = await this.storageAccess.getUserPermissionForStatement(
-              userId,
-              statement.id,
-            );
-            sharedLinks = await this.sharedLinkRepository.count({
-              where: { statementId: statement.id },
-            });
-          } catch (error) {
-            console.warn('Storage tables may not exist yet:', getErrorMessage(error));
-          }
-
-          const permissionType = isOwner
-            ? FilePermissionType.OWNER
-            : isWorkspacePeer
-              ? FilePermissionType.VIEWER
-              : permission?.permissionType;
-
-          const canReshare =
-            isOwner ||
-            (isWorkspacePeer &&
-              workspaceRole &&
-              [WorkspaceRole.OWNER, WorkspaceRole.ADMIN].includes(workspaceRole.role)) ||
-            permission?.canReshare;
-
-          const fileAvailability = this.fileStorageService.buildAvailability
-            ? this.fileStorageService.buildAvailability(
-                this.fileStorageService.isOnDisk(statement.filePath),
-                statementsWithFileData.has(statement.id),
-              )
-            : this.fileStorageService.getFileAvailability
-              ? await this.fileStorageService.getFileAvailability({
-                  id: statement.id,
-                  filePath: statement.filePath,
-                })
-              : { onDisk: false, inDb: false, status: 'unknown' };
-
-          return {
-            ...statement,
-            isOwner,
-            permissionType,
-            canReshare,
-            sharedLinksCount: sharedLinks,
-            fileAvailability,
-            hasFileOnDisk: fileAvailability.onDisk,
-            hasFileInDb: fileAvailability.inDb,
-          };
-        }),
-      );
-
-      let filtered = enrichedStatements;
-      const deletedFilter = filters?.deleted ?? 'exclude';
-      if (deletedFilter === 'only') {
-        filtered = filtered.filter(s => Boolean(s.deletedAt));
-      } else if (deletedFilter !== 'include') {
-        filtered = filtered.filter(s => !s.deletedAt);
-      }
-
-      if (filters?.scope === 'mine') {
-        filtered = filtered.filter(s => s.userId === userId);
-      } else if (filters?.scope === 'shared') {
-        filtered = filtered.filter(s => s.userId !== userId);
-      }
-
-      if (filters?.bankName) {
-        filtered = filtered.filter(s => s.bankName && s.bankName === filters.bankName);
-      }
-
-      if (filters?.folderId !== undefined) {
-        filtered = filtered.filter(s => (s.folderId || null) === (filters.folderId || null));
-      }
-
-      if (filters?.availability) {
-        filtered = filtered.filter(s => {
-          const status = s.fileAvailability?.status || s.fileAvailability;
-          if (filters.availability === 'both') {
-            return status === 'both';
-          }
-          return status === filters.availability;
-        });
-      }
-
-      if (filters?.search) {
-        const q = filters.search.toLowerCase();
-        filtered = filtered.filter(
-          s =>
-            (s.fileName || '').toLowerCase().includes(q) ||
-            (s.accountNumber || '').toLowerCase().includes(q),
-        );
-      }
-
-      if (filters?.tagIds?.length) {
-        const tagSet = new Set(filters.tagIds);
-        filtered = filtered.filter(
-          s => Array.isArray(s.tags) && s.tags.some((t: Tag) => t && tagSet.has(t.id)),
-        );
-      }
-
-      return filtered;
-    } catch (error) {
-      console.error('Error in getStorageFiles:', error);
-      throw error;
-    }
+  getStorageFiles(userId: string, workspaceId: string, filters?: StorageViewFilters) {
+    return this.storageFilesQuery.getStorageFiles(userId, workspaceId, filters);
   }
 
-  /**
-   * Get file details with transactions
-   */
-  async getFileDetails(statementId: string, userId: string) {
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-      relations: {
-        category: true,
-        user: true,
-        folder: true,
-        tags: true,
-      },
-    });
-
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-
-    // Check if user has access
-    await this.checkFileAccess(userId, statementId, 'view');
-
-    // Get transactions
-    const transactions = await this.transactionRepository.find({
-      where: { statementId },
-      order: { transactionDate: 'DESC' },
-      relations: {
-        category: true,
-        branch: true,
-        wallet: true,
-      },
-    });
-
-    // Get shared links
-    const sharedLinks = await this.sharedLinkRepository.find({
-      where: { statementId },
-      order: { createdAt: 'DESC' },
-    });
-
-    // Get permissions
-    const permissions = await this.filePermissionRepository.find({
-      where: { statementId },
-      relations: {
-        user: true,
-        grantedBy: true,
-      },
-    });
-
-    const isOwner = statement.userId === userId;
-    const userPermission = await this.storageAccess.getUserPermissionForStatement(
-      userId,
-      statementId,
-    );
-    const membership = await this.storageAccess.findMembership(statement.workspaceId, userId);
-    const isWorkspacePeer = Boolean(membership);
-    // A private row reads as a placeholder to all but its owner, here as in the list.
-    redactPrivateRows(transactions, membership?.id ?? null);
-
-    const fileAvailability = await this.fileStorageService.getFileAvailability(statement);
-
-    return {
-      statement,
-      transactions,
-      sharedLinks: sharedLinks.map(link => ({
-        ...link,
-        // Don't expose password hash
-        password: link.password ? '******' : null,
-      })),
-      permissions,
-      tags: statement.tags || [],
-      isOwner,
-      userPermission: isOwner
-        ? FilePermissionType.OWNER
-        : isWorkspacePeer
-          ? FilePermissionType.VIEWER
-          : userPermission?.permissionType,
-      fileAvailability,
-      hasFileOnDisk: fileAvailability.onDisk,
-      hasFileInDb: fileAvailability.inDb,
-    };
+  getFileDetails(statementId: string, userId: string) {
+    return this.storageFilesQuery.getFileDetails(statementId, userId);
   }
 
   /**
@@ -424,135 +169,24 @@ export class StorageService {
     return { ...saved, tags };
   }
 
-  // Folders are the caller's own plus the workspace-wide ones (no owner), matched
-  // with IsNull(): TypeORM drops a plain `null` from `where`, so `{ userId: null }`
-  // never listed the workspace-wide folders, and `{ id, userId: null }` matched
-  // any tenant's folder by id alone.
-  private folderScope(workspaceId: string, userId: string, id?: string) {
-    const byId = id ? { id } : {};
-    return [
-      { ...byId, workspaceId, userId },
-      { ...byId, workspaceId, userId: IsNull() },
-    ];
+  createFolder(dto: CreateFolderBody, userId: string, workspaceId: string) {
+    return this.storageFolders.createFolder(dto, userId, workspaceId);
   }
 
-  async createFolder(dto: CreateFolderBody, userId: string, workspaceId: string) {
-    let tag = null;
-    const tagId = dto.tagId === '' ? null : dto.tagId;
-    if (tagId) {
-      // Tags are shared across the workspace (see listTags).
-      tag = await this.tagRepository.findOne({ where: { id: tagId, workspaceId } });
-      if (!tag) {
-        throw new NotFoundException(appError('STORAGE_TAG_NOT_FOUND'));
-      }
-    }
-    const folder = this.folderRepository.create({
-      name: dto.name,
-      userId,
-      workspaceId,
-      tagId: tag?.id ?? null,
-      tag,
-    });
-    return await this.folderRepository.save(folder);
+  listFolders(userId: string, workspaceId: string) {
+    return this.storageFolders.listFolders(userId, workspaceId);
   }
 
-  async listFolders(userId: string, workspaceId: string) {
-    return await this.folderRepository.find({
-      where: this.folderScope(workspaceId, userId),
-      order: { name: 'ASC' },
-      relations: {
-        tag: true,
-      },
-    });
+  updateFolder(folderId: string, dto: UpdateFolderBody, userId: string, workspaceId: string) {
+    return this.storageFolders.updateFolder(folderId, dto, userId, workspaceId);
   }
 
-  async updateFolder(folderId: string, dto: UpdateFolderBody, userId: string, workspaceId: string) {
-    const folder = await this.folderRepository.findOne({
-      where: { id: folderId, userId, workspaceId },
-    });
-    if (!folder) {
-      throw new NotFoundException(appError('STORAGE_FOLDER_NOT_FOUND'));
-    }
-
-    if (dto.name != null) {
-      folder.name = dto.name.trim();
-    }
-    if (dto.tagId !== undefined) {
-      const tagId = dto.tagId === '' ? null : dto.tagId;
-      if (tagId) {
-        const tag = await this.tagRepository.findOne({ where: { id: tagId, workspaceId } });
-        if (!tag) {
-          throw new NotFoundException(appError('STORAGE_TAG_NOT_FOUND'));
-        }
-        folder.tagId = tag.id;
-        folder.tag = tag;
-      } else {
-        folder.tagId = null;
-        folder.tag = null;
-      }
-    }
-
-    return await this.folderRepository.save(folder);
+  deleteFolder(folderId: string, userId: string, workspaceId: string, deleteFiles: boolean) {
+    return this.storageFolders.deleteFolder(folderId, userId, workspaceId, deleteFiles);
   }
 
-  async deleteFolder(folderId: string, userId: string, workspaceId: string, deleteFiles: boolean) {
-    const folder = await this.folderRepository.findOne({
-      where: { id: folderId, userId, workspaceId },
-    });
-    if (!folder) {
-      throw new NotFoundException(appError('STORAGE_FOLDER_NOT_FOUND'));
-    }
-
-    const statements = await this.statementRepository.find({
-      where: { folderId: folder.id },
-    });
-
-    for (const statement of statements) {
-      await this.checkFileAccess(userId, statement.id, 'edit');
-    }
-
-    if (deleteFiles) {
-      // Files already in the trash stay as they are: trashing them again
-      // would restart their 30 days and announce a deletion again.
-      for (const statement of statements.filter(item => !item.deletedAt)) {
-        await this.statementsService.remove(statement.id, userId, statement.workspaceId);
-      }
-    } else if (statements.length > 0) {
-      await this.statementRepository.update({ folderId: folder.id }, { folderId: null });
-    }
-
-    await this.folderRepository.remove(folder);
-    return {
-      deleted: true,
-      filesDeleted: deleteFiles ? statements.length : 0,
-    };
-  }
-
-  async moveFileToFolder(statementId: string, userId: string, folderId: string | null) {
-    await this.checkFileAccess(userId, statementId, 'edit');
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-    });
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-
-    let folder: Folder | null = null;
-    if (folderId) {
-      // Same scoping as listFolders, in the file's own workspace. An unscoped
-      // lookup let a file be moved into another tenant's folder.
-      folder = await this.folderRepository.findOne({
-        where: this.folderScope(statement.workspaceId, userId, folderId),
-      });
-      if (!folder) {
-        throw new NotFoundException(appError('STORAGE_FOLDER_NOT_FOUND'));
-      }
-    }
-
-    statement.folderId = folder ? folder.id : null;
-    statement.folder = folder;
-    await this.statementRepository.save(statement);
-    return { folderId: statement.folderId };
+  moveFileToFolder(statementId: string, userId: string, folderId: string | null) {
+    return this.storageFolders.moveFileToFolder(statementId, userId, folderId);
   }
 
   async moveFileToTrash(statementId: string, userId: string) {
@@ -603,32 +237,16 @@ export class StorageService {
     return { status: 'deleted' };
   }
 
-  async createView(dto: StorageViewBody, userId: string, workspaceId: string) {
-    const view = this.storageViewRepository.create({
-      name: dto.name,
-      userId,
-      workspaceId,
-      filters: dto.filters || {},
-    });
-    return await this.storageViewRepository.save(view);
+  createView(dto: StorageViewBody, userId: string, workspaceId: string) {
+    return this.storageFolders.createView(dto, userId, workspaceId);
   }
 
-  async listViews(workspaceId: string) {
-    return await this.storageViewRepository.find({
-      where: { workspaceId },
-      order: { createdAt: 'DESC' },
-    });
+  listViews(workspaceId: string) {
+    return this.storageFolders.listViews(workspaceId);
   }
 
-  async deleteView(id: string, workspaceId: string) {
-    const view = await this.storageViewRepository.findOne({
-      where: { id, workspaceId },
-    });
-    if (!view) {
-      throw new NotFoundException(appError('STORAGE_VIEW_NOT_FOUND'));
-    }
-    await this.storageViewRepository.remove(view);
-    return { deleted: true };
+  deleteView(id: string, workspaceId: string) {
+    return this.storageFolders.deleteView(id, workspaceId);
   }
 
   async createFileVersion(statementId: string, userId: string) {

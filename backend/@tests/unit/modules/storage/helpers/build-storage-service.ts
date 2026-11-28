@@ -1,5 +1,7 @@
 import { FindOperator } from 'typeorm';
 import { StorageAccessService } from '@/modules/storage/storage-access.service';
+import { StorageFilesQueryService } from '@/modules/storage/storage-files-query.service';
+import { StorageFoldersService } from '@/modules/storage/storage-folders.service';
 import { StorageService } from '@/modules/storage/storage.service';
 
 /**
@@ -141,23 +143,38 @@ export function buildStorageService(overrides: Partial<StorageDeps> = {}) {
     metricsService: undefined,
     ...overrides,
   };
+  const storageAccess = new StorageAccessService(
+    deps.statementRepository,
+    deps.filePermissionRepository,
+    deps.workspaceMemberRepository,
+  );
   const service = new StorageService(
     deps.sharedLinkRepository,
     deps.filePermissionRepository,
     deps.statementRepository,
     deps.fileVersionRepository,
-    deps.storageViewRepository,
-    deps.folderRepository,
     deps.tagRepository,
     deps.workspaceMemberRepository,
     deps.fileStorageService,
     deps.statementsService,
     deps.transactionRepository,
     deps.categoryRepository,
-    new StorageAccessService(
+    storageAccess,
+    new StorageFilesQueryService(
       deps.statementRepository,
       deps.filePermissionRepository,
-      deps.workspaceMemberRepository,
+      deps.sharedLinkRepository,
+      deps.transactionRepository,
+      deps.fileStorageService,
+      storageAccess,
+    ),
+    new StorageFoldersService(
+      deps.folderRepository,
+      deps.tagRepository,
+      deps.statementRepository,
+      deps.storageViewRepository,
+      deps.statementsService,
+      storageAccess,
     ),
     deps.metricsService,
   );
