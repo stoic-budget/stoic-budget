@@ -56,6 +56,8 @@ const UNMARKED_COUNTRIES: [RegExp, string][] = [
   [/\b(?:PIX|CNPJ|CPF)\b/, 'BRL'],
   [/\bPhilippines\b/i, 'PHP'],
   [/\bSouth Africa\b|\.co\.za\b/i, 'ZAR'],
+  // US deposit insurance: a US bank's statement that prints no "$" (#675).
+  [/\bMember FDIC\b|\bFDIC[- ]insured\b/i, 'USD'],
 ];
 
 /**

@@ -488,8 +488,9 @@ function buildTransactionFromRow(
   const account = extractAccount([accountCell ?? '']) || accountCell || extractAccount(row);
   const bank = valueAt(row, columnMap.bank) || extractBank(row);
   const knp = valueAt(row, columnMap.knp);
+  // An empty default is a file that states no currency: left to the wallet, then the workspace (#675).
   const currency =
-    detectCurrency(row, columnMap) || options?.defaultCurrency || appDefaultCurrency();
+    detectCurrency(row, columnMap) || (options?.defaultCurrency ?? appDefaultCurrency());
 
   const counterpartyName =
     valueAt(row, columnMap.counterparty) || collectName(row, columnMap) || '';

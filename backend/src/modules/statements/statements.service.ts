@@ -262,6 +262,7 @@ export class StatementsService {
     statement.totalCredit = 0;
     statement.categoryId = null;
     statement.parsingDetails = null;
+    statement.currency = await this.uploads.currencyFor(statement.walletId, statement.workspaceId);
     await this.statementRepository.save(statement);
 
     await this.statementParsingQueue.enqueue(statement.id);

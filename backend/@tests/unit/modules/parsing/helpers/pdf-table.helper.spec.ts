@@ -21,6 +21,15 @@ describe('pdf-table.helper', () => {
     ).toEqual(new Set([0, 1, 5, 6, 7]));
   });
 
+  it('leaves a row without a stated currency empty when asked to, not USD (#675)', () => {
+    const rows = [
+      ['Date', 'Description', 'Amount'],
+      ['15.09.2016', 'ACME Market', '-30.00'],
+    ];
+
+    expect(mapPdfTableRowsToTransactions(rows, { defaultCurrency: '' })[0].currency).toBe('');
+  });
+
   it('maps debit and credit by their header labels instead of numeric column order', () => {
     const transactions = mapPdfTableRowsToTransactions([
       ['Назначение', 'Кредит', 'Дата', 'Контрагент', 'Дебет', 'Номер'],

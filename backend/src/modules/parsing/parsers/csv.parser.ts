@@ -2,8 +2,8 @@ import csv = require('csv-parser');
 
 import * as fs from 'fs';
 import { Readable } from 'stream';
-import { appDefaultCurrency } from '../../../common/utils/currency.util';
 import { type BankName, FileType } from '../../../entities/statement.entity';
+import { descriptionAsPayee, mostCommonCurrency } from '../helpers/tabular-columns.helper';
 import { decodeUnlabelledText } from '../helpers/text-encoding.helper';
 import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import { BaseTabularParser } from './base-tabular.parser';
@@ -59,14 +59,15 @@ export class CsvParser extends BaseTabularParser {
   }
 
   async parse(filePath: string, cachedText?: string): Promise<ParsedStatement> {
-    // Detect currency from raw file content before streaming rows
     // Decoded once, whatever the bank saved it in (#637): UTF-16, 1251, 1252…
     const text = decodeUnlabelledText(fs.readFileSync(filePath));
-    const rawContent = text.slice(0, 4096);
-    const detectedCurrency = this.detectCurrency(rawContent) || appDefaultCurrency();
-
     const rows = await this.readRows(text);
     const { headerIndex, headers, preset, columnMapping } = this.locateHeader(rows);
+    // A currency the file states sits above the table, in upper case: a word in a
+    // row ("Try Fitness") is not Turkish lira (#675). None stated leaves it empty,
+    // so the statement's own (its wallet's) and then the workspace's apply.
+    const above = rows.slice(0, Math.max(headerIndex, 0)).flat().join(' ');
+    const detectedCurrency = this.detectCurrency(above, { caseSensitive: true }) ?? '';
     const dataRows = rows.slice(headerIndex + 1);
 
     // Day and month order is a property of the file, not of each row: decided
@@ -111,7 +112,10 @@ export class CsvParser extends BaseTabularParser {
         accountNumber: 'Unknown',
         dateFrom,
         dateTo,
-        currency: preset?.currency ?? detectedCurrency,
+        currency:
+          (columnMapping.currency !== undefined ? mostCommonCurrency(transactions) : null) ??
+          preset?.currency ??
+          detectedCurrency,
         institution: preset?.name,
         rawHeader: headerText || undefined,
         normalizedHeader: normalizedHeader || undefined,
@@ -173,7 +177,7 @@ export class CsvParser extends BaseTabularParser {
       headerIndex,
       headers,
       preset: null,
-      columnMapping: guessed?.mapping ?? this.mapColumns(headers),
+      columnMapping: descriptionAsPayee(headers, guessed?.mapping ?? this.mapColumns(headers)),
     };
   }
 

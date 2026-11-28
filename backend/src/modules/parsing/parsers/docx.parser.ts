@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import { appDefaultCurrency } from '../../../common/utils/currency.util';
 import { assertSafeZipDecompressionRatio } from '../../../common/utils/zip-bomb-guard.util';
 
 import AdmZip = require('adm-zip');
@@ -37,7 +36,10 @@ export class DocxParser extends BaseTabularParser {
 
     const tables = this.extractTables(xml);
     const fullText = this.extractPlainText(xml);
-    const detectedCurrency = this.detectCurrency(fullText) || appDefaultCurrency();
+    // A currency the file states sits above its tables, in upper case: a row's
+    // "TRY FITNESS" is not lira. None stated leaves it to the wallet, then the workspace (#675).
+    const above = this.extractPlainText(xml.split('<w:tbl')[0]);
+    const detectedCurrency = this.detectCurrency(above, { caseSensitive: true }) ?? '';
     const contextYear = this.findContextYear(fullText);
 
     const transactions: ParsedTransaction[] = [];
