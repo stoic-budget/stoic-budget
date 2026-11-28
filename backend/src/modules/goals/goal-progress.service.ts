@@ -8,6 +8,7 @@ import { Transaction } from '../../entities/transaction.entity';
 import { Wallet } from '../../entities/wallet.entity';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { walletLedgers } from '../wallets/wallet-ledger';
+import { countedLinkSql } from './counted-contribution';
 import { normalizeCurrency, round2, toNumber } from './goal-money.util';
 
 export type ProgressGoal = Pick<Goal, 'id' | 'currency' | 'walletId'>;
@@ -222,10 +223,9 @@ export class GoalProgressService {
       .addSelect('COALESCE(SUM(contribution.amount), 0)', 'total')
       .where('contribution.workspace_id = :workspaceId', { workspaceId })
       .andWhere('contribution.goal_id IN (:...goalIds)', { goalIds: goals.map(goal => goal.id) })
-      // A row the bank still holds has moved no money yet; it counts once booked.
-      .andWhere(
-        'NOT EXISTS (SELECT 1 FROM transactions held WHERE held.id = contribution.transaction_id AND held.is_pending = true)',
-      );
+      // A contribution made of a row counts while the row does: not once the row is
+      // on a trashed statement, flagged a duplicate or still pending at the bank.
+      .andWhere(countedLinkSql('contribution.transaction_id', 'contribution.workspace_id'));
     if (from) {
       query.andWhere('contribution.contribution_date >= :from', { from });
     }

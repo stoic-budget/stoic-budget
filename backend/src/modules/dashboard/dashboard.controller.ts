@@ -45,6 +45,9 @@ export class DashboardController {
       query.range ?? '30d',
       query.date,
       selfMemberId ?? null,
+      // Local midnight of the viewer's day: a bare YYYY-MM-DD would be UTC
+      // midnight, the previous day for a server running west of UTC.
+      query.today ? `${query.today}T00:00:00` : undefined,
     );
   }
 

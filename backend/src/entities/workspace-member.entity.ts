@@ -75,6 +75,10 @@ export class WorkspaceMember {
   @Column({ name: 'permissions', type: 'jsonb', nullable: true })
   permissions: WorkspaceMemberPermissions | null;
 
+  /** The member's interface language in this workspace; null falls back to the user's. */
+  @Column({ name: 'locale', type: 'varchar', length: 8, nullable: true })
+  locale: string | null;
+
   @Column({ name: 'last_accessed_at', type: 'timestamp', nullable: true })
   lastAccessedAt: Date | null;
 

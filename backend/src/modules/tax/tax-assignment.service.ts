@@ -6,8 +6,9 @@ import { payeeKeyOf } from '../../common/utils/payee-key.util';
 import { TaxRule, TaxRuleDirection } from '../../entities/tax-rule.entity';
 import { TaxSource, Transaction, TransactionType } from '../../entities/transaction.entity';
 import { VatStatus, Workspace } from '../../entities/workspace.entity';
-import { findPayeeId } from '../payees/payee-resolution';
+import { payeeOfKey } from './assignment-party';
 import { isEuCountry } from './eu-membership';
+import { isOutsideVat } from './outside-vat';
 import { computeTax } from './tax-calculation';
 import { taxPaymentsCategoryId } from './tax-payments-category';
 import { TaxRatesService } from './tax-rates.service';
@@ -25,19 +26,6 @@ import { TaxRatesService } from './tax-rates.service';
  */
 export const NON_TAXABLE_NATURES = new Set(['transfer', 'salary', 'loan', 'tax']);
 
-/**
- * Seeded system categories whose rows carry no VAT anywhere we tax: interest
- * is an exempt financial service (VAT Directive art. 135(1)(b)), and wages
- * and staff benefits are not a supply at all. Insurance (art. 135(1)(a)) is
- * handled beside it, since the UAE charges VAT on general insurance.
- */
-const OUTSIDE_VAT_SYSTEM_CATEGORIES: ReadonlySet<string> = new Set([
-  'Interest income',
-  'Interest',
-  'Payroll',
-  'Benefits and compensation',
-]);
-
 export interface AssignmentInput {
   workspaceId: string;
   transactionDate: Date | string;
@@ -45,7 +33,7 @@ export interface AssignmentInput {
   amountMinor: number;
   categoryId: string | null;
   transactionType: TransactionType;
-  transactionNature: string | null;
+  transactionNature?: string | null;
   /** A rate the user chose explicitly, which always wins. */
   explicitTaxRateId?: string | null;
   /** ISO-3166-1 alpha-2 of the other party, when it is known. */
@@ -224,7 +212,7 @@ export class TaxAssignmentService {
     let payeeId = input.payeeId ?? null;
     if (!payeeId) {
       const key = payeeKeyOf(input);
-      payeeId = key ? await findPayeeId(manager, input.workspaceId, key) : null;
+      payeeId = key ? await payeeOfKey(manager, input.workspaceId, key) : null;
     }
     if (!payeeId) {
       return { country: null, vatId: null };
@@ -324,11 +312,15 @@ export class TaxAssignmentService {
       return NOT_ASSESSED;
     }
 
-    // 4b. Kinds of spending and income outside VAT everywhere we tax: interest
-    //     (exempt financial services), wages (not a supply) and, except in the
-    //     UAE, insurance. Only the workspace default stops here — a rule the
-    //     user wrote for the category was applied above.
-    if (await this.isOutsideVat(workspaceId, categoryId, workspace.taxJurisdiction?.code ?? null)) {
+    // 4b. Kinds of spending and income outside VAT everywhere we tax (see
+    //     outside-vat.ts): interest, wages, cash, transfers to people, the
+    //     Uncategorized fallback and, except in the UAE, insurance. Only the
+    //     workspace default stops here — a rule the user wrote for the category
+    //     was applied above.
+    const jurisdiction = workspace.taxJurisdiction?.code ?? null;
+    if (
+      await isOutsideVat(this.workspaceRepository.manager, workspaceId, categoryId, jurisdiction)
+    ) {
       return NOT_ASSESSED;
     }
 
@@ -399,31 +391,6 @@ export class TaxAssignmentService {
       this.logger.log(`Re-assessed ${changed} transactions in workspace ${workspaceId}`);
     }
     return changed;
-  }
-
-  /**
-   * Whether a system category (or one under it) books something no VAT is
-   * charged on. Matched by name, which is safe only because a system
-   * category's name cannot be changed.
-   */
-  private async isOutsideVat(
-    workspaceId: string,
-    categoryId: string,
-    jurisdictionCode: string | null,
-  ): Promise<boolean> {
-    const rows: Array<{ name: string; is_system: boolean }> =
-      await this.workspaceRepository.manager.query(
-        `SELECT c.name, c.is_system FROM categories c
-        WHERE c.workspace_id = $2
-          AND (c.id = $1 OR c.id = (SELECT parent_id FROM categories WHERE id = $1 AND workspace_id = $2))`,
-        [categoryId, workspaceId],
-      );
-    return rows.some(
-      row =>
-        row.is_system &&
-        (OUTSIDE_VAT_SYSTEM_CATEGORIES.has(row.name) ||
-          (row.name === 'Insurance' && jurisdictionCode?.toUpperCase() !== 'AE')),
-    );
   }
 
   private async isTaxPayment(workspaceId: string, categoryId: string): Promise<boolean> {

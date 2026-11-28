@@ -1,7 +1,7 @@
 import { ConflictException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { IsNull, type Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { shownSession } from '../../../common/demo/demo-mode';
 import { appError } from '../../../common/errors/app-error';
 import {
@@ -18,6 +18,7 @@ import { User } from '../../../entities/user.entity';
 import { WorkspaceMember, WorkspaceRole } from '../../../entities/workspace-member.entity';
 import { AuditService } from '../../audit/audit.service';
 import { recordSecurityEvent } from '../../auth/security-audit.util';
+import { forgetDeletedAccount } from './forget-deleted-account';
 
 /** How many of the user's own audit entries the export carries. */
 const EXPORT_AUDIT_LIMIT = 5000;
@@ -162,10 +163,8 @@ export class AccountDataService {
       meta: { email: user.email, reason: 'self-service' },
     });
 
-    await this.sessionRepository.update({ userId, revokedAt: IsNull() }, { revokedAt: new Date() });
-    // Credentials, like the sessions: a deleted account keeps no way back in.
-    await this.passkeyRepository.delete({ userId });
-    await this.userRepository.softDelete(userId);
+    // Sessions, passkeys and sign-on identities go with it: no way back in.
+    await forgetDeletedAccount(this.userRepository.manager, userId);
 
     this.logger.log(`Account ${userId} deleted on the owner's request`);
   }

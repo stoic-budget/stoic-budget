@@ -1,14 +1,16 @@
-import type { Repository } from 'typeorm';
-import { localDay } from '../../common/recurrence/date-only';
+import { In, MoreThanOrEqual, type Repository } from 'typeorm';
+import { addMonthsClamped, localDay } from '../../common/recurrence/date-only';
 import {
   nextOccurrence,
   nextToMake,
   type RecurrenceRule,
   shiftOffNonWorkingDays,
 } from '../../common/recurrence/recurrence';
+import type { DashboardCommitmentItem } from '../../contracts';
 import { type Payable, PayableDirection } from '../../entities/payable.entity';
-import type { SubscriptionFrequency } from '../../entities/subscription.entity';
-import { subscriptionStep } from '../subscriptions/charge-calendar.util';
+import type { Subscription, SubscriptionFrequency } from '../../entities/subscription.entity';
+import type { SubscriptionCharge } from '../../entities/subscription-charge.entity';
+import { paidAheadDays, subscriptionStep } from '../subscriptions/charge-calendar.util';
 import { daysInMonth } from './dashboard-window.util';
 
 /** Month arithmetic that clamps to the last day instead of overflowing (Jan 31 + 1m = Feb 28). */
@@ -119,6 +121,64 @@ export function projectedOccurrences(
       isOverdue: due < from,
     });
     day = nextOccurrence(rule, day);
+  }
+  return items;
+}
+
+/**
+ * Every charge each active subscription will raise inside the window, less
+ * the ones already paid ahead: such a payment has left the account and the
+ * next charge date stays put, so projecting it takes the money twice (#601).
+ * Paid ahead by the rule the budget reserve uses (`paidAheadDays`).
+ */
+export async function subscriptionCommitments(input: {
+  charges: Repository<SubscriptionCharge>;
+  workspaceId: string;
+  subscriptions: Subscription[];
+  window: { today: Date; horizonEnd: Date; maxSteps: number };
+  nextChargeOf: (subscription: Subscription) => Date | null;
+  amountOf: (subscription: Subscription) => Promise<number>;
+}): Promise<DashboardCommitmentItem[]> {
+  const { subscriptions, window } = input;
+  if (subscriptions.length === 0) return [];
+  const paid = paidAheadDays(
+    await input.charges.find({
+      where: {
+        workspaceId: input.workspaceId,
+        subscriptionId: In(subscriptions.map(subscription => subscription.id)),
+        // 19 months back: the charge before a coming one is among them, an annual one paid early too.
+        chargeDate: MoreThanOrEqual(
+          addMonthsClamped(localDay(window.today), -19) as unknown as Date,
+        ),
+      },
+      select: { subscriptionId: true, expectedDate: true, chargeDate: true },
+    }),
+    subscriptions,
+    localDay(window.today),
+  );
+  const items: DashboardCommitmentItem[] = [];
+  for (const subscription of subscriptions) {
+    const amount = await input.amountOf(subscription);
+    if (amount === 0) continue;
+    const charges = projectSubscriptionCharges(
+      input.nextChargeOf(subscription),
+      subscription.frequency,
+      window.today,
+      window.horizonEnd,
+      window.maxSteps,
+    );
+    for (const chargeDate of charges) {
+      const date = localDay(chargeDate);
+      if (paid.get(subscription.id)?.has(date)) continue;
+      items.push({
+        date,
+        label: subscription.vendorName,
+        amount,
+        source: 'subscription',
+        sourceId: subscription.id,
+        isOverdue: false,
+      });
+    }
   }
   return items;
 }

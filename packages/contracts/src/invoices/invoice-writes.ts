@@ -16,7 +16,8 @@ import {
 const WrittenAmount = Schema.Union([DecimalString, Schema.Number]);
 
 /**
- * `PUT /invoices/:id`, `PUT /invoices/:id/send` and `PUT /invoices/:id/void`:
+ * `PUT /invoices/:id`, `PUT /invoices/:id/send`, `PUT /invoices/:id/void` and
+ * `PUT /invoices/:id/stop-recurring`:
  * the row as stored, without the client or what was paid and credited. The
  * page reads the invoice back whole by its id.
  */

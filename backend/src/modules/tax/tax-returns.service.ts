@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, IsNull, Not, Repository } from 'typeorm';
@@ -17,6 +17,7 @@ import { AuditService } from '../audit/audit.service';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { TaxDeadlineResolvedEvent } from '../notifications/events/notification-events';
 import { returnGaps } from './awaiting-review';
+import { assertFilable, idsToUnlock } from './filed-periods';
 import { JurisdictionAdoptionService } from './jurisdiction-adoption.service';
 import { JurisdictionsService, toDateOnly } from './jurisdictions.service';
 import { recordStatusChange } from './tax-return-audit';
@@ -247,10 +248,6 @@ export class TaxReturnsService {
       where: { workspaceId, periodStart, periodEnd },
     });
 
-    if (existing?.status === TaxReturnStatus.FILED) {
-      throw new ConflictException(appError('TAX_RETURN_ALREADY_FILED'));
-    }
-
     const totals = await this.computeTotals(workspaceId, periodStart, periodEnd);
     if (totals.missingRates.length > 0) {
       const currencies = [...new Set(totals.missingRates.map(row => row.currency))].join(', ');
@@ -265,6 +262,8 @@ export class TaxReturnsService {
     const jurisdiction = await this.adoptionService.getCurrentJurisdiction(workspaceId);
 
     const filed = await this.returnRepository.manager.transaction(async manager => {
+      // Checked under the workspace's filing lock: two filings at once cannot both pass.
+      await assertFilable(manager, { workspaceId, periodStart, periodEnd }, existing);
       const saved = await manager.save(TaxReturn, {
         ...(existing ?? {}),
         workspaceId,
@@ -334,9 +333,9 @@ export class TaxReturnsService {
       throw new BadRequestException(appError('TAX_RETURN_NOT_FILED'));
     }
 
-    const lockedIds = (existing.snapshot ?? []).map(line => line.transactionId);
-
     const reopened = await this.returnRepository.manager.transaction(async manager => {
+      // Rows another filed return still holds stay locked (read under the filing lock).
+      const lockedIds = await idsToUnlock(manager, existing);
       if (lockedIds.length > 0) {
         await manager
           .createQueryBuilder()
