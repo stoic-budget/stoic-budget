@@ -49,30 +49,44 @@ export function groupTerms(line: string | undefined, locale: string): string[] {
 
 /**
  * A typed word finds a written one when one starts with the other, allowing
- * for an ending: "сигарету" finds "сигареты", "beers" finds "beer".
+ * for an ending: "сигарету" and "сигаретами" find "сигареты", "beers" finds
+ * "beer". Short words must match from the start, or "beers" would find "beef".
  */
 function wordMatches(word: string, query: string): boolean {
   if (word.startsWith(query)) {
     return true;
   }
-  if (word.length >= 5 && query.startsWith(word.slice(0, -2))) {
+  // A longer form of the word: a plural, a case ending.
+  if (word.length >= 4 && query.startsWith(word)) {
     return true;
   }
-  return query.length >= 5 && word.startsWith(query.slice(0, -2));
+  // Another ending of the same length or so: "сигарету" for "сигареты".
+  if (word.length >= 5 && query.length >= word.length - 2 && query.startsWith(word.slice(0, -2))) {
+    return true;
+  }
+  // A longer ending than the word has: "сигаретами" for "сигареты".
+  return query.length >= 6 && word.startsWith(query.slice(0, -2));
 }
 
-/** 0 the whole text, 1 its start, 2 the start of a word in it, 3 anywhere; null no match. */
+/**
+ * How well a match fits, lower first: the name itself, its start, the start of
+ * a word in it, then a group the user named in their own language, then one of
+ * Lucide's English search words, then the letters anywhere in the name. A
+ * group outranks the last two: "rent" means the home group, not "parentheses".
+ */
+const SCORE = { exact: 0, start: 1, word: 2, group: 3, searchWord: 4, inside: 5 } as const;
+
 function textScore(text: string, query: string): number | null {
   if (text === query) {
-    return 0;
+    return SCORE.exact;
   }
   if (text.startsWith(query)) {
-    return 1;
+    return SCORE.start;
   }
   if (text.split(/[\s-]+/).some(word => wordMatches(word, query))) {
-    return 2;
+    return SCORE.word;
   }
-  return text.includes(query) ? 3 : null;
+  return text.includes(query) ? SCORE.inside : null;
 }
 
 function termMatches(term: string, query: string): boolean {
@@ -101,10 +115,10 @@ export function searchIcons(index: IconSearchIndex, query: string, locale: strin
       score = best(score, textScore(label, needle));
     }
     if ((index.words[name] ?? []).some(word => termMatches(word, needle))) {
-      score = best(score, 4);
+      score = best(score, SCORE.searchWord);
     }
     if (byGroup.has(name)) {
-      score = best(score, 5);
+      score = best(score, SCORE.group);
     }
     if (score !== null) {
       scored.push({ name, score, at });

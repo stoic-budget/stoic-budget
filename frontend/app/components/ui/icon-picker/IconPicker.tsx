@@ -27,7 +27,7 @@ export interface IconPickerProps {
 /**
  * A field that finds an icon among the whole Lucide set by typing: by its
  * English name or search words, its name in the user's language where the
- * app has one, or a word of a group ("еда", "смартфон", "casino"). The list
+ * app has one, or a word of a group ("еда", "телефон", "casino"). The list
  * under it is virtual, so all two thousand icons scroll smoothly.
  */
 export function IconPicker({ value, onChange, allowNone = false, labelledBy }: IconPickerProps) {
@@ -42,6 +42,8 @@ export function IconPicker({ value, onChange, allowNone = false, labelledBy }: I
   const { results, loading, failed, labelOf } = useIconSearch(open, query);
 
   const current = iconName(value);
+  // An old uploaded picture or an unknown name: something is set, but no icon of the set.
+  const unnamed = value !== null && !current;
   const rows = allowNone && !query.trim() ? [NONE, ...results] : results;
   const virtualizer = useVirtualizer({
     count: open ? rows.length : 0,
@@ -53,6 +55,7 @@ export function IconPicker({ value, onChange, allowNone = false, labelledBy }: I
   const close = () => {
     setOpen(false);
     setQuery('');
+    setActive(0);
   };
   const pick = (row: string) => {
     onChange(row === NONE ? null : iconValue(row));
@@ -67,6 +70,15 @@ export function IconPicker({ value, onChange, allowNone = false, labelledBy }: I
     setActive(next);
     virtualizer.scrollToIndex(next);
   };
+  const status = failed
+    ? t.failed
+    : loading
+      ? t.loading
+      : rows.length === 0
+        ? t.nothingFound
+        : null;
+  // A row can be picked only once the list shows rows.
+  const pickable = open && !status ? rows[active] : undefined;
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
@@ -75,9 +87,12 @@ export function IconPicker({ value, onChange, allowNone = false, labelledBy }: I
         return;
       }
       move(event.key === 'ArrowDown' ? 1 : -1);
-    } else if (event.key === 'Enter' && open && rows[active]) {
+    } else if (event.key === 'Enter' && open) {
+      // Never the form around the picker: Enter in an open list is the list's.
       event.preventDefault();
-      pick(rows[active]);
+      if (pickable) {
+        pick(pickable);
+      }
     } else if (event.key === 'Escape' && open) {
       // Close the list, not the dialog around the picker.
       event.stopPropagation();
@@ -88,13 +103,6 @@ export function IconPicker({ value, onChange, allowNone = false, labelledBy }: I
   };
 
   const CurrentIcon = current ? iconComponentFor(current) : null;
-  const status = failed
-    ? t.failed
-    : loading
-      ? t.loading
-      : rows.length === 0
-        ? t.nothingFound
-        : null;
 
   return (
     <ClickAwayListener onClickAway={() => open && close()}>
@@ -114,8 +122,8 @@ export function IconPicker({ value, onChange, allowNone = false, labelledBy }: I
             aria-controls={listId}
             aria-autocomplete="list"
             aria-labelledby={labelledBy}
-            aria-activedescendant={open && rows[active] ? `${listId}-${active}` : undefined}
-            value={open ? query : current ? labelOf(current) : t.noIcon.value}
+            aria-activedescendant={pickable ? `${listId}-${active}` : undefined}
+            value={open || unnamed ? query : current ? labelOf(current) : t.noIcon.value}
             placeholder={t.search.value}
             onFocus={() => setOpen(true)}
             onClick={() => setOpen(true)}
@@ -150,7 +158,7 @@ export function IconPicker({ value, onChange, allowNone = false, labelledBy }: I
                 {virtualizer.getVirtualItems().map(item => {
                   const row = rows[item.index];
                   const Icon = row === NONE ? null : iconComponentFor(row);
-                  const selected = row === NONE ? !current : row === current;
+                  const selected = row === NONE ? value === null : row === current;
                   return (
                     <div
                       key={row}

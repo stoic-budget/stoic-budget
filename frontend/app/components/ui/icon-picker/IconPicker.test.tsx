@@ -1,10 +1,15 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { IconPicker } from './IconPicker';
 
 const catalogue = vi.hoisted(() => ({
+  // The catalogue is fetched once per page: the first test to open the picker
+  // holds it here to look at the loading list, then lets it through.
+  release: () => undefined as void,
+  gate: null as Promise<void> | null,
   nodes: {
     cigarette: [['path', { d: 'M1 1h1' }]],
     'shopping-cart': [['path', { d: 'M2 2h1' }]],
@@ -15,7 +20,10 @@ const catalogue = vi.hoisted(() => ({
 }));
 
 vi.mock('@/app/lib/icon-catalog-api', () => ({
-  fetchIconNodes: () => Promise.resolve(catalogue.nodes),
+  fetchIconNodes: async () => {
+    await catalogue.gate;
+    return catalogue.nodes;
+  },
   fetchIconWords: () => Promise.resolve(catalogue.words),
 }));
 
@@ -56,11 +64,54 @@ function Harness({ initial, onChange }: { initial: string | null; onChange: (v: 
   );
 }
 
+/** The picker inside a form and a dialog-like box, as the category dialog has it. */
+function InForm({
+  initial,
+  onChange,
+  onSubmit,
+  onDialogKey,
+}: {
+  initial: string | null;
+  onChange: (v: unknown) => void;
+  onSubmit: () => void;
+  onDialogKey: (key: string) => void;
+}) {
+  return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: stands in for the dialog's own key handler
+    <div onKeyDown={event => onDialogKey(event.key)}>
+      <form
+        onSubmit={event => {
+          event.preventDefault();
+          onSubmit();
+        }}
+      >
+        <Harness initial={initial} onChange={onChange} />
+      </form>
+    </div>
+  );
+}
+
+catalogue.gate = new Promise<void>(resolve => {
+  catalogue.release = resolve;
+});
+
 const field = () => screen.getByRole('combobox');
 
 describe('IconPicker', () => {
   const onChange = vi.fn();
   beforeEach(() => onChange.mockClear());
+
+  // First: the catalogue is still held back (see `catalogue.gate`).
+  it('picks nothing with Enter while the catalogue is still loading', async () => {
+    render(<Harness initial="lucide:plane" onChange={onChange} />);
+    fireEvent.focus(field());
+    expect(await screen.findByText('loading')).toBeInTheDocument();
+    fireEvent.keyDown(field(), { key: 'Enter' });
+
+    expect(onChange).not.toHaveBeenCalled();
+    catalogue.release();
+    expect(await screen.findByRole('option', { name: /Cigarette/ })).toBeInTheDocument();
+  });
 
   it('shows the current pick by its translated name, an old mdi value too', () => {
     render(<Harness initial="mdi:cart" onChange={onChange} />);
@@ -107,6 +158,54 @@ describe('IconPicker', () => {
     fireEvent.click(none);
     expect(onChange).toHaveBeenCalledWith(null);
     expect(field()).toHaveValue('Без значка');
+  });
+
+  it('moves the highlight with the arrows and picks that row', async () => {
+    render(<Harness initial={null} onChange={onChange} />);
+    fireEvent.focus(field());
+    await screen.findByRole('option', { name: /Cigarette/ });
+    // Rows: no icon, then the catalogue in listing order (cigarette, shopping cart, …).
+    fireEvent.keyDown(field(), { key: 'ArrowDown' });
+    fireEvent.keyDown(field(), { key: 'ArrowDown' });
+    fireEvent.keyDown(field(), { key: 'Enter' });
+    expect(onChange).toHaveBeenLastCalledWith('lucide:shopping-cart');
+  });
+
+  it('keeps Enter and Escape inside an open list: the form is not sent, the dialog stays', async () => {
+    const onSubmit = vi.fn();
+    const onDialogKey = vi.fn();
+    render(
+      <InForm initial="lucide:plane" onChange={onChange} onSubmit={onSubmit} onDialogKey={onDialogKey} />,
+    );
+    // A real keyboard: Enter in a form's text field sends the form unless stopped.
+    const user = userEvent.setup();
+    await user.click(field());
+    await user.type(field(), 'qwerty');
+    await screen.findByText('nothingFound');
+    await user.keyboard('{Enter}');
+    await user.keyboard('{Escape}');
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onDialogKey).not.toHaveBeenCalledWith('Escape');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('starts from the top again after the list is closed and opened', async () => {
+    render(<Harness initial={null} onChange={onChange} />);
+    fireEvent.focus(field());
+    await screen.findByRole('option', { name: /Cigarette/ });
+    fireEvent.keyDown(field(), { key: 'ArrowDown' });
+    fireEvent.keyDown(field(), { key: 'ArrowDown' });
+    fireEvent.keyDown(field(), { key: 'Escape' });
+    fireEvent.focus(field());
+    fireEvent.keyDown(field(), { key: 'Enter' });
+    // The first row: no icon.
+    expect(onChange).toHaveBeenLastCalledWith(null);
+  });
+
+  it('does not call an old uploaded picture "no icon"', () => {
+    render(<Harness initial="/uploads/icons/old.png" onChange={onChange} />);
+    expect(field()).toHaveValue('');
   });
 
   it('says so when nothing matches', async () => {

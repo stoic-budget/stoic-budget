@@ -85,7 +85,8 @@ export function CategoryFormDialog({ open, category, onClose, onSaved }: Categor
       const data = {
         ...restFormData,
         name: restFormData.name.trim(),
-        icon: withoutIcon ? undefined : restFormData.icon,
+        // null clears an icon the category had; a missing key would leave it.
+        icon: withoutIcon ? null : restFormData.icon,
         parentId: restFormData.parentId || undefined,
       };
 

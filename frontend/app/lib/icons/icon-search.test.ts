@@ -72,7 +72,33 @@ describe('searchIcons', () => {
   it('finds a whole group by a word in the user’s language, with another ending', () => {
     expect(search('сигареты')).toEqual(['cigarette', 'beer', 'wine']);
     expect(search('сигарету')).toEqual(['cigarette', 'beer', 'wine']);
+    // A longer ending than the written word has.
+    expect(search('сигаретами')).toEqual(['cigarette', 'beer', 'wine']);
     expect(search('игры')).toEqual(['cigarette', 'beer', 'wine']);
+  });
+
+  it('finds a plural of a short word, and not a different word that starts alike', () => {
+    const drinks = searchIcons(
+      { order: ['beer', 'beef'], words: {}, labels: new Map(), groups: [] },
+      'beers',
+      'en',
+    );
+    expect(drinks).toEqual(['beer']);
+  });
+
+  it('puts a group named in the user’s language before letters that merely occur in a name', () => {
+    const home = { icons: ['house'], terms: groupTerms('Home, rent, mortgage', 'en') };
+    const ranked = searchIcons(
+      {
+        order: listingOrder(['parentheses', 'house', 'scale'], [home]),
+        words: { scale: ['rental'] },
+        labels: new Map(),
+        groups: [home],
+      },
+      'rent',
+      'en',
+    );
+    expect(ranked).toEqual(['house', 'scale', 'parentheses']);
   });
 
   it('puts a name match before a group match', () => {
