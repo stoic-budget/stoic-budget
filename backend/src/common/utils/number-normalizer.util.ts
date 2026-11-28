@@ -143,6 +143,17 @@ export function normalizeDate(dateStr: string): Date | null {
   }
 
   const trimmed = dateStr.trim();
+  // Year first with slashes or dots, "2026/01/15", "2026.1.5": read before the
+  // short-year pattern below finds "26/01/15" inside it (#674).
+  const yearFirst = trimmed.match(
+    /^(\d{4})[/.](\d{1,2})[/.](\d{1,2})(?![\d])(?:\.?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/,
+  );
+  if (yearFirst) {
+    const [year, month, day] = [Number(yearFirst[1]), Number(yearFirst[2]), Number(yearFirst[3])];
+    const [hh = '0', mm = '0', ss = '0'] = yearFirst.slice(4).map(part => part ?? '0');
+    const date = new Date(year, month - 1, day, Number(hh), Number(mm), Number(ss));
+    return date.getMonth() === month - 1 && date.getDate() === day ? date : null;
+  }
   // Banks print "0:20:11" (one-digit hour) and "09:22" (no seconds) as well.
   const dateTimeMatch = trimmed.match(
     /(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/,
@@ -186,7 +197,7 @@ export function normalizeDate(dateStr: string): Date | null {
   }
 
   // DD/MM/YY (2-digit year)
-  const shortYearMatch = trimmed.match(/(\d{2})\/(\d{2})\/(\d{2})(?!\d)/);
+  const shortYearMatch = trimmed.match(/(?<!\d)(\d{2})\/(\d{2})\/(\d{2})(?!\d)/);
   if (shortYearMatch) {
     const [, dd, mm, yy] = shortYearMatch;
     const year = Number(yy) <= 49 ? 2000 + Number(yy) : 1900 + Number(yy);
