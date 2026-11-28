@@ -272,7 +272,12 @@ describe('api inside a past version', () => {
       Promise.reject({
         config,
         isAxiosError: true,
-        response: { status: 403, data: { message: 'You are not a member of this workspace' } },
+        response: {
+          status: 403,
+          data: {
+            error: { code: 'WORKSPACE_NOT_A_MEMBER', message: 'You are not a member of this workspace' },
+          },
+        },
       })) as typeof apiClient.defaults.adapter;
 
     await expect(apiClient.get('/dashboard')).rejects.toBeDefined();
@@ -280,5 +285,43 @@ describe('api inside a past version', () => {
     expect(toastMock).not.toHaveBeenCalled();
     expect(localStorage.getItem('currentWorkspaceId')).toBeNull();
     expect(window.location.href).toBe('/workspaces');
+  });
+
+  it('keeps the open workspace when a request pinned to another one is refused', async () => {
+    localStorage.setItem('currentWorkspaceId', 'mine');
+    apiClient.defaults.adapter = (config =>
+      Promise.reject({
+        config,
+        isAxiosError: true,
+        response: {
+          status: 403,
+          data: { error: { code: 'WORKSPACE_NOT_A_MEMBER', message: 'Not a member' } },
+        },
+      })) as typeof apiClient.defaults.adapter;
+
+    await expect(
+      apiClient.get('/receipts/documents', { headers: { 'X-Workspace-Id': 'other' } }),
+    ).rejects.toBeDefined();
+
+    expect(localStorage.getItem('currentWorkspaceId')).toBe('mine');
+    expect(window.location.href).toBe('/dashboard');
+  });
+
+  it('keeps the workspace when only a permission is missing', async () => {
+    localStorage.setItem('currentWorkspaceId', 'mine');
+    apiClient.defaults.adapter = (config =>
+      Promise.reject({
+        config,
+        isAxiosError: true,
+        response: {
+          status: 403,
+          data: { error: { code: 'PERMISSION_DENIED', message: 'You may not edit this workspace' } },
+        },
+      })) as typeof apiClient.defaults.adapter;
+
+    await expect(apiClient.post('/budgets', {})).rejects.toBeDefined();
+
+    expect(localStorage.getItem('currentWorkspaceId')).toBe('mine');
+    expect(window.location.href).toBe('/dashboard');
   });
 });

@@ -1,4 +1,5 @@
 import { Controller, Delete, Get, Patch, Post, UseFilters } from '@nestjs/common';
+import { PluginAuth } from '../../common/decorators/plugin-auth.decorator';
 import { WorkspaceId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
@@ -54,7 +55,7 @@ export class BankSyncController {
   }
 
   @Post('connections/token')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('bankSync', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BankSyncConnection)
   connectWithToken(
     @CurrentUser() user: User,
@@ -71,7 +72,7 @@ export class BankSyncController {
   }
 
   @Post('connections/redirect')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('bankSync', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BankSyncConnection)
   createRedirectConnection(
     @CurrentUser() user: User,
@@ -88,7 +89,7 @@ export class BankSyncController {
   }
 
   @Get('connections/:id/institutions')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('bankSync', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BankSyncInstitutionList)
   institutions(
     @WorkspaceId() workspaceId: string,
@@ -99,7 +100,7 @@ export class BankSyncController {
   }
 
   @Post('connections/:id/links/begin')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('bankSync', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BankSyncLinkStarted)
   beginLink(
     @WorkspaceId() workspaceId: string,
@@ -110,7 +111,7 @@ export class BankSyncController {
   }
 
   @Post('connections/:id/links/complete')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('bankSync', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BankSyncConnection)
   completeLink(
     @WorkspaceId() workspaceId: string,
@@ -121,7 +122,7 @@ export class BankSyncController {
   }
 
   @Post('connections/:id/accounts/refresh')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('bankSync', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BankSyncConnection)
   refreshAccounts(
     @WorkspaceId() workspaceId: string,
@@ -131,7 +132,7 @@ export class BankSyncController {
   }
 
   @Patch('connections/:id')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('bankSync', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BankSyncConnection)
   updateConnection(
     @WorkspaceId() workspaceId: string,
@@ -142,7 +143,7 @@ export class BankSyncController {
   }
 
   @Patch('connections/:id/accounts/:accountId')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('bankSync', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BankSyncConnection)
   updateAccount(
     @WorkspaceId() workspaceId: string,
@@ -153,7 +154,7 @@ export class BankSyncController {
   }
 
   @Post('connections/:id/sync')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('bankSync', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BankSyncResult)
   sync(
     @CurrentUser() user: User,
@@ -165,7 +166,7 @@ export class BankSyncController {
 
   /** Moves a wallet's feed to another provider without losing its history. */
   @Post('feeds/switch')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('bankSync', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BankSyncFeedSwitched)
   switchFeed(
     @WorkspaceId() workspaceId: string,

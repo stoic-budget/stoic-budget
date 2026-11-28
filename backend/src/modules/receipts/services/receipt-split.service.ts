@@ -152,7 +152,14 @@ export class ReceiptSplitService {
         ...part,
         categoryName: part.categoryId ? (nameOf.get(part.categoryId) ?? null) : null,
       })),
-      splittable: parts.length >= 2,
+      // A transfer, investment or reimbursement is unlinked before a split.
+      splittable:
+        parts.length >= 2 &&
+        !(
+          transaction.transferPairId ||
+          transaction.investmentAccountId ||
+          transaction.reimbursementOfId
+        ),
       items,
       alreadySplit: false,
       fallbackCategoryId: fallback,

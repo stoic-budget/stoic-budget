@@ -206,11 +206,11 @@ describe('ProfileSettingsPage', { timeout: 15_000 }, () => {
     expect(berlin?.textContent).toContain('Центральная Европа');
   });
 
-  it('renders the six tabs and switches tab through the URL', async () => {
+  it('renders the seven tabs and switches tab through the URL', async () => {
     const container = await renderPage();
 
     const tabs = container.querySelectorAll('[role="tab"]');
-    expect(tabs).toHaveLength(6);
+    expect(tabs).toHaveLength(7);
     expect(container.textContent).toContain('tabs.general');
 
     const securityTab = findButton(container, 'tabs.security');

@@ -356,9 +356,10 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     const [sale] = await dataSource.query('SELECT id FROM transactions WHERE statement_id = $1', [
       created.body.id,
     ]);
-    const income = await auth(api().get('/categories?type=income')).expect(200);
-    const incomeCategory = (income.body as Array<{ id: string; name: string; parentId: string | null }>)
-      .find(category => !category.parentId && category.name !== 'Uncategorized');
+    const [incomeCategory] = await dataSource.query(
+      `SELECT id FROM categories WHERE workspace_id = $1 AND system_key = 'sales'`,
+      [workspaceId],
+    );
     await auth(api().put(`/transactions/${sale.id}`))
       .send({ debit: 0, credit: 20000, categoryId: incomeCategory?.id })
       .expect(200);
@@ -372,6 +373,49 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     const watched = await auth(api().get('/tax/settings/threshold')).expect(200);
     expect(watched.body).toMatchObject({ threshold: 25000, turnover: 20000, currency: 'EUR' });
     expect(watched.body.percentUsed).toBe(80);
+
+    // Wages, and a loan left in Uncategorized, are no sales.
+    const [salary] = await dataSource.query(
+      `SELECT id FROM categories WHERE workspace_id = $1 AND system_key = 'salary'`,
+      [workspaceId],
+    );
+    // The income Uncategorized fallback, made here if no import made it yet.
+    await dataSource.query(
+      `INSERT INTO categories (workspace_id, user_id, name, type)
+       SELECT $1, owner_id, 'Uncategorized', 'income' FROM workspaces WHERE id = $1
+       ON CONFLICT DO NOTHING`,
+      [workspaceId],
+    );
+    const [uncategorized] = await dataSource.query(
+      `SELECT id FROM categories WHERE workspace_id = $1 AND name = 'Uncategorized' AND type = 'income'`,
+      [workspaceId],
+    );
+    expect(uncategorized?.id).toBeTruthy();
+    const [bonus] = await dataSource.query(
+      `INSERT INTO categories (workspace_id, user_id, name, type, parent_id)
+       SELECT $1, owner_id, 'Bonus', 'income', $2 FROM workspaces WHERE id = $1 RETURNING id`,
+      [workspaceId, salary.id],
+    );
+    const [yearEnd] = await dataSource.query(
+      `INSERT INTO categories (workspace_id, user_id, name, type, parent_id)
+       SELECT $1, owner_id, 'Year-end bonus', 'income', $2 FROM workspaces WHERE id = $1 RETURNING id`,
+      [workspaceId, bonus.id],
+    );
+    const reserveBefore = (await auth(api().get('/tax/settings/reserve/amount')).expect(200)).body;
+    // A supplier's refund, filed under the expense category it undoes.
+    for (const categoryId of [salary.id, uncategorized.id, yearEnd.id, groceries]) {
+      await dataSource.query(
+        `INSERT INTO transactions (workspace_id, transaction_date, counterparty_name, payment_purpose,
+           amount, credit, currency, transaction_type, is_verified, category_id)
+         VALUES ($1, '2026-05-20', 'ACME Employer', 'Salary', 8000, 8000, 'EUR', 'income', true, $2)`,
+        [workspaceId, categoryId],
+      );
+    }
+    const still = await auth(api().get('/tax/settings/threshold')).expect(200);
+    expect(still.body).toMatchObject({ turnover: 20000 });
+    // Nor are they earnings the reserve holds tax back for.
+    const reserveAfter = (await auth(api().get('/tax/settings/reserve/amount')).expect(200)).body;
+    expect(reserveAfter.incomeTax).toEqual(reserveBefore.incomeTax);
   });
 
   it('turns VAT off when the workspace becomes a household', async () => {

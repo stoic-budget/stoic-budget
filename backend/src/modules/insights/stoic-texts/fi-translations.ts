@@ -1183,4 +1183,85 @@ export const fi: StoicTextMap = {
         '{{percent}} %:ssa, ilman määräaikaa. Tiedä, minne purjehdit, niin kuukausittainen askel seuraa.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Kahdesti unohtaminen on tapa',
+      message:
+        '{{count}} laskua viime puolen vuoden aikana maksettiin myöhässä, koska ne unohtuivat. Muisti ei ole suunnitelma: anna muistutuksen tulla aiemmin, kun vielä ehtii toimia.',
+    },
+    {
+      title: 'Lasku ei unohtanut sinua',
+      message:
+        '{{count}} laskua odotti viime puolen vuoden aikana, että joku muistaisi ne. Minkä mieli ei kanna, sen kantaa muistutus: anna sille muutama päivä lisää.',
+    },
+    {
+      title: 'Anna muistutuksen muistaa',
+      message:
+        'Unohdettu {{count}} kertaa puolessa vuodessa. Mieli on arvioimista varten, ei päivämäärien säilyttämistä: anna muistutuksen tulla ajoissa.',
+    },
+    {
+      title: 'Pieni velvollisuus, usein ohitettu',
+      message:
+        '{{count}} myöhästynyttä laskua, jokainen yksinkertaisesti unohtunut. Tyyneys alkaa järjestyksestä pienissä asioissa, eikä aikaisempi muistutus maksa mitään.',
+    },
+    {
+      title: 'Unohtamisella on kuvio',
+      message:
+        'Puolessa vuodessa {{count}} laskua ohitti eräpäivänsä huomaamatta. Seneca kävi joka ilta päivänsä läpi; muutamaa päivää aiempi muistutus tekee sen puolestasi.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Palkka tulee laskun jälkeen',
+      message:
+        '{{count}} kertaa puolessa vuodessa rahaa ei vielä ollut, kun lasku erääntyi. Siirrä eräpäivä palkkapäivän jälkeen tai pane yksi maksu syrjään: valmistautunutta ei hoputeta.',
+    },
+    {
+      title: 'Raha tulee eräpäivän jälkeen',
+      message:
+        '{{count}} kertaa puolessa vuodessa lasku tuli ennen tuloja. Siirrä eräpäivä sinne, missä raha jo on, niin lasku lakkaa painamasta.',
+    },
+    {
+      title: 'Yksi maksu etukäteen',
+      message:
+        '{{count}} myöhästynyttä laskua odotti palkkapäivää puolen vuoden aikana. Pane yksi maksu sivuun, niin kalenteri menettää otteensa sinusta.',
+    },
+    {
+      title: 'Järjestä päivät, älä huolta',
+      message:
+        '{{count}} kertaa puolessa vuodessa rahat loppuivat ennen palkkaa. Lääke ei ole lisää huolta vaan parempi järjestys: lasku tulojen jälkeen tai puskuri ennen sitä.',
+    },
+    {
+      title: 'Valmisteltu ei kiirehdi',
+      message:
+        '{{count}} kertaa lasku erääntyi ennen kuin raha tuli. Ennalta valmisteltu kohdataan rauhassa: pane yksi maksu sivuun tai siirrä päivää.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Odottamaton palaa',
+      message:
+        '{{count}} myöhästymistä puolessa vuodessa seurasi odottamatonta menoa. Viisaalle ei tapahdu mitään vastoin hänen odotustaan, kirjoittaa Seneca. Vara odottamattoman varalle on asettamisen arvoinen tavoite.',
+    },
+    {
+      title: 'Odota odottamatonta',
+      message:
+        '{{count}} myöhästynyttä laskua puolessa vuodessa seurasi menoa, jota et ennakoinut. Stoalaiset harjoittelivat vastoinkäymisiä etukäteen; varanto on sama harjoitus rahassa.',
+    },
+    {
+      title: 'Puskuri ennakoimattomalle',
+      message:
+        'Puolessa vuodessa {{count}} laskua odotti yllättävän menon takana. Pieni varanto tekee seuraavasta yllätyksestä harmin, ei myöhästynyttä laskua.',
+    },
+    {
+      title: 'Onni lainaa ja pyytää takaisin',
+      message:
+        '{{count}} kertaa odottamaton kulu siirsi laskun yli eräpäivän. Onni pyytää taas; pane varanto sivuun, ettei laskun tarvitse odottaa.',
+    },
+    {
+      title: 'Yllätykset eivät ole harvinaisia',
+      message:
+        '{{count}} myöhästynyttä laskua seurasi jotain odottamatonta. Mikä tapahtuu usein, ei ole oikeasti odottamatonta: varantotavoite tekee sille tilaa.',
+    },
+  ],
 };

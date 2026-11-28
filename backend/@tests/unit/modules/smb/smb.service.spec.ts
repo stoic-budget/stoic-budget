@@ -73,3 +73,43 @@ describe('SmbService invoice reminder', () => {
     await expect(remind({ status: 'paid', amount: '1000.00', paidAmount: '1000.00' })).rejects.toThrow();
   });
 });
+
+describe('SmbService open items', () => {
+  it('keeps a partly paid bill open, at what is left of it', async () => {
+    const find = vi.fn(async () => [
+      {
+        id: 'bill-1',
+        direction: 'payable',
+        vendor: 'ACME Store',
+        amount: '1000.00',
+        paidAmount: '400.00',
+        currency: 'EUR',
+        dueDate: '2026-11-01',
+        createdAt: new Date('2026-10-01T00:00:00Z'),
+        status: 'partially_paid',
+      },
+    ]);
+    const service = new SmbService(
+      { find } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+
+    const items = await (
+      service as unknown as {
+        openItems(id: string, currency: string): Promise<Array<{ amount: number }>>;
+      }
+    ).openItems('ws-1', 'EUR');
+
+    const where = (find.mock.calls[0] as unknown as [{ where: { status: { value: string[] } } }])[0]
+      .where;
+    expect(where.status.value).toContain('partially_paid');
+    expect(items).toEqual([expect.objectContaining({ id: 'bill-1', amount: 600, amountInWorkspace: 600 })]);
+  });
+});

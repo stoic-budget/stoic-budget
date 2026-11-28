@@ -29,10 +29,12 @@ export class ReceiptDuplicateService {
         return [];
       }
 
+      // In UTC: the stated day is a UTC midnight, and a local step across a
+      // clock change would land on the wrong day.
       const dateFrom = new Date(receiptDate);
-      dateFrom.setDate(dateFrom.getDate() - 2);
+      dateFrom.setUTCDate(dateFrom.getUTCDate() - 2);
       const dateTo = new Date(receiptDate);
-      dateTo.setDate(dateTo.getDate() + 2);
+      dateTo.setUTCDate(dateTo.getUTCDate() + 2);
 
       const amountMin = amount * 0.99;
       const amountMax = amount * 1.01;
@@ -43,7 +45,20 @@ export class ReceiptDuplicateService {
         .andWhere('receipt.workspaceId = :workspaceId', { workspaceId: receipt.workspaceId })
         .andWhere('receipt.id != :id', { id: receipt.id })
         .andWhere('receipt.isDuplicate = :isDuplicate', { isDuplicate: false })
-        .andWhere('receipt.receivedAt BETWEEN :dateFrom AND :dateTo', { dateFrom, dateTo })
+        // Compared by the day of purchase each receipt states: a photo of the same
+        // receipt taken days later is still the same purchase. Only a receipt
+        // whose date was not read falls back to when it arrived.
+        .andWhere(
+          `(LEFT(receipt.parsed_data->>'date', 10) BETWEEN :dayFrom AND :dayTo
+            OR (COALESCE(receipt.parsed_data->>'date', '') !~ '^\\d{4}-\\d{2}-\\d{2}'
+                AND receipt.receivedAt BETWEEN :dateFrom AND :dateTo))`,
+          {
+            dayFrom: dateFrom.toISOString().slice(0, 10),
+            dayTo: dateTo.toISOString().slice(0, 10),
+            dateFrom,
+            dateTo,
+          },
+        )
         .getMany();
 
       const duplicates: Receipt[] = [];

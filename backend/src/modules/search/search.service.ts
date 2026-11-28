@@ -81,7 +81,7 @@ export class SearchService {
       .leftJoinAndSelect('t.statement', 's')
       .where('t.workspaceId = :workspaceId', { workspaceId })
       // Rows entered by hand have no statement; a row of a trashed one stays hidden.
-      .andWhere('(t.statementId IS NULL OR s.id IS NOT NULL)')
+      .andWhere('(t.statementId IS NULL OR s.deletedAt IS NULL)')
       .andWhere(
         '(LOWER(t.counterpartyName) LIKE :needle OR LOWER(t.paymentPurpose) LIKE :needle)',
         { needle },
