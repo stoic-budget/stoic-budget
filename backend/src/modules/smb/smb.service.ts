@@ -33,6 +33,7 @@ import {
   type OpenItem,
   type ReconciliationMatch,
 } from './reconciliation.util';
+import { amountToRemind, openSentence } from './reminder-amount';
 
 const LOOKBACK_DAYS = 120;
 
@@ -48,11 +49,11 @@ export interface ReconciliationResponse {
 const REMINDER_TEXT: Record<string, { subject: string; body: string }> = {
   en: {
     subject: 'Reminder: invoice {{number}} of {{total}} is {{state}}',
-    body: 'Hello {{client}},\n\nThis is a friendly reminder that invoice {{number}} for {{total}} was due on {{due}} and is {{state}}.\n\nIf you have already paid, please disregard this message.\n\nThank you,\n{{sender}}',
+    body: 'Hello {{client}},\n\nThis is a friendly reminder that invoice {{number}} for {{total}} was due on {{due}} and is {{state}}.{{open}}\n\nIf you have already paid, please disregard this message.\n\nThank you,\n{{sender}}',
   },
   ru: {
     subject: 'Напоминание: счёт {{number}} на {{total}} {{state}}',
-    body: 'Здравствуйте, {{client}}!\n\nНапоминаем, что счёт {{number}} на {{total}} со сроком оплаты {{due}} {{state}}.\n\nЕсли вы уже оплатили его, просто проигнорируйте это письмо.\n\nСпасибо,\n{{sender}}',
+    body: 'Здравствуйте, {{client}}!\n\nНапоминаем, что счёт {{number}} на {{total}} со сроком оплаты {{due}} {{state}}.{{open}}\n\nЕсли вы уже оплатили его, просто проигнорируйте это письмо.\n\nСпасибо,\n{{sender}}',
   },
 };
 
@@ -143,7 +144,12 @@ export class SmbService {
   ): Promise<{ sent: boolean; to: string; reminderCount: number }> {
     const invoice = await this.invoiceRepository.findOne({ where: { id: invoiceId, workspaceId } });
     if (!invoice) throw new NotFoundException(appError('SMB_INVOICE_NOT_FOUND'));
-    if (invoice.status !== InvoiceStatus.SENT && invoice.status !== InvoiceStatus.OVERDUE) {
+    // What is left to pay; null once the receivable is settled.
+    const due = await amountToRemind(this.payableRepository, invoice, workspaceId);
+    if (
+      (invoice.status !== InvoiceStatus.SENT && invoice.status !== InvoiceStatus.OVERDUE) ||
+      due === null
+    ) {
       throw new BadRequestException(appError('SMB_REMINDER_INVOICE_STATUS'));
     }
     const client = await this.clientRepository.findOne({
@@ -169,6 +175,7 @@ export class SmbService {
       template
         .replaceAll('{{number}}', invoice.invoiceNumber ?? invoice.id.slice(0, 8))
         .replaceAll('{{total}}', `${Number(invoice.total).toFixed(2)} ${invoice.currency}`)
+        .replaceAll('{{open}}', openSentence(locale, due, invoice))
         .replaceAll('{{due}}', String(invoice.dueDate).slice(0, 10))
         .replaceAll('{{state}}', state)
         .replaceAll('{{client}}', client.name)

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
@@ -67,10 +67,17 @@ export function composeInvoiceEmail(
       ? labels.reminderAfter
       : labels.reminderBefore
     : labels.emailIntro;
+  // Part paid or credited: what is still owed, under the total.
+  const due = invoice.amountDue;
+  const owedLine =
+    typeof due === 'number' && due > 0 && due < Number(invoice.total)
+      ? [`${labels.amountDue}: ${due.toFixed(2)} ${invoice.currency}`]
+      : [];
   const lines = [
     fill(opening),
     '',
     `${labels.total}: ${total}`,
+    ...owedLine,
     `${labels.dueDate}: ${invoice.dueDate}`,
   ];
   if (link) {
@@ -112,8 +119,6 @@ export class InvoiceDeliveryService {
   private readonly logger = new Logger(InvoiceDeliveryService.name);
 
   constructor(
-    @InjectRepository(Invoice)
-    private readonly invoiceRepository: Repository<Invoice>,
     @InjectRepository(InvoiceDelivery)
     private readonly deliveryRepository: Repository<InvoiceDelivery>,
     @InjectRepository(Client)
@@ -140,12 +145,8 @@ export class InvoiceDeliveryService {
     /** Set by the scheduler; makes the row unique per invoice and offset. */
     reminderOffset: number | null = null,
   ): Promise<InvoiceDelivery> {
-    const invoice = await this.invoiceRepository.findOne({
-      where: { id: invoiceId, workspaceId },
-    });
-    if (!invoice) {
-      throw new NotFoundException(appError('INVOICE_NOT_FOUND'));
-    }
+    // With what was paid and credited, for the amount still due.
+    const invoice = await this.invoicesService.findOne(invoiceId, workspaceId);
     // A draft has no number and no stored document; issuing it is a separate,
     // irreversible step the user takes deliberately.
     if (invoice.status === InvoiceStatus.DRAFT) {
