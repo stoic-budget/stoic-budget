@@ -27,6 +27,7 @@ import {
 } from './forecast.engine';
 import { firstOfNextMonth, monthsUntil } from './forecast-calendar';
 import { forecastCaveats } from './forecast-caveats';
+import { ForecastRates, normalizeCurrency } from './forecast-currency';
 import { inCurrency, incomeHistory, pendingEvents, withAmount } from './forecast-transactions';
 
 export type { ForecastResponse };
@@ -65,6 +66,12 @@ export class ForecastService {
     private readonly taxReserveService?: TaxReserveService,
   ) {}
 
+  private ratesHelper?: ForecastRates;
+  private get forecastRates(): ForecastRates {
+    this.ratesHelper ??= new ForecastRates(this.exchangeRatesService);
+    return this.ratesHelper;
+  }
+
   async getForecast(
     workspaceId: string,
     query: ForecastQuery,
@@ -76,6 +83,7 @@ export class ForecastService {
     const todayKey = formatDateOnly(today);
     const projectionDays = Math.max(horizonDays, PROJECTION_DAYS);
     const projectionEnd = addDays(todayKey, projectionDays - 1);
+    this.forecastRates.begin();
 
     const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
     const currency = normalizeCurrency(workspace?.currency);
@@ -173,6 +181,7 @@ export class ForecastService {
       caveats: forecastCaveats(history.monthsObserved < HISTORY_MONTHS, everydayMonthly, hasWallet),
       recurringIncome: recurring,
       unscheduledCommitted: commitments.unscheduledCommitted,
+      ...this.forecastRates.finish(),
     };
   }
 
@@ -417,25 +426,14 @@ export class ForecastService {
     return Number(summary.totalMonthlyCost) || 0;
   }
 
-  private async convert(
+  private convert(
     amount: number,
     from: string | null | undefined,
     to: string,
     workspaceId: string,
-  ): Promise<number> {
-    if (!Number.isFinite(amount) || amount === 0) return 0;
-    const source = normalizeCurrency(from);
-    if (source === to) return amount;
-    const rate = await this.exchangeRatesService.getRate(source, to, undefined, workspaceId);
-    return amount * rate;
+  ) {
+    return this.forecastRates.convert(amount, from, to, workspaceId);
   }
-}
-
-function normalizeCurrency(currency: string | null | undefined): string {
-  const normalized = String(currency || '')
-    .trim()
-    .toUpperCase();
-  return /^[A-Z]{3}$/.test(normalized) ? normalized : 'KZT';
 }
 
 function round(value: number): number {

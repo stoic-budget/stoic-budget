@@ -146,4 +146,28 @@ describe('Forecast (e2e)', () => {
     const res = await as(other, request(server()).get('/forecast?days=30')).expect(200);
     expect(res.body.events).toEqual([]);
   });
+
+  it('names a currency without a rate, counted at face value (#787)', async () => {
+    const before = await as(owner, request(server()).get('/forecast?days=30')).expect(200);
+    expect(before.body.missingRates).toBeUndefined();
+
+    // XTS is the code ISO keeps for testing: no source has a rate for it.
+    await as(owner, request(server()).post('/payables'))
+      .send({ direction: 'receivable', vendor: 'ACME Client', amount: 40, currency: 'XTS', dueDate: inDays(7) })
+      .expect(201);
+
+    const after = await as(owner, request(server()).get('/forecast?days=30')).expect(200);
+    expect(after.body.missingRates).toEqual(['XTS']);
+    expect(after.body.totalInflow - before.body.totalInflow).toBe(40);
+  });
+
+  it('names it in every one of several forecasts asked at once', async () => {
+    const answers = await Promise.all(
+      [30, 90, 365, 30].map(days =>
+        as(owner, request(server()).get(`/forecast?days=${days}`)).expect(200),
+      ),
+    );
+
+    for (const answer of answers) expect(answer.body.missingRates).toEqual(['XTS']);
+  });
 });

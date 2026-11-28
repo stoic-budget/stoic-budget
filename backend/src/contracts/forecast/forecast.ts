@@ -106,5 +106,7 @@ export const ForecastResponse = Schema.Struct({
    * earnings, minus tax already paid). Already taken out of safe-to-spend.
    */
   taxReserve: Schema.optional(Schema.Number),
+  /** Currencies with no rate to the workspace's: counted at face value. Only when there are any (#787). */
+  missingRates: Schema.optionalKey(Schema.Array(Schema.String)),
 });
 export type ForecastResponse = Wire<typeof ForecastResponse>;
