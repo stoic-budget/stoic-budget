@@ -53,6 +53,8 @@ function imageResponse(bytes: Buffer, contentType = 'image/jpeg', status = 200):
 
 function createService(stored: Goal = goal()) {
   const goalRepository = {
+    // No other goal names the cover: a copy of a past version would (#789).
+    exists: vi.fn().mockResolvedValue(false),
     findOne: vi.fn(async () => stored),
     save: vi.fn(async (data: Goal) => data),
   } as any;
@@ -311,6 +313,16 @@ describe('GoalCoversService', () => {
       expect(saved.coverAttribution).toBeNull();
       expect(saved.coverSourceUrl).toBeNull();
       expect(fs.unlink).toHaveBeenCalledWith(expect.stringContaining('kept.jpg'));
+    });
+
+    it('keeps the file while another goal still names it, as a copy does (#789)', async () => {
+      const { service, goalRepository } = createService(goal({ coverFile: 'shared.jpg' }));
+      goalRepository.exists.mockResolvedValueOnce(true);
+
+      await service.clearCover('goal-1', WORKSPACE_ID, USER_ID);
+
+      expect(goalRepository.exists).toHaveBeenCalledWith({ where: { coverFile: 'shared.jpg' }, withDeleted: true });
+      expect(fs.unlink).not.toHaveBeenCalled();
     });
   });
 

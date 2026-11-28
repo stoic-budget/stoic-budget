@@ -102,6 +102,7 @@ const TYPE_ROUTES: Record<string, (notification: NotificationLink) => string | n
   'tax.deadline.overdue': taxDeadlineRoute,
   'tax.rates.official_changed': () => withFocus('/workspaces/overview', 'tax:official-rates'),
   'member.invited': () => '/workspaces/members',
+  'backup.failed': () => '/settings/profile?tab=sync&section=backup',
   'member.joined': () => '/workspaces/members',
   // A deleted statement can still be restored from the trash; a deleted
   // transaction has nowhere to be shown and falls through to the list.

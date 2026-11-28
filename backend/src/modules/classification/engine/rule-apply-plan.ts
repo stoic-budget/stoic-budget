@@ -5,7 +5,7 @@ import type {
   MatchMode,
   RuleConditionNode,
 } from '../interfaces/classification-rule.interface';
-import { hasDecidedCategory } from './category-decision';
+import { keepsCategoryOnRerun } from './category-decision';
 import { matchesRule } from './rule-conditions';
 import { decides, type LayeredField, passRules } from './rule-layers';
 import { hasNoComment, pickedByHand } from './rule-result';
@@ -125,9 +125,7 @@ export function planRuleApply(
   return {
     matches,
     refiled: input.setsCategory
-      ? matches.filter(
-          row => !(hasDecidedCategory(row) || row.taxLocked) && wins(row, 'categoryId'),
-        )
+      ? matches.filter(row => !keepsCategoryOnRerun(row) && wins(row, 'categoryId'))
       : [],
     tagged: input.setsTags ? matches : [],
     moved: matches.filter(row => movesToWallet(row, input.walletId) && wins(row, 'walletId')),

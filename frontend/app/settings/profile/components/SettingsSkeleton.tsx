@@ -57,6 +57,7 @@ export function SettingsSkeleton({
     security: tx(['tabs', 'security']),
     notifications: tx(['tabs', 'notifications']),
     data: tx(['tabs', 'data']),
+    sync: tx(['tabs', 'sync']),
     advanced: tx(['tabs', 'advanced']),
     versions: tx(['tabs', 'versions']),
   };

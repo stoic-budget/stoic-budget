@@ -372,6 +372,21 @@ describe('Bank sync schedule (e2e)', () => {
       expect(await claimMine(mine)).toEqual([]);
     });
 
+    it('leaves a workspace with bank sync switched off alone, and picks it up once back on', async () => {
+      const paused = await connect();
+      await makeDue([paused]);
+      const setBankSync = (on: boolean) =>
+        as(owner, request(server()).patch(`/workspaces/${owner.workspaceId}`))
+          .send({ plugins: { bankSync: on } })
+          .expect(200);
+
+      await setBankSync(false);
+      expect(await claimMine([paused])).toEqual([]);
+
+      await setBankSync(true);
+      expect((await claimMine([paused])).map(claim => claim.connectionId)).toEqual([paused]);
+    });
+
     it('takes over a lease a crashed pull left behind', async () => {
       const id = await connect();
       await dataSource.query(
@@ -386,12 +401,20 @@ describe('Bank sync schedule (e2e)', () => {
     it('drops the outcome of a pull that outlived its lease, keeping the lease of the one that took over', async () => {
       const id = await connect();
       await makeDue([id]);
-      const [stale] = await claimMine([id]);
+      const [claimed] = await claimMine([id]);
       await dataSource.query(
-        `UPDATE open_protocol_settings SET pull_lease_until = now() - interval '1 minute'
+        `UPDATE open_protocol_settings
+         SET pull_lease_until = date_trunc('milliseconds', now() - interval '1 minute')
          WHERE integration_id = $1`,
         [id],
       );
+      // The late pull holds the lease that ran out, as in a real takeover. Keeping the
+      // claimed value instead lets both claims share one millisecond and one lease.
+      const [{ lease: expired }] = await dataSource.query(
+        'SELECT pull_lease_until AS "lease" FROM open_protocol_settings WHERE integration_id = $1',
+        [id],
+      );
+      const stale = { ...claimed, leaseUntil: expired as Date };
       const [current] = await claimMine([id]);
       expect(current.leaseUntil.getTime()).toBeGreaterThan(Date.now());
 
