@@ -4,6 +4,8 @@ import { StorageFileActionsService } from '@/modules/storage/storage-file-action
 import { StorageFilesQueryService } from '@/modules/storage/storage-files-query.service';
 import { StorageFoldersService } from '@/modules/storage/storage-folders.service';
 import { StorageService } from '@/modules/storage/storage.service';
+import { StoragePermissionsService } from '@/modules/storage/storage-permissions.service';
+import { StorageSharedLinksService } from '@/modules/storage/storage-shared-links.service';
 import { StorageVersionsService } from '@/modules/storage/storage-versions.service';
 
 /**
@@ -151,12 +153,6 @@ export function buildStorageService(overrides: Partial<StorageDeps> = {}) {
     deps.workspaceMemberRepository,
   );
   const service = new StorageService(
-    deps.sharedLinkRepository,
-    deps.filePermissionRepository,
-    deps.statementRepository,
-    deps.workspaceMemberRepository,
-    deps.transactionRepository,
-    storageAccess,
     new StorageFilesQueryService(
       deps.statementRepository,
       deps.filePermissionRepository,
@@ -188,6 +184,18 @@ export function buildStorageService(overrides: Partial<StorageDeps> = {}) {
       deps.fileStorageService,
       storageAccess,
       deps.metricsService,
+    ),
+    new StorageSharedLinksService(
+      deps.sharedLinkRepository,
+      deps.statementRepository,
+      deps.transactionRepository,
+      storageAccess,
+    ),
+    new StoragePermissionsService(
+      deps.filePermissionRepository,
+      deps.statementRepository,
+      deps.workspaceMemberRepository,
+      storageAccess,
     ),
   );
   return { service, deps };

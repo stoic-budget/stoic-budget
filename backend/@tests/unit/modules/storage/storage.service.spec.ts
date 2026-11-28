@@ -24,6 +24,8 @@ import { StorageFileActionsService } from '@/modules/storage/storage-file-action
 import { StorageFilesQueryService } from '@/modules/storage/storage-files-query.service';
 import { StorageFoldersService } from '@/modules/storage/storage-folders.service';
 import { StorageService } from '@/modules/storage/storage.service';
+import { StoragePermissionsService } from '@/modules/storage/storage-permissions.service';
+import { StorageSharedLinksService } from '@/modules/storage/storage-shared-links.service';
 import { StorageVersionsService } from '@/modules/storage/storage-versions.service';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
@@ -71,6 +73,8 @@ describe('StorageService', () => {
         StorageFoldersService,
         StorageFileActionsService,
         StorageVersionsService,
+        StorageSharedLinksService,
+        StoragePermissionsService,
         {
           provide: getRepositoryToken(SharedLink),
           useValue: {
@@ -409,7 +413,7 @@ describe('StorageService', () => {
         userId: '2',
         workspaceId: mockStatement.workspaceId,
       } as WorkspaceMember);
-      vi.spyOn(service as any, 'checkFileAccess').mockResolvedValue(undefined);
+      vi.spyOn(testingModule.get(StorageAccessService), 'checkFileAccess').mockResolvedValue(undefined);
     });
 
     it('refuses to share with a user outside the file\'s workspace', async () => {
@@ -447,7 +451,7 @@ describe('StorageService', () => {
     });
 
     it('should verify resource ownership', async () => {
-      (service as any).checkFileAccess.mockRejectedValue(new NotFoundException('File not found'));
+      (testingModule.get(StorageAccessService).checkFileAccess as Mock).mockRejectedValue(new NotFoundException('File not found'));
 
       await expect(service.grantPermission('1', '1', grantDto)).rejects.toThrow(NotFoundException);
     });
@@ -468,7 +472,7 @@ describe('StorageService', () => {
         grantedById: '1',
         userId: '2',
       } as FilePermission);
-      vi.spyOn(service as any, 'checkFileAccess').mockResolvedValue(undefined);
+      vi.spyOn(testingModule.get(StorageAccessService), 'checkFileAccess').mockResolvedValue(undefined);
     });
 
     it('should revoke permission', async () => {
@@ -484,7 +488,7 @@ describe('StorageService', () => {
         id: 'perm-1',
         grantedById: '999',
       } as FilePermission);
-      (service as any).checkFileAccess.mockRejectedValue(new ForbiddenException(''));
+      (testingModule.get(StorageAccessService).checkFileAccess as Mock).mockRejectedValue(new ForbiddenException(''));
 
       await expect(service.revokePermission('perm-1', '1')).rejects.toThrow(ForbiddenException);
     });
