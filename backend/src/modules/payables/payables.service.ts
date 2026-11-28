@@ -61,6 +61,7 @@ import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
 import { PayablesExportService } from './payables-export.service';
 import { paymentDayOf } from './payment-day';
+import { assertPaymentFits, assertSomethingOwed } from './payment-guards';
 import { UnbookedPaymentsService } from './unbooked-payments.service';
 
 /** A transaction that may be the payment of a bill. */
@@ -323,6 +324,8 @@ export class PayablesService {
       if (payable.linkedTransactionId) {
         throw new ConflictException(appError('PAYABLE_ALREADY_LINKED'));
       }
+      // Paid in full already (with no money yet): book that payment, not an empty one.
+      assertSomethingOwed(this.outstandingOf(payable));
       payable.linkedTransactionId = await this.recordCashPayment(
         manager,
         payable,
@@ -421,7 +424,7 @@ export class PayablesService {
     /** Null: cash handed over in person and kept in no wallet. */
     walletId: string | null,
     payload: Pick<MarkPayablePaidBody, 'paidOn' | 'categoryId'>,
-    /** What was handed over now; the whole bill when not said otherwise. */
+    /** What was handed over now; all still owed when not said (part may be paid already). */
     paidAmount?: number,
   ): Promise<string> {
     const workspaceId = payable.workspaceId;
@@ -453,7 +456,7 @@ export class PayablesService {
     }
 
     const isIncome = payable.direction === PayableDirection.RECEIVABLE;
-    const amount = this.round2(paidAmount ?? Number(payable.amount));
+    const amount = this.round2(paidAmount ?? this.outstandingOf(payable));
     const transactions = manager.getRepository(Transaction);
     const transaction = await transactions.save(
       transactions.create({
@@ -522,25 +525,17 @@ export class PayablesService {
       // An archived bill (a voided invoice's) is closed: nothing is left to pay on it.
       const outstanding = isClosed(payable) ? 0 : this.outstandingOf(payable);
       const amount = this.round2(dto.amount);
-      if (amount <= 0) {
-        throw new BadRequestException(appError('PAYABLE_PAYMENT_NOT_POSITIVE'));
-      }
-      if (amount > outstanding + 0.005) {
-        throw new BadRequestException(
-          appError('PAYABLE_PAYMENT_EXCEEDS_OUTSTANDING', {
-            outstanding: outstanding.toFixed(2),
-          }),
-        );
-      }
+      assertPaymentFits(amount, Number(dto.feeAmount ?? 0), outstanding);
 
       let transactionId = dto.linkedTransactionId ?? null;
       if (dto.payFromWalletId || dto.inHand) {
+        // What reached the wallet: the payment less the processor's fee, as on booking.
         transactionId = await this.recordCashPayment(
           manager,
           payable,
           dto.payFromWalletId ?? null,
           { paidOn: dto.paidOn, categoryId: dto.categoryId },
-          amount,
+          this.round2(amount - Number(dto.feeAmount ?? 0)),
         );
       }
 

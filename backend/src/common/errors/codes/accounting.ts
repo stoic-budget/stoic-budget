@@ -65,6 +65,7 @@ export const ACCOUNTING_ERRORS = {
   TRANSFER_SAME_ACCOUNT: 'The transaction is already in this account',
   // Payables
   PAYABLE_PAYMENT_NOT_POSITIVE: 'A payment must be more than zero',
+  PAYABLE_FEE_NOT_BELOW_PAYMENT: 'The fee must be less than the payment',
   PAYABLE_PAYMENT_EXCEEDS_OUTSTANDING:
     'That is more than the {{outstanding}} still outstanding on this bill',
   PAYABLE_PAYMENT_NOT_FOUND: 'Payment not found',
