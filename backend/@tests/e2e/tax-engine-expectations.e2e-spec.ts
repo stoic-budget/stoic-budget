@@ -137,6 +137,43 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     expect(Number((await row()).tax_amount)).toBe(7.79);
   });
 
+  it('leaves the rows before the registration day without VAT, through any later reassessment', async () => {
+    const vatStatus = (body: { status: string; effectiveFrom?: string }) =>
+      auth(api().put('/tax/settings/vat-status')).send(body).expect(200);
+    // The row is dated 2026-03-10; the business registers from 1 July.
+    await vatStatus({ status: 'not_registered' });
+    await vatStatus({ status: 'registered', effectiveFrom: '2026-07-01' });
+    expect((await row()).tax_amount).toBeNull();
+
+    await auth(api().post('/tax/settings/reassess')).send({}).expect(201);
+    expect((await row()).tax_amount).toBeNull();
+
+    // Registered from before the row's day, it is taxed again.
+    await vatStatus({ status: 'not_registered' });
+    await vatStatus({ status: 'registered', effectiveFrom: '2026-03-01' });
+    expect(Number((await row()).tax_amount)).toBe(7.79);
+
+    // Deregistered from July: the first quarter, registered then, still has a return.
+    await vatStatus({ status: 'not_registered', effectiveFrom: '2026-07-01' });
+    const q1 = await auth(api().get('/tax/returns/ustva?periodStart=2026-01-01&periodEnd=2026-03-31')).expect(200);
+    expect(q1.body.unsupported).toBeNull();
+    const q3 = await auth(api().get('/tax/returns/ustva?periodStart=2026-07-01&periodEnd=2026-09-30')).expect(200);
+    expect(q3.body.unsupported).toBe('not_registered');
+
+    // Registered for the whole past again, as the cases after this one expect.
+    await vatStatus({ status: 'registered' });
+  });
+
+  it('takes the day a status applies from as a past date only', async () => {
+    const put = (effectiveFrom: string) =>
+      auth(api().put('/tax/settings/vat-status')).send({ status: 'not_registered', effectiveFrom });
+
+    await put('2026-07-01T00:00:00Z').expect(400);
+    await put(`${new Date().getUTCFullYear() + 1}-01-01`).expect(400);
+    const settings = await auth(api().get('/tax/settings')).expect(200);
+    expect(settings.body.vatStatus).toBe('registered');
+  });
+
   it("reverse-charges purchases from a payee with an EU VAT id in another country", async () => {
     const { payee_id: payeeId } = await row();
     expect(payeeId).toBeTruthy();

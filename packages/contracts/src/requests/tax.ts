@@ -1,6 +1,7 @@
 import * as Schema from 'effect/Schema';
 import * as Struct from 'effect/Struct';
 import {
+  DateOnlyInput,
   IsoDateString,
   isAtMostTwoDecimals,
   NumericInput,
@@ -78,6 +79,11 @@ export type SetJurisdictionBody = Wire<typeof SetJurisdictionBody>;
 /** `PUT /tax/settings/vat-status`. */
 export const SetVatStatusBody = Schema.Struct({
   status: Schema.Literals(['registered', 'small_business', 'not_registered']),
+  /**
+   * Day the status applies from: rows before it keep the status they had.
+   * Without one it applies to every row not on a filed return.
+   */
+  effectiveFrom: optionalNullable(DateOnlyInput),
 });
 export type SetVatStatusBody = Wire<typeof SetVatStatusBody>;
 

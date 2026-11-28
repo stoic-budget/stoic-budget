@@ -20,15 +20,12 @@ import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
 import { getApiErrorMessage } from '@/app/lib/api-error';
-import type { VatFilingSettings, WorkspaceTaxSettings } from '@/app/lib/contracts';
+import type { VatFilingSettings } from '@/app/lib/contracts';
 import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { OfficialRatesPanel } from './OfficialRatesPanel';
 import { SettingsSection } from './SettingsSection';
-
-export type VatStatus = WorkspaceTaxSettings['vatStatus'];
-
-const STATUSES: VatStatus[] = ['registered', 'small_business', 'not_registered'];
+import { VatStatusField } from './VatStatusField';
 
 type Frequency = NonNullable<VatFilingSettings['frequency']>;
 
@@ -88,9 +85,9 @@ export function TaxStatusSection(): React.ReactElement {
   };
 
   const setStatus = useMutation({
-    mutationFn: (status: VatStatus) =>
+    mutationFn: (body: ContractInput<'SetVatStatusBody'>) =>
       apiClient
-        .put('/tax/settings/vat-status', { status } satisfies ContractInput<'SetVatStatusBody'>)
+        .put('/tax/settings/vat-status', body)
         .then(response =>
           checkContract('VatStatusChange', response.data, '/tax/settings/vat-status'),
         ),
@@ -144,17 +141,6 @@ export function TaxStatusSection(): React.ReactElement {
   });
 
   const status = settings.data?.vatStatus;
-  const statusHelp: Record<VatStatus, string> = {
-    registered: t.registeredHelp.value,
-    small_business: t.smallBusinessHelp.value,
-    not_registered: t.notRegisteredHelp.value,
-  };
-  const statusLabel: Record<VatStatus, string> = {
-    registered: t.registered.value,
-    small_business: t.smallBusiness.value,
-    not_registered: t.notRegistered.value,
-  };
-
   const parsedPercent = percent.trim() === '' ? null : Number(percent.replace(',', '.'));
   const percentInvalid =
     parsedPercent !== null &&
@@ -173,22 +159,11 @@ export function TaxStatusSection(): React.ReactElement {
       <Stack spacing={2.5}>
         {settings.isError ? <Alert severity="error">{t.loadError.value}</Alert> : null}
 
-        <Box>
-          <Select
-            size="small"
-            value={status ?? ''}
-            disabled={!status || setStatus.isPending}
-            aria-label={t.statusLabel.value}
-            onChange={value => setStatus.mutate(value as VatStatus)}
-            options={STATUSES.map(value => ({ value, label: statusLabel[value] }))}
-            sx={{ minWidth: 280 }}
-          />
-          {status ? (
-            <Typography sx={{ mt: 1, fontSize: 13, color: 'text.secondary', maxWidth: 560 }}>
-              {statusHelp[status]}
-            </Typography>
-          ) : null}
-        </Box>
+        <VatStatusField
+          status={status}
+          disabled={setStatus.isPending}
+          onChange={(value, effectiveFrom) => setStatus.mutate({ status: value, effectiveFrom })}
+        />
 
         {status === 'registered' && filing.data ? (
           <Box>

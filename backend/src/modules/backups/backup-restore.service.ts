@@ -21,6 +21,7 @@ import {
 } from './backup-data.service';
 import { GROUP_KEY_COLUMNS } from './backup-group-keys';
 import { prepareDocumentPaths } from './backup-restore-documents';
+import { restoredTaxFields } from './restored-tax-fields';
 import { UNRESTORABLE_COLLECTIONS } from './unrestorable-collections';
 
 const RESTORE_ORDER = [
@@ -227,12 +228,7 @@ export class BackupRestoreService {
         ...(typeof sourceWorkspace.ledgerBaseCurrency === 'string'
           ? { ledgerBaseCurrency: sourceWorkspace.ledgerBaseCurrency }
           : {}),
-        ...(typeof sourceWorkspace.taxJurisdictionId === 'string'
-          ? { taxJurisdictionId: sourceWorkspace.taxJurisdictionId }
-          : {}),
-        ...(typeof sourceWorkspace.vatStatus === 'string'
-          ? { vatStatus: sourceWorkspace.vatStatus as Workspace['vatStatus'] }
-          : {}),
+        ...restoredTaxFields(sourceWorkspace),
         description: this.stringOrNull(sourceWorkspace.description),
         icon: this.stringOrNull(sourceWorkspace.icon),
         color: this.stringOrNull(sourceWorkspace.color),
