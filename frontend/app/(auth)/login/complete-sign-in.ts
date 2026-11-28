@@ -1,6 +1,7 @@
 import type { AuthUser } from '@/app/lib/contracts';
 import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
 import { syncLocaleFromUser } from '@/app/lib/locale';
+import { writeOpenWorkspaceId } from '@/app/lib/open-workspace';
 
 /**
  * After any sign-in (password, passkey or single sign-on): the tokens already sit in httpOnly
@@ -14,7 +15,7 @@ export function completeSignIn(
   localStorage.setItem('user', JSON.stringify(user));
   syncLocaleFromUser(user);
   if (user.workspaceId) {
-    localStorage.setItem('currentWorkspaceId', user.workspaceId);
+    writeOpenWorkspaceId(user.workspaceId);
   }
 
   if (!inviteToken && user.onboardingCompletedAt == null) {
@@ -25,7 +26,7 @@ export function completeSignIn(
   const activeWorkspaceId = user.lastWorkspaceId || user.workspaceId;
 
   if (activeWorkspaceId) {
-    localStorage.setItem('currentWorkspaceId', activeWorkspaceId);
+    writeOpenWorkspaceId(activeWorkspaceId);
     window.location.href = nextPath || DEFAULT_APP_ROUTE;
   } else {
     window.location.href = '/workspaces';

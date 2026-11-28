@@ -1,4 +1,5 @@
 import { getCsrfHeaders } from './csrf';
+import { readOpenWorkspaceId } from './open-workspace';
 
 /**
  * Auth itself rides on httpOnly cookies, so nothing here carries a token —
@@ -8,7 +9,7 @@ import { getCsrfHeaders } from './csrf';
 export const getWorkspaceHeaders = (): Record<string, string> => {
   if (typeof window === 'undefined') return {};
 
-  const workspaceId = localStorage.getItem('currentWorkspaceId');
+  const workspaceId = readOpenWorkspaceId();
   const headers: Record<string, string> = { ...getCsrfHeaders() };
 
   if (workspaceId) {

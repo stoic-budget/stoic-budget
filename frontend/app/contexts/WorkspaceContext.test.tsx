@@ -8,7 +8,10 @@ const mocks = vi.hoisted(() => ({
   push: vi.fn(),
 }));
 
-vi.mock('../lib/api', () => ({ api: { get: mocks.get, post: mocks.post } }));
+vi.mock('../lib/api', async () => ({
+  api: { get: mocks.get, post: mocks.post },
+  tabWorkspace: (await import('../lib/open-workspace')).tabWorkspace,
+}));
 vi.mock('@/app/lib/csrf', () => ({ hasSessionCookie: () => true }));
 vi.mock('@/app/lib/query-fn-schema', () => ({
   checkContract: async (_name: string, payload: unknown) => payload,
@@ -62,6 +65,7 @@ describe('WorkspaceProvider and past versions', () => {
 
   afterEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     vi.clearAllMocks();
   });
 
@@ -121,7 +125,9 @@ describe('WorkspaceProvider and past versions', () => {
       '/versions/v1/open',
       '/workspaces/ver-ws/switch',
     ]);
-    expect(localStorage.getItem('currentWorkspaceId')).toBe('ver-ws');
+    // The version is this tab's; a new tab still opens on the real workspace.
+    expect(sessionStorage.getItem('currentWorkspaceId')).toBe('ver-ws');
+    expect(localStorage.getItem('currentWorkspaceId')).toBe('home');
     expect(screen.getByTestId('list').textContent).toBe('home,other');
     expect(screen.getByTestId('read-only').textContent).toBe('true');
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith('/dashboard'));

@@ -2,17 +2,18 @@
 
 import { useState } from 'react';
 import { useWorkspace } from '../contexts/WorkspaceContext';
+import { readOpenWorkspaceId } from '../lib/open-workspace';
 
 function readStoredWorkspaceId(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('currentWorkspaceId');
+  return readOpenWorkspaceId();
 }
 
 /**
  * Идентификатор активного воркспейса для ключей React Query.
  *
- * Фолбэк на localStorage несущий: request-интерцептор apiClient берёт
- * X-Workspace-Id прямо из localStorage, а WorkspaceContext заполняет
+ * Фолбэк на сохранённый id несущий: request-интерцептор apiClient берёт
+ * X-Workspace-Id прямо из хранилища вкладки (open-workspace.ts), а WorkspaceContext заполняет
  * currentWorkspace асинхронно. Без фолбэка первый рендер ключевал бы запросы
  * на null, хотя заголовок уже конкретный, — и после прихода стейта каждый
  * горячий запрос уходил бы на второй круг.
