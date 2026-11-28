@@ -44,6 +44,36 @@ describe('pdf-layout-table.helper', () => {
     ]);
   });
 
+  it('reads money in and out in columns of their own, "Připsáno" and "Odepsáno"', () => {
+    const columns = readHeaderRow(
+      row(100, [['Datum', 40], ['Označení', 130], ['operace', 175], ['Připsáno', 430], ['Odepsáno', 510]]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'credit', 'debit']);
+  });
+
+  it.each([
+    [[['Datum', 40], ['Popis', 110], ['Příjem', 430], ['Výdaj', 510]], ['date', 'description', 'credit', 'debit']],
+    [[['Datum', 40], ['Popis', 110], ['Kredit', 430], ['Debet', 510]], ['date', 'description', 'credit', 'debit']],
+    [[['Datum', 40], ['splatnosti', 70], ['Zpráva', 150], ['pro', 185], ['příjemce', 205], ['Objem', 430], ['Měna', 500]], ['date', 'description', 'amount', 'other']],
+    [[['Splatnost', 40], ['Název', 150], ['Částka', 500]], ['date', 'counterparty', 'amount']],
+    [[['Datum', 40], ['Příjemce', 110], ['Zpráva', 250], ['Částka', 500]], ['date', 'counterparty', 'description', 'amount']],
+    [[['Datum', 40], ['valuty', 70], ['Poznámka', 150], ['Částka', 430], ['Měna', 500]], ['date', 'description', 'amount', 'other']],
+  ] as [[string, number][], string[]][])('reads the Czech header %j', (words, roles) => {
+    expect(readHeaderRow(row(100, words))?.map(column => column.role)).toEqual(roles);
+  });
+
+  it('takes a summary box of opening and closing balance around money in and out for no header', () => {
+    const box = row(780, [
+      ['Počáteční', 40],
+      ['zůstatek', 90],
+      ['Připsáno', 200],
+      ['Odepsáno', 300],
+      ['Konečný', 400],
+      ['zůstatek', 445],
+    ]);
+    expect(readHeaderRow(box)).toBeNull();
+  });
+
   it("reads the Slovak list's headings glued as mBank prints them", () => {
     const columns = readHeaderRow(
       row(100, [['Dátumoperácie', 40], ['Opisoperácie', 120], ['Suma', 500]]),

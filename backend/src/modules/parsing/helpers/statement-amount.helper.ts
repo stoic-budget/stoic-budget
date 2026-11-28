@@ -51,6 +51,8 @@ export function parseStatementAmount(text: string): number | null {
     .replace(/\s+/g, ' ')
     .replace(/−/g, '-')
     .trim()
+    // An en dash for the minus before the figure: "–204,40".
+    .replace(/^–(?=\s?\d)/, '-')
     // The sign spaced from the figure: "+ $0.05", "- $12.89", "6.22 -".
     .replace(/^([-+])\s+(?=[\d.])/, '$1')
     .replace(/(?<=\d)\s+-$/, '-');
@@ -80,7 +82,7 @@ export function isAmountPart(word: string): boolean {
     .replace(/\([+-]\)$/, '')
     .replace(/(\d)[CcDd][Rr]\.?$/, '$1');
   return (
-    /^[-+(−]?[\d.,]*\d[\d.,]*\)?[-+]?$/.test(figure) ||
+    /^[-+(−–]?[\d.,]*\d[\d.,]*\)?[-+]?$/.test(figure) ||
     new RegExp(
       `^(?:[A-Z]{0,3}[${CURRENCY_SYMBOLS}]|[A-Z]{3}|Kč|[-+=]|\\([+-]\\)|\\(?[CcDd][Rr]\\.?\\)?)$`,
     ).test(word)

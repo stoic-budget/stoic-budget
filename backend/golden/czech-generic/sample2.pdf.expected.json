@@ -1,0 +1,68 @@
+{
+  "bankName": "other",
+  "compares": [
+    "currency",
+    "paymentPurpose"
+  ],
+  "metadata": {
+    "accountNumber": "123456789/0100",
+    "currency": "CZK",
+    "dateFrom": "2026-03-01T00:00:00",
+    "dateTo": "2026-03-31T00:00:00",
+    "balanceStart": 20000,
+    "balanceEnd": 31395.6,
+    "rawHeader": "ACME Banka, a.s. Výpis z účtu Číslo účtu: 123456789/0100 Počáteční zůstatek: 20 000,00 CZK",
+    "normalizedHeader": "ACME Banka, a.s. Výpis z účtu Číslo účtu: 123456789/0100 Počáteční zůstatek: 20 000,00 CZK",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-02T00:00:00",
+      "counterpartyName": "Zaměstnavatel One s.r.o.",
+      "paymentPurpose": "Příchozí úhrada",
+      "credit": 25000,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-06T00:00:00",
+      "counterpartyName": "ACME Potraviny",
+      "paymentPurpose": "Platba kartou",
+      "debit": 1204.4,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-15T00:00:00",
+      "counterpartyName": "ACME Bydlení",
+      "paymentPurpose": "Trvalý příkaz",
+      "debit": 12000,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-31T00:00:00",
+      "counterpartyName": "Úroky",
+      "paymentPurpose": "Úroky",
+      "credit": 0,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-31T00:00:00",
+      "counterpartyName": "Poplatek za vedení",
+      "paymentPurpose": "Poplatek za vedení",
+      "debit": 400,
+      "currency": "CZK"
+    }
+  ],
+  "checks": [
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "d7091e1132e3",
+    "headings": [
+      "date:datum zauctovani | description:oznaceni operace | counterparty:nazev protiuctu | credit:pripsano | debit:odepsano"
+    ],
+    "unknownWords": []
+  }
+}
