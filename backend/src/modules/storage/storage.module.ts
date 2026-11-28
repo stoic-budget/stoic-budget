@@ -24,6 +24,8 @@ import { StorageAccessService } from './storage-access.service';
 import { StorageFileActionsService } from './storage-file-actions.service';
 import { StorageFilesQueryService } from './storage-files-query.service';
 import { StorageFoldersService } from './storage-folders.service';
+import { StoragePermissionsService } from './storage-permissions.service';
+import { StorageSharedLinksService } from './storage-shared-links.service';
 import { StorageSharingController } from './storage-sharing.controller';
 import { StorageTagsController } from './storage-tags.controller';
 import { StorageTrashScheduler } from './storage-trash.scheduler';
@@ -59,6 +61,8 @@ import { StorageVersionsService } from './storage-versions.service';
     StorageFoldersService,
     StorageFileActionsService,
     StorageVersionsService,
+    StorageSharedLinksService,
+    StoragePermissionsService,
     StorageTrashScheduler,
     FileStorageService,
     MetricsService,

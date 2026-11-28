@@ -141,7 +141,7 @@ It goes stale within days: run the check in "How to use this plan" step 1 before
 |---|---|---|---|
 | [x] B1 | backend `reports/reports.service.ts` (3155 → 187) | 6 PRs | Done: stack #831 → #843 |
 | [ ] B2 | `telegram/telegram.service.ts` (1241) | 4 | — |
-| [ ] B3 | `storage/storage.service.ts` (1180) | 5 (tests first) | **In progress**: branch `refactor/storage-tests` and the stack on it; do not pick |
+| [x] B3 | `storage/storage.service.ts` (1180 → 148) | 5 (tests first) | Done: stack #1082 → #1086 |
 | [ ] B4 | `workspaces/workspaces.service.ts` (1182) | 4 | #748 |
 | [ ] B5 | `open-protocol-integrations/…service.ts` (1203) | 3 | — |
 | [ ] B6 | `import/services/import-session.service.ts` (792) | 2 | — |
