@@ -56,6 +56,7 @@ import {
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { ExportFormat, PayablesSortOption } from './dto/filter-payables.dto';
+import { outstandingOf, round2, startOfDay, toDateString } from './payable-money';
 import { assertOneSource, exactSubset, isClosed, notRejectedSql } from './payable-payments.util';
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
@@ -269,6 +270,7 @@ export class PayablesService {
       dto.linkedTransactionId === undefined ? undefined : (dto.linkedTransactionId ?? null),
       dto.statementId === undefined ? undefined : (dto.statementId ?? null),
     );
+    const amountBefore = Number(payable.amount);
     Object.assign(payable, this.normalizeUpdateDto(dto, payable));
     // Left out keeps the tags; a list (empty or not) is the whole new set.
     if (dto.tagIds !== undefined) {
@@ -276,7 +278,18 @@ export class PayablesService {
     }
     // A bill of a series is saved with its rule, under the series lock.
     const inSeries = this.recurrence?.applyUpdate(payable, dto);
-    return this.asStored(await (inSeries ?? this.payableRepository.save(payable)));
+    const saved = this.asStored(await (inSeries ?? this.payableRepository.save(payable)));
+    if (Number(saved.amount) === amountBefore) return saved;
+    // A new amount means a new status: the payment log decides paid, part paid or
+    // open. Under the row lock, so a payment recorded meanwhile is counted.
+    const recomputed = await this.inPaymentTransaction(async manager => {
+      const locked = await manager.getRepository(Payable).findOneOrFail({
+        where: { id, workspaceId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      return this.applyPaymentTotals(manager, locked, workspaceId);
+    });
+    return Object.assign(recomputed, { tags: saved.tags });
   }
 
   /**
@@ -346,7 +359,7 @@ export class PayablesService {
     // Settling in full is one payment for everything still outstanding, so
     // the payment log is the whole truth and the status is derived from it.
     await this.recordPayment(manager, payable, {
-      amount: this.outstandingOf(payable),
+      amount: outstandingOf(payable),
       paidOn: payload.paidOn,
       transactionId: payable.linkedTransactionId,
       ownTransaction: Boolean(payload.payFromWalletId || payload.inHand),
@@ -410,7 +423,7 @@ export class PayablesService {
       Number(transaction.debit ?? 0),
       Number(transaction.credit ?? 0),
     );
-    if (Math.round(paid * 100) < Math.round(this.outstandingOf(payable) * 100)) {
+    if (Math.round(paid * 100) < Math.round(outstandingOf(payable) * 100)) {
       throw new BadRequestException(appError('PAYABLE_PAYMENT_SHORT'));
     }
   }
@@ -453,7 +466,7 @@ export class PayablesService {
     }
 
     const isIncome = payable.direction === PayableDirection.RECEIVABLE;
-    const amount = this.round2(paidAmount ?? Number(payable.amount));
+    const amount = round2(paidAmount ?? Number(payable.amount));
     const transactions = manager.getRepository(Transaction);
     const transaction = await transactions.save(
       transactions.create({
@@ -520,8 +533,8 @@ export class PayablesService {
       });
 
       // An archived bill (a voided invoice's) is closed: nothing is left to pay on it.
-      const outstanding = isClosed(payable) ? 0 : this.outstandingOf(payable);
-      const amount = this.round2(dto.amount);
+      const outstanding = isClosed(payable) ? 0 : outstandingOf(payable);
+      const amount = round2(dto.amount);
       if (amount <= 0) {
         throw new BadRequestException(appError('PAYABLE_PAYMENT_NOT_POSITIVE'));
       }
@@ -546,7 +559,7 @@ export class PayablesService {
 
       await this.recordPayment(manager, payable, {
         amount,
-        feeAmount: dto.feeAmount ? this.round2(dto.feeAmount) : 0,
+        feeAmount: dto.feeAmount ? round2(dto.feeAmount) : 0,
         paidOn: dto.paidOn,
         transactionId,
         ownTransaction: Boolean(dto.payFromWalletId || dto.inHand),
@@ -602,7 +615,7 @@ export class PayablesService {
         throw new ConflictException(appError('PAYABLE_ALREADY_LINKED'));
       }
       // What reached the account: the payment less what the processor kept.
-      const net = this.round2(Number(payment.amount) - Number(payment.feeAmount ?? 0));
+      const net = round2(Number(payment.amount) - Number(payment.feeAmount ?? 0));
 
       let transactionId: string;
       if (dto.payFromWalletId || dto.inHand) {
@@ -742,7 +755,7 @@ export class PayablesService {
       throw new NotFoundException(appError('PAYABLE_TRANSACTION_NOT_FOUND'));
     }
 
-    const total = this.round2(
+    const total = round2(
       Number(transaction.amount ?? transaction.debit ?? transaction.credit ?? 0),
     );
     const spent = await this.paymentRepository
@@ -751,12 +764,12 @@ export class PayablesService {
       .where('payment.transactionId = :transactionId', { transactionId })
       .andWhere('payment.workspaceId = :workspaceId', { workspaceId })
       .getRawOne<{ sum: string }>();
-    const available = this.round2(total - Number(spent?.sum ?? 0));
+    const available = round2(total - Number(spent?.sum ?? 0));
 
     const empty: AllocationSuggestion = {
       transactionId,
       available,
-      currency: this.normalizeCurrency(transaction.currency),
+      currency: currencyCodeOrDefault(transaction.currency),
       exact: false,
       unallocated: available,
       allocations: [],
@@ -811,7 +824,7 @@ export class PayablesService {
       payableId: row.id,
       vendor: row.vendor,
       dueDate: row.due_date,
-      outstanding: this.round2(Number(row.outstanding)),
+      outstanding: round2(Number(row.outstanding)),
     }));
 
     const exact = exactSubset(
@@ -841,12 +854,12 @@ export class PayablesService {
       const amount = Math.min(left, bill.outstanding);
       allocations.push({
         ...bill,
-        amount: this.round2(amount),
+        amount: round2(amount),
         partial: amount < bill.outstanding - 0.005,
       });
-      left = this.round2(left - amount);
+      left = round2(left - amount);
     }
-    return { ...empty, unallocated: this.round2(left), allocations };
+    return { ...empty, unallocated: round2(left), allocations };
   }
 
   private async recordPayment(
@@ -914,7 +927,7 @@ export class PayablesService {
       .getRepository(PayablePayment)
       .find({ where: { payableId: payable.id, workspaceId } });
 
-    const paid = this.round2(payments.reduce((sum, row) => sum + Number(row.amount), 0));
+    const paid = round2(payments.reduce((sum, row) => sum + Number(row.amount), 0));
     const total = Number(payable.amount);
     const fullyPaid = paid >= total - 0.005;
     const lastPaidOn = payments
@@ -964,7 +977,7 @@ export class PayablesService {
     payable.paidAmount = decimal(payable.paidAmount);
     // A `date` column reads back as YYYY-MM-DD, not as the Date just assigned.
     if (payable.dueDate instanceof Date) {
-      payable.dueDate = this.toDateString(payable.dueDate) as unknown as Date;
+      payable.dueDate = toDateString(payable.dueDate) as unknown as Date;
     }
     return payable;
   }
@@ -974,18 +987,8 @@ export class PayablesService {
     if (payable.status === PayableStatus.SCHEDULED) {
       return PayableStatus.SCHEDULED;
     }
-    const due = payable.dueDate ? this.toDateString(payable.dueDate) : null;
-    return due && due < this.toDateString(new Date())
-      ? PayableStatus.OVERDUE
-      : PayableStatus.TO_PAY;
-  }
-
-  private outstandingOf(payable: Payable): number {
-    return this.round2(Number(payable.amount) - Number(payable.paidAmount ?? 0));
-  }
-
-  private round2(value: number): number {
-    return Math.round(Number(value) * 100) / 100;
+    const due = payable.dueDate ? toDateString(payable.dueDate) : null;
+    return due && due < toDateString(new Date()) ? PayableStatus.OVERDUE : PayableStatus.TO_PAY;
   }
 
   async findPaymentCandidates(
@@ -996,7 +999,7 @@ export class PayablesService {
     const payable = await this.findOne(id, workspaceId);
     const anchor = payable.dueDate ?? payable.createdAt;
     // A bill paid on paper is looking for the money of its unbooked payment, not for a remainder.
-    const outstanding = this.outstandingOf(payable);
+    const outstanding = outstandingOf(payable);
     const unbookedPayment =
       outstanding > 0
         ? null
@@ -1005,7 +1008,7 @@ export class PayablesService {
             order: { paidOn: 'ASC' },
           });
     const target = unbookedPayment
-      ? this.round2(Number(unbookedPayment.amount) - Number(unbookedPayment.feeAmount ?? 0))
+      ? round2(Number(unbookedPayment.amount) - Number(unbookedPayment.feeAmount ?? 0))
       : outstanding;
     const rows: Array<{
       id: string;
@@ -1075,8 +1078,8 @@ export class PayablesService {
           ? TransactionType.INCOME
           : TransactionType.EXPENSE,
         payable.vendor,
-        this.toDateString(anchor),
-        this.toDateString(payable.createdAt),
+        toDateString(anchor),
+        toDateString(payable.createdAt),
         CANDIDATE_LOOKBACK_DAYS,
         payable.id,
         CANDIDATE_LIMIT,
@@ -1092,10 +1095,6 @@ export class PayablesService {
       paymentPurpose: row.payment_purpose,
       vendorMatch: row.vendor_match,
     }));
-  }
-
-  private toDateString(value: Date | string): string {
-    return typeof value === 'string' ? value.slice(0, 10) : value.toISOString().slice(0, 10);
   }
 
   async archive(id: string, workspaceId: string, _userId: string): Promise<Payable> {
@@ -1132,14 +1131,14 @@ export class PayablesService {
         currency: true,
       },
     });
-    const targetCurrency = this.normalizeCurrency(workspace?.currency);
+    const targetCurrency = currencyCodeOrDefault(workspace?.currency);
     const rateCache = new Map<string, number>();
     // What is owed at today's rate; what came in at the rate of the day it came in.
     const convert = (value: number, currency: string | null | undefined, day?: Date) =>
       this.convertSummaryAmount(value, currency, targetCurrency, rateCache, workspaceId, day);
 
     const now = new Date();
-    const startOfToday = this.startOfDay(now);
+    const startOfToday = startOfDay(now);
     const endOfWeek = new Date(startOfToday);
     endOfWeek.setUTCDate(endOfWeek.getUTCDate() + 6);
     const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
@@ -1163,7 +1162,7 @@ export class PayablesService {
     const convertedCurrencies = new Set<string>();
 
     for (const row of rows) {
-      const currency = this.normalizeCurrency(row.currency);
+      const currency = currencyCodeOrDefault(row.currency);
       if (currency !== targetCurrency) {
         convertedCurrencies.add(currency);
       }
@@ -1263,7 +1262,7 @@ export class PayablesService {
       return false;
     }
 
-    return this.startOfDay(payable.dueDate) < this.startOfDay(new Date());
+    return startOfDay(payable.dueDate) < startOfDay(new Date());
   }
 
   /** Across workspaces, for the daily sweep; a past version keeps the statuses it was copied with. */
@@ -1276,7 +1275,7 @@ export class PayablesService {
         statuses: [PayableStatus.TO_PAY, PayableStatus.SCHEDULED],
       })
       .andWhere('payable.dueDate < :today', {
-        today: this.startOfDay(new Date()),
+        today: startOfDay(new Date()),
       })
       .getMany();
   }
@@ -1288,7 +1287,7 @@ export class PayablesService {
    * argument here once those translations exist.
    */
   async findDueSoonPayables(): Promise<Payable[]> {
-    const today = this.startOfDay(new Date());
+    const today = startOfDay(new Date());
     // Each bill's own reminder lead: due within its `remindDaysBefore` days from today.
     const due = 'payable.dueDate BETWEEN :from AND CAST(:from AS date) + payable.remindDaysBefore';
     return this.payableRepository
@@ -1301,7 +1300,7 @@ export class PayablesService {
       })
       .andWhere('payable.dueSoonNotifiedAt IS NULL')
       .andWhere(due)
-      .setParameter('from', this.toDateString(today))
+      .setParameter('from', toDateString(today))
       .getMany();
   }
 
@@ -1323,9 +1322,9 @@ export class PayablesService {
         direction: saved.direction,
         source: saved.source,
         vendor: saved.vendor,
-        outstanding: this.outstandingOf(saved),
+        outstanding: outstandingOf(saved),
         currency: saved.currency,
-        dueDate: this.toDateString(saved.dueDate as Date),
+        dueDate: toDateString(saved.dueDate as Date),
       } satisfies PayableOverdueEvent);
     }
 
@@ -1468,16 +1467,6 @@ export class PayablesService {
     }
   }
 
-  private startOfDay(date: Date): Date {
-    const copy = new Date(date);
-    copy.setUTCHours(0, 0, 0, 0);
-    return copy;
-  }
-
-  private normalizeCurrency(currency: string | null | undefined): string {
-    return currencyCodeOrDefault(currency);
-  }
-
   private async convertSummaryAmount(
     amount: number,
     sourceCurrency: string | null | undefined,
@@ -1490,7 +1479,7 @@ export class PayablesService {
       return 0;
     }
 
-    const source = this.normalizeCurrency(sourceCurrency);
+    const source = currencyCodeOrDefault(sourceCurrency);
     if (source === targetCurrency) {
       return amount;
     }
