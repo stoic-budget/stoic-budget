@@ -64,3 +64,30 @@ describe('AuditTimeline rows', () => {
     expect(row?.line?.startsWith('Scheduler ')).toBe(true);
   });
 });
+
+describe('AuditTimeline pagination', () => {
+  const pager = async (total: number) => {
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(
+        <AuditTimeline
+          events={[event('e1', {})]}
+          onSelect={() => undefined}
+          page={1}
+          limit={50}
+          total={total}
+          onPageChange={() => undefined}
+        />,
+      );
+    });
+    const found = container.querySelector('.audit-pagination');
+    act(() => root.unmount());
+    return found;
+  };
+
+  it('shows the pages only when there is more than one', async () => {
+    expect(await pager(50)).toBeNull();
+    expect((await pager(51))?.textContent).toContain('1');
+  });
+});

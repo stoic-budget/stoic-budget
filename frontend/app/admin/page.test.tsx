@@ -118,4 +118,20 @@ describe('AdminPage', () => {
     expect(apiQueryDecoded).not.toHaveBeenCalled();
     member.unmount();
   });
+
+  it('says a check failed instead of passing off its last answer as current', async () => {
+    auth.user = { role: 'admin' };
+    apiQueryDecoded.mockImplementation(async () => {
+      throw new Error('Request failed');
+    });
+    const admin = await renderPage();
+    // Neither row may read "Working" when its check did not answer.
+    expect(admin.container.querySelector('a[href="/admin/parsing"]')?.textContent).toBe(
+      'Parser healthUnknown',
+    );
+    expect(admin.container.querySelector('a[href="/admin/health"]')?.textContent).not.toContain(
+      'Working',
+    );
+    admin.unmount();
+  });
 });

@@ -13,9 +13,21 @@ vi.mock('@/app/lib/query-fn-schema', () => ({ apiQueryDecoded }));
 
 import ParserHealthPage from './page';
 
+const quietBank = {
+  bank: 'kaspi',
+  statements: 40,
+  needsReview: 0,
+  errors: 0,
+  declined: 0,
+  reasons: [],
+  layouts: [],
+};
+
 const health: ParserHealth = {
   since: '2026-09-28T00:00:00.000Z',
   banks: [
+    // The server lists the busy, healthy bank first; the page puts the troubled one on top.
+    quietBank,
     {
       bank: 'axis',
       statements: 12,
@@ -94,7 +106,9 @@ describe('ParserHealthPage', () => {
     expect(apiQueryDecoded).toHaveBeenCalledWith(
       expect.objectContaining({ url: '/parsing/health', contract: 'ParserHealth' }),
     );
-    const row = container.querySelector('button[aria-expanded]');
+    const rows = [...container.querySelectorAll('ul > li > button[aria-expanded]')];
+    expect(rows.map(r => r.textContent?.split('Statements')[0])).toEqual(['Axis Bank', 'Kaspi']);
+    const row = rows[0];
     // Closed: the bank, its count and its problems in words; no layout details yet.
     expect(row?.textContent).toContain('Axis Bank');
     expect(row?.textContent).toContain('Statements 12');

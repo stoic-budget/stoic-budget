@@ -1,5 +1,6 @@
 'use client';
 
+import Popover from '@mui/material/Popover';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, Search } from '@/app/components/icons';
@@ -9,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/app/components/ui/dropdown-menu';
-import { Select } from '@/app/components/ui/select';
+import { Select, type SelectOption } from '@/app/components/ui/select';
 import { useIntlayer } from '@/app/i18n';
 import {
   type ActorType,
@@ -76,25 +77,33 @@ const DATE_PRESETS: { value: DatePreset; labelKey: LabelKey }[] = [
   { value: 'all', labelKey: 'allTime' },
 ];
 
+/** The UTC calendar day n days ago, as the API takes `dateFrom`. */
 function daysAgoIso(n: number): string {
   const d = new Date();
-  d.setDate(d.getDate() - n);
+  d.setUTCDate(d.getUTCDate() - n);
   return d.toISOString().slice(0, 10);
 }
 
+/** "All time" clears both dates: a missing key would keep the period picked before. */
 function presetToDates(preset: DatePreset): { dateFrom?: string; dateTo?: string } {
   if (preset === 'all') {
-    return {};
+    return { dateFrom: undefined, dateTo: undefined };
   }
   const days = preset === '7d' ? 7 : preset === '30d' ? 30 : 90;
   return { dateFrom: daysAgoIso(days), dateTo: undefined };
 }
 
+/**
+ * The period the filters stand for. Both dates are whole UTC days, so the gap is
+ * a whole number of days whatever the hour; no `dateFrom` loads every event.
+ */
 function currentPreset(filters: AuditEventFilter): DatePreset {
   if (!filters.dateFrom) {
-    return '7d';
+    return 'all';
   }
-  const diff = Math.round((Date.now() - new Date(filters.dateFrom).getTime()) / 86_400_000);
+  const diff = Math.round(
+    (Date.parse(daysAgoIso(0)) - Date.parse(filters.dateFrom.slice(0, 10))) / 86_400_000,
+  );
   if (diff <= 7) {
     return '7d';
   }
@@ -130,6 +139,28 @@ function MenuButton({
         <ChevronDown size={16} aria-hidden />
       </button>
     </DropdownMenuTrigger>
+  );
+}
+
+/** A field label above its select, tied to it so a screen reader names the select. */
+function FilterField({
+  id,
+  label,
+  ...select
+}: {
+  id: string;
+  label: React.ReactNode;
+  value: string;
+  options: SelectOption[];
+  onChange: (value: string) => void;
+}): React.JSX.Element {
+  return (
+    <div className="audit-filter-field">
+      <label id={`${id}-label`} htmlFor={id}>
+        {label}
+      </label>
+      <Select id={id} labelId={`${id}-label`} size="small" {...select} />
+    </div>
   );
 }
 
@@ -169,6 +200,7 @@ export function AuditFilterBar({ filters, onFiltersChange }: AuditFilterBarProps
   const activeCount = [filters.actorType, filters.action, filters.entityType].filter(
     Boolean,
   ).length;
+  const [filtersAnchor, setFiltersAnchor] = useState<HTMLElement | null>(null);
   const preset = currentPreset(filters);
   const presetLabel = t[DATE_PRESETS.find(p => p.value === preset)?.labelKey ?? 'last7Days'];
 
@@ -184,72 +216,71 @@ export function AuditFilterBar({ filters, onFiltersChange }: AuditFilterBarProps
         />
       </div>
 
-      <DropdownMenu>
-        <MenuButton active={activeCount > 0}>
-          {filterLabels.title}
-          {activeCount > 0 ? ` · ${activeCount}` : null}
-        </MenuButton>
-        <DropdownMenuContent align="end">
-          <div className="audit-filter-panel">
-            <label>
-              {t.actor}
-              <Select
-                size="small"
-                value={filters.actorType ?? ''}
-                options={ACTOR_OPTIONS.map(o => ({ value: o.value, label: t[o.labelKey] }))}
-                onChange={value =>
-                  onFiltersChange({ actorType: (value || undefined) as ActorType })
-                }
-              />
-            </label>
-            <label>
-              {t.action}
-              <Select
-                size="small"
-                value={filters.action ?? ''}
-                options={ACTION_OPTIONS.map(o => ({ value: o.value, label: t[o.labelKey] }))}
-                onChange={value => onFiltersChange({ action: (value || undefined) as AuditAction })}
-              />
-            </label>
-            <label>
-              {t.entity}
-              <Select
-                size="small"
-                value={filters.entityType ?? ''}
-                options={[
-                  { value: '', label: t.allEntityTypes },
-                  ...ENTITY_TYPES.map(value => ({
-                    value,
-                    label: t.entityLabels[value]?.value ?? value,
-                  })),
-                ]}
-                onChange={value =>
-                  onFiltersChange({ entityType: (value || undefined) as EntityType })
-                }
-              />
-            </label>
-            {activeCount > 0 ? (
-              <button
-                type="button"
-                className="audit-filter-button"
-                style={{ alignSelf: 'flex-start' }}
-                onClick={() =>
-                  onFiltersChange({
-                    actorType: undefined,
-                    action: undefined,
-                    entityType: undefined,
-                  })
-                }
-              >
-                {t.reset}
-              </button>
-            ) : null}
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <button
+        type="button"
+        className={`audit-filter-button${activeCount > 0 ? ' audit-filter-button--active' : ''}`}
+        aria-haspopup="dialog"
+        aria-expanded={filtersAnchor !== null}
+        onClick={e => setFiltersAnchor(e.currentTarget)}
+      >
+        {filterLabels.title}
+        {activeCount > 0 ? ` · ${activeCount}` : null}
+        <ChevronDown size={16} aria-hidden />
+      </button>
+      {/* A popover, not a menu: a menu keeps focus on its list, so Tab and the arrows never reached the fields. */}
+      <Popover
+        open={filtersAnchor !== null}
+        anchorEl={filtersAnchor}
+        onClose={() => setFiltersAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{ paper: { sx: { mt: 1, borderRadius: '12px' } } }}
+      >
+        <div className="audit-filter-panel">
+          <FilterField
+            id="audit-filter-actor"
+            label={t.actor}
+            value={filters.actorType ?? ''}
+            options={ACTOR_OPTIONS.map(o => ({ value: o.value, label: t[o.labelKey] }))}
+            onChange={value => onFiltersChange({ actorType: (value || undefined) as ActorType })}
+          />
+          <FilterField
+            id="audit-filter-action"
+            label={t.action}
+            value={filters.action ?? ''}
+            options={ACTION_OPTIONS.map(o => ({ value: o.value, label: t[o.labelKey] }))}
+            onChange={value => onFiltersChange({ action: (value || undefined) as AuditAction })}
+          />
+          <FilterField
+            id="audit-filter-entity"
+            label={t.entity}
+            value={filters.entityType ?? ''}
+            options={[
+              { value: '', label: t.allEntityTypes },
+              ...ENTITY_TYPES.map(value => ({
+                value,
+                label: t.entityLabels[value]?.value ?? value,
+              })),
+            ]}
+            onChange={value => onFiltersChange({ entityType: (value || undefined) as EntityType })}
+          />
+          {activeCount > 0 ? (
+            <button
+              type="button"
+              className="audit-filter-button"
+              style={{ alignSelf: 'flex-start' }}
+              onClick={() =>
+                onFiltersChange({ actorType: undefined, action: undefined, entityType: undefined })
+              }
+            >
+              {t.reset}
+            </button>
+          ) : null}
+        </div>
+      </Popover>
 
       <DropdownMenu>
-        <MenuButton active={preset !== '7d'}>{presetLabel}</MenuButton>
+        <MenuButton active={preset !== 'all'}>{presetLabel}</MenuButton>
         <DropdownMenuContent align="end">
           {DATE_PRESETS.map(option => (
             <DropdownMenuItem

@@ -30,6 +30,7 @@ function problems(bank: ParserHealthBank, t: Labels): string[] {
 /** One layout: the parser and when it was seen; its table headings only on request. */
 function LayoutLine({ layout, t }: { layout: ParserHealthLayout; t: Labels }): React.JSX.Element {
   const [open, setOpen] = useState(false);
+  const hasHeadings = layout.headings.length > 0 || layout.unknownWords.length > 0;
   return (
     <Box component="li" sx={{ listStyle: 'none', py: 1 }}>
       {/* One run of text, so a narrow screen wraps it like a sentence. */}
@@ -42,24 +43,26 @@ function LayoutLine({ layout, t }: { layout: ParserHealthLayout; t: Labels }): R
         <span style={{ fontFamily: 'monospace' }}>{layout.parser}</span> · {t.statements}{' '}
         {layout.statements} · {formatStoredDate(layout.firstSeen)} –{' '}
         {formatStoredDate(layout.lastSeen)}{' '}
-        <Box
-          component="button"
-          type="button"
-          aria-expanded={open}
-          onClick={() => setOpen(value => !value)}
-          sx={{
-            ...MUTED,
-            p: 0,
-            border: 0,
-            background: 'none',
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            textUnderlineOffset: 3,
-            '&:hover': { color: 'var(--foreground)' },
-          }}
-        >
-          {t.headings}
-        </Box>
+        {hasHeadings ? (
+          <Box
+            component="button"
+            type="button"
+            aria-expanded={open}
+            onClick={() => setOpen(value => !value)}
+            sx={{
+              ...MUTED,
+              p: 0,
+              border: 0,
+              background: 'none',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              textUnderlineOffset: 3,
+              '&:hover': { color: 'var(--foreground)' },
+            }}
+          >
+            {t.headings}
+          </Box>
+        ) : null}
       </Box>
       {open ? (
         <Box sx={{ mt: 0.75, pl: 1.5, borderLeft: '2px solid var(--border)' }}>
