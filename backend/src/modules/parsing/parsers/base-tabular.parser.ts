@@ -1,4 +1,10 @@
 import { appDefaultCurrency } from '../../../common/utils/currency.util';
+import {
+  amountSide,
+  compactDate,
+  sideFigure,
+  tabularAmount,
+} from '../helpers/tabular-amount.helper';
 import type { ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import { BaseParser } from './base.parser';
 
@@ -20,7 +26,7 @@ export abstract class BaseTabularParser extends BaseParser {
       const date = new Date(Date.UTC(1899, 11, 30) + value * 86400000);
       return Number.isNaN(date.getTime()) ? null : date;
     }
-    const date = this.normalizeDate(String(value ?? ''));
+    const date = compactDate(value) ?? this.normalizeDate(String(value ?? ''));
     if (!date || Number.isNaN(date.getTime())) {
       return null;
     }
@@ -223,6 +229,7 @@ export abstract class BaseTabularParser extends BaseParser {
       const amountIndex = columnMapping.amount;
       const purposeIndex = columnMapping.purpose;
       const currencyIndex = columnMapping.currency;
+      const directionIndex = columnMapping.direction;
 
       const currencyFromColumn =
         currencyIndex !== undefined
@@ -235,28 +242,19 @@ export abstract class BaseTabularParser extends BaseParser {
           ? currencyFromColumn
           : defaultCurrency;
 
-      let debit =
-        debitIndex !== undefined
-          ? this.normalizeNumberValue(getValue(debitIndex) as string | number | null | undefined) ||
-            undefined
-          : undefined;
-      let credit =
-        creditIndex !== undefined
-          ? this.normalizeNumberValue(
-              getValue(creditIndex) as string | number | null | undefined,
-            ) || undefined
-          : undefined;
+      let debit = debitIndex !== undefined ? sideFigure(getValue(debitIndex)) : undefined;
+      let credit = creditIndex !== undefined ? sideFigure(getValue(creditIndex)) : undefined;
 
       // Single "Amount" column: sign decides direction; unsigned amounts fall
       // to the caller-provided hint (e.g. a "Withdrawals" section caption).
       if (debit === undefined && credit === undefined && amountIndex !== undefined) {
-        const amount = this.normalizeNumberValue(
-          getValue(amountIndex) as string | number | null | undefined,
-        );
+        const amount = tabularAmount(getValue(amountIndex));
+        // A column of its own can say the side ("Af"/"Bij"); a sign still wins.
+        const side = directionIndex !== undefined ? amountSide(getValue(directionIndex)) : null;
         if (amount !== null && amount !== 0) {
           if (amount < 0) {
             debit = Math.abs(amount);
-          } else if (unsignedAmountDirection === 'debit') {
+          } else if ((side ?? unsignedAmountDirection) === 'debit') {
             debit = amount;
           } else {
             credit = amount;

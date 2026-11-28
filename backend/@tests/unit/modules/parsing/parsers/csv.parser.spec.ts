@@ -23,6 +23,49 @@ describe('CsvParser', () => {
 
   const day = (date: Date) => [date.getFullYear(), date.getMonth() + 1, date.getDate()];
 
+  it('keeps the sign printed after a currency mark or as DR (#635)', async () => {
+    const result = await parse('signs.csv', [
+      'Date,Details,Amount',
+      '02.03.2026,ACME Store,$-12.00',
+      '03.03.2026,ACME Store,USD -13.00',
+      '04.03.2026,ACME Store,14.00 DR',
+      '05.03.2026,Member One,15.00 CR',
+    ]);
+
+    expect(result.transactions.map(t => [t.debit, t.credit])).toEqual([
+      [12, undefined],
+      [13, undefined],
+      [14, undefined],
+      [undefined, 15],
+    ]);
+  });
+
+  it('keeps a signed debit-column figure as a debit, not a dropped row', async () => {
+    const result = await parse('debit-signs.csv', [
+      'Date,Details,Debit,Credit',
+      '02.03.2026,ACME Store,$-12.00,',
+      '03.03.2026,ACME Store,1200 DR,',
+    ]);
+
+    expect(result.transactions.map(t => [t.debit, t.credit])).toEqual([
+      [12, undefined],
+      [1200, undefined],
+    ]);
+  });
+
+  it('reads the ING side column and its year-first dates', async () => {
+    const result = await parse('ing.csv', [
+      '"Datum";"Naam / Omschrijving";"Rekening";"Tegenrekening";"Code";"Af Bij";"Bedrag (EUR)";"Mutatiesoort";"Mededelingen"',
+      '"20260302";"ACME Store";"NL00EXMP0000000001";"";"BA";"Af";"12,50";"Betaalautomaat";""',
+      '"20260303";"Member One";"NL00EXMP0000000001";"NL00EXMP0000000002";"OV";"Bij";"40,00";"Overschrijving";"Refund"',
+    ]);
+
+    expect(result.transactions.map(t => [day(t.transactionDate), t.debit, t.credit])).toEqual([
+      [[2026, 3, 2], 12.5, undefined],
+      [[2026, 3, 3], undefined, 40],
+    ]);
+  });
+
   /** Writes raw bytes, for files saved in another encoding than UTF-8. */
   const parseBytes = (name: string, bytes: Uint8Array) => {
     const filePath = path.join(dir, name);

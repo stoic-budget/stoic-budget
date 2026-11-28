@@ -15,7 +15,16 @@ export interface CsvPreset {
   /** Lower-cased header name → mapping key the tabular parser understands. */
   columns: Record<
     string,
-    'date' | 'debit' | 'credit' | 'amount' | 'counterparty' | 'purpose' | 'currency' | 'document'
+    | 'date'
+    | 'debit'
+    | 'credit'
+    | 'amount'
+    | 'counterparty'
+    | 'purpose'
+    | 'currency'
+    | 'document'
+    // Which side an unsigned amount is on: "Af"/"Bij", "Debit"/"Credit".
+    | 'direction'
   >;
   /** Unsigned amount columns: which way a bare positive number flows. */
   unsignedAmountDirection?: 'debit' | 'credit';
@@ -165,6 +174,7 @@ export const CSV_PRESETS: CsvPreset[] = [
     columns: {
       datum: 'date',
       'naam / omschrijving': 'counterparty',
+      'af bij': 'direction',
       'bedrag (eur)': 'amount',
       mededelingen: 'purpose',
     },
