@@ -49,6 +49,7 @@ import { CustomTableFromSourceService } from './custom-table-from-source.service
 import { CustomTableMoneyTotalService } from './custom-table-money-total.service';
 import { CustomTablePaidStatusService } from './custom-table-paid-status.service';
 import { CustomTableRelationsService } from './custom-table-relations.service';
+import { CustomTableRollbackListener } from './custom-table-rollback.listener';
 import { CustomTableRowQueryService } from './custom-table-row-query.service';
 import { CustomTableRowValidationService } from './custom-table-row-validation.service';
 import { CustomTableRowsService } from './custom-table-rows.service';
@@ -145,6 +146,7 @@ import { SourceWriteBackService } from './write-back/source-write-back.service';
     CustomTableCommentsService,
     CustomTableMoneyTotalService,
     SourceWriteBackService,
+    CustomTableRollbackListener,
   ],
   exports: [CustomTablesService],
 })

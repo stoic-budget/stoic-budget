@@ -4,6 +4,7 @@ import {
   Budget,
   Category,
   Insight,
+  Payable,
   Subscription,
   Transaction,
   User,
@@ -16,6 +17,7 @@ import { GoalsModule } from '../goals/goals.module';
 import { NetWorthModule } from '../net-worth/net-worth.module';
 import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { FinancialAnalyzer } from './analyzers/financial.analyzer';
+import { LatePaymentsAnalyzer } from './analyzers/late-payments.analyzer';
 import { OperationalAnalyzer } from './analyzers/operational.analyzer';
 import { StoicAnalyzer } from './analyzers/stoic.analyzer';
 import { WealthAnalyzer } from './analyzers/wealth.analyzer';
@@ -39,6 +41,7 @@ import { StoicBehaviorService } from './stoic/stoic-behavior.service';
       User,
       Workspace,
       Subscription,
+      Payable,
     ]),
     NetWorthModule,
     ExchangeRatesModule,
@@ -53,6 +56,7 @@ import { StoicBehaviorService } from './stoic/stoic-behavior.service';
     FinancialAnalyzer,
     StoicAnalyzer,
     WealthAnalyzer,
+    LatePaymentsAnalyzer,
     StoicLedgerService,
     StoicBehaviorService,
     DailyQuoteService,

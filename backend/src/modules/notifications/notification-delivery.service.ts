@@ -226,6 +226,11 @@ export class NotificationDeliveryService {
     }
     const emailed: Notification[] = [];
     for (const [workspaceId, items] of byWorkspace) {
+      // No mail server for this workspace: no mail will ever go, so none waits.
+      if (!(await this.mailerService.isConfigured(workspaceId))) {
+        emailed.push(...items);
+        continue;
+      }
       const sent = await this.mailerService.send({
         to: user.email,
         subject: `${APP_NAME}: ${items.length}`,
@@ -245,55 +250,72 @@ export class NotificationDeliveryService {
     preference: NotificationPreference,
   ): Promise<void> {
     const channels = [...new Set(pending.flatMap(item => item.pendingChannels ?? []))];
-    const subject = `${APP_NAME}: ${pending.length}`;
-    const body = digestText(pending);
+    // Each channel gets only what still waits for it: never again what it delivered.
+    const waiting = (channel: NotificationChannel) =>
+      pending.filter(item => (item.pendingChannels ?? []).includes(channel));
+    const subjectOf = (items: Notification[]) => `${APP_NAME}: ${items.length}`;
 
-    let delivered = true;
-    let emailed: Notification[] = [];
-
-    if (channels.includes(NotificationChannel.EMAIL)) {
-      emailed = await this.mailDigest(pending, user);
-      delivered = emailed.length === pending.length;
-    }
-
-    if (channels.includes(NotificationChannel.TELEGRAM) && user.telegramChatId) {
-      await this.telegramService.sendPlainMessage(
-        user.telegramChatId,
-        `${subject}\n\n${body}`,
-        user,
-      );
-    }
-
-    if (channels.includes(NotificationChannel.PUSH)) {
-      // One push for the whole digest; the phone would not want one per item.
-      delivered =
-        (await this.pushService.sendToUser(user.id, {
-          title: subject,
-          body: pending
-            .slice(0, 3)
-            .map(item => item.title)
-            .join(' · '),
-          url: '/dashboard',
-          tag: 'digest',
-        })) && delivered;
-    }
-
-    if (!delivered) {
-      // A workspace whose mail did go out does not get it again with the retry.
-      for (const item of emailed) {
-        await this.notificationRepository.update(item.id, {
-          pendingChannels: (item.pendingChannels ?? []).filter(
-            channel => channel !== NotificationChannel.EMAIL,
-          ),
-        });
+    // Each channel on its own: one that fails keeps its notifications for the
+    // next digest, the others are done, and a throw in one never stops another.
+    const delivered = new Map<NotificationChannel, Notification[]>();
+    const attempt = async (
+      channel: NotificationChannel,
+      send: (items: Notification[]) => Promise<Notification[]>,
+    ) => {
+      const items = waiting(channel);
+      if (!channels.includes(channel) || items.length === 0) return;
+      try {
+        delivered.set(channel, await send(items));
+      } catch (error) {
+        this.logger.warn(
+          `Digest for ${user.id} not sent by ${channel}: ${error instanceof Error ? error.message : String(error)}`,
+        );
       }
-      return;
-    }
+    };
 
-    await this.notificationRepository.update(
-      pending.map(item => item.id),
-      { pendingChannels: [] },
-    );
+    await attempt(NotificationChannel.EMAIL, items => this.mailDigest(items, user));
+    await attempt(NotificationChannel.TELEGRAM, async items => {
+      // No chat to send to: nothing will ever go there, so nothing waits for it.
+      if (user.telegramChatId) {
+        await this.telegramService.sendPlainMessage(
+          user.telegramChatId,
+          `${subjectOf(items)}\n\n${digestText(items)}`,
+          user,
+        );
+      }
+      return items;
+    });
+    await attempt(NotificationChannel.PUSH, async items => {
+      // Push off on this server: nothing will ever go, so nothing waits for it.
+      if (!this.pushService.isEnabled()) return items;
+      // One push for the whole digest; the phone would not want one per item.
+      const pushed = await this.pushService.sendToUser(user.id, {
+        title: subjectOf(items),
+        body: items
+          .slice(0, 3)
+          .map(item => item.title)
+          .join(' · '),
+        url: '/dashboard',
+        tag: 'digest',
+      });
+      return pushed ? items : [];
+    });
+
+    // What each notification still waits for, written once per distinct rest.
+    const rests = new Map<string, { left: string[]; ids: string[] }>();
+    for (const item of pending) {
+      const left = (item.pendingChannels ?? []).filter(
+        channel =>
+          !delivered.get(channel as NotificationChannel)?.some(done => done.id === item.id),
+      );
+      if (left.length === (item.pendingChannels ?? []).length) continue;
+      const key = left.join(',');
+      rests.set(key, { left, ids: [...(rests.get(key)?.ids ?? []), item.id] });
+    }
+    for (const { left, ids } of rests.values()) {
+      await this.notificationRepository.update(ids, { pendingChannels: left });
+    }
+    // Sent or not, the next try waits for the next digest: never every 30 minutes.
     await this.preferenceRepository.update(preference.id, { lastDigestAt: new Date() });
   }
 }

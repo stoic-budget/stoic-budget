@@ -24,6 +24,8 @@ export enum InsightType {
   IDLE_CASH = 'pattern.idle_cash',
   /** Net worth passed a round number for the first time. */
   NET_WORTH_MILESTONE = 'pattern.net_worth_milestone',
+  /** The same reason for paying late, again and again. */
+  LATE_PAYMENTS = 'pattern.late_payments',
   /** A category far above its own median month. */
   CATEGORY_ANOMALY = 'trend.category_anomaly',
   /** Stoic advice: plan (budget limits) against reality, per Stoic class. */

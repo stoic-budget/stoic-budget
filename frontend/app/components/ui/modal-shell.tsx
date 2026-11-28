@@ -37,7 +37,8 @@ export interface ModalFooterProps {
   onConfirm?: () => void;
   cancelText?: string;
   confirmText?: string;
-  confirmVariant?: 'primary' | 'destructive';
+  /** `quiet-destructive`: a terracotta text button, for an undo-like action that should not shout. */
+  confirmVariant?: ConfirmVariant;
   isConfirmLoading?: boolean;
   isConfirmDisabled?: boolean;
   children?: React.ReactNode;
@@ -63,10 +64,19 @@ export const FULL_SCREEN_ON_PHONE = {
   },
 } as const;
 
-const CONFIRM_COLOR: Record<'primary' | 'destructive', 'primary' | 'error'> = {
+type ConfirmVariant = 'primary' | 'destructive' | 'quiet-destructive';
+
+const CONFIRM_COLOR: Record<ConfirmVariant, 'primary' | 'error' | undefined> = {
   primary: 'primary',
   destructive: 'error',
+  'quiet-destructive': undefined,
 };
+
+const QUIET_DESTRUCTIVE_SX = {
+  color: 'var(--money-down)',
+  fontWeight: 500,
+  '&:hover': { bgcolor: 'var(--surface-soft)' },
+} as const;
 
 function TitleBar(props: {
   title?: React.ReactNode;
@@ -183,17 +193,19 @@ export function ModalHeader(props: {
 function ConfirmBtn(props: {
   onConfirm: () => void;
   text: string;
-  variant: 'primary' | 'destructive';
+  variant: ConfirmVariant;
   loading: boolean;
   disabled: boolean;
 }): React.JSX.Element {
+  const quiet = props.variant === 'quiet-destructive';
   return (
     <MuiButton
       type="button"
       onClick={props.onConfirm}
       disabled={props.disabled || props.loading}
-      variant="contained"
+      variant={quiet ? 'text' : 'contained'}
       color={CONFIRM_COLOR[props.variant]}
+      sx={quiet ? QUIET_DESTRUCTIVE_SX : undefined}
       startIcon={props.loading ? <Spinner size={16} /> : undefined}
     >
       {props.text}

@@ -48,9 +48,9 @@ export interface DetailLabels {
   header: TablePageHeaderLabels;
   toolbar: TableToolbarLabels;
   filters: FilterBarLabels;
-  grid: TableGridLabels;
+  grid: Omit<TableGridLabels, 'mixedCurrencies'>;
   cells: CellLabels;
-  groups: { title: string; empty: string; rows: string; loading: string };
+  groups: { title: string; empty: string; rows: string; loading: string; mixedCurrencies: string };
   columnDialog: ColumnDialogLabels;
   deleteColumn: { title: string; message: string; confirm: string; cancel: string };
   deleteRows: { title: string; message: string; confirm: string; cancel: string };
@@ -186,7 +186,7 @@ export function buildDetailLabels(t: Dictionary): DetailLabels {
       aggregates: record(t.grid.aggregates, AGGREGATES),
     },
     cells,
-    groups: record(t.groups, ['title', 'empty', 'rows', 'loading']),
+    groups: record(t.groups, ['title', 'empty', 'rows', 'loading', 'mixedCurrencies']),
     columnDialog: {
       ...record(t.columnDialog, [
         'addTitle',

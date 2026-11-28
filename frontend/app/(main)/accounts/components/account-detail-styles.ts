@@ -1,3 +1,4 @@
+import { toDate } from '@/app/lib/user-format';
 import { tokens } from '@/lib/theme-tokens';
 
 /** Shared look of the account page's cards and rows. */
@@ -29,5 +30,5 @@ export const listRowStyle = {
 
 export const formatDay = (date: string, locale: string) =>
   new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(
-    new Date(date),
+    toDate(date) ?? new Date(date),
   );

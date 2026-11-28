@@ -15,7 +15,9 @@ import { tokens } from '@/lib/theme-tokens';
 import { ACCOUNT_TYPES, isDebtType } from '../account-types';
 import { parseCreditLimit } from '../credit-limit';
 import type { AccountForm } from '../hooks/useAccounts';
+import { parseOpeningBalance } from '../opening-balance';
 import { AccountSideDrawer, Field } from './AccountSideDrawer';
+import { fieldHint } from './field-hint';
 import { useAccountLabels } from './use-account-labels';
 
 const SHARED = 'shared';
@@ -115,7 +117,8 @@ export function AccountFormDrawer({
   const debt = isDebtType(form.type);
   const card = form.type === 'credit_card';
   const limitInvalid = card && parseCreditLimit(form.creditLimit) === 'invalid';
-  const canSave = form.name.trim().length > 0 && !limitInvalid && !saving;
+  const openingInvalid = parseOpeningBalance(form.openingBalance) === 'invalid';
+  const canSave = form.name.trim().length > 0 && !limitInvalid && !openingInvalid && !saving;
 
   return (
     <>
@@ -229,7 +232,7 @@ export function AccountFormDrawer({
         <Field
           id="account-opening"
           label={debt ? t.owedLabel : t.openingLabel}
-          hint={debt ? undefined : t.openingHint}
+          hint={fieldHint(openingInvalid, t.openingInvalid, debt ? undefined : t.openingHint)}
         >
           <TextField
             id="account-opening"
@@ -237,7 +240,7 @@ export function AccountFormDrawer({
             onChange={event => set({ openingBalance: event.target.value })}
             fullWidth
             size="small"
-            slotProps={{ htmlInput: { inputMode: 'decimal' } }}
+            slotProps={{ htmlInput: { inputMode: 'decimal', 'aria-invalid': openingInvalid } }}
           />
         </Field>
 
@@ -245,15 +248,7 @@ export function AccountFormDrawer({
           <Field
             id="account-credit-limit"
             label={t.creditLimitLabel}
-            hint={
-              limitInvalid ? (
-                <span role="alert" style={{ color: 'var(--money-down)' }}>
-                  {t.creditLimitInvalid}
-                </span>
-              ) : (
-                t.creditLimitHint
-              )
-            }
+            hint={fieldHint(limitInvalid, t.creditLimitInvalid, t.creditLimitHint)}
           >
             <TextField
               id="account-credit-limit"

@@ -1,5 +1,6 @@
+import { noteMissingRate } from '../../../../src/common/utils/currency.util';
 import type { Mock } from 'vitest';
-import { Between, In, IsNull } from 'typeorm';
+import { Between, In, IsNull, MoreThanOrEqual } from 'typeorm';
 import { PayableStatus } from '../../../../src/entities/payable.entity';
 import { ReceiptSource, ReceiptStatus } from '../../../../src/entities/receipt.entity';
 import { BankName, StatementStatus } from '../../../../src/entities/statement.entity';
@@ -81,6 +82,9 @@ describe('DashboardService', () => {
   const memberRepo = createRepoMock();
   const workspaceRepo = createRepoMock();
   const subscriptionRepo = createRepoMock();
+  // A subscription's linked payments, read through the repository's manager.
+  const chargeRepo = { find: vi.fn(async (): Promise<unknown[]> => []) };
+  Object.assign(subscriptionRepo, { manager: { getRepository: () => chargeRepo } });
   const exchangeRatesService = {
     getRate: vi.fn(),
     getRateOrNull: vi.fn(),
@@ -609,8 +613,44 @@ describe('DashboardService', () => {
       totalOverdue: 550,
       unapprovedCash: 500,
       currency: 'KZT',
+      missingRates: [],
     });
-    expect(exchangeRatesService.getRate).toHaveBeenCalledWith('USD', 'KZT', undefined, 'ws-1');
+    expect(exchangeRatesService.getRateOrNull).toHaveBeenCalledWith('USD', 'KZT', undefined, 'ws-1');
+  });
+
+  it("getSnapshot's list is its own, not its caller's (#787)", async () => {
+    transactionRepo.createQueryBuilder
+      .mockReturnValueOnce(createQueryBuilderMock([]))
+      .mockReturnValueOnce(createQueryBuilderMock([]));
+    payableRepo.createQueryBuilder.mockReturnValue(createQueryBuilderMock([]));
+    workspaceRepo.findOne.mockResolvedValue({ currency: 'KZT' });
+
+    const pending = (service as any).getSnapshot('ws-1', new Date('2026-02-01'), new Date('2026-03-01'));
+    // The caller converts something of its own meanwhile.
+    noteMissingRate('LEAK');
+
+    expect((await pending).missingRates).toEqual([]);
+  });
+
+  it('getSnapshot names a bill currency without a rate, counted at face value (#787)', async () => {
+    transactionRepo.createQueryBuilder
+      .mockReturnValueOnce(createQueryBuilderMock([]))
+      .mockReturnValueOnce(createQueryBuilderMock([]));
+    payableRepo.createQueryBuilder.mockReturnValue(
+      createQueryBuilderMock([{ currency: 'XTS', totalPayable: '40', totalOverdue: '0' }]),
+    );
+    workspaceRepo.findOne.mockResolvedValue({ currency: 'KZT' });
+    exchangeRatesService.getRateOrNull.mockResolvedValue(null);
+
+    const result = await (service as any).getSnapshot(
+      'ws-1',
+      new Date('2026-02-01'),
+      new Date('2026-03-01'),
+    );
+
+    // No transaction in XTS, so only the bill can tell the banner.
+    expect(result.totalPayable).toBe(40);
+    expect(result.missingRates).toEqual(['XTS']);
   });
 
   it("getSnapshot converts each day's income and spending at that day's rate", async () => {
@@ -1596,6 +1636,46 @@ describe('DashboardService', () => {
       }
     });
 
+    it("leaves out a charge already paid ahead, but not one a past period's payment was recorded against (#601)", async () => {
+      vi.useFakeTimers().setSystemTime(new Date(2026, 10, 5));
+      try {
+        primeBalance('1000');
+        payableRepo.find.mockResolvedValue([]);
+        const cloud = { vendorName: 'ACME Cloud', amount: '100', currency: 'KZT', frequency: 'monthly', nextChargeDate: '2026-11-20' };
+        subscriptionRepo.find.mockResolvedValue([
+          { ...cloud, id: 'paid-ahead' },
+          { ...cloud, id: 'paid-late' },
+          { ...cloud, id: 'october-unpaid' },
+        ]);
+        chargeRepo.find.mockResolvedValue([
+          // Paid on 5 Nov for the 20 Nov charge, after paying October's on its day.
+          { subscriptionId: 'paid-ahead', chargeDate: '2026-11-05', expectedDate: '2026-11-20' },
+          { subscriptionId: 'paid-ahead', chargeDate: '2026-10-20', expectedDate: '2026-10-20' },
+          // October's payment, posted a day late and recorded against 20 Nov.
+          { subscriptionId: 'paid-late', chargeDate: '2026-10-21', expectedDate: '2026-11-20' },
+          // Nearest the 20 Nov charge, but October's has no payment: this is October's, late.
+          { subscriptionId: 'october-unpaid', chargeDate: '2026-11-08', expectedDate: '2026-11-20' },
+        ]);
+
+        const result = await service.getCommitments('ws-1', 60);
+
+        const datesOf = (id: string) =>
+          result.items.filter(item => item.sourceId === id).map(item => item.date);
+        expect(datesOf('paid-ahead')).toEqual(['2026-12-20']);
+        expect(datesOf('paid-late')).toEqual(['2026-11-20', '2026-12-20']);
+        expect(datesOf('october-unpaid')).toEqual(['2026-11-20', '2026-12-20']);
+        // This workspace's payments, 19 months back: an annual charge paid early last year included.
+        expect(chargeRepo.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: expect.objectContaining({ workspaceId: 'ws-1', chargeDate: MoreThanOrEqual('2025-04-05') }),
+          }),
+        );
+      } finally {
+        chargeRepo.find.mockResolvedValue([]);
+        vi.useRealTimers();
+      }
+    });
+
     it('clamps an absurd horizon instead of projecting a decade of days', async () => {
       primeBalance('0');
       payableRepo.find.mockResolvedValue([]);
@@ -1754,7 +1834,8 @@ describe('DashboardService', () => {
         `receipt.receivedAt ${inJuly[0]}`,
         inJuly[1],
       );
-      expect(warningsQb.andWhere).toHaveBeenCalledWith(`s.createdAt ${inJuly[0]}`, inJuly[1]);
+      // Parsing warnings count every month: the dashboard's link lists all of them.
+      expect(warningsQb.andWhere).not.toHaveBeenCalledWith(`s.createdAt ${inJuly[0]}`, inJuly[1]);
       // The "never uploaded" empty state must not depend on the picked month.
       expect(statementRepo.findOne).toHaveBeenCalledWith(
         expect.objectContaining({ where: { workspaceId: 'ws-1', deletedAt: IsNull() } }),

@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as fsp from 'fs/promises';
 import * as path from 'path';
+import { decodeUnlabelledText } from '../../modules/parsing/helpers/text-encoding.helper';
 import {
   sniffStatementFormat,
   type TextStatementFormat,
@@ -158,7 +159,8 @@ function readTextSample(filePath: string, bytes = 8192): string | null {
   try {
     const buf = Buffer.alloc(bytes);
     const read = fs.readSync(fd, buf, 0, bytes, 0);
-    return buf.subarray(0, read).toString('utf-8');
+    // UTF-16 and single-byte exports read as the parser will read them.
+    return decodeUnlabelledText(buf.subarray(0, read));
   } catch {
     return null;
   } finally {

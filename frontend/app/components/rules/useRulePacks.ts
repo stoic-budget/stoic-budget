@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import apiClient from '@/app/lib/api';
 import type { RulePack } from '@/app/lib/contracts';
+import { localToday } from '@/app/lib/local-today';
 import { type ContractInput, checkBody, checkContract } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 
@@ -27,7 +28,7 @@ export function useExportRulePack() {
       );
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `rules-${new Date().toISOString().slice(0, 10)}.json`);
+      link.setAttribute('download', `rules-${localToday()}.json`);
       document.body.appendChild(link);
       link.click();
       link.remove();

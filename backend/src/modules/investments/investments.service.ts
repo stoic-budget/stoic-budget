@@ -246,18 +246,19 @@ export class InvestmentsService {
   /**
    * Fetches a price for every holding with a symbol (stocks and funds from
    * Yahoo Finance) and rewrites the snapshots of the accounts that changed. Returns how
-   * many holdings got a price. Coins are not here: they live in `crypto_wallets`.
+   * many holdings got a price, of how many were asked for. Coins are not here:
+   * they live in `crypto_wallets`.
    */
   async refreshPrices(
     userId: string | null,
     workspaceId: string,
     onlyIds?: string[],
-  ): Promise<number> {
+  ): Promise<{ updated: number; asked: number }> {
     const holdings = await this.holdingRepository.find({
       where: onlyIds ? { workspaceId, id: In(onlyIds) } : { workspaceId },
     });
     const priced = holdings.filter(holding => holding.symbol);
-    if (priced.length === 0) return 0;
+    if (priced.length === 0) return { updated: 0, asked: 0 };
 
     const stocks = await this.stockPriceService.getPrices(
       priced.map(holding => holding.symbol as string),
@@ -279,7 +280,7 @@ export class InvestmentsService {
     for (const accountId of touched) {
       await this.writeSnapshot(userId, workspaceId, accountId);
     }
-    return updated;
+    return { updated, asked: priced.length };
   }
 
   /** Holdings grouped by asset class, valued in the workspace currency; for net worth. */

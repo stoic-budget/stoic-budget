@@ -41,6 +41,7 @@ export * from './ledger/ledger-reports';
 export * from './ledger/reconciliation-parts';
 export * from './mcp/bulk-change';
 export * from './notes/notes';
+export * from './payables/late-reasons';
 export * from './payables/payables';
 export * from './payees/payees';
 export * from './peppol/peppol';

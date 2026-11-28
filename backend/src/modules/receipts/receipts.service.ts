@@ -47,11 +47,14 @@ import { resolvePayeeId } from '../payees/payee-resolution';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
 import { TransactionAttachmentsService } from '../transactions/services/transaction-attachments.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
+import { bookedRowUpdate } from './booked-row-update';
 import {
   attachReceiptCategories,
   type ReceiptWithCategory,
 } from './helpers/attach-receipt-categories';
+import { attachTarget } from './helpers/attach-target';
 import { ReceiptProcessorService } from './services/receipt-processor.service';
+import { trashScanStatement } from './trash-scan-statement';
 
 export interface ApproveReceiptOptions {
   /** Bank row to attach to; `null` forces a new transaction; omitted uses the stored suggestion. */
@@ -490,14 +493,13 @@ export class ReceiptsService {
         [fields.categoryId],
         workspaceId,
       );
-      await this.transactionRepository.update(
-        { id: target.id, workspaceId },
-        {
-          ...scanTransactionUpdate(fields, Boolean(receipt.parsedData?.date)),
-          // update() skips the subscriber: the vendor may have changed.
-          payeeId: await resolvePayeeId(this.transactionRepository.manager, workspaceId, fields),
-        },
-      );
+      // update() skips the subscriber: the vendor may have changed. A split row
+      // takes only what its parts share (#686).
+      const { where, set } = bookedRowUpdate(target, workspaceId, {
+        ...scanTransactionUpdate(fields, Boolean(receipt.parsedData?.date)),
+        payeeId: await resolvePayeeId(this.transactionRepository.manager, workspaceId, fields),
+      });
+      await this.transactionRepository.update(where, set);
     } else if (receipt.parsedData?.categoryId && edits.categoryId !== undefined) {
       await this.transactionRepository.update(
         { id: target.id, workspaceId },
@@ -615,10 +617,7 @@ export class ReceiptsService {
       // Attach to the bank row the receipt documents (the suggestion, or the
       // one the user picked) instead of booking the expense a second time.
       // `attachTo: null` is the explicit "no, this is a new expense".
-      const attachTo =
-        options.attachTo === undefined
-          ? (receipt.metadata?.transactionMatch?.transactionIds?.[0] ?? null)
-          : options.attachTo;
+      const attachTo = attachTarget(options.attachTo, receipt, scanTransaction);
       if (attachTo) {
         const target = await transactions.findOne({ where: { id: attachTo, workspaceId } });
         if (!target) {
@@ -695,15 +694,14 @@ export class ReceiptsService {
       const fields = buildTransaction(receipt);
       await assertWorkspaceOwned(manager, Category, [fields.categoryId], workspaceId);
       if (scanTransaction) {
-        await transactions.update(
-          { id: scanTransaction.id, workspaceId },
-          {
-            ...scanTransactionUpdate(fields, Boolean(receipt.parsedData?.date)),
-            // update() skips the subscriber: the vendor may have been corrected since the upload.
-            payeeId: await resolvePayeeId(manager, workspaceId, fields),
-            isVerified: true,
-          },
-        );
+        // update() skips the subscriber: the vendor may have been corrected since
+        // the upload. A scan row split in Review keeps its parts' money (#686).
+        const { where, set } = bookedRowUpdate(scanTransaction, workspaceId, {
+          ...scanTransactionUpdate(fields, Boolean(receipt.parsedData?.date)),
+          payeeId: await resolvePayeeId(manager, workspaceId, fields),
+          isVerified: true,
+        });
+        await transactions.update(where, set);
         const previousStatus = receipt.status;
         receipt.status = ReceiptStatus.APPROVED;
         receipt.transactionId = scanTransaction.id;
@@ -856,19 +854,14 @@ export class ReceiptsService {
 
   async delete(id: string, workspaceId: string, userId: string) {
     const receipt = await this.receiptRepository.findOne({ where: { id, workspaceId } });
-    let statementDeleted = false;
-
-    if (receipt?.statementId) {
-      const statement = await this.statementRepository.findOne({
-        where: { id: receipt.statementId, workspaceId },
-      });
-
-      if (statement && !statement.deletedAt) {
-        statement.deletedAt = new Date();
-        await this.statementRepository.save(statement);
-        statementDeleted = true;
-      }
-    }
+    const statementDeleted = receipt?.statementId
+      ? await trashScanStatement(
+          this.statementRepository,
+          this.transactionRepository,
+          receipt.statementId,
+          workspaceId,
+        )
+      : false;
 
     for (const attachmentPath of receipt?.attachmentPaths ?? []) {
       try {

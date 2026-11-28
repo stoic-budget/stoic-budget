@@ -38,7 +38,7 @@ function tx(options: {
       postTokenBalances: tokens(options.postTokens),
     },
     transaction: {
-      signatures: ['sig-1'],
+      signatures: [SIGNATURE],
       message: { accountKeys: options.keys.map(pubkey => ({ pubkey })) },
     },
   };
@@ -48,13 +48,16 @@ function map(transactions: SolanaTx[], ownAddresses = [ME]) {
   return mapSolanaTransfers({ address: ME, ownAddresses, tokens: SOLANA_TOKENS, transactions });
 }
 
+/** A real-length Solana signature: base58 of 64 bytes, 88 characters. */
+const SIGNATURE = '5'.repeat(88);
+
 describe('mapSolanaTransfers', () => {
   it('books SOL received, counterparty the account that paid', () => {
     const received = tx({ keys: [OTHER, ME], pre: [5e9, 1e9], post: [2.99e9, 3e9] });
 
     expect(map([received])).toEqual([
       {
-        hash: 'sig-1',
+        hash: SIGNATURE,
         timestamp: 1_780_219_205,
         asset: 'SOL',
         amount: '2',

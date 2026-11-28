@@ -142,7 +142,8 @@ export class EmailReceiptParserService {
     const amount = amountWithCurrency?.amount ?? fallbackAmount;
     return {
       amount,
-      currency: amountWithCurrency?.currency || appDefaultCurrency(),
+      // Only a stated currency; a stored receipt without one takes its workspace's (#685).
+      currency: amountWithCurrency?.currency,
       date: normalizeDateHeader(context.dateHeader),
       vendor,
       confidence: vendor ? 0.6 : 0.3,
@@ -188,7 +189,7 @@ export class EmailReceiptParserService {
           ) {
             return {
               amount: universal.totalAmount,
-              currency: universal.currency || appDefaultCurrency(),
+              currency: universal.currency,
               date: universal.date ? universal.date.toISOString().split('T')[0] : undefined,
               vendor: universal.vendor,
               tax: universal.tax,
@@ -206,8 +207,7 @@ export class EmailReceiptParserService {
 
       const amountWithCurrency = await this.extractAmountWithCurrency(text);
       const amount = amountWithCurrency?.amount;
-      const currency =
-        amountWithCurrency?.currency || this.extractCurrency(text) || appDefaultCurrency();
+      const currency = amountWithCurrency?.currency || this.extractCurrency(text);
       const date = this.extractDate(text);
       const vendor = this.extractVendor(text, context.sender);
       const tax = this.extractTax(text);
