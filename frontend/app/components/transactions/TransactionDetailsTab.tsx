@@ -14,7 +14,7 @@ import { FALLBACK_CURRENCY } from '@/app/lib/currency';
 import { isPrivateCategory, pickableCategories } from '@/app/lib/private-category';
 import { getCategoryDisplayName } from '@/app/lib/statement-categories';
 import { usePayeeName } from '@/app/lib/use-payee-name';
-import { formatAmount, formatDate } from './helpers/transactionFormatters';
+import { formatAmount, formatDate, isLinkedRow } from './helpers/transactionFormatters';
 import { useBulkUpdateOwner } from './hooks/useBulkUpdateOwner';
 import { useContributionLink } from './hooks/useContributionLink';
 import { useTransactionSplit } from './hooks/useTransactionSplit';
@@ -277,7 +277,8 @@ export function TransactionDetailsTab({
                 label={t.split}
                 hint={t.sheet.splitHint}
                 onClick={() => setSplitOpen(true)}
-                disabled={splitSaving || splitTotal <= 0}
+                // A linked transfer, investment or reimbursement is unlinked before a split.
+                disabled={splitSaving || splitTotal <= 0 || isLinkedRow(transaction)}
               />
             ))}
 

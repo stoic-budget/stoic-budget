@@ -129,6 +129,7 @@ import {
   CategorizationRuleList,
   CategorizationRuleSuggestionList,
   CategorizationRuleTestResult,
+  ClassifiedTransaction,
   PaymentCandidateList,
   PeppolLookup,
   PeppolTransmissionList,
@@ -261,6 +262,7 @@ import {
   ViewPreferenceState,
   WelcomeTutorialSeen,
   WorkspaceFavorite,
+  WorkspaceMemberLocale,
   XRechnungCheck,
   ItemImageList,
 } from '../../src/contracts';
@@ -1142,6 +1144,38 @@ describe('API contracts (e2e)', () => {
         .set('x-workspace-id', owner.workspaceId);
       return body ? req.send(body) : req;
     };
+
+    it('POST /classification/transaction/:id answers the re-filed row', async () => {
+      // A row of its own: re-filing it must not move rows the later tests count on.
+      const categories = await get('/categories?type=expense');
+      const expense = await request(app.getHttpServer())
+        .post('/statements/manual-expense')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('x-workspace-id', owner.workspaceId)
+        .field('amount', '7.25')
+        .field('currency', 'USD')
+        .field('merchant', 'Reclassify Kiosk')
+        .field('categoryId', categories.body[0].id)
+        .field('date', '2026-02-03')
+        .expect(201);
+      const [{ id: transactionId }] = await dataSource.query(
+        'SELECT id FROM transactions WHERE statement_id = $1 AND workspace_id = $2',
+        [expense.body.id, owner.workspaceId],
+      );
+      // A row the rules may re-file: a hand-picked category is kept as it is.
+      await dataSource.query(`UPDATE transactions SET category_source = 'keyword' WHERE id = $1`, [
+        transactionId,
+      ]);
+
+      await send('post', `/classification/transaction/${transactionId}`).expect(200);
+      // The second run changes nothing, so save() leaves undefined keys on the row it answered.
+      const classified = await send('post', `/classification/transaction/${transactionId}`).expect(200);
+
+      matches(ClassifiedTransaction, classified.body);
+      expect(classified.body).toMatchObject({ id: transactionId, branchId: null });
+      await dataSource.query('DELETE FROM transactions WHERE statement_id = $1', [expense.body.id]);
+      await dataSource.query('DELETE FROM statements WHERE id = $1', [expense.body.id]);
+    });
 
     it('POST, GET, PUT /categorization-rules, /test and /:id/apply', async () => {
       const categories = await get('/categories?type=expense');
@@ -2136,6 +2170,62 @@ describe('API contracts (e2e)', () => {
       });
     });
 
+    it('GET /custom-tables/:id/aggregates and /groups: no one money total over several currencies (#648)', async () => {
+      const table = await send('post', '/custom-tables', { name: 'ACME transfers' }).expect(201);
+      const tableId = table.body.id;
+      const column = async (title: string, type: string) =>
+        (await send('post', `/custom-tables/${tableId}/columns`, { title, type }).expect(201)).body.key as string;
+      const amount = await column('Amount', 'currency');
+      const code = await column('Currency', 'text');
+      const shop = await column('Shop', 'text');
+      // A money column the user added keeps the one currency they chose for it.
+      const mine = await column('Mine', 'currency');
+      // As a table made from transactions has them: the source fills both, each row in its own currency.
+      for (const [key, field] of [[amount, 'amount'], [code, 'currency']]) {
+        await dataSource.query(
+          `UPDATE custom_table_columns SET config = COALESCE(config, '{}'::jsonb) || jsonb_build_object('source', jsonb_build_object('kind', 'app_field', 'field', $1::text))
+            WHERE table_id = $2 AND key = $3`,
+          [field, tableId, key],
+        );
+      }
+      const rows: Array<[number, string, string]> = [
+        [100, 'USD', 'ACME Store'],
+        [50, ' usd ', 'ACME Store'],
+        [100, 'EUR', 'ACME Market'],
+        [7, '', 'ACME Market'],
+      ];
+      for (const [value, currency, payee] of rows) {
+        await send('post', `/custom-tables/${tableId}/rows`, {
+          data: { [amount]: value, [code]: currency, [shop]: payee, [mine]: 10 },
+        }).expect(201);
+      }
+      const aggs = encodeURIComponent(
+        JSON.stringify([
+          { col: amount, fn: 'sum' },
+          { col: amount, fn: 'count' },
+          { col: mine, fn: 'sum' },
+        ]),
+      );
+      const groupsBy = async (key: string) =>
+        matches(CustomTableGroups, (await get(`/custom-tables/${tableId}/groups?groupBy=${key}&aggs=${aggs}`)).body).items;
+
+      const totals = matches(CustomTableAggregates, (await get(`/custom-tables/${tableId}/aggregates?aggs=${aggs}`)).body);
+      const byShop = Object.fromEntries((await groupsBy(shop)).map(group => [group.key, group.aggregates[0]]));
+      const byCode = Object.fromEntries((await groupsBy(code)).map(group => [group.key, group.aggregates[0]]));
+
+      // 100 USD and 100 EUR are not 257 of anything; the count and the user's own column stay.
+      expect(totals.items).toEqual([
+        { col: amount, fn: 'sum', value: null, mixedCurrencies: true },
+        { col: amount, fn: 'count', value: 4 },
+        { col: mine, fn: 'sum', value: 40 },
+      ]);
+      // " usd " is USD: the store's group is one currency and says which.
+      expect(byShop['ACME Store']).toEqual({ col: amount, fn: 'sum', value: 150, currency: 'USD' });
+      // A row without a code is not added to coded ones.
+      expect(byShop['ACME Market']).toEqual({ col: amount, fn: 'sum', value: null, mixedCurrencies: true });
+      expect(byCode.EUR).toEqual({ col: amount, fn: 'sum', value: 100, currency: 'EUR' });
+    });
+
     it('GET the public share and /reports/custom-tables/available', async () => {
       const view = await request(app.getHttpServer())
         .get(`/public/custom-tables/${shareToken}`)
@@ -3069,6 +3159,20 @@ describe('API contracts (e2e)', () => {
       matches(FileCategoryUpdate, moved.body);
       expect(moved.body.category.id).toBe(categories.body[0].id);
       expect(moved.body).not.toHaveProperty('filePath');
+    });
+
+    it("the caller's language in a workspace, then in the workspace list", async () => {
+      const chosen = 'uk';
+      const saved = await call('put', `/workspaces/${owner.workspaceId}/locale`, {
+        locale: chosen,
+      }).expect(succeeded);
+      matches(WorkspaceMemberLocale, saved.body);
+      expect(saved.body.locale).toBe(chosen);
+      const listed = await get('/workspaces');
+      matches(WorkspaceList, listed.body);
+      const own = listed.body.find((w: { id: string }) => w.id === owner.workspaceId);
+      expect(own.memberLocale).toBe(chosen);
+      await call('put', `/workspaces/${owner.workspaceId}/locale`, { locale: 'xx' }).expect(400);
     });
 
     it('the business logo, a workspace favourite and the custom-tables report', async () => {

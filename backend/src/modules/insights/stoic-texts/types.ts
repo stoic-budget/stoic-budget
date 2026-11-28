@@ -57,7 +57,11 @@ export type StoicMessageKey =
   | 'stoic.keep_first' // savingsPercent, tenthAmount, months
   | 'stoic.prepare_beforehand' // cushionDays, targetAmount
   | 'stoic.wants_outrun_income' // expenseGrowth, incomeGrowth
-  | 'stoic.price_in_life'; // merchant, totalAmount, hours
+  | 'stoic.price_in_life' // merchant, totalAmount, hours
+  // Late payments: the same reason, again (Bills)
+  | 'stoic.late_forgot' // count
+  | 'stoic.late_short' // count
+  | 'stoic.late_unexpected'; // count
 
 export interface StoicText {
   title: string;

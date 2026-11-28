@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Select } from '@/app/components/ui/select';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import type { AccountStatement } from '@/app/lib/contracts';
+import { toDate } from '@/app/lib/user-format';
 import type { Account } from '../hooks/useAccounts';
 import { AccountSideDrawer } from './AccountSideDrawer';
 
@@ -13,7 +14,7 @@ const NOT_NOW = '';
 export function statementPeriod(statement: AccountStatement, locale: string): string {
   const format = (date: string) =>
     new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(
-      new Date(date),
+      toDate(date) ?? new Date(date),
     );
   if (statement.dateFrom && statement.dateTo) {
     return `${format(statement.dateFrom)} – ${format(statement.dateTo)}`;

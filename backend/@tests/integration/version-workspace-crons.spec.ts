@@ -67,6 +67,7 @@ import { OfficialVatRatesService } from '../../src/modules/tax/official-vat-rate
 import { TaxThresholdService } from '../../src/modules/tax/tax-threshold.service';
 import { TaxDeadlinesService } from '../../src/modules/tax-reminders/tax-deadlines.service';
 import { TelegramService } from '../../src/modules/telegram/telegram.service';
+import { SubscriptionCharge } from '../../src/entities/subscription-charge.entity';
 
 const BASE_URL = process.env.DATABASE_URL || 'postgresql://finflow:finflow@localhost:5434/finflow';
 const SCRATCH_DB = `seneca_version_crons_${process.pid}`;
@@ -347,15 +348,19 @@ describe('background jobs leave a past version alone (real Postgres)', () => {
     const trashed = await inBoth(workspaceId =>
       statement(workspaceId, { deleted_at: new Date(Date.now() - 90 * 86_400_000) }),
     );
-    const statementsService = { remove: vi.fn(async () => undefined) };
+    // The purge deletes for good: permanentDelete, not remove (which only trashes).
+    const statementsService = { permanentDelete: vi.fn(async () => undefined) };
 
     await new StorageTrashScheduler(
       repo(Statement),
       statementsService as never,
     ).purgeExpiredTrash();
 
-    expect(statementsService.remove).toHaveBeenCalledTimes(1);
-    expect(statementsService.remove).toHaveBeenCalledWith(trashed.standard, userId, standardId);
+    expect(statementsService.permanentDelete).toHaveBeenCalledTimes(1);
+    expect(statementsService.permanentDelete).toHaveBeenCalledWith(trashed.standard, userId, standardId, {
+      fromTrash: true,
+      system: true,
+    });
   });
 
   it('re-queues stale parsing in the live workspace only, and never parses a version statement', async () => {
@@ -498,6 +503,7 @@ describe('background jobs leave a past version alone (real Postgres)', () => {
       repo(BackupConfiguration),
       repo(Workspace),
       backups as never,
+      { create: vi.fn() } as never,
     ).runDueBackups(now);
 
     expect(backups.runConfiguration).toHaveBeenCalledTimes(1);
@@ -506,6 +512,73 @@ describe('background jobs leave a past version alone (real Postgres)', () => {
       expect.anything(),
       expect.anything(),
     );
+  });
+
+  it('finds a due export schedule behind more than 50 that are not due', async () => {
+    const table = await insert('custom_tables', {
+      user_id: userId,
+      workspace_id: standardId,
+      name: 'Many exports',
+    });
+    const schedule = (fields: Record<string, unknown>) =>
+      insert('custom_table_export_schedules', {
+        table_id: table.id,
+        workspace_id: standardId,
+        ...fields,
+      });
+    // Many more than one batch of 50, so a batch picked before the due check misses it.
+    await dataSource.query(
+      `INSERT INTO custom_table_export_schedules (table_id, workspace_id, interval_hours, last_run_at)
+       SELECT $1, $2, 168, now() FROM generate_series(1, 1000)`,
+      [table.id, standardId],
+    );
+    const hourly = await schedule({
+      interval_hours: 1,
+      last_run_at: new Date(Date.now() - 2 * 3_600_000),
+    });
+
+    const due = await job(CustomTableExportSchedulesService, {
+      scheduleRepository: repo(CustomTableExportSchedule),
+    }).findDueSchedules();
+
+    const ids = due.map(found => found.id);
+    expect(ids).toContain(hourly.id);
+    expect(due.every(found => found.lastRunAt === null || found.id === hourly.id)).toBe(true);
+  });
+
+  it('counts an export interval in hours, a zero one as a week and a negative one as an hour', async () => {
+    const table = await insert('custom_tables', {
+      user_id: userId,
+      workspace_id: standardId,
+      name: 'Interval rules',
+    });
+    const hoursAgo = (hours: number) => new Date(Date.now() - hours * 3_600_000);
+    const schedule = (interval: number, lastRun: Date) =>
+      insert('custom_table_export_schedules', {
+        table_id: table.id,
+        workspace_id: standardId,
+        interval_hours: interval,
+        last_run_at: lastRun,
+      }).then(row => row.id);
+    const rows = {
+      hourlyDue: await schedule(1, hoursAgo(1.5)),
+      hourlyNotYet: await schedule(1, hoursAgo(0.5)),
+      zeroNotYet: await schedule(0, hoursAgo(100)),
+      zeroDue: await schedule(0, hoursAgo(170)),
+      negativeDue: await schedule(-5, hoursAgo(1.5)),
+    };
+    await dataSource.query(
+      `UPDATE custom_table_export_schedules SET enabled = false
+       WHERE workspace_id = $1 AND table_id <> $2`,
+      [standardId, table.id],
+    );
+
+    const due = await job(CustomTableExportSchedulesService, {
+      scheduleRepository: repo(CustomTableExportSchedule),
+    }).findDueSchedules();
+
+    // The oldest last run first.
+    expect(due.map(found => found.id)).toEqual([rows.zeroDue, rows.hourlyDue, rows.negativeDue]);
   });
 
   it('keeps subscriptions of the version as they were copied, and announces only live charges', async () => {
@@ -524,6 +597,7 @@ describe('background jobs leave a past version alone (real Postgres)', () => {
     const notifications = { createForWorkspaceMembers: vi.fn(async () => 1) };
     const service = job(SubscriptionsService, {
       subscriptionRepository: repo(Subscription),
+      chargeRepository: repo(SubscriptionCharge),
       notificationsService: notifications,
     });
 

@@ -212,6 +212,7 @@ export class BackupsService {
       savedRun.payloadSha256 = crypto.createHash('sha256').update(archive).digest('hex');
       savedRun.sizeBytes = String(archive.length);
       savedRun.status = BackupRunStatus.SUCCEEDED;
+      savedRun.errorMessage = missingFilesNote(snapshot.missingFiles);
       savedRun.finishedAt = new Date();
       configuration.lastSuccessfulAt = savedRun.finishedAt;
       await this.configurationRepository.save(configuration);
@@ -273,4 +274,12 @@ export class BackupsService {
       passwordConfigured: Boolean(configuration.encryptedDataKey && configuration.passwordEnvelope),
     };
   }
+}
+
+/** What a finished backup left out, named so the owner can find it (#639). */
+function missingFilesNote(missing: string[]): string | null {
+  if (missing.length === 0) return null;
+  const shown = missing.slice(0, 5).join(', ');
+  const more = missing.length > 5 ? ` and ${missing.length - 5} more` : '';
+  return `Saved without ${missing.length} missing file(s): ${shown}${more}`;
 }

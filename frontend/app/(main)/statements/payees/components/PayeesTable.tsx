@@ -8,10 +8,11 @@ import { useIntlayer, useLocale } from '@/app/i18n';
 import type { PayeesOverview } from '@/app/lib/contracts';
 import { formatMoney } from '@/app/lib/format-money';
 import { localizeStatementCategoryName } from '@/app/lib/statement-categories';
+import { toDate } from '@/app/lib/user-format';
 
 const formatDay = (date: string, locale: string) =>
   new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(
-    new Date(date),
+    toDate(date) ?? new Date(date),
   );
 
 // The cells of a payee row while the list loads, column for column.

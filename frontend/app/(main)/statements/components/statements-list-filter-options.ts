@@ -60,6 +60,7 @@ export const buildHasOptions = (
   labels: Record<string, string>,
 ): Array<{ value: string; label: string }> => [
   { value: 'errors', label: labels.hasErrors },
+  { value: 'warnings', label: labels.hasWarnings },
   { value: 'processingDetails', label: labels.hasLogs },
   { value: 'transactions', label: labels.hasTransactions },
   { value: 'dateRange', label: labels.hasDateRange },

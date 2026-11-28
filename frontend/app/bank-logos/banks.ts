@@ -58,6 +58,7 @@ export const BANKS = [
     aliases: ['crédit agricole'],
   },
   { key: 'credit_one', name: 'Credit One', logo: 'credit-one.png' },
+  { key: 'csob', name: 'ČSOB', logo: 'csob.png', aliases: ['ceskoslovenska obchodni banka'] },
   { key: 'dcu', name: 'DCU', logo: 'dcu.png', aliases: ['digital federal credit union'] },
   {
     key: 'bank_of_america',
@@ -76,6 +77,7 @@ export const BANKS = [
     logo: 'fifth-third.png',
     aliases: ['fifth third bank', '53 bank'],
   },
+  { key: 'fio', name: 'Fio banka', logo: 'fio.png', aliases: ['fio'] },
   {
     key: 'first_citizens',
     name: 'First Citizens',

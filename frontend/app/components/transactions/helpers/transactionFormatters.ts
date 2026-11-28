@@ -82,3 +82,8 @@ export function resolveDisplayAmount(
   if (!showConverted || tx.convertedAmount === undefined) return rawAmount;
   return tx.convertedAmount;
 }
+
+/** Kept out of spending by a link (own transfer, investment, reimbursement): unlinked before a split. */
+export const isLinkedRow = (
+  row: Pick<Transaction, 'transferPairId' | 'investmentAccountId' | 'reimbursementOfId'>,
+): boolean => Boolean(row.transferPairId || row.investmentAccountId || row.reimbursementOfId);

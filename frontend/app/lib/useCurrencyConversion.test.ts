@@ -43,6 +43,25 @@ describe('useCurrencyConversion', () => {
     });
   });
 
+  it('never counts a foreign amount at face value, while loading or after a failed request (#646)', async () => {
+    const record = { currencyValue: 'AED', dateValue: '2026-10-16' };
+    let fail: (error: Error) => void = () => {};
+    api.post.mockReturnValue(
+      new Promise((_, reject) => {
+        fail = reject;
+      }),
+    );
+
+    const { result } = renderHook(() => useCurrencyConversion([record], 'ILS'));
+
+    expect(result.current.convert(100, 'AED', record.dateValue)).toBe(0);
+    fail(new Error('rates down'));
+    await waitFor(() => expect(api.post).toHaveBeenCalled());
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(result.current.convert(100, 'AED', record.dateValue)).toBe(0);
+    expect(result.current.convert(100, 'ILS', record.dateValue)).toBe(100);
+  });
+
   it('asks for the latest rate for a date typed in another shape, so one bad date breaks nothing', async () => {
     const typed = { currencyValue: 'EUR', dateValue: '13/10/2026' };
     const rate = 1.1;

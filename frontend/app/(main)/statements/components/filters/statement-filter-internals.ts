@@ -41,6 +41,11 @@ const toDateOnlyString = (value?: string | null): string | null => {
   if (!value) {
     return null;
   }
+  // A date-only value is that day wherever the browser is: `new Date` would read
+  // it as UTC midnight, the day before west of Greenwich.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return null;
@@ -130,11 +135,16 @@ const hasCurrency = (s: StatementFilterItem): boolean =>
 
 const HAS_CHECKERS: Record<string, (s: StatementFilterItem) => boolean> = {
   errors: hasErrors,
+  // What the dashboard counts as parsing warnings.
+  warnings: s => Boolean(s.parsingDetails?.warnings?.length),
   processingDetails: hasProcessingDetails,
   transactions: s => (s.totalTransactions || 0) > 0,
   dateRange: s => Boolean(s.statementDateFrom || s.statementDateTo),
   currency: hasCurrency,
 };
+
+/** A "has" value the list knows: a hand-edited `?has=` cannot empty the list. */
+export const isHasToken = (token: string): boolean => Object.hasOwn(HAS_CHECKERS, token);
 
 export const matchesHas = (token: string, statement: StatementFilterItem): boolean =>
   HAS_CHECKERS[token]?.(statement) ?? false;

@@ -17,23 +17,13 @@ import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
 import { useCategoryName } from '@/app/lib/use-category-name';
 import { tokens } from '@/lib/theme-tokens';
+import { periodOf, switchChart } from './datev-chart';
 import { saveBlob } from './tax-return.helpers';
 
 const ACCOUNT = /^[0-9]{1,9}$/;
 
 function fill(template: string, params: Record<string, string | number>): string {
   return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => String(params[key] ?? ''));
-}
-
-/** The year, or one of its months: DATEV recommends a file per booking period. */
-function periodOf(year: number, month: string): { from: string; to: string } {
-  if (month === 'year') {
-    return { from: `${year}-01-01`, to: `${year}-12-31` };
-  }
-  const m = Number(month);
-  const last = new Date(Date.UTC(year, m, 0)).getUTCDate();
-  const mm = String(m).padStart(2, '0');
-  return { from: `${year}-${mm}-01`, to: `${year}-${mm}-${last}` };
 }
 
 /**
@@ -192,7 +182,7 @@ export function DatevExportCard({ year }: { year: number }): React.ReactElement 
           size="small"
           value={form.chart}
           aria-label={t.chartLabel.value}
-          onChange={value => setForm({ ...form, chart: value === '04' ? '04' : '03' })}
+          onChange={value => setForm(switchChart(form, value === '04' ? '04' : '03'))}
           options={[
             { value: '03', label: 'SKR 03' },
             { value: '04', label: 'SKR 04' },
