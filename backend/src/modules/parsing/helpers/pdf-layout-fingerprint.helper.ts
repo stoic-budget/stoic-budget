@@ -70,6 +70,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.EQ_BANK, /\beq bank\b.*\bequitable bank\b|\bequitable bank tower\b/],
   [BankName.FIDELITY_BANK, /\bfidelitybank\.ng\b/],
   [BankName.FIFTH_THIRD, /\bfifth third (?:bank|business|preferred|momentum)/],
+  [BankName.FIO, /\bfio\s?banka\b|\bfio(?:bczpp|zskba)/],
   [BankName.FIRST_CITIZENS, /\bfirst citizens bank\b|\bfirstcitizens\.com\b/],
   [BankName.FIRST_DIRECT, /\bfirstdirect\.com\b|\bfirst direct is a division of hsbc\b/],
   [BankName.FNB, /\bfnb\.co\.za\b|\bfirst national bank\b/],
