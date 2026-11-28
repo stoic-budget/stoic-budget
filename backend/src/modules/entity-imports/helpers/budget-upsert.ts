@@ -1,5 +1,6 @@
 import { IsNull } from 'typeorm';
 import { Budget, type BudgetPeriodType } from '../../../entities/budget.entity';
+import { limitHistoryAfter } from '../../budgets/budget-limit-history';
 import { computePeriodRange } from '../../budgets/budget-period.util';
 import type { ImportContext, RowResult } from '../targets/target.types';
 
@@ -55,9 +56,18 @@ export async function upsertBudget(
     ctx.updated.push({
       kind: 'budget',
       id: current.id,
-      before: { limitAmount: Number(current.limitAmount), currency: current.currency },
+      // The history too: an undo puts back exactly what the import replaced.
+      before: {
+        limitAmount: Number(current.limitAmount),
+        currency: current.currency,
+        limitHistory: current.limitHistory ?? [],
+      },
     });
-    await repo.update(current.id, { limitAmount: input.limit });
+    // The old limit stays in the history, so rollover counts past periods at it.
+    await repo.update(current.id, {
+      limitAmount: input.limit,
+      ...limitHistoryAfter(current, { limitAmount: input.limit }),
+    });
     return { status: 'updated', id: current.id };
   }
   const { start } = computePeriodRange(input.periodType, new Date());

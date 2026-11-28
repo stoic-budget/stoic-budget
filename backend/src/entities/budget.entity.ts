@@ -47,6 +47,9 @@ export enum BudgetRolloverMode {
  * silently allow any number of unattached duplicates, which is the case the
  * original constraint existed to prevent.
  */
+/** A limit that applied until `until` (`YYYY-MM-DD`, the day it was changed). */
+export type BudgetLimitChange = { until: string; amount: number };
+
 @Entity('budgets')
 @Index(
   'UQ_budgets_workspace_category_period_unlinked',
@@ -86,6 +89,10 @@ export class Budget {
 
   @Column({ name: 'limit_amount', type: 'decimal', precision: 15, scale: 2 })
   limitAmount: number;
+
+  /** Earlier limits, each with the day it stopped applying (rollover reads them). */
+  @Column({ name: 'limit_history', type: 'jsonb', default: () => "'[]'" })
+  limitHistory: BudgetLimitChange[];
 
   @Column()
   currency: string;

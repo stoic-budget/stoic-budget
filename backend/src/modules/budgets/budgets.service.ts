@@ -37,6 +37,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { PayPeriodService } from '../pay-period/pay-period.service';
 import { countChargesBetween, paidAheadDays } from '../subscriptions/charge-calendar.util';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
+import { limitAt, limitHistoryAfter, pastPeriods } from './budget-limit-history';
 import {
   clampToWindow,
   computePeriodRange,
@@ -46,7 +47,7 @@ import {
   previousPeriods,
 } from './budget-period.util';
 import { type PeriodPosition, periodPosition } from './budget-period-position.util';
-import { percentOf, resolveAvailable } from './budget-rollover.util';
+import { type PastPeriod, percentOf, resolveAvailable } from './budget-rollover.util';
 import { type SpendingRow, spendingRows } from './spending-rows';
 
 export interface BudgetWithSpending extends Budget, PeriodPosition {
@@ -220,7 +221,8 @@ export class BudgetsService {
     );
     await this.assertGoalInWorkspace(dto.goalId, workspaceId);
     const before = budgetSnapshot(budget);
-    Object.assign(budget, dto);
+    // The history is worked out from the limit before the update is assigned.
+    Object.assign(budget, dto, limitHistoryAfter(budget, dto));
     const saved = await this.budgetRepository.save(budget);
     await this.audit({
       workspaceId,
@@ -536,8 +538,9 @@ export class BudgetsService {
       | 'beforeStartSpending'
     >
   > {
-    const limitAmount = Number(budget.limitAmount);
     const range = await this.periodRange(budget, now);
+    // A past period (a budget seen as of an earlier day) at the limit it had then.
+    const limitAmount = limitAt(budget, range.end);
     const period = clampToWindow(range, budget);
     if (!period) {
       return {
@@ -616,14 +619,14 @@ export class BudgetsService {
   private static readonly ROLLOVER_LOOKBACK = 12;
 
   /**
-   * Spending per previous period, oldest first, since the budget began (its
+   * Spending and limit per previous period, oldest first, since the budget began (its
    * window start, else its creation) and at most ROLLOVER_LOOKBACK periods back.
    */
   async previousPeriodsSpent(
     budget: Budget,
     categoryIds: string[],
     currentStart: Date,
-  ): Promise<number[]> {
+  ): Promise<PastPeriod[]> {
     const began = budget.startsOn
       ? parseDateOnly(budget.startsOn)
       : budget.createdAt
@@ -641,18 +644,7 @@ export class BudgetsService {
       periods[periods.length - 1].end,
     );
     const converted = await this.inBudgetCurrency(budget, rows);
-    // Each period at least zero, as its own figure is: refunds never carry over as spending.
-    return periods.map(period =>
-      Math.max(
-        0,
-        converted.reduce((sum, row) => {
-          const at = parseDateOnly(row.date).getTime();
-          return row.value !== null && at >= period.start.getTime() && at <= period.end.getTime()
-            ? sum + row.value
-            : sum;
-        }, 0),
-      ),
-    );
+    return pastPeriods(budget, periods, converted);
   }
 
   /** The category and every category under it; just the category when the tree is not available. */
