@@ -416,6 +416,11 @@ describe('StorageService', () => {
       vi.spyOn(testingModule.get(StorageAccessService), 'checkFileAccess').mockResolvedValue(undefined);
     });
 
+    // The access service is shared by every storage service: put its rules back.
+    afterEach(() => {
+      vi.mocked(testingModule.get(StorageAccessService).checkFileAccess).mockRestore();
+    });
+
     it('refuses to share with a user outside the file\'s workspace', async () => {
       vi.spyOn(workspaceMemberRepository, 'findOne').mockResolvedValue(null);
       const saveSpy = vi.spyOn(filePermissionRepository, 'save');
@@ -475,6 +480,11 @@ describe('StorageService', () => {
       vi.spyOn(testingModule.get(StorageAccessService), 'checkFileAccess').mockResolvedValue(undefined);
     });
 
+    // The access service is shared by every storage service: put its rules back.
+    afterEach(() => {
+      vi.mocked(testingModule.get(StorageAccessService).checkFileAccess).mockRestore();
+    });
+
     it('should revoke permission', async () => {
       const removeSpy = vi.spyOn(filePermissionRepository, 'remove').mockResolvedValue({} as any);
 
@@ -517,5 +527,9 @@ describe('StorageService', () => {
         expect.objectContaining({ userId: 'user-1', workspaceId: 'ws-1' }),
       );
     });
+  });
+
+  it('runs the access rules again after the blocks that skip them', () => {
+    expect(vi.isMockFunction(testingModule.get(StorageAccessService).checkFileAccess)).toBe(false);
   });
 });
