@@ -119,6 +119,7 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.UCO]: 'UCO Bank',
   [BankName.ULSTER]: 'Ulster Bank',
   [BankName.UNICREDIT]: 'UniCredit',
+  [BankName.UNICREDIT_CZ]: 'UniCredit Bank CZ',
   [BankName.UNION_BANK_OF_INDIA]: 'Union Bank of India',
   [BankName.USAA]: 'USAA',
   [BankName.US_BANK]: 'U.S. Bank',

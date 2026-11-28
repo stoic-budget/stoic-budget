@@ -197,6 +197,7 @@ export const BANKS = [
   { key: 'ubs', name: 'UBS', logo: 'ubs.png', aliases: ['ubs bank'] },
   { key: 'uco', name: 'UCO Bank', logo: 'uco.png', aliases: ['uco'] },
   { key: 'ulster', name: 'Ulster Bank', logo: 'ulster.png', aliases: ['ulster'] },
+  { key: 'unicredit_cz', name: 'UniCredit Bank CZ', logo: 'unicredit.png', aliases: ['unicredit bank czech republic'] },
   { key: 'unicredit', name: 'UniCredit', logo: 'unicredit.png', aliases: ['unicredit banca'] },
   {
     key: 'union_bank_of_india',

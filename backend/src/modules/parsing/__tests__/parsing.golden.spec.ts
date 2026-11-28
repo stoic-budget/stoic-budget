@@ -103,7 +103,12 @@ const hasRealDate = (value: Date | null | undefined) => {
  * is whitespace-normalized so a fixture does not break on PDF spacing noise.
  */
 /** Row fields a fixture may ask to be held to as well, by listing them under `compares`. */
-type ExtraField = 'counterpartyAccount' | 'amountForeign' | 'currency';
+type ExtraField =
+  | 'counterpartyAccount'
+  | 'amountForeign'
+  | 'exchangeRate'
+  | 'currency'
+  | 'paymentPurpose';
 
 function projectTransaction(
   transaction: ParsedStatement['transactions'][number],
@@ -121,7 +126,12 @@ function projectTransaction(
     documentNumber: (transaction.documentNumber || '').trim(),
     // Only a fixture that records the payment type is held to it.
     ...(withPaymentType && { paymentType: transaction.paymentType ?? null }),
-    ...Object.fromEntries(extras.map(field => [field, transaction[field] ?? null])),
+    ...Object.fromEntries(
+      extras.map(field => {
+        const value = transaction[field] ?? null;
+        return [field, typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : value];
+      }),
+    ),
   };
 }
 

@@ -190,6 +190,14 @@ describe('findForeignAmount', () => {
     expect(findForeignAmount('částka 50.00 PLN\n2,50 kwh/den', 'CZK')).toEqual({ amount: 50, currency: 'PLN' });
   });
 
+  it('reads the rate printed after the pair of codes, past a line in the account currency', () => {
+    expect(findForeignAmount('CZK 25,40\nEUR 1,00\n1,00 EUR/CZK 25,400000', 'CZK', -25.4)).toEqual({
+      amount: 1,
+      currency: 'EUR',
+      rate: 25.4,
+    });
+  });
+
   it("ignores an amount in the account's own currency", () => {
     expect(findForeignAmount('dne 10.3.2026, částka 840.00 EUR', 'EUR')).toBeNull();
   });

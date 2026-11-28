@@ -142,6 +142,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.UCO, /\bucba0\d{6}\b/],
   [BankName.ULSTER, /\bulsbgb2b\b|\bulsterbank\.co\.uk\b/],
   [BankName.UNICREDIT, /\buncritm1\w*\b|\bunicredit\.eu\b/],
+  [BankName.UNICREDIT_CZ, /\bbacx\s?cz\s?pp\b|\bunicredit bank czech republic\b/],
   [BankName.UNION_BANK_OF_INDIA, /\bubin0\d{6}\b/],
   [BankName.USAA, /\busaa federal savings bank\b/],
   [BankName.US_BANK, /\bu\.s\. bank national association\b|\b1-800-us banks\b/],

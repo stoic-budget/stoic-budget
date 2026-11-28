@@ -5,7 +5,7 @@ describe('listSupportedBanks', () => {
   it('lists every bank with a parser of its own, Bereke once and no placeholder', () => {
     const banks = listSupportedBanks();
 
-    expect(banks).toHaveLength(127);
+    expect(banks).toHaveLength(128);
     expect(banks.map(bank => bank.key)).not.toContain('other');
     expect(new Set(banks.map(bank => bank.key)).size).toBe(banks.length);
   });
@@ -140,6 +140,7 @@ describe('resolveBankLogo', () => {
     ['uco', 'UCO Bank'],
     ['ulster', 'Ulster Bank'],
     ['unicredit', 'UniCredit'],
+    ['unicredit_cz', 'UniCredit Bank CZ'],
     ['union_bank_of_india', 'Union Bank of India'],
     ['usaa', 'USAA'],
     ['us_bank', 'U.S. Bank'],

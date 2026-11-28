@@ -84,6 +84,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'oznaceni platby',
     'kategorie transakce',
     'typ transakce',
+    'transakce',
   ],
   counterparty: [
     'counterparty',
@@ -125,6 +126,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'debitos',
     'saidas',
     'af',
+    'vydaje',
   ],
   credit: [
     'deposit',
@@ -152,6 +154,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'creditos',
     'entradas',
     'bij',
+    'prijmy',
   ],
   amount: [
     'amount',

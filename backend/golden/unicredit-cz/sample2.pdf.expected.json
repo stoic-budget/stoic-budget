@@ -1,0 +1,60 @@
+{
+  "bankName": "unicredit_cz",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "exchangeRate",
+    "currency",
+    "paymentPurpose"
+  ],
+  "metadata": {
+    "accountNumber": "2222333344/2700",
+    "currency": "CZK",
+    "dateFrom": "2026-04-01T00:00:00",
+    "dateTo": "2026-04-30T00:00:00",
+    "balanceStart": 1000,
+    "balanceEnd": 550.95,
+    "rawHeader": "UniCredit Bank Czech Republic and Slovakia, a.s. Strana 1/1 Výpis z účtu Číslo účtu: 2222333344/2700",
+    "normalizedHeader": "UniCredit Bank Czech Republic and Slovakia, a.s. Strana 1/1 Výpis z účtu Číslo účtu: 2222333344/2700",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-04-07T00:00:00",
+      "counterpartyName": "Faktura ID 12026",
+      "counterpartyAccount": "1100000007/0100",
+      "paymentPurpose": "Tuzemská platba - Mobile Banking Odchozí úhrada Číslo účtu: 1100000007/0100 Popis: Faktura ID 12026 VS: 12026",
+      "debit": 350,
+      "currency": "CZK",
+      "documentNumber": "12026"
+    },
+    {
+      "transactionDate": "2026-04-12T00:00:00",
+      "counterpartyName": "Platba u obchodníka",
+      "paymentPurpose": "Platba u obchodníka Datum transakce: : 10.04.2026 1111-2XXX-XX33-0000",
+      "debit": 99.9,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-04-30T00:00:00",
+      "counterpartyName": "Úroky",
+      "paymentPurpose": "Úroky",
+      "credit": 0.85,
+      "currency": "CZK"
+    }
+  ],
+  "checks": [
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "df260a235abf",
+    "headings": [
+      "date:datum | otherDate:valuta | description:transakce | credit:prijmy | debit:vydaje"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "unicredit_cz"
+  }
+}

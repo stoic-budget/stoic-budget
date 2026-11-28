@@ -189,6 +189,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('IFSC Code UCBA0002025')).toBe(BankName.UCO);
     expect(mentionedBank('Manage your statements online at www.ulsterbank.co.uk')).toBe(BankName.ULSTER);
     expect(mentionedBank('Codice BIC SWIFT: UNCRITM1AG0')).toBe(BankName.UNICREDIT);
+    expect(mentionedBank('UniCredit Bank Czech Republic and Slovakia, a.s., BIC BACXCZPP')).toBe(BankName.UNICREDIT_CZ);
     expect(mentionedBank('IFSC : UBIN0567221')).toBe(BankName.UNION_BANK_OF_INDIA);
     expect(mentionedBank('USAA Federal Savings Bank 10750 McDermott Freeway')).toBe(BankName.USAA);
     expect(mentionedBank('U.S. Bank National Association Member FDIC')).toBe(BankName.US_BANK);
