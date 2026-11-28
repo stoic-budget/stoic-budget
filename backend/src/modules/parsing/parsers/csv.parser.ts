@@ -1,8 +1,10 @@
 import csv = require('csv-parser');
 
 import * as fs from 'fs';
+import { Readable } from 'stream';
 import { appDefaultCurrency } from '../../../common/utils/currency.util';
 import { type BankName, FileType } from '../../../entities/statement.entity';
+import { decodeUnlabelledText } from '../helpers/text-encoding.helper';
 import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-statement.interface';
 import { BaseTabularParser } from './base-tabular.parser';
 import { type CsvPreset, type DateOrder, findCsvPreset, presetColumnMapping } from './csv-presets';
@@ -58,10 +60,12 @@ export class CsvParser extends BaseTabularParser {
 
   async parse(filePath: string, cachedText?: string): Promise<ParsedStatement> {
     // Detect currency from raw file content before streaming rows
-    const rawContent = fs.readFileSync(filePath, 'utf-8').slice(0, 4096);
+    // Decoded once, whatever the bank saved it in (#637): UTF-16, 1251, 1252…
+    const text = decodeUnlabelledText(fs.readFileSync(filePath));
+    const rawContent = text.slice(0, 4096);
     const detectedCurrency = this.detectCurrency(rawContent) || appDefaultCurrency();
 
-    const rows = await this.readRows(filePath);
+    const rows = await this.readRows(text);
     const { headerIndex, headers, preset, columnMapping } = this.locateHeader(rows);
     const dataRows = rows.slice(headerIndex + 1);
 
@@ -117,11 +121,11 @@ export class CsvParser extends BaseTabularParser {
     };
   }
 
-  private readRows(filePath: string): Promise<string[][]> {
+  private readRows(text: string): Promise<string[][]> {
     return new Promise((resolve, reject) => {
       const rows: string[][] = [];
-      fs.createReadStream(filePath)
-        .pipe(csv({ separator: this.detectSeparator(filePath), headers: false }))
+      Readable.from([text])
+        .pipe(csv({ separator: this.detectSeparator(text), headers: false }))
         .on('data', (row: Record<string, string>) => rows.push(Object.values(row)))
         .on('end', () => resolve(rows))
         .on('error', reject);
@@ -173,12 +177,11 @@ export class CsvParser extends BaseTabularParser {
     };
   }
 
-  private detectSeparator(filePath: string): string {
+  private detectSeparator(content: string): string {
     // Vote over the first lines, not just the first: a preamble line such as
     // "Account statement" has no separator at all. The separator is on
     // (nearly) every line; ties go to ';' because comma-decimal files carry
     // commas inside amounts too.
-    const content = fs.readFileSync(filePath, 'utf-8');
     const lines = content
       .split(/\r?\n/)
       .filter(line => line.trim())

@@ -19,6 +19,8 @@ import {
   applyRowSort,
   buildAggregateSelections,
   buildTypedValueExprs,
+  currencyCodesSelection,
+  markMixedCurrencies,
   normalizeAggregateValue,
 } from './helpers/row-query';
 import { throwHelpfulSchemaError } from './helpers/schema-error';
@@ -157,13 +159,17 @@ export class CustomTableRowQueryService {
     }
 
     const typeByKey = await this.support.loadColumnTypeMap(tableId);
+    const rowCurrency = await this.support.loadRowCurrency(tableId);
     const query = await this.buildRowsQuery(tableId, { filters: params.filters });
     const total = await query.getCount();
 
     // ORDER BY из базового запроса несовместим с агрегацией без GROUP BY.
     query.orderBy();
 
-    const selections = buildAggregateSelections(query, aggs, typeByKey);
+    const selections = [
+      ...buildAggregateSelections(query, aggs, typeByKey),
+      ...currencyCodesSelection(query, rowCurrency),
+    ];
 
     const raw = await query.select(selections).getRawOne<Record<string, unknown>>();
 
@@ -173,7 +179,7 @@ export class CustomTableRowQueryService {
       value: normalizeAggregateValue(raw?.[`agg_${index}`]),
     }));
 
-    return { items, total };
+    return { items: markMixedCurrencies(items, raw, rowCurrency), total };
   }
 
   /**
@@ -216,6 +222,7 @@ export class CustomTableRowQueryService {
       throw new BadRequestException(appError('AGG_TOO_MANY'));
     }
 
+    const rowCurrency = await this.support.loadRowCurrency(tableId);
     const query = await this.buildRowsQuery(tableId, { filters: params.filters });
     // Порядок строк из базового запроса к группам отношения не имеет.
     query.orderBy();
@@ -227,6 +234,7 @@ export class CustomTableRowQueryService {
       `${groupExpr} AS "group_key"`,
       'COUNT(*) AS "group_count"',
       ...buildAggregateSelections(query, aggs, typeByKey),
+      ...currencyCodesSelection(query, rowCurrency),
     ];
 
     const safeLimit = Math.min(Math.max(params.limit ?? 200, 1), 1000);
@@ -241,11 +249,15 @@ export class CustomTableRowQueryService {
     const items = rows.map(row => ({
       key: row.group_key === null || row.group_key === undefined ? null : String(row.group_key),
       count: Number(row.group_count) || 0,
-      aggregates: aggs.map((agg, index) => ({
-        col: agg.col,
-        fn: agg.fn,
-        value: normalizeAggregateValue(row[`agg_${index}`]),
-      })),
+      aggregates: markMixedCurrencies(
+        aggs.map((agg, index) => ({
+          col: agg.col,
+          fn: agg.fn,
+          value: normalizeAggregateValue(row[`agg_${index}`]),
+        })),
+        row,
+        rowCurrency,
+      ),
     }));
 
     return { items, groupCount: items.length };

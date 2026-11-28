@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, type Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { canReadPrivate } from '../../common/utils/transaction-privacy.util';
-import { resolveUploadsDir } from '../../common/utils/uploads.util';
+import { fileStillNamed, resolveUploadsDir } from '../../common/utils/uploads.util';
 import type { ItemImage as ItemImageAnswer, ItemVendor } from '../../contracts';
 import { ItemImage, Payable, PayablePayment, Transaction } from '../../entities';
 import { vendorsOfTransactions } from './transaction-vendors';
@@ -285,6 +285,7 @@ export class ItemImagesService {
 
   private async deleteFile(fileName: string): Promise<void> {
     try {
+      if (await fileStillNamed(this.images, 'fileName', fileName)) return;
       await fs.unlink(this.filePath(fileName));
     } catch {
       // Already gone, or a read-only volume: an orphaned file is not worth an error.

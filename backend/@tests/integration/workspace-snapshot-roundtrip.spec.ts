@@ -202,6 +202,25 @@ describe('a workspace snapshot survives collect and restore (real Postgres)', ()
     );
     const userId = user.id;
     await insert('workspace_members', { workspace_id: workspaceId, user_id: userId, role: 'owner' });
+    // A second member, and each one's own view settings of the same page: per
+    // member, they must not come back onto the one restoring (one per user and scope).
+    const partner = await dataSource.getRepository(User).save(
+      dataSource.getRepository(User).create({
+        email: `roundtrip-partner-${randomUUID()}@example.com`,
+        passwordHash: 'x',
+        name: 'Member One',
+        workspaceId,
+      }),
+    );
+    await insert('workspace_members', { workspace_id: workspaceId, user_id: partner.id, role: 'member' });
+    for (const memberId of [userId, partner.id]) {
+      await insert('view_preferences', {
+        workspace_id: workspaceId,
+        user_id: memberId,
+        scope: 'transactions',
+        state: JSON.stringify({ density: 'compact' }),
+      });
+    }
 
     // Categories: a parent and a child under it.
     const food = await insert('categories', { workspace_id: workspaceId, user_id: userId, name: 'Food', type: 'expense' });

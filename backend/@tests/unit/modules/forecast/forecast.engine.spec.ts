@@ -268,6 +268,24 @@ describe('detectRecurringIncome', () => {
     expect(paydays.map(item => item.date)).toEqual(['2026-10-25', '2026-11-25', '2026-12-25']);
   });
 
+  it('keeps a payer in another currency apart, in its own currency', () => {
+    const paydays = ['2026-06-25', '2026-07-25', '2026-08-25', '2026-09-25'];
+    const rows = [
+      ...paydays.map(date => ({
+        counterpartyName: 'ACME Employer',
+        amount: 300_000,
+        currency: 'KZT',
+        transactionDate: date,
+      })),
+      // The same payer's bonus in EUR does not upset the KZT salary's amounts.
+      { counterpartyName: 'ACME Employer', amount: 500, currency: 'EUR', transactionDate: '2026-09-10' },
+    ];
+
+    const found = detectRecurringIncome(rows, today);
+
+    expect(found).toEqual([expect.objectContaining({ amount: 300_000, currency: 'KZT' })]);
+  });
+
   it('ignores one-off deposits and irregular payers', () => {
     const rows = [
       { counterpartyName: 'Refund', amount: 50, transactionDate: '2026-09-01' },

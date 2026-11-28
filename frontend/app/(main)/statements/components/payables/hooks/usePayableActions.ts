@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer } from '@/app/i18n';
 import { getApiErrorMessage } from '@/app/lib/api-error';
+import { lateReasonsApi } from '@/app/lib/late-reasons-api';
 import {
   type CreatePayableInput,
   type Payable,
@@ -31,6 +32,7 @@ export function usePayableActions({
   const workspaceId = useWorkspaceId();
   const queryClient = useQueryClient();
   const recurrenceText = useIntlayer('payableRecurrence');
+  const lateText = useIntlayer('lateReasons');
   // An occurrence of a repeating bill goes alone: the series makes its next one.
   const withSeriesNote = (payable: Payable, message: string): string =>
     payable.recurrence ? `${message}\n\n${recurrenceText.seriesContinues.value}` : message;
@@ -107,6 +109,12 @@ export function usePayableActions({
           : result.kind === 'book'
             ? await payablesApi.bookPayment(payable.id, result.paymentId, result.payload)
             : await payablesApi.addPayment(payable.id, result.payload);
+      // Why it was late goes with the payment; a refusal of it must not undo the payment.
+      if (result.lateReason) {
+        await lateReasonsApi.set(payable.id, result.lateReason).catch(error => {
+          toast.error(getApiErrorMessage(error, lateText.failed.value));
+        });
+      }
       // A bill that is still short keeps the dialog open on its new outstanding
       // amount: instalments arrive one after another.
       setPayingPayable(updated.status === 'partially_paid' ? updated : null);

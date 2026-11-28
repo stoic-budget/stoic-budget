@@ -19,6 +19,7 @@ import {
 } from '../stoic/stoic-signals';
 import { STOIC_VARIANT_COUNT } from '../stoic-texts/types';
 import type { AnalysisContext, InsightAnalyzer, InsightCandidate } from './analyzer.interface';
+import { hash, rotation } from './stoic-rotation';
 
 /** More than this and the page stops being advice and becomes a report. */
 const MAX_STOIC_CARDS = 5;
@@ -31,19 +32,6 @@ const MAX_UNDATED_GOALS = 3;
 const UNDATED_GOAL_MIN_AGE_MS = 30 * 86_400_000;
 /** How far ahead the forecast is read for a balance below zero. */
 const OUTLOOK_HORIZON_DAYS = 45;
-
-/** A small stable hash for the rotation below. */
-function hash(text: string): number {
-  let value = 0;
-  for (let index = 0; index < text.length; index += 1) {
-    value = (value * 31 + text.charCodeAt(index)) >>> 0;
-  }
-  return value;
-}
-
-/** Each workspace has its own rotation of wordings, moving on month by month. */
-const rotation = (workspaceId: string, month: Date) =>
-  hash(workspaceId) + month.getFullYear() * 12 + month.getMonth();
 
 /**
  * Advice in the Stoic sense. Budgets say what the user meant to spend on

@@ -199,12 +199,12 @@ function dayKey(date: Date): string {
  */
 export function settledDateOf(
   subscription: { nextChargeDate: Date | string | null; frequency: SubscriptionFrequency },
-  chargeDay: string,
+  chargeDay: Date | string,
 ): Date {
   const next = subscription.nextChargeDate;
   if (!next) return chargeDay as unknown as Date;
   const anchor = localDayOf(next instanceof Date ? next.toISOString() : String(next));
-  const target = localDayOf(chargeDay).getTime();
+  const target = dayOf(chargeDay).getTime();
   const step = target < anchor.getTime() ? -1 : 1;
   let best = anchor;
   for (let index = step; Math.abs(index) < MAX_STEPS; index += step) {
@@ -246,4 +246,68 @@ export function nextChargeOf(
 ): Date {
   sub.billingDay ??= date.getDate();
   return nextChargeAfter(date, sub.frequency, sub.billingDay);
+}
+
+const dayOf = (value: Date | string): Date =>
+  value instanceof Date ? localDayOf(dayKey(value)) : localDayOf(String(value));
+
+/**
+ * Whether a payment settled its charge ahead of time: by the same rule that
+ * books a payment, the charge nearest to its day is this one. Not a past
+ * period's payment, even posted a day late, that a schedule which had already
+ * moved on recorded against the next charge (#608).
+ */
+export function paidAhead(
+  charge: { chargeDate: Date | string; expectedDate: Date | string | null },
+  frequency: SubscriptionFrequency,
+): boolean {
+  if (!charge.expectedDate) return false;
+  const expected = dayKey(dayOf(charge.expectedDate));
+  const settled = settledDateOf({ nextChargeDate: expected, frequency }, charge.chargeDate);
+  return String(settled) === expected;
+}
+
+/**
+ * Per subscription, the days of its charges from `today` on already paid
+ * ahead. A payment nearest a coming charge counts only once the charge before
+ * it was paid too: without that it is the earlier charge's late payment, not
+ * an early one, the rule the payday planner uses. `charges` hold the recent
+ * payments, 19 months back, so that earlier charge's is among them (an
+ * annual one paid up to half a year early included).
+ */
+export function paidAheadDays(
+  charges: Array<{
+    subscriptionId: string;
+    chargeDate: Date | string;
+    expectedDate: Date | string | null;
+  }>,
+  subscriptions: Array<{ id: string; frequency: SubscriptionFrequency }>,
+  today: string,
+): Map<string, Set<string>> {
+  const days = new Map<string, Set<string>>();
+  for (const charge of charges) {
+    const subscription = subscriptions.find(row => row.id === charge.subscriptionId);
+    if (!(charge.expectedDate && dayKey(dayOf(charge.expectedDate)) >= today)) continue;
+    if (!(subscription && paidAhead(charge, subscription.frequency))) continue;
+    const expected = dayKey(dayOf(charge.expectedDate));
+    const before = dayKey(chargeAt(dayOf(expected), subscription.frequency, -1));
+    const settles = (other: (typeof charges)[number]) =>
+      String(
+        settledDateOf(
+          { nextChargeDate: expected, frequency: subscription.frequency },
+          other.chargeDate,
+        ),
+      ) === before;
+    if (
+      !charges.some(
+        other =>
+          other !== charge && other.subscriptionId === charge.subscriptionId && settles(other),
+      )
+    )
+      continue;
+    const paid = days.get(charge.subscriptionId) ?? new Set<string>();
+    paid.add(String(charge.expectedDate).slice(0, 10));
+    days.set(charge.subscriptionId, paid);
+  }
+  return days;
 }

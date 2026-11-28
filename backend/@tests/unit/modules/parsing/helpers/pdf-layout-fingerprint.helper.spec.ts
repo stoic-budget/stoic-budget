@@ -109,6 +109,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('in account with commercial bank of ceylon')).toBe(BankName.COMMERCIAL_BANK);
     expect(mentionedBank('Crédit Agricole Brie Picardie 500 Rue Saint Fuscien')).toBe(BankName.CREDIT_AGRICOLE);
     expect(mentionedBank('made payable to CREDIT ONE BANK.')).toBe(BankName.CREDIT_ONE);
+    expect(mentionedBank('Československá obchodní banka, a. s., Radlická 333/150')).toBe(BankName.CSOB);
     expect(mentionedBank('Digital Federal Credit Union 220 Sample Boulevard')).toBe(BankName.DCU);
     expect(mentionedBank('Bank of America, N.A. P.O. Box 25118')).toBe(BankName.BANK_OF_AMERICA);
     expect(mentionedBank('CAISSE DESJARDINS DE SAMPLETOWN')).toBe(BankName.DESJARDINS);
@@ -117,6 +118,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Equitable Bank Tower. 30 Sample Avenue West')).toBe(BankName.EQ_BANK);
     expect(mentionedBank('www.fidelitybank.ng')).toBe(BankName.FIDELITY_BANK);
     expect(mentionedBank('Fifth Third Business Plus')).toBe(BankName.FIFTH_THIRD);
+    expect(mentionedBank('Fio banka, a.s., V Celnici 1028/10')).toBe(BankName.FIO);
     expect(mentionedBank('Member FDIC. First Citizens Bank')).toBe(BankName.FIRST_CITIZENS);
     expect(mentionedBank('first direct is a division of HSBC UK Bank plc')).toBe(BankName.FIRST_DIRECT);
     expect(mentionedBank('visit fnb.co.za')).toBe(BankName.FNB);

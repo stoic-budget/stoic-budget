@@ -1182,4 +1182,85 @@ export const da: StoicTextMap = {
         'På {{percent}} %, uden frist. Ved du, hvor du sejler hen, følger det månedlige skridt af sig selv.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'At glemme to gange er en vane',
+      message:
+        '{{count}} regninger det seneste halve år blev betalt for sent, fordi de blev glemt. Hukommelse er ingen plan: lad påmindelsen komme tidligere, mens der stadig er tid til at handle.',
+    },
+    {
+      title: 'Regningen glemte ikke dig',
+      message:
+        '{{count}} regninger ventede det seneste halve år på, at nogen huskede dem. Det, hovedet ikke bærer, bærer en påmindelse: giv den et par dage mere.',
+    },
+    {
+      title: 'Lad påmindelsen huske',
+      message:
+        'Glemt {{count}} gange på et halvt år. Forstanden er til at dømme, ikke til at gemme datoer: lad påmindelsen komme i god tid.',
+    },
+    {
+      title: 'En lille pligt, ofte overset',
+      message:
+        '{{count}} for sene regninger, hver især simpelthen glemt. Ro begynder med orden i det små, og en tidligere påmindelse koster ingenting.',
+    },
+    {
+      title: 'Glemsel har et mønster',
+      message:
+        'På et halvt år passerede {{count}} regninger deres dato ubemærket. Seneca gennemgik sin dag hver aften; en påmindelse et par dage før gør det for dig.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Lønnen kommer efter regningen',
+      message:
+        '{{count}} gange på et halvt år var pengene der endnu ikke, da en regning forfaldt. Flyt datoen til efter lønningsdagen, eller læg én betaling til side: det forberedte jager ikke.',
+    },
+    {
+      title: 'Pengene kommer efter datoen',
+      message:
+        '{{count}} gange på et halvt år kom regningen før indtægten. Læg datoen, hvor pengene allerede er, så presser regningen ikke længere.',
+    },
+    {
+      title: 'En betaling foran',
+      message:
+        '{{count}} for sene regninger ventede på lønnen i et halvt år. Læg én betaling til side, så mister kalenderen sit greb om dig.',
+    },
+    {
+      title: 'Ordn datoerne, ikke bekymringen',
+      message:
+        '{{count}} gange på et halvt år slap pengene op før lønnen. Kuren er ikke mere bekymring, men bedre orden: regningen efter indtægten eller en buffer før.',
+    },
+    {
+      title: 'Det forberedte haster ikke',
+      message:
+        '{{count}} gange forfaldt en regning, før pengene kom. Det forberedte mødes roligt: læg én betaling til side eller flyt datoen.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Det uventede vender tilbage',
+      message:
+        '{{count}} forsinkelser på et halvt år fulgte efter en uforudset udgift. Den vise rammes af intet mod sin forventning, skriver Seneca. En reserve til det uforudsete er et mål, der er værd at sætte.',
+    },
+    {
+      title: 'Forvent det uventede',
+      message:
+        '{{count}} for sene regninger på et halvt år fulgte en udgift, du ikke forudså. Stoikerne øvede sig i modgang på forhånd; en reserve er den øvelse i penge.',
+    },
+    {
+      title: 'En buffer til det uforudsete',
+      message:
+        'På et halvt år ventede {{count}} regninger bag en overraskende udgift. En lille reserve gør den næste overraskelse til et besvær, ikke en for sen regning.',
+    },
+    {
+      title: 'Skæbnen låner ud og vil have igen',
+      message:
+        '{{count}} gange skubbede en uforudset udgift en regning forbi dens dato. Skæbnen spørger igen; læg en reserve til side, så regningen ikke skal vente.',
+    },
+    {
+      title: 'Overraskelser er ikke sjældne',
+      message:
+        '{{count}} for sene regninger fulgte noget uventet. Det, der sker ofte, er ikke rigtig uventet: et reservemål giver plads til det.',
+    },
+  ],
 };

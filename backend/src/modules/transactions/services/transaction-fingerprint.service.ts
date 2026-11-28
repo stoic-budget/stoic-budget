@@ -138,11 +138,15 @@ export class TransactionFingerprintService {
       return [];
     }
 
-    return this.transactionRepository
-      .createQueryBuilder('transaction')
-      .where('transaction.workspaceId = :workspaceId', { workspaceId })
-      .andWhere('transaction.fingerprint IN (:...fingerprints)', { fingerprints })
-      .getMany();
+    return (
+      this.transactionRepository
+        .createQueryBuilder('transaction')
+        .where('transaction.workspaceId = :workspaceId', { workspaceId })
+        .andWhere('transaction.fingerprint IN (:...fingerprints)', { fingerprints })
+        // The live row, never a copy: a repeat is flagged against the original.
+        .andWhere('transaction.isDuplicate = false')
+        .getMany()
+    );
   }
 
   /**
