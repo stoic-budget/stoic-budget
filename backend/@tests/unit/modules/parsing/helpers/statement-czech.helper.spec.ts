@@ -104,6 +104,12 @@ describe('Czech and Slovak statements', () => {
     expect(findAccountNumber(text)).toBe(iban);
   });
 
+  it('takes no "Účet:" or "Protiúčet:" line for the account: a row prints them (ČSOB reads its own)', () => {
+    expect(findAccountNumber('Výpis z účtu\n05.03. Příchozí platba Protiúčet: 2900000001/0800')).toBeNull();
+    expect(findAccountNumber('Account number: 12345678\nÚčet: 2900000001/0800')).toBe('12345678');
+    expect(findAccountNumber('Account number: 12345678\nNote: převod na účet: 123456/0800')).toBe('12345678');
+  });
+
   it('keeps a slash and four digits only after the Czech label', () => {
     expect(findAccountNumber('Account No: 12345678/2024')).toBe('12345678');
   });

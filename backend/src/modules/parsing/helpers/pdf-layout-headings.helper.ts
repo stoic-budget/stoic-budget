@@ -81,6 +81,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'popis',
     'popis transakce',
     'popis operacie',
+    'oznaceni platby',
   ],
   counterparty: [
     'counterparty',
@@ -196,5 +197,6 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'mode**',
     'id operace',
     'id operacie',
+    'identifikace',
   ],
 };

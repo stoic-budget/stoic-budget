@@ -38,6 +38,7 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.COMMERCIAL_BANK]: 'Commercial Bank',
   [BankName.CREDIT_AGRICOLE]: 'Crédit Agricole',
   [BankName.CREDIT_ONE]: 'Credit One',
+  [BankName.CSOB]: 'ČSOB',
   [BankName.DCU]: 'DCU',
   [BankName.OTHER]: 'Bank',
   [BankName.BANK_OF_AMERICA]: 'Bank of America',
