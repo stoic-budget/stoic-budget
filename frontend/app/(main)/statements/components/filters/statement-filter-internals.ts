@@ -41,6 +41,11 @@ const toDateOnlyString = (value?: string | null): string | null => {
   if (!value) {
     return null;
   }
+  // A date-only value is that day wherever the browser is: `new Date` would read
+  // it as UTC midnight, the day before west of Greenwich.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return null;
