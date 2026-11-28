@@ -215,6 +215,49 @@ describe('Backup restore isolation (e2e)', () => {
     expect(await snapshot(b.workspaceId)).toEqual(before);
   });
 
+  it('restores the tax settings and credit it can trust, and defaults for the rest', async () => {
+    const sourceId = randomUUID();
+    const archive = await archives.create({
+      password,
+      workspace: { id: sourceId, name: 'Crafted tax' },
+      collections: {
+        workspace: [
+          {
+            id: sourceId,
+            name: 'Crafted tax',
+            currency: 'EUR',
+            ledgerBaseCurrency: 'eur',
+            vatStatus: 'bogus',
+            taxJurisdictionId: randomUUID(),
+            backgroundAttribution: 'Photo by Member One, CC BY 4.0',
+          },
+        ],
+      },
+      files: [],
+    });
+    const preview = await as(request(server()).post('/backups/import/preview'))
+      .attach('file', archive, 'tax.seneca-backup')
+      .field('password', password)
+      .expect(201);
+    const res = await as(request(server()).post(`/backups/imports/${preview.body.importId}/restore`))
+      .attach('file', archive, 'tax.seneca-backup')
+      .field('password', password)
+      .expect(201);
+    restoredWorkspaceIds.push(res.body.workspaceId);
+
+    const [row] = await dataSource.query(
+      `SELECT ledger_base_currency, vat_status, tax_jurisdiction_id, background_attribution
+         FROM workspaces WHERE id = $1`,
+      [res.body.workspaceId],
+    );
+    expect(row).toEqual({
+      ledger_base_currency: 'EUR',
+      vat_status: 'registered',
+      tax_jurisdiction_id: null,
+      background_attribution: 'Photo by Member One, CC BY 4.0',
+    });
+  });
+
   it('still restores a backup of a whole workspace into a new one', async () => {
     const source = await snapshot(a.workspaceId);
     const [workspace] = await dataSource.query(

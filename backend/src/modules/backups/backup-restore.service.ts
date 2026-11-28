@@ -22,6 +22,7 @@ import {
 import { GROUP_KEY_COLUMNS } from './backup-group-keys';
 import { prepareDocumentPaths } from './backup-restore-documents';
 import { UNRESTORABLE_COLLECTIONS } from './unrestorable-collections';
+import { workspaceTaxFields } from './workspace-record';
 
 const RESTORE_ORDER = [
   'categories',
@@ -223,16 +224,7 @@ export class BackupRestoreService {
         name: options.name,
         kind: options.kind ?? WorkspaceKind.STANDARD,
         versionId: options.versionId ?? null,
-        // Older snapshots carry none of these; the defaults then apply.
-        ...(typeof sourceWorkspace.ledgerBaseCurrency === 'string'
-          ? { ledgerBaseCurrency: sourceWorkspace.ledgerBaseCurrency }
-          : {}),
-        ...(typeof sourceWorkspace.taxJurisdictionId === 'string'
-          ? { taxJurisdictionId: sourceWorkspace.taxJurisdictionId }
-          : {}),
-        ...(typeof sourceWorkspace.vatStatus === 'string'
-          ? { vatStatus: sourceWorkspace.vatStatus as Workspace['vatStatus'] }
-          : {}),
+        ...(await workspaceTaxFields(this.dataSource, sourceWorkspace)),
         description: this.stringOrNull(sourceWorkspace.description),
         icon: this.stringOrNull(sourceWorkspace.icon),
         color: this.stringOrNull(sourceWorkspace.color),

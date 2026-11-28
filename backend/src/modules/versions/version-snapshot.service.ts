@@ -11,6 +11,7 @@ import {
 } from '../../entities/workspace-version.entity';
 import { BackupDataService } from '../backups/backup-data.service';
 import { BackupKeyService } from '../backups/backup-key.service';
+import { workspaceRecord } from '../backups/workspace-record';
 import { VersionBlobStore } from './version-blob-store';
 import { encodePayload } from './version-payload';
 
@@ -101,7 +102,7 @@ export class VersionSnapshotService {
       }
       const payload: VersionPayload = {
         formatVersion: VERSION_FORMAT,
-        workspace: this.workspaceRecord(workspace),
+        workspace: workspaceRecord(workspace),
         collections: snapshot.collections,
         files,
       };
@@ -150,22 +151,5 @@ export class VersionSnapshotService {
       .andWhere('version.id <> :exceptId', { exceptId })
       .orderBy('version.takenAt', 'DESC')
       .getOne();
-  }
-
-  /** What a restore needs of the workspace row itself, beside its tables. */
-  private workspaceRecord(workspace: Workspace): Record<string, unknown> {
-    return {
-      id: workspace.id,
-      name: workspace.name,
-      description: workspace.description,
-      icon: workspace.icon,
-      color: workspace.color,
-      backgroundImage: workspace.backgroundImage,
-      currency: workspace.currency,
-      settings: workspace.settings,
-      ledgerBaseCurrency: workspace.ledgerBaseCurrency,
-      taxJurisdictionId: workspace.taxJurisdictionId,
-      vatStatus: workspace.vatStatus,
-    };
   }
 }
