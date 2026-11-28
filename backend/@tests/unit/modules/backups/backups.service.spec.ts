@@ -68,6 +68,38 @@ describe('BackupsService', () => {
     expect(run.trigger).toBe(BackupRunTrigger.MANUAL);
   });
 
+  it('finishes a run whose workspace lost a file, naming what it left out (#639)', async () => {
+    const configuration = {
+      id: 'config-1',
+      workspaceId: 'workspace-1',
+      destinationKind: BackupDestinationKind.LOCAL,
+      destinationPath: 'nightly',
+      retentionCount: 7,
+      encryptedDataKey: 'server-wrapped-data-key',
+      passwordEnvelope: { kdf: {}, wrappedDataKey: {} },
+      enabled: true,
+    };
+    const dataService = {
+      collect: vi.fn().mockResolvedValue({
+        collections: {},
+        files: [],
+        missingFiles: ['statement statement-1 (bank.csv)'],
+      }),
+    };
+    const service = createService({
+      configurationRepository: repository(configuration),
+      runRepository: repository(),
+      destination: { store: vi.fn().mockResolvedValue('nightly-workspace-1/backup.seneca-backup') },
+      archive: { create: vi.fn().mockResolvedValue(Buffer.from('encrypted archive')) },
+      dataService,
+    });
+
+    const run = await service.createRun(user, 'workspace-1', BackupRunTrigger.MANUAL);
+
+    expect(run.status).toBe(BackupRunStatus.SUCCEEDED);
+    expect(run.errorMessage).toBe('Saved without 1 missing file(s): statement statement-1 (bank.csv)');
+  });
+
   describe('audit events', () => {
     const configInput = {
       destinationKind: BackupDestinationKind.LOCAL,
@@ -229,7 +261,9 @@ function createService(overrides: Record<string, unknown> = {}) {
     encryptDataKey: vi.fn().mockReturnValue('server-wrapped-data-key'),
     decryptDataKey: vi.fn().mockReturnValue(Buffer.alloc(32, 1)),
   };
-  const dataService = { collect: vi.fn().mockResolvedValue({ collections: { categories: [{ id: 'category-1' }] }, files: [] }) };
+  const dataService = (overrides.dataService as { collect: unknown } | undefined) ?? {
+    collect: vi.fn().mockResolvedValue({ collections: { categories: [{ id: 'category-1' }] }, files: [], missingFiles: [] }),
+  };
   const destination = overrides.destination ?? { store: vi.fn() };
   const auditService = overrides.auditService ?? { createEvent: vi.fn().mockResolvedValue({}) };
 

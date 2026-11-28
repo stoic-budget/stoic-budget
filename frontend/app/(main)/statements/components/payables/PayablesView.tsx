@@ -17,11 +17,14 @@ import { tokens } from '@/lib/theme-tokens';
 import { dueDateSpan, payableFilterExtras } from '../filters/filter-summary';
 import { TransactionsPageTitle } from '../TransactionsPageTitle';
 import { CreatePayableDrawer } from './CreatePayableDrawer';
+import { useLateReasonEditor } from './hooks/useLateReasons';
 import { usePayableActions } from './hooks/usePayableActions';
 import { usePayableOccurrence } from './hooks/usePayableOccurrence';
 import { PAGE_SIZE, usePayablesData } from './hooks/usePayablesData';
 import { usePayablesFilters } from './hooks/usePayablesFilters';
 import { usePayablesLabels } from './hooks/usePayablesLabels';
+import { LatePaymentsSummaryCard } from './LatePaymentsSummaryCard';
+import { LateReasonDialog } from './LateReasonDialog';
 import { MarkPaidDialog } from './MarkPaidDialog';
 import { OccurrenceDialog } from './OccurrenceDialog';
 import PayableFiltersBar from './PayableFiltersBar';
@@ -76,6 +79,7 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
     toasts: labels.toasts,
   });
   const occurrence = usePayableOccurrence(reload);
+  const lateReason = useLateReasonEditor(reload);
   useQuickActions([{ id: 'add', label: labels.add, icon: Plus, run: actions.openCreateDrawer }]);
 
   if (authLoading || workspaceLoading) {
@@ -167,6 +171,7 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
             direction={direction}
             labels={labels.summary}
           />
+          <LatePaymentsSummaryCard enabled={direction === 'payable'} />
 
           <PayablesListLoading
             items={loading ? null : items}
@@ -192,6 +197,7 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
             onArchive={actions.handleArchive}
             onDelete={actions.handleDelete}
             onOccurrence={occurrence.start}
+            onLateReason={lateReason.open}
           />
         </div>
       </div>
@@ -203,6 +209,13 @@ export function PayablesView({ direction = 'payable' }: PayablesViewProps = {}):
         submitting={actions.markingPaidId !== null}
         onClose={() => actions.setPayingPayable(null)}
         onConfirm={(payable, result) => void actions.confirmMarkPaid(payable, result)}
+      />
+
+      <LateReasonDialog
+        payable={lateReason.editing}
+        saving={lateReason.saving}
+        onClose={lateReason.close}
+        onSave={(reason, note) => void lateReason.save(reason, note)}
       />
 
       <OccurrenceDialog

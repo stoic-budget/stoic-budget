@@ -12,6 +12,9 @@ const createRepositoryMock = () => ({
 
 const TABLE_ID = '11111111-1111-4111-8111-111111111111';
 const TOKEN = 'a'.repeat(64);
+const PEOPLE_TABLE_ID = '33333333-3333-4333-8333-333333333333';
+const RELATED_ROW_ID = '22222222-2222-4222-8222-222222222222';
+const RELATED_LABEL = 'Member One';
 
 function buildService(share?: Record<string, unknown>) {
   const shareRepository = createRepositoryMock();
@@ -20,6 +23,15 @@ function buildService(share?: Record<string, unknown>) {
   const rowRepository = createRepositoryMock();
   const workspaceMemberRepository = createRepositoryMock();
   const auditService = { createEvent: vi.fn(), createBatchEvents: vi.fn() };
+  // Labels a relation the way the real service does: by the related row's
+  // display value, kept beside the stored id.
+  const relations = {
+    applyRelationLabels: vi.fn(async (rows: Array<Record<string, unknown>>) => {
+      for (const row of rows) {
+        row.relationLabels = { b: RELATED_LABEL };
+      }
+    }),
+  };
 
   tableRepository.createQueryBuilder.mockReturnValue({
     leftJoin: vi.fn().mockReturnThis(),
@@ -28,8 +40,16 @@ function buildService(share?: Record<string, unknown>) {
     getOne: vi.fn().mockResolvedValue({ id: TABLE_ID, name: 'Отчёт', description: null }),
   });
   tableRepository.findOne.mockResolvedValue({ id: TABLE_ID, name: 'Отчёт', description: null });
+  tableRepository.find.mockResolvedValue([{ id: PEOPLE_TABLE_ID }]);
   columnRepository.find.mockResolvedValue([
     { key: 'a', title: 'A', type: 'text', position: 0 },
+    {
+      key: 'b',
+      title: 'B',
+      type: 'relation',
+      position: 1,
+      config: { targetTableId: PEOPLE_TABLE_ID },
+    },
   ]);
   shareRepository.findOne.mockResolvedValue(share ?? null);
   rowRepository.createQueryBuilder.mockReturnValue({
@@ -39,7 +59,7 @@ function buildService(share?: Record<string, unknown>) {
     take: vi.fn().mockReturnThis(),
     getCount: vi.fn().mockResolvedValue(2),
     getMany: vi.fn().mockResolvedValue([
-      { id: 'secret-row-id', rowNumber: 1, data: { a: 'x' } },
+      { id: 'secret-row-id', rowNumber: 1, data: { a: 'x', b: RELATED_ROW_ID } },
     ]),
   });
 
@@ -50,9 +70,10 @@ function buildService(share?: Record<string, unknown>) {
     rowRepository as never,
     workspaceMemberRepository as never,
     auditService as never,
+    relations as never,
   );
 
-  return { service, shareRepository, workspaceMemberRepository, auditService };
+  return { service, shareRepository, workspaceMemberRepository, auditService, relations };
 }
 
 const activeShare = {
@@ -132,8 +153,20 @@ describe('CustomTableSharesService', () => {
 
     const result = await service.getSharedRows(TOKEN, {});
 
-    expect(result.items[0]).toEqual({ rowNumber: 1, data: { a: 'x' } });
+    // Neither the row's own id nor the related row's id a relation stores.
+    expect(result.items[0]).toEqual({ rowNumber: 1, data: { a: 'x', b: RELATED_LABEL } });
     expect(JSON.stringify(result)).not.toContain('secret-row-id');
+    expect(JSON.stringify(result)).not.toContain(RELATED_ROW_ID);
+  });
+
+  it('shows a dash, not the stored row id, for a relation it cannot label', async () => {
+    const { service, relations } = buildService({ ...activeShare });
+    relations.applyRelationLabels.mockResolvedValue(undefined);
+
+    const result = await service.getSharedRows(TOKEN, {});
+
+    expect(result.items[0]).toEqual({ rowNumber: 1, data: { a: 'x', b: '—' } });
+    expect(JSON.stringify(result)).not.toContain(RELATED_ROW_ID);
   });
 
   it('counts accesses so an owner can see the link was used', async () => {

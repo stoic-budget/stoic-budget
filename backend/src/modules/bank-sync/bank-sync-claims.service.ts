@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type { DataSource } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
+import { pluginOnSql } from '../../common/utils/workspace-plugins.util';
 import type { OpenProtocolSettings } from '../../entities';
 import {
   failureOf,
@@ -48,7 +49,8 @@ export class BankSyncClaimsService {
 
   /**
    * Leases up to `limit` connections that are due: connected, auto-sync on, in
-   * an ordinary workspace (a past version pulls nothing new), with someone to
+   * an ordinary workspace (a past version pulls nothing new) that has bank sync
+   * switched on (a paused one keeps its schedule for later), with someone to
    * pull as, and no lease another pull holds. SKIP LOCKED lets a second
    * instance claim the next ones instead of waiting for these.
    */
@@ -64,6 +66,7 @@ export class BankSyncClaimsService {
          WHERE di.provider = ANY($1::text[])
            AND di.status = 'connected'
            AND w.kind = 'standard'
+           AND ${pluginOnSql('w.settings', 'bankSync')}
            AND di.connected_by_user_id IS NOT NULL
            AND due.config -> 'autoSync' IS DISTINCT FROM 'false'::jsonb
            AND (due.next_pull_at IS NULL OR due.next_pull_at <= now())

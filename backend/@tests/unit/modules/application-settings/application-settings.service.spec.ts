@@ -53,15 +53,25 @@ describe('ApplicationSettingsService', () => {
     }),
   };
 
+  // Workspaces whose SMTP or Telegram integration is switched off.
+  const pausedIntegrations = new Set<string>();
+  const plugins = {
+    isEnabled: vi.fn(async (workspaceId: string, plugin: string) =>
+      !pausedIntegrations.has(`${workspaceId}:${plugin}`),
+    ),
+  };
+
   const createService = () =>
     new ApplicationSettingsService(
       repository as never,
       new EffectRuntime(),
       instanceRepository as never,
+      plugins as never,
     );
 
   beforeEach(() => {
     process.env = { ...originalEnv };
+    pausedIntegrations.clear();
     repository.findOne.mockImplementation(({ where }: { where?: { key?: string } } = {}) =>
       Promise.resolve(where?.key ? saved[where.key] || null : null),
     );
@@ -161,6 +171,16 @@ describe('ApplicationSettingsService', () => {
       ]);
     });
 
+    it('leaves out the bot of a workspace that switched Telegram off', async () => {
+      Object.assign(repository, { find: vi.fn(async () => [row('ws-a', '2:a'), row('ws-b', '3:b')]) });
+      repository.findOne.mockResolvedValue(null);
+      pausedIntegrations.add('ws-a:telegram');
+
+      await expect(createService().listTelegramBots()).resolves.toEqual([
+        { botToken: '3:b', publicUrl: 'http://127.0.0.1:3000' },
+      ]);
+    });
+
     it('skips a token it cannot decrypt and keeps the others', async () => {
       const broken = { ...row('ws-a', null), encryptedSecrets: { botToken: `enc:${Buffer.alloc(40, 7).toString('base64')}` } };
       Object.assign(repository, { find: vi.fn(async () => [broken, row('ws-b', '3:b')]) });
@@ -219,6 +239,34 @@ describe('ApplicationSettingsService', () => {
         botToken: '2:own',
         source: 'workspace',
       });
+    });
+
+    it('serves no bot at all, own or shared, while the workspace has Telegram switched off', async () => {
+      process.env.TELEGRAM_BOT_TOKEN = '1:env';
+      instanceSaved = { key: 'telegram', encryptedSecrets: { botToken: encryptText('4:shared') } };
+      saved[WorkspaceServiceSettingsKey.TELEGRAM] = {
+        workspaceId: 'workspace-1',
+        config: {},
+        encryptedSecrets: { botToken: encryptText('2:own') },
+      };
+      pausedIntegrations.add('workspace-1:telegram');
+      const service = createService();
+
+      await expect(service.getTelegramSettings(user)).resolves.toMatchObject({
+        botToken: null,
+        paused: true,
+      });
+      // A workspace that only ever used the shared bot stops too.
+      delete saved[WorkspaceServiceSettingsKey.TELEGRAM];
+      await expect(service.getTelegramSettings(user)).resolves.toMatchObject({ botToken: null });
+      // Back on: its own bot again.
+      pausedIntegrations.clear();
+      saved[WorkspaceServiceSettingsKey.TELEGRAM] = {
+        workspaceId: 'workspace-1',
+        config: {},
+        encryptedSecrets: { botToken: encryptText('2:own') },
+      };
+      await expect(service.getTelegramSettings(user)).resolves.toMatchObject({ botToken: '2:own' });
     });
 
     it('falls through to the shared bot when the workspace row has no token', async () => {
@@ -402,6 +450,24 @@ describe('ApplicationSettingsService', () => {
       const smtp = await createService().getSmtpSettings('workspace-2');
 
       expect(smtp).toMatchObject({ host: 'smtp.other.example', source: 'workspace' });
+    });
+
+    it('sends through the environment while the workspace has SMTP switched off', async () => {
+      process.env.SMTP_HOST = 'relay.internal';
+      process.env.SMTP_FROM = 'noreply@instance.example';
+      pausedIntegrations.add('workspace-2:smtp');
+      const service = createService();
+
+      await expect(service.getSmtpSettings('workspace-2')).resolves.toMatchObject({
+        host: 'relay.internal',
+        source: 'env',
+      });
+      // Switching it back on needs no new setup: the saved server is still there.
+      pausedIntegrations.clear();
+      await expect(service.getSmtpSettings('workspace-2')).resolves.toMatchObject({
+        host: 'smtp.other.example',
+        source: 'workspace',
+      });
     });
 
     it('falls back to the environment, never to a home workspace, without one', async () => {

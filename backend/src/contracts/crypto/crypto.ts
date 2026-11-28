@@ -74,6 +74,8 @@ export const CryptoSummary = Schema.Struct({
   holdings: Schema.Array(CryptoHolding),
   /** Held but unpriceable, so deliberately outside `portfolioValue`. */
   unpriced: Schema.Array(Schema.Struct({ asset: Schema.String, amount: CoinAmount })),
+  /** ['USD'] when no USD rate to the workspace currency is known: values are USD at face value (#787). */
+  missingRates: Schema.optionalKey(Schema.Array(Schema.String)),
   cost: Schema.NullOr(Schema.Number),
   unrealized: Schema.NullOr(Schema.Number),
   realized: Schema.Number,

@@ -60,6 +60,7 @@ import { ReportTemplateGenerator } from '../../src/modules/reports/report-templa
 import { ReportsService } from '../../src/modules/reports/reports.service';
 import { SpendOverTimeReport } from '../../src/modules/reports/spend-over-time.report';
 import { StatementsSummaryReport } from '../../src/modules/reports/statements-summary.report';
+import { TemplateReportRowsLoader } from '../../src/modules/reports/template-report-rows.loader';
 import { TopCategoriesReport } from '../../src/modules/reports/top-categories.report';
 import { WorkspaceExportReport } from '../../src/modules/reports/workspace-export.report';
 import { SpendFlowService } from '../../src/modules/reports/spend-flow.service';
@@ -203,6 +204,7 @@ describe('one rule for income and spending (real Postgres)', () => {
         CashFlowMapService,
         ReportsService,
         TopCategoriesReport,
+        TemplateReportRowsLoader,
         SpendFlowService,
         ForecastService,
         BudgetsService,

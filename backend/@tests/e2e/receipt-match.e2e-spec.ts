@@ -34,13 +34,16 @@ describe('Receipt ↔ transaction (e2e)', () => {
   const server = () => app.getHttpServer();
   const transactions = () => dataSource.getRepository(Transaction);
 
-  async function insertReceipt(parsed: Record<string, unknown>): Promise<string> {
+  async function insertReceipt(
+    parsed: Record<string, unknown>,
+    statementId: string | null = null,
+  ): Promise<string> {
     const [row] = await dataSource.query(
       `INSERT INTO receipts
-         (user_id, workspace_id, source, subject, sender, received_at, parsed_data, status)
-       VALUES ($1, $2, 'scan', 'probe.jpg', 'scan', now(), $3::jsonb, 'draft')
+         (user_id, workspace_id, source, subject, sender, received_at, parsed_data, status, statement_id)
+       VALUES ($1, $2, 'scan', 'probe.jpg', 'scan', now(), $3::jsonb, 'draft', $4)
        RETURNING id`,
-      [owner.userId, owner.workspaceId, JSON.stringify(parsed)],
+      [owner.userId, owner.workspaceId, JSON.stringify(parsed), statementId],
     );
     return row.id;
   }
@@ -165,6 +168,48 @@ describe('Receipt ↔ transaction (e2e)', () => {
       [receiptId],
     );
     expect(stillLinked.transaction_id).toBe(bankRowId);
+  });
+
+  it("a scan's own row is never its match: linking attaches to the bank row", async () => {
+    const charge = { amount: '50', date: '2026-08-01' };
+    const addRow = async (merchant: string) => {
+      const statement = await as(request(server()).post('/statements/manual-expense'))
+        .field('amount', charge.amount)
+        .field('currency', 'KZT')
+        .field('merchant', merchant)
+        .field('categoryId', categoryIds[0])
+        .field('date', charge.date)
+        .expect(201);
+      const listed = await as(
+        request(server()).get(`/transactions?statementId=${statement.body.id}`),
+      ).expect(200);
+      return { statementId: statement.body.id as string, rowId: listed.body.data[0].id as string };
+    };
+    const bank = await addRow('CORNER CAFE 77123');
+    // The row the scan booked itself, in the service statement of the scan: it
+    // carries the receipt's own vendor, so on main it crowds the bank row out of the suggestion.
+    const scan = await addRow('Corner Cafe');
+    await dataSource.query(
+      `UPDATE statements SET parsing_details = jsonb_build_object('detectedBy', 'receipt-scan') WHERE id = $1`,
+      [scan.statementId],
+    );
+    const receiptId = await insertReceipt(
+      { amount: 50, currency: 'KZT', date: charge.date, vendor: 'Corner Cafe', transactionType: 'expense' },
+      scan.statementId,
+    );
+
+    const matches = await as(
+      request(server()).get(`/receipts/${receiptId}/transaction-matches`),
+    ).expect(200);
+    expect(matches.body.suggestion).toMatchObject({ transactionIds: [bank.rowId] });
+    expect(matches.body.data.map((row: { id: string }) => row.id)).not.toContain(scan.rowId);
+
+    const approved = await as(request(server()).post(`/receipts/${receiptId}/approve`))
+      .send({})
+      .expect(201);
+    expect(approved.body.transaction.id).toBe(bank.rowId);
+    const scanRow = await transactions().findOneByOrFail({ id: scan.rowId });
+    expect(scanRow).toMatchObject({ isDuplicate: true, duplicateOfId: bank.rowId });
   });
 
   it('a second receipt for the same row is not offered that row', async () => {

@@ -7,6 +7,7 @@ import { FilterDropdown } from '@/app/(main)/statements/components/filters/Filte
 import { FilterOptionRow } from '@/app/(main)/statements/components/filters/FilterOptionRow';
 import { ChevronRight } from '@/app/components/icons';
 import { useIntlayer } from '@/app/i18n';
+import { localToday } from '@/app/lib/local-today';
 import { tokens } from '@/lib/theme-tokens';
 import { ActiveRouteFilter } from './ActiveRouteFilter';
 import type {
@@ -48,7 +49,7 @@ const ensureDate = (value?: StatementFilterDate | null): StatementFilterDate => 
   dateTo: value?.dateTo,
 });
 
-const resolveFallbackDate = () => new Date().toISOString().slice(0, 10);
+const resolveFallbackDate = () => localToday();
 
 const toDateObj = (value?: string | null): Date | null => {
   if (!value) {

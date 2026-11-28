@@ -1182,4 +1182,85 @@ export const pl: StoicTextMap = {
         '{{percent}}% i brak terminu. Wiedz, dokąd płyniesz, a miesięczny krok przyjdzie sam.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Zapomnieć dwa razy to już nawyk',
+      message:
+        '{{count}} rachunków z ostatniego półrocza zapłacono po terminie, bo o nich zapomniano. Pamięć to nie plan: niech przypomnienie przychodzi wcześniej, póki jest czas działać.',
+    },
+    {
+      title: 'Rachunek o tobie nie zapomniał',
+      message:
+        '{{count}} rachunków czekało w ostatnim półroczu, aż ktoś o nich przypomni. Czego nie uniesie pamięć, uniesie przypomnienie: daj mu kilka dni więcej.',
+    },
+    {
+      title: 'Niech pamięta przypomnienie',
+      message:
+        'Zapomniane {{count}} razy w pół roku. Umysł jest do osądzania, nie do przechowywania dat: niech przypomnienie przyjdzie na czas.',
+    },
+    {
+      title: 'Mały obowiązek, często pomijany',
+      message:
+        '{{count}} spóźnionych rachunków, każdy po prostu zapomniany. Spokój zaczyna się od porządku w drobiazgach, a wcześniejsze przypomnienie nic nie kosztuje.',
+    },
+    {
+      title: 'Zapominanie ma swój wzór',
+      message:
+        'W pół roku {{count}} rachunków minęło termin niezauważenie. Seneka co wieczór przeglądał swój dzień; przypomnienie kilka dni wcześniej zrobi to za ciebie.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Wypłata przychodzi po rachunku',
+      message:
+        '{{count}} razy w pół roku pieniędzy jeszcze nie było, gdy mijał termin rachunku. Przesuń termin za dzień wypłaty albo odłóż jedną płatność: to, co przygotowane, nie pogania.',
+    },
+    {
+      title: 'Pieniądze przychodzą po terminie',
+      message:
+        '{{count}} razy w pół roku rachunek przyszedł przed dochodem. Postaw termin tam, gdzie pieniądze już są, a rachunek przestanie naciskać.',
+    },
+    {
+      title: 'Jedna płatność do przodu',
+      message:
+        '{{count}} spóźnionych rachunków czekało w pół roku na wypłatę. Odłóż jedną płatność, a kalendarz straci nad tobą władzę.',
+    },
+    {
+      title: 'Uporządkuj daty, nie niepokój',
+      message:
+        '{{count}} razy w pół roku brakowało przed wypłatą. Lekarstwem nie jest niepokój, lecz porządek: rachunek po dochodzie albo zapas przed nim.',
+    },
+    {
+      title: 'Przygotowane nie pogania',
+      message:
+        '{{count}} razy termin rachunku przyszedł przed pieniędzmi. To, co przygotowane, przyjmuje się spokojnie: odłóż jedną płatność albo przesuń datę.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Nieoczekiwane wraca',
+      message:
+        '{{count}} opóźnień w pół roku nastąpiło po nieprzewidzianym wydatku. Mędrcowi nic nie zdarza się wbrew oczekiwaniu, pisze Seneka. Rezerwa na nieprzewidziane to cel wart wyznaczenia.',
+    },
+    {
+      title: 'Spodziewaj się niespodziewanego',
+      message:
+        '{{count}} spóźnionych rachunków w pół roku przyszło po wydatku, którego nie przewidziałeś. Stoicy z góry wyobrażali sobie nieszczęście; rezerwa to to samo ćwiczenie w pieniądzach.',
+    },
+    {
+      title: 'Poduszka na nieprzewidziane',
+      message:
+        'W pół roku {{count}} rachunków czekało za niespodziewanym wydatkiem. Mała rezerwa zmieni następną niespodziankę w niewygodę, a nie w opóźnienie.',
+    },
+    {
+      title: 'Los pożycza i prosi o zwrot',
+      message:
+        '{{count}} razy nieprzewidziany koszt przesunął rachunek za termin. Los poprosi znowu; odłóż rezerwę, by rachunek nie musiał czekać.',
+    },
+    {
+      title: 'Niespodzianki nie są rzadkie',
+      message:
+        '{{count}} spóźnionych rachunków przyszło po czymś nieoczekiwanym. Co zdarza się często, nie jest naprawdę nieoczekiwane: cel rezerwy robi na to miejsce.',
+    },
+  ],
 };

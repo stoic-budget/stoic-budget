@@ -36,7 +36,7 @@ describe('ledger helpers', () => {
     expect(isDateOnly('2026-02-28')).toBe(true);
     expect(isDateOnly('2026-13-01')).toBe(false);
     expect(isDateOnly(null)).toBe(false);
-    expect(defaultPeriod(new Date('2026-09-24T10:00:00Z'))).toEqual({
+    expect(defaultPeriod(new Date(2026, 8, 24, 10))).toEqual({
       dateFrom: '2026-01-01',
       dateTo: '2026-09-24',
     });
