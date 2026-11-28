@@ -159,6 +159,7 @@ export const uploadReceiptScanFiles = async ({
       if (isOfflineStoreAvailable() && typeof navigator !== 'undefined' && !navigator.onLine) {
         await enqueue(indexedDbStore, {
           kind: 'receipt-scan',
+          workspaceId,
           fields: deviceLocation
             ? {
                 latitude: String(deviceLocation.latitude),

@@ -35,7 +35,8 @@ export function fetchDashboard(
 ): Promise<DashboardResponse> {
   return apiQueryDecoded({
     url: '/dashboard',
-    params: date ? { range, date } : { range },
+    // No month asked for: the viewer's own day decides which month that is (#594).
+    params: date ? { range, date } : { range, today: dayKeyIn(new Date()) },
     contract: 'DashboardResponse',
   });
 }

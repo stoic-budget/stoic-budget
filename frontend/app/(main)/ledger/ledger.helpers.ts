@@ -1,3 +1,4 @@
+import { localToday } from '@/app/lib/local-today';
 import type { DraftLine, LedgerAccount, TrialBalanceRow } from './ledger.types';
 
 export const LEDGER_TABS = ['accounts', 'journal', 'trial-balance', 'account'] as const;
@@ -15,7 +16,7 @@ export function isDateOnly(value: string | null | undefined): value is string {
 
 /** The reports' own default period: 1 January of this year through today. */
 export function defaultPeriod(today: Date = new Date()): { dateFrom: string; dateTo: string } {
-  const dateTo = today.toISOString().slice(0, 10);
+  const dateTo = localToday(today);
   return { dateFrom: `${dateTo.slice(0, 4)}-01-01`, dateTo };
 }
 

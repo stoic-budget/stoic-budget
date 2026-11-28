@@ -1179,4 +1179,85 @@ export const hsb: StoicTextMap = {
       message: 'Při {{percent}} %, bjez terminu. Wjedźće, hdźe pluwaće, a měsačny krok sćěhuje.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Dwójce zabyć je hižo zwučenosć',
+      message:
+        '{{count}} zličbowankow w zańdźenym połlěće bu přepozdźe zapłaćenych, dokelž buchu zabyte. Pomjatk plan njeje: njech dopomnjeće prjedy přińdźe, doniž je hišće čas jednać.',
+    },
+    {
+      title: 'Zličbowanka na was njezabyła',
+      message:
+        '{{count}} zličbowankow je zańdźeny połlěto čakało, doniž so něchtó na nje njedopomni. Štož pomjatk njenese, nese dopomnjeće: dajće jemu hišće někotre dny.',
+    },
+    {
+      title: 'Njech sej dopomnjeće pomjatkuje',
+      message:
+        '{{count}} razy zabyte w połlěće. Rozum je za posudźowanje, nic za chowanje datow: njech dopomnjeće přińdźe načasnje.',
+    },
+    {
+      title: 'Mała winowatosć, často přehladana',
+      message:
+        '{{count}} zapóznjenych zličbowankow, kóžda jednorje zabyta. Měr so z porjadom w drobnosćach započina, a zažne dopomnjeće ničo njepłaći.',
+    },
+    {
+      title: 'Zabywanje ma swój muster',
+      message:
+        'W połlěće je {{count}} zličbowankow njepytnjenje swój termin překročiło. Seneka je kóždy wječor swój dźeń přehladował; dopomnjeće někotre dny zažo to za was čini.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Mzda přińdźe po zličbowance',
+      message:
+        '{{count}} raz w połlěće pjenjezy hišće njeběchu, hdyž bě zličbowanka spadna. Přestajće datum za dźeń mzdy abo połožće jedne zapłaćenje na bok: přihotowane njehoni.',
+    },
+    {
+      title: 'Pjenjezy po terminje přińdu',
+      message:
+        '{{count}} razy w połlěće přińdźe zličbowanka do dochoda. Stajće termin tam, hdźež pjenjezy hižo su, a zličbowanka přestanje ćišćeć.',
+    },
+    {
+      title: 'Jedne płaćenje doprědka',
+      message:
+        '{{count}} zapóznjenych zličbowankow je w połlěće na mzdu čakało. Połožće jedne płaćenje na bok, a kalender swoju móc nad wami zhubi.',
+    },
+    {
+      title: 'Rjadujće daty, nic staroś',
+      message:
+        '{{count}} razy w połlěće pjenjezy do mzdy njedosahachu. Lěk njeje staroś, ale porjad: zličbowanka po dochodźe abo rezerwa před njej.',
+    },
+    {
+      title: 'Přihotowane njehoni',
+      message:
+        '{{count}} razy bě zličbowanka płaćomna, prjedy hač pjenjezy přińdźechu. Štož je dočasa přihotowane, so měrnje přijima: połožće jedne płaćenje na bok abo přestajće datum.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Njewočakowane so wróća',
+      message:
+        '{{count}} komdźenjow w połlěće přińdźe po njewočakowanym wudawku. Mudremu so ničo přećiwo jeho wočakowanju njestanje, piše Seneka. Rezerwa za njewočakowane je cil, kotryž je hódny stajić.',
+    },
+    {
+      title: 'Wočakujće njewočakowane',
+      message:
+        '{{count}} zapóznjenych zličbowankow w połlěće je wudawkej sćěhowało, kotryž njejsće předwidźeli. Stoikojo sej njezboże dočasa předstajachu; rezerwa je samsne zwučowanje w pjenjezach.',
+    },
+    {
+      title: 'Podušk za njepředwidźane',
+      message:
+        'W połlěće je {{count}} zličbowankow za překwapjacym wudawkom čakało. Mała rezerwa přichodne překwapjenje do njewužitka přetwori, nic do zapóznjenja.',
+    },
+    {
+      title: 'Wosud požčuje a chce wróćo',
+      message:
+        '{{count}} razy je njepředwidźany wudawk zličbowanku přez termin storčił. Wosud zaso žada; połožće rezerwu na bok, zo by zličbowanka čakać njetrjebała.',
+    },
+    {
+      title: 'Překwapjenja rědke njejsu',
+      message:
+        '{{count}} zapóznjenych zličbowankow je něčemu njewočakowanemu sćěhowało. Štož so často stawa, njeje woprawdźe njewočakowane: cil rezerwy jemu městno twori.',
+    },
+  ],
 };

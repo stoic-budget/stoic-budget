@@ -237,14 +237,13 @@ describe('TransactionsService.split', () => {
     ).rejects.toThrow(/positive amount/i);
   });
 
-  it('clears the fingerprint on every part so backfill recomputes them', async () => {
+  it("keeps the whole row's fingerprint on part 0, so the bank row is known on re-import", async () => {
     const parts = await service.split('tx-1', 'ws-1', 'u-1', {
       parts: [{ amount: 8000 }, { amount: 4000 }],
     });
 
-    for (const part of parts) {
-      expect(part.fingerprint).toBeNull();
-    }
+    // The new part is no bank's row: it is stored without one.
+    expect(parts.map(part => part.fingerprint ?? null)).toEqual(['fp-of-12000', null]);
   });
 
   it('re-checks under the pessimistic lock and rejects a concurrent split', async () => {
@@ -432,7 +431,8 @@ describe('TransactionsService.unsplit', () => {
     amount: 8000,
     debit: 8000,
     credit: null,
-    fingerprint: 'fp-of-8000',
+    // split() left the whole row's fingerprint on part 0.
+    fingerprint: 'fp-of-12000',
     splitGroupId: 'grp-1',
     splitIndex: 0,
   };
@@ -442,7 +442,7 @@ describe('TransactionsService.unsplit', () => {
     amount: 4000,
     debit: 4000,
     credit: null,
-    fingerprint: 'fp-of-4000',
+    fingerprint: null,
     splitGroupId: 'grp-1',
     splitIndex: 1,
     categoryId: 'cat-household',
@@ -601,10 +601,10 @@ describe('TransactionsService.unsplit', () => {
     expect(store.has('tx-1')).toBe(true);
   });
 
-  it('nulls the survivor fingerprint so backfill recomputes it from the merged amount', async () => {
+  it("gives the folded row back the whole row's fingerprint", async () => {
     const merged = await service.unsplit('tx-1', 'ws-1', 'u-1');
 
-    expect(merged.fingerprint).toBeNull();
+    expect(merged.fingerprint).toBe('fp-of-12000');
   });
 
   it('rejects a transaction that is not part of a split', async () => {

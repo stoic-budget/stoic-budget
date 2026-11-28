@@ -25,6 +25,7 @@ import {
 import { User } from '../../entities/user.entity';
 import { AuditService } from '../audit/audit.service';
 import { transactionCreatedEvent } from '../notifications/events/notification-events';
+import { partyOf } from '../tax/assignment-party';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { readManualExpenseInput } from './manual-expense-input';
@@ -144,8 +145,8 @@ export class ManualExpenseService {
       amountMinor: toMinor(amountValue),
       categoryId: category.id,
       transactionType: TransactionType.EXPENSE,
-      transactionNature: null,
       explicitTaxRateId: taxRateId || null,
+      ...partyOf({ counterpartyName: merchant, paymentPurpose: description }),
     });
 
     // Проверка дубликата и обе вставки — в одной транзакции под advisory-lock:

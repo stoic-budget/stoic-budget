@@ -5,6 +5,7 @@ import type { Payable } from '@/app/lib/payables-api';
 import { renderWithQuery } from '@/app/test/query-wrapper';
 import { MarkPaidDialog } from './MarkPaidDialog';
 import { categoryItem, walletItem } from '@/app/test/fixtures/contracts';
+import { localToday } from '@/app/lib/local-today';
 
 const appLocale = vi.hoisted(() => ({ current: 'en' }));
 
@@ -115,6 +116,43 @@ describe('MarkPaidDialog', () => {
     });
   });
 
+  it('asks why a bill paid after its due date was late, and sends the answer with the payment', async () => {
+    apiMocks.paymentCandidates.mockResolvedValue([candidate('tx-1', true)]);
+    const late = { ...payable, dueDate: '2026-09-10' } as Payable;
+    const { onConfirm } = renderDialog(late);
+
+    expect(await screen.findByText('Payee tx-1 — Invoice')).toBeInTheDocument();
+    expect(screen.getByText('question')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: 'forgot' }));
+    fireEvent.click(screen.getByRole('button', { name: 'confirm' }));
+
+    expect(onConfirm).toHaveBeenCalledWith(late, {
+      kind: 'full',
+      payload: { linkedTransactionId: 'tx-1' },
+      lateReason: 'forgot',
+    });
+  });
+
+  it('pays without a reason when the question is skipped', async () => {
+    apiMocks.paymentCandidates.mockResolvedValue([candidate('tx-1', true)]);
+    const late = { ...payable, dueDate: '2026-09-10' } as Payable;
+    const first = renderDialog(late);
+    expect(await screen.findByText('Payee tx-1 — Invoice')).toBeInTheDocument();
+    expect(screen.getByText('question')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'confirm' }));
+    expect(first.onConfirm).toHaveBeenCalledWith(late, {
+      kind: 'full',
+      payload: { linkedTransactionId: 'tx-1' },
+    });
+  });
+
+  it('asks nothing when the payment came before the due date', async () => {
+    apiMocks.paymentCandidates.mockResolvedValue([candidate('tx-1', true)]);
+    renderDialog({ ...payable, dueDate: '2026-09-25' } as Payable);
+    expect(await screen.findByText('Payee tx-1 — Invoice')).toBeInTheDocument();
+    expect(screen.queryByText('question')).toBeNull();
+  });
+
   it('refuses a proposed row for good: "not this payment" asks again without it', async () => {
     apiMocks.paymentCandidates
       .mockResolvedValueOnce([candidate('tx-1', true), candidate('tx-2')])
@@ -158,7 +196,7 @@ describe('MarkPaidDialog', () => {
       kind: 'full',
       payload: {
         payFromWalletId: 'wallet-eur',
-        paidOn: new Date().toISOString().slice(0, 10),
+        paidOn: localToday(),
         categoryId: 'cat-out',
       },
     });
@@ -186,7 +224,7 @@ describe('MarkPaidDialog', () => {
       kind: 'full',
       payload: {
         payFromWalletId: 'wallet-eur',
-        paidOn: new Date().toISOString().slice(0, 10),
+        paidOn: localToday(),
         categoryId: 'cat-ads',
       },
     });
@@ -222,6 +260,30 @@ describe('MarkPaidDialog', () => {
       paymentId: 'payment-1',
       payload: { payFromWalletId: 'wallet-eur', categoryId: undefined },
     });
+  });
+
+  it('booking a payment made on time asks nothing, whatever day it is booked', async () => {
+    apiMocks.paymentCandidates.mockResolvedValue([]);
+    apiMocks.payments.mockResolvedValue([
+      {
+        id: 'payment-1',
+        payableId: 'payable-1',
+        amount: '120.00',
+        feeAmount: '0.00',
+        paidOn: '2026-10-16',
+        transactionId: null,
+        comment: null,
+        createdAt: '2026-10-16T08:00:00.000Z',
+      },
+    ]);
+    renderDialog({
+      ...payable,
+      dueDate: '2026-10-20',
+      paidAmount: '120.00',
+      status: 'paid',
+    } as Payable);
+    expect(await screen.findByText('bookIntro')).toBeInTheDocument();
+    expect(screen.queryByText('question')).toBeNull();
   });
 
   it('books a sale paid in hand as cash kept in no wallet when no wallet has its currency', async () => {
@@ -275,7 +337,7 @@ describe('MarkPaidDialog', () => {
 
     expect(onConfirm).toHaveBeenCalledWith(payable, {
       kind: 'full',
-      payload: { inHand: true, paidOn: new Date().toISOString().slice(0, 10), categoryId: undefined },
+      payload: { inHand: true, paidOn: localToday(), categoryId: undefined },
     });
   });
 
@@ -323,5 +385,37 @@ describe('MarkPaidDialog', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'confirm' }));
     expect(onConfirm).toHaveBeenCalledWith(partlyPaid, { kind: 'full', payload: {} });
+  });
+
+  it('stays open and keeps the payment list as it is while a payment is saving', async () => {
+    apiMocks.paymentCandidates.mockResolvedValue([]);
+    apiMocks.payments.mockResolvedValue([
+      {
+        id: 'payment-1',
+        payableId: 'payable-1',
+        amount: '40.00',
+        feeAmount: '0.00',
+        paidOn: '2026-10-16',
+        transactionId: 'tx-1',
+        comment: null,
+        createdAt: '2026-10-16T08:00:00.000Z',
+      },
+    ]);
+    const onClose = vi.fn();
+    const onRemovePayment = vi.fn();
+    renderWithQuery(
+      <MarkPaidDialog
+        payable={{ ...payable, paidAmount: '40.00', status: 'partially_paid' } as Payable}
+        submitting
+        onClose={onClose}
+        onConfirm={vi.fn()}
+        onRemovePayment={onRemovePayment}
+      />,
+    );
+
+    const remove = await screen.findByRole('button', { name: 'removePayment' });
+    expect(remove).toBeDisabled();
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(onClose).not.toHaveBeenCalled();
   });
 });

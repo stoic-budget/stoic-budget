@@ -60,10 +60,8 @@ export default function ConfirmModal({
             style={{
               padding: 8,
               borderRadius: tokens.radius.full,
-              background: isDestructive
-                ? 'var(--color-error-soft-bg)'
-                : 'var(--color-info-soft-bg)',
-              color: isDestructive ? '#dc2626' : '#2563eb',
+              background: isDestructive ? 'var(--color-error-soft-bg)' : 'var(--primary-50)',
+              color: isDestructive ? 'var(--money-down)' : 'var(--primary)',
             }}
           >
             {icon ?? <AlertTriangle size={20} />}

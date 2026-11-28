@@ -58,4 +58,5 @@ export const NOTIFICATION_PREFERENCE_MAP: Record<NotificationType, NotificationP
   [NotificationType.SUBSCRIPTION_UPCOMING]: 'workspaceUpdated',
   [NotificationType.SUBSCRIPTION_PRICE_CHANGED]: 'workspaceUpdated',
   [NotificationType.RULE_MATCHED]: 'workspaceUpdated',
+  [NotificationType.BACKUP_FAILED]: 'workspaceUpdated',
 };

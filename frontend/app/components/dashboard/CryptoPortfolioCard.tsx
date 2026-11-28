@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import type React from 'react';
 import { TokenIcon } from '@/app/(main)/crypto/components/TokenIcon';
+import { MissingRatesBanner } from '@/app/(main)/dashboard/components/MissingRatesBanner';
 import { ChevronRight } from '@/app/components/icons';
 import { PRIVATE_CLASS, PrivateAmount } from '@/app/components/ui/private-amount';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
@@ -113,6 +114,12 @@ export function CryptoPortfolioCard({
           −{formatAmount(summary.expense)}
         </PrivateAmount>
       </div>
+      {/* No USD rate: the figures above are USD at face value (#787). */}
+      {summary.missingRates?.length ? (
+        <div className="seneca-dashboard__card-sub">
+          <MissingRatesBanner currencies={[...summary.missingRates]} />
+        </div>
+      ) : null}
     </div>
   );
 
