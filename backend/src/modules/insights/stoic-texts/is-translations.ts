@@ -1184,4 +1184,85 @@ export const is: StoicTextMap = {
         'Í {{percent}} %, án skiladags. Vittu hvert þú siglir og mánaðarlega skrefið fylgir.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Að gleyma tvisvar er vani',
+      message:
+        '{{count}} reikningar síðasta hálfa árið voru greiddir of seint því þeir gleymdust. Minni er ekki áætlun: láttu áminninguna koma fyrr, meðan enn er tími til að bregðast við.',
+    },
+    {
+      title: 'Reikningurinn gleymdi þér ekki',
+      message:
+        '{{count}} reikningar biðu síðasta hálfa árið eftir að einhver myndi eftir þeim. Það sem hugurinn ber ekki, ber áminning: gefðu henni nokkra daga í viðbót.',
+    },
+    {
+      title: 'Láttu áminninguna muna',
+      message:
+        'Gleymt {{count}} sinnum á hálfu ári. Hugurinn er til að dæma, ekki til að geyma dagsetningar: láttu áminninguna koma í tæka tíð.',
+    },
+    {
+      title: 'Lítil skylda, oft gleymd',
+      message:
+        '{{count}} seinir reikningar, hver og einn einfaldlega gleymdur. Ró hefst með reglu í smáu, og fyrri áminning kostar ekkert.',
+    },
+    {
+      title: 'Gleymskan hefur mynstur',
+      message:
+        'Á hálfu ári fóru {{count}} reikningar fram yfir gjalddaga án þess að nokkur tæki eftir því. Seneca fór yfir daginn sinn hvert kvöld; áminning nokkrum dögum fyrr gerir það fyrir þig.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Launin koma á eftir reikningnum',
+      message:
+        '{{count}} sinnum á hálfu ári voru peningarnir ekki komnir þegar reikningur féll í gjalddaga. Færðu dagsetninguna aftur fyrir útborgunardag eða leggðu eina greiðslu til hliðar: það sem er undirbúið rekur ekki á eftir.',
+    },
+    {
+      title: 'Peningarnir koma eftir gjalddaga',
+      message:
+        '{{count}} sinnum á hálfu ári kom reikningurinn á undan tekjunum. Settu gjalddagann þar sem peningarnir eru þegar, og reikningurinn hættir að þrýsta á.',
+    },
+    {
+      title: 'Ein greiðsla fyrir fram',
+      message:
+        '{{count}} seinir reikningar biðu eftir útborgun á hálfu ári. Leggðu eina greiðslu til hliðar, og dagatalið missir tökin á þér.',
+    },
+    {
+      title: 'Raðaðu dögunum, ekki áhyggjunum',
+      message:
+        '{{count}} sinnum á hálfu ári vantaði pening fyrir útborgun. Lausnin er ekki meiri áhyggjur heldur betri regla: reikningurinn eftir tekjunum, eða varasjóður á undan.',
+    },
+    {
+      title: 'Það sem er undirbúið rekur ekki á eftir',
+      message:
+        '{{count}} sinnum féll reikningur í gjalddaga áður en peningarnir komu. Því sem er undirbúið er mætt í ró: leggðu eina greiðslu til hliðar eða færðu daginn.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Hið óvænta kemur aftur',
+      message:
+        '{{count}} seinkanir á hálfu ári fylgdu óvæntum útgjöldum. Ekkert hendir hinn vitra gegn væntingum hans, skrifar Seneca. Varasjóður fyrir hið óvænta er markmið sem vert er að setja.',
+    },
+    {
+      title: 'Búðu þig undir hið óvænta',
+      message:
+        '{{count}} seinir reikningar á hálfu ári fylgdu útgjöldum sem þú sást ekki fyrir. Stóumenn æfðu mótlæti fyrir fram; varasjóður er sú æfing í peningum.',
+    },
+    {
+      title: 'Púði fyrir hið ófyrirséða',
+      message:
+        'Á hálfu ári biðu {{count}} reikningar á bak við óvænt útgjöld. Lítill varasjóður gerir næstu óvæntu uppákomu að óþægindum, ekki seinum reikningi.',
+    },
+    {
+      title: 'Gæfan lánar og vill fá aftur',
+      message:
+        '{{count}} sinnum ýtti ófyrirséður kostnaður reikningi fram yfir gjalddaga. Gæfan biður aftur; leggðu varasjóð til hliðar svo reikningurinn þurfi ekki að bíða.',
+    },
+    {
+      title: 'Óvæntar uppákomur eru ekki sjaldgæfar',
+      message:
+        '{{count}} seinir reikningar fylgdu einhverju óvæntu. Það sem gerist oft er ekki í raun óvænt: varasjóðsmarkmið býr því rými.',
+    },
+  ],
 };

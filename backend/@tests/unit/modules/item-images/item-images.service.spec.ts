@@ -152,6 +152,19 @@ describe('ItemImagesService', () => {
     expect(source.picture).not.toHaveBeenCalled();
   });
 
+  it('keeps a picture file another workspace still names, as a copy does (#789)', async () => {
+    const { service } = setup({
+      images: [
+        { id: 'i1', workspaceId: WORKSPACE, transactionId: TX, fileName: 'shared.png', label: null },
+        { id: 'i2', workspaceId: 'ws-copy', transactionId: 'tx-copy', fileName: 'shared.png', label: null },
+      ],
+    });
+
+    await service.remove('transaction', WORKSPACE, TX, ME);
+
+    expect(vi.mocked(fs.unlink)).not.toHaveBeenCalledWith(expect.stringMatching(/shared\.png$/));
+  });
+
   it('removing from a transaction without its own picture removes the bill’s', async () => {
     const { service, repos } = setup({
       images: [{ id: 'i1', workspaceId: WORKSPACE, payableId: BILL, fileName: 'b.png', label: null }],

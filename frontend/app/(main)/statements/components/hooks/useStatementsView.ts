@@ -93,8 +93,6 @@ export function useStatementsView({
     receiptStatus: routeReceiptStatus,
     search,
     user,
-    page,
-    pageSize: PAGE_SIZE,
     router,
     loadListErrorLabel: t.loadListError.value,
     refreshFailedLabel: t.refreshFailed.value,
@@ -110,6 +108,7 @@ export function useStatementsView({
     filterState.initFromStorage(
       searchParams.get('month'),
       Boolean(searchParams.get('transactionsFrom')),
+      searchParams.get('has'),
     );
   });
 

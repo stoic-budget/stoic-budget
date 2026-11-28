@@ -26,6 +26,7 @@ import { DataTab } from '@/app/settings/profile/tabs/DataTab';
 import { GeneralTab } from '@/app/settings/profile/tabs/GeneralTab';
 import { NotificationsTab } from '@/app/settings/profile/tabs/NotificationsTab';
 import { SecurityTab } from '@/app/settings/profile/tabs/SecurityTab';
+import { SyncTab } from '@/app/settings/profile/tabs/SyncTab';
 import type { SettingsTabProps } from '@/app/settings/profile/tabs/types';
 import { VersionsTab } from '@/app/settings/profile/tabs/VersionsTab';
 
@@ -34,6 +35,7 @@ const TAB_COMPONENT: Record<SettingsTabId, ComponentType<SettingsTabProps>> = {
   security: SecurityTab,
   notifications: NotificationsTab,
   data: DataTab,
+  sync: SyncTab,
   advanced: AdvancedTab,
   versions: VersionsTab,
 };
@@ -114,6 +116,7 @@ function ProfileSettingsPageInner(): React.JSX.Element {
     security: tx(['tabs', 'security']),
     notifications: tx(['tabs', 'notifications']),
     data: tx(['tabs', 'data']),
+    sync: tx(['tabs', 'sync']),
     advanced: tx(['tabs', 'advanced']),
     versions: tx(['tabs', 'versions']),
   };

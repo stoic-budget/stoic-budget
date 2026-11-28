@@ -1,9 +1,9 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import type { Repository } from 'typeorm';
+import { In, Not, type Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { FileStorageService } from '../../common/services/file-storage.service';
 import { assertRowsRemovable } from '../../common/utils/tax-lock.util';
@@ -80,7 +80,18 @@ export class StatementTrashService {
     return statement;
   }
 
-  async permanentDelete(id: string, userId: string, workspaceId: string): Promise<void> {
+  /**
+   * Deletes a statement for good: its rows, the file once nothing else reads
+   * it, and the statement. `fromTrash` refuses one that is no longer in the
+   * trash (restored meanwhile); `system` is the nightly purge, which acts for
+   * the workspace and not as the uploader, whose rights may have changed.
+   */
+  async permanentDelete(
+    id: string,
+    userId: string,
+    workspaceId: string,
+    options: { fromTrash?: boolean; system?: boolean } = {},
+  ): Promise<void> {
     const statement = await this.statementRepository.findOne({
       where: { id, workspaceId },
       relations: {
@@ -91,27 +102,51 @@ export class StatementTrashService {
     if (!statement) {
       throw new NotFoundException(appError('STATEMENT_NOT_FOUND'));
     }
-    await assertRowsRemovable(this.transactionRepository, {
-      statementId: statement.id,
-      workspaceId,
+    if (!options.system) {
+      await ensureCanModifyStatement(
+        this.workspaceMemberRepository,
+        statement,
+        userId,
+        workspaceId,
+      );
+    }
+
+    // One transaction with the statement row locked: a restore, a second
+    // delete or the purge at the same moment waits, then finds it gone.
+    await this.statementRepository.manager.transaction(async manager => {
+      const statements = manager.getRepository(Statement);
+      const transactions = manager.getRepository(Transaction);
+      const locked = await statements.findOne({
+        where: { id, workspaceId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!locked) {
+        throw new NotFoundException(appError('STATEMENT_NOT_FOUND'));
+      }
+      if (options.fromTrash && !locked.deletedAt) {
+        throw new BadRequestException(appError('STORAGE_FILE_NOT_IN_TRASH'));
+      }
+      await assertRowsRemovable(transactions, { statementId: id, workspaceId });
+      await unflagCopiesOf(transactions, id, workspaceId);
+      await transactions.delete({ statementId: id });
+      await statements.delete({ id, workspaceId });
     });
 
-    await ensureCanModifyStatement(this.workspaceMemberRepository, statement, userId, workspaceId);
-
-    // Audit: record statement rollback for restore operations.
+    // Not undoable: the rows and the file are gone, an undo would bring back
+    // an empty statement.
     await this.auditService.createEvent({
       workspaceId,
-      actorType: ActorType.USER,
-      actorId: userId,
+      actorType: options.system ? ActorType.SYSTEM : ActorType.USER,
+      actorId: options.system ? null : userId,
       entityType: EntityType.STATEMENT,
       entityId: statement.id,
       action: AuditAction.DELETE,
       diff: { before: { ...statement }, after: null },
       meta: {
         fileName: statement.fileName,
-        source: 'permanent',
+        source: options.system ? 'trash-purge' : 'permanent',
       },
-      isUndoable: true,
+      isUndoable: false,
     });
 
     this.eventEmitter?.emit('data.deleted', {
@@ -123,13 +158,7 @@ export class StatementTrashService {
       count: 1,
     } satisfies DataDeletedEvent);
 
-    // Delete all related transactions first
-    await this.transactionRepository.delete({ statementId: id });
-
     await removeStatementFile(this.statementRepository, statement, this.logger);
-
-    // Finally delete the statement
-    await this.statementRepository.remove(statement);
 
     // Invalidate thumbnail cache
     await this.cacheManager.del(`statements:thumbnail:${id}`);
@@ -180,4 +209,31 @@ export class StatementTrashService {
     }
     return { status: 'restored', source: restored.source };
   }
+}
+
+/**
+ * Copies of the statement's rows in other statements stand alone again: with
+ * their original gone they would stay out of every total for good, and Review
+ * cannot settle a duplicate whose original is missing.
+ */
+async function unflagCopiesOf(
+  transactions: Repository<Transaction>,
+  statementId: string,
+  workspaceId: string,
+): Promise<void> {
+  const ids = (
+    await transactions.find({ where: { statementId, workspaceId }, select: { id: true } })
+  ).map(row => row.id);
+  if (ids.length === 0) {
+    return;
+  }
+  await transactions.update(
+    { workspaceId, duplicateOfId: In(ids), id: Not(In(ids)) },
+    {
+      isDuplicate: false,
+      duplicateOfId: null,
+      duplicateConfidence: null,
+      duplicateMatchType: null,
+    },
+  );
 }

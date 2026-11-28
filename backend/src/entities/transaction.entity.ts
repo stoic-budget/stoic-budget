@@ -275,7 +275,8 @@ export class Transaction {
   @Column({ name: 'crypto_amount', type: 'decimal', precision: 38, scale: 18, nullable: true })
   cryptoAmount: string | null;
 
-  @Column({ name: 'crypto_tx_hash', type: 'varchar', length: 66, nullable: true })
+  // 120: a Solana signature is 88 characters, an EVM hash 66.
+  @Column({ name: 'crypto_tx_hash', type: 'varchar', length: 120, nullable: true })
   cryptoTxHash: string | null;
 
   /**

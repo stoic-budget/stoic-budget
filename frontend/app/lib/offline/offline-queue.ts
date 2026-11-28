@@ -14,8 +14,28 @@ export interface OfflineEntry {
   /** Form fields, all strings so they survive structured clone. */
   fields: Record<string, string>;
   files: File[];
+  /**
+   * The workspace the photos were taken in (#784): replayed into it, not into
+   * whichever one is open when the network comes back. Entries queued before
+   * this was stored have none and go to the open one.
+   */
+  workspaceId?: string | null;
+  /**
+   * Who queued it: only they send it (#784). Another person signing in on the
+   * device leaves it waiting. Older entries have none and go with anyone.
+   */
+  userId?: string | null;
   attempts: number;
   lastError?: string;
+}
+
+/**
+ * The person signed in on this device, kept by `useOfflineQueue`: entries
+ * are stamped with it when queued and sent only while it is the same.
+ */
+let signedInUserId: string | null = null;
+export function setOfflineQueueUser(userId: string | null): void {
+  signedInUserId = userId;
 }
 
 export interface OfflineStore {
@@ -83,7 +103,8 @@ export function createMemoryStore(initial: OfflineEntry[] = []): OfflineStore {
 
 export async function enqueue(
   store: OfflineStore,
-  input: Pick<OfflineEntry, 'kind' | 'fields' | 'files'>,
+  input: Pick<OfflineEntry, 'kind' | 'fields' | 'files' | 'workspaceId'>,
+  userId: string | null = signedInUserId,
 ): Promise<OfflineEntry> {
   const entry: OfflineEntry = {
     id:
@@ -92,6 +113,7 @@ export async function enqueue(
         : String(Date.now()),
     createdAt: new Date().toISOString(),
     attempts: 0,
+    userId,
     ...input,
   };
   await store.put(entry);
@@ -110,10 +132,16 @@ export interface ReplayResult {
 }
 
 /**
+ * Not the server judging the entry but the session: signed out (401). The
+ * entry waits for its owner to sign in again, as for a network failure (#784).
+ */
+const isSessionRefusal = (status: number | undefined) => status === 401;
+
+/**
  * Sends every queued entry, oldest first. An entry the server rejects (4xx)
- * is dropped as unfixable from here; a network failure, or a 409 saying the
- * same request is still running (its idempotency key is taken), keeps it for
- * next time and stops the run.
+ * is dropped as unfixable from here; a network failure, a refused session or
+ * a 409 saying the same request is still running (its idempotency key is
+ * taken) keeps it for next time and stops the run.
  */
 export async function replay(
   store: OfflineStore,
@@ -124,20 +152,31 @@ export async function replay(
   const entries = (await store.list()).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   let sent = 0;
   let kept = 0;
+  let dropped = 0;
   for (const entry of entries) {
+    // Someone else's photos wait for them, untouched.
+    if (entry.userId && entry.userId !== signedInUserId) {
+      kept += 1;
+      continue;
+    }
     const result = await send(entry);
     if (result.ok) {
       await store.remove(entry.id);
       sent += 1;
       continue;
     }
-    if (isNetworkFailure(result.status) || result.status === 409) {
+    if (
+      isNetworkFailure(result.status) ||
+      isSessionRefusal(result.status) ||
+      result.status === 409
+    ) {
       await store.put({ ...entry, attempts: entry.attempts + 1, lastError: result.error });
-      kept += entries.length - sent - kept;
+      kept = entries.length - sent - dropped;
       break;
     }
     // The server answered and said no: keeping it would only fail again.
     await store.remove(entry.id);
+    dropped += 1;
   }
   notifyQueueChanged();
   return { sent, kept };

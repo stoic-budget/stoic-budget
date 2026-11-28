@@ -45,6 +45,10 @@ export type Transaction = {
   isVerified?: boolean;
   /** The bank still holds it (a card authorisation): no money moved yet, approved or not. */
   isPending?: boolean;
+  /** One leg of a transfer between own accounts (or a reimbursement): no income or spending. */
+  transferPairId?: string | null;
+  /** Left out of budgets and every income or spending figure (a one-off such as a car). */
+  excludedFromBudgets?: boolean;
   createdAt?: string | null;
   workspaceId?: string;
   workspaceName?: string;

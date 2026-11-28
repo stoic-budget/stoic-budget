@@ -31,6 +31,7 @@ import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
 import { ensurePrivateCategory } from '../categories/private-category';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { partyOf } from '../tax/assignment-party';
 import { TaxAssignmentService } from '../tax/tax-assignment.service';
 import { markChoicesByHand } from './helpers/choices-by-hand';
 import { assertEditAllowed } from './helpers/pair-guards';
@@ -39,6 +40,7 @@ import {
   NOTHING_REPOINTED,
   repointSplitParts,
 } from './helpers/repoint-split-parts';
+import { gatherSplitFingerprint } from './helpers/split-fingerprint';
 import { lockSplitGroup } from './helpers/split-group-lock';
 import { assertMayReshape, assertSplittable, memberIdOf } from './helpers/split-guards';
 import { assertTaxEditable } from './helpers/tax-edit-guard';
@@ -461,9 +463,9 @@ export class TransactionsService {
         row.amountForeign = foreignAmounts[index];
         row.splitGroupId = splitGroupId;
         row.splitIndex = index;
-        // Part 0 would otherwise keep a fingerprint hashed from the pre-split
-        // amount. Null on every part so backfillFingerprints recomputes them all.
-        row.fingerprint = null;
+        // Part 0 keeps the whole row's fingerprint (the clone never copies it):
+        // it names the bank's row, which a split does not change, so importing
+        // that row again is known as a repeat of it (#633).
 
         applyPartCategory(row, part.categoryId, locked.isPrivate);
         row.paymentPurpose = part.paymentPurpose ?? row.paymentPurpose;
@@ -481,8 +483,7 @@ export class TransactionsService {
           transactionType: row.transactionType,
           transactionNature: row.transactionNature,
           explicitTaxRateId: row.taxSource === TaxSource.MANUAL ? row.taxRateId : null,
-          counterpartyCountry: row.counterpartyCountry,
-          counterpartyVatId: row.counterpartyVatId,
+          ...partyOf(row),
         });
 
         row.taxRateId = assignment.taxRateId;
@@ -617,10 +618,9 @@ export class TransactionsService {
       survivor.amountForeign = foreignTotal;
       survivor.splitGroupId = null;
       survivor.splitIndex = null;
-      // The stored hash was computed from the part amount, which just changed.
-      // A stale hash makes a later import treat a genuine transaction as a
-      // duplicate and drop it; null lets backfillFingerprints recompute it.
-      survivor.fingerprint = null;
+      // The survivor takes the bank row's fingerprint, kept on part 0 or handed
+      // on when that part went: its total is that row's amount again.
+      await gatherSplitFingerprint(repo, workspaceId, survivor, splitGroupId);
 
       const saved = await repo.save(survivor);
 

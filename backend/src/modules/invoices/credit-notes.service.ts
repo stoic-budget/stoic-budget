@@ -23,17 +23,10 @@ import { Payable } from '../../entities/payable.entity';
 import { BusinessProfileService } from '../business-profile/business-profile.service';
 import { LedgerPostingError, LedgerPostingService } from '../ledger/ledger-posting.service';
 import { PayablesService } from '../payables/payables.service';
+import { creditedLines, fitToTarget, type ResolvedApplication } from './credit-note-lines';
 import { buildCreditNotePdf } from './invoice-document';
-import { documentLines, priceLines, totalsOf } from './invoice-pricing';
+import { documentLines, priceEach, totalsOf } from './invoice-pricing';
 import { InvoiceXRechnungService } from './invoice-xrechnung.service';
-
-/** One invoice's share of a credit note, resolved against what it can carry. */
-interface ResolvedApplication {
-  invoice: Invoice;
-  lines: InvoiceLineItem[];
-  /** How much of the invoice is credited, as a share of its total. */
-  factor: number;
-}
 
 function round2(value: number): number {
   return Math.round(Number(value) * 100) / 100;
@@ -131,7 +124,7 @@ export class CreditNotesService {
 
       const groups = await this.copyLines(manager, note, resolved);
       const lineItems = groups.flatMap(group => group.lines);
-      const priced = await priceLines(manager, lineItems, note.pricesIncludeTax);
+      const priced = await priceEach(manager, groups, note.pricesIncludeTax);
       const totals = totalsOf(priced);
       if (totals.total <= 0) {
         throw new BadRequestException(appError('CREDIT_NOTE_ZERO_TOTAL'));
@@ -140,9 +133,8 @@ export class CreditNotesService {
       note.taxTotal = totals.taxTotal;
       note.total = totals.total;
 
-      // Each invoice is credited with what its own lines add up to, not with
-      // what was asked for: the two differ by cents when part of an invoice is
-      // credited and the scaled unit prices round.
+      // Each invoice is credited with what its own lines add up to: what was
+      // asked, or a cent below it when a tax step leaves no exact sum (#617).
       const applications = manager.getRepository(CreditNoteApplication);
       let offset = 0;
       for (const group of groups) {
@@ -314,6 +306,7 @@ export class CreditNotesService {
         // Crediting part of an invoice scales its lines, so each rate keeps its
         // share of the tax instead of the whole credit landing on one line.
         factor: Number(invoice.total) === 0 ? 0 : requested / Number(invoice.total),
+        target: Math.min(requested, creditable),
       });
     }
 
@@ -322,6 +315,10 @@ export class CreditNotesService {
     }
     if (new Set(resolved.map(row => row.invoice.currency.toUpperCase())).size > 1) {
       throw new BadRequestException(appError('CREDIT_NOTE_MIXED_CURRENCIES'));
+    }
+    // The note prices every line one way: a gross invoice read as net is over-credited.
+    if (new Set(resolved.map(row => row.invoice.pricesIncludeTax)).size > 1) {
+      throw new BadRequestException(appError('CREDIT_NOTE_MIXED_TAX_MODES'));
     }
     return resolved;
   }
@@ -353,28 +350,11 @@ export class CreditNotesService {
     const groups: Array<{ application: ResolvedApplication; lines: CreditNoteLineItem[] }> = [];
     let sortOrder = 0;
     for (const application of resolved) {
-      const rows: CreditNoteLineItem[] = [];
-      for (const line of application.lines) {
-        const unitPrice = round2(Number(line.unitPrice) * application.factor);
-        if (unitPrice === 0) {
-          continue;
-        }
-        rows.push(
-          repo.create({
-            creditNoteId: note.id,
-            // Named after the invoice it comes off, so a note covering three
-            // invoices reads line by line.
-            description: `${this.linePrefix(application)}${line.description}`,
-            quantity: Number(line.quantity),
-            unitPrice,
-            taxRateId: line.taxRateId,
-            categoryId: line.categoryId,
-            unitCode: line.unitCode ?? 'C62',
-            adjustmentPercent: line.adjustmentPercent ?? null,
-            sortOrder: sortOrder++,
-          }),
-        );
-      }
+      const rows = creditedLines(application, this.linePrefix(application)).map(line =>
+        repo.create({ ...line, creditNoteId: note.id, sortOrder: sortOrder++ }),
+      );
+      if (application.factor !== 1)
+        await fitToTarget(manager, rows, note.pricesIncludeTax, application.target);
       groups.push({ application, lines: await repo.save(rows) });
     }
     return groups;

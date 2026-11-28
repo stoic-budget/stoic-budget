@@ -32,6 +32,40 @@ export function numberFormatFor(column: CustomTableColumn, fallbackCurrency: str
   };
 }
 
+const sourceOf = (column: CustomTableColumn) =>
+  column.config?.source as { field?: unknown } | undefined;
+
+/**
+ * The key of the text column holding each row's currency code (a table made
+ * from transactions), read as the header total reads it.
+ */
+export function rowCurrencyKey(columns: CustomTableColumn[]): string | undefined {
+  return columns.find(column => column.type === 'text' && sourceOf(column)?.field === 'currency')
+    ?.key;
+}
+
+/**
+ * A money column as one row shows it: in that row's own currency when the
+ * table keeps a code per row (#648), not the code the column took from the
+ * first row. Any other column, or a row without a valid code, is unchanged.
+ */
+export function inRowCurrency(
+  column: CustomTableColumn,
+  row: CustomTableGridRow,
+  currencyKey: string | undefined,
+): CustomTableColumn {
+  // Only money the source filled, which is in the row's currency: a currency
+  // column the user added keeps the code they chose for it.
+  if (column.type !== 'currency' || !currencyKey || !sourceOf(column)) {
+    return column;
+  }
+  const code = row.data?.[currencyKey];
+  if (typeof code !== 'string' || !/^[A-Za-z]{3}$/.test(code.trim())) {
+    return column;
+  }
+  return { ...column, config: { ...(column.config ?? {}), currency: code.trim().toUpperCase() } };
+}
+
 export function selectedOptions(
   column: CustomTableColumn,
   value: CustomTableCellValue,

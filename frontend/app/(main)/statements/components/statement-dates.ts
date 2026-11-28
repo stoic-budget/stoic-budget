@@ -1,3 +1,4 @@
+import { toDate } from '@/app/lib/user-format';
 import { formatStoredDate } from '@/app/lib/user-format-store';
 import type { StatementLike } from './StatementsListView.utils';
 
@@ -13,8 +14,8 @@ export const formatStatementDate = (statement: StatementLike): string => {
   if (!dateValue) {
     return '—';
   }
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) {
+  const date = toDate(dateValue);
+  if (!date) {
     return '—';
   }
   return formatStoredDate(date);
