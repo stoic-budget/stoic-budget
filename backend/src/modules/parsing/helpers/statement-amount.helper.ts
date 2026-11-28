@@ -67,6 +67,8 @@ export function parseStatementAmount(text: string): number | null {
  */
 const GLUED_SYMBOL = new RegExp(`^([-+(−]?)[A-Z]{0,3}[${CURRENCY_SYMBOLS}](?=\\d)`);
 const TRAILING_SYMBOL = new RegExp(`(?<=\\d)[${CURRENCY_SYMBOLS}]$`);
+/** A currency's code glued after a figure with its decimals: "-3,40EUR" (mBank's Slovak branch), not "2026EUR". */
+const TRAILING_CODE = new RegExp(`(?<=[.,]\\d{2})(?:${CURRENCY_CODE_PATTERN})$`);
 
 /** A word that can be part of a printed amount: digits, a sign, or a currency mark. */
 export function isAmountPart(word: string): boolean {
@@ -74,6 +76,7 @@ export function isAmountPart(word: string): boolean {
     .replace(LETTER_SIGNS, '')
     .replace(GLUED_SYMBOL, '$1')
     .replace(TRAILING_SYMBOL, '')
+    .replace(TRAILING_CODE, '')
     .replace(/\([+-]\)$/, '')
     .replace(/(\d)[CcDd][Rr]\.?$/, '$1');
   return (

@@ -1,0 +1,67 @@
+{
+  "bankName": "mbank",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "currency",
+    "paymentPurpose"
+  ],
+  "metadata": {
+    "accountNumber": "SK1283605207004200000099",
+    "currency": "EUR",
+    "dateFrom": "2026-03-01T00:00:00",
+    "dateTo": "2026-03-31T00:00:00",
+    "rawHeader": "mBank S.A., pobočka zahraničnej banky www.mbank.sk Zoznam operácií IBAN: SK12 8360 5207 0042 0000 0099 Mena Príjmy Výdavky",
+    "normalizedHeader": "mBank S.A., pobočka zahraničnej banky www.mbank.sk Zoznam operácií IBAN: SK12 8360 5207 0042 0000 0099 Mena Príjmy Výdavky",
+    "locale": "es"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-02T00:00:00",
+      "counterpartyName": "ACME Potraviny Bratislava",
+      "paymentPurpose": "Platba kartou ACME Potraviny Bratislava",
+      "debit": 3.4,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-03-05T00:00:00",
+      "counterpartyName": "Člen Tri",
+      "counterpartyAccount": "SK3112000000001987426353",
+      "paymentPurpose": "Prijatá platba medzibanková Člen Tri",
+      "credit": 1365.85,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-03-12T00:00:00",
+      "counterpartyName": "Výber z iného bankomatu v SR",
+      "paymentPurpose": "Výber z iného bankomatu v SR",
+      "debit": 60,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-03-20T00:00:00",
+      "counterpartyName": "ACME Energie",
+      "counterpartyAccount": "SK8975000000000012345671",
+      "paymentPurpose": "Inkaso ACME Energie",
+      "debit": 71.05,
+      "currency": "EUR"
+    }
+  ],
+  "checks": [
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "a9bcaede2f0c",
+    "headings": [
+      "date:datum operacie | description:opis operacie | other:ucet | other:kategoria | amount:suma"
+    ],
+    "unknownWords": [
+      "ucet",
+      "kategoria"
+    ],
+    "mentionedBank": "mbank"
+  }
+}

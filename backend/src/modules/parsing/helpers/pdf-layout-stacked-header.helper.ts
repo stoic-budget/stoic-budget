@@ -46,6 +46,8 @@ function stackLines(top: PdfTextRow, bottom: PdfTextRow): PdfTextRow {
 
 const hasAmount = (columns: LayoutColumn[] | null) =>
   Boolean(columns?.some(c => c.role === 'amount'));
+const hasBalance = (columns: LayoutColumn[] | null) =>
+  Boolean(columns?.some(c => c.role === 'balance'));
 const dateCount = (columns: LayoutColumn[] | null) =>
   columns?.filter(c => c.role === 'date').length ?? 0;
 
@@ -65,8 +67,11 @@ export function joinStackedHeaders(
     // A header that reads on its top line alone still takes the lower line when
     // that makes one signed column of "Deposits" over "Withdrawals".
     // Or that gives a date its own heading: "Transaction" over "Date" beside "Posting Date".
+    // Or the balance its heading: "Účetní" over "zůstatek" (mBank).
     const joinsMore =
-      (hasAmount(columns) && !hasAmount(topColumns)) || dateCount(columns) > dateCount(topColumns);
+      (hasAmount(columns) && !hasAmount(topColumns)) ||
+      dateCount(columns) > dateCount(topColumns) ||
+      (hasBalance(columns) && !hasBalance(topColumns));
     const bottomColumns = close ? readHeader(bottom) : null;
     // Never at the cost of a column the lower line reads alone: "þ" glued onto
     // "Crédit" above it would lose the credit column.

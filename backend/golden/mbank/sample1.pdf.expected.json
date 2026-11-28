@@ -1,0 +1,86 @@
+{
+  "bankName": "mbank",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "currency",
+    "paymentPurpose"
+  ],
+  "metadata": {
+    "accountNumber": "670100-2200000099/6210",
+    "currency": "CZK",
+    "dateFrom": "2026-03-01T00:00:00",
+    "dateTo": "2026-03-31T00:00:00",
+    "balanceStart": 10000,
+    "balanceEnd": 29764.59,
+    "rawHeader": "mBank S.A., organizační složka Strana: 1/1 Výpis z účtu Číslo účtu: 670100-2200000099/6210 Období: 01.03.2026 - 31.03.2026",
+    "normalizedHeader": "mBank S.A., organizační složka Strana: 1/1 Výpis z účtu Číslo účtu: 670100-2200000099/6210 Období: 01.03.2026 - 31.03.2026"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-01T00:00:00",
+      "counterpartyName": "ACME POTRAVINY PRAHA",
+      "paymentPurpose": "Platba kartou ACME POTRAVINY PRAHA",
+      "debit": 245.9,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-05T00:00:00",
+      "counterpartyName": "Zaměstnavatel One s.r.o.",
+      "counterpartyAccount": "670100-2200000001/6210",
+      "paymentPurpose": "Příchozí platba z mBank Zaměstnavatel One s.r.o.",
+      "credit": 32000,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-10T00:00:00",
+      "counterpartyName": "Nájem ACME",
+      "counterpartyAccount": "000000-1100000004/0300",
+      "paymentPurpose": "Odchozí okamžitá platba Nájem ACME",
+      "debit": 12000,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-31T00:00:00",
+      "counterpartyName": "Připsání úroků",
+      "paymentPurpose": "Připsání úroků",
+      "credit": 12.34,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-31T00:00:00",
+      "counterpartyName": "Daň z připsání úroku",
+      "paymentPurpose": "Daň z připsání úroku",
+      "debit": 1.85,
+      "currency": "CZK"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_totals",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "f8224c58c45d",
+    "headings": [
+      "date:datum zauctovani datum uskutecneni | description:popis transakce | amount:castka | balance:ucetni zustatek"
+    ],
+    "unknownWords": [
+      "datum uskutecneni"
+    ],
+    "mentionedBank": "mbank"
+  }
+}

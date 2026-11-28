@@ -145,6 +145,8 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Laurentian Bank of Canada')).toBe(BankName.LAURENTIAN);
     expect(mentionedBank('LLOYDS BASIC ACCT 18 May 2023 to 18 Aug 2023')).toBe(BankName.LLOYDS);
     expect(mentionedBank('Manufacturers and Traders Trust Company, member FDIC')).toBe(BankName.M_AND_T);
+    expect(mentionedBank('mBank S.A., organizační složka')).toBe(BankName.MBANK);
+    expect(mentionedBank('Platba na účet 670100-2200000001/6210 BIC BREXCZPP')).toBeUndefined();
     expect(mentionedBank('Customer Service Information Marcus.com')).toBe(BankName.MARCUS);
     expect(mentionedBank('MERRICK ACCOUNT SUMMARY Account Number')).toBe(BankName.MERRICK);
     expect(mentionedBank('Metro Bank PLC is registered in England and Wales')).toBe(BankName.METRO_BANK);

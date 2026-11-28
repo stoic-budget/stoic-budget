@@ -4,6 +4,7 @@ import {
   readHeaderRow,
 } from '@/modules/parsing/helpers/pdf-layout-columns.helper';
 import { readLayoutTransactions } from '@/modules/parsing/helpers/pdf-layout-table.helper';
+import { joinStackedHeaders } from '@/modules/parsing/helpers/pdf-layout-stacked-header.helper';
 import {
   closingBalanceFromRows,
   openingBalanceFromRows,
@@ -31,6 +32,25 @@ const header = row(100, [
 ]);
 
 describe('pdf-layout-table.helper', () => {
+  it('joins a heading wrapped onto a second line when that gives the balance its column', () => {
+    const top = row(100, [['Datum', 40], ['Popis', 170], ['transakce', 200], ['Částka', 430], ['Účetní', 520]]);
+    const bottom = row(109, [['zůstatek', 516]]);
+    const [joined] = joinStackedHeaders([top, bottom]);
+    expect(readHeaderRow(joined)?.map(column => column.role)).toEqual([
+      'date',
+      'description',
+      'amount',
+      'balance',
+    ]);
+  });
+
+  it("reads the Slovak list's headings glued as mBank prints them", () => {
+    const columns = readHeaderRow(
+      row(100, [['Dátumoperácie', 40], ['Opisoperácie', 120], ['Suma', 500]]),
+    );
+    expect(columns?.map(column => column.role)).toEqual(['date', 'description', 'amount']);
+  });
+
   it('keeps two headings apart even when only a few points separate them', () => {
     const columns = readHeaderRow(
       row(100, [

@@ -99,6 +99,8 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.KROO, /\bkroo bank ltd\b/],
   [BankName.LAURENTIAN, /\blaurentian bank\b|\b1360,? boul\.? rene-levesque o\./],
   [BankName.M_AND_T, /\bmanufacturers and traders trust company\b|\bmtb\.com\b/],
+  // Not its BIC: another Czech bank's transfer row prints it.
+  [BankName.MBANK, /\bmbank s\. ?a\.|\bmbank\.(?:cz|sk)\b/],
   [BankName.MARCUS, /\bmarcus\.com\b/],
   [BankName.MERRICK, /\bmerrick account summary\b/],
   [BankName.METRO_BANK, /\bmetro bank plc\b/],

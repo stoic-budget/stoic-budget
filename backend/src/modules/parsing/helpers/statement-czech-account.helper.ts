@@ -5,7 +5,8 @@
  * has five digits or more: "12/2026" is a month.
  */
 const DOMESTIC = /(?<![\d/-])((?:\d{1,6}-)?\d{5,10})\s?\/\s?(\d{4})(?![\d/])/;
-const IBAN = /\b([A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}(?: ?[A-Z0-9]{1,4})?)\b/;
+/** Its last group ends at a word's end: "SK89…5671 Bývanie" leaves the category's letter. */
+const IBAN = /\b([A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}(?: ?[A-Z0-9]{1,4})?)(?![\p{L}\p{N}])/u;
 
 /** The account number printed in the text, without spaces; null when there is none. */
 export function findCzechAccount(text: string): string | null {
