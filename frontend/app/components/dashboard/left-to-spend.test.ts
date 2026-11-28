@@ -137,4 +137,43 @@ describe('leftToSpend', () => {
 
     expect(leftToSpend([annualFood, groceries], MONTH)).toEqual([{ currency: 'USD', amount: 50, allowed: 500 }]);
   });
+
+  it('leaves a budget to one on any category above it, not only its parent (#658)', () => {
+    const top = budgetItem({ id: 'b-top', name: 'Food', categoryId: 'food', availableAmount: 500, spentAmount: 200 });
+    // Groceries → Food → (no budget) → Fruit, budgeted two levels below Food.
+    const fruit = budgetItem({
+      id: 'b-fruit',
+      name: 'Fruit',
+      categoryId: 'fruit',
+      category: { ...top.category, id: 'fruit', parentId: 'groceries' },
+      availableAmount: 50,
+      spentAmount: 30,
+    });
+    const parentOf = new Map<string, string | null>([
+      ['fruit', 'groceries'],
+      ['groceries', 'food'],
+      ['food', null],
+    ]);
+
+    expect(leftToSpend([top, fruit], MONTH, parentOf)).toEqual([{ currency: 'USD', amount: 300, allowed: 500 }]);
+  });
+
+  it("counts a goal's budget only where no standalone budget covers its category (#658)", () => {
+    const groceries = budgetItem({ id: 'b-1', name: 'Groceries', categoryId: 'groceries', availableAmount: 300, spentAmount: 100 });
+    const goal = budgetItem({ id: 'b-2', name: 'Groceries for the trip', categoryId: 'groceries', goalId: 'trip', availableAmount: 100, spentAmount: 100 });
+    const travel = budgetItem({ id: 'b-3', name: 'Travel', categoryId: 'travel', goalId: 'trip', availableAmount: 80, spentAmount: 20 });
+
+    expect(leftToSpend([groceries, goal, travel], MONTH)).toEqual([{ currency: 'USD', amount: 260, allowed: 380 }]);
+  });
+
+  it('keeps a budget whose categories loop, and counts one of two goals\' budgets on one category (#658)', () => {
+    const looped = budgetItem({ id: 'b-x', name: 'X', categoryId: 'x', availableAmount: 10, spentAmount: 1 });
+    expect(leftToSpend([looped], MONTH, new Map([['x', 'y'], ['y', 'x']]))).toEqual([
+      { currency: 'USD', amount: 9, allowed: 10 },
+    ]);
+
+    const tripA = budgetItem({ id: 'b-a', name: 'Trip A', categoryId: 'food', goalId: 'a', availableAmount: 100, spentAmount: 80 });
+    const tripB = budgetItem({ id: 'b-b', name: 'Trip B', categoryId: 'food', goalId: 'b', availableAmount: 60, spentAmount: 80 });
+    expect(leftToSpend([tripA, tripB], MONTH)).toEqual([{ currency: 'USD', amount: 20, allowed: 100 }]);
+  });
 });
