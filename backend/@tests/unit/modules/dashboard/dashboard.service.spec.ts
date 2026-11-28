@@ -1,6 +1,6 @@
 import { noteMissingRate } from '../../../../src/common/utils/currency.util';
 import type { Mock } from 'vitest';
-import { Between, In, IsNull } from 'typeorm';
+import { Between, In, IsNull, MoreThanOrEqual } from 'typeorm';
 import { PayableStatus } from '../../../../src/entities/payable.entity';
 import { ReceiptSource, ReceiptStatus } from '../../../../src/entities/receipt.entity';
 import { BankName, StatementStatus } from '../../../../src/entities/statement.entity';
@@ -82,6 +82,9 @@ describe('DashboardService', () => {
   const memberRepo = createRepoMock();
   const workspaceRepo = createRepoMock();
   const subscriptionRepo = createRepoMock();
+  // A subscription's linked payments, read through the repository's manager.
+  const chargeRepo = { find: vi.fn(async (): Promise<unknown[]> => []) };
+  Object.assign(subscriptionRepo, { manager: { getRepository: () => chargeRepo } });
   const exchangeRatesService = {
     getRate: vi.fn(),
     getRateOrNull: vi.fn(),
@@ -1629,6 +1632,46 @@ describe('DashboardService', () => {
         expect(result.shortfallDate).toBe('2026-03-28');
         expect(result.lowestBalance).toBe(-50);
       } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("leaves out a charge already paid ahead, but not one a past period's payment was recorded against (#601)", async () => {
+      vi.useFakeTimers().setSystemTime(new Date(2026, 10, 5));
+      try {
+        primeBalance('1000');
+        payableRepo.find.mockResolvedValue([]);
+        const cloud = { vendorName: 'ACME Cloud', amount: '100', currency: 'KZT', frequency: 'monthly', nextChargeDate: '2026-11-20' };
+        subscriptionRepo.find.mockResolvedValue([
+          { ...cloud, id: 'paid-ahead' },
+          { ...cloud, id: 'paid-late' },
+          { ...cloud, id: 'october-unpaid' },
+        ]);
+        chargeRepo.find.mockResolvedValue([
+          // Paid on 5 Nov for the 20 Nov charge, after paying October's on its day.
+          { subscriptionId: 'paid-ahead', chargeDate: '2026-11-05', expectedDate: '2026-11-20' },
+          { subscriptionId: 'paid-ahead', chargeDate: '2026-10-20', expectedDate: '2026-10-20' },
+          // October's payment, posted a day late and recorded against 20 Nov.
+          { subscriptionId: 'paid-late', chargeDate: '2026-10-21', expectedDate: '2026-11-20' },
+          // Nearest the 20 Nov charge, but October's has no payment: this is October's, late.
+          { subscriptionId: 'october-unpaid', chargeDate: '2026-11-08', expectedDate: '2026-11-20' },
+        ]);
+
+        const result = await service.getCommitments('ws-1', 60);
+
+        const datesOf = (id: string) =>
+          result.items.filter(item => item.sourceId === id).map(item => item.date);
+        expect(datesOf('paid-ahead')).toEqual(['2026-12-20']);
+        expect(datesOf('paid-late')).toEqual(['2026-11-20', '2026-12-20']);
+        expect(datesOf('october-unpaid')).toEqual(['2026-11-20', '2026-12-20']);
+        // This workspace's payments, 19 months back: an annual charge paid early last year included.
+        expect(chargeRepo.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: expect.objectContaining({ workspaceId: 'ws-1', chargeDate: MoreThanOrEqual('2025-04-05') }),
+          }),
+        );
+      } finally {
+        chargeRepo.find.mockResolvedValue([]);
         vi.useRealTimers();
       }
     });
