@@ -22,9 +22,10 @@ encrypted. Env variables with the same purpose are only temporary fallback defau
 
 - Owners and admins can switch each integration (SMTP, IMAP, bank sync, Peppol, Telegram) off for the
   workspace. Off pauses it and keeps the saved settings: its sync, import and send actions answer
-  `PLUGIN_DISABLED`, scheduled bank pulls and Peppol polling skip the workspace, mail goes through the
-  server's `SMTP_*` settings and Telegram through the shared bot. Its status and **Disconnect** still
-  work. Every integration starts switched on.
+  `PLUGIN_DISABLED`, scheduled bank pulls and Peppol polling skip the workspace, and mail goes through the
+  server's `SMTP_*` settings. Telegram stops altogether: no bot, the shared one included, writes to or
+  answers the workspace's chats. Its status and **Disconnect** still work. Every integration starts
+  switched on.
 - Endpoints and hosts saved here (SMTP, S3, WebDAV, IMAP, SimpleFIN) must resolve to public addresses: the
   egress guard rejects private and loopback hosts when you save and again on every connection. An
   SMTP relay on a private network goes in `SMTP_HOST`/`SMTP_FROM` on the server instead.

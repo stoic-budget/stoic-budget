@@ -241,7 +241,8 @@ describe('ApplicationSettingsService', () => {
       });
     });
 
-    it("serves the shared bot while the workspace has Telegram switched off", async () => {
+    it('serves no bot at all, own or shared, while the workspace has Telegram switched off', async () => {
+      process.env.TELEGRAM_BOT_TOKEN = '1:env';
       instanceSaved = { key: 'telegram', encryptedSecrets: { botToken: encryptText('4:shared') } };
       saved[WorkspaceServiceSettingsKey.TELEGRAM] = {
         workspaceId: 'workspace-1',
@@ -249,11 +250,23 @@ describe('ApplicationSettingsService', () => {
         encryptedSecrets: { botToken: encryptText('2:own') },
       };
       pausedIntegrations.add('workspace-1:telegram');
+      const service = createService();
 
-      await expect(createService().getTelegramSettings(user)).resolves.toMatchObject({
-        botToken: '4:shared',
-        source: 'instance',
+      await expect(service.getTelegramSettings(user)).resolves.toMatchObject({
+        botToken: null,
+        paused: true,
       });
+      // A workspace that only ever used the shared bot stops too.
+      delete saved[WorkspaceServiceSettingsKey.TELEGRAM];
+      await expect(service.getTelegramSettings(user)).resolves.toMatchObject({ botToken: null });
+      // Back on: its own bot again.
+      pausedIntegrations.clear();
+      saved[WorkspaceServiceSettingsKey.TELEGRAM] = {
+        workspaceId: 'workspace-1',
+        config: {},
+        encryptedSecrets: { botToken: encryptText('2:own') },
+      };
+      await expect(service.getTelegramSettings(user)).resolves.toMatchObject({ botToken: '2:own' });
     });
 
     it('falls through to the shared bot when the workspace row has no token', async () => {

@@ -13,6 +13,8 @@ import {
   WebhookSubscription,
 } from '../../src/entities/webhook-subscription.entity';
 import { WorkspaceMember, WorkspaceRole } from '../../src/entities/workspace-member.entity';
+import { PeppolConnection } from '../../src/entities/peppol-connection.entity';
+import { PeppolService } from '../../src/modules/peppol/peppol.service';
 import { WebhookDispatcherService } from '../../src/modules/webhooks/services/webhook-dispatcher.service';
 import {
   deleteUserByEmail,
@@ -36,6 +38,7 @@ describe('Workspace plugin switches (e2e)', () => {
   const emails = {
     owner: `plugins-owner-${stamp}@example.com`,
     member: `plugins-member-${stamp}@example.com`,
+    other: `plugins-other-${stamp}@example.com`,
   };
   let owner: E2eAccount;
   let member: E2eAccount;
@@ -153,29 +156,86 @@ describe('Workspace plugin switches (e2e)', () => {
 
   describe('integrations', () => {
     it('pauses an integration: its actions are refused, its status and disconnect still answer', async () => {
-      await setPlugins(owner, { imap: false, bankSync: false }).expect(200);
+      await setPlugins(owner, {
+        imap: false,
+        bankSync: false,
+        smtp: false,
+        telegram: false,
+        peppol: false,
+      }).expect(200);
+      const missing = '00000000-0000-4000-8000-000000000000';
 
       // Built one at a time: supertest binds a port when a request is created.
       for (const call of [
         () => request(server()).post('/integrations/imap/sync'),
         () => request(server()).post('/integrations/imap/settings').send({}),
-        () => request(server()).get('/integrations/bank-sync/providers'),
         () => request(server()).post('/integrations/bank-sync/feeds/switch').send({}),
+        () => request(server()).put('/settings/email/smtp').send({}),
+        () => request(server()).put('/settings/notifications/telegram').send({}),
+        () => request(server()).post('/integrations/peppol/settings').send({}),
+        () => request(server()).post('/integrations/peppol/sync'),
+        () => request(server()).post('/peppol/lookup').send({}),
+        () => request(server()).post(`/invoices/${missing}/peppol`),
+        () => request(server()).post(`/credit-notes/${missing}/peppol`),
       ]) {
         const res = await as(owner, call()).expect(403);
         expect(res.body.error?.code ?? res.body.code).toBe('PLUGIN_DISABLED');
       }
-      await as(owner, request(server()).get('/integrations/imap/status')).expect(200);
-      await as(owner, request(server()).get('/integrations/bank-sync/connections')).expect(200);
-      await as(owner, request(server()).delete('/integrations/imap')).expect(200);
+      // A paused integration can still be looked at and removed.
+      for (const call of [
+        () => request(server()).get('/integrations/imap/status'),
+        () => request(server()).get('/integrations/bank-sync/providers'),
+        () => request(server()).get('/integrations/bank-sync/connections'),
+        () => request(server()).get('/settings/email/smtp'),
+        () => request(server()).get('/settings/notifications/telegram'),
+        () => request(server()).get('/integrations/peppol/status'),
+        () => request(server()).delete('/integrations/imap'),
+        () => request(server()).delete('/settings/email/smtp'),
+      ]) {
+        await as(owner, call()).expect(200);
+      }
+    });
+
+    it('leaves a workspace with Peppol switched off out of the inbox poll', async () => {
+      const peppol = app.get(PeppolService);
+      const connections = dataSource.getRepository(PeppolConnection);
+      const other = await registerAccount(app, emails.other, 'Plugins Other');
+      for (const workspaceId of [owner.workspaceId, other.workspaceId]) {
+        await connections.save(
+          connections.create({
+            workspaceId,
+            apiKeyId: 'key_test',
+            apiSecret: 'not-a-real-secret',
+            companyId: 'c_test',
+            senderPeppolId: '9930:DE000000000',
+          }),
+        );
+      }
+      const polled: string[] = [];
+      vi.spyOn(peppol as never, 'poll').mockImplementation((async (id: string) => {
+        polled.push(id);
+      }) as never);
+
+      await peppol.pollAll();
+
+      expect(polled).toContain(other.workspaceId);
+      expect(polled).not.toContain(owner.workspaceId);
+      vi.restoreAllMocks();
+      await dataSource.query('DELETE FROM peppol_connections WHERE workspace_id = ANY($1)', [
+        [owner.workspaceId, other.workspaceId],
+      ]);
     });
 
     it('lets the actions through again once switched back on', async () => {
-      await setPlugins(owner, { imap: true, bankSync: true }).expect(200);
+      await setPlugins(owner, {
+        imap: true,
+        bankSync: true,
+        smtp: true,
+        telegram: true,
+        peppol: true,
+      }).expect(200);
 
       // Past the switch: nothing is configured, so the answer is about that, not the plugin.
-      const res = await as(owner, request(server()).get('/integrations/bank-sync/providers'));
-      expect(res.status).toBe(200);
       const sync = await as(owner, request(server()).post('/integrations/imap/sync'));
       expect(sync.body.error?.code ?? sync.body.code).not.toBe('PLUGIN_DISABLED');
     });

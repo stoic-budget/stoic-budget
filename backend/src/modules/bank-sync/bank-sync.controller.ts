@@ -41,7 +41,7 @@ export class BankSyncController {
   ) {}
 
   @Get('providers')
-  @PluginAuth('bankSync', Permission.INTEGRATION_MANAGE)
+  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
   @SchemaResponse(BankSyncProviderList)
   providers() {
     return this.connections.catalogue();
