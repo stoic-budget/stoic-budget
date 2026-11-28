@@ -20,6 +20,15 @@ export abstract class BankPdfParser extends GenericPdfParser {
     return null;
   }
 
+  /**
+   * The account's currency when the bank prints it its own way (a header line,
+   * the balances): it then stands for the statement and every row, not the
+   * most printed code, which payments abroad can outnumber.
+   */
+  protected accountCurrency(_text: string): string | null {
+    return null;
+  }
+
   /** A row as the bank prints it, reworked; as it is by default. */
   protected entry(row: ParsedTransaction): ParsedTransaction {
     return row;
@@ -46,12 +55,20 @@ export abstract class BankPdfParser extends GenericPdfParser {
     const text = cachedText ?? (await extractTextFromPdf(filePath));
     const parsed = await super.parse(filePath, text);
     const accountNumber = parsed.otherAccounts ? null : this.accountNumber(text);
-    const statement = accountNumber
-      ? { ...parsed, metadata: { ...parsed.metadata, accountNumber } }
-      : parsed;
+    const currency = parsed.otherAccounts ? null : this.accountCurrency(text);
+    const statement = {
+      ...parsed,
+      metadata: {
+        ...parsed.metadata,
+        ...(accountNumber && { accountNumber }),
+        ...(currency && { currency }),
+      },
+    };
     const rework = (account: ParsedStatement): ParsedStatement => ({
       ...account,
-      transactions: account.transactions.map(row => this.entry(row)),
+      transactions: account.transactions.map(row =>
+        this.entry(currency ? { ...row, currency } : row),
+      ),
     });
     return {
       ...rework(statement),

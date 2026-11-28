@@ -3,7 +3,7 @@ import type { LayoutTransaction } from './pdf-layout-table.helper';
 import { isNextLine } from './pdf-layout-wrapped.helper';
 import { parseDateParts } from './statement-date.helper';
 
-const byPosition = (a: { page: number; y: number }, b: { page: number; y: number }) =>
+export const byPosition = (a: { page: number; y: number }, b: { page: number; y: number }) =>
   a.page - b.page || a.y - b.y;
 
 /**

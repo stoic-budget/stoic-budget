@@ -1,0 +1,73 @@
+{
+  "bankName": "other",
+  "metadata": {
+    "accountNumber": "123456789/0100",
+    "currency": "CZK",
+    "dateFrom": "2026-03-01T00:00:00",
+    "dateTo": "2026-03-31T00:00:00",
+    "balanceStart": 100000,
+    "balanceEnd": 129491,
+    "rawHeader": "ACME Banka a.s. Výpis z účtu Číslo účtu: 123456789/0100 Období: 01.03.2026 - 31.03.2026",
+    "normalizedHeader": "ACME Banka a.s. Výpis z účtu Číslo účtu: 123456789/0100 Období: 01.03.2026 - 31.03.2026",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-02T00:00:00",
+      "counterpartyName": "Splátka úvěru UniCredit Bank Czech Republic Číslo účtu: 2100123456/2700 BIC BACXCZPP",
+      "paymentPurpose": "Splátka úvěru UniCredit Bank Czech Republic Číslo účtu: 2100123456/2700 BIC BACXCZPP",
+      "debit": 12500,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-05T00:00:00",
+      "counterpartyName": "Platba kartou ACME Market",
+      "paymentPurpose": "Platba kartou ACME Market",
+      "debit": 759,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-10T00:00:00",
+      "counterpartyName": "Příchozí platba ACME Holding",
+      "paymentPurpose": "Příchozí platba ACME Holding",
+      "credit": 45000,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-15T00:00:00",
+      "counterpartyName": "Platba ACME Energie",
+      "paymentPurpose": "Platba ACME Energie",
+      "debit": 1250,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-20T00:00:00",
+      "counterpartyName": "Platba ACME Voda",
+      "paymentPurpose": "Platba ACME Voda",
+      "debit": 1000,
+      "currency": "CZK"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "9923e014919a",
+    "headings": [
+      "date:datum | description:popis | amount:castka | balance:zustatek"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "unicredit_cz"
+  }
+}

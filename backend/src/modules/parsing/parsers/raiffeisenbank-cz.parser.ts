@@ -1,12 +1,15 @@
 // Behaviour ported from zumfi-finance (MIT, © 2026 Simmak7), commit a5b8a09.
 // See THIRD_PARTY_NOTICES.md.
-import { extractTextFromPdf, type PdfTextRow } from '../../../common/utils/pdf-parser.util';
+import type { PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import { BankName } from '../../../entities/statement.entity';
 import { readBlocks } from '../helpers/pdf-layout-blocks.helper';
 import type { LayoutTransaction } from '../helpers/pdf-layout-table.helper';
-import { findAccountCurrency, findCzechAccount } from '../helpers/statement-czech-account.helper';
+import {
+  findAccountCurrency,
+  findCzechAccount,
+  headerLines,
+} from '../helpers/statement-czech-account.helper';
 import { findForeignAmount } from '../helpers/statement-foreign-amount.helper';
-import type { ParsedStatement } from '../interfaces/parsed-statement.interface';
 import { BankPdfParser } from './bank-pdf.parser';
 
 /**
@@ -32,7 +35,6 @@ const RB_BANK = /\bRZBC\s?CZ\s?PP\b|(?<!\p{L})raiffeisenbank,?\s+a\.\s?s\./iu;
 /** The header's own account, on its label's line, with the bank's code 5500. */
 const RB_ACCOUNT =
   /^[ \t]*(?:[čc][íi]slo\s+[úu][čc]tu|iban)\s*:?[^\n]*?(?:\d\s?\/\s?5500\b|\bCZ\d{2}\s?5500)/imu;
-const HEADER_LINES = 20;
 
 /**
  * A Raiffeisenbank statement names the bank in its header and prints its own
@@ -40,7 +42,7 @@ const HEADER_LINES = 20;
  * row paying a Raiffeisenbank account, in another bank's statement, does not.
  */
 export function isRaiffeisenbankCzStatement(text: string): boolean {
-  const head = text.normalize('NFC').split('\n').slice(0, HEADER_LINES).join('\n');
+  const head = headerLines(text);
   return RB_BANK.test(head) && RB_ACCOUNT.test(head);
 }
 
@@ -141,16 +143,9 @@ export class RaiffeisenbankCzParser extends BankPdfParser {
     return isRaiffeisenbankCzStatement(text);
   }
 
-  /** The account's currency is the one its balances print, not the most printed code: an original abroad is not it. */
-  async parse(filePath: string, cachedText?: string): Promise<ParsedStatement> {
-    const text = cachedText ?? (await extractTextFromPdf(filePath));
-    const statement = await super.parse(filePath, text);
-    const currency = accountCurrency(text);
-    return {
-      ...statement,
-      metadata: { ...statement.metadata, currency },
-      transactions: statement.transactions.map(row => ({ ...row, currency })),
-    };
+  /** The one its balances print, not the most printed code: an original abroad is not it. */
+  protected accountCurrency(text: string): string {
+    return accountCurrency(text);
   }
 
   protected readTransactions(rows: PdfTextRow[]): LayoutTransaction[] {

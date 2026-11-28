@@ -49,3 +49,17 @@ const ACCOUNT_CURRENCY = /^[ \t]*M[eě]na(?:\s+(?:účtu|uctu))?[ \t]*:?[ \t]*([
 export function findAccountCurrency(text: string): string | null {
   return text.match(ACCOUNT_CURRENCY)?.[1] ?? null;
 }
+
+/** A line starting with a date: the first row of the table, past the header. */
+const DATED_LINE = /^\s*\d{1,2}\.\s?\d{1,2}\.\s?\d{4}\b|^\s*\d{4}-\d{2}-\d{2}\b/;
+
+/**
+ * The statement's header: its first lines up to the first one starting with
+ * a date (a row), at most `max`. What a bank prints there names the statement;
+ * a row's lines under it (a payment to that bank's account) do not.
+ */
+export function headerLines(text: string, max = 20): string {
+  const lines = text.normalize('NFC').split('\n').slice(0, max);
+  const firstRow = lines.findIndex(line => DATED_LINE.test(line));
+  return (firstRow === -1 ? lines : lines.slice(0, firstRow)).join('\n');
+}

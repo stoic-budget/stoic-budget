@@ -114,6 +114,7 @@ import { UbsParser } from '../parsers/ubs.parser';
 import { UcoParser } from '../parsers/uco.parser';
 import { UlsterParser } from '../parsers/ulster.parser';
 import { UnicreditParser } from '../parsers/unicredit.parser';
+import { UnicreditCzParser } from '../parsers/unicredit-cz.parser';
 import { UnionBankOfIndiaParser } from '../parsers/union-bank-of-india.parser';
 import { UsBankParser } from '../parsers/us-bank.parser';
 import { UsaaParser } from '../parsers/usaa.parser';
@@ -246,6 +247,7 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [UcoParser, { bankName: BankName.UCO }],
   [UlsterParser, { bankName: BankName.ULSTER }],
   [UnicreditParser, { bankName: BankName.UNICREDIT }],
+  [UnicreditCzParser, { bankName: BankName.UNICREDIT_CZ }],
   [UnionBankOfIndiaParser, { bankName: BankName.UNION_BANK_OF_INDIA }],
   [UsaaParser, { bankName: BankName.USAA }],
   [UsBankParser, { bankName: BankName.US_BANK }],

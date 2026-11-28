@@ -1,0 +1,77 @@
+{
+  "bankName": "unicredit_cz",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "exchangeRate",
+    "currency",
+    "paymentPurpose"
+  ],
+  "metadata": {
+    "accountNumber": "1234567890/2700",
+    "currency": "CZK",
+    "dateFrom": "2026-03-01T00:00:00",
+    "dateTo": "2026-03-31T00:00:00",
+    "balanceStart": 68775.85,
+    "balanceEnd": 109791.45,
+    "rawHeader": "UniCredit Bank Czech Republic and Slovakia, a.s. Strana 1/2 Výpis z účtu Číslo účtu: 1234567890/2700 Počáteční zůstatek 68.775,85",
+    "normalizedHeader": "UniCredit Bank Czech Republic and Slovakia, a.s. Strana 1/2 Výpis z účtu Číslo účtu: 1234567890/2700 Počáteční zůstatek 68.775,85",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-02T00:00:00",
+      "counterpartyName": "ACME Market Praha",
+      "paymentPurpose": "Platba u obchodníka Datum transakce: : 28.02.2026 1111-2XXX-XX33-0000 MEMBER ONE CZK 759,00 ACME0001, ACME Market Praha Praha, CZE",
+      "debit": 759,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-05T00:00:00",
+      "counterpartyName": "ACME Holding a.s.",
+      "counterpartyAccount": "9876543210/2700",
+      "paymentPurpose": "PŘEVOD V RÁMCI BANKY Příchozí úhrada Číslo účtu: 9876543210/2700 Plátce: ACME Holding a.s. Popis: Mzda 02/2026",
+      "credit": 45000,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-10T00:00:00",
+      "counterpartyName": "ACME Bydlení",
+      "counterpartyAccount": "1100000004/0300",
+      "paymentPurpose": "Tuzemská platba okamžitá - Mobile Banking Odchozí úhrada Číslo účtu: 1100000004/0300 Příjemce: ACME Bydlení Popis: Příjmy z pronájmu vyúčtování VS: 1001",
+      "debit": 1200,
+      "currency": "CZK",
+      "documentNumber": "1001"
+    },
+    {
+      "transactionDate": "2026-03-15T00:00:00",
+      "counterpartyName": "ACME Café Wien",
+      "paymentPurpose": "Platba u obchodníka Datum transakce: : 13.03.2026 1111-2XXX-XX33-0000 MEMBER ONE EUR 1,00 1,00 EUR/CZK 25,400000 WIEN0001, ACME Café Wien Wien, AUT",
+      "debit": 25.4,
+      "currency": "CZK",
+      "amountForeign": 1,
+      "exchangeRate": 25.4
+    },
+    {
+      "transactionDate": "2026-03-20T00:00:00",
+      "counterpartyName": "Výběr z bankomatu, ACME ATM Brno",
+      "paymentPurpose": "Výběr z bankomatu Datum transakce: : 20.03.2026 1111-2XXX-XX33-0000 CZK 2.000,00 ACME ATM Brno, CZE",
+      "debit": 2000,
+      "currency": "CZK"
+    }
+  ],
+  "checks": [
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "df260a235abf",
+    "headings": [
+      "date:datum | otherDate:valuta | description:transakce | credit:prijmy | debit:vydaje"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "unicredit_cz"
+  }
+}
