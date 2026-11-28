@@ -63,7 +63,7 @@ export default function ConfirmModal({
               background: isDestructive
                 ? 'var(--color-error-soft-bg)'
                 : 'var(--color-info-soft-bg)',
-              color: isDestructive ? '#dc2626' : '#2563eb',
+              color: isDestructive ? 'var(--money-down)' : 'var(--primary)',
             }}
           >
             {icon ?? <AlertTriangle size={20} />}
