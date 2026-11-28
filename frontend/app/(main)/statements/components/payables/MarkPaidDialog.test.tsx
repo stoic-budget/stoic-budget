@@ -5,6 +5,7 @@ import type { Payable } from '@/app/lib/payables-api';
 import { renderWithQuery } from '@/app/test/query-wrapper';
 import { MarkPaidDialog } from './MarkPaidDialog';
 import { categoryItem, walletItem } from '@/app/test/fixtures/contracts';
+import { localToday } from '@/app/lib/local-today';
 
 const appLocale = vi.hoisted(() => ({ current: 'en' }));
 
@@ -195,7 +196,7 @@ describe('MarkPaidDialog', () => {
       kind: 'full',
       payload: {
         payFromWalletId: 'wallet-eur',
-        paidOn: new Date().toISOString().slice(0, 10),
+        paidOn: localToday(),
         categoryId: 'cat-out',
       },
     });
@@ -223,7 +224,7 @@ describe('MarkPaidDialog', () => {
       kind: 'full',
       payload: {
         payFromWalletId: 'wallet-eur',
-        paidOn: new Date().toISOString().slice(0, 10),
+        paidOn: localToday(),
         categoryId: 'cat-ads',
       },
     });
@@ -336,7 +337,7 @@ describe('MarkPaidDialog', () => {
 
     expect(onConfirm).toHaveBeenCalledWith(payable, {
       kind: 'full',
-      payload: { inHand: true, paidOn: new Date().toISOString().slice(0, 10), categoryId: undefined },
+      payload: { inHand: true, paidOn: localToday(), categoryId: undefined },
     });
   });
 

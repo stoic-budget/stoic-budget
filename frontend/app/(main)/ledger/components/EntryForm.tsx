@@ -15,6 +15,7 @@ import { X } from '@/app/components/icons';
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer } from '@/app/i18n';
 import { getApiErrorMessage } from '@/app/lib/api-error';
+import { localToday } from '@/app/lib/local-today';
 import type { EntryInput } from '../hooks/useLedger';
 import {
   accountDisplayName,
@@ -40,8 +41,6 @@ interface EntryFormProps {
   onPost: (id: string) => Promise<unknown>;
   onDelete: (id: string) => Promise<unknown>;
 }
-
-const today = (): string => new Date().toISOString().slice(0, 10);
 
 function linesOf(draft: JournalEntry | null, baseCurrency: string): DraftLine[] {
   if (!draft || draft.lines.length === 0) {
@@ -73,7 +72,7 @@ export function EntryForm({
 }: EntryFormProps): React.ReactElement {
   const t = useIntlayer('ledgerPage');
   const [saved, setSaved] = useState<JournalEntry | null>(draft);
-  const [entryDate, setEntryDate] = useState(draft?.entryDate ?? today());
+  const [entryDate, setEntryDate] = useState(draft?.entryDate ?? localToday());
   const [memo, setMemo] = useState(draft?.memo ?? '');
   const [lines, setLines] = useState<DraftLine[]>(() => linesOf(draft, baseCurrency));
   const [dirty, setDirty] = useState(draft === null);
