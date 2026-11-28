@@ -5,6 +5,7 @@ import TelegramIcon from '@mui/icons-material/Telegram';
 import type React from 'react';
 import { useMemo } from 'react';
 import { useIntlayer } from '@/app/i18n';
+import type { IntegrationKey } from '@/app/plugins/types';
 import type { ProtocolIntegrationPageProps } from '../open-protocol-page';
 import { smtpIntegrationEntry } from './smtp-entry';
 
@@ -24,7 +25,7 @@ export type IntegrationDetail =
   | { kind: 'bank-sync' };
 
 export type IntegrationEntry = {
-  key: string;
+  key: IntegrationKey;
   name: string;
   description: string;
   badge: string;

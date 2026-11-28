@@ -3,8 +3,8 @@ title: Integrations
 description: Mail, storage, inbox, bank sync and Telegram
 ---
 
-Integrations are configured in the app under **Integrations**, per workspace. Secrets are stored
-encrypted. Env variables with the same purpose are only temporary fallback defaults for bootstrap.
+Integrations are configured in the app under **Plugins** (account menu), per workspace, next to the
+plugins. Secrets are stored encrypted. Env variables with the same purpose are only temporary fallback defaults for bootstrap.
 
 ## Catalog
 
@@ -55,7 +55,7 @@ SimpleFIN, North America) exposes your bank accounts over the open
 [SimpleFIN protocol](https://www.simplefin.org/protocol.html), and Stoic Budget pulls from it.
 
 1. In SimpleFIN Bridge, connect your bank and create a **new connection**; it shows a *setup token*.
-2. In Stoic Budget, open **Integrations → Bank sync via SimpleFIN**, paste the token and connect. A token
+2. In Stoic Budget, open **Plugins → Bank sync via SimpleFIN**, paste the token and connect. A token
    works once: Stoic Budget exchanges it for an access credential and stores only that, encrypted.
 3. Choose which accounts to pull and, optionally, which Stoic Budget wallet each one lands in. Accounts the
    provider adds later start switched off.

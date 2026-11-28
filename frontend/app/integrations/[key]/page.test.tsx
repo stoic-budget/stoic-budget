@@ -37,7 +37,7 @@ describe('/integrations/<key>', () => {
     for (const key of ['imap', 'constructor']) {
       params.current = { key };
       render(<IntegrationRoute />);
-      expect(openAppPanel).toHaveBeenLastCalledWith('integrations', key);
+      expect(openAppPanel).toHaveBeenLastCalledWith('plugins', key);
     }
     expect(replace).toHaveBeenCalledWith('/dashboard');
   });
