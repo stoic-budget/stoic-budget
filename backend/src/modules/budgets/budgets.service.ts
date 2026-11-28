@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, MoreThanOrEqual, type Repository } from 'typeorm';
 import { toEnum } from '../../common/effect/to-enum';
 import { appError } from '../../common/errors/app-error';
+import { addMonthsClamped } from '../../common/recurrence/date-only';
 import { assertFound } from '../../common/utils/assert-found.util';
 import { countedSql } from '../../common/utils/counted-transactions.util';
 import { STANDARD_WORKSPACE } from '../../common/workspaces/version-workspaces';
@@ -34,7 +35,7 @@ import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { BudgetExceededEvent } from '../notifications/events/notification-events';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PayPeriodService } from '../pay-period/pay-period.service';
-import { countChargesBetween } from '../subscriptions/charge-calendar.util';
+import { countChargesBetween, paidAheadDays } from '../subscriptions/charge-calendar.util';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import {
   clampToWindow,
@@ -449,21 +450,15 @@ export class BudgetsService {
       order: { vendorName: 'ASC' },
     });
     if (!this.subscriptionChargeRepository || linked.subscriptions.length === 0) return linked;
-    const today = new Date();
     const charges = await this.subscriptionChargeRepository.find({
       where: {
         workspaceId,
         subscriptionId: In(linked.subscriptions.map(subscription => subscription.id)),
-        expectedDate: MoreThanOrEqual(localDay(today) as unknown as Date),
+        chargeDate: MoreThanOrEqual(addMonthsClamped(localDay(new Date()), -19) as unknown as Date),
       },
-      select: { subscriptionId: true, expectedDate: true },
+      select: { subscriptionId: true, expectedDate: true, chargeDate: true },
     });
-    for (const charge of charges) {
-      if (!charge.expectedDate) continue;
-      const days = linked.paidAhead.get(charge.subscriptionId) ?? new Set<string>();
-      days.add(String(charge.expectedDate).slice(0, 10));
-      linked.paidAhead.set(charge.subscriptionId, days);
-    }
+    linked.paidAhead = paidAheadDays(charges, linked.subscriptions, localDay(new Date()));
     return linked;
   }
 
