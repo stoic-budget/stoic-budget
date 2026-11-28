@@ -141,3 +141,23 @@ export const AppImportResult = Schema.Struct({
   ),
 });
 export type AppImportResult = Wire<typeof AppImportResult>;
+
+/**
+ * `POST /entity-imports/broker-statement`: a broker's PDF as the import
+ * wizard's table of trades (its first row the header), and what the file says
+ * that its rows do not.
+ */
+export const BrokerStatementTable = Schema.Struct({
+  source: Schema.Literals(['revolut_trading', 'revolut_pnl']),
+  rows: Schema.Array(Schema.Array(Schema.String)),
+  checks: Schema.Array(
+    Schema.Struct({
+      code: Schema.Literals(['cash_mismatch', 'holding_mismatch']),
+      currency: Schema.String,
+      symbol: Schema.optional(Schema.String),
+      expected: Schema.Number,
+      actual: Schema.Number,
+    }),
+  ),
+});
+export type BrokerStatementTable = Wire<typeof BrokerStatementTable>;

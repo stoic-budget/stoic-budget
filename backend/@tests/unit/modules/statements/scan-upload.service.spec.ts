@@ -8,6 +8,10 @@ import { ScanUploadService } from '@/modules/statements/services/scan-upload.ser
 import type { StatementsService } from '@/modules/statements/statements.service';
 
 const isBankStatementScan = vi.hoisted(() => vi.fn());
+// A broker's report is refused before routing; these files are none.
+vi.mock('@/modules/entity-imports/broker/broker-statement', () => ({
+  rejectBrokerReports: vi.fn(async () => undefined),
+}));
 vi.mock('@/modules/parsing/helpers/scan-statement.helper', () => ({ isBankStatementScan }));
 vi.mock('@/common/utils/file-validator.util', () => ({
   assertReceiptFileSupported: vi.fn(),

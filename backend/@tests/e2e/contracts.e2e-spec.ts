@@ -80,6 +80,7 @@ import {
   DisclaimerStatus,
   DuplicateGroups,
   EntityImportResult,
+  BrokerStatementTable,
   ExchangeRateCoverage,
   ExchangeRateQuote,
   ForecastResponse,
@@ -2969,6 +2970,24 @@ describe('API contracts (e2e)', () => {
           }).expect(succeeded)
         ).body,
       );
+      // A made-up Revolut account statement as the wizard's table of trades.
+      const broker = await request(app.getHttpServer())
+        .post('/entity-imports/broker-statement')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('x-workspace-id', owner.workspaceId)
+        .attach('file', path.join(__dirname, '../fixtures/parsing/revolut-trading-made-up.pdf'))
+        .expect(succeeded);
+      expect(broker.body.rows.length).toBeGreaterThan(1);
+      expect(broker.body.checks.length).toBeGreaterThan(0);
+      matches(BrokerStatementTable, broker.body);
+      // The same file uploaded as a bank statement is refused with a pointer to the trades import.
+      const refused = await request(app.getHttpServer())
+        .post('/statements/upload')
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('x-workspace-id', owner.workspaceId)
+        .attach('files', path.join(__dirname, '../fixtures/parsing/revolut-trading-made-up.pdf'))
+        .expect(400);
+      expect(refused.body.error?.code).toBe('STATEMENT_IS_BROKER_REPORT');
       matches(
         CreatedWebhookEndpoint,
         (await call('post', '/webhook-endpoints', { name: 'Action endpoint' }).expect(succeeded)).body,

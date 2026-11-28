@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { TABULAR_FILE_ACCEPT } from '@/app/(main)/custom-tables/[id]/utils/tabularFileReader';
 import { useIntlayer } from '@/app/i18n';
+import { setBrokerChecks } from './broker-checks-store';
 import { ImportWizardDialog } from './ImportWizardDialog';
 import type { ImportPeriod } from './import-choices';
 import type { ImportRunResult, ImportTarget } from './import-wizard-api';
@@ -28,7 +29,8 @@ export function ImportFromFileButton(props: ImportFromFileButtonProps): React.JS
       <input
         ref={inputRef}
         type="file"
-        accept={TABULAR_FILE_ACCEPT}
+        // A broker's PDF (Revolut) is read as trades.
+        accept={props.target === 'trades' ? `${TABULAR_FILE_ACCEPT},.pdf` : TABULAR_FILE_ACCEPT}
         hidden
         data-testid={`import-file-input-${props.target}`}
         onChange={event => {
@@ -42,7 +44,11 @@ export function ImportFromFileButton(props: ImportFromFileButtonProps): React.JS
       {file && (
         <ImportWizardDialog
           isOpen
-          onClose={() => setFile(null)}
+          onClose={() => {
+            // What the file said goes with it.
+            setBrokerChecks([]);
+            setFile(null);
+          }}
           file={file}
           fixedTarget={props.target}
           onImported={props.onImported}

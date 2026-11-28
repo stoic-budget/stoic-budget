@@ -93,6 +93,10 @@ export const DOCUMENTS_ERRORS = {
   STATEMENT_UPLOAD_TOO_MANY_FILES: 'Maximum 2 files allowed',
   STATEMENT_SAMPLE_NOT_FOUND: 'Dropped sample not found',
   STATEMENT_TRANSACTION_DATE_INVALID: 'Transaction date is invalid',
+  STATEMENT_IS_BROKER_REPORT:
+    'This is a broker statement, not a bank statement: import it as trades in Investments',
+  BROKER_STATEMENT_UNREADABLE:
+    'This PDF is no broker statement we read: a Revolut account statement or profit and loss statement',
   STATEMENT_AMOUNT_REQUIRED: 'Either debit or credit amount is required',
   STATEMENT_FILE_RESTORE_UNAVAILABLE: 'File data is unavailable for restore',
   STATEMENT_FILE_DATA_UNAVAILABLE: 'File data not available',

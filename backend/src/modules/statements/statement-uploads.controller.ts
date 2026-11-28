@@ -40,6 +40,7 @@ import { EntityType } from '../../entities/audit-event.entity';
 import type { User } from '../../entities/user.entity';
 import { Audit } from '../audit/decorators/audit.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { rejectBrokerReports } from '../entity-imports/broker/broker-statement';
 import { ScanUploadService } from './services/scan-upload.service';
 import { StatementsService } from './statements.service';
 
@@ -218,6 +219,7 @@ export class StatementUploadsController {
 
     // Validate each file
     await validateFiles(files);
+    await rejectBrokerReports(files);
 
     // Process each file
     const results = await Promise.all(

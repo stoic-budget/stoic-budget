@@ -81,7 +81,8 @@ export const INVESTMENT_FIELDS: Record<InvestmentTarget, TargetField[]> = {
       key: 'kind',
       type: 'enum',
       required: true,
-      options: ['buy', 'sell', 'dividend', 'split', 'transfer_in', 'transfer_out'],
+      // 'balance' states what is held on a day: the import moves in or out the difference.
+      options: ['buy', 'sell', 'dividend', 'split', 'transfer_in', 'transfer_out', 'balance'],
       aliases: [
         'type',
         'action',
@@ -121,6 +122,13 @@ export const INVESTMENT_FIELDS: Record<InvestmentTarget, TargetField[]> = {
       type: 'text',
       required: false,
       aliases: ['name', 'security', 'instrument', 'название', 'инструмент', 'бумага', 'wertpapier'],
+    },
+    {
+      key: 'assetClass',
+      type: 'enum',
+      required: false,
+      options: ['stock', 'etf', 'fund', 'bond', 'cash', 'other'],
+      aliases: ['asset class', 'assetclass', 'класс актива', 'anlageklasse', 'clase de activo'],
     },
     {
       key: 'price',
@@ -215,6 +223,14 @@ export const INVESTMENT_ENUM_ALIASES: Record<string, Record<string, string[]>> =
     kg: ['kg', 'kilo', 'kilogram', 'кг', 'килограмм'],
   },
 
+  assetClass: {
+    stock: ['stock', 'stocks', 'share', 'equity', 'акция', 'акции', 'aktie'],
+    etf: ['etf', 'exchange traded fund'],
+    fund: ['fund', 'mutual fund', 'фонд', 'fonds'],
+    bond: ['bond', 'bonds', 'облигация', 'облигации', 'anleihe'],
+    cash: ['cash', 'деньги', 'наличные', 'bargeld', 'efectivo'],
+    other: ['other', 'другое', 'sonstige'],
+  },
   tradeKind: {
     buy: ['buy', 'bought', 'purchase', 'покупка', 'купля', 'kauf', 'compra', 'achat'],
     sell: ['sell', 'sold', 'sale', 'продажа', 'verkauf', 'venta', 'vente'],
@@ -229,6 +245,7 @@ export const INVESTMENT_ENUM_ALIASES: Record<string, Record<string, string[]>> =
       'ввод',
       'einbuchung',
     ],
+    balance: ['balance', 'opening balance', 'остаток', 'входящий остаток', 'saldo', 'bestand'],
     transfer_out: [
       'transfer out',
       'transfer_out',

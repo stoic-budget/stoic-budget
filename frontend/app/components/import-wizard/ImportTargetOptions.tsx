@@ -3,6 +3,7 @@
 import { Checkbox } from '@/app/components/ui/checkbox';
 import { Select } from '@/app/components/ui/select';
 import { useIntlayer } from '@/app/i18n';
+import { BrokerChecks } from './BrokerChecks';
 import type { ImportChoices } from './import-choices';
 import type { ImportTarget } from './import-wizard-api';
 import { TransactionImportOptions } from './TransactionImportOptions';
@@ -53,6 +54,7 @@ function TradeImportOptions({ choices: values, onChange }: ChoicesProps): React.
         <span>{t.createMissingHoldings}</span>
       </div>
       {!values.investmentAccountId && <p className="seneca-iw__hint">{t.createMissingHint}</p>}
+      <BrokerChecks />
     </>
   );
 }

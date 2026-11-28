@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
   pickDefaultSheet,
-  readTabularWorkbook,
   sheetToTextRows,
   type TabularWorkbook,
 } from '@/app/(main)/custom-tables/[id]/utils/tabularFileReader';
@@ -23,6 +22,7 @@ import { formatDate } from '@/app/lib/user-format';
 import { ImportProblems } from './ImportProblems';
 import { ImportTargetOptions } from './ImportTargetOptions';
 import { type ImportChoices, type ImportPeriod, initialImportChoices } from './import-choices';
+import { readFailedMessage, readImportWorkbook } from './import-file';
 import {
   createTableFromImport,
   IMPORT_TARGETS,
@@ -169,7 +169,7 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
     let cancelled = false;
     (async () => {
       try {
-        const book = await readTabularWorkbook(file);
+        const book = await readImportWorkbook(file);
         if (cancelled) {
           return;
         }
@@ -177,9 +177,9 @@ export function ImportWizardDialog(props: ImportWizardDialogProps): React.JSX.El
         setWorkbook(book);
         setSheetIndex(index);
         await loadRows(sheetToTextRows(book.sheets[index]));
-      } catch {
+      } catch (error) {
         if (!cancelled) {
-          toast.error(t.errors.readFailed.value);
+          toast.error(readFailedMessage(error, t.errors.readFailed.value));
           onClose();
         }
       }

@@ -28,6 +28,10 @@ import {
 } from '../helpers/import-values';
 import { resolveEnumAlias } from '../target-aliases';
 import type { ImportContext, ImportTarget, RowResult } from './target.types';
+import { balanceDifference, bookKey, coveredByLater, statedBookEnds } from './trade-balance';
+import { bySymbol, parseRatio, sameTrade } from './trade-rows';
+
+export { parseRatio } from './trade-rows';
 
 /** A holding the rows go to, with the trades it has and the ones this run adds. */
 interface Book {
@@ -84,10 +88,14 @@ export class TradesTarget implements ImportTarget {
     const order = detectDateOrder(rows.map(row => ctx.cell(row, 'date')));
     const base = Date.now();
     const results: RowResult[] = [];
+    const statementEnds = statedBookEnds(rows, ctx, order);
 
     for (const [index, row] of rows.entries()) {
-      const kind = resolveEnumAlias('tradeKind', ctx.cell(row, 'kind')) as TradeKind | null;
-      if (!kind) {
+      const stated = resolveEnumAlias('tradeKind', ctx.cell(row, 'kind')) as
+        | TradeKind
+        | 'balance'
+        | null;
+      if (!stated) {
         results.push({ index, status: 'error', reason: 'kind' });
         continue;
       }
@@ -101,7 +109,28 @@ export class TradesTarget implements ImportTarget {
         results.push({ index, status: 'error', reason: found });
         continue;
       }
+      // Rows a later statement already counts, and a balance the holding already has, are skipped.
+      const end = statementEnds.get(bookKey(row, ctx) ?? '');
+      const covered = coveredByLater(found.events.slice(0, found.stored), end);
+      // A balance moves in or out what the holding lacks or has over at the start of its day.
+      const difference =
+        stated === 'balance'
+          ? balanceDifference(found.events, ctx.cell(row, 'quantity'), date)
+          : null;
+      if (!covered && stated === 'balance' && difference === null) {
+        results.push({ index, status: 'error', reason: 'quantity' });
+        continue;
+      }
+      if (covered || (difference !== null && Math.abs(difference) < 1e-9)) {
+        results.push({ index, status: 'skipped', reason: 'duplicate' });
+        continue;
+      }
+      const kind: TradeKind =
+        stated === 'balance' ? ((difference ?? 0) > 0 ? 'transfer_in' : 'transfer_out') : stated;
       const draft = this.draft(row, ctx, kind, date, order);
+      if (difference !== null) {
+        draft.fields.quantity = Math.abs(difference);
+      }
       const normalized = normalizeTrade(draft.fields);
       if ('error' in normalized) {
         results.push({ index, status: 'error', reason: RULE_REASONS[normalized.error] });
@@ -175,11 +204,11 @@ export class TradesTarget implements ImportTarget {
     books: Map<string, Book>,
     dryRun: boolean,
   ): Promise<Book | string> {
+    const key = bookKey(row, ctx);
+    if (!key) return 'holding';
     const rawSymbol = ctx.cell(row, 'symbol').trim();
     const symbol = rawSymbol ? normalizeStockSymbol(rawSymbol) : '';
     const name = ctx.cell(row, 'name').trim();
-    if (!(symbol || name)) return 'holding';
-    const key = symbol ? `s:${symbol}` : `n:${nameKey(name)}`;
     const open = books.get(key);
     if (open) return open;
 
@@ -192,15 +221,22 @@ export class TradesTarget implements ImportTarget {
     if (!holding) {
       if (!(ctx.createMissingHoldings && ctx.investmentAccountId)) return 'holding_not_found';
       const repo = ctx.manager.getRepository(InvestmentHolding);
+      const assetClass =
+        (resolveEnumAlias(
+          'assetClass',
+          ctx.cell(row, 'assetClass'),
+        ) as InvestmentAssetClass | null) ?? InvestmentAssetClass.OTHER;
+      const cash = assetClass === InvestmentAssetClass.CASH;
       holding = repo.create({
         workspaceId: ctx.workspaceId,
         accountId: ctx.investmentAccountId,
         symbol: symbol || null,
         name: name || symbol,
-        assetClass: InvestmentAssetClass.OTHER,
+        assetClass,
         quantity: 0,
-        price: 0,
-        priceCurrency: ctx.currency,
+        // A unit of cash is worth one of its currency.
+        price: cash ? 1 : 0,
+        priceCurrency: (cash && normalizeCurrencyCode(ctx.cell(row, 'currency'))) || ctx.currency,
         priceSource: InvestmentPriceSource.MANUAL,
         pricedAt: null,
       });
@@ -303,42 +339,4 @@ export class TradesTarget implements ImportTarget {
       await repo.update({ id: holding.id, workspaceId: ctx.workspaceId }, { quantity, price });
     }
   }
-}
-
-/**
- * Holdings a sheet's ticker names. Stored symbols carry a market (VWCE.DE,
- * ACME.US); a broker often writes the bare ticker, which then matches the
- * one holding with that ticker on any market.
- */
-function bySymbol(holdings: InvestmentHolding[], raw: string, normalized: string) {
-  const exact = holdings.filter(holding => holding.symbol === normalized);
-  if (exact.length > 0 || raw.includes('.')) return exact;
-  const ticker = raw.toUpperCase();
-  return holdings.filter(holding => holding.symbol?.split('.')[0] === ticker);
-}
-
-/** "3:1", "3 for 1", "3-for-1", "1/10", "1 to 10": new units for old. */
-export function parseRatio(raw: string): { to: number; from: number } | null {
-  const match =
-    /^\s*(\d+(?:[.,]\d+)?)\s*(?::|\/|-?\s*for\s*-?|to|за|к)\s*(\d+(?:[.,]\d+)?)\s*$/i.exec(raw);
-  if (!match) return null;
-  const to = Number(match[1].replace(',', '.'));
-  const from = Number(match[2].replace(',', '.'));
-  return to > 0 && from > 0 ? { to, from } : null;
-}
-
-/** Two trades of one holding that say the same thing: kind, day and every figure. */
-function sameTrade(stored: TradeEvent, row: Omit<TradeEvent, 'id'>): boolean {
-  const same = (a: number | null, b: number | null) =>
-    a === null || b === null ? a === b : Math.abs(a - b) < 1e-9;
-  return (
-    stored.kind === row.kind &&
-    stored.date === row.date &&
-    same(stored.quantity, row.quantity) &&
-    same(stored.price, row.price) &&
-    same(stored.fee, row.fee) &&
-    same(stored.amount, row.amount) &&
-    same(stored.splitFrom, row.splitFrom) &&
-    same(stored.splitTo, row.splitTo)
-  );
 }
