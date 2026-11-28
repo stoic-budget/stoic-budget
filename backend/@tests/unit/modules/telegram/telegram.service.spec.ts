@@ -599,3 +599,60 @@ describe('TelegramService connection', () => {
     );
   });
 });
+
+describe('TelegramService report already sent', () => {
+  it('sends it again when the person asks for it (the /report command, the button)', async () => {
+    const { service, reportsService } = createService({ users: [] });
+    const internals = service as any;
+    vi.spyOn(internals, 'isEnabled').mockResolvedValue(true);
+    vi.spyOn(internals, 'findExisting').mockResolvedValue({ id: 'rep-1', status: 'sent' });
+    vi.spyOn(internals, 'formatMonthlyReportMessage').mockReturnValue('November report');
+    const persistAndSend = vi
+      .spyOn(internals, 'persistAndSend')
+      .mockResolvedValue({ status: 'sent', report: { id: 'rep-1' } });
+    reportsService.generateMonthlyReport.mockResolvedValue({});
+    const owner = { id: 'user-1', telegramChatId: 'chat-1', locale: 'en' } as any;
+
+    const result = await service.sendReport(
+      owner,
+      { reportType: 'monthly', year: 2026, month: 11 } as any,
+      'workspace-1',
+    );
+
+    expect(reportsService.generateMonthlyReport).toHaveBeenCalledWith('workspace-1', 2026, 11);
+    expect(persistAndSend).toHaveBeenCalled();
+    expect(result).toMatchObject({ status: 'sent' });
+  });
+});
+
+describe('TelegramService failed resend', () => {
+  it('keeps a report that once reached the user delivered when a resend fails', async () => {
+    const { service, telegramReportRepository } = createService({ users: [] });
+    const internals = service as any;
+    vi.spyOn(internals, 'sendMessage').mockRejectedValue(new Error('Telegram is down'));
+    const delivered = {
+      id: 'rep-1',
+      status: 'sent',
+      sentAt: new Date('2026-11-21T08:00:00Z'),
+      messageId: 'm1',
+    };
+    const saves: Array<{ status: string }> = [];
+    telegramReportRepository.save = vi.fn(async (record: any) => {
+      saves.push({ status: record.status });
+      return record;
+    });
+
+    await expect(
+      internals.persistAndSend(
+        { id: 'user-1' },
+        'chat-1',
+        'daily',
+        new Date('2026-11-20'),
+        'Report of 20 November',
+        delivered,
+      ),
+    ).rejects.toThrow('Telegram is down');
+
+    expect(saves.at(-1)?.status).toBe('sent');
+  });
+});

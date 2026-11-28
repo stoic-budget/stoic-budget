@@ -127,3 +127,79 @@ describe('TelegramScheduler.pushInsightDigests', () => {
     expect(telegramService.pushInsightDigest).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('TelegramScheduler scheduled reports', () => {
+  const build = () => {
+    const telegramService = {
+      sendReport: vi.fn(async () => ({ status: 'sent' })),
+      resolveWorkspaceId: vi.fn(async () => 'workspace-1'),
+    } as any;
+    const reportRepository = { findOne: vi.fn(async (): Promise<unknown> => null) };
+    const scheduler = new TelegramScheduler(
+      telegramService,
+      {} as any,
+      createUserRepoMock([{ id: 'user-1', telegramChatId: 'chat-1' }]),
+      { createEvent: vi.fn(async () => undefined) } as any,
+      reportRepository as any,
+    );
+    return { scheduler, telegramService, reportRepository };
+  };
+
+  afterEach(() => vi.useRealTimers());
+
+  it('sends the month that ended on the 1st', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2027-01-01T09:00:00Z'));
+    const { scheduler, telegramService } = build();
+
+    await scheduler.sendMonthlyReports();
+
+    expect(telegramService.sendReport).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ year: 2026, month: 12 }),
+      'workspace-1',
+    );
+  });
+
+  it('sends the day that ended at 8 in the morning', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-12-01T08:00:00Z'));
+    const { scheduler, telegramService } = build();
+
+    await scheduler.sendDailyReports();
+
+    expect(telegramService.sendReport).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ date: '2026-11-30' }),
+      'workspace-1',
+    );
+  });
+
+  it('skips a period already delivered after it ended, so a restart does not send it twice', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-12-01T09:00:00Z'));
+    const { scheduler, telegramService, reportRepository } = build();
+    reportRepository.findOne.mockResolvedValue({ status: 'sent', sentAt: new Date('2026-12-01T08:00:30Z') });
+
+    await scheduler.sendMonthlyReports();
+    await scheduler.sendDailyReports();
+
+    expect(telegramService.sendReport).not.toHaveBeenCalled();
+  });
+
+  it('still sends the period when the only delivery was asked for before it ended', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-12-01T09:00:00Z'));
+    const { scheduler, telegramService, reportRepository } = build();
+    // `/report` on 15 November: a partial month, not the report of November.
+    reportRepository.findOne.mockResolvedValue({ status: 'sent', sentAt: new Date('2026-11-15T10:00:00Z') });
+
+    await scheduler.sendMonthlyReports();
+
+    expect(telegramService.sendReport).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ year: 2026, month: 11 }),
+      'workspace-1',
+    );
+  });
+});
