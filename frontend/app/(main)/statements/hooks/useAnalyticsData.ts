@@ -1,6 +1,7 @@
 import { useContext, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import apiClient from '@/app/lib/api';
+import { fetchAllPages } from '@/app/lib/fetch-all-pages';
 import { checkContract } from '@/app/lib/query-fn-schema';
 import type { ReceiptDocument, StatementMeta, Transaction } from '../types/statement-types';
 import { AnalyticsDataContext } from './analytics-data-context';
@@ -39,30 +40,6 @@ export interface UseAnalyticsDataResult {
 // ---------------------------------------------------------------------------
 // Pagination helpers
 // ---------------------------------------------------------------------------
-
-/** Every page of a list, `load` fetching one by its number and offset. */
-async function fetchAllPages<T>(
-  pageSize: number,
-  load: (page: number, offset: number) => Promise<{ items: readonly T[]; total: number }>,
-): Promise<T[]> {
-  const results: T[] = [];
-  let page = 1;
-  let offset = 0;
-  let total = Number.POSITIVE_INFINITY;
-
-  while (results.length < total) {
-    const batch = await load(page, offset);
-    results.push(...batch.items);
-    total = batch.total;
-    if (batch.items.length < pageSize) {
-      break;
-    }
-    page += 1;
-    offset += pageSize;
-  }
-
-  return results;
-}
 
 // ---------------------------------------------------------------------------
 // Hook
