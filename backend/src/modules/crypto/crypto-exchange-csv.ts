@@ -22,6 +22,8 @@ export type ExchangeEntryKind = 'trade' | 'move' | 'earn' | 'fee';
 export interface ExchangeEntry {
   /** The exchange's own id for the row, or the row's text when it has none. */
   reference: string;
+  /** The reference is the exchange's own id: a repeat of it is the same row, not a second one. */
+  exchangeId?: boolean;
   /** YYYY-MM-DD. */
   date: string;
   /** Ticker, uppercase and normalised (Kraken's `XXBT` is `BTC`). */
@@ -71,15 +73,31 @@ export function parseExchangeCsv(text: string): ParsedExchangeFile | null {
   const body = rows.slice(index + 1).filter(row => row.some(cell => cell.trim() !== ''));
 
   if (has(columns, ['transaction type', 'asset', 'quantity transacted'])) {
-    return { exchange: 'Coinbase', entries: coinbase(columns, body) };
+    return { exchange: 'Coinbase', entries: numberRepeats(coinbase(columns, body)) };
   }
   if (has(columns, ['operation', 'coin', 'change'])) {
-    return { exchange: 'Binance', entries: binance(columns, body) };
+    return { exchange: 'Binance', entries: numberRepeats(binance(columns, body)) };
   }
   if (has(columns, ['refid', 'type', 'asset', 'amount'])) {
-    return { exchange: 'Kraken', entries: kraken(columns, body) };
+    return { exchange: 'Kraken', entries: numberRepeats(kraken(columns, body)) };
   }
   return null;
+}
+
+/**
+ * Two identical rows of one file without the exchange's own ids (the same buy
+ * twice on a day) are two movements: the second and later ones get `#2`, `#3` on their reference. The
+ * first keeps its reference as before, and the same file gives the same
+ * numbers, so importing it again still writes nothing new.
+ */
+function numberRepeats(entries: ExchangeEntry[]): ExchangeEntry[] {
+  const seen = new Map<string, number>();
+  return entries.map(entry => {
+    if (entry.exchangeId) return entry;
+    const count = (seen.get(entry.reference) ?? 0) + 1;
+    seen.set(entry.reference, count);
+    return count === 1 ? entry : { ...entry, reference: `${entry.reference}#${count}` };
+  });
 }
 
 /**
@@ -109,7 +127,9 @@ function coinbase(columns: Map<string, number>, rows: string[][]): ExchangeEntry
     const asset = normalizeAsset(cell(row, columns, 'asset'));
     const quantity = toNumber(cell(row, columns, 'quantity transacted'));
     const notes = cell(row, columns, 'notes');
-    const reference = cell(row, columns, 'id') || `${date}|${type}|${asset}|${quantity}`;
+    const id = cell(row, columns, 'id');
+    const reference = id || `${date}|${type}|${asset}|${quantity}`;
+    const exchangeId = Boolean(id);
     if (!(date && asset && quantity)) {
       continue;
     }
@@ -135,6 +155,7 @@ function coinbase(columns: Map<string, number>, rows: string[][]): ExchangeEntry
     if (!FIAT.has(asset)) {
       entries.push({
         reference,
+        exchangeId,
         date,
         asset,
         amount: outgoing ? -Math.abs(quantity) : Math.abs(quantity),
@@ -149,6 +170,7 @@ function coinbase(columns: Map<string, number>, rows: string[][]): ExchangeEntry
       if (!FIAT.has(target)) {
         entries.push({
           reference: `${reference}|to`,
+          exchangeId,
           date,
           asset: target,
           amount: Math.abs(toNumber(converted[1])),
@@ -229,7 +251,9 @@ function kraken(columns: Map<string, number>, rows: string[][]): ExchangeEntry[]
     const asset = normalizeAsset(cell(row, columns, 'asset'));
     const amount = toNumber(cell(row, columns, 'amount'));
     const fee = toNumber(cell(row, columns, 'fee'));
-    const reference = cell(row, columns, 'txid') || `${date}|${type}|${asset}|${amount}`;
+    const txid = cell(row, columns, 'txid');
+    const reference = txid || `${date}|${type}|${asset}|${amount}`;
+    const exchangeId = Boolean(txid);
     if (!(date && asset) || FIAT.has(asset)) {
       continue;
     }
@@ -237,6 +261,7 @@ function kraken(columns: Map<string, number>, rows: string[][]): ExchangeEntry[]
     if (amount) {
       entries.push({
         reference,
+        exchangeId,
         date,
         asset,
         amount,
@@ -247,6 +272,7 @@ function kraken(columns: Map<string, number>, rows: string[][]): ExchangeEntry[]
     if (fee > 0) {
       entries.push({
         reference: `${reference}|fee`,
+        exchangeId,
         date,
         asset,
         amount: -fee,
