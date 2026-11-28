@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, IsNull, Not, Repository } from 'typeorm';
+import { Between, In, IsNull, Not, Raw, Repository } from 'typeorm';
 import { countedWhere } from '../../common/utils/counted-transactions.util';
 import { fromMinor, roundHalfAwayFromZero, toMinor } from '../../common/utils/money.util';
 import { readWorkspaceProfile } from '../../common/utils/workspace-profile.util';
@@ -13,6 +13,7 @@ import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { TaxThresholdReachedEvent } from '../notifications/events/notification-events';
 import { JurisdictionAdoptionService } from './jurisdiction-adoption.service';
 import { toDateOnly } from './jurisdictions.service';
+import { salesCategorySql } from './sales-categories';
 
 export interface ThresholdStatus {
   /** Null when the jurisdiction publishes no threshold we track. */
@@ -129,7 +130,11 @@ export class TaxThresholdService {
         transferPairId: IsNull(),
         transactionType: TransactionType.INCOME,
         transactionDate: Between(new Date(periodStart), new Date(periodEnd)),
-        categoryId: Not(IsNull()),
+        // Sales only: an income category, not wages, interest or the Uncategorized fallback.
+        categoryId: Raw(
+          column =>
+            `${column} IS NOT NULL AND ${salesCategorySql(`"${column.split('.')[0].replaceAll('"', '')}"`)}`,
+        ),
       }),
     });
 

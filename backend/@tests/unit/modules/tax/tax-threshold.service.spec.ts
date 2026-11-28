@@ -90,9 +90,9 @@ describe('TaxThresholdService', () => {
       for (const branch of where) {
         expect(branch).toMatchObject({ isVerified: true, isDuplicate: false, workspaceId: 'ws-1' });
         expect(branch.transferPairId).toEqual(IsNull());
-        // Every categorised sale, assessed or not. `Not(null)` would compile to
-        // `!= NULL`, which matches nothing.
-        expect(branch.categoryId).toEqual(Not(IsNull()));
+        // Every sale, assessed or not: a row in an income category that is not
+        // wages, interest or the Uncategorized fallback (checked in SQL by the e2e).
+        expect(branch.categoryId.type).toBe('raw');
       }
       expect(where[0].statementId).toEqual(IsNull());
       expect(where[1].statement).toEqual({ deletedAt: IsNull() });
