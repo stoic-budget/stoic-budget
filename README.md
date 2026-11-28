@@ -270,6 +270,8 @@ Built on great open-source foundations:
 
 The cash flow, net worth, category and ROI charts follow the chart design of [Aurum](https://github.com/ZProger/Aurum) by [ZProger](https://github.com/ZProger). They were reimplemented for Stoic Budget; no Aurum source code is included (Aurum is licensed under PolyForm Noncommercial 1.0.0).
 
+The Czech and Slovak statement parsers (Fio banka, ČSOB and those that follow) port the behaviour of the parsers in [zumfi-finance](https://github.com/Simmak7/zumfi-finance) by [Simmak7](https://github.com/Simmak7), MIT licensed; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
 ---
 
 <div align="center">
