@@ -70,9 +70,11 @@ function wordMatches(word: string, query: string): boolean {
 
 /**
  * How well a match fits, lower first: the name itself, its start, the start of
- * a word in it, then a group the user named in their own language, then one of
- * Lucide's English search words, then the letters anywhere in the name. A
- * group outranks the last two: "rent" means the home group, not "parentheses".
+ * a word in it (or one of Lucide's search words exactly: "casino" is playing
+ * cards before anything else), then a group the user named in their own
+ * language, then Lucide's search words by their start, then the letters
+ * anywhere in the name. A group outranks the last two: "rent" means the home
+ * group, not "parentheses".
  */
 const SCORE = { exact: 0, start: 1, word: 2, group: 3, searchWord: 4, inside: 5 } as const;
 
@@ -114,7 +116,10 @@ export function searchIcons(index: IconSearchIndex, query: string, locale: strin
     if (label) {
       score = best(score, textScore(label, needle));
     }
-    if ((index.words[name] ?? []).some(word => termMatches(word, needle))) {
+    const words = index.words[name] ?? [];
+    if (words.includes(needle)) {
+      score = best(score, SCORE.word);
+    } else if (words.some(word => termMatches(word, needle))) {
       score = best(score, SCORE.searchWord);
     }
     if (byGroup.has(name)) {

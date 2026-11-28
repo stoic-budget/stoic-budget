@@ -101,6 +101,21 @@ describe('searchIcons', () => {
     expect(ranked).toEqual(['house', 'scale', 'parentheses']);
   });
 
+  it('puts an icon whose search word is exactly what was typed before a whole group', () => {
+    const habits = { icons: ['cigarette', 'beer'], terms: groupTerms('Habits, casino', 'en') };
+    const ranked = searchIcons(
+      {
+        order: listingOrder(['beer', 'cigarette', 'playing-cards'], [habits]),
+        words: { 'playing-cards': ['casino', 'poker'] },
+        labels: new Map(),
+        groups: [habits],
+      },
+      'casino',
+      'en',
+    );
+    expect(ranked).toEqual(['playing-cards', 'cigarette', 'beer']);
+  });
+
   it('puts a name match before a group match', () => {
     const habitsAndHouse = searchIcons(
       { ...index, labels: new Map([['house', 'дом']]), words: {} },
