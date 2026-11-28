@@ -11,7 +11,6 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { In, IsNull, type Repository } from 'typeorm';
-import { workspaceMemberCanEdit } from '../../common/authz/workspace-permissions';
 import { toEnum } from '../../common/effect/to-enum';
 import { appError } from '../../common/errors/app-error';
 import { FileStorageService } from '../../common/services/file-storage.service';
@@ -48,6 +47,7 @@ import { MetricsService } from '../observability/metrics.service';
 import { StatementsService } from '../statements/statements.service';
 import type { StorageViewFilters } from './interfaces/storage-view-filters.interface';
 import { purgeFromTrash } from './purge-from-trash';
+import { StorageAccessService, type StorageAction } from './storage-access.service';
 import { buildStorageCategoryWhere } from './storage-category-scope.util';
 
 type FileAvailability = {
@@ -97,21 +97,10 @@ export class StorageService {
     private readonly transactionRepository: Repository<Transaction>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    private readonly storageAccess: StorageAccessService,
     @Optional()
     private readonly metricsService?: MetricsService,
   ) {}
-
-  /** The caller's membership in a file's own workspace, the anchor for access to it. */
-  private findMembership(workspaceId: string, userId: string) {
-    return this.workspaceMemberRepository.findOne({
-      where: { workspaceId, userId },
-      select: {
-        id: true,
-        role: true,
-        permissions: true,
-      },
-    });
-  }
 
   /**
    * Get all files (statements) of the current workspace
@@ -171,7 +160,7 @@ export class StorageService {
       }
 
       // Enrich with permissions info
-      const workspaceRole = await this.findMembership(workspaceId, userId);
+      const workspaceRole = await this.storageAccess.findMembership(workspaceId, userId);
 
       const statementsWithFileData = this.fileStorageService.getStatementsWithFileData
         ? await this.fileStorageService.getStatementsWithFileData(allStatements.map(s => s.id))
@@ -185,7 +174,10 @@ export class StorageService {
           let sharedLinks = 0;
 
           try {
-            permission = await this.getUserPermissionForStatement(userId, statement.id);
+            permission = await this.storageAccess.getUserPermissionForStatement(
+              userId,
+              statement.id,
+            );
             sharedLinks = await this.sharedLinkRepository.count({
               where: { statementId: statement.id },
             });
@@ -334,8 +326,11 @@ export class StorageService {
     });
 
     const isOwner = statement.userId === userId;
-    const userPermission = await this.getUserPermissionForStatement(userId, statementId);
-    const membership = await this.findMembership(statement.workspaceId, userId);
+    const userPermission = await this.storageAccess.getUserPermissionForStatement(
+      userId,
+      statementId,
+    );
+    const membership = await this.storageAccess.findMembership(statement.workspaceId, userId);
     const isWorkspacePeer = Boolean(membership);
     // A private row reads as a placeholder to all but its owner, here as in the list.
     redactPrivateRows(transactions, membership?.id ?? null);
@@ -770,7 +765,9 @@ export class StorageService {
     });
     // As in getFileDetails: a private row reads as a placeholder to all but its owner.
     const workspaceId = transactions[0]?.workspaceId;
-    const membership = workspaceId ? await this.findMembership(workspaceId, userId) : null;
+    const membership = workspaceId
+      ? await this.storageAccess.findMembership(workspaceId, userId)
+      : null;
     redactPrivateRows(transactions, membership?.id ?? null);
 
     const header = [
@@ -1333,135 +1330,9 @@ export class StorageService {
     await this.filePermissionRepository.remove(permission);
   }
 
-  /**
-   * Check if user has specific access to a file
-   */
-  private async checkFileAccess(
-    userId: string,
-    statementId: string,
-    requiredAction: 'view' | 'download' | 'edit' | 'share',
-  ): Promise<void> {
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-      relations: {
-        user: true,
-      },
-    });
-
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-
-    // Access follows membership in the file's own workspace, whichever
-    // workspace the caller registered with.
-    const membership = await this.findMembership(statement.workspaceId, userId);
-
-    // Uploading the file does not outrank the role: a viewer who dropped a
-    // statement in still only reads it. Nor does it outlast the membership: an
-    // uploader who left the workspace is just anyone, down to an explicit grant.
-    if (statement.userId === userId && membership) {
-      if (
-        requiredAction === 'edit' &&
-        !workspaceMemberCanEdit(membership.role, 'canEditStatements', membership.permissions)
-      ) {
-        throw new ForbiddenException(appError('STATEMENTS_EDIT_FORBIDDEN'));
-      }
-      if (
-        requiredAction === 'share' &&
-        !workspaceMemberCanEdit(membership.role, 'canShareFiles', membership.permissions)
-      ) {
-        throw new ForbiddenException(appError('SHARING_FORBIDDEN'));
-      }
-      return;
-    }
-
-    // Workspace members: allow view/download; admins/owners can edit/share
-    if (membership) {
-      if (requiredAction === 'view' || requiredAction === 'download') {
-        return;
-      }
-
-      const canManage =
-        membership && [WorkspaceRole.ADMIN, WorkspaceRole.OWNER].includes(membership.role);
-
-      if (requiredAction === 'edit' && canManage) {
-        return;
-      }
-
-      if (requiredAction === 'share' && canManage) {
-        return;
-      }
-    }
-
-    // Check file permissions
-    const permission = await this.getUserPermissionForStatement(userId, statementId);
-
-    if (!permission?.isActive) {
-      throw new ForbiddenException(appError('STORAGE_ACCESS_DENIED'));
-    }
-
-    // Check if permission is expired
-    if (permission.expiresAt && new Date(permission.expiresAt) < new Date()) {
-      throw new ForbiddenException(appError('STORAGE_PERMISSION_EXPIRED'));
-    }
-
-    // Check action permission
-    const hasPermission = this.checkActionPermission(
-      permission.permissionType,
-      requiredAction,
-      permission.canReshare,
-    );
-
-    if (!hasPermission) {
-      throw new ForbiddenException(appError('STORAGE_ACTION_DENIED', { action: requiredAction }));
-    }
-  }
-
-  /**
-   * Get user permission for a statement
-   */
-  private async getUserPermissionForStatement(
-    userId: string,
-    statementId: string,
-  ): Promise<FilePermission | null> {
-    return await this.filePermissionRepository.findOne({
-      where: {
-        userId,
-        statementId,
-        isActive: true,
-      },
-    });
-  }
-
-  /**
-   * Check if permission type allows specific action
-   */
-  private checkActionPermission(
-    permissionType: FilePermissionType,
-    action: 'view' | 'download' | 'edit' | 'share',
-    canReshare: boolean,
-  ): boolean {
-    switch (action) {
-      case 'view':
-        return [
-          FilePermissionType.OWNER,
-          FilePermissionType.EDITOR,
-          FilePermissionType.VIEWER,
-          FilePermissionType.DOWNLOADER,
-        ].includes(permissionType);
-      case 'download':
-        return [
-          FilePermissionType.OWNER,
-          FilePermissionType.EDITOR,
-          FilePermissionType.DOWNLOADER,
-        ].includes(permissionType);
-      case 'edit':
-        return [FilePermissionType.OWNER, FilePermissionType.EDITOR].includes(permissionType);
-      case 'share':
-        return permissionType === FilePermissionType.OWNER || canReshare;
-      default:
-        return false;
-    }
+  /** Kept as a method of its own: specs replace it to skip the access rules. */
+  private checkFileAccess(userId: string, statementId: string, requiredAction: StorageAction) {
+    return this.storageAccess.checkFileAccess(userId, statementId, requiredAction);
   }
 
   /**

@@ -19,6 +19,7 @@ import {
 } from '@/entities';
 import { MetricsService } from '@/modules/observability/metrics.service';
 import { StatementsService } from '@/modules/statements/statements.service';
+import { StorageAccessService } from '@/modules/storage/storage-access.service';
 import { StorageService } from '@/modules/storage/storage.service';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
@@ -61,6 +62,7 @@ describe('StorageService', () => {
     testingModule = await Test.createTestingModule({
       providers: [
         StorageService,
+        StorageAccessService,
         {
           provide: getRepositoryToken(SharedLink),
           useValue: {

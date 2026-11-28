@@ -1,4 +1,5 @@
 import { FindOperator } from 'typeorm';
+import { StorageAccessService } from '@/modules/storage/storage-access.service';
 import { StorageService } from '@/modules/storage/storage.service';
 
 /**
@@ -153,6 +154,11 @@ export function buildStorageService(overrides: Partial<StorageDeps> = {}) {
     deps.statementsService,
     deps.transactionRepository,
     deps.categoryRepository,
+    new StorageAccessService(
+      deps.statementRepository,
+      deps.filePermissionRepository,
+      deps.workspaceMemberRepository,
+    ),
     deps.metricsService,
   );
   return { service, deps };
