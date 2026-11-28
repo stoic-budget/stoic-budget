@@ -182,6 +182,8 @@ const TOTAL_CREDITS = [
   'soucet prijmu',
   'suma prijmov',
   'prijmy celkem',
+  'kreditni polozky',
+  'kreditnipolozky',
 ];
 const TOTAL_DEBITS = [
   'money out',
@@ -193,6 +195,8 @@ const TOTAL_DEBITS = [
   'soucet vydaju',
   'suma vydavkov',
   'vydaje celkem',
+  'debetni polozky',
+  'debetnipolozky',
 ];
 
 /** Words that open a line of sums, not of a movement. */
@@ -217,6 +221,9 @@ export function isTotalsLabel(description: string): boolean {
  * label, as a box printed beside it can end the same line. Null for a side
  * the statement does not total.
  */
+/** Totals labels that print how many items before their sum. */
+const COUNTED = /polozky$/;
+
 export function findStatementTotals(
   text: string,
   order: NumericDateOrder,
@@ -227,13 +234,12 @@ export function findStatementTotals(
       // "Total Withdrawals & Other Debits" totals one section, not the statement.
       const pattern = new RegExp(`(?:^|[^a-z])${label}(?![a-z]|\\s*(?:&|and)\\s+[a-z])`, 'g');
       for (const match of folded.matchAll(pattern)) {
-        const value = amountAfter(
-          text,
-          folded,
-          (match.index ?? 0) + match[0].length,
-          order,
-          'first',
-        );
+        const end = (match.index ?? 0) + match[0].length;
+        // "Debetní položky 3 245,90 CZK": a count of items comes before their sum (mBank).
+        const count = COUNTED.test(label)
+          ? (folded.slice(end).match(/^\s*\d+\s+(?=\d)/)?.[0] ?? '')
+          : '';
+        const value = amountAfter(text, folded, end + count.length, order, 'first');
         if (value !== null) {
           return Math.abs(value);
         }

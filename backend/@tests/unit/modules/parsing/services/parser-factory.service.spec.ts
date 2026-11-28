@@ -248,6 +248,7 @@ describe('ParserFactoryService', () => {
       'LaurentianParser',
       'LloydsParser',
       'MAndTParser',
+      'MbankParser',
       'MarcusParser',
       'MerrickParser',
       'MetroBankParser',

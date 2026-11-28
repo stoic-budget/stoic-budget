@@ -119,6 +119,7 @@ export const BANKS = [
     logo: 'm-and-t.png',
     aliases: ['m&t', 'm and t', 'manufacturers and traders'],
   },
+  { key: 'mbank', name: 'mBank', logo: 'mbank.png', aliases: ['mbank s.a.'] },
   {
     key: 'marcus',
     name: 'Marcus by Goldman Sachs',

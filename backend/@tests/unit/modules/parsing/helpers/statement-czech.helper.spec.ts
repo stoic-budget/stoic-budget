@@ -7,6 +7,7 @@ import {
   parseDateParts,
   resolveDate,
 } from '@/modules/parsing/helpers/statement-date.helper';
+import { findCzechAccount } from '@/modules/parsing/helpers/statement-czech-account.helper';
 import { findForeignAmount } from '@/modules/parsing/helpers/statement-foreign-amount.helper';
 import {
   detectStatementCurrency,
@@ -28,6 +29,20 @@ const HEADER = [
   'Konečný zůstatek 11 805,67',
 ].join('\n');
 
+describe('findStatementTotals: a count before the sum', () => {
+  it('reads mBank\'s "položky" as the count of items, then their sum', () => {
+    expect(findStatementTotals('Debetnípoložky 3 245,90 CZK', 'dmy').debits).toBe(245.9);
+    expect(findStatementTotals('Kreditní položky 22 103 670,61 CZK', 'dmy').credits).toBe(103670.61);
+    expect(findStatementTotals('Kreditnípoložky 2 32012,34 CZK', 'dmy').credits).toBe(32012.34);
+  });
+});
+
+describe('findCzechAccount: an IBAN beside a word', () => {
+  it('ends the IBAN at its own last character', () => {
+    expect(findCzechAccount('SK8975000000000012345671 Bývanie -71,05EUR')).toBe('SK8975000000000012345671');
+  });
+});
+
 describe('Czech and Slovak statements', () => {
   it.each([
     ['1 234,56 Kč', 1234.56],
@@ -36,6 +51,13 @@ describe('Czech and Slovak statements', () => {
     ['-3,40EUR', -3.4],
   ])('reads the amount %s', (text, expected) => {
     expect(parseStatementAmount(text)).toBe(expected);
+  });
+
+  it('takes a figure with its currency code glued on for an amount word, a merchant glued on not', () => {
+    expect(isAmountPart('-3,40EUR')).toBe(true);
+    expect(isAmountPart('44,91LIU')).toBe(false);
+    expect(isAmountPart('2026EUR')).toBe(false);
+    expect(isAmountPart('100CZK')).toBe(false);
   });
 
   it('takes "Kč" printed as a word of its own for part of the amount', () => {

@@ -75,6 +75,7 @@ export const BANK_DISPLAY_NAMES: Record<BankName, string> = {
   [BankName.LAURENTIAN]: 'Laurentian Bank',
   [BankName.LLOYDS]: 'Lloyds Bank',
   [BankName.M_AND_T]: 'M&T Bank',
+  [BankName.MBANK]: 'mBank',
   [BankName.MARCUS]: 'Marcus by Goldman Sachs',
   [BankName.MERRICK]: 'Merrick Bank',
   [BankName.METRO_BANK]: 'Metro Bank',

@@ -11,7 +11,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **Belgium:** KBC
 - **Brazil:** Banco do Brasil
 - **Canada:** ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank, RBC Royal Bank, Scotiabank, Simplii Financial, Tangerine, TD Bank
-- **Czech Republic:** ČSOB¹, Fio banka¹, Raiffeisenbank¹, UniCredit Bank¹
+- **Czech Republic:** ČSOB¹, Fio banka¹, mBank¹, Raiffeisenbank¹, UniCredit Bank¹
 - **France:** Crédit Agricole, Société Générale, Sogexia
 - **Germany:** Deutsche Bank, N26
 - **Hong Kong:** Bank of China (Hong Kong)
@@ -26,7 +26,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **Poland:** BNP Paribas Bank Polska
 - **Qatar:** QNB
 - **Romania:** Raiffeisen Bank
-- **Slovakia:** Fio banka¹
+- **Slovakia:** Fio banka¹, mBank¹
 - **South Africa:** Absa, Capitec, FNB
 - **Sri Lanka:** Commercial Bank of Ceylon
 - **Switzerland:** UBS
