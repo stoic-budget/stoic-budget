@@ -68,7 +68,7 @@ export const tokens = {
     warning: '#f59e0b',
     warningSoft: '#fffbeb',
     danger: '#b4493f',
-    dangerSoft: '#f6e4df',
+    dangerSoft: '#f8ebe7',
     info: '#0ea5e9',
     infoSoft: '#f0f9ff',
 
@@ -76,7 +76,7 @@ export const tokens = {
     surface: '#f3f0ea',
     surfaceMuted: '#e7e2d9',
     surfaceWarning: '#fffbeb',
-    surfaceError: '#f6e4df',
+    surfaceError: '#f8ebe7',
 
     textPrimary: '#0b0b10',
     textSecondary: '#4a4a58',
