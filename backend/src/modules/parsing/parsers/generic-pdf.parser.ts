@@ -23,6 +23,7 @@ import {
 import {
   closingBalanceFromRows,
   openingBalanceFromRows,
+  sharedAccountCurrency,
   splitByAccount,
   toParsedTransactions,
 } from '../helpers/pdf-layout-transactions.helper';
@@ -85,10 +86,12 @@ export class GenericPdfParser extends BaseParser {
 
     const headerInfo = this.extractHeaderFromText(text);
     const localeInfo = this.detectLocale(text);
-    const detectedCurrency = detectStatementCurrency(text) || appDefaultCurrency();
-
     const reading = this.readingFor(text);
     const layoutTransactions = this.checkedReading(layoutRows, reading, text);
+    // A currency every row's account heading names stands for the statement.
+    const detectedCurrency =
+      sharedAccountCurrency(layoutTransactions) ??
+      (detectStatementCurrency(text) || appDefaultCurrency());
     // The generic reading of the same rows: its sections' totals and the layout's words.
     const table = readLayoutTable(layoutRows, reading);
     const layout = statementLayout(table.layout, text);

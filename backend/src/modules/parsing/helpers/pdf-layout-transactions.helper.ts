@@ -93,6 +93,12 @@ export function toParsedTransactions(
   });
 }
 
+/** The currency every row's account heading names, when they all name the same one. */
+export function sharedAccountCurrency(transactions: LayoutTransaction[]): string | undefined {
+  const currencies = new Set(transactions.map(row => row.account?.currency));
+  return currencies.size === 1 ? [...currencies][0] : undefined;
+}
+
 /**
  * Rows grouped by the account heading printed above their table, in the
  * order the accounts appear. A statement with one account (or none named)
