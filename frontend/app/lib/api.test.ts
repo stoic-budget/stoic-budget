@@ -161,6 +161,7 @@ describe('api workspace header', () => {
   afterEach(() => {
     apiClient.defaults.adapter = originalAdapter;
     localStorage.clear();
+    sessionStorage.clear();
   });
 
   const captureWorkspaceHeader = (): { sent: Array<string | undefined> } => {
@@ -179,6 +180,16 @@ describe('api workspace header', () => {
     await apiClient.get('/statements');
 
     expect(sent).toEqual(['ws-open']);
+  });
+
+  it("sends this tab's workspace, not the one another tab switched to (#682)", async () => {
+    sessionStorage.setItem('currentWorkspaceId', 'ws-home');
+    localStorage.setItem('currentWorkspaceId', 'ws-business');
+    const { sent } = captureWorkspaceHeader();
+
+    await apiClient.get('/statements');
+
+    expect(sent).toEqual(['ws-home']);
   });
 
   it('keeps a workspace the caller asked for explicitly', async () => {

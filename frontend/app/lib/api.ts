@@ -17,6 +17,10 @@ import type {
 import { apiQueryDecoded, type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { getApiErrorMessage, isReadOnlyError } from './api-error';
 import { CSRF_HEADER, clearCsrfCookie, getCsrfHeaders, getCsrfToken } from './csrf';
+import { clearOpenWorkspaceId, readOpenWorkspaceId } from './open-workspace';
+
+export { tabWorkspace } from './open-workspace';
+
 import { isPublicPath } from './public-paths';
 import { getQueryClient } from './query-client';
 
@@ -64,7 +68,7 @@ rawClient.interceptors.request.use(
 
     // Add workspace context header, unless the caller picked a workspace itself
     // (an upload pinned to where it started, a per-workspace analytics fetch).
-    const workspaceId = localStorage.getItem('currentWorkspaceId');
+    const workspaceId = readOpenWorkspaceId();
     if (workspaceId && !config.headers.has('X-Workspace-Id')) {
       config.headers['X-Workspace-Id'] = workspaceId;
     }
@@ -77,7 +81,7 @@ rawClient.interceptors.request.use(
 );
 
 async function handleForbiddenError(error: unknown): Promise<never> {
-  localStorage.removeItem('currentWorkspaceId');
+  clearOpenWorkspaceId();
   window.location.href = '/workspaces';
   return Promise.reject(error);
 }
@@ -223,7 +227,7 @@ rawClient.interceptors.response.use(
       try {
         return await refreshAccessToken(originalRequest);
       } catch (refreshError) {
-        localStorage.removeItem('currentWorkspaceId');
+        clearOpenWorkspaceId();
         // Обязательно: пока эта кука на месте, AuthProvider считает, что сессия
         // есть, снова зовёт /auth/me, снова получает 401 — и страница логина
         // перезагружается по кругу.

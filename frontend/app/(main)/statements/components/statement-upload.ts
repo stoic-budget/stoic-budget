@@ -3,6 +3,7 @@
 import apiClient from '@/app/lib/api';
 import type { DeviceLocation } from '@/app/lib/device-location';
 import { enqueue, indexedDbStore, isOfflineStoreAvailable } from '@/app/lib/offline/offline-queue';
+import { readOpenWorkspaceId } from '@/app/lib/open-workspace';
 import { enqueuePlaceFollowups, needsPlaceFollowup } from '@/app/lib/receipt-place-followup';
 
 export const RECEIPT_SCAN_UPLOAD_BATCH_SIZE = 5;
@@ -46,10 +47,6 @@ type UploadScanDrawerFilesParams = UploadCallbacks & {
     deviceLocationRequest?: Promise<DeviceLocation | null> | null;
   };
 };
-
-// Read once per upload: batches go out one after another, and switching
-// workspace in the meantime must not send the rest of them to the new one.
-const readOpenWorkspaceId = (): string | null => localStorage.getItem('currentWorkspaceId');
 
 const chunkFiles = (files: File[], size: number): File[][] => {
   const chunks: File[][] = [];

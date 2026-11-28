@@ -14,6 +14,7 @@ import apiClient from '@/app/lib/api';
 import { getApiErrorMessage } from '@/app/lib/api-error';
 import { DEFAULT_APP_ROUTE } from '@/app/lib/default-app-route';
 import { syncLocaleFromUser } from '@/app/lib/locale';
+import { writeOpenWorkspaceId } from '@/app/lib/open-workspace';
 import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 import { safeInternalPath } from '@/app/lib/safe-path';
 import { AuthHero } from '../AuthHero';
@@ -99,7 +100,7 @@ function RegisterPageContent(): React.JSX.Element {
       localStorage.setItem('user', JSON.stringify(user));
       syncLocaleFromUser(user);
       if (user.workspaceId) {
-        localStorage.setItem('currentWorkspaceId', user.workspaceId);
+        writeOpenWorkspaceId(user.workspaceId);
       }
 
       if (inviteToken) {
