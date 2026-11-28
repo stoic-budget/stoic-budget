@@ -2,7 +2,7 @@
 // See THIRD_PARTY_NOTICES.md.
 import { extractTextFromPdf, type PdfTextRow } from '../../../common/utils/pdf-parser.util';
 import { BankName } from '../../../entities/statement.entity';
-import { rowBlocks } from '../helpers/pdf-layout-blocks.helper';
+import { asTextRow, rowBlocks } from '../helpers/pdf-layout-blocks.helper';
 import { withoutStackedDates } from '../helpers/pdf-layout-stacked-dates.helper';
 import type { LayoutTransaction } from '../helpers/pdf-layout-table.helper';
 import {
@@ -173,13 +173,6 @@ function blockLines(rows: PdfTextRow[], read: LayoutTransaction[]): string[][] {
   );
 }
 
-/** A line read as one word, so its figure is text, not money. */
-function asText(row: PdfTextRow): PdfTextRow {
-  const [first] = [...row.items].sort((a, b) => a.x - b.x);
-  const last = row.items.reduce((end, item) => Math.max(end, item.x + item.width), first.x);
-  return { ...row, items: [{ ...first, text: row.text, width: last - first.x }] };
-}
-
 function accountCurrency(text: string): string {
   return findAccountCurrency(text) ?? detectStatementCurrency(text) ?? 'CZK';
 }
@@ -204,7 +197,7 @@ export class FioParser extends BankPdfParser {
   }
 
   protected readTransactions(rows: PdfTextRow[]): LayoutTransaction[] {
-    const lines = rows.map(row => (FOREIGN_TAIL.test(row.text.trim()) ? asText(row) : row));
+    const lines = rows.map(row => (FOREIGN_TAIL.test(row.text.trim()) ? asTextRow(row) : row));
     const read = super.readTransactions(lines);
     const currency = accountCurrency(rows.map(row => row.text).join('\n'));
     const blocks = blockLines(rows, read);

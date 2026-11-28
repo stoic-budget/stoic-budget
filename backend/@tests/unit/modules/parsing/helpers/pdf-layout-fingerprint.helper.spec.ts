@@ -163,6 +163,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('MEMBER FDIC NYSE Symbol "PB"')).toBe(BankName.PROSPERITY);
     expect(mentionedBank('Qatar National Bank (Q.P.S.C.)')).toBe(BankName.QNB);
     expect(mentionedBank('Cod BIC Raiffeisen Bank: RZBRROBU')).toBe(BankName.RAIFFEISEN);
+    expect(mentionedBank('Raiffeisenbank a.s., Hvězdova 1716/2b, BIC: RZBCCZPP')).toBe(BankName.RAIFFEISENBANK_CZ);
     expect(mentionedBank('Your RBC personal banking account statement')).toBe(BankName.RBC);
     expect(mentionedBank('please call 1-800-REGIONS (734-4667)')).toBe(BankName.REGIONS);
     expect(mentionedBank('Revolut Ltd (No. 08804411) is authorised by the FCA')).toBe(BankName.REVOLUT);

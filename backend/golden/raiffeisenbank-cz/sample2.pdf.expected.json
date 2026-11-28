@@ -1,0 +1,60 @@
+{
+  "bankName": "raiffeisenbank_cz",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "currency"
+  ],
+  "metadata": {
+    "accountNumber": "9876543210/5500",
+    "currency": "CZK",
+    "dateFrom": "2026-04-01T00:00:00",
+    "dateTo": "2026-04-30T00:00:00",
+    "balanceStart": 50000,
+    "balanceEnd": 55033.3,
+    "rawHeader": "Raiffeisenbank a.s. Strana 1/1 Výpis ze spořicího účtu Číslo účtu: 9876543210/5500 Období: 1. 4. 2026 - 30. 4. 2026",
+    "normalizedHeader": "Raiffeisenbank a.s. Strana 1/1 Výpis ze spořicího účtu Číslo účtu: 9876543210/5500 Období: 1. 4. 2026 - 30. 4. 2026"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-04-10T00:00:00",
+      "counterpartyName": "Člen Jedna",
+      "counterpartyAccount": "1234567890/5500",
+      "paymentPurpose": "Převody Převod z vlastního účtu 1234567890/5500 8436777001 Člen Jedna",
+      "credit": 5000,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-04-30T00:00:00",
+      "counterpartyName": "Úroky Úrok",
+      "paymentPurpose": "Úroky Úrok 8436777002",
+      "credit": 41.1,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-04-30T00:00:00",
+      "counterpartyName": "Daně Daň z úroku",
+      "paymentPurpose": "Daně Daň z úroku 8436777003",
+      "debit": 7.8,
+      "currency": "CZK"
+    }
+  ],
+  "checks": [
+    {
+      "code": "printed_totals",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "3065f70619e7",
+    "headings": [
+      "date:datum | description:kategorie transakce | description:typ transakce | amount:zauctovana castka"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "raiffeisenbank_cz"
+  }
+}

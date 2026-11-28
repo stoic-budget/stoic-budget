@@ -1,0 +1,85 @@
+{
+  "bankName": "raiffeisenbank_cz",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "currency"
+  ],
+  "metadata": {
+    "accountNumber": "CZ1255000000001234567890",
+    "currency": "CZK",
+    "dateFrom": "2026-03-01T00:00:00",
+    "dateTo": "2026-03-31T00:00:00",
+    "balanceStart": 10000,
+    "balanceEnd": 29632.14,
+    "rawHeader": "Raiffeisenbank a.s. Strana 1/2 Výpis z běžného účtu Číslo účtu: 1234567890/5500 Období: 1. 3. 2026 - 31. 3. 2026",
+    "normalizedHeader": "Raiffeisenbank a.s. Strana 1/2 Výpis z běžného účtu Číslo účtu: 1234567890/5500 Období: 1. 3. 2026 - 31. 3. 2026",
+    "locale": "es"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-02T00:00:00",
+      "counterpartyName": "Zaměstnavatel One s.r.o.",
+      "counterpartyAccount": "2900000001/0800",
+      "paymentPurpose": "Příjmy Příchozí platba 2900000001/0800 8436776101 Zaměstnavatel One s.r.o.",
+      "credit": 32000,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-04T00:00:00",
+      "counterpartyName": "ACME POTRAVINY",
+      "paymentPurpose": "Nákupy Platba kartou 8436776102 PK: 516844XXXXXX4400 ACME POTRAVINY; PRAHA 4; CZE",
+      "debit": 245.9,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-09T00:00:00",
+      "counterpartyName": "ACME FUEL 731 SVIT",
+      "paymentPurpose": "Nákupy Platba kartou 3,00 EUR 8436776103 PK: 516844XXXXXX4400 25,10 CZK/EUR 3,00 EUR;ACME FUEL 731 SVIT; Svit; SVK",
+      "debit": 75.3,
+      "currency": "CZK",
+      "amountForeign": 3,
+      "exchangeRate": 25.1
+    },
+    {
+      "transactionDate": "2026-03-15T00:00:00",
+      "counterpartyName": "ACME Bydlení s.r.o.",
+      "counterpartyAccount": "1100000004/0300",
+      "paymentPurpose": "Bydlení Trvalý platební příkaz 1100000004/0300 0308 8436776104 ACME Bydlení s.r.o.",
+      "debit": 12000,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-20T00:00:00",
+      "counterpartyName": "KAVARNA U VKLADU",
+      "paymentPurpose": "Nákupy Platba kartou 8436776106 PK: 516844XXXXXX4400 KAVARNA U VKLADU; BRNO; CZE",
+      "debit": 59,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-31T00:00:00",
+      "counterpartyName": "Úroky Úrok",
+      "paymentPurpose": "Úroky Úrok 8436776105",
+      "credit": 12.34,
+      "currency": "CZK"
+    }
+  ],
+  "checks": [
+    {
+      "code": "printed_totals",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "3065f70619e7",
+    "headings": [
+      "date:datum | description:kategorie transakce | description:typ transakce | amount:zauctovana castka"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "raiffeisenbank_cz"
+  }
+}

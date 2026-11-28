@@ -1,0 +1,59 @@
+{
+  "bankName": "other",
+  "metadata": {
+    "accountNumber": "1111111111/0600",
+    "currency": "CZK",
+    "dateFrom": "2026-03-01T00:00:00",
+    "dateTo": "2026-03-31T00:00:00",
+    "balanceStart": 2000,
+    "balanceEnd": 1550,
+    "rawHeader": "ACME Banka a.s. Výpis z účtu Číslo účtu: 1111111111/0600 Období: 1. 3. 2026 - 31. 3. 2026",
+    "normalizedHeader": "ACME Banka a.s. Výpis z účtu Číslo účtu: 1111111111/0600 Období: 1. 3. 2026 - 31. 3. 2026",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-02T00:00:00",
+      "counterpartyName": "Platba na účet 1234567890/5500 Raiffeisenbank a.s.",
+      "paymentPurpose": "Platba na účet 1234567890/5500 Raiffeisenbank a.s.",
+      "debit": 300,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-05T00:00:00",
+      "counterpartyName": "Platba BIC RZBCCZPP Člen Dva",
+      "paymentPurpose": "Platba BIC RZBCCZPP Člen Dva",
+      "debit": 100,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-09T00:00:00",
+      "counterpartyName": "Platba kartou ACME Kavárna",
+      "paymentPurpose": "Platba kartou ACME Kavárna",
+      "debit": 50,
+      "currency": "CZK"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "9923e014919a",
+    "headings": [
+      "date:datum | description:popis | amount:castka | balance:zustatek"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "raiffeisenbank_cz"
+  }
+}

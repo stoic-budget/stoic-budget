@@ -117,6 +117,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.PROSPERITY, /\bprosperity bank\b|\bnyse symbol "pb"/],
   [BankName.QNB, /\bqatar national bank\b/],
   [BankName.RAIFFEISEN, /\brzbrrobu\b/],
+  [BankName.RAIFFEISENBANK_CZ, /\brzbc\s?cz\s?pp\b|\braiffeisenbank,? a\. ?s\./],
   [BankName.RBC, /\byour rbc (?:personal|business) banking\b/],
   [BankName.REGIONS, /\b1-800-regions\b/],
   [BankName.REVOLUT, /\brevolut (?:ltd|bank uab)\b/],

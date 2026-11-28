@@ -82,6 +82,8 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'popis transakce',
     'popis operacie',
     'oznaceni platby',
+    'kategorie transakce',
+    'typ transakce',
   ],
   counterparty: [
     'counterparty',
@@ -163,6 +165,7 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     // One signed column under both headings, stacked: "Deposits (CR)" over "Withdrawals (DT)".
     'deposits withdrawals',
     'castka',
+    'zauctovana castka',
     'suma',
   ],
   balance: [
@@ -198,5 +201,10 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'id operace',
     'id operacie',
     'identifikace',
+    'kod transakce',
+    'puvodni castka',
+    'kurz',
+    'konstantni symbol',
+    'cislo protiuctu',
   ],
 };
