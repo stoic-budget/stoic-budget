@@ -39,12 +39,15 @@ function createRepositoryMock<T extends object>() {
         getRepository: () => ({
           findOneOrFail: (...args: unknown[]) => repository.findOne(...args),
           findOne: (...args: unknown[]) => repository.findOne(...args),
+          exists: async (...args: unknown[]) => Boolean(await repository.findOne(...args)),
           find: async (...args: unknown[]) => (await repository.find(...args)) ?? [],
           create: (...args: unknown[]) => repository.create(...args),
           save: (...args: unknown[]) => repository.save(...args),
           update: vi.fn(),
           delete: vi.fn(),
         }),
+        // The day of the bank row a payment stands on (payment-day.ts).
+        query: vi.fn(async () => [{ day: '2026-01-15' }]),
       }),
     ),
   };

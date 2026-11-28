@@ -7,6 +7,7 @@ import { ConflictException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { occurrenceFingerprint } from '@/common/utils/fingerprint.util';
 import { BankName, FileType, type Statement, StatementStatus } from '@/entities/statement.entity';
 import type { Transaction } from '@/entities/transaction.entity';
 import type { ParsedStatement } from '@/modules/parsing/interfaces/parsed-statement.interface';
@@ -371,14 +372,15 @@ describe('StatementProcessingService', () => {
     expect(statement.parsingDetails?.transactionsFlaggedDuplicate).toBe(1);
   });
 
-  it('flags the second occurrence when one batch repeats a fingerprint', async () => {
+  it('counts both rows when one file repeats a fingerprint: they get their own by occurrence', async () => {
     transactionFingerprintService.generateFingerprint.mockReturnValue('fp-same');
 
     await service.processStatement(statement.id);
 
-    expect(savedTransactions[0].isDuplicate).toBeUndefined();
-    expect(savedTransactions[1].isDuplicate).toBe(true);
-    expect(statement.parsingDetails?.transactionsFlaggedDuplicate).toBe(1);
+    expect(savedTransactions.map(row => row.isDuplicate)).toEqual([undefined, undefined]);
+    expect(savedTransactions[0].fingerprint).toBe('fp-same');
+    expect(savedTransactions[1].fingerprint).toBe(occurrenceFingerprint('fp-same', 2));
+    expect(statement.parsingDetails?.transactionsFlaggedDuplicate ?? 0).toBe(0);
   });
 
   it('flags a row repeating one booked by hand, before anything is saved', async () => {

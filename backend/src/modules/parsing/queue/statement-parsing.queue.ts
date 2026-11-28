@@ -27,10 +27,18 @@ export class StatementParsingQueue {
 
   /**
    * Enqueues a statement for parsing. Safe to call repeatedly: while a job for
-   * this statement is waiting or active, BullMQ ignores the duplicate id.
+   * this statement is waiting or active, BullMQ ignores the duplicate id; a
+   * finished one is cleared first so the statement is parsed again.
    */
   async enqueue(statementId: string): Promise<void> {
     try {
+      // A failed job stays in Redis under the statement's id (removeOnFail), and
+      // BullMQ ignores an add with an id it already holds: a statement taught or
+      // given a new file after a failure would never be parsed again.
+      const state = await this.queue.getJobState(statementId);
+      if (state === 'failed' || state === 'completed') {
+        await this.queue.remove(statementId);
+      }
       await this.queue.add(
         'parse',
         { statementId },
@@ -45,7 +53,9 @@ export class StatementParsingQueue {
       );
     } catch (error) {
       // Redis being down must not lose the upload: the statement is already
-      // persisted as UPLOADED and the reaper below will pick it up.
+      // persisted as UPLOADED, and reprocessing it queues it again. (The reaper
+      // looks at PROCESSING only: an UPLOADED scan without an amount waits on
+      // purpose and must not be fed to the bank parser.)
       this.logger.error(
         `Failed to enqueue statement ${statementId}: ${
           error instanceof Error ? error.message : String(error)

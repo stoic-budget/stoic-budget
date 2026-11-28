@@ -109,7 +109,7 @@ storage paths and more. Treat it as a reference and copy single values, not the 
 ## Integrations
 
 Configure SMTP, S3-compatible storage, WebDAV, IMAP, Telegram and the public App URL in
-the app under **Integrations** and **Settings**. Their credentials are stored encrypted per workspace;
+the app under **Plugins** (account menu) and **Settings**. Their credentials are stored encrypted per workspace;
 env values with the same purpose are only temporary fallback defaults. See
 [Integrations](../guides/integrations).
 

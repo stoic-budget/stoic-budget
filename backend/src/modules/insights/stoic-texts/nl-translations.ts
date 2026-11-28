@@ -1184,4 +1184,85 @@ export const nl: StoicTextMap = {
         'Op {{percent}}%, zonder deadline. Weet waarheen je vaart, dan volgt de maandelijkse stap vanzelf.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Twee keer vergeten is een gewoonte',
+      message:
+        '{{count}} rekeningen in het afgelopen halfjaar waren te laat omdat ze vergeten werden. Geheugen is geen plan: laat de herinnering eerder komen, zolang er nog tijd is om te handelen.',
+    },
+    {
+      title: 'De rekening is u niet vergeten',
+      message:
+        '{{count}} rekeningen wachtten het afgelopen halfjaar tot iemand eraan dacht. Wat het hoofd niet draagt, draagt een herinnering: geef haar een paar dagen meer.',
+    },
+    {
+      title: 'Laat de herinnering onthouden',
+      message:
+        '{{count}} keer vergeten in een halfjaar. Het verstand is er om te oordelen, niet om data te bewaren: laat de herinnering op tijd komen.',
+    },
+    {
+      title: 'Een kleine plicht, vaak gemist',
+      message:
+        '{{count}} late rekeningen, elk gewoon vergeten. Rust begint met orde in kleine dingen, en een eerdere herinnering kost niets.',
+    },
+    {
+      title: 'Vergeten heeft een patroon',
+      message:
+        'In een halfjaar gingen {{count}} rekeningen ongemerkt hun datum voorbij. Seneca overzag elke avond zijn dag; een herinnering een paar dagen eerder doet dat voor u.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Het salaris komt na de rekening',
+      message:
+        '{{count}} keer in een halfjaar was het geld er nog niet toen een rekening vervaldag had. Zet de datum na je salarisdag of houd één betaling apart: wat voorbereid is, jaagt je niet op.',
+    },
+    {
+      title: 'Het geld komt na de datum',
+      message:
+        '{{count}} keer in een halfjaar kwam de rekening vóór het inkomen. Leg de datum waar het geld al is, en de rekening drukt niet meer.',
+    },
+    {
+      title: 'Eén betaling vooruit',
+      message:
+        '{{count}} late rekeningen wachtten in een halfjaar op de betaaldag. Leg één betaling apart, en de kalender verliest zijn greep op u.',
+    },
+    {
+      title: 'Orden de data, niet de zorg',
+      message:
+        '{{count}} keer in een halfjaar was het krap vóór de betaaldag. De oplossing is geen zorg maar orde: de rekening na het inkomen, of een buffer ervoor.',
+    },
+    {
+      title: 'Wat voorbereid is, haast niet',
+      message:
+        '{{count}} keer viel een rekening vóór het geld. Wat vooraf geregeld is, ontmoet je kalm: leg één betaling apart of verschuif de datum.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Het onverwachte keert terug',
+      message:
+        '{{count}} keer te laat in een halfjaar volgde op een onvoorziene uitgave. De wijze overkomt niets tegen zijn verwachting in, schrijft Seneca. Een reserve voor het onvoorziene is een doel dat de moeite waard is.',
+    },
+    {
+      title: 'Verwacht het onverwachte',
+      message:
+        '{{count}} late rekeningen volgden in een halfjaar op een uitgave die u niet voorzag. De Stoïcijnen oefenden tegenspoed vooraf; een reserve is die oefening in geld.',
+    },
+    {
+      title: 'Een buffer voor het onvoorziene',
+      message:
+        'In een halfjaar wachtten {{count}} rekeningen achter een onverwachte uitgave. Een kleine reserve maakt van de volgende verrassing een ongemak, geen late rekening.',
+    },
+    {
+      title: 'Het lot leent en vraagt terug',
+      message:
+        '{{count}} keer duwde een onvoorziene kost een rekening over haar datum. Het lot vraagt opnieuw; zet een reserve opzij zodat de rekening niet hoeft te wachten.',
+    },
+    {
+      title: 'Verrassingen zijn niet zeldzaam',
+      message:
+        '{{count}} late rekeningen volgden op iets onverwachts. Wat vaak gebeurt, is niet echt onverwacht: een reservedoel maakt er ruimte voor.',
+    },
+  ],
 };

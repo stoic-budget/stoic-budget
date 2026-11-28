@@ -8,6 +8,7 @@ import {
   Cloud,
   FlaskConical,
   History,
+  RefreshCw,
   ShieldCheck,
   UserCircle,
 } from '@/app/components/icons';
@@ -24,6 +25,7 @@ const TAB_ICON: Record<SettingsTabId, ComponentType<{ size?: number }>> = {
   security: ShieldCheck,
   notifications: Bell,
   data: Cloud,
+  sync: RefreshCw,
   advanced: FlaskConical,
   versions: History,
 };

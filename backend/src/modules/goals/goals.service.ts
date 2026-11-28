@@ -1,6 +1,6 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import type { Repository } from 'typeorm';
+import { Raw, type Repository } from 'typeorm';
 import { assertFound } from '../../common/utils/assert-found.util';
 import type { CreateContributionBody, CreateGoalBody, UpdateGoalBody } from '../../contracts';
 import { Goal, GoalContribution } from '../../entities';
@@ -10,6 +10,7 @@ import type { CreateAuditEventDto } from '../audit/interfaces/audit-event.interf
 import { PayPeriodService } from '../pay-period/pay-period.service';
 import { periodDaysOfKey } from '../pay-period/pay-period-dates';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
+import { countedLinkSql } from './counted-contribution';
 import { toNumber } from './goal-money.util';
 import { GoalProgressService } from './goal-progress.service';
 import { GoalTransactionLinkService } from './goal-transaction-link.service';
@@ -108,8 +109,16 @@ export class GoalsService {
     const goal = await this.goalRepository.findOne({ where: { id, workspaceId } });
     assertFound(goal, 'Goal');
 
+    // The movements the progress counts: a row's that is trashed or a duplicate is not one.
     const contributions = await this.contributionRepository.find({
-      where: { goalId: goal.id, workspaceId },
+      where: {
+        goalId: goal.id,
+        workspaceId,
+        // Raw hands over `Alias.transactionId`, unquoted and by property name.
+        transactionId: Raw(column => countedLinkSql(transactionColumn(column), ':workspaceId'), {
+          workspaceId,
+        }),
+      },
       order: { contributionDate: 'DESC', createdAt: 'DESC' },
     });
 
@@ -277,4 +286,9 @@ export class GoalsService {
     const progress = await this.progressService.progress(workspaceId, [goal]);
     return toProgress(goal, progress.get(goal.id));
   }
+}
+
+/** The contribution's transaction column, from the alias Raw hands over. */
+function transactionColumn(column: string): string {
+  return `"${column.split('.')[0].replace(/"/g, '')}"."transaction_id"`;
 }

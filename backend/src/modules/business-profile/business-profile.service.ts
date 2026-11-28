@@ -4,7 +4,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { resolveAvatarContentType } from '../../common/utils/avatar-filename.util';
-import { resolveUploadsDir } from '../../common/utils/uploads.util';
+import { fileStillNamed, resolveUploadsDir } from '../../common/utils/uploads.util';
 import type { UpdateBusinessProfileBody } from '../../contracts';
 import { WorkspaceBusinessProfile } from '../../entities/workspace-business-profile.entity';
 
@@ -107,6 +107,7 @@ export class BusinessProfileService {
 
   private async removeLogoFile(fileName: string): Promise<void> {
     try {
+      if (await fileStillNamed(this.profileRepository, 'logoFile', fileName)) return;
       await fs.unlink(this.logoPath(fileName));
     } catch {
       // Already gone, or never written: nothing to clean up.

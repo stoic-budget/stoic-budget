@@ -13,6 +13,8 @@ import type { IntegrationEntry } from './integration-catalog';
 
 interface IntegrationDetailDrawerProps {
   entry: IntegrationEntry | undefined;
+  /** Above the settings: the notice that the integration is switched off. */
+  banner?: React.ReactNode;
   onBack: () => void;
   onClose: () => void;
   /** Lets the list refresh its dots once a connection is saved or dropped. */
@@ -39,6 +41,7 @@ function DetailBody({
 
 export function IntegrationDetailDrawer({
   entry,
+  banner,
   onBack,
   onClose,
   onConnectionChange,
@@ -56,6 +59,7 @@ export function IntegrationDetailDrawer({
     >
       {entry ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, overflowY: 'auto' }}>
+          {banner}
           <Typography sx={{ fontSize: 13, lineHeight: 1.6, color: 'text.secondary' }}>
             {entry.description}
           </Typography>

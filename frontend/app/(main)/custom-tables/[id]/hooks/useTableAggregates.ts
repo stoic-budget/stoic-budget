@@ -13,6 +13,35 @@ export type AggregateSelection = Record<string, AggregateFn>;
 
 export type AggregateValues = Record<string, number | string | null>;
 
+/** A money total over rows in several currencies: no one figure to show (#648). */
+export const MIXED_CURRENCIES = '\u0000mixed-currencies';
+
+/** Where a total keeps the one currency its rows share (#648), beside its value. */
+const currencyKey = (col: string) => `${col}\u0000currency`;
+
+/** The totals as the footer reads them: a value, or several currencies, and the one currency. */
+export function aggregateValuesOf(
+  items: ReadonlyArray<{
+    col: string;
+    value: number | string | null;
+    mixedCurrencies?: boolean;
+    currency?: string;
+  }>,
+): AggregateValues {
+  const next: AggregateValues = {};
+  for (const item of items) {
+    next[item.col] = item.mixedCurrencies ? MIXED_CURRENCIES : item.value;
+    if (item.currency) next[currencyKey(item.col)] = item.currency;
+  }
+  return next;
+}
+
+/** The currency a column's total is in, when its rows share one the column does not name. */
+export const aggregateCurrency = (values: AggregateValues, col: string): string | undefined => {
+  const code = values[currencyKey(col)];
+  return typeof code === 'string' ? code : undefined;
+};
+
 interface UseTableAggregatesParams {
   tableId: string | null;
   isAuthenticated: boolean;
@@ -68,11 +97,7 @@ export function useTableAggregates({
       if (controller.signal.aborted) {
         return;
       }
-      const next: AggregateValues = {};
-      for (const item of page.items) {
-        next[item.col] = item.value;
-      }
-      setValues(next);
+      setValues(aggregateValuesOf(page.items));
     })()
       .catch(async error => {
         if (!isAbortError(error)) {
