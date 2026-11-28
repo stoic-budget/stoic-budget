@@ -1,0 +1,72 @@
+{
+  "bankName": "revolut",
+  "compares": [
+    "currency",
+    "paymentPurpose"
+  ],
+  "metadata": {
+    "accountNumber": "LT123250000000000001",
+    "currency": "CZK",
+    "dateFrom": "2026-03-20T00:00:00",
+    "dateTo": "2026-03-28T00:00:00",
+    "balanceStart": 100,
+    "balanceEnd": 505,
+    "rawHeader": "EUR Statement Generated on the 1 Apr 2026 Revolut Bank UAB",
+    "normalizedHeader": "EUR Statement Generated on the 1 Apr 2026 Revolut Bank UAB",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-20T00:00:00",
+      "counterpartyName": "Exchanged from EUR",
+      "paymentPurpose": "Exchanged from EUR",
+      "credit": 1262.5,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-20T00:00:00",
+      "counterpartyName": "Fee: Exchanged from EUR",
+      "paymentPurpose": "Fee: Exchanged from EUR",
+      "debit": 12.5,
+      "currency": "CZK",
+      "paymentType": "fee"
+    },
+    {
+      "transactionDate": "2026-03-25T00:00:00",
+      "counterpartyName": "ACME Potraviny",
+      "paymentPurpose": "ACME Potraviny",
+      "debit": 245,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-28T00:00:00",
+      "counterpartyName": "Cash withdrawal",
+      "paymentPurpose": "Cash withdrawal ACME ATM",
+      "debit": 600,
+      "currency": "CZK",
+      "paymentType": "cash"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_totals",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "6c5c97570cec",
+    "headings": [
+      "balance:balance product opening | debit:money out | credit:money in | balance:closing balance",
+      "date:date | description:description | debit:money out | credit:money in | balance:balance"
+    ],
+    "unknownWords": [
+      "product",
+      "opening"
+    ],
+    "mentionedBank": "revolut"
+  }
+}
