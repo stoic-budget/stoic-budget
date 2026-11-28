@@ -35,6 +35,7 @@ import { queryKeys } from '@/app/lib/query-keys';
 import { useCategoryName } from '@/app/lib/use-category-name';
 import { tokens } from '@/lib/theme-tokens';
 import { DatevExportCard } from './DatevExportCard';
+import { ReserveFigures } from './ReserveFigures';
 import { TaxCategoryGroups } from './TaxCategoryGroups';
 import { TaxThresholdCard } from './TaxThresholdCard';
 import { saveBlob } from './tax-return.helpers';
@@ -71,27 +72,6 @@ export function taxMoney(value: number, currency: string, locale: string): strin
 
 const SECTION_TITLE_SX = { fontSize: 15, fontWeight: 500, color: 'text.primary' } as const;
 const HINT_SX = { fontSize: 14, color: 'var(--text-muted)', maxWidth: 680 } as const;
-
-function Figure({ label, value }: { label: string; value: string }) {
-  return (
-    <Box sx={{ flex: { xs: '1 1 140px', md: '0 0 auto' }, minWidth: { md: 170 } }}>
-      <Typography sx={{ fontSize: 14, color: 'var(--text-muted)' }}>{label}</Typography>
-      <Typography
-        className={PRIVATE_CLASS}
-        sx={{
-          mt: 0.5,
-          fontSize: 28,
-          fontWeight: 500,
-          lineHeight: 1.2,
-          fontVariantNumeric: 'tabular-nums',
-          color: 'text.primary',
-        }}
-      >
-        {value}
-      </Typography>
-    </Box>
-  );
-}
 
 /**
  * Everything a person needs at tax time, whatever kind of workspace it is:
@@ -215,30 +195,7 @@ export function TaxYearView(): React.ReactElement {
         {reserve.isPending ? (
           <SnapshotSkeleton id="reports-tax-reserve" loading fallback="lines" />
         ) : reserveData && reserveConfigured ? (
-          <Stack direction="row" sx={{ flexWrap: 'wrap', columnGap: 3, rowGap: 2 }}>
-            <Figure
-              label={t.reserveTotal.value}
-              value={money(reserveData.total, reserveData.currency)}
-            />
-            {reserveData.vat ? (
-              // Paid more VAT than collected: that is money back, said in words, not a bare minus.
-              <Figure
-                label={reserveData.vat.net < 0 ? t.reserveVatReclaim.value : t.reserveVat.value}
-                value={money(Math.abs(reserveData.vat.net), reserveData.currency)}
-              />
-            ) : null}
-            {reserveData.incomeTax ? (
-              <Figure
-                label={fill(t.reserveIncomeTax.value, { percent: reserveData.incomeTax.percent })}
-                value={money(reserveData.incomeTax.amount, reserveData.currency)}
-              />
-            ) : null}
-            {/* Subtracted from the total, so a minus — but never on a zero. */}
-            <Figure
-              label={fill(t.reservePaid.value, { count: reserveData.payments.count })}
-              value={money(-reserveData.payments.amount, reserveData.currency)}
-            />
-          </Stack>
+          <ReserveFigures reserve={reserveData} money={money} />
         ) : (
           <Typography sx={HINT_SX}>
             {t.reserveNotSet.value}{' '}

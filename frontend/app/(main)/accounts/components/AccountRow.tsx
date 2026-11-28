@@ -4,13 +4,16 @@ import Link from 'next/link';
 import { fillTemplateNodes, PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
+import { toDate } from '@/app/lib/user-format';
 import { tokens } from '@/lib/theme-tokens';
 import { accountIconOf, accountSubtitle, countsInNetWorth, isDebtType } from '../account-types';
 import type { Account } from '../hooks/useAccounts';
 import { AccountCreditLimit } from './AccountCreditLimit';
 
 const formatDay = (date: string, locale: string) =>
-  new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).format(new Date(date));
+  new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).format(
+    toDate(date) ?? new Date(date),
+  );
 
 /** The balance as a person reads it: a debt is "€1,200 owed", not "−€1,200". */
 export function AccountBalance({

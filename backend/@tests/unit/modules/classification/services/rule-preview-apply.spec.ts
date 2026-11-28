@@ -405,6 +405,55 @@ describe('applying a rule to existing rows', () => {
     expect(tax.reassess).toHaveBeenCalledWith(WORKSPACE, { ids: ['open'] });
   });
 
+  it('leaves the category a person approved in Review, and files an approved row with none', async () => {
+    const { rulesService, transactions } = build([
+      row('approved-suggested', {
+        isVerified: true,
+        categoryId: 'cat-history',
+        categorySource: TransactionCategorySource.HISTORY,
+      }),
+      row('approved-empty', { isVerified: true }),
+      row('approved-uncategorized', {
+        isVerified: true,
+        categoryId: 'cat-uncategorized',
+        categorySource: TransactionCategorySource.DEFAULT,
+      }),
+    ]);
+
+    const result = await rulesService.applyRuleToExisting({
+      rule: storeRule,
+      userId: 'user-1',
+      viewerMemberId: ME,
+    });
+
+    expect(result.applied).toBe(2);
+    expect((transactions.update.mock.calls[0] as unknown as [{ id: { value: string[] } }])[0].id.value).toEqual([
+      'approved-empty',
+      'approved-uncategorized',
+    ]);
+  });
+
+  it('counts in the preview only what applying would change', async () => {
+    const { rulesService } = build([
+      row('approved-suggested', {
+        isVerified: true,
+        categoryId: 'cat-history',
+        categorySource: TransactionCategorySource.HISTORY,
+      }),
+      row('filed', { taxLocked: true }),
+      row('open'),
+    ]);
+
+    const preview = await rulesService.previewRule({
+      workspaceId: WORKSPACE,
+      viewerMemberId: ME,
+      conditions: storeRule.conditions,
+      matchMode: storeRule.matchMode,
+    });
+
+    expect(preview.overridable).toBe(1);
+  });
+
   it("never touches another member's private row", async () => {
     const { rulesService, transactions } = build([
       row('theirs', { isPrivate: true, ownerMemberId: PARTNER }),

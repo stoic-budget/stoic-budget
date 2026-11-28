@@ -5,6 +5,7 @@ import type { Payable, PayableStatus } from '@/app/lib/payables-api';
 import { categoryItem, payableRow, walletItem } from '@/app/test/fixtures/contracts';
 import { renderWithQuery } from '@/app/test/query-wrapper';
 import { CreatePayableDrawer } from './CreatePayableDrawer';
+import { localToday } from '@/app/lib/local-today';
 
 const apiMocks = vi.hoisted(() => ({ apiQuery: vi.fn() }));
 
@@ -145,7 +146,7 @@ describe('CreatePayableDrawer', () => {
     save();
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localToday();
     expect(onSubmit).toHaveBeenCalledWith(
       expect.objectContaining({
         status: 'paid',

@@ -13,7 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { decryptText, encryptText } from '../../common/utils/encryption.util';
-import { STANDARD_WORKSPACE } from '../../common/workspaces/version-workspaces';
+import { standardWorkspaceWith } from '../../common/utils/workspace-plugins.util';
 import { CreditNoteStatus } from '../../entities/credit-note.entity';
 import { InvoiceStatus } from '../../entities/invoice.entity';
 import { PeppolConnection } from '../../entities/peppol-connection.entity';
@@ -25,12 +25,7 @@ import {
 } from '../../entities/peppol-transmission.entity';
 import { ReceiptSource } from '../../entities/receipt.entity';
 import { Workspace } from '../../entities/workspace.entity';
-import {
-  formatPeppolId,
-  LEITWEG_SCHEME,
-  parsePeppolId,
-  suggestPeppolId,
-} from '../e-invoices/peppol-id';
+import { formatPeppolId, parsePeppolId, suggestPeppolId } from '../e-invoices/peppol-id';
 import { missingForPeppol, PEPPOL_DOCTYPES, writePeppolUbl } from '../e-invoices/peppol-ubl-writer';
 import {
   missingForXRechnung,
@@ -39,6 +34,7 @@ import {
 } from '../e-invoices/xrechnung-writer';
 import { InvoiceXRechnungService } from '../invoices/invoice-xrechnung.service';
 import { ReceiptsService } from '../receipts/receipts.service';
+import { assertEveryLineRated, recipientOf } from './peppol-sendable';
 import {
   failureText,
   RecommandClient,
@@ -290,6 +286,7 @@ export class PeppolService {
     if (!issued) {
       throw new BadRequestException(appError('PEPPOL_NOT_ISSUED'));
     }
+    assertEveryLineRated(document.missing);
     const input: XRechnungInput = {
       ...document.input,
       seller: { ...document.input.seller, peppolId: connection.senderPeppolId },
@@ -478,7 +475,7 @@ export class PeppolService {
       where: {
         status: 'pending',
         providerDocumentId: Not(IsNull()),
-        workspace: STANDARD_WORKSPACE,
+        workspace: standardWorkspaceWith('peppol'),
       },
     });
     const byWorkspace = new Map<string, PeppolTransmission[]>();
@@ -605,7 +602,7 @@ export class PeppolService {
   async pollAll(): Promise<void> {
     // A past version takes nothing in: documents arriving now belong to the live workspace.
     const connected = await this.connections.find({
-      where: { workspace: STANDARD_WORKSPACE },
+      where: { workspace: standardWorkspaceWith('peppol') },
       select: { workspaceId: true },
     });
     for (const { workspaceId } of connected) {
@@ -616,27 +613,6 @@ export class PeppolService {
       );
     }
   }
-}
-
-/**
- * The buyer's Peppol id; a public authority addressed by Leitweg-ID also
- * needs it as the buyer reference, or the federal portal rejects the invoice.
- */
-function recipientOf(input: XRechnungInput): string {
-  const id = parsePeppolId(input.buyer.peppolId);
-  if (!id) {
-    throw new BadRequestException({
-      ...appError('PEPPOL_DOCUMENT_INCOMPLETE'),
-      missing: ['buyer_peppol_id'],
-    });
-  }
-  if (
-    id.scheme === LEITWEG_SCHEME &&
-    input.buyerReference?.trim().toUpperCase() !== id.value.toUpperCase()
-  ) {
-    throw new BadRequestException(appError('PEPPOL_LEITWEG_MISMATCH', { leitweg: id.value }));
-  }
-  return formatPeppolId(id);
 }
 
 function deliveryStatusOf(status: string | null | undefined): PeppolDeliveryStatus {

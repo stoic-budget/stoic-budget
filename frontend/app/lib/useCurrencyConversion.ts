@@ -17,8 +17,9 @@ const keyOf = (currency: string, day: string): string => `${currency}:${day}`;
  * Converts amounts into `targetCurrency` at the rate of each record's own day,
  * as Reports do, so a leaderboard and the cash-flow map beside it agree. The
  * rates for every (currency, day) in `records` come in one request. An amount
- * whose currency has no rate that day is left out (0), not counted 1:1; one
- * whose rate has not arrived yet passes through until it does.
+ * whose currency has no rate that day is left out (0), never counted 1:1: so
+ * is one whose rate has not arrived yet, and every one of a request that
+ * failed (#646), as the tab's warning says.
  */
 export function useCurrencyConversion(
   records: RecordWithCurrency[],
@@ -76,7 +77,16 @@ export function useCurrencyConversion(
           return next;
         });
       } catch {
-        // Rates unavailable for now: amounts pass through until they load.
+        // No rates: those amounts stay out, as missing ones do, not at face value.
+        if (!cancelled) {
+          setRates(prev => {
+            const next = { ...prev };
+            for (const pair of pairs) {
+              next[pair] ??= null;
+            }
+            return next;
+          });
+        }
       }
     };
 
@@ -97,10 +107,7 @@ export function useCurrencyConversion(
         return amount;
       }
       const rate = rates[keyOf(source, dayOf(date))];
-      if (rate === undefined) {
-        return amount;
-      }
-      return rate === null ? 0 : amount * rate;
+      return rate === undefined || rate === null ? 0 : amount * rate;
     },
     [rates, targetCurrency],
   );

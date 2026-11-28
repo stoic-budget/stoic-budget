@@ -56,6 +56,7 @@ export type FilterOptionLabels = {
   groupByUser: string;
   groupByAmount: string;
   hasErrors: string;
+  hasWarnings: string;
   hasLogs: string;
   hasTransactions: string;
   hasDateRange: string;

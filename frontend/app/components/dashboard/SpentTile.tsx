@@ -3,6 +3,7 @@
 import Skeleton from '@mui/material/Skeleton';
 import type React from 'react';
 import { budgetTone, useBudgets } from '@/app/(main)/dashboard/components/BudgetSummaryWidget';
+import { useCategoryParents } from '@/app/hooks/useCategoryParents';
 import { useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
 import { leftToSpend } from './left-to-spend';
@@ -43,11 +44,13 @@ export function SpentTile({
 }: SpentTileProps): React.JSX.Element {
   const { locale } = useLocale();
   const { budgets, loaded } = useBudgets(month);
+  const { parentOf, settled } = useCategoryParents();
   // Until the budgets are in it is not known which of the two the tile is.
-  if (!loaded) {
+  // The category tree decides which budgets count: the figure waits for it too.
+  if (!(loaded && settled)) {
     return <KpiCard {...spent} value={<Skeleton variant="text" width={120} />} />;
   }
-  const left = leftToSpend(budgets, month);
+  const left = leftToSpend(budgets, month, parentOf);
   if (!left) {
     return <KpiCard {...spent} />;
   }

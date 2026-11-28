@@ -62,7 +62,7 @@ export class ReceiptMatchService {
     viewerMemberId?: string | null,
   ): Promise<MatchCandidate[]> {
     const at = new Date(input.date as string).getTime();
-    const rows = await this.transactionRepository
+    const query = this.transactionRepository
       .createQueryBuilder('t')
       .leftJoin('t.statement', 's')
       .where('t.workspaceId = :workspaceId', { workspaceId: receipt.workspaceId })
@@ -77,8 +77,15 @@ export class ReceiptMatchService {
       .andWhere(
         'NOT EXISTS (SELECT 1 FROM receipts r WHERE r.transaction_id = t.id AND r.id != :receiptId)',
         { receiptId: receipt.id },
-      )
-      .getMany();
+      );
+    // A scanned receipt books its own row in its own statement. That row always
+    // matches perfectly, so it would crowd out the bank row the receipt documents.
+    if (receipt.statementId) {
+      query.andWhere('(t.statementId IS NULL OR t.statementId != :ownStatementId)', {
+        ownStatementId: receipt.statementId,
+      });
+    }
+    const rows = await query.getMany();
     if (viewerMemberId !== undefined) {
       redactPrivateRows(rows, viewerMemberId);
     }

@@ -1,12 +1,14 @@
 import type { BadgeVariant } from '@/app/components/ui/badge';
 import type { InvoiceStatus } from '@/app/lib/invoices-api';
+import { toDate } from '@/app/lib/user-format';
 
 export function formatInvoiceDate(value: string | null | undefined, locale = 'en'): string {
   if (!value) {
     return '—';
   }
-  const date = new Date(value.length <= 10 ? `${value}T00:00:00.000Z` : value);
-  if (Number.isNaN(date.getTime())) {
+  // An issue or due date is a calendar day: read and shown where the person is.
+  const date = toDate(value);
+  if (!date) {
     return '—';
   }
   return new Intl.DateTimeFormat(locale, {

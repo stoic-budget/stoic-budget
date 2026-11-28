@@ -84,6 +84,11 @@ export function toParsedTransactions(
       debit: transaction.debit ?? (amount !== undefined && amount < 0 ? -amount : undefined),
       credit: transaction.credit ?? (amount !== undefined && amount >= 0 ? amount : undefined),
       currency,
+      ...(transaction.documentNumber && { documentNumber: transaction.documentNumber }),
+      ...(transaction.amountForeign !== undefined && {
+        amountForeign: transaction.amountForeign,
+        exchangeRate: transaction.exchangeRate,
+      }),
     };
   });
 }

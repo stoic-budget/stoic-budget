@@ -183,7 +183,10 @@ export function ReceiptTransactionMatch({
               size="small"
               variant="contained"
               disabled={saving}
-              onClick={() => void onApprove({})}
+              // The row on screen, not whatever the suggestion says by the time of the click.
+              onClick={() =>
+                void onApprove(candidates[0] ? { transactionId: candidates[0].id } : {})
+              }
             >
               {t.approveAttach.value}
             </Button>

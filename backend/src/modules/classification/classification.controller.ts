@@ -69,7 +69,10 @@ export class ClassificationController {
     await this.transactionRepository.save(transaction);
     await this.addRuleTags(workspaceId, transaction.id, tags);
 
-    return redactPrivate(transaction, selfMemberId);
+    // Answer the stored row: the classification leaves keys such as branchId
+    // undefined, and the answer would drop them.
+    const stored = await this.transactionRepository.findOneOrFail({ where: { id, workspaceId } });
+    return redactPrivate(stored, selfMemberId);
   }
 
   @Post('bulk')

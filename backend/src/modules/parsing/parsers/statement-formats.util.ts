@@ -3,7 +3,7 @@ import type { ParsedStatement, ParsedTransaction } from '../interfaces/parsed-st
 
 /**
  * Pure parsers for the interchange formats banks export besides CSV:
- * OFX/QFX (SGML or XML), QIF, ISO 20022 camt.053 and SWIFT MT940. Each takes
+ * OFX/QFX (SGML or XML), QIF, ISO 20022 camt.052/053/054 and SWIFT MT940. Each takes
  * the file's text and returns the same shape the bank parsers do, so the
  * import pipeline (dedupe, rules, review) does not know the difference.
  */
@@ -19,7 +19,8 @@ export function sniffStatementFormat(sample: string): TextStatementFormat | null
   const head = sample.slice(0, 8192);
   if (/OFXHEADER|<OFX>|<\?OFX/i.test(head)) return 'ofx';
   if (/^\s*!(Type|Account|Option)/i.test(head)) return 'qif';
-  if (/BkToCstmrStmt|BkToCstmrAcctRpt|camt\.05[23]/i.test(head)) return 'camt';
+  if (/BkToCstmrStmt|BkToCstmrAcctRpt|BkToCstmrDbtCdtNtfctn|camt\.05[234]/i.test(head))
+    return 'camt';
   if (/^\s*(\{1:|:20:)/.test(head) && /:61:/.test(sample)) return 'mt940';
   return null;
 }
@@ -100,97 +101,10 @@ export function parseOfx(text: string): ParsedStatement {
 export { parseQif } from './qif-format.util';
 
 /* ----------------------------------------------------------------------- */
-/* camt.053 (ISO 20022)                                                      */
+/* camt.052 / camt.053 / camt.054 (ISO 20022)                                */
 /* ----------------------------------------------------------------------- */
 
-function xmlTag(block: string, tag: string): string | undefined {
-  const match = new RegExp(
-    `<(?:\\w+:)?${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</(?:\\w+:)?${tag}>`,
-    'i',
-  ).exec(block);
-  return match ? decodeEntities(match[1].trim()) : undefined;
-}
-
-function xmlBlocks(text: string, tag: string): string[] {
-  return (
-    text.match(new RegExp(`<(?:\\w+:)?${tag}(?:\\s[^>]*)?>[\\s\\S]*?</(?:\\w+:)?${tag}>`, 'gi')) ??
-    []
-  );
-}
-
-function xmlAttr(block: string, tag: string, attr: string): string | undefined {
-  const match = new RegExp(`<(?:\\w+:)?${tag}\\s[^>]*${attr}="([^"]*)"`, 'i').exec(block);
-  return match ? match[1] : undefined;
-}
-
-export function parseCamt053(text: string): ParsedStatement {
-  const statement = xmlBlocks(text, 'Stmt')[0] ?? text;
-  const accountBlock = xmlBlocks(statement, 'Acct')[0] ?? '';
-  const accountNumber = xmlTag(accountBlock, 'IBAN') ?? xmlTag(accountBlock, 'Id') ?? 'Unknown';
-  const currency = xmlTag(accountBlock, 'Ccy') ?? xmlAttr(statement, 'Amt', 'Ccy') ?? 'EUR';
-  const transactions: ParsedTransaction[] = [];
-  for (const entry of xmlBlocks(statement, 'Ntry')) {
-    const amount = Number.parseFloat(xmlTag(entry, 'Amt') ?? '');
-    const indicator = (xmlTag(entry, 'CdtDbtInd') ?? '').toUpperCase();
-    const dateText =
-      xmlTag(xmlBlocks(entry, 'BookgDt')[0] ?? xmlBlocks(entry, 'ValDt')[0] ?? '', 'Dt') ??
-      xmlTag(xmlBlocks(entry, 'BookgDt')[0] ?? '', 'DtTm');
-    const date = dateText
-      ? new Date(dateText.length === 10 ? `${dateText}T00:00:00Z` : dateText)
-      : null;
-    if (!date || Number.isNaN(date.getTime()) || !Number.isFinite(amount)) continue;
-    const details = xmlBlocks(entry, 'TxDtls')[0] ?? entry;
-    const parties = xmlBlocks(details, 'RltdPties')[0] ?? '';
-    const counterparty =
-      indicator === 'DBIT'
-        ? (xmlTag(xmlBlocks(parties, 'Cdtr')[0] ?? '', 'Nm') ?? xmlTag(parties, 'Nm'))
-        : (xmlTag(xmlBlocks(parties, 'Dbtr')[0] ?? '', 'Nm') ?? xmlTag(parties, 'Nm'));
-    const purpose =
-      xmlBlocks(details, 'RmtInf')
-        .map(block =>
-          xmlBlocks(block, 'Ustrd')
-            .map(item => xmlTag(item, 'Ustrd') ?? '')
-            .join(' '),
-        )
-        .join(' ')
-        .trim() ||
-      xmlTag(entry, 'AddtlNtryInf') ||
-      '';
-    const reference = xmlTag(entry, 'AcctSvcrRef') ?? xmlTag(details, 'EndToEndId');
-    transactions.push({
-      transactionDate: date,
-      documentNumber: reference,
-      counterpartyName: counterparty || purpose || '',
-      paymentPurpose: purpose || counterparty || '',
-      ...(indicator === 'DBIT' ? { debit: amount } : { credit: amount }),
-      currency: xmlAttr(entry, 'Amt', 'Ccy') ?? currency,
-    });
-  }
-  const balances = xmlBlocks(statement, 'Bal');
-  const balanceOf = (code: string) => {
-    const block = balances.find(item => (xmlTag(item, 'Cd') ?? '').toUpperCase() === code);
-    if (!block) return undefined;
-    const value = Number.parseFloat(xmlTag(block, 'Amt') ?? '');
-    if (!Number.isFinite(value)) return undefined;
-    return (xmlTag(block, 'CdtDbtInd') ?? '').toUpperCase() === 'DBIT' ? -value : value;
-  };
-  const period = xmlBlocks(statement, 'FrToDt')[0] ?? '';
-  const dates = transactions.map(t => t.transactionDate.getTime());
-  const from = xmlTag(period, 'FrDtTm');
-  const to = xmlTag(period, 'ToDtTm');
-  return {
-    metadata: {
-      accountNumber,
-      currency,
-      institution: xmlTag(xmlBlocks(accountBlock, 'Svcr')[0] ?? '', 'Nm'),
-      dateFrom: from ? new Date(from) : new Date(dates.length ? Math.min(...dates) : Date.now()),
-      dateTo: to ? new Date(to) : new Date(dates.length ? Math.max(...dates) : Date.now()),
-      balanceStart: balanceOf('OPBD'),
-      balanceEnd: balanceOf('CLBD'),
-    },
-    transactions,
-  };
-}
+export { parseCamt053 } from './camt-format.util';
 
 /* ----------------------------------------------------------------------- */
 /* MT940                                                                     */
