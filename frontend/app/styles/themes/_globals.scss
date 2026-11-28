@@ -118,8 +118,8 @@
   --color-success-soft-bg:     #f0fdf4;
   --color-success-soft-border: #bbf7d0;
   --color-success-soft-text:   #15803d;
-  --color-error-soft-bg:       #fef2f2;
-  --color-error-soft-border:   #fca5a5;
+  --color-error-soft-bg:       #{$seneca-color-danger-soft};
+  --color-error-soft-border:   rgba(180, 73, 63, 0.4);
   --color-info-soft-bg:        #eff6ff;
   --color-info-soft-border:    #bfdbfe;
   --color-info-soft-text:      #1d4ed8;

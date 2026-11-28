@@ -6,6 +6,7 @@ import { assertRowsRemovable } from '../../../common/utils/tax-lock.util';
 import { redactPrivateRows } from '../../../common/utils/transaction-privacy.util';
 import { Statement } from '../../../entities/statement.entity';
 import { Transaction } from '../../../entities/transaction.entity';
+import { unmarkDuplicate } from '../helpers/unmark-duplicate';
 
 export interface DuplicateCandidate {
   transaction: Transaction;
@@ -218,25 +219,8 @@ export class CrossStatementDeduplicationService {
    * Unmark transaction as duplicate
    * @param workspaceId Workspace ID — scopes the update to the caller's own transaction
    */
-  async unmarkDuplicate(transactionId: string, workspaceId: string): Promise<Transaction> {
-    const existing = await this.transactionRepository.findOneBy({ id: transactionId, workspaceId });
-    if (!existing) {
-      throw new NotFoundException(appError('TRANSACTION_NOT_FOUND'));
-    }
-
-    await this.transactionRepository.update(transactionId, {
-      isDuplicate: false,
-      duplicateOfId: null,
-      duplicateConfidence: null,
-      duplicateMatchType: null,
-    });
-
-    const transaction = await this.transactionRepository.findOneBy({ id: transactionId });
-    if (!transaction) {
-      throw new NotFoundException(appError('TRANSACTION_NOT_FOUND'));
-    }
-
-    return transaction;
+  unmarkDuplicate(transactionId: string, workspaceId: string): Promise<Transaction> {
+    return unmarkDuplicate(this.transactionRepository, transactionId, workspaceId);
   }
 
   /**

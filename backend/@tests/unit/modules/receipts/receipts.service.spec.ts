@@ -30,6 +30,8 @@ describe('ReceiptsService', () => {
   };
   let jobRepository: { create: Mock; save: Mock };
   let transactionRepository: {
+    count: Mock;
+    createQueryBuilder: Mock;
     create: Mock;
     save: Mock;
     update: Mock;
@@ -65,6 +67,16 @@ describe('ReceiptsService', () => {
     };
 
     transactionRepository = {
+      count: vi.fn().mockResolvedValue(0),
+      // assertRowsRemovable: no locked loan interest carried by the rows.
+      createQueryBuilder: vi.fn(() => {
+        const qb = {
+          setFindOptions: () => qb,
+          innerJoin: () => qb,
+          getCount: async () => 0,
+        };
+        return qb;
+      }),
       create: vi.fn().mockImplementation(payload => payload),
       save: vi.fn().mockImplementation(async payload => ({ id: 'tx-1', ...payload })),
       update: vi.fn().mockResolvedValue({ affected: 1 }),
@@ -620,6 +632,32 @@ describe('ReceiptsService', () => {
       id: 'receipt-scan-1',
       workspaceId: 'workspace-1',
     });
+  });
+
+  it('refuses to delete a scan whose row a filed return holds, and keeps it', async () => {
+    receiptRepository.findOne.mockResolvedValue({
+      id: 'receipt-scan-1',
+      workspaceId: 'workspace-1',
+      source: ReceiptSource.SCAN,
+      statementId: 'statement-scan-1',
+      attachmentPaths: [],
+    } as unknown as Receipt);
+    statementRepository.findOne.mockResolvedValue({
+      id: 'statement-scan-1',
+      workspaceId: 'workspace-1',
+      deletedAt: null,
+    } as unknown as Statement);
+    transactionRepository.count.mockResolvedValue(1);
+
+    await expect(service.delete('receipt-scan-1', 'workspace-1', 'user-1')).rejects.toMatchObject({
+      status: 409,
+    });
+
+    expect(transactionRepository.count).toHaveBeenCalledWith({
+      where: { statementId: 'statement-scan-1', workspaceId: 'workspace-1', taxLocked: true },
+    });
+    expect(statementRepository.save).not.toHaveBeenCalled();
+    expect(receiptRepository.delete).not.toHaveBeenCalled();
   });
 
   describe('audit', () => {

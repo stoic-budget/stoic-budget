@@ -7,6 +7,7 @@ import { Invoice, InvoiceStatus } from '../../entities/invoice.entity';
 import { Payable, PayableStatus } from '../../entities/payable.entity';
 import { BusinessProfileService } from '../business-profile/business-profile.service';
 import { type InvoiceLabelMap, renderInvoiceLabels } from './invoice-document.translations';
+import { lineAmount } from './invoice-pricing';
 
 /** The invoice as the client sees it: no ids, no workspace, nothing internal. */
 export interface PublicInvoiceView {
@@ -50,6 +51,7 @@ export interface PublicInvoiceView {
     description: string;
     quantity: string;
     unitPrice: string;
+    adjustmentPercent: string | null;
     amount: string;
   }>;
 }
@@ -123,7 +125,11 @@ export class PublicInvoicesService {
         description: item.description,
         quantity: String(item.quantity),
         unitPrice: String(item.unitPrice),
-        amount: String(Math.round(Number(item.quantity) * Number(item.unitPrice) * 100) / 100),
+        adjustmentPercent: Number(item.adjustmentPercent)
+          ? String(Number(item.adjustmentPercent))
+          : null,
+        // After the line's discount or surcharge, as the PDF and the e-invoice state it.
+        amount: String(lineAmount(item)),
       })),
     };
   }

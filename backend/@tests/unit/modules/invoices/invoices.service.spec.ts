@@ -318,12 +318,21 @@ describe('InvoicesService', () => {
         status: InvoiceStatus.SENT,
         payableId: 'payable-1',
       } as Invoice);
-      payableRepository.findOne.mockResolvedValue({ status: PayableStatus.PAID } as Payable);
+      queryMock.mockImplementation(async (sql: string, params: unknown[]) =>
+        sql.includes('AS settled') ? [{ settled: params[2] === PayableStatus.PAID }] : [],
+      );
 
       await expect(service.void('invoice-1', 'workspace-1', 'user-1')).rejects.toBeInstanceOf(
         ConflictException,
       );
       expect(payableRepository.update).not.toHaveBeenCalled();
+      expect(queryMock).toHaveBeenCalledWith(expect.stringContaining('AS settled'), [
+        'payable-1',
+        'invoice-1',
+        PayableStatus.PAID,
+        'workspace-1',
+        'issued',
+      ]);
     });
   });
 });

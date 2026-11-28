@@ -56,10 +56,11 @@ import {
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { ExportFormat, PayablesSortOption } from './dto/filter-payables.dto';
-import { assertOneSource, exactSubset, notRejectedSql } from './payable-payments.util';
+import { assertOneSource, exactSubset, isClosed, notRejectedSql } from './payable-payments.util';
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
 import { PayablesExportService } from './payables-export.service';
+import { paymentDayOf } from './payment-day';
 import { assertPaymentFits, assertSomethingOwed } from './payment-guards';
 import { UnbookedPaymentsService } from './unbooked-payments.service';
 
@@ -349,7 +350,7 @@ export class PayablesService {
     // the payment log is the whole truth and the status is derived from it.
     await this.recordPayment(manager, payable, {
       amount: this.outstandingOf(payable),
-      paidOn: payload.paidOn ?? this.toDateString(new Date()),
+      paidOn: payload.paidOn,
       transactionId: payable.linkedTransactionId,
       ownTransaction: Boolean(payload.payFromWalletId || payload.inHand),
       createdById: userId,
@@ -521,7 +522,8 @@ export class PayablesService {
         lock: { mode: 'pessimistic_write' },
       });
 
-      const outstanding = this.outstandingOf(payable);
+      // An archived bill (a voided invoice's) is closed: nothing is left to pay on it.
+      const outstanding = isClosed(payable) ? 0 : this.outstandingOf(payable);
       const amount = this.round2(dto.amount);
       assertPaymentFits(amount, Number(dto.feeAmount ?? 0), outstanding);
 
@@ -540,7 +542,7 @@ export class PayablesService {
       await this.recordPayment(manager, payable, {
         amount,
         feeAmount: dto.feeAmount ? this.round2(dto.feeAmount) : 0,
-        paidOn: dto.paidOn ?? this.toDateString(new Date()),
+        paidOn: dto.paidOn,
         transactionId,
         ownTransaction: Boolean(dto.payFromWalletId || dto.inHand),
         comment: dto.comment ?? null,
@@ -848,7 +850,8 @@ export class PayablesService {
     input: {
       amount: number;
       feeAmount?: number;
-      paidOn: string;
+      /** Left out: the day of its bank row, else today (payment-day.ts). */
+      paidOn?: string | null;
       transactionId: string | null;
       /** Recorded here with the payment (cash, a wallet), not found among the rows. */
       ownTransaction?: boolean;
@@ -859,21 +862,15 @@ export class PayablesService {
     const payments = manager.getRepository(PayablePayment);
     // Idempotent per (bill, transaction): a retried request re-applies the
     // same bank row rather than crediting the bill twice.
-    if (input.transactionId) {
-      const existing = await payments.findOne({
-        where: { payableId: payable.id, transactionId: input.transactionId },
-      });
-      if (existing) {
-        return;
-      }
-    }
+    const where = { payableId: payable.id, transactionId: input.transactionId ?? undefined };
+    if (input.transactionId && (await payments.exists({ where }))) return;
     await payments.save(
       payments.create({
         payableId: payable.id,
         workspaceId: payable.workspaceId,
         amount: input.amount,
         feeAmount: input.feeAmount ?? 0,
-        paidOn: input.paidOn,
+        paidOn: await paymentDayOf(manager, payable.workspaceId, input.paidOn, input.transactionId),
         transactionId: input.transactionId,
         ownTransaction: input.ownTransaction ?? false,
         comment: input.comment ?? null,
