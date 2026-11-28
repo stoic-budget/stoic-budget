@@ -110,28 +110,19 @@ export class StatementUploadsController {
     @WorkspaceId() workspaceId: string,
     @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    if (idempotencyKey) {
-      const cached = await this.idempotencyService.checkKey(idempotencyKey, user.id, workspaceId);
-      if (cached) {
-        return {
-          ...this.toObjectRecord(cached.data),
-          cached: true,
-        };
-      }
-    }
-
-    const result = await this.statementsService.createManualExpense({
-      user,
+    const { data, cached } = await this.idempotencyService.once(
+      idempotencyKey,
+      user.id,
       workspaceId,
-      files: files || [],
-      payload,
-    });
-
-    if (idempotencyKey) {
-      await this.idempotencyService.storeKey(idempotencyKey, user.id, workspaceId, result);
-    }
-
-    return result;
+      () =>
+        this.statementsService.createManualExpense({
+          user,
+          workspaceId,
+          files: files || [],
+          payload,
+        }),
+    );
+    return cached ? { ...this.toObjectRecord(data), cached: true } : data;
   }
 
   @Post('upload-receipt')
@@ -205,17 +196,32 @@ export class StatementUploadsController {
       throw new BadRequestException(appError('STATEMENT_UPLOAD_TOO_MANY_FILES'));
     }
 
-    // Check idempotency key if provided
-    if (idempotencyKey) {
-      const cached = await this.idempotencyService.checkKey(idempotencyKey, user.id, workspaceId);
-      if (cached) {
-        return {
-          ...this.toObjectRecord(cached.data),
-          cached: true,
-        };
-      }
-    }
+    const { data, cached } = await this.idempotencyService.once(
+      idempotencyKey,
+      user.id,
+      workspaceId,
+      () =>
+        this.uploadFiles(
+          files,
+          user,
+          workspaceId,
+          uploadDto,
+          idempotencyKey,
+          returnUnwrappedSingle,
+        ),
+    );
+    return cached ? { ...this.toObjectRecord(data), cached: true } : data;
+  }
 
+  /** Reads the files into statements; the answer the idempotency key keeps. */
+  private async uploadFiles(
+    files: Express.Multer.File[],
+    user: User,
+    workspaceId: string,
+    uploadDto: UploadStatementBody,
+    idempotencyKey: string | undefined,
+    returnUnwrappedSingle: boolean,
+  ): Promise<Record<string, unknown>> {
     // Validate each file
     await validateFiles(files);
 
@@ -241,28 +247,17 @@ export class StatementUploadsController {
 
     // Return unwrapped statement for single file (backward compatibility)
     if (returnUnwrappedSingle && responseData.length === 1) {
-      const response = {
+      return {
         ...responseData[0],
         idempotencyKey,
         cached: false,
       };
-      if (idempotencyKey) {
-        await this.idempotencyService.storeKey(idempotencyKey, user.id, workspaceId, response);
-      }
-      return response;
     }
 
-    const response = {
+    return {
       data: responseData,
       idempotencyKey,
       cached: false,
     };
-
-    // Store idempotency key if provided
-    if (idempotencyKey) {
-      await this.idempotencyService.storeKey(idempotencyKey, user.id, workspaceId, response);
-    }
-
-    return response;
   }
 }

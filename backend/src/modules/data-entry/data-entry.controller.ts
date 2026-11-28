@@ -64,20 +64,10 @@ export class DataEntryController {
     @SchemaBody(CreateDataEntryBody) dto: CreateDataEntryBody,
     @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    if (idempotencyKey) {
-      const cached = await this.idempotencyService.checkKey(idempotencyKey, user.id, workspaceId);
-      if (cached) {
-        return cached.data;
-      }
-    }
-
-    const entry = await this.dataEntryService.create(workspaceId, user.id, dto);
-
-    if (idempotencyKey) {
-      await this.idempotencyService.storeKey(idempotencyKey, user.id, workspaceId, entry);
-    }
-
-    return entry;
+    const { data } = await this.idempotencyService.once(idempotencyKey, user.id, workspaceId, () =>
+      this.dataEntryService.create(workspaceId, user.id, dto),
+    );
+    return data;
   }
 
   @Get()

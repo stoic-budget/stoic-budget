@@ -45,6 +45,17 @@ describe('offline queue', () => {
     expect(await store.list()).toEqual([]);
   });
 
+  it('keeps an entry whose first send is still running (409), for next time', async () => {
+    const store = createMemoryStore([entry('a', '1')]);
+    const result = await replay(store, async () => ({
+      ok: false as const,
+      status: 409,
+      error: 'REQUEST_IN_PROGRESS',
+    }));
+    expect(result).toEqual({ sent: 0, kept: 1 });
+    expect((await store.list()).map(item => item.id)).toEqual(['a']);
+  });
+
   it('enqueues with an id and a timestamp', async () => {
     const store = createMemoryStore();
     const saved = await enqueue(store, { kind: 'receipt-scan', fields: {}, files: [] });

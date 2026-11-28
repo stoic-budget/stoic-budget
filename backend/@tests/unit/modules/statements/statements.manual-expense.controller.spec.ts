@@ -3,19 +3,18 @@ vi.mock('franc', () => ({
 }));
 
 import { StatementUploadsController } from '@/modules/statements/statement-uploads.controller';
+import { fakeIdempotency } from '../../test/fake-idempotency';
 
 describe('StatementUploadsController manual expense', () => {
   it('delegates manual expense creation to the service', async () => {
     const statementsService = {
       createManualExpense: vi.fn().mockResolvedValue({ id: 'manual-statement-1' }),
     };
-    const idempotencyService = {
-      checkKey: vi.fn(),
-      storeKey: vi.fn(),
-    };
+    const idempotencyService = fakeIdempotency();
 
     const controller = new StatementUploadsController(
       statementsService as any,
+      {} as any,
       idempotencyService as any,
     );
 
@@ -47,13 +46,11 @@ describe('StatementUploadsController manual expense', () => {
       createManualExpense: vi.fn(),
       attachFile: vi.fn().mockResolvedValue({ id: 'statement-1' }),
     };
-    const idempotencyService = {
-      checkKey: vi.fn(),
-      storeKey: vi.fn(),
-    };
+    const idempotencyService = fakeIdempotency();
 
     const controller = new StatementUploadsController(
       statementsService as any,
+      {} as any,
       idempotencyService as any,
     );
 

@@ -1,6 +1,7 @@
 import { DataEntryType } from '@/entities/data-entry.entity';
 import { DataEntryController } from '@/modules/data-entry/data-entry.controller';
 import { BadRequestException } from '@nestjs/common';
+import { fakeIdempotency } from '../../test/fake-idempotency';
 
 describe('DataEntryController', () => {
   it('list clamps limit/page and returns paging metadata', async () => {
@@ -15,7 +16,7 @@ describe('DataEntryController', () => {
       updateCustomField: vi.fn(),
       removeCustomField: vi.fn(),
     };
-    const controller = new DataEntryController(dataEntryService as any, {} as any);
+    const controller = new DataEntryController(dataEntryService as any, fakeIdempotency() as any);
     const workspaceId = 'ws-1';
 
     const result = await controller.list(
@@ -51,7 +52,7 @@ describe('DataEntryController', () => {
       updateCustomField: vi.fn(async () => ({ id: 'f1' })),
       removeCustomField: vi.fn(async () => undefined),
     };
-    const controller = new DataEntryController(dataEntryService as any, {} as any);
+    const controller = new DataEntryController(dataEntryService as any, fakeIdempotency() as any);
     const user = { id: 'u1' } as any;
     const workspaceId = 'ws-1';
 
@@ -87,9 +88,15 @@ describe('DataEntryController', () => {
     const dataEntryService = {
       create: vi.fn(async () => ({ id: 'e1' })),
     };
+    // Keeps answers by key, as IdempotencyService.once does.
+    const answers = new Map<string, unknown>();
     const idempotencyService = {
-      checkKey: vi.fn(async () => null),
-      storeKey: vi.fn(async () => undefined),
+      once: vi.fn(async (key: string | undefined, _user: string, _ws: string, work: () => Promise<unknown>) => {
+        if (key && answers.has(key)) return { data: answers.get(key), cached: true };
+        const data = await work();
+        if (key) answers.set(key, data);
+        return { data, cached: false };
+      }),
     };
     const controller = new DataEntryController(
       dataEntryService as any,
@@ -101,22 +108,22 @@ describe('DataEntryController', () => {
 
     const first = await controller.create(user, workspaceId, dto, 'key-1');
     expect(first).toEqual({ id: 'e1' });
-    expect(idempotencyService.checkKey).toHaveBeenCalledWith('key-1', 'u1', 'ws-1');
-    expect(idempotencyService.storeKey).toHaveBeenCalledWith('key-1', 'u1', 'ws-1', { id: 'e1' });
+    expect(idempotencyService.once).toHaveBeenCalledWith('key-1', 'u1', 'ws-1', expect.any(Function));
 
-    idempotencyService.checkKey.mockResolvedValueOnce({ data: { id: 'e1' }, cached: true } as any);
     const second = await controller.create(user, workspaceId, dto, 'key-1');
     expect(second).toEqual({ id: 'e1' });
     expect(dataEntryService.create).toHaveBeenCalledTimes(1);
   });
 
-  it('skips idempotency machinery when no key is provided', async () => {
+  it('creates the entry when no key is provided', async () => {
     const dataEntryService = {
       create: vi.fn(async () => ({ id: 'e1' })),
     };
     const idempotencyService = {
-      checkKey: vi.fn(),
-      storeKey: vi.fn(),
+      once: vi.fn(async (_key: unknown, _user: string, _ws: string, work: () => Promise<unknown>) => ({
+        data: await work(),
+        cached: false,
+      })),
     };
     const controller = new DataEntryController(
       dataEntryService as any,
@@ -125,8 +132,8 @@ describe('DataEntryController', () => {
 
     await controller.create({ id: 'u1' } as any, 'ws-1', { type: DataEntryType.CASH } as any);
 
-    expect(idempotencyService.checkKey).not.toHaveBeenCalled();
-    expect(idempotencyService.storeKey).not.toHaveBeenCalled();
+    expect(idempotencyService.once).toHaveBeenCalledWith(undefined, 'u1', 'ws-1', expect.any(Function));
+    expect(dataEntryService.create).toHaveBeenCalledTimes(1);
   });
 
   it('uploadCustomIcon throws when file is missing', async () => {

@@ -13,6 +13,8 @@ describe('IdempotencyService', () => {
     create: vi.fn(),
     save: vi.fn(),
     delete: vi.fn(),
+    // No reservation to fill: storeKey inserts the key.
+    update: vi.fn().mockResolvedValue({ affected: 0 }),
   };
 
   beforeEach(async () => {
@@ -32,76 +34,7 @@ describe('IdempotencyService', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe('checkKey', () => {
-    it('should return null if key does not exist', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
-
-      const result = await service.checkKey('test-key', 'user-id', 'workspace-id');
-
-      expect(result).toBeNull();
-      expect(mockRepository.findOne).toHaveBeenCalledWith({
-        where: {
-          key: 'test-key',
-          userId: 'user-id',
-          workspaceId: 'workspace-id',
-        },
-      });
-    });
-
-    it('should return null and delete if key is expired', async () => {
-      const expiredKey = {
-        id: 'key-id',
-        key: 'test-key',
-        userId: 'user-id',
-        workspaceId: 'workspace-id',
-        expiresAt: new Date(Date.now() - 1000), // Expired 1 second ago
-        responseData: { data: 'test' },
-      };
-
-      mockRepository.findOne.mockResolvedValue(expiredKey);
-
-      const result = await service.checkKey('test-key', 'user-id', 'workspace-id');
-
-      expect(result).toBeNull();
-      expect(mockRepository.delete).toHaveBeenCalledWith('key-id');
-    });
-
-    it('should return cached response if key exists and is not expired', async () => {
-      const validKey = {
-        id: 'key-id',
-        key: 'test-key',
-        userId: 'user-id',
-        workspaceId: 'workspace-id',
-        expiresAt: new Date(Date.now() + 10000), // Expires in 10 seconds
-        responseData: { data: 'test', results: [1, 2, 3] },
-      };
-
-      mockRepository.findOne.mockResolvedValue(validKey);
-
-      const result = await service.checkKey('test-key', 'user-id', 'workspace-id');
-
-      expect(result).toEqual({
-        data: { data: 'test', results: [1, 2, 3] },
-        cached: true,
-      });
-      expect(mockRepository.delete).not.toHaveBeenCalled();
-    });
-
-    it('should handle null workspace ID', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
-
-      await service.checkKey('test-key', 'user-id', null);
-
-      expect(mockRepository.findOne).toHaveBeenCalledWith({
-        where: {
-          key: 'test-key',
-          userId: 'user-id',
-          workspaceId: null,
-        },
-      });
-    });
+    mockRepository.update.mockResolvedValue({ affected: 0 });
   });
 
   describe('storeKey', () => {
