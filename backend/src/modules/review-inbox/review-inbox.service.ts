@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, type Repository, type SelectQueryBuilder } from 'typeorm';
+import { In, type Repository, type SelectQueryBuilder } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import {
   applyOwnerFilter,
@@ -24,8 +24,8 @@ import { Transaction } from '../../entities/transaction.entity';
 import { isUncategorizedName } from '../categories/uncategorized-category';
 import { CrossStatementDeduplicationService } from '../transactions/services/cross-statement-deduplication.service';
 import { TransactionsService } from '../transactions/transactions.service';
+import { afterApproval } from './after-approval';
 import { DuplicateDecision, ReviewInboxKind } from './dto/review-inbox.dto';
-
 import {
   pendingReceiptsQuery,
   QUEUE_DATE_COLUMN,
@@ -33,7 +33,6 @@ import {
   uncategorizedRowsQuery,
   unconfirmedRowsQuery,
 } from './review-queue.queries';
-import { approveScanReceipt } from './scan-receipt-close';
 
 /** No reviewer asked for: the whole workspace's backlog. */
 const ALL_OWNERS: OwnerFilter = { kind: 'all' };
@@ -328,36 +327,8 @@ export class ReviewInboxService {
       userId,
       ids.map(id => ({ id, updates })),
     );
-    await this.closeScanReceipts(workspaceId, updated);
+    await afterApproval(this.receiptRepository, this.eventEmitter, workspaceId, updated);
     return { approved: updated.length };
-  }
-
-  /**
-   * A confirmed scan row settles its receipt too, the way approving the
-   * receipt settles the row; otherwise the receipt would still read as waiting.
-   */
-  private async closeScanReceipts(workspaceId: string, rows: Transaction[]): Promise<void> {
-    const rowByStatement = new Map(
-      rows.filter(row => row.statementId).map(row => [row.statementId as string, row.id]),
-    );
-    if (rowByStatement.size === 0) {
-      return;
-    }
-    const receipts = await this.receiptRepository.find({
-      select: { id: true, statementId: true, metadata: true },
-      where: { workspaceId, statementId: In([...rowByStatement.keys()]), transactionId: IsNull() },
-    });
-    for (const receipt of receipts) {
-      // A receipt matched to a bank row documents that row; the scan's is its duplicate (#687).
-      const scanRowId = rowByStatement.get(receipt.statementId as string) as string;
-      await approveScanReceipt(
-        this.receiptRepository.manager,
-        workspaceId,
-        receipt,
-        scanRowId,
-        this.eventEmitter,
-      );
-    }
   }
 
   /**
