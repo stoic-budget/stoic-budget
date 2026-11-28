@@ -74,7 +74,15 @@ export interface CreateInvoiceInput {
   deliveryDate?: string;
 }
 
-export type UpdateInvoiceInput = Partial<CreateInvoiceInput>;
+/** On an edit, `null` clears a field; left out leaves it as it was. */
+export type UpdateInvoiceInput = Partial<
+  Omit<CreateInvoiceInput, 'notes' | 'deliveryDate' | 'recurrenceInterval' | 'recurrenceEndDate'>
+> & {
+  notes?: string | null;
+  recurrenceEndDate?: string | null;
+  deliveryDate?: string | null;
+  recurrenceInterval?: InvoiceRecurrenceInterval | null;
+};
 
 export type InvoiceSettingsInput = Partial<InvoiceSettings>;
 
@@ -145,6 +153,11 @@ export const invoicesApi = {
   },
   async void(id: string): Promise<Invoice> {
     await apiClient.put(`/invoices/${id}/void`);
+    return invoicesApi.getOne(id);
+  },
+  /** Ends a recurring invoice's series; the invoice itself is unchanged. */
+  async stopRecurring(id: string): Promise<Invoice> {
+    await apiClient.put(`/invoices/${id}/stop-recurring`);
     return invoicesApi.getOne(id);
   },
   /** Emails the client a reminder about a sent or overdue invoice. */

@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import toast from 'react-hot-toast';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
@@ -16,9 +17,9 @@ export interface GoalItemsState {
   isPending: boolean;
   isSaving: boolean;
   error: string | null;
-  createItem: (payload: GoalItemPayload) => Promise<void>;
-  updateItem: (itemId: string, payload: Partial<GoalItemPayload>) => Promise<void>;
-  removeItem: (itemId: string) => Promise<void>;
+  createItem: (payload: GoalItemPayload) => Promise<boolean>;
+  updateItem: (itemId: string, payload: Partial<GoalItemPayload>) => Promise<boolean>;
+  removeItem: (itemId: string) => Promise<boolean>;
 }
 
 type Write =
@@ -51,6 +52,8 @@ export function useGoalItems(goalId: string): GoalItemsState {
             : await apiClient.delete(`${base}/${write.itemId}`);
       return checkContract('GoalItemsResponse', unwrapEnvelope(response.data), base);
     },
+    // A refused line says why; the dialog stays open (see `ok` below).
+    onError: error => toast.error(getApiErrorMessage(error)),
     onSuccess: (data: GoalItemsResponse) => {
       queryClient.setQueryData(queryKey, data);
       // The plan reads the estimate and the flow reads the goal, so both are
@@ -61,23 +64,26 @@ export function useGoalItems(goalId: string): GoalItemsState {
     },
   });
 
+  /** Whether the write went through; a failure was already shown by onError. */
+  const ok = (write: Promise<unknown>) => write.then(() => true).catch(() => false);
+
   const createItem = useCallback(
     async (payload: GoalItemPayload) => {
-      await mutation.mutateAsync({ kind: 'create', payload });
+      return ok(mutation.mutateAsync({ kind: 'create', payload }));
     },
     [mutation.mutateAsync],
   );
 
   const updateItem = useCallback(
     async (itemId: string, payload: Partial<GoalItemPayload>) => {
-      await mutation.mutateAsync({ kind: 'update', itemId, payload });
+      return ok(mutation.mutateAsync({ kind: 'update', itemId, payload }));
     },
     [mutation.mutateAsync],
   );
 
   const removeItem = useCallback(
     async (itemId: string) => {
-      await mutation.mutateAsync({ kind: 'remove', itemId });
+      return ok(mutation.mutateAsync({ kind: 'remove', itemId }));
     },
     [mutation.mutateAsync],
   );

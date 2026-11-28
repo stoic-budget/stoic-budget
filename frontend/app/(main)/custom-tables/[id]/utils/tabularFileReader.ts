@@ -1,6 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
+import { decodeUnlabelledText } from '@/app/lib/decode-text';
 
 /** Расширения, которые умеет разобрать readTabularWorkbook. */
 export const TABULAR_FILE_ACCEPT = '.csv,.tsv,.xlsx,.xls';
@@ -76,19 +77,6 @@ function isSupported(fileName: string): boolean {
 }
 
 const isTextFormat = (fileName: string): boolean => /\.(csv|tsv)$/i.test(fileName);
-
-/** windows-1251 — обычный подозреваемый, когда банк отдаёт CSV не в UTF-8. */
-function decodeText(buffer: ArrayBuffer): string {
-  const utf8 = new TextDecoder('utf-8').decode(buffer);
-  if (!utf8.includes('�')) {
-    return utf8;
-  }
-  try {
-    return new TextDecoder('windows-1251').decode(buffer);
-  } catch {
-    return utf8;
-  }
-}
 
 function cellKind(cell: SheetJsCell, text: string): TabularCellKind {
   if (cell.t === 'n') {
@@ -182,7 +170,7 @@ export async function readTabularWorkbook(file: ReadableTabularFile): Promise<Ta
     const buffer = await file.arrayBuffer();
     const workbook = isTextFormat(file.name)
       ? // raw: текст CSV остаётся текстом, дальше его разбирает наш парсер.
-        xlsx.read(decodeText(buffer), { type: 'string', raw: true })
+        xlsx.read(decodeUnlabelledText(new Uint8Array(buffer)), { type: 'string', raw: true })
       : xlsx.read(buffer, { type: 'array', cellDates: true, cellFormula: true, cellNF: true });
     sheets = workbook.SheetNames.map(name =>
       readSheet(

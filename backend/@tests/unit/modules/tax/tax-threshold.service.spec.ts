@@ -54,6 +54,11 @@ describe('TaxThresholdService', () => {
     workspaceRepo = createRepoMock();
     workspaceRepo.findOne.mockImplementation(async () => workspace);
     workspaceRepo.save.mockImplementation(async (row: unknown) => row);
+    // The re-arm writes the two alert columns: the stored workspace follows.
+    workspaceRepo.update.mockImplementation(async (_where: unknown, patch: object) => {
+      Object.assign(workspace, patch);
+      return { affected: 1 };
+    });
     transactionRepo = createRepoMock();
     transactionRepo.find.mockResolvedValue([]);
     adoption = { getCurrentJurisdiction: vi.fn().mockResolvedValue(GB) };
@@ -85,9 +90,9 @@ describe('TaxThresholdService', () => {
       for (const branch of where) {
         expect(branch).toMatchObject({ isVerified: true, isDuplicate: false, workspaceId: 'ws-1' });
         expect(branch.transferPairId).toEqual(IsNull());
-        // Every categorised sale, assessed or not. `Not(null)` would compile to
-        // `!= NULL`, which matches nothing.
-        expect(branch.categoryId).toEqual(Not(IsNull()));
+        // Every sale, assessed or not: a row in an income category that is not
+        // wages, interest or the Uncategorized fallback (checked in SQL by the e2e).
+        expect(branch.categoryId.type).toBe('raw');
       }
       expect(where[0].statementId).toEqual(IsNull());
       expect(where[1].statement).toEqual({ deletedAt: IsNull() });
@@ -243,6 +248,42 @@ describe('TaxThresholdService', () => {
 
       turnoverOf('85000.00');
       await service.checkWorkspace('ws-1', NOW);
+
+      expect(events.emit).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not warn again the next days of a rolling window', async () => {
+      turnoverOf('72000.00');
+
+      await service.checkWorkspace('ws-1', new Date('2026-06-15T00:00:00.000Z'));
+      await service.checkWorkspace('ws-1', new Date('2026-06-16T00:00:00.000Z'));
+      await service.checkWorkspace('ws-1', new Date('2026-06-17T00:00:00.000Z'));
+
+      expect(events.emit).toHaveBeenCalledTimes(1);
+    });
+
+    it('warns again when a rolling turnover fell clearly back below 80% and rises past it', async () => {
+      turnoverOf('72000.00');
+      await service.checkWorkspace('ws-1', new Date('2026-06-15T00:00:00.000Z'));
+      turnoverOf('50000.00');
+      await service.checkWorkspace('ws-1', new Date('2026-07-15T00:00:00.000Z'));
+      expect(workspaceRepo.update).toHaveBeenCalledWith(
+        { id: 'ws-1' },
+        expect.objectContaining({ taxThresholdAlertLevel: 0 }),
+      );
+      turnoverOf('73000.00');
+      await service.checkWorkspace('ws-1', new Date('2026-08-15T00:00:00.000Z'));
+
+      expect(events.emit).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not re-arm on a small dip around 80%', async () => {
+      turnoverOf('72100.00');
+      await service.checkWorkspace('ws-1', new Date('2026-06-15T00:00:00.000Z'));
+      turnoverOf('71900.00');
+      await service.checkWorkspace('ws-1', new Date('2026-06-16T00:00:00.000Z'));
+      turnoverOf('72100.00');
+      await service.checkWorkspace('ws-1', new Date('2026-06-17T00:00:00.000Z'));
 
       expect(events.emit).toHaveBeenCalledTimes(1);
     });

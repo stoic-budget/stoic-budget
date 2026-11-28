@@ -1186,4 +1186,85 @@ export const id: StoicTextMap = {
         'Di {{percent}}%, tanpa tenggat. Ketahuilah ke mana Anda berlayar, dan langkah bulanan akan menyusul.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Lupa dua kali adalah kebiasaan',
+      message:
+        '{{count}} tagihan dalam setengah tahun terakhir terlambat karena terlupa. Ingatan bukanlah rencana: biarkan pengingat datang lebih awal, selagi masih ada waktu untuk bertindak.',
+    },
+    {
+      title: 'Tagihan tidak melupakan Anda',
+      message:
+        'Dalam setengah tahun terakhir {{count}} tagihan menunggu sampai ada yang ingat. Apa yang tak sanggup dipikul ingatan, dipikul pengingat: berikan beberapa hari lebih awal.',
+    },
+    {
+      title: 'Biar pengingat yang mengingat',
+      message:
+        'Terlupa {{count}} kali dalam setengah tahun. Pikiran untuk menimbang, bukan untuk menyimpan tanggal: biarkan pengingat datang tepat waktu.',
+    },
+    {
+      title: 'Kewajiban kecil, sering terlewat',
+      message:
+        '{{count}} tagihan terlambat, masing-masing hanya terlupa. Ketenangan dimulai dari keteraturan dalam hal kecil, dan pengingat yang lebih awal tak berbiaya.',
+    },
+    {
+      title: 'Lupa punya pola',
+      message:
+        'Dalam setengah tahun {{count}} tagihan melewati tanggalnya tanpa disadari. Seneca meninjau harinya setiap malam; pengingat beberapa hari lebih awal melakukan itu untuk Anda.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Gajian datang setelah tagihan',
+      message:
+        '{{count}} kali dalam setengah tahun uangnya belum ada saat tagihan jatuh tempo. Pindahkan tanggalnya setelah gajian atau sisihkan satu pembayaran: yang sudah disiapkan tidak membuat terburu-buru.',
+    },
+    {
+      title: 'Uang datang setelah jatuh tempo',
+      message:
+        '{{count}} kali dalam setengah tahun tagihan datang sebelum pemasukan. Tempatkan tanggalnya saat uang sudah ada, dan tagihan berhenti mendesak.',
+    },
+    {
+      title: 'Satu pembayaran di depan',
+      message:
+        '{{count}} tagihan terlambat menunggu hari gajian dalam setengah tahun. Sisihkan satu pembayaran, dan kalender kehilangan kuasanya atas Anda.',
+    },
+    {
+      title: 'Atur tanggalnya, bukan kecemasannya',
+      message:
+        '{{count}} kali dalam setengah tahun uang kurang sebelum gajian. Obatnya bukan cemas, melainkan keteraturan: tagihan setelah pemasukan, atau bantalan sebelumnya.',
+    },
+    {
+      title: 'Yang disiapkan tidak terburu-buru',
+      message:
+        '{{count}} kali tagihan jatuh tempo sebelum uang datang. Apa yang disiapkan lebih dulu disambut dengan tenang: sisihkan satu pembayaran atau geser tanggalnya.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Hal tak terduga terus datang',
+      message:
+        '{{count}} keterlambatan dalam setengah tahun terjadi setelah pengeluaran tak terduga. Tak ada yang menimpa orang bijak di luar dugaannya, tulis Seneca. Cadangan untuk hal tak terduga adalah tujuan yang layak.',
+    },
+    {
+      title: 'Harapkan yang tak terduga',
+      message:
+        '{{count}} tagihan terlambat dalam setengah tahun terjadi setelah pengeluaran yang tak Anda perkirakan. Kaum Stoa melatih diri menghadapi kemalangan lebih dulu; dana cadangan adalah latihan itu dalam uang.',
+    },
+    {
+      title: 'Bantalan untuk yang tak terduga',
+      message:
+        'Dalam setengah tahun {{count}} tagihan tertahan di balik pengeluaran mendadak. Cadangan kecil membuat kejutan berikutnya hanya merepotkan, bukan terlambat.',
+    },
+    {
+      title: 'Nasib meminjamkan, lalu menagih',
+      message:
+        '{{count}} kali biaya tak terduga mendorong tagihan melewati jatuh tempo. Nasib akan menagih lagi; sisihkan cadangan agar tagihan tak perlu menunggu.',
+    },
+    {
+      title: 'Kejutan tidak langka',
+      message:
+        '{{count}} tagihan terlambat terjadi setelah sesuatu yang tak terduga. Yang sering terjadi tidak benar-benar tak terduga: tujuan dana cadangan memberinya tempat.',
+    },
+  ],
 };

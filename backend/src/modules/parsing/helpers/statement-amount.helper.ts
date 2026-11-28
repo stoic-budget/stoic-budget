@@ -1,9 +1,17 @@
 import { normalizeNumber } from '../../../common/utils/number-normalizer.util';
+import { CURRENCY_CODE_PATTERN } from './statement-currency-codes.helper';
 
 const CURRENCY_SYMBOLS = '$€£¥₸₽₪₹฿';
 
-/** "S$", "HK$", "€", or an ISO code such as "SGD" printed next to the figure. */
-const CURRENCY_MARK = new RegExp(`(?:[A-Z]{0,3}[${CURRENCY_SYMBOLS}]|\\b[A-Z]{3}\\b)`, 'g');
+/**
+ * "S$", "HK$", "€", or an ISO code such as "SGD" printed next to the figure;
+ * glued on only when it is a currency's code ("-3,40EUR", not the merchant in
+ * "44,91LIU JO"); the koruna's "Kč" as Czech statements print it.
+ */
+const CURRENCY_MARK = new RegExp(
+  `(?:[A-Z]{0,3}[${CURRENCY_SYMBOLS}]|\\b[A-Z]{3}\\b|(?<=\\d)(?:${CURRENCY_CODE_PATTERN})\\b|(?:\\b|(?<=\\d))Kč(?![\\p{L}]))`,
+  'gu',
+);
 
 /**
  * A currency sign written with letters and glued to the figure, the sign of
@@ -71,7 +79,7 @@ export function isAmountPart(word: string): boolean {
   return (
     /^[-+(−]?[\d.,]*\d[\d.,]*\)?[-+]?$/.test(figure) ||
     new RegExp(
-      `^(?:[A-Z]{0,3}[${CURRENCY_SYMBOLS}]|[A-Z]{3}|[-+=]|\\([+-]\\)|\\(?[CcDd][Rr]\\.?\\)?)$`,
+      `^(?:[A-Z]{0,3}[${CURRENCY_SYMBOLS}]|[A-Z]{3}|Kč|[-+=]|\\([+-]\\)|\\(?[CcDd][Rr]\\.?\\)?)$`,
     ).test(word)
   );
 }

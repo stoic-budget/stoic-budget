@@ -88,6 +88,11 @@ export class VersionSnapshotService {
   private async fill(workspace: Workspace, version: WorkspaceVersion): Promise<WorkspaceVersion> {
     try {
       const snapshot = await this.collector.collect(workspace.id);
+      if (snapshot.missingFiles.length > 0) {
+        this.logger.warn(
+          `Version of workspace ${workspace.id} left out missing files: ${snapshot.missingFiles.join(', ')}`,
+        );
+      }
       const files: Record<string, string> = {};
       let fileBytes = 0;
       for (const file of snapshot.files) {

@@ -20,6 +20,7 @@ import {
   readSubscriptionDraft,
   saveSubscriptionDraft,
 } from './subscription-draft';
+import { useSubscriptionSummary } from './useSubscriptionSummary';
 
 export type SubscriptionChargeCalendar = ChargeCalendarContract;
 export type SubscriptionSummary = SummaryContract;
@@ -157,12 +158,7 @@ export function useSubscriptionsPage() {
     enabled: Boolean(workspaceId),
   });
 
-  const summaryQuery = useQuery({
-    queryKey: queryKeys.subscriptionsSummary(workspaceId),
-    queryFn: ({ signal }) =>
-      apiQueryDecoded({ url: '/subscriptions/summary', signal, contract: 'SubscriptionSummary' }),
-    enabled: Boolean(workspaceId),
-  });
+  const summaryQuery = useSubscriptionSummary(workspaceId);
 
   // Deliberately not derived from `listQuery`: the calendar shows the whole
   // workspace's active spend, so it must not follow the status tab or the

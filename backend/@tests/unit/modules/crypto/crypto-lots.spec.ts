@@ -53,6 +53,33 @@ describe('computeBasis', () => {
     expect(basis?.avgCost).toBeNull();
   });
 
+  it('counts a buy before a sale of the same day, whatever order the rows come in', () => {
+    const basis = computeBasis([sell('2026-03-01', 1, 2500), buy('2026-03-01', 1, 2000)]).get('ETH');
+
+    expect(basis).toMatchObject({ incomplete: false, realized: 500 });
+  });
+
+  it('sells fractional lots to the last coin without leaving float noise as an uncovered sale', () => {
+    const basis = computeBasis([
+      buy('2026-01-01', 0.1, 100),
+      buy('2026-01-02', 0.2, 200),
+      sell('2026-02-01', 0.3, 600),
+    ]).get('ETH');
+
+    expect(basis).toMatchObject({ incomplete: false, quantity: 0 });
+    expect(basis?.realized).toBeCloseTo(300, 6);
+  });
+
+  it('sells the rest of a big lot to the last coin, though the lot is a million times the sale', () => {
+    const basis = computeBasis([
+      buy('2026-01-01', 1_000_000.1, 1_000_000),
+      sell('2026-02-01', 1_000_000, 1_000_000),
+      sell('2026-03-01', 0.1, 1),
+    ]).get('ETH');
+
+    expect(basis).toMatchObject({ incomplete: false, quantity: 0 });
+  });
+
   it('sorts events by date rather than trusting the order they arrive in', () => {
     const late = computeBasis([
       sell('2026-03-01', 1, 2500),

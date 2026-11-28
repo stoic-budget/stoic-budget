@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import { type BankName, FileType } from '../../../entities/statement.entity';
+import { decodeUnlabelledText } from '../helpers/text-encoding.helper';
 import type { ParsedStatement } from '../interfaces/parsed-statement.interface';
 import { BaseParser } from './base.parser';
 import { parseOfx } from './statement-formats.util';
@@ -11,7 +12,8 @@ export class OfxParser extends BaseParser {
   }
 
   async parse(filePath: string, cachedText?: string): Promise<ParsedStatement> {
-    const text = cachedText ?? (await fs.promises.readFile(filePath, 'utf-8'));
+    // Often Windows-1252 rather than UTF-8: decoded by what the bytes are.
+    const text = cachedText ?? decodeUnlabelledText(await fs.promises.readFile(filePath));
     return parseOfx(text);
   }
 }

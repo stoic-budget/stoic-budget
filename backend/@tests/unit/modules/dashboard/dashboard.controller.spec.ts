@@ -21,6 +21,7 @@ describe('DashboardController', () => {
       '30d',
       undefined,
       null,
+      undefined,
     );
   });
 
@@ -41,6 +42,7 @@ describe('DashboardController', () => {
       'month',
       '2026-03-01',
       null,
+      undefined,
     );
   });
 
@@ -58,6 +60,7 @@ describe('DashboardController', () => {
       '30d',
       undefined,
       null,
+      undefined,
     );
     expect(() => query.transform({ range: 'bogus' })).toThrow();
   });

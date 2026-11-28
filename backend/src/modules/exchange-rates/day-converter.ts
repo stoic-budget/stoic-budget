@@ -43,6 +43,32 @@ export async function loadDayConverter(
     rows.map(row => ({ currency: currencyCodeOrDefault(row.currency), date: row.day ?? today })),
     workspaceId,
   );
+  return asDayConvert(converter, today);
+}
+
+/**
+ * The same, for a long range: one rate curve per currency instead of one
+ * lookup per currency and day, which over years of rows is thousands of round
+ * trips. Each day takes the latest stored quote on or before it.
+ */
+export async function loadDayRangeConverter(
+  exchangeRates: ExchangeRatesService,
+  target: string,
+  rows: Array<{ currency: string | null | undefined; day: string }>,
+  workspaceId: string,
+): Promise<DayConvert> {
+  const days = [...new Set(rows.map(row => row.day))].sort();
+  const converter = await CurrencyConverter.loadRange(
+    exchangeRates,
+    target,
+    rows.map(row => currencyCodeOrDefault(row.currency)),
+    days,
+    workspaceId,
+  );
+  return asDayConvert(converter, days[days.length - 1] ?? new Date().toISOString().slice(0, 10));
+}
+
+function asDayConvert(converter: CurrencyConverter, fallbackDay: string): DayConvert {
   const convert = (
     amount: number | string | null | undefined,
     currency: string | null | undefined,
@@ -50,7 +76,7 @@ export async function loadDayConverter(
   ) => {
     const value = typeof amount === 'number' ? amount : Number.parseFloat(amount ?? '');
     return Number.isFinite(value)
-      ? converter.convert(value, currencyCodeOrDefault(currency), day ?? today)
+      ? converter.convert(value, currencyCodeOrDefault(currency), day ?? fallbackDay)
       : 0;
   };
   return Object.defineProperty(convert, 'missing', { get: () => converter.missing }) as DayConvert;
