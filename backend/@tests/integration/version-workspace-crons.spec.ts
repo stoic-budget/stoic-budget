@@ -503,6 +503,7 @@ describe('background jobs leave a past version alone (real Postgres)', () => {
       repo(BackupConfiguration),
       repo(Workspace),
       backups as never,
+      { create: vi.fn() } as never,
     ).runDueBackups(now);
 
     expect(backups.runConfiguration).toHaveBeenCalledTimes(1);
