@@ -5,14 +5,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import type { DataSource, EntityManager, EntityMetadata, Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
-import { appDefaultCurrency } from '../../common/utils/currency.util';
 import { resolveUploadsDir } from '../../common/utils/uploads.util';
-import { WorkspaceRole } from '../../entities';
 import type { User } from '../../entities/user.entity';
 import { Workspace, WorkspaceKind } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { BackupArchiveService, type OpenedBackup } from './backup-archive.service';
 import { withLegacyAttachmentFiles, withRestorableAttachments } from './backup-attachment-files';
+import { stageBackground } from './backup-background';
 import {
   EXCLUDED_TABLES,
   isWorkspaceScoped,
@@ -21,6 +20,7 @@ import {
 } from './backup-data.service';
 import { GROUP_KEY_COLUMNS } from './backup-group-keys';
 import { prepareDocumentPaths } from './backup-restore-documents';
+import { restoredWorkspace, restoreOwnerMembership } from './backup-restore-workspace';
 import { UNRESTORABLE_COLLECTIONS } from './unrestorable-collections';
 
 const RESTORE_ORDER = [
@@ -219,46 +219,33 @@ export class BackupRestoreService {
       await this.restorableCollections(withRestorableAttachments({ ...opened, files })),
     );
     const workspace = await this.workspaceRepository.save(
-      this.workspaceRepository.create({
-        name: options.name,
-        kind: options.kind ?? WorkspaceKind.STANDARD,
-        versionId: options.versionId ?? null,
-        // Older snapshots carry none of these; the defaults then apply.
-        ...(typeof sourceWorkspace.ledgerBaseCurrency === 'string'
-          ? { ledgerBaseCurrency: sourceWorkspace.ledgerBaseCurrency }
-          : {}),
-        ...(typeof sourceWorkspace.taxJurisdictionId === 'string'
-          ? { taxJurisdictionId: sourceWorkspace.taxJurisdictionId }
-          : {}),
-        ...(typeof sourceWorkspace.vatStatus === 'string'
-          ? { vatStatus: sourceWorkspace.vatStatus as Workspace['vatStatus'] }
-          : {}),
-        description: this.stringOrNull(sourceWorkspace.description),
-        icon: this.stringOrNull(sourceWorkspace.icon),
-        color: this.stringOrNull(sourceWorkspace.color),
-        backgroundImage: this.stringOrNull(sourceWorkspace.backgroundImage),
-        // The column is required; a backup taken before that falls back the same
-        // way the RequireWorkspaceCurrency migration backfilled missing ones.
-        currency: this.stringOrNull(sourceWorkspace.currency) ?? appDefaultCurrency(),
-        settings: this.objectOrNull(sourceWorkspace.settings),
-        ownerId: user.id,
-        isFavorite: false,
-      }),
+      this.workspaceRepository.create(restoredWorkspace(sourceWorkspace, user, options)),
     );
     const stagedFiles: Array<{ stagedPath: string; targetPath: string }> = [];
     const restoreDirectory = await fs.mkdtemp(path.join(resolveUploadsDir(), '.restore-'));
 
     try {
-      await this.workspaceMemberRepository.save(
-        this.workspaceMemberRepository.create({
-          workspaceId: workspace.id,
-          userId: user.id,
-          role: WorkspaceRole.OWNER,
-          permissions: null,
-          invitedById: user.id,
-        }),
+      // An uploaded background comes back as the copy's own picture (#677).
+      const background = await stageBackground(
+        sourceWorkspace.backgroundImage,
+        files,
+        restoreDirectory,
+        stagedFiles,
       );
-      const idMap = this.buildIdMap(collections, sourceWorkspace.id, workspace.id);
+      if (background) {
+        workspace.backgroundImage = background;
+        await this.workspaceRepository.update(workspace.id, { backgroundImage: background });
+      }
+      const own = await restoreOwnerMembership(
+        this.workspaceMemberRepository,
+        workspace.id,
+        user,
+        sourceWorkspace,
+      );
+      const idMap = new Map([
+        ...this.buildIdMap(collections, sourceWorkspace.id, workspace.id),
+        ...own,
+      ]);
       const prepared = await this.prepareCollections(
         collections,
         files,
@@ -639,15 +626,5 @@ export class BackupRestoreService {
       (value as Record<string, unknown>).encoding === 'base64' &&
       typeof (value as Record<string, unknown>).value === 'string'
     );
-  }
-
-  private stringOrNull(value: unknown): string | null {
-    return typeof value === 'string' ? value : null;
-  }
-
-  private objectOrNull(value: unknown): Record<string, unknown> | null {
-    return value && typeof value === 'object' && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : null;
   }
 }

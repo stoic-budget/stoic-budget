@@ -9,6 +9,8 @@ import {
   collectTransactionAttachmentFiles,
   shareIdenticalAttachmentFiles,
 } from './backup-attachment-files';
+import { carryBackground } from './backup-background';
+import { collectColumnFiles, FILE_COLUMNS } from './backup-file-columns';
 
 export const EXCLUDED_TABLES = new Set([
   'api_keys',
@@ -102,6 +104,16 @@ export const isWorkspaceScoped = (metadata: EntityMetadata): boolean =>
 type BackupSnapshotData = {
   collections: Record<string, unknown[]>;
   files: Array<{ path: string; contents: Buffer }>;
+  /** The workspace's background as a snapshot keeps it: a carried picture's path (#677). */
+  backgroundImage: string | null;
+  /**
+   * The owner, as user and member id from one read at collection time, so a
+   * restore by that same person keeps their private rows theirs (#640). Read
+   * together: an owner taken from an older record could pair with another
+   * member's id after ownership changed hands.
+   */
+  ownerId: string | null;
+  ownerMemberId: string | null;
   /**
    * Documents whose file could not be read (#639): left out of the archive,
    * so one lost file no longer fails every backup and version.
@@ -116,7 +128,8 @@ export class BackupDataService {
     @Optional() private readonly fileStorageService?: FileStorageService,
   ) {}
 
-  async collect(workspaceId: string): Promise<BackupSnapshotData> {
+  /** `backgroundImage`: the workspace's own, which the caller holds already. */
+  async collect(workspaceId: string, backgroundImage?: string | null): Promise<BackupSnapshotData> {
     const collections: Record<string, unknown[]> = {};
     const files: Array<{ path: string; contents: Buffer }> = [];
     const missingFiles: string[] = [];
@@ -139,10 +152,31 @@ export class BackupDataService {
       if (metadata.tableName === 'transaction_attachments') {
         collections[metadata.tableName] = await collectTransactionAttachmentFiles(records, files);
       }
+      if (FILE_COLUMNS.some(spec => spec.table === metadata.tableName)) {
+        collections[metadata.tableName] = await collectColumnFiles(
+          metadata.tableName,
+          records,
+          files,
+        );
+      }
     }
     await this.collectRelatedCollections(collections);
     shareIdenticalAttachmentFiles(collections, files);
-    return { collections, files, missingFiles };
+    const carried = await carryBackground(backgroundImage ?? null, workspaceId, files);
+    const [owner] = await this.dataSource.query(
+      `SELECT member.id, workspace.owner_id AS "ownerId" FROM workspace_members member
+         JOIN workspaces workspace ON workspace.id = member.workspace_id AND workspace.owner_id = member.user_id
+        WHERE member.workspace_id = $1`,
+      [workspaceId],
+    );
+    return {
+      collections,
+      files,
+      backgroundImage: carried,
+      ownerId: owner?.ownerId ?? null,
+      ownerMemberId: owner?.id ?? null,
+      missingFiles,
+    };
   }
 
   /** The usual columns, plus the hidden ones this table's backup needs. */

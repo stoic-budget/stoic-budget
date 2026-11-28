@@ -13,10 +13,12 @@ import * as path from 'node:path';
 import { ForbiddenException } from '@nestjs/common';
 import { Client } from 'pg';
 import { DataSource } from 'typeorm';
+import { columnFilesOf } from '../../src/modules/backups/backup-file-columns';
 
 import { resolveUploadsDir } from '../../src/common/utils/uploads.util';
 import * as entityIndex from '../../src/entities';
 import { User, Workspace, WorkspaceMember, WorkspaceVersion } from '../../src/entities';
+import { WorkspaceVersionTrigger } from '../../src/entities/workspace-version.entity';
 import { BackupArchiveService } from '../../src/modules/backups/backup-archive.service';
 import { BackupDataService } from '../../src/modules/backups/backup-data.service';
 import { BackupKeyService } from '../../src/modules/backups/backup-key.service';
@@ -406,5 +408,109 @@ describe('workspace versions are taken and kept (real Postgres)', () => {
     it('is the owner’s alone', async () => {
       await expect(versions.open(versionId, randomUUID())).rejects.toThrow(ForbiddenException);
     });
+  });
+
+  it('names for removal only the pictures no other workspace still names (#677)', async () => {
+    const [{ id: copy }] = await sql(
+      "INSERT INTO workspaces (name, currency) VALUES ('ACME copy', 'EUR') RETURNING id",
+    );
+    const [{ id: original }] = await sql(
+      "INSERT INTO workspaces (name, currency) VALUES ('ACME original', 'EUR') RETURNING id",
+    );
+    const goal = (workspace: string, name: string, file: string) =>
+      sql("INSERT INTO goals (workspace_id, name, target_amount, currency, cover_file) VALUES ($1, $2, 100, 'EUR', $3)", [
+        workspace,
+        name,
+        file,
+      ]);
+    await goal(copy, 'Own cover', 'own.jpg');
+    // A copy opened before its pictures were copied points at the original's file.
+    await goal(copy, 'Shared cover', 'shared.jpg');
+    await goal(original, 'Shared cover', 'shared.jpg');
+    // The original's own picture is none of the copy's business.
+    await goal(original, 'Their cover', 'theirs.jpg');
+
+    const files = await columnFilesOf((query, params) => dataSource.query(query, params), copy);
+
+    expect(files.map(file => path.basename(file))).toEqual(['own.jpg']);
+  });
+
+  it("opens a version with a background and credit of its own, and takes the copy away on close (#677)", async () => {
+    const directory = path.join(resolveUploadsDir(), 'workspace-backgrounds');
+    fs.mkdirSync(directory, { recursive: true });
+    const name = `versions-it-${randomUUID()}.jpg`;
+    fs.writeFileSync(path.join(directory, name), 'ACME lake');
+    await sql(
+      `UPDATE workspaces SET background_image = $1, background_attribution = $2, background_source_url = $3 WHERE id = $4`,
+      [`/uploads/workspace-backgrounds/${name}`, '"Lake" by Member One, CC BY 2.0', 'https://example.com/lake', workspace.id],
+    );
+    const taken = await versions.takeNow(workspace.id, owner.id);
+
+    const opened = await versions.open(taken.id, owner.id);
+
+    expect(opened.backgroundImage).toMatch(/^\/uploads\/workspace-backgrounds\/[0-9a-f-]{36}\.jpg$/);
+    expect(opened.backgroundImage).not.toContain(name);
+    const [row] = await sql('SELECT background_attribution, background_source_url FROM workspaces WHERE id = $1', [opened.id]);
+    expect(row).toEqual({ background_attribution: '"Lake" by Member One, CC BY 2.0', background_source_url: 'https://example.com/lake' });
+    const copy = path.join(directory, path.basename(opened.backgroundImage as string));
+    expect(fs.readFileSync(copy, 'utf8')).toBe('ACME lake');
+
+    await versions.close(taken.id, owner.id);
+
+    expect(fs.existsSync(copy)).toBe(false);
+    expect(fs.existsSync(path.join(directory, name))).toBe(true);
+    await sql('UPDATE workspaces SET background_image = NULL, background_attribution = NULL, background_source_url = NULL WHERE id = $1', [workspace.id]);
+    fs.rmSync(path.join(directory, name), { force: true });
+  });
+
+  it("keeps the owner's private rows theirs in an opened version, and no other member's (#640)", async () => {
+    const other = await dataSource.getRepository(User).save(
+      dataSource.getRepository(User).create({
+        email: `versions-member-${randomUUID()}@example.com`,
+        passwordHash: 'x',
+        name: 'Member Two',
+      }),
+    );
+    // The other member first, so only the owner condition can pick the owner's membership.
+    const [{ id: otherMember }] = await sql(
+      "INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ($1, $2, 'viewer') RETURNING id",
+      [workspace.id, other.id],
+    );
+    const [{ id: ownerMember }] = await sql(
+      "INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ($1, $2, 'owner') RETURNING id",
+      [workspace.id, owner.id],
+    );
+    const privateRow = (payee: string, member: string) =>
+      sql(
+        `INSERT INTO transactions (workspace_id, transaction_date, counterparty_name, payment_purpose, currency, transaction_type, amount, debit, is_verified, is_private, owner_member_id)
+         VALUES ($1, '2026-10-03', $2::text, $2::text, 'EUR', 'expense', 30, 30, true, true, $3)`,
+        [workspace.id, payee, member],
+      );
+    await privateRow('ACME Store', ownerMember);
+    await privateRow('ACME Pharmacy', otherMember);
+    const taken = await versions.takeNow(workspace.id, owner.id);
+
+    const opened = await versions.open(taken.id, owner.id);
+
+    const rows = await sql(
+      `SELECT t.counterparty_name AS payee, m.user_id AS "ownerUser"
+         FROM transactions t LEFT JOIN workspace_members m ON m.id = t.owner_member_id
+        WHERE t.workspace_id = $1 AND t.is_private ORDER BY payee`,
+      [opened.id],
+    );
+    expect(rows).toEqual([
+      { payee: 'ACME Pharmacy', ownerUser: null },
+      { payee: 'ACME Store', ownerUser: owner.id },
+    ]);
+    await versions.close(taken.id, owner.id);
+
+    // Ownership changes hands after the workspace was read and before its snapshot:
+    // the version records the owner of that moment with their own membership.
+    await sql('UPDATE workspaces SET owner_id = $1 WHERE id = $2', [other.id, workspace.id]);
+    const stale = await snapshots.take(workspace, WorkspaceVersionTrigger.MANUAL, owner.id);
+    expect((await payloadOf(stale)).workspace).toMatchObject({ ownerId: other.id, ownerMemberId: otherMember });
+    await sql('UPDATE workspaces SET owner_id = $1 WHERE id = $2', [owner.id, workspace.id]);
+    await sql('DELETE FROM transactions WHERE workspace_id = $1 AND is_private', [workspace.id]);
+    await sql('DELETE FROM workspace_members WHERE id = ANY($1::uuid[])', [[ownerMember, otherMember]]);
   });
 });

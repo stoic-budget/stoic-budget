@@ -5,6 +5,7 @@ import {
   sha256Of,
   storedAttachmentPath,
 } from '../transactions/services/transaction-attachment-files';
+import { withRestorablePictures } from './backup-file-columns';
 
 const TABLE = 'transaction_attachments';
 /** Where an attachment's bytes sit inside a backup or a version. */
@@ -43,12 +44,16 @@ export function withRestorableAttachments<
   T extends { collections: Record<string, unknown[]>; files: Map<string, Buffer> },
 >(opened: T): T {
   const rows = opened.collections[TABLE];
-  if (!rows) return opened;
+  if (!rows) return withRestorablePictures(opened);
   const carried = rows.filter(row => {
     const name = (row as Record<string, unknown> | null)?.storedFileName;
     return typeof name === 'string' && opened.files.has(name);
   });
-  return { ...opened, collections: { ...opened.collections, [TABLE]: carried } };
+  // Item pictures follow the same rule (#677): no file in the archive, no row.
+  return withRestorablePictures({
+    ...opened,
+    collections: { ...opened.collections, [TABLE]: carried },
+  });
 }
 
 /**

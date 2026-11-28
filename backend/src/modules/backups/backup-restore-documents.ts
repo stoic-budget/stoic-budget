@@ -3,6 +3,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { resolveUploadsDir } from '../../common/utils/uploads.util';
 import { attachmentsDir } from '../transactions/services/transaction-attachment-files';
+import { restoreColumnFile } from './backup-file-columns';
 
 type StagedFile = { stagedPath: string; targetPath: string };
 
@@ -50,7 +51,9 @@ export async function prepareDocumentPaths(
       return path.join(attachmentsDir(), `${randomUUID()}${extension.slice(0, 8)}`);
     });
     mapped.storedFileName = path.basename(target);
+    return;
   }
+  await restoreColumnFile(tableName, source, mapped, stage);
 }
 
 async function stageDocument(

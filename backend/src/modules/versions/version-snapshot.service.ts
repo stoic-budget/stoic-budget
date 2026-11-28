@@ -87,7 +87,7 @@ export class VersionSnapshotService {
 
   private async fill(workspace: Workspace, version: WorkspaceVersion): Promise<WorkspaceVersion> {
     try {
-      const snapshot = await this.collector.collect(workspace.id);
+      const snapshot = await this.collector.collect(workspace.id, workspace.backgroundImage);
       if (snapshot.missingFiles.length > 0) {
         this.logger.warn(
           `Version of workspace ${workspace.id} left out missing files: ${snapshot.missingFiles.join(', ')}`,
@@ -101,7 +101,11 @@ export class VersionSnapshotService {
       }
       const payload: VersionPayload = {
         formatVersion: VERSION_FORMAT,
-        workspace: this.workspaceRecord(workspace),
+        workspace: {
+          ...this.workspaceRecord(workspace, snapshot.backgroundImage),
+          ownerId: snapshot.ownerId,
+          ownerMemberId: snapshot.ownerMemberId,
+        },
         collections: snapshot.collections,
         files,
       };
@@ -153,14 +157,19 @@ export class VersionSnapshotService {
   }
 
   /** What a restore needs of the workspace row itself, beside its tables. */
-  private workspaceRecord(workspace: Workspace): Record<string, unknown> {
+  private workspaceRecord(
+    workspace: Workspace,
+    backgroundImage: string | null,
+  ): Record<string, unknown> {
     return {
       id: workspace.id,
       name: workspace.name,
       description: workspace.description,
       icon: workspace.icon,
       color: workspace.color,
-      backgroundImage: workspace.backgroundImage,
+      backgroundImage,
+      backgroundAttribution: workspace.backgroundAttribution,
+      backgroundSourceUrl: workspace.backgroundSourceUrl,
       currency: workspace.currency,
       settings: workspace.settings,
       ledgerBaseCurrency: workspace.ledgerBaseCurrency,

@@ -11,6 +11,8 @@ import {
   WorkspaceVersionStatus,
   WorkspaceVersionTrigger,
 } from '../../entities/workspace-version.entity';
+import { ownBackgroundFile } from '../backups/backup-background';
+import { columnFilesOf } from '../backups/backup-file-columns';
 import { BackupKeyService } from '../backups/backup-key.service';
 import { BackupRestoreService } from '../backups/backup-restore.service';
 import { VersionBlobStore } from './version-blob-store';
@@ -195,8 +197,22 @@ export class VersionsService {
          UNION ALL SELECT NULL, attachment_paths FROM receipts WHERE workspace_id = $1`,
         [workspace.id],
       );
+    // The pictures an opened version restored are its own copies too (#677).
+    const pictures = await columnFilesOf(
+      (sql, params) => this.workspaceRepository.query(sql, params),
+      workspace.id,
+    );
+    pictures.push(
+      ...(await ownBackgroundFile(
+        (sql, params) => this.workspaceRepository.query(sql, params),
+        workspace.id,
+      )),
+    );
     await this.workspaceRepository.delete({ id: workspace.id, kind: WorkspaceKind.VERSION });
-    const files = documents.flatMap(row => [row.path, ...(row.paths ?? [])]).filter(Boolean);
+    const files = [
+      ...documents.flatMap(row => [row.path, ...(row.paths ?? [])]),
+      ...pictures,
+    ].filter(Boolean);
     for (const file of files) {
       await fs.rm(file as string, { force: true }).catch(error => {
         this.logger.warn(`Could not remove ${file}: ${(error as Error).message}`);

@@ -188,7 +188,7 @@ export class BackupsService {
     const savedRun = await this.runRepository.save(run);
 
     try {
-      const snapshot = await this.dataService.collect(workspace.id);
+      const snapshot = await this.dataService.collect(workspace.id, workspace.backgroundImage);
       const collections = {
         workspace: [
           {
@@ -197,9 +197,13 @@ export class BackupsService {
             description: workspace.description,
             icon: workspace.icon,
             color: workspace.color,
-            backgroundImage: workspace.backgroundImage,
+            backgroundImage: snapshot.backgroundImage,
+            backgroundAttribution: workspace.backgroundAttribution,
+            backgroundSourceUrl: workspace.backgroundSourceUrl,
             currency: workspace.currency,
             settings: workspace.settings,
+            ownerId: snapshot.ownerId,
+            ownerMemberId: snapshot.ownerMemberId,
           },
         ],
         ...snapshot.collections,
