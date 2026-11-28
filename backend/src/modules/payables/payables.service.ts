@@ -28,13 +28,7 @@ import type {
   PaymentCandidate,
   UpdatePayableBody,
 } from '../../contracts';
-import { EntityType } from '../../entities/audit-event.entity';
 import { Category } from '../../entities/category.entity';
-import {
-  NotificationCategory,
-  NotificationSeverity,
-  NotificationType,
-} from '../../entities/notification.entity';
 import {
   Payable,
   PayableDirection,
@@ -56,6 +50,7 @@ import {
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { ExportFormat, PayablesSortOption } from './dto/filter-payables.dto';
+import { notifyMarkedPaid } from './payable-notifications';
 import { assertOneSource, exactSubset, isClosed, notRejectedSql } from './payable-payments.util';
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
@@ -201,7 +196,7 @@ export class PayablesService {
     const saved = await this.inPaymentTransaction(async manager =>
       this.settle(manager, await manager.getRepository(Payable).save(payable), payment, userId),
     );
-    await this.notifyMarkedPaid(saved, userId);
+    await notifyMarkedPaid(this.notificationsService, this.logger, saved, userId);
     return saved;
   }
 
@@ -305,7 +300,7 @@ export class PayablesService {
       });
       return this.settle(manager, payable, payload, userId);
     });
-    await this.notifyMarkedPaid(saved, userId);
+    await notifyMarkedPaid(this.notificationsService, this.logger, saved, userId);
     return saved;
   }
 
@@ -316,23 +311,30 @@ export class PayablesService {
     payload: MarkPayablePaidBody,
     userId: string,
   ): Promise<Payable> {
+    // Part already paid in instalments: this pays the rest, as one more payment
+    // with its own source, not the first instalment's link (#660).
+    const partlyPaid = Number(payable.paidAmount ?? 0) > 0 && this.outstandingOf(payable) > 0;
+    let transactionId = partlyPaid ? null : payable.linkedTransactionId;
+    // Paid with nothing left: a repeat (a double click, a retry) changes nothing.
+    if (payable.status === PayableStatus.PAID && this.outstandingOf(payable) <= 0) {
+      return payable;
+    }
     if (payload.payFromWalletId || payload.inHand) {
-      if (payable.status === PayableStatus.PAID && payable.linkedTransactionId) {
-        return payable;
-      }
-      if (payable.linkedTransactionId) {
+      if (payable.linkedTransactionId && !partlyPaid) {
         throw new ConflictException(appError('PAYABLE_ALREADY_LINKED'));
       }
-      payable.linkedTransactionId = await this.recordCashPayment(
+      transactionId = await this.recordCashPayment(
         manager,
         payable,
         payload.payFromWalletId ?? null,
         payload,
+        this.outstandingOf(payable),
       );
     }
     // Swapping the payment silently would leave the old one (a recorded cash
     // payment, say) in the books as well: the expense would count twice.
     if (
+      !partlyPaid &&
       payload.linkedTransactionId &&
       payable.linkedTransactionId &&
       payable.linkedTransactionId !== payload.linkedTransactionId
@@ -341,14 +343,15 @@ export class PayablesService {
     }
     if (payload.linkedTransactionId) {
       await this.assertCoversOutstanding(manager, payable, payload.linkedTransactionId);
+      transactionId = payload.linkedTransactionId;
     }
-    payable.linkedTransactionId = payload.linkedTransactionId || payable.linkedTransactionId;
+    payable.linkedTransactionId = payable.linkedTransactionId || transactionId;
     // Settling in full is one payment for everything still outstanding, so
     // the payment log is the whole truth and the status is derived from it.
     await this.recordPayment(manager, payable, {
       amount: this.outstandingOf(payable),
       paidOn: payload.paidOn,
-      transactionId: payable.linkedTransactionId,
+      transactionId,
       ownTransaction: Boolean(payload.payFromWalletId || payload.inHand),
       createdById: userId,
     });
@@ -356,30 +359,6 @@ export class PayablesService {
       manager,
       await this.applyPaymentTotals(manager, payable, payable.workspaceId),
     );
-  }
-
-  private async notifyMarkedPaid(saved: Payable, userId: string): Promise<void> {
-    try {
-      await this.notificationsService.createForWorkspaceMembers({
-        workspaceId: saved.workspaceId,
-        actorId: userId,
-        type: NotificationType.PAYABLE_MARKED_PAID,
-        category: NotificationCategory.WORKSPACE_ACTIVITY,
-        severity: NotificationSeverity.INFO,
-        messageKey: 'payable.marked_paid',
-        messageParams: { vendor: saved.vendor },
-        entityType: EntityType.PAYABLE,
-        entityId: saved.id,
-        meta: {
-          payableId: saved.id,
-          direction: saved.direction,
-        },
-      });
-    } catch (error) {
-      this.logger.warn(
-        `Failed to send payable paid notification for ${saved.id}: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
   }
 
   /**
