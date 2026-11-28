@@ -10,24 +10,7 @@ import type { DashboardCommitmentItem } from '../../contracts';
 import { type Payable, PayableDirection } from '../../entities/payable.entity';
 import type { Subscription, SubscriptionFrequency } from '../../entities/subscription.entity';
 import type { SubscriptionCharge } from '../../entities/subscription-charge.entity';
-import { paidAheadDays, subscriptionStep } from '../subscriptions/charge-calendar.util';
-import { daysInMonth } from './dashboard-window.util';
-
-/** Month arithmetic that clamps to the last day instead of overflowing (Jan 31 + 1m = Feb 28). */
-function addMonths(date: Date, months: number): Date {
-  const dayOfMonth = date.getDate();
-  const result = new Date(date.getFullYear(), date.getMonth() + months, 1);
-  result.setDate(Math.min(dayOfMonth, daysInMonth(result)));
-  return result;
-}
-
-function advanceByFrequency(date: Date, frequency: SubscriptionFrequency): Date {
-  const step = subscriptionStep(frequency);
-  if (step.unit === 'month') return addMonths(date, step.count);
-  const next = new Date(date);
-  next.setDate(next.getDate() + step.count);
-  return next;
-}
+import { chargeAt, paidAheadDays, subscriptionStep } from '../subscriptions/charge-calendar.util';
 
 /** Every charge date of a subscription, from its next charge, that falls inside [today, horizonEnd]. */
 export function projectSubscriptionCharges(
@@ -37,25 +20,40 @@ export function projectSubscriptionCharges(
   horizonEnd: Date,
   maxSteps: number,
 ): Date[] {
-  let cursor = nextCharge;
-  if (!cursor) {
+  if (!nextCharge) {
     return [];
   }
-
-  // A next-charge date left in the past means the charge was never reconciled;
-  // roll it forward so the projection starts from the next real occurrence.
-  let guard = 0;
-  while (cursor < today && guard < maxSteps) {
-    cursor = advanceByFrequency(cursor, frequency);
-    guard += 1;
-  }
-
+  // Each charge is counted from the next-charge date, not stepped from the one
+  // before: stepping from 31 Jan through 28 Feb would leave every later charge
+  // on the 28th. A date left in the past rolls forward to the next real one.
   const charges: Date[] = [];
-  while (cursor <= horizonEnd && charges.length < maxSteps) {
-    charges.push(new Date(cursor));
-    cursor = advanceByFrequency(cursor, frequency);
+  for (
+    let index = firstIndexFrom(nextCharge, frequency, today);
+    charges.length < maxSteps;
+    index += 1
+  ) {
+    const charge = chargeAt(nextCharge, frequency, index);
+    if (charge > horizonEnd) break;
+    if (charge >= today) charges.push(charge);
   }
   return charges;
+}
+
+/** The index of the first charge on or after `today`, however far back the anchor is. */
+function firstIndexFrom(anchor: Date, frequency: SubscriptionFrequency, today: Date): number {
+  if (anchor >= today) return 0;
+  const step = subscriptionStep(frequency);
+  const behind =
+    step.unit === 'day'
+      ? Math.floor((today.getTime() - anchor.getTime()) / (86_400_000 * step.count))
+      : Math.floor(
+          ((today.getFullYear() - anchor.getFullYear()) * 12 +
+            today.getMonth() -
+            anchor.getMonth()) /
+            step.count,
+        );
+  // One step short of it at most: the loop above skips what is still before today.
+  return Math.max(0, behind - 1);
 }
 
 /**
