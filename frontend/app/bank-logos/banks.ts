@@ -151,6 +151,7 @@ export const BANKS = [
   { key: 'pnc', name: 'PNC Bank', logo: 'pnc.png', aliases: ['pnc'] },
   { key: 'prosperity', name: 'Prosperity Bank', logo: 'prosperity.png', aliases: ['prosperity'] },
   { key: 'qnb', name: 'QNB', logo: 'qnb.png', aliases: ['qatar national bank'] },
+  { key: 'raiffeisenbank_cz', name: 'Raiffeisenbank', logo: 'raiffeisen.png', aliases: ['raiffeisenbank cz'] },
   { key: 'raiffeisen', name: 'Raiffeisen Bank', logo: 'raiffeisen.png', aliases: ['raiffeisen'] },
   { key: 'rbc', name: 'RBC Royal Bank', logo: 'rbc.png', aliases: ['royal bank of canada', 'rbc'] },
   { key: 'regions', name: 'Regions Bank', logo: 'regions.png', aliases: ['regions'] },

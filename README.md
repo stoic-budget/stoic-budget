@@ -150,7 +150,7 @@ Setting expectations upfront:
 | 🇩🇪 Germany | Deutsche Bank, N26 | N26, Sparkasse / DKB, Commerzbank |
 | 🇳🇱 Netherlands | | ING, Rabobank |
 | 🇸🇪 🇩🇰 🇳🇴 🇫🇮 Nordics | | Nordea |
-| 🇨🇿 🇸🇰 Czech Republic, Slovakia | ČSOB, Fio banka (checked on sample layouts only) | |
+| 🇨🇿 🇸🇰 Czech Republic, Slovakia | ČSOB, Fio banka, Raiffeisenbank (checked on sample layouts only) | |
 | 🇫🇷 France | Crédit Agricole, Société Générale, Sogexia | |
 | 🇵🇱 Poland | BNP Paribas Bank Polska | |
 | 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank, RBC Royal Bank, Scotiabank, Simplii Financial, Tangerine, TD Bank | |

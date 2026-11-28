@@ -87,6 +87,10 @@ describe('Czech and Slovak statements', () => {
     const slovak = 'Starý zostatok 353,74\nSuma príjmov 1 000,00\nSuma výdavkov -11,67\nNový zostatok 1 342,07';
     expect(findStatementBalances(slovak, 'dmy')).toEqual({ start: 353.74, end: 1342.07 });
     expect(findStatementTotals(slovak, 'dmy')).toEqual({ credits: 1000, debits: 11.67 });
+    expect(findStatementTotals('Příjmy celkem: 32 012,34 CZK\nVýdaje celkem: -12 380,20 CZK', 'dmy')).toEqual({
+      credits: 32012.34,
+      debits: 12380.2,
+    });
   });
 
   it('takes a balance row for a balance, not a payment', () => {
@@ -158,6 +162,32 @@ describe('findForeignAmount', () => {
     ['Úhrada\nFAK 2026001'],
   ])('reads no foreign amount in %j', text => {
     expect(findForeignAmount(text, 'CZK', -1000)).toBeNull();
+  });
+
+  it('reads a line of a figure and its code, with a rate printed as "25,10 CZK/EUR"', () => {
+    expect(findForeignAmount('3,00 EUR\n8436776103 PK: 516844XXXXXX4400 25,10 CZK/EUR', 'CZK', -75.3)).toEqual({
+      amount: 3,
+      currency: 'EUR',
+      rate: 25.1,
+    });
+  });
+
+  it('reads the figure and its code ending a line after an account', () => {
+    expect(findForeignAmount('DE89370400440532013000 100,00 EUR\n8436776301 ACME GmbH 25,10 CZK/EUR', 'CZK', 2510)).toEqual({
+      amount: 100,
+      currency: 'EUR',
+      rate: 25.1,
+    });
+  });
+
+  it('turns over a rate printed the other way, and holds it to the booked amount', () => {
+    expect(findForeignAmount('3,00 EUR\n0,0398 EUR/CZK', 'CZK', -75.3)).toEqual({ amount: 3, currency: 'EUR', rate: 25.125628 });
+    // A rate that fits neither way is worked out from the two amounts.
+    expect(findForeignAmount('3,00 EUR\n22,00 CZK/EUR', 'CZK', -75.3)).toEqual({ amount: 3, currency: 'EUR', rate: 25.1 });
+  });
+
+  it('takes no rate from lower-case words ("0,10 CZK/min")', () => {
+    expect(findForeignAmount('částka 50.00 PLN\n2,50 kwh/den', 'CZK')).toEqual({ amount: 50, currency: 'PLN' });
   });
 
   it("ignores an amount in the account's own currency", () => {

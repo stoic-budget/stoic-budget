@@ -88,6 +88,7 @@ import { PncParser } from '../parsers/pnc.parser';
 import { ProsperityParser } from '../parsers/prosperity.parser';
 import { QnbParser } from '../parsers/qnb.parser';
 import { RaiffeisenParser } from '../parsers/raiffeisen.parser';
+import { RaiffeisenbankCzParser } from '../parsers/raiffeisenbank-cz.parser';
 import { RbcParser } from '../parsers/rbc.parser';
 import { RbsParser } from '../parsers/rbs.parser';
 import { RegionsParser } from '../parsers/regions.parser';
@@ -219,6 +220,7 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [ProsperityParser, { bankName: BankName.PROSPERITY }],
   [QnbParser, { bankName: BankName.QNB }],
   [RaiffeisenParser, { bankName: BankName.RAIFFEISEN }],
+  [RaiffeisenbankCzParser, { bankName: BankName.RAIFFEISENBANK_CZ }],
   [RbcParser, { bankName: BankName.RBC }],
   [RegionsParser, { bankName: BankName.REGIONS }],
   [RevolutParser, { bankName: BankName.REVOLUT }],

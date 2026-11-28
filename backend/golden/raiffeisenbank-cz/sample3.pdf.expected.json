@@ -1,0 +1,58 @@
+{
+  "bankName": "raiffeisenbank_cz",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "currency"
+  ],
+  "metadata": {
+    "accountNumber": "CZ6555000000009876543211",
+    "currency": "CZK",
+    "dateFrom": "2026-05-01T00:00:00",
+    "dateTo": "2026-05-31T00:00:00",
+    "balanceStart": 1000,
+    "balanceEnd": 5924.62,
+    "rawHeader": "Raiffeisenbank a.s. Strana 1/2 Výpis ze spořicího účtu Číslo účtu: 9876543211 / 5500 Období: 1. 5. 2026 - 31. 5. 2026",
+    "normalizedHeader": "Raiffeisenbank a.s. Strana 1/2 Výpis ze spořicího účtu Číslo účtu: 9876543211 / 5500 Období: 1. 5. 2026 - 31. 5. 2026",
+    "locale": "es"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-05-06T00:00:00",
+      "counterpartyName": "ACME GmbH",
+      "counterpartyAccount": "DE89370400440532013000",
+      "paymentPurpose": "Příjmy Příchozí platba ze zahraničí DE89370400440532013000 199,20 EUR 8436778001 ACME GmbH 25,10 CZK/EUR",
+      "credit": 4999.92,
+      "currency": "CZK",
+      "amountForeign": 199.2,
+      "exchangeRate": 25.1
+    },
+    {
+      "transactionDate": "2026-05-09T00:00:00",
+      "counterpartyName": "ACME FUEL 731 SVIT",
+      "paymentPurpose": "Nákupy Platba kartou 3,00 EUR 8436778002 PK: 516844XXXXXX4400 25,10 CZK/EUR 3,00 EUR;ACME FUEL 731 SVIT; Svit; SVK",
+      "debit": 75.3,
+      "currency": "CZK",
+      "amountForeign": 3,
+      "exchangeRate": 25.1
+    }
+  ],
+  "checks": [
+    {
+      "code": "printed_totals",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "3065f70619e7",
+    "headings": [
+      "date:datum | description:kategorie transakce | description:typ transakce | amount:zauctovana castka"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "raiffeisenbank_cz"
+  }
+}

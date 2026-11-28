@@ -181,6 +181,7 @@ const TOTAL_CREDITS = [
   'total paid in',
   'soucet prijmu',
   'suma prijmov',
+  'prijmy celkem',
 ];
 const TOTAL_DEBITS = [
   'money out',
@@ -191,6 +192,7 @@ const TOTAL_DEBITS = [
   'total paid out',
   'soucet vydaju',
   'suma vydavkov',
+  'vydaje celkem',
 ];
 
 /** Words that open a line of sums, not of a movement. */

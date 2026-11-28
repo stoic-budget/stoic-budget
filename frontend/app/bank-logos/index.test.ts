@@ -5,7 +5,7 @@ describe('listSupportedBanks', () => {
   it('lists every bank with a parser of its own, Bereke once and no placeholder', () => {
     const banks = listSupportedBanks();
 
-    expect(banks).toHaveLength(126);
+    expect(banks).toHaveLength(127);
     expect(banks.map(bank => bank.key)).not.toContain('other');
     expect(new Set(banks.map(bank => bank.key)).size).toBe(banks.length);
   });
@@ -114,6 +114,7 @@ describe('resolveBankLogo', () => {
     ['prosperity', 'Prosperity Bank'],
     ['qnb', 'QNB'],
     ['raiffeisen', 'Raiffeisen Bank'],
+    ['raiffeisenbank_cz', 'Raiffeisenbank'],
     ['rbc', 'RBC Royal Bank'],
     ['regions', 'Regions Bank'],
     ['revolut', 'Revolut'],

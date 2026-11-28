@@ -1,5 +1,5 @@
 import type { PdfTextRow } from '@/common/utils/pdf-parser.util';
-import { rowBlocks } from '@/modules/parsing/helpers/pdf-layout-blocks.helper';
+import { readBlocks, rowBlocks } from '@/modules/parsing/helpers/pdf-layout-blocks.helper';
 import type { LayoutTransaction } from '@/modules/parsing/helpers/pdf-layout-table.helper';
 
 const line = (page: number, y: number, text: string): PdfTextRow => ({
@@ -49,3 +49,32 @@ describe('rowBlocks', () => {
     expect(rowBlocks([line(1, 100, 'x')], [{ ...row(1, 100), at: undefined }])).toEqual([[]]);
   });
 });
+
+describe('readBlocks', () => {
+  const isFirst = (entry: PdfTextRow) => entry.text.endsWith('CZK');
+  const isHeader = (entry: PdfTextRow) => /^(?:Strana|Datum)/.test(entry.text);
+
+  it('goes on with a block cut by the page break, past the next page header', () => {
+    const rows = [
+      line(1, 100, '2.3.2026 Platba -1,00 CZK'),
+      line(1, 770, '9.3.2026 Platba kartou -75,30 CZK'),
+      line(1, 790, 'Strana 1/2'),
+      line(2, 30, 'Strana 2/2'),
+      line(2, 60, 'Datum Kategorie'),
+      line(2, 100, '8436778002 PK: 516844XXXXXX4400'),
+      line(2, 110, 'ACME FUEL; Svit; SVK'),
+    ];
+    const reading = readBlocks(rows, isFirst, isHeader);
+    const read = [row(1, 100), row(1, 770)];
+    expect(texts(reading.blocks(read))).toEqual([
+      ['2.3.2026 Platba -1,00 CZK'],
+      ['9.3.2026 Platba kartou -75,30 CZK', '8436778002 PK: 516844XXXXXX4400', 'ACME FUEL; Svit; SVK'],
+    ]);
+  });
+
+  it('ends a block at a gap on the same page', () => {
+    const rows = [line(1, 100, '2.3.2026 Platba -1,00 CZK'), line(1, 160, 'Přehled poplatků')];
+    expect(texts(readBlocks(rows, isFirst, isHeader).blocks([row(1, 100)]))).toEqual([['2.3.2026 Platba -1,00 CZK']]);
+  });
+});
+
