@@ -19,6 +19,7 @@ import {
 import { useClearAsOf } from '@/app/hooks/useClearAsOf';
 import { usePayPeriods } from '@/app/hooks/usePayPeriods';
 import { monthDeepLinkFilters } from '../filters/month-deep-link';
+import { isHasToken } from '../filters/statement-filter-internals';
 import { reconcileFiltersWithColumns } from '../StatementsListView.utils';
 
 interface UseStatementsFilterStateReturn {
@@ -55,7 +56,11 @@ interface UseStatementsFilterStateReturn {
   handleSaveColumns: () => void;
   handleColumnsOpen: () => void;
   /** `deepLinkMonth` (`?month=YYYY-MM`) wins over the stored filters for this visit, unsaved. */
-  initFromStorage: (deepLinkMonth?: string | null, ignoreStored?: boolean) => void;
+  initFromStorage: (
+    deepLinkMonth?: string | null,
+    ignoreStored?: boolean,
+    deepLinkHas?: string | null,
+  ) => void;
 }
 
 export function useStatementsFilterState({
@@ -90,9 +95,18 @@ export function useStatementsFilterState({
     }
   }, [context]);
 
-  const initFromStorage = (deepLinkMonth?: string | null, ignoreStored = false): void => {
-    linkedMonth.current = context ? null : (deepLinkMonth ?? null);
+  const initFromStorage = (
+    deepLinkMonth?: string | null,
+    ignoreStored = false,
+    deepLinkHas?: string | null,
+  ): void => {
+    // `?has=warnings` (the dashboard's parsing warnings): only that, for this visit.
+    const has = (deepLinkHas ?? '').split(',').filter(isHasToken);
+    const hasFilters = has.length > 0 ? { ...DEFAULT_STATEMENT_FILTERS, has } : null;
+    // It wins over a linked month, also when the pay period loads later.
+    linkedMonth.current = context || hasFilters ? null : (deepLinkMonth ?? null);
     const storedFilters =
+      hasFilters ??
       monthDeepLinkFilters(deepLinkMonth, new Date(), context) ??
       (ignoreStored ? DEFAULT_STATEMENT_FILTERS : loadStatementFilters());
     setDraftFilters(storedFilters);

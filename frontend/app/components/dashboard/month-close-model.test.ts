@@ -74,7 +74,7 @@ describe('buildMonthCloseModel', () => {
     const model = buildMonthCloseModel(dashboard({ parsingWarnings: 3 }), OCTOBER);
 
     expect(model.attention).toEqual([
-      { id: 'parsing', count: 3, href: '/statements?filter=has_errors' },
+      { id: 'parsing', count: 3, href: '/statements?has=warnings' },
     ]);
   });
 

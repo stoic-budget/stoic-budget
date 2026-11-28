@@ -130,11 +130,16 @@ const hasCurrency = (s: StatementFilterItem): boolean =>
 
 const HAS_CHECKERS: Record<string, (s: StatementFilterItem) => boolean> = {
   errors: hasErrors,
+  // What the dashboard counts as parsing warnings.
+  warnings: s => Boolean(s.parsingDetails?.warnings?.length),
   processingDetails: hasProcessingDetails,
   transactions: s => (s.totalTransactions || 0) > 0,
   dateRange: s => Boolean(s.statementDateFrom || s.statementDateTo),
   currency: hasCurrency,
 };
+
+/** A "has" value the list knows: a hand-edited `?has=` cannot empty the list. */
+export const isHasToken = (token: string): boolean => Object.hasOwn(HAS_CHECKERS, token);
 
 export const matchesHas = (token: string, statement: StatementFilterItem): boolean =>
   HAS_CHECKERS[token]?.(statement) ?? false;

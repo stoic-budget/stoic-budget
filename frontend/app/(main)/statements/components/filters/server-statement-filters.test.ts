@@ -93,3 +93,12 @@ describe('server statement filters', () => {
     expect(result).toContain('status');
   });
 });
+
+describe('the parsing warnings filter', () => {
+  it('keeps the statements the dashboard counts as having parsing warnings', async () => {
+    const { matchesHas } = await import('./statement-filter-internals');
+    expect(matchesHas('warnings', { parsingDetails: { warnings: ['Row 4: date unread'] } } as never)).toBe(true);
+    expect(matchesHas('warnings', { parsingDetails: { warnings: [] } } as never)).toBe(false);
+    expect(matchesHas('warnings', { status: 'error', errorMessage: 'No parser' } as never)).toBe(false);
+  });
+});
