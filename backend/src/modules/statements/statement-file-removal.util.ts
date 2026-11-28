@@ -13,12 +13,11 @@ export async function removeStatementFile(
   statement: Pick<Statement, 'id' | 'workspaceId' | 'filePath'>,
   logger: Logger,
 ): Promise<void> {
+  // Any workspace, as a safety net: version copies and restored backups get
+  // their own statement files today, but a statement elsewhere pointing at
+  // this path must not lose it (#789). Only a count, nothing is read.
   const sharedWith = await statements.count({
-    where: {
-      workspaceId: statement.workspaceId,
-      filePath: statement.filePath,
-      id: Not(statement.id),
-    },
+    where: { filePath: statement.filePath, id: Not(statement.id) },
   });
   if (sharedWith > 0 || !fs.existsSync(statement.filePath)) {
     return;

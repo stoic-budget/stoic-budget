@@ -39,6 +39,7 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import { useWorkspace, WorkspaceProvider } from './contexts/WorkspaceContext';
 import { useAutoTheme } from './hooks/useAutoTheme';
 import { useHTMLLanguage } from './hooks/useHTMLLanguage';
+import { useWorkspaceLocaleSync } from './hooks/useWorkspaceLocaleSync';
 import { createAppTheme } from './theme';
 
 // Before anything below reads its saved preferences.
@@ -95,6 +96,7 @@ function WorkspaceScopedProviders({
   mounted: boolean;
 }): React.JSX.Element {
   const { currentWorkspace } = useWorkspace();
+  useWorkspaceLocaleSync();
   const workspaceId = currentWorkspace?.id ?? null;
   // Page hooks mostly do not refetch on workspace change, so a real switch
   // between two loaded workspaces remounts the page tree. The initial

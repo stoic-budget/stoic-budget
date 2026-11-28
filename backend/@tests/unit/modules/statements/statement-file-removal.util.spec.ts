@@ -16,14 +16,14 @@ describe('removeStatementFile', () => {
 
   const statement = () => ({ id: 'statement-1', workspaceId: 'workspace-1', filePath });
 
-  it('keeps a file another statement of the workspace still reads', async () => {
+  it('keeps a file another statement still reads, in any workspace (a version copy too)', async () => {
     const statements = { count: vi.fn(async () => 1) };
 
     await removeStatementFile(statements as never, statement(), logger as never);
 
     expect(fs.existsSync(filePath)).toBe(true);
     expect(statements.count).toHaveBeenCalledWith({
-      where: { workspaceId: 'workspace-1', filePath, id: expect.anything() },
+      where: { filePath, id: expect.anything() },
     });
   });
 

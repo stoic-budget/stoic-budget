@@ -34,6 +34,8 @@ function build(options: {
   transactions?: unknown[];
   /** The portfolio value the last sync before a day wrote. */
   valueBefore?: number;
+  /** USD to the workspace currency; null when no source has one. */
+  usdRate?: number | null;
 }) {
   const walletRepo = {
     count: vi.fn(async () => 1),
@@ -63,7 +65,9 @@ function build(options: {
       return price;
     }),
   };
-  const exchangeRatesService = { getRate: vi.fn(async () => 0.5) };
+  const exchangeRatesService = {
+    getRateOrNull: vi.fn(async (): Promise<number | null> => (options.usdRate === undefined ? 0.5 : options.usdRate)),
+  };
   const balanceService = {
     writePortfolioSnapshot: vi.fn(),
     valueBefore: vi.fn(async () => options.valueBefore ?? 0),
@@ -140,6 +144,27 @@ describe('CryptoService.getSummary', () => {
       expect.objectContaining({ asset: 'ETH', amount: '2', price: 1500, value: 3000 }),
     ]);
     expect(summary.holdings[0]).toMatchObject({ avgCost: null, cost: null, realized: 0 });
+  });
+
+  it('says when there is no USD rate, counting USD at face value, and shows no day change (#787)', async () => {
+    const { service } = build({
+      balances: [{ asset: 'ETH', amount: '2' }],
+      current: { ETH: 3000 },
+      yesterday: { ETH: 2000 },
+      usdRate: null,
+    });
+
+    const summary = await service.getSummary(WORKSPACE);
+
+    expect(summary.holdings[0]).toMatchObject({ price: 3000, value: 6000 });
+    expect(summary.missingRates).toEqual(['USD']);
+    expect(summary.portfolioChangeSinceYesterday).toBeNull();
+  });
+
+  it('names no rate while the USD rate is known', async () => {
+    const { service } = build({ balances: [{ asset: 'ETH', amount: '2' }], current: { ETH: 3000 } });
+
+    expect((await service.getSummary(WORKSPACE)).missingRates).toBeUndefined();
   });
 
   it('keeps a unit price below a cent and the gain percent from unrounded figures', async () => {

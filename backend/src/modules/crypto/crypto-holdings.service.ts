@@ -51,6 +51,8 @@ export interface CryptoHoldingsResult {
   /** Gains realised on coins no priced holding carries: sold out, or held unpriced (#655). */
   realizedClosed: number;
   closedBasisIncomplete: boolean;
+  /** ['USD'] when there is no USD rate to the workspace currency: values are then in USD at face value (#787). */
+  missingRates?: string[];
 }
 
 /**
@@ -125,9 +127,9 @@ export class CryptoHoldingsService {
       return { currency, holdings: [], unpriced: [], ...closedGains(basis, new Set()) };
     }
 
-    const [usdPrices, usdToCurrency, basis] = await Promise.all([
+    const [usdPrices, usdRate, basis] = await Promise.all([
       this.priceService.getCurrentUsdPrices([...amountByAsset.keys()]),
-      this.exchangeRatesService.getRate('USD', currency, undefined, workspaceId),
+      this.exchangeRatesService.getRateOrNull('USD', currency, undefined, workspaceId),
       this.costBasis(workspaceId, wallets),
     ]);
 
@@ -135,6 +137,8 @@ export class CryptoHoldingsService {
     const shown = new Set(
       held.map(([asset]) => asset).filter(asset => usdPrices[asset] !== undefined),
     );
+    // No rate: prices stay in USD, as they used to silently, and the answer says so.
+    const usdToCurrency = usdRate ?? 1;
 
     return {
       currency,
@@ -155,6 +159,7 @@ export class CryptoHoldingsService {
         .filter(([asset]) => usdPrices[asset] === undefined)
         .map(([asset, amount]) => ({ asset, amount })),
       ...closedGains(basis, shown),
+      ...(usdRate === null && currency.toUpperCase() !== 'USD' ? { missingRates: ['USD'] } : {}),
     };
   }
 

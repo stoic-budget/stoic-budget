@@ -37,6 +37,7 @@ export class WorkspaceResponseDto {
   // Member-specific data
   memberRole?: WorkspaceRole;
   memberPermissions?: WorkspaceMemberPermissions | null;
+  memberLocale?: string | null;
 
   // Statistics
   stats?: WorkspaceStatsDto;

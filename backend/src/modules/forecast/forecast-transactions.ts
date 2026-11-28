@@ -22,6 +22,7 @@ export function incomeHistory(
     .select([
       `${redactedSql('t', 't.counterparty_name')} AS "counterpartyName"`,
       't.credit AS amount',
+      't.currency AS currency',
       't.transactionDate AS "transactionDate"',
     ])
     .where('t.workspaceId = :workspaceId', {
@@ -37,6 +38,7 @@ export function incomeHistory(
     .getRawMany<{
       counterpartyName: string | null;
       amount: string;
+      currency: string | null;
       transactionDate: string | Date;
     }>();
 }
@@ -96,4 +98,25 @@ export async function pendingEvents(
     });
   }
   return events;
+}
+
+/** An income row with its amount as a number, in its own currency. */
+export const withAmount = <T extends { amount: string }>(row: T) => ({
+  ...row,
+  amount: Number.parseFloat(row.amount),
+});
+
+/** Detected income in the workspace currency (at today's rate), each with its source id. */
+export function inCurrency<T extends { amount: number; currency: string | null }>(
+  detected: T[],
+  currency: string,
+  convert: (amount: number, from: string) => Promise<number>,
+) {
+  return Promise.all(
+    detected.map(async (income, index) => ({
+      ...income,
+      amount: Math.round((await convert(income.amount, income.currency ?? currency)) * 100) / 100,
+      sourceId: `income:${index}`,
+    })),
+  );
 }

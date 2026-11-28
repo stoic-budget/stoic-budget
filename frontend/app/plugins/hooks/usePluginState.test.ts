@@ -23,4 +23,11 @@ describe('readPluginSwitch', () => {
   it('keeps an AI assistant the workspace switched off', () => {
     expect(readPluginSwitch({ plugins: { aiAssistant: false } }, 'ai-assistant')).toBe(false);
   });
+
+  it('starts every integration on and reads each from its own key', () => {
+    expect(readPluginSwitch({}, 'smtp')).toBe(true);
+    expect(readPluginSwitch(null, 'telegram')).toBe(true);
+    expect(readPluginSwitch({ plugins: { bankSync: false } }, 'bank-sync')).toBe(false);
+    expect(readPluginSwitch({ plugins: { bankSync: false } }, 'imap')).toBe(true);
+  });
 });

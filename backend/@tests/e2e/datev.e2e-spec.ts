@@ -106,6 +106,25 @@ describe('DATEV export (e2e)', () => {
     expect(settings.body).toMatchObject({ available: true, chart: '03', bankAccount: '1200' });
   });
 
+  it("moves the bank to the new chart's bank when the chart changes, and back", async () => {
+    const save = (chart: string, bankAccount: string | null) =>
+      auth(api().put('/tax/datev/settings'))
+        .send({ chart, consultantNumber: null, clientNumber: null, bankAccount })
+        .expect(200);
+    expect((await save('04', '1200')).body).toMatchObject({ chart: '04', bankAccount: '1800' });
+    expect((await save('03', '1800')).body).toMatchObject({ chart: '03', bankAccount: '1200' });
+    // A number of one's own stays.
+    expect((await save('04', '1210')).body.bankAccount).toBe('1210');
+    // Saved so before the fix: read as the chart's own bank.
+    await dataSource.query(
+      `UPDATE workspace_service_settings SET config = config || '{"chart":"04","bankAccount":"1200"}'::jsonb
+        WHERE workspace_id = $1 AND key = 'datev'`,
+      [workspaceId],
+    );
+    expect((await auth(api().get('/tax/datev/settings')).expect(200)).body.bankAccount).toBe('1800');
+    await save('03', null);
+  });
+
   it('lists the bank accounts the statements came from', async () => {
     const mapping = await auth(api().get('/tax/datev/mapping?year=2026')).expect(200);
     expect(mapping.body.bankAccounts).toEqual([
