@@ -195,6 +195,41 @@ describe('TaxAssignmentService', () => {
       expect(result.taxSource).toBe(TaxSource.DEFAULT);
     });
 
+    it('gives a refund of a purchase the rate of the expense rule its category books under', async () => {
+      // The refund arrives as income, but sits in the expense category it undoes.
+      ruleRepo.find.mockResolvedValue([rule({ direction: TaxRuleDirection.EXPENSE })]);
+      ratesService.findByCodeForDate.mockResolvedValue(STANDARD_RATE);
+      ratesService.findDefaultForDate.mockResolvedValue(REDUCED_RATE);
+      workspaceRepo.manager.query.mockImplementation(async (sql: string) =>
+        sql.includes('FROM "categories"') ? [{ type: 'expense' }] : [],
+      );
+
+      const result = await service.resolve({ ...base, transactionType: TransactionType.INCOME });
+
+      expect(result.taxSource).not.toBe(TaxSource.DEFAULT);
+      expect(result.taxRateId).toBe(STANDARD_RATE.id);
+      // The category is read in the row's workspace only.
+      expect(workspaceRepo.manager.query).toHaveBeenCalledWith(
+        expect.stringContaining('"workspace_id" = $2'),
+        [base.categoryId, 'ws-1'],
+      );
+    });
+
+    it('honours a rule set by hand for the row\'s own direction over the category\'s type', async () => {
+      ruleRepo.find.mockResolvedValue([
+        rule({ id: 'expense-rule', direction: TaxRuleDirection.EXPENSE, taxRateCode: 'KZ_REDUCED' }),
+        rule({ id: 'income-rule', direction: TaxRuleDirection.INCOME }),
+      ]);
+      ratesService.findByCodeForDate.mockResolvedValue(STANDARD_RATE);
+      workspaceRepo.manager.query.mockImplementation(async (sql: string) =>
+        sql.includes('FROM "categories"') ? [{ type: 'expense' }] : [],
+      );
+
+      const result = await service.resolve({ ...base, transactionType: TransactionType.INCOME });
+
+      expect(result.taxRuleId).toBe('income-rule');
+    });
+
     it('ignores a rule for another category', async () => {
       ruleRepo.find.mockResolvedValue([rule({ categoryId: 'cat-other' })]);
       ratesService.findDefaultForDate.mockResolvedValue(REDUCED_RATE);

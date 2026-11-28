@@ -3,12 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { fromMinor, toMinor } from '../../common/utils/money.util';
 import { payeeKeyOf } from '../../common/utils/payee-key.util';
-import { TaxRule, TaxRuleDirection } from '../../entities/tax-rule.entity';
+import { TaxRule } from '../../entities/tax-rule.entity';
 import { TaxSource, Transaction, TransactionType } from '../../entities/transaction.entity';
 import { VatStatus, Workspace } from '../../entities/workspace.entity';
 import { payeeOfKey } from './assignment-party';
 import { isEuCountry } from './eu-membership';
 import { isOutsideVat } from './outside-vat';
+import { matchingRule } from './rule-direction';
 import { computeTax } from './tax-calculation';
 import { taxPaymentsCategoryId } from './tax-payments-category';
 import { TaxRatesService } from './tax-rates.service';
@@ -291,7 +292,11 @@ export class TaxAssignmentService {
     }
 
     // 4. The best matching rule.
-    const rule = await this.findMatchingRule(workspaceId, categoryId, transactionType);
+    const rule = await matchingRule(this.taxRuleRepository, this.workspaceRepository.manager, {
+      workspaceId,
+      categoryId,
+      transactionType,
+    });
     if (rule) {
       const rate = await this.taxRatesService.findByCodeForDate(
         workspaceId,
@@ -407,46 +412,6 @@ export class TaxAssignmentService {
       [categoryId, workspaceId],
     );
     return category?.parent_id === paymentsCategoryId;
-  }
-
-  /**
-   * Highest priority wins. A rule naming a category beats a catch-all at the
-   * same priority, since it is the more specific statement of intent.
-   */
-  private async findMatchingRule(
-    workspaceId: string,
-    categoryId: string,
-    transactionType: TransactionType,
-  ): Promise<TaxRule | null> {
-    const direction =
-      transactionType === TransactionType.INCOME
-        ? TaxRuleDirection.INCOME
-        : TaxRuleDirection.EXPENSE;
-
-    const rules = await this.taxRuleRepository.find({
-      where: { workspaceId, isEnabled: true },
-    });
-
-    const matches = rules.filter(
-      rule =>
-        (rule.direction === TaxRuleDirection.BOTH || rule.direction === direction) &&
-        (rule.categoryId === null || rule.categoryId === categoryId),
-    );
-
-    if (matches.length === 0) {
-      return null;
-    }
-
-    matches.sort((a, b) => {
-      if (a.priority !== b.priority) {
-        return b.priority - a.priority;
-      }
-      const aSpecific = a.categoryId === null ? 0 : 1;
-      const bSpecific = b.categoryId === null ? 0 : 1;
-      return bSpecific - aSpecific;
-    });
-
-    return matches[0];
   }
 
   private assess(
