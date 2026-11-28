@@ -281,11 +281,9 @@ export class TelegramService {
 
   private async handleDailyReport(user: User, workspaceId: string, chatId: string, date: string) {
     const reportDate = this.toDateOnly(date);
+    // Asked for (the /report command, the button), it is built and sent again;
+    // the schedule checks first and skips a period already delivered.
     const existing = await this.findExisting(user.id, ReportType.DAILY, reportDate);
-
-    if (existing?.status === ReportStatus.SENT) {
-      return { status: 'already_sent', report: existing };
-    }
 
     const dailyReport = await this.reportsService.generateDailyReport(workspaceId, date);
     const message = formatDailyReportMessage(user.locale || 'en', date, dailyReport);
@@ -301,11 +299,9 @@ export class TelegramService {
     month: number,
   ) {
     const reportDate = this.toDateOnly(`${year}-${String(month).padStart(2, '0')}-01`);
+    // Asked for (the /report command, the button), it is built and sent again;
+    // the schedule checks first and skips a period already delivered.
     const existing = await this.findExisting(user.id, ReportType.MONTHLY, reportDate);
-
-    if (existing?.status === ReportStatus.SENT) {
-      return { status: 'already_sent', report: existing };
-    }
 
     const monthlyReport = await this.reportsService.generateMonthlyReport(workspaceId, year, month);
     const message = formatMonthlyReportMessage(user.locale || 'en', year, month, monthlyReport);
@@ -346,7 +342,8 @@ export class TelegramService {
       const report = { ...savedRecord, reportDate: this.formatDateOnly(reportDate) };
       return { status: 'sent', report };
     } catch (error) {
-      savedRecord.status = ReportStatus.FAILED;
+      // A report that reached the user once (sentAt) stays delivered if a resend fails.
+      savedRecord.status = savedRecord.sentAt ? ReportStatus.SENT : ReportStatus.FAILED;
       await this.telegramReportRepository.save(savedRecord);
       throw error;
     }
