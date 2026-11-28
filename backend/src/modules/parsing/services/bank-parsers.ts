@@ -40,6 +40,7 @@ import { DiscoverParser } from '../parsers/discover.parser';
 import { EqBankParser } from '../parsers/eq-bank.parser';
 import { FidelityBankParser } from '../parsers/fidelity-bank.parser';
 import { FifthThirdParser } from '../parsers/fifth-third.parser';
+import { FioParser } from '../parsers/fio.parser';
 import { FirstCitizensParser } from '../parsers/first-citizens.parser';
 import { FirstDirectParser } from '../parsers/first-direct.parser';
 import { FnbParser } from '../parsers/fnb.parser';
@@ -171,6 +172,7 @@ export const BANK_PARSERS: [new () => IParser, { bankName: BankName }][] = [
   [EqBankParser, { bankName: BankName.EQ_BANK }],
   [FidelityBankParser, { bankName: BankName.FIDELITY_BANK }],
   [FifthThirdParser, { bankName: BankName.FIFTH_THIRD }],
+  [FioParser, { bankName: BankName.FIO }],
   [FirstCitizensParser, { bankName: BankName.FIRST_CITIZENS }],
   [FirstDirectParser, { bankName: BankName.FIRST_DIRECT }],
   [FnbParser, { bankName: BankName.FNB }],

@@ -117,6 +117,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('Equitable Bank Tower. 30 Sample Avenue West')).toBe(BankName.EQ_BANK);
     expect(mentionedBank('www.fidelitybank.ng')).toBe(BankName.FIDELITY_BANK);
     expect(mentionedBank('Fifth Third Business Plus')).toBe(BankName.FIFTH_THIRD);
+    expect(mentionedBank('Fio banka, a.s., V Celnici 1028/10')).toBe(BankName.FIO);
     expect(mentionedBank('Member FDIC. First Citizens Bank')).toBe(BankName.FIRST_CITIZENS);
     expect(mentionedBank('first direct is a division of HSBC UK Bank plc')).toBe(BankName.FIRST_DIRECT);
     expect(mentionedBank('visit fnb.co.za')).toBe(BankName.FNB);

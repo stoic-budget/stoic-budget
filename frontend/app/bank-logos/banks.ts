@@ -76,6 +76,7 @@ export const BANKS = [
     logo: 'fifth-third.png',
     aliases: ['fifth third bank', '53 bank'],
   },
+  { key: 'fio', name: 'Fio banka', logo: 'fio.png', aliases: ['fio'] },
   {
     key: 'first_citizens',
     name: 'First Citizens',

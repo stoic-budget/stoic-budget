@@ -176,6 +176,14 @@ describe('golden parsing (optional)', () => {
 
       const actual = await parser.parse(input);
       const expectedAccounts = loadExpected(expected);
+      // A fixture may name the bank the file must be read as ("other" for one no bank parser may claim).
+      const expectedBank: string | undefined = JSON.parse(fs.readFileSync(expected, 'utf8')).bankName;
+      if (expectedBank) {
+        expect({ fixture: caseName, bank: detected.bankName }).toEqual({
+          fixture: caseName,
+          bank: expectedBank,
+        });
+      }
 
       // Guard against the fixture itself being a recording of broken output.
       // Comparing a parse only against its own past result is tautological: it
