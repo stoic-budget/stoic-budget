@@ -104,8 +104,10 @@ const buildTransactionRecord = ({
     status: getMetaStatus(meta),
     fileType,
     createdAt: getMetaCreatedAt(meta, item),
-    statementDateFrom: getMetaDateFrom(meta, item),
-    statementDateTo: getMetaDateTo(meta),
+    // A row is in the period of its own day, not of the statement holding it
+    // (20 February in a statement to 15 March is February), as on the dashboard.
+    statementDateFrom: opt(item.transactionDate) ?? getMetaDateFrom(meta, item),
+    statementDateTo: opt(item.transactionDate) ?? getMetaDateTo(meta),
     bankName: getMetaBankName(meta),
     totalDebit: amount,
     totalCredit: null,

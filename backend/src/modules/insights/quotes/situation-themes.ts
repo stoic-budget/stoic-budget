@@ -47,4 +47,7 @@ export const SITUATION_THEMES: Record<StoicMessageKey, QuoteTheme> = {
   'stoic.prepare_beforehand': 'foresight',
   'stoic.wants_outrun_income': 'needs',
   'stoic.price_in_life': 'temperance',
+  'stoic.late_forgot': 'small_things',
+  'stoic.late_short': 'foresight',
+  'stoic.late_unexpected': 'fortune',
 };

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { useAutoSave } from '@/app/hooks/useAutoSave';
+import { useIntlayer } from '@/app/i18n';
 import type { Transaction } from '../editHelpers';
 import { applyCategoryToTarget, type SpreadMessages } from './category-target';
 import {
@@ -92,11 +93,17 @@ export function useStatementEditForm({
 
   useResuggest(statementId, s.transactions, loadData);
 
+  const updateFailed = useIntlayer('statementEditPage').errors.updateStatement.value;
   const handleMetadataAutoSave = useCallback(
     async (formData: Parameters<typeof metadataAutoSave>[0]['formData']): Promise<void> => {
-      await metadataAutoSave({ statementId, formData, setStatement });
+      await metadataAutoSave({
+        statementId,
+        formData,
+        setStatement,
+        failedMessage: updateFailed,
+      });
     },
-    [statementId, setStatement],
+    [statementId, setStatement, updateFailed],
   );
 
   useAutoSave({

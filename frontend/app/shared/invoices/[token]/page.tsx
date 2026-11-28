@@ -7,6 +7,7 @@ import { PRIVATE_CLASS } from '@/app/components/ui/private-amount';
 import { useIntlayer } from '@/app/i18n';
 import { getApiErrorMessage } from '@/app/lib/api-error';
 import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
+import { InvoiceLineRows, money, type PublicInvoiceLine } from './InvoiceLineRows';
 
 interface PublicInvoice {
   number: string;
@@ -37,10 +38,8 @@ interface PublicInvoice {
     logoUrl: string | null;
   };
   billedTo: { name: string; addressLines: string | null; taxId: string | null };
-  lines: Array<{ description: string; quantity: string; unitPrice: string; amount: string }>;
+  lines: PublicInvoiceLine[];
 }
-
-const money = (amount: string, currency: string) => `${Number(amount).toFixed(2)} ${currency}`;
 
 /** Multi-line text as lines, with the empty ones dropped. */
 function Lines({ text }: { text: string | null | undefined }) {
@@ -233,32 +232,7 @@ export default function SharedInvoicePage() {
               ))}
             </Box>
           </Box>
-          <Box component="tbody">
-            {invoice.lines.map(line => (
-              <Box component="tr" key={`${line.description}-${line.amount}`}>
-                <Box component="td" sx={{ fontSize: 14, py: 0.75 }}>
-                  {line.description}
-                </Box>
-                <Box component="td" sx={{ fontSize: 14, py: 0.75, textAlign: 'right' }}>
-                  {Number(line.quantity)}
-                </Box>
-                <Box
-                  component="td"
-                  className={PRIVATE_CLASS}
-                  sx={{ fontSize: 14, py: 0.75, textAlign: 'right' }}
-                >
-                  {money(line.unitPrice, invoice.currency)}
-                </Box>
-                <Box
-                  component="td"
-                  className={PRIVATE_CLASS}
-                  sx={{ fontSize: 14, py: 0.75, textAlign: 'right' }}
-                >
-                  {money(line.amount, invoice.currency)}
-                </Box>
-              </Box>
-            ))}
-          </Box>
+          <InvoiceLineRows lines={invoice.lines} currency={invoice.currency} labels={t} />
         </Box>
 
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>

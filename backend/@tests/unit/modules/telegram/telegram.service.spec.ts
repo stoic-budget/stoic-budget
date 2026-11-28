@@ -85,6 +85,8 @@ function createService(options: {
   linkClaim?: { userId: string; workspaceId: string; botId: string } | null;
   /** The bot token saved in the settings of the workspace the chat is connected in. */
   workspaceBotToken?: string;
+  /** That workspace has Telegram switched off. */
+  paused?: boolean;
 } = {}) {
   const userRepository = createUserRepoMock(options.users ?? []);
   const telegramReportRepository = createReportRepoMock();
@@ -100,7 +102,11 @@ function createService(options: {
   } as any;
 
   const applicationSettingsService = {
-    getTelegramSettings: vi.fn(async () => ({ botToken: options.workspaceBotToken ?? null })),
+    getTelegramSettings: vi.fn(async () =>
+      options.paused
+        ? { botToken: null, paused: true }
+        : { botToken: options.workspaceBotToken ?? null },
+    ),
   } as any;
   const linkCodes = { take: vi.fn(async () => options.linkClaim ?? null) } as any;
 
@@ -486,6 +492,17 @@ describe('TelegramService bot choice', () => {
     expect(calls[0].url).toContain('/bot456:ws/sendMessage');
   });
 
+  it('sends nothing, not even through the server bot, while the workspace has Telegram off', async () => {
+    const calls = mockFetchOk();
+    const { service } = createService({ workspaceBotToken: '456:ws', paused: true });
+    const connected = user({ telegramWorkspaceId: 'ws-open' });
+
+    await service.pushInsightDigest(connected, [{ title: 't', message: 'm' } as any]);
+
+    expect(calls).toEqual([]);
+    expect(await service.isEnabled(connected)).toBe(false);
+  });
+
   it('falls back to the server bot when the workspace has none of its own', async () => {
     const calls = mockFetchOk();
     const { service } = createService();
@@ -514,6 +531,19 @@ describe('TelegramService inbound bot', () => {
 
     await service.handleUpdate(goals, '456:ws');
     expect(goalsService.findAll).toHaveBeenCalledWith('ws-open');
+  });
+
+  it('neither answers nor acts on a chat whose workspace switched Telegram off', async () => {
+    const calls = mockFetchOk();
+    const { service, goalsService } = createService({
+      users: [user({ locale: 'en', telegramId: 'tg-9', telegramWorkspaceId: 'ws-open' })],
+      paused: true,
+    });
+
+    await service.handleUpdate(goals);
+
+    expect(goalsService.findAll).not.toHaveBeenCalled();
+    expect(calls).toEqual([]);
   });
 
   it('serves a workspace without its own bot only through the shared bot', async () => {

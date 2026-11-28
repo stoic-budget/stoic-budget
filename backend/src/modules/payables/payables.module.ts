@@ -18,6 +18,8 @@ import { ItemImagesModule } from '../item-images/item-images.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { ReferenceDataModule } from '../reference-data/reference-data.module';
 import { WorkspaceCurrencyModule } from '../workspaces/workspace-currency.module';
+import { PayableLateReasonsController } from './payable-late-reasons.controller';
+import { PayableLateReasonsService } from './payable-late-reasons.service';
 import { PayableOccurrencesService } from './payable-occurrences.service';
 import { PayableRecurrenceService } from './payable-recurrence.service';
 import { PayablesController } from './payables.controller';
@@ -52,7 +54,7 @@ import { UnbookedPaymentsService } from './unbooked-payments.service';
     ReferenceDataModule,
     WorkspaceCurrencyModule,
   ],
-  controllers: [PayablesController],
+  controllers: [PayablesController, PayableLateReasonsController],
   providers: [
     PayablesService,
     IdempotencyService,
@@ -62,6 +64,7 @@ import { UnbookedPaymentsService } from './unbooked-payments.service';
     PayablesEventsListener,
     PayableRecurrenceService,
     PayableOccurrencesService,
+    PayableLateReasonsService,
   ],
   exports: [PayablesService],
 })

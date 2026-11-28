@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, Not, type Repository, type SelectQueryBuilder } from 'typeorm';
+import { In, type Repository, type SelectQueryBuilder } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import {
   applyOwnerFilter,
@@ -371,7 +371,8 @@ export class ReviewInboxService {
     decision: DuplicateDecision,
   ): Promise<{ id: string; isDuplicate: boolean }> {
     const row = await this.transactionRepository.findOne({
-      where: { id, workspaceId, isDuplicate: true, duplicateOfId: Not(IsNull()) },
+      // Rows flagged before in-file repeats were told apart have no original; Keep must still work.
+      where: { id, workspaceId, isDuplicate: true },
     });
     if (!row) {
       throw new NotFoundException(appError('REVIEW_DUPLICATE_NOT_FOUND'));

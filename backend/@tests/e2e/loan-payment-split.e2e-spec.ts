@@ -890,6 +890,13 @@ describe('Loan payment split (e2e)', () => {
     try {
       expect(await code(call('delete', `/transactions/${payment.id}`, 409))).toBe('TAX_LOCKED');
       expect(await code(call('delete', `/statements/${statement.id}`, 409))).toBe('TAX_LOCKED');
+      // A scan's receipt deleted with its statement is refused the same way.
+      const [scan] = await dataSource.query(
+        `INSERT INTO receipts (user_id, workspace_id, source, subject, sender, received_at, statement_id)
+         VALUES ($1, $2, 'scan', 'Scan', 'scan', now(), $3) RETURNING id`,
+        [owner.userId, owner.workspaceId, statement.id],
+      );
+      expect(await code(call('delete', `/receipts/${scan.id}`, 409))).toBe('TAX_LOCKED');
       expect(await code(call('post', `/statements/${statement.id}/reprocess?mode=replace`, 409))).toBe(
         'TAX_LOCKED',
       );

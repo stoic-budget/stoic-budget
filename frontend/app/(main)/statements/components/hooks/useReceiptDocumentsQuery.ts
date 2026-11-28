@@ -4,30 +4,33 @@ import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { receiptDocumentsApi } from '@/app/lib/api';
+import { fetchAllPages } from '@/app/lib/fetch-all-pages';
 import { queryKeys } from '@/app/lib/query-keys';
 import { hasReceiptAmount, type ReceiptDocument } from '../receipt-document-mapping';
 
-const POLL_INTERVAL_MS = 6000;
+/**
+ * Each poll reads every receipt, so it runs twice a minute: an upload refreshes
+ * the list itself, this only brings in receipts that arrive by e-mail or bot.
+ */
+const POLL_INTERVAL_MS = 30_000;
+/** The most the server answers in one request. */
+const RECEIPTS_PER_REQUEST = 100;
 
 export interface UseReceiptDocumentsQueryParams {
   categoryId?: string | null;
   receiptStatus?: string | null;
-  page: number;
-  pageSize: number;
   enabled: boolean;
 }
 
 export function useReceiptDocumentsQuery({
   categoryId,
   receiptStatus,
-  page,
-  pageSize,
   enabled,
 }: UseReceiptDocumentsQueryParams): UseQueryResult<ReceiptDocument[], Error> {
   const workspaceId = useWorkspaceId();
+  // Every receipt, not one server page: the list merges them with the statements
+  // and pages the whole on the client, so one server page showed at most 30.
   const params = {
-    limit: pageSize,
-    offset: Math.max(0, (page - 1) * pageSize),
     includeInvalid: false,
     // Scans without a recognised amount still belong in the list (as "Needs review").
     includeLinkedScans: true,
@@ -51,12 +54,26 @@ export function useReceiptDocumentsQuery({
     queryKey: queryKeys.receiptDocuments({ workspaceId, params }),
     // Сырой список кладётся в кэш нефильтрованным, поэтому смена receiptStatus
     // меняет только select и не вызывает повторный запрос.
-    queryFn: async () => {
-      const response = await receiptDocumentsApi.listReceipts(params);
-      return Array.isArray(response.data?.receipts) ? response.data.receipts : [];
-    },
+    // Once per id: a receipt arriving between two requests shifts the pages.
+    queryFn: async () =>
+      uniqueById(
+        await fetchAllPages<ReceiptDocument>(RECEIPTS_PER_REQUEST, async (_page, offset) => {
+          const response = await receiptDocumentsApi.listReceipts({
+            ...params,
+            limit: RECEIPTS_PER_REQUEST,
+            offset,
+          });
+          const receipts = Array.isArray(response.data?.receipts) ? response.data.receipts : [];
+          const total = Number(response.data?.total);
+          return { items: receipts, total: Number.isFinite(total) ? total : receipts.length };
+        }),
+      ),
     enabled: enabled && Boolean(workspaceId),
     refetchInterval: POLL_INTERVAL_MS,
     select: selectByAmount,
   });
 }
+
+const uniqueById = (receipts: ReceiptDocument[]): ReceiptDocument[] => [
+  ...new Map(receipts.map(receipt => [receipt.id, receipt])).values(),
+];

@@ -1,11 +1,9 @@
 import type { EventEmitter2 } from '@nestjs/event-emitter';
 import { In, IsNull, type Repository } from 'typeorm';
-import { type Receipt, ReceiptStatus } from '../../entities/receipt.entity';
+import type { Receipt } from '../../entities/receipt.entity';
 import type { Transaction } from '../../entities/transaction.entity';
-import type {
-  ReceiptApprovedEvent,
-  TransactionsPostedEvent,
-} from '../notifications/events/notification-events';
+import type { TransactionsPostedEvent } from '../notifications/events/notification-events';
+import { approveScanReceipt } from './scan-receipt-close';
 
 /**
  * What follows confirming rows in Review. A confirmed scan row settles its
@@ -25,21 +23,13 @@ export async function afterApproval(
   );
   if (rowByStatement.size > 0) {
     const scans = await receipts.find({
-      select: { id: true, statementId: true },
+      select: { id: true, statementId: true, metadata: true },
       where: { workspaceId, statementId: In([...rowByStatement.keys()]), transactionId: IsNull() },
     });
     for (const receipt of scans) {
-      const transactionId = rowByStatement.get(receipt.statementId as string) as string;
-      await receipts.update(
-        { id: receipt.id, workspaceId },
-        { status: ReceiptStatus.APPROVED, transactionId },
-      );
-      events?.emit('receipt.approved', {
-        workspaceId,
-        receiptId: receipt.id,
-        transactionId,
-        mode: 'confirmed_scan',
-      } satisfies ReceiptApprovedEvent);
+      // A receipt matched to a bank row documents that row; the scan's is its duplicate (#687).
+      const scanRowId = rowByStatement.get(receipt.statementId as string) as string;
+      await approveScanReceipt(receipts.manager, workspaceId, receipt, scanRowId, events);
     }
   }
   if (rows.length > 0) {
