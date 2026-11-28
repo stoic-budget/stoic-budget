@@ -56,6 +56,7 @@ import {
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { ExportFormat, PayablesSortOption } from './dto/filter-payables.dto';
+import { afterPaymentRemoved } from './own-payment-row';
 import { assertOneSource, exactSubset, isClosed, notRejectedSql } from './payable-payments.util';
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
@@ -686,15 +687,13 @@ export class PayablesService {
         throw new NotFoundException(appError('PAYABLE_PAYMENT_NOT_FOUND'));
       }
       await payments.delete({ id: paymentId });
-
-      const remaining = await payments.find({ where: { payableId: id, workspaceId } });
       const payable = await manager
         .getRepository(Payable)
         .findOneOrFail({ where: { id, workspaceId } });
-      if (payment.transactionId && payable.linkedTransactionId === payment.transactionId) {
-        payable.linkedTransactionId = remaining[0]?.transactionId ?? null;
-      }
-      return this.applyPaymentTotals(manager, payable, workspaceId);
+      // Relinks the bill, and takes the wallet or cash row the payment booked with it (#661).
+      return afterPaymentRemoved(manager, payment, payable, () =>
+        this.applyPaymentTotals(manager, payable, workspaceId),
+      );
     });
   }
 

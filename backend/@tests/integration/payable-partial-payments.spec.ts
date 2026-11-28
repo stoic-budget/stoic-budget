@@ -37,6 +37,7 @@ import { NotificationsService } from '../../src/modules/notifications/notificati
 import { PayablesService } from '../../src/modules/payables/payables.service';
 import { PayablesExportService } from '../../src/modules/payables/payables-export.service';
 import { WorkspaceCurrencyService } from '../../src/modules/workspaces/workspace-currency.service';
+import { UnbookedPaymentsService } from '../../src/modules/payables/unbooked-payments.service';
 
 const BASE_URL = process.env.DATABASE_URL || 'postgresql://finflow:finflow@localhost:5434/finflow';
 const SCRATCH_DB = `seneca_partial_payments_${process.pid}`;
@@ -346,6 +347,84 @@ describe('partial payments (real Postgres)', () => {
 
     expect(reopened.status).toBe(PayableStatus.OVERDUE);
     expect(Number(reopened.paidAmount)).toBe(0);
+  });
+
+  it('takes back the wallet transaction a payment booked when the payment is undone, not a bank row', async () => {
+    const fromWallet = await bill();
+    await payables.addPayment(fromWallet.id, workspaceId, userId, {
+      amount: 300,
+      payFromWalletId: walletId,
+      categoryId,
+      paidOn: daysAgo(1),
+    });
+    const [own] = await payables.listPayments(fromWallet.id, workspaceId);
+
+    await payables.removePayment(fromWallet.id, own.id, workspaceId);
+
+    expect(await txRepo.existsBy({ id: own.transactionId as string })).toBe(false);
+
+    const byBank = await bill();
+    const wire = await transaction({ amount: 300, debit: 300 });
+    await payables.addPayment(byBank.id, workspaceId, userId, { amount: 300, linkedTransactionId: wire.id });
+    const [linked] = await payables.listPayments(byBank.id, workspaceId);
+
+    await payables.removePayment(byBank.id, linked.id, workspaceId);
+
+    expect(await txRepo.existsBy({ id: wire.id })).toBe(true);
+  });
+
+  /** A 300 payment from the wallet, and the payment and row it made. */
+  const walletPayment = async () => {
+    const payable = await bill();
+    await payables.addPayment(payable.id, workspaceId, userId, {
+      amount: 300,
+      payFromWalletId: walletId,
+      categoryId,
+      paidOn: daysAgo(1),
+    });
+    const [own] = await payables.listPayments(payable.id, workspaceId);
+    return { payable, own, ownId: own.transactionId as string };
+  };
+
+  it('never deletes a bank row the payment was linked to after its own row was deleted', async () => {
+    const { payable, own, ownId } = await walletPayment();
+    await txRepo.delete({ id: ownId });
+    const bankRow = await transaction({ amount: 300, debit: 300 });
+    await new UnbookedPaymentsService(paymentRepo).linkUnbooked(workspaceId);
+    expect((await paymentRepo.findOneByOrFail({ id: own.id })).transactionId).toBe(bankRow.id);
+
+    await payables.removePayment(payable.id, own.id, workspaceId);
+
+    expect(await txRepo.existsBy({ id: bankRow.id })).toBe(true);
+  });
+
+  it('lets a bank row flagged as a copy of the own row count again, and takes back every split part', async () => {
+    const copied = await walletPayment();
+    const copy = await transaction({ amount: 300, debit: 300, isDuplicate: true, duplicateOfId: copied.ownId });
+    await payables.removePayment(copied.payable.id, copied.own.id, workspaceId);
+    expect(await txRepo.findOneByOrFail({ id: copy.id })).toMatchObject({ isDuplicate: false, duplicateOfId: null });
+
+    const split = await walletPayment();
+    const group = randomUUID();
+    await txRepo.update({ id: split.ownId }, { splitGroupId: group, amount: 200, debit: 200 });
+    const part = await transaction({ statementId: null, amount: 100, debit: 100, splitGroupId: group, walletId });
+    await payables.removePayment(split.payable.id, split.own.id, workspaceId);
+    expect(await txRepo.existsBy({ id: part.id })).toBe(false);
+  });
+
+  it('refuses to undo a payment whose own transaction is on a filed return', async () => {
+    const payable = await bill();
+    await payables.addPayment(payable.id, workspaceId, userId, {
+      amount: 200,
+      payFromWalletId: walletId,
+      categoryId,
+      paidOn: daysAgo(1),
+    });
+    const [own] = await payables.listPayments(payable.id, workspaceId);
+    await txRepo.update({ id: own.transactionId as string }, { taxAmount: 0, taxLocked: true });
+
+    expect((await errorOf(payables.removePayment(payable.id, own.id, workspaceId)))?.status).toBe(409);
+    expect(await payables.listPayments(payable.id, workspaceId)).toHaveLength(1);
   });
 
   it('records a cash instalment as a wallet transaction', async () => {
