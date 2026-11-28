@@ -1942,5 +1942,28 @@ describe('DashboardService', () => {
       expect(result.dailyTrend).toHaveLength(19);
       expect(result.forecast).toEqual([{ date: '2026-03-20', income: 1, expense: 1 }]);
     });
+
+    it('forecasts a month of 31 days a week ahead, counting the days nothing was spent', async () => {
+      // Three purchases of 1,000 in a month: about 100 a day, not 1,000.
+      vi.spyOn(service as any, 'getWorkspaceCurrency').mockResolvedValue('EUR');
+      vi.spyOn(service as any, 'sumCashFlowByBucket').mockResolvedValue(
+        new Map(
+          ['2026-11-20', '2026-12-01', '2026-12-10'].map(date => [date, { date, income: 0, expense: 1000 }]),
+        ),
+      );
+
+      const forecast = await (service as any).computeForecast(
+        'ws-1',
+        [{ date: '2026-12-15', income: 0, expense: 0 }],
+        { since: new Date(2026, 11, 1), endDate: new Date(2026, 11, 15, 23, 59) },
+        31,
+      );
+
+      expect(forecast).toHaveLength(7);
+      // 3,000 over the last 30 days: the week ahead is about 700, not 7,000 or 0.
+      const week = forecast.reduce((sum: number, day: { expense: number }) => sum + day.expense, 0);
+      expect(week).toBeGreaterThan(400);
+      expect(week).toBeLessThan(1000);
+    });
   });
 });

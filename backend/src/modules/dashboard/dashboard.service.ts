@@ -68,6 +68,7 @@ import {
   parseMonthWindow,
 } from './dashboard-window.util';
 import { spendableBalance } from './opening-balance';
+import { dateKey, withEmptyDays } from './trend-days';
 import { OPEN_BILL_PARAMS, OPEN_BILL_SQL, OWED_COLUMNS } from './owed-bills';
 
 /** How many individual categories the donut shows before folding the rest into "Other". */
@@ -215,8 +216,8 @@ export class DashboardService {
     };
 
     if (autoShifted) {
-      response.effectiveEndDate = this.formatDateOnly(effectiveWindow.endDate);
-      response.effectiveSince = this.formatDateOnly(effectiveWindow.since);
+      response.effectiveEndDate = dateKey(effectiveWindow.endDate);
+      response.effectiveSince = dateKey(effectiveWindow.since);
     }
 
     return response;
@@ -566,8 +567,8 @@ export class DashboardService {
     return {
       range,
       currency,
-      since: this.formatDateOnly(window.since),
-      endDate: this.formatDateOnly(window.endDate),
+      since: dateKey(window.since),
+      endDate: dateKey(window.endDate),
       totals: { income, expense, net: round2(income - expense) },
       points,
     };
@@ -1062,8 +1063,8 @@ export class DashboardService {
     const response = this.buildTrendsResponse(trendData, dailyTrend, forecast);
 
     if (autoShifted) {
-      response.effectiveEndDate = this.formatDateOnly(effectiveWindow.endDate);
-      response.effectiveSince = this.formatDateOnly(effectiveWindow.since);
+      response.effectiveEndDate = dateKey(effectiveWindow.endDate);
+      response.effectiveSince = dateKey(effectiveWindow.since);
     }
 
     return response;
@@ -1246,7 +1247,7 @@ export class DashboardService {
       // Anything already past due is still owed today, so it lands on day zero.
       const isOverdue = dueDate < today;
       items.push({
-        date: this.formatDateOnly(isOverdue ? today : dueDate),
+        date: dateKey(isOverdue ? today : dueDate),
         label: payable.vendor,
         amount,
         source: 'payable',
@@ -1294,13 +1295,13 @@ export class DashboardService {
     let balance = openingBalance;
     let totalCommitted = 0;
     let lowestBalance = openingBalance;
-    let lowestBalanceDate = this.formatDateOnly(today);
+    let lowestBalanceDate = dateKey(today);
     let shortfallDate: string | null = null;
 
     for (let offset = 0; offset < horizonDays; offset += 1) {
       const cursor = new Date(today);
       cursor.setDate(cursor.getDate() + offset);
-      const date = this.formatDateOnly(cursor);
+      const date = dateKey(cursor);
       const outflow = outflowByDate.get(date) ?? 0;
 
       totalCommitted += outflow;
@@ -1357,13 +1358,6 @@ export class DashboardService {
       .getRawOne<{ earliestTransactionDate: Date | string | null }>();
 
     return result?.earliestTransactionDate ? new Date(result.earliestTransactionDate) : null;
-  }
-
-  private formatDateOnly(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
   }
 
   /**
@@ -1502,7 +1496,7 @@ export class DashboardService {
     last.setHours(0, 0, 0, 0);
 
     while (cursor <= last) {
-      buckets.push(this.formatDateOnly(cursor));
+      buckets.push(dateKey(cursor));
       cursor.setDate(cursor.getDate() + 1);
     }
 
@@ -1514,7 +1508,7 @@ export class DashboardService {
     const cursor = new Date(since.getFullYear(), since.getMonth(), 1);
 
     while (cursor <= endDate) {
-      buckets.push(this.formatDateOnly(cursor).slice(0, 7));
+      buckets.push(dateKey(cursor).slice(0, 7));
       cursor.setMonth(cursor.getMonth() + 1);
     }
 
@@ -1577,14 +1571,15 @@ export class DashboardService {
     days: number,
   ): Promise<Array<{ date: string; income: number; expense: number }>> {
     const isWeekly = days >= 90;
-    const forecastCount = days <= 7 ? 3 : days <= 30 ? 7 : 2;
-    const historyMultiplier = days <= 7 ? 4 : days <= 30 ? 3 : 2;
+    // A month of 31 days is a month like the others: daysInMonth comes in here.
+    const forecastCount = days <= 7 ? 3 : days <= 31 ? 7 : 2;
+    const historyMultiplier = days <= 7 ? 4 : days <= 31 ? 3 : 2;
 
     const extendedSince = new Date(currentWindow.since);
     extendedSince.setDate(extendedSince.getDate() - days * historyMultiplier);
 
     // In the workspace currency, as the days it continues.
-    const history = [
+    const booked = [
       ...(
         await this.sumCashFlowByBucket(
           workspaceId,
@@ -1595,10 +1590,10 @@ export class DashboardService {
         )
       ).values(),
     ];
-
-    if (history.length < 3) {
+    if (booked.length < 3) {
       return [];
     }
+    const history = withEmptyDays(booked, extendedSince, currentWindow.endDate);
 
     if (isWeekly) {
       return this.forecastWeekly(history, currentTrend, forecastCount);
@@ -1611,11 +1606,11 @@ export class DashboardService {
     currentTrend: Array<{ date: string; income: number; expense: number }>,
     forecastDays: number,
   ): Array<{ date: string; income: number; expense: number }> {
-    const windowSize = Math.min(7, history.length);
-    const recent = history.slice(-windowSize);
-
-    const wmaIncome = this.weightedMovingAverage(recent.map(d => d.income));
-    const wmaExpense = this.weightedMovingAverage(recent.map(d => d.expense));
+    // A month's mean of every day, spent on or not: a weighted week of a few
+    // purchases reads as a spike or as nothing.
+    const recent = history.slice(-Math.min(30, history.length));
+    const wmaIncome = recent.reduce((sum, d) => sum + d.income, 0) / recent.length;
+    const wmaExpense = recent.reduce((sum, d) => sum + d.expense, 0) / recent.length;
 
     const dowFactors = this.computeDayOfWeekFactors(history);
 
@@ -1632,7 +1627,7 @@ export class DashboardService {
       const dow = d.getDay();
       const factor = dowFactors[dow];
       forecast.push({
-        date: this.formatDateOnly(d),
+        date: dateKey(d),
         income: Math.max(0, Math.round(wmaIncome * factor * 100) / 100),
         expense: Math.max(0, Math.round(wmaExpense * factor * 100) / 100),
       });
