@@ -1,10 +1,15 @@
 'use client';
 
+import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FilterActions } from '@/app/(main)/statements/components/filters/FilterActions';
-import { FilterDropdown } from '@/app/(main)/statements/components/filters/FilterDropdown';
-import { Search } from '@/app/components/icons';
-import { FilterChipButton } from '@/app/components/ui/filter-chip-button';
+import { Check, ChevronDown, Search } from '@/app/components/icons';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/app/components/ui/dropdown-menu';
+import { Select } from '@/app/components/ui/select';
 import { useIntlayer } from '@/app/i18n';
 import {
   type ActorType,
@@ -102,30 +107,40 @@ function currentPreset(filters: AuditEventFilter): DatePreset {
   return 'all';
 }
 
-function dateChipLabelKey(filters: AuditEventFilter): LabelKey {
-  const preset = currentPreset(filters);
-  return DATE_PRESETS.find(p => p.value === preset)?.labelKey ?? 'last7Days';
-}
-
 interface AuditFilterBarProps {
   filters: AuditEventFilter;
   onFiltersChange: (update: Partial<AuditEventFilter>) => void;
 }
 
+/** A quiet text button that opens a menu; it reads as active while a choice is in force. */
+function MenuButton({
+  active,
+  children,
+}: {
+  active?: boolean;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  return (
+    <DropdownMenuTrigger asChild>
+      <button
+        type="button"
+        className={`audit-filter-button${active ? ' audit-filter-button--active' : ''}`}
+      >
+        {children}
+        <ChevronDown size={16} aria-hidden />
+      </button>
+    </DropdownMenuTrigger>
+  );
+}
+
+/**
+ * Search across the row; after it, one "Filters" menu holding who, what and
+ * which kind of record, each applied as it is picked, and the period.
+ */
 export function AuditFilterBar({ filters, onFiltersChange }: AuditFilterBarProps) {
   const t = useIntlayer('auditUi');
-  const [usersOpen, setUsersOpen] = useState(false);
-  const [actionsOpen, setActionsOpen] = useState(false);
-  const [dateOpen, setDateOpen] = useState(false);
-  const [entityOpen, setEntityOpen] = useState(false);
+  const filterLabels = useIntlayer('adminPage').auditTab.filters;
 
-  // Pending state for dropdowns (apply on confirm)
-  const [pendingActorType, setPendingActorType] = useState<ActorType | ''>(filters.actorType ?? '');
-  const [pendingAction, setPendingAction] = useState<AuditAction | ''>(filters.action ?? '');
-  const [pendingDatePreset, setPendingDatePreset] = useState<DatePreset>(currentPreset(filters));
-  const [pendingEntity, setPendingEntity] = useState<EntityType | ''>(filters.entityType ?? '');
-
-  // Search debounce
   const [searchVal, setSearchVal] = useState(filters.actorLabel ?? '');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -151,63 +166,14 @@ export function AuditFilterBar({ filters, onFiltersChange }: AuditFilterBarProps
     [],
   );
 
-  const applyUsers = () => {
-    onFiltersChange({ actorType: pendingActorType || undefined });
-    setUsersOpen(false);
-  };
-  const resetUsers = () => {
-    setPendingActorType('');
-    onFiltersChange({ actorType: undefined });
-    setUsersOpen(false);
-  };
-
-  const applyActions = () => {
-    onFiltersChange({ action: pendingAction || undefined });
-    setActionsOpen(false);
-  };
-  const resetActions = () => {
-    setPendingAction('');
-    onFiltersChange({ action: undefined });
-    setActionsOpen(false);
-  };
-
-  const applyEntity = () => {
-    onFiltersChange({ entityType: pendingEntity || undefined });
-    setEntityOpen(false);
-  };
-  const resetEntity = () => {
-    setPendingEntity('');
-    onFiltersChange({ entityType: undefined });
-    setEntityOpen(false);
-  };
-
-  const applyDate = () => {
-    onFiltersChange(presetToDates(pendingDatePreset));
-    setDateOpen(false);
-  };
-  const resetDate = () => {
-    setPendingDatePreset('7d');
-    onFiltersChange(presetToDates('7d'));
-    setDateOpen(false);
-  };
-
-  const usersActive = Boolean(filters.actorType);
-  const actionsActive = Boolean(filters.action);
-  const dateActive = currentPreset(filters) !== '7d';
-  const entityActive = Boolean(filters.entityType);
-  const entityLabel = filters.entityType
-    ? (t.entityLabels[filters.entityType]?.value ?? filters.entityType)
-    : t.allEntityTypes.value;
-
-  const usersLabel =
-    t[ACTOR_OPTIONS.find(o => o.value === filters.actorType)?.labelKey ?? 'allUsers'].value;
-
-  const actionsLabel =
-    t[ACTION_OPTIONS.find(o => o.value === filters.action)?.labelKey ?? 'allActions'].value;
+  const activeCount = [filters.actorType, filters.action, filters.entityType].filter(
+    Boolean,
+  ).length;
+  const preset = currentPreset(filters);
+  const presetLabel = t[DATE_PRESETS.find(p => p.value === preset)?.labelKey ?? 'last7Days'];
 
   return (
     <div className="audit-filter-bar">
-      {/* Search */}
       <div className="audit-search-wrap">
         <Search size={14} />
         <input
@@ -218,189 +184,87 @@ export function AuditFilterBar({ filters, onFiltersChange }: AuditFilterBarProps
         />
       </div>
 
-      {/* Users chip */}
-      <FilterDropdown
-        open={usersOpen}
-        onOpenChange={open => {
-          setUsersOpen(open);
-          if (open) {
-            setPendingActorType(filters.actorType ?? '');
-          }
-        }}
-        trigger={<FilterChipButton active={usersActive}>{usersLabel}</FilterChipButton>}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {ACTOR_OPTIONS.map(opt => (
-            <label
-              key={opt.value}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 13,
-                cursor: 'pointer',
-                padding: '4px 0',
-              }}
-            >
-              <input
-                type="radio"
-                name="audit-actor-type"
-                value={opt.value}
-                checked={pendingActorType === opt.value}
-                onChange={() => setPendingActorType(opt.value)}
+      <DropdownMenu>
+        <MenuButton active={activeCount > 0}>
+          {filterLabels.title}
+          {activeCount > 0 ? ` · ${activeCount}` : null}
+        </MenuButton>
+        <DropdownMenuContent align="end">
+          <div className="audit-filter-panel">
+            <label>
+              {t.actor}
+              <Select
+                size="small"
+                value={filters.actorType ?? ''}
+                options={ACTOR_OPTIONS.map(o => ({ value: o.value, label: t[o.labelKey] }))}
+                onChange={value =>
+                  onFiltersChange({ actorType: (value || undefined) as ActorType })
+                }
               />
-              {t[opt.labelKey]}
             </label>
-          ))}
-        </div>
-        <FilterActions
-          applyLabel={t.apply.value}
-          resetLabel={t.reset.value}
-          onApply={applyUsers}
-          onReset={resetUsers}
-        />
-      </FilterDropdown>
+            <label>
+              {t.action}
+              <Select
+                size="small"
+                value={filters.action ?? ''}
+                options={ACTION_OPTIONS.map(o => ({ value: o.value, label: t[o.labelKey] }))}
+                onChange={value => onFiltersChange({ action: (value || undefined) as AuditAction })}
+              />
+            </label>
+            <label>
+              {t.entity}
+              <Select
+                size="small"
+                value={filters.entityType ?? ''}
+                options={[
+                  { value: '', label: t.allEntityTypes },
+                  ...ENTITY_TYPES.map(value => ({
+                    value,
+                    label: t.entityLabels[value]?.value ?? value,
+                  })),
+                ]}
+                onChange={value =>
+                  onFiltersChange({ entityType: (value || undefined) as EntityType })
+                }
+              />
+            </label>
+            {activeCount > 0 ? (
+              <button
+                type="button"
+                className="audit-filter-button"
+                style={{ alignSelf: 'flex-start' }}
+                onClick={() =>
+                  onFiltersChange({
+                    actorType: undefined,
+                    action: undefined,
+                    entityType: undefined,
+                  })
+                }
+              >
+                {t.reset}
+              </button>
+            ) : null}
+          </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      {/* Actions chip */}
-      <FilterDropdown
-        open={actionsOpen}
-        onOpenChange={open => {
-          setActionsOpen(open);
-          if (open) {
-            setPendingAction(filters.action ?? '');
-          }
-        }}
-        trigger={<FilterChipButton active={actionsActive}>{actionsLabel}</FilterChipButton>}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {ACTION_OPTIONS.map(opt => (
-            <label
-              key={opt.value}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 13,
-                cursor: 'pointer',
-                padding: '4px 0',
-              }}
+      <DropdownMenu>
+        <MenuButton active={preset !== '7d'}>{presetLabel}</MenuButton>
+        <DropdownMenuContent align="end">
+          {DATE_PRESETS.map(option => (
+            <DropdownMenuItem
+              key={option.value}
+              onSelect={() => onFiltersChange(presetToDates(option.value))}
+              style={{ gap: 8, fontSize: 14 }}
             >
-              <input
-                type="radio"
-                name="audit-action"
-                value={opt.value}
-                checked={pendingAction === opt.value}
-                onChange={() => setPendingAction(opt.value)}
-              />
-              {t[opt.labelKey]}
-            </label>
+              <span style={{ display: 'inline-flex', width: 16 }}>
+                {option.value === preset ? <Check size={16} aria-hidden /> : null}
+              </span>
+              {t[option.labelKey]}
+            </DropdownMenuItem>
           ))}
-        </div>
-        <FilterActions
-          applyLabel={t.apply.value}
-          resetLabel={t.reset.value}
-          onApply={applyActions}
-          onReset={resetActions}
-        />
-      </FilterDropdown>
-
-      {/* Entity type chip */}
-      <FilterDropdown
-        open={entityOpen}
-        onOpenChange={open => {
-          setEntityOpen(open);
-          if (open) {
-            setPendingEntity(filters.entityType ?? '');
-          }
-        }}
-        trigger={<FilterChipButton active={entityActive}>{entityLabel}</FilterChipButton>}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 4,
-            maxHeight: 320,
-            overflowY: 'auto',
-          }}
-        >
-          {(['', ...ENTITY_TYPES] as const).map(value => (
-            <label
-              key={value || 'all'}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 13,
-                cursor: 'pointer',
-                padding: '4px 0',
-              }}
-            >
-              <input
-                type="radio"
-                name="audit-entity-type"
-                value={value}
-                checked={pendingEntity === value}
-                onChange={() => setPendingEntity(value)}
-              />
-              {value ? (t.entityLabels[value]?.value ?? value) : t.allEntityTypes.value}
-            </label>
-          ))}
-        </div>
-        <FilterActions
-          applyLabel={t.apply.value}
-          resetLabel={t.reset.value}
-          onApply={applyEntity}
-          onReset={resetEntity}
-        />
-      </FilterDropdown>
-
-      {/* Date chip */}
-      <FilterDropdown
-        open={dateOpen}
-        onOpenChange={open => {
-          setDateOpen(open);
-          if (open) {
-            setPendingDatePreset(currentPreset(filters));
-          }
-        }}
-        trigger={
-          <FilterChipButton active={dateActive}>
-            {t[dateChipLabelKey(filters)].value}
-          </FilterChipButton>
-        }
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {DATE_PRESETS.map(opt => (
-            <label
-              key={opt.value}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 13,
-                cursor: 'pointer',
-                padding: '4px 0',
-              }}
-            >
-              <input
-                type="radio"
-                name="audit-date-preset"
-                value={opt.value}
-                checked={pendingDatePreset === opt.value}
-                onChange={() => setPendingDatePreset(opt.value)}
-              />
-              {t[opt.labelKey]}
-            </label>
-          ))}
-        </div>
-        <FilterActions
-          applyLabel={t.apply.value}
-          resetLabel={t.reset.value}
-          onApply={applyDate}
-          onReset={resetDate}
-        />
-      </FilterDropdown>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

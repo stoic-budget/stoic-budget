@@ -1,155 +1,99 @@
 'use client';
 
-import { Button, Container, Stack, Typography } from '@mui/material';
-import Link from 'next/link';
-import { useTheme } from 'next-themes';
-import { useEffect, useMemo, useState } from 'react';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { LoadError } from '@/app/components/ui/load-error';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useIntlayer } from '@/app/i18n';
 import type { AuditEvent, AuditEventFilter } from '@/lib/api/audit';
-import { fetchAuditEvents, rollbackEvent } from '@/lib/api/audit';
-import { tokens } from '@/lib/theme-tokens';
+import { rollbackEvent } from '@/lib/api/audit';
 import { AuditEventModal } from '../audit/components/AuditEventModal';
 import { AuditFilterBar } from '../audit/components/AuditFilterBar';
 import { AuditTimeline, AuditTimelineSkeleton } from '../audit/components/AuditTimeline';
+import { useAuditLoader } from '../audit/hooks/useAuditLoader';
 import { assertRollbackSucceeded } from '../audit/utils/rollback-result';
+import { AdminHeader } from './components/AdminGroup';
+import { AdminStatusRows } from './components/AdminStatusRows';
 
+/**
+ * The admin area's front page: for the server's administrator, the state of
+ * parsing and of the server, a row each; for everyone who may open it, the
+ * workspace's activity with its rollbacks.
+ */
 export default function AdminPage() {
-  const { resolvedTheme } = useTheme();
-  const c = resolvedTheme === 'dark' ? tokens.dark.color : tokens.color;
   const t = useIntlayer('adminPage');
-  const parsing = useIntlayer('adminParsingPage');
-  const health = useIntlayer('adminHealthPage');
   const { user } = useAuth();
-
-  const [auditLogs, setAuditLogs] = useState<AuditEvent[]>([]);
-  const [auditTotal, setAuditTotal] = useState(0);
-  const [auditPage, setAuditPage] = useState(1);
-  const [auditLimit] = useState(50);
-  const [auditFilters, setAuditFilters] = useState<AuditEventFilter>({});
-  const [auditLoading, setAuditLoading] = useState(true);
-  const [auditError, setAuditError] = useState<string | null>(null);
+  const loader = useAuditLoader();
 
   const [selectedEvent, setSelectedEvent] = useState<AuditEvent | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [rollbackLoading, setRollbackLoading] = useState(false);
 
-  const auditParams = useMemo(
-    () => ({ ...auditFilters, page: auditPage, limit: auditLimit }),
-    [auditFilters, auditPage, auditLimit],
-  );
-
-  const loadAuditLogs = async (): Promise<void> => {
-    setAuditLoading(true);
-    setAuditError(null);
-
-    await (async () => {
-      const response = await fetchAuditEvents(auditParams);
-      setAuditLogs(response.data || []);
-      setAuditTotal(response.total || 0);
-    })()
-      .catch(async (err: unknown) => {
-        const error = err as { response?: { data?: { message?: string } } };
-        setAuditError(error.response?.data?.message || t.errors.loadAudit.value);
-      })
-      .finally(async () => {
-        setAuditLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    void loadAuditLogs();
-  }, [auditParams]);
-
   const handleDirectRollback = async (event: AuditEvent): Promise<void> => {
     setRollbackLoading(true);
-
-    await (async () => {
-      const result = await rollbackEvent(event.id);
-      assertRollbackSucceeded(result);
-      toast.success(t.toasts.rollbackSuccess.value);
-      setModalOpen(false);
-      setSelectedEvent(null);
-      void loadAuditLogs();
-    })()
-      .catch(async () => {
+    await rollbackEvent(event.id)
+      .then(result => {
+        assertRollbackSucceeded(result);
+        toast.success(t.toasts.rollbackSuccess.value);
+        setModalOpen(false);
+        setSelectedEvent(null);
+        loader.reload();
+      })
+      .catch(() => {
         toast.error(t.toasts.rollbackFailed.value);
       })
-      .finally(async () => {
+      .finally(() => {
         setRollbackLoading(false);
       });
   };
 
   const handleFiltersChange = (update: Partial<AuditEventFilter>) => {
-    setAuditFilters(prev => ({ ...prev, ...update }));
-    setAuditPage(1);
+    loader.setFilters(prev => ({ ...prev, ...update }));
+    loader.setPage(1);
   };
 
   return (
-    <Container maxWidth={false} sx={{ mt: 4, mb: 4, px: { xs: 2, md: 4 } }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        {t.title}
-      </Typography>
-      {user?.role === 'admin' ? (
-        <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-          <Button component={Link} href="/admin/parsing" variant="outlined" size="small">
-            {parsing.title}
-          </Button>
-          <Button component={Link} href="/admin/health" variant="outlined" size="small">
-            {health.title}
-          </Button>
-        </Stack>
-      ) : null}
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4, px: { xs: 2, md: 4 } }}>
+      <AdminHeader title={t.title} />
+      {user?.role === 'admin' ? <AdminStatusRows /> : null}
 
-      <div className="audit-page" style={{ maxWidth: '100%', padding: '24px 0 0' }}>
-        <div className="audit-page__head">
-          <div>
-            <h2 className="audit-page__title" style={{ fontSize: 18 }}>
-              {t.auditTab.title}
-            </h2>
-            <p className="audit-page__subtitle">{t.auditTab.helper}</p>
-          </div>
-        </div>
-
+      <Box component="section">
+        <Box
+          component="h2"
+          sx={{ fontSize: 15, fontWeight: 500, m: 0, mb: 1.5, color: 'var(--foreground)' }}
+        >
+          {t.auditTab.title}
+        </Box>
         <div data-tour-id="admin-audit-filters">
-          <AuditFilterBar filters={auditFilters} onFiltersChange={handleFiltersChange} />
+          <AuditFilterBar filters={loader.filters} onFiltersChange={handleFiltersChange} />
         </div>
-
-        {auditError && (
+        {loader.error ? (
+          <LoadError>{t.errors.loadAudit}</LoadError>
+        ) : (
           <div
-            style={{
-              padding: '10px 14px',
-              marginBottom: 16,
-              fontSize: 13,
-              color: c.danger,
-              background: c.dangerSoft,
-              border: `1px solid ${c.danger}`,
-              borderRadius: tokens.radius.md,
-            }}
+            className="audit-timeline-card"
+            style={{ opacity: loader.isFetching ? 0.6 : 1, transition: 'opacity 150ms ease' }}
           >
-            {auditError}
+            {loader.isPending ? (
+              <AuditTimelineSkeleton />
+            ) : (
+              <AuditTimeline
+                events={loader.events}
+                onSelect={event => {
+                  setSelectedEvent(event);
+                  setModalOpen(true);
+                }}
+                page={loader.page}
+                limit={loader.limit}
+                total={loader.total}
+                onPageChange={loader.setPage}
+              />
+            )}
           </div>
         )}
-
-        <div className="audit-timeline-card">
-          {auditLoading ? (
-            <AuditTimelineSkeleton />
-          ) : (
-            <AuditTimeline
-              events={auditLogs}
-              onSelect={event => {
-                setSelectedEvent(event);
-                setModalOpen(true);
-              }}
-              page={auditPage}
-              limit={auditLimit}
-              total={auditTotal}
-              onPageChange={setAuditPage}
-            />
-          )}
-        </div>
-      </div>
+      </Box>
 
       <AuditEventModal
         event={selectedEvent}
