@@ -1,4 +1,6 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -10,6 +12,7 @@ import {
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
+import { billingDayAfter } from '../common/utils/billing-day.util';
 import { Budget } from './budget.entity';
 import { Category } from './category.entity';
 import { User } from './user.entity';
@@ -119,6 +122,17 @@ export class Subscription {
 
   @Column({ name: 'next_charge_date', type: 'date', nullable: true })
   nextChargeDate: Date | null;
+
+  /** The day of the month it is billed on: steps return to it after a short month. */
+  @Column({ name: 'billing_day', type: 'smallint', nullable: true })
+  billingDay: number | null;
+
+  /** A next charge date set by hand names the billing day; a step keeps it. */
+  @BeforeInsert()
+  @BeforeUpdate()
+  keepBillingDay(): void {
+    this.billingDay = billingDayAfter(this.nextChargeDate, this.billingDay ?? null);
+  }
 
   @Column({ name: 'last_charge_date', type: 'date', nullable: true })
   lastChargeDate: Date | null;

@@ -550,7 +550,7 @@ export class SubscriptionsService {
         for (
           let charge = new Date(sub.nextChargeDate);
           charge <= monthAhead;
-          charge = this.addInterval(charge, sub.frequency)
+          charge = this.addInterval(charge, sub)
         ) {
           if (charge >= startOfToday) count += 1;
         }
@@ -1533,7 +1533,7 @@ export class SubscriptionsService {
     if (next && next > chargeDay) return;
     let date = new Date(chargeDay);
     do {
-      date = this.addInterval(date, subscription.frequency);
+      date = this.addInterval(date, subscription);
     } while ((toDay(date) ?? '') <= chargeDay);
     subscription.nextChargeDate = toDay(date) as unknown as Date;
   }
@@ -1555,9 +1555,9 @@ export class SubscriptionsService {
     }
   }
 
-  /** One step on: a month-end clamps to a shorter month (31 Jan, 28 Feb) instead of overflowing. */
-  private addInterval(date: Date, frequency: SubscriptionFrequency): Date {
-    return calendar.chargeAt(date, frequency, 1);
+  /** One step on, back on the billing day after a short month (31 Jan, 28 Feb, 31 Mar). */
+  private addInterval(date: Date, sub: Pick<Subscription, 'frequency' | 'billingDay'>): Date {
+    return calendar.nextChargeOf(date, sub);
   }
 
   private async recordDetectedCharges(subscription: Subscription): Promise<void> {
