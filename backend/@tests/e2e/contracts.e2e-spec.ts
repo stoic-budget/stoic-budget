@@ -262,6 +262,7 @@ import {
   ViewPreferenceState,
   WelcomeTutorialSeen,
   WorkspaceFavorite,
+  WorkspaceMemberLocale,
   XRechnungCheck,
   ItemImageList,
 } from '../../src/contracts';
@@ -3158,6 +3159,20 @@ describe('API contracts (e2e)', () => {
       matches(FileCategoryUpdate, moved.body);
       expect(moved.body.category.id).toBe(categories.body[0].id);
       expect(moved.body).not.toHaveProperty('filePath');
+    });
+
+    it("the caller's language in a workspace, then in the workspace list", async () => {
+      const chosen = 'uk';
+      const saved = await call('put', `/workspaces/${owner.workspaceId}/locale`, {
+        locale: chosen,
+      }).expect(succeeded);
+      matches(WorkspaceMemberLocale, saved.body);
+      expect(saved.body.locale).toBe(chosen);
+      const listed = await get('/workspaces');
+      matches(WorkspaceList, listed.body);
+      const own = listed.body.find((w: { id: string }) => w.id === owner.workspaceId);
+      expect(own.memberLocale).toBe(chosen);
+      await call('put', `/workspaces/${owner.workspaceId}/locale`, { locale: 'xx' }).expect(400);
     });
 
     it('the business logo, a workspace favourite and the custom-tables report', async () => {
