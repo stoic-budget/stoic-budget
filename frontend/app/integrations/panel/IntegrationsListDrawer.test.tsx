@@ -26,8 +26,7 @@ vi.mock('@/app/i18n', async () => {
     setUp: { value: 'Set up' },
     nothingMatches: { value: 'Nothing matches "{query}".' },
     categories: {
-      application: 'Application',
-      storage: 'Storage',
+      bank: 'Bank',
       email: 'Email',
       messaging: 'Messaging',
     },
@@ -62,10 +61,11 @@ describe('IntegrationsListDrawer', () => {
   it('lists the open-protocol integrations instead of legacy SaaS cards', () => {
     renderList();
 
-    expect(screen.getByText('S3-compatible storage')).toBeTruthy();
-    expect(screen.getByText('WebDAV storage')).toBeTruthy();
     expect(screen.getByText('IMAP inbox')).toBeTruthy();
     expect(screen.getByText('SMTP email')).toBeTruthy();
+    // File stores and the app address are workspace settings now (Settings → Sync / Data).
+    expect(screen.queryByText('S3-compatible storage')).toBeNull();
+    expect(screen.queryByText('WebDAV storage')).toBeNull();
 
     expect(screen.queryByText('AI-compatible endpoint')).toBeNull();
     expect(screen.queryByText('Dropbox')).toBeNull();
@@ -75,16 +75,16 @@ describe('IntegrationsListDrawer', () => {
   it('opens the settings layer for the clicked integration', () => {
     const { onSelect } = renderList();
 
-    const row = document.querySelector('[data-integration-card="s3-compatible"]') as HTMLElement;
+    const row = document.querySelector('[data-integration-card="imap"]') as HTMLElement;
     fireEvent.click(row);
 
-    expect(onSelect).toHaveBeenCalledWith('s3-compatible');
+    expect(onSelect).toHaveBeenCalledWith('imap');
   });
 
   it('marks connected integrations and filters by search', () => {
-    renderList({ 's3-compatible': true });
+    renderList({ smtp: true });
 
-    const row = document.querySelector('[data-integration-card="s3-compatible"]') as HTMLElement;
+    const row = document.querySelector('[data-integration-card="smtp"]') as HTMLElement;
     expect(row.textContent).toContain('Connected');
 
     fireEvent.change(screen.getByPlaceholderText('Search integrations...'), {
@@ -92,6 +92,6 @@ describe('IntegrationsListDrawer', () => {
     });
 
     expect(screen.getByText('IMAP inbox')).toBeTruthy();
-    expect(screen.queryByText('S3-compatible storage')).toBeNull();
+    expect(screen.queryByText('SMTP email')).toBeNull();
   });
 });

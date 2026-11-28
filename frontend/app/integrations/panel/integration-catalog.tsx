@@ -1,7 +1,4 @@
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
-import CloudQueueOutlinedIcon from '@mui/icons-material/CloudQueueOutlined';
-import DnsOutlinedIcon from '@mui/icons-material/DnsOutlined';
-import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined';
 import MarkEmailUnreadOutlinedIcon from '@mui/icons-material/MarkEmailUnreadOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import TelegramIcon from '@mui/icons-material/Telegram';
@@ -11,7 +8,7 @@ import { useIntlayer } from '@/app/i18n';
 import type { ProtocolIntegrationPageProps } from '../open-protocol-page';
 import { smtpIntegrationEntry } from './smtp-entry';
 
-export type IntegrationCategoryKey = 'application' | 'bank' | 'storage' | 'email' | 'messaging';
+export type IntegrationCategoryKey = 'bank' | 'email' | 'messaging';
 
 export type CatalogText = ReturnType<typeof useIntlayer<'integrationCatalog'>>;
 type PeppolText = ReturnType<typeof useIntlayer<'peppol'>>;
@@ -50,115 +47,6 @@ function buildIntegrationCatalog(t: CatalogText, peppol: PeppolText): Integratio
 
   return [
     smtpIntegrationEntry(t),
-    {
-      key: 'app-url',
-      name: e.appUrl.name.value,
-      description: e.appUrl.description.value,
-      badge: 'Workspace setting',
-      category: 'application',
-      recommended: true,
-      icon: <LinkOutlinedIcon sx={{ fontSize: 22 }} aria-hidden="true" />,
-      statusPath: '/settings/app',
-      detail: {
-        kind: 'protocol',
-        config: {
-          title: e.appUrl.name.value,
-          description: e.appUrl.detailDescription.value,
-          statusPath: '/settings/app',
-          settingsPath: '/settings/app',
-          settingsMethod: 'put',
-          disconnectPath: '/settings/app',
-          icon: <LinkOutlinedIcon sx={{ fontSize: 24 }} aria-hidden="true" />,
-          workflow: e.appUrl.workflow.value,
-          fields: [
-            {
-              name: 'publicUrl',
-              label: f.publicUrl.value,
-              placeholder: 'https://app.example.com',
-              required: true,
-            },
-          ],
-        },
-      },
-    },
-    {
-      key: 's3-compatible',
-      name: e.s3.name.value,
-      description: e.s3.description.value,
-      badge: 'OSS protocol',
-      category: 'storage',
-      recommended: true,
-      icon: <DnsOutlinedIcon sx={{ fontSize: 22 }} aria-hidden="true" />,
-      statusPath: '/integrations/s3-compatible/status',
-      docsUrl: 'https://min.io/docs/minio/linux/developers/javascript/API.html',
-      detail: {
-        kind: 'protocol',
-        config: {
-          title: e.s3.name.value,
-          description: e.s3.detailDescription.value,
-          statusPath: '/integrations/s3-compatible/status',
-          settingsPath: '/integrations/s3-compatible/settings',
-          disconnectPath: '/integrations/s3-compatible',
-          icon: <DnsOutlinedIcon sx={{ fontSize: 24 }} aria-hidden="true" />,
-          filesPath: '/integrations/s3-compatible/files',
-          importPath: '/integrations/s3-compatible/import',
-          syncPath: '/integrations/s3-compatible/sync',
-          fields: [
-            {
-              name: 'endpoint',
-              label: f.endpoint.value,
-              placeholder: 'http://localhost:9000',
-              required: true,
-            },
-            { name: 'region', label: f.region.value, placeholder: 'us-east-1' },
-            { name: 'bucket', label: f.bucket.value, placeholder: 'seneca', required: true },
-            { name: 'prefix', label: f.prefix.value, placeholder: 'statements' },
-            { name: 'accessKeyId', label: f.accessKeyId.value, type: 'password' },
-            { name: 'secretAccessKey', label: f.secretAccessKey.value, type: 'password' },
-            { name: 'forcePathStyle', label: f.forcePathStyle.value, type: 'checkbox' },
-            { name: 'autoBackup', label: f.autoBackup.value, type: 'checkbox' },
-          ],
-          workflow: e.s3.workflow.value,
-        },
-      },
-    },
-    {
-      key: 'webdav',
-      name: e.webdav.name.value,
-      description: e.webdav.description.value,
-      badge: 'Open protocol',
-      category: 'storage',
-      recommended: true,
-      icon: <CloudQueueOutlinedIcon sx={{ fontSize: 22 }} aria-hidden="true" />,
-      statusPath: '/integrations/webdav/status',
-      docsUrl: 'https://datatracker.ietf.org/doc/html/rfc4918',
-      detail: {
-        kind: 'protocol',
-        config: {
-          title: e.webdav.name.value,
-          description: e.webdav.detailDescription.value,
-          statusPath: '/integrations/webdav/status',
-          settingsPath: '/integrations/webdav/settings',
-          disconnectPath: '/integrations/webdav',
-          icon: <CloudQueueOutlinedIcon sx={{ fontSize: 24 }} aria-hidden="true" />,
-          filesPath: '/integrations/webdav/files',
-          importPath: '/integrations/webdav/import',
-          syncPath: '/integrations/webdav/sync',
-          fields: [
-            {
-              name: 'url',
-              label: f.webdavUrl.value,
-              placeholder: 'https://cloud.example.com/remote.php/dav/files/user',
-              required: true,
-            },
-            { name: 'rootPath', label: f.rootPath.value, placeholder: '/' },
-            { name: 'username', label: f.username.value },
-            { name: 'password', label: f.password.value, type: 'password' },
-          ],
-          workflow: e.webdav.workflow.value,
-        },
-      },
-    },
     {
       key: 'imap',
       name: e.imap.name.value,

@@ -25,21 +25,13 @@ interface IntegrationsListDrawerProps {
   onClose: () => void;
 }
 
-const CATEGORY_ORDER: IntegrationCategoryKey[] = [
-  'application',
-  'bank',
-  'storage',
-  'email',
-  'messaging',
-];
+const CATEGORY_ORDER: IntegrationCategoryKey[] = ['bank', 'email', 'messaging'];
 
 function useCategoryLabels(): Record<IntegrationCategoryKey, React.ReactNode> {
   const t = useIntlayer('integrationsPage');
 
   return {
-    application: t.categories.application,
     bank: t.categories.bank,
-    storage: t.categories.storage,
     email: t.categories.email,
     messaging: t.categories.messaging,
   };

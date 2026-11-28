@@ -11,9 +11,9 @@ encrypted. Env variables with the same purpose are only temporary fallback defau
 | Integration | What it does |
 |---|---|
 | SMTP email | Sends workspace invitations, password reset links and email change confirmations |
-| App URL | The public URL used in invitations and shared links |
-| S3-compatible storage | Syncs statements with a bucket such as MinIO |
-| WebDAV storage | Imports and syncs files from Nextcloud or another WebDAV server |
+| App URL | The public URL used in invitations and shared links; set in **Settings → Data** |
+| S3-compatible storage | Syncs statements with a bucket such as MinIO; set in **Settings → Sync** |
+| WebDAV storage | Imports and syncs files from Nextcloud or another WebDAV server; set in **Settings → Sync** |
 | IMAP inbox | Polls a mailbox for receipts and invoice attachments |
 | Bank sync via SimpleFIN | Pulls statements from your own SimpleFIN Bridge account through the regular import — see below |
 | Telegram | Scheduled reports to a chat or channel; set up in **Settings → Telegram** |

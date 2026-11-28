@@ -37,6 +37,9 @@ describe('settings-url-state', () => {
     expect(parseSettingsSection('general', 'sessions')).toBeNull();
     expect(parseSettingsSection('general', null)).toBeNull();
     expect(parseSettingsSection('data', 'receipt-location')).toBe('receipt-location');
+    expect(parseSettingsSection('sync', 's3-compatible')).toBe('s3-compatible');
+    // The archive panel left Data for the Sync tab.
+    expect(parseSettingsSection('data', 'sync')).toBeNull();
   });
 
   it('patches the query string and removes keys set to null', () => {

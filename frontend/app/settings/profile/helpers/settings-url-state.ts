@@ -8,6 +8,7 @@ export const SETTINGS_TABS = [
   'security',
   'notifications',
   'data',
+  'sync',
   'advanced',
   'versions',
 ] as const;
@@ -21,13 +22,14 @@ export const SETTINGS_SECTIONS = {
   notifications: ['telegram', 'push', 'calendar'],
   data: [
     'workspace-profile',
+    'app-url',
     'month-start',
     'processing',
     'exchange-rates',
     'receipt-location',
-    'sync',
     'my-data',
   ],
+  sync: ['backup', 's3-compatible', 'webdav'],
   advanced: ['changelog'],
   versions: ['versions'],
 } as const satisfies Record<SettingsTabId, readonly string[]>;
@@ -103,7 +105,7 @@ export const LEGACY_HASH_TARGETS: Record<
   notifications: { tab: 'notifications' },
   telegram: { tab: 'notifications', section: 'telegram' },
   processing: { tab: 'data', section: 'processing' },
-  sync: { tab: 'data', section: 'sync' },
+  sync: { tab: 'sync', section: 'backup' },
   'my-data': { tab: 'data', section: 'my-data' },
   changelog: { tab: 'advanced', section: 'changelog' },
   experimental: { tab: 'advanced' },
