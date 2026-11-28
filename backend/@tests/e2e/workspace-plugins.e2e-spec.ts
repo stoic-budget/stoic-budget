@@ -26,6 +26,9 @@ import {
  * a workspace with webhooks off neither accepts inbound uploads nor queues
  * outbound deliveries.
  */
+/** Integrations start switched on, so a workspace that set one up keeps it running. */
+const INTEGRATIONS_ON = { smtp: true, imap: true, bankSync: true, peppol: true, telegram: true };
+
 describe('Workspace plugin switches (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
@@ -125,7 +128,7 @@ describe('Workspace plugin switches (e2e)', () => {
     await setPlugins(member, { webhooks: true }).expect(403);
     await setPlugins(owner, { webhooks: true }).expect(200);
 
-    expect(await pluginsOf()).toEqual({ webhooks: true, mcp: false, aiAssistant: true });
+    expect(await pluginsOf()).toEqual({ ...INTEGRATIONS_ON, webhooks: true, mcp: false, aiAssistant: true });
   });
 
   it('keeps the other switches and the processing settings when one changes', async () => {
@@ -136,7 +139,7 @@ describe('Workspace plugin switches (e2e)', () => {
     const res = await as(owner, request(server()).get('/workspaces')).expect(200);
     const list = Array.isArray(res.body) ? res.body : res.body.data;
     const settings = list.find((w: { id: string }) => w.id === owner.workspaceId).settings;
-    expect(settings.plugins).toEqual({ webhooks: true, mcp: true, aiAssistant: true });
+    expect(settings.plugins).toEqual({ ...INTEGRATIONS_ON, webhooks: true, mcp: true, aiAssistant: true });
     expect(settings.processing.merchantLearning).toBe(false);
   });
 
@@ -146,5 +149,35 @@ describe('Workspace plugin switches (e2e)', () => {
 
     await dispatch();
     expect(await deliveriesOf()).toBe(1);
+  });
+
+  describe('integrations', () => {
+    it('pauses an integration: its actions are refused, its status and disconnect still answer', async () => {
+      await setPlugins(owner, { imap: false, bankSync: false }).expect(200);
+
+      // Built one at a time: supertest binds a port when a request is created.
+      for (const call of [
+        () => request(server()).post('/integrations/imap/sync'),
+        () => request(server()).post('/integrations/imap/settings').send({}),
+        () => request(server()).get('/integrations/bank-sync/providers'),
+        () => request(server()).post('/integrations/bank-sync/feeds/switch').send({}),
+      ]) {
+        const res = await as(owner, call()).expect(403);
+        expect(res.body.error?.code ?? res.body.code).toBe('PLUGIN_DISABLED');
+      }
+      await as(owner, request(server()).get('/integrations/imap/status')).expect(200);
+      await as(owner, request(server()).get('/integrations/bank-sync/connections')).expect(200);
+      await as(owner, request(server()).delete('/integrations/imap')).expect(200);
+    });
+
+    it('lets the actions through again once switched back on', async () => {
+      await setPlugins(owner, { imap: true, bankSync: true }).expect(200);
+
+      // Past the switch: nothing is configured, so the answer is about that, not the plugin.
+      const res = await as(owner, request(server()).get('/integrations/bank-sync/providers'));
+      expect(res.status).toBe(200);
+      const sync = await as(owner, request(server()).post('/integrations/imap/sync'));
+      expect(sync.body.error?.code ?? sync.body.code).not.toBe('PLUGIN_DISABLED');
+    });
   });
 });

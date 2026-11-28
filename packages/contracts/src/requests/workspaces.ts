@@ -38,11 +38,19 @@ export const WorkspaceProcessingInput = Schema.Struct({
 });
 export type WorkspaceProcessingInput = Wire<typeof WorkspaceProcessingInput>;
 
-/** Which plugins are switched on; a missing key leaves that switch as it is. */
+/**
+ * Which plugins and integrations are switched on; a missing key leaves that
+ * switch as it is. An integration switched off keeps its saved settings.
+ */
 export const WorkspacePluginsInput = Schema.Struct({
   webhooks: optionalNullable(Schema.Boolean),
   mcp: optionalNullable(Schema.Boolean),
   aiAssistant: optionalNullable(Schema.Boolean),
+  smtp: optionalNullable(Schema.Boolean),
+  imap: optionalNullable(Schema.Boolean),
+  bankSync: optionalNullable(Schema.Boolean),
+  peppol: optionalNullable(Schema.Boolean),
+  telegram: optionalNullable(Schema.Boolean),
 });
 export type WorkspacePluginsInput = Wire<typeof WorkspacePluginsInput>;
 

@@ -13,7 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { decryptText, encryptText } from '../../common/utils/encryption.util';
-import { STANDARD_WORKSPACE } from '../../common/workspaces/version-workspaces';
+import { standardWorkspaceWith } from '../../common/utils/workspace-plugins.util';
 import { CreditNoteStatus } from '../../entities/credit-note.entity';
 import { InvoiceStatus } from '../../entities/invoice.entity';
 import { PeppolConnection } from '../../entities/peppol-connection.entity';
@@ -478,7 +478,7 @@ export class PeppolService {
       where: {
         status: 'pending',
         providerDocumentId: Not(IsNull()),
-        workspace: STANDARD_WORKSPACE,
+        workspace: standardWorkspaceWith('peppol'),
       },
     });
     const byWorkspace = new Map<string, PeppolTransmission[]>();
@@ -605,7 +605,7 @@ export class PeppolService {
   async pollAll(): Promise<void> {
     // A past version takes nothing in: documents arriving now belong to the live workspace.
     const connected = await this.connections.find({
-      where: { workspace: STANDARD_WORKSPACE },
+      where: { workspace: standardWorkspaceWith('peppol') },
       select: { workspaceId: true },
     });
     for (const { workspaceId } of connected) {

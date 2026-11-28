@@ -372,6 +372,21 @@ describe('Bank sync schedule (e2e)', () => {
       expect(await claimMine(mine)).toEqual([]);
     });
 
+    it('leaves a workspace with bank sync switched off alone, and picks it up once back on', async () => {
+      const paused = await connect();
+      await makeDue([paused]);
+      const setBankSync = (on: boolean) =>
+        as(owner, request(server()).patch(`/workspaces/${owner.workspaceId}`))
+          .send({ plugins: { bankSync: on } })
+          .expect(200);
+
+      await setBankSync(false);
+      expect(await claimMine([paused])).toEqual([]);
+
+      await setBankSync(true);
+      expect((await claimMine([paused])).map(claim => claim.connectionId)).toEqual([paused]);
+    });
+
     it('takes over a lease a crashed pull left behind', async () => {
       const id = await connect();
       await dataSource.query(
