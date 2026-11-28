@@ -117,52 +117,6 @@
     }
   }
 
-  // Eight to a row: room around each line icon.
-  &__icons {
-    display: grid;
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    gap: 6px;
-
-    @media (max-width: 420px) {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-    }
-
-    button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 44px;
-      padding: 0;
-      border: 1.5px solid transparent;
-      border-radius: $seneca-radius-sm;
-      background: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: background-color 120ms ease;
-
-      &:hover {
-        background: var(--surface-soft);
-      }
-
-      &[aria-checked='true'] {
-        border-color: #3f7d5c;
-        background: #eef3ef;
-        color: #3f7d5c;
-
-        @include dark {
-          border-color: var(--primary);
-          background: var(--primary-50);
-          color: var(--primary);
-        }
-      }
-
-      &:focus-visible {
-        outline: 2px solid var(--primary);
-        outline-offset: 1px;
-      }
-    }
-  }
-
   // "No icon": a dashed ring, so it does not read as one more placeholder glyph.
   &__no-icon {
     display: inline-block;
