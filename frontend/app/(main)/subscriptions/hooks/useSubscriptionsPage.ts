@@ -20,6 +20,7 @@ import {
   readSubscriptionDraft,
   saveSubscriptionDraft,
 } from './subscription-draft';
+import { useSubscriptionCalendar } from './useSubscriptionCalendar';
 import { useSubscriptionSummary } from './useSubscriptionSummary';
 
 export type SubscriptionChargeCalendar = ChargeCalendarContract;
@@ -92,7 +93,6 @@ const readCreatedId = (response: unknown): string | null => {
 };
 
 const DEFAULT_CURRENCY = 'USD';
-const CALENDAR_MONTHS = 6;
 
 const EMPTY_CALENDAR: SubscriptionChargeCalendar = {
   currency: null,
@@ -164,17 +164,7 @@ export function useSubscriptionsPage() {
   // workspace's active spend, so it must not follow the status tab or the
   // client-side filters, and its amounts come converted by the same service as
   // the monthly-cost summary.
-  const calendarQuery = useQuery({
-    queryKey: queryKeys.subscriptionsChargeCalendar({ workspaceId, months: CALENDAR_MONTHS }),
-    queryFn: ({ signal }) =>
-      apiQueryDecoded({
-        url: '/subscriptions/charge-calendar',
-        params: { months: CALENDAR_MONTHS } satisfies ContractInput<'ChargeCalendarQuery'>,
-        signal,
-        contract: 'SubscriptionChargeCalendar',
-      }),
-    enabled: Boolean(workspaceId),
-  });
+  const calendarQuery = useSubscriptionCalendar(workspaceId);
 
   const invalidate = useCallback((): Promise<void> => {
     return queryClient.invalidateQueries({ queryKey: ['subscriptions', workspaceId] });

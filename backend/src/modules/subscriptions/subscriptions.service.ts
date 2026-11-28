@@ -618,6 +618,12 @@ export class SubscriptionsService {
     ]);
 
     const workspaceCurrency = workspace?.currency?.toUpperCase() ?? null;
+    // One converter for the plans and the bills: what has no rate counts as it is and is named (#787).
+    const toWorkspace = summaryConverter(
+      this.exchangeRatesService,
+      workspaceCurrency ?? undefined,
+      workspaceId,
+    );
     const from = new Date();
     const monthLabels = Array.from({ length: horizon }, (_, index) => {
       const date = new Date(from.getFullYear(), from.getMonth() + index, 1);
@@ -633,17 +639,7 @@ export class SubscriptionsService {
           horizon,
         );
 
-        let amount = Number(sub.amount);
-        if (workspaceCurrency && sub.currency.toUpperCase() !== workspaceCurrency) {
-          const converted = await this.exchangeRatesService.convert(
-            amount,
-            sub.currency,
-            workspaceCurrency,
-            new Date(),
-            workspaceId,
-          );
-          amount = converted.converted;
-        }
+        const amount = await toWorkspace.convert(Number(sub.amount), sub.currency);
 
         return {
           subscriptionId: sub.id,
@@ -654,7 +650,7 @@ export class SubscriptionsService {
         };
       }),
     );
-    rows.push(...(await this.dueRows(workspaceId, from, horizon, workspaceCurrency)));
+    rows.push(...(await this.dueRows(workspaceId, from, horizon, toWorkspace.convert)));
 
     const visibleRows = rows
       .filter(row => row.amounts.some(value => value > 0))
@@ -674,7 +670,13 @@ export class SubscriptionsService {
         ) / 100,
     );
 
-    return { currency: workspaceCurrency, months: monthLabels, monthTotals, rows: visibleRows };
+    return {
+      currency: workspaceCurrency,
+      months: monthLabels,
+      monthTotals,
+      rows: visibleRows,
+      ...toWorkspace.missingRates(),
+    };
   }
 
   /**
@@ -764,7 +766,7 @@ export class SubscriptionsService {
     workspaceId: string,
     from: Date,
     horizon: number,
-    workspaceCurrency: string | null,
+    convert: (amount: number, currency: string) => Promise<number>,
   ): Promise<
     Array<{
       subscriptionId: string;
@@ -781,18 +783,6 @@ export class SubscriptionsService {
       const date = new Date(due);
       if (date < start || date >= end) return -1;
       return (date.getFullYear() - start.getFullYear()) * 12 + date.getMonth() - start.getMonth();
-    };
-    const convert = async (amount: number, currency: string): Promise<number> => {
-      if (!workspaceCurrency || currency.toUpperCase() === workspaceCurrency) return amount;
-      return (
-        await this.exchangeRatesService.convert(
-          amount,
-          currency,
-          workspaceCurrency,
-          new Date(),
-          workspaceId,
-        )
-      ).converted;
     };
     const rows: Array<{
       subscriptionId: string;

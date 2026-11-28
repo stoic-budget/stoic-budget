@@ -141,6 +141,8 @@ export const SubscriptionChargeCalendar = Schema.Struct({
       kind: Schema.optional(Schema.Literals(['subscription', 'payable', 'invoice'])),
     }),
   ),
+  /** Currencies with no rate to the workspace's: counted at face value. Only when there are any (#787). */
+  missingRates: Schema.optionalKey(Schema.Array(Schema.String)),
 });
 export type SubscriptionChargeCalendar = Wire<typeof SubscriptionChargeCalendar>;
 

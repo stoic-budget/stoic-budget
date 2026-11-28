@@ -11,6 +11,7 @@ import { usePresentPeriod } from '@/app/components/dashboard/use-period-label';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
+import { useSubscriptionCalendar } from '../hooks/useSubscriptionCalendar';
 import { useSubscriptionSummary } from '../hooks/useSubscriptionSummary';
 
 /**
@@ -26,7 +27,14 @@ export function SubscriptionsPastMonth({
   const { locale } = useLocale();
   const present = usePresentPeriod().current;
   // Under the title: totals with a currency that has no rate count it at face value (#787).
-  const missingRates = useSubscriptionSummary(useWorkspaceId()).data?.missingRates ?? [];
+  const workspaceId = useWorkspaceId();
+  // The summary's plans and the calendar's plans and bills, each currency once.
+  const missingRates = [
+    ...new Set([
+      ...(useSubscriptionSummary(workspaceId).data?.missingRates ?? []),
+      ...(useSubscriptionCalendar(workspaceId).data?.missingRates ?? []),
+    ]),
+  ].sort();
   const banner = (
     <Box sx={{ '& .seneca-dashboard__rates-banner': { mx: 0, mb: 2 } }}>
       <MissingRatesBanner currencies={[...missingRates]} />
