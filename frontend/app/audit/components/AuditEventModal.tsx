@@ -75,7 +75,8 @@ export function AuditEventModal({
             ? {
                 onConfirm: () => onRollback(event),
                 confirmText: t.rollback.value,
-                confirmVariant: 'destructive',
+                // Rolling back undoes one change: terracotta words, not a filled alarm.
+                confirmVariant: 'quiet-destructive',
                 isConfirmLoading: rollbackLoading,
               }
             : {})}
