@@ -81,6 +81,8 @@ export function repeatPayload(
   form: PayableFormState,
   payable: Payable | null | undefined,
 ): { recurrence?: RecurrenceRule | null; remindDaysBefore?: number } {
+  // A loan's bill repeats and reminds as the loan's terms say.
+  if (payable?.loanWalletId) return {};
   const remind = Number(form.remindDaysBefore);
   const remindDaysBefore =
     Number.isInteger(remind) && remind >= 0 && remind <= 60 ? remind : undefined;

@@ -21,6 +21,7 @@ import { WorkspaceMember } from '../../../entities/workspace-member.entity';
 import { AuditService } from '../../audit/audit.service';
 import type { DataDeletedEvent } from '../../notifications/events/notification-events';
 import { recountStatementTotals } from '../../statements/helpers/statement-totals';
+import { withLoanPaymentLegs } from '../helpers/loan-payment-legs';
 import {
   type DeletedRowLinks,
   deleteAndDetach,
@@ -81,7 +82,9 @@ export class TransactionDeleteService {
       'canEditStatements',
       'STATEMENTS_EDIT_FORBIDDEN',
     );
-    const unique = [...new Set(ids)];
+    const unique = await withLoanPaymentLegs(this.transactionRepository.manager, workspaceId, [
+      ...new Set(ids),
+    ]);
 
     const removed = await this.transactionRepository.manager.transaction(manager =>
       this.deleteRows(manager, unique, workspaceId),

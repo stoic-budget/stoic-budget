@@ -80,6 +80,9 @@ export const ACCOUNTING_ERRORS = {
     'That transaction is less than what is still owed; record it as a partial payment',
   PAYABLE_CATEGORY_NOT_FOUND: 'Category not found in this workspace',
   PAYABLE_NOT_RECURRING: 'This bill does not repeat',
+  PAYABLE_LOAN_PAID_FROM_ITSELF: 'A loan payment cannot come from the loan account itself',
+  PAYABLE_LOAN_MANAGED:
+    'This bill is a loan payment: it repeats as the loan schedule does; change the loan terms instead',
   PAYABLE_NOT_LATE: 'This bill was not paid late, so it takes no reason for being late',
   PAYABLE_LATE_REASON_PAYABLES_ONLY: 'Only a bill to pay takes a reason for being late',
   PAYABLE_OCCURRENCE_SETTLED:

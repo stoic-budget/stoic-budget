@@ -376,14 +376,16 @@ describe('WalletsService', () => {
 
     describe('a change of type', () => {
       let deleteTerms: ReturnType<typeof vi.fn>;
+      let query: ReturnType<typeof vi.fn>;
 
       beforeEach(() => {
         stored = { ...mockWallet, type: 'loan', creditLimit: null } as Wallet;
         deleteTerms = vi.fn(async () => ({ affected: 1 }));
+        query = vi.fn(async () => []);
         Object.assign(walletRepository, {
           manager: {
             transaction: vi.fn(async (work: (manager: unknown) => unknown) =>
-              work({ getRepository: () => locked, delete: deleteTerms }),
+              work({ getRepository: () => locked, delete: deleteTerms, query }),
             ),
           },
         });
@@ -405,6 +407,12 @@ describe('WalletsService', () => {
           walletId: 'wallet-1',
           workspaceId: 'ws-1',
         });
+        // Its payment bills stop with the terms, in the same transaction.
+        expect(query).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM "payables"'), [
+          'ws-1',
+          'wallet-1',
+          null,
+        ]);
       });
 
       it('keeps the loan terms from one debt type to another, and on any other change', async () => {

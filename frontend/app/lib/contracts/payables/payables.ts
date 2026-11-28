@@ -52,6 +52,8 @@ export const Payable = Schema.Struct({
   skippedAt: Schema.NullOr(Timestamp),
   remindDaysBefore: Schema.Number,
   comment: Schema.NullOr(Schema.String),
+  /** The loan account this bill is a payment of; its terms own the rule and the amounts. */
+  loanWalletId: Schema.NullOr(Schema.String),
   /** Why it was paid late, as the person said it. */
   lateReason: Schema.NullOr(LateReason),
   lateReasonNote: Schema.NullOr(Schema.String),

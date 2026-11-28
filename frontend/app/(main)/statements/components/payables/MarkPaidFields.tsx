@@ -118,6 +118,8 @@ export function CashFields(props: {
   onChange: (next: CashState) => void;
   /** Booking a payment already recorded: its own day stands, so none is asked for. */
   hideDate?: boolean;
+  /** A loan's bill: the money moves into the loan account, with no category. */
+  loan?: boolean;
 }): React.JSX.Element {
   const t = useIntlayer('payableMarkPaid');
   const unbookedText = useIntlayer('payablesUnbooked');
@@ -159,7 +161,7 @@ export function CashFields(props: {
           />
         </Box>
       )}
-      <Box>
+      <Box sx={props.loan ? { display: 'none' } : undefined}>
         <Typography component="label" htmlFor="mark-paid-category" variant="caption">
           {t.category.value}
         </Typography>
@@ -174,7 +176,11 @@ export function CashFields(props: {
         />
       </Box>
       <Alert severity="info">
-        {value.walletId === IN_HAND ? unbookedText.inHandHint.value : t.cashHint.value}
+        {props.loan
+          ? t.loanHint.value
+          : value.walletId === IN_HAND
+            ? unbookedText.inHandHint.value
+            : t.cashHint.value}
       </Alert>
     </Box>
   );

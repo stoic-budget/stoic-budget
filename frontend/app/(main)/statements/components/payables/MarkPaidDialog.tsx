@@ -242,11 +242,12 @@ function MarkPaidForm({
         )}
         {mode === 'cash' && (
           <CashFields
-            wallets={options.wallets}
+            wallets={options.wallets.filter(wallet => wallet.id !== payable.loanWalletId)}
             categories={options.categories}
             value={selectedCash}
             onChange={setCash}
             hideDate={Boolean(unbooked)}
+            loan={Boolean(payable.loanWalletId)}
           />
         )}
         {mode === 'plain' && <Alert severity="warning">{t.plainHint.value}</Alert>}

@@ -100,6 +100,10 @@ export class LoanTerms {
   @Column({ name: 'auto_split', type: 'boolean', default: false })
   autoSplit: boolean;
 
+  /** Days before each payment date its reminder goes out; null is no reminders. */
+  @Column({ name: 'remind_days_before', type: 'smallint', nullable: true })
+  remindDaysBefore: number | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

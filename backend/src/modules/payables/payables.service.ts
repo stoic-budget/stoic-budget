@@ -29,7 +29,6 @@ import type {
   UpdatePayableBody,
 } from '../../contracts';
 import { EntityType } from '../../entities/audit-event.entity';
-import { Category } from '../../entities/category.entity';
 import {
   NotificationCategory,
   NotificationSeverity,
@@ -45,17 +44,16 @@ import { PayablePayment } from '../../entities/payable-payment.entity';
 import { Statement } from '../../entities/statement.entity';
 import { Tag } from '../../entities/tag.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
-import { Wallet } from '../../entities/wallet.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import {
   type PayableOverdueEvent,
   type PayablePaidEvent,
-  transactionCreatedEvent,
 } from '../notifications/events/notification-events';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkspaceCurrencyService } from '../workspaces/workspace-currency.service';
 import { ExportFormat, PayablesSortOption } from './dto/filter-payables.dto';
+import { deletePayment, recordCashPayment } from './payable-cash-payment';
 import { assertOneSource, exactSubset, isClosed, notRejectedSql } from './payable-payments.util';
 import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
@@ -415,70 +413,16 @@ export class PayablesService {
     }
   }
 
-  private async recordCashPayment(
+  private recordCashPayment(
     manager: EntityManager,
     payable: Payable,
-    /** Null: cash handed over in person and kept in no wallet. */
     walletId: string | null,
     payload: Pick<MarkPayablePaidBody, 'paidOn' | 'categoryId'>,
-    /** What was handed over now; the whole bill when not said otherwise. */
     paidAmount?: number,
   ): Promise<string> {
-    const workspaceId = payable.workspaceId;
-    const currency = payable.currency.toUpperCase();
-    const wallet = walletId
-      ? await manager.getRepository(Wallet).findOne({
-          where: { id: walletId, workspaceId },
-          select: { id: true, currency: true },
-        })
-      : null;
-    if (walletId && !wallet) {
-      throw new BadRequestException(appError('PAYABLE_WALLET_NOT_FOUND'));
-    }
-    if (wallet && wallet.currency.toUpperCase() !== currency) {
-      throw new BadRequestException(
-        appError('PAYABLE_WALLET_CURRENCY_MISMATCH', {
-          walletCurrency: wallet.currency.toUpperCase(),
-          currency,
-        }),
-      );
-    }
-    if (payload.categoryId) {
-      const category = await manager.getRepository(Category).exists({
-        where: { id: payload.categoryId, workspaceId },
-      });
-      if (!category) {
-        throw new BadRequestException(appError('PAYABLE_CATEGORY_NOT_FOUND'));
-      }
-    }
-
-    const isIncome = payable.direction === PayableDirection.RECEIVABLE;
-    const amount = this.round2(paidAmount ?? Number(payable.amount));
-    const transactions = manager.getRepository(Transaction);
-    const transaction = await transactions.save(
-      transactions.create({
-        workspaceId,
-        statementId: null,
-        walletId: wallet?.id ?? null,
-        transactionDate: payload.paidOn ? new Date(payload.paidOn) : new Date(),
-        counterpartyName: payable.vendor,
-        paymentPurpose: payable.comment || payable.vendor,
-        amount,
-        debit: isIncome ? null : amount,
-        credit: isIncome ? amount : null,
-        currency,
-        transactionType: isIncome ? TransactionType.INCOME : TransactionType.EXPENSE,
-        categoryId: payload.categoryId ?? null,
-        // The user recorded this payment by hand.
-        isVerified: true,
-      }),
+    return recordCashPayment(manager, payable, walletId, payload, paidAmount, (name, event) =>
+      this.queueEvent(manager, name, event),
     );
-    this.queueEvent(
-      manager,
-      'transaction.created',
-      transactionCreatedEvent(transaction, 'payment'),
-    );
-    return transaction.id;
   }
 
   /**
@@ -506,7 +450,8 @@ export class PayablesService {
   async addPayment(
     id: string,
     workspaceId: string,
-    userId: string,
+    /** Null: a payment the application matched by itself (a loan's). */
+    userId: string | null,
     dto: AddPayablePaymentBody,
   ): Promise<Payable> {
     assertOneSource(dto);
@@ -685,7 +630,7 @@ export class PayablesService {
       if (!payment) {
         throw new NotFoundException(appError('PAYABLE_PAYMENT_NOT_FOUND'));
       }
-      await payments.delete({ id: paymentId });
+      await deletePayment(manager, payment);
 
       const remaining = await payments.find({ where: { payableId: id, workspaceId } });
       const payable = await manager

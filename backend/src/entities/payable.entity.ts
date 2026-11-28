@@ -16,6 +16,7 @@ import type { LateReason, RecurrenceRule } from '../contracts';
 import { Tag } from './tag.entity';
 import { Transaction } from './transaction.entity';
 import { User } from './user.entity';
+import { Wallet } from './wallet.entity';
 import { Workspace } from './workspace.entity';
 
 export enum PayableStatus {
@@ -143,6 +144,16 @@ export class Payable {
   @Column({ type: 'text', nullable: true })
   comment: string | null;
 
+  /**
+   * The loan account this bill is a payment of: the loan's terms own its rule
+   * and amounts, and a payment into the account settles it.
+   */
+  @ManyToOne(() => Wallet, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'loan_wallet_id' })
+  loanWallet?: Relation<Wallet | null>;
+
+  @Column({ name: 'loan_wallet_id', type: 'uuid', nullable: true })
+  loanWalletId: string | null;
   /** Why the bill was paid late, as the person said it; null until they do. */
   @Column({ name: 'late_reason', type: 'varchar', length: 32, nullable: true })
   lateReason: LateReason | null;
