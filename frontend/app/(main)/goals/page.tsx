@@ -3,6 +3,7 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
+import ConfirmModal from '@/app/components/ConfirmModal';
 import { Plus } from '@/app/components/icons';
 import { useQuickActions } from '@/app/components/mobile/quick-actions-store';
 import { EmptyState } from '@/app/components/ui/EmptyState';
@@ -32,7 +33,8 @@ export default function GoalsPage() {
     updateGoal,
     deleteGoal,
     addContribution,
-  } = useGoals();
+  } = useGoals({ saveFailed: t.saveFailed.value, coverFailed: t.coverFailed.value });
+  const [deleting, setDeleting] = useState<Goal | null>(null);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Goal | null>(null);
@@ -187,7 +189,7 @@ export default function GoalsPage() {
                 <Button size="small" onClick={() => openEdit(goal)}>
                   {t.edit}
                 </Button>
-                <Button size="small" color="error" onClick={() => void deleteGoal(goal.id)}>
+                <Button size="small" color="error" onClick={() => setDeleting(goal)}>
                   {t.remove}
                 </Button>
               </>
@@ -195,6 +197,22 @@ export default function GoalsPage() {
           />
         ))}
       </Box>
+
+      <ConfirmModal
+        isOpen={deleting !== null}
+        onClose={() => setDeleting(null)}
+        onConfirm={() => {
+          if (deleting) {
+            void deleteGoal(deleting.id);
+          }
+          setDeleting(null);
+        }}
+        title={t.confirmDeleteTitle.value}
+        message={`${deleting?.name ?? ''}: ${t.confirmDeleteMessage.value}`}
+        confirmText={t.remove.value}
+        cancelText={t.cancel.value}
+        isDestructive
+      />
 
       <GoalFormDrawer
         open={formOpen}

@@ -341,7 +341,7 @@ export class CryptoService {
     const transactionCount = await this.transactionRepo.count({
       where: { workspaceId, cryptoWalletId: wallet.id },
     });
-    await this.walletRepo.delete(wallet.id);
+    await this.balanceService.removeWallet(this.walletRepo, wallet.id, workspaceId, userId);
     await this.recordAudit([
       {
         workspaceId,
@@ -398,6 +398,7 @@ export class CryptoService {
       walletCount,
       holdings,
       unpriced: portfolio.unpriced,
+      ...(portfolio.missingRates ? { missingRates: portfolio.missingRates } : {}),
       ...totalGain(holdings),
       portfolioChangeSinceYesterday: await this.getPortfolioChangeSinceYesterday(
         holdings,
@@ -496,12 +497,10 @@ export class CryptoService {
       return null;
     }
     const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const usdToCurrency = await this.exchangeRatesService.getRate(
-      'USD',
-      currency,
-      undefined,
-      workspaceId,
-    );
+    const rates = this.exchangeRatesService;
+    const usdToCurrency = await rates.getRateOrNull('USD', currency, undefined, workspaceId);
+    // No rate: no honest change to show, as when a price is missing (#787).
+    if (usdToCurrency === null) return null;
 
     let now = 0;
     let before = 0;

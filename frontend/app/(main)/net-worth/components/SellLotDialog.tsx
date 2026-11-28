@@ -9,6 +9,7 @@ import { ModalFooter, ModalShell } from '@/app/components/ui/modal-shell';
 import { PRIVATE_CLASS } from '@/app/components/ui/private-amount';
 import { useIntlayer } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
+import { localToday } from '@/app/lib/local-today';
 import type { MetalLot, SellLotInput } from '../hooks/useMetals';
 
 interface SellLotDialogProps {
@@ -44,7 +45,7 @@ export function SellLotDialog({
     if (!lot) return;
     setPieces(String(lot.quantity));
     setProceeds(String(round2(lot.dealerValue)));
-    setSoldOn(new Date().toISOString().slice(0, 10));
+    setSoldOn(localToday());
     setCounterparty(lot.counterparty ?? '');
   }, [lot]);
 

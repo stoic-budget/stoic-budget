@@ -10,6 +10,7 @@ import { CustomTableRow } from '../../../entities/custom-table-row.entity';
 import {
   CUSTOM_TABLE_AGGREGATE_FNS,
   type CustomTableAggregateDto,
+  type CustomTableAggregateResult,
   type CustomTableRowSortDto,
 } from '../dto/list-custom-table-rows.dto';
 
@@ -180,4 +181,47 @@ export function normalizeAggregateValue(value: unknown): number | string | null 
   }
   const num = Number(value);
   return Number.isFinite(num) ? num : String(value);
+}
+
+/** A table that keeps each row's currency code: that column, and the money columns the source fills. */
+export interface RowCurrency {
+  codeKey: string;
+  money: Set<string>;
+}
+
+/**
+ * How many currency codes the rows in scope carry, and the one they share,
+ * for a table that keeps each row's code (a table made from transactions)
+ * (#648). A row without a code counts as a currency of its own: added to
+ * coded rows it would be another currency added up.
+ */
+export function currencyCodesSelection(
+  query: SelectQueryBuilder<CustomTableRow>,
+  rowCurrency: RowCurrency | null,
+): string[] {
+  if (!rowCurrency) return [];
+  query.setParameter('currency_col', rowCurrency.codeKey);
+  const code = `COALESCE(UPPER(TRIM(${buildTypedValueExprs('currency_col').textExpr})), '')`;
+  return [`COUNT(DISTINCT ${code}) AS "currency_codes"`, `MIN(${code}) AS "currency_code"`];
+}
+
+/**
+ * A sum, average, minimum or maximum of money in several currencies is no one
+ * figure: it is given as none and said so, never the codes added up. Over
+ * rows in one currency it carries that code, the one their cells show (#648).
+ * A count stays as it is, and so does a column the user keeps in one currency.
+ */
+export function markMixedCurrencies(
+  items: CustomTableAggregateResult[],
+  scope: Record<string, unknown> | undefined,
+  rowCurrency: RowCurrency | null,
+): CustomTableAggregateResult[] {
+  if (!rowCurrency) return items;
+  const mixed = Number(scope?.currency_codes) > 1;
+  const code = String(scope?.currency_code ?? '');
+  return items.map(item => {
+    if (item.fn === 'count' || !rowCurrency.money.has(item.col)) return item;
+    if (mixed) return { ...item, value: null, mixedCurrencies: true };
+    return /^[A-Z]{3}$/.test(code) ? { ...item, currency: code } : item;
+  });
 }

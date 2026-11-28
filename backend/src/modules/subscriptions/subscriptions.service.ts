@@ -73,6 +73,7 @@ import {
 } from '../tax/tax-assignment.service';
 import * as calendar from './charge-calendar.util';
 import { CurrencyTotals } from './currency-totals';
+import { advancePastDue, chargeArrived } from './missed-charge';
 import {
   chargesInMonth,
   isPastMonth,
@@ -696,7 +697,10 @@ export class SubscriptionsService {
       this.workspaceRepository.findOne({ where: { id: workspaceId } }),
     ]);
 
-    const workspaceCurrency = workspace?.currency?.toUpperCase() ?? null;
+    const money = workspaceMoney(this.exchangeRatesService, workspaceId, workspace?.currency, {
+      faceValue: true,
+    });
+    const workspaceCurrency = money.currency;
     const { key, period, today } = monthInView(month, new Date(), payPeriod);
     const recordedThisMonth = await chargesInMonth(this.chargeRepository, workspaceId, period);
     const status = { paidAmount: 0, paidCount: 0, unpaidAmount: 0, unpaidCount: 0 };
@@ -719,17 +723,11 @@ export class SubscriptionsService {
       paidByCurrency.add(sub.currency, Number(sub.amount) * paid);
       unpaidByCurrency.add(sub.currency, Number(sub.amount) * unpaid);
 
-      let amount = Number(sub.amount);
-      if (workspaceCurrency && sub.currency.toUpperCase() !== workspaceCurrency) {
-        const converted = await this.exchangeRatesService.convert(
-          amount,
-          sub.currency,
-          workspaceCurrency,
-          today,
-          workspaceId,
-        );
-        amount = converted.converted;
-      }
+      // At today's rate; a currency with none counts at face value, as in the summary, and is named (#787).
+      const amount =
+        workspaceCurrency && sub.currency.toUpperCase() !== workspaceCurrency
+          ? await money.convert(Number(sub.amount), sub.currency, today)
+          : Number(sub.amount);
 
       status.paidAmount += amount * paid;
       status.paidCount += paid;
@@ -759,6 +757,7 @@ export class SubscriptionsService {
       paidByCurrency: paidByCurrency.list(),
       unpaidByCurrency: unpaidByCurrency.list(),
       items,
+      ...money.missing(),
     };
   }
 
@@ -1113,13 +1112,10 @@ export class SubscriptionsService {
     });
 
     for (const sub of pastDue) {
-      const currentChargeDate = sub.nextChargeDate;
-      if (!currentChargeDate) continue;
-
-      sub.lastChargeDate = currentChargeDate;
-      sub.nextChargeDate = this.addInterval(new Date(currentChargeDate), sub.frequency);
-      sub.riskStatus = SubscriptionRiskStatus.MISSING_CHARGE;
-      await this.subscriptionRepository.save(sub);
+      // Flags a charge missing only once its due date has had a cycle to arrive.
+      if (await advancePastDue(sub, this.chargeRepository)) {
+        await this.subscriptionRepository.save(sub);
+      }
     }
 
     if (pastDue.length > 0) {
@@ -1517,6 +1513,8 @@ export class SubscriptionsService {
 
   /** Last charge is the latest payment; the next one moves past a payment on or after it. */
   private advancePastCharge(subscription: Subscription, chargeDay: string): void {
+    // A charge came: whatever "missing" said about it is over.
+    chargeArrived(subscription);
     const last = toDay(subscription.lastChargeDate);
     if (!last || last < chargeDay) {
       subscription.lastChargeDate = chargeDay as unknown as Date;
@@ -1580,7 +1578,8 @@ export class SubscriptionsService {
           currency: transaction.currency,
           chargeDate: transaction.transactionDate,
           expectedAmount: subscription.amount,
-          expectedDate: subscription.nextChargeDate,
+          // The charge this payment settled: a past row is a past period's, not the next one (#608).
+          expectedDate: calendar.settledDateOf(subscription, transaction.transactionDate),
           matchStatus,
         }),
       );

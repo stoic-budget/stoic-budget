@@ -7,7 +7,7 @@ import type { Repository } from 'typeorm';
 import { EffectRuntime } from '../../common/effect/effect-runtime';
 import { getWith } from '../../common/effect/http-json';
 import { appError } from '../../common/errors/app-error';
-import { assertPublicEgressHost, pinPublicEgressHost } from '../../common/utils/egress-url.util';
+import { assertPublicEgressHost } from '../../common/utils/egress-url.util';
 import { decryptText, encryptText } from '../../common/utils/encryption.util';
 import type {
   SaveAppSettingsBody,
@@ -22,6 +22,11 @@ import {
   WorkspaceServiceSettings,
   WorkspaceServiceSettingsKey,
 } from '../../entities';
+import { WorkspacePluginsService } from '../workspaces/workspace-plugins.service';
+import { smtpConnectTarget, smtpFromEnv } from './smtp-env';
+
+export { smtpConnectTarget };
+
 import { storedSmtpForSameServer } from './smtp-stored-secret';
 
 /** Telegram's `getMe`: `ok` false with a description for a bad token. */
@@ -42,26 +47,13 @@ export type SmtpRuntimeSettings = {
   source: 'workspace' | 'env' | 'disabled';
 };
 
-/**
- * Where an SMTP transport for `host` connects. A host from a workspace's
- * settings is user input: it was checked when saved and is resolved and checked
- * again here, so the socket goes to the address that passed (DNS rebinding).
- * The SMTP_* env host is the operator's own and may be a private relay.
- */
-export function smtpConnectTarget(
-  smtp: SmtpRuntimeSettings | null | undefined,
-  host: string,
-): Promise<{ host: string; servername?: string }> {
-  const workspaceHost =
-    smtp?.source !== 'env' && smtp?.host === host && host !== process.env.SMTP_HOST;
-  return workspaceHost ? pinPublicEgressHost(host) : Promise.resolve({ host });
-}
-
 export type TelegramRuntimeSettings = {
   botToken: string | null;
   timeoutMs: number;
   /** `instance`: the shared bot an instance admin saved; `env`: TELEGRAM_BOT_TOKEN. */
   source: 'workspace' | 'instance' | 'env' | 'disabled';
+  /** The workspace switched Telegram off: no bot talks for it, not even the shared one. */
+  paused?: boolean;
 };
 
 export type AppRuntimeSettings = {
@@ -77,6 +69,7 @@ export class ApplicationSettingsService {
     private readonly effects: EffectRuntime,
     @InjectRepository(InstanceSetting)
     private readonly instanceSettingsRepository: Repository<InstanceSetting>,
+    private readonly plugins: WorkspacePluginsService,
   ) {}
 
   async getSmtpStatus(user: User, requestWorkspaceId?: string) {
@@ -86,6 +79,8 @@ export class ApplicationSettingsService {
       requestWorkspaceId,
     );
     const runtime = await this.getSmtpSettings(this.requireWorkspaceId(user, requestWorkspaceId));
+    // While SMTP is switched off the status shows the server's own, password included.
+    const storedPass = settings?.encryptedSecrets?.pass;
     return {
       connected: runtime.source !== 'disabled',
       status: runtime.source !== 'disabled' ? 'connected' : 'disconnected',
@@ -98,7 +93,9 @@ export class ApplicationSettingsService {
         from: runtime.from,
         replyTo: runtime.replyTo,
         timeoutMs: runtime.timeoutMs,
-        passConfigured: Boolean(settings?.encryptedSecrets?.pass || process.env.SMTP_PASS),
+        passConfigured: Boolean(
+          runtime.source === 'workspace' ? storedPass : process.env.SMTP_PASS,
+        ),
       },
     };
   }
@@ -241,12 +238,7 @@ export class ApplicationSettingsService {
    * workspace: that is another tenant's server for mail about this one.
    */
   async getSmtpSettings(workspaceId: string | null): Promise<SmtpRuntimeSettings> {
-    const workspace = workspaceId
-      ? await this.settingsRepository.findOne({
-          where: { workspaceId, key: WorkspaceServiceSettingsKey.SMTP },
-        })
-      : null;
-    return this.smtpRuntimeOf(workspace);
+    return this.smtpRuntimeOf(await this.smtpRowOf(workspaceId));
   }
 
   /**
@@ -258,12 +250,18 @@ export class ApplicationSettingsService {
   async getAccountSmtpSettings(
     user: Pick<User, 'id' | 'workspaceId'>,
   ): Promise<SmtpRuntimeSettings> {
-    const workspace = user.workspaceId
-      ? await this.settingsRepository.findOne({
-          where: { workspaceId: user.workspaceId, key: WorkspaceServiceSettingsKey.SMTP },
-        })
-      : null;
+    const workspace = await this.smtpRowOf(user.workspaceId);
     return this.smtpRuntimeOf(workspace?.accountMailUserId === user.id ? workspace : null);
+  }
+
+  /** The SMTP server a workspace saved, unless it has SMTP switched off. */
+  private async smtpRowOf(workspaceId: string | null | undefined) {
+    if (!(workspaceId && (await this.plugins.isEnabled(workspaceId, 'smtp')))) {
+      return null;
+    }
+    return this.settingsRepository.findOne({
+      where: { workspaceId, key: WorkspaceServiceSettingsKey.SMTP },
+    });
   }
 
   private smtpRuntimeOf(workspace: WorkspaceServiceSettings | null): SmtpRuntimeSettings {
@@ -275,25 +273,22 @@ export class ApplicationSettingsService {
       );
     }
 
-    const env = {
-      host: process.env.SMTP_HOST || null,
-      port: this.positiveNumber(process.env.SMTP_PORT, 587),
-      secure: process.env.SMTP_SECURE === 'true',
-      user: process.env.SMTP_USER || null,
-      pass: process.env.SMTP_PASS || null,
-      from: process.env.SMTP_FROM || null,
-      replyTo: process.env.SMTP_REPLY_TO || null,
-      timeoutMs: this.positiveNumber(process.env.SMTP_TIMEOUT_MS, 10000),
-    };
-    return env.host && env.from ? { ...env, source: 'env' } : { ...env, source: 'disabled' };
+    return smtpFromEnv((value, fallback) => this.positiveNumber(value, fallback));
   }
 
   async getTelegramSettings(
     user?: User | null,
     requestWorkspaceId?: string,
   ): Promise<TelegramRuntimeSettings> {
-    const workspace = user
-      ? await this.findSettings(user, WorkspaceServiceSettingsKey.TELEGRAM, requestWorkspaceId)
+    // Never throws for a user without a workspace: an inbound update still gets the shared bot.
+    const workspaceId = requestWorkspaceId || user?.workspaceId || user?.lastWorkspaceId;
+    if (workspaceId && !(await this.plugins.isEnabled(workspaceId, 'telegram'))) {
+      return { botToken: null, timeoutMs: 10000, source: 'disabled', paused: true };
+    }
+    const workspace = workspaceId
+      ? await this.settingsRepository.findOne({
+          where: { workspaceId, key: WorkspaceServiceSettingsKey.TELEGRAM },
+        })
       : null;
     if (workspace) {
       const runtime = this.telegramRuntimeFromParts(
@@ -355,7 +350,8 @@ export class ApplicationSettingsService {
         // A token encrypted under another key cannot be used; the others still can.
         continue;
       }
-      if (!botToken || bots.has(botToken)) {
+      const paused = !(await this.plugins.isEnabled(row.workspaceId, 'telegram'));
+      if (!botToken || bots.has(botToken) || paused) {
         continue;
       }
       const app = await this.settingsRepository.findOne({

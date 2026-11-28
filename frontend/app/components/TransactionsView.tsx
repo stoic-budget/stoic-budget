@@ -55,8 +55,8 @@ export default function TransactionsView({ transactions }: TransactionsViewProps
 
   const formatDate = useCallback(
     (dateString: string): string => {
-      const date = new Date(dateString);
-      return formatStoredDate(date, resolveLocaleTag(locale));
+      // The raw day: formatStoredDate reads a YYYY-MM-DD as that day where the person is.
+      return formatStoredDate(dateString, resolveLocaleTag(locale));
     },
     [locale],
   );

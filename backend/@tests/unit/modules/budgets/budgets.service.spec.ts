@@ -820,7 +820,9 @@ describe('BudgetsService', () => {
         }),
       ]);
       chargeRepository.find.mockResolvedValue([
-        { subscriptionId: 'sub-music', expectedDate: '2026-05-20' },
+        { subscriptionId: 'sub-music', chargeDate: '2026-05-06', expectedDate: '2026-05-20' },
+        // April's charge paid on its day: the May payment is an early one, not April's late one.
+        { subscriptionId: 'sub-music', chargeDate: '2026-04-20', expectedDate: '2026-04-20' },
       ]);
 
       const [fun] = await service.findAll(workspaceId);
@@ -830,11 +832,31 @@ describe('BudgetsService', () => {
           where: {
             workspaceId,
             subscriptionId: In(['sub-music']),
-            expectedDate: MoreThanOrEqual('2026-05-08'),
+            // 19 months of payments: the charge before a coming one, an annual one paid up to half a year early included.
+            chargeDate: MoreThanOrEqual('2024-10-08'),
           },
         }),
       );
       expect(fun.subscriptionReserve).toEqual({ amount: 0, items: [] });
+    });
+
+    it("still reserves the next charge when a past period's payment was recorded against it (#608)", async () => {
+      budgetRepository.find.mockResolvedValue([budget()]);
+      // Posted on 21 Apr for the 20 Apr charge, linked after the schedule had moved on to 20 May.
+      subscriptionRepository.find.mockResolvedValue([
+        subscription({
+          frequency: SubscriptionFrequency.MONTHLY,
+          amount: '10.00',
+          nextChargeDate: '2026-05-20',
+        }),
+      ]);
+      chargeRepository.find.mockResolvedValue([
+        { subscriptionId: 'sub-music', chargeDate: '2026-04-21', expectedDate: '2026-05-20' },
+      ]);
+
+      const [fun] = await service.findAll(workspaceId);
+
+      expect(fun.subscriptionReserve.amount).toBe(10);
     });
 
     it('reserves nothing for a budget whose window has closed', async () => {

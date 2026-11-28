@@ -46,7 +46,6 @@ const nav = {
 
 const userMenuNav = {
   activityLog: 'Activity log',
-  integrations: 'Integrations',
   plugins: 'Plugins',
 };
 

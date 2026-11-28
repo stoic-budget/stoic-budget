@@ -89,6 +89,10 @@ describe('Transaction ownership (e2e)', () => {
     dataSource = moduleFixture.get<DataSource>(DataSource);
 
     owner = await registerAccount(app, emails.owner, 'Household Owner');
+
+    // The rows are booked in EUR: the reports, in the workspace's currency, count them as booked.
+
+    await dataSource.query("UPDATE workspaces SET currency = 'EUR' WHERE id = $1", [owner.workspaceId]);
     partner = await registerAccount(app, emails.partner, 'Household Partner');
     outsider = await registerAccount(app, emails.outsider, 'Outsider');
 

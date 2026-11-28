@@ -1,9 +1,23 @@
+import { Raw } from 'typeorm';
+import { STANDARD_WORKSPACE } from '../workspaces/version-workspaces';
+
 /**
- * Which plugins a workspace has switched on. Stored under `settings.plugins`
- * next to `processing` and `profile`; a missing key takes its default.
+ * Which plugins and integrations a workspace has switched on. Stored under
+ * `settings.plugins` next to `processing` and `profile`; a missing key takes
+ * its default. Integrations default to on: they did nothing before they were
+ * set up, and a workspace that set one up keeps it running.
  */
 
-export const pluginKeys = ['webhooks', 'mcp', 'aiAssistant'] as const;
+export const pluginKeys = [
+  'webhooks',
+  'mcp',
+  'aiAssistant',
+  'smtp',
+  'imap',
+  'bankSync',
+  'peppol',
+  'telegram',
+] as const;
 export type WorkspacePluginKey = (typeof pluginKeys)[number];
 
 export type WorkspacePluginSettings = Record<WorkspacePluginKey, boolean>;
@@ -12,6 +26,11 @@ export const DEFAULT_PLUGIN_SETTINGS: WorkspacePluginSettings = {
   webhooks: false,
   mcp: false,
   aiAssistant: true,
+  smtp: true,
+  imap: true,
+  bankSync: true,
+  peppol: true,
+  telegram: true,
 };
 
 const PLUGINS_KEY = 'plugins';
@@ -39,4 +58,19 @@ export const mergePluginSettings = (
   [PLUGINS_KEY]: readPluginSettings({
     settings: { [PLUGINS_KEY]: { ...readPluginSettings({ settings: current }), ...patch } },
   }),
+});
+
+/**
+ * SQL that holds while `settingsColumn` (a `workspaces.settings` jsonb) leaves
+ * `plugin` on, with the same default as `readPluginSettings`.
+ */
+export const pluginOnSql = (settingsColumn: string, plugin: WorkspacePluginKey): string =>
+  DEFAULT_PLUGIN_SETTINGS[plugin]
+    ? `(${settingsColumn} -> '${PLUGINS_KEY}' -> '${plugin}') IS DISTINCT FROM 'false'::jsonb`
+    : `(${settingsColumn} -> '${PLUGINS_KEY}' -> '${plugin}') = 'true'::jsonb`;
+
+/** For `find()` on a `workspace` relation: a live workspace (not a version) with `plugin` on. */
+export const standardWorkspaceWith = (plugin: WorkspacePluginKey) => ({
+  ...STANDARD_WORKSPACE,
+  settings: Raw(alias => pluginOnSql(alias, plugin)),
 });

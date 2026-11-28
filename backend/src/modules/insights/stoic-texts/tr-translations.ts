@@ -1181,4 +1181,85 @@ export const tr: StoicTextMap = {
         '%{{percent}} düzeyinde, bitiş tarihi olmadan. Nereye yelken açtığınızı bilin, aylık adım arkasından gelir.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'İki kez unutmak bir alışkanlıktır',
+      message:
+        'Son altı ayda {{count}} fatura unutulduğu için geç ödendi. Hafıza bir plan değildir: hatırlatma, harekete geçmeye vakit varken daha erken gelsin.',
+    },
+    {
+      title: 'Fatura sizi unutmadı',
+      message:
+        'Son altı ayda {{count}} fatura biri onları hatırlayana kadar bekledi. Aklın taşıyamadığını bir hatırlatma taşır: ona birkaç gün daha verin.',
+    },
+    {
+      title: 'Hatırlatma hatırlasın',
+      message:
+        'Altı ayda {{count}} kez unutuldu. Akıl tarihleri saklamak için değil, yargılamak içindir: hatırlatma vaktinde gelsin.',
+    },
+    {
+      title: 'Küçük bir görev, sık kaçırılan',
+      message:
+        '{{count}} geciken fatura, her biri sadece unutulmuş. Huzur küçük işlerde düzenle başlar ve daha erken bir hatırlatma hiçbir şeye mal olmaz.',
+    },
+    {
+      title: 'Unutmanın bir düzeni var',
+      message:
+        'Altı ayda {{count}} fatura fark edilmeden vadesini geçti. Seneca her akşam gününü gözden geçirirdi; birkaç gün önce gelen bir hatırlatma bunu sizin için yapar.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Maaş faturadan sonra geliyor',
+      message:
+        'Altı ayda {{count}} kez fatura vadesinde para henüz yoktu. Tarihi maaş gününün sonrasına alın ya da bir ödemeyi kenara ayırın: hazırlanan şey insanı aceleye getirmez.',
+    },
+    {
+      title: 'Para vadeden sonra geliyor',
+      message:
+        'Altı ayda {{count}} kez fatura gelirden önce geldi. Tarihi paranın zaten olduğu yere koyun, fatura sizi sıkıştırmayı bırakır.',
+    },
+    {
+      title: 'Bir ödeme önde',
+      message:
+        'Altı ayda {{count}} geciken fatura maaş gününü bekledi. Bir ödemeyi kenara koyun, takvim üzerinizdeki gücünü kaybeder.',
+    },
+    {
+      title: 'Tarihleri düzenleyin, kaygıyı değil',
+      message:
+        'Altı ayda {{count}} kez maaştan önce para yetmedi. Çare kaygı değil düzendir: fatura gelirden sonra ya da öncesinde bir yastık.',
+    },
+    {
+      title: 'Hazırlanan acele ettirmez',
+      message:
+        '{{count}} kez faturanın vadesi paradan önce geldi. Önceden hazırlanan sakince karşılanır: bir ödemeyi kenara koyun ya da tarihi taşıyın.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Beklenmedik olan tekrar ediyor',
+      message:
+        'Altı aydaki {{count}} gecikme beklenmedik bir harcamanın ardından geldi. Bilgeye beklentisine aykırı hiçbir şey olmaz, diye yazar Seneca. Beklenmedik olana karşı bir yedek, konmaya değer bir hedeftir.',
+    },
+    {
+      title: 'Beklenmedik olanı bekleyin',
+      message:
+        'Altı ayda {{count}} geciken fatura öngörmediğiniz bir harcamadan sonra geldi. Stoacılar talihsizliği önceden prova ederdi; bir yedek akçe o provanın paradaki karşılığıdır.',
+    },
+    {
+      title: 'Öngörülemeyen için bir yastık',
+      message:
+        'Altı ayda {{count}} fatura sürpriz bir harcamanın ardında bekledi. Küçük bir yedek, bir sonraki sürprizi gecikmeye değil bir rahatsızlığa çevirir.',
+    },
+    {
+      title: 'Talih ödünç verir, geri ister',
+      message:
+        '{{count}} kez öngörülmeyen bir masraf faturayı vadesinden öteye itti. Talih yine isteyecek; faturanın beklememesi için bir yedek ayırın.',
+    },
+    {
+      title: 'Sürprizler nadir değil',
+      message:
+        '{{count}} geciken fatura beklenmedik bir şeyin ardından geldi. Sık olan şey aslında beklenmedik değildir: bir yedek hedefi ona yer açar.',
+    },
+  ],
 };

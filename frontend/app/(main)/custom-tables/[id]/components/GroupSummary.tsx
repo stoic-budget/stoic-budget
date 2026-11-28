@@ -13,7 +13,7 @@ interface GroupSummaryProps {
   loading: boolean;
   fallbackCurrency: string;
   onPick: (key: string | null) => void;
-  labels: { title: string; empty: string; rows: string; loading: string };
+  labels: { title: string; empty: string; rows: string; loading: string; mixedCurrencies: string };
 }
 
 const fill = (template: string, count: number) => template.replace('{{count}}', String(count));
@@ -28,8 +28,16 @@ export function GroupSummary({
   onPick,
   labels,
 }: GroupSummaryProps) {
-  const formatAggregate = (col: string, value: number | string | null, fn: string) => {
-    const column = columns.find(c => c.key === col);
+  const formatAggregate = (
+    col: string,
+    value: number | string | null,
+    fn: string,
+    currency?: string,
+  ) => {
+    const found = columns.find(c => c.key === col);
+    // A group's rows in one currency are shown in it (#648), not in the column's.
+    const column =
+      found && currency ? { ...found, config: { ...(found.config ?? {}), currency } } : found;
     if (typeof value !== 'number') {
       return value ?? '—';
     }
@@ -61,8 +69,12 @@ export function GroupSummary({
               {group.aggregates.map(item => (
                 <span key={`${item.col}:${item.fn}`} className="seneca-ct__group-agg">
                   {columns.find(c => c.key === item.col)?.title ?? item.col}:{' '}
-                  {isMoneyAggregate(item.col, item.value, item.fn) ? (
-                    <PrivateAmount>{formatAggregate(item.col, item.value, item.fn)}</PrivateAmount>
+                  {item.mixedCurrencies ? (
+                    labels.mixedCurrencies
+                  ) : isMoneyAggregate(item.col, item.value, item.fn) ? (
+                    <PrivateAmount>
+                      {formatAggregate(item.col, item.value, item.fn, item.currency)}
+                    </PrivateAmount>
                   ) : (
                     formatAggregate(item.col, item.value, item.fn)
                   )}
