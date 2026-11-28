@@ -1,9 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, LessThanOrEqual, type Repository } from 'typeorm';
+import { IsNull, LessThanOrEqual, Not, type Repository } from 'typeorm';
+import { appError } from '../../common/errors/app-error';
 import { STANDARD_WORKSPACE } from '../../common/workspaces/version-workspaces';
-import { Invoice } from '../../entities/invoice.entity';
+import { Invoice, InvoiceStatus } from '../../entities/invoice.entity';
 import { InvoiceLineItem } from '../../entities/invoice-line-item.entity';
 import { advanceIssueDate } from './invoice-recurrence.util';
 import { InvoicesService } from './invoices.service';
@@ -27,6 +28,8 @@ export class InvoicesScheduler {
     const templates = await this.invoiceRepository.find({
       where: {
         isRecurring: true,
+        // A void invoice is no template, whatever its recurrence still says.
+        status: Not(InvoiceStatus.VOID),
         nextIssueDate: LessThanOrEqual(today),
         deletedAt: IsNull(),
         workspace: STANDARD_WORKSPACE,
@@ -45,6 +48,19 @@ export class InvoicesScheduler {
         );
       }
     }
+  }
+
+  /**
+   * Ends an invoice's series, whatever its status: an issued invoice cannot be
+   * edited, yet the client must be able to stop being billed.
+   */
+  async stopSeries(id: string, workspaceId: string): Promise<Invoice> {
+    const invoice = await this.invoiceRepository.findOne({ where: { id, workspaceId } });
+    if (!invoice) {
+      throw new NotFoundException(appError('INVOICE_NOT_FOUND'));
+    }
+    Object.assign(invoice, { isRecurring: false, recurrenceInterval: null, nextIssueDate: null });
+    return this.invoiceRepository.save(invoice);
   }
 
   private async generateOne(template: Invoice): Promise<void> {

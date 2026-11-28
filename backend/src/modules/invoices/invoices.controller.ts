@@ -39,6 +39,7 @@ import { InvoiceAgeingService } from './invoice-ageing.service';
 import { InvoiceDeliveryService } from './invoice-delivery.service';
 import { InvoiceSettingsService } from './invoice-settings.service';
 import { InvoiceXRechnungService } from './invoice-xrechnung.service';
+import { InvoicesScheduler } from './invoices.scheduler';
 import { InvoicesService } from './invoices.service';
 
 @Controller('invoices')
@@ -50,6 +51,7 @@ export class InvoicesController {
     private readonly invoiceAgeingService: InvoiceAgeingService,
     private readonly creditNotesService: CreditNotesService,
     private readonly xrechnungService: InvoiceXRechnungService,
+    private readonly scheduler: InvoicesScheduler,
   ) {}
 
   @Post()
@@ -260,6 +262,18 @@ export class InvoicesController {
     @WorkspaceId() workspaceId: string,
   ) {
     return this.invoicesService.void(id, workspaceId, user.id);
+  }
+
+  /** Stops a recurring invoice issuing copies; it stays as it is otherwise. */
+  @Put(':id/stop-recurring')
+  @WorkspaceAuth(Permission.INVOICE_EDIT)
+  @Audit({ entityType: EntityType.INVOICE, includeDiff: true, isUndoable: false })
+  @SchemaResponse(InvoiceWritten)
+  async stopRecurring(
+    @SchemaParams(InvoiceParams) { id }: InvoiceParams,
+    @WorkspaceId() workspaceId: string,
+  ) {
+    return this.scheduler.stopSeries(id, workspaceId);
   }
 
   @Delete(':id')
