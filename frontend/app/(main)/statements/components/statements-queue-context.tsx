@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { openAppPanel } from '@/app/components/panels/app-panels-store';
+import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
@@ -14,6 +15,7 @@ import {
   STATEMENTS_OPEN_EXPENSE_DRAWER_EVENT,
   type StatementExpenseMode,
 } from '@/app/lib/statement-expense-drawer';
+import { readPluginSwitch } from '@/app/plugins/hooks/usePluginState';
 
 export type StatementsQueueValue = {
   inboxConnected: boolean;
@@ -37,8 +39,10 @@ export function useStatementsQueue(): StatementsQueueValue {
   return useContext(StatementsQueueContext);
 }
 
+/** Whether the inbox can be synced: connected, and IMAP not switched off for the workspace. */
 function useInboxConnected(user: unknown): boolean {
   const [inboxConnected, setInboxConnected] = useState(FALLBACK_VALUE.inboxConnected);
+  const imapOn = readPluginSwitch(useWorkspace().currentWorkspace?.settings, 'imap');
 
   useEffect(() => {
     let isMounted = true;
@@ -70,7 +74,7 @@ function useInboxConnected(user: unknown): boolean {
     };
   }, [user]);
 
-  return inboxConnected;
+  return inboxConnected && imapOn;
 }
 
 type UploadActions = Pick<StatementsQueueValue, 'onScan' | 'onInboxSync' | 'onLocalUpload'>;

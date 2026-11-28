@@ -77,7 +77,9 @@ export function PluginsPanel(): React.JSX.Element {
         // The assistant has nothing to configure while off; the others open to set up first.
         openable={plugin.configurable && (active || plugin.key !== 'ai-assistant')}
         canToggle={canToggle}
-        pending={pending === plugin.key}
+        // One switch at a time: they share one settings blob, and two saves in flight
+        // would each write back the other's old value.
+        pending={pending !== null}
         onToggle={enabled => void setEnabled(plugin.key, enabled)}
         onOpen={() => openAppPanelItem(plugin.key)}
       />
@@ -102,7 +104,7 @@ export function PluginsPanel(): React.JSX.Element {
         ) : null
       }
       canToggle={canToggle}
-      pending={pending === integration.key}
+      pending={pending !== null}
       onToggle={enabled => void setEnabled(integration.key, enabled)}
       onOpen={() => openAppPanelItem(integration.key)}
       dataAttributes={{

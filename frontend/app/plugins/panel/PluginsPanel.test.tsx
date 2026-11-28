@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PluginsPanel } from './PluginsPanel';
 
 const setPluginsMock = vi.hoisted(() => vi.fn());
+const openItemMock = vi.hoisted(() => vi.fn());
 const toastErrorMock = vi.hoisted(() => vi.fn());
 const panelState = vi.hoisted(() => ({ current: { panel: 'plugins', item: null as string | null } }));
 const workspaceMock = vi.hoisted(() => ({
@@ -25,7 +26,7 @@ vi.mock('@/app/components/panels/app-panels-store', () => ({
   useAppPanelState: () => panelState.current,
   closeAppPanel: vi.fn(),
   closeAppPanelItem: vi.fn(),
-  openAppPanelItem: vi.fn(),
+  openAppPanelItem: openItemMock,
 }));
 vi.mock('../ai-assistant/AiAssistantDrawer', () => ({ AiAssistantDrawer: () => null }));
 vi.mock('../webhooks/WebhooksDrawer', () => ({ WebhooksDrawer: () => null }));
@@ -155,5 +156,41 @@ describe('PluginsPanel', () => {
 
     const layer = screen.getByTestId('layer-IMAP inbox');
     expect(layer.textContent).toContain('IMAP inbox is off');
+  });
+
+  it('opens an integration from its row even while it is switched off', () => {
+    workspaceMock.current = { ...workspaceMock.current, settings: { plugins: { peppol: false } } };
+    openItemMock.mockReset();
+    render(<PluginsPanel />);
+
+    const row = document.querySelector('[data-integration-card="peppol"] button') as HTMLElement;
+    expect(row).toBeEnabled();
+    fireEvent.click(row);
+
+    expect(openItemMock).toHaveBeenCalledWith('peppol');
+  });
+
+  it('lists the plugins first, then mail, bank and messaging', () => {
+    render(<PluginsPanel />);
+
+    const order = [...document.querySelectorAll('[role="switch"]')].map(node =>
+      node.getAttribute('aria-label'),
+    );
+    const first = (name: string) => order.findIndex(label => label?.includes(name));
+    expect(first('MCP')).toBeLessThan(first('SMTP'));
+    expect(first('SMTP')).toBeLessThan(first('Bank sync'));
+    expect(first('Bank sync')).toBeLessThan(first('Telegram'));
+  });
+
+  it('holds every switch while one is being saved', async () => {
+    let finish: () => void = () => undefined;
+    setPluginsMock.mockImplementation(() => new Promise<void>(resolve => (finish = resolve)));
+    render(<PluginsPanel />);
+
+    fireEvent.click(switchOf('IMAP inbox'));
+
+    await waitFor(() => expect(switchOf('SMTP email')).toBeDisabled());
+    finish();
+    await waitFor(() => expect(switchOf('SMTP email')).toBeEnabled());
   });
 });
