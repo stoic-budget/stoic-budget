@@ -1,14 +1,7 @@
 import Box from '@mui/material/Box';
 import type React from 'react';
 import type { SystemHealthLevel } from '@/app/lib/contracts';
-
-const DOT: Record<SystemHealthLevel, string> = {
-  ok: 'var(--primary)',
-  warning: 'var(--attention)',
-  error: 'var(--money-down)',
-  off: 'var(--cat-tone-other)',
-  unknown: 'var(--cat-tone-other)',
-};
+import { AdminGroup, StatusDot } from '../../components/AdminGroup';
 
 interface HealthRowProps {
   label: string;
@@ -28,20 +21,9 @@ export function HealthRow({
   detail,
 }: HealthRowProps): React.JSX.Element {
   return (
-    <Box
-      component="li"
-      sx={{
-        listStyle: 'none',
-        py: 1.5,
-        px: 2,
-        '& + &': { borderTop: '1px solid var(--border)' },
-      }}
-    >
+    <Box component="li" sx={{ py: 1.5, px: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-        <Box
-          aria-hidden
-          sx={{ flexShrink: 0, width: 8, height: 8, borderRadius: '50%', bgcolor: DOT[level] }}
-        />
+        <StatusDot level={level} />
         <Box
           component="span"
           sx={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 500, color: 'var(--foreground)' }}
@@ -88,26 +70,5 @@ export function HealthSection({
   title: string;
   children: React.ReactNode;
 }): React.JSX.Element {
-  return (
-    <Box component="section" sx={{ mb: 3 }}>
-      <Box
-        component="h2"
-        sx={{ fontSize: 15, fontWeight: 500, m: 0, mb: 1, color: 'var(--foreground)' }}
-      >
-        {title}
-      </Box>
-      <Box
-        component="ul"
-        sx={{
-          m: 0,
-          p: 0,
-          bgcolor: 'var(--card)',
-          border: '1px solid var(--border)',
-          borderRadius: '12px',
-        }}
-      >
-        {children}
-      </Box>
-    </Box>
-  );
+  return <AdminGroup title={title}>{children}</AdminGroup>;
 }

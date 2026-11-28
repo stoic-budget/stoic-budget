@@ -13,9 +13,21 @@ vi.mock('@/app/lib/query-fn-schema', () => ({ apiQueryDecoded }));
 
 import ParserHealthPage from './page';
 
+const quietBank = {
+  bank: 'kaspi',
+  statements: 40,
+  needsReview: 0,
+  errors: 0,
+  declined: 0,
+  reasons: [],
+  layouts: [],
+};
+
 const health: ParserHealth = {
   since: '2026-09-28T00:00:00.000Z',
   banks: [
+    // The server lists the busy, healthy bank first; the page puts the troubled one on top.
+    quietBank,
     {
       bank: 'axis',
       statements: 12,
@@ -79,7 +91,14 @@ describe('ParserHealthPage', () => {
     });
   };
 
-  it("shows each bank's outcomes, why statements were held, and a new layout marked", async () => {
+  const click = async (element: Element | null | undefined) => {
+    expect(element).toBeTruthy();
+    await act(async () => {
+      (element as HTMLElement).click();
+    });
+  };
+
+  it("lists each bank in a row with what went wrong, and opens its layouts on a click", async () => {
     auth.user = { role: 'admin' };
     apiQueryDecoded.mockResolvedValue(health);
     await render();
@@ -87,14 +106,29 @@ describe('ParserHealthPage', () => {
     expect(apiQueryDecoded).toHaveBeenCalledWith(
       expect.objectContaining({ url: '/parsing/health', contract: 'ParserHealth' }),
     );
+    const rows = [...container.querySelectorAll('ul > li > button[aria-expanded]')];
+    expect(rows.map(r => r.textContent?.split('Statements')[0])).toEqual(['Axis Bank', 'Kaspi']);
+    const row = rows[0];
+    // Closed: the bank, its count and its problems in words; no layout details yet.
+    expect(row?.textContent).toContain('Axis Bank');
+    expect(row?.textContent).toContain('Statements 12');
+    expect(row?.textContent).toContain('Failed 1 · Held for review 3 · Declined by its parser 2 · New layout');
+    expect(container.textContent).not.toContain('balance_chain');
+
+    await click(row);
     const text = container.textContent ?? '';
-    expect(text).toContain('Axis Bank');
     expect(text).toContain('balance_chain · 3');
-    expect(text).toContain('New layout');
-    expect(text).toContain('description:narration');
-    expect(text).toContain('Unknown words: narration');
-    // Exactly one layout is marked new.
-    expect(text.split('New layout')).toHaveLength(2);
+    expect(text).toContain('AxisParser');
+    // Exactly one of the two layouts is marked new (the row's own mark aside).
+    expect(container.querySelectorAll('li li').length).toBe(2);
+    expect([...container.querySelectorAll('li li')].filter(li => li.textContent?.includes('New layout'))).toHaveLength(1);
+    // Headings stay folded until asked for.
+    expect(text).not.toContain('description:narration');
+
+    const headingsButtons = [...container.querySelectorAll('li li button')];
+    await click(headingsButtons[0]);
+    expect(container.textContent).toContain('description:narration');
+    expect(container.textContent).toContain('Unknown words: narration');
   });
 
   it('leads back to the admin page', async () => {

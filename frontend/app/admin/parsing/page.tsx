@@ -1,17 +1,24 @@
 'use client';
 
-import { Alert, Button, Container, Skeleton, Stack, Typography } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
-import Link from 'next/link';
-import { ArrowLeft } from '@/app/components/icons';
-import { useAuth } from '@/app/hooks/useAuth';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Skeleton from '@mui/material/Skeleton';
 import { useIntlayer } from '@/app/i18n';
-import type { ParserHealth } from '@/app/lib/contracts';
-import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
-import { queryKeys } from '@/app/lib/query-keys';
-import { ParserHealthBankCard } from './components/ParserHealthBankCard';
+import { AdminGroup, AdminHeader } from '../components/AdminGroup';
+import { useParserHealth } from '../hooks/useParserHealth';
+import { sortBanks } from '../lib/admin-summary';
+import { ParserBankRow } from './components/ParserBankRow';
 
 const SKELETON_KEYS = ['bank-0', 'bank-1', 'bank-2'];
+
+/** A line inside the group in place of rows: loading failed, nothing yet, or not an admin. */
+function Note({ children }: { children: React.ReactNode }): React.ReactElement {
+  return (
+    <Box component="li" sx={{ px: 2, py: 1.5, fontSize: 14, color: 'var(--text-muted)' }}>
+      {children}
+    </Box>
+  );
+}
 
 /**
  * Parser health for the server's administrator: per bank, how statements
@@ -21,51 +28,36 @@ const SKELETON_KEYS = ['bank-0', 'bank-1', 'bank-2'];
 export default function ParserHealthPage(): React.ReactElement {
   const t = useIntlayer('adminParsingPage');
   const adminPage = useIntlayer('adminPage');
-  const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
-  const query = useQuery({
-    queryKey: queryKeys.parserHealth(),
-    queryFn: ({ signal }): Promise<ParserHealth> =>
-      apiQueryDecoded({ url: '/parsing/health', signal, contract: 'ParserHealth' }),
-    enabled: isAdmin,
-  });
+  const { isAdmin, health, isPending, isError } = useParserHealth();
 
   return (
-    <Container maxWidth={false} sx={{ mt: 4, mb: 4, px: { xs: 2, md: 4 } }}>
-      <Button
-        component={Link}
-        href="/admin"
-        size="small"
-        startIcon={<ArrowLeft size={16} />}
-        sx={{ mb: 1, ml: -1, color: 'text.secondary' }}
-      >
-        {adminPage.title}
-      </Button>
-      <Typography variant="h4" component="h1" gutterBottom>
-        {t.title}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        {t.subtitle}
-      </Typography>
-      {!isAdmin ? (
-        <Alert severity="info">{t.notAdmin}</Alert>
-      ) : query.isError ? (
-        <Alert severity="error">{t.loadFailed}</Alert>
-      ) : query.isPending ? (
-        <Stack spacing={2}>
-          {SKELETON_KEYS.map(key => (
-            <Skeleton key={key} variant="rounded" height={140} />
-          ))}
-        </Stack>
-      ) : query.data.banks.length === 0 ? (
-        <Alert severity="info">{t.empty}</Alert>
-      ) : (
-        <Stack spacing={2}>
-          {query.data.banks.map(bank => (
-            <ParserHealthBankCard key={bank.bank} bank={bank} />
-          ))}
-        </Stack>
-      )}
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4, px: { xs: 2, md: 4 } }}>
+      <AdminHeader
+        back={{ href: '/admin', label: adminPage.title }}
+        title={t.title}
+        subtitle={t.subtitle}
+      />
+      <AdminGroup>
+        {!isAdmin ? (
+          <Note>{t.notAdmin}</Note>
+        ) : isError ? (
+          <Note>
+            <span role="alert" style={{ color: 'var(--money-down)' }}>
+              {t.loadFailed}
+            </span>
+          </Note>
+        ) : isPending || !health ? (
+          SKELETON_KEYS.map(key => (
+            <Box component="li" key={key} sx={{ px: 2, py: 1.25 }}>
+              <Skeleton variant="text" height={28} />
+            </Box>
+          ))
+        ) : health.banks.length === 0 ? (
+          <Note>{t.empty}</Note>
+        ) : (
+          sortBanks(health.banks).map(bank => <ParserBankRow key={bank.bank} bank={bank} />)
+        )}
+      </AdminGroup>
     </Container>
   );
 }

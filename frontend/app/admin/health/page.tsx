@@ -1,11 +1,10 @@
 'use client';
 
-import { Alert, Button, Container, Skeleton, Stack, Typography } from '@mui/material';
-import Link from 'next/link';
-import { ArrowLeft } from '@/app/components/icons';
+import { Alert, Container, Skeleton, Stack } from '@mui/material';
 import { fill, formatHealthTime } from '@/app/components/system-health/health-format';
 import { useSystemHealth } from '@/app/hooks/useSystemHealth';
 import { useIntlayer, useLocale } from '@/app/i18n';
+import { AdminHeader } from '../components/AdminGroup';
 import { HealthRow, HealthSection } from './components/HealthRow';
 import { checkText, queueFigures, queueText, type ReasonTexts } from './lib/health-text';
 
@@ -28,24 +27,18 @@ export default function SystemHealthPage(): React.ReactElement {
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4, px: { xs: 2, md: 4 } }}>
-      <Button
-        component={Link}
-        href="/admin"
-        size="small"
-        startIcon={<ArrowLeft size={16} />}
-        sx={{ mb: 1, ml: -1, color: 'text.secondary' }}
-      >
-        {adminPage.title}
-      </Button>
-      <Typography variant="h4" component="h1" gutterBottom>
-        {t.title}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        {t.subtitle}
-        {health
-          ? ` ${fill(t.checkedAt.value, { time: formatHealthTime(health.checkedAt, lang) })}`
-          : null}
-      </Typography>
+      <AdminHeader
+        back={{ href: '/admin', label: adminPage.title }}
+        title={t.title}
+        subtitle={
+          <>
+            {t.subtitle}
+            {health
+              ? ` ${fill(t.checkedAt.value, { time: formatHealthTime(health.checkedAt, lang) })}`
+              : null}
+          </>
+        }
+      />
       {!isAdmin ? (
         <Alert severity="info">{t.notAdmin}</Alert>
       ) : isError && !health ? (
