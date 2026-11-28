@@ -30,6 +30,22 @@ export interface StatementValidation {
   balanceCheck?: BalanceCheck;
 }
 
+/**
+ * Rows read and rows dropped: a count, or the dropped samples themselves, of
+ * which those that carried money (not "no debit/credit amount") are lost.
+ */
+interface DropInfo {
+  rawCount: number;
+  droppedCount?: number;
+  lostCount?: number;
+  /** Rows kept, when not every one of them is in `transactions` (duplicates). */
+  keptCount?: number;
+  samples?: Array<{ reason: string }>;
+}
+
+const lostOf = (samples: Array<{ reason: string }>) =>
+  samples.filter(sample => !sample.reason.includes('no debit/credit')).length;
+
 /** More than this share of parsed rows rejected is a failed parse, not a few bad rows. */
 const HIGH_DROP_RATIO_THRESHOLD = 0.5;
 
@@ -79,15 +95,25 @@ function checkWarning({ code, detail = {} }: ParseCheck): string {
 function droppedRows(
   metadata: { balanceStart?: number | null; balanceEnd?: number | null },
   validCount: number,
-  { rawCount, droppedCount }: { rawCount: number; droppedCount: number },
+  { rawCount, samples, ...counts }: DropInfo,
 ): { code: ValidationReasonCode; warning: string } | null {
+  const droppedCount = samples?.length ?? counts.droppedCount ?? 0;
+  const lostCount = samples ? lostOf(samples) : (counts.lostCount ?? droppedCount);
   if (rawCount > 0 && validCount === 0) {
     return {
       code: 'no_rows_kept',
       warning: `All ${rawCount} parsed rows were rejected during validation — statement produced zero transactions`,
     };
   }
-  if (rawCount > 0 && droppedCount / rawCount > HIGH_DROP_RATIO_THRESHOLD) {
+  // Without balances nothing else would show the loss: any dropped row that
+  // carried money keeps the statement for review (#636). A zero row (a card
+  // check) loses nothing.
+  const noBalances = metadata.balanceStart == null || metadata.balanceEnd == null;
+  if (
+    rawCount > 0 &&
+    droppedCount > 0 &&
+    ((noBalances && lostCount > 0) || droppedCount / rawCount > HIGH_DROP_RATIO_THRESHOLD)
+  ) {
     const percent = Math.round((droppedCount / rawCount) * 100);
     return {
       code: 'rows_dropped',
@@ -120,8 +146,7 @@ export function validateParsedStatement(
   transactions: MovedRow[],
   options: {
     tolerance: number;
-    /** `keptCount`: rows kept, when not every one of them is in `transactions` (duplicates). */
-    dropInfo?: { rawCount: number; droppedCount: number; keptCount?: number };
+    dropInfo?: DropInfo;
     checks?: ParseCheck[];
   },
 ): StatementValidation {

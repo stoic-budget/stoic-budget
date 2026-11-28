@@ -23,6 +23,31 @@ describe('CsvParser', () => {
 
   const day = (date: Date) => [date.getFullYear(), date.getMonth() + 1, date.getDate()];
 
+  it('passes a row with an unreadable date on to be counted, not an empty one (#636)', async () => {
+    const result = await parse('bad-date.csv', [
+      'Date,Payee,Amount',
+      '02.03.2026,ACME Store,-12.00',
+      '31.02.2026,Member One,-5.00',
+      '15 марта 2026,Member One,-7.00',
+      '31.03.2026 Balance transfer,Member One,-2.00',
+      ',Total,-17.00',
+      'Total 2026,,-17.00',
+      'Page 2 of 5,,',
+      '12:30,Member One,-5.00',
+      '123456,Member One,-5.00',
+    ]);
+
+    // Kept: the read rows; lost and counted: 31.02 and "15 марта"; quiet: the rest.
+    expect(result.transactions.map(t => t.debit)).toEqual([12, 5, 7, 2]);
+    expect(result.transactions.map(t => Number.isNaN(t.transactionDate.getTime()))).toEqual([
+      false,
+      true,
+      true,
+      false,
+    ]);
+    expect(result.metadata.dateFrom.getTime()).not.toBeNaN();
+  });
+
   /** Writes raw bytes, for files saved in another encoding than UTF-8. */
   const parseBytes = (name: string, bytes: Uint8Array) => {
     const filePath = path.join(dir, name);

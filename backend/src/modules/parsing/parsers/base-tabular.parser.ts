@@ -4,6 +4,26 @@ import { BaseParser } from './base.parser';
 
 type TabularColumnMapping = Record<string, number>;
 
+/** Words of total and balance lines, which carry no date of their own. */
+/** A total or balance line: its date cell starts with the word ("Total 2026", "Saldo"). */
+const SUMMARY_LINE = /^\s*(total|balance|saldo|summe|итог|сальдо|остаток|всего)(?![\p{L}])/iu;
+
+/**
+ * A date cell in a shape the parser does not read: a separator between digits
+ * ("2026/3/2", "02-Mar-26") or a word beside them ("15 марта 2026"). A bare
+ * number (a reference, an XLSX serial out of range) or a time is no date.
+ */
+const looksLikeLostDate = (cell: unknown): boolean => {
+  if (cell instanceof Date) {
+    // The caller saw a date in a known shape that is no real day.
+    return Number.isNaN(cell.getTime());
+  }
+  if (typeof cell !== 'string' || !/\d/.test(cell) || /^\s*\d{1,2}:\d{2}/.test(cell)) {
+    return false;
+  }
+  return /\d\s*[./-]\s*\d/.test(cell) || /\p{L}{3,}/u.test(cell);
+};
+
 export abstract class BaseTabularParser extends BaseParser {
   /**
    * Converts a raw table cell to a Date. Handles Excel serial dates (numeric
@@ -208,10 +228,20 @@ export abstract class BaseTabularParser extends BaseParser {
         return null;
       }
 
-      const transactionDate = this.normalizeCellDate(getValue(dateIndex));
-      if (!transactionDate) {
+      const dateCell = getValue(dateIndex);
+      const readDate = this.normalizeCellDate(dateCell);
+      // A total or balance line is no transaction, even when its date reads.
+      if (typeof dateCell === 'string' && SUMMARY_LINE.test(dateCell)) {
         return null;
       }
+      // A date in a shape not read, on a row that carries money, is a row lost,
+      // not a blank one: it goes on with an invalid date, so the import counts
+      // it and keeps a sample to correct (#636). Checked once the money is read.
+      const lostDate = !readDate && looksLikeLostDate(dateCell);
+      if (!readDate && !lostDate) {
+        return null;
+      }
+      const transactionDate = readDate ?? new Date(Number.NaN);
 
       const documentIndex = columnMapping.document;
       const counterpartyIndex = columnMapping.counterparty;
@@ -262,6 +292,10 @@ export abstract class BaseTabularParser extends BaseParser {
             credit = amount;
           }
         }
+      }
+      // A lost date without money is no transaction either: a footer or a note.
+      if (lostDate && !debit && !credit) {
+        return null;
       }
 
       return {

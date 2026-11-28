@@ -85,7 +85,9 @@ export class DocxParser extends BaseTabularParser {
     const headerInfo = this.extractHeaderFromText(fullText);
     const localeInfo = this.detectLocale(fullText);
     const dateRange = this.extractDateRange(fullText);
-    const transactionDates = transactions.map(t => t.transactionDate).filter(Boolean);
+    const transactionDates = transactions
+      .map(t => t.transactionDate)
+      .filter(date => date && !Number.isNaN(date.getTime()));
     const minDate = transactionDates.length
       ? new Date(Math.min(...transactionDates.map(d => d.getTime())))
       : null;

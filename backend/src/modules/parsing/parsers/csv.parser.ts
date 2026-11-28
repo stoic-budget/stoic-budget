@@ -48,6 +48,19 @@ function parseNumericDate(value: string, order: DateOrder): Date | null {
   return date.getMonth() === month - 1 && date.getDate() === day ? date : null;
 }
 
+/**
+ * A date cell as the row parser gets it: a numeric date read in the file's
+ * order; one in that shape that is no real day (31.02.2026) an invalid date,
+ * counted as a lost row rather than rolled over to 3 March; anything else as
+ * it is, for the general date reader.
+ */
+function numericDateCell(value: string, order: DateOrder): Date | string {
+  if (!NUMERIC_DATE.test(value.trim())) {
+    return value;
+  }
+  return parseNumericDate(value, order) ?? new Date(Number.NaN);
+}
+
 export class CsvParser extends BaseTabularParser {
   async canParse(
     bankName: BankName,
@@ -85,10 +98,7 @@ export class CsvParser extends BaseTabularParser {
       const transaction = this.parseRow(
         row,
         columnMapping,
-        index =>
-          index === dateIndex
-            ? (parseNumericDate(row[index] ?? '', dateOrder) ?? row[index])
-            : row[index],
+        index => (index === dateIndex ? numericDateCell(row[index] ?? '', dateOrder) : row[index]),
         preset ? `CSV:${preset.name}` : 'CSV',
         preset?.currency ?? detectedCurrency,
         preset?.unsignedAmountDirection ?? 'credit',
@@ -99,7 +109,10 @@ export class CsvParser extends BaseTabularParser {
     }
 
     // CSV exports rarely print the period, so it is the span of the rows.
-    const times = transactions.map(transaction => transaction.transactionDate.getTime());
+    // Read dates only: a row with an unreadable one is counted as lost later.
+    const times = transactions
+      .map(transaction => transaction.transactionDate.getTime())
+      .filter(time => !Number.isNaN(time));
     const dateFrom = times.length ? new Date(Math.min(...times)) : new Date();
     const dateTo = times.length ? new Date(Math.max(...times)) : dateFrom;
 

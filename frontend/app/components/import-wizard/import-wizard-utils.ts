@@ -10,6 +10,8 @@ export interface PreparedSheet {
   rows: string[][];
   /** First data rows, for the suggestion request and the example column. */
   samples: string[][];
+  /** Data rows in the file, before the import's cap (more than `rows` when cut). */
+  totalRows: number;
 }
 
 const isEmptyRow = (row: string[]): boolean => row.every(cell => String(cell ?? '').trim() === '');
@@ -26,12 +28,16 @@ export function prepareSheet(rawRows: string[][]): PreparedSheet {
     headerIndex >= 0
       ? Array.from({ length: width }, (_, i) => String(rows[headerIndex][i] ?? '').trim())
       : Array.from({ length: width }, (_, i) => `#${i + 1}`);
-  const dataRows = rows
-    .slice(headerIndex + 1)
-    .filter(row => !isEmptyRow(row))
+  const filled = rows.slice(headerIndex + 1).filter(row => !isEmptyRow(row));
+  const dataRows = filled
     .slice(0, IMPORT_ROWS_MAX)
     .map(row => Array.from({ length: width }, (_, i) => row[i] ?? ''));
-  return { headers, rows: dataRows, samples: dataRows.slice(0, SAMPLE_ROWS) };
+  return {
+    headers,
+    rows: dataRows,
+    samples: dataRows.slice(0, SAMPLE_ROWS),
+    totalRows: filled.length,
+  };
 }
 
 export const mappingFromSuggestion = (
@@ -94,3 +100,16 @@ export const fillTemplate = (template: string, vars: Record<string, string | num
     (acc, [key, value]) => acc.split(`{{${key}}}`).join(String(value)),
     template,
   );
+
+/**
+ * How many rows the import takes, saying so when the file had more than the
+ * cap (#636): the rest would otherwise be left out without a word.
+ */
+export const rowsLabel = (
+  sheet: Pick<PreparedSheet, 'rows' | 'totalRows'>,
+  texts: { rowsTotal: { value: string }; rowsCut: { value: string } },
+): string =>
+  fillTemplate(sheet.totalRows > sheet.rows.length ? texts.rowsCut.value : texts.rowsTotal.value, {
+    count: sheet.rows.length,
+    total: sheet.totalRows,
+  });

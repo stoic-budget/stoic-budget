@@ -758,7 +758,7 @@ export class StatementProcessingService {
         parsedStatement.transactions,
         {
           tolerance: StatementProcessingService.BALANCE_EPS,
-          dropInfo: { rawCount: rawTransactionCount, droppedCount: droppedSamples.length },
+          dropInfo: { rawCount: rawTransactionCount, samples: droppedSamples },
           checks: parsedStatement.checks,
         },
       );
