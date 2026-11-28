@@ -230,7 +230,7 @@ function TablePage({ state, skeletonRows }: { state: CustomTablePageState; skele
         onLoadMore={() => void grid.loadRows()}
         onEditColumn={state.columnEditor.openEdit}
         onDeleteColumn={column => state.setPendingDelete({ kind: 'column', column })}
-        labels={labels.grid}
+        labels={{ ...labels.grid, mixedCurrencies: labels.groups.mixedCurrencies }}
       />
       <SummariesBar
         tableId={table.id}

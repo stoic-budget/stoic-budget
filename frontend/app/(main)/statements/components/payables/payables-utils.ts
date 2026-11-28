@@ -228,3 +228,18 @@ export const filtersFromSearchParams = (
         : DEFAULT_PAYABLES_FILTERS.source,
   };
 };
+
+/** Fills `{name}` slots in a translated template. */
+export const fillTemplate = (template: string, values: Record<string, string | number>): string =>
+  Object.entries(values).reduce(
+    (result, [key, value]) => result.replace(`{${key}}`, String(value)),
+    template,
+  );
+
+/** The rows a page shows, counted from one: "21–40 of 57"; none of an empty list. */
+export function pageRange(pagination: { page: number; pageSize: number; totalItems: number }) {
+  const { page, pageSize, totalItems } = pagination;
+  const to = Math.min(page * pageSize, totalItems);
+  const from = totalItems === 0 ? 0 : Math.min((page - 1) * pageSize + 1, to);
+  return { from, to };
+}

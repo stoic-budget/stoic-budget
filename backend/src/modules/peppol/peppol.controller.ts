@@ -1,5 +1,6 @@
 import { Controller, Delete, Get, Post, Res } from '@nestjs/common';
 import type { Response } from 'express';
+import { PluginAuth } from '../../common/decorators/plugin-auth.decorator';
 import { WorkspaceId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
@@ -44,7 +45,7 @@ export class PeppolController {
   }
 
   @Post('integrations/peppol/settings')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('peppol', Permission.INTEGRATION_MANAGE)
   @SchemaResponse(IntegrationConnection)
   connect(
     @WorkspaceId() workspaceId: string,
@@ -55,7 +56,7 @@ export class PeppolController {
 
   /** Takes in what arrived since the last poll. */
   @Post('integrations/peppol/sync')
-  @WorkspaceAuth(Permission.INTEGRATION_MANAGE)
+  @PluginAuth('peppol', Permission.INTEGRATION_MANAGE)
   // The integrations page reads every sync through one contract.
   @SchemaResponse(ProtocolSyncResult)
   async sync(@CurrentUser() user: User, @WorkspaceId() workspaceId: string) {
@@ -71,14 +72,14 @@ export class PeppolController {
 
   /** Calls the access point with the workspace's credentials: for those who send invoices. */
   @Post('peppol/lookup')
-  @WorkspaceAuth(Permission.INVOICE_EDIT)
+  @PluginAuth('peppol', Permission.INVOICE_EDIT)
   @SchemaResponse(PeppolLookup)
   lookup(@WorkspaceId() workspaceId: string, @SchemaBody(PeppolLookupBody) body: PeppolLookupBody) {
     return this.peppol.lookup(workspaceId, body.peppolId);
   }
 
   @Post('invoices/:id/peppol')
-  @WorkspaceAuth(Permission.INVOICE_EDIT)
+  @PluginAuth('peppol', Permission.INVOICE_EDIT)
   @Audit({ entityType: EntityType.INVOICE, isUndoable: false })
   @SchemaResponse(PeppolTransmission)
   sendInvoice(
@@ -100,7 +101,7 @@ export class PeppolController {
   }
 
   @Post('credit-notes/:id/peppol')
-  @WorkspaceAuth(Permission.INVOICE_EDIT)
+  @PluginAuth('peppol', Permission.INVOICE_EDIT)
   @Audit({ entityType: EntityType.INVOICE, isUndoable: false })
   @SchemaResponse(PeppolTransmission)
   sendCreditNote(

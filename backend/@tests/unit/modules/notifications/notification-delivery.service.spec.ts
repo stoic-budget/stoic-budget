@@ -14,9 +14,10 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('NotificationDeliveryService', () => {
   let service: NotificationDeliveryService;
-  let mailerService: { send: Mock };
+  let mailerService: { send: Mock; isConfigured: Mock };
   let telegramService: { sendPlainMessage: Mock };
   let notificationRepository: { update: Mock; createQueryBuilder: Mock };
+  let preferenceRepository: { findOne: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
 
   const user = {
     id: 'u1',
@@ -45,9 +46,10 @@ describe('NotificationDeliveryService', () => {
     }) as NotificationPreference;
 
   beforeEach(async () => {
-    mailerService = { send: vi.fn(async () => true) };
+    mailerService = { send: vi.fn(async () => true), isConfigured: vi.fn(async () => true) };
     telegramService = { sendPlainMessage: vi.fn(async () => ({ messageId: '1' })) };
     notificationRepository = { update: vi.fn(), createQueryBuilder: vi.fn() };
+    preferenceRepository = { findOne: vi.fn(), update: vi.fn() };
 
     const testingModule: TestingModule = await Test.createTestingModule({
       providers: [
@@ -55,12 +57,12 @@ describe('NotificationDeliveryService', () => {
         { provide: getRepositoryToken(Notification), useValue: notificationRepository },
         {
           provide: getRepositoryToken(NotificationPreference),
-          useValue: { findOne: vi.fn(), update: vi.fn() },
+          useValue: preferenceRepository,
         },
         { provide: getRepositoryToken(User), useValue: { findOne: vi.fn() } },
         { provide: MailerService, useValue: mailerService },
         { provide: TelegramService, useValue: telegramService },
-        { provide: PushService, useValue: { sendToUser: vi.fn(async () => true) } },
+        { provide: PushService, useValue: { sendToUser: vi.fn(async () => true), isEnabled: () => true } },
       ],
     }).compile();
 
@@ -176,7 +178,53 @@ describe('NotificationDeliveryService', () => {
       await sendDigest([item('n1', 'ws-a'), item('n2', 'ws-b')]);
 
       expect(notificationRepository.update).toHaveBeenCalledTimes(1);
-      expect(notificationRepository.update).toHaveBeenCalledWith('n1', { pendingChannels: [] });
+      expect(notificationRepository.update).toHaveBeenCalledWith(['n1'], { pendingChannels: [] });
+    });
+
+    it('clears the mail even when Telegram throws, and waits for the next digest', async () => {
+      telegramService.sendPlainMessage.mockRejectedValueOnce(new Error('bot blocked'));
+      const both = { ...item('n1', 'ws-a'), pendingChannels: ['email', 'telegram'] } as unknown as Notification;
+
+      await sendDigest([both]);
+
+      expect(notificationRepository.update).toHaveBeenCalledWith(['n1'], { pendingChannels: ['telegram'] });
+      expect(preferenceRepository.update).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ lastDigestAt: expect.any(Date) }),
+      );
+    });
+
+    it('sends each channel only what still waits for it', async () => {
+      mailerService.send.mockResolvedValue(false);
+      const mailOnly = { ...item('n1', 'ws-a'), pendingChannels: ['email'] } as unknown as Notification;
+      const both = { ...item('n2', 'ws-a'), pendingChannels: ['email', 'telegram'] } as unknown as Notification;
+
+      await sendDigest([mailOnly, both]);
+
+      const [, text] = telegramService.sendPlainMessage.mock.calls[0];
+      expect(text).toContain('Title n2');
+      expect(text).not.toContain('Title n1');
+    });
+
+    it('lets nothing wait for mail when the workspace has no mail server', async () => {
+      mailerService.isConfigured.mockResolvedValue(false);
+
+      await sendDigest([item('n1', 'ws-a')]);
+
+      expect(mailerService.send).not.toHaveBeenCalled();
+      expect(notificationRepository.update).toHaveBeenCalledWith(['n1'], { pendingChannels: [] });
+    });
+
+    it('does not try again within the period when the mail could not go out', async () => {
+      mailerService.send.mockResolvedValue(false);
+
+      await sendDigest([item('n1', 'ws-a')]);
+
+      expect(notificationRepository.update).not.toHaveBeenCalled();
+      expect(preferenceRepository.update).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ lastDigestAt: expect.any(Date) }),
+      );
     });
   });
 });

@@ -20,3 +20,22 @@ export function hasDecidedCategory(
     transaction.categorySource === TransactionCategorySource.RULE
   );
 }
+
+/**
+ * Whether a rule run on old rows leaves the row's category alone: a person
+ * stands behind it, approved it in Review as it was suggested, or a filed
+ * tax return holds the row. An approved row with no category, or still in
+ * Uncategorized, still gets one.
+ */
+export function keepsCategoryOnRerun(
+  transaction: Pick<Transaction, 'categoryId' | 'categorySource' | 'isVerified' | 'taxLocked'>,
+): boolean {
+  return (
+    hasDecidedCategory(transaction) ||
+    Boolean(transaction.taxLocked) ||
+    (Boolean(transaction.isVerified) &&
+      Boolean(transaction.categoryId) &&
+      // Uncategorized, the importer's fallback, is no category anyone approved.
+      transaction.categorySource !== TransactionCategorySource.DEFAULT)
+  );
+}

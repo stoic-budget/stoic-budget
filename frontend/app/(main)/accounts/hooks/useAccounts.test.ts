@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { walletItem } from '@/app/test/fixtures/contracts';
-import { accountToForm, emptyAccountForm } from './useAccounts';
+import { accountToForm, emptyAccountForm, toPayload } from './useAccounts';
 
 describe('account form', () => {
   it('shows a debt as the positive amount owed', () => {
@@ -25,5 +25,15 @@ describe('account form', () => {
     expect(accountToForm(card).creditLimit).toBe('5000.5');
     expect(accountToForm({ ...card, creditLimit: null }).creditLimit).toBe('');
     expect(emptyAccountForm('EUR').creditLimit).toBe('');
+  });
+});
+
+describe('toPayload', () => {
+  it('sends the opening balance as typed, thousands separators and all', () => {
+    const form = { ...emptyAccountForm('EUR'), type: 'checking' as const, name: 'ACME Bank' };
+
+    expect(toPayload({ ...form, openingBalance: '1 500' }).initialBalance).toBe(1500);
+    expect(toPayload({ ...form, openingBalance: '1.500,50' }).initialBalance).toBe(1500.5);
+    expect(toPayload({ ...form, type: 'loan', openingBalance: '2 000' }).initialBalance).toBe(-2000);
   });
 });

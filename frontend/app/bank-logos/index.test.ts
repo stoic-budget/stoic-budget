@@ -5,7 +5,7 @@ describe('listSupportedBanks', () => {
   it('lists every bank with a parser of its own, Bereke once and no placeholder', () => {
     const banks = listSupportedBanks();
 
-    expect(banks).toHaveLength(124);
+    expect(banks).toHaveLength(126);
     expect(banks.map(bank => bank.key)).not.toContain('other');
     expect(new Set(banks.map(bank => bank.key)).size).toBe(banks.length);
   });
@@ -68,6 +68,8 @@ describe('resolveBankLogo', () => {
     ['eq_bank', 'EQ Bank'],
     ['fidelity_bank', 'Fidelity Bank'],
     ['fifth_third', 'Fifth Third'],
+    ['fio', 'Fio banka'],
+    ['csob', 'ČSOB'],
     ['first_citizens', 'First Citizens'],
     ['first_direct', 'first direct'],
     ['fnb', 'FNB'],

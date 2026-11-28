@@ -2,18 +2,10 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import {
-  closeAppPanel,
-  closeAppPanelItem,
-  openAppPanelItem,
-  useAppPanelState,
-} from '@/app/components/panels/app-panels-store';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
+import { useIntegrationCatalog } from '@/app/integrations/panel/integration-catalog';
 import apiClient from '@/app/lib/api';
 import { queryKeys } from '@/app/lib/query-keys';
-import { IntegrationDetailDrawer } from './IntegrationDetailDrawer';
-import { IntegrationsListDrawer } from './IntegrationsListDrawer';
-import { findIntegrationEntry, useIntegrationCatalog } from './integration-catalog';
 
 /**
  * Different endpoints answer differently: with `connected`, with a `status`
@@ -25,8 +17,12 @@ async function readConnected(statusPath: string): Promise<boolean> {
     .get(statusPath)
     .then(response => {
       const data = response.data;
-      if (Array.isArray(data)) return data.length > 0;
-      if (typeof data !== 'object' || data === null) return false;
+      if (Array.isArray(data)) {
+        return data.length > 0;
+      }
+      if (typeof data !== 'object' || data === null) {
+        return false;
+      }
       return (
         ('connected' in data && data.connected === true) ||
         ('status' in data && String(data.status).toLowerCase() === 'connected')
@@ -35,7 +31,8 @@ async function readConnected(statusPath: string): Promise<boolean> {
     .catch(() => false);
 }
 
-function useConnectionStatuses(enabled: boolean): {
+/** Whether each integration in the catalog is connected, read while the panel is open. */
+export function useIntegrationStatuses(enabled: boolean): {
   statuses: Record<string, boolean>;
   refresh: () => void;
 } {
@@ -63,28 +60,4 @@ function useConnectionStatuses(enabled: boolean): {
   }, [queryClient, queryKey]);
 
   return { statuses: query.data ?? {}, refresh };
-}
-
-export function IntegrationsPanel(): React.JSX.Element {
-  const { panel, item } = useAppPanelState();
-  const open = panel === 'integrations';
-  const { statuses, refresh } = useConnectionStatuses(open);
-  const catalog = useIntegrationCatalog();
-
-  return (
-    <>
-      <IntegrationsListDrawer
-        open={open}
-        statuses={statuses}
-        onSelect={openAppPanelItem}
-        onClose={closeAppPanel}
-      />
-      <IntegrationDetailDrawer
-        entry={open ? findIntegrationEntry(catalog, item) : undefined}
-        onBack={closeAppPanelItem}
-        onClose={closeAppPanel}
-        onConnectionChange={refresh}
-      />
-    </>
-  );
 }

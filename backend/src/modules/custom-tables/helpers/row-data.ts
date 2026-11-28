@@ -7,7 +7,7 @@ import { CustomTableRow } from '../../../entities/custom-table-row.entity';
 import { type CustomTableAggregateFn } from '../dto/list-custom-table-rows.dto';
 import { formulaColumnsOf } from '../formula-recalc.service';
 import type { SourceValue } from '../sources/source.types';
-import { evaluateFormula } from './formula-evaluator';
+import { collectFieldRefs, evaluateFormula, needsTableContext } from './formula-evaluator';
 import { orderFormulaColumns } from './table-evaluator';
 
 export type ViewSettingsColumns = Record<
@@ -228,8 +228,8 @@ export function readSummaries(
 /**
  * Значения формул живут в `computed` и пишутся пересчётом после каждой
  * записи; здесь они подмешиваются в data для выдачи. Строка, которую
- * пересчёт ещё не видел, получает значение на лету — без табличного
- * контекста, но без пустых ячеек.
+ * пересчёт ещё не видел, получает значение на лету, если формуле хватает
+ * самой строки; итогам по таблице — пусто до пересчёта.
  */
 export function applyFormulaColumns(rows: CustomTableRow[], columns: CustomTableColumn[]): void {
   const formulaColumns = orderFormulaColumns(formulaColumnsOf(columns));
@@ -239,9 +239,22 @@ export function applyFormulaColumns(rows: CustomTableRow[], columns: CustomTable
   for (const row of rows) {
     const data = (row.data ?? {}) as Record<string, unknown>;
     const computed = toRowDataRecord(row.computed);
+    // A total or a running sum needs the whole table: until the recalculation
+    // reaches the row it stays empty, and so does a formula built on it, rather
+    // than showing a plausible wrong number.
+    const waiting = new Set<string>();
     for (const col of formulaColumns) {
-      data[col.key] =
-        col.key in computed ? computed[col.key] : evaluateFormula(col.expression, data);
+      if (col.key in computed) {
+        data[col.key] = computed[col.key];
+      } else if (
+        needsTableContext(col.expression) ||
+        collectFieldRefs(col.expression).some(key => waiting.has(key))
+      ) {
+        waiting.add(col.key);
+        data[col.key] = null;
+      } else {
+        data[col.key] = evaluateFormula(col.expression, data);
+      }
     }
     row.data = data;
   }

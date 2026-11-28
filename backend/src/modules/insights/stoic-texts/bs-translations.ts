@@ -1180,4 +1180,85 @@ export const bs: StoicTextMap = {
       message: '{{percent}} % i bez roka. Znajte kamo plovite, a mjesečni korak slijedi sam.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Zaboraviti dvaput već je navika',
+      message:
+        '{{count}} računa u posljednjih pola godine plaćeno je kasno jer su zaboravljeni. Pamćenje nije plan: neka podsjetnik dolazi ranije, dok još ima vremena za djelovanje.',
+    },
+    {
+      title: 'Račun vas nije zaboravio',
+      message:
+        '{{count}} računa čekalo je zadnjih pola godine da ih se neko sjeti. Što pamćenje ne nosi, nosi podsjetnik: dajte mu još nekoliko dana.',
+    },
+    {
+      title: 'Neka pamti podsjetnik',
+      message:
+        'Zaboravljeno {{count}} puta za pola godine. Um je za prosuđivanje, ne za čuvanje datuma: neka podsjetnik stigne na vrijeme.',
+    },
+    {
+      title: 'Mala obaveza, često propuštena',
+      message:
+        '{{count}} zakašnjelih računa, svaki jednostavno zaboravljen. Mir počinje redom u sitnicama, a raniji podsjetnik ne košta ništa.',
+    },
+    {
+      title: 'Zaborav ima svoj obrazac',
+      message:
+        'Za pola godine {{count}} računa prošlo je rok neprimijećeno. Seneka je svake večeri pregledao svoj dan; podsjetnik nekoliko dana ranije uradit će to za vas.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Plata dolazi nakon računa',
+      message:
+        '{{count}} puta za pola godine novca još nije bilo kad je račun dospio. Pomjerite datum iza dana plate ili odvojite jednu uplatu: ono što je pripremljeno ne požuruje.',
+    },
+    {
+      title: 'Novac stiže nakon roka',
+      message:
+        '{{count}} puta za pola godine račun je stigao prije prihoda. Stavite datum tamo gdje novac već jeste i račun prestaje pritiskati.',
+    },
+    {
+      title: 'Jedna uplata unaprijed',
+      message:
+        '{{count}} zakašnjelih računa čekalo je platu za pola godine. Odvojite jednu uplatu i kalendar gubi moć nad vama.',
+    },
+    {
+      title: 'Uredite datume, ne brigu',
+      message:
+        '{{count}} puta za pola godine nije bilo dovoljno do plate. Lijek nije briga nego red: račun nakon prihoda ili rezerva prije njega.',
+    },
+    {
+      title: 'Pripremljeno ne žuri',
+      message:
+        '{{count}} puta račun je dospio prije novca. Pripremljeno se dočekuje mirno: odvojite jednu uplatu ili pomjerite datum.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Neočekivano se vraća',
+      message:
+        '{{count}} kašnjenja za pola godine uslijedilo je nakon nepredviđenog troška. Mudracu se ništa ne dešava protiv njegovog očekivanja, piše Seneka. Rezerva za nepredviđeno cilj je vrijedan postavljanja.',
+    },
+    {
+      title: 'Očekujte neočekivano',
+      message:
+        '{{count}} zakašnjelih računa za pola godine uslijedilo je nakon troška koji niste predvidjeli. Stoici su unaprijed zamišljali nesreću; rezerva je ta vježba u novcu.',
+    },
+    {
+      title: 'Jastuk za nepredviđeno',
+      message:
+        'Za pola godine {{count}} računa čekalo je iza iznenadnog troška. Mala rezerva pretvara sljedeće iznenađenje u neugodnost, a ne u kašnjenje.',
+    },
+    {
+      title: 'Sudbina posuđuje i traži nazad',
+      message:
+        '{{count}} puta nepredviđeni trošak odgurnuo je račun preko roka. Sudbina će tražiti opet; odvojite rezervu da račun ne mora čekati.',
+    },
+    {
+      title: 'Iznenađenja nisu rijetka',
+      message:
+        '{{count}} zakašnjelih računa uslijedilo je nakon nečeg neočekivanog. Što se često dešava, nije zaista neočekivano: cilj rezerve pravi mu mjesto.',
+    },
+  ],
 };

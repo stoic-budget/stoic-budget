@@ -6,6 +6,7 @@ import { User } from '../../entities/user.entity';
 import { chooseAdviceCards } from './advice-cards';
 import type { InsightCandidate } from './analyzers/analyzer.interface';
 import { FinancialAnalyzer } from './analyzers/financial.analyzer';
+import { LatePaymentsAnalyzer } from './analyzers/late-payments.analyzer';
 import { OperationalAnalyzer } from './analyzers/operational.analyzer';
 import { StoicAnalyzer } from './analyzers/stoic.analyzer';
 import { WealthAnalyzer } from './analyzers/wealth.analyzer';
@@ -38,6 +39,7 @@ export class InsightsService {
     private readonly financialAnalyzer: FinancialAnalyzer,
     private readonly stoicAnalyzer: StoicAnalyzer,
     private readonly wealthAnalyzer: WealthAnalyzer,
+    private readonly latePaymentsAnalyzer: LatePaymentsAnalyzer,
   ) {}
 
   /**
@@ -53,13 +55,15 @@ export class InsightsService {
     options: { locale?: string } = {},
   ): Promise<{ created: number; updated: number; total: number; newInsights: Insight[] }> {
     const context = { userId, workspaceId };
-    const [operational, financial, stoic, wealth] = await Promise.all([
+    const [operational, financial, stoic, wealth, late] = await Promise.all([
       this.operationalAnalyzer.analyze(context),
       this.financialAnalyzer.analyze(context),
       this.stoicAnalyzer.analyze(context),
       this.wealthAnalyzer.analyze(context),
+      this.latePaymentsAnalyzer.analyze(context),
     ]);
-    const candidates = [...operational, ...chooseAdviceCards([...financial, ...wealth], stoic)];
+    const advice = chooseAdviceCards([...financial, ...wealth, ...late], stoic);
+    const candidates = [...operational, ...advice];
 
     // One refresh writes a handful of insights for the same recipient — read
     // the locale they are phrased in once, not once per insight.
@@ -84,11 +88,8 @@ export class InsightsService {
       }
     }
 
-    await this.retireStale(
-      userId,
-      workspaceId,
-      candidates.map(candidate => candidate.deduplicationKey),
-    );
+    const keys = candidates.map(candidate => candidate.deduplicationKey);
+    await this.retireStale(userId, workspaceId, keys);
 
     return { created, updated, total: candidates.length, newInsights };
   }
@@ -290,10 +291,7 @@ export class InsightsService {
   private async resolveLocale(userId: string): Promise<string> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      select: {
-        id: true,
-        locale: true,
-      },
+      select: { id: true, locale: true },
     });
     return user?.locale ?? 'en';
   }

@@ -12,7 +12,9 @@ vi.mock('nodemailer', () => {
 vi.mock('imapflow', () => ({
   ImapFlow: class {
     async connect() {}
-    async mailboxOpen() {}
+    async mailboxOpen(path: string) {
+      return { path, uidValidity: 7n };
+    }
     async list() {
       return [{ path: 'INBOX' }, { path: 'Receipts' }];
     }

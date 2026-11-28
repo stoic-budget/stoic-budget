@@ -82,8 +82,10 @@ export const MetalTotals = Schema.Struct({
   value: Schema.Number,
   cost: Schema.Number,
   gain: Schema.Number,
-  /** Average cost of a fine ounce across the lots still held. */
+  /** Average cost of a fine ounce across the lots with a purchase price. */
   costPerOunce: Schema.NullOr(Schema.Number),
+  /** Lots without a purchase price: left out of the gain, which would call them all profit. */
+  unpricedLots: Schema.Number,
   dealerValue: Schema.Number,
   /** Percent below spot a dealer pays for this metal. */
   dealerDiscount: Schema.Number,
@@ -116,7 +118,10 @@ export const MetalsSummary = Schema.Struct({
   currency: Schema.String,
   value: Schema.Number,
   cost: Schema.Number,
+  /** Value less cost of the lots with a purchase price. */
   gain: Schema.Number,
+  /** Lots without a purchase price, left out of `gain`. */
+  unpricedLots: Schema.Number,
   dealerValue: Schema.Number,
   realized: Schema.Number,
   /** What the lots are insured for in total; zero when nobody filled it in. */

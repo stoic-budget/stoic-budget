@@ -1184,4 +1184,85 @@ export const vi: StoicTextMap = {
         'Ở {{percent}}%, không có hạn chót. Biết mình đang đi đâu, thì bước đi hằng tháng sẽ tự đến.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Quên hai lần là thói quen',
+      message:
+        'Nửa năm qua có {{count}} hóa đơn trả muộn vì bị quên. Trí nhớ không phải là kế hoạch: hãy để lời nhắc đến sớm hơn, khi vẫn còn thời gian để làm.',
+    },
+    {
+      title: 'Hóa đơn không quên bạn',
+      message:
+        'Nửa năm qua có {{count}} hóa đơn phải chờ đến khi có người nhớ ra. Điều tâm trí không giữ được, lời nhắc sẽ giữ: hãy cho nó đến sớm hơn vài ngày.',
+    },
+    {
+      title: 'Hãy để lời nhắc ghi nhớ',
+      message:
+        'Quên {{count}} lần trong nửa năm. Tâm trí để phán đoán, không phải để giữ ngày tháng: hãy để lời nhắc đến kịp lúc.',
+    },
+    {
+      title: 'Một bổn phận nhỏ, thường bị lỡ',
+      message:
+        '{{count}} hóa đơn trễ hạn, mỗi cái đơn giản là bị quên. Sự bình thản bắt đầu từ trật tự trong việc nhỏ, và một lời nhắc sớm hơn không tốn gì.',
+    },
+    {
+      title: 'Sự quên lãng có khuôn mẫu',
+      message:
+        'Trong nửa năm, {{count}} hóa đơn đã qua hạn mà không ai để ý. Seneca mỗi tối đều xem lại ngày của mình; một lời nhắc sớm vài ngày sẽ làm việc đó thay bạn.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Lương về sau hóa đơn',
+      message:
+        'Trong nửa năm, {{count}} lần đến hạn hóa đơn mà tiền chưa về. Dời ngày sang sau ngày lương hoặc để riêng một kỳ thanh toán: điều đã chuẩn bị thì không làm ta vội.',
+    },
+    {
+      title: 'Tiền đến sau hạn',
+      message:
+        '{{count}} lần trong nửa năm hóa đơn đến trước thu nhập. Hãy đặt hạn vào lúc tiền đã có, và hóa đơn sẽ thôi thúc ép bạn.',
+    },
+    {
+      title: 'Đi trước một khoản',
+      message:
+        'Nửa năm qua có {{count}} hóa đơn trễ phải chờ ngày lĩnh lương. Hãy để riêng một khoản, và lịch sẽ mất quyền chi phối bạn.',
+    },
+    {
+      title: 'Sắp xếp ngày tháng, đừng sắp xếp nỗi lo',
+      message:
+        '{{count}} lần trong nửa năm thiếu tiền trước ngày lương. Cách chữa không phải là lo thêm mà là sắp xếp tốt hơn: hóa đơn sau thu nhập, hoặc một khoản đệm trước đó.',
+    },
+    {
+      title: 'Đã chuẩn bị thì không vội',
+      message:
+        '{{count}} lần hóa đơn đến hạn trước khi tiền về. Điều đã chuẩn bị trước sẽ được đón nhận bình thản: để riêng một khoản hoặc dời ngày.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Điều bất ngờ cứ lặp lại',
+      message:
+        'Nửa năm qua có {{count}} lần trả muộn sau một khoản chi bất ngờ. Seneca viết: không gì xảy đến với người khôn trái với điều họ đã liệu trước. Một khoản dự phòng cho điều bất ngờ là mục tiêu đáng đặt ra.',
+    },
+    {
+      title: 'Hãy lường trước điều bất ngờ',
+      message:
+        'Nửa năm qua có {{count}} hóa đơn trễ sau một khoản chi bạn không lường trước. Người Khắc kỷ tập hình dung bất hạnh trước để không bị bất ngờ; quỹ dự phòng là bài tập ấy bằng tiền.',
+    },
+    {
+      title: 'Một tấm đệm cho điều không lường trước',
+      message:
+        'Trong nửa năm, {{count}} hóa đơn phải chờ sau một khoản chi đột ngột. Một quỹ nhỏ biến bất ngờ tiếp theo thành chút phiền toái, chứ không phải trễ hạn.',
+    },
+    {
+      title: 'Vận may cho mượn rồi đòi lại',
+      message:
+        '{{count}} lần một khoản chi bất ngờ đẩy hóa đơn qua hạn. Vận may sẽ lại đòi; hãy để riêng một quỹ dự phòng để hóa đơn không phải chờ.',
+    },
+    {
+      title: 'Bất ngờ không hiếm',
+      message:
+        '{{count}} hóa đơn trễ đến sau một điều bất ngờ. Điều xảy ra thường xuyên thì không thật sự bất ngờ: một mục tiêu dự phòng sẽ dành chỗ cho nó.',
+    },
+  ],
 };
