@@ -1181,4 +1181,85 @@ export const sv: StoicTextMap = {
         'På {{percent}}%, utan tidsgräns. Vet du vart du seglar följer det månatliga steget av sig självt.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Att glömma två gånger är en vana',
+      message:
+        '{{count}} räkningar det senaste halvåret betalades sent för att de glömdes bort. Minnet är ingen plan: låt påminnelsen komma tidigare, medan det finns tid att agera.',
+    },
+    {
+      title: 'Räkningen glömde inte dig',
+      message:
+        '{{count}} räkningar väntade det senaste halvåret på att någon skulle minnas dem. Det huvudet inte bär, bär en påminnelse: ge den några dagar till.',
+    },
+    {
+      title: 'Låt påminnelsen minnas',
+      message:
+        'Glömt {{count}} gånger på ett halvår. Förståndet är till för att döma, inte för att hålla datum: låt påminnelsen komma i tid.',
+    },
+    {
+      title: 'En liten plikt, ofta missad',
+      message:
+        '{{count}} sena räkningar, var och en helt enkelt glömd. Lugn börjar med ordning i det lilla, och en tidigare påminnelse kostar ingenting.',
+    },
+    {
+      title: 'Glömskan har ett mönster',
+      message:
+        'På ett halvår passerade {{count}} räkningar sitt datum obemärkt. Seneca gick igenom sin dag varje kväll; en påminnelse några dagar tidigare gör det åt dig.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Lönen kommer efter räkningen',
+      message:
+        '{{count}} gånger på ett halvår fanns pengarna inte än när en räkning förföll. Flytta datumet till efter lönedagen eller lägg undan en betalning: det som är förberett stressar inte.',
+    },
+    {
+      title: 'Pengarna kommer efter datumet',
+      message:
+        '{{count}} gånger på ett halvår kom räkningen före inkomsten. Lägg datumet där pengarna redan finns, så slutar räkningen trycka på.',
+    },
+    {
+      title: 'En betalning före',
+      message:
+        '{{count}} sena räkningar väntade på lönen under ett halvår. Lägg undan en betalning, så förlorar kalendern sitt grepp om dig.',
+    },
+    {
+      title: 'Ordna datumen, inte oron',
+      message:
+        '{{count}} gånger på ett halvår räckte pengarna inte till lönen. Botemedlet är inte mer oro utan bättre ordning: räkningen efter inkomsten, eller en buffert före.',
+    },
+    {
+      title: 'Det förberedda brådskar inte',
+      message:
+        '{{count}} gånger förföll en räkning innan pengarna kom. Det som är förberett möter man lugnt: lägg undan en betalning eller flytta datumet.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Det oväntade återkommer',
+      message:
+        '{{count}} förseningar på ett halvår följde på en oförutsedd utgift. Den vise drabbas inte av något mot sin förväntan, skriver Seneca. En reserv för det oförutsedda är ett mål värt att sätta.',
+    },
+    {
+      title: 'Räkna med det oväntade',
+      message:
+        '{{count}} sena räkningar på ett halvår kom efter en utgift du inte förutsåg. Stoikerna övade på motgång i förväg; en reserv är den övningen i pengar.',
+    },
+    {
+      title: 'En buffert för det oförutsedda',
+      message:
+        'På ett halvår väntade {{count}} räkningar bakom en överraskande utgift. En liten reserv gör nästa överraskning till ett besvär, inte en sen räkning.',
+    },
+    {
+      title: 'Ödet lånar ut och vill ha tillbaka',
+      message:
+        '{{count}} gånger sköt en oförutsedd kostnad en räkning förbi sitt datum. Ödet frågar igen; lägg undan en reserv så att räkningen inte behöver vänta.',
+    },
+    {
+      title: 'Överraskningar är inte ovanliga',
+      message:
+        '{{count}} sena räkningar följde på något oväntat. Det som händer ofta är inte riktigt oväntat: ett reservmål ger plats åt det.',
+    },
+  ],
 };

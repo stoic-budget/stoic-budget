@@ -184,7 +184,7 @@ describe('TransferPairingService', () => {
         relations: { statement: true },
       });
       expect(repository.update).toHaveBeenCalledWith(
-        { id: In(['a', 'b']), workspaceId: WORKSPACE, transferPairId: IsNull() },
+        { id: In(['a', 'b']), workspaceId: WORKSPACE, transferPairId: IsNull(), splitGroupId: IsNull() },
         { transferPairId: pairId, transferPairSource: TransferPairSource.MANUAL },
       );
       // Linking by hand lifts an earlier refusal of the same two rows.
@@ -367,7 +367,7 @@ describe('TransferPairingService reimbursements', () => {
     expect(result.full).toBe(true);
     expect(repository.update).toHaveBeenNthCalledWith(
       1,
-      { id: In(['inc', 'exp']), workspaceId: WORKSPACE, transferPairId: IsNull() },
+      { id: In(['inc', 'exp']), workspaceId: WORKSPACE, transferPairId: IsNull(), splitGroupId: IsNull() },
       expect.objectContaining({
         transferPairId: result.transferPairId,
         transferPairSource: TransferPairSource.MANUAL,

@@ -1180,4 +1180,85 @@ export const fo: StoicTextMap = {
       message: 'Á {{percent}} %, uttan freist. Veit, hvar tú siglir, og mánaðarskrefið fylgir.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'At gloyma tvær ferðir er ein vani',
+      message:
+        '{{count}} rokningar seinasta hálva árið vórðu goldnar ov seint, tí tær vórðu gloymdar. Minnið er eingin ætlan: lat áminningina koma fyrr, meðan enn er tíð at gera nakað.',
+    },
+    {
+      title: 'Rokningurin gloymdi ikki teg',
+      message:
+        '{{count}} rokningar bíðaðu seinasta hálva árið eftir, at onkur mintist teirra. Tað, sum hugurin ikki ber, ber ein áminning: gev henni nakrar dagar afturat.',
+    },
+    {
+      title: 'Lat áminningina minnast',
+      message:
+        'Gloymt {{count}} ferðir á einum hálvum ári. Hugurin er til at døma, ikki til at goyma dagfestingar: lat áminningina koma í góðari tíð.',
+    },
+    {
+      title: 'Ein lítil skylda, ofta gloymd',
+      message:
+        '{{count}} seinir rokningar, hvør einstakur einfaldliga gloymdur. Friður byrjar við skipan í tí smáa, og ein fyrri áminning kostar einki.',
+    },
+    {
+      title: 'Gloymskan hevur eitt mynstur',
+      message:
+        'Á einum hálvum ári fóru {{count}} rokningar fram um gjalddagin, uttan at nakar varnaðist tað. Seneca gekk ígjøgnum dagin hvørt kvøld; ein áminning nakrar dagar fyrr ger tað fyri teg.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Lønin kemur aftan á rokningina',
+      message:
+        '{{count}} ferðir á einum hálvum ári vóru pengarnir ikki komnir, tá ein rokning fall til gjaldingar. Flyt dagin aftur um lønardagin, ella legg eina gjalding til viks: tað, sum er fyrireikað, rekur ikki á.',
+    },
+    {
+      title: 'Pengarnir koma eftir gjalddagin',
+      message:
+        '{{count}} ferðir á einum hálvum ári kom rokningurin undan inntøkuni. Set gjalddagin, har pengarnir longu eru, so steðgar rokningurin at trýsta.',
+    },
+    {
+      title: 'Ein gjalding frammanundan',
+      message:
+        '{{count}} seinir rokningar bíðaðu eftir lønini í hálvt ár. Legg eina gjalding til viks, so missir kalendarin takið á tær.',
+    },
+    {
+      title: 'Skipa dagarnar, ikki ótryggleikan',
+      message:
+        '{{count}} ferðir á einum hálvum ári vantaði pening fyri løn. Bótin er ikki meiri ótryggleiki, men betri skipan: rokningurin eftir inntøkuni, ella ein goymsla undan.',
+    },
+    {
+      title: 'Tað fyrireikaða skundar ikki',
+      message:
+        '{{count}} ferðir fall ein rokningur til gjaldingar, áðrenn pengarnir komu. Tað fyrireikaða verður móttikið í ró: legg eina gjalding til viks ella flyt dagin.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Tað óvæntaða kemur aftur',
+      message:
+        '{{count}} seinkingar á einum hálvum ári komu aftan á eina óvæntaða útreiðslu. Einki hendir tí vísa ímóti tí, hann væntar, skrivar Seneca. Ein varagrunnur til tað óvæntaða er eitt mál, sum er vert at seta.',
+    },
+    {
+      title: 'Vænta tað óvæntaða',
+      message:
+        '{{count}} seinir rokningar á einum hálvum ári komu eftir eina útreiðslu, tú ikki sást frammanundan. Stóikararnir vandu seg í mótgangi frammanundan; ein goymsla er tann venjingin í pengum.',
+    },
+    {
+      title: 'Ein dýna fyri tað ófyriséða',
+      message:
+        'Á einum hálvum ári bíðaðu {{count}} rokningar aftanfyri eina óvænta útreiðslu. Ein lítil goymsla ger næstu óvæntaðu hending til ein ampa, ikki ein seinan rokning.',
+    },
+    {
+      title: 'Lagnan lænir og vil hava aftur',
+      message:
+        '{{count}} ferðir skumpaði ein ófyriséður kostnaður ein rokning um gjalddagin. Lagnan spyr aftur; legg eina goymslu til viks, so rokningurin ikki noyðist at bíða.',
+    },
+    {
+      title: 'Óvæntaðar hendingar eru ikki sjáldsamar',
+      message:
+        '{{count}} seinir rokningar fylgdu einum óvæntaðum. Tað, sum ofta hendir, er ikki veruliga óvæntað: eitt goymslumál gevur tí pláss.',
+    },
+  ],
 };

@@ -62,7 +62,9 @@ export class InvoiceAgeingService {
          SELECT i."client_id",
                 c."name"     AS client_name,
                 i."currency",
-                i."total"::numeric AS amount,
+                -- What is still owed: the bill's remainder (payments and credit notes
+                -- taken off), the invoice total when it has no bill.
+                COALESCE(GREATEST(p."amount" - p."paid_amount", 0), i."total")::numeric AS amount,
                 ($1::date - i."due_date") AS days_overdue
            FROM "invoices" i
            JOIN "clients" c ON c."id" = i."client_id"

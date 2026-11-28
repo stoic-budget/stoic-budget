@@ -5,14 +5,14 @@ import { useEffect } from 'react';
 import { openAppPanel } from '@/app/components/panels/app-panels-store';
 
 /**
- * Integrations are a panel now. The route stays for deep links — tours, docs,
- * old bookmarks — and opens the panel over the dashboard.
+ * Integrations live in the plugins panel now. The route stays for deep links —
+ * tours, docs, old bookmarks — and opens that panel over the dashboard.
  */
 export default function IntegrationsRoute(): null {
   const router = useRouter();
 
   useEffect(() => {
-    openAppPanel('integrations');
+    openAppPanel('plugins');
     router.replace('/dashboard');
   }, [router]);
 

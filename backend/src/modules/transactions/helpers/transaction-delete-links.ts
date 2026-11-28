@@ -4,6 +4,7 @@ import {
   TransferPairKind,
   type TransferPairSource,
 } from '../../../entities/transaction.entity';
+import { handOverSplitIdentity } from './split-fingerprint';
 
 /**
  * What a deleted row was linked to, kept in its audit entry so that undoing the
@@ -136,6 +137,8 @@ export async function deleteAndDetach(
 ): Promise<void> {
   const repo = manager.getRepository(Transaction);
   const ids = rows.map(row => row.id);
+  // A split part's copies and fingerprint stay with its split first.
+  await handOverSplitIdentity(manager, workspaceId, ids);
   await repo.update(
     { workspaceId, duplicateOfId: In(ids), id: Not(In(ids)) },
     {

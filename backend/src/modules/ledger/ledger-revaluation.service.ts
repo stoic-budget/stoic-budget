@@ -69,7 +69,8 @@ export class LedgerRevaluationService {
   ) {}
 
   async revalue(workspaceId: string, userId: string, date: string): Promise<RevaluationResult> {
-    if (date > toDate(new Date())) {
+    // A day of slack: the person's today runs ahead of Greenwich's east of it.
+    if (date > toDate(new Date(Date.now() + 86_400_000))) {
       throw new BadRequestException(appError('LEDGER_REVALUATION_FUTURE'));
     }
     const settings = await this.syncService.getSettings(workspaceId);

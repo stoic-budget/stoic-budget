@@ -54,4 +54,29 @@ describe('ModalShell', () => {
     expect(spinner?.getAttribute('role')).toBe('status');
     expect(container.textContent).toContain('Saving');
   });
+
+  it('draws a quiet destructive action as terracotta text, a loud one filled', async () => {
+    let clicked = 0;
+    await act(async () => {
+      root.render(
+        <>
+          <ModalFooter onConfirm={() => clicked++} confirmVariant="quiet-destructive" confirmText="Rollback" />
+          <ModalFooter onConfirm={() => undefined} confirmVariant="destructive" confirmText="Delete" />
+        </>,
+      );
+      await Promise.resolve();
+    });
+
+    const [quiet, loud] = [...container.querySelectorAll('button')];
+    expect(quiet?.className).toContain('MuiButton-text');
+    expect(quiet?.className).not.toContain('MuiButton-contained');
+    expect(getComputedStyle(quiet as Element).color).toBe('var(--money-down)');
+    expect(loud?.className).toContain('MuiButton-contained');
+    expect(loud?.className).toContain('MuiButton-colorError');
+
+    await act(async () => {
+      quiet?.click();
+    });
+    expect(clicked).toBe(1);
+  });
 });

@@ -81,6 +81,9 @@ describe('Single sign-on account safety (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.use(cookieParser());
     await app.init();
+    // Listen once up front: on an idle server supertest calls listen(0) per request,
+    // and the two racing sign-ins below would race on that, resetting one connection.
+    await new Promise<void>(resolve => app.getHttpServer().listen(0, '127.0.0.1', resolve));
     dataSource = moduleFixture.get(DataSource);
     admin = await registerAccount(app, adminEmail, 'Admin One');
     victim = await registerAccount(app, victimEmail, 'Member One');

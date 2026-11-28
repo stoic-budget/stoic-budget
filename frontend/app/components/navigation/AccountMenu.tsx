@@ -11,16 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import {
-  ChevronUp,
-  Eye,
-  LogOut,
-  Moon,
-  Plug,
-  Puzzle,
-  ScrollText,
-  Settings,
-} from '@/app/components/icons';
+import { ChevronUp, Eye, LogOut, Moon, Puzzle, ScrollText, Settings } from '@/app/components/icons';
 import { openAppPanel } from '@/app/components/panels/app-panels-store';
 import { useWhatsNew } from '@/app/components/whats-new/useWhatsNew';
 import { useAuth } from '@/app/hooks/useAuth';
@@ -216,19 +207,6 @@ export function AccountMenu({
               <Puzzle size={18} />
             </ListItemIcon>
             <ListItemText>{nav.plugins}</ListItemText>
-          </MenuItem>
-        ) : null}
-
-        {canOpenApps ? (
-          <MenuItem
-            onClick={() => {
-              openPanel('integrations');
-            }}
-          >
-            <ListItemIcon>
-              <Plug size={18} />
-            </ListItemIcon>
-            <ListItemText>{nav.integrations}</ListItemText>
           </MenuItem>
         ) : null}
 

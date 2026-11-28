@@ -108,6 +108,10 @@ describe('Private transactions (e2e)', () => {
     dataSource = moduleFixture.get<DataSource>(DataSource);
 
     owner = await registerAccount(app, emails.owner, 'Privacy Owner');
+
+    // The rows are booked in EUR: the reports, in the workspace's currency, count them as booked.
+
+    await dataSource.query("UPDATE workspaces SET currency = 'EUR' WHERE id = $1", [owner.workspaceId]);
     partner = await registerAccount(app, emails.partner, 'Privacy Partner');
 
     const invite = await as(

@@ -20,7 +20,13 @@ export interface BudgetItem {
   id: string;
   name: string;
   categoryId: string;
-  category?: { id: string; name: string; color?: string | null; icon?: string | null };
+  category?: {
+    id: string;
+    name: string;
+    color?: string | null;
+    icon?: string | null;
+    parentId?: string | null;
+  };
   limitAmount: number;
   /** Budget limit in the workspace currency (API may return it as a decimal string). */
   limitAmountWorkspace?: number;

@@ -19,6 +19,7 @@ import {
 import { AuditService } from '../audit/audit.service';
 import { statementCashKey } from './ledger-accounts.service';
 import { LedgerPostingError, LedgerPostingService } from './ledger-posting.service';
+import { noBankStatementRowsSql, walletOwnRowSql } from './moved-rows';
 import { LedgerSyncQueue } from './queue/ledger-sync.queue';
 
 /** Rows per query while draining a workspace. */
@@ -425,22 +426,20 @@ export class LedgerSyncService {
       has_opening: boolean;
       wallet_balance: string | null;
     }> = await this.workspaceRepository.query(
-      // A wallet's own rows book to it unless they sit on a statement, and
+      // A wallet's own rows book to it unless they sit on a bank statement (a
+      // manual expense or a receipt is the wallet's own), and
       // duplicates and unconfirmed rows are not booked at all; its opening
       // balance is booked only for an active wallet with no statement rows.
       // The expected balance follows the same rules.
       `SELECT a."id", a."code", a."name", a."currency", a."statement_account_key",
               -- NULL for a statement account, which has no wallet.
               (CASE WHEN w."id" IS NULL THEN NULL
-                    WHEN w."is_active" AND NOT EXISTS (
-                      SELECT 1 FROM "transactions" st
-                       WHERE st."wallet_id" = w."id" AND st."statement_id" IS NOT NULL
-                    ) THEN w."initial_balance" ELSE 0 END
+                    WHEN w."is_active" AND ${noBankStatementRowsSql('w')} THEN w."initial_balance" ELSE 0 END
                + coalesce((
                  SELECT sum(CASE WHEN t."transaction_type" = 'income' THEN 1 ELSE -1 END
                             * coalesce(t."amount", t."debit", t."credit"))
                    FROM "transactions" t
-                  WHERE t."wallet_id" = w."id" AND t."statement_id" IS NULL
+                  WHERE t."wallet_id" = w."id" AND ${walletOwnRowSql('t')}
                     AND NOT t."is_duplicate" AND ${countedSql('t')}
                     AND upper(t."currency") = upper(w."currency")
                ), 0))::numeric(15,2) AS "wallet_balance",
