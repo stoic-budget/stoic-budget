@@ -138,6 +138,34 @@ describe('Forecast (e2e)', () => {
     );
   });
 
+  it('takes an open invoice of a regular payer for its next payday, not one more', async () => {
+    const payday = (monthsBack: number) => {
+      const date = new Date(`${inDays(7)}T00:00:00Z`);
+      date.setUTCMonth(date.getUTCMonth() - monthsBack);
+      return date.toISOString().slice(0, 10);
+    };
+    for (const monthsBack of [1, 2, 3]) {
+      await dataSource.query(
+        `INSERT INTO transactions (workspace_id, transaction_date, counterparty_name, payment_purpose,
+           amount, credit, currency, transaction_type, is_verified)
+         VALUES ($1, $2, 'ACME Client', 'Retainer', 1000, 1000, 'USD', 'income', true)`,
+        [owner.workspaceId, payday(monthsBack)],
+      );
+    }
+    const before = await as(owner, request(server()).get('/forecast?days=30')).expect(200);
+    const acme = (body: { events: Array<{ label: string; amount: number }> }) =>
+      body.events.filter(event => event.label.startsWith('ACME Client')).map(event => event.amount);
+    expect(acme(before.body)).toEqual([1000]);
+
+    await as(owner, request(server()).post('/payables'))
+      .send({ direction: 'receivable', vendor: 'ACME Client', amount: 1000, currency: 'USD', dueDate: inDays(7) })
+      .expect(201);
+    const after = await as(owner, request(server()).get('/forecast?days=30')).expect(200);
+
+    expect(acme(after.body)).toEqual([1000]);
+    expect(after.body.safeToSpend.untilDate < inDays(7)).toBe(true);
+  });
+
   it('accepts only the three horizons', () => {
     return as(owner, request(server()).get('/forecast?days=45')).expect(400);
   });

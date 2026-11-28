@@ -27,7 +27,9 @@ import {
 } from './forecast.engine';
 import { firstOfNextMonth, monthsUntil } from './forecast-calendar';
 import { forecastCaveats } from './forecast-caveats';
+import { normalizeCurrency, round } from './forecast-money';
 import { inCurrency, incomeHistory, pendingEvents, withAmount } from './forecast-transactions';
+import { withoutInvoicedIncome } from './invoiced-income';
 
 export type { ForecastResponse };
 
@@ -98,8 +100,11 @@ export class ForecastService {
     // Detected in the payer's own currency, projected at today's rate as the rest is.
     const detected = detectRecurringIncome(incomeRows.map(withAmount), todayKey);
     const recurring = await inCurrency(detected, currency, convert);
-    const incomeEvents = recurring.flatMap(income =>
-      projectIncome(income, income.sourceId, todayKey, projectionEnd),
+    // An open invoice of a regular payer is that payer's next payment, not one more.
+    const incomeEvents = withoutInvoicedIncome(
+      recurring.flatMap(income => projectIncome(income, income.sourceId, todayKey, projectionEnd)),
+      [...receivables, ...invoices],
+      sourceId => recurring.find(income => income.sourceId === sourceId)?.intervalDays ?? 30,
     );
 
     const committed: ForecastEvent[] = commitments.items.map(item => ({
@@ -429,15 +434,4 @@ export class ForecastService {
     const rate = await this.exchangeRatesService.getRate(source, to, undefined, workspaceId);
     return amount * rate;
   }
-}
-
-function normalizeCurrency(currency: string | null | undefined): string {
-  const normalized = String(currency || '')
-    .trim()
-    .toUpperCase();
-  return /^[A-Z]{3}$/.test(normalized) ? normalized : 'KZT';
-}
-
-function round(value: number): number {
-  return Math.round(value * 100) / 100;
 }
