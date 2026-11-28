@@ -53,6 +53,11 @@ import {
   type ReceiptWithCategory,
 } from './helpers/attach-receipt-categories';
 import { attachTarget } from './helpers/attach-target';
+import {
+  categoryChangesOnly,
+  categoryIfEdited,
+  syncStatementCategory,
+} from './receipt-category-sync';
 import { ReceiptProcessorService } from './services/receipt-processor.service';
 import { trashScanStatement } from './trash-scan-statement';
 
@@ -264,16 +269,18 @@ export class ReceiptsService {
       receipt.status = dto.status;
     }
 
-    if (dto.parsedData) {
+    // The form sends every field: a category equal to the stored one is no choice (#688).
+    const parsedEdits = dto.parsedData && categoryChangesOnly(dto.parsedData, receipt.parsedData);
+    if (parsedEdits) {
       // Where a category came from is the server's to say, never the client's.
-      const { categorySource: _source, categoryReason: _reason, ...edits } = dto.parsedData;
+      const { categorySource: _source, categoryReason: _reason, ...edits } = parsedEdits;
       receipt.parsedData = {
         ...(receipt.parsedData ?? {}),
         ...edits,
       };
       // A category a person picked on the receipt is theirs, and teaches the payee.
-      if (userId && dto.parsedData.categoryId !== undefined) {
-        receipt.parsedData.categorySource = dto.parsedData.categoryId
+      if (userId && parsedEdits.categoryId !== undefined) {
+        receipt.parsedData.categorySource = parsedEdits.categoryId
           ? TransactionCategorySource.MANUAL
           : null;
         receipt.parsedData.categoryReason = null;
@@ -285,9 +292,16 @@ export class ReceiptsService {
     }
 
     const saved = await this.receiptRepository.save(receipt);
-    await this.syncStatementCategory(saved, workspaceId);
-    if (dto.parsedData) {
-      await this.syncBookedTransaction(saved, workspaceId, dto.parsedData);
+    if (parsedEdits?.categoryId !== undefined || dto.statementId !== undefined) {
+      await syncStatementCategory(
+        this.transactionRepository.manager,
+        saved,
+        workspaceId,
+        this.taxAssignmentService,
+      );
+    }
+    if (parsedEdits) {
+      await this.syncBookedTransaction(saved, workspaceId, parsedEdits);
     }
 
     if (userId) {
@@ -404,59 +418,6 @@ export class ReceiptsService {
   }
 
   /**
-   * A scan receipt is converted into a statement before the user ever opens it,
-   * so the statement carries the fallback category picked at conversion time.
-   * When the user then picks a category on the receipt, the statement has to
-   * follow — otherwise the choice is invisible everywhere the statement is shown.
-   */
-  private async syncStatementCategory(receipt: Receipt, workspaceId: string): Promise<void> {
-    const categoryId = receipt.parsedData?.categoryId;
-    if (!(receipt.statementId && categoryId)) {
-      return;
-    }
-
-    const category = await this.categoryRepository.findOne({
-      where: { id: categoryId, workspaceId },
-      select: {
-        id: true,
-      },
-    });
-    if (!category) {
-      return;
-    }
-
-    const statement = await this.statementRepository.findOne({
-      where: { id: receipt.statementId, workspaceId },
-    });
-    if (!statement) {
-      return;
-    }
-
-    await this.statementRepository.update(
-      { id: statement.id, workspaceId },
-      { categoryId: category.id },
-    );
-
-    // The dashboard aggregates by transaction category, so the transaction the
-    // scan produced has to follow the receipt too — otherwise the spend stays
-    // filed under the fallback category picked at conversion time. Statements
-    // parsed from a bank file carry unrelated transactions and are left alone.
-    if (statement.parsingDetails?.detectedBy === 'receipt-scan') {
-      // Rows on a filed tax return keep the category they were filed under.
-      await this.transactionRepository.update(
-        { statementId: statement.id, workspaceId, taxLocked: false },
-        {
-          categoryId: category.id,
-          categorySource: receipt.parsedData?.categorySource ?? null,
-          categoryReason: receipt.parsedData?.categoryReason ?? null,
-        },
-      );
-      // update() skips the tax subscriber; the new category may carry another rate.
-      await this.taxAssignmentService?.reassess(workspaceId, { statementId: statement.id });
-    }
-  }
-
-  /**
    * Every figure sums transactions, not receipts, so an edit to a receipt has
    * to reach the row it stands for, or the documents list shows one date and
    * every number another. The row the receipt booked itself (its scan's row, or
@@ -486,7 +447,10 @@ export class ReceiptsService {
         return;
       }
       const currency = await this.workspaceCurrency.resolve(workspaceId);
-      const fields = receiptTransactionFields(receipt, workspaceId, currency);
+      const fields = categoryIfEdited(
+        edits,
+        receiptTransactionFields(receipt, workspaceId, currency),
+      );
       await assertWorkspaceOwned(
         this.transactionRepository.manager,
         Category,
@@ -697,7 +661,11 @@ export class ReceiptsService {
         // update() skips the subscriber: the vendor may have been corrected since
         // the upload. A scan row split in Review keeps its parts' money (#686).
         const { where, set } = bookedRowUpdate(scanTransaction, workspaceId, {
-          ...scanTransactionUpdate(fields, Boolean(receipt.parsedData?.date)),
+          // A category the row was given since (Review, the card) is kept (#688).
+          ...scanTransactionUpdate(
+            hasDecidedCategory(scanTransaction) ? categoryIfEdited({}, fields) : fields,
+            Boolean(receipt.parsedData?.date),
+          ),
           payeeId: await resolvePayeeId(manager, workspaceId, fields),
           isVerified: true,
         });
