@@ -22,6 +22,7 @@
 
 import type { ForecastEventKind } from '../../contracts';
 import { sameParty } from './forecast-parties';
+import { incomeStreams } from './income-streams';
 
 export type { ForecastEventKind };
 export { sameParty };
@@ -326,7 +327,9 @@ function round(value: number): number {
 
 export interface IncomeRow {
   counterpartyName: string | null;
+  /** In the row's own currency: a fixed salary stays fixed whatever the rate did. */
   amount: number;
+  currency?: string | null;
   /** YYYY-MM-DD or Date */
   transactionDate: string | Date;
 }
@@ -335,6 +338,8 @@ export interface RecurringIncome {
   label: string;
   /** What the latest paydays brought (median of the last three), so a raise shows. */
   amount: number;
+  /** The currency the payer pays in; `amount` is in it. */
+  currency: string | null;
   intervalDays: number;
   /** Monthly payers are paid on a day of the month, not every N days; null otherwise. */
   dayOfMonth: number | null;
@@ -357,12 +362,7 @@ const RECENT_PAYDAYS = 3;
  * not projected at all.
  */
 export function detectRecurringIncome(rows: IncomeRow[], today: string): RecurringIncome[] {
-  const groups = new Map<string, IncomeRow[]>();
-  for (const row of rows) {
-    const key = (row.counterpartyName ?? '').trim().toLowerCase();
-    if (!key) continue;
-    groups.set(key, [...(groups.get(key) ?? []), row]);
-  }
+  const groups = incomeStreams(rows);
   const result: RecurringIncome[] = [];
   for (const group of groups.values()) {
     const sorted = group
@@ -390,6 +390,7 @@ export function detectRecurringIncome(rows: IncomeRow[], today: string): Recurri
     result.push({
       label: (last.counterpartyName ?? '').trim(),
       amount: round(median(amounts.slice(-RECENT_PAYDAYS))),
+      currency: last.currency ?? null,
       ...income,
       lastDate: last.date,
       nextDate: next,

@@ -223,12 +223,15 @@ type AutoSaveArgs = {
   statementId: string;
   formData: MetaForm;
   setStatement: (v: Statement | null) => void;
+  /** Shown when the server refuses: the typed value is not saved. */
+  failedMessage: string;
 };
 
 export async function metadataAutoSave({
   statementId,
   formData,
   setStatement,
+  failedMessage,
 }: AutoSaveArgs): Promise<void> {
   try {
     const payload = {
@@ -244,6 +247,8 @@ export async function metadataAutoSave({
     setStatement(await readStatement(statementId));
     invalidateDocumentLists();
   } catch (err) {
-    console.error('Metadata autosave failed:', err);
+    toast.error(getApiErrorMessage(err, failedMessage));
+    // Rethrown so the autosave keeps the value as unsaved and retries it.
+    throw err;
   }
 }

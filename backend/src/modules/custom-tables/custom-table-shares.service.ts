@@ -11,6 +11,9 @@ import { CustomTableRow } from '../../entities/custom-table-row.entity';
 import { CustomTableShare, CustomTableShareStatus } from '../../entities/custom-table-share.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
 import { AuditService } from '../audit/audit.service';
+import { CustomTableRelationsService } from './custom-table-relations.service';
+import { applyFormulaColumns } from './helpers/row-data';
+import { SHARED_PAGE_MAX, sameWorkspaceRelations, sharedValues } from './shared-rows';
 
 /** Срок жизни ссылки по умолчанию: бессрочные ссылки на финданные — плохая идея. */
 const DEFAULT_EXPIRY_DAYS = 30;
@@ -35,6 +38,7 @@ export class CustomTableSharesService {
     @InjectRepository(WorkspaceMember)
     private readonly workspaceMemberRepository: Repository<WorkspaceMember>,
     private readonly auditService: AuditService,
+    private readonly relations: CustomTableRelationsService,
   ) {}
 
   /** Выдача и отзыв внешнего доступа — привилегия редакторов таблиц. */
@@ -191,7 +195,8 @@ export class CustomTableSharesService {
   ): Promise<{ items: Array<{ rowNumber: number; data: unknown }>; total: number }> {
     const share = await this.resolveActiveShare(token);
 
-    const limit = Math.min(Math.max(params.limit ?? 50, 1), 200);
+    // A page of up to 1000: the public route allows 30 requests a minute.
+    const limit = Math.min(Math.max(params.limit ?? 50, 1), SHARED_PAGE_MAX);
     const query = this.rowRepository
       .createQueryBuilder('r')
       .where('r.tableId = :tableId', { tableId: share.tableId })
@@ -203,11 +208,22 @@ export class CustomTableSharesService {
       query.andWhere('r.rowNumber > :cursor', { cursor: params.cursor });
     }
     const rows = await query.getMany();
+    const columns = await this.columnRepository.find({ where: { tableId: share.tableId } });
+    // As the table shows them: formulas worked out, relations by their label.
+    applyFormulaColumns(rows, columns);
+    await this.relations.applyRelationLabels(
+      rows,
+      await sameWorkspaceRelations(this.tableRepository, columns, share.workspaceId),
+    );
 
     // Идентификаторы строк наружу не отдаём: по ссылке доступен только просмотр,
-    // а id — это ключ к операциям записи в приватном API.
+    // а id — это ключ к операциям записи в приватном API. Only the table's
+    // current columns go out: a deleted column's values stay in the row's data.
     return {
-      items: rows.map(row => ({ rowNumber: row.rowNumber, data: row.data })),
+      items: rows.map(row => ({
+        rowNumber: row.rowNumber,
+        data: sharedValues(row, columns),
+      })),
       total,
     };
   }

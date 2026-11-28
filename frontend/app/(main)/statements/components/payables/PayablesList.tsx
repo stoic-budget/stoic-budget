@@ -19,12 +19,15 @@ import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIsMobile } from '@/app/hooks/useIsMobile';
 import { useIntlayer } from '@/app/i18n';
 import type { Payable } from '@/app/lib/payables-api';
+import { LateReasonMenuItem, LateReasonNote } from './LateReasonParts';
 import { OccurrenceMenuItems } from './OccurrenceMenuItems';
 import {
   daysOverdue,
+  fillTemplate,
   formatMoney,
   formatPayableDate,
   isPayableOverdue,
+  pageRange,
   toNumber,
   toneOf,
 } from './payables-utils';
@@ -69,13 +72,8 @@ interface PayablesListProps {
   onArchive: (payable: Payable) => void;
   onDelete: (payable: Payable) => void;
   onOccurrence?: React.ComponentProps<typeof OccurrenceMenuItems>['onAction'];
+  onLateReason?: (payable: Payable) => void;
 }
-
-const fillTemplate = (template: string, values: Record<string, string | number>): string =>
-  Object.entries(values).reduce(
-    (result, [key, value]) => result.replace(`{${key}}`, String(value)),
-    template,
-  );
 
 function PayablesList({
   items,
@@ -91,6 +89,7 @@ function PayablesList({
   onArchive,
   onDelete,
   onOccurrence,
+  onLateReason,
 }: PayablesListProps): React.JSX.Element {
   const isMobile = useIsMobile();
   const unbookedText = useIntlayer('payablesUnbooked');
@@ -106,10 +105,7 @@ function PayablesList({
     );
   }
 
-  const rangeStart =
-    pagination.totalItems === 0 ? 0 : (pagination.page - 1) * pagination.pageSize + 1;
-  const rangeEnd = Math.min(pagination.page * pagination.pageSize, pagination.totalItems);
-  const safeRangeStart = pagination.totalItems === 0 ? 0 : Math.min(rangeStart, rangeEnd);
+  const { from: safeRangeStart, to: rangeEnd } = pageRange(pagination);
   // A column that says the same thing on every row says nothing.
   const showSource = new Set(items.map(item => item.source)).size > 1;
   // A column of its own on the table, shown only when some bill has a tag.
@@ -131,6 +127,7 @@ function PayablesList({
             {relative.format(-daysOverdue(payable.dueDate), 'day')}
           </span>
         )}
+        <LateReasonNote payable={payable} onAsk={onLateReason} />
         {/* Paid on paper, with no money in an account yet: it waits for its bank row. */}
         {!overdue && toNumber(payable.unbookedAmount) > 0 && (
           <span className="seneca-payable-status__unbooked">
@@ -181,6 +178,7 @@ function PayablesList({
           <DropdownMenuContent align="end" style={{ minWidth: 180 }}>
             <DropdownMenuItem onClick={() => onEdit(payable)}>{labels.edit}</DropdownMenuItem>
             <OccurrenceMenuItems payable={payable} onAction={onOccurrence} />
+            <LateReasonMenuItem payable={payable} onSelect={onLateReason} />
             <DropdownMenuItem onClick={() => onArchive(payable)}>{labels.archive}</DropdownMenuItem>
             <DropdownMenuItem onClick={() => onDelete(payable)}>{labels.delete}</DropdownMenuItem>
           </DropdownMenuContent>

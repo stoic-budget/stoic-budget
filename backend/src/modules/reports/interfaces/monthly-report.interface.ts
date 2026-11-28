@@ -41,6 +41,10 @@ export interface PeriodComparison {
 }
 
 export interface MonthlyReport {
+  /** The workspace's currency every amount is in, at each row's own day's rate. */
+  currency: string;
+  /** Currencies with no rate to it: their rows are left out, not counted one to one. */
+  missingRates: string[];
   month: string;
   year: number;
   dailyTrends: DailyTrend[];

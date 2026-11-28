@@ -158,6 +158,9 @@ const DATA_ROUTES: Record<string, (data: InsightData) => string | null> = {
   // one with data, which need not be the judged one.
   'stoic.fortune': data => withQuery('/dashboard', { month: readMonth(data) }),
   'stoic.goal': data => goalRoute(data) ?? '/goals',
+  // Late again for the same reason: remind earlier or move the date on the bills; save for the unforeseen.
+  'pattern.late_payments': data =>
+    readString(data, 'target') === 'goals' ? '/goals' : '/statements/pay?focus=late-payments',
 };
 
 /**

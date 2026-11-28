@@ -1,5 +1,6 @@
 import { Controller, Delete, Get, Put, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import { PluginAuth } from '../../common/decorators/plugin-auth.decorator';
 import { WorkspaceId } from '../../common/decorators/workspace.decorator';
 import { WorkspaceAuth } from '../../common/decorators/workspace-auth.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
@@ -36,7 +37,7 @@ export class ApplicationSettingsController {
   // Checks the caller's password (bcrypt): an online guessing oracle for a stolen session.
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Put('email/smtp')
-  @WorkspaceAuth(Permission.WORKSPACE_SETTINGS_MANAGE)
+  @PluginAuth('smtp', Permission.WORKSPACE_SETTINGS_MANAGE)
   @SchemaResponse(IntegrationConnection)
   saveSmtp(
     @CurrentUser() user: User,
@@ -61,7 +62,7 @@ export class ApplicationSettingsController {
   }
 
   @Put('notifications/telegram')
-  @WorkspaceAuth(Permission.WORKSPACE_SETTINGS_MANAGE)
+  @PluginAuth('telegram', Permission.WORKSPACE_SETTINGS_MANAGE)
   @SchemaResponse(TelegramBotStatus)
   saveTelegram(
     @CurrentUser() user: User,

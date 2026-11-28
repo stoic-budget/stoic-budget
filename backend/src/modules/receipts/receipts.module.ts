@@ -18,6 +18,7 @@ import { TaxModule } from '../tax/tax.module';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { WorkspaceCurrencyModule } from '../workspaces/workspace-currency.module';
 import { ReceiptApprovalsController } from './receipt-approvals.controller';
+import { ReceiptCurrencySubscriber } from './receipt-currency.subscriber';
 import { ReceiptTagsController } from './receipt-tags.controller';
 import { ReceiptsController } from './receipts.controller';
 import { ReceiptsService } from './receipts.service';
@@ -56,6 +57,7 @@ import { ReceiptTagsService } from './services/receipt-tags.service';
   controllers: [ReceiptsController, ReceiptApprovalsController, ReceiptTagsController],
   providers: [
     ReceiptsService,
+    ReceiptCurrencySubscriber,
     EmailReceiptParserService,
     ReceiptCategoryService,
     ReceiptDocumentsService,

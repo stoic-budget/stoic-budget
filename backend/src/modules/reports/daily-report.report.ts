@@ -14,6 +14,7 @@ import {
 } from './helpers/report-query.util';
 import { dayOf } from './helpers/report-values.util';
 import type { DailyReport } from './interfaces/daily-report.interface';
+import { TemplateReportRowsLoader } from './template-report-rows.loader';
 
 /** One day's income by counterparty and expense by category; the latest day by default. */
 @Injectable()
@@ -23,6 +24,7 @@ export class DailyReportGenerator {
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
     private readonly auditService: AuditService,
+    private readonly rowsLoader: TemplateReportRowsLoader,
   ) {}
 
   async generateDailyReport(
@@ -62,6 +64,10 @@ export class DailyReportGenerator {
       .getMany();
     redactPrivateRows(incomeTransactions, viewerMemberId);
     redactPrivateRows(expenseTransactions, viewerMemberId);
+    const money = await this.rowsLoader.toWorkspaceCurrency(workspaceId, [
+      ...incomeTransactions,
+      ...expenseTransactions,
+    ]);
 
     // Calculate income block
     const incomeTotal = incomeTransactions.reduce((sum, t) => sum + Number(t.amount ?? 0), 0);
@@ -105,6 +111,7 @@ export class DailyReportGenerator {
 
     const report: DailyReport = {
       date: date,
+      ...money,
       income: {
         totalAmount: incomeTotal,
         transactionCount: incomeTransactions.length,

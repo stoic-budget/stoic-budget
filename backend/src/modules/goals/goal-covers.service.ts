@@ -18,7 +18,7 @@ import {
   type OpenverseResult,
   requestOpenverseJson,
 } from '../../common/utils/openverse.util';
-import { resolveUploadsDir } from '../../common/utils/uploads.util';
+import { fileStillNamed, resolveUploadsDir } from '../../common/utils/uploads.util';
 import type { SetGoalCoverBody } from '../../contracts';
 import { Goal } from '../../entities';
 import { ActorType, AuditAction, EntityType } from '../../entities/audit-event.entity';
@@ -281,9 +281,8 @@ export class GoalCoversService {
   }
 
   private async deleteCoverFile(fileName: string | null, keep: string | null): Promise<void> {
-    if (!fileName || fileName === keep) {
-      return;
-    }
+    if (!fileName || fileName === keep) return;
+    if (await fileStillNamed(this.goalRepository, 'coverFile', fileName)) return;
     try {
       await fs.unlink(this.coverPath(fileName));
     } catch {
