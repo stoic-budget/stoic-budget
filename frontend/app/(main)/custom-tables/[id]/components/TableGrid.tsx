@@ -18,6 +18,8 @@ export interface TableGridLabels extends CellLabels, ColumnHeaderLabels {
   emptyTitle: string;
   emptySubtitle: string;
   noTotal: string;
+  /** A money total over rows in several currencies (#648). */
+  mixedCurrencies: string;
   aggregates: Record<AggregateFn, string>;
   caption: string;
 }

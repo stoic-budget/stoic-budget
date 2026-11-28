@@ -1182,4 +1182,85 @@ export const en: StoicTextMap = {
         'At {{percent}}%, with no deadline. Know where you are sailing, and the monthly step follows.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Forgotten twice is a habit',
+      message:
+        '{{count}} bills in the last half year were late because they slipped your mind. Memory is not a plan: let the reminder come earlier, while there is still time to act.',
+    },
+    {
+      title: 'The bill did not forget you',
+      message:
+        '{{count}} bills in half a year waited while they were forgotten. What the mind cannot carry, a reminder can: give it a few more days.',
+    },
+    {
+      title: 'Let the reminder remember',
+      message:
+        'Forgotten {{count}} times in half a year. The mind is for judging, not for keeping dates; let the reminder come early enough to act on.',
+    },
+    {
+      title: 'A small duty, often missed',
+      message:
+        '{{count}} late bills, each one simply forgotten. Calm begins with order in small things, and an earlier reminder costs nothing.',
+    },
+    {
+      title: 'Forgetting has a pattern',
+      message:
+        'In half a year {{count}} bills slipped past their dates unnoticed. Seneca reviewed his day each evening; a reminder a few days sooner does that work for you.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Payday comes after the bill',
+      message:
+        '{{count}} times in half a year the money was not there yet when a bill fell due. Move its date past your payday, or keep one payment aside: what is prepared does not hurry you.',
+    },
+    {
+      title: 'The money arrives after the date',
+      message:
+        '{{count}} times in half a year the bill came before the income did. Put the date where the money already is, and the bill stops pressing on you.',
+    },
+    {
+      title: 'One payment ahead',
+      message:
+        '{{count}} late bills in half a year waited for payday. Keep one payment set aside, and the calendar loses its hold on you.',
+    },
+    {
+      title: 'Order the dates, not the worry',
+      message:
+        'Short before payday {{count}} times in half a year. The cure is not more worry but a better order: the bill after the income, or a cushion before it.',
+    },
+    {
+      title: 'Prepared money does not hurry',
+      message:
+        '{{count}} times a bill fell due before the money came. What is prepared in advance is met calmly: set one payment aside or move the date.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'The unexpected keeps coming',
+      message:
+        '{{count}} late bills in half a year followed an unforeseen expense. Nothing happens to the wise against their expectation, Seneca writes. A reserve for the unforeseen is a goal worth setting.',
+    },
+    {
+      title: 'Expect the unexpected',
+      message:
+        '{{count}} late bills in half a year came after an expense you did not foresee. The Stoics rehearsed misfortune so it would not surprise them; a reserve is that rehearsal in money.',
+    },
+    {
+      title: 'A cushion for the unforeseen',
+      message:
+        'In half a year {{count}} bills waited behind a surprise expense. A small reserve turns the next surprise into an inconvenience, not a late bill.',
+    },
+    {
+      title: 'Fortune lends, and asks back',
+      message:
+        '{{count}} times an unforeseen cost pushed a bill past its date. Fortune will ask again; set a reserve aside so the bill need not wait.',
+    },
+    {
+      title: 'Surprises are not rare',
+      message:
+        '{{count}} late bills followed something unexpected. What happens often is not truly unexpected: a reserve goal makes room for it.',
+    },
+  ],
 };

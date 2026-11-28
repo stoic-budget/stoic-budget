@@ -1,0 +1,44 @@
+{
+  "bankName": "csob",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "currency"
+  ],
+  "metadata": {
+    "accountNumber": "123456789/0300",
+    "currency": "CZK",
+    "dateFrom": "2025-03-07T00:00:00",
+    "dateTo": "2025-03-07T00:00:00",
+    "balanceStart": 50000,
+    "balanceEnd": 48743.1,
+    "rawHeader": "Výpis z účtu Účet: 123456789/0300 Měna: CZK Rok/č. výpisu: 2025/3",
+    "normalizedHeader": "Výpis z účtu Účet: 123456789/0300 Měna: CZK Rok/č. výpisu: 2025/3",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2025-03-07T00:00:00",
+      "counterpartyName": "ACME Potraviny",
+      "paymentPurpose": "Platba kartou 516844******4400",
+      "debit": 1256.9,
+      "currency": "CZK"
+    }
+  ],
+  "checks": [
+    {
+      "code": "printed_balances",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "5af8ef2d0d15",
+    "headings": [
+      "date:datum | description:oznaceni platby | counterparty:protistrana | other:identifikace | amount:castka | balance:zustatek"
+    ],
+    "unknownWords": [
+      "identifikace"
+    ],
+    "mentionedBank": "csob"
+  }
+}

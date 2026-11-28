@@ -36,6 +36,8 @@ export const TaxReserve = Schema.Struct({
   incomeTax: Schema.NullOr(
     Schema.Struct({ percent: Schema.Number, earnings: Schema.Number, amount: Schema.Number }),
   ),
+  /** Last year's tax still unpaid at its end: owed this year too, so its payment settles it first. */
+  carriedOver: Schema.Number,
   payments: Schema.Struct({
     categoryId: Schema.NullOr(Schema.String),
     amount: Schema.Number,

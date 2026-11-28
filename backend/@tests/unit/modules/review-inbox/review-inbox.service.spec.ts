@@ -16,12 +16,24 @@ describe('ReviewInboxService', () => {
   const transactionRepository = { findOne: vi.fn(), update: vi.fn(), createQueryBuilder: vi.fn() };
   const transactionsService = { bulkUpdate: vi.fn() };
   const deduplicationService = { unmarkDuplicate: vi.fn() };
-  const receiptRepository = {
+  const receiptRepository: Record<string, unknown> & {
+    find: ReturnType<typeof vi.fn>;
+    findOne: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
+  } = {
     count: vi.fn(),
     findAndCount: vi.fn(),
     find: vi.fn(async () => []),
+    findOne: vi.fn(async () => null),
     update: vi.fn(),
   };
+  // Approving a scan's receipt writes through the manager: the same mocks.
+  const fakeManager = {
+    getRepository: (entity: unknown) => (entity === Receipt ? receiptRepository : transactionRepository),
+    query: vi.fn(async () => []),
+    transaction: async (work: (manager: unknown) => unknown) => work(fakeManager),
+  };
+  receiptRepository.manager = fakeManager;
   const eventEmitter = { emit: vi.fn() };
 
   beforeEach(async () => {
@@ -69,6 +81,31 @@ describe('ReviewInboxService', () => {
       transactionId: 'row-1',
       mode: 'confirmed_scan',
     });
+  });
+
+  it("documents the matched bank row and flags the scan's row its duplicate (#687)", async () => {
+    transactionsService.bulkUpdate.mockResolvedValue([{ id: 'row-1', statementId: 'scan-1' }]);
+    receiptRepository.find.mockResolvedValueOnce([
+      { id: 'receipt-1', statementId: 'scan-1', metadata: { transactionMatch: { transactionIds: ['bank-1'] } } },
+    ]);
+    transactionRepository.findOne.mockImplementation(async ({ where }: { where: { id: string } }) =>
+      where.id === 'bank-1' ? { id: 'bank-1' } : { id: 'row-1', taxLocked: false },
+    );
+
+    await service.approveTransactions('ws-1', 'u1', ['row-1']);
+
+    expect(transactionRepository.update).toHaveBeenCalledWith(
+      { id: 'row-1', workspaceId: 'ws-1' },
+      { isDuplicate: true, duplicateOfId: 'bank-1' },
+    );
+    expect(receiptRepository.update).toHaveBeenCalledWith(
+      { id: 'receipt-1', workspaceId: 'ws-1' },
+      expect.objectContaining({ transactionId: 'bank-1' }),
+    );
+    expect(eventEmitter.emit).toHaveBeenCalledWith(
+      'receipt.approved',
+      expect.objectContaining({ transactionId: 'bank-1', mode: 'attached_to_bank_row' }),
+    );
   });
 
   it('approves as is without touching the category', async () => {

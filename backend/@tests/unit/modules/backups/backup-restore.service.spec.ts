@@ -168,6 +168,59 @@ describe('BackupRestoreService', () => {
     await fs.rm(uploads, { recursive: true, force: true });
   });
 
+  it('restores a statement whose file the backup could not carry, without it (#639)', async () => {
+    const uploads = await fs.mkdtemp(path.join(os.tmpdir(), 'seneca-restore-'));
+    const previousUploads = process.env.UPLOADS_DIR;
+    process.env.UPLOADS_DIR = uploads;
+    const statementInsert = vi.fn().mockResolvedValue(undefined);
+    const workspaceRepository = {
+      create: vi.fn().mockImplementation(value => ({ id: 'new-workspace', ...value })),
+      save: vi.fn().mockResolvedValue({ id: 'new-workspace', name: 'Restored finance' }),
+      delete: vi.fn(),
+      update: vi.fn().mockResolvedValue(undefined),
+    };
+    const memberRepository = { create: vi.fn().mockImplementation(value => value), save: vi.fn().mockResolvedValue(undefined) };
+    const manager = { getRepository: vi.fn().mockReturnValue({ insert: statementInsert }), query: vi.fn().mockResolvedValue([]) };
+    const archive = {
+      open: vi.fn().mockResolvedValue({
+        manifest: { workspace: { id: 'old-workspace', name: 'Finance' }, collections: { workspace: 1, statements: 1 }, files: [] },
+        collections: {
+          workspace: [{ id: 'old-workspace', name: 'Finance' }],
+          statements: [{ id: 'old-statement', workspaceId: 'old-workspace', userId: 'old-user', fileName: 'bank.csv', filePath: 'statements/old-statement/bank.csv' }],
+        },
+        files: new Map(),
+      }),
+    };
+    const service = new BackupRestoreService(
+      {
+        entityMetadatas: [
+          {
+            tableName: 'statements',
+            target: 'Statement',
+            columns: [{ propertyName: 'id' }, { propertyName: 'workspaceId' }, { propertyName: 'userId' }, { propertyName: 'fileName' }, { propertyName: 'filePath' }],
+          },
+        ],
+        transaction: vi.fn().mockImplementation(callback => callback(manager)),
+        query: vi.fn().mockResolvedValue([]),
+      } as never,
+      workspaceRepository as never,
+      memberRepository as never,
+      archive as never,
+    );
+
+    await service.restore(Buffer.from('archive'), 'backup password', { id: 'user-1', workspaceId: 'workspace-1' } as never);
+
+    const inserted = statementInsert.mock.calls[0][0][0];
+    expect(inserted.filePath).toMatch(/bank\.csv$/);
+    await expect(fs.access(inserted.filePath)).rejects.toThrow();
+    if (previousUploads === undefined) {
+      delete process.env.UPLOADS_DIR;
+    } else {
+      process.env.UPLOADS_DIR = previousUploads;
+    }
+    await fs.rm(uploads, { recursive: true, force: true });
+  });
+
   it('skips custom_table_import_jobs from backups made before the Google Sheets removal', async () => {
     const categoryInsert = vi.fn().mockResolvedValue(undefined);
     const workspaceRepository = {

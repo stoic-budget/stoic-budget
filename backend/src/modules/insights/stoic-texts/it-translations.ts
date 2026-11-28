@@ -1183,4 +1183,85 @@ export const it: StoicTextMap = {
         'Al {{percent}}%, senza scadenza. Sappi dove navighi, e il passo mensile verrà da sé.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Dimenticare due volte è un’abitudine',
+      message:
+        '{{count}} bollette dell’ultimo semestre sono state pagate in ritardo perché dimenticate. La memoria non è un piano: fai arrivare il promemoria prima, finché c’è tempo per agire.',
+    },
+    {
+      title: 'La bolletta non si è dimenticata di te',
+      message:
+        '{{count}} bollette hanno aspettato nell’ultimo semestre che qualcuno se ne ricordasse. Ciò che la mente non trattiene, lo trattiene un promemoria: dagli qualche giorno in più.',
+    },
+    {
+      title: 'Lascia che il promemoria ricordi',
+      message:
+        'Dimenticato {{count}} volte in sei mesi. La mente serve a giudicare, non a custodire date: il promemoria arrivi in tempo per agire.',
+    },
+    {
+      title: 'Un piccolo dovere, spesso mancato',
+      message:
+        '{{count}} bollette in ritardo, ognuna semplicemente dimenticata. La calma comincia dall’ordine nelle piccole cose, e un promemoria prima non costa nulla.',
+    },
+    {
+      title: 'La dimenticanza ha uno schema',
+      message:
+        'In sei mesi {{count}} bollette hanno superato la scadenza senza che nessuno se ne accorgesse. Seneca ripassava ogni sera la sua giornata; un promemoria qualche giorno prima fa questo lavoro per te.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Lo stipendio arriva dopo la bolletta',
+      message:
+        '{{count}} volte in sei mesi i soldi non c’erano ancora alla scadenza. Sposta la data dopo lo stipendio o tieni da parte una rata: ciò che è preparato non mette fretta.',
+    },
+    {
+      title: 'I soldi arrivano dopo la scadenza',
+      message:
+        '{{count}} volte in sei mesi la bolletta è arrivata prima dell’entrata. Metti la scadenza dove i soldi ci sono già, e la bolletta smette di incalzarti.',
+    },
+    {
+      title: 'Un pagamento d’anticipo',
+      message:
+        '{{count}} bollette in ritardo hanno aspettato lo stipendio in sei mesi. Metti da parte un pagamento, e il calendario perde il suo potere su di te.',
+    },
+    {
+      title: 'Ordina le date, non l’ansia',
+      message:
+        '{{count}} volte in sei mesi mancavano soldi prima dello stipendio. Il rimedio non è più ansia ma più ordine: la bolletta dopo l’entrata, o un cuscinetto prima.',
+    },
+    {
+      title: 'Ciò che è preparato non mette fretta',
+      message:
+        '{{count}} volte una bolletta è scaduta prima che arrivassero i soldi. Ciò che è preparato si accoglie con calma: metti da parte un pagamento o sposta la data.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'L’imprevisto ritorna',
+      message:
+        '{{count}} ritardi in sei mesi sono seguiti a una spesa imprevista. Al saggio nulla accade contro le sue attese, scrive Seneca. Una riserva per l’imprevisto è un obiettivo che vale la pena.',
+    },
+    {
+      title: 'Aspettati l’inaspettato',
+      message:
+        '{{count}} bollette in ritardo in sei mesi sono seguite a una spesa che non avevi previsto. Gli stoici provavano in anticipo la sventura perché non li sorprendesse; una riserva è quella prova in denaro.',
+    },
+    {
+      title: 'Un cuscinetto per l’imprevisto',
+      message:
+        'In sei mesi {{count}} bollette hanno atteso dietro una spesa a sorpresa. Una piccola riserva trasforma la prossima sorpresa in un fastidio, non in un ritardo.',
+    },
+    {
+      title: 'La fortuna presta e chiede indietro',
+      message:
+        '{{count}} volte un costo imprevisto ha spinto una bolletta oltre la scadenza. La fortuna chiederà ancora; metti da parte una riserva perché la bolletta non debba aspettare.',
+    },
+    {
+      title: 'Le sorprese non sono rare',
+      message:
+        '{{count}} bollette in ritardo sono seguite a qualcosa di inatteso. Ciò che accade spesso non è davvero inatteso: un obiettivo di riserva gli fa spazio.',
+    },
+  ],
 };

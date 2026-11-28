@@ -10,6 +10,12 @@ const link = (overrides: Record<string, unknown>) =>
   }) as any;
 
 describe('notificationUrl', () => {
+  it('opens a failed backup on the Sync tab, the same page as the bell', () => {
+    expect(notificationUrl(link({ type: 'backup.failed' }))).toBe(
+      '/settings/profile?tab=sync&section=backup',
+    );
+  });
+
   it('opens a statement on its details page, which exists, not on a bare /statements/:id', () => {
     expect(
       notificationUrl(link({ type: 'parsing.error', entityType: 'statement', entityId: 's-1' })),

@@ -19,6 +19,12 @@ describe('UniversalExtractorService', () => {
   });
 
   describe('extractFromText', () => {
+    it('states no currency when the document shows none, not the installation default (#685)', async () => {
+      const result = await service.extractFromText('ACME Store\nReceipt\nWireless Buds 20.00\nTotal 20.00');
+      expect(result.totalAmount).toBe(20);
+      expect(result.currency).toBeUndefined();
+    });
+
     it('extracts amount and expense type from receipt text', async () => {
       const text = 'Payment Receipt\nStore ABC\nItem 1  $10.00\nItem 2  $20.49\nTotal: $30.49';
       const result = await service.extractFromText(text);

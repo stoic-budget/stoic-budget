@@ -4,13 +4,37 @@
  * single-byte code pages older desktop software writes: Windows-1251 when the
  * high bytes run together the way Cyrillic words do, Windows-1252 (what
  * "latin1" means in practice) when they sit alone inside Latin words.
+ * UTF-16 first, by its byte-order mark or, without one, by the zero byte of
+ * every ASCII character (Excel's "Unicode text" export).
  */
 export function decodeUnlabelledText(bytes: Uint8Array): string {
-  try {
-    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
-  } catch {
-    return new TextDecoder(looksCyrillic(bytes) ? 'windows-1251' : 'windows-1252').decode(bytes);
+  const wide = utf16Of(bytes);
+  if (wide) {
+    return new TextDecoder(wide).decode(bytes);
   }
+  const utf8 = new TextDecoder('utf-8').decode(bytes);
+  if (mostlyUtf8(utf8)) {
+    return utf8;
+  }
+  return new TextDecoder(looksCyrillic(bytes) ? 'windows-1251' : 'windows-1252').decode(bytes);
+}
+
+/**
+ * UTF-8 with a stray bad byte stays UTF-8 (only that byte is lost), as a
+ * cut-off download or one Latin-1 byte in a UTF-8 export: it is single-byte
+ * text only when its high bytes mostly fail to form UTF-8 characters.
+ */
+function mostlyUtf8(text: string): boolean {
+  let bad = 0;
+  let good = 0;
+  for (const char of text) {
+    if (char === '\uFFFD') {
+      bad++;
+    } else if (char.charCodeAt(0) >= 0x80) {
+      good++;
+    }
+  }
+  return bad === 0 || good > bad * 4;
 }
 
 /** Windows-1251 letters below А..я: Ў ў Ґ Ё Є Ї І і ґ ё є ї. */
@@ -60,4 +84,38 @@ function looksCyrillic(bytes: Uint8Array): boolean {
 function touchesLatinLetter(bytes: Uint8Array, start: number, end: number): boolean {
   const before = start >= 2 && isLatinLetter(bytes[start - 1]) && bytes[start - 2] !== 0x0a;
   return before || (end < bytes.length && isLatinLetter(bytes[end]));
+}
+
+/**
+ * UTF-16 by its mark (the decoder drops it), or by zero bytes on one side of
+ * the pairs (every ASCII character has one) and almost none on the other.
+ * Single-byte text never holds a zero, so one side is compared with the
+ * other: ASCII and most Latin and Cyrillic put a zero on the high side, and
+ * the few characters at U+xx00 (U+3000, 대) put one on the low side.
+ */
+function utf16Of(bytes: Uint8Array): 'utf-16le' | 'utf-16be' | null {
+  if (bytes[0] === 0xff && bytes[1] === 0xfe) {
+    return 'utf-16le';
+  }
+  if (bytes[0] === 0xfe && bytes[1] === 0xff) {
+    return 'utf-16be';
+  }
+  const sample = bytes.subarray(0, Math.min(bytes.length, 512) & ~1);
+  if (sample.length < 4) {
+    return null;
+  }
+  let lowZeros = 0;
+  let highZeros = 0;
+  for (let index = 0; index < sample.length; index += 2) {
+    if (sample[index + 1] === 0) lowZeros++;
+    if (sample[index] === 0) highZeros++;
+  }
+  const pairs = sample.length / 2;
+  if (lowZeros > pairs * 0.1 && lowZeros > highZeros * 10) {
+    return 'utf-16le';
+  }
+  if (highZeros > pairs * 0.1 && highZeros > lowZeros * 10) {
+    return 'utf-16be';
+  }
+  return null;
 }

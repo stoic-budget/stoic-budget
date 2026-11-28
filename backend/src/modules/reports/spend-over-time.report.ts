@@ -9,6 +9,7 @@ import {
   formatMonthLabel,
   formatMonthPeriod,
   getIsoWeekInfo,
+  round2,
   toDateKey,
   toEndOfUtcDay,
   toStartOfUtcDay,
@@ -17,6 +18,7 @@ import type {
   SpendOverTimePoint,
   SpendOverTimeResult,
 } from './interfaces/spend-over-time.interface';
+import { TemplateReportRowsLoader } from './template-report-rows.loader';
 
 /** Income, expense and net per day, week, month, quarter or year, empty periods included. */
 @Injectable()
@@ -24,6 +26,7 @@ export class SpendOverTimeReport {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    private readonly rowsLoader: TemplateReportRowsLoader,
   ) {}
 
   async getSpendOverTimeReport(
@@ -96,17 +99,29 @@ export class SpendOverTimeReport {
         'expense',
       )
       .addSelect('COUNT(transaction.id)', 'count')
+      // Summed per currency and day, then converted at that day's rate (#598).
+      .addSelect('transaction.currency', 'currency')
+      .addSelect(dayPeriodExpr, 'day')
       .groupBy('period')
-      .orderBy('period', 'ASC')
-      .getRawMany<{ period: string; income: string; expense: string; count: string }>();
+      .addGroupBy('transaction.currency')
+      .addGroupBy('day')
+      .getRawMany<{
+        period: string;
+        income: string;
+        expense: string;
+        count: string;
+        currency: string;
+        day: string;
+      }>();
+    const { currency, convert } = await this.rowsLoader.dayConverter(workspaceId, rows);
 
     const valuesByPeriod = new Map<string, { income: number; expense: number; count: number }>();
     for (const row of rows) {
-      valuesByPeriod.set(row.period, {
-        income: Number(row.income || 0),
-        expense: Number(row.expense || 0),
-        count: Number(row.count || 0),
-      });
+      const value = valuesByPeriod.get(row.period) ?? { income: 0, expense: 0, count: 0 };
+      value.income = round2(value.income + convert(row.income, row.currency, row.day));
+      value.expense = round2(value.expense + convert(row.expense, row.currency, row.day));
+      value.count += Number(row.count || 0);
+      valuesByPeriod.set(row.period, value);
     }
 
     const points: SpendOverTimePoint[] = [];
@@ -147,7 +162,7 @@ export class SpendOverTimeReport {
         label,
         income: current.income,
         expense: current.expense,
-        net,
+        net: round2(net),
         count: current.count,
       });
 
@@ -174,15 +189,18 @@ export class SpendOverTimeReport {
 
     return {
       groupBy,
+      currency,
+      missingRates: convert.missing,
       dateFrom: from.toISOString().split('T')[0],
       dateTo: to.toISOString().split('T')[0],
       points,
+      // Converted amounts add up with float tails: every figure is to the cent.
       totals: {
-        income: totals.income,
-        expense: totals.expense,
-        net: totals.net,
+        income: round2(totals.income),
+        expense: round2(totals.expense),
+        net: round2(totals.net),
         count: totals.count,
-        avgPerPeriod,
+        avgPerPeriod: round2(avgPerPeriod),
       },
     };
   }

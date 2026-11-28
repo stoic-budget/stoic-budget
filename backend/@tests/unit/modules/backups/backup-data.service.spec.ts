@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { BackupDataService } from '../../../../src/modules/backups/backup-data.service';
 import { Readable } from 'node:stream';
 import * as fs from 'node:fs/promises';
@@ -157,6 +158,60 @@ describe('BackupDataService', () => {
     if (previous === undefined) delete process.env.UPLOADS_DIR;
     else process.env.UPLOADS_DIR = previous;
     await fs.rm(uploads, { recursive: true, force: true });
+  });
+
+  it('leaves out a statement and a receipt photo whose files are gone, and names them (#639)', async () => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'seneca-receipt-'));
+    const kept = path.join(directory, 'kept.jpg');
+    await fs.writeFile(kept, 'receipt image');
+    const lost = path.join(directory, 'lost.jpg');
+    const rows: Record<string, unknown[]> = {
+      Statement: [
+        { id: 'statement-1', workspaceId: 'ws-1', fileName: 'bank.csv', filePath: '/uploads/bank.csv' },
+      ],
+      Receipt: [{ id: 'receipt-1', workspaceId: 'ws-1', attachmentPaths: [lost, kept] }],
+    };
+    const service = new BackupDataService(
+      {
+        entityMetadatas: [
+          metadata('statements', 'Statement', ['id', 'workspaceId', 'fileName', 'filePath']),
+          metadata('receipts', 'Receipt', ['id', 'workspaceId', 'attachmentPaths']),
+        ],
+        getRepository: (target: string) => ({ find: vi.fn().mockResolvedValue(rows[target]) }),
+        query: vi.fn(async () => []),
+      } as never,
+      // As the storage does when neither the disk nor the database has the file.
+      { getStatementFileStream: vi.fn().mockRejectedValue(new NotFoundException('FILE_CONTENT_UNAVAILABLE')) } as never,
+    );
+
+    const snapshot = await service.collect('ws-1');
+
+    expect(snapshot.missingFiles).toEqual(['statement statement-1 (bank.csv)', 'receipt receipt-1 (lost.jpg)']);
+    expect(snapshot.files.map(file => file.path)).toEqual(['receipts/receipt-1/1-kept.jpg']);
+    expect(snapshot.collections.receipts).toEqual([
+      { id: 'receipt-1', workspaceId: 'ws-1', attachmentPaths: ['receipts/receipt-1/1-kept.jpg'] },
+    ]);
+    // No server path in the archive, even for a file it does not carry.
+    expect(snapshot.collections.statements).toEqual([
+      expect.objectContaining({ filePath: 'statements/statement-1/bank.csv' }),
+    ]);
+    await fs.rm(directory, { recursive: true, force: true });
+  });
+
+  it('still fails when a statement file cannot be read for another reason', async () => {
+    const service = new BackupDataService(
+      {
+        entityMetadatas: [metadata('statements', 'Statement', ['id', 'workspaceId', 'fileName', 'filePath'])],
+        getRepository: () => ({
+          find: vi.fn().mockResolvedValue([
+            { id: 'statement-1', workspaceId: 'ws-1', fileName: 'bank.csv', filePath: '/uploads/bank.csv' },
+          ]),
+        }),
+      } as never,
+      { getStatementFileStream: vi.fn().mockRejectedValue(new Error('Connection terminated unexpectedly')) } as never,
+    );
+
+    await expect(service.collect('ws-1')).rejects.toThrow('Connection terminated unexpectedly');
   });
 
   it('includes statement file versions with binary data encoded for JSON', async () => {

@@ -1,8 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { BadRequestException } from '@nestjs/common';
-import { appError } from '../../common/errors/app-error';
 import { resolveUploadsDir } from '../../common/utils/uploads.util';
 import { attachmentsDir } from '../transactions/services/transaction-attachment-files';
 import { restoreColumnFile } from './backup-file-columns';
@@ -66,10 +64,11 @@ async function stageDocument(
   stagedFiles: StagedFile[],
 ): Promise<string> {
   const contents = files.get(portablePath);
-  if (!contents)
-    throw new BadRequestException(appError('BACKUP_DOCUMENT_MISSING', { path: portablePath }));
   const safeName = path.basename(portablePath);
   const target = targetPath(safeName);
+  // A file the backup could not read (#639): the row comes back without it,
+  // showing "file missing" as it did before, instead of failing the restore.
+  if (!contents) return target;
   const stagedPath = path.join(restoreDirectory, `${randomUUID()}-${safeName}`);
   await fs.writeFile(stagedPath, contents, { flag: 'wx' });
   stagedFiles.push({ stagedPath, targetPath: target });

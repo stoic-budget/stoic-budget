@@ -1,10 +1,36 @@
-import { IsNull, type Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { Statement } from '../../entities/statement.entity';
 import type { Transaction } from '../../entities/transaction.entity';
+import { statementCashKey } from './ledger-accounts.service';
 import type { SkipReason } from './ledger-posting.rules';
 
 /** What names a statement's cash account. */
 type CashHome = Pick<Statement, 'bankName' | 'accountNumber'>;
+
+/**
+ * A manual expense and a receipt scan are stored as statements too, but they
+ * are entries of the account they name, not a bank's statement of it.
+ */
+const OWN_ENTRY_DETECTORS = ['manual-expense', 'receipt-scan'];
+
+export function isOwnEntry(statement: Pick<Statement, 'parsingDetails'> | null): boolean {
+  return OWN_ENTRY_DETECTORS.includes(String(statement?.parsingDetails?.detectedBy ?? ''));
+}
+
+/** The same in SQL, for a statements alias: true for a bank's statement. */
+export const bankStatementSql = (alias: string): string =>
+  `coalesce(${alias}."parsing_details"->>'detectedBy', '') NOT IN (${OWN_ENTRY_DETECTORS.map(d => `'${d}'`).join(', ')})`;
+
+/** A wallet (alias) with no rows of a bank statement: its opening balance is its own to book. */
+export const noBankStatementRowsSql = (wallet: string): string => `NOT EXISTS (
+  SELECT 1 FROM "transactions" st JOIN "statements" ss ON ss."id" = st."statement_id"
+   WHERE st."wallet_id" = ${wallet}."id" AND ${bankStatementSql('ss')})`;
+
+/** A row (alias) booked to its wallet: on no statement, or on a manual expense or receipt. */
+export const walletOwnRowSql = (
+  row: string,
+): string => `(${row}."statement_id" IS NULL OR NOT EXISTS (
+  SELECT 1 FROM "statements" ts WHERE ts."id" = ${row}."statement_id" AND ${bankStatementSql('ts')}))`;
 
 /**
  * The statement whose cash account a row is booked under: its own, unless a
@@ -15,21 +41,32 @@ type CashHome = Pick<Statement, 'bankName' | 'accountNumber'>;
 export async function cashHomeOf(
   statements: Repository<Statement>,
   tx: Pick<Transaction, 'workspaceId' | 'walletId'>,
-  statement: (CashHome & Pick<Statement, 'walletId'>) | null,
+  statement: (CashHome & Pick<Statement, 'walletId' | 'parsingDetails'>) | null,
 ): Promise<CashHome | null> {
+  // An expense typed in on an account is that account's money.
+  if (tx.walletId && isOwnEntry(statement)) {
+    return null;
+  }
   if (!(statement?.walletId && tx.walletId) || tx.walletId === statement.walletId) {
     return statement;
   }
-  return statements.findOne({
-    where: { workspaceId: tx.workspaceId, walletId: tx.walletId, deletedAt: IsNull() },
-    select: { id: true, bankName: true, accountNumber: true },
-    order: { statementDateTo: 'DESC', createdAt: 'DESC' },
-  });
+  // The account's latest bank statement: its own entries are not one.
+  return statements
+    .createQueryBuilder('statement')
+    .select(['statement.id', 'statement.bankName', 'statement.accountNumber'])
+    .where('statement.workspaceId = :workspaceId', { workspaceId: tx.workspaceId })
+    .andWhere('statement.walletId = :walletId', { walletId: tx.walletId })
+    .andWhere('statement.deletedAt IS NULL')
+    .andWhere(bankStatementSql('statement'))
+    .orderBy('statement.statementDateTo', 'DESC', 'NULLS FIRST')
+    .addOrderBy('statement.createdAt', 'DESC')
+    .getOne();
 }
 
 /**
  * Whether the wallet mirrors a bank account whose statements already carry its
- * opening balance: a statement is attached to it, or it holds statement rows.
+ * opening balance: a bank statement is attached to it, or it holds rows of one
+ * (a manual expense or a receipt on it does not count).
  * A row a rule moved in from another account's statement does not make it one:
  * a cash wallet that took such a row keeps its own opening.
  */
@@ -40,7 +77,11 @@ export async function mirrorsAStatement(
 ): Promise<boolean> {
   const attached = await transactions.manager
     .getRepository(Statement)
-    .exists({ where: { workspaceId, walletId } });
+    .createQueryBuilder('statement')
+    .where('statement.workspaceId = :workspaceId', { workspaceId })
+    .andWhere('statement.walletId = :walletId', { walletId })
+    .andWhere(bankStatementSql('statement'))
+    .getExists();
   if (attached) {
     return true;
   }
@@ -50,6 +91,7 @@ export async function mirrorsAStatement(
     .where('transaction.workspaceId = :workspaceId', { workspaceId })
     .andWhere('transaction.walletId = :walletId', { walletId })
     .andWhere('(statement.walletId IS NULL OR statement.walletId = transaction.walletId)')
+    .andWhere(bankStatementSql('statement'))
     .getExists();
 }
 
@@ -84,4 +126,22 @@ export async function interestSkip(
     return 'unconfirmed';
   }
   return payment.trashed ? 'statement_deleted' : null;
+}
+
+/**
+ * The earliest bank statement of each statement cash account, the one whose
+ * opening balance is booked. Statements come sorted by date (undated last in
+ * Postgres), so the first seen per key is the earliest. A manual expense or a
+ * receipt is no bank's statement and carries no opening.
+ */
+export function earliestBankStatements<
+  T extends Pick<Statement, 'bankName' | 'accountNumber' | 'currency' | 'parsingDetails'>,
+>(statements: T[]): Map<string, T> {
+  const earliest = new Map<string, T>();
+  for (const statement of statements) {
+    if (isOwnEntry(statement)) continue;
+    const key = statementCashKey(statement.bankName, statement.accountNumber, statement.currency);
+    if (!earliest.has(key)) earliest.set(key, statement);
+  }
+  return earliest;
 }
