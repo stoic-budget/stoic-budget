@@ -110,3 +110,20 @@ export const LEGACY_HASH_TARGETS: Record<
   changelog: { tab: 'advanced', section: 'changelog' },
   experimental: { tab: 'advanced' },
 };
+
+/**
+ * Panels that moved to another tab, by the `tab` and `section` of their old
+ * links (push notifications already sent, bookmarks).
+ */
+const MOVED_SECTIONS: Record<string, { tab: SettingsTabId; section: SettingsSectionId }> = {
+  'data/sync': { tab: 'sync', section: 'backup' },
+};
+
+/** Where an old `?tab=…&section=…` pair lives now, if its panel moved. */
+export function movedSection(
+  tab: string | null | undefined,
+  section: string | null | undefined,
+): { tab: SettingsTabId; section: SettingsSectionId } | undefined {
+  const key = `${tab}/${section}`;
+  return Object.hasOwn(MOVED_SECTIONS, key) ? MOVED_SECTIONS[key] : undefined;
+}

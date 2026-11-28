@@ -22,7 +22,7 @@ export default function IntegrationRoute(): null {
   const key = typeof params?.key === 'string' ? params.key : undefined;
 
   useEffect(() => {
-    const moved = key ? MOVED_TO_SETTINGS[key] : undefined;
+    const moved = key && Object.hasOwn(MOVED_TO_SETTINGS, key) ? MOVED_TO_SETTINGS[key] : undefined;
     if (moved) {
       router.replace(moved);
       return;
