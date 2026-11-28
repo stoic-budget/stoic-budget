@@ -1,3 +1,4 @@
+import { TRADE_COLUMNS } from '@/modules/entity-imports/broker/broker-table';
 import { ImportSuggestService } from '../../../src/modules/entity-imports/import-suggest.service';
 import {
   parseImportBoolean,
@@ -161,4 +162,19 @@ describe('aliases and value parsers', () => {
     expect(parseImportBoolean('no')).toBe(false);
     expect(parseImportBoolean('maybe')).toBeNull();
   });
+
+  it("takes a broker's PDF read into trades for trades, however few its rows", () => {
+    const headers = [...TRADE_COLUMNS];
+    const result = new ImportSuggestService().suggest({
+      headers,
+      samples: [
+        ['2026-01-01', 'balance', '', 'USD cash', 'cash', '50', '1', '', '', 'USD', '', 'Opening cash'],
+        ['2026-01-20', 'transfer_out', '', 'USD cash', 'cash', '0.12', '1', '', '', 'USD', '', 'Custody fee'],
+      ],
+    });
+    expect(result.target).toBe('trades');
+    expect(result.columns.find(column => column.index === headers.indexOf('Asset class'))?.role).toBe('assetClass');
+    expect(result.columns.find(column => column.index === headers.indexOf('Kind'))?.role).toBe('kind');
+  });
 });
+

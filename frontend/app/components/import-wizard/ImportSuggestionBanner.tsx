@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useIntlayer } from '@/app/i18n';
+import { setBrokerChecks } from './broker-checks-store';
 import { ImportWizardDialog } from './ImportWizardDialog';
 import type { ImportRunResult } from './import-wizard-api';
 import { fillTemplate } from './import-wizard-utils';
@@ -34,7 +35,15 @@ export function ImportSuggestionBanner(
     <>
       <p className="seneca-ct__hint seneca-iw__banner" data-testid="import-suggestion-banner">
         <span>{fillTemplate(t.banner.text.value, { target: targetLabel })}</span>{' '}
-        <button type="button" className="seneca-iw__banner-action" onClick={() => setOpen(true)}>
+        <button
+          type="button"
+          className="seneca-iw__banner-action"
+          onClick={() => {
+            // Rows of a sheet, not a broker's PDF: nothing of an earlier PDF applies.
+            setBrokerChecks([]);
+            setOpen(true);
+          }}
+        >
           {fillTemplate(t.banner.action.value, { target: targetLabel })}
         </button>
       </p>

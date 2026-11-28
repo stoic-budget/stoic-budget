@@ -9,6 +9,7 @@ import {
 } from '../../../common/utils/file-validator.util';
 import { Statement } from '../../../entities/statement.entity';
 import type { User } from '../../../entities/user.entity';
+import { rejectBrokerReports } from '../../entity-imports/broker/broker-statement';
 import { isBankStatementScan } from '../../parsing/helpers/scan-statement.helper';
 import { ParserFactoryService } from '../../parsing/services/parser-factory.service';
 import { StatementsService } from '../statements.service';
@@ -38,6 +39,8 @@ export class ScanUploadService {
   }): Promise<Statement[]> {
     const { files } = params;
     let isStatement: boolean[];
+    // A broker's report: no statement, no receipt, but trades (Investments).
+    await rejectBrokerReports(files);
     try {
       isStatement = await Promise.all(
         files.map(file => isBankStatementScan(file, this.parserFactory)),

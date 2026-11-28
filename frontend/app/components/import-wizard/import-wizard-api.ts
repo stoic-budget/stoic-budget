@@ -1,4 +1,5 @@
 import { api } from '@/app/lib/api';
+import type { BrokerStatementTable } from '@/app/lib/contracts';
 import { type ContractInput, checkContract } from '@/app/lib/query-fn-schema';
 
 export type ImportTarget =
@@ -84,6 +85,7 @@ export const TARGET_FIELDS: Record<ImportTarget, Array<{ key: string; required: 
     { key: 'quantity', required: true },
     { key: 'symbol', required: false },
     { key: 'name', required: false },
+    { key: 'assetClass', required: false },
     { key: 'price', required: false },
     { key: 'fee', required: false },
     { key: 'amount', required: false },
@@ -153,6 +155,17 @@ export const suggestImport = async (
     samples,
   } satisfies ContractInput<'SuggestImportBody'>);
   return checkContract('ImportSuggestion', response.data, '/entity-imports/suggest');
+};
+
+/** A broker's PDF (a Revolut account or profit and loss statement) read by the server into a table of trades. */
+export const readBrokerStatement = async (file: File): Promise<BrokerStatementTable> => {
+  const url = '/entity-imports/broker-statement';
+  const body = new FormData();
+  body.append('file', file, file.name);
+  const response = await api.post(url, body, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return checkContract('BrokerStatementTable', response.data, url);
 };
 
 export const runEntityImport = async (payload: ImportRunPayload): Promise<ImportRunResult> => {

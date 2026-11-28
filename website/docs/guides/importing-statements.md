@@ -35,6 +35,27 @@ See [Integrations](integrations).
   rows that match existing transactions are flagged as conflicts.
 - Conflicts are resolved manually in the preview.
 
+## Broker statements (Revolut)
+
+A Revolut account statement (stocks) or profit and loss statement is no bank
+statement: uploading one as a statement is refused. Import it as trades
+instead: on **Net worth**, under Holdings → Investments and retirement, **Import trades** and pick the PDF.
+
+- The account statement gives the buys, sells and splits (the ratio read from
+  the holdings at the end) and a cash holding per currency ("USD cash"): the
+  statement's opening cash, then every top-up, withdrawal, buy, sale, dividend
+  and fee. Importing next month's statement adds only what changed.
+- The profit and loss statement gives the dividends, gross, with the tax
+  withheld as their fee. The account statement's dividend lines move cash only,
+  so importing both does not count a dividend twice.
+- Units held before the statement are not imported (their cost is not in it):
+  the preview says how many, and an earlier statement fills them in.
+- Import statements oldest first. A statement older than one already imported
+  leaves the cash as it is: the newer statement's opening cash already counts
+  what it moved.
+- A cash holding you made yourself keeps its asset class and price: set it to
+  cash, at 1, or let the import create "USD cash".
+
 ## Tips
 
 - Use the same export date range for consistent results.

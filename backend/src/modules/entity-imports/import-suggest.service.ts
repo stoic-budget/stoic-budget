@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { SuggestImportBody } from '../../contracts';
+import { TRADE_COLUMNS } from './broker/broker-table';
 import { parseImportDate, parseImportNumber } from './helpers/import-values';
 import {
   headerMatchScore,
@@ -112,13 +113,16 @@ export class ImportSuggestService {
       kind,
       ...this.scoreTarget(kind, profiles),
     })).sort((a, b) => b.score - a.score);
-    const best = scored[0];
+    // A broker's PDF this app read into trades keeps its own header, whatever few rows it has.
+    const own = headers.join('|') === TRADE_COLUMNS.join('|');
+    const best = own ? (scored.find(item => item.kind === 'trades') ?? scored[0]) : scored[0];
+    const sure = own || best.score >= TABLE_THRESHOLD;
     return {
-      target: best.score >= TABLE_THRESHOLD ? best.kind : 'table',
+      target: sure ? best.kind : 'table',
       confidence: Number(best.score.toFixed(2)),
       columns: profiles.map(profile => ({
         index: profile.index,
-        role: best.score >= TABLE_THRESHOLD ? (best.columns.get(profile.index) ?? null) : null,
+        role: sure ? (best.columns.get(profile.index) ?? null) : null,
       })),
       alternatives: scored.slice(1, 3).map(item => ({
         target: item.kind,

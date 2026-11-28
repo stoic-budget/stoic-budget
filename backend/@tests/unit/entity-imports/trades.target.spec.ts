@@ -61,6 +61,7 @@ function context(
     amount: 7,
     ratio: 8,
     currency: 9,
+    assetClass: 10,
   };
   const ctx = {
     workspaceId: WORKSPACE,
@@ -275,4 +276,113 @@ describe('parseRatio', () => {
     expect(parseRatio('0:1')).toBeNull();
     expect(parseRatio('three')).toBeNull();
   });
+
+  describe('a stated balance', () => {
+    const cash = {
+      id: 'h-cash',
+      workspaceId: WORKSPACE,
+      accountId: 'acc-1',
+      symbol: null,
+      name: 'USD cash',
+      assetClass: InvestmentAssetClass.CASH,
+      quantity: '30',
+      priceCurrency: 'USD',
+    };
+    const stored = (id: string, kind: string, tradeDate: string, quantity: string) => ({
+      id,
+      kind,
+      tradeDate,
+      quantity,
+      price: '1',
+      fee: '0',
+      amount: null,
+      splitFrom: null,
+      splitTo: null,
+      acquiredOn: null,
+      currency: 'USD',
+    });
+
+    it('opens a new cash holding worth one unit of its currency with what the balance states', async () => {
+      const { ctx, savedHoldings, savedTrades } = context({ holdings: [], accountId: 'acc-1', create: true });
+      const results = await new TradesTarget().run(
+        [
+          row('2026-01-01', 'balance', '', 'USD cash', '50', '1', '', '', '', 'USD', 'cash'),
+          row('2026-01-05', 'transfer_out', '', 'USD cash', '20', '1', '', '', '', 'USD', 'cash'),
+        ],
+        ctx,
+        false,
+      );
+      expect(results.map(item => item.status)).toEqual(['created', 'created']);
+      expect(savedHoldings[0]).toMatchObject({ assetClass: 'cash', price: 1, priceCurrency: 'USD', name: 'USD cash' });
+      expect(savedTrades[0]).toMatchObject({ kind: 'transfer_in', quantity: 50 });
+    });
+
+    it('moves in or out only the difference from what the holding has on that day', async () => {
+      const { ctx, savedTrades } = context({
+        holdings: [cash],
+        trades: [stored('t1', 'transfer_in', '2026-01-01', '50'), stored('t2', 'transfer_out', '2026-01-10', '20')],
+      });
+      const results = await new TradesTarget().run(
+        [
+          // The same statement again: what was there on the 1st is there.
+          row('2026-01-01', 'balance', '', 'USD cash', '50', '1', '', '', '', 'USD'),
+          // The next month's statement opens with 80: 50 more than the 30 held.
+          row('2026-02-01', 'balance', '', 'USD cash', '80', '1', '', '', '', 'USD'),
+          row('2026-03-01', 'balance', '', 'USD cash', '60', '1', '', '', '', 'USD'),
+        ],
+        ctx,
+        false,
+      );
+      expect(results.map(item => item.status)).toEqual(['skipped', 'created', 'created']);
+      expect(savedTrades[0]).toMatchObject({ kind: 'transfer_in', quantity: 50 });
+      expect(savedTrades[1]).toMatchObject({ kind: 'transfer_out', quantity: 20 });
+    });
+
+    it('states the units at the start of its day: the same statement again, with a top-up that day, adds nothing', async () => {
+      const { ctx, savedTrades } = context({
+        holdings: [cash],
+        trades: [stored('t1', 'transfer_in', '2026-01-01', '50'), stored('t2', 'transfer_in', '2026-01-01', '500')],
+      });
+      const results = await new TradesTarget().run(
+        [
+          row('2026-01-01', 'balance', '', 'USD cash', '50', '1', '', '', '', 'USD'),
+          row('2026-01-01', 'transfer_in', '', 'USD cash', '500', '1', '', '', '', 'USD'),
+        ],
+        ctx,
+        false,
+      );
+      expect(results.map(item => item.status)).toEqual(['skipped', 'skipped']);
+      expect(savedTrades).toEqual([]);
+    });
+
+    it("skips an earlier statement's rows once a later one is in: its opening balance counts them", async () => {
+      const { ctx, savedTrades } = context({
+        holdings: [cash],
+        trades: [stored('t1', 'transfer_in', '2026-02-01', '330'), stored('t2', 'transfer_in', '2026-02-03', '100')],
+      });
+      const results = await new TradesTarget().run(
+        [
+          row('2026-01-01', 'balance', '', 'USD cash', '50', '1', '', '', '', 'USD'),
+          row('2026-01-03', 'transfer_in', '', 'USD cash', '500', '1', '', '', '', 'USD'),
+          row('2026-01-05', 'transfer_out', '', 'USD cash', '220', '1', '', '', '', 'USD'),
+        ],
+        ctx,
+        false,
+      );
+      expect(results.map(item => item.status)).toEqual(['skipped', 'skipped', 'skipped']);
+      expect(savedTrades).toEqual([]);
+    });
+
+    it('refuses a balance that states no units, rather than emptying the holding', async () => {
+      const { ctx, savedTrades } = context({ holdings: [cash], trades: [stored('t1', 'transfer_in', '2026-01-01', '50')] });
+      const results = await new TradesTarget().run(
+        [row('2026-02-01', 'balance', '', 'USD cash', '', '1', '', '', '', 'USD')],
+        ctx,
+        false,
+      );
+      expect(results).toEqual([{ index: 0, status: 'error', reason: 'quantity' }]);
+      expect(savedTrades).toEqual([]);
+    });
+  });
 });
+

@@ -1,25 +1,29 @@
 import {
+  BadRequestException,
   Controller,
   Delete,
   Post,
   Req,
+  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { ApiKeyAllowed } from '../../common/decorators/api-key-allowed.decorator';
 import { WorkspaceId } from '../../common/decorators/workspace.decorator';
 import { SchemaBody } from '../../common/effect/schema-body';
 import { SchemaParams } from '../../common/effect/schema-query';
 import { SchemaResponse } from '../../common/effect/schema-response';
+import { appError } from '../../common/errors/app-error';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { WorkspaceContextGuard } from '../../common/guards/workspace-context.guard';
 import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import {
   AppImportForm,
   AppImportResult,
+  BrokerStatementTable,
   EntityImportBatchParams,
   EntityImportResult,
   EntityImportUndone,
@@ -30,6 +34,7 @@ import {
 import type { User } from '../../entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AppImportService } from './apps/app-import.service';
+import { brokerStatementTable } from './broker/broker-statement';
 import { EntityImportService } from './entity-import.service';
 import { ImportSuggestService } from './import-suggest.service';
 
@@ -91,6 +96,27 @@ export class EntityImportsController {
       }),
     );
     return this.appImport.run(user.id, workspaceId, uploads, form, req.apiKey);
+  }
+
+  /** A broker's PDF (Revolut) as the wizard's table of trades: nothing is stored. */
+  @Post('broker-statement')
+  @UseInterceptors(
+    FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } }),
+  )
+  @SchemaResponse(BrokerStatementTable)
+  async readBrokerStatement(
+    @CurrentUser() user: User,
+    @WorkspaceId() workspaceId: string,
+    @UploadedFile() file: unknown,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    // Read only for someone who may import what it reads.
+    await this.entityImport.ensurePermission(user.id, workspaceId, 'trades', req.apiKey);
+    const buffer = (file as { buffer?: Buffer } | undefined)?.buffer;
+    if (!buffer?.length) {
+      throw new BadRequestException(appError('UPLOAD_NO_FILE'));
+    }
+    return brokerStatementTable(new Uint8Array(buffer));
   }
 
   @Delete(':batchId')
