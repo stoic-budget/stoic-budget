@@ -3,7 +3,7 @@ import { BadRequestException, Inject, Injectable, Logger, NotFoundException } fr
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
-import { In, Not, type Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import { FileStorageService } from '../../common/services/file-storage.service';
 import { assertRowsRemovable } from '../../common/utils/tax-lock.util';
@@ -13,6 +13,7 @@ import { Statement } from '../../entities/statement.entity';
 import { Transaction } from '../../entities/transaction.entity';
 import { AuditService } from '../audit/audit.service';
 import type { DataDeletedEvent } from '../notifications/events/notification-events';
+import { deletePromotingCopies } from '../transactions/helpers/promote-copies';
 import { ensureCanModifyStatement } from './statement-access';
 import { removeStatementFile } from './statement-file-removal.util';
 
@@ -127,7 +128,11 @@ export class StatementTrashService {
         throw new BadRequestException(appError('STORAGE_FILE_NOT_IN_TRASH'));
       }
       await assertRowsRemovable(transactions, { statementId: id, workspaceId });
-      await unflagCopiesOf(transactions, id, workspaceId);
+      // Their copies elsewhere get an original before the rows go.
+      const rowIds = (
+        await transactions.find({ where: { statementId: id, workspaceId }, select: { id: true } })
+      ).map(row => row.id);
+      await deletePromotingCopies(transactions, workspaceId, rowIds);
       await transactions.delete({ statementId: id });
       await statements.delete({ id, workspaceId });
     });
@@ -209,31 +214,4 @@ export class StatementTrashService {
     }
     return { status: 'restored', source: restored.source };
   }
-}
-
-/**
- * Copies of the statement's rows in other statements stand alone again: with
- * their original gone they would stay out of every total for good, and Review
- * cannot settle a duplicate whose original is missing.
- */
-async function unflagCopiesOf(
-  transactions: Repository<Transaction>,
-  statementId: string,
-  workspaceId: string,
-): Promise<void> {
-  const ids = (
-    await transactions.find({ where: { statementId, workspaceId }, select: { id: true } })
-  ).map(row => row.id);
-  if (ids.length === 0) {
-    return;
-  }
-  await transactions.update(
-    { workspaceId, duplicateOfId: In(ids), id: Not(In(ids)) },
-    {
-      isDuplicate: false,
-      duplicateOfId: null,
-      duplicateConfidence: null,
-      duplicateMatchType: null,
-    },
-  );
 }

@@ -78,8 +78,27 @@ export async function restoreDeletedTransaction(
         { fingerprint: null },
       );
     }
+    // The copy the delete made the original holds the fingerprint the row
+    // comes back with: it steps aside until it is the row's copy again.
+    const stepped = row.fingerprint
+      ? ((
+          await tx.query(
+            `UPDATE transactions SET fingerprint = NULL WHERE workspace_id = $1
+               AND id = ANY($2::uuid[]) AND fingerprint = $3 AND is_duplicate = false RETURNING id`,
+            [workspaceId, links.copies.map(copy => copy.id), row.fingerprint],
+          )
+        )[0] as Array<{ id: string }>)
+      : [];
     const saved = await repo.save(row);
     await restoreLinks(tx, workspaceId, saved, links);
+    if (stepped.length > 0) {
+      // Back only on a copy flagged again; one split meanwhile stays without it.
+      await tx.query(
+        `UPDATE transactions SET fingerprint = $3 WHERE workspace_id = $1
+           AND id = ANY($2::uuid[]) AND is_duplicate = true`,
+        [workspaceId, stepped.map(copy => copy.id), row.fingerprint],
+      );
+    }
     await recountStatementTotals(tx, workspaceId, [saved.statementId]);
   });
 }

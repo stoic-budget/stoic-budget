@@ -1,9 +1,10 @@
-import { type EntityManager, In, IsNull, Not } from 'typeorm';
+import { type EntityManager, In, IsNull } from 'typeorm';
 import {
   Transaction,
   TransferPairKind,
   type TransferPairSource,
 } from '../../../entities/transaction.entity';
+import { deletePromotingCopies } from './promote-copies';
 import { handOverSplitIdentity } from './split-fingerprint';
 
 /**
@@ -139,16 +140,8 @@ export async function deleteAndDetach(
   const ids = rows.map(row => row.id);
   // A split part's copies and fingerprint stay with its split first.
   await handOverSplitIdentity(manager, workspaceId, ids);
-  await repo.update(
-    { workspaceId, duplicateOfId: In(ids), id: Not(In(ids)) },
-    {
-      isDuplicate: false,
-      duplicateOfId: null,
-      duplicateConfidence: null,
-      duplicateMatchType: null,
-    },
-  );
-  await repo.delete({ workspaceId, id: In(ids) });
+  // One copy becomes the original, the others point to it (one per fingerprint).
+  await deletePromotingCopies(repo, workspaceId, ids);
 
   const pairIds = distinct(rows.map(row => row.transferPairId));
   if (pairIds.length > 0) {
@@ -204,24 +197,23 @@ export async function restoreLinks(
       );
     }
   }
+  // The delete made one copy the original and pointed the others to it; both
+  // come back. A copy split meanwhile is not re-flagged: its parts carry the charge.
+  const copyIds = links.copies.map(copy => copy.id);
+  const flagged = [{ isDuplicate: false, duplicateOfId: IsNull() }, { duplicateOfId: In(copyIds) }];
   for (const copy of links.copies) {
-    await repo.update(
-      // A copy split meanwhile is not re-flagged: its parts carry the charge now.
-      {
-        workspaceId,
-        id: copy.id,
-        isDuplicate: false,
-        duplicateOfId: IsNull(),
-        splitGroupId: IsNull(),
-      },
-      {
-        isDuplicate: true,
-        duplicateOfId: restored.id,
-        duplicateConfidence:
-          copy.duplicateConfidence === null ? null : Number(copy.duplicateConfidence),
-        duplicateMatchType: copy.duplicateMatchType,
-      },
-    );
+    for (const was of flagged) {
+      await repo.update(
+        { workspaceId, id: copy.id, splitGroupId: IsNull(), ...was },
+        {
+          isDuplicate: true,
+          duplicateOfId: restored.id,
+          duplicateConfidence:
+            copy.duplicateConfidence === null ? null : Number(copy.duplicateConfidence),
+          duplicateMatchType: copy.duplicateMatchType,
+        },
+      );
+    }
   }
   for (const sibling of links.splitSiblings) {
     await repo.update(
