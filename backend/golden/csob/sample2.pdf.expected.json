@@ -1,0 +1,76 @@
+{
+  "bankName": "csob",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "currency"
+  ],
+  "metadata": {
+    "accountNumber": "987654321/0300",
+    "currency": "EUR",
+    "dateFrom": "2025-12-15T00:00:00",
+    "dateTo": "2026-01-14T00:00:00",
+    "balanceStart": 1200,
+    "balanceEnd": 2085.5,
+    "rawHeader": "Výpis z účtu Účet: 987654321/0300 Období: 15. 12. 2025 - 14. 1. 2026 Měna: EUR Rok/č. výpisu: 2026/1",
+    "normalizedHeader": "Výpis z účtu Účet: 987654321/0300 Období: 15. 12. 2025 - 14. 1. 2026 Měna: EUR Rok/č. výpisu: 2026/1",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2025-12-20T00:00:00",
+      "counterpartyName": "ACME Shop Wien",
+      "paymentPurpose": "Platba kartou 516844******4400",
+      "debit": 64.5,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2025-12-31T00:00:00",
+      "counterpartyName": "Poplatek za vedení účtu",
+      "paymentPurpose": "Poplatek za vedení účtu",
+      "debit": 2,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-01-05T00:00:00",
+      "counterpartyName": "ACME GmbH",
+      "counterpartyAccount": "AT611904300234573201",
+      "paymentPurpose": "Příchozí úhrada AT611904300234573201",
+      "credit": 1000,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-01-10T00:00:00",
+      "counterpartyName": "Člen Tři",
+      "counterpartyAccount": "19-2000000003/0300",
+      "paymentPurpose": "Odchozí úhrada 19-2000000003/0300",
+      "debit": 48,
+      "currency": "EUR",
+      "documentNumber": "20260110"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "5af8ef2d0d15",
+    "headings": [
+      "date:datum | description:oznaceni platby | counterparty:protistrana | other:identifikace | amount:castka | balance:zustatek"
+    ],
+    "unknownWords": [
+      "identifikace"
+    ],
+    "mentionedBank": "csob"
+  }
+}

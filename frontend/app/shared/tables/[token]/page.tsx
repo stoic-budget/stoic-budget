@@ -38,6 +38,9 @@ function formatCell(value: unknown): string {
   return String(value);
 }
 
+/** Rows a request asks for, the server's own cap: the public route allows 30 requests a minute. */
+const PAGE = 1000;
+
 /**
  * Публичный просмотр таблицы по ссылке. Страница вне авторизации: доступ
  * определяет только токен, а сервер отдаёт исключительно данные для чтения.
@@ -57,25 +60,40 @@ export default function SharedTablePage() {
 
     async function load(): Promise<void> {
       return await (async () => {
-        const [tableResponse, rowsResponse] = await Promise.all([
+        // Every row, a page at a time: the link shows the whole table.
+        const allRows = async (): Promise<SharedRow[]> => {
+          const items: SharedRow[] = [];
+          for (let cursor: number | undefined; ; ) {
+            const response = await api.get(`/public/custom-tables/${token}/rows`, {
+              params: { limit: PAGE, ...(cursor === undefined ? {} : { cursor }) },
+            });
+            const page = await checkContract(
+              'SharedTableRows',
+              response.data,
+              '/public/custom-tables/:token/rows',
+            );
+            items.push(...page.items);
+            const last = page.items.at(-1);
+            if (cancelled || !last || items.length >= page.meta.total) {
+              return items;
+            }
+            cursor = last.rowNumber;
+          }
+        };
+        const [tableResponse, rows] = await Promise.all([
           api.get(`/public/custom-tables/${token}`),
-          api.get(`/public/custom-tables/${token}/rows`, { params: { limit: 200 } }),
+          allRows(),
         ]);
         const view = await checkContract(
           'SharedTableView',
           tableResponse.data,
           '/public/custom-tables/:token',
         );
-        const page = await checkContract(
-          'SharedTableRows',
-          rowsResponse.data,
-          '/public/custom-tables/:token/rows',
-        );
         if (cancelled) {
           return;
         }
         setView(view);
-        setRows(page.items);
+        setRows(rows);
       })()
         .catch(async err => {
           if (!cancelled) {

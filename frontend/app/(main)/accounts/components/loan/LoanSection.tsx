@@ -8,6 +8,7 @@ import { CalendarLineIcon } from '@/app/components/ui/empty-state-icons';
 import { ReadOnlyHint } from '@/app/components/versions/ReadOnlyHint';
 import { useIntlayer } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
+import { localToday } from '@/app/lib/local-today';
 import type { Account } from '../../hooks/useAccounts';
 import { useLoan, useLoanMutations } from '../../hooks/useLoan';
 import { cardStyle, titleStyle } from '../account-detail-styles';
@@ -38,9 +39,7 @@ export function LoanSection({
   // The form starts from the terms as they are when it opens, never a copy kept from before.
   const open = () =>
     setDrawer(
-      terms
-        ? termsToForm(terms)
-        : emptyLoanForm(Math.max(0, -account.balance), new Date().toISOString().slice(0, 10)),
+      terms ? termsToForm(terms) : emptyLoanForm(Math.max(0, -account.balance), localToday()),
     );
   const close = () => setDrawer(null);
 
@@ -107,7 +106,7 @@ export function LoanSection({
 
       <LoanTermsDrawer
         open={drawer !== null}
-        initial={drawer ?? emptyLoanForm(0, new Date().toISOString().slice(0, 10))}
+        initial={drawer ?? emptyLoanForm(0, localToday())}
         editing={terms !== null}
         saving={mutations.saving}
         onClose={close}

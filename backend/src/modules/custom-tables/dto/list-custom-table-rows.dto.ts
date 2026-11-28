@@ -39,4 +39,8 @@ export interface CustomTableAggregateResult {
   col: string;
   fn: CustomTableAggregateFn;
   value: number | string | null;
+  /** The rows in scope are in several currencies: no one figure (#648). */
+  mixedCurrencies?: boolean;
+  /** The one currency the rows in scope share, for money a table keeps per row (#648). */
+  currency?: string;
 }

@@ -12,6 +12,12 @@ const make = (overrides: Partial<Link>): Link => ({
 });
 
 describe('notificationHref', () => {
+  it('opens a failed backup on the Sync tab, where backups live', () => {
+    expect(notificationHref(make({ type: 'backup.failed' }))).toBe(
+      '/settings/profile?tab=sync&section=backup',
+    );
+  });
+
   it('opens an overdue payable filtered to overdue and rings its row', () => {
     expect(
       notificationHref(

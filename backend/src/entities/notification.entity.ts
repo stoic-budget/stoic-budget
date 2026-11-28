@@ -41,6 +41,8 @@ export enum NotificationType {
   TAX_RATES_OFFICIAL_CHANGED = 'tax.rates.official_changed',
   /** A new row matched a rule that asks to be told. */
   RULE_MATCHED = 'rule.matched',
+  /** A scheduled backup did not run through (#639). */
+  BACKUP_FAILED = 'backup.failed',
 }
 
 export enum NotificationCategory {

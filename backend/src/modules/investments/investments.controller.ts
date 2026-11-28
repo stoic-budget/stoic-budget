@@ -156,8 +156,8 @@ export class InvestmentsController {
   @WorkspaceAuth(Permission.WALLET_EDIT)
   @SchemaResponse(PriceRefreshResult)
   async refreshPrices(@CurrentUser() user: User, @WorkspaceId() workspaceId: string) {
-    const updated = await this.investmentsService.refreshPrices(user.id, workspaceId);
-    return { updated };
+    const { updated, asked } = await this.investmentsService.refreshPrices(user.id, workspaceId);
+    return { updated, failed: asked - updated };
   }
 
   /** Marks an expense as money moved into an investment account (a one-leg transfer). */

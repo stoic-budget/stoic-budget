@@ -63,6 +63,15 @@ describe('insightHref', () => {
     expect(insightHref(makeInsight({ type: 'trend.category_anomaly', data: null }))).toBeNull();
   });
 
+  it('sends late-payment advice to the bills, or to the goals for a reserve', () => {
+    expect(
+      insightHref(makeInsight({ type: 'pattern.late_payments', data: { target: 'bills' } })),
+    ).toBe('/statements/pay?focus=late-payments');
+    expect(
+      insightHref(makeInsight({ type: 'pattern.late_payments', data: { target: 'goals' } })),
+    ).toBe('/goals');
+  });
+
   it('sends idle cash to goals and a net worth milestone to the net worth page', () => {
     expect(insightHref(makeInsight({ type: 'pattern.idle_cash', data: { months: 9 } }))).toBe(
       '/goals',

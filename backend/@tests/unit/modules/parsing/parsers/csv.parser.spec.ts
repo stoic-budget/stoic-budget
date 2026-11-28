@@ -48,6 +48,41 @@ describe('CsvParser', () => {
     expect(result.metadata.dateFrom.getTime()).not.toBeNaN();
   });
 
+  /** Writes raw bytes, for files saved in another encoding than UTF-8. */
+  const parseBytes = (name: string, bytes: Uint8Array) => {
+    const filePath = path.join(dir, name);
+    fs.writeFileSync(filePath, bytes);
+    return parser.parse(filePath);
+  };
+  const cp1251 = (text: string) =>
+    Uint8Array.from(
+      [...text].map(char => {
+        const code = char.charCodeAt(0);
+        // А..я are 0xC0..0xFF in Windows-1251.
+        return code >= 0x410 && code <= 0x44f ? code - 0x410 + 0xc0 : code;
+      }),
+    );
+
+  it('reads Windows-1251, Latin-1 and UTF-16 exports (#637)', async () => {
+    const lines = ['Дата;Контрагент;Сумма', '02.03.2026;Магазин Пример;-10,00'];
+    const cyrillic = await parseBytes('cp1251.csv', cp1251(lines.join('\n')));
+    expect(cyrillic.transactions.map(t => [t.counterpartyName, t.debit])).toEqual([
+      ['Магазин Пример', 10],
+    ]);
+
+    const latin = await parseBytes(
+      'latin1.csv',
+      Buffer.from('Date,Payee,Amount\n02.03.2026,Müller,-12.00', 'latin1'),
+    );
+    expect(latin.transactions[0].counterpartyName).toBe('Müller');
+
+    const wide = await parseBytes(
+      'utf16.csv',
+      Uint8Array.from([0xff, 0xfe, ...Buffer.from('Date\tPayee\tAmount\n02.03.2026\tMüller\t-12.00', 'utf16le')]),
+    );
+    expect(wide.transactions.map(t => [t.counterpartyName, t.debit])).toEqual([['Müller', 12]]);
+  });
+
   it('reads every date in a file with one day/month order', async () => {
     // 01/13 can only be month-first, so 01/05 in the same export is January 5th.
     const result = await parse('chase.csv', [

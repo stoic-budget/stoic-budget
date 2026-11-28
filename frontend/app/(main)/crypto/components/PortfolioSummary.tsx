@@ -4,6 +4,7 @@ import Box from '@mui/material/Box';
 import type { SxProps, Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import type React from 'react';
+import { MissingRatesBanner } from '@/app/(main)/dashboard/components/MissingRatesBanner';
 import { LazyNetWorthArea } from '@/app/components/charts/lazy-charts';
 import { ArrowDownRight, ArrowUpRight } from '@/app/components/icons';
 import { PRIVATE_CLASS, PrivateAmount } from '@/app/components/ui/private-amount';
@@ -87,6 +88,13 @@ export function PortfolioSummary({
         alignItems: 'start',
       }}
     >
+      {/* Values counted in USD at face value for want of a rate: say so (#787). */}
+      {summary.missingRates?.length ? (
+        // Across the whole card, in line with its padding: not a cell of the grid.
+        <Box sx={{ gridColumn: '1 / -1', '& .seneca-dashboard__rates-banner': { m: 0 } }}>
+          <MissingRatesBanner currencies={[...summary.missingRates]} />
+        </Box>
+      ) : null}
       <Box>
         {/* The page is read for this number and the three beside it, so both are
             sized to be read across a desk, not squinted at. */}

@@ -1,0 +1,80 @@
+{
+  "bankName": "fio",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "currency"
+  ],
+  "metadata": {
+    "accountNumber": "CZ1220100000001234567890",
+    "currency": "CZK",
+    "dateFrom": "2026-03-01T00:00:00",
+    "dateTo": "2026-03-31T00:00:00",
+    "balanceStart": 12345.67,
+    "balanceEnd": 36805.17,
+    "rawHeader": "Fio banka, a.s. 1 z 2 Výpis z účtu Číslo účtu: 1234567890/2010 Výpis za období 1.3.2026-31.3.2026",
+    "normalizedHeader": "Fio banka, a.s. 1 z 2 Výpis z účtu Číslo účtu: 1234567890/2010 Výpis za období 1.3.2026-31.3.2026",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-02T00:00:00",
+      "counterpartyName": "ACME Potraviny",
+      "paymentPurpose": "Platba kartou Nákup: ACME Potraviny, Hlavní 12, Praha, CZE, dne 1.3.2026, částka 245.90 CZK",
+      "debit": 245.9,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-05T00:00:00",
+      "counterpartyName": "Zaměstnavatel One s.r.o.",
+      "counterpartyAccount": "2900000001/0800",
+      "paymentPurpose": "Příchozí platba 2900000001/0800 Zaměstnavatel One s.r.o.",
+      "credit": 25000,
+      "currency": "CZK",
+      "documentNumber": "2026030"
+    },
+    {
+      "transactionDate": "2026-03-09T00:00:00",
+      "counterpartyName": "ACME Market",
+      "paymentPurpose": "Platba kartou Nákup: ACME Market, Rynek 1, Krakow, POL, dne 7.3.2026, částka 50.00 PLN",
+      "debit": 295.5,
+      "currency": "CZK",
+      "amountForeign": 50,
+      "exchangeRate": 5.91
+    },
+    {
+      "transactionDate": "2026-03-14T00:00:00",
+      "counterpartyName": "Nájem ACME Bydlení",
+      "counterpartyAccount": "1100000004/0300",
+      "paymentPurpose": "Trvalý příkaz 1100000004/0300 Nájem ACME Bydlení",
+      "debit": 839.1,
+      "currency": "CZK",
+      "documentNumber": "1001"
+    },
+    {
+      "transactionDate": "2026-03-20T00:00:00",
+      "counterpartyName": "Člen Dva",
+      "paymentPurpose": "Bezhotovostní vklad Bezhotovostní vklad Člen Dva",
+      "credit": 840,
+      "currency": "CZK"
+    }
+  ],
+  "checks": [
+    {
+      "code": "printed_totals",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "fba99a269a0a",
+    "headings": [
+      "date:datum zauctovani | description:operace | counterparty:protiucet | amount:castka"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "fio"
+  }
+}

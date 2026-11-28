@@ -38,6 +38,8 @@ interface DropInfo {
   rawCount: number;
   droppedCount?: number;
   lostCount?: number;
+  /** Rows kept, when not every one of them is in `transactions` (duplicates). */
+  keptCount?: number;
   samples?: Array<{ reason: string }>;
 }
 
@@ -181,7 +183,9 @@ export function validateParsedStatement(
     }
   }
 
-  const dropped = options.dropInfo && droppedRows(metadata, transactions.length, options.dropInfo);
+  const dropped =
+    options.dropInfo &&
+    droppedRows(metadata, options.dropInfo.keptCount ?? transactions.length, options.dropInfo);
   if (dropped) {
     raise(dropped.code, dropped.warning);
   }
