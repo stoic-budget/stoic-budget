@@ -21,6 +21,7 @@ function recordingService() {
     'select',
     'addSelect',
     'groupBy',
+    'addGroupBy',
     'orderBy',
     'take',
   ]) {

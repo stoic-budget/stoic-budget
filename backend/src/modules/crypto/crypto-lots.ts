@@ -130,7 +130,16 @@ export function computeBasisWithDisposals(events: LotEvent[]): BasisResult {
   const result = new Map<string, AssetBasis>();
   const disposals: Disposal[] = [];
   for (const [asset, assetEvents] of byAsset) {
-    const ordered = [...assetEvents].sort((a, b) => a.date.localeCompare(b.date));
+    // On one day, what came in is counted before what went out: rows carry only
+    // the day, and a coin sold the day it was bought was bought first.
+    const ordered = [...assetEvents].sort(
+      (a, b) =>
+        a.date.localeCompare(b.date) ||
+        Number(a.direction === 'out') - Number(b.direction === 'out'),
+    );
+    // Float noise grows with the largest amount the asset ever moved: 0.3 − 0.1 − 0.2
+    // is not quite zero, nor is what is left of a lot of a million after a big sale.
+    const dust = Math.max(1e-18, Math.max(...ordered.map(event => event.amount)) * 1e-12);
     const lots: Lot[] = [];
     let realized = 0;
     let incomplete = false;
@@ -147,7 +156,7 @@ export function computeBasisWithDisposals(events: LotEvent[]): BasisResult {
       }
 
       const proceedsPerUnit = event.value / event.amount;
-      const taken = takeFromLots(lots, event.amount, 'fifo');
+      const taken = takeFromLots(lots, event.amount, 'fifo', dust);
       for (const piece of taken.pieces) {
         realized += piece.quantity * (proceedsPerUnit - piece.unitCost);
       }

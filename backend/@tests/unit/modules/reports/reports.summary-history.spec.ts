@@ -97,13 +97,14 @@ describe('ReportsService — getStatementsSummary', () => {
     expect(result.totals.expense).toBe(250);
   });
 
-  it('reads at most 2000 rows, newest edit first', async () => {
+  it('reads every row of the period, newest edit first (#598)', async () => {
     const { service, qb } = serviceWithRows([]);
 
     await service.getStatementsSummary(WS_ID, 30);
 
     expect(qb.orderBy).toHaveBeenCalledWith('transaction.updatedAt', 'DESC');
-    expect(qb.take).toHaveBeenCalledWith(2000);
+    // No cap: the 2,000 most recently changed rows understated a long period.
+    expect(qb.take).not.toHaveBeenCalled();
   });
 });
 

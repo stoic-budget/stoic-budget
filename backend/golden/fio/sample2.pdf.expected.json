@@ -1,0 +1,89 @@
+{
+  "bankName": "fio",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "currency"
+  ],
+  "metadata": {
+    "accountNumber": "SK1283300000002900000099",
+    "currency": "EUR",
+    "dateFrom": "2026-02-01T00:00:00",
+    "dateTo": "2026-02-28T00:00:00",
+    "balanceStart": 353.74,
+    "balanceEnd": 1332.07,
+    "rawHeader": "Fio banka, a.s., pobočka zahraničnej banky 1 z 2 Výpis z účtu Číslo účtu: 2900000099 Výpis za obdobie 1.2.2026-28.2.2026",
+    "normalizedHeader": "Fio banka, a.s., pobočka zahraničnej banky 1 z 2 Výpis z účtu Číslo účtu: 2900000099 Výpis za obdobie 1.2.2026-28.2.2026",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-02-03T00:00:00",
+      "counterpartyName": "ACME Kaviareň",
+      "paymentPurpose": "Platba kartou Nákup: ACME Kaviareň, Hlavná 5, Bratislava, SVK, dne 1.2.2026, částka 11.67 EUR",
+      "debit": 11.67,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-02-06T00:00:00",
+      "counterpartyName": "Člen Tri",
+      "counterpartyAccount": "SK3112000000001987426353",
+      "paymentPurpose": "Bezhotovostný vklad SK3112000000001987426353 Člen Tri",
+      "credit": 1000,
+      "currency": "EUR",
+      "documentNumber": "555"
+    },
+    {
+      "transactionDate": "2026-02-10T00:00:00",
+      "counterpartyName": "ATM ACME",
+      "paymentPurpose": "Výber z bankomatu Nákup: ATM ACME, Brno, CZE, dne 9.2.2026, částka 1 450.00 CZK",
+      "debit": 60,
+      "currency": "EUR",
+      "amountForeign": 1450,
+      "exchangeRate": 0.041379
+    },
+    {
+      "transactionDate": "2026-02-15T00:00:00",
+      "counterpartyName": "Vklad do bankomatu: ACME Mall",
+      "paymentPurpose": "Vklad do bankomatu Vklad do bankomatu: ACME Mall, Bratislava, SVK",
+      "credit": 200,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-02-20T00:00:00",
+      "counterpartyName": "Poplatok za vedenie účtu",
+      "paymentPurpose": "Poplatok za vedenie účtu",
+      "credit": 0,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-02-28T00:00:00",
+      "counterpartyName": "ACME Energie a.s.",
+      "counterpartyAccount": "CZ6508000000192000145399",
+      "paymentPurpose": "Úhrada CZ6508000000192000145399 ACME Energie a.s.",
+      "debit": 150,
+      "currency": "EUR",
+      "documentNumber": "778899"
+    }
+  ],
+  "checks": [
+    {
+      "code": "printed_totals",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "aac566a2f6d2",
+    "headings": [
+      "date:datum zauctovaniaoperacie | counterparty:protiucet | amount:suma"
+    ],
+    "unknownWords": [
+      "zauctovaniaoperacie"
+    ],
+    "mentionedBank": "fio"
+  }
+}

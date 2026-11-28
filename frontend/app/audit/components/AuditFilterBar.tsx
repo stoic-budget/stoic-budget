@@ -6,6 +6,7 @@ import { FilterDropdown } from '@/app/(main)/statements/components/filters/Filte
 import { Search } from '@/app/components/icons';
 import { FilterChipButton } from '@/app/components/ui/filter-chip-button';
 import { useIntlayer } from '@/app/i18n';
+import { localToday } from '@/app/lib/local-today';
 import {
   type ActorType,
   type AuditAction,
@@ -71,11 +72,8 @@ const DATE_PRESETS: { value: DatePreset; labelKey: LabelKey }[] = [
   { value: 'all', labelKey: 'allTime' },
 ];
 
-function daysAgoIso(n: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
-}
+const daysAgoIso = (n: number, now = new Date()): string =>
+  localToday(new Date(now.getFullYear(), now.getMonth(), now.getDate() - n));
 
 function presetToDates(preset: DatePreset): { dateFrom?: string; dateTo?: string } {
   if (preset === 'all') {

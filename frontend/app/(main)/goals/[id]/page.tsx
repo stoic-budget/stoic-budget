@@ -59,12 +59,11 @@ export default function GoalDetailPage(): React.JSX.Element {
 
   const saveItem = useCallback(
     async (payload: GoalItemPayload) => {
-      if (editing) {
-        await items.updateItem(editing.id, payload);
-      } else {
-        await items.createItem(payload);
-      }
-      setEditing(undefined);
+      const saved = editing
+        ? await items.updateItem(editing.id, payload)
+        : await items.createItem(payload);
+      // A refused line keeps the dialog open with what was typed.
+      if (saved) setEditing(undefined);
     },
     [editing, items.createItem, items.updateItem],
   );

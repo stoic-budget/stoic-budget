@@ -1,0 +1,84 @@
+{
+  "bankName": "csob",
+  "compares": [
+    "counterpartyAccount",
+    "amountForeign",
+    "currency"
+  ],
+  "metadata": {
+    "accountNumber": "123456789/0300",
+    "currency": "CZK",
+    "dateFrom": "2026-03-01T00:00:00",
+    "dateTo": "2026-03-31T00:00:00",
+    "balanceStart": 50000,
+    "balanceEnd": 73744.35,
+    "rawHeader": "Výpis z účtu Účet: 123456789/0300 Období: 1. 3. 2026 - 31. 3. 2026 Měna: CZK Rok/č. výpisu: 2026/3",
+    "normalizedHeader": "Výpis z účtu Účet: 123456789/0300 Období: 1. 3. 2026 - 31. 3. 2026 Měna: CZK Rok/č. výpisu: 2026/3",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-05T00:00:00",
+      "counterpartyName": "Zaměstnavatel One s.r.o.",
+      "counterpartyAccount": "2900000001/0800",
+      "paymentPurpose": "Příchozí úhrada 2900000001/0800",
+      "credit": 42000,
+      "currency": "CZK",
+      "documentNumber": "2026030"
+    },
+    {
+      "transactionDate": "2026-03-07T00:00:00",
+      "counterpartyName": "ACME Potraviny",
+      "paymentPurpose": "Platba kartou 516844******4400",
+      "debit": 1256.9,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-12T00:00:00",
+      "counterpartyName": "ACME Bydlení",
+      "counterpartyAccount": "1100000004/0300",
+      "paymentPurpose": "Trvalý příkaz 1100000004/0300",
+      "debit": 15000,
+      "currency": "CZK",
+      "documentNumber": "1001"
+    },
+    {
+      "transactionDate": "2026-03-28T00:00:00",
+      "counterpartyName": "ATM ACME Praha",
+      "paymentPurpose": "Výběr z bankomatu 516844******4400",
+      "debit": 2000,
+      "currency": "CZK"
+    },
+    {
+      "transactionDate": "2026-03-31T00:00:00",
+      "counterpartyName": "Úrok",
+      "paymentPurpose": "Úrok",
+      "credit": 1.25,
+      "currency": "CZK"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "5af8ef2d0d15",
+    "headings": [
+      "date:datum | description:oznaceni platby | counterparty:protistrana | other:identifikace | amount:castka | balance:zustatek"
+    ],
+    "unknownWords": [
+      "identifikace"
+    ],
+    "mentionedBank": "csob"
+  }
+}

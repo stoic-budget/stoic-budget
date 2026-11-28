@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { type EntityManager, LessThan, type Repository } from 'typeorm';
@@ -17,6 +18,7 @@ import {
 } from '../../entities/audit-event.entity';
 import { User } from '../../entities/user.entity';
 import { Workspace } from '../../entities/workspace.entity';
+import { announceRollback, reversedDiff } from './audit-rolled-back.event';
 import {
   AuditDescriptionService,
   renderAuditDescriptionEnglish,
@@ -59,6 +61,7 @@ export class AuditService {
     private readonly workspaceRepository: Repository<Workspace>,
     private readonly rollbackService: RollbackService,
     private readonly descriptionService: AuditDescriptionService,
+    private readonly eventEmitter?: EventEmitter2,
   ) {}
 
   async createEvent(dto: CreateAuditEventDto, manager?: EntityManager): Promise<AuditEvent> {
@@ -295,7 +298,9 @@ export class AuditService {
       return rollbackResult;
     }
 
-    const rollbackDiff = this.buildRollbackDiff(event.diff);
+    // Listeners bring derived state up to date (a table's formulas and cache).
+    await announceRollback(this.eventEmitter, event);
+    const rollbackDiff = reversedDiff(event.diff);
 
     // Audit: record rollback action referencing the original event.
     const rollbackEvent = await this.createEvent({
@@ -378,17 +383,6 @@ export class AuditService {
       ].includes(entityType);
     }
     return false;
-  }
-
-  private buildRollbackDiff(diff: AuditEventDiff | null | undefined): AuditEventDiff | null {
-    if (!diff || Array.isArray(diff)) {
-      return diff ?? null;
-    }
-
-    return {
-      before: diff.after ?? null,
-      after: diff.before ?? null,
-    };
   }
 
   /**

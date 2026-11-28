@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { appError } from '../../common/errors/app-error';
+import { type Payable, PayableStatus } from '../../entities/payable.entity';
 
 /** The money came one way: a bank row, a wallet, or cash in hand — never two at once. */
 export function assertOneSource(source: {
@@ -44,4 +45,9 @@ export function notRejectedSql(payableId: string, transactionId: string): string
   return `NOT EXISTS (
     SELECT 1 FROM "payable_match_rejections" rejected
      WHERE rejected."payable_id" = ${payableId} AND rejected."transaction_id" = ${transactionId})`;
+}
+
+/** A bill closed for good (archived, as a voided invoice's is): no payment lands on it. */
+export function isClosed(payable: Pick<Payable, 'status'>): boolean {
+  return payable.status === PayableStatus.ARCHIVED;
 }

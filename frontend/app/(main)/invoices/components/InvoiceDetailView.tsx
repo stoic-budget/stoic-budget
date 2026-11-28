@@ -3,15 +3,12 @@
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import {
-  MarkPaidDialog,
-  type MarkPaidResult,
-} from '@/app/(main)/statements/components/payables/MarkPaidDialog';
+import { MarkPaidDialog } from '@/app/(main)/statements/components/payables/MarkPaidDialog';
 import CustomDatePicker from '@/app/components/CustomDatePicker';
 import { Badge } from '@/app/components/ui/badge';
 import { Breadcrumbs } from '@/app/components/ui/breadcrumbs';
 import { Button } from '@/app/components/ui/button';
-import { FORM_CONTROL_SX, Input } from '@/app/components/ui/input';
+import { Input } from '@/app/components/ui/input';
 import { PRIVATE_CLASS, PrivateAmount } from '@/app/components/ui/private-amount';
 import { Select } from '@/app/components/ui/select';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
@@ -31,9 +28,12 @@ import {
   type SendInvoiceEmailInput,
 } from '@/app/lib/invoices-api';
 import { type Payable, payablesApi } from '@/app/lib/payables-api';
+import { useRecordPayment } from '../hooks/useRecordPayment';
 import { CreditNoteDialog } from './CreditNoteDialog';
 import { InvoiceEmailDrawer } from './InvoiceEmailDrawer';
+import { InvoiceRecurrenceField } from './InvoiceRecurrenceField';
 import { InvoiceDetailSkeleton } from './InvoicesSkeletons';
+import { InvoiceTotalLines, savedTotals } from './InvoiceTotalLines';
 import { InvoiceWizard } from './invoice-wizard/InvoiceWizard';
 import { lineAmount, useInvoiceForm } from './invoice-wizard/useInvoiceForm';
 import { formatInvoiceDate, getInvoiceStatusVariant } from './invoices-format';
@@ -124,14 +124,14 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
       return;
     }
     setSaving(true);
-    await (isNew
-      ? invoicesApi.create(form.buildPayload())
-      : invoicesApi.update(invoiceId, form.buildPayload())
-    )
+    await form
+      .save(invoiceId)
       .then(saved => {
         toast.success(isNew ? t.toasts.createSuccess.value : t.toasts.updateSuccess.value);
         router.replace(`/invoices/${saved.id}`);
         setInvoice(saved);
+        // The form shows what was stored, not only what was typed.
+        fillFrom(saved);
       })
       .catch(error => {
         toast.error(getApiErrorMessage(error, t.toasts.genericFailed.value));
@@ -203,7 +203,8 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
       .send(invoice.id)
       .then(updated => {
         setInvoice(updated);
-        toast.success(t.toasts.sendSuccess.value);
+        // Issued is not sent: the email dialog takes the next step at once (#665).
+        setEmailOpen(true);
       })
       .catch(error => toast.error(getApiErrorMessage(error, t.toasts.genericFailed.value)))
       .finally(() => setActing(false));
@@ -247,20 +248,11 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
       .catch(error => toast.error(getApiErrorMessage(error, t.toasts.genericFailed.value)));
   };
 
-  const confirmMarkPaid = async (payable: Payable, result: MarkPaidResult): Promise<void> => {
-    await (result.kind === 'full'
-      ? payablesApi.markAsPaid(payable.id, result.payload)
-      : result.kind === 'book'
-        ? payablesApi.bookPayment(payable.id, result.paymentId, result.payload)
-        : payablesApi.addPayment(payable.id, result.payload)
-    )
-      .then(async updated => {
-        // Still short: the dialog stays open for the next instalment.
-        setPayingPayable(updated.status === 'partially_paid' ? updated : null);
-        await loadInvoice();
-      })
-      .catch(error => toast.error(getApiErrorMessage(error, t.toasts.genericFailed.value)));
-  };
+  const { paying, confirm: confirmMarkPaid } = useRecordPayment(
+    setPayingPayable,
+    loadInvoice,
+    t.toasts.genericFailed.value,
+  );
 
   const createCreditNote = async (payload: CreateCreditNoteInput): Promise<void> => {
     setActing(true);
@@ -458,26 +450,14 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
                 {currency}
               </button>
             </div>
-            <div className="seneca-payable-drawer__field-group">
-              <label className="seneca-payable-drawer__field-label" htmlFor="invoice-recurrence">
-                {t.detail.recurring.value}
-              </label>
-              <Select
-                fullWidth
-                id="invoice-recurrence"
-                sx={FORM_CONTROL_SX}
-                value={recurrenceInterval || 'none'}
-                disabled
-                onChange={() => undefined}
-                options={[
-                  { value: 'none', label: t.actions.cancel.value },
-                  { value: 'weekly', label: t.detail.recurrenceInterval.weekly.value },
-                  { value: 'monthly', label: t.detail.recurrenceInterval.monthly.value },
-                  { value: 'quarterly', label: t.detail.recurrenceInterval.quarterly.value },
-                  { value: 'yearly', label: t.detail.recurrenceInterval.yearly.value },
-                ]}
-              />
-            </div>
+            <InvoiceRecurrenceField
+              invoice={invoice}
+              recurrenceInterval={recurrenceInterval}
+              onStopped={updated => {
+                setInvoice(updated);
+                fillFrom(updated);
+              }}
+            />
           </div>
 
           <label
@@ -593,29 +573,11 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <div style={{ display: 'grid', gap: 4, minWidth: 220 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-                <span>{t.detail.subtotal.value}</span>
-                <span className={PRIVATE_CLASS}>
-                  {formatMoney(totals.subtotal, currency, locale)}
-                </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-                <span>{t.detail.tax.value}</span>
-                <span className={PRIVATE_CLASS}>
-                  {formatMoney(totals.taxTotal, currency, locale)}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontSize: 16,
-                  fontWeight: 700,
-                }}
-              >
-                <span>{t.columns.total.value}</span>
-                <span className={PRIVATE_CLASS}>{formatMoney(totals.total, currency, locale)}</span>
-              </div>
+              <InvoiceTotalLines
+                totals={invoice ? savedTotals(invoice) : totals}
+                currency={currency}
+                locale={locale}
+              />
               {/* Payments against the invoice: what the client still owes is the
                     number they care about, and it is not the total. */}
               {Number(invoice?.amountPaid ?? 0) > 0 && (
@@ -782,7 +744,7 @@ export function InvoiceDetailView({ invoiceId }: InvoiceDetailViewProps): React.
 
       <MarkPaidDialog
         payable={payingPayable}
-        submitting={false}
+        submitting={paying}
         removingPaymentId={removingPaymentId}
         onClose={() => setPayingPayable(null)}
         onConfirm={(payable, result) => void confirmMarkPaid(payable, result)}

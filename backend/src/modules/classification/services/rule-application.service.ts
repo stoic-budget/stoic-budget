@@ -8,7 +8,7 @@ import { CategorizationRule } from '../../../entities/categorization-rule.entity
 import { Transaction, TransactionCategorySource } from '../../../entities/transaction.entity';
 import { AuditService } from '../../audit/audit.service';
 import { TaxAssignmentService } from '../../tax/tax-assignment.service';
-import { hasDecidedCategory } from '../engine/category-decision';
+import { keepsCategoryOnRerun } from '../engine/category-decision';
 import { movesToWallet, planRuleApply, rowsMatching } from '../engine/rule-apply-plan';
 import { conditionsUse } from '../engine/rule-condition-tree';
 import { explainMatch } from '../engine/rule-conditions';
@@ -165,7 +165,7 @@ export class RuleApplicationService {
     return {
       totalTransactions: readable.length,
       matchedTransactions: matches.length,
-      overridable: matches.filter(({ row }) => !hasDecidedCategory(row)).length,
+      overridable: matches.filter(({ row }) => !keepsCategoryOnRerun(row)).length,
       shadowed: matches.filter(({ wonBy }) => wonBy).length,
       movable: matches.filter(({ row }) => movesToWallet(row, input.walletId)).length,
       truncated,
@@ -179,7 +179,7 @@ export class RuleApplicationService {
         direction: row.transactionType ?? null,
         currency: row.currency,
         categoryId: row.categoryId ?? null,
-        decided: hasDecidedCategory(row),
+        decided: keepsCategoryOnRerun(row),
         wonBy,
       })),
     };

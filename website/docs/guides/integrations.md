@@ -3,23 +3,29 @@ title: Integrations
 description: Mail, storage, inbox, bank sync and Telegram
 ---
 
-Integrations are configured in the app under **Integrations**, per workspace. Secrets are stored
-encrypted. Env variables with the same purpose are only temporary fallback defaults for bootstrap.
+Integrations are configured in the app under **Plugins** (account menu), per workspace, next to the
+plugins. Secrets are stored encrypted. Env variables with the same purpose are only temporary fallback defaults for bootstrap.
 
 ## Catalog
 
 | Integration | What it does |
 |---|---|
 | SMTP email | Sends workspace invitations, password reset links and email change confirmations |
-| App URL | The public URL used in invitations and shared links |
-| S3-compatible storage | Syncs statements with a bucket such as MinIO |
-| WebDAV storage | Imports and syncs files from Nextcloud or another WebDAV server |
+| App URL | The public URL used in invitations and shared links; set in **Settings → Data** |
+| S3-compatible storage | Syncs statements with a bucket such as MinIO; set in **Settings → Sync** |
+| WebDAV storage | Imports and syncs files from Nextcloud or another WebDAV server; set in **Settings → Sync** |
 | IMAP inbox | Polls a mailbox for receipts and invoice attachments |
 | Bank sync via SimpleFIN | Pulls statements from your own SimpleFIN Bridge account through the regular import — see below |
 | Telegram | Scheduled reports to a chat or channel; set up in **Settings → Telegram** |
 
 ## Notes
 
+- Owners and admins can switch each integration (SMTP, IMAP, bank sync, Peppol, Telegram) off for the
+  workspace. Off pauses it and keeps the saved settings: its sync, import and send actions answer
+  `PLUGIN_DISABLED`, scheduled bank pulls and Peppol polling skip the workspace, and mail goes through the
+  server's `SMTP_*` settings. Telegram stops altogether: no bot, the shared one included, writes to or
+  answers the workspace's chats. Its status and **Disconnect** still work. Every integration starts
+  switched on.
 - Endpoints and hosts saved here (SMTP, S3, WebDAV, IMAP, SimpleFIN) must resolve to public addresses: the
   egress guard rejects private and loopback hosts when you save and again on every connection. An
   SMTP relay on a private network goes in `SMTP_HOST`/`SMTP_FROM` on the server instead.
@@ -49,7 +55,7 @@ SimpleFIN, North America) exposes your bank accounts over the open
 [SimpleFIN protocol](https://www.simplefin.org/protocol.html), and Stoic Budget pulls from it.
 
 1. In SimpleFIN Bridge, connect your bank and create a **new connection**; it shows a *setup token*.
-2. In Stoic Budget, open **Integrations → Bank sync via SimpleFIN**, paste the token and connect. A token
+2. In Stoic Budget, open **Plugins → Bank sync via SimpleFIN**, paste the token and connect. A token
    works once: Stoic Budget exchanges it for an access credential and stores only that, encrypted.
 3. Choose which accounts to pull and, optionally, which Stoic Budget wallet each one lands in. Accounts the
    provider adds later start switched off.
