@@ -4,6 +4,7 @@ import * as Schema from 'effect/Schema';
 import { RecurrenceRule } from '../common/recurrence';
 import { DateOnly, DecimalString, Timestamp, type Wire } from '../common/wire';
 import { StorageTag } from '../storage/storage';
+import { LateReason } from './late-reasons';
 
 export const PayableStatus = Schema.Literals([
   'to_pay',
@@ -53,6 +54,9 @@ export const Payable = Schema.Struct({
   comment: Schema.NullOr(Schema.String),
   /** The loan account this bill is a payment of; its terms own the rule and the amounts. */
   loanWalletId: Schema.NullOr(Schema.String),
+  /** Why it was paid late, as the person said it. */
+  lateReason: Schema.NullOr(LateReason),
+  lateReasonNote: Schema.NullOr(Schema.String),
   statementId: Schema.NullOr(Schema.String),
   /** The workspace tags on the bill; on list rows and single reads. */
   tags: Schema.optional(Schema.Array(StorageTag)),

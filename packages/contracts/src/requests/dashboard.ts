@@ -1,5 +1,5 @@
 import * as Schema from 'effect/Schema';
-import { IsoDateString, NumericInput } from '../common/requests';
+import { DateOnlyInput, IsoDateString, NumericInput } from '../common/requests';
 import type { Wire } from '../common/wire';
 
 const Days = NumericInput.check(Schema.isInt(), Schema.isGreaterThanOrEqualTo(1));
@@ -8,6 +8,11 @@ const Days = NumericInput.check(Schema.isInt(), Schema.isGreaterThanOrEqualTo(1)
 export const DashboardQuery = Schema.Struct({
   range: Schema.optional(Schema.Literals(['7d', '30d', '90d', 'month'])),
   date: Schema.optional(IsoDateString),
+  /**
+   * The viewer's own day (`YYYY-MM-DD`) when no month is picked: east of UTC,
+   * early in a month, the server's day is still in the old one.
+   */
+  today: Schema.optional(DateOnlyInput),
 });
 export type DashboardQuery = Wire<typeof DashboardQuery>;
 

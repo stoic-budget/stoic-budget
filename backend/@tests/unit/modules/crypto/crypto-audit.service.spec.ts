@@ -36,6 +36,14 @@ function build(options: { imported?: number; existing?: Record<string, unknown> 
     createEvent: vi.fn().mockResolvedValue({}),
     createBatchEvents: vi.fn().mockResolvedValue({ batchId: 'b', events: [] }),
   };
+  const balanceService = {
+    writePortfolioSnapshot: vi.fn(),
+    // As the real one: delete, then write the portfolio without the wallet.
+    removeWallet: vi.fn(async (repo: { delete(id: string): Promise<unknown> }, id: string, ws: string, user: string) => {
+      await repo.delete(id);
+      await balanceService.writePortfolioSnapshot(ws, user);
+    }),
+  };
   const service = new CryptoService(
     walletRepo as never,
     transactionRepo as never,
@@ -44,9 +52,9 @@ function build(options: { imported?: number; existing?: Record<string, unknown> 
     {} as never,
     auditService as never,
     {} as never,
-    { writePortfolioSnapshot: vi.fn() } as never,
+    balanceService as never,
   );
-  return { service, auditService, walletRepo, transactionRepo };
+  return { service, auditService, walletRepo, transactionRepo, balanceService };
 }
 
 const wallet = {
@@ -93,11 +101,13 @@ describe('CryptoService audit', () => {
   });
 
   it('logs a removed wallet as a DELETE with its cascaded transaction count', async () => {
-    const { service, auditService, walletRepo } = build({ existing: wallet });
+    const { service, auditService, walletRepo, balanceService } = build({ existing: wallet });
 
     await service.remove(WORKSPACE, 'w-9', 'u-1');
 
     expect(walletRepo.delete).toHaveBeenCalledWith('w-9');
+    // Net worth drops at once: the portfolio is written without the wallet (#694).
+    expect(balanceService.writePortfolioSnapshot).toHaveBeenCalledWith(WORKSPACE, 'u-1');
     expect(auditService.createEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         workspaceId: WORKSPACE,

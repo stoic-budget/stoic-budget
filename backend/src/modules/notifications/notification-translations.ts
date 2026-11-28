@@ -15,6 +15,7 @@ export type NotificationMessageKey =
   | 'parsing.error.named'
   | 'import.failed'
   | 'import.failed.named'
+  | 'backup.failed'
   | 'transactions.uncategorized'
   | 'receipt.uncategorized'
   | 'receipt.uncategorized.named'
@@ -110,6 +111,11 @@ const ru: TranslationMap = {
     message: 'Не удалось обработать выписку "{{statementName}}"',
   },
   'import.failed': { title: 'Ошибка импорта', message: 'Импорт завершился с ошибкой' },
+  'backup.failed': {
+    title: 'Резервная копия не создана',
+    message:
+      'Плановая резервная копия «{{workspace}}» не создалась. Откройте настройки резервного копирования, чтобы узнать причину',
+  },
   'import.failed.named': {
     title: 'Ошибка импорта',
     message: 'Импорт выписки "{{statementName}}" завершился с ошибкой',
@@ -241,6 +247,10 @@ const en: TranslationMap = {
     message: 'Failed to process statement "{{statementName}}"',
   },
   'import.failed': { title: 'Import failed', message: 'Import failed with an error' },
+  'backup.failed': {
+    title: 'Backup failed',
+    message: 'The scheduled backup of "{{workspace}}" failed. Open the backup settings to see why',
+  },
   'import.failed.named': {
     title: 'Import failed',
     message: 'Import of statement "{{statementName}}" failed',
@@ -378,6 +388,11 @@ const kk: TranslationMap = {
     message: '"{{statementName}}" үзіндісін өңдеу мүмкін болмады',
   },
   'import.failed': { title: 'Импорт қатесі', message: 'Импорт қатемен аяқталды' },
+  'backup.failed': {
+    title: 'Сақтық көшірме жасалмады',
+    message:
+      '«{{workspace}}» жоспарлы сақтық көшірмесі жасалмады. Себебін көру үшін сақтық көшірме баптауларын ашыңыз',
+  },
   'import.failed.named': {
     title: 'Импорт қатесі',
     message: '"{{statementName}}" үзіндісінің импорты сәтсіз аяқталды',
@@ -518,6 +533,11 @@ const de: TranslationMap = {
     message: 'Der Kontoauszug "{{statementName}}" konnte nicht verarbeitet werden',
   },
   'import.failed': { title: 'Import fehlgeschlagen', message: 'Der Import ist fehlgeschlagen' },
+  'backup.failed': {
+    title: 'Sicherung fehlgeschlagen',
+    message:
+      'Die geplante Sicherung von „{{workspace}}“ ist fehlgeschlagen. Öffnen Sie die Sicherungseinstellungen, um den Grund zu sehen',
+  },
   'import.failed.named': {
     title: 'Import fehlgeschlagen',
     message: 'Der Import des Kontoauszugs "{{statementName}}" ist fehlgeschlagen',
@@ -662,6 +682,11 @@ const fr: TranslationMap = {
     message: 'Impossible de traiter le relevé "{{statementName}}"',
   },
   'import.failed': { title: "Échec de l'import", message: "L'import a échoué" },
+  'backup.failed': {
+    title: 'Échec de la sauvegarde',
+    message:
+      'La sauvegarde planifiée de « {{workspace}} » a échoué. Ouvrez les réglages de sauvegarde pour en voir la raison',
+  },
   'import.failed.named': {
     title: "Échec de l'import",
     message: 'L\'import du relevé "{{statementName}}" a échoué',
@@ -806,6 +831,11 @@ const es: TranslationMap = {
     message: 'No se pudo procesar el extracto "{{statementName}}"',
   },
   'import.failed': { title: 'Importación fallida', message: 'La importación falló' },
+  'backup.failed': {
+    title: 'Copia de seguridad fallida',
+    message:
+      'La copia de seguridad programada de «{{workspace}}» falló. Abre los ajustes de copia de seguridad para ver el motivo',
+  },
   'import.failed.named': {
     title: 'Importación fallida',
     message: 'La importación del extracto "{{statementName}}" falló',
@@ -950,6 +980,11 @@ const pt: TranslationMap = {
     message: 'Não foi possível processar o extrato "{{statementName}}"',
   },
   'import.failed': { title: 'Importação falhou', message: 'A importação falhou' },
+  'backup.failed': {
+    title: 'Cópia de segurança falhou',
+    message:
+      'A cópia de segurança agendada de «{{workspace}}» falhou. Abra as definições de cópia de segurança para ver o motivo',
+  },
   'import.failed.named': {
     title: 'Importação falhou',
     message: 'A importação do extrato "{{statementName}}" falhou',
@@ -1088,6 +1123,11 @@ const tr: TranslationMap = {
     message: '"{{statementName}}" hesap özeti işlenemedi',
   },
   'import.failed': { title: 'İçe aktarma başarısız', message: 'İçe aktarma başarısız oldu' },
+  'backup.failed': {
+    title: 'Yedekleme başarısız',
+    message:
+      '"{{workspace}}" için planlanan yedekleme başarısız oldu. Nedenini görmek için yedekleme ayarlarını açın',
+  },
   'import.failed.named': {
     title: 'İçe aktarma başarısız',
     message: '"{{statementName}}" hesap özetinin içe aktarması başarısız oldu',
@@ -1231,6 +1271,11 @@ const uk: TranslationMap = {
     message: 'Не вдалося обробити виписку "{{statementName}}"',
   },
   'import.failed': { title: 'Помилка імпорту', message: 'Імпорт завершився з помилкою' },
+  'backup.failed': {
+    title: 'Резервну копію не створено',
+    message:
+      'Планова резервна копія «{{workspace}}» не створилася. Відкрийте налаштування резервного копіювання, щоб дізнатися причину',
+  },
   'import.failed.named': {
     title: 'Помилка імпорту',
     message: 'Імпорт виписки "{{statementName}}" завершився з помилкою',
@@ -1353,6 +1398,10 @@ const zh: TranslationMap = {
   'parsing.error': { title: '对账单解析错误', message: '无法处理对账单' },
   'parsing.error.named': { title: '对账单解析错误', message: '无法处理对账单 "{{statementName}}"' },
   'import.failed': { title: '导入失败', message: '导入失败' },
+  'backup.failed': {
+    title: '备份失败',
+    message: '“{{workspace}}”的计划备份失败。请打开备份设置查看原因',
+  },
   'import.failed.named': { title: '导入失败', message: '对账单 "{{statementName}}" 导入失败' },
   'transactions.uncategorized': { title: '未分类交易', message: '{{count}} 笔交易需要分类' },
   'receipt.uncategorized': { title: '未分类收据', message: '发现未分类的收据' },
@@ -1480,6 +1529,11 @@ const pl: TranslationMap = {
     message: 'Nie udało się przetworzyć wyciągu "{{statementName}}"',
   },
   'import.failed': { title: 'Import nieudany', message: 'Import zakończył się błędem' },
+  'backup.failed': {
+    title: 'Kopia zapasowa nieudana',
+    message:
+      'Zaplanowana kopia zapasowa „{{workspace}}” nie powiodła się. Otwórz ustawienia kopii zapasowej, aby zobaczyć przyczynę',
+  },
   'import.failed.named': {
     title: 'Import nieudany',
     message: 'Import wyciągu "{{statementName}}" zakończył się błędem',
@@ -1623,6 +1677,11 @@ const it: TranslationMap = {
     message: 'Impossibile elaborare l\'estratto conto "{{statementName}}"',
   },
   'import.failed': { title: 'Importazione fallita', message: "L'importazione è fallita" },
+  'backup.failed': {
+    title: 'Backup non riuscito',
+    message:
+      'Il backup pianificato di «{{workspace}}» non è riuscito. Apri le impostazioni di backup per vederne il motivo',
+  },
   'import.failed.named': {
     title: 'Importazione fallita',
     message: 'L\'importazione dell\'estratto conto "{{statementName}}" è fallita',
@@ -1764,6 +1823,11 @@ const sk: TranslationMap = {
     message: 'Nepodarilo sa spracovať výpis "{{statementName}}"',
   },
   'import.failed': { title: 'Import zlyhal', message: 'Import zlyhal' },
+  'backup.failed': {
+    title: 'Záloha zlyhala',
+    message:
+      'Plánovaná záloha „{{workspace}}“ zlyhala. Otvorte nastavenia zálohovania a pozrite sa prečo',
+  },
   'import.failed.named': {
     title: 'Import zlyhal',
     message: 'Import výpisu "{{statementName}}" zlyhal',
@@ -1907,6 +1971,11 @@ const ja: TranslationMap = {
     message: '明細書 "{{statementName}}" を処理できませんでした',
   },
   'import.failed': { title: 'インポート失敗', message: 'インポートに失敗しました' },
+  'backup.failed': {
+    title: 'バックアップに失敗しました',
+    message:
+      '「{{workspace}}」の定期バックアップに失敗しました。バックアップ設定を開いて理由を確認してください',
+  },
   'import.failed.named': {
     title: 'インポート失敗',
     message: '明細書 "{{statementName}}" のインポートに失敗しました',
@@ -2050,6 +2119,10 @@ const ko: TranslationMap = {
     message: '명세서 "{{statementName}}"을(를) 처리할 수 없습니다',
   },
   'import.failed': { title: '가져오기 실패', message: '가져오기에 실패했습니다' },
+  'backup.failed': {
+    title: '백업 실패',
+    message: '"{{workspace}}"의 예약된 백업이 실패했습니다. 백업 설정을 열어 이유를 확인하세요',
+  },
   'import.failed.named': {
     title: '가져오기 실패',
     message: '명세서 "{{statementName}}" 가져오기에 실패했습니다',
@@ -2180,6 +2253,10 @@ const hi: TranslationMap = {
     message: 'स्टेटमेंट "{{statementName}}" प्रोसेस नहीं किया जा सका',
   },
   'import.failed': { title: 'आयात विफल', message: 'आयात विफल हो गया' },
+  'backup.failed': {
+    title: 'बैकअप विफल',
+    message: '"{{workspace}}" का निर्धारित बैकअप विफल रहा। कारण देखने के लिए बैकअप सेटिंग्स खोलें',
+  },
   'import.failed.named': {
     title: 'आयात विफल',
     message: 'स्टेटमेंट "{{statementName}}" का आयात विफल हो गया',
@@ -2322,6 +2399,11 @@ const nl: TranslationMap = {
     message: 'Het afschrift "{{statementName}}" kon niet worden verwerkt',
   },
   'import.failed': { title: 'Import mislukt', message: 'De import is mislukt' },
+  'backup.failed': {
+    title: 'Back-up mislukt',
+    message:
+      'De geplande back-up van "{{workspace}}" is mislukt. Open de back-upinstellingen om te zien waarom',
+  },
   'import.failed.named': {
     title: 'Import mislukt',
     message: 'De import van afschrift "{{statementName}}" is mislukt',
@@ -2463,6 +2545,11 @@ const sv: TranslationMap = {
     message: 'Kontoutdraget "{{statementName}}" kunde inte bearbetas',
   },
   'import.failed': { title: 'Import misslyckades', message: 'Importen misslyckades' },
+  'backup.failed': {
+    title: 'Säkerhetskopiering misslyckades',
+    message:
+      'Den schemalagda säkerhetskopieringen av "{{workspace}}" misslyckades. Öppna inställningarna för säkerhetskopiering för att se varför',
+  },
   'import.failed.named': {
     title: 'Import misslyckades',
     message: 'Importen av kontoutdraget "{{statementName}}" misslyckades',
@@ -2604,6 +2691,11 @@ const vi: TranslationMap = {
     message: 'Không thể xử lý sao kê "{{statementName}}"',
   },
   'import.failed': { title: 'Nhập thất bại', message: 'Quá trình nhập đã thất bại' },
+  'backup.failed': {
+    title: 'Sao lưu thất bại',
+    message:
+      'Bản sao lưu theo lịch của "{{workspace}}" đã thất bại. Mở cài đặt sao lưu để xem lý do',
+  },
   'import.failed.named': {
     title: 'Nhập thất bại',
     message: 'Nhập sao kê "{{statementName}}" đã thất bại',
@@ -2741,6 +2833,11 @@ const id: TranslationMap = {
     message: 'Gagal memproses laporan "{{statementName}}"',
   },
   'import.failed': { title: 'Impor gagal', message: 'Impor gagal' },
+  'backup.failed': {
+    title: 'Pencadangan gagal',
+    message:
+      'Pencadangan terjadwal "{{workspace}}" gagal. Buka pengaturan pencadangan untuk melihat alasannya',
+  },
   'import.failed.named': {
     title: 'Impor gagal',
     message: 'Impor laporan "{{statementName}}" gagal',
@@ -2889,6 +2986,11 @@ const da: TranslationMap = {
   'import.failed': {
     title: 'Import mislykkedes',
     message: 'Importen mislykkedes med en fejl',
+  },
+  'backup.failed': {
+    title: 'Sikkerhedskopiering mislykkedes',
+    message:
+      'Den planlagte sikkerhedskopiering af "{{workspace}}" mislykkedes. Åbn indstillingerne for sikkerhedskopiering for at se hvorfor',
   },
   'import.failed.named': {
     title: 'Import mislykkedes',
@@ -3040,6 +3142,11 @@ const nb: TranslationMap = {
     title: 'Import mislyktes',
     message: 'Importen mislyktes med en feil',
   },
+  'backup.failed': {
+    title: 'Sikkerhetskopiering mislyktes',
+    message:
+      'Den planlagte sikkerhetskopieringen av «{{workspace}}» mislyktes. Åpne innstillingene for sikkerhetskopiering for å se hvorfor',
+  },
   'import.failed.named': {
     title: 'Import mislyktes',
     message: 'Import av kontoutskriften "{{statementName}}" mislyktes',
@@ -3189,6 +3296,11 @@ const nn: TranslationMap = {
   'import.failed': {
     title: 'Import mislukkast',
     message: 'Importen mislukkast med ein feil',
+  },
+  'backup.failed': {
+    title: 'Tryggingskopiering mislukkast',
+    message:
+      'Den planlagde tryggingskopieringa av «{{workspace}}» mislukkast. Opne innstillingane for tryggingskopiering for å sjå kvifor',
   },
   'import.failed.named': {
     title: 'Import mislukkast',
@@ -3340,6 +3452,11 @@ const fi: TranslationMap = {
     title: 'Tuonti epäonnistui',
     message: 'Tuonti päättyi virheeseen',
   },
+  'backup.failed': {
+    title: 'Varmuuskopiointi epäonnistui',
+    message:
+      'Työtilan ”{{workspace}}” ajastettu varmuuskopiointi epäonnistui. Avaa varmuuskopioinnin asetukset nähdäksesi syyn',
+  },
   'import.failed.named': {
     title: 'Tuonti epäonnistui',
     message: 'Tiliotteen "{{statementName}}" tuonti epäonnistui',
@@ -3489,6 +3606,11 @@ const is: TranslationMap = {
   'import.failed': {
     title: 'Innflutningur mistókst',
     message: 'Innflutningur endaði með villu',
+  },
+  'backup.failed': {
+    title: 'Öryggisafritun mistókst',
+    message:
+      'Áætluð öryggisafritun „{{workspace}}“ mistókst. Opnaðu stillingar öryggisafritunar til að sjá hvers vegna',
   },
   'import.failed.named': {
     title: 'Innflutningur mistókst',
@@ -3640,6 +3762,11 @@ const fo: TranslationMap = {
     title: 'Innflutningur miseydnaðist',
     message: 'Innflutningurin endaði við einum feili',
   },
+  'backup.failed': {
+    title: 'Trygdarritan miseydnaðist',
+    message:
+      'Ætlaða trygdarritanin av "{{workspace}}" miseydnaðist. Lat stillingarnar fyri trygdarritan upp fyri at síggja hví',
+  },
   'import.failed.named': {
     title: 'Innflutningur miseydnaðist',
     message: 'Innflutningur av kontoúrtøkinum "{{statementName}}" miseydnaðist',
@@ -3790,6 +3917,11 @@ const cs: TranslationMap = {
     title: 'Import se nezdařil',
     message: 'Import skončil chybou',
   },
+  'backup.failed': {
+    title: 'Záloha selhala',
+    message:
+      'Plánovaná záloha „{{workspace}}“ selhala. Otevřete nastavení zálohování a podívejte se proč',
+  },
   'import.failed.named': {
     title: 'Import se nezdařil',
     message: 'Import výpisu "{{statementName}}" se nezdařil',
@@ -3938,6 +4070,11 @@ const bg: TranslationMap = {
   'import.failed': {
     title: 'Импортът се провали',
     message: 'Импортът завърши с грешка',
+  },
+  'backup.failed': {
+    title: 'Резервното копие не успя',
+    message:
+      'Планираното резервно копие на „{{workspace}}“ не успя. Отворете настройките за резервни копия, за да видите защо',
   },
   'import.failed.named': {
     title: 'Импортът се провали',
@@ -4089,6 +4226,11 @@ const hr: TranslationMap = {
     title: 'Uvoz nije uspio',
     message: 'Uvoz je završio pogreškom',
   },
+  'backup.failed': {
+    title: 'Sigurnosna kopija nije uspjela',
+    message:
+      'Zakazana sigurnosna kopija „{{workspace}}” nije uspjela. Otvorite postavke sigurnosnog kopiranja da vidite zašto',
+  },
   'import.failed.named': {
     title: 'Uvoz nije uspio',
     message: 'Uvoz izvoda "{{statementName}}" nije uspio',
@@ -4237,6 +4379,11 @@ const sr: TranslationMap = {
   'import.failed': {
     title: 'Увоз није успео',
     message: 'Увоз је завршио грешком',
+  },
+  'backup.failed': {
+    title: 'Резервна копија није успела',
+    message:
+      'Заказана резервна копија „{{workspace}}” није успела. Отворите подешавања резервних копија да видите зашто',
   },
   'import.failed.named': {
     title: 'Увоз није успео',
@@ -4388,6 +4535,11 @@ const sl: TranslationMap = {
     title: 'Uvoz ni uspel',
     message: 'Uvoz se je končal z napako',
   },
+  'backup.failed': {
+    title: 'Varnostno kopiranje ni uspelo',
+    message:
+      'Načrtovano varnostno kopiranje »{{workspace}}« ni uspelo. Odprite nastavitve varnostnega kopiranja, da vidite zakaj',
+  },
   'import.failed.named': {
     title: 'Uvoz ni uspel',
     message: 'Uvoz izpiska "{{statementName}}" ni uspel',
@@ -4536,6 +4688,11 @@ const mk: TranslationMap = {
   'import.failed': {
     title: 'Увозот не успеа',
     message: 'Увозот заврши со грешка',
+  },
+  'backup.failed': {
+    title: 'Резервната копија не успеа',
+    message:
+      'Закажаната резервна копија на „{{workspace}}“ не успеа. Отворете ги поставките за резервни копии за да видите зошто',
   },
   'import.failed.named': {
     title: 'Увозот не успеа',
@@ -4687,6 +4844,11 @@ const be: TranslationMap = {
     title: 'Імпарт не ўдаўся',
     message: 'Імпарт завяршыўся памылкай',
   },
+  'backup.failed': {
+    title: 'Рэзервовая копія не створана',
+    message:
+      'Планавая рэзервовая копія «{{workspace}}» не стварылася. Адкрыйце налады рэзервовага капіявання, каб даведацца прычыну',
+  },
   'import.failed.named': {
     title: 'Імпарт не ўдаўся',
     message: 'Імпарт выпіскі «{{statementName}}» не ўдаўся',
@@ -4836,6 +4998,11 @@ const bs: TranslationMap = {
     title: 'Uvoz nije uspio',
     message: 'Uvoz je završio greškom',
   },
+  'backup.failed': {
+    title: 'Sigurnosna kopija nije uspjela',
+    message:
+      'Zakazana sigurnosna kopija „{{workspace}}” nije uspjela. Otvorite postavke sigurnosnog kopiranja da vidite zašto',
+  },
   'import.failed.named': {
     title: 'Uvoz nije uspio',
     message: 'Uvoz izvoda "{{statementName}}" nije uspio',
@@ -4984,6 +5151,11 @@ const hsb: TranslationMap = {
   'import.failed': {
     title: 'Import je so njeporadźił',
     message: 'Import je so ze zmylkom skónčił',
+  },
+  'backup.failed': {
+    title: 'Zawěsćenje njeje so poradźiło',
+    message:
+      'Planowane zawěsćenje „{{workspace}}“ njeje so poradźiło. Wočińće nastajenja zawěsćenja, zo byšće přičinu widźał',
   },
   'import.failed.named': {
     title: 'Import je so njeporadźił',

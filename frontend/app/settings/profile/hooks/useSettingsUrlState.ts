@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   buildSettingsHref,
   LEGACY_HASH_TARGETS,
+  movedSection,
   parseSettingsSection,
   parseSettingsTab,
   type SettingsSectionId,
@@ -29,13 +30,22 @@ type State = { tab: SettingsTabId; section: SettingsSectionId | null };
 export function useSettingsUrlState(): UseSettingsUrlStateReturn {
   const searchParams = useSearchParams();
   const [state, setState] = useState<State>(() => {
+    const moved = movedSection(searchParams?.get('tab'), searchParams?.get('section'));
+    if (moved) {
+      return moved;
+    }
     const tab = parseSettingsTab(searchParams?.get('tab'));
     return { tab, section: parseSettingsSection(tab, searchParams?.get('section')) };
   });
 
-  // The sidebar era addressed panels by `#hash`; a server redirect cannot see
-  // the fragment, so the translation has to happen here.
+  // The sidebar era addressed panels by `#hash`, and some panels moved tabs
+  // since; a server redirect cannot see the fragment, so both are translated here.
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const moved = movedSection(params.get('tab'), params.get('section'));
+    if (moved) {
+      window.history.replaceState(null, '', buildSettingsHref(moved.tab, moved.section));
+    }
     const hash = window.location.hash.replace('#', '');
     const target = hash ? LEGACY_HASH_TARGETS[hash] : undefined;
     if (target) {

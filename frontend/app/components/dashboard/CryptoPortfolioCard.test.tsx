@@ -21,6 +21,9 @@ vi.mock('@/app/i18n', () => ({
     amount: 'Amount',
     worth: 'Value',
     unrealized: 'Profit',
+    // The dashboard's missing-rate notice (#787).
+    missingRates: { value: 'No rate for {{currencies}}: counted at face value.' },
+    missingRatesAction: 'Set a rate',
   }),
   useLocale: () => ({ locale: 'en' }),
 }));
@@ -59,6 +62,23 @@ describe('CryptoPortfolioCard', () => {
       '/crypto/summary',
       expect.objectContaining({ params: { month: '2026-08' } }),
     );
+  });
+
+  it('says when the figures are USD at face value for want of a rate (#787)', async () => {
+    apiGet.mockResolvedValue({ data: { ...summaryFor(0, 0).data, missingRates: ['USD'] } });
+
+    renderWithQuery(<CryptoPortfolioCard formatAmount={format} month="2026-08" monthLabel="August 2026" />);
+
+    expect(await screen.findByRole('status')).toHaveTextContent('USD');
+  });
+
+  it('says nothing about rates while the rate is known', async () => {
+    apiGet.mockResolvedValue(summaryFor(1, 1));
+
+    renderWithQuery(<CryptoPortfolioCard formatAmount={format} month="2026-08" monthLabel="August 2026" />);
+
+    await screen.findByText('5532.00 €');
+    expect(screen.queryByRole('status')).toBeNull();
   });
 
   it('refetches when the month changes', async () => {

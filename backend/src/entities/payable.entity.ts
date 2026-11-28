@@ -12,7 +12,7 @@ import {
   type Relation,
   UpdateDateColumn,
 } from 'typeorm';
-import type { RecurrenceRule } from '../contracts';
+import type { LateReason, RecurrenceRule } from '../contracts';
 import { Tag } from './tag.entity';
 import { Transaction } from './transaction.entity';
 import { User } from './user.entity';
@@ -154,6 +154,12 @@ export class Payable {
 
   @Column({ name: 'loan_wallet_id', type: 'uuid', nullable: true })
   loanWalletId: string | null;
+  /** Why the bill was paid late, as the person said it; null until they do. */
+  @Column({ name: 'late_reason', type: 'varchar', length: 32, nullable: true })
+  lateReason: LateReason | null;
+
+  @Column({ name: 'late_reason_note', type: 'varchar', length: 200, nullable: true })
+  lateReasonNote: string | null;
 
   @Column({ name: 'statement_id', type: 'uuid', nullable: true })
   statementId: string | null;

@@ -1,7 +1,4 @@
-import {
-  normalizeDate,
-  normalizeNumberAdvanced,
-} from '../../../common/utils/number-normalizer.util';
+import { normalizeDate, normalizeNumber } from '../../../common/utils/number-normalizer.util';
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   $: 'USD',
@@ -15,7 +12,11 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 export const isBlank = (value: string | undefined | null): boolean =>
   value === undefined || value === null || String(value).trim() === '';
 
-/** «1 500,50 ₸», «$1,234», «(100)», «12%» → число; символ валюты отдельно. */
+/**
+ * «1 500,50 ₸», «1.234,56», «$1,234», «(100)», «100-», «12%» → число; символ валюты отдельно.
+ * With both separators the last one is the decimal; a lone comma before three digits
+ * groups thousands, a lone dot before three digits stays a decimal point («31.103 g»).
+ */
 export function parseImportNumber(raw: string): { value: number | null; currency: string | null } {
   const text = String(raw ?? '').trim();
   if (!text) {
@@ -35,9 +36,7 @@ export function parseImportNumber(raw: string): { value: number | null; currency
     cleaned = cleaned.replace(code[0], ' ');
   }
   cleaned = cleaned.replace(/%/g, '').trim();
-  const negative = /^\(.*\)$/.test(cleaned);
-  const { value } = normalizeNumberAdvanced(negative ? cleaned.slice(1, -1) : cleaned);
-  return { value: value === null ? null : negative ? -Math.abs(value) : value, currency };
+  return { value: normalizeNumber(cleaned, { loneDotIsDecimal: true }), currency };
 }
 
 /** Order of day and month in numeric dates such as `03/04/2026`. */

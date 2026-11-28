@@ -32,8 +32,9 @@ $seneca-color-success:       #10b981;
 $seneca-color-success-soft:  #ecfdf5;
 $seneca-color-warning:       #f59e0b;
 $seneca-color-warning-soft:  #fffbeb;
-$seneca-color-danger:        #e11d48;
-$seneca-color-danger-soft:   #fff1f2;
+// Terracotta, the same as money down: the rose it replaced was the one colour outside the palette.
+$seneca-color-danger:        #b4493f;
+$seneca-color-danger-soft:   #f8ebe7;
 $seneca-color-info:          #0ea5e9;
 $seneca-color-info-soft:     #f0f9ff;
 // Money up/down on the dashboard: earthy rather than neon, both ≥4.5:1 on white.
@@ -81,7 +82,7 @@ $seneca-color-bg:              #ebe7df;
 $seneca-color-surface:         #f3f0ea;
 $seneca-color-surface-muted:   #e7e2d9;
 $seneca-color-surface-warning: #fffbeb;
-$seneca-color-surface-error:   #fff1f2;
+$seneca-color-surface-error:   #f8ebe7;
 
 // ── Text ──────────────────────────────────────────────────────
 $seneca-color-text-primary:   #0b0b10;
@@ -178,7 +179,7 @@ $ff-dash-surface:       #f3f0ea;
 $ff-dash-foreground:    #0b0b10;
 $ff-dash-muted:         #e7e2d9;
 $ff-dash-border:        #e1dbd1;
-$ff-dash-critical:      #e11d48;
+$ff-dash-critical:      #b4493f;
 $ff-dash-warning:       #f59e0b;
 $ff-dash-info:          #0ea5e9;
 $ff-dash-success:       #10b981;

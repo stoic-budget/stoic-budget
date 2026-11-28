@@ -21,6 +21,7 @@ import {
 } from './backup-data.service';
 import { GROUP_KEY_COLUMNS } from './backup-group-keys';
 import { prepareDocumentPaths } from './backup-restore-documents';
+import { UNRESTORABLE_COLLECTIONS } from './unrestorable-collections';
 
 const RESTORE_ORDER = [
   'categories',
@@ -54,23 +55,6 @@ const REMOVED_COLLECTIONS = new Set([
   'ai_chat_messages',
   'transaction_embeddings',
   'user_ai_settings',
-]);
-
-/**
- * Collections that backups made before they were excluded still carry, and
- * that cannot come back: people and per-member rows rather than workspace
- * data (the restore makes its own owner membership, and every member's row
- * would land on the restorer), and share links whose required token the
- * backup stripped.
- */
-const UNRESTORABLE_COLLECTIONS = new Set([
-  'custom_table_shares',
-  // Derived and regenerated; its dedup key is unique per user, so a copy of
-  // the same user's live insights would collide.
-  'insights',
-  'users',
-  'workspace_invitations',
-  'workspace_members',
 ]);
 
 /**

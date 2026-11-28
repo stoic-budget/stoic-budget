@@ -240,6 +240,8 @@ export async function seedWorkspace(
     issueDate: '2026-01-05',
     dueDate: '2026-02-04',
     currency: 'USD',
+    // Repeats, so a route that stops another workspace's series changes a row.
+    recurrenceInterval: 'monthly',
     lineItems: [{ description: `${marker} work`, quantity: 1, unitPrice: 100 }],
   });
   await send('invoice sent', 'put', `/invoices/${invoice.body.id}/send`);

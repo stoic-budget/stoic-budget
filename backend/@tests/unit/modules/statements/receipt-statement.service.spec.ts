@@ -19,6 +19,7 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { TaxAssignmentService } from '@/modules/tax/tax-assignment.service';
+import { WorkspaceCurrencyService } from '@/modules/workspaces/workspace-currency.service';
 
 vi.mock('@/common/utils/file-hash.util');
 vi.mock('@/common/utils/file-validator.util');
@@ -83,6 +84,11 @@ describe('ReceiptStatementService', () => {
           },
         },
         { provide: TaxAssignmentService, useValue: { resolve: vi.fn(async () => ({ taxRateId: null, taxRuleId: null, taxSource: null, taxAmount: null, taxNetAmount: null, taxReverseCharge: false })) } },
+        {
+          provide: WorkspaceCurrencyService,
+          // The workspace keeps its books in EUR; a receipt's own currency wins.
+          useValue: { resolveFor: vi.fn(async (_workspace: string, own?: string | null) => own || 'EUR') },
+        },
         {
           provide: AuditService,
           useValue: {
@@ -227,6 +233,40 @@ describe('ReceiptStatementService', () => {
       statementId: 'stmt-ocr-1',
     });
     expect(result).toEqual([expect.objectContaining({ id: 'stmt-ocr-1' })]);
+  });
+
+  it("books a receipt with no currency on it in the workspace's currency (#685)", async () => {
+    const file = {
+      path: '/tmp/receipt.jpg',
+      originalname: 'receipt.jpg',
+      mimetype: 'image/jpeg',
+      size: 1024,
+    } as Express.Multer.File;
+    vi.spyOn(statementRepository, 'create').mockImplementation((input: any) => input);
+    vi
+      .spyOn(statementRepository, 'save')
+      .mockImplementation(async (input: any) => ({ id: 'stmt-ocr-2', ...input }));
+    vi.spyOn(statementRepository, 'update').mockResolvedValue({ affected: 1 } as any);
+    vi.spyOn(transactionRepository, 'create').mockImplementation((input: any) => input);
+    vi
+      .spyOn(transactionRepository, 'save')
+      .mockImplementation(async (input: any) => ({ id: 'tx-ocr-2', ...input }));
+    vi.spyOn(receiptsService, 'createFromScan').mockResolvedValue({
+      id: 'receipt-2',
+      status: ReceiptStatus.DRAFT,
+      subject: 'receipt.jpg',
+      parsedData: { amount: 12, vendor: 'ACME Store', date: '2026-03-27', validationIssues: [] },
+      extractionMethod: 'ocr_hybrid',
+      metadata: {},
+    } as any);
+
+    await service.createFromReceiptScan({ user: mockUser as User, workspaceId: 'ws-1', files: [file] });
+
+    expect(transactionRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 12, currency: 'EUR' }),
+    );
+    // The workspace the scan was made in, not any other.
+    expect(testingModule.get(WorkspaceCurrencyService).resolveFor).toHaveBeenCalledWith('ws-1', undefined);
   });
 
   it('leaves the scan uncategorised when the receipt names no category', async () => {

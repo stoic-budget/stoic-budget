@@ -83,6 +83,8 @@ export const ACCOUNTING_ERRORS = {
   PAYABLE_LOAN_PAID_FROM_ITSELF: 'A loan payment cannot come from the loan account itself',
   PAYABLE_LOAN_MANAGED:
     'This bill is a loan payment: it repeats as the loan schedule does; change the loan terms instead',
+  PAYABLE_NOT_LATE: 'This bill was not paid late, so it takes no reason for being late',
+  PAYABLE_LATE_REASON_PAYABLES_ONLY: 'Only a bill to pay takes a reason for being late',
   PAYABLE_OCCURRENCE_SETTLED:
     'This payment is already paid, skipped or partly paid; change it as a whole bill instead',
   PAYABLE_RECURRENCE_NEVER_FIRES: 'This repeat rule has no date on or after its start',
@@ -92,7 +94,8 @@ export const ACCOUNTING_ERRORS = {
   INVOICE_NOT_DRAFT: 'Only a draft invoice can be edited',
   INVOICE_ALREADY_SENT: 'This invoice was already sent',
   INVOICE_ZERO_TOTAL: 'An invoice with no line items cannot be sent',
-  INVOICE_NOT_VOIDABLE: 'A paid invoice cannot be voided',
+  INVOICE_NOT_VOIDABLE:
+    'An invoice with a payment or a credit note cannot be voided: remove the payment or void the credit note first',
   INVOICE_CLIENT_NOT_FOUND: 'Client not found in this workspace',
   INVOICE_PROFILE_INCOMPLETE:
     'Fill in your business details before sending an invoice (missing: {{fields}})',
@@ -122,6 +125,8 @@ export const ACCOUNTING_ERRORS = {
     'Invoice {{number}} has only {{creditable}} left that can be credited',
   CREDIT_NOTE_MIXED_CLIENTS: 'One credit note covers the invoices of one client',
   CREDIT_NOTE_MIXED_CURRENCIES: 'One credit note covers invoices in one currency',
+  CREDIT_NOTE_MIXED_TAX_MODES:
+    'One credit note covers invoices priced the same way: all with tax included or all without',
   CREDIT_NOTE_ZERO_TOTAL: 'A credit note must credit more than zero',
   CREDIT_NOTE_ALREADY_VOID: 'This credit note is already void',
   // ── tax ─────────────────────────────────────────────────────────────────
@@ -156,6 +161,8 @@ export const ACCOUNTING_ERRORS = {
     'This workspace has no tax jurisdiction. Pick a country before building a return.',
   TAX_RETURN_PERIOD_INVALID: 'Period end must not be before period start',
   TAX_RETURN_ALREADY_FILED: 'This period has already been filed',
+  TAX_RETURN_PERIOD_OVERLAPS:
+    'A filed return already covers part of this period ({{start}} – {{end}}). Reopen it, or file the days it leaves out.',
   TAX_RETURN_NOT_FILED: 'This period is not filed',
   TAX_RATE_NAME_REQUIRED: 'Tax rate name is required',
   TAX_RATE_NAME_TAKEN: 'Tax rate with this name already exists',

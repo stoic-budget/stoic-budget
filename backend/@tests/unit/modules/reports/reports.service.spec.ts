@@ -51,6 +51,7 @@ describe('ReportsService (helpers)', () => {
       select: vi.fn().mockReturnThis(),
       addSelect: vi.fn().mockReturnThis(),
       groupBy: vi.fn().mockReturnThis(),
+      addGroupBy: vi.fn().mockReturnThis(),
       orderBy: vi.fn().mockReturnThis(),
       getRawMany: vi.fn(async () => [
         { period: '2025-01-01', income: '100', expense: '0', count: '1' },
@@ -85,7 +86,8 @@ describe('ReportsService (helpers)', () => {
     expect(result.totals.expense).toBe(20);
     expect(result.totals.net).toBe(80);
     expect(result.totals.count).toBe(2);
-    expect(result.totals.avgPerPeriod).toBeCloseTo(80 / 3, 5);
+    // To the cent, as every figure of a report in the workspace currency (#598).
+    expect(result.totals.avgPerPeriod).toBe(26.67);
   });
 
   it('getSpendOverTimeReport supports quarterly grouping', async () => {
@@ -98,6 +100,7 @@ describe('ReportsService (helpers)', () => {
       select: vi.fn().mockReturnThis(),
       addSelect: vi.fn().mockReturnThis(),
       groupBy: vi.fn().mockReturnThis(),
+      addGroupBy: vi.fn().mockReturnThis(),
       orderBy: vi.fn().mockReturnThis(),
       getRawMany: vi.fn(async () => [
         { period: '2025-Q1', income: '100', expense: '40', count: '2' },
@@ -143,6 +146,7 @@ describe('ReportsService (helpers)', () => {
       select: vi.fn().mockReturnThis(),
       addSelect: vi.fn().mockReturnThis(),
       groupBy: vi.fn().mockReturnThis(),
+      addGroupBy: vi.fn().mockReturnThis(),
       orderBy: vi.fn().mockReturnThis(),
       getRawMany: vi.fn(async () => [
         { period: '2025', income: '250', expense: '150', count: '3' },

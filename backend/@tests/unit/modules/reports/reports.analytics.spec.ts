@@ -23,14 +23,18 @@ function topCategoriesService(rows: any[]) {
   return { service, qb };
 }
 
-function spendService(rows: Array<{ period: string; income: string; expense: string; count: string }>) {
+function spendService(
+  rows: Array<{ period: string; income: string; expense: string; count: string; currency?: string; day?: string }>,
+  exchangeRatesService?: unknown,
+) {
   const qb: any = {};
-  for (const method of ['where', 'andWhere', 'leftJoin', 'select', 'addSelect', 'groupBy', 'orderBy']) {
+  for (const method of ['where', 'andWhere', 'leftJoin', 'select', 'addSelect', 'groupBy', 'addGroupBy', 'orderBy']) {
     qb[method] = vi.fn().mockReturnValue(qb);
   }
   qb.getRawMany = vi.fn().mockResolvedValue(rows);
   return buildReportsService({
     transactionRepository: { createQueryBuilder: vi.fn().mockReturnValue(qb) },
+    ...(exchangeRatesService ? { exchangeRatesService } : {}),
   });
 }
 
@@ -124,7 +128,7 @@ describe('ReportsService — top categories', () => {
     expect(result.period).toEqual({ from: '2026-09-01', to: '2026-09-30' });
   });
 
-  it('cuts every list to the limit and reads at most 5000 rows', async () => {
+  it('cuts every list to the limit and reads every row of the period (#598)', async () => {
     const { service, qb } = topCategoriesService(rows);
 
     const result = await service.getTopCategoriesReport(WS_ID, { limit: 1 } as any);
@@ -132,7 +136,7 @@ describe('ReportsService — top categories', () => {
     expect(result.categories).toHaveLength(1);
     expect(result.banks).toHaveLength(1);
     expect(result.counterparties).toHaveLength(1);
-    expect(qb.take).toHaveBeenCalledWith(5000);
+    expect(qb.take).not.toHaveBeenCalled();
   });
 
   it('keeps 20 lines when the limit is 0', async () => {
@@ -157,6 +161,54 @@ describe('ReportsService — top categories', () => {
     const result = await service.getTopCategoriesReport(WS_ID, { dateTo: '2026-09-30' } as any);
 
     expect(result.period).toEqual({ from: '2026-08-31', to: '2026-09-30' });
+  });
+});
+
+describe('ReportsService — reports in the workspace currency (#598)', () => {
+  // The workspace is in EUR; 1 USD = 0.90 EUR; no rate for XAU.
+  const rates = { getRateOrNull: vi.fn(async (from: string) => (from === 'USD' ? 0.9 : null)) };
+
+  it('converts spend over time per currency and day before adding a period up', async () => {
+    const service = spendService(
+      [
+        { period: '2025-01', income: '0', expense: '100', count: '1', currency: 'USD', day: '2025-01-10' },
+        { period: '2025-01', income: '0', expense: '100', count: '1', currency: 'EUR', day: '2025-01-11' },
+        { period: '2025-01', income: '0', expense: '50', count: '1', currency: 'XAU', day: '2025-01-12' },
+      ],
+      rates,
+    );
+
+    const result = await service.getSpendOverTimeReport(WS_ID, {
+      groupBy: 'month',
+      dateFrom: '2025-01-01',
+      dateTo: '2025-01-31',
+    } as any);
+
+    expect(result.points[0].expense).toBe(190);
+    expect(result.points[0].count).toBe(3);
+    expect([result.currency, result.missingRates]).toEqual(['EUR', ['XAU']]);
+  });
+
+  it('converts the statements summary and the top categories', async () => {
+    const day = new Date('2025-01-10');
+    const row = (id: string, currency: string) => ({
+      id, amount: 100, currency, transactionType: TransactionType.EXPENSE, transactionDate: day,
+      updatedAt: day, createdAt: day, counterpartyName: 'ACME Store', category: { name: 'Shopping' }, categoryId: 'cat-shop',
+    });
+    const qb: any = {};
+    for (const method of ['leftJoinAndSelect', 'where', 'andWhere', 'orderBy', 'take']) qb[method] = vi.fn().mockReturnValue(qb);
+    qb.getMany = vi.fn(async () => [row('1', 'USD'), row('2', 'EUR')]);
+    const service = buildReportsService({
+      transactionRepository: { createQueryBuilder: vi.fn().mockReturnValue(qb) },
+      exchangeRatesService: rates,
+    });
+
+    const summary = await service.getStatementsSummary(WS_ID, 30);
+    const top = await service.getTopCategoriesReport(WS_ID, {} as any);
+
+    expect(summary.totals.expense).toBe(190);
+    expect(top.totals.expense).toBe(190);
+    expect([summary.currency, top.currency]).toEqual(['EUR', 'EUR']);
   });
 });
 

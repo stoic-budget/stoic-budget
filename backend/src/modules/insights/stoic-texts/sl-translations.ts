@@ -1178,4 +1178,85 @@ export const sl: StoicTextMap = {
       message: '{{percent}} % in brez roka. Vedite, kam plujete, in mesečni korak sledi sam.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Dvakrat pozabiti je že navada',
+      message:
+        '{{count}} računov v zadnjega pol leta je bilo plačanih pozno, ker so bili pozabljeni. Spomin ni načrt: naj opomnik pride prej, dokler je še čas za ukrepanje.',
+    },
+    {
+      title: 'Račun vas ni pozabil',
+      message:
+        '{{count}} računov je zadnjega pol leta čakalo, da se jih kdo spomni. Česar spomin ne nosi, nosi opomnik: dajte mu še nekaj dni.',
+    },
+    {
+      title: 'Naj si zapomni opomnik',
+      message:
+        'Pozabljeno {{count}}-krat v pol leta. Um je za presojanje, ne za hranjenje datumov: naj opomnik pride pravočasno.',
+    },
+    {
+      title: 'Majhna dolžnost, pogosto spregledana',
+      message:
+        '{{count}} zamujenih računov, vsak preprosto pozabljen. Mir se začne z redom v malenkostih, zgodnejši opomnik pa nič ne stane.',
+    },
+    {
+      title: 'Pozabljanje ima vzorec',
+      message:
+        'V pol leta je {{count}} računov neopazno prešlo rok. Seneka je vsak večer pregledal svoj dan; opomnik nekaj dni prej to stori namesto vas.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Plača pride po računu',
+      message:
+        '{{count}}-krat v pol leta denarja še ni bilo, ko je račun zapadel. Prestavite datum za dan plače ali prihranite eno plačilo: kar je pripravljeno, ne priganja.',
+    },
+    {
+      title: 'Denar pride po roku',
+      message:
+        '{{count}}-krat v pol leta je račun prišel pred prihodkom. Postavite datum tja, kjer denar že je, in račun preneha pritiskati.',
+    },
+    {
+      title: 'Eno plačilo vnaprej',
+      message:
+        '{{count}} zamujenih računov je v pol leta čakalo na plačo. Odložite eno plačilo in koledar izgubi moč nad vami.',
+    },
+    {
+      title: 'Uredite datume, ne skrbi',
+      message:
+        '{{count}}-krat v pol leta ni bilo dovolj do plače. Zdravilo ni skrb, ampak red: račun po prihodku ali rezerva pred njim.',
+    },
+    {
+      title: 'Pripravljeno ne priganja',
+      message:
+        '{{count}}-krat je račun zapadel, preden je prišel denar. Kar je pripravljeno vnaprej, sprejmemo mirno: odložite eno plačilo ali premaknite datum.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Nepričakovano se vrača',
+      message:
+        '{{count}} zamud v pol leta je sledilo nepredvidenemu izdatku. Modremu se nič ne zgodi proti njegovemu pričakovanju, piše Seneka. Rezerva za nepredvideno je cilj, vreden postavitve.',
+    },
+    {
+      title: 'Pričakujte nepričakovano',
+      message:
+        '{{count}} zamujenih računov v pol leta je sledilo izdatku, ki ga niste predvideli. Stoiki so si nesrečo zamišljali vnaprej; rezerva je ta vaja v denarju.',
+    },
+    {
+      title: 'Blazina za nepredvideno',
+      message:
+        'V pol leta je {{count}} računov čakalo za presenetljivim izdatkom. Majhna rezerva spremeni naslednje presenečenje v nevšečnost, ne v zamudo.',
+    },
+    {
+      title: 'Usoda posoja in zahteva nazaj',
+      message:
+        '{{count}}-krat je nepredviden strošek potisnil račun čez rok. Usoda bo spet zahtevala; odložite rezervo, da račun ne bo čakal.',
+    },
+    {
+      title: 'Presenečenja niso redka',
+      message:
+        '{{count}} zamujenih računov je sledilo nečemu nepričakovanemu. Kar se pogosto zgodi, ni zares nepričakovano: cilj rezerve mu naredi prostor.',
+    },
+  ],
 };

@@ -211,6 +211,8 @@ export function payableRow(overrides: Partial<Payable> & Pick<Payable, 'id' | 'v
     remindDaysBefore: 3,
     comment: null,
     loanWalletId: null,
+    lateReason: null,
+    lateReasonNote: null,
     statementId: null,
     paidAt: null,
     dueSoonNotifiedAt: null,

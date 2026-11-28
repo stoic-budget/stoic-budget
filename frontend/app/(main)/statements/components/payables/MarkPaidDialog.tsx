@@ -13,41 +13,31 @@ import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { formatMoney } from '@/app/lib/format-money';
-import {
-  type AddPayablePaymentInput,
-  type BookPayablePaymentInput,
-  type MarkPayablePaidInput,
-  type Payable,
-  type PayablePayment,
-  payablesApi,
-} from '@/app/lib/payables-api';
+import type { LateReason } from '@/app/lib/late-reasons-api';
+import { type Payable, type PayablePayment, payablesApi } from '@/app/lib/payables-api';
 import { queryKeys } from '@/app/lib/query-keys';
 import { useCashPaymentOptions } from './hooks/useCashPaymentOptions';
 import { usePayableMatchRejection } from './hooks/usePayableMatchRejection';
+import { LateReasonPicker } from './LateReasonPicker';
+import { paidLate } from './late-reason-utils';
 import {
   AmountFields,
   type AmountState,
   CandidateList,
   CashFields,
-  type CashState,
-  cashSource,
   IN_HAND,
   PaymentLog,
   today,
 } from './MarkPaidFields';
+import {
+  buildBooking,
+  buildResult,
+  type CashState,
+  type MarkPaidResult,
+  type Mode,
+} from './mark-paid-result';
 
-type Mode = 'match' | 'cash' | 'plain';
-
-/**
- * Settling in full keeps going through `mark-paid` — it guards against a
- * second payment and notifies the workspace. Anything else is one payment
- * among several.
- */
-export type MarkPaidResult =
-  | { kind: 'full'; payload: MarkPayablePaidInput }
-  | { kind: 'payment'; payload: AddPayablePaymentInput }
-  /** The money of a payment recorded without it: where it went. */
-  | { kind: 'book'; paymentId: string; payload: BookPayablePaymentInput };
+export type { MarkPaidResult } from './mark-paid-result';
 
 type MarkPaidDialogProps = {
   /** The bill being settled; the dialog is closed while null. */
@@ -97,88 +87,6 @@ function usePaymentOptions(payable: Payable) {
   };
 }
 
-function buildResult(
-  mode: Mode,
-  selected: {
-    transactionId: string | null;
-    cash: CashState;
-    amount: AmountState;
-    outstanding: number;
-  },
-): MarkPaidResult | null {
-  const amount = Math.round(Number(selected.amount.amount) * 100) / 100;
-  const fee = Math.round(Number(selected.amount.feeAmount || 0) * 100) / 100;
-  if (!Number.isFinite(amount) || amount <= 0 || amount > selected.outstanding + 0.005) {
-    return null;
-  }
-  const settlesInFull = amount >= selected.outstanding - 0.005 && fee <= 0;
-
-  if (mode === 'match') {
-    if (!selected.transactionId) {
-      return null;
-    }
-    return settlesInFull
-      ? { kind: 'full', payload: { linkedTransactionId: selected.transactionId } }
-      : {
-          kind: 'payment',
-          payload: {
-            amount,
-            feeAmount: fee || undefined,
-            linkedTransactionId: selected.transactionId,
-          },
-        };
-  }
-  if (mode === 'cash') {
-    const { walletId, paidOn, categoryId } = selected.cash;
-    if (!walletId) {
-      return null;
-    }
-    const source = cashSource(walletId);
-    return settlesInFull
-      ? {
-          kind: 'full',
-          payload: { ...source, paidOn, categoryId: categoryId || undefined },
-        }
-      : {
-          kind: 'payment',
-          payload: {
-            amount,
-            feeAmount: fee || undefined,
-            paidOn,
-            ...source,
-            categoryId: categoryId || undefined,
-          },
-        };
-  }
-  return settlesInFull
-    ? { kind: 'full', payload: {} }
-    : { kind: 'payment', payload: { amount, feeAmount: fee || undefined } };
-}
-
-/** For a payment recorded without money: the bank row or the wallet it went into. */
-function buildBooking(
-  mode: Mode,
-  paymentId: string,
-  selected: { transactionId: string | null; cash: CashState },
-): MarkPaidResult | null {
-  if (mode === 'match') {
-    return selected.transactionId
-      ? { kind: 'book', paymentId, payload: { linkedTransactionId: selected.transactionId } }
-      : null;
-  }
-  if (mode === 'cash' && selected.cash.walletId) {
-    return {
-      kind: 'book',
-      paymentId,
-      payload: {
-        ...cashSource(selected.cash.walletId),
-        categoryId: selected.cash.categoryId || undefined,
-      },
-    };
-  }
-  return null;
-}
-
 function MarkPaidForm({
   payable,
   submitting,
@@ -197,6 +105,7 @@ function MarkPaidForm({
   const rejection = usePayableMatchRejection(payable.id);
   const [cash, setCash] = useState<CashState>({ walletId: null, paidOn: today(), categoryId: '' });
   const [amount, setAmount] = useState<AmountState | null>(null);
+  const [lateReason, setLateReason] = useState<LateReason | null>(null);
 
   const total = Number(payable.amount);
   const paidSoFar = Math.round(Number(payable.paidAmount ?? 0) * 100) / 100;
@@ -223,6 +132,17 @@ function MarkPaidForm({
     options.candidates.find(candidate => candidate.id === payable.linkedTransactionId)?.id ??
     options.candidates[0]?.id ??
     null;
+  // Paid after its due date, by the day the payment carries: the dialog asks why.
+  // Booking keeps the day already recorded; it only says where the money went.
+  const paidOn = unbooked
+    ? unbooked.paidOn
+    : mode === 'cash'
+      ? selectedCash.paidOn
+      : mode === 'match'
+        ? options.candidates.find(c => c.id === (transactionId ?? defaultTransaction))
+            ?.transactionDate
+        : today();
+  const late = paidLate(payable, paidOn);
   const result = unbooked
     ? buildBooking(mode, unbooked.id, {
         transactionId: transactionId ?? defaultTransaction,
@@ -238,7 +158,9 @@ function MarkPaidForm({
   return (
     <ModalShell
       isOpen
-      onClose={onClose}
+      // While a payment is saving, closing would lose sight of it: X, Escape
+      // and the backdrop wait like Cancel does.
+      onClose={submitting ? () => undefined : onClose}
       size="sm"
       title={payable.direction === 'receivable' ? t.titleReceived.value : t.titlePaid.value}
       footer={
@@ -247,7 +169,9 @@ function MarkPaidForm({
             {t.cancel.value}
           </Button>
           <Button
-            onClick={() => result && onConfirm(payable, result)}
+            onClick={() =>
+              result && onConfirm(payable, late && lateReason ? { ...result, lateReason } : result)
+            }
             disabled={!result || submitting}
           >
             {t.confirm.value}
@@ -266,6 +190,7 @@ function MarkPaidForm({
           currency={options.currency}
           locale={locale}
           removingId={removingPaymentId ?? null}
+          busy={submitting}
           onRemove={paymentId => onRemovePayment(payable, paymentId)}
         />
 
@@ -326,6 +251,7 @@ function MarkPaidForm({
           />
         )}
         {mode === 'plain' && <Alert severity="warning">{t.plainHint.value}</Alert>}
+        {late && <LateReasonPicker value={lateReason} onChange={setLateReason} />}
       </Box>
     </ModalShell>
   );

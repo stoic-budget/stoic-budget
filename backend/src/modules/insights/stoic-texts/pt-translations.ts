@@ -1184,4 +1184,85 @@ export const pt: StoicTextMap = {
         'Em {{percent}}%, sem prazo. Saiba para onde navega, e o passo mensal vem em seguida.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Esquecer duas vezes é um hábito',
+      message:
+        '{{count}} contas do último semestre foram pagas com atraso por esquecimento. Memória não é plano: faça o lembrete chegar antes, enquanto ainda há tempo para agir.',
+    },
+    {
+      title: 'A conta não se esqueceu de você',
+      message:
+        '{{count}} contas esperaram no último meio ano até alguém se lembrar delas. O que a mente não guarda, um lembrete guarda: dê-lhe mais alguns dias.',
+    },
+    {
+      title: 'Deixe o lembrete lembrar',
+      message:
+        'Esquecido {{count}} vezes em meio ano. A mente serve para julgar, não para guardar datas: que o lembrete chegue a tempo de agir.',
+    },
+    {
+      title: 'Um pequeno dever, muitas vezes perdido',
+      message:
+        '{{count}} contas atrasadas, cada uma simplesmente esquecida. A calma começa pela ordem nas pequenas coisas, e um lembrete mais cedo não custa nada.',
+    },
+    {
+      title: 'O esquecimento tem um padrão',
+      message:
+        'Em meio ano, {{count}} contas passaram da data sem ninguém notar. Sêneca revia seu dia todas as noites; um lembrete alguns dias antes faz esse trabalho por você.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'O salário chega depois da conta',
+      message:
+        '{{count}} vezes em seis meses o dinheiro ainda não estava lá no vencimento. Mude a data para depois do salário ou guarde um pagamento à parte: o que está preparado não apressa.',
+    },
+    {
+      title: 'O dinheiro chega depois da data',
+      message:
+        '{{count}} vezes em meio ano a conta veio antes da renda. Ponha a data onde o dinheiro já está, e a conta deixa de pressionar.',
+    },
+    {
+      title: 'Um pagamento à frente',
+      message:
+        '{{count}} contas atrasadas esperaram o dia do salário em meio ano. Guarde um pagamento, e o calendário perde o poder sobre você.',
+    },
+    {
+      title: 'Ordene as datas, não a preocupação',
+      message:
+        '{{count}} vezes em meio ano faltou dinheiro antes do salário. O remédio não é mais preocupação, mas melhor ordem: a conta depois da renda, ou uma reserva antes.',
+    },
+    {
+      title: 'O que está preparado não apressa',
+      message:
+        '{{count}} vezes uma conta venceu antes do dinheiro chegar. O que é preparado com antecedência é recebido com calma: guarde um pagamento ou mude a data.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'O inesperado volta',
+      message:
+        '{{count}} atrasos em seis meses vieram depois de uma despesa imprevista. Nada acontece ao sábio contra a sua expectativa, escreve Sêneca. Uma reserva para o imprevisto é uma meta que vale a pena.',
+    },
+    {
+      title: 'Espere o inesperado',
+      message:
+        '{{count}} contas atrasadas em meio ano vieram depois de um gasto que você não previu. Os estoicos ensaiavam o infortúnio para não serem surpreendidos; uma reserva é esse ensaio em dinheiro.',
+    },
+    {
+      title: 'Uma almofada para o imprevisto',
+      message:
+        'Em meio ano, {{count}} contas esperaram por trás de um gasto surpresa. Uma pequena reserva transforma a próxima surpresa num incômodo, não num atraso.',
+    },
+    {
+      title: 'A fortuna empresta e pede de volta',
+      message:
+        '{{count}} vezes um custo imprevisto empurrou uma conta para depois da data. A fortuna pedirá de novo; guarde uma reserva para que a conta não precise esperar.',
+    },
+    {
+      title: 'Surpresas não são raras',
+      message:
+        '{{count}} contas atrasadas seguiram algo inesperado. O que acontece com frequência não é de fato inesperado: uma meta de reserva abre espaço para isso.',
+    },
+  ],
 };
