@@ -686,7 +686,8 @@ describe('TaxAssignmentService', () => {
       expect(changed).toBe(1);
       expect(transactionRepo.update).toHaveBeenCalledTimes(1);
       expect(transactionRepo.update).toHaveBeenCalledWith(
-        { id: 'tx-new', workspaceId: 'ws-1', taxLocked: false },
+        // Only while the row still has what the figures came from.
+        expect.objectContaining({ id: 'tx-new', workspaceId: 'ws-1', taxLocked: false, categoryId: 'cat-1' }),
         expect.objectContaining({ taxRateId: 'rate-standard', taxAmount: 12, taxNetAmount: 100 }),
       );
     });

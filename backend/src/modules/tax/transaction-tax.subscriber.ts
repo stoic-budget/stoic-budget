@@ -1,9 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import type { DataSource, EntitySubscriberInterface, UpdateEvent } from 'typeorm';
+import type {
+  DataSource,
+  EntitySubscriberInterface,
+  InsertEvent,
+  QueryRunner,
+  TransactionCommitEvent,
+  TransactionRollbackEvent,
+  UpdateEvent,
+} from 'typeorm';
 import { Transaction } from '../../entities/transaction.entity';
 import { toDateOnly } from './jurisdictions.service';
 import { applyAssignment, assignmentInputOf, TaxAssignmentService } from './tax-assignment.service';
+
+/** How deep in nested transactions (savepoints) the runner is; TypeORM keeps it, untyped. */
+const depthOf = (runner: QueryRunner): number =>
+  (runner as unknown as { transactionDepth?: number }).transactionDepth ?? 0;
 
 /** What the tax on a row depends on. */
 const TAX_INPUTS = [
@@ -43,7 +55,7 @@ function changed(entity: Transaction, before: Transaction, field: keyof Transact
  * row from "Groceries" to "Office supplies" kept the rate of the old category,
  * and the return carried the stale figure.
  *
- * Only `save()` reaches a subscriber; paths that write with `update()` call
+ * Only `save()` and `insert()` reach a subscriber; paths that write with `update()` call
  * `TaxAssignmentService.reassess` themselves. Rows in a filed return are left
  * alone — the edit guard refuses those changes before they get here.
  */
@@ -58,6 +70,92 @@ export class TransactionTaxSubscriber implements EntitySubscriberInterface<Trans
 
   listenTo() {
     return Transaction;
+  }
+
+  /** New rows created without their tax, and the inserts' query runners waiting to commit. */
+  private readonly needsTax = new WeakSet<object>();
+  private readonly pending = new WeakMap<
+    QueryRunner,
+    Array<{ workspaceId: string; id: string; depth: number }>
+  >();
+  private readonly logger = new Logger(TransactionTaxSubscriber.name);
+
+  /**
+   * A row created without its tax (a payment recorded from a wallet, an
+   * approved receipt, a file import) is assessed once its insert commits. A
+   * creator that assessed it set the tax fields and is left alone, as is loan
+   * interest, which counts only with its payment. Assessed afterwards, on its
+   * own connection: resolving inside the insert would hold one connection and
+   * wait for another, and a burst of such inserts could exhaust the pool.
+   */
+  beforeInsert(event: InsertEvent<Transaction>): void {
+    const entity = event.entity as Transaction | undefined;
+    if (!entity?.workspaceId || entity.taxLocked || entity.loanInterestOfId) {
+      return;
+    }
+    if (TAX_OUTPUTS.some(field => entity[field] !== undefined)) {
+      return;
+    }
+    this.needsTax.add(entity);
+  }
+
+  afterInsert(event: InsertEvent<Transaction>): void {
+    const entity = event.entity as Transaction | undefined;
+    if (!(entity?.id && this.needsTax.has(entity))) {
+      return;
+    }
+    const runner = event.queryRunner;
+    const rows = this.pending.get(runner) ?? [];
+    rows.push({ workspaceId: entity.workspaceId, id: entity.id, depth: depthOf(runner) });
+    this.pending.set(runner, rows);
+    if (!runner.isTransactionActive) {
+      this.assessLater(runner);
+    }
+  }
+
+  afterTransactionCommit(event: TransactionCommitEvent): void {
+    // A released savepoint is not the commit: wait for the outermost one.
+    if (!event.queryRunner.isTransactionActive) {
+      this.assessLater(event.queryRunner);
+    }
+  }
+
+  afterTransactionRollback(event: TransactionRollbackEvent): void {
+    const runner = event.queryRunner;
+    // A rolled-back savepoint drops only the rows inserted inside it.
+    const kept = runner.isTransactionActive
+      ? (this.pending.get(runner) ?? []).filter(row => row.depth <= depthOf(runner))
+      : [];
+    if (kept.length > 0) {
+      this.pending.set(runner, kept);
+    } else {
+      this.pending.delete(runner);
+    }
+  }
+
+  private assessLater(runner: QueryRunner): void {
+    const rows = this.pending.get(runner);
+    this.pending.delete(runner);
+    if (!rows?.length) {
+      return;
+    }
+    const byWorkspace = new Map<string, string[]>();
+    for (const row of rows) {
+      byWorkspace.set(row.workspaceId, [...(byWorkspace.get(row.workspaceId) ?? []), row.id]);
+    }
+    setImmediate(() => {
+      for (const [workspaceId, all] of byWorkspace) {
+        // In parts: one query takes at most 65,535 parameters.
+        for (let start = 0; start < all.length; start += 1000) {
+          const ids = all.slice(start, start + 1000);
+          this.taxAssignmentService.reassess(workspaceId, { ids }).catch((error: unknown) => {
+            this.logger.warn(
+              `Could not assess the tax of ${ids.length} new row(s): ${error instanceof Error ? error.message : String(error)}`,
+            );
+          });
+        }
+      }
+    });
   }
 
   async beforeUpdate(event: UpdateEvent<Transaction>): Promise<void> {

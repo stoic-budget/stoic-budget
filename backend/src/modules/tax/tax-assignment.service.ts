@@ -12,6 +12,7 @@ import { isOutsideVat } from './outside-vat';
 import { computeTax } from './tax-calculation';
 import { taxPaymentsCategoryId } from './tax-payments-category';
 import { TaxRatesService } from './tax-rates.service';
+import { writeAssignment } from './write-assignment';
 
 /**
  * Operation kinds that are outside the scope of VAT everywhere we support.
@@ -368,18 +369,7 @@ export class TaxAssignmentService {
         if (hasAssignment(row, assignment)) {
           continue;
         }
-        await this.transactionRepository.update(
-          { id: row.id, workspaceId, taxLocked: false },
-          {
-            taxRateId: assignment.taxRateId,
-            taxRuleId: assignment.taxRuleId,
-            taxSource: assignment.taxSource,
-            taxAmount: assignment.taxAmount,
-            taxNetAmount: assignment.taxNetAmount,
-            taxReverseCharge: assignment.taxReverseCharge,
-            taxNotionalAmount: assignment.taxNotionalAmount,
-          },
-        );
+        await writeAssignment(this.transactionRepository, row, assignment);
         changed++;
       }
       if (rows.length < BATCH) {

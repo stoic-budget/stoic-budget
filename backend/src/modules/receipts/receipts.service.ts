@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
-import * as path from 'node:path';
 import {
   BadRequestException,
   ConflictException,
@@ -53,6 +52,7 @@ import {
   type ReceiptWithCategory,
 } from './helpers/attach-receipt-categories';
 import { attachTarget } from './helpers/attach-target';
+import { copyFileToTransaction } from './receipt-file-copy';
 import { ReceiptProcessorService } from './services/receipt-processor.service';
 import { trashScanStatement } from './trash-scan-statement';
 
@@ -61,19 +61,6 @@ export interface ApproveReceiptOptions {
   attachTo?: string | null;
   /** Who approved; needed to record the copied file attachment. */
   userId?: string;
-}
-
-const MIME_BY_EXTENSION: Record<string, string> = {
-  '.pdf': 'application/pdf',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.webp': 'image/webp',
-  '.heic': 'image/heic',
-};
-
-function mimeTypeOf(fileName: string): string {
-  return MIME_BY_EXTENSION[path.extname(fileName).toLowerCase()] ?? 'application/octet-stream';
 }
 
 type UploadParams = {
@@ -737,7 +724,15 @@ export class ReceiptsService {
     });
 
     if (result?.attached) {
-      await this.copyFileToTransaction(result.receipt, result.transaction.id, options.userId);
+      await copyFileToTransaction(
+        this.attachmentsService,
+        this.logger,
+        result.receipt,
+        result.transaction.id,
+        options.userId,
+      );
+      // Attaching wrote the row with update(): the tax subscriber did not see its new category.
+      await this.taxAssignmentService?.reassess(workspaceId, { ids: [result.transaction.id] });
     }
 
     if (result?.mode) {
@@ -1066,33 +1061,6 @@ export class ReceiptsService {
    * The receipt image goes onto the bank row as an attachment, so it is found
    * where the expense is. Best effort: a missing file must not undo an approve.
    */
-  private async copyFileToTransaction(
-    receipt: Receipt,
-    transactionId: string,
-    userId: string | undefined,
-  ): Promise<void> {
-    const filePath = receipt.attachmentPaths?.[0];
-    if (!(filePath && userId && this.attachmentsService)) {
-      return;
-    }
-    try {
-      const buffer = await fs.readFile(filePath);
-      const originalname = path.basename(filePath);
-      await this.attachmentsService.attachFromServer(transactionId, receipt.workspaceId, userId, {
-        originalname,
-        mimetype: mimeTypeOf(originalname),
-        size: buffer.length,
-        buffer,
-      });
-    } catch (error) {
-      this.logger.warn(
-        `Could not attach receipt ${receipt.id} file to transaction ${transactionId}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    }
-  }
-
   private buildTransactionFromReceipt(
     receipt: Receipt,
     workspaceId: string,

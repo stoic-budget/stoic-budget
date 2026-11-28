@@ -16,11 +16,13 @@ import {
 import { ActorType, AuditAction, EntityType } from '../../../../src/entities/audit-event.entity';
 import { AuditService } from '../../../../src/modules/audit/audit.service';
 import { ReceiptsService } from '../../../../src/modules/receipts/receipts.service';
+import { TaxAssignmentService } from '../../../../src/modules/tax/tax-assignment.service';
 import { ReceiptProcessorService } from '../../../../src/modules/receipts/services/receipt-processor.service';
 import { workspaceCurrencyProvider } from '../../../helpers/workspace-currency-stub';
 
 describe('ReceiptsService', () => {
   let service: ReceiptsService;
+  const taxAssignment = { reassess: vi.fn(async () => 1), resolve: vi.fn() };
   let receiptRepository: {
     create: Mock;
     save: Mock;
@@ -144,6 +146,7 @@ describe('ReceiptsService', () => {
         { provide: getRepositoryToken(Category), useValue: categoryRepository },
         { provide: ReceiptProcessorService, useValue: processorService },
         { provide: AuditService, useValue: auditService },
+        { provide: TaxAssignmentService, useValue: taxAssignment },
         {
           provide: EventEmitter2,
           useValue: (mockEventEmitter = { emit: vi.fn(), emitAsync: vi.fn().mockResolvedValue([]) }),
@@ -455,9 +458,6 @@ describe('ReceiptsService', () => {
       transactionId: null,
     });
     transactionRepository.findOne.mockResolvedValue({ id: 'bank-row', workspaceId: 'workspace-1' });
-    vi
-      .spyOn(service as any, 'copyFileToTransaction')
-      .mockResolvedValue(undefined);
 
     await service.approve('receipt-attach', 'workspace-1', 'user-1', { attachTo: 'bank-row' });
 
@@ -470,6 +470,8 @@ describe('ReceiptsService', () => {
       }),
     );
     expect(mockEventEmitter.emit).not.toHaveBeenCalledWith('transaction.created', expect.anything());
+    // The bank row took the receipt's category with update(): its tax is looked at again.
+    expect(taxAssignment.reassess).toHaveBeenCalledWith('workspace-1', { ids: ['bank-row'] });
   });
 
   // Every income and spending figure sums debit and credit: a row with only an
