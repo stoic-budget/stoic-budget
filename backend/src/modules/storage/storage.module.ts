@@ -21,11 +21,13 @@ import { TagsModule } from '../tags/tags.module';
 import { StorageController } from './storage.controller';
 import { StorageService } from './storage.service';
 import { StorageAccessService } from './storage-access.service';
+import { StorageFileActionsService } from './storage-file-actions.service';
 import { StorageFilesQueryService } from './storage-files-query.service';
 import { StorageFoldersService } from './storage-folders.service';
 import { StorageSharingController } from './storage-sharing.controller';
 import { StorageTagsController } from './storage-tags.controller';
 import { StorageTrashScheduler } from './storage-trash.scheduler';
+import { StorageVersionsService } from './storage-versions.service';
 
 /**
  * Storage module for file management, sharing, and permissions
@@ -55,6 +57,8 @@ import { StorageTrashScheduler } from './storage-trash.scheduler';
     StorageAccessService,
     StorageFilesQueryService,
     StorageFoldersService,
+    StorageFileActionsService,
+    StorageVersionsService,
     StorageTrashScheduler,
     FileStorageService,
     MetricsService,

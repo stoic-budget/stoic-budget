@@ -20,9 +20,11 @@ import {
 import { MetricsService } from '@/modules/observability/metrics.service';
 import { StatementsService } from '@/modules/statements/statements.service';
 import { StorageAccessService } from '@/modules/storage/storage-access.service';
+import { StorageFileActionsService } from '@/modules/storage/storage-file-actions.service';
 import { StorageFilesQueryService } from '@/modules/storage/storage-files-query.service';
 import { StorageFoldersService } from '@/modules/storage/storage-folders.service';
 import { StorageService } from '@/modules/storage/storage.service';
+import { StorageVersionsService } from '@/modules/storage/storage-versions.service';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -67,6 +69,8 @@ describe('StorageService', () => {
         StorageAccessService,
         StorageFilesQueryService,
         StorageFoldersService,
+        StorageFileActionsService,
+        StorageVersionsService,
         {
           provide: getRepositoryToken(SharedLink),
           useValue: {

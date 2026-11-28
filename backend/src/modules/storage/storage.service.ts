@@ -3,20 +3,15 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import * as fs from 'fs';
-import { In, IsNull, type Repository } from 'typeorm';
+import { type Repository } from 'typeorm';
 import { toEnum } from '../../common/effect/to-enum';
 import { appError } from '../../common/errors/app-error';
-import { FileStorageService } from '../../common/services/file-storage.service';
 import { hashPassword } from '../../common/utils/password-hash.util';
-import { neutralizeSpreadsheetFormulaCell } from '../../common/utils/spreadsheet-formula.util';
-import { assertRowsRemovable } from '../../common/utils/tax-lock.util';
 import { redactPrivateRows } from '../../common/utils/transaction-privacy.util';
 import type {
   CreateFolderBody,
@@ -28,26 +23,21 @@ import type {
   UpdateSharedLinkBody,
 } from '../../contracts';
 import {
-  Category,
   FilePermission,
   FilePermissionType,
-  FileVersion,
   SharedLink,
   ShareLinkStatus,
   SharePermissionLevel,
   Statement,
-  Tag,
   Transaction,
   WorkspaceMember,
 } from '../../entities';
-import { MetricsService } from '../observability/metrics.service';
-import { StatementsService } from '../statements/statements.service';
 import type { StorageViewFilters } from './interfaces/storage-view-filters.interface';
-import { purgeFromTrash } from './purge-from-trash';
 import { StorageAccessService, type StorageAction } from './storage-access.service';
-import { buildStorageCategoryWhere } from './storage-category-scope.util';
+import { StorageFileActionsService } from './storage-file-actions.service';
 import { StorageFilesQueryService } from './storage-files-query.service';
 import { StorageFoldersService } from './storage-folders.service';
+import { StorageVersionsService } from './storage-versions.service';
 
 type FileAvailability = {
   onDisk: boolean;
@@ -77,23 +67,15 @@ export class StorageService {
     private readonly filePermissionRepository: Repository<FilePermission>,
     @InjectRepository(Statement)
     private readonly statementRepository: Repository<Statement>,
-    @InjectRepository(FileVersion)
-    private readonly fileVersionRepository: Repository<FileVersion>,
-    @InjectRepository(Tag)
-    private readonly tagRepository: Repository<Tag>,
     @InjectRepository(WorkspaceMember)
     private readonly workspaceMemberRepository: Repository<WorkspaceMember>,
-    private readonly fileStorageService: FileStorageService,
-    private readonly statementsService: StatementsService,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
-    @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>,
     private readonly storageAccess: StorageAccessService,
     private readonly storageFilesQuery: StorageFilesQueryService,
     private readonly storageFolders: StorageFoldersService,
-    @Optional()
-    private readonly metricsService?: MetricsService,
+    private readonly storageFileActions: StorageFileActionsService,
+    private readonly storageVersions: StorageVersionsService,
   ) {}
 
   getStorageFiles(userId: string, workspaceId: string, filters?: StorageViewFilters) {
@@ -104,69 +86,12 @@ export class StorageService {
     return this.storageFilesQuery.getFileDetails(statementId, userId);
   }
 
-  /**
-   * Update category for a statement (file)
-   */
-  async updateFileCategory(statementId: string, userId: string, categoryId: string | null) {
-    await this.checkFileAccess(userId, statementId, 'edit');
-
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-      relations: {
-        category: true,
-      },
-    });
-
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-
-    let category: Category | null = null;
-    if (categoryId) {
-      category = await this.categoryRepository.findOne({
-        where: buildStorageCategoryWhere(categoryId, statement.userId, statement.workspaceId),
-      });
-
-      if (!category) {
-        throw new NotFoundException(appError('CATEGORY_NOT_FOUND'));
-      }
-    }
-
-    statement.categoryId = category ? category.id : null;
-    statement.category = category;
-
-    const saved = await this.statementRepository.save(statement);
-
-    // Only what changed: the whole row would hand out the server path and the file hash.
-    return { id: saved.id, categoryId: saved.categoryId, category };
+  updateFileCategory(statementId: string, userId: string, categoryId: string | null) {
+    return this.storageFileActions.updateFileCategory(statementId, userId, categoryId);
   }
 
-  async updateFileTags(statementId: string, userId: string, tagIds: string[]) {
-    await this.checkFileAccess(userId, statementId, 'edit');
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-      relations: {
-        tags: true,
-      },
-    });
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-
-    // Ids from the request: only the file's own workspace's tags exist for it.
-    const uniqueTagIds = [...new Set(tagIds)];
-    const tags = uniqueTagIds.length
-      ? await this.tagRepository.findBy({
-          id: In(uniqueTagIds),
-          workspaceId: statement.workspaceId ?? IsNull(),
-        })
-      : [];
-    if (tags.length !== uniqueTagIds.length) {
-      throw new NotFoundException(appError('STORAGE_TAG_NOT_FOUND'));
-    }
-    statement.tags = tags;
-    const saved = await this.statementRepository.save(statement);
-    return { ...saved, tags };
+  updateFileTags(statementId: string, userId: string, tagIds: string[]) {
+    return this.storageFileActions.updateFileTags(statementId, userId, tagIds);
   }
 
   createFolder(dto: CreateFolderBody, userId: string, workspaceId: string) {
@@ -189,52 +114,16 @@ export class StorageService {
     return this.storageFolders.moveFileToFolder(statementId, userId, folderId);
   }
 
-  async moveFileToTrash(statementId: string, userId: string) {
-    await this.checkFileAccess(userId, statementId, 'edit');
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-    });
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-    if (statement.deletedAt) {
-      return { status: 'already_trashed', deletedAt: statement.deletedAt };
-    }
-    statement.deletedAt = new Date();
-    await this.statementRepository.save(statement);
-    return { status: 'trashed', deletedAt: statement.deletedAt };
+  moveFileToTrash(statementId: string, userId: string) {
+    return this.storageFileActions.moveFileToTrash(statementId, userId);
   }
 
-  async restoreFileFromTrash(statementId: string, userId: string) {
-    await this.checkFileAccess(userId, statementId, 'edit');
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-    });
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-    if (!statement.deletedAt) {
-      return { status: 'active' };
-    }
-    statement.deletedAt = null;
-    await this.statementRepository.save(statement);
-    return { status: 'restored' };
+  restoreFileFromTrash(statementId: string, userId: string) {
+    return this.storageFileActions.restoreFileFromTrash(statementId, userId);
   }
 
-  async deleteFilePermanently(statementId: string, userId: string) {
-    await this.checkFileAccess(userId, statementId, 'edit');
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-    });
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-    if (!statement.deletedAt) {
-      throw new BadRequestException(appError('STORAGE_FILE_NOT_IN_TRASH'));
-    }
-    // Out of the trash for good: the rows and the file go (remove only trashes).
-    await purgeFromTrash(this.statementsService, this.transactionRepository, [statement], userId);
-    return { status: 'deleted' };
+  deleteFilePermanently(statementId: string, userId: string) {
+    return this.storageFileActions.deleteFilePermanently(statementId, userId);
   }
 
   createView(dto: StorageViewBody, userId: string, workspaceId: string) {
@@ -249,375 +138,48 @@ export class StorageService {
     return this.storageFolders.deleteView(id, workspaceId);
   }
 
-  async createFileVersion(statementId: string, userId: string) {
-    await this.checkFileAccess(userId, statementId, 'edit');
-
-    const statement = await this.statementRepository
-      .createQueryBuilder('statement')
-      .addSelect('statement.fileData')
-      .where('statement.id = :id', { id: statementId })
-      .getOne();
-
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-
-    let fileData = statement.fileData ?? null;
-
-    if (!fileData) {
-      const resolved = this.fileStorageService.resolveFilePath(statement.filePath);
-      if (resolved) {
-        try {
-          fileData = await fs.promises.readFile(resolved);
-        } catch {
-          fileData = null;
-        }
-      }
-    }
-
-    if (!fileData && statement.fileHash && statement.userId) {
-      const other = await this.statementRepository
-        .createQueryBuilder('statement')
-        .addSelect('statement.fileData')
-        .where('statement.userId = :userId', { userId: statement.userId })
-        .andWhere('statement.fileHash = :fileHash', {
-          fileHash: statement.fileHash,
-        })
-        .andWhere('statement.fileData IS NOT NULL')
-        .andWhere('statement.id <> :id', { id: statement.id })
-        .orderBy('statement.createdAt', 'DESC')
-        .getOne();
-
-      fileData = other?.fileData ?? null;
-    }
-
-    if (!fileData) {
-      throw new NotFoundException(appError('STORAGE_FILE_DATA_UNAVAILABLE_VERSIONING'));
-    }
-
-    const actualHash = crypto.createHash('sha256').update(fileData).digest('hex');
-    if (actualHash !== statement.fileHash) {
-      throw new BadRequestException(appError('STORAGE_FILE_HASH_MISMATCH'));
-    }
-
-    const version = this.fileVersionRepository.create({
-      statementId: statement.id,
-      createdBy: userId,
-      fileHash: statement.fileHash,
-      fileName: statement.fileName,
-      fileType: statement.fileType,
-      fileSize: statement.fileSize,
-      fileData,
-    });
-
-    const saved = await this.fileVersionRepository.save(version);
-
-    return {
-      id: saved.id,
-      statementId: saved.statementId,
-      createdBy: saved.createdBy,
-      fileHash: saved.fileHash,
-      fileName: saved.fileName,
-      fileType: saved.fileType,
-      // bigint: the version list answers it as a string, so this answers the same.
-      fileSize: String(saved.fileSize),
-      createdAt: saved.createdAt,
-    };
+  createFileVersion(statementId: string, userId: string) {
+    return this.storageVersions.createFileVersion(statementId, userId);
   }
 
-  async listFileVersions(statementId: string, userId: string) {
-    await this.checkFileAccess(userId, statementId, 'view');
-
-    return await this.fileVersionRepository.find({
-      where: { statementId },
-      order: { createdAt: 'DESC' },
-      select: {
-        id: true,
-        statementId: true,
-        createdBy: true,
-        fileHash: true,
-        fileName: true,
-        fileType: true,
-        fileSize: true,
-        createdAt: true,
-      },
-    });
+  listFileVersions(statementId: string, userId: string) {
+    return this.storageVersions.listFileVersions(statementId, userId);
   }
 
-  /**
-   * Download file
-   */
-  async downloadFile(statementId: string, userId: string) {
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-    });
-
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-
-    const { stream, fileName, mimeType } = await this.getFileStream(statement, userId, 'download');
-    return { stream, fileName, mimeType };
+  downloadFile(statementId: string, userId: string) {
+    return this.storageVersions.downloadFile(statementId, userId);
   }
 
-  async restoreFile(statementId: string, userId: string) {
-    await this.checkFileAccess(userId, statementId, 'edit');
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-    });
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-    const restored = await this.fileStorageService.restoreFile(statement);
-    if (!restored) {
-      throw new NotFoundException(appError('STORAGE_FILE_DATA_UNAVAILABLE_RESTORE'));
-    }
-    return { status: 'restored', source: restored.source };
+  restoreFile(statementId: string, userId: string) {
+    return this.storageVersions.restoreFile(statementId, userId);
   }
 
-  async exportTransactionsCsv(statementId: string, userId: string) {
-    await this.checkFileAccess(userId, statementId, 'view');
-    const transactions = await this.transactionRepository.find({
-      where: { statementId },
-      order: { transactionDate: 'DESC' },
-    });
-    // As in getFileDetails: a private row reads as a placeholder to all but its owner.
-    const workspaceId = transactions[0]?.workspaceId;
-    const membership = workspaceId
-      ? await this.storageAccess.findMembership(workspaceId, userId)
-      : null;
-    redactPrivateRows(transactions, membership?.id ?? null);
-
-    const header = [
-      'date',
-      'documentNumber',
-      'counterpartyName',
-      'counterpartyBin',
-      'debit',
-      'credit',
-      'currency',
-      'paymentPurpose',
-    ];
-    const rows = transactions.map(t => [
-      // The `date` column comes back as a string, not a Date.
-      t.transactionDate ? new Date(t.transactionDate).toISOString().split('T')[0] : '',
-      t.documentNumber ?? '',
-      t.counterpartyName ?? '',
-      t.counterpartyBin ?? '',
-      t.debit ?? '',
-      t.credit ?? '',
-      t.currency ?? '',
-      (t.paymentPurpose || '').replace(/\n/g, ' '),
-    ]);
-    const csv = [header, ...rows]
-      .map(r =>
-        r
-          .map(v => `"${String(neutralizeSpreadsheetFormulaCell(v)).replace(/"/g, '""')}"`)
-          .join(','),
-      )
-      .join('\n');
-    const fileName = `transactions-${statementId}.csv`;
-    return { csv, fileName };
+  exportTransactionsCsv(statementId: string, userId: string) {
+    return this.storageVersions.exportTransactionsCsv(statementId, userId);
   }
 
-  async bulkDelete(statementIds: string[], userId: string) {
-    const uniqueIds = Array.from(new Set(statementIds));
-    const statements = await this.statementRepository.findBy({
-      id: In(uniqueIds),
-    });
-
-    if (!statements.length) {
-      return { deleted: 0, missing: uniqueIds.length };
-    }
-
-    for (const st of statements) {
-      await this.checkFileAccess(userId, st.id, 'edit');
-    }
-
-    // The same path as deleting one file: to the trash, audited, and refused
-    // for rows on a filed tax return — checked for all first, so a refusal
-    // leaves none trashed. Files already in the trash stay as they are.
-    const toTrash = statements.filter(item => !item.deletedAt);
-    if (toTrash.length) {
-      await assertRowsRemovable(this.transactionRepository, {
-        statementId: In(toTrash.map(st => st.id)),
-      });
-    }
-    for (const st of toTrash) {
-      await this.statementsService.remove(st.id, userId, st.workspaceId);
-    }
-    return {
-      deleted: statements.length,
-      missing: uniqueIds.length - statements.length,
-    };
+  bulkDelete(statementIds: string[], userId: string) {
+    return this.storageFileActions.bulkDelete(statementIds, userId);
   }
 
-  async bulkRestoreFromTrash(statementIds: string[], userId: string) {
-    const uniqueIds = Array.from(new Set(statementIds));
-    const statements = await this.statementRepository.findBy({
-      id: In(uniqueIds),
-    });
-
-    if (!statements.length) {
-      return { restored: 0, missing: uniqueIds.length };
-    }
-
-    for (const st of statements) {
-      await this.checkFileAccess(userId, st.id, 'edit');
-    }
-
-    const restoreIds = statements.filter(st => st.deletedAt).map(st => st.id);
-
-    if (restoreIds.length) {
-      await this.statementRepository.update({ id: In(restoreIds) }, { deletedAt: null });
-    }
-
-    return {
-      restored: restoreIds.length,
-      missing: uniqueIds.length - statements.length,
-      skipped: statements.length - restoreIds.length,
-    };
+  bulkRestoreFromTrash(statementIds: string[], userId: string) {
+    return this.storageFileActions.bulkRestoreFromTrash(statementIds, userId);
   }
 
-  async bulkDeleteFromTrash(statementIds: string[], userId: string) {
-    const uniqueIds = Array.from(new Set(statementIds));
-    const statements = await this.statementRepository.findBy({
-      id: In(uniqueIds),
-    });
-
-    if (!statements.length) {
-      return { deleted: 0, missing: uniqueIds.length };
-    }
-
-    for (const st of statements) {
-      await this.checkFileAccess(userId, st.id, 'edit');
-    }
-
-    const deletable = statements.filter(st => st.deletedAt);
-    await purgeFromTrash(this.statementsService, this.transactionRepository, deletable, userId);
-    return {
-      deleted: deletable.length,
-      missing: uniqueIds.length - statements.length,
-      skipped: statements.length - deletable.length,
-    };
+  bulkDeleteFromTrash(statementIds: string[], userId: string) {
+    return this.storageFileActions.bulkDeleteFromTrash(statementIds, userId);
   }
 
-  async bulkDownload(statementIds: string[], userId: string) {
-    const uniqueIds = Array.from(new Set(statementIds));
-    const statements = await this.statementRepository.findBy({
-      id: In(uniqueIds),
-    });
-    const allowed: { id: string; downloadUrl: string }[] = [];
-    for (const st of statements) {
-      try {
-        await this.checkFileAccess(userId, st.id, 'download');
-        const base =
-          process.env.API_BASE_URL || process.env.BACKEND_URL || 'http://localhost:3001/api/v1';
-        allowed.push({
-          id: st.id,
-          downloadUrl: `${base}/storage/files/${st.id}/download`,
-        });
-      } catch {
-        // skip not allowed
-      }
-    }
-    return {
-      files: allowed,
-      requested: uniqueIds.length,
-      allowed: allowed.length,
-    };
+  bulkDownload(statementIds: string[], userId: string) {
+    return this.storageFileActions.bulkDownload(statementIds, userId);
   }
 
-  /**
-   * Get file info for inline preview
-   */
-  async getFilePreview(statementId: string, userId: string) {
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-    });
-
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-
-    const started = Date.now();
-    try {
-      const { stream, fileName, mimeType } = await this.getFileStream(statement, userId, 'view');
-      return { stream, fileName, mimeType };
-    } catch (error) {
-      this.observeFileAccess('view', 'error', started);
-      throw error;
-    }
+  getFilePreview(statementId: string, userId: string) {
+    return this.storageVersions.getFilePreview(statementId, userId);
   }
 
-  async getSharedDownloadStream(statementId: string): Promise<{
-    stream: NodeJS.ReadableStream;
-    fileName: string;
-    mimeType: string;
-  }> {
-    const statement = await this.statementRepository.findOne({
-      where: { id: statementId },
-    });
-
-    if (!statement) {
-      throw new NotFoundException(appError('STORAGE_FILE_NOT_FOUND'));
-    }
-
-    const started = Date.now();
-    try {
-      const { stream, fileName, mimeType, source } =
-        await this.fileStorageService.getStatementFileStream(statement);
-      this.observeFileAccess('shared-download', 'ok', started, source);
-      return { stream, fileName, mimeType };
-    } catch (error) {
-      this.observeFileAccess('shared-download', 'error', started);
-      throw error;
-    }
-  }
-
-  private async getFileStream(
-    statement: Statement,
-    userId: string,
-    action: 'view' | 'download',
-  ): Promise<{
-    stream: NodeJS.ReadableStream;
-    fileName: string;
-    mimeType: string;
-  }> {
-    await this.checkFileAccess(userId, statement.id, action);
-
-    const started = Date.now();
-    try {
-      const { stream, fileName, mimeType, source } =
-        await this.fileStorageService.getStatementFileStream(statement);
-      this.observeFileAccess(action, 'ok', started, source);
-      return { stream, fileName, mimeType };
-    } catch (error) {
-      this.observeFileAccess(action, 'error', started);
-      throw error;
-    }
-  }
-
-  private observeFileAccess(
-    action: 'view' | 'download' | 'shared-download',
-    result: 'ok' | 'error',
-    startedAt: number,
-    source: 'disk' | 'db' | 'restored' | 'unknown' = 'unknown',
-  ) {
-    if (!this.metricsService?.storageFileAccessDurationSeconds) {
-      return;
-    }
-    const duration = (Date.now() - startedAt) / 1000;
-    this.metricsService.storageFileAccessDurationSeconds.observe(
-      { action, source, result },
-      duration,
-    );
-    if (result === 'error' && this.metricsService.storageFileAccessErrorsTotal) {
-      this.metricsService.storageFileAccessErrorsTotal.inc({
-        action,
-        reason: 'access_failed',
-      });
-    }
+  getSharedDownloadStream(statementId: string) {
+    return this.storageVersions.getSharedDownloadStream(statementId);
   }
 
   /**

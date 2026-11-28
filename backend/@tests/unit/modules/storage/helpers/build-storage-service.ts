@@ -1,8 +1,10 @@
 import { FindOperator } from 'typeorm';
 import { StorageAccessService } from '@/modules/storage/storage-access.service';
+import { StorageFileActionsService } from '@/modules/storage/storage-file-actions.service';
 import { StorageFilesQueryService } from '@/modules/storage/storage-files-query.service';
 import { StorageFoldersService } from '@/modules/storage/storage-folders.service';
 import { StorageService } from '@/modules/storage/storage.service';
+import { StorageVersionsService } from '@/modules/storage/storage-versions.service';
 
 /**
  * Builds StorageService over in-memory repositories, so a spec states the rows
@@ -152,13 +154,8 @@ export function buildStorageService(overrides: Partial<StorageDeps> = {}) {
     deps.sharedLinkRepository,
     deps.filePermissionRepository,
     deps.statementRepository,
-    deps.fileVersionRepository,
-    deps.tagRepository,
     deps.workspaceMemberRepository,
-    deps.fileStorageService,
-    deps.statementsService,
     deps.transactionRepository,
-    deps.categoryRepository,
     storageAccess,
     new StorageFilesQueryService(
       deps.statementRepository,
@@ -176,7 +173,22 @@ export function buildStorageService(overrides: Partial<StorageDeps> = {}) {
       deps.statementsService,
       storageAccess,
     ),
-    deps.metricsService,
+    new StorageFileActionsService(
+      deps.statementRepository,
+      deps.categoryRepository,
+      deps.tagRepository,
+      deps.transactionRepository,
+      deps.statementsService,
+      storageAccess,
+    ),
+    new StorageVersionsService(
+      deps.statementRepository,
+      deps.fileVersionRepository,
+      deps.transactionRepository,
+      deps.fileStorageService,
+      storageAccess,
+      deps.metricsService,
+    ),
   );
   return { service, deps };
 }
