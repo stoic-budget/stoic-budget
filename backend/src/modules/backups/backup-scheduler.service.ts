@@ -4,6 +4,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { STANDARD_WORKSPACE } from '../../common/workspaces/version-workspaces';
 import { BackupConfiguration, BackupRunTrigger, Workspace } from '../../entities';
+import {
+  NotificationCategory,
+  NotificationSeverity,
+  NotificationType,
+} from '../../entities/notification.entity';
+import { NotificationsService } from '../notifications/notifications.service';
 import { BackupsService } from './backups.service';
 
 @Injectable()
@@ -17,6 +23,7 @@ export class BackupSchedulerService {
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
     private readonly backupsService: BackupsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   @Cron('* * * * *')
@@ -38,8 +45,11 @@ export class BackupSchedulerService {
       if (this.claimedSlots.has(slotKey)) continue;
       this.claimedSlots.add(slotKey);
 
+      // A failed lookup or run is logged and the loop goes on: each
+      // configuration's minute comes once a night.
+      let workspace: Workspace | null = null;
       try {
-        const workspace = await this.workspaceRepository.findOne({
+        workspace = await this.workspaceRepository.findOne({
           where: { id: configuration.workspaceId },
         });
         if (workspace) {
@@ -54,8 +64,30 @@ export class BackupSchedulerService {
           `Scheduled backup failed for workspace ${configuration.workspaceId}`,
           error instanceof Error ? error.stack : undefined,
         );
+        if (workspace) await this.tellOwner(workspace);
       }
     }
+  }
+
+  /**
+   * Nobody watches a nightly backup: a failed one is told to the owner, who
+   * alone manages backups, or the workspace goes on without one unnoticed (#639).
+   */
+  private async tellOwner(workspace: Workspace): Promise<void> {
+    if (!workspace.ownerId) return;
+    await this.notificationsService
+      .create({
+        recipientId: workspace.ownerId,
+        workspaceId: workspace.id,
+        type: NotificationType.BACKUP_FAILED,
+        category: NotificationCategory.SYSTEM,
+        severity: NotificationSeverity.ERROR,
+        messageKey: 'backup.failed',
+        messageParams: { workspace: workspace.name },
+        entityType: 'workspace',
+        entityId: workspace.id,
+      })
+      .catch(error => this.logger.warn(`Backup failure not told: ${String(error)}`));
   }
 
   private localSlot(now: Date, timeZone: string): { date: string; hour: string; minute: string } {

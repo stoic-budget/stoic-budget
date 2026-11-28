@@ -1183,4 +1183,85 @@ export const es: StoicTextMap = {
       message: 'Al {{percent}}%, sin plazo. Sabe adónde navegas y el paso mensual vendrá solo.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Olvidar dos veces es un hábito',
+      message:
+        '{{count}} facturas del último medio año se pagaron tarde porque se olvidaron. La memoria no es un plan: que el aviso llegue antes, mientras aún hay tiempo para actuar.',
+    },
+    {
+      title: 'La factura no se olvidó de usted',
+      message:
+        '{{count}} facturas esperaron en el último medio año a que alguien las recordara. Lo que la mente no retiene, lo retiene un aviso: dele unos días más.',
+    },
+    {
+      title: 'Que el aviso recuerde',
+      message:
+        'Olvidado {{count}} veces en medio año. La mente sirve para juzgar, no para guardar fechas: que el aviso llegue con tiempo para actuar.',
+    },
+    {
+      title: 'Un deber pequeño, a menudo olvidado',
+      message:
+        '{{count}} facturas atrasadas, cada una simplemente olvidada. La calma empieza por el orden en lo pequeño, y un aviso antes no cuesta nada.',
+    },
+    {
+      title: 'El olvido tiene un patrón',
+      message:
+        'En medio año, {{count}} facturas pasaron su fecha sin que nadie lo notara. Séneca repasaba cada noche su día; un aviso unos días antes hace ese trabajo por usted.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'El día de pago llega después de la factura',
+      message:
+        '{{count}} veces en medio año el dinero aún no estaba cuando venció una factura. Mueva la fecha a después del día de pago o aparte un pago: lo preparado no apremia.',
+    },
+    {
+      title: 'El dinero llega después de la fecha',
+      message:
+        '{{count}} veces en medio año la factura llegó antes que el ingreso. Ponga la fecha donde el dinero ya está, y la factura deja de apremiarle.',
+    },
+    {
+      title: 'Un pago por delante',
+      message:
+        '{{count}} facturas atrasadas esperaron el día de cobro en medio año. Aparte un pago, y el calendario pierde su poder sobre usted.',
+    },
+    {
+      title: 'Ordene las fechas, no la preocupación',
+      message:
+        '{{count}} veces en medio año faltó dinero antes del cobro. El remedio no es preocuparse más, sino ordenar mejor: la factura después del ingreso, o un colchón antes.',
+    },
+    {
+      title: 'Lo preparado no apremia',
+      message:
+        '{{count}} veces una factura venció antes de que llegara el dinero. Lo preparado se recibe con calma: aparte un pago o mueva la fecha.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Lo inesperado vuelve',
+      message:
+        '{{count}} retrasos en medio año siguieron a un gasto imprevisto. Al sabio nada le sucede contra lo que esperaba, escribe Séneca. Una reserva para lo imprevisto es una meta que vale la pena.',
+    },
+    {
+      title: 'Espere lo inesperado',
+      message:
+        '{{count}} facturas atrasadas en medio año siguieron a un gasto que no previó. Los estoicos ensayaban la desgracia para que no los sorprendiera; una reserva es ese ensayo en dinero.',
+    },
+    {
+      title: 'Un colchón para lo imprevisto',
+      message:
+        'En medio año, {{count}} facturas esperaron tras un gasto sorpresa. Una pequeña reserva convierte la próxima sorpresa en una molestia, no en un retraso.',
+    },
+    {
+      title: 'La fortuna presta y pide devolver',
+      message:
+        '{{count}} veces un gasto imprevisto empujó una factura más allá de su fecha. La fortuna volverá a pedir; aparte una reserva para que la factura no tenga que esperar.',
+    },
+    {
+      title: 'Las sorpresas no son raras',
+      message:
+        '{{count}} facturas atrasadas siguieron a algo inesperado. Lo que pasa a menudo no es realmente inesperado: una meta de reserva le hace sitio.',
+    },
+  ],
 };

@@ -151,6 +151,13 @@ function applyHasFilter(qb: StatementQuery, has: string[] | undefined) {
     );
   }
 
+  // What the dashboard counts as parsing warnings.
+  if (has?.includes('warnings')) {
+    qb.andWhere(
+      "jsonb_array_length(COALESCE(statement.parsingDetails->'warnings', '[]'::jsonb)) > 0",
+    );
+  }
+
   if (has?.includes('processingDetails')) {
     qb.andWhere(
       "jsonb_array_length(COALESCE(statement.parsingDetails->'logEntries', '[]'::jsonb)) > 0",

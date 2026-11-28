@@ -36,6 +36,8 @@ describe('TaxReturnsService', () => {
     transactionRepo = createRepoMock();
     transactionRepo.find.mockResolvedValue([]);
     returnRepo.findOne.mockResolvedValue(null);
+    // Other filed returns: none.
+    returnRepo.find.mockResolvedValue([]);
     returnRepo.create.mockImplementation((input: unknown) => input);
     returnRepo.save.mockImplementation(async (input: unknown) => (stored = input));
     Object.assign(returnRepo, { findOneByOrFail: vi.fn(async () => stored) });
@@ -234,6 +236,9 @@ describe('TaxReturnsService', () => {
     const manager = {
       save: vi.fn(async (_entity: unknown, row: unknown) => (stored = row)),
       createQueryBuilder: vi.fn(),
+      // The filing lock, and the returns read under it.
+      query: vi.fn(async () => []),
+      getRepository: () => returnRepo,
     };
 
     beforeEach(() => {
@@ -314,7 +319,8 @@ describe('TaxReturnsService', () => {
     });
 
     it('audits the filing against the persisted return row', async () => {
-      returnRepo.findOne.mockResolvedValue({ id: 'ret-1', status: TaxReturnStatus.DRAFT });
+      // The period's draft; then no filed return overlapping it.
+      returnRepo.findOne.mockResolvedValueOnce({ id: 'ret-1', status: TaxReturnStatus.DRAFT });
 
       await service.file('ws-1', '2026-01-01', '2026-03-31', 'user-1');
 
@@ -352,6 +358,9 @@ describe('TaxReturnsService', () => {
     const manager = {
       save: vi.fn(async (_entity: unknown, row: unknown) => (stored = row)),
       createQueryBuilder: vi.fn(),
+      // The filing lock, and the returns read under it.
+      query: vi.fn(async () => []),
+      getRepository: () => returnRepo,
     };
 
     beforeEach(() => {
@@ -373,6 +382,21 @@ describe('TaxReturnsService', () => {
       await expect(service.reopen('ws-1', '2026-01-01', '2026-03-31')).rejects.toThrow(
         BadRequestException,
       );
+    });
+
+    it('keeps locked the rows another filed return holds', async () => {
+      returnRepo.findOne.mockResolvedValue({
+        id: 'ret-1',
+        workspaceId: 'ws-1',
+        status: TaxReturnStatus.FILED,
+        snapshot: [{ transactionId: 'a' }, { transactionId: 'b' }],
+      });
+      returnRepo.find.mockResolvedValue([{ id: 'ret-year', snapshot: [{ transactionId: 'b' }] }]);
+
+      await service.reopen('ws-1', '2026-01-01', '2026-03-31');
+
+      const builder = manager.createQueryBuilder.mock.results.at(-1)?.value;
+      expect(builder.whereInIds).toHaveBeenCalledWith(['a']);
     });
 
     it('unlocks the transactions and clears the submission record', async () => {

@@ -4,7 +4,6 @@ import Box from '@mui/material/Box';
 import Link from 'next/link';
 import {
   Bug,
-  Cloud,
   Globe,
   PlayCircle,
   ScrollText,
@@ -65,12 +64,6 @@ export function SettingsElsewhereLinks({ tx }: { tx: Tx }) {
       key: 'workspace',
       label: tx(['navigation', 'links', 'workspace']),
       icon: UserCircle,
-    },
-    {
-      panel: 'integrations',
-      key: 'integrations',
-      label: tx(['navigation', 'links', 'integrations']),
-      icon: Cloud,
     },
     {
       panel: 'plugins',

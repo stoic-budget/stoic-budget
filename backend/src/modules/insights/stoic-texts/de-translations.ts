@@ -1187,4 +1187,85 @@ export const de: StoicTextMap = {
         'Bei {{percent}}%, ohne Frist. Wissen Sie, wohin Sie segeln, dann ergibt sich der monatliche Schritt.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Zweimal vergessen ist eine Gewohnheit',
+      message:
+        '{{count}} Rechnungen im letzten halben Jahr kamen zu spät, weil sie vergessen wurden. Erinnerung ist kein Plan: Lassen Sie die Erinnerung früher kommen, solange noch Zeit zum Handeln ist.',
+    },
+    {
+      title: 'Die Rechnung hat Sie nicht vergessen',
+      message:
+        '{{count}} Rechnungen warteten im letzten halben Jahr, bis man an sie dachte. Was der Kopf nicht trägt, trägt eine Erinnerung: geben Sie ihr ein paar Tage mehr.',
+    },
+    {
+      title: 'Lassen Sie die Erinnerung erinnern',
+      message:
+        '{{count}}-mal vergessen in einem halben Jahr. Der Verstand ist zum Urteilen da, nicht zum Merken von Terminen: Die Erinnerung soll früh genug kommen.',
+    },
+    {
+      title: 'Eine kleine Pflicht, oft verpasst',
+      message:
+        '{{count}} verspätete Rechnungen, jede einfach vergessen. Gelassenheit beginnt mit Ordnung im Kleinen, und eine frühere Erinnerung kostet nichts.',
+    },
+    {
+      title: 'Das Vergessen hat ein Muster',
+      message:
+        'In einem halben Jahr gingen {{count}} Rechnungen unbemerkt über ihren Termin. Seneca ging jeden Abend seinen Tag durch; eine Erinnerung ein paar Tage früher erledigt das für Sie.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'Der Zahltag kommt nach der Rechnung',
+      message:
+        '{{count}}-mal in einem halben Jahr war das Geld noch nicht da, als eine Rechnung fällig wurde. Verschieben Sie den Termin hinter den Zahltag oder legen Sie eine Rate zurück: Was vorbereitet ist, hetzt nicht.',
+    },
+    {
+      title: 'Das Geld kommt nach dem Termin',
+      message:
+        '{{count}}-mal in einem halben Jahr kam die Rechnung vor dem Einkommen. Legen Sie den Termin dorthin, wo das Geld schon ist, und die Rechnung drängt nicht mehr.',
+    },
+    {
+      title: 'Eine Rate voraus',
+      message:
+        '{{count}} verspätete Rechnungen warteten in einem halben Jahr auf den Zahltag. Legen Sie eine Rate zurück, und der Kalender verliert seine Macht über Sie.',
+    },
+    {
+      title: 'Ordnen Sie die Termine, nicht die Sorge',
+      message:
+        '{{count}}-mal in einem halben Jahr fehlte Geld vor dem Zahltag. Die Lösung ist nicht mehr Sorge, sondern bessere Ordnung: die Rechnung nach dem Einkommen oder ein Polster davor.',
+    },
+    {
+      title: 'Vorbereitetes drängt nicht',
+      message:
+        '{{count}}-mal war eine Rechnung fällig, bevor das Geld kam. Was vorbereitet ist, nimmt man gelassen: Legen Sie eine Rate zurück oder verschieben Sie den Termin.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'Das Unerwartete kehrt wieder',
+      message:
+        '{{count}} verspätete Rechnungen in einem halben Jahr folgten einer unvorhergesehenen Ausgabe. Dem Weisen geschieht nichts wider Erwarten, schreibt Seneca. Eine Reserve für das Unvorhergesehene ist ein Ziel, das sich lohnt.',
+    },
+    {
+      title: 'Rechnen Sie mit dem Unerwarteten',
+      message:
+        '{{count}} verspätete Rechnungen folgten in einem halben Jahr einer Ausgabe, die Sie nicht vorhergesehen hatten. Die Stoiker übten das Unglück im Voraus; eine Rücklage ist diese Übung in Geld.',
+    },
+    {
+      title: 'Ein Polster für das Unvorhergesehene',
+      message:
+        'In einem halben Jahr warteten {{count}} Rechnungen hinter einer überraschenden Ausgabe. Eine kleine Rücklage macht aus der nächsten Überraschung eine Unannehmlichkeit, keine Verspätung.',
+    },
+    {
+      title: 'Das Glück leiht und fordert zurück',
+      message:
+        '{{count}}-mal schob eine unvorhergesehene Ausgabe eine Rechnung über ihren Termin. Es wird wieder fordern; legen Sie eine Rücklage an, damit die Rechnung nicht warten muss.',
+    },
+    {
+      title: 'Überraschungen sind nicht selten',
+      message:
+        '{{count}} verspätete Rechnungen folgten etwas Unerwartetem. Was oft geschieht, ist nicht wirklich unerwartet: Ein Rücklagenziel schafft Platz dafür.',
+    },
+  ],
 };

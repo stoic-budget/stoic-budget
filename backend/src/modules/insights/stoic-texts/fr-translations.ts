@@ -1185,4 +1185,85 @@ export const fr: StoicTextMap = {
       message: 'À {{percent}}%, sans échéance. Sachez où vous naviguez, et le pas mensuel suivra.',
     },
   ],
+  'stoic.late_forgot': [
+    {
+      title: 'Oublier deux fois, c’est une habitude',
+      message:
+        '{{count}} factures du dernier semestre ont été payées en retard parce qu’elles étaient oubliées. La mémoire n’est pas un plan : faites venir le rappel plus tôt, tant qu’il reste le temps d’agir.',
+    },
+    {
+      title: 'La facture ne vous a pas oublié',
+      message:
+        '{{count}} factures ont attendu ces six derniers mois qu’on pense à elles. Ce que l’esprit ne retient pas, un rappel le retient : donnez-lui quelques jours de plus.',
+    },
+    {
+      title: 'Laissez le rappel se souvenir',
+      message:
+        'Oublié {{count}} fois en six mois. L’esprit sert à juger, non à garder des dates : que le rappel arrive assez tôt pour agir.',
+    },
+    {
+      title: 'Un petit devoir, souvent manqué',
+      message:
+        '{{count}} factures en retard, chacune simplement oubliée. La sérénité commence par l’ordre dans les petites choses, et un rappel plus tôt ne coûte rien.',
+    },
+    {
+      title: 'L’oubli a sa logique',
+      message:
+        'En six mois, {{count}} factures ont passé leur échéance sans qu’on le voie. Sénèque revoyait sa journée chaque soir ; un rappel quelques jours plus tôt fait ce travail pour vous.',
+    },
+  ],
+  'stoic.late_short': [
+    {
+      title: 'La paie arrive après la facture',
+      message:
+        '{{count}} fois en six mois, l’argent n’était pas encore là à l’échéance. Placez la date après votre paie, ou gardez une échéance de côté : ce qui est préparé ne presse pas.',
+    },
+    {
+      title: 'L’argent arrive après l’échéance',
+      message:
+        '{{count}} fois en six mois, la facture est arrivée avant le revenu. Placez l’échéance là où l’argent est déjà, et la facture cesse de vous presser.',
+    },
+    {
+      title: 'Un paiement d’avance',
+      message:
+        '{{count}} factures en retard ont attendu le jour de paie en six mois. Mettez un paiement de côté, et le calendrier perd son emprise sur vous.',
+    },
+    {
+      title: 'Ordonnez les dates, pas l’inquiétude',
+      message:
+        '{{count}} fois en six mois, il manquait de l’argent avant la paie. Le remède n’est pas l’inquiétude mais l’ordre : la facture après le revenu, ou une réserve avant.',
+    },
+    {
+      title: 'Ce qui est préparé ne presse pas',
+      message:
+        '{{count}} fois, une facture est échue avant l’arrivée de l’argent. Ce qui est préparé se reçoit calmement : mettez un paiement de côté ou déplacez la date.',
+    },
+  ],
+  'stoic.late_unexpected': [
+    {
+      title: 'L’imprévu revient',
+      message:
+        '{{count}} retards en six mois ont suivi une dépense imprévue. Rien n’arrive au sage contre son attente, écrit Sénèque. Une réserve pour l’imprévu est un objectif qui vaut la peine.',
+    },
+    {
+      title: 'Attendez-vous à l’inattendu',
+      message:
+        '{{count}} factures en retard en six mois ont suivi une dépense imprévue. Les stoïciens répétaient le malheur pour qu’il ne les surprenne pas ; une réserve est cet exercice en argent.',
+    },
+    {
+      title: 'Un coussin pour l’imprévu',
+      message:
+        'En six mois, {{count}} factures ont attendu derrière une dépense surprise. Une petite réserve fait de la prochaine surprise un désagrément, non un retard.',
+    },
+    {
+      title: 'La fortune prête, puis réclame',
+      message:
+        '{{count}} fois, un coût imprévu a repoussé une facture au-delà de son échéance. La fortune réclamera encore ; mettez une réserve de côté pour que la facture n’attende pas.',
+    },
+    {
+      title: 'Les surprises ne sont pas rares',
+      message:
+        '{{count}} factures en retard ont suivi un imprévu. Ce qui arrive souvent n’est pas vraiment inattendu : un objectif de réserve lui fait de la place.',
+    },
+  ],
 };
