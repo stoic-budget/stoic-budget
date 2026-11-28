@@ -491,7 +491,7 @@ describe('StatementsService', () => {
         currencies: ['KZT', 'USD'],
         exported: true,
         paid: false,
-        has: ['errors', 'transactions'],
+        has: ['errors', 'transactions', 'warnings'],
         categoryId: 'cat-1',
         groupBy: 'amount',
       } satisfies StatementsQuery);
@@ -499,6 +499,9 @@ describe('StatementsService', () => {
       expect(qb.skip).not.toHaveBeenCalled();
       expect(qb.take).toHaveBeenCalledWith(15);
       expect(qb.andWhere).toHaveBeenCalledWith('statement.fileType = :type', { type: 'pdf' });
+      expect(qb.andWhere).toHaveBeenCalledWith(
+        "jsonb_array_length(COALESCE(statement.parsingDetails->'warnings', '[]'::jsonb)) > 0",
+      );
       expect(qb.andWhere).toHaveBeenCalledWith('CAST(statement.status AS text) IN (:...statuses)', {
         statuses: ['processing', 'error'],
       });

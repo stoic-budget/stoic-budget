@@ -63,6 +63,11 @@ export interface LayoutTransaction {
   account?: { accountNumber: string; currency?: string };
   /** Where the row starts on its page, in the words' own coordinates. */
   at?: { page: number; y: number };
+  /** The payment's reference as the bank prints it (a Czech variable symbol). */
+  documentNumber?: string;
+  /** What the row moved in another currency, and the rate it was converted at. */
+  amountForeign?: number;
+  exchangeRate?: number;
 }
 
 /** A workspace's taught layout (layout-template.helper), read on top of the built-in one. */

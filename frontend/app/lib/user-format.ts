@@ -47,10 +47,24 @@ const EXPLICIT_ORDER: Record<
   ymd: { parts: ['year', 'month', 'day'], separator: '-' },
 };
 
-const toDate = (value: Date | string | number | null | undefined): Date | null => {
+/** "2026-03-01", or the midnight UTC a `date` column serializes to: a calendar day, no instant. */
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})(?:T00:00:00(?:\.000)?Z)?$/;
+
+/**
+ * A calendar day is read as that day where the person is: `new Date('2026-03-01')`
+ * is midnight UTC, which west of Greenwich is still the evening of 28 February.
+ */
+export const toDate = (value: Date | string | number | null | undefined): Date | null => {
   if (value === null || value === undefined || value === '') return null;
-  const date = value instanceof Date ? value : new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
+  const day = typeof value === 'string' ? DATE_ONLY.exec(value) : null;
+  const date = day
+    ? new Date(Number(day[1]), Number(day[2]) - 1, Number(day[3]))
+    : value instanceof Date
+      ? value
+      : new Date(value);
+  // 2026-13-01 or 2026-02-30 is no day, not one rolled over into the next month.
+  const impossible = day && date.getMonth() !== Number(day[2]) - 1;
+  return impossible || Number.isNaN(date.getTime()) ? null : date;
 };
 
 const pad = (value: number) => String(value).padStart(2, '0');

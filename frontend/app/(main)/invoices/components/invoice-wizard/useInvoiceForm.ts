@@ -13,13 +13,17 @@ import {
   type InvoiceLineItemInput,
   type InvoiceRecurrenceInterval,
   invoicesApi,
+  type UpdateInvoiceInput,
 } from '@/app/lib/invoices-api';
+import { localToday } from '@/app/lib/local-today';
 import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
 
 export interface TaxRateOption {
   id: string;
   name: string;
   rate: number;
+  /** A reverse-charge rate: the buyer accounts for the tax, the invoice charges none. */
+  isReverseCharge?: boolean;
 }
 
 const emptyLine = (): InvoiceLineItemInput => ({
@@ -29,7 +33,7 @@ const emptyLine = (): InvoiceLineItemInput => ({
   unitCode: 'C62',
 });
 
-const todayIso = (): string => new Date().toISOString().slice(0, 10);
+const todayIso = (): string => localToday();
 
 const addDays = (iso: string, days: number): string => {
   const date = new Date(`${iso}T00:00:00.000Z`);
@@ -38,6 +42,8 @@ const addDays = (iso: string, days: number): string => {
 };
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
+/** The server's `roundHalfAwayFromZero`, on minor units. */
+const halfAway = (value: number) => (value < 0 ? -Math.round(-value) : Math.round(value));
 
 /** Quantity × unit price after the line's discount or surcharge, as the backend prices it. */
 export function lineAmount(item: InvoiceLineItemInput): number {
@@ -50,25 +56,29 @@ export function lineAmount(item: InvoiceLineItemInput): number {
  * The same split the backend does, so the form and the saved invoice agree:
  * a tax-inclusive price has its tax extracted, an exclusive one has it added.
  */
-function computeTotals(
+export function computeTotals(
   lineItems: InvoiceLineItemInput[],
   taxRates: TaxRateOption[],
   pricesIncludeTax: boolean,
 ) {
-  const rateById = new Map(taxRates.map(rate => [rate.id, rate.rate]));
-  let subtotal = 0;
-  let taxTotal = 0;
+  // As the server's computeTax (#684): a reverse-charge rate charges nothing,
+  // and each line's tax is worked out in whole cents, rounded half away from
+  // zero, with the net or gross derived from it by subtraction.
+  const rateById = new Map(taxRates.map(rate => [rate.id, rate.isReverseCharge ? 0 : rate.rate]));
+  let subtotalMinor = 0;
+  let taxMinor = 0;
   for (const item of lineItems) {
-    const amount = lineAmount(item);
+    const amountMinor = halfAway(lineAmount(item) * 100);
     const pct = item.taxRateId ? (rateById.get(item.taxRateId) ?? 0) : 0;
-    const tax = pricesIncludeTax ? (amount * pct) / (100 + pct) : (amount * pct) / 100;
-    subtotal += pricesIncludeTax ? amount - tax : amount;
-    taxTotal += tax;
+    const inclusive = pricesIncludeTax && pct > 0;
+    const tax = halfAway(inclusive ? (amountMinor * pct) / (100 + pct) : (amountMinor * pct) / 100);
+    subtotalMinor += inclusive ? amountMinor - tax : amountMinor;
+    taxMinor += tax;
   }
   return {
-    subtotal: round2(subtotal),
-    taxTotal: round2(taxTotal),
-    total: round2(subtotal + taxTotal),
+    subtotal: subtotalMinor / 100,
+    taxTotal: taxMinor / 100,
+    total: (subtotalMinor + taxMinor) / 100,
   };
 }
 
@@ -177,6 +187,20 @@ export function useInvoiceForm(isNew: boolean) {
     recurrenceInterval: recurrenceInterval || undefined,
   });
 
+  /** The same, for an edit: a cleared note, delivery date or recurrence is sent as null, so it is cleared. */
+  const buildUpdatePayload = (): UpdateInvoiceInput => ({
+    ...buildPayload(),
+    notes: notes || null,
+    deliveryDate: deliveryDate || null,
+    recurrenceInterval: recurrenceInterval || null,
+    // A stopped recurrence takes its end date with it.
+    ...(recurrenceInterval ? {} : { recurrenceEndDate: null }),
+  });
+
+  /** Creates the invoice, or saves the draft `id` with its cleared fields cleared. */
+  const save = (id: string): Promise<Invoice> =>
+    isNew ? invoicesApi.create(buildPayload()) : invoicesApi.update(id, buildUpdatePayload());
+
   /**
    * Picking a client on a new invoice also sets the due date from its payment
    * terms: "net 30" is a property of the relationship, not something to retype.
@@ -269,6 +293,8 @@ export function useInvoiceForm(isNew: boolean) {
     addClient,
     addLateFee,
     buildPayload,
+    buildUpdatePayload,
+    save,
   };
 }
 

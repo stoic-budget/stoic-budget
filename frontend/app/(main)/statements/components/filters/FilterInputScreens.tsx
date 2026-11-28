@@ -4,6 +4,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CustomDatePicker from '@/app/components/CustomDatePicker';
 import { useIntlayer } from '@/app/i18n';
+import { localToday } from '@/app/lib/local-today';
 import { FilterOptionRow } from './FilterOptionRow';
 import type {
   FilterDateModeOption,
@@ -64,7 +65,7 @@ export function DateFilterScreen({
               onUpdateFilters({
                 date: {
                   mode: option.value,
-                  date: filters.date?.date || new Date().toISOString().slice(0, 10),
+                  date: filters.date?.date || localToday(),
                 },
               })
             }

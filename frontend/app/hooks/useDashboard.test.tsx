@@ -73,6 +73,27 @@ describe('useDashboard', () => {
     workspaceMocks.currentWorkspaceId = 'workspace-1';
   });
 
+  it("sends the viewer's own day: east of UTC, already the next month", async () => {
+    const zone = process.env.TZ;
+    process.env.TZ = 'Asia/Almaty';
+    vi.useFakeTimers({ toFake: ['Date'] });
+    // 21:30 UTC on 30 November is 02:30 on 1 December in Almaty.
+    vi.setSystemTime(new Date('2026-11-30T21:30:00Z'));
+    apiMocks.get.mockResolvedValue({ data: createDashboardPayload(100) });
+    try {
+      const { result } = renderHookWithQuery(() => useDashboard('month'));
+      await waitFor(() => expect(result.current.data).toBeDefined());
+
+      expect(apiMocks.get).toHaveBeenCalledWith(
+        '/dashboard',
+        expect.objectContaining({ params: { range: 'month', today: '2026-12-01' } }),
+      );
+    } finally {
+      vi.useRealTimers();
+      process.env.TZ = zone;
+    }
+  });
+
   it('loads dashboard once when backend returns effective window metadata', async () => {
     apiMocks.get.mockResolvedValue({
       data: {
@@ -88,7 +109,10 @@ describe('useDashboard', () => {
     expect(apiMocks.get).toHaveBeenCalledTimes(1);
     expect(apiMocks.get).toHaveBeenCalledWith(
       '/dashboard',
-      expect.objectContaining({ params: { range: '30d' } }),
+      // No month picked: the viewer's own day goes along, so "this month" is theirs.
+      expect.objectContaining({
+        params: { range: '30d', today: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) },
+      }),
     );
     expect(result.current.data?.effectiveEndDate).toBe('2025-05-31');
     expect(result.current.targetDate).toBeNull();
