@@ -98,7 +98,7 @@ function useUploadActions(inboxConnected: boolean): UploadActions {
 
   const onInboxSync = useCallback((): void => {
     if (!inboxConnected) {
-      openAppPanel('integrations', 'imap');
+      openAppPanel('plugins', 'imap');
       return;
     }
 

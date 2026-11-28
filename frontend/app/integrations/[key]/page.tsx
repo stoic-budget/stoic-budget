@@ -27,7 +27,7 @@ export default function IntegrationRoute(): null {
       router.replace(moved);
       return;
     }
-    openAppPanel('integrations', key);
+    openAppPanel('plugins', key);
     router.replace('/dashboard');
   }, [key, router]);
 
