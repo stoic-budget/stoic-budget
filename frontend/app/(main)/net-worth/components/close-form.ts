@@ -21,8 +21,4 @@ export function buildClose(
   return { date: form.date, close };
 }
 
-/** Today in the browser's calendar, as the date field writes it. */
-export function localToday(now = new Date()): string {
-  const offset = now.getTimezoneOffset() * 60_000;
-  return new Date(now.getTime() - offset).toISOString().slice(0, 10);
-}
+export { localToday } from '@/app/lib/local-today';

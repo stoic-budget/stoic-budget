@@ -184,7 +184,8 @@ export class TransferPairingService {
 
     const transferPairId = randomUUID();
     const result = await this.transactionRepository.update(
-      { id: In([a.id, b.id]), workspaceId, transferPairId: IsNull() },
+      // Not split meanwhile either: a split part would leave the rest of the row counted.
+      { id: In([a.id, b.id]), workspaceId, transferPairId: IsNull(), splitGroupId: IsNull() },
       { transferPairId, transferPairSource: TransferPairSource.MANUAL },
     );
     if (result.affected !== 2) {
@@ -285,7 +286,12 @@ export class TransferPairingService {
     if (full) {
       transferPairId = randomUUID();
       const result = await this.transactionRepository.update(
-        { id: In([income.id, expense.id]), workspaceId, transferPairId: IsNull() },
+        {
+          id: In([income.id, expense.id]),
+          workspaceId,
+          transferPairId: IsNull(),
+          splitGroupId: IsNull(),
+        },
         {
           transferPairId,
           transferPairSource: TransferPairSource.MANUAL,

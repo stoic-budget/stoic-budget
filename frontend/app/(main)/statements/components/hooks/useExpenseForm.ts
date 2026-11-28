@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import { getApiErrorMessage } from '@/app/lib/api-error';
 import { type DeviceLocation, getDeviceLocation } from '@/app/lib/device-location';
+import { localToday } from '@/app/lib/local-today';
 import { peekManualPrefill } from '@/app/lib/manual-expense-prefill';
 import { getReceiptLocationCapture } from '@/app/lib/receipt-location-capture';
 import {
@@ -27,22 +28,9 @@ import {
   type TaxRateOption,
   validateManualExpenseDraft,
 } from '@/app/lib/statement-expense-drawer';
-
-type SubmitScanPayload = {
-  files: File[];
-  allowDuplicates: boolean;
-  requireManualCategorySelection: boolean;
-  deviceLocationRequest: Promise<DeviceLocation | null> | null;
-};
+import type { SubmitManualPayload, SubmitScanPayload } from './useExpenseForm.types';
 
 export type SelectedFilesOrigin = 'camera' | 'gallery';
-
-type SubmitManualPayload = {
-  draft: ManualExpenseDraft;
-  date: string;
-  files: File[];
-  allowDuplicates: boolean;
-};
 
 type UseExpenseFormProps = {
   open: boolean;
@@ -132,7 +120,7 @@ export function useExpenseForm({
   const [manualDraft, setManualDraft] = useState<ManualExpenseDraft>(() =>
     createDefaultManualDraft(resolvedDefaultCurrency),
   );
-  const [manualDate, setManualDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [manualDate, setManualDate] = useState<string>(localToday());
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -252,7 +240,7 @@ export function useExpenseForm({
     setCurrencySearch('');
     setFiles([]);
     setManualDraft(createDefaultManualDraft(resolvedDefaultCurrency));
-    setManualDate(new Date().toISOString().slice(0, 10));
+    setManualDate(localToday());
     setError(null);
     setSubmitting(false);
     onClose();

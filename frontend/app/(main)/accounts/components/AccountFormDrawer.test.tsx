@@ -32,6 +32,8 @@ vi.mock('@/app/i18n', async () => {
         typeCreditCard: value('Credit card'),
         typeLoan: value('Loan'),
         loanTermsDropped: value('Saving deletes the loan terms'),
+        openingInvalid: value('Enter an amount, such as 1 500 or 1500.50'),
+        save: value('Save'),
       }),
   };
 });
@@ -68,5 +70,30 @@ describe('AccountFormDrawer', () => {
     drawer('loan', false);
     fireEvent.click(screen.getByRole('radio', { name: 'Checking' }));
     expect(screen.queryByRole('note')).toBeNull();
+  });
+
+  it('refuses to save an opening balance it cannot read, and saves one it can', () => {
+    const onSave = vi.fn();
+    render(
+      <AccountFormDrawer
+        open
+        editing={false}
+        initial={{ ...emptyAccountForm('USD'), type: 'checking', name: 'ACME Bank - Main' }}
+        saving={false}
+        onClose={() => {}}
+        onSave={onSave}
+      />,
+    );
+    const opening = document.getElementById('account-opening') as HTMLInputElement;
+    const save = screen.getByRole('button', { name: 'Save' });
+
+    fireEvent.change(opening, { target: { value: '0.125' } });
+    expect(screen.getByRole('alert')).toHaveTextContent('Enter an amount');
+    expect(save).toBeDisabled();
+
+    fireEvent.change(opening, { target: { value: '1 500' } });
+    expect(screen.queryByRole('alert')).toBeNull();
+    fireEvent.click(save);
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ openingBalance: '1 500' }));
   });
 });

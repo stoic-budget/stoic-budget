@@ -34,8 +34,24 @@ export class CryptoBalanceService {
   ) {}
 
   /**
+   * Deletes a wallet and writes the portfolio without it, so net worth drops at
+   * once instead of keeping the last value until something else writes (#694).
+   */
+  async removeWallet(
+    wallets: { delete(id: string): Promise<unknown> },
+    walletId: string,
+    workspaceId: string,
+    userId: string,
+  ): Promise<void> {
+    await wallets.delete(walletId);
+    await this.writePortfolioSnapshot(workspaceId, userId);
+  }
+
+  /**
    * Writes today's portfolio value as the crypto account's snapshot. Never throws:
    * a sheet that could not be updated must not fail the sync that did work.
+   * Without a person behind it (the daily job) the write is the system's; a
+   * member is only needed to open the crypto account the first time.
    */
   async writePortfolioSnapshot(workspaceId: string, userId?: string | null): Promise<void> {
     try {
@@ -45,7 +61,7 @@ export class CryptoBalanceService {
         return;
       }
       const account = await this.ensureAccount(workspaceId, actorId);
-      await this.balanceService.updateSnapshot(actorId, workspaceId, {
+      await this.balanceService.updateSnapshot(userId ?? null, workspaceId, {
         accountId: account.id,
         amount: value,
         currency,

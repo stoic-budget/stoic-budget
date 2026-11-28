@@ -21,7 +21,6 @@ export const INTEGRATIONS_ERRORS = {
     'Import preview has expired. Preview this backup again before restoring.',
   BACKUP_NO_WORKSPACE_DATA: 'Backup does not contain workspace data',
   BACKUP_UNKNOWN_COLLECTION: 'Backup contains unsupported collection: {{table}}',
-  BACKUP_DOCUMENT_MISSING: 'Backup document is missing: {{path}}',
   BACKUP_FILE_REQUIRED: 'Backup file is required',
   BACKUP_PASSWORD_REQUIRED: 'A backup password is required for the first configuration',
   BACKUP_NOT_CONFIGURED: 'Backup is not configured',
