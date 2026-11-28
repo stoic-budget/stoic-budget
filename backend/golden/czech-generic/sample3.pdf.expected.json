@@ -1,0 +1,64 @@
+{
+  "bankName": "other",
+  "compares": [
+    "currency",
+    "paymentPurpose"
+  ],
+  "metadata": {
+    "accountNumber": "SK1211000000002600000099",
+    "currency": "EUR",
+    "dateFrom": "2026-03-01T00:00:00",
+    "dateTo": "2026-03-31T00:00:00",
+    "balanceStart": 1000,
+    "balanceEnd": 1863.15,
+    "rawHeader": "ACME banka, a.s. Výpis za obdobie 1.3.2026-31.3.2026 IBAN: SK12 1100 0000 0026 0000 0099 Starý zostatok 1 000,00",
+    "normalizedHeader": "ACME banka, a.s. Výpis za obdobie 1.3.2026-31.3.2026 IBAN: SK12 1100 0000 0026 0000 0099 Starý zostatok 1 000,00",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-03T00:00:00",
+      "counterpartyName": "Prijatá platba Člen Tri",
+      "paymentPurpose": "Prijatá platba Člen Tri",
+      "credit": 1500,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-03-09T00:00:00",
+      "counterpartyName": "Platba kartou ACME Potraviny",
+      "paymentPurpose": "Platba kartou ACME Potraviny",
+      "debit": 36.85,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-03-20T00:00:00",
+      "counterpartyName": "Trvalý príkaz ACME Nájom",
+      "paymentPurpose": "Trvalý príkaz ACME Nájom",
+      "debit": 600,
+      "currency": "EUR"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "7613f9795f88",
+    "headings": [
+      "date:datum | description:popis transakcie | amount:suma | balance:zostatok"
+    ],
+    "unknownWords": [
+      "transakcie"
+    ]
+  }
+}

@@ -53,6 +53,11 @@ describe('Czech and Slovak statements', () => {
     expect(parseStatementAmount(text)).toBe(expected);
   });
 
+  it('reads an en dash before the figure as its minus', () => {
+    expect(parseStatementAmount('–204,40')).toBe(-204.4);
+    expect(isAmountPart('–204,40')).toBe(true);
+  });
+
   it('takes a figure with its currency code glued on for an amount word, a merchant glued on not', () => {
     expect(isAmountPart('-3,40EUR')).toBe(true);
     expect(isAmountPart('44,91LIU')).toBe(false);

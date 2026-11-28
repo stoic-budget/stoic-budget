@@ -128,7 +128,7 @@ export function readHeaderRow(row: PdfTextRow, taught?: TaughtHeadings): LayoutC
   const roles = new Set(columns.map(column => column.role));
   const hasMoney = roles.has('debit') || roles.has('credit') || roles.has('amount');
   const hasText = roles.has('date') || roles.has('description');
-  const valid = columns.length >= 3 && hasMoney && (hasText || isMoneyOnlyHeader(roles));
+  const valid = columns.length >= 3 && hasMoney && (hasText || isMoneyOnlyHeader(roles, columns));
   return valid && !isSummaryGrid(columns) ? columns : null;
 }
 
@@ -146,8 +146,11 @@ function isSummaryGrid(columns: LayoutColumn[]): boolean {
  * rows still open with their date, and their words left of the money are the
  * text. All three money headings make it a header, not a summary line.
  */
-function isMoneyOnlyHeader(roles: Set<ColumnRole>): boolean {
-  return roles.has('debit') && roles.has('credit') && roles.has('balance');
+function isMoneyOnlyHeader(roles: Set<ColumnRole>, columns: LayoutColumn[]): boolean {
+  // Two balances, opening and closing, head a summary box ("Počáteční zůstatek
+  // Připsáno Odepsáno Konečný zůstatek"): a table runs one.
+  const balances = columns.filter(column => column.role === 'balance').length;
+  return roles.has('debit') && roles.has('credit') && balances === 1;
 }
 
 /**
