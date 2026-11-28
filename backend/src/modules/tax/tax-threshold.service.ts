@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, IsNull, Not, Repository } from 'typeorm';
+import { Between, In, IsNull, Not, Raw, Repository } from 'typeorm';
 import { countedWhere } from '../../common/utils/counted-transactions.util';
 import { fromMinor, roundHalfAwayFromZero, toMinor } from '../../common/utils/money.util';
 import { readWorkspaceProfile } from '../../common/utils/workspace-profile.util';
@@ -13,6 +13,7 @@ import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import type { TaxThresholdReachedEvent } from '../notifications/events/notification-events';
 import { JurisdictionAdoptionService } from './jurisdiction-adoption.service';
 import { toDateOnly } from './jurisdictions.service';
+import { salesCategorySql } from './sales-categories';
 
 export interface ThresholdStatus {
   /** Null when the jurisdiction publishes no threshold we track. */
@@ -57,12 +58,14 @@ export class TaxThresholdService {
   /**
    * The window the threshold is measured over.
    *
-   * A calendar year resets on 1 January; a rolling window always ends today
-   * and is therefore keyed by that date, so it is re-evaluated daily.
+   * A calendar year resets on 1 January. A rolling window always ends today
+   * but is one window that moves: its alerts are kept under one key and
+   * re-armed only when turnover falls back below a level.
    */
   private resolveWindow(
     period: TaxThresholdPeriod,
     now: Date,
+    code: string,
   ): { periodStart: string; periodEnd: string; window: string } {
     if (period === TaxThresholdPeriod.CALENDAR_YEAR) {
       const year = now.getUTCFullYear();
@@ -80,7 +83,7 @@ export class TaxThresholdService {
     return {
       periodStart: toDateOnly(start),
       periodEnd: toDateOnly(now),
-      window: `r${toDateOnly(now)}`,
+      window: `rolling:${code}`,
     };
   }
 
@@ -111,7 +114,7 @@ export class TaxThresholdService {
     }
 
     const period = jurisdiction.thresholdPeriod ?? TaxThresholdPeriod.CALENDAR_YEAR;
-    const { periodStart, periodEnd, window } = this.resolveWindow(period, now);
+    const { periodStart, periodEnd, window } = this.resolveWindow(period, now, jurisdiction.code);
     const threshold =
       jurisdiction.registrationThreshold === null
         ? null
@@ -127,7 +130,11 @@ export class TaxThresholdService {
         transferPairId: IsNull(),
         transactionType: TransactionType.INCOME,
         transactionDate: Between(new Date(periodStart), new Date(periodEnd)),
-        categoryId: Not(IsNull()),
+        // Sales only: an income category, not wages, interest or the Uncategorized fallback.
+        categoryId: Raw(
+          column =>
+            `${column} IS NOT NULL AND ${salesCategorySql(`"${column.split('.')[0].replaceAll('"', '')}"`)}`,
+        ),
       }),
     });
 
@@ -208,6 +215,22 @@ export class TaxThresholdService {
       workspace.taxThresholdAlertWindow === status.window ? workspace.taxThresholdAlertLevel : 0;
 
     const reachedLevel = status.percentUsed >= 100 ? 100 : status.percentUsed >= 80 ? 80 : 0;
+    // A rolling window moves: turnover that fell clearly back (five points below
+    // the level, every sale priced) re-arms it, so a later rise alerts again. A
+    // calendar year re-arms only with the next year.
+    const fellBack =
+      status.window.startsWith('rolling') &&
+      status.missingRateCurrencies.length === 0 &&
+      sentLevel > 0 &&
+      status.percentUsed < sentLevel - 5;
+    if (fellBack) {
+      const level = status.percentUsed >= 80 ? 80 : 0;
+      await this.workspaceRepository.update(
+        { id: workspaceId },
+        { taxThresholdAlertLevel: level, taxThresholdAlertWindow: status.window },
+      );
+      return status;
+    }
     if (reachedLevel === 0 || reachedLevel <= sentLevel) {
       return status;
     }

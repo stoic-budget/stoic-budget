@@ -9,7 +9,7 @@ import { type Transaction, TransactionCategorySource } from '../../../entities/t
  * relation objects (category, wallet, branch, ...), so saving a part never
  * cascades into them; the per-part money columns (amount/debit/credit/
  * amountForeign) and the split markers, which `split()` assigns itself;
- * `fingerprint`, which backfill recomputes from the post-split amount; and the
+ * `fingerprint`, which stays on part 0 alone (a new part is no bank's row); and the
  * duplicate-flag columns and `isPending`, unreachable because a flagged or a
  * pending row cannot be split (`assertSplittable`).
  */

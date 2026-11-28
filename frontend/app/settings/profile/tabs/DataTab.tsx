@@ -4,27 +4,26 @@ import Stack from '@mui/material/Stack';
 import type React from 'react';
 import {
   CalendarRange,
-  Cloud,
   DollarSign,
   Home,
+  Link2,
   MapPin,
   Shield,
   SlidersHorizontal,
 } from '@/app/components/icons';
 import { useWorkspace } from '@/app/contexts/WorkspaceContext';
 import { useIntlayer } from '@/app/i18n';
+import { ConnectionSection } from '@/app/settings/profile/components/ConnectionSection';
 import { ExchangeRatesSection } from '@/app/settings/profile/components/ExchangeRatesSection';
 import { MonthStartSection } from '@/app/settings/profile/components/MonthStartSection';
 import { MyDataSection } from '@/app/settings/profile/components/MyDataSection';
 import { ProcessingSection } from '@/app/settings/profile/components/ProcessingSection';
 import { ReceiptLocationCaptureSection } from '@/app/settings/profile/components/ReceiptLocationCaptureSection';
 import { SettingsAccordion } from '@/app/settings/profile/components/SettingsAccordion';
-import { SyncSection } from '@/app/settings/profile/components/SyncSection';
 import { WorkspaceProfileSection } from '@/app/settings/profile/components/WorkspaceProfileSection';
 import { resolveOpenSection } from '@/app/settings/profile/helpers/settings-url-state';
 import { useProcessing } from '@/app/settings/profile/hooks/useProcessing';
 import { useSettingsText } from '@/app/settings/profile/hooks/useSettingsText';
-import { useSync } from '@/app/settings/profile/hooks/useSync';
 
 import type { SettingsTabProps } from './types';
 
@@ -40,15 +39,6 @@ export function DataTab({ section, user, logout }: SettingsTabProps): React.JSX.
     saveError: tx(['processingCard', 'saveError']),
     savedMessage: tx(['notificationsCard', 'messages', 'saved']),
   });
-
-  const {
-    bankStats,
-    totalCount,
-    statsLoading,
-    downloading,
-    errorMessage: syncError,
-    handleExportZip,
-  } = useSync();
 
   // The account is gone; clear the client session rather than leaving a dead token around.
   const handleAccountDeleted = (): void => {
@@ -66,6 +56,12 @@ export function DataTab({ section, user, logout }: SettingsTabProps): React.JSX.
       >
         <WorkspaceProfileSection tx={tx} />
       </SettingsAccordion>
+
+      <ConnectionSection
+        connection="app-url"
+        icon={Link2}
+        defaultExpanded={openSection === 'app-url'}
+      />
 
       <SettingsAccordion
         id="month-start"
@@ -105,23 +101,6 @@ export function DataTab({ section, user, logout }: SettingsTabProps): React.JSX.
         defaultExpanded={openSection === 'receipt-location'}
       >
         <ReceiptLocationCaptureSection />
-      </SettingsAccordion>
-
-      <SettingsAccordion
-        id="sync"
-        title={tx(['syncCard', 'title'])}
-        description={tx(['syncCard', 'description'])}
-        icon={Cloud}
-        defaultExpanded={openSection === 'sync'}
-      >
-        <SyncSection
-          bankStats={bankStats}
-          totalCount={totalCount}
-          statsLoading={statsLoading}
-          downloading={downloading}
-          errorMessage={syncError}
-          handleExportZip={handleExportZip}
-        />
       </SettingsAccordion>
 
       <SettingsAccordion

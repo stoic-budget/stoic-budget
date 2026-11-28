@@ -30,10 +30,17 @@ export function AuditEventModal({
   const { resolvedTheme } = useTheme();
   const c = resolvedTheme === 'dark' ? tokens.dark.color : tokens.color;
   const [previewOpen, setPreviewOpen] = useState(false);
+  // Rollback asks twice: the quiet button no longer looks dangerous, so a stray click must not undo.
+  const [armedFor, setArmedFor] = useState<string | null>(null);
+  const close = (): void => {
+    setArmedFor(null);
+    onClose();
+  };
 
   if (!event) {
     return null;
   }
+  const armed = armedFor === event.id;
   const formatted = formatAuditEvent(event);
   // A deleted statement has no file left to show.
   const hasStatementFile = event.entityType === 'statement' && event.action !== 'delete';
@@ -64,18 +71,19 @@ export function AuditEventModal({
     <ModalShell
       demoNotice={false}
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={close}
       title={t.eventDetails.value}
       size="sm"
       footer={
         <ModalFooter
-          onCancel={onClose}
+          onCancel={close}
           cancelText={t.close.value}
           {...(event.isUndoable && onRollback
             ? {
-                onConfirm: () => onRollback(event),
-                confirmText: t.rollback.value,
-                confirmVariant: 'destructive',
+                onConfirm: () => (armed ? onRollback(event) : setArmedFor(event.id)),
+                confirmText: armed ? t.confirmRollback.value : t.rollback.value,
+                // Rolling back undoes one change: terracotta words, not a filled alarm.
+                confirmVariant: 'quiet-destructive',
                 isConfirmLoading: rollbackLoading,
               }
             : {})}

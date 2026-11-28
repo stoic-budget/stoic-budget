@@ -61,7 +61,7 @@ export function buildMonthCloseModel(data: DashboardData, month: Date): MonthClo
   }
   const warnings = health?.parsingWarnings ?? 0;
   if (warnings > 0) {
-    attention.push({ id: 'parsing', count: warnings, href: '/statements?filter=has_errors' });
+    attention.push({ id: 'parsing', count: warnings, href: '/statements?has=warnings' });
   }
 
   return {

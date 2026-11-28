@@ -14,10 +14,11 @@ import { DemoNotice } from '@/app/components/demo/DemoNotice';
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer } from '@/app/i18n';
 import { getApiErrorMessage } from '@/app/lib/api-error';
+import { localToday } from '@/app/lib/local-today';
 import { useLedgerMutations } from '../hooks/useLedger';
 import type { RevaluationResult } from '../ledger.types';
 
-const today = (): string => new Date().toISOString().slice(0, 10);
+const today = (): string => localToday();
 
 /** What the last request did, in words. */
 function ResultAlert({ result }: { result: RevaluationResult }): React.ReactElement {

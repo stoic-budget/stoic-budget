@@ -1,0 +1,59 @@
+{
+  "bankName": "other",
+  "metadata": {
+    "accountNumber": "12345678",
+    "currency": "EUR",
+    "dateFrom": "2026-03-01T00:00:00",
+    "dateTo": "2026-03-31T00:00:00",
+    "balanceStart": 1000,
+    "balanceEnd": 1200,
+    "rawHeader": "ACME Bank plc Account statement Account number: 12345678 Opening balance 1,000.00 EUR",
+    "normalizedHeader": "ACME Bank plc Account statement Account number: 12345678 Opening balance 1,000.00 EUR",
+    "locale": "en"
+  },
+  "transactions": [
+    {
+      "transactionDate": "2026-03-03T00:00:00",
+      "counterpartyName": "Transfer from Member Two, BIC FIOBCZPPXXX, Fio banka, a.s.",
+      "paymentPurpose": "Transfer from Member Two, BIC FIOBCZPPXXX, Fio banka, a.s.",
+      "credit": 250,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-03-05T00:00:00",
+      "counterpartyName": "Card payment ACME Coffee",
+      "paymentPurpose": "Card payment ACME Coffee",
+      "debit": 35,
+      "currency": "EUR"
+    },
+    {
+      "transactionDate": "2026-03-12T00:00:00",
+      "counterpartyName": "Card payment ACME Books",
+      "paymentPurpose": "Card payment ACME Books",
+      "debit": 15,
+      "currency": "EUR"
+    }
+  ],
+  "checks": [
+    {
+      "code": "balance_chain",
+      "passed": true
+    },
+    {
+      "code": "printed_balances",
+      "passed": true
+    },
+    {
+      "code": "dates_in_period",
+      "passed": true
+    }
+  ],
+  "layout": {
+    "fingerprint": "35b994ad847f",
+    "headings": [
+      "date:date | description:description | amount:amount | balance:balance"
+    ],
+    "unknownWords": [],
+    "mentionedBank": "fio"
+  }
+}

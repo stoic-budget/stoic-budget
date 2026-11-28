@@ -67,7 +67,7 @@ PostgreSQL listens on `127.0.0.1:5434` and Redis on `127.0.0.1:6379`.
 ## Next steps
 
 - Upload a statement from the Statements page
-- Connect storage, mail or bank sync under **Integrations** — see [Integrations](../guides/integrations)
+- Connect mail or bank sync under **Plugins** and storage under **Settings → Sync** — see [Integrations](../guides/integrations)
 - Read [Configuration](configuration) before exposing Stoic Budget beyond localhost
 
 Next: [Local Development](local-development)

@@ -1,4 +1,4 @@
-import type { DeepPartial, EntityManager } from 'typeorm';
+import { type DeepPartial, type EntityManager, In } from 'typeorm';
 import { Transaction } from '../../../entities/transaction.entity';
 import { lockStatements, recountStatementTotals } from '../../statements/helpers/statement-totals';
 import { type DeletedRowLinks, restoreLinks } from './transaction-delete-links';
@@ -69,6 +69,15 @@ export async function restoreDeletedTransaction(
       row.reimbursementOfId = null;
     }
 
+    // A split part comes back with the bank row's fingerprint it handed on
+    // (to a sibling the delete recorded; the last one left lost its split marks).
+    const siblings = links.splitSiblings.map(link => link.id);
+    if (row.fingerprint && siblings.length > 0) {
+      await repo.update(
+        { workspaceId, id: In(siblings), fingerprint: row.fingerprint },
+        { fingerprint: null },
+      );
+    }
     // The copy the delete made the original holds the fingerprint the row
     // comes back with: it steps aside until it is the row's copy again.
     const stepped = row.fingerprint

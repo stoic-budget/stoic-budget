@@ -7,7 +7,9 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { UNCATEGORIZED_CATEGORY_NAME } from '../categories/uncategorized-category';
 import { applyReportFilters } from './helpers/report-filters.util';
 import { countedTransactions } from './helpers/report-query.util';
+import { round2 } from './helpers/report-values.util';
 import type { TopCategoriesReport as TopCategoriesResult } from './interfaces/top-categories-report.interface';
+import { TemplateReportRowsLoader } from './template-report-rows.loader';
 
 /** Where the money went: the largest categories, banks and counterparties in a period. */
 @Injectable()
@@ -15,6 +17,7 @@ export class TopCategoriesReport {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    private readonly rowsLoader: TemplateReportRowsLoader,
   ) {}
 
   async getTopCategoriesReport(
@@ -62,10 +65,12 @@ export class TopCategoriesReport {
       }
     }
 
+    // Every row of the period: a cap on the most recently changed ones understated the totals (#598).
     const transactions = redactPrivateRows(
-      await qb.orderBy('transaction.updatedAt', 'DESC').take(5000).getMany(),
+      await qb.orderBy('transaction.updatedAt', 'DESC').getMany(),
       selfMemberId,
     );
+    const money = await this.rowsLoader.toWorkspaceCurrency(workspaceId, transactions);
 
     const totals = {
       income: 0,
@@ -149,7 +154,10 @@ export class TopCategoriesReport {
       counterpartyMap.set(counterpartyName, counterpartyCurrent);
     });
 
-    totals.net = totals.income - totals.expense;
+    // Converted amounts add up with float tails: every figure is to the cent.
+    totals.income = round2(totals.income);
+    totals.expense = round2(totals.expense);
+    totals.net = round2(totals.income - totals.expense);
 
     const totalFlow = totals.income + totals.expense;
     const categories = Array.from(categoryMap.values())
@@ -157,6 +165,7 @@ export class TopCategoriesReport {
       .slice(0, safeLimit)
       .map(item => ({
         ...item,
+        amount: round2(item.amount),
         percentage: totalFlow > 0 ? Number(((item.amount / totalFlow) * 100).toFixed(2)) : 0,
       }));
 
@@ -165,6 +174,7 @@ export class TopCategoriesReport {
       .slice(0, safeLimit)
       .map(item => ({
         ...item,
+        amount: round2(item.amount),
         percentage: totalFlow > 0 ? Number(((item.amount / totalFlow) * 100).toFixed(2)) : 0,
       }));
 
@@ -173,10 +183,12 @@ export class TopCategoriesReport {
       .slice(0, safeLimit)
       .map(item => ({
         ...item,
+        amount: round2(item.amount),
         percentage: totalFlow > 0 ? Number(((item.amount / totalFlow) * 100).toFixed(2)) : 0,
       }));
 
     return {
+      ...money,
       period: {
         from: from.toISOString().split('T')[0],
         to: to.toISOString().split('T')[0],

@@ -79,6 +79,9 @@ vi.mock('@/app/lib/theme-preference', () => ({
   resolveThemePreference: (value: string) => value,
 }));
 
+// Covered by its own test; here it would need the workspace list and the language api.
+vi.mock('./hooks/useWorkspaceLocaleSync', () => ({ useWorkspaceLocaleSync: () => {} }));
+
 vi.mock('./components/side-panel', () => ({
   SidePanelProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
