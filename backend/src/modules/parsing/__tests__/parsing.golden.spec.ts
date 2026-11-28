@@ -102,9 +102,13 @@ const hasRealDate = (value: Date | null | undefined) => {
  * The comparable shape of a transaction. Amounts are rounded to cents and text
  * is whitespace-normalized so a fixture does not break on PDF spacing noise.
  */
+/** Row fields a fixture may ask to be held to as well, by listing them under `compares`. */
+type ExtraField = 'counterpartyAccount' | 'amountForeign' | 'currency';
+
 function projectTransaction(
   transaction: ParsedStatement['transactions'][number],
   withPaymentType = false,
+  extras: ExtraField[] = [],
 ) {
   const round = (value: unknown) =>
     Number.isFinite(Number(value)) ? Number(Number(value).toFixed(2)) : null;
@@ -117,6 +121,7 @@ function projectTransaction(
     documentNumber: (transaction.documentNumber || '').trim(),
     // Only a fixture that records the payment type is held to it.
     ...(withPaymentType && { paymentType: transaction.paymentType ?? null }),
+    ...Object.fromEntries(extras.map(field => [field, transaction[field] ?? null])),
   };
 }
 
@@ -203,7 +208,10 @@ describe('golden parsing (optional)', () => {
       // A known format must pass every check of its own reading: a check that
       // fails here would hold good statements for review. A fixture of an
       // incomplete file names the checks it is expected to fail.
-      const expectedFailures: string[] = JSON.parse(fs.readFileSync(expected, 'utf8')).failedChecks ?? [];
+      const fixture = JSON.parse(fs.readFileSync(expected, 'utf8'));
+      const expectedFailures: string[] = fixture.failedChecks ?? [];
+      // Fields recorded by every fixture but checked only where one says so.
+      const extras: ExtraField[] = fixture.compares ?? [];
       actualAccounts.forEach((account, index) => {
         const failed = (account.checks ?? []).filter(check => !check.passed);
         expect({ account: index, failed: failed.map(check => check.code) }).toEqual({
@@ -229,9 +237,9 @@ describe('golden parsing (optional)', () => {
         // Matching totals are not enough: a parser can drop one row and misread
         // another by the same amount. Compare row by row.
         const withPaymentType = expected.transactions.some(t => t.paymentType !== undefined);
-        expect(actualAccount.transactions.map(t => projectTransaction(t, withPaymentType))).toEqual(
-          expected.transactions.map(t => projectTransaction(t, withPaymentType)),
-        );
+        expect(
+          actualAccount.transactions.map(t => projectTransaction(t, withPaymentType, extras)),
+        ).toEqual(expected.transactions.map(t => projectTransaction(t, withPaymentType, extras)));
 
         if (expected.metadata.accountNumber) {
           expect(actualAccount.metadata.accountNumber).toBe(expected.metadata.accountNumber);
