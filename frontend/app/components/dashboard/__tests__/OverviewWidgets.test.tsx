@@ -261,6 +261,7 @@ describe('TaxesCard', () => {
         incomeTax: null,
         payments: { categoryId: null, amount: 0, count: 0 },
         total: 400,
+        carriedOver: 0,
         missingRateCurrencies: [],
       },
       '/tax/settings/threshold': null,

@@ -41,6 +41,15 @@ describe('normalizeNumber', () => {
     expect(normalizeNumber('1.234.56')).toBe(1234.56);
   });
 
+  it('reads dots between three-digit groups as grouping only', () => {
+    expect(normalizeNumber('1.234.567')).toBe(1234567);
+  });
+
+  it('never reads a separator after a zero as grouping', () => {
+    expect(normalizeNumber('0,125')).toBe(0.125);
+    expect(normalizeNumber('0.125')).toBe(0.125);
+  });
+
   it('strips non-numeric chars', () => {
     expect(normalizeNumber('$1,234.56')).toBe(1234.56);
   });

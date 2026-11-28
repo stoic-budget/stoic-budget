@@ -6,7 +6,7 @@ import { Checkbox } from '@/app/components/ui/checkbox';
 import { AggregateFooter } from '../components/AggregateFooter';
 import { ColumnMenu } from '../components/ColumnHeader';
 import { EditableCell } from '../components/cells/EditableCell';
-import { isNumericColumn } from '../components/cells/formatCell';
+import { inRowCurrency, isNumericColumn, rowCurrencyKey } from '../components/cells/formatCell';
 import type { TableGridProps } from '../components/TableGrid';
 import { isMissingRequiredCell } from '../helpers/draftRowHelpers';
 import { type CustomTableGridRow } from '../utils/types';
@@ -52,6 +52,7 @@ export const useGridColumns = (
         </span>
       ),
     };
+    const currencyKey = rowCurrencyKey(columns);
     const dataColumns = columns.map<GridColumnDef<CustomTableGridRow, unknown>>(column => ({
       id: column.key,
       accessorFn: row => row.data?.[column.key],
@@ -85,7 +86,7 @@ export const useGridColumns = (
       },
       cell: ({ row }) => (
         <EditableCell
-          column={column}
+          column={inRowCurrency(column, row.original, currencyKey)}
           row={row.original}
           fallbackCurrency={fallbackCurrency}
           missingRequired={isMissingRequiredCell(row.original, column)}

@@ -32,7 +32,7 @@ import { AuditService } from '../audit/audit.service';
 import { recordSecurityEvent } from '../auth/security-audit.util';
 import { StandingAccessService } from '../auth/standing-access/standing-access.service';
 import { WorkspacesService } from '../workspaces/workspaces.service';
-import { snapshotAdminFields } from './admin-fields';
+import { forgetDeletedAccount, snapshotAdminFields } from './admin-fields';
 import { CURRENT_DISCLAIMER_VERSION } from './disclaimer.constant';
 import { OWN_PROFILE_COLUMNS } from './own-profile-columns';
 import { recordPasswordChanged } from './password-changed';
@@ -176,7 +176,7 @@ export class UsersService {
     }
 
     const target = await this.findOne(id);
-    await this.userRepository.softDelete(id);
+    await forgetDeletedAccount(this.userRepository.manager, id);
 
     await recordSecurityEvent(this.auditService, this.logger, {
       workspaceId: target.workspaceId,

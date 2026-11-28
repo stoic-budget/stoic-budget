@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { ModalFooter, ModalShell } from '@/app/components/ui/modal-shell';
 import { useIntlayer } from '@/app/i18n';
+import { localToday } from '@/app/lib/local-today';
 import type { InvestmentTrade, TradeInput } from '../hooks/useInvestmentTrades';
 import { LabeledField } from './LabeledField';
 import { parseDecimal } from './trade-form';
@@ -40,7 +41,7 @@ export function SplitDialog({
 }: SplitDialogProps) {
   const t = useIntlayer('investmentTrades');
   // Filled once per opening (the parent keys it by the split).
-  const [date, setDate] = useState(split?.date ?? new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(split?.date ?? localToday());
   const [to, setTo] = useState(split?.splitTo ? String(split.splitTo) : '');
   const [from, setFrom] = useState(split?.splitFrom ? String(split.splitFrom) : '1');
 

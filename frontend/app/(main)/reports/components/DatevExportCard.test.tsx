@@ -130,7 +130,7 @@ describe('DatevExportCard', () => {
     );
   });
 
-  it('drops the mapping when the chart changes', async () => {
+  it("drops the mapping and moves the bank to the new chart's when the chart changes", async () => {
     mockApi();
     renderWithQuery(<DatevExportCard year={2026} />);
     await screen.findByTestId('datev-mapping');
@@ -143,7 +143,7 @@ describe('DatevExportCard', () => {
     await waitFor(() =>
       expect(api.put).toHaveBeenCalledWith(
         '/tax/datev/settings',
-        expect.objectContaining({ chart: '04', accounts: {} }),
+        expect.objectContaining({ chart: '04', accounts: {}, bankAccount: '1800' }),
       ),
     );
   });

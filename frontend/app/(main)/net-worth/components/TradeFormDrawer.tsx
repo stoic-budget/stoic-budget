@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { DrawerShell } from '@/app/components/ui/drawer-shell';
 import { Select } from '@/app/components/ui/select';
 import { useIntlayer } from '@/app/i18n';
+import { localToday } from '@/app/lib/local-today';
 import type { InvestmentTrade, TradeInput } from '../hooks/useInvestmentTrades';
 import { LabeledField } from './LabeledField';
 import {
@@ -32,7 +33,7 @@ interface TradeFormDrawerProps {
   onSave: (input: TradeInput) => Promise<unknown>;
 }
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => localToday();
 
 /** A buy, sale, dividend or transfer, entered or corrected; only the fields its kind uses. */
 export function TradeFormDrawer({

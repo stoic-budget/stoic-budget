@@ -158,16 +158,16 @@ function EventDrawerBody({
         <button
           type="button"
           onClick={() => onRollback?.(event)}
+          // Quiet terracotta words: the confirmation that follows carries the weight.
           style={{
-            width: '100%',
-            border: `1px solid ${c.danger}`,
-            background: c.dangerSoft,
-            padding: '8px 16px',
+            alignSelf: 'flex-start',
+            border: 0,
+            background: 'none',
+            padding: '8px 0',
             fontSize: 14,
-            fontWeight: 600,
-            color: c.danger,
+            fontWeight: 500,
+            color: 'var(--money-down)',
             cursor: 'pointer',
-            borderRadius: tokens.radius.md,
           }}
         >
           {t.rollbackChange.value}

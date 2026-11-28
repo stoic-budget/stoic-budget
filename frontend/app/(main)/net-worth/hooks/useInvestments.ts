@@ -107,18 +107,25 @@ export function useInvestments() {
     [mutation.mutateAsync],
   );
   const pricesUpdated = t.pricesUpdated.value;
+  const pricesFailed = t.pricesFailed.value;
   const refreshPrices = useCallback(
     () =>
       mutation.mutateAsync(async () => {
         const response = await apiClient.post('/investments/refresh-prices');
-        const { updated } = await checkContract(
+        const { updated, failed = 0 } = await checkContract(
           'PriceRefreshResult',
           response.data,
           '/investments/refresh-prices',
         );
-        toast.success(pricesUpdated.replaceAll('{{count}}', String(updated)));
+        // A source that gave no price is said, not hidden behind a green count (#696).
+        if (updated > 0 || failed === 0) {
+          toast.success(pricesUpdated.replaceAll('{{count}}', String(updated)));
+        }
+        if (failed > 0) {
+          toast.error(pricesFailed.replaceAll('{{count}}', String(failed)));
+        }
       }),
-    [mutation.mutateAsync, pricesUpdated],
+    [mutation.mutateAsync, pricesUpdated, pricesFailed],
   );
 
   return {

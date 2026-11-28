@@ -635,6 +635,12 @@ describe('API contracts: ledger book (e2e)', () => {
       }).expect(201);
       matches(BulkFilesDeleted, purged.body);
       expect(purged.body.deleted).toBe(1);
+      // Gone for good, not trashed again (#678).
+      const [left] = await dataSource.query(
+        'SELECT count(*)::int AS n FROM statements WHERE id = ANY($1::uuid[])',
+        [[one, two]],
+      );
+      expect(left.n).toBe(0);
     });
   });
 });

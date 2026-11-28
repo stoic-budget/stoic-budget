@@ -21,8 +21,6 @@ describe('useStatementsListData', () => {
         appliedFilters: DEFAULT_STATEMENT_FILTERS,
         search: '',
         user: { id: 'u1' },
-        page: 1,
-        pageSize: 20,
         router: { replace: vi.fn() } as never,
         loadListErrorLabel: 'Failed to load statements',
         refreshFailedLabel: 'Failed to refresh statements',

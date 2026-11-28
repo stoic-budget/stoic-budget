@@ -8,6 +8,10 @@ const COINBASE = [
   'bbb,2026-02-05T10:00:00Z,Sell,ETH,0.5,EUR,2000,1000.00,994.00,6.00,Sold 0.5 ETH for €994.00 EUR',
   'ccc,2026-03-05T10:00:00Z,Convert,BTC,0.005,EUR,60000,300.00,300.00,0.00,Converted 0.005 BTC to 0.15 ETH',
   'ddd,2026-04-05T10:00:00Z,Receive,BTC,0.02,EUR,60000,,,,"Received 0.02 BTC from an external account"',
+  'ggg,2026-04-06T10:00:00Z,Send,BTC,-0.009,EUR,60000,,,,"Sent 0.009 BTC to an external wallet"',
+  'hhh,2026-04-07T10:00:00Z,Send,BTC,0.001,EUR,60000,,,,"Sent 0.001 BTC to an external wallet"',
+  'iii,2026-04-08T10:00:00Z,Retail Staking Transfer,ETH,-0.004,EUR,60000,,,,',
+  'jjj,2026-04-09T10:00:00Z,Exchange Withdrawal,BTC,0.003,EUR,60000,,,,',
   'eee,2026-05-05T10:00:00Z,Staking Income,ETH,0.01,EUR,2000,20.00,20.00,0.00,',
   'fff,2026-06-05T10:00:00Z,Deposit,EUR,500,EUR,1,,,,Deposited €500',
 ].join('\n');
@@ -94,6 +98,24 @@ describe('parseExchangeCsv', () => {
 
       expect(buy).toMatchObject({ asset: 'BTC', amount: 0.01, kind: 'trade', date: '2026-01-05' });
       expect(sell).toMatchObject({ asset: 'ETH', amount: -0.5, kind: 'trade' });
+    });
+
+    it('reads a send as coins leaving, whether the file signs the quantity or not', () => {
+      const signed = parsed?.entries.find(entry => entry.reference === 'ggg');
+      const unsigned = parsed?.entries.find(entry => entry.reference === 'hhh');
+      const receive = parsed?.entries.find(entry => entry.reference === 'ddd');
+
+      expect(signed).toMatchObject({ asset: 'BTC', amount: -0.009, kind: 'move' });
+      expect(unsigned).toMatchObject({ asset: 'BTC', amount: -0.001, kind: 'move' });
+      expect(receive).toMatchObject({ asset: 'BTC', amount: 0.02, kind: 'move' });
+    });
+
+    it('trusts the sign of any other move, and keeps an unsigned withdrawal from Pro incoming', () => {
+      const staking = parsed?.entries.find(entry => entry.reference === 'iii');
+      const fromPro = parsed?.entries.find(entry => entry.reference === 'jjj');
+
+      expect(staking).toMatchObject({ amount: -0.004, kind: 'move' });
+      expect(fromPro).toMatchObject({ amount: 0.003, kind: 'move' });
     });
 
     it('takes both sides of a conversion out of the note', () => {

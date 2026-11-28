@@ -131,6 +131,10 @@ describe('crypto wallet sync (real Postgres)', () => {
   let cardRowId: string;
 
   function explorerAnswer(url: string): unknown {
+    // No contract paid the wallet anything inside these transactions (#693).
+    if (url.includes('action=txlistinternal')) {
+      return { status: '0', message: 'No transactions found', result: [] };
+    }
     if (url.includes('action=txlist')) {
       return {
         status: '1',
@@ -532,6 +536,23 @@ describe('crypto wallet sync (real Postgres)', () => {
 
       const again = await importer.importCsv(workspaceId, userId, CSV);
       expect(again).toMatchObject({ imported: 0, skipped: 2 });
+    });
+  });
+
+  describe('a Kraken export with a fee too small to print plainly', () => {
+    // 0.00000075 and 0.00000002 come out of the parse as 7.5e-7 and 2e-8.
+    const CSV = [
+      '"txid","refid","time","type","subtype","aclass","asset","wallet","amount","fee","balance"',
+      '"K1","R1","2026-01-15 09:00:00","deposit","","currency","XETH","spot",0.03,0.00000075,0.02999925',
+      '"K2","R2","2026-02-15 09:00:00","staking","","currency","ETH.S","spot",0.00000002,0,0.02999927',
+    ].join('\n');
+
+    it('imports, and holds exactly what the file adds up to', async () => {
+      const result = await importer.importCsv(workspaceId, userId, CSV);
+      const wallet = await walletRepo.findOneByOrFail({ id: result.walletId });
+
+      expect(result).toMatchObject({ exchange: 'Kraken', skipped: 0 });
+      expect(wallet.balances).toEqual([{ asset: 'ETH', amount: '0.02999927' }]);
     });
   });
 
