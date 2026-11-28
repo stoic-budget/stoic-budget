@@ -48,6 +48,7 @@ import { EmailReceiptParserService } from '../receipts/services/email-receipt-pa
 import { ReceiptCategoryService } from '../receipts/services/receipt-category.service';
 import { ReceiptDuplicateService } from '../receipts/services/receipt-duplicate.service';
 import { StatementsService } from '../statements/statements.service';
+import { keptImapCursor, openImapBatch } from './imap-cursor';
 
 type ProtocolStatusResponse = {
   connected: boolean;
@@ -267,6 +268,7 @@ export class OpenProtocolIntegrationsService {
         port: config.port,
         secure: config.secure,
         mailbox: config.mailbox,
+        ...keptImapCursor(existing.settings, config),
       },
       secrets: {
         user: config.user,
@@ -522,12 +524,10 @@ export class OpenProtocolIntegrationsService {
 
     try {
       await client.connect();
-      await client.mailboxOpen(config.mailbox);
-      const searchResult = await client.search({});
-      const uids = Array.isArray(searchResult) ? searchResult : [];
-      const limitedUids = uids.slice(0, Number(process.env.IMAP_SYNC_LIMIT ?? 50));
+      // UIDs, not sequence numbers, and the next ones after the last sync (#679).
+      const imap = await openImapBatch(client, config, this.integrationRepository, workspaceId);
 
-      for (const uid of limitedUids) {
+      for (const uid of imap.batch) {
         scanned += 1;
         try {
           const message = await client.fetchOne(
@@ -535,10 +535,7 @@ export class OpenProtocolIntegrationsService {
             { source: true, envelope: true, flags: true },
             { uid: true },
           );
-          if (!message) {
-            continue;
-          }
-          const source = message.source;
+          const source = message ? message.source : undefined;
           if (!source) {
             continue;
           }
@@ -550,12 +547,14 @@ export class OpenProtocolIntegrationsService {
             await client.messageFlagsAdd(uid, ['\\Seen'], { uid: true });
           }
         } catch (msgError) {
+          imap.failed(uid);
           const e = msgError as Record<string, unknown>;
           this.logger.warn(
             `IMAP: failed to process uid ${uid}: ${String(e.message)} | responseStatus: ${String(e.responseStatus)} | response: ${JSON.stringify(e.response)}`,
           );
         }
       }
+      await imap.remember();
     } finally {
       await client.logout().catch(() => undefined);
     }

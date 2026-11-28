@@ -73,6 +73,7 @@ import {
 } from '../tax/tax-assignment.service';
 import * as calendar from './charge-calendar.util';
 import { CurrencyTotals } from './currency-totals';
+import { advancePastDue, chargeArrived } from './missed-charge';
 import {
   chargesInMonth,
   isPastMonth,
@@ -91,6 +92,7 @@ import {
   monthlySetAside,
 } from './subscription-insights.util';
 import { forgetPayeeRule, NOT_REJECTED_FOR_SUBSCRIPTION, rejectedRows } from './subscription-links';
+import { summaryConverter } from './summary-currency';
 
 const DEFAULT_CALENDAR_MONTHS = 6;
 /** How far back a bank row can still be picked as a payment. */
@@ -513,19 +515,14 @@ export class SubscriptionsService {
 
     const workspace = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
     const workspaceCurrency = workspace?.currency?.toUpperCase();
+    const toWorkspace = summaryConverter(this.exchangeRatesService, workspaceCurrency, workspaceId);
     const normalizedMonthlyCosts = await Promise.all(
-      active.map(async sub => {
-        const amount = this.normalizeToMonthly(Number(sub.amount), sub.frequency);
-        if (!workspaceCurrency || sub.currency.toUpperCase() === workspaceCurrency) return amount;
-        const converted = await this.exchangeRatesService.convert(
-          amount,
+      active.map(sub =>
+        toWorkspace.convert(
+          this.normalizeToMonthly(Number(sub.amount), sub.frequency),
           sub.currency,
-          workspaceCurrency,
-          new Date(),
-          workspaceId,
-        );
-        return converted.converted;
-      }),
+        ),
+      ),
     );
     const totalMonthlyCost = normalizedMonthlyCosts.reduce((sum, amount) => sum + amount, 0);
 
@@ -557,18 +554,10 @@ export class SubscriptionsService {
         ) {
           if (charge >= startOfToday) count += 1;
         }
-        const amount = Number(sub.amount) * count;
-        if (!(amount && workspaceCurrency) || sub.currency.toUpperCase() === workspaceCurrency) {
-          return { count, amount };
-        }
-        const converted = await this.exchangeRatesService.convert(
-          amount,
-          sub.currency,
-          workspaceCurrency,
-          new Date(),
-          workspaceId,
-        );
-        return { count, amount: converted.converted };
+        return {
+          count,
+          amount: await toWorkspace.convert(Number(sub.amount) * count, sub.currency),
+        };
       }),
     );
     const upcoming30DaysCount = upcoming30Days.reduce((sum, next) => sum + next.count, 0);
@@ -580,18 +569,7 @@ export class SubscriptionsService {
     const yearlyEffects = await Promise.all(
       priceChanged.map(async sub => {
         const change = sub.detectionMeta?.priceChange as { yearlyDelta?: number } | undefined;
-        const yearly = Number(change?.yearlyDelta ?? 0);
-        if (!(yearly && workspaceCurrency) || sub.currency.toUpperCase() === workspaceCurrency) {
-          return yearly;
-        }
-        const converted = await this.exchangeRatesService.convert(
-          yearly,
-          sub.currency,
-          workspaceCurrency,
-          new Date(),
-          workspaceId,
-        );
-        return converted.converted;
+        return toWorkspace.convert(Number(change?.yearlyDelta ?? 0), sub.currency);
       }),
     );
     const priceChangeYearlyEffect =
@@ -616,6 +594,7 @@ export class SubscriptionsService {
       duplicateCount,
       overdueReviewCount,
       realizedAnnualSavings: Math.round(realizedAnnualSavings * 100) / 100,
+      ...toWorkspace.missingRates(),
     };
   }
 
@@ -716,7 +695,10 @@ export class SubscriptionsService {
       this.workspaceRepository.findOne({ where: { id: workspaceId } }),
     ]);
 
-    const workspaceCurrency = workspace?.currency?.toUpperCase() ?? null;
+    const money = workspaceMoney(this.exchangeRatesService, workspaceId, workspace?.currency, {
+      faceValue: true,
+    });
+    const workspaceCurrency = money.currency;
     const { key, period, today } = monthInView(month, new Date(), payPeriod);
     const recordedThisMonth = await chargesInMonth(this.chargeRepository, workspaceId, period);
     const status = { paidAmount: 0, paidCount: 0, unpaidAmount: 0, unpaidCount: 0 };
@@ -739,17 +721,11 @@ export class SubscriptionsService {
       paidByCurrency.add(sub.currency, Number(sub.amount) * paid);
       unpaidByCurrency.add(sub.currency, Number(sub.amount) * unpaid);
 
-      let amount = Number(sub.amount);
-      if (workspaceCurrency && sub.currency.toUpperCase() !== workspaceCurrency) {
-        const converted = await this.exchangeRatesService.convert(
-          amount,
-          sub.currency,
-          workspaceCurrency,
-          today,
-          workspaceId,
-        );
-        amount = converted.converted;
-      }
+      // At today's rate; a currency with none counts at face value, as in the summary, and is named (#787).
+      const amount =
+        workspaceCurrency && sub.currency.toUpperCase() !== workspaceCurrency
+          ? await money.convert(Number(sub.amount), sub.currency, today)
+          : Number(sub.amount);
 
       status.paidAmount += amount * paid;
       status.paidCount += paid;
@@ -779,6 +755,7 @@ export class SubscriptionsService {
       paidByCurrency: paidByCurrency.list(),
       unpaidByCurrency: unpaidByCurrency.list(),
       items,
+      ...money.missing(),
     };
   }
 
@@ -1145,13 +1122,10 @@ export class SubscriptionsService {
     });
 
     for (const sub of pastDue) {
-      const currentChargeDate = sub.nextChargeDate;
-      if (!currentChargeDate) continue;
-
-      sub.lastChargeDate = currentChargeDate;
-      sub.nextChargeDate = this.addInterval(new Date(currentChargeDate), sub.frequency);
-      sub.riskStatus = SubscriptionRiskStatus.MISSING_CHARGE;
-      await this.subscriptionRepository.save(sub);
+      // Flags a charge missing only once its due date has had a cycle to arrive.
+      if (await advancePastDue(sub, this.chargeRepository)) {
+        await this.subscriptionRepository.save(sub);
+      }
     }
 
     if (pastDue.length > 0) {
@@ -1549,6 +1523,8 @@ export class SubscriptionsService {
 
   /** Last charge is the latest payment; the next one moves past a payment on or after it. */
   private advancePastCharge(subscription: Subscription, chargeDay: string): void {
+    // A charge came: whatever "missing" said about it is over.
+    chargeArrived(subscription);
     const last = toDay(subscription.lastChargeDate);
     if (!last || last < chargeDay) {
       subscription.lastChargeDate = chargeDay as unknown as Date;
@@ -1612,7 +1588,8 @@ export class SubscriptionsService {
           currency: transaction.currency,
           chargeDate: transaction.transactionDate,
           expectedAmount: subscription.amount,
-          expectedDate: subscription.nextChargeDate,
+          // The charge this payment settled: a past row is a past period's, not the next one (#608).
+          expectedDate: calendar.settledDateOf(subscription, transaction.transactionDate),
           matchStatus,
         }),
       );

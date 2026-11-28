@@ -188,8 +188,8 @@ export class StatementsService {
     return this.statementTrash.trash(await this.findOne(id, workspaceId), userId, workspaceId);
   }
 
-  async permanentDelete(id: string, userId: string, workspaceId: string): Promise<void> {
-    await this.statementTrash.permanentDelete(id, userId, workspaceId);
+  async permanentDelete(...args: Parameters<StatementTrashService['permanentDelete']>) {
+    await this.statementTrash.permanentDelete(...args);
   }
 
   async remove(id: string, userId: string, workspaceId: string): Promise<void> {
@@ -254,6 +254,8 @@ export class StatementsService {
 
     statement.status = StatementStatus.UPLOADED;
     statement.errorMessage = null;
+    // A new reading starts with a full set of tries, not what the failed ones left.
+    statement.parsingAttempts = 0;
     statement.processedAt = null;
     statement.totalTransactions = 0;
     statement.totalDebit = 0;

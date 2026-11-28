@@ -12,6 +12,7 @@ import { withCreditMarks } from '../helpers/pdf-layout-credit-marks.helper';
 import { statementLayout } from '../helpers/pdf-layout-fingerprint.helper';
 import type { RowRule } from '../helpers/pdf-layout-row-date.helper';
 import { pickByChecks, ROW_RULES } from '../helpers/pdf-layout-rules.helper';
+import { withoutStackedDates } from '../helpers/pdf-layout-stacked-dates.helper';
 import {
   type LayoutReading,
   type LayoutTransaction,
@@ -229,7 +230,11 @@ export class GenericPdfParser extends BaseParser {
     rows: PdfTextRow[],
     reading: LayoutReading = this.reading,
   ): LayoutTransaction[] {
-    return withCreditMarks(rows, readLayoutTransactions(rows, { ...reading, rows: this.rowRule }));
+    const lines = withoutStackedDates(rows);
+    return withCreditMarks(
+      lines,
+      readLayoutTransactions(lines, { ...reading, rows: this.rowRule }),
+    );
   }
 
   /** The row rule `readTransactions` reads under; a bank's override passes no reading. */

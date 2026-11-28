@@ -1040,5 +1040,33 @@ describe('Repeating bills and "not this payment" (e2e)', () => {
       );
       expect(charges.map(row => row.transaction_id)).toEqual([kept]);
     });
+
+    it("books each detected past payment against its own period's charge, not the next one (#608)", async () => {
+      const rows = [
+        await bankRow('ACME Radio', 7, addDays(today, -50)),
+        await bankRow('ACME Radio', 7, addDays(today, -20)),
+      ];
+      const detected = await dataSource.getRepository(Subscription).save({
+        workspaceId: owner.workspaceId,
+        vendorName: 'ACME Radio',
+        amount: 7,
+        currency: 'KZT',
+        frequency: SubscriptionFrequency.MONTHLY,
+        status: SubscriptionStatus.DETECTED,
+        nextChargeDate: addDays(today, 10),
+        detectionMeta: { transactionIds: rows },
+      });
+      await post(`/subscriptions/${detected.id}/confirm`, {}).expect(201);
+
+      const charges: Array<{ expected: string; next: string }> = await dataSource.query(
+        `SELECT charge.expected_date::text AS expected, subscription.next_charge_date::text AS next
+           FROM subscription_charges charge
+           JOIN subscriptions subscription ON subscription.id = charge.subscription_id
+          WHERE charge.subscription_id = $1`,
+        [detected.id],
+      );
+      expect(charges).toHaveLength(2);
+      for (const charge of charges) expect(charge.expected < charge.next).toBe(true);
+    });
   });
 });

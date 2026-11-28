@@ -8,14 +8,14 @@ import type React from 'react';
 import { useIntlayer } from '@/app/i18n';
 import { tokens } from '@/lib/theme-tokens';
 import { usePluginState } from '../hooks/usePluginState';
-import type { PluginKey } from '../types';
+import type { SwitchKey } from '../types';
 
-/** Shown at the top of a plugin's drawer while the plugin is switched off. */
+/** Shown at the top of a plugin's or integration's drawer while it is switched off. */
 export function PluginOffBanner({
   plugin,
   message,
 }: {
-  plugin: PluginKey;
+  plugin: SwitchKey;
   message: React.ReactNode;
 }): React.JSX.Element | null {
   const t = useIntlayer('pluginsPage');

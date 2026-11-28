@@ -481,26 +481,49 @@ describe('TaxAssignmentService', () => {
   // ─── outside VAT ───────────────────────────────────────────
 
   describe('system categories outside VAT', () => {
-    const categorySql = (rows: Array<{ name: string; is_system: boolean }>) => async (text: string) =>
-      text.includes('c.is_system') ? rows : [];
+    type CategoryRow = { name: string; system_key: string | null };
+    const categorySql = (rows: CategoryRow[]) => async (text: string) =>
+      text.includes('c.system_key') ? rows : [];
 
-    it.each(['Interest income', 'Interest', 'Payroll', 'Benefits and compensation', 'Insurance'])(
-      'assesses no default VAT on %s',
-      async name => {
-        ratesService.findDefaultForDate.mockResolvedValue(STANDARD_RATE);
-        workspaceRepo.manager.query.mockImplementation(categorySql([{ name, is_system: true }]));
+    it.each([
+      ['Interest income', 'interest_income'],
+      ['Interest', 'interest'],
+      ['Payroll', 'payroll'],
+      ['Benefits and compensation', 'benefits'],
+      ['Insurance', 'insurance'],
+      ['Salary', 'salary'],
+      ['Cash withdrawals', 'cash'],
+      ['Transfers to people', 'transfers_people'],
+    ])('assesses no default VAT on %s', async (name, key) => {
+      ratesService.findDefaultForDate.mockResolvedValue(STANDARD_RATE);
+      workspaceRepo.manager.query.mockImplementation(categorySql([{ name, system_key: key }]));
 
-        expect((await service.resolve(base)).taxAmount).toBeNull();
-      },
-    );
+      expect((await service.resolve(base)).taxAmount).toBeNull();
+    });
 
     it('nor on a subcategory of one', async () => {
       ratesService.findDefaultForDate.mockResolvedValue(STANDARD_RATE);
       workspaceRepo.manager.query.mockImplementation(
         categorySql([
-          { name: 'Bank interest', is_system: false },
-          { name: 'Interest', is_system: true },
+          { name: 'Bank interest', system_key: null },
+          { name: 'Interest', system_key: 'interest' },
         ]),
+      );
+
+      expect((await service.resolve(base)).taxAmount).toBeNull();
+    });
+
+    it('nor on a default renamed by the user: the key decides', async () => {
+      ratesService.findDefaultForDate.mockResolvedValue(STANDARD_RATE);
+      workspaceRepo.manager.query.mockImplementation(categorySql([{ name: 'ATM', system_key: 'cash' }]));
+
+      expect((await service.resolve(base)).taxAmount).toBeNull();
+    });
+
+    it('nor on the Uncategorized fallback, which says nothing about the row', async () => {
+      ratesService.findDefaultForDate.mockResolvedValue(STANDARD_RATE);
+      workspaceRepo.manager.query.mockImplementation(
+        categorySql([{ name: 'Uncategorized', system_key: null }]),
       );
 
       expect((await service.resolve(base)).taxAmount).toBeNull();
@@ -509,14 +532,18 @@ describe('TaxAssignmentService', () => {
     it('charges VAT on insurance in the UAE, where general insurance is taxable', async () => {
       workspace.taxJurisdiction = { code: 'AE', isEu: false };
       ratesService.findDefaultForDate.mockResolvedValue(STANDARD_RATE);
-      workspaceRepo.manager.query.mockImplementation(categorySql([{ name: 'Insurance', is_system: true }]));
+      workspaceRepo.manager.query.mockImplementation(
+        categorySql([{ name: 'Insurance', system_key: 'insurance' }]),
+      );
 
       expect((await service.resolve(base)).taxSource).toBe(TaxSource.DEFAULT);
     });
 
-    it('goes by system categories only: a user category of the same name is taxed', async () => {
+    it('goes by the key only: a user category merely named like one is taxed', async () => {
       ratesService.findDefaultForDate.mockResolvedValue(STANDARD_RATE);
-      workspaceRepo.manager.query.mockImplementation(categorySql([{ name: 'Interest', is_system: false }]));
+      workspaceRepo.manager.query.mockImplementation(
+        categorySql([{ name: 'Interest', system_key: null }]),
+      );
 
       expect((await service.resolve(base)).taxSource).toBe(TaxSource.DEFAULT);
     });
@@ -524,7 +551,9 @@ describe('TaxAssignmentService', () => {
     it("lets the user's own rule for the category win", async () => {
       ruleRepo.find.mockResolvedValue([rule()]);
       ratesService.findByCodeForDate.mockResolvedValue(STANDARD_RATE);
-      workspaceRepo.manager.query.mockImplementation(categorySql([{ name: 'Insurance', is_system: true }]));
+      workspaceRepo.manager.query.mockImplementation(
+        categorySql([{ name: 'Cash withdrawals', system_key: 'cash' }]),
+      );
 
       expect((await service.resolve(base)).taxSource).toBe(TaxSource.RULE);
     });

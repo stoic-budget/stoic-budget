@@ -27,7 +27,7 @@ import {
 } from './forecast.engine';
 import { firstOfNextMonth, monthsUntil } from './forecast-calendar';
 import { forecastCaveats } from './forecast-caveats';
-import { incomeHistory, pendingEvents } from './forecast-transactions';
+import { inCurrency, incomeHistory, pendingEvents, withAmount } from './forecast-transactions';
 
 export type { ForecastResponse };
 
@@ -95,13 +95,9 @@ export class ForecastService {
         pendingEvents(this.transactionRepository, workspaceId, todayKey, viewerMemberId, convert),
       ]);
 
-    const recurring = detectRecurringIncome(
-      incomeRows.map(row => ({ ...row, amount: Number.parseFloat(row.amount) })),
-      todayKey,
-    ).map((income, index) => ({
-      ...income,
-      sourceId: `income:${index}`,
-    }));
+    // Detected in the payer's own currency, projected at today's rate as the rest is.
+    const detected = detectRecurringIncome(incomeRows.map(withAmount), todayKey);
+    const recurring = await inCurrency(detected, currency, convert);
     const incomeEvents = recurring.flatMap(income =>
       projectIncome(income, income.sourceId, todayKey, projectionEnd),
     );

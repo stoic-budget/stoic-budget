@@ -11,6 +11,7 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **Belgium:** KBC
 - **Brazil:** Banco do Brasil
 - **Canada:** ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank, RBC Royal Bank, Scotiabank, Simplii Financial, Tangerine, TD Bank
+- **Czech Republic:** ČSOB¹, Fio banka¹
 - **France:** Crédit Agricole, Société Générale, Sogexia
 - **Germany:** Deutsche Bank, N26
 - **Hong Kong:** Bank of China (Hong Kong)
@@ -25,11 +26,14 @@ Stoic Budget includes bank-specific parsers plus generic fallbacks.
 - **Poland:** BNP Paribas Bank Polska
 - **Qatar:** QNB
 - **Romania:** Raiffeisen Bank
+- **Slovakia:** Fio banka¹
 - **South Africa:** Absa, Capitec, FNB
 - **Sri Lanka:** Commercial Bank of Ceylon
 - **Switzerland:** UBS
 - **United Kingdom:** Bank of Scotland, Barclays, first direct, Halifax, Handelsbanken, HSBC, iFAST Global Bank, Kroo, Lloyds Bank, Metro Bank, Monzo, Nationwide, NatWest, Royal Bank of Scotland, Santander UK, Starling Bank, The Co-operative Bank, Ulster Bank, Virgin Money
 - **United States:** Ally Bank, Associated Bank, Bank of America, BECU, BMO, Capital One, Cash App, Charles Schwab, Chase, Chime, Citizens, Comerica, Commerce Bank, Credit One, DCU, Discover, Fifth Third, First Citizens, Found, Frost Bank, GO2bank, Green Dot, HSA Bank, Huntington, IBC Bank, KeyBank, M&T Bank, Marcus by Goldman Sachs, Merrick Bank, Navy Federal Credit Union, Netspend, Optum Bank, PNC Bank, Prosperity Bank, Regions Bank, SoFi, Synchrony Bank, Synovus, Truist, U.S. Bank, USAA, Varo Bank, Walmart MoneyCard, Webster Bank, Wells Fargo, Woodforest National Bank
+
+¹ Built from the layout a published open-source parser was written against and checked on made-up statements: no real statement has been read yet. If yours reads wrong, an issue with an anonymized copy helps.
 
 ## CSV presets
 

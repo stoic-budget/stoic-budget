@@ -150,6 +150,7 @@ Setting expectations upfront:
 | 🇩🇪 Germany | Deutsche Bank, N26 | N26, Sparkasse / DKB, Commerzbank |
 | 🇳🇱 Netherlands | | ING, Rabobank |
 | 🇸🇪 🇩🇰 🇳🇴 🇫🇮 Nordics | | Nordea |
+| 🇨🇿 🇸🇰 Czech Republic, Slovakia | ČSOB, Fio banka (checked on sample layouts only) | |
 | 🇫🇷 France | Crédit Agricole, Société Générale, Sogexia | |
 | 🇵🇱 Poland | BNP Paribas Bank Polska | |
 | 🇨🇦 Canada | ATB Financial, CIBC, Coast Capital, Desjardins, EQ Bank, Laurentian Bank, RBC Royal Bank, Scotiabank, Simplii Financial, Tangerine, TD Bank | |
@@ -269,6 +270,8 @@ Built on great open-source foundations:
 [NestJS](https://nestjs.com/) · [Next.js](https://nextjs.org/) · [vinext](https://vinext.dev/) · [Vite](https://vite.dev/) · [PostgreSQL](https://www.postgresql.org/) · [TypeORM](https://typeorm.io/) · [Redis](https://redis.io/) · [MUI](https://mui.com/) · [Emotion](https://emotion.sh/) · [TanStack Table](https://tanstack.com/table) · [ECharts](https://echarts.apache.org/) · [Recharts](https://recharts.org/) · [Tesseract.js](https://tesseract.projectnaptha.com/) · [Socket.IO](https://socket.io/) · [Intlayer](https://intlayer.org/) · [driver.js](https://driverjs.com/) · [Biome](https://biomejs.dev/) · and many more.
 
 The cash flow, net worth, category and ROI charts follow the chart design of [Aurum](https://github.com/ZProger/Aurum) by [ZProger](https://github.com/ZProger). They were reimplemented for Stoic Budget; no Aurum source code is included (Aurum is licensed under PolyForm Noncommercial 1.0.0).
+
+The Czech and Slovak statement parsers (Fio banka, ČSOB and those that follow) port the behaviour of the parsers in [zumfi-finance](https://github.com/Simmak7/zumfi-finance) by [Simmak7](https://github.com/Simmak7), MIT licensed; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ---
 

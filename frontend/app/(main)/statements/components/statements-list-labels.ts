@@ -83,6 +83,7 @@ export const buildFilterOptionLabels = (_t: IntlayerDict, tx: TxFn): FilterOptio
   groupByUser: tx(['filters', 'groupByUser']),
   groupByAmount: tx(['filters', 'groupByAmount']),
   hasErrors: tx(['filters', 'hasErrors']),
+  hasWarnings: tx(['filters', 'hasWarnings']),
   hasLogs: tx(['filters', 'hasLogs']),
   hasTransactions: tx(['filters', 'hasTransactions']),
   hasDateRange: tx(['filters', 'hasDateRange']),
