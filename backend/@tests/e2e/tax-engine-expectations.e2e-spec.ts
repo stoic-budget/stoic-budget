@@ -137,6 +137,62 @@ describe('Tax engine: defects and user expectations (e2e)', () => {
     expect(Number((await row()).tax_amount)).toBe(7.79);
   });
 
+  it('counts the rows of the period a category would bring into the return (#669)', async () => {
+    const preview = async () =>
+      (await auth(api().get('/tax/returns/preview?periodStart=2026-01-01&periodEnd=2026-03-31')).expect(200))
+        .body.uncategorized;
+    const [{ category_id: categoryId }] = await dataSource.query(
+      'SELECT category_id FROM transactions WHERE id = $1',
+      [transactionId],
+    );
+    const before = await preview();
+    // Removing the category clears the tax worked out from it: the row leaves the return.
+    await auth(api().put(`/transactions/${transactionId}`)).send({ categoryId: null }).expect(200);
+    try {
+      expect(await preview()).toBe(before + 1);
+      // A hand-picked rate keeps it in the return; a salary is never taxable.
+      await dataSource.query("UPDATE transactions SET tax_amount = 7.79, tax_source = 'manual' WHERE id = $1", [
+        transactionId,
+      ]);
+      expect(await preview()).toBe(before);
+      await dataSource.query(
+        "UPDATE transactions SET tax_amount = NULL, tax_source = NULL, transaction_nature = 'salary' WHERE id = $1",
+        [transactionId],
+      );
+      expect(await preview()).toBe(before);
+      await dataSource.query('UPDATE transactions SET transaction_nature = NULL WHERE id = $1', [transactionId]);
+      // A workspace not registered for VAT has no return for a category to change.
+      await auth(api().put('/tax/settings/vat-status')).send({ status: 'not_registered' }).expect(200);
+      expect(await preview()).toBe(0);
+      await auth(api().put('/tax/settings/vat-status')).send({ status: 'registered' }).expect(200);
+      expect(await preview()).toBe(before + 1);
+    } finally {
+      await auth(api().put(`/transactions/${transactionId}`)).send({ categoryId }).expect(200);
+    }
+  });
+
+  it('counts the rows with tax still waiting in Review, which the return leaves out', async () => {
+    const preview = () =>
+      auth(api().get('/tax/returns/preview?periodStart=2026-01-01&periodEnd=2026-03-31')).expect(200);
+    const before = (await preview()).body.awaitingReview;
+    await dataSource.query('UPDATE transactions SET is_verified = false WHERE id = $1', [transactionId]);
+    try {
+      expect((await preview()).body.awaitingReview).toBe(before + 1);
+      // A suspected duplicate, or a row whose tax is zero, changes nothing by approval.
+      await dataSource.query('UPDATE transactions SET is_duplicate = true WHERE id = $1', [transactionId]);
+      expect((await preview()).body.awaitingReview).toBe(before);
+      await dataSource.query(
+        'UPDATE transactions SET is_duplicate = false, tax_amount = 0, tax_reverse_charge = false WHERE id = $1',
+        [transactionId],
+      );
+      expect((await preview()).body.awaitingReview).toBe(before);
+    } finally {
+      // Back as it was: confirmed, and reassessed for the cases after this one.
+      await dataSource.query('UPDATE transactions SET is_verified = true WHERE id = $1', [transactionId]);
+      await auth(api().post('/tax/settings/reassess')).send({}).expect(201);
+    }
+  });
+
   it("reverse-charges purchases from a payee with an EU VAT id in another country", async () => {
     const { payee_id: payeeId } = await row();
     expect(payeeId).toBeTruthy();

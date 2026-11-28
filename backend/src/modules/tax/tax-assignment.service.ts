@@ -24,7 +24,7 @@ import { TaxRatesService } from './tax-rates.service';
  * These values come from the AI classifier, which is why they are a safety net
  * and not the only guard — see `resolve` for the rest.
  */
-const NON_TAXABLE_NATURES: ReadonlySet<string> = new Set(['transfer', 'salary', 'loan', 'tax']);
+export const NON_TAXABLE_NATURES = new Set(['transfer', 'salary', 'loan', 'tax']);
 
 export interface AssignmentInput {
   workspaceId: string;

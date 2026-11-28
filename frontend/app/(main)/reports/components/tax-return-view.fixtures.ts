@@ -35,6 +35,8 @@ export const TOTALS: TaxReturnPreview = {
     },
   ],
   missingRates: [],
+  awaitingReview: 0,
+  uncategorized: 0,
 };
 
 /** TaxReturnRecord: the saved return of the period. */

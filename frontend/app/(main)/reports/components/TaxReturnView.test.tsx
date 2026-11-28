@@ -98,6 +98,33 @@ describe('TaxReturnView', () => {
     );
   });
 
+  it('asks before filing while rows wait in Review, and files nothing when declined', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    mockApi({ totals: { ...TOTALS, awaitingReview: 2 } });
+    renderWithQuery(<TaxReturnView />);
+
+    await userEvent.click(await screen.findByRole('button', { name: 'File and lock' }));
+
+    expect(confirm).toHaveBeenCalledWith(expect.stringContaining('waiting in Review: 2'));
+    expect(post).not.toHaveBeenCalledWith('/tax/returns/file', expect.anything());
+    confirm.mockRestore();
+  });
+
+  it('says how many rows of the period have no category, so no tax (#669)', async () => {
+    mockApi({ totals: { ...TOTALS, uncategorized: 4 } });
+    renderWithQuery(<TaxReturnView />);
+
+    expect(await screen.findByText(/with no category: 4/)).toBeTruthy();
+  });
+
+  it('says nothing about categories when every row has one', async () => {
+    mockApi({ totals: { ...TOTALS, uncategorized: 0 } });
+    renderWithQuery(<TaxReturnView />);
+
+    await screen.findByRole('button', { name: 'File and lock' });
+    expect(screen.queryByText(/with no category/)).toBeNull();
+  });
+
   it('offers reopening once filed, and says the rows are locked', async () => {
     mockApi({ status: 'filed' });
     renderWithQuery(<TaxReturnView />);
@@ -185,6 +212,13 @@ describe('TaxReturnView', () => {
     renderWithQuery(<TaxReturnView />);
 
     expect(await screen.findByText(/without an exchange rate for their date: 2 \(USD\)/)).toBeInTheDocument();
+  });
+
+  it('warns that rows still waiting in Review are not in the return', async () => {
+    mockApi({ totals: { ...TOTALS, awaitingReview: 3 } });
+    renderWithQuery(<TaxReturnView />);
+
+    expect(await screen.findByText(/still waiting in Review: 3/)).toBeInTheDocument();
   });
 
   it("shows the server's reason when filing is refused", async () => {
