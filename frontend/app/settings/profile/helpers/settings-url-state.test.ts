@@ -3,6 +3,7 @@ import {
   LEGACY_HASH_TARGETS,
   SETTINGS_SECTIONS,
   buildSettingsHref,
+  movedSection,
   parseSettingsSection,
   parseSettingsTab,
   withSettingsParams,
@@ -37,6 +38,9 @@ describe('settings-url-state', () => {
     expect(parseSettingsSection('general', 'sessions')).toBeNull();
     expect(parseSettingsSection('general', null)).toBeNull();
     expect(parseSettingsSection('data', 'receipt-location')).toBe('receipt-location');
+    expect(parseSettingsSection('sync', 's3-compatible')).toBe('s3-compatible');
+    // The archive panel left Data for the Sync tab.
+    expect(parseSettingsSection('data', 'sync')).toBeNull();
   });
 
   it('patches the query string and removes keys set to null', () => {
@@ -65,5 +69,11 @@ describe('settings-url-state', () => {
         expect(SETTINGS_SECTIONS[target.tab] as readonly string[]).toContain(target.section);
       }
     }
+  });
+
+  it('sends an old link to a panel that moved tabs to its new place', () => {
+    expect(movedSection('data', 'sync')).toEqual({ tab: 'sync', section: 'backup' });
+    expect(movedSection('data', 'processing')).toBeUndefined();
+    expect(movedSection('constructor', undefined)).toBeUndefined();
   });
 });

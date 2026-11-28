@@ -182,4 +182,43 @@ describe('Small-business pack (e2e)', () => {
       .send({ payableId: rentId, transactionId: rentTransactionId })
       .expect(404);
   });
+
+  it('pays the rest of a part-paid bill with the matched row, and never offers the row that paid the part', async () => {
+    const categories = await as(owner, request(server()).get('/categories?type=expense')).expect(200);
+    const row = async (amount: string, merchant: string) => {
+      const statement = await as(owner, request(server()).post('/statements/manual-expense'))
+        .field('amount', amount)
+        .field('currency', 'USD')
+        .field('merchant', merchant)
+        .field('categoryId', categories.body[0].id)
+        .field('date', day(-1))
+        .expect(201);
+      const listed = await as(
+        owner,
+        request(server()).get(`/transactions?statementId=${statement.body.id}`),
+      ).expect(200);
+      return listed.body.data[0].id as string;
+    };
+    const bill = await as(owner, request(server()).post('/payables'))
+      .send({ vendor: 'Corner Printer', amount: 1000, currency: 'USD', dueDate: day(5) })
+      .expect(201);
+    const first = await row('400', 'CORNER PRINTER deposit');
+    await as(owner, request(server()).post(`/payables/${bill.body.id}/payments`))
+      .send({ amount: 400, linkedTransactionId: first })
+      .expect(201);
+    const rest = await row('600', 'CORNER PRINTER balance');
+
+    const res = await as(owner, request(server()).get('/reconciliation')).expect(200);
+    const match = res.body.matches.find(
+      (item: { item: { id: string } }) => item.item.id === bill.body.id,
+    );
+    expect(match).toMatchObject({ transactionId: rest, item: expect.objectContaining({ amount: 600 }) });
+    expect(res.body.matches.map((m: { transactionId: string }) => m.transactionId)).not.toContain(first);
+
+    const confirmed = await as(owner, request(server()).post('/reconciliation/confirm'))
+      .send({ payableId: bill.body.id, transactionId: rest })
+      .expect(200);
+    expect(confirmed.body).toMatchObject({ status: 'paid' });
+    expect(Number(confirmed.body.paidAmount)).toBe(1000);
+  });
 });

@@ -8,6 +8,7 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { VatStatus, Workspace } from '../../entities/workspace.entity';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { toDateOnly } from './jurisdictions.service';
+import { salesCategorySql } from './sales-categories';
 import { TaxReturnsService } from './tax-returns.service';
 import { WorkspaceTaxSettingsService } from './workspace-tax-settings.service';
 
@@ -26,9 +27,11 @@ export interface TaxReserve {
   vat: { net: number; outputTax: number; inputTax: number } | null;
   /** The user's share of the year's earnings, NULL until a share is set. */
   incomeTax: { percent: number; earnings: number; amount: number } | null;
+  /** Tax of the years before still unpaid on last 31 December: owed this year as well. */
+  carriedOver: number;
   /** Tax already paid this year, read from the payments category. */
   payments: { categoryId: string | null; amount: number; count: number };
-  /** What should still be held back: VAT + share of earnings − payments, never below zero. */
+  /** What should still be held back: VAT + share of earnings + carried over − payments, never below zero. */
   total: number;
   /** Currencies whose rows were left out for want of an exchange rate. */
   missingRateCurrencies: string[];
@@ -38,8 +41,9 @@ export interface TaxReserve {
  * How much of the money in the account is really the tax office's.
  *
  * Counted over the calendar year so far: the VAT the year collected, plus the
- * user's share of what the year earned, minus every tax payment the year has
- * already made. Paying a quarterly VAT return or an income-tax advance lowers
+ * user's share of what the year earned, plus what last year left unpaid at its
+ * end (a running balance since the books began), minus every tax payment the
+ * year has already made. Paying a quarterly VAT return or an income-tax advance lowers
  * the reserve by exactly what left the account, so the reserve and the
  * balance never count the same money twice.
  *
@@ -72,15 +76,81 @@ export class TaxReserveService {
     const settings = await this.settingsService.getReserveSettings(workspaceId);
     const missing = new Set<string>();
     const convert = this.converter(workspaceId, currency, missing);
+    const registered =
+      workspace?.vatStatus === VatStatus.REGISTERED && Boolean(workspace.taxJurisdiction);
 
+    const thisYear = await this.held(
+      workspaceId,
+      settings,
+      registered,
+      yearStart,
+      asOf,
+      convert,
+      missing,
+    );
+    // One running balance: what the books owed before this year, less every
+    // payment in that time, is owed now too. So a January payment of last
+    // year's tax settles that first, not this year's, and the same holds every
+    // year after (each January pays the year before). It starts the year before
+    // the reserve was set up (that year's tax may still be due), never before
+    // the books: today's share is not laid over years the user never kept it for.
+    const setUp = await this.settingsService.reserveSetUpOn(workspaceId);
+    const firstYear = Math.max(
+      (await this.firstBookYear(workspaceId)) ?? year,
+      (setUp?.getFullYear() ?? year) - 1,
+    );
+    let carriedOver = 0;
+    if (firstYear < year) {
+      const before = await this.held(
+        workspaceId,
+        settings,
+        registered,
+        `${firstYear}-01-01`,
+        `${year - 1}-12-31`,
+        convert,
+        missing,
+      );
+      const owedBefore = (before.vat?.net ?? 0) + (before.incomeTax?.amount ?? 0);
+      carriedOver = round(Math.max(0, owedBefore - before.payments.amount));
+    }
+
+    const { vat, incomeTax, payments } = thisYear;
+    const owed = (vat?.net ?? 0) + (incomeTax?.amount ?? 0) + carriedOver;
+    return {
+      currency,
+      year,
+      asOf,
+      vat,
+      incomeTax,
+      carriedOver,
+      payments: { categoryId: settings.paymentsCategoryId, ...payments },
+      // Nothing to hold back when nothing was set up: no VAT and no share.
+      total: vat || incomeTax ? round(Math.max(0, owed - payments.amount)) : 0,
+      missingRateCurrencies: [...missing],
+    };
+  }
+
+  /** What a stretch of time owes in tax (VAT, the user's share of earnings) and paid. */
+  private async held(
+    workspaceId: string,
+    settings: { percent: number | null; paymentsCategoryId: string | null },
+    registered: boolean,
+    from: string,
+    to: string,
+    convert: Converter,
+    missing: Set<string>,
+  ): Promise<{
+    vat: TaxReserve['vat'];
+    incomeTax: TaxReserve['incomeTax'];
+    payments: { amount: number; count: number };
+  }> {
     let vat: TaxReserve['vat'] = null;
-    if (workspace?.vatStatus === VatStatus.REGISTERED && workspace.taxJurisdiction) {
-      const totals = await this.taxReturnsService.computeTotals(workspaceId, yearStart, asOf);
+    if (registered) {
+      const totals = await this.taxReturnsService.computeTotals(workspaceId, from, to);
       for (const row of totals.missingRates) {
         missing.add(row.currency);
       }
-      const rate = await convert(1, totals.currency, asOf);
-      const factor = rate ?? 0;
+      const factor = (await convert(1, totals.currency, to)) ?? 0;
       vat = {
         outputTax: round(totals.outputTax * factor),
         inputTax: round(totals.inputTax * factor),
@@ -90,7 +160,7 @@ export class TaxReserveService {
 
     let incomeTax: TaxReserve['incomeTax'] = null;
     if (settings.percent !== null) {
-      const earnings = await this.earnings(workspaceId, yearStart, asOf, convert);
+      const earnings = await this.earnings(workspaceId, from, to, convert);
       incomeTax = {
         percent: settings.percent,
         earnings,
@@ -101,23 +171,11 @@ export class TaxReserveService {
     const payments = await this.payments(
       workspaceId,
       settings.paymentsCategoryId,
-      yearStart,
-      asOf,
+      from,
+      to,
       convert,
     );
-
-    const owed = (vat?.net ?? 0) + (incomeTax?.amount ?? 0);
-    return {
-      currency,
-      year,
-      asOf,
-      vat,
-      incomeTax,
-      payments: { categoryId: settings.paymentsCategoryId, ...payments },
-      // Nothing to hold back when nothing was set up: no VAT and no share.
-      total: vat || incomeTax ? round(Math.max(0, owed - payments.amount)) : 0,
-      missingRateCurrencies: [...missing],
-    };
+    return { vat, incomeTax, payments };
   }
 
   /** The year's earnings, net of the VAT they carried. */
@@ -132,6 +190,9 @@ export class TaxReserveService {
       .andWhere('(t.transactionNature IS NULL OR t.transactionNature NOT IN (:...natures))', {
         natures: [...NOT_EARNINGS],
       })
+      // Earned: not wages, not a loan or a transfer left in Uncategorized. Interest
+      // is income here, and a client payment recorded with no category counts.
+      .andWhere(salesCategorySql('t', { interest: true, uncategorizedRows: true }))
       .getMany();
 
     let total = 0;
@@ -175,6 +236,21 @@ export class TaxReserveService {
       total += (await convert(amount, row.currency, toDateOnly(row.transactionDate))) ?? 0;
     }
     return { amount: round(total), count: rows.length };
+  }
+
+  /** The year of the first counted row: where the books, and so the balance, begin. */
+  private async firstBookYear(workspaceId: string): Promise<number | null> {
+    const row = await onlyCounted(
+      this.transactionRepository
+        .createQueryBuilder('t')
+        .select('MIN(t.transactionDate)', 'first')
+        .where('t.workspaceId = :workspaceId', { workspaceId }),
+      't',
+    ).getRawOne<{ first: string | Date | null }>();
+    if (!row?.first) {
+      return null;
+    }
+    return Number(toDateOnly(row.first).slice(0, 4));
   }
 
   private yearRows(workspaceId: string, from: string, to: string) {

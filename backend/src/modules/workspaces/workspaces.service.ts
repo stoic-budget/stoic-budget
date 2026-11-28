@@ -960,9 +960,7 @@ export class WorkspacesService {
   async getUserWorkspaces(userId: string): Promise<WorkspaceResponseDto[]> {
     const memberships = await this.workspaceMemberRepository.find({
       where: { userId },
-      relations: {
-        workspace: true,
-      },
+      relations: { workspace: true },
       order: { lastAccessedAt: 'DESC' },
     });
 
@@ -991,6 +989,7 @@ export class WorkspacesService {
           updatedAt: workspace.updatedAt,
           memberRole: membership.role,
           memberPermissions: membership.permissions,
+          memberLocale: membership.locale,
           stats,
         };
       }),

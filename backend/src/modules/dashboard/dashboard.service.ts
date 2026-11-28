@@ -9,7 +9,12 @@ import {
   type SelectQueryBuilder,
 } from 'typeorm';
 import { flowsSql, onlyFlows } from '../../common/utils/counted-transactions.util';
-import { currencyCodeOrDefault } from '../../common/utils/currency.util';
+import {
+  beginMissingRates,
+  currencyCodeOrDefault,
+  noteMissingRate,
+  withMissingRates,
+} from '../../common/utils/currency.util';
 import { PRIVACY_VIEWER_PARAM, redactedSql } from '../../common/utils/transaction-privacy.util';
 import type {
   DashboardActionItem,
@@ -30,6 +35,7 @@ import { Payable, PayableDirection, PayableStatus } from '../../entities/payable
 import { Receipt, ReceiptStatus } from '../../entities/receipt.entity';
 import { BankName, Statement, StatementStatus } from '../../entities/statement.entity';
 import { Subscription, SubscriptionStatus } from '../../entities/subscription.entity';
+import { SubscriptionCharge } from '../../entities/subscription-charge.entity';
 import { Transaction, TransactionType } from '../../entities/transaction.entity';
 import { Workspace } from '../../entities/workspace.entity';
 import { WorkspaceMember } from '../../entities/workspace-member.entity';
@@ -50,7 +56,7 @@ import { recentRowHrefs } from './bill-hrefs';
 import {
   newestRecurringPayables,
   projectedOccurrences,
-  projectSubscriptionCharges,
+  subscriptionCommitments,
 } from './commitment-projections';
 import {
   type CashFlowRange,
@@ -62,6 +68,7 @@ import {
   parseMonthWindow,
 } from './dashboard-window.util';
 import { spendableBalance } from './opening-balance';
+import { OPEN_BILL_PARAMS, OPEN_BILL_SQL, OWED_COLUMNS } from './owed-bills';
 
 /** How many individual categories the donut shows before folding the rest into "Other". */
 const TOP_CATEGORIES_LIMIT = 8;
@@ -137,10 +144,12 @@ export class DashboardService {
     range: '7d' | '30d' | '90d' | 'month' = '30d',
     endDateParam?: string,
     viewerMemberId: string | null = null,
+    /** The viewer's own day: "this month" is theirs, not the server's (UTC). */
+    today?: string,
   ): Promise<DashboardResponse> {
     const isMonth = range === 'month';
     const days = range === '7d' ? 7 : range === '90d' ? 90 : 30;
-    const anchorDate = endDateParam ? new Date(endDateParam) : new Date();
+    const anchorDate = new Date(endDateParam ?? today ?? Date.now());
 
     const payPeriod = await this.payPeriods?.contextFor(workspaceId);
     const requestedWindow = dashboardWindow(isMonth, days, anchorDate, payPeriod, !!endDateParam);
@@ -159,11 +168,8 @@ export class DashboardService {
 
       if (latestTransactionDate) {
         effectiveWindow = dashboardWindow(isMonth, days, latestTransactionDate, payPeriod);
-        snapshot = await this.getSnapshot(
-          workspaceId,
-          effectiveWindow.since,
-          effectiveWindow.endDate,
-        );
+        const { since, endDate } = effectiveWindow;
+        snapshot = await this.getSnapshot(workspaceId, since, endDate);
         autoShifted = true;
       }
     }
@@ -227,6 +233,8 @@ export class DashboardService {
         currency: true,
       },
     });
+    // After the first await: the record belongs to this call, not to its caller.
+    beginMissingRates();
     const targetCurrency = this.normalizeCurrency(workspace?.currency);
 
     // Grouped by currency and day, so each sum converts at its own day's rate.
@@ -278,40 +286,29 @@ export class DashboardService {
 
     const payableRows = await this.payableRepo
       .createQueryBuilder('p')
-      .select([
-        'p.currency AS currency',
-        'COALESCE(SUM(CASE WHEN p.status IN (:...payStatuses) THEN p.amount ELSE 0 END), 0) AS "totalPayable"',
-        'COALESCE(SUM(CASE WHEN p.status = :overdue THEN p.amount ELSE 0 END), 0) AS "totalOverdue"',
-      ])
+      .select(['p.currency AS currency', ...OWED_COLUMNS])
       .where('p.workspaceId = :workspaceId', { workspaceId })
       .andWhere('p.deletedAt IS NULL')
       .andWhere('p.direction = :direction', { direction: PayableDirection.PAYABLE })
-      .setParameter('payStatuses', [PayableStatus.TO_PAY, PayableStatus.SCHEDULED])
-      .setParameter('overdue', PayableStatus.OVERDUE)
+      .andWhere(OPEN_BILL_SQL, OPEN_BILL_PARAMS)
       .groupBy('p.currency')
       .getRawMany<{ currency: string; totalPayable: string; totalOverdue: string }>();
 
     let totalPayable = 0;
     let totalOverdue = 0;
+    const toTarget = (amount: string, from: string) =>
+      this.convertDashboardAmount(amount, from, targetCurrency, workspaceId);
     for (const row of payableRows) {
-      totalPayable += await this.convertDashboardAmount(
-        row.totalPayable,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
-      totalOverdue += await this.convertDashboardAmount(
-        row.totalOverdue,
-        row.currency,
-        targetCurrency,
-        workspaceId,
-      );
+      totalPayable += await toTarget(row.totalPayable, row.currency);
+      totalOverdue += await toTarget(row.totalOverdue, row.currency);
     }
 
-    // Rows in a currency with no rate were counted at face value above; say so.
+    // Rows and bills in a currency with no rate were counted at face value above; say so.
     const coverage =
       (await this.exchangeRatesService.coverageForWorkspace(workspaceId, targetCurrency)) ?? [];
-    const missingRates = coverage.filter(item => item.rate === null).map(item => item.currency);
+    const missingRates = withMissingRates(
+      coverage.filter(item => item.rate === null).map(item => item.currency),
+    );
 
     return {
       totalBalance,
@@ -361,13 +358,13 @@ export class DashboardService {
     if (source === targetCurrency) {
       return value;
     }
-    const rate = await this.exchangeRatesService.getRate(
+    const rate = await this.exchangeRatesService.getRateOrNull(
       source,
       targetCurrency,
       undefined,
       workspaceId,
     );
-    return value * rate;
+    return value * (rate ?? noteMissingRate(source));
   }
 
   async getWorkspaceCurrency(workspaceId: string): Promise<string> {
@@ -898,12 +895,9 @@ export class DashboardService {
         QUEUE_DATE_COLUMN.receipt,
         window,
       ).getCount(),
-      // parsing warnings: actual warnings captured in parsing details
-      this.withinWindow(
-        this.createParsingWarningsQuery(workspaceId),
-        's.createdAt',
-        window,
-      ).getCount(),
+      // Parsing warnings of every month: a warning stays until it is dealt with,
+      // and the dashboard's link opens all of them (`?has=warnings`).
+      this.createParsingWarningsQuery(workspaceId).getCount(),
       // latest statement upload date
       this.statementRepo.findOne({
         where: { workspaceId, deletedAt: IsNull() },
@@ -1188,7 +1182,15 @@ export class DashboardService {
 
     const [payableItems, subscriptionItems] = await Promise.all([
       this.collectPayableCommitments(payables, series, currency, today, horizonEnd),
-      this.collectSubscriptionCommitments(subscriptions, currency, today, horizonEnd),
+      subscriptionCommitments({
+        charges: this.subscriptionRepo.manager.getRepository(SubscriptionCharge),
+        workspaceId,
+        subscriptions,
+        window: { today, horizonEnd, maxSteps: MAX_COMMITMENT_HORIZON_DAYS },
+        nextChargeOf: subscription => this.parseDateOnly(subscription.nextChargeDate),
+        amountOf: ({ amount, currency: from }) =>
+          this.convertDashboardAmount(amount, from, currency, workspaceId),
+      }),
     ]);
 
     const items = [...payableItems.items, ...subscriptionItems].sort((a, b) =>
@@ -1271,46 +1273,6 @@ export class DashboardService {
     }
 
     return { items, unscheduledCommitted };
-  }
-
-  /** Every charge each active subscription will raise inside the horizon. */
-  private async collectSubscriptionCommitments(
-    subscriptions: Subscription[],
-    currency: string,
-    today: Date,
-    horizonEnd: Date,
-  ): Promise<DashboardCommitmentItem[]> {
-    const items: DashboardCommitmentItem[] = [];
-
-    for (const subscription of subscriptions) {
-      const amount = await this.convertDashboardAmount(
-        subscription.amount,
-        subscription.currency,
-        currency,
-        subscription.workspaceId,
-      );
-      if (amount === 0) {
-        continue;
-      }
-      for (const chargeDate of projectSubscriptionCharges(
-        this.parseDateOnly(subscription.nextChargeDate),
-        subscription.frequency,
-        today,
-        horizonEnd,
-        MAX_COMMITMENT_HORIZON_DAYS,
-      )) {
-        items.push({
-          date: this.formatDateOnly(chargeDate),
-          label: subscription.vendorName,
-          amount,
-          source: 'subscription',
-          sourceId: subscription.id,
-          isOverdue: false,
-        });
-      }
-    }
-
-    return items;
   }
 
   /** Walks the horizon day by day, draining the opening balance as commitments fall due. */

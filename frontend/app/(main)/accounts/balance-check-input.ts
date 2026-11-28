@@ -50,9 +50,4 @@ export function parseBankBalance(text: string, isDebt: boolean): number | null {
   return isDebt ? -value : value;
 }
 
-/** Today as the person's own calendar has it, `YYYY-MM-DD`. */
-export function localToday(now: Date = new Date()): string {
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${now.getFullYear()}-${month}-${day}`;
-}
+export { localToday } from '@/app/lib/local-today';

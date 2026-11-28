@@ -30,6 +30,7 @@ import { CustomTableSourcesService } from './custom-table-sources.service';
 import { FormulaRecalcService } from './formula-recalc.service';
 import { storageTypeOf } from './helpers/column-config';
 import { attachColumnStyles, isUuid, type JsonObject } from './helpers/row-data';
+import type { RowCurrency } from './helpers/row-query';
 import { throwHelpfulSchemaError } from './helpers/schema-error';
 
 /** What every custom-table service shares: access checks, table lookup, audit events and recalc. */
@@ -256,6 +257,21 @@ export class CustomTableSupportService {
       },
     });
     return new Map<string, CustomTableColumnType>(columns.map(c => [c.key, storageTypeOf(c)]));
+  }
+
+  /** The row-currency layout of a table that keeps each row's code (#648); null otherwise. */
+  async loadRowCurrency(tableId: string): Promise<RowCurrency | null> {
+    const columns = await this.customTableColumnRepository.find({
+      where: { tableId },
+      select: { key: true, type: true, config: true },
+    });
+    const source = (column: CustomTableColumn) =>
+      column.config?.source as { field?: unknown } | undefined;
+    const code = columns.find(
+      c => c.type === CustomTableColumnType.TEXT && source(c)?.field === 'currency',
+    );
+    const money = columns.filter(c => c.type === CustomTableColumnType.CURRENCY && source(c));
+    return code ? { codeKey: code.key, money: new Set(money.map(c => c.key)) } : null;
   }
 
   async getTable(workspaceId: string, tableId: string): Promise<CustomTable> {

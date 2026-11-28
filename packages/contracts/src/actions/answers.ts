@@ -11,7 +11,11 @@ export const OkResult = Schema.Struct({ ok: Schema.Literal(true) });
 export type OkResult = Wire<typeof OkResult>;
 
 /** `POST /investments/refresh-prices` and `POST /metals/refresh-prices`. */
-export const PriceRefreshResult = Schema.Struct({ updated: Schema.Number });
+export const PriceRefreshResult = Schema.Struct({
+  updated: Schema.Number,
+  /** Holdings the quote source gave no price for (#696): said, not shown as a green 0. */
+  failed: Schema.optional(Schema.Number),
+});
 export type PriceRefreshResult = Wire<typeof PriceRefreshResult>;
 
 /** `POST /crypto/import`: an exchange's CSV booked into one wallet. */

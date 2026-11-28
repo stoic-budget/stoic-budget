@@ -78,7 +78,6 @@ export const NAV_BINDINGS: Record<string, string> = {
   '/forecast': 'KeyG KeyF',
   '/roi': 'KeyG KeyE',
   '/subscriptions': 'KeyG KeyU',
-  '/integrations': 'KeyG KeyK',
   '/plugins': 'KeyG KeyP',
   '/admin': 'KeyG KeyL',
 };
