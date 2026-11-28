@@ -12,6 +12,7 @@ import {
 } from '@/app/components/ui/dropdown-menu';
 import { Select, type SelectOption } from '@/app/components/ui/select';
 import { useIntlayer } from '@/app/i18n';
+import { localToday } from '@/app/lib/local-today';
 import {
   type ActorType,
   type AuditAction,
@@ -77,12 +78,8 @@ const DATE_PRESETS: { value: DatePreset; labelKey: LabelKey }[] = [
   { value: 'all', labelKey: 'allTime' },
 ];
 
-/** The UTC calendar day n days ago, as the API takes `dateFrom`. */
-function daysAgoIso(n: number): string {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() - n);
-  return d.toISOString().slice(0, 10);
-}
+const daysAgoIso = (n: number, now = new Date()): string =>
+  localToday(new Date(now.getFullYear(), now.getMonth(), now.getDate() - n));
 
 /** "All time" clears both dates: a missing key would keep the period picked before. */
 function presetToDates(preset: DatePreset): { dateFrom?: string; dateTo?: string } {

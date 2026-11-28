@@ -150,22 +150,22 @@ export class TelegramService {
    * The bot to talk through: the one the update being handled came in on, else
    * the bot of the workspace the user's chat is connected in (the only bot that
    * chat has started, so the only one allowed to write to it), else the server
-   * default.
+   * default. None while that workspace has Telegram switched off.
    */
   private async resolveBot(
     user?: User | null,
   ): Promise<{ botToken: string | null; timeoutMs?: number }> {
-    const inbound = this.inboundBot.getStore();
-    if (inbound) {
-      return { botToken: inbound };
-    }
     const settings = await this.applicationSettingsService?.getTelegramSettings(
       user,
       user?.telegramWorkspaceId ?? undefined,
     );
+    if (settings?.paused) {
+      return { botToken: null };
+    }
+    const inbound = this.inboundBot.getStore();
     return {
-      botToken: settings?.botToken || this.botToken || null,
-      timeoutMs: settings?.timeoutMs,
+      botToken: inbound || settings?.botToken || this.botToken || null,
+      timeoutMs: inbound ? undefined : settings?.timeoutMs,
     };
   }
 
@@ -464,24 +464,23 @@ export class TelegramService {
     }
 
     const message = update?.message;
-    if (!message) {
+    const chatId = message?.chat?.id ? String(message.chat.id) : null;
+    if (!(message && chatId)) {
       return;
     }
     const updateId = update.update_id;
-
-    const chatId = message.chat?.id ? String(message.chat.id) : null;
     const text: string | undefined = message.text?.trim();
     const telegramId = message.from?.id ? String(message.from.id) : null;
-
-    if (!chatId) {
-      return;
-    }
 
     // Telegram's own client language is the only signal available before a
     // user is matched to an account — once matched, their in-app locale
     // choice (User.locale) always wins, see resolveLocale().
     const fallbackLocale = resolveTelegramLocale(message.from?.language_code);
     const knownUser = telegramId ? await this.findLinkedUser(telegramId, chatId) : null;
+    // A chat connected in a workspace that switched Telegram off is not answered.
+    if (knownUser && !(await this.isEnabled(knownUser))) {
+      return;
+    }
     const locale = knownUser?.locale || fallbackLocale;
 
     if (text?.startsWith('/start')) {

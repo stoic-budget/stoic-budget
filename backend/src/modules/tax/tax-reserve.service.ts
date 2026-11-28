@@ -8,6 +8,7 @@ import { Transaction, TransactionType } from '../../entities/transaction.entity'
 import { VatStatus, Workspace } from '../../entities/workspace.entity';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { toDateOnly } from './jurisdictions.service';
+import { salesCategorySql } from './sales-categories';
 import { TaxReturnsService } from './tax-returns.service';
 import { WorkspaceTaxSettingsService } from './workspace-tax-settings.service';
 
@@ -189,6 +190,9 @@ export class TaxReserveService {
       .andWhere('(t.transactionNature IS NULL OR t.transactionNature NOT IN (:...natures))', {
         natures: [...NOT_EARNINGS],
       })
+      // Earned: not wages, not a loan or a transfer left in Uncategorized. Interest
+      // is income here, and a client payment recorded with no category counts.
+      .andWhere(salesCategorySql('t', { interest: true, uncategorizedRows: true }))
       .getMany();
 
     let total = 0;

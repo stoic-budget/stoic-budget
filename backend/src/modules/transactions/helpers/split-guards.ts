@@ -48,6 +48,16 @@ export function assertSplittable(
   // Not split already, and not a balance adjustment (a one-leg pair).
   assertSplitAllowed(transaction);
 
+  // A transfer between own accounts, an investment or a reimbursement is kept
+  // out of spending by its link; the parts would not carry it and would count.
+  if (
+    transaction.transferPairId ||
+    transaction.investmentAccountId ||
+    transaction.reimbursementOfId
+  ) {
+    throw new BadRequestException(appError('TRANSACTION_SPLIT_LINKED'));
+  }
+
   // A duplicate-flagged row is excluded from dashboards and reports. Splitting it
   // would produce siblings that default to isDuplicate=false, so the sibling
   // amounts would reappear in those totals. Refuse instead.

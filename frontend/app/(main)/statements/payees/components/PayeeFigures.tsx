@@ -1,10 +1,11 @@
 import { PrivateAmount } from '@/app/components/ui/private-amount';
 import { useIntlayer, useLocale } from '@/app/i18n';
 import type { PayeeSummary } from '@/app/lib/contracts';
+import { toDate } from '@/app/lib/user-format';
 
 const formatDay = (date: string, locale: string) =>
   new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(
-    new Date(date),
+    toDate(date) ?? new Date(date),
   );
 
 /** The payee's figures for the last year: spent, received, average, how often, last seen. */

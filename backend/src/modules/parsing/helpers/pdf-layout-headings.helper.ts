@@ -22,6 +22,10 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     // Over the date a payment was posted, right of its text: "Date" over "Paid", "Credited".
     'date paid',
     'date credited',
+    'datum zauctovani',
+    'datum zauctovania',
+    'zauctovano',
+    'zauctovani',
   ],
   otherDate: [
     'trans date',
@@ -35,6 +39,11 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'valeur',
     'valuta',
     'data tranzactiei',
+    'datum transakce',
+    'datum transakcie',
+    'datum provedeni',
+    'provedeno',
+    'provedeni',
   ],
   description: [
     'description',
@@ -67,6 +76,12 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'remarks',
     'description of transaction',
     'descrierea tranzactiei',
+    'operace',
+    'operacie',
+    'popis',
+    'popis transakce',
+    'popis operacie',
+    'oznaceni platby',
   ],
   counterparty: [
     'counterparty',
@@ -75,6 +90,9 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'payee',
     'beneficiary',
     'beneficiary name',
+    'protiucet',
+    'nazev protiuctu',
+    'protistrana',
   ],
   debit: [
     'withdrawal',
@@ -144,6 +162,8 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'valor',
     // One signed column under both headings, stacked: "Deposits (CR)" over "Withdrawals (DT)".
     'deposits withdrawals',
+    'castka',
+    'suma',
   ],
   balance: [
     'balance',
@@ -157,6 +177,8 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'solde',
     'saldo',
     'kontostand',
+    'zustatek',
+    'zostatok',
   ],
   // Columns whose words are no text of the row: the row number left of the date, a
   // category label ("Credit", "Debit") beside the amount.
@@ -173,5 +195,8 @@ export const HEADINGS: Record<ColumnRole, string[]> = {
     'ref no./cheque no.',
     'mode',
     'mode**',
+    'id operace',
+    'id operacie',
+    'identifikace',
   ],
 };

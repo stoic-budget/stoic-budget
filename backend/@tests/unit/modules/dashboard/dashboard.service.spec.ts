@@ -1834,7 +1834,8 @@ describe('DashboardService', () => {
         `receipt.receivedAt ${inJuly[0]}`,
         inJuly[1],
       );
-      expect(warningsQb.andWhere).toHaveBeenCalledWith(`s.createdAt ${inJuly[0]}`, inJuly[1]);
+      // Parsing warnings count every month: the dashboard's link lists all of them.
+      expect(warningsQb.andWhere).not.toHaveBeenCalledWith(`s.createdAt ${inJuly[0]}`, inJuly[1]);
       // The "never uploaded" empty state must not depend on the picked month.
       expect(statementRepo.findOne).toHaveBeenCalledWith(
         expect.objectContaining({ where: { workspaceId: 'ws-1', deletedAt: IsNull() } }),

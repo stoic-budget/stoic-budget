@@ -5,7 +5,7 @@ import type {
   ListedTransactions,
   TransactionCategorySource,
 } from '@/app/lib/contracts';
-import { resolveLocaleTag } from '@/app/lib/user-format';
+import { resolveLocaleTag, toDate } from '@/app/lib/user-format';
 import { formatStoredDate } from '@/app/lib/user-format-store';
 
 export interface CategoryOption {
@@ -220,7 +220,9 @@ export function buildHints({ prefix, locale, meta, fmt, labels }: BuildHintsPara
   const filePrefix = prefix ?? labels.fromFilePrefix.value;
   const { dateFrom, dateTo, balanceStart, balanceEnd } = meta ?? {};
   const dateHint = (value?: string | null): string =>
-    value ? `${filePrefix}${new Date(value).toLocaleDateString(resolveLocale(locale))}` : '';
+    value
+      ? `${filePrefix}${(toDate(value) ?? new Date(value)).toLocaleDateString(resolveLocale(locale))}`
+      : '';
   return {
     startDate: dateHint(dateFrom),
     endDate: dateHint(dateTo),

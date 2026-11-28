@@ -13,7 +13,9 @@ import {
   type InvoiceLineItemInput,
   type InvoiceRecurrenceInterval,
   invoicesApi,
+  type UpdateInvoiceInput,
 } from '@/app/lib/invoices-api';
+import { localToday } from '@/app/lib/local-today';
 import { apiQueryDecoded } from '@/app/lib/query-fn-schema';
 
 export interface TaxRateOption {
@@ -31,7 +33,7 @@ const emptyLine = (): InvoiceLineItemInput => ({
   unitCode: 'C62',
 });
 
-const todayIso = (): string => new Date().toISOString().slice(0, 10);
+const todayIso = (): string => localToday();
 
 const addDays = (iso: string, days: number): string => {
   const date = new Date(`${iso}T00:00:00.000Z`);
@@ -185,6 +187,20 @@ export function useInvoiceForm(isNew: boolean) {
     recurrenceInterval: recurrenceInterval || undefined,
   });
 
+  /** The same, for an edit: a cleared note, delivery date or recurrence is sent as null, so it is cleared. */
+  const buildUpdatePayload = (): UpdateInvoiceInput => ({
+    ...buildPayload(),
+    notes: notes || null,
+    deliveryDate: deliveryDate || null,
+    recurrenceInterval: recurrenceInterval || null,
+    // A stopped recurrence takes its end date with it.
+    ...(recurrenceInterval ? {} : { recurrenceEndDate: null }),
+  });
+
+  /** Creates the invoice, or saves the draft `id` with its cleared fields cleared. */
+  const save = (id: string): Promise<Invoice> =>
+    isNew ? invoicesApi.create(buildPayload()) : invoicesApi.update(id, buildUpdatePayload());
+
   /**
    * Picking a client on a new invoice also sets the due date from its payment
    * terms: "net 30" is a property of the relationship, not something to retype.
@@ -277,6 +293,8 @@ export function useInvoiceForm(isNew: boolean) {
     addClient,
     addLateFee,
     buildPayload,
+    buildUpdatePayload,
+    save,
   };
 }
 

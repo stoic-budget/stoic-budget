@@ -895,12 +895,9 @@ export class DashboardService {
         QUEUE_DATE_COLUMN.receipt,
         window,
       ).getCount(),
-      // parsing warnings: actual warnings captured in parsing details
-      this.withinWindow(
-        this.createParsingWarningsQuery(workspaceId),
-        's.createdAt',
-        window,
-      ).getCount(),
+      // Parsing warnings of every month: a warning stays until it is dealt with,
+      // and the dashboard's link opens all of them (`?has=warnings`).
+      this.createParsingWarningsQuery(workspaceId).getCount(),
       // latest statement upload date
       this.statementRepo.findOne({
         where: { workspaceId, deletedAt: IsNull() },

@@ -25,7 +25,7 @@ import { LedgerPostingError, LedgerPostingService } from '../ledger/ledger-posti
 import { PayablesService } from '../payables/payables.service';
 import { creditedLines, fitToTarget, type ResolvedApplication } from './credit-note-lines';
 import { buildCreditNotePdf } from './invoice-document';
-import { documentLines, priceLines, totalsOf } from './invoice-pricing';
+import { documentLines, priceEach, totalsOf } from './invoice-pricing';
 import { InvoiceXRechnungService } from './invoice-xrechnung.service';
 
 function round2(value: number): number {
@@ -124,7 +124,7 @@ export class CreditNotesService {
 
       const groups = await this.copyLines(manager, note, resolved);
       const lineItems = groups.flatMap(group => group.lines);
-      const priced = await priceLines(manager, lineItems, note.pricesIncludeTax);
+      const priced = await priceEach(manager, groups, note.pricesIncludeTax);
       const totals = totalsOf(priced);
       if (totals.total <= 0) {
         throw new BadRequestException(appError('CREDIT_NOTE_ZERO_TOTAL'));

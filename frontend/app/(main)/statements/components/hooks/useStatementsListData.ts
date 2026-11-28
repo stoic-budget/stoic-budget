@@ -24,8 +24,6 @@ interface UseStatementsListDataParams {
   receiptStatus?: string | null;
   search: string;
   user: unknown;
-  page: number;
-  pageSize: number;
   router: AppRouterInstance;
   /** resolveLabel(t.loadListError, 'Failed to load statements') */
   loadListErrorLabel: string;
@@ -51,8 +49,6 @@ export function useStatementsListData({
   receiptStatus,
   search,
   user,
-  page,
-  pageSize,
   router,
   loadListErrorLabel,
   refreshFailedLabel,
@@ -68,8 +64,6 @@ export function useStatementsListData({
   const receiptsQuery = useReceiptDocumentsQuery({
     categoryId,
     receiptStatus,
-    page,
-    pageSize,
     enabled: Boolean(user),
   });
 

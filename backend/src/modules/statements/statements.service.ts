@@ -254,6 +254,8 @@ export class StatementsService {
 
     statement.status = StatementStatus.UPLOADED;
     statement.errorMessage = null;
+    // A new reading starts with a full set of tries, not what the failed ones left.
+    statement.parsingAttempts = 0;
     statement.processedAt = null;
     statement.totalTransactions = 0;
     statement.totalDebit = 0;

@@ -17,7 +17,7 @@ import {
   Workspace,
 } from '../../entities';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
-import { LedgerAccountsService, statementCashKey } from './ledger-accounts.service';
+import { LedgerAccountsService } from './ledger-accounts.service';
 import { LEDGER_ACCOUNT_CODES } from './ledger-default-accounts';
 import { factsOf } from './ledger-facts';
 import {
@@ -33,7 +33,7 @@ import {
   toLineColumns,
   transactionLegs,
 } from './ledger-posting.rules';
-import { cashHomeOf, interestSkip, mirrorsAStatement } from './moved-rows';
+import { cashHomeOf, earliestBankStatements, interestSkip, mirrorsAStatement } from './moved-rows';
 
 export type LedgerPostingErrorCode =
   | 'LEDGER_DISABLED'
@@ -464,18 +464,12 @@ export class LedgerPostingService {
         balanceStart: true,
         statementDateFrom: true,
         createdAt: true,
+        parsingDetails: true,
       },
       order: { statementDateFrom: 'ASC', createdAt: 'ASC' },
     });
 
-    // Undated statements sort last in Postgres, so the first seen per key is the earliest.
-    const earliest = new Map<string, Statement>();
-    for (const statement of statements) {
-      const key = statementCashKey(statement.bankName, statement.accountNumber, statement.currency);
-      if (!earliest.has(key)) {
-        earliest.set(key, statement);
-      }
-    }
+    const earliest = earliestBankStatements(statements);
 
     const openingAccountId = system[LEDGER_ACCOUNT_CODES.OPENING_BALANCE];
     const results: OpeningResult[] = [];
@@ -794,6 +788,7 @@ export class LedgerPostingService {
             accountNumber: true,
             walletId: true,
             deletedAt: true,
+            parsingDetails: true,
           },
         })
       : null;
@@ -822,8 +817,7 @@ export class LedgerPostingService {
        ) AS "settles"`,
       [tx.workspaceId, PayableSource.INVOICE, tx.id],
     );
-    const settlesInvoice = settles;
-    const counterpart = settlesInvoice
+    const counterpart = settles
       ? system[LEDGER_ACCOUNT_CODES.RECEIVABLES]
       : tx.categoryId
         ? await this.accountsService.categoryAccountId(tx.workspaceId, tx.categoryId)
