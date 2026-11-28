@@ -341,7 +341,7 @@ export class CryptoService {
     const transactionCount = await this.transactionRepo.count({
       where: { workspaceId, cryptoWalletId: wallet.id },
     });
-    await this.walletRepo.delete(wallet.id);
+    await this.balanceService.removeWallet(this.walletRepo, wallet.id, workspaceId, userId);
     await this.recordAudit([
       {
         workspaceId,
