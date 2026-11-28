@@ -131,6 +131,10 @@ describe('crypto wallet sync (real Postgres)', () => {
   let cardRowId: string;
 
   function explorerAnswer(url: string): unknown {
+    // No contract paid the wallet anything inside these transactions (#693).
+    if (url.includes('action=txlistinternal')) {
+      return { status: '0', message: 'No transactions found', result: [] };
+    }
     if (url.includes('action=txlist')) {
       return {
         status: '1',

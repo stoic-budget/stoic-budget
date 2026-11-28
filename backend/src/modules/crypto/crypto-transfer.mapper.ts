@@ -19,6 +19,50 @@ export interface EtherscanTx {
   isError?: string;
 }
 
+/**
+ * The wallet's transactions with the native coin contracts paid it inside them
+ * (`txlistinternal`), as one list (#693). A swap of a token for ETH pays the ETH
+ * back from the router as an internal transfer: without it only the token
+ * leaving was seen, booked as a spend, and the ETH had no purchase.
+ *
+ * Only payments *to* the wallet are read; several in one transaction are one
+ * receipt. Inside a transaction the wallet itself sent ETH with, a payment back
+ * is change, not income: it lowers what left (an overpaid purchase stays a
+ * smaller spend, a swap with unused ETH returned stays one ETH-for-token
+ * trade). Where nothing left in ETH, it is money in. Blockscout names the hash
+ * `transactionHash`; a list the explorer cannot give leaves the sync as before.
+ */
+export async function withInternalTransfers(
+  address: string,
+  fetch: (action: 'txlist' | 'txlistinternal') => Promise<EtherscanTx[]>,
+): Promise<EtherscanTx[]> {
+  const me = address.toLowerCase();
+  const [transactions, internal] = await Promise.all([
+    fetch('txlist'),
+    fetch('txlistinternal').catch(() => [] as EtherscanTx[]),
+  ]);
+  const paidBack = new Map<string, EtherscanTx>();
+  for (const row of internal as Array<EtherscanTx & { transactionHash?: string }>) {
+    const hash = row.hash ?? row.transactionHash;
+    if (!hash || row.isError === '1' || (row.to ?? '').toLowerCase() !== me) continue;
+    const seen = paidBack.get(hash);
+    const value = toBigInt(row.value) + (seen ? toBigInt(seen.value) : 0n);
+    // Gas is the outer transaction's, never an internal transfer's.
+    paidBack.set(hash, { ...row, hash, gasUsed: '0', gasPrice: '0', value: String(value) });
+  }
+  const netted = transactions.map(tx => {
+    const back = paidBack.get(tx.hash);
+    if (!back || tx.from.toLowerCase() !== me || toBigInt(tx.value) === 0n) return tx;
+    paidBack.delete(tx.hash);
+    const sent = toBigInt(tx.value);
+    const returned = toBigInt(back.value);
+    // More back than sent is money in on top; the rest of what was sent left.
+    if (returned > sent) paidBack.set(tx.hash, { ...back, value: String(returned - sent) });
+    return { ...tx, value: String(sent > returned ? sent - returned : 0n) };
+  });
+  return [...netted, ...paidBack.values()];
+}
+
 /** A row from Etherscan's `tokentx` action (ERC-20 transfers). */
 export interface EtherscanTokenTx {
   hash: string;
