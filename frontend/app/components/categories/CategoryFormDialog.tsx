@@ -1,17 +1,19 @@
 'use client';
 
-import { Box, Button } from '@mui/material';
+import { Button } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { IconPicker } from '@/app/components/ui/icon-picker/IconPicker';
 import { FULL_SCREEN_ON_PHONE, ModalShell } from '@/app/components/ui/modal-shell';
 import { useWorkspaceId } from '@/app/hooks/useWorkspaceId';
 import { useIntlayer } from '@/app/i18n';
 import apiClient from '@/app/lib/api';
-import { CATEGORY_ICON_CHOICES, categoryIconFor } from '@/app/lib/category-icon-choices';
+import { resolveCategoryIconUrl } from '@/app/lib/category-icon-url';
+import { iconComponentFor } from '@/app/lib/icons/icon-component';
+import { iconName, iconValue } from '@/app/lib/icons/icon-value';
 import { apiQueryDecoded, type ContractInput } from '@/app/lib/query-fn-schema';
 import { queryKeys } from '@/app/lib/query-keys';
-import { getNestedValue, resolveLabel } from '@/app/lib/side-panel-utils';
 
 /** The fields the dialog edits; any category row from the API fits. */
 export interface CategoryFormValue {
@@ -23,25 +25,10 @@ export interface CategoryFormValue {
   parentId?: string | null;
 }
 
-export const resolveIconUrl = (iconValue?: string | null) => {
-  if (!iconValue) {
-    return null;
-  }
-  if (iconValue.startsWith('http')) {
-    return iconValue;
-  }
-  if (iconValue.startsWith('/uploads')) {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-    const base = apiUrl.replace(/\/api\/v1$/, '') || '';
-    return `${base}${iconValue}`;
-  }
-  return null;
-};
-
 const emptyForm = (category: CategoryFormValue | null) => ({
   name: category?.name ?? '',
   type: category?.type ?? ('expense' as 'income' | 'expense'),
-  icon: category?.icon || 'mdi:tag',
+  icon: category?.icon || iconValue('tag'),
   withoutIcon: category ? !category.icon : false,
   parentId: category?.parentId || '',
 });
@@ -60,16 +47,17 @@ function CurrentIcon({ icon, withoutIcon }: { icon: string; withoutIcon: boolean
   if (withoutIcon) {
     return <span className="seneca-category-dialog__no-icon" aria-hidden="true" />;
   }
-  const url = resolveIconUrl(icon);
+  const url = resolveCategoryIconUrl(icon);
   if (url) {
     return <img src={url} alt="" width={18} height={18} style={{ objectFit: 'contain' }} />;
   }
-  const Glyph = categoryIconFor(icon);
+  const Glyph = iconComponentFor(iconName(icon) ?? 'tag');
   return <Glyph size={18} />;
 }
 
 /**
- * Create or edit a category: a name, income or expense, and a line icon. No
+ * Create or edit a category: a name, income or expense, and a line icon found
+ * by search among the whole Lucide set (IconPicker). No
  * colour any more: charts give each category one of a few earthy tones of
  * their own (see categoryTones), and the colour stored on older rows is left
  * as it is. Used on the workspace Categories tab and wherever a category is
@@ -77,8 +65,6 @@ function CurrentIcon({ icon, withoutIcon }: { icon: string; withoutIcon: boolean
  */
 export function CategoryFormDialog({ open, category, onClose, onSaved }: CategoryFormDialogProps) {
   const t = useIntlayer('categoriesPage');
-  const iconNames = useIntlayer('categoryIcons');
-  const tx = (path: string[]) => resolveLabel(getNestedValue(t, path));
   const workspaceId = useWorkspaceId();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState(() => emptyForm(category));
@@ -99,7 +85,8 @@ export function CategoryFormDialog({ open, category, onClose, onSaved }: Categor
       const data = {
         ...restFormData,
         name: restFormData.name.trim(),
-        icon: withoutIcon ? undefined : restFormData.icon,
+        // null clears an icon the category had; a missing key would leave it.
+        icon: withoutIcon ? null : restFormData.icon,
         parentId: restFormData.parentId || undefined,
       };
 
@@ -234,35 +221,18 @@ export function CategoryFormDialog({ open, category, onClose, onSaved }: Categor
           <span className="seneca-category-dialog__label" id="category-icon-label">
             {t.dialog.chooseIcon}
           </span>
-          <Box
-            className="seneca-category-dialog__icons"
-            role="radiogroup"
-            aria-labelledby="category-icon-label"
-          >
-            <button
-              type="button"
-              role="radio"
-              aria-checked={formData.withoutIcon}
-              title={tx(['dialog', 'withoutIcon'])}
-              aria-label={tx(['dialog', 'withoutIcon'])}
-              onClick={() => setFormData({ ...formData, withoutIcon: true })}
-            >
-              <span className="seneca-category-dialog__no-icon" aria-hidden="true" />
-            </button>
-            {CATEGORY_ICON_CHOICES.map(({ value, labelKey, Icon }) => (
-              <button
-                key={value}
-                type="button"
-                role="radio"
-                aria-checked={!formData.withoutIcon && formData.icon === value}
-                title={iconNames[labelKey].value}
-                aria-label={iconNames[labelKey].value}
-                onClick={() => setFormData({ ...formData, icon: value, withoutIcon: false })}
-              >
-                <Icon size={20} />
-              </button>
-            ))}
-          </Box>
+          <IconPicker
+            labelledBy="category-icon-label"
+            allowNone
+            value={formData.withoutIcon ? null : formData.icon}
+            onChange={icon =>
+              setFormData(
+                icon
+                  ? { ...formData, icon, withoutIcon: false }
+                  : { ...formData, withoutIcon: true },
+              )
+            }
+          />
         </div>
       </form>
     </ModalShell>

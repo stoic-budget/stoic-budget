@@ -1,6 +1,6 @@
 import { type Dictionary, t } from 'intlayer';
 
-/** Names of the icons offered in the category editor (app/lib/category-icon-choices.ts). */
+/** Translated names of the icons the category editor used to offer (app/lib/category-icon-choices.ts): the icon picker lists and finds them by these. */
 const content = {
   key: 'categoryIcons',
   content: {

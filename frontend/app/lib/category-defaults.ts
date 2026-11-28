@@ -1,5 +1,4 @@
 import type { LucideIcon } from '@/app/components/icons';
-import { categoryIconFor } from './category-icon-choices';
 import { resolveCategoryIconUrl } from './category-icon-url';
 import {
   ArrowLeftRight,
@@ -41,6 +40,8 @@ import {
   Wrench,
   Zap,
 } from './category-line-icons';
+import { iconComponentFor } from './icons/icon-component';
+import { iconName } from './icons/icon-value';
 import { resolveCategorySlug } from './statement-categories';
 
 /** The backend substitutes this when a category row has no colour; treat it as "unset". */
@@ -121,7 +122,7 @@ export const CATEGORY_DEFAULTS: Record<string, CategoryVisual> = {
 export interface CategoryVisualInput {
   name?: string | null;
   color?: string | null;
-  /** Stored icon value: an uploaded-file URL or a picked `mdi:*` icon. */
+  /** Stored icon value: an uploaded-file URL, a picked `lucide:*` icon or an older `mdi:*` one. */
   icon?: string | null;
   /** The synthetic "Other" rollup bucket. */
   isOther?: boolean;
@@ -155,12 +156,15 @@ export function resolveCategoryVisual(input: CategoryVisualInput): ResolvedCateg
     return { color: NEUTRAL_CATEGORY_COLOR, iconUrl: null, Icon: MoreHorizontal };
   }
   const iconUrl = resolveCategoryIconUrl(input.icon);
+  const picked = iconName(input.icon);
   return {
     color: categoryColorFor(input.name, input.color),
     iconUrl,
     // An icon picked in the category editor wins over the default by name.
-    Icon: input.icon?.startsWith('mdi:')
-      ? categoryIconFor(input.icon)
-      : (defaultFor(input.name)?.Icon ?? Tag),
+    Icon: picked
+      ? iconComponentFor(picked)
+      : input.icon?.startsWith('mdi:')
+        ? Tag
+        : (defaultFor(input.name)?.Icon ?? Tag),
   };
 }

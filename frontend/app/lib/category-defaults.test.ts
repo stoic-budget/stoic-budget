@@ -6,7 +6,8 @@ import {
   categoryColorFor,
   resolveCategoryVisual,
 } from './category-defaults';
-import { categoryIconFor } from './category-icon-choices';
+import { Plane } from './category-line-icons';
+import { iconComponentFor } from './icons/icon-component';
 import systemCategories from './systemCategories.content';
 
 describe('category-defaults', () => {
@@ -39,9 +40,22 @@ describe('category-defaults', () => {
 
   it('uses an icon picked in the category editor over the default by name', () => {
     const visual = resolveCategoryVisual({ name: 'Rent', icon: 'mdi:airplane' });
-    expect(visual.Icon).toBe(categoryIconFor('mdi:airplane'));
+    expect(visual.Icon).toBe(Plane);
     expect(visual.Icon).not.toBe(CATEGORY_DEFAULTS.rent.Icon);
     expect(visual.iconUrl).toBeNull();
+  });
+
+  it('draws a Lucide icon picked from the whole set', () => {
+    expect(resolveCategoryVisual({ name: 'Rent', icon: 'lucide:plane' }).Icon).toBe(Plane);
+    const cigarette = resolveCategoryVisual({ name: 'Rent', icon: 'lucide:cigarette' }).Icon;
+    expect(cigarette).toBe(iconComponentFor('cigarette'));
+    expect(cigarette).not.toBe(CATEGORY_DEFAULTS.rent.Icon);
+  });
+
+  it('keeps an unknown old mdi value a tag, as before', () => {
+    expect(resolveCategoryVisual({ name: 'Rent', icon: 'mdi:unknown' }).Icon).toBe(
+      CATEGORY_DEFAULTS.uncategorized.Icon,
+    );
   });
 
   it('keeps uploaded icon URLs', () => {
