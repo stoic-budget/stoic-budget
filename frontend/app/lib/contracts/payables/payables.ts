@@ -95,8 +95,10 @@ export const PayablesSummary = Schema.Struct({
   /** Marked paid or received with no money in an account yet, and how many bills. */
   unbookedTotal: Schema.Number,
   unbookedCount: Schema.Number,
-  /** Currencies whose bills were converted into the workspace currency for these totals. */
+  /** Currencies whose bills were converted into the workspace currency for these totals (not those without a rate). */
   convertedCurrencies: Schema.Array(Schema.String),
+  /** Currencies with no rate to the workspace's: counted at face value. Only when there are any. */
+  missingRates: Schema.optionalKey(Schema.Array(Schema.String)),
 });
 export type PayablesSummary = Wire<typeof PayablesSummary>;
 

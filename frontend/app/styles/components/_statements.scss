@@ -5742,6 +5742,12 @@
   }
 }
 
+// The dashboard's missing-rate banner under the bills cards (#787): in line with
+// the cards and the note, not inset as in the dashboard header.
+.seneca-payable-summary-wrap .seneca-dashboard__rates-banner {
+  margin: 0;
+}
+
 // The missing-rate banner inside a dashboard card (#787): flush with the card's figures.
 .seneca-dashboard__card-sub .seneca-dashboard__rates-banner {
   margin: 8px 0 0;

@@ -61,6 +61,7 @@ import { applyPayableFilters, parsePayableDate } from './payable-query.util';
 import { PayableRecurrenceService } from './payable-recurrence.service';
 import { PayablesExportService } from './payables-export.service';
 import { paymentDayOf } from './payment-day';
+import { summaryRates } from './summary-rates';
 import { UnbookedPaymentsService } from './unbooked-payments.service';
 
 /** A transaction that may be the payment of a bill. */
@@ -1133,10 +1134,9 @@ export class PayablesService {
       },
     });
     const targetCurrency = this.normalizeCurrency(workspace?.currency);
-    const rateCache = new Map<string, number>();
     // What is owed at today's rate; what came in at the rate of the day it came in.
-    const convert = (value: number, currency: string | null | undefined, day?: Date) =>
-      this.convertSummaryAmount(value, currency, targetCurrency, rateCache, workspaceId, day);
+    const rates = summaryRates(this.exchangeRatesService, targetCurrency, workspaceId);
+    const convert = rates.convert;
 
     const now = new Date();
     const startOfToday = this.startOfDay(now);
@@ -1219,7 +1219,8 @@ export class PayablesService {
       dueThisWeekCount,
       unbookedTotal,
       unbookedCount,
-      convertedCurrencies: [...convertedCurrencies].sort(),
+      convertedCurrencies: rates.rated(convertedCurrencies),
+      ...rates.missingRates(),
     };
   }
 
@@ -1476,32 +1477,5 @@ export class PayablesService {
 
   private normalizeCurrency(currency: string | null | undefined): string {
     return currencyCodeOrDefault(currency);
-  }
-
-  private async convertSummaryAmount(
-    amount: number,
-    sourceCurrency: string | null | undefined,
-    targetCurrency: string,
-    rateCache: Map<string, number>,
-    workspaceId: string,
-    day?: Date,
-  ): Promise<number> {
-    if (!Number.isFinite(amount) || amount === 0) {
-      return 0;
-    }
-
-    const source = this.normalizeCurrency(sourceCurrency);
-    if (source === targetCurrency) {
-      return amount;
-    }
-
-    const cacheKey = `${source}:${targetCurrency}:${day?.toISOString().slice(0, 10) ?? ''}`;
-    let rate = rateCache.get(cacheKey);
-    if (rate === undefined) {
-      rate = await this.exchangeRatesService.getRate(source, targetCurrency, day, workspaceId);
-      rateCache.set(cacheKey, rate);
-    }
-
-    return amount * rate;
   }
 }

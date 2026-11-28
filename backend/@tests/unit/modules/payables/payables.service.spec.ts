@@ -64,7 +64,7 @@ describe('PayablesService', () => {
   let statementRepository: Repository<Statement>;
   let workspaceRepository: Repository<Workspace>;
   let tagRepository: Repository<Tag>;
-  let exchangeRatesService: { getRate: Mock };
+  let exchangeRatesService: { getRateOrNull: Mock };
 
   const transactionEntity = {
     id: 'tx-1',
@@ -127,7 +127,7 @@ describe('PayablesService', () => {
         {
           provide: ExchangeRatesService,
           useValue: {
-            getRate: vi.fn(),
+            getRateOrNull: vi.fn(),
           },
         },
         {
@@ -159,7 +159,7 @@ describe('PayablesService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(workspaceRepository, 'findOne').mockResolvedValue({ currency: 'KZT' } as Workspace);
-    exchangeRatesService.getRate.mockResolvedValue(1);
+    exchangeRatesService.getRateOrNull.mockResolvedValue(1);
     // The list reads the tags of its page with `find`.
     vi.spyOn(payableRepository, 'find').mockResolvedValue([]);
   });
@@ -670,7 +670,7 @@ describe('PayablesService', () => {
             updatedAt: new Date('2026-03-01T10:00:00.000Z'),
           },
         ] as Payable[]);
-      exchangeRatesService.getRate.mockResolvedValueOnce(0.002);
+      exchangeRatesService.getRateOrNull.mockResolvedValueOnce(0.002);
       vi.useFakeTimers().setSystemTime(new Date('2026-03-17T12:00:00.000Z'));
 
       const result = await service.getSummary('workspace-1');
@@ -680,7 +680,7 @@ describe('PayablesService', () => {
       expect(result.paidThisMonth).toBe(2);
       expect(result.paidTotal).toBe(2);
       // What came in converts at the rate of the day it was paid, as the dashboard counts it.
-      const [from, to, day, workspaceId] = exchangeRatesService.getRate.mock.calls[0];
+      const [from, to, day, workspaceId] = exchangeRatesService.getRateOrNull.mock.calls[0];
       expect([from, to, workspaceId]).toEqual(['KZT', 'USD', 'workspace-1']);
       expect((day as Date).toISOString().slice(0, 10)).toBe('2026-03-05');
       vi.useRealTimers();
@@ -699,14 +699,14 @@ describe('PayablesService', () => {
           updatedAt: new Date('2026-03-01T10:00:00.000Z'),
         },
       ] as Payable[]);
-      exchangeRatesService.getRate.mockResolvedValueOnce(500);
+      exchangeRatesService.getRateOrNull.mockResolvedValueOnce(500);
       vi.useFakeTimers().setSystemTime(new Date('2026-03-17T12:00:00.000Z'));
 
       const result = await service.getSummary('workspace-1');
 
       expect(result.toPay).toBe(5000);
       expect(result.dueThisWeek).toBe(5000);
-      expect(exchangeRatesService.getRate).toHaveBeenCalledWith('USD', 'KZT', undefined, 'workspace-1');
+      expect(exchangeRatesService.getRateOrNull).toHaveBeenCalledWith('USD', 'KZT', undefined, 'workspace-1');
       vi.useRealTimers();
     });
 
@@ -792,6 +792,41 @@ describe('PayablesService', () => {
       vi.useRealTimers();
     });
 
+    it('converts what is owed at today\'s rate and what was paid at its own day\'s', async () => {
+      vi.spyOn(workspaceRepository, 'findOne').mockResolvedValue({ currency: 'USD' } as Workspace);
+      vi.spyOn(payableRepository, 'find').mockResolvedValue([
+        {
+          id: 'paid',
+          status: PayableStatus.PAID,
+          dueDate: new Date('2026-03-05T00:00:00.000Z'),
+          amount: 1000,
+          currency: 'ILS',
+          paidAt: new Date('2026-03-05T10:00:00.000Z'),
+          updatedAt: new Date('2026-03-05T10:00:00.000Z'),
+        },
+        {
+          id: 'open',
+          status: PayableStatus.TO_PAY,
+          dueDate: new Date('2026-03-20T00:00:00.000Z'),
+          amount: 1000,
+          currency: 'ILS',
+          paidAt: null,
+          updatedAt: new Date('2026-03-01T10:00:00.000Z'),
+        },
+      ] as Payable[]);
+      // One currency, two days: a lookup each, never one rate for both.
+      exchangeRatesService.getRateOrNull.mockImplementation(async (_from: string, _to: string, day?: Date) =>
+        day ? 0.3 : 0.25,
+      );
+      vi.useFakeTimers().setSystemTime(new Date('2026-03-17T12:00:00.000Z'));
+
+      const result = await service.getSummary('workspace-1');
+
+      expect(result.paidTotal).toBeCloseTo(300);
+      expect(result.toPay).toBeCloseTo(250);
+      vi.useRealTimers();
+    });
+
     it('names the currencies it converted, so the totals can say so', async () => {
       vi.spyOn(workspaceRepository, 'findOne').mockResolvedValue({ currency: 'USD' } as Workspace);
       vi.spyOn(payableRepository, 'find').mockResolvedValue([
@@ -814,13 +849,38 @@ describe('PayablesService', () => {
           updatedAt: new Date('2026-03-01T10:00:00.000Z'),
         },
       ] as Payable[]);
-      exchangeRatesService.getRate.mockResolvedValue(0.3);
+      exchangeRatesService.getRateOrNull.mockResolvedValue(0.3);
       vi.useFakeTimers().setSystemTime(new Date('2026-03-17T12:00:00.000Z'));
 
       const result = await service.getSummary('workspace-1');
 
       expect(result.convertedCurrencies).toEqual(['ILS']);
       expect(result.paidTotal).toBeCloseTo(1050);
+      vi.useRealTimers();
+    });
+
+    it('counts a bill in a currency with no rate at face value and names it (#787)', async () => {
+      vi.spyOn(workspaceRepository, 'findOne').mockResolvedValue({ currency: 'USD' } as Workspace);
+      vi.spyOn(payableRepository, 'find').mockResolvedValue([
+        {
+          id: 'xts',
+          status: PayableStatus.TO_PAY,
+          dueDate: new Date('2026-03-20T00:00:00.000Z'),
+          amount: 10,
+          currency: 'XTS',
+          paidAt: null,
+          updatedAt: new Date('2026-03-01T10:00:00.000Z'),
+        },
+      ] as Payable[]);
+      exchangeRatesService.getRateOrNull.mockResolvedValue(null);
+      vi.useFakeTimers().setSystemTime(new Date('2026-03-17T12:00:00.000Z'));
+
+      const result = await service.getSummary('workspace-1');
+
+      expect(result.toPay).toBe(10);
+      expect(result.missingRates).toEqual(['XTS']);
+      // Not "converted from XTS" beside "no rate for XTS".
+      expect(result.convertedCurrencies).toEqual([]);
       vi.useRealTimers();
     });
 

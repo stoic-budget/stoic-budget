@@ -2,6 +2,7 @@
 
 import Skeleton from '@mui/material/Skeleton';
 import React from 'react';
+import { MissingRatesBanner } from '@/app/(main)/dashboard/components/MissingRatesBanner';
 import type { LucideIcon } from '@/app/components/icons';
 import { Card } from '@/app/components/ui/card';
 import { fillTemplateNodes, PRIVATE_CLASS } from '@/app/components/ui/private-amount';
@@ -130,6 +131,8 @@ function PayableSummaryCards({
             .replace('{currencies}', converted.join(', '))}
         </p>
       )}
+      {/* Bills in a currency with no rate count at face value: say which (#787). */}
+      <MissingRatesBanner currencies={[...(summary?.missingRates ?? [])]} />
     </div>
   );
 }
