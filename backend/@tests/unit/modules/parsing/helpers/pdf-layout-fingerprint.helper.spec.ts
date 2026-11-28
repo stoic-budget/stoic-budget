@@ -109,6 +109,7 @@ describe('pdf-layout-fingerprint.helper', () => {
     expect(mentionedBank('in account with commercial bank of ceylon')).toBe(BankName.COMMERCIAL_BANK);
     expect(mentionedBank('Crédit Agricole Brie Picardie 500 Rue Saint Fuscien')).toBe(BankName.CREDIT_AGRICOLE);
     expect(mentionedBank('made payable to CREDIT ONE BANK.')).toBe(BankName.CREDIT_ONE);
+    expect(mentionedBank('Československá obchodní banka, a. s., Radlická 333/150')).toBe(BankName.CSOB);
     expect(mentionedBank('Digital Federal Credit Union 220 Sample Boulevard')).toBe(BankName.DCU);
     expect(mentionedBank('Bank of America, N.A. P.O. Box 25118')).toBe(BankName.BANK_OF_AMERICA);
     expect(mentionedBank('CAISSE DESJARDINS DE SAMPLETOWN')).toBe(BankName.DESJARDINS);

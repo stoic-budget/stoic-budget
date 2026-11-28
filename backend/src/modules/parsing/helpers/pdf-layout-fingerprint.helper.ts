@@ -62,6 +62,7 @@ const BANK_MENTIONS: [BankName, RegExp][] = [
   [BankName.COMMERCIAL_BANK, /\bcommercial bank of c(?:eylon|yelon)\b/],
   [BankName.CREDIT_AGRICOLE, /\bcredit agricole\b/],
   [BankName.CREDIT_ONE, /\bcredit one bank\b/],
+  [BankName.CSOB, /\bceskoslovenska obchodni banka\b|\bcekoczpp/],
   [BankName.DCU, /\bdigital federal credit union\b/],
   [BankName.BANK_OF_AMERICA, /\bbank of america, n\.a\.|\bbankofamerica\.com\b/],
   [BankName.DESJARDINS, /\bcaisse desjardins\b|\bdesjardins\.com\b/],
