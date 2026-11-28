@@ -22,6 +22,9 @@ const SummaryShare = Schema.Struct({
 
 /** `GET /reports/statements/summary`: the last `days` of counted rows. */
 export const StatementsSummary = Schema.Struct({
+  /** The workspace's currency every amount is in; currencies with no rate are left out and named. */
+  currency: Schema.String,
+  missingRates: Schema.Array(Schema.String),
   totals: SummaryTotals,
   timeseries: Schema.Array(SummaryDay),
   categories: Schema.Array(SummaryShare),
@@ -71,6 +74,9 @@ export type CustomTablesSummary = Wire<typeof CustomTablesSummary>;
 
 /** `GET /reports/top-categories`. */
 export const TopCategoriesReport = Schema.Struct({
+  /** The workspace's currency every amount is in; currencies with no rate are left out and named. */
+  currency: Schema.String,
+  missingRates: Schema.Array(Schema.String),
   period: Schema.Struct({ from: Schema.String, to: Schema.String }),
   totals: Schema.Struct({
     income: Schema.Number,
@@ -113,6 +119,9 @@ export type TopCategoriesReport = Wire<typeof TopCategoriesReport>;
 /** `GET /reports/spend-over-time`: income and spending per period. */
 export const SpendOverTimeReport = Schema.Struct({
   groupBy: Schema.String,
+  /** The workspace's currency every amount is in; currencies with no rate are left out and named. */
+  currency: Schema.String,
+  missingRates: Schema.Array(Schema.String),
   dateFrom: Schema.String,
   dateTo: Schema.String,
   points: Schema.Array(

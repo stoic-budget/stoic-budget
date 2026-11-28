@@ -64,6 +64,7 @@ import { ReportTemplateGenerator } from '../../src/modules/reports/report-templa
 import { ReportsService } from '../../src/modules/reports/reports.service';
 import { SpendOverTimeReport } from '../../src/modules/reports/spend-over-time.report';
 import { StatementsSummaryReport } from '../../src/modules/reports/statements-summary.report';
+import { TemplateReportRowsLoader } from '../../src/modules/reports/template-report-rows.loader';
 import { TopCategoriesReport } from '../../src/modules/reports/top-categories.report';
 import { WorkspaceExportReport } from '../../src/modules/reports/workspace-export.report';
 import { TransactionsService } from '../../src/modules/transactions/transactions.service';
@@ -231,6 +232,7 @@ describe('split() preserves every money aggregate (real Postgres)', () => {
         WorkspaceCurrencyService,
         ReportsService,
         TopCategoriesReport,
+        TemplateReportRowsLoader,
         { provide: TaxAssignmentService, useValue: { resolve: vi.fn(async () => ({ taxRateId: null, taxRuleId: null, taxSource: null, taxAmount: null, taxNetAmount: null, taxReverseCharge: false })) } },
         { provide: AuditService, useValue: auditStub },
         { provide: CACHE_MANAGER, useValue: cacheStub },
