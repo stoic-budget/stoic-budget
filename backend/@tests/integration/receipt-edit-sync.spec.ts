@@ -43,6 +43,7 @@ import { ExchangeRatesService } from '../../src/modules/exchange-rates/exchange-
 import { GoalsService } from '../../src/modules/goals/goals.service';
 import { NotificationsService } from '../../src/modules/notifications/notifications.service';
 import { ReceiptProcessorService } from '../../src/modules/receipts/services/receipt-processor.service';
+import { TRANSACTIONS_MONEY_CHANGED } from '../../src/modules/receipts/helpers/booked-row';
 import { ReceiptsService } from '../../src/modules/receipts/receipts.service';
 import { SubscriptionsService } from '../../src/modules/subscriptions/subscriptions.service';
 import { TaxReserveService } from '../../src/modules/tax/tax-reserve.service';
@@ -96,6 +97,8 @@ describe('editing an approved receipt reaches the figures (real Postgres)', () =
   let travelId: string;
   let receipts: ReceiptsService;
   let dashboard: DashboardService;
+  // `emit` tells what follows a row's money (a goal contribution) that the row moved.
+  const events = { emit: vi.fn(() => true), emitAsync: vi.fn(async () => []) };
 
   const statement = async (fields: Partial<Statement> = {}) =>
     (
@@ -192,7 +195,7 @@ describe('editing an approved receipt reaches the figures (real Postgres)', () =
         BudgetWithinLimitService,
         WorkspaceCurrencyService,
         { provide: ReceiptProcessorService, useValue: {} },
-        { provide: EventEmitter2, useValue: { emitAsync: vi.fn(async () => []) } },
+        { provide: EventEmitter2, useValue: events },
         { provide: AuditService, useValue: { createEvent: vi.fn(), createBatch: vi.fn() } },
         { provide: ExchangeRatesService, useValue: rates },
         { provide: GoalsService, useValue: { findAll: vi.fn(async () => []) } },
@@ -272,6 +275,10 @@ describe('editing an approved receipt reaches the figures (real Postgres)', () =
     expect(moved.counterpartyName).toBe('Renamed');
     expect(await spentIn(LAST_MONTH)).toBe(0);
     expect(await spentIn(MONTH_BEFORE)).toBe(300);
+    expect(events.emit).toHaveBeenCalledWith(TRANSACTIONS_MONEY_CHANGED, {
+      workspaceId,
+      transactionIds: [id],
+    });
     await txRepo.delete({ id });
   });
 

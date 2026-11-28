@@ -12,6 +12,7 @@ import { CategoriesModule } from '../categories/categories.module';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { PayPeriodModule } from '../pay-period/pay-period.module';
 import { WorkspaceCurrencyModule } from '../workspaces/workspace-currency.module';
+import { GoalContributionFollowSubscriber } from './goal-contribution-follow.subscriber';
 import { GoalCoversService } from './goal-covers.service';
 import { GoalFlowService } from './goal-flow.service';
 import { GoalItemsService } from './goal-items.service';
@@ -49,6 +50,7 @@ import { GoalsService } from './goals.service';
     GoalCoversService,
     GoalTransactionLinkService,
     GoalProgressService,
+    GoalContributionFollowSubscriber,
   ],
   exports: [GoalsService, GoalFlowService, GoalItemsService, GoalPlanService, GoalCoversService],
 })

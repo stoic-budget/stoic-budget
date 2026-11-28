@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { type EntityManager, type QueryDeepPartialEntity, Repository } from 'typeorm';
+import { type EntityManager, Repository } from 'typeorm';
 import { appError } from '../../common/errors/app-error';
 import type { CaptureLocation } from '../../common/utils/capture-location.util';
 import { currencyCodeOrDefault } from '../../common/utils/currency.util';
@@ -53,6 +53,7 @@ import {
   type ReceiptWithCategory,
 } from './helpers/attach-receipt-categories';
 import { attachTarget } from './helpers/attach-target';
+import { scanTransactionUpdate, updateBookedRow, withLedgerSides } from './helpers/booked-row';
 import { ReceiptProcessorService } from './services/receipt-processor.service';
 import { trashScanStatement } from './trash-scan-statement';
 
@@ -495,11 +496,10 @@ export class ReceiptsService {
       );
       // update() skips the subscriber: the vendor may have changed. A split row
       // takes only what its parts share (#686).
-      const { where, set } = bookedRowUpdate(target, workspaceId, {
+      await updateBookedRow(this.transactionRepository, this.eventEmitter, target, workspaceId, {
         ...scanTransactionUpdate(fields, Boolean(receipt.parsedData?.date)),
         payeeId: await resolvePayeeId(this.transactionRepository.manager, workspaceId, fields),
       });
-      await this.transactionRepository.update(where, set);
     } else if (receipt.parsedData?.categoryId && edits.categoryId !== undefined) {
       await this.transactionRepository.update(
         { id: target.id, workspaceId },
@@ -1172,47 +1172,5 @@ export function receiptAuditSnapshot(receipt: Receipt): Record<string, unknown> 
     categoryId: receipt.parsedData?.categoryId ?? null,
     statementId: receipt.statementId ?? null,
     transactionId: receipt.transactionId ?? null,
-  };
-}
-
-/**
- * The receipt's fields for its scan's transaction. The transaction keeps its
- * statement, and a field the receipt lacks keeps its value: no amount parsed,
- * or no date (the builder would fall back to today).
- */
-function scanTransactionUpdate(
-  fields: Partial<Transaction>,
-  hasDate: boolean,
-): QueryDeepPartialEntity<Transaction> {
-  const { statementId: _statementId, workspaceId: _workspaceId, transactionDate, ...rest } = fields;
-  const update: QueryDeepPartialEntity<Transaction> = Object.fromEntries(
-    Object.entries(rest).filter(([, value]) => value !== null && value !== undefined),
-  );
-  if (hasDate) {
-    update.transactionDate = transactionDate;
-  }
-  return withLedgerSides(update as Partial<Transaction>) as QueryDeepPartialEntity<Transaction>;
-}
-
-/**
- * A booked row carries its amount on the side it moves: debit for spending,
- * credit for income. Every income and spending figure sums those two, so a row
- * with only an amount would count as nothing. A parse may hand the amount over
- * as text; it is a number by the time it is stored.
- */
-function withLedgerSides<T extends Partial<Transaction>>(fields: T): T {
-  if (fields.amount === null || fields.amount === undefined) {
-    return fields;
-  }
-  const amount = Math.round(Math.abs(Number(fields.amount)) * 100) / 100;
-  if (!Number.isFinite(amount)) {
-    return fields;
-  }
-  const isExpense = fields.transactionType !== TransactionType.INCOME;
-  return {
-    ...fields,
-    amount,
-    debit: isExpense ? amount : null,
-    credit: isExpense ? null : amount,
   };
 }
